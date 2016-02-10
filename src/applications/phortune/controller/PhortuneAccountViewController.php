@@ -44,7 +44,6 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($request->getRequestURI())
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Account'))
@@ -133,6 +132,10 @@ final class PhortuneAccountViewController extends PhortuneController {
     $methods = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
+      ->withStatuses(
+        array(
+          PhortunePaymentMethod::STATUS_ACTIVE,
+        ))
       ->execute();
 
     foreach ($methods as $method) {
@@ -251,9 +254,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+          ->setIcon('fa-list')
           ->setHref($orders_uri)
           ->setText(pht('View All Orders')));
 
@@ -295,9 +296,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+          ->setIcon('fa-list')
           ->setHref($charges_uri)
           ->setText(pht('View All Charges')));
 
@@ -333,7 +332,7 @@ final class PhortuneAccountViewController extends PhortuneController {
           ->setTag('a')
           ->setIcon(
             id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+              ->setIcon('fa-list'))
           ->setHref($subscriptions_uri)
           ->setText(pht('View All Subscriptions')));
 

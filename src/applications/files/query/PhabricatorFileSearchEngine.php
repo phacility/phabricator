@@ -178,4 +178,23 @@ final class PhabricatorFileSearchEngine
     return $result;
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Upload a File'))
+      ->setHref('/file/upload/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Just a place for files.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

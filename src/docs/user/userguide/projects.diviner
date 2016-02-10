@@ -1,0 +1,339 @@
+@title Projects User Guide
+@group userguide
+
+Organize users and objects with projects.
+
+Overview
+========
+
+NOTE: This document is only partially complete.
+
+Phabricator projects are flexible, general-purpose groups of objects that you
+can use to organize information. Projects have some basic information like
+a name and an icon, and may optionally have members.
+
+For example, you can create projects to provide:
+
+  - **Organization**: Create a project to represent a product or initative,
+    then use it to organize related work.
+  - **Groups**: Create a project to represent a group of people (like a team),
+    then add members of the group as project members.
+  - **Tags**: To create a tag, just create a project without any members. Then
+    tag anything you want.
+  - **Access Control Lists**: Add members to a project, then restrict the
+    visibility of objects to members of that project. See "Understanding
+    Policies" below to understand how policies and projects interact in
+    more detail.
+
+Understanding Policies
+======================
+
+An important rule to understand about projects is that **adding or removing
+projects to an object never affects who can see the object**.
+
+For example, if you tag a task with a project like {nav Backend}, that does not
+change who can see the task. In particular, it does not limit visibility to
+only members of the "Backend" project, nor does it allow them to see it if they
+otherwise could not. Likewise, removing projects does not affect visibility.
+
+If you're familiar with other software that works differently, this may be
+unexpected, but the rule in Phabrictor is simple: **adding and removing
+projects never affects policies.**
+
+Note that you //can// write policy rules which restrict capabilities to members
+of a specific project or set of projects, but you do this by editing an
+object's policies and adding rules based on project membership, not by tagging
+or untagging the object with projects.
+
+To manage who can seen an object, use the object's policy controls,
+Spaces (see @{article:Spaces User Guide}) and Custom Forms
+(see @{article:User Guide: Customizing Forms}).
+
+For more details about rationale, see "Policies In Depth", below.
+
+Joining Projects
+================
+
+Once you join a project, you become a member and will receive mail sent to the
+project, like a mailing list. For example, if a project is added as a
+subscriber on a task or a reviewer on a revision, you will receive mail about
+that task or revision.
+
+If you'd prefer not to receive mail sent to a project, you can go to
+{nav Members} and select {nav Disable Mail}. If you disable mail for a project,
+you will no longer receive mail sent to the project.
+
+
+Watching Projects
+=================
+
+Watching a project allows you to closely follow all activity related to a
+project.
+
+You can **watch** a project by clicking {nav Watch Project} on the project
+page. To stop watching a project, click {nav Unwatch Project}.
+
+When you watch a project, you will receive a copy of mail about any objects
+(like tasks or revisions) that are tagged with the project, or that the project
+is a subscriber, reviewer, or auditor for. For moderately active projects, this
+may be a large volume of mail.
+
+
+Edit Notifications
+==================
+
+Edit notifications are generated when project details (like the project
+description, name, or icon) are updated, or when users join or leave projects.
+
+By default, these notifications are are only sent to the acting user. These
+notifications are usually not very interesting, and project mail is already
+complicated by members and watchers.
+
+If you'd like to receive edit notifications for a project, you can write a
+Herald rule to keep you in the loop.
+
+
+Customizing Menus
+=================
+
+Projects support profile menus, which are customizable. For full details on
+managing and customizing profile menus, see @{article:Profile Menu User Guide}.
+
+Here are some examples of common ways to customize project profile menus that
+may be useful:
+
+**Link to Tasks or Repositories**: You can add a menu item for "Open Tasks" or
+"Active Repositories" for a project by running the search in the appropriate
+application, then adding a link to the search results to the menu.
+
+This can let you quickly jump from a project screen to related tasks,
+revisions, repositories, or other objects.
+
+For more details on how to use search and manage queries, see
+@{article:Search User Guide}.
+
+**New Task Button**: To let users easily make a new task that is tagged with
+the current project, add a link to the "New Task" form with the project
+prefilled, or to a custom form with appropriate defaults.
+
+For information on customizing and prefilling forms, see
+@{article:User Guide: Customizing Forms}.
+
+**Link to Wiki Pages**: You can add links to relevant wiki pages or other
+documentation to the menu to make it easy to find and access. You could also
+link to a Conpherence if you have a chatroom for a project.
+
+**Link to External Resources**: You can link to external resources outside
+of Phabricator if you have other pages which are relevant to a project.
+
+**Set Workboard as Default**: For projects that are mostly used to organize
+tasks, change the default item to the workboard instead of the profile to get
+to the workboard view more easily.
+
+**Hide Unused Items**: If you have a project which you don't expect to have
+members or won't have a workboard, you can hide these items to streamline the
+menu.
+
+
+Subprojects and Milestones
+==========================
+
+IMPORTANT: This feature is only partially implemented.
+
+After creating a project, you can use the
+{nav icon="sitemap", name="Subprojects"} menu item to add subprojects or
+milestones.
+
+**Subprojects** are projects that are contained inside the main project. You
+can use them to break large or complex groups, tags, lists, or undertakings
+apart into smaller pieces.
+
+**Milestones** are a special kind of subproject for organizing tasks into
+blocks of work. You can use them to implement sprints, iterations, milestones,
+versions, etc.
+
+Subprojects and milestones have some additional special behaviors and rules,
+particularly around policies and membership. See below for details.
+
+This is a brief summary of the major differences between normal projects,
+subprojects, parent projects, and milestones.
+
+| | Normal | Parent | Subproject | Milestone |
+|---|---|---|---|---|
+| //Members// | Yes | Union of Subprojects | Yes | Same as Parent |
+| //Policies// | Yes | Yes | Affected by Parent | Same as Parent |
+| //Hashtags// | Yes | Yes | Yes | Special |
+
+
+Subprojects
+===========
+
+Subprojects are full-power projects that are contained inside some parent
+project. You can use them to divide a large or complex project into smaller
+parts.
+
+Subprojects have normal members and normal policies, but note that the policies
+of the parent project affect the policies of the subproject (see "Parent
+Projects", below).
+
+Subprojects can have their own subprojects, milestones, or both. If a
+subproject has its own subprojects, it is both a subproject and a parent
+project. Thus, the parent project rules apply to it, and are stronger than the
+subproject rules.
+
+Subprojects can have normal workboards.
+
+The maximum subproject depth is 16. This limit is intended to grossly exceed
+the depth necessary in normal usage.
+
+Objects may not be tagged with multiple projects that are ancestors or
+descendants of one another. For example, a task may not be tagged with both
+{nav Stonework} and {nav Stonework > Masonry}.
+
+When a project tag is added that is the ancestor or descendant of one or more
+existing tags, the old tags are replaced. For example, adding
+{nav Stonework > Masonry} to a task tagged with {nav Stonework} will replace
+{nav Stonework} with the newer, more specific tag.
+
+This restriction does not apply to projects which share some common ancestor
+but are not themselves mutual ancestors. For example, a task may be tagged
+with both {nav Stonework > Masonry} and {nav Stonework > Sculpting}.
+
+This restriction //does// apply when the descendant is a milestone. For
+example, a task may not be tagged with both {nav Stonework} and
+{nav Stonework > Iteration II}.
+
+
+Milestones
+==========
+
+Milestones are simple subprojects for tracking sprints, iterations, versions,
+or other similar blocks of work. Milestones make it easier to create and manage
+a large number of similar subprojects (for example: {nav Sprint 1},
+{nav Sprint 2}, {nav Sprint 3}, etc).
+
+Milestones can not have direct members or policies. Instead, the membership
+and policies of a milestones are always the same as the milestone's parent
+project. This makes large numbers of milestones more manageable when changes
+occur.
+
+Milestones can not have subprojects, and can not have their own milestones.
+
+By default, Milestones do not have their own hashtags.
+
+Milestones can have normal workboards.
+
+Objects may not be tagged with two different milestones of the same parent
+project. For example, a task may not be tagged with both {nav Stonework >
+Iteration III} and {nav Stonework > Iteration V}.
+
+When a milestone tag is added to an object which already has a tag from the
+same series of milestones, the old tag is removed. For example, adding the
+{nav Stonework > Iteration V} tag to a task which already has the
+{nav Stonework > Iteration III} tag will remove the {nav Iteration III} tag.
+
+This restriction does not apply to milestones which are not part of the same
+series. For example, a task may be tagged with both
+{nav Stonework > Iteration V} and {nav Heraldry > Iteration IX}.
+
+
+Parent Projects
+===============
+
+When you add the first subproject to an existing project, it is converted into
+a **parent project**. Parent projects have some special rules.
+
+**No Direct Members**: Parent projects can not have members of their own.
+Instead, all of the users who are members of any subproject count as members
+of the parent project. By joining (or leaving) a subproject, a user is
+implicitly added to (or removed from) all ancestors of that project.
+
+Consequently, when you add the first subproject to an existing project, all of
+the project's current members are moved to become members of the subproject
+instead. Implicitly, they will remain members of the parent project because the
+parent project is an ancestor of the new subproject.
+
+You can edit the project afterward to change or remove members if you want to
+split membership apart in a more granular way across multiple new subprojects.
+
+**Searching**: When you search for a parent project, results for any subproject
+are returned. For example, if you search for {nav Engineering}, your query will
+match results in {nav Engineering} itself, but also subprojects like
+{nav Engineering > Warp Drive} and {nav Engineering > Shield Batteries}.
+
+**Policy Effects**: To view a subproject or milestone, you must be able to
+view the parent project. As a result, the parent project's view policy now
+affects child projects. If you restrict the visibility of the parent, you also
+restrict the visibility of the children.
+
+In contrast, permission to edit a parent project grants permission to edit
+any subproject. If a user can {nav Root Project}, they can also edit
+{nav Root Project > Child} and {nav Root Project > Child > Sprint 3}.
+
+
+Policies In Depth
+=================
+
+As discussed above, adding and removing projects never affects who can see an
+object. This is an explicit product design choice aimed at reducing the
+complexity of policy management.
+
+Phabricator projects are a flexible, general-purpose, freeform tool. This is a
+good match for many organizational use cases, but a very poor match for
+policies. It is important that policies be predictable and rigid, because the
+cost of making a mistake with policies is high (inadvertent disclosure of
+private information).
+
+In Phabricator, each object (like a task) can be tagged with multiple projects.
+This is important in a flexible organizational tool, but is a liability in a
+policy tool.
+
+If each project potentially affected visibility, it would become more difficult
+to predict the visibility of objects and easier to make mistakes with policies.
+There are different, reasonable expectations about how policies might be
+affected when tagging objects with projects, but these expectations are in
+conflict, and different users have different expectations. For example:
+
+  - if a user adds a project like {nav Backend} to a task, their intent
+    might be to //open// the task up and share it with the "Backend" team;
+  - if a user adds a project like {nav Security Vulnerability} to a task,
+    their intent might be to //close// the task down and restrict it to just
+    the security team;
+  - if a user adds a project like {nav Easy Starter Task} to a task, their
+    intent might be to not affect policies at all;
+  - if a user adds {nav Secret Inner Council} to a task already tagged with
+    {nav Security Vulnerability}, their intent might be to //open// the task
+    to members of //either// project, or //close// the task to just members of
+    //both// projects;
+  - if a user adds {nav Backend} to a task already tagged with
+    {nav Security Vulnerability}, their intent is totally unclear;
+  - in all cases, users may be adding projects purely to organize objects
+    without intending to affect policies.
+
+We can't distinguish between these cases without adding substantial complexity,
+and even if we made an attempt to navigate this it would still be very
+difficult to predict the effect of tagging an object with multiple
+policy-affecting projects. Users would need to learn many rules about how these
+policy types interacted to predict the policy effects of adding or removing a
+project.
+
+Because of the implied complexity, we almost certainly could not prevent some
+cases where a user intends to take a purely organizational action (like adding
+a {nav Needs Documentation} tag) and accidentally opens a private object to a
+wide audience. The policy system is intended to make these catastrophically bad
+cases very difficult, and allowing projects to affect policies would make these
+mistakes much easier to make.
+
+We believe the only reasonable way we could reduce ambiguity and complexity is
+by making project policy actions explicit and rule-based. But we already have a
+system for explicit, rule-based management of policies: the policy system. The
+policy tools are designed for policy management and aimed at making actions
+explicit and mistakes very difficult.
+
+Many of the use cases where project-based access control seems like it might be
+a good fit can be satisfied with Spaces instead (see @{article:Spaces User
+Guide}). Spaces are explicit, unambiguous containers for groups of objects with
+similar policies.
+
+Form customization also provides a powerful tool for making many policy
+management tasks easier (see @{article:User Guide: Customizing Forms}).

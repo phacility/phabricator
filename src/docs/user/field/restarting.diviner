@@ -1,0 +1,116 @@
+@title Restarting Phabricator
+@group fieldmanual
+
+Instructions on how to restart HTTP and PHP servers to reload configuration
+changes in Phabricator.
+
+
+Overview
+========
+
+Phabricator's setup and configuration instructions sometimes require you to
+restart your server processes, particularly after making configuration changes.
+This document explains how to restart them properly.
+
+In general, you need to restart both whatever is serving HTTP requests and
+whatever is serving PHP requests. In some cases, these will be the same process
+and handled with one restart command. In other cases, they will be two
+different processes and handled with two different restart commands.
+
+{icon exclamation-circle color=blue} If you have two different processes (for
+example, nginx and PHP-FPM), you need to issue two different restart commands.
+
+It's important to restart both your HTTP server and PHP server because each
+server caches different configuration and settings. Restarting both servers
+after making changes ensures you're running up-to-date configuration.
+
+To restart properly:
+
+  - Identify which HTTP server you are running (for example, Apache or nginx).
+  - Identify which PHP server you are running (for example, mod_php or PHP-FPM).
+  - For each server, follow the instructions below to restart it.
+  - If the instructions tell you to do so, make sure you restart **both**
+    servers!
+
+
+Quick Start
+===========
+
+**Apache**: If you use Apache with `mod_php`, you can just restart Apache. You
+do not need to restart `mod_php` separately. See below for instructions on how
+to do this if you aren't sure. This is a very common configuration.
+
+**nginx**: If you use nginx with PHP-FPM, you need to restart both nginx and
+PHP-FPM. See below for instructions on how to do this if you aren't sure. This
+is also a very common configuration.
+
+It's possible to use Apache or nginx in other configurations, or a different
+webserver. Consult the documentation for your system or webserver if you aren't
+sure how things are set up.
+
+
+Universal Restart
+=================
+
+If you are having trouble properly restarting processes on your server, try
+turning it off and on again. This is effective on every known system and
+under all configurations.
+
+
+HTTP Server: Apache
+===================
+
+If you are using Apache with `mod_php`, you only need to restart Apache.
+
+If you are using Apache in FastCGI mode, you need to restart both Apache and
+the FCGI server (usually PHP-FPM). This is very unusual.
+
+The correct method for restarting Apache depends on what system you are
+running. Consult your system documentation for details. You might use a command
+like one of these on your system, or a different command:
+
+```
+$ sudo apachectl restart
+$ sudo /etc/init.d/httpd restart
+$ sudo service apache2 restart
+```
+
+
+HTTP Server: Nginx
+==================
+
+If you're using Nginx with PHP-FPM, you need to restart both of them. This is
+the most common Nginx configuration.
+
+The correct method for restarting Nginx depends on what system you are running.
+Consult your system documentation for details. You might use a command like
+one of these on your system, or a different command:
+
+```
+$ sudo /etc/init.d/nginx restart
+$ sudo service nginx restart
+```
+
+
+PHP Server: mod_php
+===================
+
+This is a builtin PHP server that runs within Apache. Restarting Apache (see
+above) is sufficient to restart it. There is no separate restart command for
+`mod_php`, so you don't need to do anything else.
+
+
+PHP Server: PHP-FPM
+===================
+
+If you're using FastCGI mode, PHP-FPM is the most common PHP FastCGI server.
+You'll need to restart it if you're running it.
+
+The correct method for restarting PHP-FPM depends on what system you are
+running. Consult your system documentation for details. You might use a command
+like one of these on your system, or a different command:
+
+```
+$ sudo /etc/init.d/php-fpm restart
+$ sudo service php5-fpm reload
+```

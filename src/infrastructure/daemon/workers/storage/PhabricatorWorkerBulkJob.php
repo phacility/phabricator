@@ -130,6 +130,10 @@ final class PhabricatorWorkerBulkJob
     return idx($map, $this->getStatus(), $this->getStatus());
   }
 
+  public function isConfirming() {
+    return ($this->getStatus() == self::STATUS_CONFIRM);
+  }
+
 
 /* -(  Job Implementation  )------------------------------------------------- */
 
@@ -215,10 +219,6 @@ final class PhabricatorWorkerBulkJob
   }
 
   public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
-  public function shouldAllowSubscription($phid) {
     return true;
   }
 

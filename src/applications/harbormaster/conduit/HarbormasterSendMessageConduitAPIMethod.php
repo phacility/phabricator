@@ -256,10 +256,15 @@ final class HarbormasterSendMessageConduitAPIMethod
 
     // If the build has completely paused because all steps are blocked on
     // waiting targets, this will resume it.
+    $build = $build_target->getBuild();
+
     PhabricatorWorker::scheduleTask(
       'HarbormasterBuildWorker',
       array(
-        'buildID' => $build_target->getBuild()->getID(),
+        'buildID' => $build->getID(),
+      ),
+      array(
+        'objectPHID' => $build->getPHID(),
       ));
 
     return null;

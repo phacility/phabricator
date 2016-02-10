@@ -48,20 +48,30 @@ final class ManiphestTaskSearchEngine
       id(new PhabricatorOwnersSearchField())
         ->setLabel(pht('Assigned To'))
         ->setKey('assignedPHIDs')
-        ->setAliases(array('assigned')),
+        ->setConduitKey('assigned')
+        ->setAliases(array('assigned'))
+        ->setDescription(
+          pht('Search for tasks owned by a user from a list.')),
       id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Authors'))
         ->setKey('authorPHIDs')
-        ->setAliases(array('author', 'authors')),
+        ->setAliases(array('author', 'authors'))
+        ->setDescription(
+          pht('Search for tasks with given authors.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Statuses'))
         ->setKey('statuses')
         ->setAliases(array('status'))
+        ->setDescription(
+          pht('Search for tasks with given statuses.'))
         ->setDatasource(new ManiphestTaskStatusFunctionDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Priorities'))
         ->setKey('priorities')
         ->setAliases(array('priority'))
+        ->setDescription(
+          pht('Search for tasks with given priorities.'))
+        ->setConduitParameterType(new ConduitIntListParameterType())
         ->setDatasource(new ManiphestTaskPriorityDatasource()),
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Contains Words'))
@@ -84,9 +94,6 @@ final class ManiphestTaskSearchEngine
         ->setLabel(pht('Group By'))
         ->setKey('group')
         ->setOptions($this->getGroupOptions()),
-      id(new PhabricatorSearchStringListField())
-        ->setLabel(pht('Task IDs'))
-        ->setKey('ids'),
       id(new PhabricatorSearchDateField())
         ->setLabel(pht('Created After'))
         ->setKey('createdStart'),
@@ -376,6 +383,26 @@ final class ManiphestTaskSearchEngine
     }
 
     $saved->setParameter('projectPHIDs', $project_phids);
+  }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Task'))
+      ->setHref('/maniphest/task/edit/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Use Maniphest to track bugs, features, todos, or anything else '.
+            'you need to get done. Tasks assigned to you will appear here.'))
+      ->addAction($create_button);
+
+      return $view;
   }
 
 }

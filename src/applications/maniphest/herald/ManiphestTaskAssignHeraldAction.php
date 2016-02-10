@@ -23,12 +23,21 @@ abstract class ManiphestTaskAssignHeraldAction
       PhabricatorPeopleUserPHIDType::TYPECONST,
     );
 
-    $targets = $this->loadStandardTargets($phids, $allowed_types, $current);
-    if (!$targets) {
-      return;
-    }
+    if (head($phids) == PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN) {
+      $phid = null;
 
-    $phid = head_key($targets);
+      if ($object->getOwnerPHID() == null) {
+        $this->logEffect(self::DO_STANDARD_NO_EFFECT);
+        return;
+      }
+    } else {
+      $targets = $this->loadStandardTargets($phids, $allowed_types, $current);
+      if (!$targets) {
+        return;
+      }
+
+      $phid = head_key($targets);
+    }
 
     $xaction = $adapter->newTransaction()
       ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
@@ -52,9 +61,13 @@ abstract class ManiphestTaskAssignHeraldAction
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
       case self::DO_ASSIGN:
-        return pht(
-          'Assigned task to: %s.',
-          $this->renderHandleList($data));
+        if (head($data) === null) {
+          return pht('Unassigned task.');
+        } else {
+          return pht(
+            'Assigned task to: %s.',
+            $this->renderHandleList($data));
+        }
     }
   }
 

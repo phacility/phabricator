@@ -385,6 +385,12 @@ final class DifferentialDiff
     return $map;
   }
 
+  public function getURI() {
+    $id = $this->getID();
+    return "/differential/diff/{$id}/";
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -487,6 +493,49 @@ final class DifferentialDiff
     // where it sent changes and we should only provide staging details
     // if we reasonably believe they are accurate.
     return 'refs/tags/phabricator/diff/'.$this->getID();
+  }
+
+  public function loadTargetBranch() {
+    // TODO: This is sketchy, but just eat the query cost until this can get
+    // cleaned up.
+
+    // For now, we're only returning a target if there's exactly one and it's
+    // a branch, since we don't support landing to more esoteric targets like
+    // tags yet.
+
+    $property = id(new DifferentialDiffProperty())->loadOneWhere(
+      'diffID = %d AND name = %s',
+      $this->getID(),
+      'arc:onto');
+    if (!$property) {
+      return null;
+    }
+
+    $data = $property->getData();
+
+    if (!$data) {
+      return null;
+    }
+
+    if (!is_array($data)) {
+      return null;
+    }
+
+    if (count($data) != 1) {
+      return null;
+    }
+
+    $onto = head($data);
+    if (!is_array($onto)) {
+      return null;
+    }
+
+    $type = idx($onto, 'type');
+    if ($type != 'branch') {
+      return null;
+    }
+
+    return idx($onto, 'name');
   }
 
 

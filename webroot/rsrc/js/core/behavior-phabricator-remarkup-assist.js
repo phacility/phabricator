@@ -7,13 +7,17 @@
  *           phabricator-textareautils
  *           javelin-workflow
  *           javelin-vector
+ *           phuix-autocomplete
  */
 
 JX.behavior('phabricator-remarkup-assist', function(config) {
   var pht = JX.phtize(config.pht);
+  var root = JX.$(config.rootID);
+  var area = JX.DOM.find(root, 'textarea');
 
   var edit_mode = 'normal';
   var edit_root = null;
+  var preview = null;
 
   function set_edit_mode(root, mode) {
     if (mode == edit_mode) {
@@ -26,7 +30,16 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', false);
         JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', false);
       }
-      JX.DOM.find(edit_root, 'textarea').style.height = '';
+
+      area.style.height = '';
+
+      // If we're in preview mode, kick the preview back down to default
+      // size.
+      if (preview) {
+        JX.DOM.show(area);
+        resize_preview();
+        JX.DOM.hide(area);
+      }
     }
 
     edit_root = root;
@@ -36,10 +49,21 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     if (mode == 'fa-arrows-alt') {
       JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', true);
       JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', true);
+
+      // If we're in preview mode, expand the preview to full-size.
+      if (preview) {
+        JX.DOM.show(area);
+      }
+
       resizearea();
+
+      if (preview) {
+        resize_preview();
+        JX.DOM.hide(area);
+      }
     }
 
-    JX.DOM.focus(JX.DOM.find(edit_root, 'textarea'));
+    JX.DOM.focus(area);
   }
 
   function resizearea() {
@@ -54,8 +78,6 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     // "top" and "bottom", and height "auto" renders as two lines high. Force
     // it to the correct height with Javascript.
 
-    var area = JX.DOM.find(edit_root, 'textarea');
-
     var v = JX.Vector.getViewport();
     v.x = null;
     v.y -= 26;
@@ -64,7 +86,6 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
   }
 
   JX.Stratcom.listen('resize', null, resizearea);
-
 
   JX.Stratcom.listen('keydown', null, function(e) {
     if (e.getSpecialKey() != 'esc') {
@@ -81,7 +102,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
   function update(area, l, m, r) {
     // Replace the selection with the entire assisted text.
-    JX.TextAreaUtils.setSelectionText(area, l + m + r);
+    JX.TextAreaUtils.setSelectionText(area, l + m + r, true);
 
     // Now, select just the middle part. For instance, if the user clicked
     // "B" to create bold text, we insert '**bold**' but just select the word
@@ -115,7 +136,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     return sel.join('\n' + ch);
   }
 
-  function assist(area, action, root) {
+  function assist(area, action, root, button) {
     // If the user has some text selected, we'll try to use that (for example,
     // if they have a word selected and want to bold it). Otherwise we'll insert
     // generic text.
@@ -182,11 +203,81 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           set_edit_mode(root, 'fa-arrows-alt');
         }
         break;
+      case 'fa-eye':
+        if (!preview) {
+          preview = JX.$N(
+            'div',
+            {
+              className: 'remarkup-inline-preview'
+            },
+            null);
+
+          area.parentNode.insertBefore(preview, area);
+          JX.DOM.alterClass(button, 'preview-active', true);
+          resize_preview();
+          JX.DOM.hide(area);
+
+          update_preview();
+        } else {
+          JX.DOM.show(area);
+          resize_preview(true);
+          JX.DOM.remove(preview);
+          preview = null;
+
+          JX.DOM.alterClass(button, 'preview-active', false);
+        }
+        break;
     }
   }
 
-  JX.Stratcom.listen(
-    ['click'],
+  function resize_preview(restore) {
+    if (!preview) {
+      return;
+    }
+
+    var src;
+    var dst;
+
+    if (restore) {
+      src = preview;
+      dst = area;
+    } else {
+      src = area;
+      dst = preview;
+    }
+
+    var d = JX.Vector.getDim(src);
+    d.x = null;
+    d.setDim(dst);
+  }
+
+  function update_preview() {
+    var value = area.value;
+
+    var data = {
+      text: value
+    };
+
+    var onupdate = function(r) {
+      if (area.value !== value) {
+        return;
+      }
+
+      if (!preview) {
+        return;
+      }
+
+      JX.DOM.setContent(preview, JX.$H(r.content).getFragment());
+    };
+
+    new JX.Workflow('/transactions/remarkuppreview/', data)
+      .setHandler(onupdate)
+      .start();
+  }
+
+  JX.DOM.listen(
+    root,
+    'click',
     'remarkup-assist',
     function(e) {
       var data = e.getNodeData('remarkup-assist');
@@ -196,10 +287,20 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
       e.kill();
 
-      var root = e.getNode('remarkup-assist-control');
-      var area = JX.DOM.find(root, 'textarea');
+      if (config.disabled) {
+        return;
+      }
 
-      assist(area, data.action, root);
+      assist(area, data.action, root, e.getNode('remarkup-assist'));
     });
+
+  var autocomplete = new JX.PHUIXAutocomplete()
+    .setArea(area);
+
+  for (var k in config.autocompleteMap) {
+    autocomplete.addAutocomplete(k, config.autocompleteMap[k]);
+  }
+
+  autocomplete.start();
 
 });

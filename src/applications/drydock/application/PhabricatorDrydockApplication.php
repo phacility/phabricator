@@ -14,7 +14,7 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return pht('Allocate Software Resources');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-truck';
   }
 
@@ -96,6 +96,7 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
           '(?P<id>[1-9]\d*)/' => array(
             '' => 'DrydockRepositoryOperationViewController',
             'status/' => 'DrydockRepositoryOperationStatusController',
+            'dismiss/' => 'DrydockRepositoryOperationDismissController',
           ),
         ),
       ),

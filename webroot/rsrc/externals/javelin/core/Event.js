@@ -326,7 +326,16 @@ JX.install('Event', {
     /**
      * @task info
      */
-    nodeDistances : {}
+    nodeDistances : {},
+
+    /**
+     * True if this is a cursor event that was caused by a touch interaction
+     * rather than a mouse device interaction.
+     *
+     * @type bool
+     * @taks info
+     */
+    isTouchEvent: false
   },
 
   /**
@@ -339,7 +348,13 @@ JX.install('Event', {
     if (__DEV__) {
       JX.Event.prototype.toString = function() {
         var path = '['+this.getPath().join(', ')+']';
-        return 'Event<'+this.getType()+', '+path+', '+this.getTarget()+'>';
+
+        var type = this.getType();
+        if (this.getIsTouchEvent()) {
+          type = type + '/touch';
+        }
+
+        return 'Event<'+type+', '+path+', '+this.getTarget()+'>';
       };
     }
   }

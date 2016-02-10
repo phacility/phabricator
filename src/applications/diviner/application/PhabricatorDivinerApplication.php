@@ -6,7 +6,7 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     return '/diviner/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-sun-o';
   }
 
@@ -35,7 +35,7 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     return array(
       '/diviner/' => array(
         '' => 'DivinerMainController',
-        'query/((?<key>[^/]+)/)?' => 'DivinerAtomListController',
+        'query/((?<queryKey>[^/]+)/)?' => 'DivinerAtomListController',
         'find/' => 'DivinerFindController',
       ),
       '/book/(?P<book>[^/]+)/' => 'DivinerBookController',

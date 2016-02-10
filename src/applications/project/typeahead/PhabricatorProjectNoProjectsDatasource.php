@@ -4,11 +4,11 @@ final class PhabricatorProjectNoProjectsDatasource
   extends PhabricatorTypeaheadDatasource {
 
   public function getBrowseTitle() {
-    return pht('Browse Not In Any Projects');
+    return pht('Browse Not Tagged With Any Projects');
   }
 
   public function getPlaceholderText() {
-    return pht('Type "not in any projects"...');
+    return pht('Type "not tagged with any projects"...');
   }
 
   public function getDatasourceApplicationClass() {
@@ -18,10 +18,11 @@ final class PhabricatorProjectNoProjectsDatasource
   public function getDatasourceFunctions() {
     return array(
       'null' => array(
-        'name' => pht('Not In Any Projects'),
-        'summary' => pht('Find results which are not in any projects.'),
+        'name' => pht('Not Tagged With Any Projects'),
+        'summary' => pht(
+          'Find results which are not tagged with any projects.'),
         'description' => pht(
-          "This function matches results which are not associated with any ".
+          "This function matches results which are not tagged with any ".
           "projects. It is usually most often used to find objects which ".
           "might have slipped through the cracks and not been organized ".
           "properly.\n\n%s",
@@ -60,7 +61,7 @@ final class PhabricatorProjectNoProjectsDatasource
   }
 
   private function buildNullResult() {
-    $name = pht('Not In Any Projects');
+    $name = pht('Not Tagged With Any Projects');
 
     return $this->newFunctionResult()
       ->setUnique(true)

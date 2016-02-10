@@ -7,8 +7,9 @@ final class PHUIHandleTagListView extends AphrontTagView {
   private $limit;
   private $noDataString;
   private $slim;
+  private $showHovercards;
 
-  public function setHandles(array $handles) {
+  public function setHandles($handles) {
     $this->handles = $handles;
     return $this;
   }
@@ -30,6 +31,11 @@ final class PHUIHandleTagListView extends AphrontTagView {
 
   public function setSlim($slim) {
     $this->slim = true;
+    return $this;
+  }
+
+  public function setShowHovercards($show_hovercards) {
+    $this->showHovercards = $show_hovercards;
     return $this;
   }
 
@@ -62,6 +68,9 @@ final class PHUIHandleTagListView extends AphrontTagView {
     $list = array();
     foreach ($handles as $handle) {
       $tag = $handle->renderTag();
+      if ($this->showHovercards) {
+        $tag->setPHID($handle->getPHID());
+      }
       if ($this->slim) {
         $tag->setSlimShady(true);
       }

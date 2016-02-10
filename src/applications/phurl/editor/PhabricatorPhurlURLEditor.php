@@ -106,22 +106,6 @@ final class PhabricatorPhurlURLEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case PhabricatorPhurlURLTransaction::TYPE_NAME:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getName(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('URL name is required.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-        break;
       case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
         $overdrawn = $this->validateIsTextFieldTooLong(
           $object->getName(),
@@ -227,11 +211,9 @@ final class PhabricatorPhurlURLEditor
 
   public function getMailTagsMap() {
     return array(
-      PhabricatorPhurlURLTransaction::MAILTAG_CONTENT =>
+      PhabricatorPhurlURLTransaction::MAILTAG_DETAILS =>
         pht(
-          "A URL's name or path changes."),
-      PhabricatorPhurlURLTransaction::MAILTAG_OTHER =>
-        pht('Other event activity not listed above occurs.'),
+          "A URL's details change."),
     );
   }
 
@@ -252,7 +234,7 @@ final class PhabricatorPhurlURLEditor
     $body = parent::buildMailBody($object, $xactions);
 
     if (strlen($description)) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('URL DESCRIPTION'),
         $object->getDescription());
     }
@@ -278,6 +260,11 @@ final class PhabricatorPhurlURLEditor
       null);
 
     throw new PhabricatorApplicationTransactionValidationException($errors);
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhabricatorPhurlURLReplyHandler())
+      ->setMailReceiver($object);
   }
 
 }

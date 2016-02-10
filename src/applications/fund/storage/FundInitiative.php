@@ -9,7 +9,8 @@ final class FundInitiative extends FundDAO
     PhabricatorMentionableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorFulltextInterface {
 
   protected $name;
   protected $ownerPHID;
@@ -181,10 +182,6 @@ final class FundInitiative extends FundDAO
     return true;
   }
 
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenRecevierInterface  )---------------------------------- */
 
@@ -205,6 +202,14 @@ final class FundInitiative extends FundDAO
     $this->openTransaction();
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new FundInitiativeFulltextEngine();
   }
 
 }

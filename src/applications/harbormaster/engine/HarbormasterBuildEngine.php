@@ -81,6 +81,9 @@ final class HarbormasterBuildEngine extends Phobject {
         'HarbormasterTargetWorker',
         array(
           'targetID' => $target->getID(),
+        ),
+        array(
+          'objectPHID' => $target->getPHID(),
         ));
     }
 

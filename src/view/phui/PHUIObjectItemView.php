@@ -27,6 +27,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $countdownNum;
   private $countdownNoun;
   private $launchButton;
+  private $coverImage;
 
   const AGE_FRESH = 'fresh';
   const AGE_STALE = 'stale';
@@ -150,6 +151,11 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this->imageIcon;
   }
 
+  public function setCoverImage($image) {
+    $this->coverImage = $image;
+    return $this;
+  }
+
   public function setState($state) {
     $this->state = $state;
     switch ($state) {
@@ -169,13 +175,13 @@ final class PHUIObjectItemView extends AphrontTagView {
         $fi = 'fa-refresh ph-spin sky';
       break;
     }
-    $this->setFontIcon($fi);
+    $this->setIcon($fi);
     return $this;
   }
 
-  public function setFontIcon($icon) {
+  public function setIcon($icon) {
     $this->fontIcon = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIcon($icon);
     return $this;
   }
 
@@ -383,17 +389,24 @@ final class PHUIObjectItemView extends AphrontTagView {
       ),
       $this->header);
 
-    $header = javelin_tag(
+    // Wrap the header content in a <span> with the "slippery" sigil. This
+    // prevents us from beginning a drag if you click the text (like "T123"),
+    // but not if you click the white space after the header.
+    $header = phutil_tag(
       'div',
       array(
         'class' => 'phui-object-item-name',
-        'sigil' => 'slippery',
       ),
-      array(
-        $this->headIcons,
-        $header_name,
-        $header_link,
-      ));
+      javelin_tag(
+        'span',
+        array(
+          'sigil' => 'slippery',
+        ),
+        array(
+          $this->headIcons,
+          $header_name,
+          $header_link,
+        )));
 
     $icons = array();
     if ($this->icons) {
@@ -401,7 +414,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       foreach ($this->icons as $spec) {
         $icon = $spec['icon'];
         $icon = id(new PHUIIconView())
-          ->setIconFont($icon)
+          ->setIcon($icon)
           ->addClass('phui-object-item-icon-image');
 
         if (isset($spec['attributes']['tip'])) {
@@ -452,14 +465,15 @@ final class PHUIObjectItemView extends AphrontTagView {
         $icon_list);
     }
 
+    $handle_bar = null;
     if ($this->handleIcons) {
       $handle_bar = array();
       foreach ($this->handleIcons as $handleicon) {
         $handle_bar[] =
           $this->renderHandleIcon($handleicon['icon'], $handleicon['label']);
       }
-      $icons[] = phutil_tag(
-        'div',
+      $handle_bar = phutil_tag(
+        'li',
         array(
           'class' => 'phui-object-item-handle-icons',
         ),
@@ -504,7 +518,7 @@ final class PHUIObjectItemView extends AphrontTagView {
     }
 
     $attrs = null;
-    if ($this->attributes) {
+    if ($this->attributes || $handle_bar) {
       $attrs = array();
       $spacer = phutil_tag(
         'span',
@@ -531,7 +545,10 @@ final class PHUIObjectItemView extends AphrontTagView {
         array(
           'class' => 'phui-object-item-attributes',
         ),
-        $attrs);
+        array(
+          $handle_bar,
+          $attrs,
+        ));
     }
 
     $status = null;
@@ -709,23 +726,52 @@ final class PHUIObjectItemView extends AphrontTagView {
         $actions);
     }
 
-    return phutil_tag(
+    $frame_content = phutil_tag(
       'div',
       array(
-        'class' => 'phui-object-item-frame',
+        'class' => 'phui-object-item-frame-content',
       ),
       array(
         $actions,
         $image,
         $box,
       ));
+
+    $frame_cover = null;
+    if ($this->coverImage) {
+      $cover_image = phutil_tag(
+        'img',
+        array(
+          'src' => $this->coverImage,
+          'class' => 'phui-object-item-cover-image',
+        ));
+
+      $frame_cover = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-frame-cover',
+        ),
+        $cover_image);
+    }
+
+    $frame = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-object-item-frame',
+      ),
+      array(
+        $frame_cover,
+        $frame_content,
+      ));
+
+    return $frame;
   }
 
   private function renderStatusIcon($icon, $label) {
     Javelin::initBehavior('phabricator-tooltips');
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIcon($icon);
 
     $options = array(
       'class' => 'phui-object-item-status-icon',
@@ -750,7 +796,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if (strlen($label)) {
       $options['sigil'] = 'has-tooltip';
-      $options['meta']  = array('tip' => $label);
+      $options['meta']  = array('tip' => $label, 'align' => 'E');
     }
 
     return javelin_tag('span', $options, '');

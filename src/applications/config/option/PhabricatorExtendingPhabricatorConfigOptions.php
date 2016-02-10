@@ -11,7 +11,7 @@ final class PhabricatorExtendingPhabricatorConfigOptions
     return pht('Make Phabricator even cooler!');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-rocket';
   }
 

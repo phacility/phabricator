@@ -3,9 +3,11 @@
 final class ProjectBoardTaskCard extends Phobject {
 
   private $viewer;
+  private $projectHandles;
   private $task;
   private $owner;
   private $canEdit;
+  private $coverImageFile;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -13,6 +15,24 @@ final class ProjectBoardTaskCard extends Phobject {
   }
   public function getViewer() {
     return $this->viewer;
+  }
+
+  public function setProjectHandles(array $handles) {
+    $this->projectHandles = $handles;
+    return $this;
+  }
+
+  public function getProjectHandles() {
+    return $this->projectHandles;
+  }
+
+  public function setCoverImageFile(PhabricatorFile $cover_image_file) {
+    $this->coverImageFile = $cover_image_file;
+    return $this;
+  }
+
+  public function getCoverImageFile() {
+    return $this->coverImageFile;
   }
 
   public function setTask(ManiphestTask $task) {
@@ -44,23 +64,20 @@ final class ProjectBoardTaskCard extends Phobject {
     $task = $this->getTask();
     $owner = $this->getOwner();
     $can_edit = $this->getCanEdit();
+    $viewer = $this->getViewer();
 
     $color_map = ManiphestTaskPriority::getColorMap();
     $bar_color = idx($color_map, $task->getPriority(), 'grey');
 
     $card = id(new PHUIObjectItemView())
       ->setObject($task)
-      ->setUser($this->getViewer())
+      ->setUser($viewer)
       ->setObjectName('T'.$task->getID())
       ->setHeader($task->getTitle())
       ->setGrippable($can_edit)
       ->setHref('/T'.$task->getID())
       ->addSigil('project-card')
       ->setDisabled($task->isClosed())
-      ->setMetadata(
-        array(
-          'objectPHID' => $task->getPHID(),
-        ))
       ->addAction(
         id(new PHUIListItemView())
         ->setName(pht('Edit'))
@@ -70,8 +87,31 @@ final class ProjectBoardTaskCard extends Phobject {
       ->setBarColor($bar_color);
 
     if ($owner) {
-      $card->addAttribute($owner->renderLink());
+      $card->addHandleIcon($owner, $owner->getName());
     }
+
+    $cover_file = $this->getCoverImageFile();
+    if ($cover_file) {
+      $card->setCoverImage($cover_file->getBestURI());
+    }
+
+    if ($task->isClosed()) {
+      $icon = ManiphestTaskStatus::getStatusIcon($task->getStatus());
+      $icon = id(new PHUIIconView())
+        ->setIcon($icon.' grey');
+      $card->addAttribute($icon);
+      $card->setBarColor('grey');
+    }
+
+    $project_handles = $this->getProjectHandles();
+    if ($project_handles) {
+      $tag_list = id(new PHUIHandleTagListView())
+        ->setSlim(true)
+        ->setHandles($project_handles);
+      $card->addAttribute($tag_list);
+    }
+
+    $card->addClass('phui-workcard');
 
     return $card;
   }

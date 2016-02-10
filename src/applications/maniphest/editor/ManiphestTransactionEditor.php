@@ -26,6 +26,10 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
     $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
+    $types[] = ManiphestTransaction::TYPE_PARENT;
+    $types[] = ManiphestTransaction::TYPE_COLUMN;
+    $types[] = ManiphestTransaction::TYPE_COVER_IMAGE;
+    $types[] = ManiphestTransaction::TYPE_POINTS;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -64,8 +68,19 @@ final class ManiphestTransactionEditor
         return $xaction->getOldValue();
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         return $object->getSubpriority();
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        return $object->getCoverImageFilePHID();
+      case ManiphestTransaction::TYPE_POINTS:
+        $points = $object->getPoints();
+        if ($points !== null) {
+          $points = (double)$points;
+        }
+        return $points;
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
+        return null;
+      case ManiphestTransaction::TYPE_PARENT:
+      case ManiphestTransaction::TYPE_COLUMN:
         return null;
     }
   }
@@ -87,7 +102,20 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
       case ManiphestTransaction::TYPE_UNBLOCK:
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
         return $xaction->getNewValue();
+      case ManiphestTransaction::TYPE_PARENT:
+      case ManiphestTransaction::TYPE_COLUMN:
+        return $xaction->getNewValue();
+      case ManiphestTransaction::TYPE_POINTS:
+        $value = $xaction->getNewValue();
+        if (!strlen($value)) {
+          $value = null;
+        }
+        if ($value !== null) {
+          $value = (double)$value;
+        }
+        return $value;
     }
   }
 
@@ -153,7 +181,38 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_MERGED_INTO:
         $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
         return;
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        $file_phid = $xaction->getNewValue();
+
+        if ($file_phid) {
+          $file = id(new PhabricatorFileQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($file_phid))
+            ->executeOne();
+        } else {
+          $file = null;
+        }
+
+        if (!$file || !$file->isTransformableImage()) {
+          $object->setProperty('cover.filePHID', null);
+          $object->setProperty('cover.thumbnailPHID', null);
+          return;
+        }
+
+        $xform_key = PhabricatorFileThumbnailTransform::TRANSFORM_WORKCARD;
+
+        $xform = PhabricatorFileTransform::getTransformByKey($xform_key)
+          ->executeTransform($file);
+
+        $object->setProperty('cover.filePHID', $file->getPHID());
+        $object->setProperty('cover.thumbnailPHID', $xform->getPHID());
+        return;
+      case ManiphestTransaction::TYPE_POINTS:
+        $object->setPoints($xaction->getNewValue());
+        return;
       case ManiphestTransaction::TYPE_MERGED_FROM:
+      case ManiphestTransaction::TYPE_PARENT:
+      case ManiphestTransaction::TYPE_COLUMN:
         return;
     }
   }
@@ -163,6 +222,15 @@ final class ManiphestTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_PARENT:
+        $parent_phid = $xaction->getNewValue();
+        $parent_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+        $task_phid = $object->getPHID();
+
+        id(new PhabricatorEdgeEditor())
+          ->addEdge($parent_phid, $parent_type, $task_phid)
+          ->save();
+        break;
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         $board_phid = idx($xaction->getNewValue(), 'projectPHID');
         if (!$board_phid) {
@@ -181,18 +249,6 @@ final class ManiphestTransactionEditor
               'columnPHIDs'));
         }
 
-        $columns = id(new PhabricatorProjectColumnQuery())
-          ->setViewer($this->requireActor())
-          ->withPHIDs($new_phids)
-          ->execute();
-        $columns = mpull($columns, null, 'getPHID');
-
-        $positions = id(new PhabricatorProjectColumnPositionQuery())
-          ->setViewer($this->requireActor())
-          ->withObjectPHIDs(array($object->getPHID()))
-          ->withBoardPHIDs(array($board_phid))
-          ->execute();
-
         $before_phid = idx($xaction->getNewValue(), 'beforePHID');
         $after_phid = idx($xaction->getNewValue(), 'afterPHID');
 
@@ -208,111 +264,86 @@ final class ManiphestTransactionEditor
         // object's position in the "natural" ordering, so we do need to update
         // some rows.
 
+        $object_phid = $object->getPHID();
+
+        // We're doing layout with the ominpotent viewer to make sure we don't
+        // remove positions in columns that exist, but which the actual actor
+        // can't see.
+        $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
+
+        $select_phids = array($board_phid);
+
+        $descendants = id(new PhabricatorProjectQuery())
+          ->setViewer($omnipotent_viewer)
+          ->withAncestorProjectPHIDs($select_phids)
+          ->execute();
+        foreach ($descendants as $descendant) {
+          $select_phids[] = $descendant->getPHID();
+        }
+
+        $board_tasks = id(new ManiphestTaskQuery())
+          ->setViewer($omnipotent_viewer)
+          ->withEdgeLogicPHIDs(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+            PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
+            array($select_phids))
+          ->execute();
+
+        $object_phids = mpull($board_tasks, 'getPHID');
+        $object_phids[] = $object_phid;
+
+        $engine = id(new PhabricatorBoardLayoutEngine())
+          ->setViewer($omnipotent_viewer)
+          ->setBoardPHIDs(array($board_phid))
+          ->setObjectPHIDs($object_phids)
+          ->executeLayout();
+
+        // TODO: This logic needs to be revised if we legitimately support
+        // multiple column positions.
+
+        // NOTE: When a task is newly created, it's implicitly added to the
+        // backlog but we don't currently record that in the "$old_phids". Just
+        // clean it up for now.
+        $columns = $engine->getObjectColumns($board_phid, $object_phid);
+        foreach ($columns as $column) {
+          $engine->queueRemovePosition(
+            $board_phid,
+            $column->getPHID(),
+            $object_phid);
+        }
+
         // Remove all existing column positions on the board.
-
-        foreach ($positions as $position) {
-          $position->delete();
+        foreach ($old_phids as $column_phid) {
+          $engine->queueRemovePosition(
+            $board_phid,
+            $column_phid,
+            $object_phid);
         }
 
-        // Add the new column positions.
-
-        foreach ($new_phids as $phid) {
-          $column = idx($columns, $phid);
-          if (!$column) {
-            throw new Exception(
-              pht('No such column "%s" exists!', $phid));
-          }
-
-          // Load the other object positions in the column. Note that we must
-          // skip implicit column creation to avoid generating a new position
-          // if the target column is a backlog column.
-
-          $other_positions = id(new PhabricatorProjectColumnPositionQuery())
-            ->setViewer($this->requireActor())
-            ->withColumns(array($column))
-            ->withBoardPHIDs(array($board_phid))
-            ->setSkipImplicitCreate(true)
-            ->execute();
-          $other_positions = msort($other_positions, 'getOrderingKey');
-
-          // Set up the new position object. We're going to figure out the
-          // right sequence number and then persist this object with that
-          // sequence number.
-          $new_position = id(new PhabricatorProjectColumnPosition())
-            ->setBoardPHID($board_phid)
-            ->setColumnPHID($column->getPHID())
-            ->setObjectPHID($object->getPHID());
-
-          $updates = array();
-          $sequence = 0;
-
-          // If we're just dropping this into the column without any specific
-          // position information, put it at the top.
-          if (!$before_phid && !$after_phid) {
-            $new_position->setSequence($sequence)->save();
-            $sequence++;
-          }
-
-          foreach ($other_positions as $position) {
-            $object_phid = $position->getObjectPHID();
-
-            // If this is the object we're moving before and we haven't
-            // saved yet, insert here.
-            if (($before_phid == $object_phid) && !$new_position->getID()) {
-              $new_position->setSequence($sequence)->save();
-              $sequence++;
-            }
-
-            // This object goes here in the sequence; we might need to update
-            // the row.
-            if ($sequence != $position->getSequence()) {
-              $updates[$position->getID()] = $sequence;
-            }
-            $sequence++;
-
-            // If this is the object we're moving after and we haven't saved
-            // yet, insert here.
-            if (($after_phid == $object_phid) && !$new_position->getID()) {
-              $new_position->setSequence($sequence)->save();
-              $sequence++;
-            }
-          }
-
-          // We should have found a place to put it.
-          if (!$new_position->getID()) {
-            throw new Exception(
-              pht('Unable to find a place to insert object on column!'));
-          }
-
-          // If we changed other objects' column positions, bulk reorder them.
-
-          if ($updates) {
-            $position = new PhabricatorProjectColumnPosition();
-            $conn_w = $position->establishConnection('w');
-
-            $pairs = array();
-            foreach ($updates as $id => $sequence) {
-              // This is ugly because MySQL gets upset with us if it is
-              // configured strictly and we attempt inserts which can't work.
-              // We'll never actually do these inserts since they'll always
-              // collide (triggering the ON DUPLICATE KEY logic), so we just
-              // provide dummy values in order to get there.
-
-              $pairs[] = qsprintf(
-                $conn_w,
-                '(%d, %d, "", "", "")',
-                $id,
-                $sequence);
-            }
-
-            queryfx(
-              $conn_w,
-              'INSERT INTO %T (id, sequence, boardPHID, columnPHID, objectPHID)
-                VALUES %Q ON DUPLICATE KEY UPDATE sequence = VALUES(sequence)',
-              $position->getTableName(),
-              implode(', ', $pairs));
+        // Add new positions.
+        foreach ($new_phids as $column_phid) {
+          if ($before_phid) {
+            $engine->queueAddPositionBefore(
+              $board_phid,
+              $column_phid,
+              $object_phid,
+              $before_phid);
+          } else if ($after_phid) {
+            $engine->queueAddPositionAfter(
+              $board_phid,
+              $column_phid,
+              $object_phid,
+              $after_phid);
+          } else {
+            $engine->queueAddPosition(
+              $board_phid,
+              $column_phid,
+              $object_phid);
           }
         }
+
+        $engine->applyPositionUpdates();
+
         break;
       default:
         break;
@@ -352,12 +383,14 @@ final class ManiphestTransactionEditor
         $new = $unblock_xaction->getNewValue();
 
         foreach ($blocked_tasks as $blocked_task) {
-          $unblock_xactions = array();
-
-          $unblock_xactions[] = id(new ManiphestTransaction())
+          $parent_xaction = id(new ManiphestTransaction())
             ->setTransactionType(ManiphestTransaction::TYPE_UNBLOCK)
             ->setOldValue(array($object->getPHID() => $old))
             ->setNewValue(array($object->getPHID() => $new));
+
+          if ($this->getIsNewObject()) {
+            $parent_xaction->setMetadataValue('blocker.new', true);
+          }
 
           id(new ManiphestTransactionEditor())
             ->setActor($this->getActor())
@@ -365,7 +398,7 @@ final class ManiphestTransactionEditor
             ->setContentSource($this->getContentSource())
             ->setContinueOnNoEffect(true)
             ->setContinueOnMissingFields(true)
-            ->applyTransactions($blocked_task, $unblock_xactions);
+            ->applyTransactions($blocked_task, array($parent_xaction));
         }
       }
     }
@@ -442,7 +475,7 @@ final class ManiphestTransactionEditor
     $body = parent::buildMailBody($object, $xactions);
 
     if ($this->getIsNewObject()) {
-      $body->addTextSection(
+      $body->addRemarkupSection(
         pht('TASK DESCRIPTION'),
         $object->getDescription());
     }
@@ -714,6 +747,320 @@ final class ManiphestTransactionEditor
     }
 
     return array($dst->getPriority(), $sub);
+  }
+
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case ManiphestTransaction::TYPE_TITLE:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getTitle(),
+          $xactions);
+
+        if ($missing) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('Task title is required.'),
+            nonempty(last($xactions), null));
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
+      case ManiphestTransaction::TYPE_PARENT:
+        $with_effect = array();
+        foreach ($xactions as $xaction) {
+          $task_phid = $xaction->getNewValue();
+          if (!$task_phid) {
+            continue;
+          }
+
+          $with_effect[] = $xaction;
+
+          $task = id(new ManiphestTaskQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($task_phid))
+            ->executeOne();
+          if (!$task) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Parent task identifier "%s" does not identify a visible '.
+                'task.',
+                $task_phid),
+              $xaction);
+          }
+        }
+
+        if ($with_effect && !$this->getIsNewObject()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can only select a parent task when creating a '.
+              'transaction for the first time.'),
+            last($with_effect));
+        }
+        break;
+      case ManiphestTransaction::TYPE_COLUMN:
+        $with_effect = array();
+        foreach ($xactions as $xaction) {
+          $column_phid = $xaction->getNewValue();
+          if (!$column_phid) {
+            continue;
+          }
+
+          $with_effect[] = $xaction;
+
+          $column = $this->loadProjectColumn($column_phid);
+          if (!$column) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Column PHID "%s" does not identify a visible column.',
+                $column_phid),
+              $xaction);
+          }
+        }
+
+        if ($with_effect && !$this->getIsNewObject()) {
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'You can only put a task into an initial column during task '.
+              'creation.'),
+            last($with_effect));
+        }
+        break;
+      case ManiphestTransaction::TYPE_OWNER:
+        foreach ($xactions as $xaction) {
+          $old = $xaction->getOldValue();
+          $new = $xaction->getNewValue();
+          if (!strlen($new)) {
+            continue;
+          }
+
+          if ($new === $old) {
+            continue;
+          }
+
+          $assignee_list = id(new PhabricatorPeopleQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($new))
+            ->execute();
+          if (!$assignee_list) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'User "%s" is not a valid user.',
+                $new),
+              $xaction);
+          }
+        }
+        break;
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        foreach ($xactions as $xaction) {
+          $old = $xaction->getOldValue();
+          $new = $xaction->getNewValue();
+          if (!$new) {
+            continue;
+          }
+
+          if ($new === $old) {
+            continue;
+          }
+
+          $file = id(new PhabricatorFileQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs(array($new))
+            ->executeOne();
+          if (!$file) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('File "%s" is not valid.', $new),
+              $xaction);
+            continue;
+          }
+
+          if (!$file->isTransformableImage()) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('File "%s" is not a valid image file.', $new),
+              $xaction);
+            continue;
+          }
+        }
+        break;
+
+      case ManiphestTransaction::TYPE_POINTS:
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+          if (strlen($new) && !is_numeric($new)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('Points value must be numeric or empty.'),
+              $xaction);
+            continue;
+          }
+
+          if ((double)$new < 0) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('Points value must be nonnegative.'),
+              $xaction);
+            continue;
+          }
+        }
+        break;
+
+    }
+
+    return $errors;
+  }
+
+  protected function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $actor = $this->getActor();
+    $actor_phid = $actor->getPHID();
+
+    $results = parent::expandTransactions($object, $xactions);
+
+    $is_unassigned = ($object->getOwnerPHID() === null);
+
+    $any_assign = false;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == ManiphestTransaction::TYPE_OWNER) {
+        $any_assign = true;
+        break;
+      }
+    }
+
+    $is_open = !$object->isClosed();
+
+    $new_status = null;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTransaction::TYPE_STATUS:
+          $new_status = $xaction->getNewValue();
+          break;
+      }
+    }
+
+    if ($new_status === null) {
+      $is_closing = false;
+    } else {
+      $is_closing = ManiphestTaskStatus::isClosedStatus($new_status);
+    }
+
+    // If the task is not assigned, not being assigned, currently open, and
+    // being closed, try to assign the actor as the owner.
+    if ($is_unassigned && !$any_assign && $is_open && $is_closing) {
+      // Don't assign the actor if they aren't a real user.
+      if ($actor_phid) {
+        $results[] = id(new ManiphestTransaction())
+          ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+          ->setNewValue($actor_phid);
+      }
+    }
+
+    // Automatically subscribe the author when they create a task.
+    if ($this->getIsNewObject()) {
+      if ($actor_phid) {
+        $results[] = id(new ManiphestTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(
+            array(
+              '+' => array($actor_phid => $actor_phid),
+            ));
+      }
+    }
+
+    return $results;
+  }
+
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $results = parent::expandTransaction($object, $xaction);
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_COLUMN:
+        $column_phid = $xaction->getNewValue();
+        if (!$column_phid) {
+          break;
+        }
+
+        // When a task is created into a column, we also generate a transaction
+        // to actually put it in that column.
+        $column = $this->loadProjectColumn($column_phid);
+        $results[] = id(new ManiphestTransaction())
+          ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
+          ->setOldValue(
+            array(
+              'projectPHID' => $column->getProjectPHID(),
+              'columnPHIDs' => array(),
+            ))
+          ->setNewValue(
+            array(
+              'projectPHID' => $column->getProjectPHID(),
+              'columnPHIDs' => array($column->getPHID()),
+            ));
+        break;
+      case ManiphestTransaction::TYPE_OWNER:
+        // When a task is reassigned, move the old owner to the subscriber
+        // list so they're still in the loop.
+        $owner_phid = $object->getOwnerPHID();
+        if ($owner_phid) {
+          $results[] = id(new ManiphestTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+            ->setIgnoreOnNoEffect(true)
+            ->setNewValue(
+              array(
+                '+' => array($owner_phid => $owner_phid),
+              ));
+        }
+        break;
+    }
+
+    return $results;
+  }
+
+  private function loadProjectColumn($column_phid) {
+    return id(new PhabricatorProjectColumnQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs(array($column_phid))
+      ->executeOne();
+  }
+
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    $phids = parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
+
+    switch ($xaction->getTransactionType()) {
+      case ManiphestTransaction::TYPE_COVER_IMAGE:
+        $phids[] = $xaction->getNewValue();
+        break;
+    }
+
+    return $phids;
   }
 
 

@@ -51,8 +51,7 @@ final class PhragmentVersionController extends PhragmentController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($version)
-      ->setObjectURI($version->getURI());
+      ->setObject($version);
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download Version'))

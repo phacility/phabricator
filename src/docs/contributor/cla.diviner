@@ -1,0 +1,169 @@
+@title Understanding the Phacility CLA
+@group detail
+
+Describes the Contributor License Agreement (CLA).
+
+Overview
+========
+
+IMPORTANT: This document is not legal advice.
+
+Phacility requires contributors to sign a Contributor License Agreement
+(often abbreviated "CLA") before we can accept contributions into the upstream.
+This document explains what this document means and why we require it.
+
+This requirement is not unusual, and many large open source projects require a
+similar CLA, including Python, Go, jQuery, and Apache Software Foundation
+projects.
+
+You can read more about CLAs and find more examples of companies and projects
+which require them on Wikipedia's
+[[ https://en.wikipedia.org/wiki/Contributor_License_Agreement | CLA ]] page.
+
+Our CLA is substantially similar to the CLA required by Apache, the
+"Apache Individual Contributor License Agreement V2.0". Many projects which
+require a CLA use this CLA or a similar one.
+
+
+Why We Require a CLA
+====================
+
+While many projects require a CLA, others do not. This project requires a CLA
+primarily because:
+
+  - it gives us certain rights, particularly the ability to relicense the work
+    later;
+  - it makes the terms of your contribution clear, protecting us from liability
+    related to copyright and patent disputes.
+
+**More Rights**: We consider the cost of maintaining changes to greatly
+outweigh the cost of writing them in the first place. When we accept work
+into the upstream, we are agreeing to bear that maintenance cost.
+
+This cost is not worthwhile to us unless the changes come with no strings
+attached. Among other concerns, we would be unable to redistribute Phabricator
+under a different license in the future without the additional rights the CLA
+gives us.
+
+For a concrete example of the problems this causes, Bootstrap switched from
+GPLv2 to MIT in 2012-2013. You can see the issue tracking the process and read
+about what they had to go through to do this here:
+
+https://github.com/twbs/bootstrap/issues/2054
+
+This took almost 18 months and required a huge amount of effort. We are not
+willing to encumber the project with that kind of potential cost in order to
+accept contributions.
+
+The rights you give us by signing the CLA allow us to release the software
+under a different license later without asking you for permission, including a
+license you may not agree with.
+
+They do not allow us to //undo// the existing release under the Apache license,
+but allow us to make an //additional// release under a different license, or
+release under multiple licenses (if we do, users may choose which license or
+licenses they wish to use the software under). It would also allow us to
+discontinue updating the release under the Apache license.
+
+While we do not currently plan to relicense Phabricator, we do not want to
+give up the ability to do so: we may want or need to in the future.
+
+The most likely scenario which would lead to us changing the license is if a
+new version of the Apache license is released. Open source software licenses
+are still largely untested in the US legal system, and they may face challenges
+in the future which could require adapting them to a changing legal
+environment. If this occurs, we would want to be able to update to a newer
+version of the license which accounted for these changes.
+
+It is also possible that we may want to change open source licenses (for
+example, to MIT) or adopt dual-licensing (for example, both Apache and MIT). We
+might want to do this so that our license is compatible with the licenses used
+by other software we want to be distributed alongside.
+
+Although we currently believe it is unlikely, it is also possible we may want
+to relicense Phabricator under a closed, proprietary, or literally evil license.
+By signing the CLA, you are giving us the power to do this without requiring
+you to consent. If you are not comfortable with this, do not sign the CLA and
+do not contribute to Phabricator.
+
+**Limitation of Liability**: The second benefit the CLA provides is that it
+makes the terms of your contribition explicitly clear upfront, and it puts us
+in a much stronger legal position if a contributor later claims there is
+ambiguity about ownership of their work. We can point at the document they
+signed as proof that they consented to our use and understood the terms of
+their contribution.
+
+//SCO v. IBM// was a lawsuit filed in 2003 alleging (roughly) that IBM had
+improperly contributed code owned by SCO to Linux. The details of this and the
+subsequent cases are very complex and the situation is not a direct parallel to
+anything we are likely to face, but SCO claimed billions of dollars in damages
+and the litigation has now been ongoing for more than a decade.
+
+We want to avoid situations like this in the future by making the terms of
+contibution explicit upfront.
+
+Generally, we believe the terms of the CLA are fair and reasonable for
+contributors, and that the primary way contributors benefit from contributing
+to Phabricator is that we publish and maintain their changes so they do not
+have to fork the software.
+
+If you have strong ideological reasons for contributing to open source, you may
+not be comfortable with the terms of the CLA (for example, it may be important
+to you that your changes are never available under a license which you haven't
+explicitly approved). This is fine and we can understand why contributors may
+hold this viewpoint, but we can not accept your changes into the upstream.
+
+
+Corporate vs Individual CLAs
+============================
+
+We offer two CLAs:
+
+  - {L28}
+  - {L30}
+
+These are both substantially similar to the corresponding Apache CLAs.
+
+If you own the work you are contributing, sign the individual CLA. If your
+employer owns the work you are contributing, have them sign the corporate CLA.
+
+**If you are employed, there is a substantial possibility that your employer
+owns your work.** If they do, you do not have the right to contribute it to us
+or assign the rights that we require, and can not contribute under the
+individual CLA. Work with your employer to contribute under the corporate CLA
+instead.
+
+Particularly, this clause in the individual CLA is the important one:
+
+> 4. You represent that you are legally entitled to grant the above license. If
+> your employer(s) has rights to intellectual property that you create that
+> includes your Contributions, you represent that you have received permission
+> to make Contributions on behalf of that employer, that your employer has
+> waived such rights for your Contributions to Phacility, or that your employer
+> has executed a separate Corporate CLA with Phacility.
+
+Ownership of your work varies based on where you live, how you are employed,
+and your agreements with your employer. However, at least in the US, it is
+likely that your employer owns your work unless you have anticipated conflicts
+and specifically avoided them. This generally makes sense: if you are paid by
+your employer for your work, they own the product of your work and you receive
+salary and benefits in fair exchange for that work.
+
+Your employer may have an ownership claim on your work even if you perform it
+on your own time, if you use their equipment (like a company laptop or phone),
+resources, facilities, or trade secrets, or signed something like an "Invention
+Assignment Agreement" when you were hired. Such agreements are common. The
+details of the strength of their claim will vary based on your situation and
+local law.
+
+If you are unsure, you should speak with your employer or a lawyer. If you
+contribute code you do not own under the individual CLA, you are exposing
+yourself to liability. You may also be exposing us to liablity, but we'll have
+the CLA on our side to show that we were unwilling pawns in your malicious
+scheme to defraud your employer.
+
+The good news is that most employers are happy to contribute to open source
+projects. Incentives are generally well aligned: they get features they want,
+and it reflects well on them. In the past, potential contributors who have
+approached their employers about a corporate CLA have generally had little
+difficulty getting approval.

@@ -10,12 +10,18 @@ final class PhabricatorEditEngineConfiguration
   protected $builtinKey;
   protected $name;
   protected $viewPolicy;
-  protected $editPolicy;
   protected $properties = array();
   protected $isDisabled = 0;
   protected $isDefault = 0;
+  protected $isEdit = 0;
+  protected $createOrder = 0;
+  protected $editOrder = 0;
 
   private $engine = self::ATTACHABLE;
+
+  const LOCK_VISIBLE = 'visible';
+  const LOCK_LOCKED = 'locked';
+  const LOCK_HIDDEN = 'hidden';
 
   public function getTableName() {
     return 'search_editengineconfiguration';
@@ -25,19 +31,42 @@ final class PhabricatorEditEngineConfiguration
     PhabricatorUser $actor,
     PhabricatorEditEngine $engine) {
 
-    // TODO: This should probably be controlled by a new defualt capability.
-    $edit_policy = PhabricatorPolicies::POLICY_ADMIN;
-
     return id(new PhabricatorEditEngineConfiguration())
       ->setEngineKey($engine->getEngineKey())
       ->attachEngine($engine)
-      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
-      ->setEditPolicy($edit_policy);
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy());
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorEditEngineConfigurationPHIDType::TYPECONST);
+  }
+
+  public function getCreateSortKey() {
+    return $this->getSortKey($this->createOrder);
+  }
+
+  public function getEditSortKey() {
+    return $this->getSortKey($this->editOrder);
+  }
+
+  private function getSortKey($order) {
+    // Put objects at the bottom by default if they haven't previously been
+    // reordered. When they're explicitly reordered, the smallest sort key we
+    // assign is 1, so if the object has a value of 0 it means it hasn't been
+    // ordered yet.
+    if ($order != 0) {
+      $group = 'A';
+    } else {
+      $group = 'B';
+    }
+
+    return sprintf(
+      "%s%012d%s\0%012d",
+      $group,
+      $order,
+      $this->getName(),
+      $this->getID());
   }
 
   protected function getConfiguration() {
@@ -52,6 +81,9 @@ final class PhabricatorEditEngineConfiguration
         'name' => 'text255',
         'isDisabled' => 'bool',
         'isDefault' => 'bool',
+        'isEdit' => 'bool',
+        'createOrder' => 'uint32',
+        'editOrder' => 'uint32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_engine' => array(
@@ -60,6 +92,9 @@ final class PhabricatorEditEngineConfiguration
         ),
         'key_default' => array(
           'columns' => array('engineKey', 'isDefault', 'isDisabled'),
+        ),
+        'key_edit' => array(
+          'columns' => array('engineKey', 'isEdit', 'isDisabled'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -85,26 +120,54 @@ final class PhabricatorEditEngineConfiguration
 
   public function applyConfigurationToFields(
     PhabricatorEditEngine $engine,
+    $object,
     array $fields) {
     $fields = mpull($fields, null, 'getKey');
 
+    $is_new = !$object->getID();
+
     $values = $this->getProperty('defaults', array());
     foreach ($fields as $key => $field) {
-      if ($engine->getIsCreate()) {
+      if ($is_new) {
         if (array_key_exists($key, $values)) {
           $field->readDefaultValueFromConfiguration($values[$key]);
         }
       }
     }
 
+    $locks = $this->getFieldLocks();
+    foreach ($fields as $field) {
+      $key = $field->getKey();
+      switch (idx($locks, $key)) {
+        case self::LOCK_LOCKED:
+          $field->setIsHidden(false);
+          $field->setIsLocked(true);
+          break;
+        case self::LOCK_HIDDEN:
+          $field->setIsHidden(true);
+          $field->setIsLocked(false);
+          break;
+        case self::LOCK_VISIBLE:
+          $field->setIsHidden(false);
+          $field->setIsLocked(false);
+          break;
+        default:
+          // If we don't have an explicit value, don't make any adjustments.
+          break;
+      }
+    }
+
     $fields = $this->reorderFields($fields);
 
-    $head_instructions = $this->getProperty('instructions.head');
-    if (strlen($head_instructions)) {
+    $preamble = $this->getPreamble();
+    if (strlen($preamble)) {
       $fields = array(
-        'config.instructions.head' => id(new PhabricatorInstructionsEditField())
-          ->setKey('config.instructions.head')
-          ->setValue($head_instructions),
+        'config.preamble' => id(new PhabricatorInstructionsEditField())
+          ->setKey('config.preamble')
+          ->setIsReorderable(false)
+          ->setIsDefaultable(false)
+          ->setIsLockable(false)
+          ->setValue($preamble),
       ) + $fields;
     }
 
@@ -112,21 +175,9 @@ final class PhabricatorEditEngineConfiguration
   }
 
   private function reorderFields(array $fields) {
-    $keys = array();
+    $keys = $this->getFieldOrder();
     $fields = array_select_keys($fields, $keys) + $fields;
-
-    // Now, move locked fields to the bottom.
-    $head = array();
-    $tail = array();
-    foreach ($fields as $key => $field) {
-      if (!$field->getIsLocked()) {
-        $head[$key] = $field;
-      } else {
-        $tail[$key] = $field;
-      }
-    }
-
-    return $head + $tail;
+    return $fields;
   }
 
   public function getURI() {
@@ -158,6 +209,45 @@ final class PhabricatorEditEngineConfiguration
     return pht('Untitled Form');
   }
 
+  public function getPreamble() {
+    return $this->getProperty('preamble');
+  }
+
+  public function setPreamble($preamble) {
+    return $this->setProperty('preamble', $preamble);
+  }
+
+  public function setFieldOrder(array $field_order) {
+    return $this->setProperty('order', $field_order);
+  }
+
+  public function getFieldOrder() {
+    return $this->getProperty('order', array());
+  }
+
+  public function setFieldLocks(array $field_locks) {
+    return $this->setProperty('locks', $field_locks);
+  }
+
+  public function getFieldLocks() {
+    return $this->getProperty('locks', array());
+  }
+
+  public function getFieldDefault($key) {
+    $defaults = $this->getProperty('defaults', array());
+    return idx($defaults, $key);
+  }
+
+  public function setFieldDefault($key, $value) {
+    $defaults = $this->getProperty('defaults', array());
+    $defaults[$key] = $value;
+    return $this->setProperty('defaults', $defaults);
+  }
+
+  public function getIcon() {
+    return $this->getEngine()->getIcon();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -174,11 +264,21 @@ final class PhabricatorEditEngineConfiguration
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return $this->getEditPolicy();
+        return $this->getEngine()
+          ->getApplication()
+          ->getPolicy($capability);
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          $this->getEngine()->getApplication(),
+          PhabricatorPolicyCapability::CAN_EDIT);
+    }
+
     return false;
   }
 

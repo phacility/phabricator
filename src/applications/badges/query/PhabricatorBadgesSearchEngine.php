@@ -84,7 +84,7 @@ final class PhabricatorBadgesSearchEngine
         return $query->setParameter(
           'statuses',
           array(
-            PhabricatorBadgesBadge::STATUS_OPEN,
+            PhabricatorBadgesBadge::STATUS_ACTIVE,
           ));
     }
 
@@ -124,7 +124,7 @@ final class PhabricatorBadgesSearchEngine
         ->addAttribute($quality)
         ->addAttribute($badge->getFlavor());
 
-      if ($badge->isClosed()) {
+      if ($badge->isArchived()) {
         $item->setDisabled(true);
         $item->addIcon('fa-ban', pht('Archived'));
       }
@@ -138,6 +138,26 @@ final class PhabricatorBadgesSearchEngine
 
     return $result;
 
+  }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Badge'))
+      ->setHref('/badges/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Badges let you award and distinguish special users '.
+          'throughout your instance.'))
+      ->addAction($create_button);
+
+      return $view;
   }
 
 }

@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorEdgeEditType extends PhabricatorEditType {
+final class PhabricatorEdgeEditType
+  extends PhabricatorPHIDListEditType {
 
   private $edgeOperation;
   private $valueDescription;
@@ -14,38 +15,23 @@ final class PhabricatorEdgeEditType extends PhabricatorEditType {
     return $this->edgeOperation;
   }
 
-  public function getValueType() {
-    return 'list<phid>';
-  }
-
-  public function generateTransaction(
+  public function generateTransactions(
     PhabricatorApplicationTransaction $template,
     array $spec) {
 
     $value = idx($spec, 'value');
-    $value = array_fuse($value);
-    $value = array(
-      $this->getEdgeOperation() => $value,
-    );
 
-    $template
-      ->setTransactionType($this->getTransactionType())
-      ->setNewValue($value);
-
-    foreach ($this->getMetadata() as $key => $value) {
-      $template->setMetadataValue($key, $value);
+    if ($this->getEdgeOperation() !== null) {
+      $value = array_fuse($value);
+      $value = array(
+        $this->getEdgeOperation() => $value,
+      );
     }
 
-    return $template;
-  }
+    $xaction = $this->newTransaction($template)
+      ->setNewValue($value);
 
-  public function setValueDescription($value_description) {
-    $this->valueDescription = $value_description;
-    return $this;
-  }
-
-  public function getValueDescription() {
-    return $this->valueDescription;
+    return array($xaction);
   }
 
 }

@@ -129,8 +129,8 @@ final class DifferentialChangesetListView extends AphrontView {
       array(
         'pht' => array(
           'Open in Editor' => pht('Open in Editor'),
-          'Show Entire File' => pht('Show Entire File'),
-          'Entire File Shown' => pht('Entire File Shown'),
+          'Show All Context' => pht('Show All Context'),
+          'All Context Shown' => pht('All Context Shown'),
           "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
           'Expand File' => pht('Expand File'),
           'Collapse File' => pht('Collapse File'),
@@ -314,8 +314,7 @@ final class DifferentialChangesetListView extends AphrontView {
         $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
         '/');
       $line = idx($changeset->getMetadata(), 'line:first', 1);
-      $callsign = $repository->getCallsign();
-      $editor_link = $user->loadEditorLink($path, $line, $callsign);
+      $editor_link = $user->loadEditorLink($path, $line, $repository);
       if ($editor_link) {
         $meta['editor'] = $editor_link;
       } else {

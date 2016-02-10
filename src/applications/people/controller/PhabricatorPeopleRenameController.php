@@ -3,30 +3,24 @@
 final class PhabricatorPeopleRenameController
   extends PhabricatorPeopleController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer($admin)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
     }
 
-    $profile_uri = '/p/'.$user->getUsername().'/';
+    $done_uri = $this->getApplicationURI("manage/{$id}/");
 
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $admin,
+      $viewer,
       $request,
-      $profile_uri);
+      $done_uri);
 
     $errors = array();
 
@@ -34,7 +28,6 @@ final class PhabricatorPeopleRenameController
     $e_username = true;
     if ($request->isFormPost()) {
       $v_username = $request->getStr('username');
-
 
       if (!strlen($v_username)) {
         $e_username = pht('Required');
@@ -50,12 +43,10 @@ final class PhabricatorPeopleRenameController
       if (!$errors) {
         try {
           id(new PhabricatorUserEditor())
-            ->setActor($admin)
+            ->setActor($viewer)
             ->changeUsername($user, $v_username);
 
-          $new_uri = '/p/'.$v_username.'/';
-
-          return id(new AphrontRedirectResponse())->setURI($new_uri);
+          return id(new AphrontRedirectResponse())->setURI($done_uri);
         } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_username = pht('Not Unique');
           $errors[] = pht('Another user already has that username.');
@@ -88,7 +79,7 @@ final class PhabricatorPeopleRenameController
       'password if necessary.');
 
     $form = id(new AphrontFormView())
-      ->setUser($admin)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Old Username'))
@@ -114,9 +105,9 @@ final class PhabricatorPeopleRenameController
       ->appendParagraph($inst4)
       ->appendParagraph($inst5)
       ->appendParagraph(null)
-      ->appendChild($form->buildLayoutView())
+      ->appendForm($form)
       ->addSubmitButton(pht('Rename User'))
-      ->addCancelButton($profile_uri);
+      ->addCancelButton($done_uri);
   }
 
 }

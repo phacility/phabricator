@@ -30,8 +30,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $rows = array();
     $show_edit = false;
     foreach ($this->paths as $path) {
-
-      $history_link = $this->linkHistory($path->getPath());
+      $full_path = $base_path.$path->getPath();
 
       $dir_slash = null;
       $file_type = $path->getFileType();
@@ -40,11 +39,13 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $dir_slash = '/';
 
         $browse_link = phutil_tag('strong', array(), $this->linkBrowse(
-          $base_path.$path->getPath().$dir_slash,
+          $full_path.$dir_slash,
           array(
             'type' => $file_type,
             'name' => $browse_text,
           )));
+
+        $history_path = $full_path.'/';
       } else if ($file_type == DifferentialChangeType::FILE_SUBMODULE) {
         $browse_text = $path->getPath().'/';
         $browse_link = phutil_tag('strong', array(), $this->linkBrowse(
@@ -55,15 +56,21 @@ final class DiffusionBrowseTableView extends DiffusionView {
             'hash' => $path->getHash(),
             'external' => $path->getExternalURI(),
           )));
+
+        $history_path = $full_path.'/';
       } else {
         $browse_text = $path->getPath();
         $browse_link = $this->linkBrowse(
-          $base_path.$path->getPath(),
+          $full_path,
           array(
             'type' => $file_type,
             'name' => $browse_text,
           ));
+
+        $history_path = $full_path;
       }
+
+      $history_link = $this->linkHistory($history_path);
 
       $dict = array(
         'lint'      => celerity_generate_unique_node_id(),
@@ -73,7 +80,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         'details'   => celerity_generate_unique_node_id(),
       );
 
-      $need_pull[$base_path.$path->getPath().$dir_slash] = $dict;
+      $need_pull[$full_path.$dir_slash] = $dict;
       foreach ($dict as $k => $uniq) {
         $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
       }

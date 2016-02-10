@@ -11,16 +11,14 @@ final class PhabricatorFileListController extends PhabricatorFileController {
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($request->getURIData('key'))
-      ->setSearchEngine(new PhabricatorFileSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
+    return id(new PhabricatorFileSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
+
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Upload File'))

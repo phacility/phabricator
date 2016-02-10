@@ -156,10 +156,11 @@ final class PhabricatorCalendarEventTransaction
             $this->renderHandleLink($author_phid));
         }
       case self::TYPE_ICON:
+        $set = new PhabricatorCalendarIconSet();
         return pht(
           '%s set this event\'s icon to %s.',
           $this->renderHandleLink($author_phid),
-          PhabricatorCalendarIcon::getLabel($new));
+          $set->getIconLabel($new));
         break;
       case self::TYPE_CANCEL:
         if ($new) {
@@ -356,11 +357,12 @@ final class PhabricatorCalendarEventTransaction
             $this->renderHandleLink($object_phid));
         }
       case self::TYPE_ICON:
+        $set = new PhabricatorCalendarIconSet();
         return pht(
           '%s set the icon for %s to %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid),
-          PhabricatorCalendarIcon::getLabel($new));
+          $set->getIconLabel($new));
       case self::TYPE_CANCEL:
         if ($new) {
           return pht(

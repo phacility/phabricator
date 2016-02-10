@@ -155,15 +155,21 @@ final class PhabricatorRepositorySearchEngine
         ->setUser($viewer)
         ->setObject($repository)
         ->setHeader($repository->getName())
-        ->setObjectName('r'.$repository->getCallsign())
-        ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
+        ->setObjectName($repository->getMonogram())
+        ->setHref($repository->getURI());
 
       $commit = $repository->getMostRecentCommit();
       if ($commit) {
-        $commit_link = DiffusionView::linkCommit(
-            $repository,
-            $commit->getCommitIdentifier(),
-            $commit->getSummary());
+        $commit_link = phutil_tag(
+          'a',
+          array(
+            'href' => $commit->getURI(),
+          ),
+          pht(
+            '%s: %s',
+            $commit->getLocalName(),
+            $commit->getSummary()));
+
         $item->setSubhead($commit_link);
         $item->setEpoch($commit->getEpoch());
       }
@@ -175,9 +181,8 @@ final class PhabricatorRepositorySearchEngine
 
       $size = $repository->getCommitCount();
       if ($size) {
-        $history_uri = DiffusionRequest::generateDiffusionURI(
+        $history_uri = $repository->generateURI(
           array(
-            'callsign' => $repository->getCallsign(),
             'action' => 'history',
           ));
 
@@ -205,6 +210,8 @@ final class PhabricatorRepositorySearchEngine
       if (!$repository->isTracked()) {
         $item->setDisabled(true);
         $item->addIcon('disable-grey', pht('Inactive'));
+      } else if ($repository->isImporting()) {
+        $item->addIcon('fa-clock-o indigo', pht('Importing...'));
       }
 
       $list->addItem($item);
@@ -231,6 +238,33 @@ final class PhabricatorRepositorySearchEngine
     }
 
     $saved->setParameter('projectPHIDs', $project_phids);
+  }
+
+  protected function getNewUserBody() {
+
+    $import_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Import Repository'))
+      ->setHref('/diffusion/import/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create Repository'))
+      ->setHref('/diffusion/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Import, create, or just browse repositories in Diffusion.'))
+      ->addAction($import_button)
+      ->addAction($create_button);
+
+      return $view;
   }
 
 }

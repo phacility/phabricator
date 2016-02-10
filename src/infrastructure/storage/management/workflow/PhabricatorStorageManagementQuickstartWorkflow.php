@@ -22,6 +22,8 @@ final class PhabricatorStorageManagementQuickstartWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    parent::execute($args);
+
     $output = $args->getArg('output');
     if (!$output) {
       throw new PhutilArgumentUsageException(
@@ -38,8 +40,10 @@ final class PhabricatorStorageManagementQuickstartWorkflow
       throw new PhutilArgumentUsageException(
         pht(
           'You can only generate a new quickstart file if MySQL supports '.
-          'the utf8mb4 character set (available in MySQL 5.5 and newer). The '.
-          'configured server does not support utf8mb4.'));
+          'the %s character set (available in MySQL 5.5 and newer). The '.
+          'configured server does not support %s.',
+          'utf8mb4',
+          'utf8mb4'));
     }
 
     $err = phutil_passthru(
@@ -139,7 +143,7 @@ final class PhabricatorStorageManagementQuickstartWorkflow
     $dump = preg_replace('/^--.*$/m', '', $dump);
 
     // Remove table drops, locks, and unlocks. These are never relevant when
-    // performing q quickstart.
+    // performing a quickstart.
     $dump = preg_replace(
       '/^(DROP TABLE|LOCK TABLES|UNLOCK TABLES).*$/m',
       '',

@@ -11,18 +11,18 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
   var target = JX.$(config.target);
 
   function onupload(f) {
-    var text = JX.TextAreaUtils.getSelectionText(target);
     var ref = '{F' + f.getID() + '}';
 
-    // If the user has dragged and dropped multiple files, we'll get an event
-    // each time an upload completes. Rather than overwriting the first
-    // reference, append the new reference if the selected text looks like an
-    // existing file reference.
-    if (text.match(/^\{F/)) {
-      ref = text + '\n\n' + ref;
+    // If we're inserting immediately after a "}" (usually, another file
+    // reference), put some newlines before our token so that multiple file
+    // uploads get laid out more nicely.
+    var range = JX.TextAreaUtils.getSelectionRange(target);
+    var before = target.value.substring(0, range.start);
+    if (before.match(/\}$/)) {
+      ref = '\n\n' + ref;
     }
 
-    JX.TextAreaUtils.setSelectionText(target, ref);
+    JX.TextAreaUtils.setSelectionText(target, ref, false);
   }
 
   if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {

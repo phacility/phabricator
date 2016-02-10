@@ -11,7 +11,7 @@ final class PhabricatorSMSConfigOptions
     return pht('Configure SMS.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-mobile';
   }
 

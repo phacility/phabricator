@@ -10,8 +10,8 @@ final class PhabricatorStorageManagementStatusWorkflow
       ->setSynopsis(pht('Show patch application status.'));
   }
 
-  public function execute(PhutilArgumentParser $args) {
-    $api = $this->getAPI();
+  public function didExecute(PhutilArgumentParser $args) {
+    $api     = $this->getAPI();
     $patches = $this->getPatches();
 
     $applied = $api->getAppliedPatches();
@@ -20,18 +20,18 @@ final class PhabricatorStorageManagementStatusWorkflow
       echo phutil_console_format(
         "**%s**: %s\n",
         pht('Database Not Initialized'),
-        pht('Run **%s** to initialize.', 'storage upgrade'));
+        pht('Run **%s** to initialize.', './bin/storage upgrade'));
 
       return 1;
     }
 
     $table = id(new PhutilConsoleTable())
       ->setShowHeader(false)
-      ->addColumn('id',     array('title' => pht('ID')))
-      ->addColumn('status', array('title' => pht('Status')))
+      ->addColumn('id',       array('title' => pht('ID')))
+      ->addColumn('status',   array('title' => pht('Status')))
       ->addColumn('duration', array('title' => pht('Duration')))
-      ->addColumn('type',   array('title' => pht('Type')))
-      ->addColumn('name',   array('title' => pht('Name')));
+      ->addColumn('type',     array('title' => pht('Type')))
+      ->addColumn('name',     array('title' => pht('Name')));
 
     $durations = $api->getPatchDurations();
 

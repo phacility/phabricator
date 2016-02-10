@@ -30,10 +30,11 @@ final class PhamePostSearchEngine
       id(new PhabricatorSearchSelectField())
         ->setKey('visibility')
         ->setLabel(pht('Visibility'))
-        ->setOptions(array(
-          '' => pht('All'),
-          PhameConstants::VISIBILITY_PUBLISHED => pht('Published'),
-          PhameConstants::VISIBILITY_DRAFT => pht('Draft'),
+        ->setOptions(
+          array(
+            '' => pht('All'),
+            PhameConstants::VISIBILITY_PUBLISHED => pht('Published'),
+            PhameConstants::VISIBILITY_DRAFT => pht('Draft'),
           )),
     );
   }
@@ -68,6 +69,8 @@ final class PhamePostSearchEngine
 
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
+
+
   protected function renderResultList(
     array $posts,
     PhabricatorSavedQuery $query,
@@ -82,18 +85,16 @@ final class PhamePostSearchEngine
     foreach ($posts as $post) {
       $id = $post->getID();
       $blog = $post->getBlog();
-      if ($blog) {
-        $blog_name = $viewer->renderHandle($post->getBlogPHID())->render();
-        $blog_name = pht('Blog: %s', $blog_name);
-      } else {
-        $blog_name = pht('[No Blog]');
-      }
+
+      $blog_name = $viewer->renderHandle($post->getBlogPHID())->render();
+      $blog_name = pht('Blog: %s', $blog_name);
+
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($post)
         ->setHeader($post->getTitle())
         ->setStatusIcon('fa-star')
-        ->setHref($this->getApplicationURI("/post/view/{$id}/"))
+        ->setHref($post->getViewURI())
         ->addAttribute($blog_name);
       if ($post->isDraft()) {
         $item->setStatusIcon('fa-star-o grey');

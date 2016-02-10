@@ -14,7 +14,7 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return '/maniphest/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-anchor';
   }
 
@@ -36,13 +36,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     );
   }
 
-  public function getEventListeners() {
-    return array(
-      new ManiphestNameIndexEventListener(),
-      new ManiphestHovercardEventListener(),
-    );
-  }
-
   public function getRemarkupRules() {
     return array(
       new ManiphestRemarkupRule(),
@@ -57,15 +50,8 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
         'batch/' => 'ManiphestBatchEditController',
         'task/' => array(
-          'create/' => 'ManiphestTaskEditController',
-          'edit/(?P<id>[1-9]\d*)/' => 'ManiphestTaskEditController',
-          'descriptionpreview/'
-            => 'PhabricatorMarkupPreviewController',
-        ),
-        'transaction/' => array(
-          'save/' => 'ManiphestTransactionSaveController',
-          'preview/(?P<id>[1-9]\d*)/'
-            => 'ManiphestTransactionPreviewController',
+          $this->getEditRoutePattern('edit/')
+            => 'ManiphestTaskEditController',
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
@@ -80,16 +66,20 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
       return $status;
     }
 
+    $limit = self::MAX_STATUS_ITEMS;
+
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->withOwners(array($user->getPHID()))
-      ->setLimit(self::MAX_STATUS_ITEMS);
+      ->setLimit($limit);
+
     $count = count($query->execute());
-    $count_str = self::formatStatusCount(
-      $count,
-      '%s Assigned Tasks',
-      '%d Assigned Task(s)');
+    if ($count >= $limit) {
+      $count_str = pht('%s+ Assigned Task(s)', new PhutilNumber($limit - 1));
+    } else {
+      $count_str = pht('%s Assigned Task(s)', new PhutilNumber($count));
+    }
 
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
@@ -101,15 +91,9 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
   }
 
   public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Maniphest Task'))
-      ->setIcon('fa-anchor')
-      ->setHref($this->getBaseURI().'task/create/');
-    $items[] = $item;
-
-    return $items;
+    return id(new ManiphestEditEngine())
+      ->setViewer($viewer)
+      ->loadQuickCreateItems();
   }
 
   public function supportsEmailIntegration() {

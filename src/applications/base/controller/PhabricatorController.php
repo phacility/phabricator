@@ -352,7 +352,7 @@ abstract class PhabricatorController extends AphrontController {
 
     $application = $this->getCurrentApplication();
     if ($application) {
-      $icon = $application->getFontIcon();
+      $icon = $application->getIcon();
       if (!$icon) {
         $icon = 'fa-puzzle';
       }
@@ -400,7 +400,7 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     $icon = id(new PHUIIconView())
-      ->setIconFont($icon_name);
+      ->setIcon($icon_name);
 
     require_celerity_resource('policy-css');
 
@@ -462,9 +462,6 @@ abstract class PhabricatorController extends AphrontController {
     if ($viewer) {
       $page->setUser($viewer);
     }
-
-    // TODO: Remove after removing callsites to addExtraQuicksandConfig().
-    $page->addQuicksandConfig($this->extraQuicksandConfig);
 
     return $page;
   }
@@ -531,22 +528,6 @@ abstract class PhabricatorController extends AphrontController {
 
 
 /* -(  Deprecated  )--------------------------------------------------------- */
-
-
-  /**
-   * DEPRECATED.
-   */
-  private $extraQuicksandConfig = array();
-
-
-  /**
-   * DEPRECATED. Use @{method:newPage} and call addQuicksandConfig().
-   */
-  public function addExtraQuicksandConfig($config) {
-    // TODO: When this method is removed,
-    $this->extraQuicksandConfig += $config;
-    return $this;
-  }
 
 
   /**

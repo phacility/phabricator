@@ -105,10 +105,52 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return 'fa-arrow-right';
   }
 
+  public static function isDisabledPriority($priority) {
+    $config = idx(self::getConfig(), $priority, array());
+    return idx($config, 'disabled', false);
+  }
+
   private static function getConfig() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.priorities');
     krsort($config);
     return $config;
+  }
+
+  public static function validateConfiguration($config) {
+    if (!is_array($config)) {
+      throw new Exception(
+        pht(
+          'Configuration is not valid. Maniphest priority configurations '.
+          'must be dictionaries.',
+          $config));
+    }
+
+    foreach ($config as $key => $value) {
+      if (!ctype_digit((string)$key)) {
+        throw new Exception(
+          pht(
+            'Key "%s" is not a valid priority constant. Priority constants '.
+            'must be nonnegative integers.',
+            $key));
+      }
+
+      if (!is_array($value)) {
+        throw new Exception(
+          pht(
+            'Value for key "%s" should be a dictionary.',
+            $key));
+      }
+
+      PhutilTypeSpec::checkMap(
+        $value,
+        array(
+          'name' => 'string',
+          'short' => 'optional string',
+          'color' => 'optional string',
+          'keywords' => 'optional list<string>',
+          'disabled' => 'optional bool',
+        ));
+    }
   }
 
 }

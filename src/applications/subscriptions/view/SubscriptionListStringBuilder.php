@@ -57,7 +57,7 @@ final class SubscriptionListStringBuilder extends Phobject {
     // link. Instead, render "a, b, c, d" in this case, and then when we get one
     // more render "a, b, c, and 2 others".
     if ($subscribers_count <= ($show_count + 1)) {
-      return phutil_implode_html(', ', mpull($handles, 'renderLink'));
+      return phutil_implode_html(', ', mpull($handles, 'renderHovercardLink'));
     }
 
     $show = array_slice($handles, 0, $show_count);

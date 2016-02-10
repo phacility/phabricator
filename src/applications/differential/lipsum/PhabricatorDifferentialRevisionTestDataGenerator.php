@@ -3,7 +3,11 @@
 final class PhabricatorDifferentialRevisionTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
-  public function generate() {
+  public function getGeneratorName() {
+    return pht('Differential Revisions');
+  }
+
+  public function generateObject() {
     $author = $this->loadPhabrictorUser();
 
     $revision = DifferentialRevision::initializeNewRevision($author);
@@ -23,13 +27,10 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
       ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
       ->setNewValue($diff->getPHID());
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LIPSUM,
-      array());
 
     id(new DifferentialTransactionEditor())
       ->setActor($author)
-      ->setContentSource($content_source)
+      ->setContentSource($this->getLipsumContentSource())
       ->applyTransactions($revision, $xactions);
 
     return $revision;

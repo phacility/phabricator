@@ -21,7 +21,6 @@ final class PHUIButtonView extends AphrontTagView {
   private $tag = 'button';
   private $dropdown;
   private $icon;
-  private $iconFont;
   private $iconFirst;
   private $href = null;
   private $title = null;
@@ -88,16 +87,13 @@ final class PHUIButtonView extends AphrontTagView {
     return $this;
   }
 
-  public function setIcon(PHUIIconView $icon, $first = true) {
+  public function setIcon($icon, $first = true) {
+    if (!($icon instanceof PHUIIconView)) {
+      $icon = id(new PHUIIconView())
+        ->setIcon($icon);
+    }
     $this->icon = $icon;
     $this->iconFirst = $first;
-    return $this;
-  }
-
-  public function setIconFont($icon) {
-    $icon = id(new PHUIIconView())
-      ->setIconFont($icon);
-    $this->setIcon($icon);
     return $this;
   }
 

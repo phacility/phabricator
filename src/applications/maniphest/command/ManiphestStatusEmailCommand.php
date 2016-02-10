@@ -23,6 +23,10 @@ final class ManiphestStatusEmailCommand
     $table[] = '| '.pht('Status').' | '.pht('Keywords');
     $table[] = '|---|---|';
     foreach ($keywords as $status => $words) {
+      if (ManiphestTaskStatus::isDisabledStatus($status)) {
+        continue;
+      }
+
       $words = implode(', ', $words);
       $table[] = '| '.$names[$status].' | '.$words;
     }
@@ -32,9 +36,11 @@ final class ManiphestStatusEmailCommand
       "To change the status of a task, specify the desired status, like ".
       "`%s`. This table shows the configured names for statuses.\n\n%s\n\n".
       "If you specify an invalid status, the command is ignored. This ".
-      "command has no effect if you do not specify a status.",
+      "command has no effect if you do not specify a status.\n\n".
+      "To quickly close a task, see `%s`.",
       '!status invalid',
-      $table);
+      $table,
+      '!close');
   }
 
   public function buildTransactions(
@@ -59,6 +65,10 @@ final class ManiphestStatusEmailCommand
     }
 
     if ($status === null) {
+      return array();
+    }
+
+    if (ManiphestTaskStatus::isDisabledStatus($status)) {
       return array();
     }
 

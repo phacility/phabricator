@@ -55,7 +55,7 @@ abstract class DiffusionView extends AphrontView {
           'align' => 'E',
         ),
       ),
-      id(new PHUIIconView())->setIconFont('fa-history bluegrey'));
+      id(new PHUIIconView())->setIcon('fa-history bluegrey'));
   }
 
   final public function linkBrowse($path, array $details = array()) {
@@ -95,7 +95,7 @@ abstract class DiffusionView extends AphrontView {
     }
 
     $icon = DifferentialChangeType::getIconForFileType($file_type);
-    $icon_view = id(new PHUIIconView())->setIconFont("{$icon} blue");
+    $icon_view = id(new PHUIIconView())->setIcon($icon);
 
     // If we're rendering a file or directory name, don't show the tooltip.
     if ($display_name !== null) {
@@ -123,31 +123,12 @@ abstract class DiffusionView extends AphrontView {
       ));
   }
 
-  final public static function nameCommit(
-    PhabricatorRepository $repository,
-    $commit) {
-
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $commit_name = substr($commit, 0, 12);
-        break;
-      default:
-        $commit_name = $commit;
-        break;
-    }
-
-    $callsign = $repository->getCallsign();
-    return "r{$callsign}{$commit_name}";
-  }
-
   final public static function linkCommit(
     PhabricatorRepository $repository,
     $commit,
     $summary = '') {
 
-    $commit_name = self::nameCommit($repository, $commit);
-    $callsign = $repository->getCallsign();
+    $commit_name = $repository->formatCommitName($commit, $local = true);
 
     if (strlen($summary)) {
       $commit_name .= ': '.$summary;
@@ -156,7 +137,7 @@ abstract class DiffusionView extends AphrontView {
     return phutil_tag(
       'a',
       array(
-        'href' => "/r{$callsign}{$commit}",
+        'href' => $repository->getCommitURI($commit),
       ),
       $commit_name);
   }
@@ -202,7 +183,7 @@ abstract class DiffusionView extends AphrontView {
     $name = HarbormasterBuildable::getBuildableStatusName($status);
 
     $icon_view = id(new PHUIIconView())
-      ->setIconFont($icon.' '.$color);
+      ->setIcon($icon.' '.$color);
 
     $tooltip_view = javelin_tag(
       'span',

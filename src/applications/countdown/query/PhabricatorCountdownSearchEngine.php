@@ -145,4 +145,24 @@ final class PhabricatorCountdownSearchEngine
     return $result;
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Countdown'))
+      ->setHref('/countdown/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Keep track of upcoming launch dates with '.
+            'embeddable counters.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

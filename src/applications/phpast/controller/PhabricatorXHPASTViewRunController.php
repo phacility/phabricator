@@ -21,7 +21,7 @@ final class PhabricatorXHPASTViewRunController
 
       list($err, $stdout, $stderr) = $resolved;
 
-      $storage_tree = id(new PhabricatorXHPASTViewParseTree())
+      $storage_tree = id(new PhabricatorXHPASTParseTree())
         ->setInput($source)
         ->setReturnCode($err)
         ->setStdout($stdout)

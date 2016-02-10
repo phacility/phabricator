@@ -209,7 +209,7 @@ final class PhabricatorAppSearchEngine
       $list = new PHUIObjectItemListView();
 
       foreach ($applications as $application) {
-        $icon = $application->getFontIcon();
+        $icon = $application->getIcon();
         if (!$icon) {
           $icon = 'application';
         }

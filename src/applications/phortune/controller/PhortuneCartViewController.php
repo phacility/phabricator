@@ -132,8 +132,7 @@ final class PhortuneCartViewController
           id(new PHUIButtonView())
             ->setTag('a')
             ->setHref($done_uri)
-            ->setIcon(id(new PHUIIconView())
-              ->setIconFont('fa-check-square green'))
+            ->setIcon('fa-check-square green')
             ->setText($cart->getDoneActionName()));
       }
     }

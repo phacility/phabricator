@@ -56,15 +56,6 @@ final class DiffusionCommitHookEngine extends Phobject {
     return $this->remoteAddress;
   }
 
-  private function getRemoteAddressForLog() {
-    // If whatever we have here isn't a valid IPv4 address, just store `null`.
-    // Older versions of PHP return `-1` on failure instead of `false`.
-    $remote_address = $this->getRemoteAddress();
-    $remote_address = max(0, ip2long($remote_address));
-    $remote_address = nonempty($remote_address, null);
-    return $remote_address;
-  }
-
   public function setSubversionTransactionInfo($transaction, $repository) {
     $this->subversionTransaction = $transaction;
     $this->subversionRepository = $repository;
@@ -308,6 +299,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $rules = null;
     $blocking_effect = null;
     $blocked_update = null;
+    $blocking_xscript = null;
     foreach ($updates as $update) {
       $adapter = id(clone $adapter_template)
         ->setPushLog($update);
@@ -332,6 +324,7 @@ final class DiffusionCommitHookEngine extends Phobject {
           if ($effect->getAction() == $block_action) {
             $blocking_effect = $effect;
             $blocked_update = $update;
+            $blocking_xscript = $xscript;
             break;
           }
         }
@@ -357,13 +350,16 @@ final class DiffusionCommitHookEngine extends Phobject {
       throw new DiffusionCommitHookRejectException(
         pht(
           "This push was rejected by Herald push rule %s.\n".
-          "Change: %s\n".
-          "  Rule: %s\n".
-          "Reason: %s",
+          "    Change: %s\n".
+          "      Rule: %s\n".
+          "    Reason: %s\n".
+          "Transcript: %s",
           $rule->getMonogram(),
           $blocked_name,
           $rule->getName(),
-          $message));
+          $message,
+          PhabricatorEnv::getProductionURI(
+            '/herald/transcript/'.$blocking_xscript->getID().'/')));
     }
   }
 
@@ -1073,7 +1069,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $viewer = $this->getViewer();
     return PhabricatorRepositoryPushEvent::initializeNewEvent($viewer)
       ->setRepositoryPHID($this->getRepository()->getPHID())
-      ->setRemoteAddress($this->getRemoteAddressForLog())
+      ->setRemoteAddress($this->getRemoteAddress())
       ->setRemoteProtocol($this->getRemoteProtocol())
       ->setEpoch(time());
   }

@@ -1,18 +1,12 @@
 <?php
 
-/**
- * NOTE: this class should only be used where local access to the repository
- * is guaranteed and NOT from within the Diffusion application. Diffusion
- * should use Conduit method 'diffusion.filecontentquery' to get this sort
- * of data.
- */
 abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
-  private $needsBlame;
-  private $fileContent;
-  private $viewer;
   private $timeout;
   private $byteLimit;
+
+  private $didHitByteLimit = false;
+  private $didHitTimeLimit = false;
 
   public function setTimeout($timeout) {
     $this->timeout = $timeout;
@@ -37,163 +31,69 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
     return parent::newQueryObject(__CLASS__, $request);
   }
 
-  abstract public function getFileContentFuture();
-  abstract protected function executeQueryFromFuture(Future $future);
+  final public function getExceededByteLimit() {
+    return $this->didHitByteLimit;
+  }
 
-  final public function loadFileContentFromFuture(Future $future) {
+  final public function getExceededTimeLimit() {
+    return $this->didHitTimeLimit;
+  }
 
-    if ($this->timeout) {
-      $future->setTimeout($this->timeout);
+  abstract protected function getFileContentFuture();
+  abstract protected function resolveFileContentFuture(Future $future);
+
+  final protected function executeQuery() {
+    $future = $this->getFileContentFuture();
+
+    if ($this->getTimeout()) {
+      $future->setTimeout($this->getTimeout());
     }
 
-    if ($this->getByteLimit()) {
-      $future->setStdoutSizeLimit($this->getByteLimit());
+    $byte_limit = $this->getByteLimit();
+    if ($byte_limit) {
+      $future->setStdoutSizeLimit($byte_limit + 1);
     }
+
+    $drequest = $this->getRequest();
+
+    $name = basename($drequest->getPath());
+    $ttl = PhabricatorTime::getNow() + phutil_units('48 hours in seconds');
 
     try {
-      $file_content = $this->executeQueryFromFuture($future);
+      $threshold = PhabricatorFileStorageEngine::getChunkThreshold();
+      $future->setReadBufferSize($threshold);
+
+      $source = id(new PhabricatorExecFutureFileUploadSource())
+        ->setName($name)
+        ->setTTL($ttl)
+        ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+        ->setExecFuture($future);
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $file = $source->uploadFile();
+      unset($unguarded);
+
     } catch (CommandException $ex) {
       if (!$future->getWasKilledByTimeout()) {
         throw $ex;
       }
 
-      $message = pht(
-        '<Attempt to load this file was terminated after %s second(s).>',
-        $this->timeout);
-
-      $file_content = new DiffusionFileContent();
-      $file_content->setCorpus($message);
+      $this->didHitTimeLimit = true;
+      $file = null;
     }
 
-    $this->fileContent = $file_content;
+    if ($byte_limit && ($file->getByteSize() > $byte_limit)) {
+      $this->didHitByteLimit = true;
 
-    $repository = $this->getRequest()->getRepository();
-    $try_encoding = $repository->getDetail('encoding');
-    if ($try_encoding) {
-        $this->fileContent->setCorpus(
-          phutil_utf8_convert(
-            $this->fileContent->getCorpus(), 'UTF-8', $try_encoding));
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        id(new PhabricatorDestructionEngine())
+          ->destroyObject($file);
+      unset($unguarded);
+
+      $file = null;
     }
 
-    return $this->fileContent;
+    return $file;
   }
 
-  final protected function executeQuery() {
-    return $this->loadFileContentFromFuture($this->getFileContentFuture());
-  }
-
-  final public function loadFileContent() {
-    return $this->executeQuery();
-  }
-
-  final public function getRawData() {
-    return $this->fileContent->getCorpus();
-  }
-
-  /**
-   * Pretty hairy function. If getNeedsBlame is false, this returns
-   *
-   *   ($text_list, array(), array())
-   *
-   * Where $text_list is the raw file content with trailing new lines stripped.
-   *
-   * If getNeedsBlame is true, this returns
-   *
-   *   ($text_list, $line_rev_dict, $blame_dict)
-   *
-   * Where $text_list is just the lines of code -- the raw file content will
-   * contain lots of blame data, $line_rev_dict is a dictionary of line number
-   * => revision id, and $blame_dict is another complicated data structure.
-   * In detail, $blame_dict contains [revision id][author] keys, as well
-   * as [commit id][authorPhid] and [commit id][epoch] keys.
-   *
-   * @return ($text_list, $line_rev_dict, $blame_dict)
-   */
-  final public function getBlameData() {
-    $raw_data = preg_replace('/\n$/', '', $this->getRawData());
-
-    $text_list = array();
-    $line_rev_dict = array();
-    $blame_dict = array();
-
-    if (!$this->getNeedsBlame()) {
-      $text_list = explode("\n", $raw_data);
-    } else if ($raw_data != '') {
-      $lines = array();
-      foreach (explode("\n", $raw_data) as $k => $line) {
-        $lines[$k] = $this->tokenizeLine($line);
-
-        list($rev_id, $author, $text) = $lines[$k];
-        $text_list[$k] = $text;
-        $line_rev_dict[$k] = $rev_id;
-      }
-
-      $line_rev_dict = $this->processRevList($line_rev_dict);
-
-      foreach ($lines as $k => $line) {
-        list($rev_id, $author, $text) = $line;
-        $rev_id = $line_rev_dict[$k];
-
-        if (!isset($blame_dict[$rev_id])) {
-          $blame_dict[$rev_id]['author'] = $author;
-        }
-      }
-
-      $repository = $this->getRequest()->getRepository();
-
-      $commits = id(new DiffusionCommitQuery())
-        ->setViewer($this->getViewer())
-        ->withDefaultRepository($repository)
-        ->withIdentifiers(array_unique($line_rev_dict))
-        ->execute();
-
-      foreach ($commits as $commit) {
-        $blame_dict[$commit->getCommitIdentifier()]['epoch'] =
-          $commit->getEpoch();
-      }
-
-      if ($commits) {
-        $commits_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
-          'commitID IN (%Ls)',
-          mpull($commits, 'getID'));
-
-        foreach ($commits_data as $data) {
-          $author_phid = $data->getCommitDetail('authorPHID');
-          if (!$author_phid) {
-            continue;
-          }
-          $commit = $commits[$data->getCommitID()];
-          $commit_identifier = $commit->getCommitIdentifier();
-          $blame_dict[$commit_identifier]['authorPHID'] = $author_phid;
-        }
-      }
-
-   }
-
-    return array($text_list, $line_rev_dict, $blame_dict);
-  }
-
-  abstract protected function tokenizeLine($line);
-
-  public function setNeedsBlame($needs_blame) {
-    $this->needsBlame = $needs_blame;
-    return $this;
-  }
-
-  public function getNeedsBlame() {
-    return $this->needsBlame;
-  }
-
-  public function setViewer(PhabricatorUser $user) {
-    $this->viewer = $user;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
-  }
-
-  protected function processRevList(array $rev_list) {
-    return $rev_list;
-  }
 }

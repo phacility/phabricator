@@ -98,4 +98,24 @@ final class PhabricatorSpacesNamespaceSearchEngine
     return $result;
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Space'))
+      ->setHref('/spaces/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Policy namespaces to segment object visibility throughout your '.
+        'instance.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

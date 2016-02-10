@@ -1,0 +1,54 @@
+/**
+ * @provides phui-chart-css
+ */
+
+.chart .axis line,
+.chart .axis path {
+  fill: none;
+  stroke: {$blueborder};
+  shape-rendering: crispEdges;
+}
+
+.chart .axis text {
+  fill: {$darkgreytext};
+}
+
+.chart .outer,
+.chart .inner {
+  shape-rendering: crispEdges;
+}
+
+.chart .outer {
+  fill: none;
+  stroke: none;
+}
+
+.chart .inner {
+  fill: {$lightbluebackground};
+  stroke: {$lightblueborder};
+}
+
+.chart .line {
+  fill: none;
+  stroke: {$blue};
+  stroke-width: 2px;
+}
+
+.chart .point {
+  fill: {$lightblue};
+  stroke: {$blue};
+  stroke-width: 1px;
+}
+
+.chart-tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: 16px;
+  overflow: hidden;
+  padding: 2px;
+  background: {$lightbluebackground};
+  border: 1px solid {$blueborder};
+  border-radius: 8px;
+  pointer-events: none;
+}

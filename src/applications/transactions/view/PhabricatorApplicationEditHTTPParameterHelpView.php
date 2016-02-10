@@ -39,10 +39,17 @@ final class PhabricatorApplicationEditHTTPParameterHelpView
     // Remove fields which do not expose an HTTP parameter type.
     $types = array();
     foreach ($fields as $key => $field) {
+      if (!$field->shouldGenerateTransactionsFromSubmit()) {
+        unset($fields[$key]);
+        continue;
+      }
+
       $type = $field->getHTTPParameterType();
       if ($type === null) {
         unset($fields[$key]);
+        continue;
       }
+
       $types[$type->getTypeName()] = $type;
     }
 
@@ -94,7 +101,7 @@ EOTEXT
     foreach ($fields as $field) {
       $rows[] = array(
         $field->getLabel(),
-        $field->getKey(),
+        head($field->getAllReadValueFromRequestKeys()),
         $field->getHTTPParameterType()->getTypeName(),
         $field->getDescription(),
       );
@@ -149,7 +156,7 @@ EOTEXT
 
     $rows = array();
     foreach ($fields as $field) {
-      $aliases = $field->getAliases();
+      $aliases = array_slice($field->getAllReadValueFromRequestKeys(), 1);
       if (!$aliases) {
         continue;
       }
@@ -172,6 +179,59 @@ EOTEXT
         array(
           'pri',
           null,
+          'wide',
+        ));
+
+    $template_text = pht(<<<EOTEXT
+Template Objects
+----------------
+
+Instead of specifying each field value individually, you can specify another
+object to use as a template. Some of the initial fields will be copied from the
+template object.
+
+Specify a template object with the `template` parameter. You can use an ID,
+PHID, or monogram (for objects which have monograms). For example, you might
+use URIs like these:
+
+```
+%s?template=123
+%s?template=PHID-WXYZ-abcdef...
+%s?template=T123
+```
+
+You can combine the `template` parameter with HTTP parameters: the template
+object will be copied first, then any HTTP parameters will be read.
+
+When using `template`, these fields will be copied:
+EOTEXT
+      ,
+      $uri,
+      $uri,
+      $uri);
+
+    $yes = id(new PHUIIconView())->setIcon('fa-check-circle green');
+    $no = id(new PHUIIconView())->setIcon('fa-times grey');
+
+    $rows = array();
+    foreach ($fields as $field) {
+      $rows[] = array(
+        $field->getLabel(),
+        $field->getIsCopyable() ? $yes : $no,
+      );
+    }
+
+    $template_table = id(new AphrontTableView($rows))
+      ->setNoDataString(
+        pht('None of the fields on this object support templating.'))
+      ->setHeaders(
+        array(
+          pht('Field'),
+          pht('Will Copy'),
+        ))
+      ->setColumnClasses(
+        array(
+          'pri',
           'wide',
         ));
 
@@ -242,6 +302,8 @@ EOTEXT
       $main_table,
       $this->renderInstructions($aliases_text),
       $alias_table,
+      $this->renderInstructions($template_text),
+      $template_table,
       $this->renderInstructions($select_text),
       $select_table,
       $this->renderInstructions($types_text),

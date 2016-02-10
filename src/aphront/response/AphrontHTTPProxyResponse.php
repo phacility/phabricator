@@ -57,6 +57,20 @@ final class AphrontHTTPProxyResponse extends AphrontResponse {
 
     list($status, $body, $headers) = $this->future->resolve();
     $this->httpCode = $status->getStatusCode();
+
+    // Strip "Transfer-Encoding" headers. Particularly, the server we proxied
+    // may have chunked the response, but cURL will already have un-chunked it.
+    // If we emit the header and unchunked data, the response becomes invalid.
+    foreach ($headers as $key => $header) {
+      list($header_head, $header_body) = $header;
+      $header_head = phutil_utf8_strtolower($header_head);
+      switch ($header_head) {
+        case 'transfer-encoding':
+          unset($headers[$key]);
+          break;
+      }
+    }
+
     $this->headers = $headers;
 
     return $body;

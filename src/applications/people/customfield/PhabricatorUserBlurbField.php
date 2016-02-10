@@ -58,6 +58,13 @@ final class PhabricatorUserBlurbField
       ->setLabel($this->getFieldName());
   }
 
+  public function getApplicationTransactionRemarkupBlocks(
+    PhabricatorApplicationTransaction $xaction) {
+    return array(
+      $xaction->getNewValue(),
+    );
+  }
+
   public function renderPropertyViewLabel() {
     return null;
   }
@@ -67,10 +74,11 @@ final class PhabricatorUserBlurbField
     if (!strlen($blurb)) {
       return null;
     }
-    return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($blurb),
-      'default',
-      $this->getViewer());
+
+    $viewer = $this->getViewer();
+    $view = new PHUIRemarkupView($viewer, $blurb);
+
+    return $view;
   }
 
   public function getStyleForPropertyView() {

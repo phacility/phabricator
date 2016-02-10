@@ -154,7 +154,7 @@ final class PHUIDiffInlineCommentDetailView
       }
 
       $ghost_icon = id(new PHUIIconView())
-        ->setIconFont($ghosticon)
+        ->setIcon($ghosticon)
         ->addSigil('has-tooltip')
         ->setMetadata(
           array(
@@ -200,14 +200,14 @@ final class PHUIDiffInlineCommentDetailView
       $up = id(new PHUIButtonView())
         ->setTag('a')
         ->setTooltip(pht('Previous'))
-        ->setIconFont('fa-chevron-up')
+        ->setIcon('fa-chevron-up')
         ->addSigil('differential-inline-prev')
         ->setMustCapture(true);
 
       $down = id(new PHUIButtonView())
         ->setTag('a')
         ->setTooltip(pht('Next'))
-        ->setIconFont('fa-chevron-down')
+        ->setIcon('fa-chevron-down')
         ->addSigil('differential-inline-next')
         ->setMustCapture(true);
 
@@ -215,7 +215,7 @@ final class PHUIDiffInlineCommentDetailView
         $hide = id(new PHUIButtonView())
           ->setTag('a')
           ->setTooltip(pht('Hide Comment'))
-          ->setIconFont('fa-times')
+          ->setIcon('fa-times')
           ->addSigil('hide-inline')
           ->setMustCapture(true);
 
@@ -227,9 +227,7 @@ final class PHUIDiffInlineCommentDetailView
 
       $action_buttons = array();
       if ($this->allowReply) {
-
         if (!$is_synthetic) {
-
           // NOTE: No product reason why you can't reply to these, but the reply
           // mechanism currently sends the inline comment ID to the server, not
           // file/line information, and synthetic comments don't have an inline
@@ -237,12 +235,11 @@ final class PHUIDiffInlineCommentDetailView
 
           $action_buttons[] = id(new PHUIButtonView())
             ->setTag('a')
-            ->setIconFont('fa-reply')
+            ->setIcon('fa-reply')
             ->setTooltip(pht('Reply'))
             ->addSigil('differential-inline-reply')
             ->setMustCapture(true);
         }
-
       }
     }
 
@@ -251,14 +248,14 @@ final class PHUIDiffInlineCommentDetailView
     if ($this->editable && !$this->preview) {
       $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIconFont('fa-pencil')
+        ->setIcon('fa-pencil')
         ->setTooltip(pht('Edit'))
         ->addSigil('differential-inline-edit')
         ->setMustCapture(true);
 
       $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIconFont('fa-trash-o')
+        ->setIcon('fa-trash-o')
         ->setTooltip(pht('Delete'))
         ->addSigil('differential-inline-delete')
         ->setMustCapture(true);
@@ -267,18 +264,18 @@ final class PHUIDiffInlineCommentDetailView
       $links[] = javelin_tag(
         'a',
         array(
-          'class' => 'inline-button-divider pml msl',
-          'meta'        => array(
+          'class'  => 'inline-button-divider pml msl',
+          'meta'  => array(
             'anchor' => $anchor_name,
           ),
-          'sigil'       => 'differential-inline-preview-jump',
+          'sigil'  => 'differential-inline-preview-jump',
         ),
         pht('Not Visible'));
 
       $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setTooltip(pht('Delete'))
-        ->setIconFont('fa-trash-o')
+        ->setIcon('fa-trash-o')
         ->addSigil('differential-inline-delete')
         ->setMustCapture(true);
     }
@@ -341,7 +338,7 @@ final class PHUIDiffInlineCommentDetailView
           ));
       } else {
         if ($is_done) {
-          $icon = id(new PHUIIconView())->setIconFont('fa-check sky msr');
+          $icon = id(new PHUIIconView())->setIcon('fa-check sky msr');
           $label = pht('Done');
           $class = 'button-done';
         } else {

@@ -158,11 +158,8 @@ abstract class PhabricatorWorker extends Phobject {
 
       while (true) {
         try {
-          $worker->doWork();
-          foreach ($worker->getQueuedTasks() as $queued_task) {
-            list($queued_class, $queued_data, $queued_options) = $queued_task;
-            self::scheduleTask($queued_class, $queued_data, $queued_options);
-          }
+          $worker->executeTask();
+          $worker->flushTaskQueue();
           break;
         } catch (PhabricatorWorkerYieldException $ex) {
           phlog(
@@ -236,8 +233,31 @@ abstract class PhabricatorWorker extends Phobject {
    *
    * @return list<tuple<string, wild, int|null>> Queued task specifications.
    */
-  final public function getQueuedTasks() {
+  final protected function getQueuedTasks() {
     return $this->queuedTasks;
+  }
+
+
+  /**
+   * Schedule any queued tasks, then empty the task queue.
+   *
+   * By default, the queue is flushed only if a task succeeds. You can call
+   * this method to force the queue to flush before failing (for example, if
+   * you are using queues to improve locking behavior).
+   *
+   * @param map<string, wild> Optional default options.
+   * @return this
+   */
+  final public function flushTaskQueue($defaults = array()) {
+    foreach ($this->getQueuedTasks() as $task) {
+      list($class, $data, $options) = $task;
+
+      $options = $options + $defaults;
+
+      self::scheduleTask($class, $data, $options);
+    }
+
+    $this->queuedTasks = array();
   }
 
 

@@ -41,6 +41,10 @@ final class PhabricatorProjectColumnPosition extends PhabricatorProjectDAO
   }
 
   public function getOrderingKey() {
+    if (!$this->getID() && !$this->getSequence()) {
+      return 0;
+    }
+
     // Low sequence numbers go above high sequence numbers.
     // High position IDs go above low position IDs.
     // Broadly, this makes newly added stuff float to the top.

@@ -30,8 +30,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     }
 
     if (!$points) {
-      // NOTE: Raphael crashes Safari if you hand it series with no points.
-      throw new Exception(pht('No data to show!'));
+      throw new Exception('No data to show!');
     }
 
     // Limit amount of data passed to browser.
@@ -56,16 +55,12 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'div',
       array(
         'id' => $id,
-        'style' => 'border: 1px solid #6f6f6f; '.
-                   'margin: 1em 2em; '.
-                   'background: #ffffff; '.
-                   'height: 400px; ',
+        'style' => 'background: #ffffff; '.
+                   'height: 480px; ',
       ),
       '');
 
-    require_celerity_resource('raphael-core');
-    require_celerity_resource('raphael-g');
-    require_celerity_resource('raphael-g-line');
+    require_celerity_resource('d3');
 
     Javelin::initBehavior('line-chart', array(
       'hardpoint' => $id,
@@ -75,9 +70,9 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'colors' => array('#0000ff'),
     ));
 
-    $panel = new PHUIObjectBoxView();
-    $panel->setHeaderText(pht('Count of %s', $spec->getName()));
-    $panel->appendChild($chart);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Count of %s', $spec->getName()))
+      ->appendChild($chart);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Chart'));
@@ -85,7 +80,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $panel,
+        $box,
       ),
       array(
         'title' => pht('Chart'),

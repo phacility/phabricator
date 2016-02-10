@@ -45,13 +45,11 @@ final class PonderQuestionTransaction
 
   public function getRemarkupBlocks() {
     $blocks = parent::getRemarkupBlocks();
-
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         $blocks[] = $this->getNewValue();
         break;
     }
-
     return $blocks;
   }
 
@@ -222,20 +220,6 @@ final class PonderQuestionTransaction
     return parent::getActionName();
   }
 
-  public function shouldHide() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_CONTENT:
-        if ($this->getOldValue() === null) {
-          return true;
-        } else {
-          return false;
-        }
-        break;
-    }
-
-    return parent::shouldHide();
-  }
-
   public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
@@ -302,34 +286,14 @@ final class PonderQuestionTransaction
     return parent::getTitleForFeed();
   }
 
-  public function getBodyForFeed(PhabricatorFeedStory $story) {
-    $new = $this->getNewValue();
-    $old = $this->getOldValue();
-
-    $body = null;
-
+  public function getRemarkupBodyForFeed(PhabricatorFeedStory $story) {
+    $text = null;
     switch ($this->getTransactionType()) {
-      case self::TYPE_TITLE:
-        if ($old === null) {
-          $question = $story->getObject($this->getObjectPHID());
-          return phutil_escape_html_newlines(
-            id(new PhutilUTF8StringTruncator())
-            ->setMaximumGlyphs(128)
-            ->truncateString($question->getContent()));
-        }
-        break;
-      case self::TYPE_ANSWERS:
-        $answer = $this->getNewAnswerObject($story);
-        if ($answer) {
-          return phutil_escape_html_newlines(
-            id(new PhutilUTF8StringTruncator())
-            ->setMaximumGlyphs(128)
-            ->truncateString($answer->getContent()));
-        }
+      case self::TYPE_CONTENT:
+        $text = $this->getNewValue();
         break;
     }
-
-    return parent::getBodyForFeed($story);
+    return $text;
   }
 
   /**

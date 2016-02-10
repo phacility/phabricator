@@ -27,6 +27,8 @@ final class PhabricatorObjectHandle
   private $complete;
   private $objectName;
   private $policyFiltered;
+  private $subtitle;
+  private $tokenIcon;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -42,6 +44,15 @@ final class PhabricatorObjectHandle
       return $this->icon;
     }
     return $this->getTypeIcon();
+  }
+
+  public function setSubtitle($subtitle) {
+    $this->subtitle = $subtitle;
+    return $this;
+  }
+
+  public function getSubtitle() {
+    return $this->subtitle;
   }
 
   public function setTagColor($color) {
@@ -74,6 +85,19 @@ final class PhabricatorObjectHandle
       return $this->tagColor;
     }
     return null;
+  }
+
+  public function setTokenIcon($icon) {
+    $this->tokenIcon = $icon;
+    return $this;
+  }
+
+  public function getTokenIcon() {
+    if ($this->tokenIcon !== null) {
+      return $this->tokenIcon;
+    }
+
+    return $this->getIcon();
   }
 
   public function getTypeIcon() {
@@ -248,6 +272,23 @@ final class PhabricatorObjectHandle
 
 
   public function renderLink($name = null) {
+    return $this->renderLinkWithAttributes($name, array());
+  }
+
+  public function renderHovercardLink($name = null) {
+    Javelin::initBehavior('phui-hovercards');
+
+    $attributes = array(
+      'sigil' => 'hovercard',
+      'meta' => array(
+        'hoverPHID' => $this->getPHID(),
+      ),
+    );
+
+    return $this->renderLinkWithAttributes($name, $attributes);
+  }
+
+  private function renderLinkWithAttributes($name, array $attributes) {
     if ($name === null) {
       $name = $this->getLinkName();
     }
@@ -272,16 +313,18 @@ final class PhabricatorObjectHandle
     $icon = null;
     if ($this->getPolicyFiltered()) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-lock lightgreytext');
+        ->setIcon('fa-lock lightgreytext');
     }
 
-    return phutil_tag(
+    $attributes = $attributes + array(
+      'href'  => $uri,
+      'class' => implode(' ', $classes),
+      'title' => $title,
+    );
+
+    return javelin_tag(
       $uri ? 'a' : 'span',
-      array(
-        'href'  => $uri,
-        'class' => implode(' ', $classes),
-        'title' => $title,
-      ),
+      $attributes,
       array($icon, $name));
   }
 

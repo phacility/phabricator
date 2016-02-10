@@ -59,8 +59,8 @@ return array(
     'phabricator-file-upload',
     'javelin-behavior-global-drag-and-drop',
     'javelin-behavior-phabricator-reveal-content',
-    'phabricator-hovercard',
-    'javelin-behavior-phabricator-hovercards',
+    'phui-hovercard',
+    'javelin-behavior-phui-hovercards',
     'javelin-color',
     'javelin-fx',
     'phabricator-draggable-list',
@@ -116,6 +116,7 @@ return array(
     'phui-spacing-css',
     'phui-form-css',
     'phui-icon-view-css',
+    'phui-profile-menu-css',
 
     'phabricator-application-launch-view-css',
     'phabricator-action-list-view-css',
@@ -187,9 +188,6 @@ return array(
   ),
   'maniphest.pkg.js' => array(
     'javelin-behavior-maniphest-batch-selector',
-    'javelin-behavior-maniphest-transaction-controls',
-    'javelin-behavior-maniphest-transaction-preview',
-    'javelin-behavior-maniphest-transaction-expand',
     'javelin-behavior-maniphest-subpriority-editor',
     'javelin-behavior-maniphest-list-editor',
   ),

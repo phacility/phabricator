@@ -163,4 +163,23 @@ final class PhabricatorSlowvoteSearchEngine
     return $result;
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Poll'))
+      ->setHref('/vote/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Poll other users to help facilitate decision making.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

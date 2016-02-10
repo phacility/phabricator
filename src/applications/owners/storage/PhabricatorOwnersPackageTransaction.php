@@ -27,6 +27,14 @@ final class PhabricatorOwnersPackageTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_OWNERS:
+        if (!is_array($old)) {
+          $old = array();
+        }
+
+        if (!is_array($new)) {
+          $new = array();
+        }
+
         $add = array_diff($new, $old);
         foreach ($add as $phid) {
           $phids[] = $phid;
@@ -47,11 +55,16 @@ final class PhabricatorOwnersPackageTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
-        return ($old === null);
+        if ($old === null) {
+          return true;
+        }
+        break;
       case self::TYPE_PRIMARY:
         // TODO: Eventually, remove these transactions entirely.
         return true;
     }
+
+    return parent::shouldHide();
   }
 
   public function getTitle() {
@@ -60,6 +73,10 @@ final class PhabricatorOwnersPackageTransaction
     $author_phid = $this->getAuthorPHID();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this package.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
         if ($old === null) {
           return pht(
@@ -206,6 +223,18 @@ final class PhabricatorOwnersPackageTransaction
     }
 
     return parent::renderChangeDetails($viewer);
+  }
+
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_DESCRIPTION:
+        $blocks[] = $this->getNewValue();
+        break;
+    }
+
+    return $blocks;
   }
 
 }

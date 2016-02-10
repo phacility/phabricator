@@ -13,7 +13,8 @@ final class PhabricatorProjectSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorProjectQuery())
-      ->needImages(true);
+      ->needImages(true)
+      ->withIsMilestone(false);
   }
 
   protected function buildCustomSearchFields() {
@@ -41,7 +42,7 @@ final class PhabricatorProjectSearchEngine
   }
 
 
-protected function buildQueryFromParameters(array $map) {
+  protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
     if (strlen($map['name'])) {
@@ -128,12 +129,17 @@ protected function buildQueryFromParameters(array $map) {
   private function getIconOptions() {
     $options = array();
 
-    foreach (PhabricatorProjectIcon::getIconMap() as $icon => $name) {
-      $options[$icon] = array(
+    $set = new PhabricatorProjectIconSet();
+    foreach ($set->getIcons() as $icon) {
+      if ($icon->getIsDisabled()) {
+        continue;
+      }
+
+      $options[$icon->getKey()] = array(
         id(new PHUIIconView())
-          ->setIconFont($icon),
+          ->setIcon($icon->getIcon()),
         ' ',
-        $name,
+        $icon->getLabel(),
       );
     }
 
@@ -143,14 +149,12 @@ protected function buildQueryFromParameters(array $map) {
   private function getColorOptions() {
     $options = array();
 
-    foreach (PhabricatorProjectIcon::getColorMap() as $color => $name) {
+    foreach (PhabricatorProjectIconSet::getColorMap() as $color => $name) {
       $options[$color] = array(
         id(new PHUITagView())
           ->setType(PHUITagView::TYPE_SHADE)
           ->setShade($color)
           ->setName($name),
-        ' ',
-        $name,
       );
     }
 
@@ -163,42 +167,35 @@ protected function buildQueryFromParameters(array $map) {
     array $handles) {
     assert_instances_of($projects, 'PhabricatorProject');
     $viewer = $this->requireViewer();
-    $handles = $viewer->loadHandles(mpull($projects, 'getPHID'));
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
-    $can_edit_projects = id(new PhabricatorPolicyFilter())
-      ->setViewer($viewer)
-      ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
-      ->apply($projects);
+    $list = id(new PhabricatorProjectListView())
+      ->setUser($viewer)
+      ->setProjects($projects)
+      ->renderList();
 
-    foreach ($projects as $key => $project) {
-      $id = $project->getID();
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setObjectList($list)
+      ->setNoDataString(pht('No projects found.'));
+  }
 
-      $tag_list = id(new PHUIHandleTagListView())
-        ->setSlim(true)
-        ->setHandles(array($handles[$project->getPHID()]));
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Project'))
+      ->setHref('/project/edit/')
+      ->setColor(PHUIButtonView::GREEN);
 
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($project->getName())
-        ->setHref($this->getApplicationURI("view/{$id}/"))
-        ->setImageURI($project->getProfileImageURI())
-        ->addAttribute($tag_list);
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Projects are flexible storage containers used as '.
+            'tags, teams, projects, or anything you need to group.'))
+      ->addAction($create_button);
 
-      if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ARCHIVED) {
-        $item->addIcon('delete-grey', pht('Archived'));
-        $item->setDisabled(true);
-      }
-
-      $list->addItem($item);
-    }
-
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setObjectList($list);
-    $result->setNoDataString(pht('No projects found.'));
-
-    return $result;
-
+      return $view;
   }
 
 }

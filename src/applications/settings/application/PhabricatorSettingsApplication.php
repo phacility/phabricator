@@ -14,7 +14,7 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
     return pht('User Preferences');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-wrench';
   }
 
@@ -38,28 +38,6 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
 
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
-  }
-
-  public function buildMainMenuItems(
-    PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-
-    $items = array();
-
-    if ($user->isLoggedIn() && $user->isUserActivated()) {
-      $selected = ($controller instanceof PhabricatorSettingsMainController);
-      $item = id(new PHUIListItemView())
-        ->setName(pht('Settings'))
-        ->setIcon('fa-wrench')
-        ->addClass('core-menu-item')
-        ->setSelected($selected)
-        ->setHref('/settings/')
-        ->setAural(pht('Settings'))
-        ->setOrder(400);
-      $items[] = $item;
-    }
-
-    return $items;
   }
 
 }

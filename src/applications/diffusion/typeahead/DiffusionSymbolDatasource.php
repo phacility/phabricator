@@ -47,7 +47,10 @@ final class DiffusionSymbolDatasource
           ->setPHID(md5($symbol->getURI())) // Just needs to be unique.
           ->setDisplayName($name)
           ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$repo.')')
-          ->setPriorityType('symb');
+          ->setPriorityType('symb')
+          ->setImageSprite(
+            'phabricator-search-icon phui-font-fa phui-icon-view fa-code '.
+            'lightgreytext');
       }
     }
 

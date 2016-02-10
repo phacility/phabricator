@@ -11,3 +11,39 @@
 .phui-box.focus {
   box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.90);
 }
+
+.phui-box-grey {
+  background-color: {$page.background};
+  border-radius: 3px;
+  border: none;
+}
+
+.phui-box-blue {
+  background-color: {$bluebackground};
+  border-radius: 3px;
+  border: none;
+}
+
+.phui-box-blue .phui-object-item,
+.phui-box-grey .phui-object-item {
+  background: transparent;
+}
+
+.phui-box-blue .phui-object-item-link,
+.phui-box-grey .phui-object-item-link {
+  color: {$darkbluetext};
+}
+
+.phui-box-blue .phui-header-shell,
+.phui-box-grey .phui-header-shell {
+  border-bottom: 2px solid #fff;
+}
+
+.phui-object-box.phui-box-blue div.phui-info-severity-nodata,
+.phui-object-box.phui-box-grey div.phui-info-severity-nodata {
+  background: transparent;
+  padding: 12px 4px;
+  text-align: center;
+  border: none;
+  color: {$greytext};
+}

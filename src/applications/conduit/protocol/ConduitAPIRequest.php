@@ -14,6 +14,10 @@ final class ConduitAPIRequest extends Phobject {
     return coalesce(idx($this->params, $key), $default);
   }
 
+  public function getValueExists($key) {
+    return array_key_exists($key, $this->params);
+  }
+
   public function getAllParameters() {
     return $this->params;
   }

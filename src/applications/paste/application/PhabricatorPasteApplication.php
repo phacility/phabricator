@@ -10,7 +10,7 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
     return '/paste/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-paste';
   }
 
@@ -41,7 +41,7 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
         'create/' => 'PhabricatorPasteEditController',
         $this->getEditRoutePattern('edit/') => 'PhabricatorPasteEditController',
         'raw/(?P<id>[1-9]\d*)/' => 'PhabricatorPasteRawController',
-        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorPasteCommentController',
+        'archive/(?P<id>[1-9]\d*)/' => 'PhabricatorPasteArchiveController',
       ),
     );
   }
@@ -77,15 +77,9 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
   }
 
   public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Paste'))
-      ->setIcon('fa-clipboard')
-      ->setHref($this->getBaseURI().'create/');
-    $items[] = $item;
-
-    return $items;
+    return id(new PhabricatorPasteEditEngine())
+      ->setViewer($viewer)
+      ->loadQuickCreateItems();
   }
 
   public function getMailCommandObjects() {

@@ -34,4 +34,50 @@ abstract class PhabricatorEditEngineController
     return $crumbs;
   }
 
+  protected function loadConfigForEdit() {
+    return $this->loadConfig($need_edit = true);
+  }
+
+  protected function loadConfigForView() {
+    return $this->loadConfig($need_edit = false);
+  }
+
+  private function loadConfig($need_edit) {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $engine_key = $request->getURIData('engineKey');
+    $this->setEngineKey($engine_key);
+
+    $key = $request->getURIData('key');
+
+    if ($need_edit) {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+        PhabricatorPolicyCapability::CAN_EDIT,
+      );
+    } else {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+      );
+    }
+
+    $config = id(new PhabricatorEditEngineConfigurationQuery())
+      ->setViewer($viewer)
+      ->withEngineKeys(array($engine_key))
+      ->withIdentifiers(array($key))
+      ->requireCapabilities($capabilities)
+      ->executeOne();
+    if ($config) {
+      $engine = $config->getEngine();
+    }
+
+    if (!$engine->isEngineConfigurable()) {
+      return null;
+    }
+
+    return $config;
+  }
+
+
 }

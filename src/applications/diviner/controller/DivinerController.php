@@ -2,19 +2,9 @@
 
 abstract class DivinerController extends PhabricatorController {
 
-  protected function buildSideNavView() {
-    $menu = $this->buildApplicationMenu();
-    return AphrontSideNavFilterView::newFromMenu($menu);
-  }
-
   public function buildApplicationMenu() {
-    $menu = new PHUIListView();
-
-    id(new DivinerAtomSearchEngine())
-      ->setViewer($this->getRequest()->getViewer())
-      ->addNavigationItems($menu);
-
-    return $menu;
+    return $this->newApplicationMenu()
+      ->setSearchEngine(new DivinerAtomSearchEngine());
   }
 
   protected function renderAtomList(array $symbols) {

@@ -24,6 +24,11 @@ final class PhabricatorStorageFixtureScopeGuard extends Phobject {
   public function destroy() {
     PhabricatorLiskDAO::popStorageNamespace();
 
+    // NOTE: We need to close all connections before destroying the databases.
+    // If we do not, the "DROP DATABASE ..." statements may hang, waiting for
+    // our connections to close.
+    PhabricatorLiskDAO::closeAllConnections();
+
     execx(
       'php %s destroy --force --namespace %s',
       $this->getStorageBinPath(),

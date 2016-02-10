@@ -141,7 +141,7 @@ JX.install('ChangesetViewManager', {
      * Load missing context in a changeset.
      *
      * We do this when the user clicks "Show X Lines". We also expand all of
-     * the missing context when they "Show Entire File".
+     * the missing context when they "Show All Context".
      *
      * @param string Line range specification, like "0-40/0-20".
      * @param node Row where the context should be rendered after loading.
@@ -162,7 +162,7 @@ JX.install('ChangesetViewManager', {
 
       if (bulk) {
         // If we're loading a bunch of these because the viewer clicked
-        // "Show Entire File Content" or similar, use lower-priority requests
+        // "Show All Context" or similar, use lower-priority requests
         // and draw a progress bar.
         this._startContentWorkflow(workflow);
       } else {

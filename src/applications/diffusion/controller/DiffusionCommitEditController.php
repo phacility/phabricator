@@ -2,18 +2,23 @@
 
 final class DiffusionCommitEditController extends DiffusionController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $user       = $request->getUser();
-    $drequest   = $this->getDiffusionRequest();
-    $callsign   = $drequest->getRepository()->getCallsign();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
-    $commit     = $drequest->loadCommit();
-    $data = $commit->loadCommitData();
-    $page_title = pht('Edit Diffusion Commit');
+    $commit = $drequest->loadCommit();
 
     if (!$commit) {
       return new Aphront404Response();
     }
+
+    $data = $commit->loadCommitData();
+    $page_title = pht('Edit Diffusion Commit');
 
     $commit_phid = $commit->getPHID();
     $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
@@ -28,18 +33,21 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue('edge:type', $edge_type)
         ->setNewValue(array('=' => array_fuse($proj_phids)));
+
       $editor = id(new PhabricatorAuditEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request);
-      $xactions = $editor->applyTransactions($commit, $xactions);
+
+      $editor->applyTransactions($commit, $xactions);
+
       return id(new AphrontRedirectResponse())
-        ->setURI('/r'.$callsign.$commit->getCommitIdentifier());
+        ->setURI($commit->getURI());
     }
 
     $tokenizer_id = celerity_generate_unique_node_id();
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setAction($request->getRequestURI()->getPath())
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -47,15 +55,6 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setName('projects')
         ->setValue($current_proj_phids)
         ->setID($tokenizer_id)
-        ->setCaption(
-          javelin_tag(
-            'a',
-            array(
-              'href'        => '/project/create/',
-              'mustcapture' => true,
-              'sigil'       => 'project-create',
-            ),
-            pht('Create New Project')))
         ->setDatasource(new PhabricatorProjectDatasource()));
 
     $reason = $data->getCommitDetail('autocloseReason', false);
@@ -97,33 +96,25 @@ final class DiffusionCommitEditController extends DiffusionController {
           ->setValue(array($desc, " \xC2\xB7 ", $doc_link)));
     }
 
+    $form->appendControl(
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Save'))
+        ->addCancelButton($commit->getURI()));
 
-    Javelin::initBehavior('project-create', array(
-      'tokenizerID' => $tokenizer_id,
-    ));
-
-    $submit = id(new AphrontFormSubmitControl())
-      ->setValue(pht('Save'))
-      ->addCancelButton('/r'.$callsign.$commit->getCommitIdentifier());
-    $form->appendChild($submit);
-
-    $crumbs = $this->buildCrumbs(array(
-      'commit' => true,
-    ));
+    $crumbs = $this->buildCrumbs(
+      array(
+        'commit' => true,
+      ));
     $crumbs->addTextCrumb(pht('Edit'));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $page_title,
-      ));
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild($form_box);
   }
 
 }

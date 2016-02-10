@@ -18,7 +18,7 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
     return '/phurl/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-compress';
   }
 
@@ -35,9 +35,9 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/U(?P<id>[1-9]\d*)' => 'PhabricatorPhurlURLViewController',
-      '/u/(?P<id>[1-9]\d*)' => 'PhabricatorPhurlURLAccessController',
-      '/u/(?P<alias>[^/]+)' => 'PhabricatorPhurlURLAccessController',
+      '/U(?P<id>[1-9]\d*)/?' => 'PhabricatorPhurlURLViewController',
+      '/u/(?P<id>[1-9]\d*)/?' => 'PhabricatorPhurlURLAccessController',
+      '/u/(?P<alias>[^/]+)/?' => 'PhabricatorPhurlURLAccessController',
       '/phurl/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorPhurlURLListController',
@@ -46,6 +46,8 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
             => 'PhabricatorPhurlURLEditController',
           'edit/(?P<id>[1-9]\d*)/'
             => 'PhabricatorPhurlURLEditController',
+          'comment/(?P<id>[1-9]\d*)/'
+            => 'PhabricatorPhurlURLCommentController',
         ),
       ),
     );
@@ -55,6 +57,14 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
     return array(
       '/u/(?P<append>[^/]+)' => 'PhabricatorPhurlShortURLController',
       '.*' => 'PhabricatorPhurlShortURLDefaultController',
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorPhurlURLCreateCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_USER,
+      ),
     );
   }
 

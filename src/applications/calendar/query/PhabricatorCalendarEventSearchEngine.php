@@ -266,25 +266,12 @@ final class PhabricatorCalendarEventSearchEngine
     $list = new PHUIObjectItemListView();
 
     foreach ($events as $event) {
-      $duration = '';
       $event_date_info = $this->getEventDateLabel($event);
       $creator_handle = $handles[$event->getUserPHID()];
       $attendees = array();
 
       foreach ($event->getInvitees() as $invitee) {
         $attendees[] = $invitee->getInviteePHID();
-      }
-
-      $attendees = pht(
-        'Attending: %s',
-        $viewer->renderHandleList($attendees)
-          ->setAsInline(1)
-          ->render());
-
-      if (strlen($event->getDuration()) > 0) {
-        $duration = pht(
-          'Duration: %s',
-          $event->getDuration());
       }
 
       if ($event->getIsGhostEvent()) {
@@ -302,9 +289,25 @@ final class PhabricatorCalendarEventSearchEngine
         ->setObject($event)
         ->setHeader($title_text)
         ->setHref($event->getURI())
-        ->addAttribute($event_date_info)
-        ->addAttribute($attendees)
-        ->addIcon('none', $duration);
+        ->addAttribute($event_date_info);
+
+      if ($attendees) {
+        $attending = pht(
+          'Attending: %s',
+          $viewer->renderHandleList($attendees)
+            ->setAsInline(1)
+            ->render());
+
+        $item->addAttribute($attending);
+      }
+
+      if (strlen($event->getDuration()) > 0) {
+        $duration = pht(
+          'Duration: %s',
+          $event->getDuration());
+
+        $item->addIcon('none', $duration);
+      }
 
       $list->addItem($item);
     }

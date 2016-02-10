@@ -52,7 +52,7 @@ inherent complexity, like these:
 
   - {icon times, color=red} A 100MB wiki page takes a long time to render.
   - {icon times, color=red} A turing-complete simulation of Conway's Game of
-    Life implented in 958,000 Herald rules executes slowly.
+    Life implemented in 958,000 Herald rules executes slowly.
   - {icon times, color=red} Uploading an 8GB file takes several minutes.
 
 Generally, the path forward will be:

@@ -249,11 +249,15 @@ final class DrydockWorkingCopyBlueprintImplementation
 
       $ref = idx($spec, 'ref');
 
+      // Reset things first, in case previous builds left anything staged or
+      // dirty.
+      $cmd[] = 'git reset --hard HEAD';
+
       if ($commit !== null) {
-        $cmd[] = 'git reset --hard %s';
+        $cmd[] = 'git checkout %s --';
         $arg[] = $commit;
       } else if ($branch !== null) {
-        $cmd[] = 'git checkout %s';
+        $cmd[] = 'git checkout %s --';
         $arg[] = $branch;
 
         $cmd[] = 'git reset --hard origin/%s';
@@ -267,13 +271,8 @@ final class DrydockWorkingCopyBlueprintImplementation
         $arg[] = $ref_ref;
         $arg[] = $ref_ref;
 
-        $cmd[] = 'git checkout %s';
+        $cmd[] = 'git checkout %s --';
         $arg[] = $ref_ref;
-
-        $cmd[] = 'git reset --hard %s';
-        $arg[] = $ref_ref;
-      } else {
-        $cmd[] = 'git reset --hard HEAD';
       }
 
       $cmd = implode(' && ', $cmd);

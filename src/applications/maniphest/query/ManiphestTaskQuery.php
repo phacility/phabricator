@@ -278,8 +278,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
       foreach ($tasks as $key => $task) {
         if (!$task->getGroupByProjectPHID()) {
-          // This task is either not in any projects, or only in projects
-          // which we're ignoring because they're being queried for explicitly.
+          // This task is either not tagged with any projects, or only tagged
+          // with projects which we're ignoring because they're being queried
+          // for explicitly.
           continue;
         }
 
@@ -499,7 +500,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $fulltext_query->setParameter('types',
       array(ManiphestTaskPHIDType::TYPECONST));
 
-    $engine = PhabricatorSearchEngine::loadEngine();
+    $engine = PhabricatorFulltextStorageEngine::loadEngine();
     $fulltext_results = $engine->executeSearch($fulltext_query);
 
     if (empty($fulltext_results)) {
@@ -642,14 +643,14 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
    * Return project PHIDs which we should ignore when grouping tasks by
    * project. For example, if a user issues a query like:
    *
-   *   Tasks in all projects: Frontend, Bugs
+   *   Tasks tagged with all projects: Frontend, Bugs
    *
    * ...then we don't show "Frontend" or "Bugs" groups in the result set, since
    * they're meaningless as all results are in both groups.
    *
    * Similarly, for queries like:
    *
-   *   Tasks in any projects: Public Relations
+   *   Tasks tagged with any projects: Public Relations
    *
    * ...we ignore the single project, as every result is in that project. (In
    * the case that there are several "any" projects, we do not ignore them.)

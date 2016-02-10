@@ -115,6 +115,43 @@ final class PhabricatorConduitMethodQuery
     return $methods;
   }
 
+  protected function willFilterPage(array $methods) {
+    $application_phids = array();
+    foreach ($methods as $method) {
+      $application = $method->getApplication();
+      if ($application === null) {
+        continue;
+      }
+      $application_phids[] = $application->getPHID();
+    }
+
+    if ($application_phids) {
+      $applications = id(new PhabricatorApplicationQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withPHIDs($application_phids)
+        ->execute();
+      $applications = mpull($applications, null, 'getPHID');
+    } else {
+      $applications = array();
+    }
+
+    // Remove methods which belong to an application the viewer can not see.
+    foreach ($methods as $key => $method) {
+      $application = $method->getApplication();
+      if ($application === null) {
+        continue;
+      }
+
+      if (empty($applications[$application->getPHID()])) {
+        $this->didRejectResult($method);
+        unset($methods[$key]);
+      }
+    }
+
+    return $methods;
+  }
+
   public function getQueryApplicationClass() {
     return 'PhabricatorConduitApplication';
   }

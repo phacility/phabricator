@@ -243,50 +243,6 @@ final class PhabricatorPolicyFilter extends Phobject {
   }
 
   private function applyExtendedPolicyChecks(array $extended_objects) {
-    // First, we're going to detect cycles and reject any objects which are
-    // part of a cycle. We don't want to loop forever if an object has a
-    // self-referential or nonsense policy.
-
-    static $in_flight = array();
-
-    $all_phids = array();
-    foreach ($extended_objects as $key => $object) {
-      $phid = $object->getPHID();
-      if (isset($in_flight[$phid])) {
-        // TODO: This could be more user-friendly.
-        $this->rejectObject($extended_objects[$key], false, '<cycle>');
-        unset($extended_objects[$key]);
-        continue;
-      }
-
-      // We might throw from rejectObject(), so we don't want to actually mark
-      // anything as in-flight until we survive this entire step.
-      $all_phids[$phid] = $phid;
-    }
-
-    foreach ($all_phids as $phid) {
-      $in_flight[$phid] = true;
-    }
-
-    $caught = null;
-    try {
-      $extended_objects = $this->executeExtendedPolicyChecks($extended_objects);
-    } catch (Exception $ex) {
-      $caught = $ex;
-    }
-
-    foreach ($all_phids as $phid) {
-      unset($in_flight[$phid]);
-    }
-
-    if ($caught) {
-      throw $caught;
-    }
-
-    return $extended_objects;
-  }
-
-  private function executeExtendedPolicyChecks(array $extended_objects) {
     $viewer = $this->viewer;
     $filter_capabilities = $this->capabilities;
 
@@ -365,7 +321,7 @@ final class PhabricatorPolicyFilter extends Phobject {
       $objects_in = array();
       foreach ($structs as $struct) {
         $extended_key = $struct['key'];
-        if (empty($extended_objects[$key])) {
+        if (empty($extended_objects[$extended_key])) {
           // If this object has already been rejected by an earlier filtering
           // pass, we don't need to do any tests on it.
           continue;
@@ -379,8 +335,8 @@ final class PhabricatorPolicyFilter extends Phobject {
             // We weren't able to load the corresponding object, so just
             // reject this result outright.
 
-            $reject = $extended_objects[$key];
-            unset($extended_objects[$key]);
+            $reject = $extended_objects[$extended_key];
+            unset($extended_objects[$extended_key]);
 
             // TODO: This could be friendlier.
             $this->rejectObject($reject, false, '<bad-ref>');
@@ -396,10 +352,11 @@ final class PhabricatorPolicyFilter extends Phobject {
       }
 
       if ($objects_in) {
-        $objects_out = id(new PhabricatorPolicyFilter())
-          ->setViewer($viewer)
-          ->requireCapabilities($capabilities)
-          ->apply($objects_in);
+        $objects_out = $this->executeExtendedPolicyChecks(
+          $viewer,
+          $capabilities,
+          $objects_in,
+          $key_map);
         $objects_out = mpull($objects_out, null, 'getPHID');
       } else {
         $objects_out = array();
@@ -433,6 +390,53 @@ final class PhabricatorPolicyFilter extends Phobject {
     }
 
     return $extended_objects;
+  }
+
+  private function executeExtendedPolicyChecks(
+    PhabricatorUser $viewer,
+    array $capabilities,
+    array $objects,
+    array $key_map) {
+
+    // Do crude cycle detection by seeing if we have a huge stack depth.
+    // Although more sophisticated cycle detection is possible in theory,
+    // it is difficult with hierarchical objects like subprojects. Many other
+    // checks make it difficult to create cycles normally, so just do a
+    // simple check here to limit damage.
+
+    static $depth;
+
+    $depth++;
+
+    if ($depth > 32) {
+      foreach ($objects as $key => $object) {
+        $this->rejectObject($objects[$key], false, '<cycle>');
+        unset($objects[$key]);
+        continue;
+      }
+    }
+
+    if (!$objects) {
+      return array();
+    }
+
+    $caught = null;
+    try {
+      $result = id(new PhabricatorPolicyFilter())
+        ->setViewer($viewer)
+        ->requireCapabilities($capabilities)
+        ->apply($objects);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $depth--;
+
+    if ($caught) {
+      throw $caught;
+    }
+
+    return $result;
   }
 
   private function checkCapability(
@@ -603,6 +607,11 @@ final class PhabricatorPolicyFilter extends Phobject {
     $viewer_phid = $viewer->getPHID();
 
     $rules = PhabricatorPolicyQuery::getObjectPolicyRules(null);
+
+    // Make sure we have clean, empty policy rule objects.
+    foreach ($rules as $key => $rule) {
+      $rules[$key] = clone $rule;
+    }
 
     $results = array();
     foreach ($map as $key => $object_list) {

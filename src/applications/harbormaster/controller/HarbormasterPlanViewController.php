@@ -202,9 +202,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
           ->setText(pht('Add Build Step'))
           ->setHref($this->getApplicationURI("step/add/{$plan_id}/"))
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-plus'))
+          ->setIcon('fa-plus')
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
 
@@ -221,8 +219,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
     $list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($plan)
-      ->setObjectURI($this->getApplicationURI("plan/{$id}/"));
+      ->setObject($plan);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

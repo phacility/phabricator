@@ -100,8 +100,8 @@ final class PhabricatorRepositoryDiscoveryEngine
 
     $this->log(
       pht(
-        'Discovering commits in repository %s.',
-        $repository->getCallsign()));
+        'Discovering commits in repository "%s".',
+        $repository->getDisplayName()));
 
     $this->fillCommitCache(array_values($branches));
 
@@ -244,7 +244,7 @@ final class PhabricatorRepositoryDiscoveryEngine
           'configured URI is "%s". To resolve this error, set the remote URI '.
           'to point at the repository root. If you want to import only part '.
           'of a Subversion repository, use the "Import Only" option.',
-          $repository->getCallsign(),
+          $repository->getDisplayName(),
           $remote_root,
           $expect_root));
     }

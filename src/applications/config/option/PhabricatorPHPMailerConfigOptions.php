@@ -11,7 +11,7 @@ final class PhabricatorPHPMailerConfigOptions
     return pht('Configure PHPMailer.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-send-o';
   }
 

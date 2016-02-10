@@ -130,13 +130,12 @@ final class AlmanacNetworkEditController
       $crumbs->addTextCrumb(pht('Edit'));
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
       ));
   }
 

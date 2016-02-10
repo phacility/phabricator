@@ -55,49 +55,49 @@ final class PhabricatorUSEnglishTranslation
         'There are %d aggregate facts in storage.',
       ),
 
-      '%d Commit(s) Awaiting Audit' => array(
-        '%d Commit Awaiting Audit',
-        '%d Commits Awaiting Audit',
+      '%s Commit(s) Awaiting Audit' => array(
+        '%s Commit Awaiting Audit',
+        '%s Commits Awaiting Audit',
       ),
 
-      '%d Problem Commit(s)' => array(
-        '%d Problem Commit',
-        '%d Problem Commits',
+      '%s Problem Commit(s)' => array(
+        '%s Problem Commit',
+        '%s Problem Commits',
       ),
 
-      '%d Review(s) Blocking Others' => array(
-        '%d Review Blocking Others',
-        '%d Reviews Blocking Others',
+      '%s Review(s) Blocking Others' => array(
+        '%s Review Blocking Others',
+        '%s Reviews Blocking Others',
       ),
 
-      '%d Review(s) Need Attention' => array(
-        '%d Review Needs Attention',
-        '%d Reviews Need Attention',
+      '%s Review(s) Need Attention' => array(
+        '%s Review Needs Attention',
+        '%s Reviews Need Attention',
       ),
 
-      '%d Review(s) Waiting on Others' => array(
-        '%d Review Waiting on Others',
-        '%d Reviews Waiting on Others',
+      '%s Review(s) Waiting on Others' => array(
+        '%s Review Waiting on Others',
+        '%s Reviews Waiting on Others',
       ),
 
-      '%d Active Review(s)' => array(
-        '%d Active Review',
-        '%d Active Reviews',
+      '%s Active Review(s)' => array(
+        '%s Active Review',
+        '%s Active Reviews',
       ),
 
-      '%d Flagged Object(s)' => array(
-        '%d Flagged Object',
-        '%d Flagged Objects',
+      '%s Flagged Object(s)' => array(
+        '%s Flagged Object',
+        '%s Flagged Objects',
       ),
 
-      '%d Object(s) Tracked' => array(
-        '%d Object Tracked',
-        '%d Objects Tracked',
+      '%s Object(s) Tracked' => array(
+        '%s Object Tracked',
+        '%s Objects Tracked',
       ),
 
-      '%d Assigned Task(s)' => array(
-        '%d Assigned Task',
-        '%d Assigned Tasks',
+      '%s Assigned Task(s)' => array(
+        '%s Assigned Task',
+        '%s Assigned Tasks',
       ),
 
       'Show %d Lint Message(s)' => array(
@@ -178,14 +178,14 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%s merged %d task(s): %s.' => array(
+      '%s merged %s task(s): %s.' => array(
         array(
           '%s merged a task: %3$s.',
           '%s merged tasks: %3$s.',
         ),
       ),
 
-      '%s merged %d task(s) %s into %s.' => array(
+      '%s merged %s task(s) %s into %s.' => array(
         array(
           '%s merged %3$s into %4$s.',
           '%s merged tasks %3$s into %4$s.',
@@ -766,13 +766,21 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%d project hashtag(s) are already used: %s.' => array(
-          'Project hashtag %2$s is already used.',
-          '%d project hashtags are already used: %2$s.',
+      '%s project hashtag(s) are already used by other projects: %s.' => array(
+        'Project hashtag "%2$s" is already used by another project.',
+        'Some project hashtags are already used by other projects: %2$s.',
       ),
 
       '%s changed project hashtag(s), added %d: %s; removed %d: %s.' =>
         '%s changed project hashtags, added %3$s; removed %5$s.',
+
+      'Hashtags must contain at least one letter or number. %s '.
+      'project hashtag(s) are invalid: %s.' => array(
+        'Hashtags must contain at least one letter or number. The '.
+        'hashtag "%2$s" is not valid.',
+        'Hashtags must contain at least one letter or number. These '.
+        'hashtags are invalid: %2$s.',
+      ),
 
       '%s added %d project hashtag(s): %s.' => array(
         array(
@@ -808,11 +816,6 @@ final class PhabricatorUSEnglishTranslation
       '%d User(s) Need Approval' => array(
         '%d User Needs Approval',
         '%d Users Need Approval',
-      ),
-
-      '%s older changes(s) are hidden.' => array(
-        '%d older change is hidden.',
-        '%d older changes are hidden.',
       ),
 
       '%s, %s line(s)' => array(
@@ -1488,6 +1491,29 @@ final class PhabricatorUSEnglishTranslation
         'repositories for updates yet.',
       ),
 
+
+      '%s updated %s, added %d: %s.' =>
+        '%s updated %s, added: %4$s.',
+
+      '%s updated %s, removed %s: %s.' =>
+        '%s updated %s, removed: %4$s.',
+
+      '%s updated %s, added %s: %s; removed %s: %s.' =>
+        '%s updated %s, added: %4$s; removed: %6$s.',
+
+      '%s updated %s for %s, added %d: %s.' =>
+        '%s updated %s for %s, added: %5$s.',
+
+      '%s updated %s for %s, removed %s: %s.' =>
+        '%s updated %s for %s, removed: %5$s.',
+
+      '%s updated %s for %s, added %s: %s; removed %s: %s.' =>
+        '%s updated %s for %s, added: %5$s; removed; %7$s.',
+
+      'Permanently destroyed %s object(s).' => array(
+        'Permanently destroyed %s object.',
+        'Permanently destroyed %s objects.',
+      ),
     );
   }
 

@@ -155,7 +155,7 @@ abstract class PhabricatorApplication
     return null;
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-puzzle-piece';
   }
 
@@ -286,22 +286,6 @@ abstract class PhabricatorApplication
    */
   public function loadStatus(PhabricatorUser $user) {
     return array();
-  }
-
-  /**
-   * @return string
-   * @task ui
-   */
-  final public static function formatStatusCount(
-    $count,
-    $limit_string = '%s',
-    $base_string = '%d') {
-    if ($count == self::MAX_STATUS_ITEMS) {
-      $count_str = pht($limit_string, ($count - 1).'+');
-    } else {
-      $count_str = pht($base_string, $count);
-    }
-    return $count_str;
   }
 
 
@@ -636,11 +620,35 @@ abstract class PhabricatorApplication
   }
 
   protected function getEditRoutePattern($base = null) {
-    return $base.'(?:(?P<id>[0-9]\d*)/)?(?:(?P<editAction>parameters)/)?';
+    return $base.'(?:'.
+      '(?P<id>[0-9]\d*)/)?'.
+      '(?:'.
+        '(?:'.
+          '(?P<editAction>parameters|nodefault|nocreate|nomanage|comment)'.
+          '|'.
+          '(?:form/(?P<formKey>[^/]+))'.
+        ')'.
+      '/)?';
   }
 
   protected function getQueryRoutePattern($base = null) {
     return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
+  }
+
+  protected function getPanelRouting($controller) {
+    $edit_route = $this->getEditRoutePattern();
+
+    return array(
+      '(?P<panelAction>view)/(?P<panelID>[^/]+)/' => $controller,
+      '(?P<panelAction>hide)/(?P<panelID>[^/]+)/' => $controller,
+      '(?P<panelAction>default)/(?P<panelID>[^/]+)/' => $controller,
+      '(?P<panelAction>configure)/' => $controller,
+      '(?P<panelAction>reorder)/' => $controller,
+      '(?P<panelAction>edit)/'.$edit_route => $controller,
+      '(?P<panelAction>new)/(?<panelKey>[^/]+)/'.$edit_route => $controller,
+      '(?P<panelAction>builtin)/(?<panelID>[^/]+)/'.$edit_route
+        => $controller,
+    );
   }
 
 }

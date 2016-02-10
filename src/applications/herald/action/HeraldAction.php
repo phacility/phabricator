@@ -95,9 +95,15 @@ abstract class HeraldAction extends Phobject {
 
     switch ($type) {
       case self::STANDARD_PHID_LIST:
-        $handles = $viewer->loadHandles($target);
-        $handles = iterator_to_array($handles);
-        return mpull($handles, 'getName', 'getPHID');
+        $datasource = $this->getDatasource();
+
+        if (!$datasource) {
+          return array();
+        }
+
+        return $datasource
+          ->setViewer($viewer)
+          ->getWireTokens($target);
     }
 
     return $target;
@@ -344,10 +350,14 @@ abstract class HeraldAction extends Phobject {
         return pht(
           'This action specifies no targets.');
       case self::DO_STANDARD_NO_EFFECT:
-        return pht(
-          'This action has no effect on %s target(s): %s.',
-          phutil_count($data),
-          $this->renderHandleList($data));
+        if ($data && is_array($data)) {
+          return pht(
+            'This action has no effect on %s target(s): %s.',
+            phutil_count($data),
+            $this->renderHandleList($data));
+        } else {
+          return pht('This action has no effect.');
+        }
       case self::DO_STANDARD_INVALID:
         return pht(
           '%s target(s) are invalid or of the wrong type: %s.',

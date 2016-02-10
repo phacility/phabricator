@@ -38,4 +38,8 @@ final class PhabricatorSearchDateField
     return PhabricatorTime::parseLocalTime($value, $this->getViewer());
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitEpochParameterType();
+  }
+
 }

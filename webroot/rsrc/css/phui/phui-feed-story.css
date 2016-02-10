@@ -24,7 +24,6 @@
   padding: 12px 4px;
   overflow: hidden;
   color: {$greytext};
-  line-height: 16px;
   word-break: break-word;
 }
 
@@ -35,6 +34,7 @@
 
 .phui-feed-story-body {
   margin: 4px 4px 8px;
+  padding-bottom: 8px;
   color: {$darkgreytext};
   word-break: break-word;
   max-height: 300px;
@@ -43,7 +43,7 @@
 
 .phui-feed-story-foot {
   font-size: {$smallerfontsize};
-  padding: 8px 4px 12px;
+  padding: 0 4px 12px;
 }
 
 .phui-feed-story-foot,

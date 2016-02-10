@@ -1,0 +1,325 @@
+/**
+ * @provides phui-profile-menu-css
+ */
+
+.device-desktop .phui-navigation-shell.phui-profile-menu {
+  display: table;
+  width: 100%;
+  height: calc(100vh - {$menu.main.height});
+}
+
+.device-desktop .phui-profile-menu .phabricator-nav {
+  display: table-row;
+}
+
+.device-desktop .phui-profile-menu .phabricator-nav-local {
+  display: table-cell;
+  position: relative;
+  vertical-align: top;
+  width: {$menu.profile.width};
+  max-width: {$menu.profile.width};
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.device-desktop .phui-profile-menu-collapsed .phabricator-nav-local {
+  width: {$menu.profile.width.collapsed};
+  max-width: {$menu.profile.width.collapsed};
+}
+
+.device-desktop .phui-profile-menu .phabricator-nav-content {
+  display: table-cell;
+  margin-left: 0;
+}
+
+.phui-profile-menu .phabricator-side-menu {
+  background: #525867;
+  box-shadow: inset -2px 0 2px rgba(0, 0, 0, 0.150);
+  width: 240px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-list-item-view {
+  position: relative;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-list-item-href {
+  display: block;
+  text-decoration: none;
+  padding: 0 8px 0 48px;
+  height: 48px;
+  font-size: {$biggerfontsize};
+  -webkit-font-smoothing: antialiased;
+  color: {$menu.profile.text};
+  line-height: 22px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 48px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-list-item-icon,
+.phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href .phui-list-item-icon {
+  position: absolute;
+  top: 12px;
+  left: 13px;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  color: {$menu.profile.text};
+  background-size: 100%;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-list-item-href {
+  text-align: center;
+  padding: 42px 4px 14px;
+  line-height: 14px;
+  height: auto;
+  font-size: {$smallerfontsize};
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-list-item-name {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-list-item-icon,
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-list-item-href .phui-list-item-icon  {
+  top: 14px;
+  left: 32px;
+}
+
+.phui-profile-menu .phabricator-side-menu
+  .phui-list-item-disabled
+  .phui-list-item-icon {
+  color: {$menu.profile.icon.disabled};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-icon-view {
+  border-radius: 3px;
+}
+
+.device-desktop .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href:hover {
+  background-color: rgba(0,0,0,0.15);
+  color: {$menu.profile.text.selected};
+}
+
+.phui-profile-menu .phabricator-side-menu
+  .phui-list-item-selected
+  .phui-list-item-icon,
+.device-desktop .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href:hover
+  .phui-list-item-icon {
+  color: {$menu.profile.text.selected};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-list-item-selected
+  .phui-list-item-href {
+  background-color: rgba(0,0,0,0.3);
+  color: {$menu.profile.text.selected};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-list-item-selected
+  .phui-list-item-href:hover {
+  background-color: rgba(0,0,0,0.45);
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-divider {
+  margin: 4px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-motivator {
+  white-space: normal;
+  padding: 18px 15px;
+  font-size: 12px;
+  color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-motivator .phui-icon-view {
+  position: static;
+  font-size: 12px;
+  color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-error {
+  color: {$greytext};
+  font-size: {$smallerfontsize};
+  padding: 18px 15px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-segment-bar {
+  color: {$menu.profile.text};
+  font-size: {$smallerfontsize};
+  -webkit-font-smoothing: antialiased;
+  padding: 8px 12px 16px;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-segment-bar {
+    padding: 8px 8px 16px;
+}
+
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-spacer {
+  box-sizing: border-box;
+  height: {$menu.profile.item.height};
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer
+  .phui-list-item-name {
+  display: none;
+}
+
+.phui-profile-menu .phui-profile-menu-expanded
+  .phui-profile-menu-visible-when-collapsed,
+.phui-profile-menu .phui-profile-menu-collapsed
+  .phui-profile-menu-visible-when-expanded {
+  display: none;
+}
+
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer .phui-list-item-href {
+  padding: 20px 0 24px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer
+  .phui-list-item-href:hover {
+    background: transparent;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-footer .phui-list-item-href .phui-list-item-icon {
+    top: 8px;
+}
+
+.phui-profile-menu .phui-profile-menu-footer .phui-icon-circle {
+  border-color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phui-profile-menu-footer .phui-icon-circle .phui-icon-view {
+  color: {$menu.profile.text};
+}
+
+.phui-profile-menu .phui-profile-menu-footer .phui-list-item-href:hover
+  .phui-icon-circle,
+.phui-profile-menu .phui-list-item-selected.phui-profile-menu-footer
+  .phui-icon-circle {
+    border-color: {$menu.profile.text.selected};
+}
+
+.phui-profile-menu .phui-profile-menu-footer .phui-list-item-href:hover
+  .phui-icon-circle .phui-icon-view,
+.phui-profile-menu .phui-list-item-selected.phui-profile-menu-footer
+  .phui-icon-circle .phui-icon-view {
+    color: {$menu.profile.text.selected};
+}
+
+.phui-profile-menu .phui-profile-menu-footer
+  .phui-icon-circle.phui-list-item-icon {
+  font-size: 12px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
+  bottom: 0;
+  position: fixed;
+}
+
+.phui-profile-menu .phui-profile-menu-footer-1 {
+  width: {$menu.profile.width};
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-1 {
+  width: {$menu.profile.width.collapsed};
+}
+
+.phui-profile-menu .phabricator-side-menu
+  .phui-list-item-selected.phui-profile-menu-footer .phui-list-item-href {
+  background: transparent;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsing
+  .phabricator-nav-local {
+  animation: profile-menu-collapse 0.2s;
+}
+
+.phui-profile-menu .phui-profile-menu-expanding
+  .phabricator-nav-local {
+  animation: profile-menu-expand 0.2s;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsing
+  .phabricator-side-menu .phui-list-item-href {
+  animation: profile-menu-blink 0.2s;
+}
+
+.phui-profile-menu .phui-profile-menu-expanding
+  .phabricator-side-menu .phui-list-item-href {
+  animation: profile-menu-blink 0.2s;
+}
+
+@keyframes profile-menu-blink {
+  0% {
+    opacity: 1.0;
+  }
+  25% {
+    opacity: 0.0;
+  }
+  75% {
+    opacity: 0.0;
+  }
+  100% {
+    opacity: 1.0;
+  }
+}
+
+@keyframes profile-menu-collapse {
+  0% {
+    width: {$menu.profile.width};
+    max-width: {$menu.profile.width};
+  }
+  33% {
+    width: {$menu.profile.width};
+    max-width: {$menu.profile.width};
+  }
+  66% {
+    width: {$menu.profile.width.collapsed};
+    max-width: {$menu.profile.width.collapsed};
+  }
+  100% {
+    width: {$menu.profile.width.collapsed};
+    max-width: {$menu.profile.width.collapsed};
+  }
+}
+
+@keyframes profile-menu-expand {
+  0% {
+    width: {$menu.profile.width.collapsed};
+    max-width: {$menu.profile.width.collapsed};
+  }
+  33% {
+    width: {$menu.profile.width.collapsed};
+    max-width: {$menu.profile.width.collapsed};
+  }
+  66% {
+    width: {$menu.profile.width};
+    max-width: {$menu.profile.width};
+  }
+  100% {
+    width: {$menu.profile.width};
+    max-width: {$menu.profile.width};
+  }
+}
+
+!print .phui-profile-menu .phabricator-side-menu {
+  display: none;
+}

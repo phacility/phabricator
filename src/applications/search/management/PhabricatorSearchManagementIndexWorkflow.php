@@ -9,7 +9,7 @@ final class PhabricatorSearchManagementIndexWorkflow
       ->setSynopsis(pht('Build or rebuild search indexes.'))
       ->setExamples(
         "**index** D123\n".
-        "**index** --type DREV\n".
+        "**index** --type task\n".
         "**index** --all")
       ->setArguments(
         array(
@@ -19,8 +19,9 @@ final class PhabricatorSearchManagementIndexWorkflow
           ),
           array(
             'name'  => 'type',
-            'param' => 'TYPE',
-            'help'  => pht('PHID type to reindex, like "TASK" or "DREV".'),
+            'param' => 'type',
+            'help'  => pht(
+              'Object types to reindex, like "task", "commit" or "revision".'),
           ),
           array(
             'name' => 'background',
@@ -28,6 +29,13 @@ final class PhabricatorSearchManagementIndexWorkflow
               'Instead of indexing in this process, queue tasks for '.
               'the daemons. This can improve performance, but makes '.
               'it more difficult to debug search indexing.'),
+          ),
+          array(
+            'name' => 'force',
+            'short' => 'f',
+            'help' => pht(
+              'Force a complete rebuild of the entire index instead of an '.
+              'incremental update.'),
           ),
           array(
             'name'      => 'objects',
@@ -41,6 +49,7 @@ final class PhabricatorSearchManagementIndexWorkflow
 
     $is_all = $args->getArg('all');
     $is_type = $args->getArg('type');
+    $is_force = $args->getArg('force');
 
     $obj_names = $args->getArg('objects');
 
@@ -93,11 +102,14 @@ final class PhabricatorSearchManagementIndexWorkflow
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($phids));
 
+    $parameters = array(
+      'force' => $is_force,
+    );
+
     $any_success = false;
-    $indexer = new PhabricatorSearchIndexer();
     foreach ($phids as $phid) {
       try {
-        $indexer->queueDocumentForIndexing($phid);
+        PhabricatorSearchWorker::queueDocumentForIndexing($phid, $parameters);
         $any_success = true;
       } catch (Exception $ex) {
         phlog($ex);
@@ -135,20 +147,49 @@ final class PhabricatorSearchManagementIndexWorkflow
   }
 
   private function loadPHIDsByTypes($type) {
-    $indexers = id(new PhutilClassMapQuery())
-      ->setAncestorClass('PhabricatorSearchDocumentIndexer')
+    $objects = id(new PhutilClassMapQuery())
+      ->setAncestorClass('PhabricatorFulltextInterface')
       ->execute();
 
-    $phids = array();
-    foreach ($indexers as $indexer) {
-      $indexer_phid = $indexer->getIndexableObject()->generatePHID();
-      $indexer_type = phid_get_type($indexer_phid);
+    $normalized_type = phutil_utf8_strtolower($type);
 
-      if ($type && strcasecmp($indexer_type, $type)) {
-        continue;
+    $matches = array();
+    foreach ($objects as $object) {
+      $object_class = get_class($object);
+      $normalized_class = phutil_utf8_strtolower($object_class);
+
+      if (!strlen($type) ||
+          strpos($normalized_class, $normalized_type) !== false) {
+        $matches[$object_class] = $object;
       }
+    }
 
-      $iterator = $indexer->getIndexIterator();
+    if (!$matches) {
+      $all_types = array();
+      foreach ($objects as $object) {
+        $all_types[] = get_class($object);
+      }
+      sort($all_types);
+
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Type "%s" matches no indexable objects. Supported types are: %s.',
+          $type,
+          implode(', ', $all_types)));
+    }
+
+    if ((count($matches) > 1) && strlen($type)) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Type "%s" matches multiple indexable objects. Use a more '.
+          'specific string. Matching object types are: %s.',
+          $type,
+          implode(', ', array_keys($matches))));
+    }
+
+    $phids = array();
+    foreach ($matches as $match) {
+      $iterator = new LiskMigrationIterator($match);
       foreach ($iterator as $object) {
         $phids[] = $object->getPHID();
       }
@@ -156,5 +197,6 @@ final class PhabricatorSearchManagementIndexWorkflow
 
     return $phids;
   }
+
 
 }

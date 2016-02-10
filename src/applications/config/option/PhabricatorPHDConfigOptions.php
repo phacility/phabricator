@@ -11,7 +11,7 @@ final class PhabricatorPHDConfigOptions
     return pht('Options relating to PHD (daemons).');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-pied-piper-alt';
   }
 
@@ -22,12 +22,15 @@ final class PhabricatorPHDConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('phd.pid-directory', 'string', '/var/tmp/phd/pid')
+        ->setLocked(true)
         ->setDescription(
           pht('Directory that phd should use to track running daemons.')),
       $this->newOption('phd.log-directory', 'string', '/var/tmp/phd/log')
+        ->setLocked(true)
         ->setDescription(
           pht('Directory that the daemons should use to store log files.')),
       $this->newOption('phd.taskmasters', 'int', 4)
+        ->setLocked(true)
         ->setSummary(pht('Maximum taskmaster daemon pool size.'))
         ->setDescription(
           pht(
@@ -35,6 +38,7 @@ final class PhabricatorPHDConfigOptions
             'this can increase the maximum throughput of the task queue. The '.
             'pool will automatically scale down when unutilized.')),
       $this->newOption('phd.verbose', 'bool', false)
+        ->setLocked(true)
         ->setBoolOptions(
           array(
             pht('Verbose mode'),
@@ -59,6 +63,7 @@ final class PhabricatorPHDConfigOptions
             'Phabricator imports or manages. This option is new and '.
             'experimental.')),
       $this->newOption('phd.trace', 'bool', false)
+        ->setLocked(true)
         ->setBoolOptions(
           array(
             pht('Trace mode'),

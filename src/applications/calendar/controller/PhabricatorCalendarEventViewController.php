@@ -125,16 +125,14 @@ final class PhabricatorCalendarEventViewController
     if ($is_invite_pending) {
       $decline_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIcon(id(new PHUIIconView())
-          ->setIconFont('fa-times grey'))
+        ->setIcon('fa-times grey')
         ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
         ->setWorkflow(true)
         ->setText(pht('Decline'));
 
       $accept_button = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIcon(id(new PHUIIconView())
-          ->setIconFont('fa-check green'))
+        ->setIcon('fa-check green')
         ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
         ->setWorkflow(true)
         ->setText(pht('Accept'));
@@ -152,7 +150,6 @@ final class PhabricatorCalendarEventViewController
     $is_attending = $event->getIsUserAttending($viewer->getPHID());
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI('event/'.$id.'/'))
       ->setUser($viewer)
       ->setObject($event);
 
@@ -360,11 +357,10 @@ final class PhabricatorCalendarEventViewController
 
     $properties->invokeWillRenderEvent();
 
-    $icon_display = PhabricatorCalendarIcon::renderIconForChooser(
-      $event->getIcon());
     $properties->addProperty(
       pht('Icon'),
-      $icon_display);
+      id(new PhabricatorCalendarIconSet())
+        ->getIconLabel($event->getIcon()));
 
     if (strlen($event->getDescription())) {
       $description = PhabricatorMarkupEngine::renderOneObject(

@@ -11,7 +11,7 @@ final class PhabricatorRepositoryConfigOptions
     return pht('Configure repositories.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-hdd-o';
   }
 

@@ -14,7 +14,7 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return pht('Review Mocks and Design');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-camera-retro';
   }
 
@@ -44,7 +44,9 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
       '/pholio/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PholioMockListController',
         'new/'                  => 'PholioMockEditController',
+        'create/'               => 'PholioMockEditController',
         'edit/(?P<id>\d+)/'     => 'PholioMockEditController',
+        'archive/(?P<id>\d+)/'  => 'PholioMockArchiveController',
         'comment/(?P<id>\d+)/'  => 'PholioMockCommentController',
         'inline/' => array(
           '(?:(?P<id>\d+)/)?' => 'PholioInlineController',
@@ -63,7 +65,7 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     $item = id(new PHUIListItemView())
       ->setName(pht('Pholio Mock'))
       ->setIcon('fa-picture-o')
-      ->setHref($this->getBaseURI().'new/');
+      ->setHref($this->getBaseURI().'create/');
     $items[] = $item;
 
     return $items;

@@ -18,7 +18,7 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-clock-o';
   }
 
@@ -48,17 +48,18 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
 
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
+    $limit = self::MAX_STATUS_ITEMS;
 
     // Show number of objects that are currently
     // being tracked for a user.
 
-    $count = PhrequentUserTimeQuery::getUserTotalObjectsTracked(
-      $user,
-      self::MAX_STATUS_ITEMS);
-    $count_str = self::formatStatusCount(
-      $count,
-      '%s Objects Tracked',
-      '%d Object(s) Tracked');
+    $count = PhrequentUserTimeQuery::getUserTotalObjectsTracked($user, $limit);
+    if ($count >= $limit) {
+      $count_str = pht('%s+ Object(s) Tracked', new PhutilNumber($limit - 1));
+    } else {
+      $count_str = pht('%s Object(s) Tracked', new PhutilNumber($count));
+    }
+
     $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)

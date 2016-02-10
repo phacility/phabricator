@@ -26,4 +26,13 @@ final class PhabricatorSelectEditField
     return new AphrontSelectHTTPParameterType();
   }
 
+  protected function newCommentAction() {
+    return id(new PhabricatorEditEngineSelectCommentAction())
+      ->setOptions($this->getOptions());
+  }
+
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

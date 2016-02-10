@@ -39,28 +39,26 @@ final class DiffusionPushLogListView extends AphrontView {
 
     $rows = array();
     foreach ($logs as $log) {
+      $repository = $log->getRepository();
 
       // Reveal this if it's valid and the user can edit the repository.
-      $remote_addr = '-';
+      $remote_address = '-';
       if (isset($editable_repos[$log->getRepositoryPHID()])) {
-        $remote_long = $log->getPushEvent()->getRemoteAddress();
-        if ($remote_long) {
-          $remote_addr = long2ip($remote_long);
-        }
+        $remote_address = $log->getPushEvent()->getRemoteAddress();
       }
 
       $event_id = $log->getPushEvent()->getID();
 
-      $callsign = $log->getRepository()->getCallsign();
       $old_ref_link = null;
       if ($log->getRefOld() != DiffusionCommitHookEngine::EMPTY_HASH) {
         $old_ref_link = phutil_tag(
           'a',
           array(
-            'href' => '/r'.$callsign.$log->getRefOld(),
+            'href' => $repository->getCommitURI($log->getRefOld()),
           ),
           $log->getRefOldShort());
       }
+
       $rows[] = array(
         phutil_tag(
           'a',
@@ -71,11 +69,11 @@ final class DiffusionPushLogListView extends AphrontView {
         phutil_tag(
           'a',
           array(
-            'href' => '/diffusion/'.$callsign.'/',
+            'href' => $repository->getURI(),
           ),
-          $callsign),
+          $repository->getDisplayName()),
         $handles[$log->getPusherPHID()]->renderLink(),
-        $remote_addr,
+        $remote_address,
         $log->getPushEvent()->getRemoteProtocol(),
         $log->getRefType(),
         $log->getRefName(),
@@ -83,7 +81,7 @@ final class DiffusionPushLogListView extends AphrontView {
         phutil_tag(
           'a',
           array(
-            'href' => '/r'.$callsign.$log->getRefNew(),
+            'href' => $repository->getCommitURI($log->getRefNew()),
           ),
           $log->getRefNewShort()),
 

@@ -47,19 +47,30 @@ final class PhabricatorPasteSearchEngine
       id(new PhabricatorUsersSearchField())
         ->setAliases(array('authors'))
         ->setKey('authorPHIDs')
-        ->setLabel(pht('Authors')),
+        ->setConduitKey('authors')
+        ->setLabel(pht('Authors'))
+        ->setDescription(
+          pht('Search for pastes with specific authors.')),
       id(new PhabricatorSearchStringListField())
         ->setKey('languages')
-        ->setLabel(pht('Languages')),
+        ->setLabel(pht('Languages'))
+        ->setDescription(
+          pht('Search for pastes highlighted in specific languages.')),
       id(new PhabricatorSearchDateField())
         ->setKey('createdStart')
-        ->setLabel(pht('Created After')),
+        ->setLabel(pht('Created After'))
+        ->setDescription(
+          pht('Search for pastes created after a given time.')),
       id(new PhabricatorSearchDateField())
         ->setKey('createdEnd')
-        ->setLabel(pht('Created Before')),
+        ->setLabel(pht('Created Before'))
+        ->setDescription(
+          pht('Search for pastes created before a given time.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Status'))
+        ->setDescription(
+          pht('Search for archived or active pastes.'))
         ->setOptions(
           id(new PhabricatorPaste())
             ->getStatusNameMap()),
@@ -190,5 +201,24 @@ final class PhabricatorPasteSearchEngine
     $result->setNoDataString(pht('No pastes found.'));
 
     return $result;
+  }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Paste'))
+      ->setHref('/paste/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Store, share, and embed snippets of code.'))
+      ->addAction($create_button);
+
+      return $view;
   }
 }

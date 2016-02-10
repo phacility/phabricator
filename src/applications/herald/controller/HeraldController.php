@@ -12,30 +12,25 @@ abstract class HeraldController extends PhabricatorController {
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Create Herald Rule'))
-        ->setHref($this->getApplicationURI('new/'))
+        ->setHref($this->getApplicationURI('create/'))
         ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }
 
-  public function buildSideNavView($for_app = false) {
-    $user = $this->getRequest()->getUser();
+  public function buildSideNavView() {
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    if ($for_app) {
-      $nav->addFilter('new', pht('Create Rule'));
-    }
-
     id(new HeraldRuleSearchEngine())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
 
-    $nav
-      ->addLabel(pht('Utilities'))
-      ->addFilter('test', pht('Test Console'))
-      ->addFilter('transcript', pht('Transcripts'));
+    $nav->addLabel(pht('Utilities'))
+        ->addFilter('test', pht('Test Console'))
+        ->addFilter('transcript', pht('Transcripts'));
 
     $nav->selectFilter(null);
 

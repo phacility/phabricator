@@ -191,4 +191,55 @@ final class PhabricatorStandardCustomFieldDate
     }
   }
 
+  public function getApplicationTransactionTitleForFeed(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $viewer = $this->getViewer();
+
+    $author_phid = $xaction->getAuthorPHID();
+    $object_phid = $xaction->getObjectPHID();
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    if (!$old) {
+      return pht(
+        '%s set %s to %s on %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        phabricator_datetime($new, $viewer),
+        $xaction->renderHandleLink($object_phid));
+    } else if (!$new) {
+      return pht(
+        '%s removed %s on %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $xaction->renderHandleLink($object_phid));
+    } else {
+      return pht(
+        '%s changed %s from %s to %s on %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        phabricator_datetime($old, $viewer),
+        phabricator_datetime($new, $viewer),
+        $xaction->renderHandleLink($object_phid));
+    }
+  }
+
+
+  public function shouldAppearInConduitTransactions() {
+    // TODO: Dates are complicated and we don't yet support handling them from
+    // Conduit.
+    return false;
+  }
+
+  protected function newConduitSearchParameterType() {
+    // TODO: Build a new "pair<epoch|null, epoch|null>" type or similar.
+    return null;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitEpochParameterType();
+  }
+
 }

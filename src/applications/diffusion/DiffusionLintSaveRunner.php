@@ -71,7 +71,7 @@ final class DiffusionLintSaveRunner extends Phobject {
     } else if ($uuid) {
       $repository_query->withUUIDs(array($uuid));
     } else if ($remote_uri) {
-      $repository_query->withRemoteURIs(array($remote_uri));
+      $repository_query->withURIs(array($remote_uri));
     }
 
     $repository = $repository_query->executeOne();
@@ -257,8 +257,10 @@ final class DiffusionLintSaveRunner extends Phobject {
         'path' => $path,
         'commit' => $this->lintCommit,
       ));
-      $query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
-        ->setNeedsBlame(true);
+
+      // TODO: Restore blame information / generally fix this workflow.
+
+      $query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest);
       $queries[$path] = $query;
       $futures[$path] = $query->getFileContentFuture();
     }

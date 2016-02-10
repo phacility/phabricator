@@ -74,8 +74,7 @@ final class HarbormasterBuildableViewController
 
     $list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($buildable)
-      ->setObjectURI($buildable->getMonogram());
+      ->setObject($buildable);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -312,7 +311,7 @@ final class HarbormasterBuildableViewController
           id(new PHUIButtonView())
             ->setTag('a')
             ->setHref($lint_href)
-            ->setIconFont('fa-list-ul')
+            ->setIcon('fa-list-ul')
             ->setText('View All'));
 
       $lint = id(new PHUIObjectBoxView())
@@ -336,7 +335,7 @@ final class HarbormasterBuildableViewController
           id(new PHUIButtonView())
             ->setTag('a')
             ->setHref($unit_href)
-            ->setIconFont('fa-list-ul')
+            ->setIcon('fa-list-ul')
             ->setText('View All'));
 
       $unit = id(new PHUIObjectBoxView())

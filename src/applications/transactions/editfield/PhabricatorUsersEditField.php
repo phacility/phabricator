@@ -11,4 +11,12 @@ final class PhabricatorUsersEditField
     return new AphrontUserListHTTPParameterType();
   }
 
+  protected function newConduitParameterType() {
+    if ($this->getIsSingleValue()) {
+      return new ConduitUserParameterType();
+    } else {
+      return new ConduitUserListParameterType();
+    }
+  }
+
 }

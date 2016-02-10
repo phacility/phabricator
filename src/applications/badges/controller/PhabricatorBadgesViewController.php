@@ -24,7 +24,7 @@ final class PhabricatorBadgesViewController
     $crumbs->addTextCrumb($badge->getName());
     $title = $badge->getName();
 
-    if ($badge->isClosed()) {
+    if ($badge->isArchived()) {
       $status_icon = 'fa-ban';
       $status_color = 'dark';
     } else {
@@ -64,17 +64,16 @@ final class PhabricatorBadgesViewController
 
     $add_comment = $this->buildCommentForm($badge);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $recipient_list,
-        $timeline,
-        $add_comment,
-      ),
-      array(
-        'title' => $title,
-        'pageObjects' => array($badge->getPHID()),
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($badge->getPHID()))
+      ->appendChild(
+        array(
+          $box,
+          $recipient_list,
+          $timeline,
+          $add_comment,
       ));
   }
 
@@ -86,7 +85,6 @@ final class PhabricatorBadgesViewController
       ->setObject($badge);
 
     $quality = idx($badge->getQualityNameMap(), $badge->getQuality());
-    $icon = idx($badge->getIconNameMap(), $badge->getIcon());
 
     $view->addProperty(
       pht('Quality'),
@@ -94,7 +92,8 @@ final class PhabricatorBadgesViewController
 
     $view->addProperty(
       pht('Icon'),
-      $icon);
+      id(new PhabricatorBadgesIconSet())
+        ->getIconLabel($badge->getIcon()));
 
     $view->addProperty(
       pht('Flavor'),
@@ -139,8 +138,25 @@ final class PhabricatorBadgesViewController
         ->setName(pht('Edit Badge'))
         ->setIcon('fa-pencil')
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit)
         ->setHref($this->getApplicationURI("/edit/{$id}/")));
+
+    if ($badge->isArchived()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Activate Badge'))
+          ->setIcon('fa-check')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit)
+          ->setHref($this->getApplicationURI("/archive/{$id}/")));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Badge'))
+          ->setIcon('fa-ban')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit)
+          ->setHref($this->getApplicationURI("/archive/{$id}/")));
+    }
 
     $view->addAction(
       id(new PhabricatorActionView())

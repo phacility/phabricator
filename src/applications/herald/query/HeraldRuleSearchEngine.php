@@ -173,12 +173,12 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($rules as $rule) {
-      $id = $rule->getID();
+      $monogram = $rule->getMonogram();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName("H{$id}")
+        ->setObjectName($monogram)
         ->setHeader($rule->getName())
-        ->setHref($this->getApplicationURI("rule/{$id}/"));
+        ->setHref("/{$monogram}");
 
       if ($rule->isPersonalRule()) {
         $item->addIcon('fa-user', pht('Personal Rule'));
@@ -209,6 +209,26 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
 
     return $result;
 
+  }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create Herald Rule'))
+      ->setHref('/herald/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('A flexible rules engine that can notify and act on '.
+            'other actions such as tasks, diffs, and commits.'))
+      ->addAction($create_button);
+
+      return $view;
   }
 
 }

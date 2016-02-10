@@ -14,7 +14,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return pht('Store and Share Files');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-file';
   }
 
@@ -70,7 +70,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return array(
       '/F(?P<id>[1-9]\d*)' => 'PhabricatorFileInfoController',
       '/file/' => array(
-        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorFileListController',
+        '(query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorFileListController',
         'upload/' => 'PhabricatorFileUploadController',
         'dropupload/' => 'PhabricatorFileDropUploadController',
         'compose/' => 'PhabricatorFileComposeController',
@@ -83,6 +83,9 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
           'PhabricatorFileTransformListController',
         'uploaddialog/' => 'PhabricatorFileUploadDialogController',
         'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
+        'iconset/(?P<key>[^/]+)/' => array(
+          'select/' => 'PhabricatorFileIconSetSelectController',
+        ),
       ) + $this->getResourceSubroutes(),
     );
   }

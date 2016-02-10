@@ -111,4 +111,24 @@ final class PassphraseCredentialSearchEngine
     return $result;
   }
 
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Credential'))
+      ->setHref('/passphrase/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Credential management for re-use in other areas of Phabricator '.
+            'or general storage of shared secrets.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

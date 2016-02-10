@@ -10,7 +10,6 @@ final class PhabricatorActionView extends AphrontView {
   private $workflow;
   private $renderAsForm;
   private $download;
-  private $objectURI;
   private $sigils = array();
   private $metadata;
   private $selected;
@@ -34,15 +33,6 @@ final class PhabricatorActionView extends AphrontView {
     return $this->metadata;
   }
 
-  public function setObjectURI($object_uri) {
-    $this->objectURI = $object_uri;
-    return $this;
-  }
-
-  public function getObjectURI() {
-    return $this->objectURI;
-  }
-
   public function setDownload($download) {
     $this->download = $download;
     return $this;
@@ -62,19 +52,7 @@ final class PhabricatorActionView extends AphrontView {
     return $this;
   }
 
-  /**
-   * If the user is not logged in and the action is relatively complicated,
-   * give them a generic login link that will re-direct to the page they're
-   * viewing.
-   */
   public function getHref() {
-    if (($this->workflow || $this->renderAsForm) && !$this->download) {
-      if (!$this->user || !$this->user->isLoggedIn()) {
-        return id(new PhutilURI('/auth/start/'))
-          ->setQueryParam('next', (string)$this->getObjectURI());
-      }
-    }
-
     return $this->href;
   }
 
@@ -127,7 +105,7 @@ final class PhabricatorActionView extends AphrontView {
       }
       $icon = id(new PHUIIconView())
         ->addClass('phabricator-action-view-icon')
-        ->setIconFont($this->icon.$color);
+        ->setIcon($this->icon.$color);
     }
 
     if ($this->href) {

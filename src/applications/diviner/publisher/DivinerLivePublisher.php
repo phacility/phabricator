@@ -40,8 +40,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
       $conn_w->saveTransaction();
       $this->book = $book;
 
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing($book->getPHID());
+      PhabricatorSearchWorker::queueDocumentForIndexing($book->getPHID());
     }
 
     return $this->book;
@@ -147,8 +146,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
 
       $symbol->save();
 
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing($symbol->getPHID());
+      PhabricatorSearchWorker::queueDocumentForIndexing($symbol->getPHID());
 
       // TODO: We probably need a finer-grained sense of what "documentable"
       // atoms are. Neither files nor methods are currently considered

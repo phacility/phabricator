@@ -58,6 +58,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->setMaximumBytes(255)
       ->truncateString((string)$author));
 
+    $data->setCommitDetail('authorEpoch', $ref->getAuthorEpoch());
     $data->setCommitDetail('authorName', $ref->getAuthorName());
     $data->setCommitDetail('authorEmail', $ref->getAuthorEmail());
 
@@ -216,47 +217,24 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
               $low_level_query->getRevisionMatchData());
           }
 
-          $diff = $this->generateFinalDiff($revision, $acting_as_phid);
-
-          $vs_diff = $this->loadChangedByCommit($revision, $diff);
-          $changed_uri = null;
-          if ($vs_diff) {
-            $data->setCommitDetail('vsDiff', $vs_diff->getID());
-
-            $changed_uri = PhabricatorEnv::getProductionURI(
-              '/D'.$revision->getID().
-              '?vs='.$vs_diff->getID().
-              '&id='.$diff->getID().
-              '#toc');
-          }
-
-          $xactions = array();
-          $xactions[] = id(new DifferentialTransaction())
-            ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
-            ->setIgnoreOnNoEffect(true)
-            ->setNewValue($diff->getPHID())
-            ->setMetadataValue('isCommitUpdate', true);
-          $xactions[] = $commit_close_xaction;
+          $extraction_engine = id(new DifferentialDiffExtractionEngine())
+            ->setViewer($actor)
+            ->setAuthorPHID($acting_as_phid);
 
           $content_source = PhabricatorContentSource::newForSource(
             PhabricatorContentSource::SOURCE_DAEMON,
             array());
 
-          $editor = id(new DifferentialTransactionEditor())
-            ->setActor($actor)
-            ->setActingAsPHID($acting_as_phid)
-            ->setContinueOnMissingFields(true)
-            ->setContentSource($content_source)
-            ->setChangedPriorToCommitURI($changed_uri)
-            ->setIsCloseByCommit(true);
+          $update_data = $extraction_engine->updateRevisionWithCommit(
+            $revision,
+            $commit,
+            array(
+              $commit_close_xaction,
+            ),
+            $content_source);
 
-          try {
-            $editor->applyTransactions($revision, $xactions);
-          } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-            // NOTE: We've marked transactions other than the CLOSE transaction
-            // as ignored when they don't have an effect, so this means that we
-            // lost a race to close the revision. That's perfectly fine, we can
-            // just continue normally.
+          foreach ($update_data as $key => $value) {
+            $data->setCommitDetail($key, $value);
           }
         }
       }
@@ -275,172 +253,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $commit->writeImportStatusFlag(
       PhabricatorRepositoryCommit::IMPORTED_MESSAGE);
-  }
-
-  private function generateFinalDiff(
-    DifferentialRevision $revision,
-    $actor_phid) {
-
-    $viewer = PhabricatorUser::getOmnipotentUser();
-
-    $drequest = DiffusionRequest::newFromDictionary(array(
-      'user' => $viewer,
-      'repository' => $this->repository,
-    ));
-
-    $raw_diff = DiffusionQuery::callConduitWithDiffusionRequest(
-      $viewer,
-      $drequest,
-      'diffusion.rawdiffquery',
-      array(
-        'commit' => $this->commit->getCommitIdentifier(),
-      ));
-
-    // TODO: Support adds, deletes and moves under SVN.
-    if (strlen($raw_diff)) {
-      $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
-    } else {
-      // This is an empty diff, maybe made with `git commit --allow-empty`.
-      // NOTE: These diffs have the same tree hash as their ancestors, so
-      // they may attach to revisions in an unexpected way. Just let this
-      // happen for now, although it might make sense to special case it
-      // eventually.
-      $changes = array();
-    }
-
-    $diff = DifferentialDiff::newFromRawChanges($viewer, $changes)
-      ->setRepositoryPHID($this->repository->getPHID())
-      ->setAuthorPHID($actor_phid)
-      ->setCreationMethod('commit')
-      ->setSourceControlSystem($this->repository->getVersionControlSystem())
-      ->setLintStatus(DifferentialLintStatus::LINT_AUTO_SKIP)
-      ->setUnitStatus(DifferentialUnitStatus::UNIT_AUTO_SKIP)
-      ->setDateCreated($this->commit->getEpoch())
-      ->setDescription(
-        pht(
-          'Commit %s',
-          'r'.$this->repository->getCallsign().
-          $this->commit->getCommitIdentifier()));
-
-    $parents = DiffusionQuery::callConduitWithDiffusionRequest(
-      $viewer,
-      $drequest,
-      'diffusion.commitparentsquery',
-      array(
-        'commit' => $this->commit->getCommitIdentifier(),
-      ));
-    if ($parents) {
-      $diff->setSourceControlBaseRevision(head($parents));
-    }
-
-    // TODO: Attach binary files.
-
-    return $diff->save();
-  }
-
-  private function loadChangedByCommit(
-    DifferentialRevision $revision,
-    DifferentialDiff $diff) {
-
-    $repository = $this->repository;
-
-    $vs_diff = id(new DifferentialDiffQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withRevisionIDs(array($revision->getID()))
-      ->needChangesets(true)
-      ->setLimit(1)
-      ->executeOne();
-    if (!$vs_diff) {
-      return null;
-    }
-
-    if ($vs_diff->getCreationMethod() == 'commit') {
-      return null;
-    }
-
-    $vs_changesets = array();
-    foreach ($vs_diff->getChangesets() as $changeset) {
-      $path = $changeset->getAbsoluteRepositoryPath($repository, $vs_diff);
-      $path = ltrim($path, '/');
-      $vs_changesets[$path] = $changeset;
-    }
-
-    $changesets = array();
-    foreach ($diff->getChangesets() as $changeset) {
-      $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
-      $path = ltrim($path, '/');
-      $changesets[$path] = $changeset;
-    }
-
-    if (array_fill_keys(array_keys($changesets), true) !=
-        array_fill_keys(array_keys($vs_changesets), true)) {
-      return $vs_diff;
-    }
-
-    $file_phids = array();
-    foreach ($vs_changesets as $changeset) {
-      $metadata = $changeset->getMetadata();
-      $file_phid = idx($metadata, 'new:binary-phid');
-      if ($file_phid) {
-        $file_phids[$file_phid] = $file_phid;
-      }
-    }
-
-    $files = array();
-    if ($file_phids) {
-      $files = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs($file_phids)
-        ->execute();
-      $files = mpull($files, null, 'getPHID');
-    }
-
-    foreach ($changesets as $path => $changeset) {
-      $vs_changeset = $vs_changesets[$path];
-
-      $file_phid = idx($vs_changeset->getMetadata(), 'new:binary-phid');
-      if ($file_phid) {
-        if (!isset($files[$file_phid])) {
-          return $vs_diff;
-        }
-        $drequest = DiffusionRequest::newFromDictionary(array(
-          'user' => PhabricatorUser::getOmnipotentUser(),
-          'repository' => $this->repository,
-          'commit' => $this->commit->getCommitIdentifier(),
-          'path' => $path,
-        ));
-        $corpus = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->loadFileContent()
-          ->getCorpus();
-        if ($files[$file_phid]->loadFileData() != $corpus) {
-          return $vs_diff;
-        }
-      } else {
-        $context = implode("\n", $changeset->makeChangesWithContext());
-        $vs_context = implode("\n", $vs_changeset->makeChangesWithContext());
-
-        // We couldn't just compare $context and $vs_context because following
-        // diffs will be considered different:
-        //
-        //   -(empty line)
-        //   -echo 'test';
-        //    (empty line)
-        //
-        //    (empty line)
-        //   -echo "test";
-        //   -(empty line)
-
-        $hunk = id(new DifferentialModernHunk())->setChanges($context);
-        $vs_hunk = id(new DifferentialModernHunk())->setChanges($vs_context);
-        if ($hunk->makeOldFile() != $vs_hunk->makeOldFile() ||
-            $hunk->makeNewFile() != $vs_hunk->makeNewFile()) {
-          return $vs_diff;
-        }
-      }
-    }
-
-    return null;
   }
 
   private function resolveUserPHID(

@@ -40,6 +40,7 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
     if (!$package_ids) {
       return array();
     }
+
     $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
       'packageID IN (%Ls)',
       $package_ids);
@@ -50,20 +51,19 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
       PhabricatorPeopleUserPHIDType::TYPECONST,
       array());
 
-    $users_in_project_phids = array();
-    $project_phids = idx(
-      $all_phids,
-      PhabricatorProjectProjectPHIDType::TYPECONST);
-    if ($project_phids) {
-      $query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs($project_phids)
-        ->withEdgeTypes(array(
-          PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
-        ));
-      $query->execute();
-      $users_in_project_phids = $query->getDestinationPHIDs();
+    if ($user_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withMemberPHIDs($user_phids)
+        ->withIsMilestone(false)
+        ->execute();
+      $project_phids = mpull($projects, 'getPHID');
+    } else {
+      $project_phids = array();
     }
 
-    return array_unique(array_merge($users_in_project_phids, $user_phids));
+    $all_phids = array_fuse($user_phids) + array_fuse($project_phids);
+
+    return array_values($all_phids);
   }
 }

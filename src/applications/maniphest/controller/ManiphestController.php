@@ -6,21 +6,17 @@ abstract class ManiphestController extends PhabricatorController {
     return $this->buildSideNavView(true)->getMenu();
   }
 
-  public function buildSideNavView($for_app = false) {
-    $user = $this->getRequest()->getUser();
+  public function buildSideNavView() {
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    if ($for_app) {
-      $nav->addFilter('task/create/', pht('Create Task'));
-    }
-
     id(new ManiphestTaskSearchEngine())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
 
-    if ($user->isLoggedIn()) {
+    if ($viewer->isLoggedIn()) {
       // For now, don't give logged-out users access to reports.
       $nav->addLabel(pht('Reports'));
       $nav->addFilter('report', pht('Reports'));
@@ -34,16 +30,14 @@ abstract class ManiphestController extends PhabricatorController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Task'))
-        ->setHref($this->getApplicationURI('task/create/'))
-        ->setIcon('fa-plus-square'));
+    id(new ManiphestEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }
 
-  protected function renderSingleTask(ManiphestTask $task) {
+  public function renderSingleTask(ManiphestTask $task) {
     $request = $this->getRequest();
     $user = $request->getUser();
 

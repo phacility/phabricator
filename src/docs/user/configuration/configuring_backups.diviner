@@ -3,7 +3,9 @@
 
 Advice for backing up Phabricator, or migrating from one machine to another.
 
-= Overview =
+
+Overview
+========
 
 Phabricator does not currently have a comprehensive backup system, but creating
 backups is not particularly difficult and Phabricator does have a few basic
@@ -11,6 +13,7 @@ tools which can help you set up a reasonable process. In particular, the things
 which needs to be backed up are:
 
   - the MySQL databases;
+  - hosted repositories;
   - uploaded files; and
   - your Phabricator configuration files.
 
@@ -21,7 +24,9 @@ same steps you would if you were creating a backup and then restoring it, you
 will just backup the old machine and then restore the data onto the new
 machine.
 
-= Backup: MySQL Databases =
+
+Backup: MySQL Databases
+=======================
 
 Most of Phabricator's data is stored in MySQL, and it's the most important thing
 to back up. You can run `bin/storage dump` to get a dump of all the MySQL
@@ -36,14 +41,35 @@ gzip prior to storage. For example:
 Then store the backup somewhere safe, like in a box buried under an old tree
 stump. No one will ever think to look for it there.
 
-= Restore: MySQL =
+Restore: MySQL
+==============
 
 To restore a MySQL dump, just pipe it to `mysql` on a clean host. (You may need
 to uncompress it first, if you compressed it prior to storage.)
 
   $ gunzip -c backup.sql.gz | mysql
 
-= Backup: Uploaded Files =
+
+Backup: Hosted Repositories
+===========================
+
+If you host repositories in Phabricator, you should back them up. You can use
+`bin/repository list-paths` to show the local paths on disk for each
+repository. To back them up, copy them elsewhere.
+
+You can also just clone them and keep the clones up to date, or use
+{nav Add Mirror} to have the mirror somewhere automatically.
+
+
+Restore: Hosted Repositories
+============================
+
+To restore hosted repositories, copy them back into the correct locations
+as shown by `bin/repository list-paths`.
+
+
+Backup: Uploaded Files
+======================
 
 Uploaded files may be stored in several different locations. The backup
 procedure depends on where files are stored:
@@ -65,11 +91,15 @@ setting).
 For more information about configuring how files are stored, see
 @{article:Configuring File Storage}.
 
-= Restore: Uploaded Files =
+
+Restore: Uploaded Files
+=======================
 
 To restore a backup of local disk storage, just copy the backup into place.
 
-= Backup: Configuration Files =
+
+Backup: Configuration Files
+===========================
 
 You should also backup your configuration files, and any scripts you use to
 deploy or administrate Phabricator (like a customized upgrade script). The best
@@ -85,12 +115,15 @@ creates:
 This file contains all of the configuration settings that have been adjusted
 by using `bin/config set <key> <value>`.
 
-= Restore: Configuration Files =
+
+Restore: Configuration Files
+============================
 
 To restore configuration files, just copy them into the right locations. Copy
 your backup of `local.json` to `phabricator/conf/local/local.json`.
 
-= Security =
+Security
+========
 
 MySQL dumps have no builtin encryption and most data in Phabricator is stored in
 a raw, accessible form, so giving a user access to backups is a lot like giving
@@ -105,7 +138,9 @@ Some of this information is durable, so disclosure of even a very old backup may
 present a risk. If you restrict access to the Phabricator host or database, you
 should also restrict access to the backups.
 
-= Next Steps =
+
+Next Steps
+==========
 
 Continue by:
 

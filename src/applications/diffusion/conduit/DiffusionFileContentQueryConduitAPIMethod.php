@@ -19,7 +19,6 @@ final class DiffusionFileContentQueryConduitAPIMethod
     return array(
       'path' => 'required string',
       'commit' => 'required string',
-      'needsBlame' => 'optional bool',
       'timeout' => 'optional int',
       'byteLimit' => 'optional int',
     );
@@ -27,12 +26,8 @@ final class DiffusionFileContentQueryConduitAPIMethod
 
   protected function getResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
-    $needs_blame = $request->getValue('needsBlame');
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $drequest);
-    $file_query
-      ->setViewer($request->getUser())
-      ->setNeedsBlame($needs_blame);
+
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest);
 
     $timeout = $request->getValue('timeout');
     if ($timeout) {
@@ -44,20 +39,28 @@ final class DiffusionFileContentQueryConduitAPIMethod
       $file_query->setByteLimit($byte_limit);
     }
 
-    $file_content = $file_query->loadFileContent();
+    $file = $file_query->execute();
 
-    if ($needs_blame) {
-      list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
-    } else {
-      $text_list = $rev_list = $blame_dict = array();
+    $too_slow = (bool)$file_query->getExceededTimeLimit();
+    $too_huge = (bool)$file_query->getExceededByteLimit();
+
+    $file_phid = null;
+    if (!$too_slow && !$too_huge) {
+      $repository = $drequest->getRepository();
+      $repository_phid = $repository->getPHID();
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $file->attachToObject($repository_phid);
+      unset($unguarded);
+
+      $file_phid = $file->getPHID();
     }
 
-    $file_content
-      ->setBlameDict($blame_dict)
-      ->setRevList($rev_list)
-      ->setTextList($text_list);
-
-    return $file_content->toDictionary();
+    return array(
+      'tooSlow' => $too_slow,
+      'tooHuge' => $too_huge,
+      'filePHID' => $file_phid,
+    );
   }
 
 }

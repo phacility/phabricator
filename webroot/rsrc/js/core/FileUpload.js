@@ -23,6 +23,7 @@ JX.install('PhabricatorFileUpload', {
     URI: null,
     status: null,
     markup: null,
+    targetNode: null,
     error: null
   },
 

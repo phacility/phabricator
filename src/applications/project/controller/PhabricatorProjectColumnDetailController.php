@@ -22,6 +22,8 @@ final class PhabricatorProjectColumnDetailController
     }
     $this->setProject($project);
 
+    $project_id = $project->getID();
+
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
@@ -45,19 +47,25 @@ final class PhabricatorProjectColumnDetailController
     $actions = $this->buildActionView($column);
     $properties = $this->buildPropertyView($column, $actions);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Workboard'), "/project/board/{$project_id}/");
+    $crumbs->addTextCrumb(pht('Column: %s', $title));
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $nav = $this->buildIconNavView($project);
-    $nav->appendChild($box);
-    $nav->appendChild($timeline);
+    $nav = $this->getProfileMenu();
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setNavigation($nav)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
+          $timeline,
+        ));
   }
 
   private function buildHeaderView(PhabricatorProjectColumn $column) {
@@ -83,7 +91,6 @@ final class PhabricatorProjectColumnDetailController
     $base_uri = '/board/'.$project_id.'/';
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI($base_uri.'column/'.$id.'/'))
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

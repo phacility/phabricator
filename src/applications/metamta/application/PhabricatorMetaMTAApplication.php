@@ -10,7 +10,7 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
     return '/mail/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-send';
   }
 

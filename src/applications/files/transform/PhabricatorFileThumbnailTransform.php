@@ -7,6 +7,7 @@ final class PhabricatorFileThumbnailTransform
   const TRANSFORM_PINBOARD = 'pinboard';
   const TRANSFORM_THUMBGRID = 'thumbgrid';
   const TRANSFORM_PREVIEW = 'preview';
+  const TRANSFORM_WORKCARD = 'workcard';
 
   private $name;
   private $key;
@@ -57,9 +58,9 @@ final class PhabricatorFileThumbnailTransform
   public function generateTransforms() {
     return array(
       id(new PhabricatorFileThumbnailTransform())
-        ->setName(pht("Profile (100px \xC3\x97 100px)"))
+        ->setName(pht("Profile (200px \xC3\x97 200px)"))
         ->setKey(self::TRANSFORM_PROFILE)
-        ->setDimensions(100, 100)
+        ->setDimensions(200, 200)
         ->setScaleUp(true),
       id(new PhabricatorFileThumbnailTransform())
         ->setName(pht("Pinboard (280px \xC3\x97 210px)"))
@@ -73,6 +74,11 @@ final class PhabricatorFileThumbnailTransform
         ->setName(pht('Preview (220px)'))
         ->setKey(self::TRANSFORM_PREVIEW)
         ->setDimensions(220, null),
+      id(new self())
+        ->setName(pht('Workcard (526px)'))
+        ->setKey(self::TRANSFORM_WORKCARD)
+        ->setScaleUp(true)
+        ->setDimensions(526, null),
     );
   }
 

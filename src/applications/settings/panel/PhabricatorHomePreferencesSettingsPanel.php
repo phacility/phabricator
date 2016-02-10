@@ -140,7 +140,7 @@ final class PhabricatorHomePreferencesSettingsPanel
         continue;
       }
 
-      $icon = $application->getFontIcon();
+      $icon = $application->getIcon();
       if (!$icon) {
         $icon = 'application';
       }
@@ -182,9 +182,7 @@ final class PhabricatorHomePreferencesSettingsPanel
           ->setText(pht('Pin Application'))
           ->setHref($this->getPanelURI().'?add=true')
           ->setWorkflow(true)
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-thumb-tack')));
+          ->setIcon('fa-thumb-tack'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)

@@ -14,7 +14,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
     return pht('Accounts and Billing');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-diamond';
   }
 

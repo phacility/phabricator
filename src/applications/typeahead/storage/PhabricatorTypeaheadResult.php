@@ -16,6 +16,7 @@ final class PhabricatorTypeaheadResult extends Phobject {
   private $closed;
   private $tokenType;
   private $unique;
+  private $autocomplete;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -114,6 +115,15 @@ final class PhabricatorTypeaheadResult extends Phobject {
     return $this->color;
   }
 
+  public function setAutocomplete($autocomplete) {
+    $this->autocomplete = $autocomplete;
+    return $this;
+  }
+
+  public function getAutocomplete() {
+    return $this->autocomplete;
+  }
+
   public function getSortKey() {
     // Put unique results (special parameter functions) ahead of other
     // results.
@@ -142,6 +152,7 @@ final class PhabricatorTypeaheadResult extends Phobject {
       $this->color,
       $this->tokenType,
       $this->unique ? 1 : null,
+      $this->autocomplete,
     );
     while (end($data) === null) {
       array_pop($data);

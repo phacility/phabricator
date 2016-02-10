@@ -201,7 +201,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
     $is_binary = ($this->getUTF8Charset() == 'binary');
     $matches = null;
-    if (preg_match('/^(fulltext|sort|text)(\d+)?\z/', $data_type, $matches)) {
+    $pattern = '/^(fulltext|sort|text|char)(\d+)?\z/';
+    if (preg_match($pattern, $data_type, $matches)) {
 
       // Limit the permitted column lengths under the theory that it would
       // be nice to eventually reduce this to a small set of standard lengths.
@@ -220,6 +221,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         'text8' => true,
         'text4' => true,
         'text' => true,
+        'char3' => true,
         'sort255' => true,
         'sort128' => true,
         'sort64' => true,
@@ -266,10 +268,14 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
           // the majority of cases.
           $column_type = 'longtext';
           break;
+        case 'char':
+          $column_type = 'char('.$size.')';
+          break;
       }
 
       switch ($type) {
         case 'text':
+        case 'char':
           if ($is_binary) {
             // We leave collation and character set unspecified in order to
             // generate valid SQL.
@@ -315,6 +321,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
           break;
         case 'phid':
         case 'policy';
+        case 'hashpath64':
+        case 'ipaddress':
           $column_type = 'varbinary(64)';
           break;
         case 'bytes64':

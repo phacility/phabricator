@@ -49,49 +49,42 @@ final class PhabricatorProjectUIEventListener
 
     $annotations = array();
     if ($handles && $can_appear_on_boards) {
+      $engine = id(new PhabricatorBoardLayoutEngine())
+        ->setViewer($user)
+        ->setBoardPHIDs($project_phids)
+        ->setObjectPHIDs(array($object->getPHID()))
+        ->executeLayout();
 
       // TDOO: Generalize this UI and move it out of Maniphest.
-
       require_celerity_resource('maniphest-task-summary-css');
-
-      $positions_query = id(new PhabricatorProjectColumnPositionQuery())
-        ->setViewer($user)
-        ->withBoardPHIDs($project_phids)
-        ->withObjectPHIDs(array($object->getPHID()))
-        ->needColumns(true);
-
-      // This is important because positions will be created "on demand"
-      // based on the set of columns. If we don't specify it, positions
-      // won't be created.
-      $columns = id(new PhabricatorProjectColumnQuery())
-        ->setViewer($user)
-        ->withProjectPHIDs($project_phids)
-        ->execute();
-      if ($columns) {
-        $positions_query->withColumns($columns);
-      }
-      $positions = $positions_query->execute();
-      $positions = mpull($positions, null, 'getBoardPHID');
 
       foreach ($project_phids as $project_phid) {
         $handle = $handles[$project_phid];
 
-        $position = idx($positions, $project_phid);
-        if ($position) {
-          $column = $position->getColumn();
+        $columns = $engine->getObjectColumns(
+          $project_phid,
+          $object->getPHID());
+
+        $annotation = array();
+        foreach ($columns as $column) {
+          $project_id = $column->getProject()->getID();
 
           $column_name = pht('(%s)', $column->getDisplayName());
           $column_link = phutil_tag(
             'a',
             array(
-              'href' => $handle->getURI().'board/',
+              'href' => "/project/board/{$project_id}/",
               'class' => 'maniphest-board-link',
             ),
             $column_name);
 
+          $annotation[] = $column_link;
+        }
+
+        if ($annotation) {
           $annotations[$project_phid] = array(
             ' ',
-            $column_link,
+            phutil_implode_html(', ', $annotation),
           );
         }
       }
@@ -101,7 +94,8 @@ final class PhabricatorProjectUIEventListener
     if ($handles) {
       $list = id(new PHUIHandleTagListView())
         ->setHandles($handles)
-        ->setAnnotations($annotations);
+        ->setAnnotations($annotations)
+        ->setShowHovercards(true);
     } else {
       $list = phutil_tag('em', array(), pht('None'));
     }

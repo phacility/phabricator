@@ -14,7 +14,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     return '/diffusion/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-code';
   }
 
@@ -37,12 +37,6 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     );
   }
 
-  public function getEventListeners() {
-    return array(
-      new DiffusionHovercardEventListener(),
-    );
-  }
-
   public function getRemarkupRules() {
     return array(
       new DiffusionCommitRemarkupRule(),
@@ -53,8 +47,13 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'
+      '/(?:'.
+        'r(?P<repositoryCallsign>[A-Z]+)'.
+        '|'.
+        'R(?P<repositoryID>[1-9]\d*):'.
+      ')(?P<commit>[a-f0-9]+)'
         => 'DiffusionCommitController',
+
       '/diffusion/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'DiffusionRepositoryListController',
@@ -65,13 +64,13 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DiffusionPushLogListController',
           'view/(?P<id>\d+)/' => 'DiffusionPushEventViewController',
         ),
-        '(?P<callsign>[A-Z]+)/' => array(
+        '(?P<repositoryCallsign>[A-Z]+)/' => array(
           '' => 'DiffusionRepositoryController',
 
           'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
           'change/(?P<dblob>.*)'        => 'DiffusionChangeController',
           'history/(?P<dblob>.*)'       => 'DiffusionHistoryController',
-          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseMainController',
+          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseController',
           'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
           'diff/'                       => 'DiffusionDiffController',
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
@@ -116,7 +115,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         // catch-all for serving repositories over HTTP. We must accept
         // requests without the trailing "/" because SVN commands don't
         // necessarily include it.
-        '(?P<callsign>[A-Z]+)(/|$).*' => 'DiffusionRepositoryDefaultController',
+        '(?P<repositoryCallsign>[A-Z]+)(?:/.*)?' =>
+          'DiffusionRepositoryDefaultController',
 
         'inline/' => array(
           'edit/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',

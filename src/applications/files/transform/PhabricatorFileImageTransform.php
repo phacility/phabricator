@@ -119,9 +119,9 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
     $out = new TempFile();
 
     $future = new ExecFuture('convert %s %Ls %s', $tmp, $argv, $out);
-    // Don't spend more than 10 seconds resizing; just fail if it takes longer
+    // Don't spend more than 60 seconds resizing; just fail if it takes longer
     // than that.
-    $future->setTimeout(10)->resolvex();
+    $future->setTimeout(60)->resolvex();
 
     $data = Filesystem::readFile($out);
 
@@ -259,7 +259,7 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
 
     $file = $this->file;
 
-    $max_size = (1024 * 1024 * 4);
+    $max_size = (1024 * 1024 * 16);
     $img_size = $file->getByteSize();
     if ($img_size > $max_size) {
       throw new Exception(

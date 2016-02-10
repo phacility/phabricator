@@ -14,7 +14,7 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return pht('Service Directory');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-server';
   }
 

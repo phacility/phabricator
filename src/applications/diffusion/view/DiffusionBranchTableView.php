@@ -81,7 +81,7 @@ final class DiffusionBranchTableView extends DiffusionView {
       }
 
       $status_icon = id(new PHUIIconView())
-        ->setIconFont($icon)
+        ->setIcon($icon)
         ->addSigil('has-tooltip')
         ->setHref($doc_href)
         ->setMetadata(

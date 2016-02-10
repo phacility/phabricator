@@ -13,7 +13,9 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface,
+    PhabricatorFulltextInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -32,11 +34,10 @@ final class ManiphestTask extends ManiphestDAO
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
-  protected $attached = array();
-  protected $projectPHIDs = array();
-
   protected $ownerOrdering;
   protected $spacePHID;
+  protected $properties = array();
+  protected $points;
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
@@ -67,9 +68,7 @@ final class ManiphestTask extends ManiphestDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'ccPHIDs' => self::SERIALIZATION_JSON,
-        'attached' => self::SERIALIZATION_JSON,
-        'projectPHIDs' => self::SERIALIZATION_JSON,
+        'properties' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'ownerPHID' => 'phid?',
@@ -82,11 +81,7 @@ final class ManiphestTask extends ManiphestDAO
         'ownerOrdering' => 'text64?',
         'originalEmailSource' => 'text255?',
         'subpriority' => 'double',
-
-        // T6203/NULLABILITY
-        // This should not be nullable. It's going away soon anyway.
-        'ccPHIDs' => 'text?',
-
+        'points' => 'double?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -135,10 +130,6 @@ final class ManiphestTask extends ManiphestDAO
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getPHID(),
       ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
-  }
-
-  public function getAttachedPHIDs($type) {
-    return array_keys(idx($this->attached, $type, array()));
   }
 
   public function generatePHID() {
@@ -203,11 +194,37 @@ final class ManiphestTask extends ManiphestDAO
     return ManiphestTaskStatus::isClosedStatus($this->getStatus());
   }
 
-  public function getPrioritySortVector() {
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function getCoverImageFilePHID() {
+    return idx($this->properties, 'cover.filePHID');
+  }
+
+  public function getCoverImageThumbnailPHID() {
+    return idx($this->properties, 'cover.thumbnailPHID');
+  }
+
+  public function getWorkboardOrderVectors() {
     return array(
-      $this->getPriority(),
-      -$this->getSubpriority(),
-      $this->getID(),
+      PhabricatorProjectColumn::ORDER_PRIORITY => array(
+        (int)-$this->getPriority(),
+        (double)-$this->getSubpriority(),
+        (int)-$this->getID(),
+      ),
+    );
+  }
+
+  public function getWorkboardProperties() {
+    return array(
+      'status' => $this->getStatus(),
+      'points' => (double)$this->getPoints(),
     );
   }
 
@@ -220,10 +237,6 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
-  public function shouldAllowSubscription($phid) {
     return true;
   }
 
@@ -388,6 +401,73 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The title of the task.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('Original task author.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('ownerPHID')
+        ->setType('phid?')
+        ->setDescription(pht('Current task owner, if task is assigned.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about task status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('priority')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Information about task priority.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+
+    $status_value = $this->getStatus();
+    $status_info = array(
+      'value' => $status_value,
+      'name' => ManiphestTaskStatus::getTaskStatusName($status_value),
+      'color' => ManiphestTaskStatus::getStatusColor($status_value),
+    );
+
+    $priority_value = (int)$this->getPriority();
+    $priority_info = array(
+      'value' => $priority_value,
+      'subpriority' => (double)$this->getSubpriority(),
+      'name' => ManiphestTaskPriority::getTaskPriorityName($priority_value),
+      'color' => ManiphestTaskPriority::getTaskPriorityColor($priority_value),
+    );
+
+    return array(
+      'name' => $this->getTitle(),
+      'authorPHID' => $this->getAuthorPHID(),
+      'ownerPHID' => $this->getOwnerPHID(),
+      'status' => $status_info,
+      'priority' => $priority_info,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new ManiphestTaskFulltextEngine();
   }
 
 }

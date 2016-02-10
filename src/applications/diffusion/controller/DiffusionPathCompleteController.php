@@ -2,20 +2,19 @@
 
 final class DiffusionPathCompleteController extends DiffusionController {
 
-  protected function shouldLoadDiffusionRequest() {
-    return false;
+  protected function getRepositoryIdentifierFromRequest(
+    AphrontRequest $request) {
+    return $request->getStr('repositoryPHID');
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-
-    $repository_phid = $request->getStr('repositoryPHID');
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($request->getUser())
-      ->withPHIDs(array($repository_phid))
-      ->executeOne();
-    if (!$repository) {
-      return new Aphront400Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
     }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
 
     $query_path = $request->getStr('q');
     if (preg_match('@/$@', $query_path)) {
@@ -25,19 +24,11 @@ final class DiffusionPathCompleteController extends DiffusionController {
     }
     $query_dir = ltrim($query_dir, '/');
 
-    $drequest = DiffusionRequest::newFromDictionary(
-      array(
-        'user' => $request->getUser(),
-        'repository' => $repository,
-        'path' => $query_dir,
-      ));
-    $this->setDiffusionRequest($drequest);
-
     $browse_results = DiffusionBrowseResultSet::newFromConduit(
       $this->callConduitWithDiffusionRequest(
         'diffusion.browsequery',
         array(
-          'path' => $drequest->getPath(),
+          'path' => $query_dir,
           'commit' => $drequest->getCommit(),
         )));
     $paths = $browse_results->getPaths();

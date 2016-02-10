@@ -35,7 +35,7 @@ final class PhabricatorBadgesPHIDType extends PhabricatorPHIDType {
       $id = $badge->getID();
       $name = $badge->getName();
 
-      if ($badge->isClosed()) {
+      if ($badge->isArchived()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
 

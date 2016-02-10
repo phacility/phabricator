@@ -8,14 +8,21 @@ final class PhabricatorSlowvoteListController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $querykey = $request->getURIData('queryKey');
+    return id(new PhabricatorSlowvoteSearchEngine())
+      ->setController($this)
+      ->buildResponse();
+  }
 
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($querykey)
-      ->setSearchEngine(new PhabricatorSlowvoteSearchEngine())
-      ->setNavigation($this->buildSideNavView());
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
-    return $this->delegateToController($controller);
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Poll'))
+        ->setHref($this->getApplicationURI('create/'))
+        ->setIcon('fa-plus-square'));
+
+    return $crumbs;
   }
 
 }

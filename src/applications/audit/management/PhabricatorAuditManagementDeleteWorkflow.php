@@ -222,22 +222,23 @@ final class PhabricatorAuditManagementDeleteWorkflow
     return $list;
   }
 
-  private function loadRepos($callsigns) {
-    $callsigns = $this->parseList($callsigns);
-    if (!$callsigns) {
+  private function loadRepos($identifiers) {
+    $identifiers = $this->parseList($identifiers);
+    if (!$identifiers) {
       return null;
     }
 
-    $repos = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
-      ->withCallsigns($callsigns)
-      ->execute();
-    $repos = mpull($repos, null, 'getCallsign');
+      ->withIdentifiers($identifiers);
 
-    foreach ($callsigns as $sign) {
-      if (empty($repos[$sign])) {
+    $repos = $query->execute();
+
+    $map = $query->getIdentifierMap();
+    foreach ($identifiers as $identifier) {
+      if (empty($map[$identifier])) {
         throw new PhutilArgumentUsageException(
-          pht('No such repository with callsign "%s"!', $sign));
+          pht('No repository "%s" exists!', $identifier));
       }
     }
 

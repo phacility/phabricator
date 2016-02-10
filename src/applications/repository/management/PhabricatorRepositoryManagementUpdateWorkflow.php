@@ -20,9 +20,9 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       ->setExamples('**update** [options] __repository__')
       ->setSynopsis(
         pht(
-          'Update __repository__, named by callsign. '.
-          'This performs the __pull__, __discover__, __ref__ and __mirror__ '.
-          'operations and is primarily an internal workflow.'))
+          'Update __repository__. This performs the __pull__, __discover__, '.
+          '__ref__ and __mirror__ operations and is primarily an internal '.
+          'workflow.'))
       ->setArguments(
         array(
           array(
@@ -47,7 +47,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     $repos = $this->loadRepositories($args, 'repos');
     if (count($repos) !== 1) {
       throw new PhutilArgumentUsageException(
-        pht('Specify exactly one repository to update, by callsign.'));
+        pht('Specify exactly one repository to update.'));
     }
 
     $repository = head($repos);

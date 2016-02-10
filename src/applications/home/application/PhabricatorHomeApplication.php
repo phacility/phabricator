@@ -16,7 +16,7 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     return pht('Command Center');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-home';
   }
 
@@ -100,7 +100,6 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     $view = null;
     if ($items) {
       $view = new PHUIListView();
-      $view->newLabel(pht('Create New...'));
       foreach ($items as $item) {
         $view->addMenuItem($item);
       }

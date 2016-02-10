@@ -41,7 +41,10 @@ final class PhabricatorPasteTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
       case self::TYPE_LANGUAGE:
-        return ($old === null);
+        if ($old === null) {
+          return true;
+        }
+        break;
     }
     return parent::shouldHide();
   }
@@ -77,6 +80,10 @@ final class PhabricatorPasteTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this paste.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_CONTENT:
         if ($old === null) {
           return pht(

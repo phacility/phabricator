@@ -86,8 +86,7 @@ final class ReleephProductViewController extends ReleephProductController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($product)
-      ->setObjectURI($this->getRequest()->getRequestURI());
+      ->setObject($product);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

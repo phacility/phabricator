@@ -4,7 +4,7 @@
  *           javelin-vector
  *           javelin-request
  *           javelin-uri
- * @provides phabricator-hovercard
+ * @provides phui-hovercard
  * @javelin
  */
 
@@ -14,8 +14,9 @@ JX.install('Hovercard', {
     _node : null,
     _activeRoot : null,
     _visiblePHID : null,
+    _alignment: null,
 
-    fetchUrl : '/search/hovercard/retrieve/',
+    fetchUrl : '/search/hovercard/',
 
     /**
      * Hovercard storage. {"PHID-XXXX-YYYY":"<...>", ...}
@@ -31,12 +32,18 @@ JX.install('Hovercard', {
       return self._node;
     },
 
+    getAlignment: function() {
+      var self = JX.Hovercard;
+      return self._alignment;
+    },
+
     show : function(root, phid) {
       var self = JX.Hovercard;
-      // Already displaying
-      if (self.getCard() && phid == self._visiblePHID) {
+
+      if (root === this._activeRoot) {
         return;
       }
+
       self.hide();
 
       self._visiblePHID = phid;
@@ -81,30 +88,32 @@ JX.install('Hovercard', {
       var d = JX.Vector.getDim(root);
       var n = JX.Vector.getDim(child);
       var v = JX.Vector.getViewport();
+      var s = JX.Vector.getScroll();
 
       // Move the tip so it's nicely aligned.
-      // I'm just doing north/south alignment for now
-      // TODO: Fix southern graceful align
       var margin = 20;
-      // We can't shift left by ~$margin or more here due to Pholio, Phriction
-      var x = parseInt(p.x, 10) - margin / 2;
-      var y = parseInt(p.y - n.y, 10) - margin;
 
-      // If running off the edge of the viewport, make it margin / 2 away
-      // from the far right edge of the viewport instead
-      if ((x + n.x) > (v.x)) {
-        x = x - parseInt(x + n.x - v.x + margin / 2, 10);
-      // If more in the center, we can safely center
-      } else if (x > (n.x / 2) + margin) {
-        x = parseInt(p.x - (n.x / 2) + d.x, 10);
+
+      // Try to align the card directly above the link, with left borders
+      // touching.
+      var x = p.x;
+
+      // If this would push us off the right side of the viewport, push things
+      // back to the left.
+      if ((x + n.x + margin) > (s.x + v.x)) {
+        x = (s.x + v.x) - n.x - margin;
       }
 
-      // Temporarily disabled, since it gives weird results (you can only see
-      // a hovercard once, as soon as it's hidden, it cannot be shown again)
-      // if (y < n.y) {
-      //   // Place it southern, since northern is not enough space
-      //   y = p.y + d.y + margin;
-      // }
+      // Try to put the card above the link.
+      var y = p.y - n.y - margin;
+      self._alignment = 'north';
+
+      // If the card is near the top of the window, show it beneath the
+      // link we're hovering over instead.
+      if ((y - margin) < s.y) {
+        y = p.y + d.y + margin;
+        self._alignment = 'south';
+      }
 
       node.style.left = x + 'px';
       node.style.top  = y + 'px';

@@ -293,7 +293,18 @@ JX.install('HeraldRuleEditor', {
         },
         function(map) {
           for (var k in map) {
-            build.tokenizer.addToken(k, map[k]);
+            var v = map[k];
+
+            // The control value may be set from wire values from the server,
+            // or a transformed value from another control, or a bare string
+            // value from another control.
+            if (typeof v == 'string') {
+              v = v;
+            } else if (!v.hasOwnProperty('id')) {
+              v = JX.Prefab.transformDatasourceResults(v);
+            }
+
+            build.tokenizer.addToken(k, v);
           }
         }];
     },

@@ -8,8 +8,7 @@ final class PhabricatorPhurlURLTransaction
   const TYPE_ALIAS = 'phurl.alias';
   const TYPE_DESCRIPTION = 'phurl.description';
 
-  const MAILTAG_CONTENT = 'phurl:content';
-  const MAILTAG_OTHER = 'phurl:other';
+  const MAILTAG_DETAILS = 'phurl-details';
 
   public function getApplicationName() {
     return 'phurl';
@@ -235,7 +234,7 @@ final class PhabricatorPhurlURLTransaction
       case self::TYPE_DESCRIPTION:
       case self::TYPE_URL:
       case self::TYPE_ALIAS:
-        $tags[] = self::MAILTAG_CONTENT;
+        $tags[] = self::MAILTAG_DETAILS;
         break;
     }
     return $tags;

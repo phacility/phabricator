@@ -14,7 +14,7 @@ final class PhabricatorFeedApplication extends PhabricatorApplication {
     return pht('Review Recent Activity');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-newspaper-o';
   }
 

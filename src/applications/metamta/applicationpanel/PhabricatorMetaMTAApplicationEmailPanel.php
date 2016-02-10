@@ -29,9 +29,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
         id(new PHUIButtonView())
           ->setTag('a')
           ->setText(pht('Edit Application Emails'))
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-pencil'))
+          ->setIcon('fa-pencil')
           ->setHref($this->getPanelURI())
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
@@ -89,7 +87,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       ->setSubheader($application->getAppEmailBlurb());
 
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-plus');
+      ->setIcon('fa-plus');
     $button = new PHUIButtonView();
     $button->setText(pht('Add New Address'));
     $button->setTag('a');

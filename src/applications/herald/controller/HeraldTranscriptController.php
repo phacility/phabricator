@@ -81,13 +81,14 @@ final class HeraldTranscriptController extends HeraldController {
         $this->getApplicationURI('/transcript/'))
       ->addTextCrumb($xscript->getID());
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-      ),
-      array(
-        'title' => pht('Transcript'),
+    $title = pht('Transcript');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $content,
       ));
   }
 

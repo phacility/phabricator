@@ -81,10 +81,12 @@ final class PhabricatorProjectColumnEditController
 
       $xactions = array();
 
-      $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
-      $xactions[] = id(new PhabricatorProjectColumnTransaction())
-        ->setTransactionType($type_name)
-        ->setNewValue($v_name);
+      if (!$column->getProxy()) {
+        $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
+        $xactions[] = id(new PhabricatorProjectColumnTransaction())
+          ->setTransactionType($type_name)
+          ->setNewValue($v_name);
+      }
 
       $type_limit = PhabricatorProjectColumnTransaction::TYPE_LIMIT;
       $xactions[] = id(new PhabricatorProjectColumnTransaction())
@@ -105,26 +107,26 @@ final class PhabricatorProjectColumnEditController
       }
     }
 
-    $form = new AphrontFormView();
-    $form
-      ->setUser($request->getUser())
-      ->appendChild(
+    $form = id(new AphrontFormView())
+      ->setUser($request->getUser());
+
+    if (!$column->getProxy()) {
+      $form->appendChild(
         id(new AphrontFormTextControl())
           ->setValue($v_name)
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setError($e_name)
-          ->setCaption(
-            pht('This will be displayed as the header of the column.')))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setValue($v_limit)
-          ->setLabel(pht('Point Limit'))
-          ->setName('limit')
-          ->setError($e_limit)
-          ->setCaption(
-            pht('Maximum number of points of tasks allowed in the column.')));
+          ->setError($e_name));
+    }
 
+    $form->appendChild(
+      id(new AphrontFormTextControl())
+        ->setValue($v_limit)
+        ->setLabel(pht('Point Limit'))
+        ->setName('limit')
+        ->setError($e_limit)
+        ->setCaption(
+          pht('Maximum number of points of tasks allowed in the column.')));
 
     if ($is_new) {
       $title = pht('Create Column');
@@ -144,13 +146,11 @@ final class PhabricatorProjectColumnEditController
       ->setValidationException($validation_exception)
       ->setForm($form);
 
-    $nav = $this->buildIconNavView($project);
-    $nav->appendChild($form_box);
+    $nav = $this->getProfileMenu();
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setNavigation($nav)
+      ->appendChild($form_box);
   }
 }

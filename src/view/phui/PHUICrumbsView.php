@@ -52,6 +52,15 @@ final class PHUICrumbsView extends AphrontView {
     if ($this->actions) {
       $actions = array();
       foreach ($this->actions as $action) {
+      if ($action->getType() == PHUIListItemView::TYPE_DIVIDER) {
+          $actions[] = phutil_tag(
+            'span',
+            array(
+              'class' => 'phui-crumb-action-divider',
+            ));
+          continue;
+        }
+
         $icon = null;
         if ($action->getIcon()) {
           $icon_name = $action->getIcon();
@@ -60,22 +69,29 @@ final class PHUICrumbsView extends AphrontView {
           }
 
           $icon = id(new PHUIIconView())
-            ->setIconFont($icon_name);
+            ->setIcon($icon_name);
 
         }
-        $name = phutil_tag(
-          'span',
-            array(
-              'class' => 'phui-crumbs-action-name',
-            ),
-          $action->getName());
+
+        $action_classes = $action->getClasses();
+        $action_classes[] = 'phui-crumbs-action';
+
+        $name = null;
+        if ($action->getName()) {
+          $name = phutil_tag(
+            'span',
+              array(
+                'class' => 'phui-crumbs-action-name',
+              ),
+            $action->getName());
+        } else {
+          $action_classes[] = 'phui-crumbs-action-icon';
+        }
 
         $action_sigils = $action->getSigils();
         if ($action->getWorkflow()) {
           $action_sigils[] = 'workflow';
         }
-        $action_classes = $action->getClasses();
-        $action_classes[] = 'phui-crumbs-action';
 
         if ($action->getDisabled()) {
           $action_classes[] = 'phui-crumbs-action-disabled';

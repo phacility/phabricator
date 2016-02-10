@@ -64,7 +64,7 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
           $line .= ' called at ['.$entry['file'].':'.$entry['line'].']';
           try {
             $user = $this->getRequest()->getUser();
-            $href = $user->loadEditorLink($entry['file'], $entry['line'], '');
+            $href = $user->loadEditorLink($entry['file'], $entry['line'], null);
           } catch (Exception $ex) {
             // The database can be inaccessible.
           }

@@ -63,7 +63,7 @@ final class CelerityDefaultPostprocessor
       'violet'        => '#8e44ad',
       'lightviolet'   => '#ecdff1',
       'charcoal'      => '#4b4d51',
-      'backdrop'      => '#dadee7',
+      'backdrop'      => '#c4cde0',
       'hoverwhite'    => 'rgba(255,255,255,.6)',
       'hovergrey'     => '#c5cbcf',
       'hoverblue'     => '#eceff5',
@@ -185,11 +185,21 @@ final class CelerityDefaultPostprocessor
       'sh-disabledtext'         => '#a6a6a6',
       'sh-disabledbackground'   => '#f3f3f3',
 
-      // Background color for "light" themes.
-      'page.background.light' => '#f7f7f7',
+      // Background color for "most" themes.
+      'page.background' => '#f1f1f4',
 
       // Background color for "dark" themes.
       'page.background.dark' => '#ebecee',
+
+      'menu.profile.text' => 'rgba(255,255,255,.8)',
+      'menu.profile.text.selected' => 'rgba(255,255,255,1)',
+      'menu.profile.icon.disabled' => 'rgba(255,255,255,.4)',
+
+      'menu.main.height' => '44px',
+
+      'menu.profile.width' => '240px',
+      'menu.profile.width.collapsed' => '88px',
+      'menu.profile.item.height' => '46px',
 
     );
   }

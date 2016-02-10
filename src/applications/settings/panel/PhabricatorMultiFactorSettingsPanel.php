@@ -107,22 +107,18 @@ final class PhabricatorMultiFactorSettingsPanel
     $help_uri = PhabricatorEnv::getDoclink(
       'User Guide: Multi-Factor Authentication');
 
-    $help_icon = id(new PHUIIconView())
-      ->setIconFont('fa-info-circle');
     $help_button = id(new PHUIButtonView())
       ->setText(pht('Help'))
       ->setHref($help_uri)
       ->setTag('a')
-      ->setIcon($help_icon);
+      ->setIcon('fa-info-circle');
 
-    $create_icon = id(new PHUIIconView())
-      ->setIconFont('fa-plus');
     $create_button = id(new PHUIButtonView())
       ->setText(pht('Add Authentication Factor'))
       ->setHref($this->getPanelURI('?new=true'))
       ->setTag('a')
       ->setWorkflow(true)
-      ->setIcon($create_icon);
+      ->setIcon('fa-plus');
 
     $header->setHeader(pht('Authentication Factors'));
     $header->addActionLink($help_button);

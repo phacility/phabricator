@@ -8,16 +8,26 @@
 
 JX.behavior('remarkup-preview', function(config) {
 
+  // Don't bother with any of this on mobile.
+  if (JX.Device.getDevice() !== 'desktop') {
+    return;
+  }
+
   var preview = JX.$(config.previewID);
   var control = JX.$(config.controlID);
 
   var callback = function(r) {
-    JX.DOM.setContent(preview, JX.$H(r));
+    // This currently accepts responses from two controllers:
+    // Old: PhabricatorMarkupPreviewController
+    // New: PhabricatorApplicationTransactionRemarkupPreviewController
+    // TODO: Swap everything to just the new controller.
+
+    JX.DOM.setContent(preview, JX.$H(r.content || r));
   };
 
   var getdata = function() {
     return {
-      text : control.value
+      text: control.value
     };
   };
 

@@ -22,6 +22,8 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
   protected $authorPHID;
   protected $spacePHID;
 
+  protected $mailKey;
+
   const DEFAULT_ICON = 'fa-compress';
 
   public static function initializeNewPhurlURL(PhabricatorUser $actor) {
@@ -45,6 +47,7 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
         'alias' => 'sort64?',
         'longURL' => 'text',
         'description' => 'text',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_instance' => array(
@@ -56,6 +59,13 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public function generatePHID() {
@@ -77,6 +87,22 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     $uri = new PhutilURI($this->getLongURL());
 
     return isset($allowed_protocols[$uri->getProtocol()]);
+  }
+
+  public function getDisplayName() {
+    if ($this->getName()) {
+      return $this->getName();
+    } else {
+      return $this->getLongURL();
+    }
+  }
+
+  public function getRedirectURI() {
+    if (strlen($this->getAlias())) {
+      return '/u/'.$this->getAlias();
+    } else {
+      return '/u/'.$this->getID();
+    }
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
@@ -144,10 +170,6 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
   }
 
   public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
-  public function shouldAllowSubscription($phid) {
     return true;
   }
 

@@ -81,10 +81,6 @@ div.phui-calendar-day-event {
   z-index: 5;
 }
 
-.drag-dragging {
-  z-index: 5;
-}
-
 .phui-calendar-date-number  {
   z-index: 5;
 }
@@ -142,12 +138,20 @@ div.jx-typeahead-results {
   z-index: 15;
 }
 
+.drag-frame {
+  z-index: 16;
+}
+
 .jx-hovercard-container {
   z-index: 17;
 }
 
 .pholio-device-lightbox {
   z-index: 20;
+}
+
+.phuix-autocomplete {
+  z-index: 21;
 }
 
 .phuix-dropdown-menu {

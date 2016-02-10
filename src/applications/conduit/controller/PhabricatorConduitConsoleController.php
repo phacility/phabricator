@@ -19,6 +19,8 @@ final class PhabricatorConduitConsoleController
       return new Aphront404Response();
     }
 
+    $method->setViewer($viewer);
+
     $call_uri = '/api/'.$method->getAPIMethodName();
 
     $status = $method->getMethodStatus();
@@ -99,64 +101,9 @@ final class PhabricatorConduitConsoleController
       ->appendChild($properties);
 
     $content[] = $info_box;
+    $content[] = $method->getMethodDocumentation();
     $content[] = $form_box;
     $content[] = $this->renderExampleBox($method, null);
-
-    $query = $method->newQueryObject();
-    if ($query) {
-      $orders = $query->getBuiltinOrders();
-
-      $rows = array();
-      foreach ($orders as $key => $order) {
-        $rows[] = array(
-          $key,
-          $order['name'],
-          implode(', ', $order['vector']),
-        );
-      }
-
-      $table = id(new AphrontTableView($rows))
-        ->setHeaders(
-          array(
-            pht('Key'),
-            pht('Description'),
-            pht('Columns'),
-          ))
-        ->setColumnClasses(
-          array(
-            'pri',
-            '',
-            'wide',
-          ));
-      $content[] = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Builtin Orders'))
-        ->setTable($table);
-
-      $columns = $query->getOrderableColumns();
-
-      $rows = array();
-      foreach ($columns as $key => $column) {
-        $rows[] = array(
-          $key,
-          idx($column, 'unique') ? pht('Yes') : pht('No'),
-        );
-      }
-
-      $table = id(new AphrontTableView($rows))
-        ->setHeaders(
-          array(
-            pht('Key'),
-            pht('Unique'),
-          ))
-        ->setColumnClasses(
-          array(
-            'pri',
-            'wide',
-          ));
-      $content[] = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Column Orders'))
-        ->setTable($table);
-    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($method->getAPIMethodName());

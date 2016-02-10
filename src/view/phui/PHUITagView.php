@@ -122,7 +122,7 @@ final class PHUITagView extends AphrontTagView {
     }
 
     if ($this->phid) {
-      Javelin::initBehavior('phabricator-hovercards');
+      Javelin::initBehavior('phui-hovercards');
 
       $attributes = array(
         'href'  => $this->href,
@@ -166,7 +166,7 @@ final class PHUITagView extends AphrontTagView {
 
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon);
+        ->setIcon($this->icon);
     } else {
       $icon = null;
     }

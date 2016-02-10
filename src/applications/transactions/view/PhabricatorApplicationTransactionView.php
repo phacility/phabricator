@@ -383,9 +383,21 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     foreach ($groups as $key => $group) {
-      $group = msort($group, 'getActionStrength');
-      $group = array_reverse($group);
-      $groups[$key] = $group;
+      $results = array();
+
+      // Sort transactions within the group by action strength, then by
+      // chronological order. This makes sure that multiple actions of the
+      // same type (like a close, then a reopen) render in the order they
+      // were performed.
+      $strength_groups = mgroup($group, 'getActionStrength');
+      krsort($strength_groups);
+      foreach ($strength_groups as $strength_group) {
+        foreach (msort($strength_group, 'getID') as $xaction) {
+          $results[] = $xaction;
+        }
+      }
+
+      $groups[$key] = $results;
     }
 
     return $groups;

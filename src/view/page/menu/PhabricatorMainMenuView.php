@@ -27,10 +27,9 @@ final class PhabricatorMainMenuView extends AphrontView {
     $user = $this->user;
 
     require_celerity_resource('phabricator-main-menu-view');
-    require_celerity_resource('sprite-main-header-css');
 
     $header_id = celerity_generate_unique_node_id();
-    $menus = array();
+    $menu_bar = array();
     $alerts = array();
     $search_button = '';
     $app_button = '';
@@ -41,7 +40,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       if (array_filter($menu)) {
         $alerts[] = $menu;
       }
-      $menus = array_merge($menus, $dropdowns);
+      $menu_bar = array_merge($menu_bar, $dropdowns);
       $app_button = $this->renderApplicationMenuButton($header_id);
       $search_button = $this->renderSearchMenuButton($header_id);
     } else {
@@ -73,15 +72,71 @@ final class PhabricatorMainMenuView extends AphrontView {
     }
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
+
+    $menus = array();
+    $controller = $this->getController();
     foreach ($applications as $application) {
-      $menus[] = $application->buildMainMenuExtraNodes(
+      $app_actions = $application->buildMainMenuItems(
         $user,
-        $this->getController());
+        $controller);
+      $app_extra = $application->buildMainMenuExtraNodes(
+        $user,
+        $controller);
+
+      foreach ($app_actions as $action) {
+        $menus[] = id(new PHUIMainMenuView())
+          ->setMenuBarItem($action)
+          ->setOrder($action->getOrder());
+      }
+
+      if ($app_extra !== null) {
+        $menus[] = id(new PHUIMainMenuView())
+          ->appendChild($app_extra);
+      }
     }
 
-    $application_menu = $this->renderApplicationMenu();
+    $extensions = PhabricatorMainMenuBarExtension::getAllEnabledExtensions();
+    foreach ($extensions as $extension) {
+      $extension->setViewer($user);
+
+      $controller = $this->getController();
+      if ($controller) {
+        $extension->setController($controller);
+        $application = $controller->getCurrentApplication();
+        if ($application) {
+          $extension->setApplication($application);
+        }
+      }
+    }
+
+    foreach ($extensions as $key => $extension) {
+      if (!$extension->isExtensionEnabledForViewer($extension->getViewer())) {
+        unset($extensions[$key]);
+      }
+    }
+
+    foreach ($extensions as $extension) {
+      foreach ($extension->buildMainMenus() as $menu) {
+        $menus[] = $menu;
+      }
+    }
+
+    $menus = msort($menus, 'getOrder');
+    $bar_items = array();
+    foreach ($menus as $menu) {
+      $menu_bar[] = $menu;
+
+      $item = $menu->getMenuBarItem();
+      if ($item === null) {
+        continue;
+      }
+
+      $bar_items[] = $item;
+    }
+
+    $application_menu = $this->renderApplicationMenu($bar_items);
     $classes = array();
-    $classes[] = 'phabricator-main-menu sprite-main-header';
+    $classes[] = 'phabricator-main-menu';
     $classes[] = 'phabricator-main-menu-background';
 
     return phutil_tag(
@@ -98,7 +153,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         $aural,
         $application_menu,
         $search_menu,
-        $menus,
+        $menu_bar,
       ));
   }
 
@@ -174,21 +229,8 @@ final class PhabricatorMainMenuView extends AphrontView {
         ''));
   }
 
-  public function renderApplicationMenu() {
+  private function renderApplicationMenu(array $bar_items) {
     $user = $this->getUser();
-    $controller = $this->getController();
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-
-    $actions = array();
-    foreach ($applications as $application) {
-      $app_actions = $application->buildMainMenuItems($user, $controller);
-      foreach ($app_actions as $action) {
-        $actions[] = $action;
-      }
-    }
-
-    $actions = msort($actions, 'getOrder');
 
     $view = $this->getApplicationMenu();
 
@@ -199,13 +241,13 @@ final class PhabricatorMainMenuView extends AphrontView {
     $view->addClass('phabricator-dark-menu');
     $view->addClass('phabricator-application-menu');
 
-    if ($actions) {
+    if ($bar_items) {
       $view->addMenuItem(
         id(new PHUIListItemView())
           ->setType(PHUIListItemView::TYPE_LABEL)
           ->setName(pht('Actions')));
-      foreach ($actions as $action) {
-        $view->addMenuItem($action);
+      foreach ($bar_items as $bar_item) {
+        $view->addMenuItem($bar_item);
       }
     }
 

@@ -63,7 +63,7 @@ final class RepositoryQueryConduitAPIMethod
 
     $remote_uris = $request->getValue('remoteURIs', array());
     if ($remote_uris) {
-      $query->withRemoteURIs($remote_uris);
+      $query->withURIs($remote_uris);
     }
 
     $uuids = $request->getValue('uuids', array());

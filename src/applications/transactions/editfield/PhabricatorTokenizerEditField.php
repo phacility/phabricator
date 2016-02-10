@@ -1,9 +1,7 @@
 <?php
 
 abstract class PhabricatorTokenizerEditField
-  extends PhabricatorEditField {
-
-  private $originalValue;
+  extends PhabricatorPHIDListEditField {
 
   abstract protected function newDatasource();
 
@@ -11,75 +9,51 @@ abstract class PhabricatorTokenizerEditField
     $control = id(new AphrontFormTokenizerControl())
       ->setDatasource($this->newDatasource());
 
-    if ($this->originalValue !== null) {
-      $control->setOriginalValue($this->originalValue);
+    $initial_value = $this->getInitialValue();
+    if ($initial_value !== null) {
+      $control->setInitialValue($initial_value);
+    }
+
+    if ($this->getIsSingleValue()) {
+      $control->setLimit(1);
     }
 
     return $control;
   }
 
-  public function setValue($value) {
-    $this->originalValue = $value;
-    return parent::setValue($value);
+  protected function getInitialValueFromSubmit(AphrontRequest $request, $key) {
+    return $request->getArr($key.'.initial');
   }
 
-  protected function getValueFromSubmit(AphrontRequest $request, $key) {
-    // TODO: Maybe move this unusual read somewhere else so subclassing this
-    // correctly is easier?
-    $this->originalValue = $request->getArr($key.'.original');
+  protected function newEditType() {
+    $type = parent::newEditType();
 
-    return parent::getValueFromSubmit($request, $key);
+    $datasource = $this->newDatasource()
+      ->setViewer($this->getViewer());
+    $type->setDatasource($datasource);
+
+    return $type;
   }
 
-  protected function getValueForTransaction() {
-    $new = parent::getValueForTransaction();
+  protected function newCommentAction() {
+    $viewer = $this->getViewer();
 
-    $edge_types = array(
-      PhabricatorTransactions::TYPE_EDGE => true,
-      PhabricatorTransactions::TYPE_SUBSCRIBERS => true,
-    );
+    $datasource = $this->newDatasource()
+      ->setViewer($viewer);
 
-    if (isset($edge_types[$this->getTransactionType()])) {
-      if ($this->originalValue !== null) {
-        // If we're building an edge transaction and the request has data
-        // about the original value the user saw when they loaded the form,
-        // interpret the edit as a mixture of "+" and "-" operations instead
-        // of a single "=" operation. This limits our exposure to race
-        // conditions by making most concurrent edits merge correctly.
+    $action = id(new PhabricatorEditEngineTokenizerCommentAction())
+      ->setDatasource($datasource);
 
-        $new = parent::getValueForTransaction();
-        $old = $this->originalValue;
-
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        $value = array();
-
-        if ($add) {
-          $value['+'] = array_fuse($add);
-        }
-        if ($rem) {
-          $value['-'] = array_fuse($rem);
-        }
-
-        return $value;
-      } else {
-
-        if (!is_array($new)) {
-          throw new Exception(print_r($new, true));
-        }
-
-        return array(
-          '=' => array_fuse($new),
-        );
-      }
+    if ($this->getIsSingleValue()) {
+      $action->setLimit(1);
     }
 
-    return $new;
-  }
+    $initial_value = $this->getInitialValue();
+    if ($initial_value !== null) {
+      $action->setInitialValue($initial_value);
+    }
 
-  protected function newHTTPParameterType() {
-    return new AphrontPHIDListHTTPParameterType();
+    return $action;
   }
 
 }

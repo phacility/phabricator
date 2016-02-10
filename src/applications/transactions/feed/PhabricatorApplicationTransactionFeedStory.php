@@ -77,7 +77,7 @@ class PhabricatorApplicationTransactionFeedStory
       $class = $phid_type->getPHIDTypeApplicationClass();
       if ($class) {
         $application = PhabricatorApplication::getByClass($class);
-        $icon = $application->getFontIcon();
+        $icon = $application->getIcon();
       }
     }
 

@@ -11,7 +11,7 @@ final class PhabricatorUserConfigOptions
     return pht('User profiles configuration.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-users';
   }
 
@@ -24,6 +24,7 @@ final class PhabricatorUserConfigOptions
     $default = array(
       id(new PhabricatorUserRealNameField())->getFieldKey() => true,
       id(new PhabricatorUserTitleField())->getFieldKey() => true,
+      id(new PhabricatorUserIconField())->getFieldKey() => true,
       id(new PhabricatorUserSinceField())->getFieldKey() => true,
       id(new PhabricatorUserRolesField())->getFieldKey() => true,
       id(new PhabricatorUserStatusField())->getFieldKey() => true,

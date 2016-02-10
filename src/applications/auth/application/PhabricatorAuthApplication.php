@@ -10,7 +10,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     return '/auth/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-key';
   }
 
@@ -36,48 +36,6 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     // applications?
 
     return array();
-  }
-
-  public function buildMainMenuItems(
-    PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-
-    $items = array();
-
-    if ($user->isLoggedIn()) {
-      $item = id(new PHUIListItemView())
-        ->addClass('core-menu-item')
-        ->setName(pht('Log Out'))
-        ->setIcon('fa-sign-out')
-        ->setWorkflow(true)
-        ->setHref('/logout/')
-        ->setSelected(($controller instanceof PhabricatorLogoutController))
-        ->setAural(pht('Log Out'))
-        ->setOrder(900);
-      $items[] = $item;
-    } else {
-      if ($controller instanceof PhabricatorAuthController) {
-        // Don't show the "Login" item on auth controllers, since they're
-        // generally all related to logging in anyway.
-      } else {
-        $uri = new PhutilURI('/auth/start/');
-        if ($controller) {
-          $path = $controller->getRequest()->getPath();
-          $uri->setQueryParam('next', $path);
-        }
-        $item = id(new PHUIListItemView())
-          ->addClass('core-menu-item')
-          ->setName(pht('Log In'))
-          // TODO: Login icon?
-          ->setIcon('fa-sign-in')
-          ->setHref($uri)
-          ->setAural(pht('Log In'))
-          ->setOrder(900);
-        $items[] = $item;
-      }
-    }
-
-    return $items;
   }
 
   public function getApplicationGroup() {

@@ -6,8 +6,8 @@ final class PHUIDocumentViewPro extends AphrontTagView {
   private $bookname;
   private $bookdescription;
   private $fluid;
-  private $propertyList;
   private $toc;
+  private $foot;
 
   public function setHeader(PHUIHeaderView $header) {
     $header->setTall(true);
@@ -26,25 +26,29 @@ final class PHUIDocumentViewPro extends AphrontTagView {
     return $this;
   }
 
-  public function setPropertyList($view) {
-    $this->propertyList = $view;
+  public function setToc($toc) {
+    $this->toc = $toc;
     return $this;
   }
 
-  public function setToc(PHUIListView $toc) {
-    $this->toc = $toc;
+  public function setFoot($foot) {
+    $this->foot = $foot;
     return $this;
   }
 
   protected function getTagAttributes() {
     $classes = array();
 
+    $classes[] = 'phui-document-container';
     if ($this->fluid) {
       $classes[] = 'phui-document-fluid';
     }
+    if ($this->foot) {
+      $classes[] = 'document-has-foot';
+    }
 
     return array(
-      'class' => $classes,
+      'class' => implode(' ', $classes),
     );
   }
 
@@ -74,7 +78,7 @@ final class PHUIDocumentViewPro extends AphrontTagView {
       $toc_id = celerity_generate_unique_node_id();
       $toc[] = id(new PHUIButtonView())
         ->setTag('a')
-        ->setIconFont('fa-align-left')
+        ->setIcon('fa-align-left')
         ->setColor(PHUIButtonView::SIMPLE)
         ->addClass('phui-document-toc')
         ->addSigil('jx-toggle-class')
@@ -100,6 +104,16 @@ final class PHUIDocumentViewPro extends AphrontTagView {
         $toc);
     }
 
+    $foot_content = null;
+    if ($this->foot) {
+      $foot_content = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-document-foot-content',
+        ),
+        $this->foot);
+    }
+
     $content_inner = phutil_tag(
         'div',
         array(
@@ -109,6 +123,7 @@ final class PHUIDocumentViewPro extends AphrontTagView {
           $table_of_contents,
           $this->header,
           $main_content,
+          $foot_content,
         ));
 
     $content = phutil_tag(
@@ -118,19 +133,13 @@ final class PHUIDocumentViewPro extends AphrontTagView {
         ),
         $content_inner);
 
-    $view = phutil_tag(
-      'div',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      $content);
+  return phutil_tag(
+    'div',
+    array(
+      'class' => implode(' ', $classes),
+    ),
+    $content);
 
-    $list = null;
-    if ($this->propertyList) {
-      $list = phutil_tag_div('phui-document-properties', $this->propertyList);
-    }
-
-    return array($view, $list);
   }
 
 }

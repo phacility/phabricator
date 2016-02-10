@@ -157,7 +157,7 @@ final class PHUIFeedStoryView extends AphrontView {
   public function render() {
 
     require_celerity_resource('phui-feed-story-css');
-    Javelin::initBehavior('phabricator-hovercards');
+    Javelin::initBehavior('phui-hovercards');
 
     $body = null;
     $foot = null;
@@ -193,7 +193,7 @@ final class PHUIFeedStoryView extends AphrontView {
     $icon = null;
     if ($this->appIcon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->appIcon);
+        ->setIcon($this->appIcon);
     }
 
     $action_list = array();

@@ -1,0 +1,515 @@
+@title User Guide: Customizing Forms
+@group userguide
+
+Guide to prefilling and customizing forms in Phabricator applications.
+
+Overview
+========
+
+In most applications, objects are created by clicking a "Create" button from
+the main list view, and edited by clicking an "Edit" link from the main detail
+view. For example, you create a new task by clicking "Create Task", and edit it
+by clicking "Edit Task".
+
+The forms these workflows use can be customized to accommodate a number of
+different use cases. In particular:
+
+**Prefilling**: You can use HTTP GET parameters to prefill fields or copy
+fields from another object. This is a lightweight way to create a link with
+some fields set to initial values. For example, you might want to create a
+link to create a task which has some default projects or subscribers.
+
+**Custom Forms**: You can create custom forms which can have default values;
+locked, hidden, and reordered fields; and additional instructions. This can let
+you make specialized forms for creating certain types of objects, like a
+"New Bug Report" form with extra help text or a "New Security Issue" form with
+locked policies.
+
+**"Create" Defaults**: You can change the default form available to users for
+creating objects, or provide multiple default forms for them to choose between.
+This can let you simplify or specialize the creation process.
+
+**"Edit" Defaults**: You can change the default form users are given to edit
+objects, which will also affect their ability to take inline actions in the
+comment form if you're working in an application which supports comments. This
+can streamline the edit workflow for less experienced users.
+
+Anyone can use prefiling, but you must have permission to configure an
+application in order to modify the application's forms. By default, only
+administrators can configure applications.
+
+The remainder of this document walks through configuring these features in
+greater detail.
+
+
+Supported Applications
+======================
+
+These applications currently support form customization:
+
+| Application       | Support |
+|-------------------|---------|
+| Maniphest         | Full
+| Owners            | Full
+| Paste             | Full
+| ApplicationEditor | Meta
+
+This documentation is geared toward use in Maniphest because customizing task
+creation flows is the most common use case for many of these features, but the
+features discussed here work in any application with support.
+
+These features first became available in December 2015. Additional applications
+will support them in the future.
+
+Internally, this infrastructure is called `ApplicationEditor`, and the main
+component is `EditEngine`. You may see technical documentation, changelogs, or
+internal discussion using these terms.
+
+Prefilling
+==========
+
+You can prefill the fields in forms by providing HTTP parameters. For example,
+if a form has a "Projects" field, you can generally prefill it by adding a
+`projects` parameter to the URI like this:
+
+```
+https://your.install.com/application/edit/?projects=skunkworks
+```
+
+The parameters available in each application vary, and depend on which fields
+the application supports.
+
+For full documentation on a particular form, navigate to that form (by
+selecting the "Create" or "Edit" action in the application) and then use
+{nav Actions > Show HTTP Parameters} to see full details on which parameters
+you can use and how to specify them.
+
+You can also use the `template` parameter to copy fields from an existing
+object that you have permission to see. Which fields are copied depend on the
+application, but usually content fields (like a name or title) are not copied
+while other fields (like projects, subscribers, and object states) are.
+The {nav Show HTTP Parameters} page has a full list of which fields will be
+copied.
+
+You can combine the `template` parameter with other prefilling. The `template`
+will act first, then prefilling will take effect. This allows you to overwrite
+template values with prefilled values.
+
+Some use cases for this include:
+
+**Lightweight Integrations**: If you want to give users a way to file tasks from
+an external application, this is an easy way to get a basic integration
+working. For example, you might have a tool for reviewing error logs in
+production that has a link to "File a Bug" about an error. The link could
+prefill the `title`, `body` and `projects` fields with details about the log
+message and a link back into the external tool.
+
+**Convenience**: You can create lightweight, ad-hoc links that make taking
+actions a little easier for users. For example, if you're sending out an email
+about a change you just made to a lot of people, you could include instructions
+like "If you run into any issues, assign a task to me with details: ..." and
+include a link which prefills you as the task assignee.
+
+**Searchbar Commands**: If you use a searchbar plugin which gives you shortcut
+commands, you can write a custom shortcut so a command like "bug ..." can
+quickly redirect you to a prefilled form.
+
+
+Creating New Forms
+==================
+
+Beyond prefilling forms with HTTP parameters, you can create and save form
+configurations. This is more heavyweight than prefilling and allows you to
+customize, streamline, or structure a workflow more heavily.
+
+You must be able to configure an application in order to manage its forms.
+
+Form configurations can have special names (like "New Bug Report") and
+additional instruction text, and may prefill, lock, hide, and reorder fields.
+Prefilling and templating still work with custom form configurations, but only
+apply to visible fields.
+
+To create a new form configuration, navigate to an existing form via "Create"
+or "Edit" and choose {nav Actions > View Form Configurations}. This will show
+you a list of current configurations.
+
+You can also edit existing configurations, including the default configuration.
+
+You can use {nav Create Form} from this screen to create a new configuration.
+After setting some basic information you will be able to lock, hide, and
+reorder form fields, as well as set defaults.
+
+Clicking {nav Use Form} will take you to the permanent URI for this form. You
+can link to this form from elsewhere to take the user directly to your
+custom flow.
+
+You can adjust defaults using {nav Change Default Values}. These defaults are
+saved with the form, and do not require HTTP parameter prefilling. However,
+they work in conjunction with prefilling, and you can use prefilling or
+templating to overwrite the defaults for visible fields.
+
+If you set a default value for a field and lock or hide the field, the default
+you set will still be respected and can not be overridden with templating
+or prefilling. This allows you to force certain forms to create tasks with
+specific field values, like projects or policies.
+
+You can also set a view policy for a form. Only users who are able to view the
+form can use it to create objects.
+
+There are some additional options ("Mark as Create Form" and
+"Mark as Edit Form") which are more complicated and explained in greater
+detail later in this document.
+
+Some use cases for this include:
+
+**Tailoring Workflows**: If you have certain intake workflows like
+"New Bug Report" or "New Security Issue", you can create forms for them with
+more structure than the default form.
+
+You can provide detailed instructions and links to documentation in the
+"Preamble" for the form configuration. You might use this to remind users about
+reporting guidelines, help them fill out the form correctly, or link to other
+resources.
+
+You can hide fields that aren't important to simplify the workflow, or reorder
+fields to emphasize things that are important. For example, you might want to
+hide the "Priority" field on a bug report form if you'd like all bugs to come
+in at the default priority before they are triaged.
+
+You can set default view and edit policies, and optionally lock or hide those
+fields. This allows you to create a form that is locked to certain policy
+settings.
+
+**Simplifying Forms**: If you rarely (or never) use some object fields, you can
+create a simplified form by hiding the fields you don't use regularly, or
+hide these fields completely from the default form.
+
+
+Changing Creation Defaults
+=========================
+
+You can control which form or forms are presented to users by default when
+they go to create new objects in an application.
+
+Using {nav Mark as "Create" Form} from the detail page for a form
+configuration, you can mark a form to appear in the create menu.
+
+When a user visits the application, Phabricator finds all the form
+configurations that are:
+
+  - marked as "create" forms; and
+  - visible to the user based on policy configuration; and
+  - enabled.
+
+If there is only one such form, Phabricator renders a single "Create" button.
+(If there are zero forms, it renders the button but disables it.)
+
+If there are several such forms, Phabricator renders a dropdown which allows
+the user to choose between them.
+
+You can reorder these forms by returning to the configuration list and using
+{nav Reorder Create Forms} in the left menu.
+
+This logic is also used to select items for the global "Quick Create" menu
+in the main menu bar.
+
+Some use cases for this include:
+
+**Simplification**: You can modify the default form to reorder fields, add
+instructions, or hide fields you never use.
+
+**Multiple Intake Workflows**: If you have multiple distinct intake workflows
+like "New Bug Report" and "New Security Issue", you can mark several forms
+as "Create" forms and users will be given a choice between them when they go
+to create a task.
+
+These flows can provide different instructions and defaults to help users
+provide the desired information correctly.
+
+**Basic and Advanced Workflows**: You can create a simplified "Basic" workflow
+which hides or locks some fields, and a separate "Advanced" workflow which
+has all of the fields.
+
+If you do this, you can also restrict the visibility policy for the "Advanced"
+form to experienced users. If you do, newer users will see a button which
+takes them to the basic form, while advanced users will be able to choose
+between the basic and advanced forms.
+
+
+Changing Editing Defaults
+=========================
+
+You can control which form users are taken to when they click "Edit" on an
+object detail page.
+
+Using {nav Mark as "Edit" Form} from the detail page for a form configuration,
+you can mark a form as a default edit form.
+
+When a user goes to edit an object, they are taken to the first form which is:
+
+  - marked as an "edit" form; and
+  - visible to them; and
+  - enabled.
+
+You can reorder forms by going up one level and using {nav Reorder Edit Forms}
+in the left menu. This will let you choose which forms have precedence if
+a user has access to multiple edit forms.
+
+The default edit form also controls which which actions are available inline
+in the "Comment" form at the bottom of the detail page, for applications which
+support comments. If you hide or lock a field, corresponding actions will not
+be available.
+
+Some use cases for this include:
+
+**Simplification**: You can modify the default form to reorder fields, add
+instructions, or hide fields you never use.
+
+By default, applications tend to have just one form, which is both an edit form
+and a create form. You can split this into two forms (one edit form and one
+create form) and then simplify the create form without affecting the edit
+form.
+
+You might do this if there are some fields you still want access to that you
+never modify when creating objects. For example, you might always want to
+create tasks with status "Open", and just hide that field from from the create
+form completely. A separate edit form can still give you access to these fields
+if you want to adjust them later.
+
+**Basic and Advanced Workflows**: You can create a basic edit form (with fewer
+fields available) and an advanced edit form, then restrict access to the
+advanced form to experienced users.
+
+By ordering the forms as "Advanced", then "Basic", and applying a view policy
+to the "Advanced" form, you can send experienced users to the advanced form
+and less experienced users to the basic form.
+
+For example, you might use this to hide policy controls or task priorities from
+inexperienced users.
+
+
+Understanding Policies
+======================
+
+IMPORTANT: Simplifying workflows by restricting access to forms and fields does
+**not** enforce policy controls for those fields.
+
+The configurations described above which simplify workflows are advisory, and
+are intended to help users complete workflows quickly and correctly. A user who
+has very limited access to an application through forms will generally still be
+able to use other workflows (like Conduit, Herald, Workboards, email, and other
+applications and integrations) to directly or indirectly modify fields.
+
+For example, even if you lock a user out of all the forms in an application
+that have a "Subscribers" field, they can still add subscribers indirectly by
+using `@username` mentions.
+
+We do not currently plan to change this or introduce enforced, platform-wide
+field-level policy controls. These form customization features are generally
+aimed at helping well-intentioned but inexperienced users complete workflows
+quickly and correctly.
+
+
+Disabling Form Configurations
+=============================
+
+You can disable a form configuration from the form configuration details screen,
+by selecting {nav Disable Form}.
+
+Disabled forms do not appear in any menus by default, and can not be used to
+create or edit objects.
+
+
+Use Case: Specialized Report Form
+=================================
+
+A project might want to provide a specialized bug report form for a specific
+type of issue. For example, if you have an Android application, you might have
+an internal link in that application for employees to "Report a Bug".
+
+A simple way to do this would be to link to the default form and use HTTP
+parameter prefilling to set a project. You might end up with a link like this
+one:
+
+```
+https://your.install.com/maniphest/task/edit/?projects=android
+```
+
+A slightly more advanced method is to create a template task, then use it to
+prefill the form. For example, you might set some projects, subscribers, and
+custom field values on the template task. Then have the application link to
+the a URI that prefills using the template:
+
+```
+https://your.install.com/maniphest/task/edit/?template=123
+```
+
+This is a little easier to use, and lets you update the template later if you
+want to change anything about the defaults that the new tasks are created
+with.
+
+An even more advanced method is to create a new custom form configuration.
+You could call this something like "New Android Bug Report". In addition to
+setting defaults, you could lock, hide, or reorder fields so that the form
+only presents the fields that are relevant to the workflow. You could also
+provide instructions to help users file good reports.
+
+After customizing your form configuration, you'd link to the {nav Use Form}
+URI, like this:
+
+```
+https://your.install.com/maniphest/task/edit/form/123/
+```
+
+You can also combine this with templating or prefilling to further specialize
+the flow.
+
+
+Use Case: Simple Report Flow
+============================
+
+An open source project might want to give new users a simpler bug report form
+with fewer fields and more instructions.
+
+To do this, create a custom form and configure it so it has only the relevant
+fields and includes any instructions. Once it looks good, mark it as a "Create"
+form.
+
+The "Create Task" button should now change into a menu and show both the
+default form and the new simpler form, as well as in the global "Quick Create"
+menu in the main menu bar.
+
+If you prefer the fields appear in a different order, use
+{nav Reorder Create Forms} to adjust the display order. (You could also rename
+the default creation flow to something like "Create Advanced Task" to guide
+users toward the best form).
+
+
+Use Case: Basic and Advanced Users
+==================================
+
+An open source project or a company with a mixture of experienced and less
+experienced users might want to give only some users access to adjust advanced
+fields like "View Policy" and "Edit Policy" when creating tasks.
+
+Before configuring things like this, make sure you review "Understanding
+Policies" above.
+
+To do this, first customize four forms:
+
+  - Basic Create
+  - Advanced Create
+  - Basic Edit
+  - Advanced Edit
+
+You can customize these however you'd like.
+
+The "Advanced" forms should have more fields, while the "Basic" forms should
+be simpler. You may want to add additional instructions to the "Basic Create"
+form.
+
+Then:
+
+  - Mark the two "Create" forms as create forms.
+  - Mark the two "Edit" forms as edit forms.
+  - Limit the visibility of the two "Advanced" forms to only advanced users
+    (for example, "Members of Project: Elite Strike Force").
+  - Use {nav Reorder Edit Forms} to make sure the "Advanced" edit form is at
+    the top of the list. The first visible form on this list will be used, so
+    this makes sure advanced users see the advanced edit form.
+
+Basic users should now only have access to basic fields when creating, editing,
+and commenting on tasks, while advanced users will retain full access.
+
+
+Use Case: Security Issues
+=========================
+
+If you want to make sure security issues are reported with the correct
+policies, you can create a "New Security Issue" form. On this form, prefill the
+View and Edit policies and lock or hide them, then lock or hide any additional
+fields (like projects or subscribers) that you don't want users to adjust. You
+might use a custom policy like this for both the View and Edit policies:
+
+> Allow: Members of Project "Security"
+> Allow: Task Author
+> Deny all other users
+
+This will make it nearly impossible for users to make policy mistakes, and will
+prevent other users from observing these tasks indirectly through Herald rules.
+
+You should review "Understanding Policies" above before pursuing this. In
+particular, note that the author may still be able to leak information about
+the report like this:
+
+  - if they have access to a full-power edit form, they can edit the task
+    //after// creating it and open the policies; or
+  - regardless of their edit form access, they can use the Conduit API to
+    change the task policy; or
+  - regardless of any policy controls in Phabricator, they can screenshot,
+    print, or forward email about the task to anyone; or
+  - regardless of any technical controls in any software, they can decline to
+    report the issue to you in the first place and sell it on the black market
+    instead.
+
+This goals of this workflow are to:
+
+  - prevent other users from observing security issues improperly through
+    mechanisms like Herald; and
+  - prevent mistakes by well-meaning reporters who are unfamiliar with
+    the software.
+
+It is **not** aimed at preventing reporters who are already in possession of
+information from //intentionally// disclosing that information, since they have
+many other channels by which to do this anyway and no software can ever prevent
+it.
+
+
+Use Case: Upstream
+==================
+
+This section describes the upstream configuration circa December 2015. The
+current configuration may not be exactly the same as the one described below.
+
+We run an open source project with a small core team, a moderate number
+of regular contributors, and a large public userbase. Access to the upstream
+Phabricator instance is open to the public.
+
+Although our product is fairly technical, we receive many bug reports and
+feature requests which are of very poor quality. Some users also ignore all the
+documentation and warnings and use the upstream instance as a demo/test
+instance to click as many buttons as they can.
+
+The goals of our configuration are:
+
+  - Provide highly structured "New Bug Report" and "New Feature Request"
+    workflows which make things as easy as possible to get right, in order
+    to improve the quality of new reports.
+  - Separate the userbase into "basic" and "advanced" users. Give the
+    basic users simpler, more streamlined workflows, to make expectations
+    more clear, improve report quality, and limit collateral damage from
+    testing and fiddling.
+
+To these ends, we've configured things like this:
+
+**Community Project**: Advanced users are added to a "Community" project, which
+gives them more advanced access. Advanced forms are "Visible To: Members of
+Project Community".
+
+**Basic and Advanced Edit**: We have basic and advanced task edit forms.
+Members of the community project get access to the advanced one, while other
+users only have access to the basic one.
+
+**Bug, Feature and Advanced Create**: We have "New Bug", "New Feature" and
+"New Advanced Task" creation forms.
+
+The advanced form is the standard creation form, and is only accessible to
+community members.
+
+The basic forms have fewer fields, and each form provides tailored instructions
+which point users at relevant documentation to help them provide good reports.
+
+The basic versions of these forms also have their "Edit Policy" locked down to
+members of the "Community" project and the task author. This means that users
+generally can't mess around with other users' reports, but more experienced
+users can still help manage and resolve tasks.

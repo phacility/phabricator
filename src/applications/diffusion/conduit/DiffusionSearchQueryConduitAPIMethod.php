@@ -25,18 +25,19 @@ final class DiffusionSearchQueryConduitAPIMethod
     );
   }
 
-  protected function defineCustomErrorTypes() {
-    return array(
-      'ERR-GREP-COMMAND' => pht('Grep command failed.'),
-    );
-  }
-
   protected function getResult(ConduitAPIRequest $request) {
     try {
       $results = parent::getResult($request);
     } catch (CommandException $ex) {
-      throw id(new ConduitException('ERR-GREP-COMMAND'))
-        ->setErrorDescription($ex->getStderr());
+      $err = $ex->getError();
+
+      if ($err === 1) {
+        // `git grep` and `hg grep` exit with 1 if there are no matches;
+        // assume we just didn't get any hits.
+        return array();
+      }
+
+      throw $ex;
     }
 
     $offset = $request->getValue('offset');
@@ -63,6 +64,7 @@ final class DiffusionSearchQueryConduitAPIMethod
 
     $binary_pattern = '/Binary file [^:]*:(.+) matches/';
     $lines = new LinesOfALargeExecFuture($future);
+
     foreach ($lines as $line) {
       $result = null;
       if (preg_match('/[^:]*:(.+)\0(.+)\0(.*)/', $line, $result)) {

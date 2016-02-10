@@ -184,14 +184,13 @@ final class PhabricatorCountdownEditController
       ->setFormErrors($errors)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $page_title,
-      ));
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $form_box,
+        ));
   }
 
 }

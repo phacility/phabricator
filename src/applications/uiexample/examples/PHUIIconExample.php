@@ -23,9 +23,9 @@ final class PHUIIconExample extends PhabricatorUIExample {
 
   public function renderExample() {
 
-    $colors = PHUIIconView::getFontIconColors();
+    $colors = PHUIIconView::getIconColors();
     $colors = array_merge(array(null), $colors);
-    $fas = PHUIIconView::getFontIcons();
+    $fas = PHUIIconView::getIcons();
 
     $trans = $this->listTransforms();
 
@@ -33,7 +33,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($colors as $color) {
       $cicons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-transform')
-        ->setIconFont('fa-tag '.$color)
+        ->setIcon('fa-tag '.$color)
         ->setText(pht('fa-tag %s', $color));
     }
     $ficons = array();
@@ -41,7 +41,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     foreach ($fas as $fa) {
       $ficons[] = id(new PHUIIconView())
         ->addClass('phui-example-icon-name')
-        ->setIconFont($fa)
+        ->setIcon($fa)
         ->setText($fa);
     }
 
@@ -110,6 +110,26 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->addClass(PHUI::MARGIN_SMALL_RIGHT);
     }
 
+    $circles = array('fa-pencil', 'fa-chevron-left', 'fa-chevron-right');
+    $circleview = array();
+    foreach ($circles as $circle) {
+      $circleview[] =
+        id(new PHUIIconCircleView())
+          ->setIcon($circle)
+          ->setHref('#')
+          ->addClass('mmr');
+    }
+
+    $circles = array('fa-plus', 'fa-bars', 'fa-paw');
+    foreach ($circles as $circle) {
+      $circleview[] =
+        id(new PHUIIconCircleView())
+          ->setIcon($circle)
+          ->setSize(PHUIIconCircleView::MEDIUM)
+          ->setHref('#')
+          ->addClass('mmr');
+    }
+
     $layout_cicons = id(new PHUIBoxView())
       ->appendChild($cicons)
       ->addMargin(PHUI::MARGIN_LARGE);
@@ -128,6 +148,10 @@ final class PHUIIconExample extends PhabricatorUIExample {
 
     $layout3 = id(new PHUIBoxView())
       ->appendChild($tokenview)
+      ->addMargin(PHUI::MARGIN_MEDIUM);
+
+    $layout4 = id(new PHUIBoxView())
+      ->appendChild($circleview)
       ->addMargin(PHUI::MARGIN_MEDIUM);
 
     $layout5 = id(new PHUIBoxView())
@@ -158,6 +182,10 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->setHeaderText(pht('Tokens'))
       ->appendChild($layout3);
 
+    $wrap4 = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Circles'))
+      ->appendChild($layout4);
+
     $wrap5 = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Authentication'))
       ->appendChild($layout5);
@@ -172,6 +200,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           $transforms,
           $wrap2,
           $wrap3,
+          $wrap4,
           $wrap5,
         ));
   }

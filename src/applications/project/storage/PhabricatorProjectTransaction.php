@@ -10,13 +10,15 @@ final class PhabricatorProjectTransaction
   const TYPE_ICON       = 'project:icon';
   const TYPE_COLOR      = 'project:color';
   const TYPE_LOCKED     = 'project:locked';
+  const TYPE_PARENT = 'project:parent';
+  const TYPE_MILESTONE = 'project:milestone';
+  const TYPE_HASWORKBOARD = 'project:hasworkboard';
 
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
 
   const MAILTAG_METADATA    = 'project-metadata';
   const MAILTAG_MEMBERS     = 'project-members';
-  const MAILTAG_SUBSCRIBERS = 'project-subscribers';
   const MAILTAG_WATCHERS    = 'project-watchers';
   const MAILTAG_OTHER       = 'project-other';
 
@@ -97,9 +99,15 @@ final class PhabricatorProjectTransaction
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
-    $author_handle = $this->renderHandleLink($this->getAuthorPHID());
+    $author_phid = $this->getAuthorPHID();
+    $author_handle = $this->renderHandleLink($author_phid);
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this project.',
+          $this->renderHandleLink($author_phid));
+
       case self::TYPE_NAME:
         if ($old === null) {
           return pht(
@@ -147,10 +155,12 @@ final class PhabricatorProjectTransaction
         break;
 
       case self::TYPE_ICON:
+        $set = new PhabricatorProjectIconSet();
+
         return pht(
           "%s set this project's icon to %s.",
           $author_handle,
-          PhabricatorProjectIcon::getLabel($new));
+          $set->getIconLabel($new));
         break;
 
       case self::TYPE_COLOR:
@@ -237,6 +247,17 @@ final class PhabricatorProjectTransaction
           }
         }
         break;
+
+      case self::TYPE_HASWORKBOARD:
+        if ($new) {
+          return pht(
+            '%s enabled the workboard for this project.',
+            $author_handle);
+        } else {
+          return pht(
+            '%s disabled the workboard for this project.',
+            $author_handle);
+        }
     }
 
     return parent::getTitle();
@@ -301,11 +322,13 @@ final class PhabricatorProjectTransaction
         }
 
       case self::TYPE_ICON:
+        $set = new PhabricatorProjectIconSet();
+
         return pht(
           '%s set the icon for %s to %s.',
           $author_handle,
           $object_handle,
-          PhabricatorProjectIcon::getLabel($new));
+          $set->getIconLabel($new));
 
       case self::TYPE_COLOR:
         return pht(
@@ -355,6 +378,20 @@ final class PhabricatorProjectTransaction
             $object_handle,
             $this->renderSlugList($rem));
         }
+
+      case self::TYPE_HASWORKBOARD:
+        if ($new) {
+          return pht(
+            '%s enabled the workboard for %s.',
+            $author_handle,
+            $object_handle);
+        } else {
+          return pht(
+            '%s disabled the workboard for %s.',
+            $author_handle,
+            $object_handle);
+        }
+
     }
 
     return parent::getTitleForFeed();
@@ -369,9 +406,6 @@ final class PhabricatorProjectTransaction
       case self::TYPE_ICON:
       case self::TYPE_COLOR:
         $tags[] = self::MAILTAG_METADATA;
-        break;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        $tags[] = self::MAILTAG_SUBSCRIBERS;
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         $type = $this->getMetadata('edge:type');

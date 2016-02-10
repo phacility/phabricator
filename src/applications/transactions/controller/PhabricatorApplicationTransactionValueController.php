@@ -3,21 +3,18 @@
 final class PhabricatorApplicationTransactionValueController
   extends PhabricatorApplicationTransactionController {
 
-  private $value;
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-    $this->value = $data['value'];
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $phid = $request->getURIData('phid');
+    $type = $request->getURIData('value');
 
     $xaction = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array($this->phid))
+      ->withPHIDs(array($phid))
       ->executeOne();
     if (!$xaction) {
       return new Aphront404Response();
@@ -42,11 +39,12 @@ final class PhabricatorApplicationTransactionValueController
         break;
     }
 
-    if ($this->value == 'old') {
+    if ($type == 'old') {
       $value = $xaction->getOldValue();
     } else {
       $value = $xaction->getNewValue();
     }
+
     $policy = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($value))
@@ -54,6 +52,7 @@ final class PhabricatorApplicationTransactionValueController
     if (!$policy) {
       return new Aphront404Response();
     }
+
     if ($policy->getType() != PhabricatorPolicyType::TYPE_CUSTOM) {
       return new Aphront404Response();
     }
@@ -66,15 +65,12 @@ final class PhabricatorApplicationTransactionValueController
 
     $this->requireResource('policy-transaction-detail-css');
     $cancel_uri = $this->guessCancelURI($viewer, $xaction);
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+
+    return $this->newDialog()
       ->setTitle($policy->getFullName())
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendChild(
-        $this->renderPolicyDetails($policy, $rule_objects))
+      ->appendChild($this->renderPolicyDetails($policy, $rule_objects))
       ->addCancelButton($cancel_uri, pht('Close'));
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
   private function extractPHIDs(
@@ -109,7 +105,7 @@ final class PhabricatorApplicationTransactionValueController
         $icon = 'fa-minus-circle red';
       }
       $icon = id(new PHUIIconView())
-        ->setIconFont($icon)
+        ->setIcon($icon)
         ->setText(
           ucfirst($rule['action']).' '.$rule_object->getRuleDescription());
 

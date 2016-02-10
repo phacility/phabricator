@@ -7,12 +7,13 @@ final class PhabricatorProjectMoveController
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
+    $request->validateCSRF();
+
     $column_phid = $request->getStr('columnPHID');
     $object_phid = $request->getStr('objectPHID');
     $after_phid = $request->getStr('afterPHID');
     $before_phid = $request->getStr('beforePHID');
     $order = $request->getStr('order', PhabricatorProjectColumn::DEFAULT_ORDER);
-
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -26,9 +27,12 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
-    $object = id(new PhabricatorObjectQuery())
+    $board_phid = $project->getPHID();
+
+    $object = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($object_phid))
+      ->needProjectPHIDs(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -53,11 +57,14 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
-    $positions = id(new PhabricatorProjectColumnPositionQuery())
+    $engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
-      ->withColumns($columns)
-      ->withObjectPHIDs(array($object_phid))
-      ->execute();
+      ->setBoardPHIDs(array($board_phid))
+      ->setObjectPHIDs(array($object_phid))
+      ->executeLayout();
+
+    $columns = $engine->getObjectColumns($board_phid, $object_phid);
+    $old_column_phids = mpull($columns, 'getPHID');
 
     $xactions = array();
 
@@ -79,7 +86,7 @@ final class PhabricatorProjectMoveController
         ) + $order_params)
       ->setOldValue(
         array(
-          'columnPHIDs' => mpull($positions, 'getColumnPHID'),
+          'columnPHIDs' => $old_column_phids,
           'projectPHID' => $column->getProjectPHID(),
         ));
 
@@ -95,6 +102,7 @@ final class PhabricatorProjectMoveController
       $tasks = id(new ManiphestTaskQuery())
         ->setViewer($viewer)
         ->withPHIDs($task_phids)
+        ->needProjectPHIDs(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -132,7 +140,33 @@ final class PhabricatorProjectMoveController
           ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
           ->setNewValue($sub);
       }
-   }
+    }
+
+    $proxy = $column->getProxy();
+    if ($proxy) {
+      // We're moving the task into a subproject or milestone column, so add
+      // the subproject or milestone.
+      $add_projects = array($proxy->getPHID());
+    } else if ($project->getHasSubprojects() || $project->getHasMilestones()) {
+      // We're moving the task into the "Backlog" column on the parent project,
+      // so add the parent explicitly. This gets rid of any subproject or
+      // milestone tags.
+      $add_projects = array($project->getPHID());
+    } else {
+      $add_projects = array();
+    }
+
+    if ($add_projects) {
+      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $project_type)
+        ->setNewValue(
+          array(
+            '+' => array_fuse($add_projects),
+          ));
+    }
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
@@ -142,22 +176,7 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    $owner = null;
-    if ($object->getOwnerPHID()) {
-      $owner = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($object->getOwnerPHID()))
-        ->executeOne();
-    }
-    $card = id(new ProjectBoardTaskCard())
-      ->setViewer($viewer)
-      ->setTask($object)
-      ->setOwner($owner)
-      ->setCanEdit(true)
-      ->getItem();
-
-    return id(new AphrontAjaxResponse())->setContent(
-      array('task' => $card));
- }
+    return $this->newCardResponse($board_phid, $object_phid);
+  }
 
 }

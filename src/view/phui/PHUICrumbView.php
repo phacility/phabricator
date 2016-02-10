@@ -70,7 +70,7 @@ final class PHUICrumbView extends AphrontView {
     if ($this->icon) {
       $classes[] = 'phui-crumb-has-icon';
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon);
+        ->setIcon($this->icon);
     }
 
     $name = phutil_tag(
@@ -83,7 +83,7 @@ final class PHUICrumbView extends AphrontView {
     $divider = null;
     if (!$this->isLastCrumb) {
       $divider = id(new PHUIIconView())
-        ->setIconFont('fa-angle-right')
+        ->setIcon('fa-angle-right')
         ->addClass('phui-crumb-divider')
         ->addClass('phui-crumb-view');
     } else {

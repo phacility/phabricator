@@ -19,4 +19,8 @@ final class PhabricatorSearchStringListField
     return implode(', ', parent::getValueForControl());
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringListParameterType();
+  }
+
 }

@@ -2,12 +2,30 @@
 
 final class DiffusionServeController extends DiffusionController {
 
-  protected function shouldLoadDiffusionRequest() {
-    return false;
+  private $serviceViewer;
+  private $serviceRepository;
+
+  public function setServiceViewer(PhabricatorUser $viewer) {
+    $this->serviceViewer = $viewer;
+    return $this;
   }
 
-  public static function isVCSRequest(AphrontRequest $request) {
-    if (!self::getCallsign($request)) {
+  public function getServiceViewer() {
+    return $this->serviceViewer;
+  }
+
+  public function setServiceRepository(PhabricatorRepository $repository) {
+    $this->serviceRepository = $repository;
+    return $this;
+  }
+
+  public function getServiceRepository() {
+    return $this->serviceRepository;
+  }
+
+  public function isVCSRequest(AphrontRequest $request) {
+    $identifier = $this->getRepositoryIdentifierFromRequest($request);
+    if ($identifier === null) {
       return null;
     }
 
@@ -47,20 +65,76 @@ final class DiffusionServeController extends DiffusionController {
     return $vcs;
   }
 
-  private static function getCallsign(AphrontRequest $request) {
-    $uri = $request->getRequestURI();
+  public function handleRequest(AphrontRequest $request) {
+    $service_exception = null;
+    $response = null;
 
-    $regex = '@^/diffusion/(?P<callsign>[A-Z]+)(/|$)@';
-    $matches = null;
-    if (!preg_match($regex, (string)$uri, $matches)) {
-      return null;
+    try {
+      $response = $this->serveRequest($request);
+    } catch (Exception $ex) {
+      $service_exception = $ex;
     }
 
-    return $matches['callsign'];
+    try {
+      $remote_addr = $request->getRemoteAddress();
+
+      $pull_event = id(new PhabricatorRepositoryPullEvent())
+        ->setEpoch(PhabricatorTime::getNow())
+        ->setRemoteAddress($remote_addr)
+        ->setRemoteProtocol('http');
+
+      if ($response) {
+        $pull_event
+          ->setResultType('wild')
+          ->setResultCode($response->getHTTPResponseCode());
+
+        if ($response instanceof PhabricatorVCSResponse) {
+          $pull_event->setProperties(
+            array(
+              'response.message' => $response->getMessage(),
+            ));
+        }
+      } else {
+        $pull_event
+          ->setResultType('exception')
+          ->setResultCode(500)
+          ->setProperties(
+            array(
+              'exception.class' => get_class($ex),
+              'exception.message' => $ex->getMessage(),
+            ));
+      }
+
+      $viewer = $this->getServiceViewer();
+      if ($viewer) {
+        $pull_event->setPullerPHID($viewer->getPHID());
+      }
+
+      $repository = $this->getServiceRepository();
+      if ($repository) {
+        $pull_event->setRepositoryPHID($repository->getPHID());
+      }
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $pull_event->save();
+      unset($unguarded);
+
+    } catch (Exception $ex) {
+      if ($service_exception) {
+        throw $service_exception;
+      }
+      throw $ex;
+    }
+
+    if ($service_exception) {
+      throw $service_exception;
+    }
+
+    return $response;
   }
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $callsign = self::getCallsign($request);
+  private function serveRequest(AphrontRequest $request) {
+    $identifier = $this->getRepositoryIdentifierFromRequest($request);
 
     // If authentication credentials have been provided, try to find a user
     // that actually matches those credentials.
@@ -79,6 +153,8 @@ final class DiffusionServeController extends DiffusionController {
       // being "not logged in".
       $viewer = new PhabricatorUser();
     }
+
+    $this->setServiceViewer($viewer);
 
     $allow_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
     $allow_auth = PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
@@ -99,7 +175,7 @@ final class DiffusionServeController extends DiffusionController {
     try {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer($viewer)
-        ->withCallsigns(array($callsign))
+        ->withIdentifiers(array($identifier))
         ->executeOne();
       if (!$repository) {
         return new PhabricatorVCSResponse(
@@ -125,6 +201,8 @@ final class DiffusionServeController extends DiffusionController {
         }
       }
     }
+
+    $this->setServiceRepository($repository);
 
     if (!$repository->isTracked()) {
       return new PhabricatorVCSResponse(
@@ -387,7 +465,10 @@ final class DiffusionServeController extends DiffusionController {
     if ($err) {
       return new PhabricatorVCSResponse(
         500,
-        pht('Error %d: %s', $err, $stderr));
+        pht(
+          'Error %d: %s',
+          $err,
+          phutil_utf8ize($stderr)));
     }
 
     return id(new DiffusionGitResponse())->setGitData($stdout);
@@ -638,11 +719,11 @@ final class DiffusionServeController extends DiffusionController {
   }
 
   private function getCommonEnvironment(PhabricatorUser $viewer) {
-    $remote_addr = $this->getRequest()->getRemoteAddr();
+    $remote_address = $this->getRequest()->getRemoteAddress();
 
     return array(
       DiffusionCommitHookEngine::ENV_USER => $viewer->getUsername(),
-      DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS => $remote_addr,
+      DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS => $remote_address,
       DiffusionCommitHookEngine::ENV_REMOTE_PROTOCOL => 'http',
     );
   }

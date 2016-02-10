@@ -6,7 +6,7 @@ final class DiffusionRepositoryCreateController
   private $edit;
   private $repository;
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
     $this->edit = $request->getURIData('edit');
 
@@ -19,6 +19,11 @@ final class DiffusionRepositoryCreateController
     switch ($this->edit) {
       case 'remote':
       case 'policy':
+        $response = $this->loadDiffusionContextForEdit();
+        if ($response) {
+          return $response;
+        }
+
         $repository = $this->getDiffusionRequest()->getRepository();
 
         // Make sure we have CAN_EDIT.
@@ -275,14 +280,10 @@ final class DiffusionRepositoryCreateController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($form);
   }
 
 
@@ -322,25 +323,6 @@ final class DiffusionRepositoryCreateController
         PhabricatorRepositoryType::REPOSITORY_TYPE_SVN,
         pht('Subversion'),
         $svn_str);
-
-    if ($is_import) {
-      $control->addButton(
-        PhabricatorRepositoryType::REPOSITORY_TYPE_PERFORCE,
-        pht('Perforce'),
-        pht(
-          'Perforce is not directly supported, but you can import '.
-          'a Perforce repository as a Git repository using %s.',
-          phutil_tag(
-            'a',
-            array(
-              'href' =>
-                'http://www.perforce.com/product/components/git-fusion',
-              'target' => '_blank',
-            ),
-            pht('Perforce Git Fusion'))),
-        'disabled',
-        $disabled = true);
-    }
 
     return id(new PHUIFormPageView())
       ->setPageName(pht('Repository Type'))

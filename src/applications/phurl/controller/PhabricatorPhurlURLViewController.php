@@ -49,7 +49,7 @@ final class PhabricatorPhurlURLViewController
       : pht('More Cowbell');
     $draft = PhabricatorDraft::newFromUserAndKey($viewer, $url->getPHID());
     $comment_uri = $this->getApplicationURI(
-      '/phurl/comment/'.$url->getID().'/');
+      '/url/comment/'.$url->getID().'/');
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
       ->setObjectPHID($url->getPHID())
@@ -79,7 +79,7 @@ final class PhabricatorPhurlURLViewController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($url->getName())
+      ->setHeader($url->getDisplayName())
       ->setStatus($icon, $color, $status)
       ->setPolicyObject($url);
 
@@ -91,7 +91,6 @@ final class PhabricatorPhurlURLViewController
     $id = $url->getID();
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($url->getURI())
       ->setUser($viewer)
       ->setObject($url);
 

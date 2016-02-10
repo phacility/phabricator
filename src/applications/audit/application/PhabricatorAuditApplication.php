@@ -6,7 +6,7 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return '/audit/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-check-circle-o';
   }
 
@@ -47,6 +47,7 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
 
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
+    $limit = self::MAX_STATUS_ITEMS;
 
     $phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
 
@@ -54,14 +55,16 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
       ->setViewer($user)
       ->withAuthorPHIDs(array($user->getPHID()))
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_CONCERN)
-      ->setLimit(self::MAX_STATUS_ITEMS);
+      ->setLimit($limit);
     $commits = $query->execute();
 
     $count = count($commits);
-    $count_str = self::formatStatusCount(
-      $count,
-      '%s Problem Commits',
-      '%d Problem Commit(s)');
+    if ($count >= $limit) {
+      $count_str = pht('%s+ Problem Commit(s)', new PhutilNumber($limit - 1));
+    } else {
+      $count_str = pht('%s Problem Commit(s)', new PhutilNumber($count));
+    }
+
     $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
@@ -72,14 +75,16 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
       ->setViewer($user)
       ->withNeedsAuditByPHIDs($phids)
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_OPEN)
-      ->setLimit(self::MAX_STATUS_ITEMS);
+      ->setLimit($limit);
     $commits = $query->execute();
 
     $count = count($commits);
-    $count_str = self::formatStatusCount(
-      $count,
-      '%s Commits Awaiting Audit',
-      '%d Commit(s) Awaiting Audit');
+    if ($count >= $limit) {
+      $count_str = pht('%s+ Problem Commit(s)', new PhutilNumber($limit - 1));
+    } else {
+      $count_str = pht('%s Problem Commit(s)', new PhutilNumber($count));
+    }
+
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)

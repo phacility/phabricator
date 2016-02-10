@@ -14,7 +14,7 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
     return pht('Achievements and Notority');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-trophy';
   }
 
@@ -45,12 +45,10 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
           => 'PhabricatorBadgesCommentController',
         'edit/(?:(?P<id>\d+)/)?'
           => 'PhabricatorBadgesEditController',
+        'archive/(?:(?P<id>\d+)/)?'
+          => 'PhabricatorBadgesArchiveController',
         'view/(?:(?P<id>\d+)/)?'
           => 'PhabricatorBadgesViewController',
-        'icon/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorBadgesEditIconController',
-        'icon/'
-          => 'PhabricatorBadgesEditIconController',
         'recipients/(?P<id>[1-9]\d*)/'
           => 'PhabricatorBadgesEditRecipientsController',
         'recipients/(?P<id>[1-9]\d*)/remove/'

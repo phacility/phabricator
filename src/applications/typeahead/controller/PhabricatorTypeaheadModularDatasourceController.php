@@ -237,7 +237,7 @@ final class PhabricatorTypeaheadModularDatasourceController
 
           $function_help = array(
             id(new PHUIIconView())
-              ->setIconFont('fa-book'),
+              ->setIcon('fa-book'),
             ' ',
             $reference_link,
           );

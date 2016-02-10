@@ -24,7 +24,6 @@ final class PHUIStatusItemView extends AphrontTagView {
   const ICON_CLOCK = 'fa-clock-o';
   const ICON_STAR = 'fa-star';
 
-  /* render_textarea */
   public function setIcon($icon, $color = null, $label = null) {
     $this->icon = $icon;
     $this->iconLabel = $label;
@@ -71,7 +70,7 @@ final class PHUIStatusItemView extends AphrontTagView {
     $icon = null;
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon.' '.$this->iconColor);
+        ->setIcon($this->icon.' '.$this->iconColor);
 
       if ($this->iconLabel) {
         Javelin::initBehavior('phabricator-tooltips');

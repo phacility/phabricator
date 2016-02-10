@@ -3,15 +3,15 @@
 final class DiffusionRepositoryEditMainController
   extends DiffusionRepositoryEditController {
 
-  protected function processDiffusionRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
+    }
 
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $is_svn = false;
     $is_git = false;
@@ -224,7 +224,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -287,15 +286,12 @@ final class DiffusionRepositoryEditMainController
     $view->addProperty(pht('Type'), $type);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
-    $clone_name = $repository->getDetail('clone-name');
-
-    if ($repository->isHosted()) {
-      $view->addProperty(
-        pht('Clone/Checkout As'),
-        $clone_name
-          ? $clone_name.'/'
-          : phutil_tag('em', array(), $repository->getCloneName().'/'));
+    $short_name = $repository->getRepositorySlug();
+    if ($short_name === null) {
+      $short_name = $repository->getCloneName();
+      $short_name = phutil_tag('em', array(), $short_name);
     }
+    $view->addProperty(pht('Short Name'), $short_name);
 
     $view->invokeWillRenderEvent();
 
@@ -327,7 +323,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -364,7 +359,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -419,7 +413,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -469,7 +462,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -509,7 +501,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -551,7 +542,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -592,7 +582,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -640,7 +629,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getViewer();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -678,7 +666,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getViewer();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())
@@ -732,7 +719,6 @@ final class DiffusionRepositoryEditMainController
     $user = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($user);
 
     $edit = id(new PhabricatorActionView())
@@ -1148,45 +1134,8 @@ final class DiffusionRepositoryEditMainController
     }
 
     if ($repository->isImporting()) {
-      $progress = queryfx_all(
-        $repository->establishConnection('r'),
-        'SELECT importStatus, count(*) N FROM %T WHERE repositoryID = %d
-          GROUP BY importStatus',
-        id(new PhabricatorRepositoryCommit())->getTableName(),
-        $repository->getID());
-
-      $done = 0;
-      $total = 0;
-      foreach ($progress as $row) {
-        $total += $row['N'] * 4;
-        $status = $row['importStatus'];
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_MESSAGE) {
-          $done += $row['N'];
-        }
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_CHANGE) {
-          $done += $row['N'];
-        }
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_OWNERS) {
-          $done += $row['N'];
-        }
-        if ($status & PhabricatorRepositoryCommit::IMPORTED_HERALD) {
-          $done += $row['N'];
-        }
-      }
-
-      if ($total) {
-        $percentage = 100 * ($done / $total);
-      } else {
-        $percentage = 0;
-      }
-
-      // Cap this at "99.99%", because it's confusing to users when the actual
-      // fraction is "99.996%" and it rounds up to "100.00%".
-      if ($percentage > 99.99) {
-        $percentage = 99.99;
-      }
-
-      $percentage = sprintf('%.2f%%', $percentage);
+      $ratio = $repository->loadImportProgress();
+      $percentage = sprintf('%.2f%%', 100 * $ratio);
 
       $view->addItem(
         id(new PHUIStatusItemView())
@@ -1240,7 +1189,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $mirror_actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $new_mirror_uri = $this->getRepositoryControllerURI(
@@ -1319,7 +1267,6 @@ final class DiffusionRepositoryEditMainController
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $edit = id(new PhabricatorActionView())

@@ -54,12 +54,12 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
 
     static $icon_names;
     if (!$icon_names) {
-      $icon_names = array_fuse(PHUIIconView::getFontIcons());
+      $icon_names = array_fuse(PHUIIconView::getIcons());
     }
 
     static $color_names;
     if (!$color_names) {
-      $color_names = array_fuse(PHUIIconView::getFontIconColors());
+      $color_names = array_fuse(PHUIIconView::getIconColors());
     }
 
     if (empty($icon_names['fa-'.$icon])) {
@@ -80,7 +80,7 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
     }
 
     $icon_view = id(new PHUIIconView())
-      ->setIconFont('fa-'.$icon, implode(' ', $classes));
+      ->setIcon('fa-'.$icon, implode(' ', $classes));
 
     return $this->getEngine()->storeText($icon_view);
   }

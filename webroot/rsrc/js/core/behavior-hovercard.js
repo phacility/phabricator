@@ -1,14 +1,14 @@
 /**
- * @provides javelin-behavior-phabricator-hovercards
+ * @provides javelin-behavior-phui-hovercards
  * @requires javelin-behavior
  *           javelin-behavior-device
  *           javelin-stratcom
  *           javelin-vector
- *           phabricator-hovercard
+ *           phui-hovercard
  * @javelin
  */
 
-JX.behavior('phabricator-hovercards', function() {
+JX.behavior('phui-hovercards', function() {
 
   // We listen for mousemove instead of mouseover to handle the case when user
   // scrolls with keyboard. We don't want to display hovercard if node gets
@@ -40,8 +40,8 @@ JX.behavior('phabricator-hovercards', function() {
 
       var root = JX.Hovercard.getAnchor();
       var node = JX.Hovercard.getCard();
+      var align = JX.Hovercard.getAlignment();
 
-      // TODO: Add southern cases here, too
       var mouse = JX.$V(e);
       var node_pos = JX.$V(node);
       var node_dim = JX.Vector.getDim(node);
@@ -50,14 +50,26 @@ JX.behavior('phabricator-hovercards', function() {
 
       var margin = 20;
 
-      // Cursor is above the node.
-      if (mouse.y < node_pos.y - margin) {
-        JX.Hovercard.hide();
-      }
+      if (align == 'south') {
+        // Cursor is below the node.
+        if (mouse.y > node_pos.y + node_dim.y + margin) {
+          JX.Hovercard.hide();
+        }
 
-      // Cursor is below the root.
-      if (mouse.y > root_pos.y + root_dim.y + margin) {
-        JX.Hovercard.hide();
+        // Cursor is above the root.
+        if (mouse.y < root_pos.y - margin) {
+          JX.Hovercard.hide();
+        }
+      } else {
+        // Cursor is above the node.
+        if (mouse.y < node_pos.y - margin) {
+          JX.Hovercard.hide();
+        }
+
+        // Cursor is below the root.
+        if (mouse.y > root_pos.y + root_dim.y + margin) {
+          JX.Hovercard.hide();
+        }
       }
 
       // Cursor is too far to the left.

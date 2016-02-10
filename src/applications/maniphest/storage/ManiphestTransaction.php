@@ -14,6 +14,10 @@ final class ManiphestTransaction
   const TYPE_MERGED_INTO = 'mergedinto';
   const TYPE_MERGED_FROM = 'mergedfrom';
   const TYPE_UNBLOCK = 'unblock';
+  const TYPE_PARENT = 'parent';
+  const TYPE_COLUMN = 'column';
+  const TYPE_COVER_IMAGE = 'cover-image';
+  const TYPE_POINTS = 'points';
 
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
@@ -147,6 +151,8 @@ final class ManiphestTransaction
         }
         break;
       case self::TYPE_SUBPRIORITY:
+      case self::TYPE_PARENT:
+      case self::TYPE_COLUMN:
         return true;
       case self::TYPE_PROJECT_COLUMN:
         $old_cols = idx($this->getOldValue(), 'columnPHIDs');
@@ -158,9 +164,42 @@ final class ManiphestTransaction
         sort($new_cols);
 
         return ($old_cols === $new_cols);
+      case self::TYPE_COVER_IMAGE:
+        // At least for now, don't show these.
+        return true;
+      case self::TYPE_POINTS:
+        if (!ManiphestTaskPoints::getIsEnabled()) {
+          return true;
+        }
     }
 
     return parent::shouldHide();
+  }
+
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_POINTS:
+        return true;
+    }
+
+    return parent::shouldHideForMail($xactions);
+  }
+
+  public function shouldHideForFeed() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_UNBLOCK:
+        // Hide "alice created X, a task blocking Y." from feed because it
+        // will almost always appear adjacent to "alice created Y".
+        $is_new = $this->getMetadataValue('blocker.new');
+        if ($is_new) {
+          return true;
+        }
+        break;
+      case self::TYPE_POINTS:
+        return true;
+    }
+
+    return parent::shouldHideForFeed();
   }
 
   public function getActionStrength() {
@@ -377,6 +416,11 @@ final class ManiphestTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this task.',
+          $this->renderHandleLink($author_phid));
+
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
@@ -470,7 +514,12 @@ final class ManiphestTransaction
         $old_name = ManiphestTaskStatus::getTaskStatusName($old_status);
         $new_name = ManiphestTaskStatus::getTaskStatusName($new_status);
 
-        if ($old_closed && !$new_closed) {
+        if ($this->getMetadataValue('blocker.new')) {
+          return pht(
+            '%s created blocking task %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid));
+        } else if ($old_closed && !$new_closed) {
           return pht(
             '%s reopened blocking task %s as "%s".',
             $this->renderHandleLink($author_phid),
@@ -591,6 +640,23 @@ final class ManiphestTransaction
           $this->renderHandleList($new));
         break;
 
+      case self::TYPE_POINTS:
+        if ($old === null) {
+          return pht(
+            '%s set the point value for this task to %s.',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else if ($new === null) {
+          return pht(
+            '%s removed the point value for this task.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s changed the point value for this task from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
 
     }
 
@@ -839,9 +905,9 @@ final class ManiphestTransaction
 
       case self::TYPE_MERGED_FROM:
         return pht(
-          '%s merged %d task(s) %s into %s.',
+          '%s merged %s task(s) %s into %s.',
           $this->renderHandleLink($author_phid),
-          count($new),
+          phutil_count($new),
           $this->renderHandleList($new),
           $this->renderHandleLink($object_phid));
 

@@ -121,6 +121,10 @@ abstract class PhabricatorAuthProvider extends Phobject {
   }
 
   public function shouldAllowRegistration() {
+    if (!$this->shouldAllowLogin()) {
+      return false;
+    }
+
     return $this->getProviderConfig()->getShouldAllowRegistration();
   }
 

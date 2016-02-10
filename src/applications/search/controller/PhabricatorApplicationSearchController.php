@@ -100,18 +100,26 @@ final class PhabricatorApplicationSearchController
     } else if (!strlen($this->queryKey)) {
       $found_query_data = false;
 
-      if ($request->isHTTPGet()) {
+      if ($request->isHTTPGet() || $request->isQuicksand()) {
         // If this is a GET request and it has some query data, don't
         // do anything unless it's only before= or after=. We'll build and
         // execute a query from it below. This allows external tools to build
         // URIs like "/query/?users=a,b".
         $pt_data = $request->getPassthroughRequestData();
 
+        $exempt = array(
+          'before' => true,
+          'after' => true,
+          'nux' => true,
+        );
+
         foreach ($pt_data as $pt_key => $pt_value) {
-          if ($pt_key != 'before' && $pt_key != 'after') {
-            $found_query_data = true;
-            break;
+          if (isset($exempt[$pt_key])) {
+            continue;
           }
+
+          $found_query_data = true;
+          break;
         }
       }
 
@@ -203,12 +211,15 @@ final class PhabricatorApplicationSearchController
 
     $body[] = $box;
 
+
     if ($run_query) {
       $box->setAnchor(
         id(new PhabricatorAnchorView())
           ->setAnchorName('R'));
 
       try {
+        $engine->setRequest($request);
+
         $query = $engine->buildQueryFromSavedQuery($saved_query);
 
         $pager = $engine->newPagerForSavedQuery($saved_query);
@@ -216,49 +227,58 @@ final class PhabricatorApplicationSearchController
 
         $objects = $engine->executeQuery($query, $pager);
 
-        $engine->setRequest($request);
-        $list = $engine->renderResults($objects, $saved_query);
-
-        if (!($list instanceof PhabricatorApplicationSearchResultView)) {
-          throw new Exception(
-            pht(
-              'SearchEngines must render a "%s" object, but this engine '.
-              '(of class "%s") rendered something else.',
-              'PhabricatorApplicationSearchResultView',
-              get_class($engine)));
+        $force_nux = $request->getBool('nux');
+        if (!$objects || $force_nux) {
+          $nux_view = $this->renderNewUserView($engine, $force_nux);
+        } else {
+          $nux_view = null;
         }
 
-        if ($list->getActions()) {
-          foreach ($list->getActions() as $action) {
-            $header->addActionLink($action);
+        if ($nux_view) {
+          $box->appendChild($nux_view);
+        } else {
+          $list = $engine->renderResults($objects, $saved_query);
+
+          if (!($list instanceof PhabricatorApplicationSearchResultView)) {
+            throw new Exception(
+              pht(
+                'SearchEngines must render a "%s" object, but this engine '.
+                '(of class "%s") rendered something else.',
+                'PhabricatorApplicationSearchResultView',
+                get_class($engine)));
+          }
+
+          if ($list->getActions()) {
+            foreach ($list->getActions() as $action) {
+              $header->addActionLink($action);
+            }
+          }
+
+          if ($list->getObjectList()) {
+            $box->setObjectList($list->getObjectList());
+          }
+          if ($list->getTable()) {
+            $box->setTable($list->getTable());
+          }
+          if ($list->getInfoView()) {
+            $box->setInfoView($list->getInfoView());
+          }
+          if ($list->getContent()) {
+            $box->appendChild($list->getContent());
+          }
+          if ($list->getCollapsed()) {
+            $box->setCollapsed(true);
+          }
+
+          if ($pager->willShowPagingControls()) {
+            $pager_box = id(new PHUIBoxView())
+              ->addPadding(PHUI::PADDING_MEDIUM)
+              ->addMargin(PHUI::MARGIN_LARGE)
+              ->setBorder(true)
+              ->appendChild($pager);
+            $body[] = $pager_box;
           }
         }
-
-        if ($list->getObjectList()) {
-          $box->setObjectList($list->getObjectList());
-        }
-        if ($list->getTable()) {
-          $box->setTable($list->getTable());
-        }
-        if ($list->getInfoView()) {
-          $box->setInfoView($list->getInfoView());
-        }
-        if ($list->getContent()) {
-          $box->appendChild($list->getContent());
-        }
-        if ($list->getCollapsed()) {
-          $box->setCollapsed(true);
-        }
-
-        if ($pager->willShowPagingControls()) {
-          $pager_box = id(new PHUIBoxView())
-            ->addPadding(PHUI::PADDING_MEDIUM)
-            ->addMargin(PHUI::MARGIN_LARGE)
-            ->setBorder(true)
-            ->appendChild($pager);
-          $body[] = $pager_box;
-        }
-
       } catch (PhabricatorTypeaheadInvalidTokenException $ex) {
         $errors[] = pht(
           'This query specifies an invalid parameter. Review the '.
@@ -395,5 +415,48 @@ final class PhabricatorApplicationSearchController
 
     return $nav;
   }
+
+  private function renderNewUserView(
+    PhabricatorApplicationSearchEngine $engine,
+    $force_nux) {
+
+    // Don't render NUX if the user has clicked away from the default page.
+    if (strlen($this->getQueryKey())) {
+      return null;
+    }
+
+    // Don't put NUX in panels because it would be weird.
+    if ($engine->isPanelContext()) {
+      return null;
+    }
+
+    // Try to render the view itself first, since this should be very cheap
+    // (just returning some text).
+    $nux_view = $engine->renderNewUserView();
+
+    if (!$nux_view) {
+      return null;
+    }
+
+    $query = $engine->newQuery();
+    if (!$query) {
+      return null;
+    }
+
+    // Try to load any object at all. If we can, the application has seen some
+    // use so we just render the normal view.
+    if (!$force_nux) {
+      $object = $query
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setLimit(1)
+        ->execute();
+      if ($object) {
+        return null;
+      }
+    }
+
+    return $nux_view;
+  }
+
 
 }

@@ -67,6 +67,7 @@ final class DrydockRepositoryOperationStatusView
 
     $item = id(new PHUIObjectItemView())
       ->setHref("/drydock/operation/{$id}/")
+      ->setObjectName(pht('Operation %d', $id))
       ->setHeader($operation->getOperationDescription($viewer))
       ->setStatusIcon($icon, $name);
 
@@ -98,6 +99,16 @@ final class DrydockRepositoryOperationStatusView
       } else {
         $item->addAttribute(pht('Operation encountered an error.'));
       }
+
+      $is_dismissed = $operation->getIsDismissed();
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setName('Dismiss')
+          ->setIcon('fa-times')
+          ->setDisabled($is_dismissed)
+          ->setWorkflow(true)
+          ->setHref("/drydock/operation/{$id}/dismiss/"));
     }
 
     return id(new PHUIObjectItemListView())

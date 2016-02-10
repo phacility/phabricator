@@ -18,7 +18,7 @@ final class PhabricatorRepositoryManagementListWorkflow
       ->execute();
     if ($repos) {
       foreach ($repos as $repo) {
-        $console->writeOut("%s\n", $repo->getCallsign());
+        $console->writeOut("%s\n", $repo->getMonogram());
       }
     } else {
       $console->writeErr("%s\n", pht('There are no repositories.'));

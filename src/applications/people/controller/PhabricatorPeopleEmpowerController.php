@@ -3,47 +3,41 @@
 final class PhabricatorPeopleEmpowerController
   extends PhabricatorPeopleController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer($admin)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
     }
 
-    $profile_uri = '/p/'.$user->getUsername().'/';
+    $done_uri = $this->getApplicationURI("manage/{$id}/");
 
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
-      $admin,
+      $viewer,
       $request,
-      $profile_uri);
+      $done_uri);
 
-    if ($user->getPHID() == $admin->getPHID()) {
+    if ($user->getPHID() == $viewer->getPHID()) {
       return $this->newDialog()
         ->setTitle(pht('Your Way is Blocked'))
         ->appendParagraph(
           pht(
             'After a time, your efforts fail. You can not adjust your own '.
             'status as an administrator.'))
-        ->addCancelButton($profile_uri, pht('Accept Fate'));
+        ->addCancelButton($done_uri, pht('Accept Fate'));
     }
 
     if ($request->isFormPost()) {
       id(new PhabricatorUserEditor())
-        ->setActor($admin)
+        ->setActor($viewer)
         ->makeAdminUser($user, !$user->getIsAdmin());
 
-      return id(new AphrontRedirectResponse())->setURI($profile_uri);
+      return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
 
     if ($user->getIsAdmin()) {
@@ -69,7 +63,7 @@ final class PhabricatorPeopleEmpowerController
       ->setTitle($title)
       ->setShortTitle($short)
       ->appendParagraph($body)
-      ->addCancelButton($profile_uri)
+      ->addCancelButton($done_uri)
       ->addSubmitButton($submit);
   }
 

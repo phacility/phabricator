@@ -140,7 +140,7 @@ final class PhabricatorDashboardSearchEngine
           ->setSlim(true)
           ->setHandles($project_handles));
 
-      if ($dashboard->isClosed()) {
+      if ($dashboard->isArchived()) {
         $item->setDisabled(true);
       }
 
@@ -172,6 +172,26 @@ final class PhabricatorDashboardSearchEngine
     $result->setNoDataString(pht('No dashboards found.'));
 
     return $result;
+  }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Dashboard'))
+      ->setHref('/dashboard/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Customize your homepage with different panels and '.
+            'search queries.'))
+      ->addAction($create_button);
+
+      return $view;
   }
 
 }

@@ -4,7 +4,6 @@ final class PHUIIconView extends AphrontTagView {
 
   const SPRITE_TOKENS = 'tokens';
   const SPRITE_LOGIN = 'login';
-  const SPRITE_PROJECTS = 'projects';
 
   const HEAD_SMALL = 'phuihead-small';
   const HEAD_MEDIUM = 'phuihead-medium';
@@ -49,7 +48,7 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
-  public function setIconFont($icon, $color = null) {
+  public function setIcon($icon, $color = null) {
     $this->iconFont = $icon;
     $this->iconColor = $color;
     return $this;
@@ -106,7 +105,7 @@ final class PHUIIconView extends AphrontTagView {
     return idx(phutil_json_decode($data), 'sprites');
   }
 
-  public static function getFontIcons() {
+  public static function getIcons() {
     return array(
       'fa-glass',
       'fa-music',
@@ -725,11 +724,30 @@ final class PHUIIconView extends AphrontTagView {
       'fa-vimeo',
       'fa-black-tie',
       'fa-fonticons',
-
+      'fa-reddit-alien',
+      'fa-edge',
+      'fa-credit-card-alt',
+      'fa-codiepie:before',
+      'fa-modx',
+      'fa-fort-awesome',
+      'fa-usb',
+      'fa-product-hunt',
+      'fa-mixcloud',
+      'fa-scribd',
+      'fa-pause-circle',
+      'fa-pause-circle-o',
+      'fa-stop-circle',
+      'fa-stop-circle-o',
+      'fa-shopping-bag',
+      'fa-shopping-basket',
+      'fa-hashtag',
+      'fa-bluetooth',
+      'fa-bluetooth-b',
+      'fa-percent',
     );
   }
 
-  public static function getFontIconColors() {
+  public static function getIconColors() {
     return array(
       'bluegrey',
       'white',

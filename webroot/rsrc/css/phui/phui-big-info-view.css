@@ -1,0 +1,37 @@
+/**
+ * @provides phui-big-info-view-css
+ */
+
+.phui-big-info-view {
+  padding: 64px 32px;
+  margin: 16px 4px;
+  background-color: {$sh-greybackground};
+  text-align: center;
+}
+
+.phui-big-info-icon {
+  font-size: 48px;
+}
+
+.phui-big-info-title {
+  font-size: 18px;
+  padding: 4px;
+  font-weight: bold;
+}
+
+.phui-big-info-description {
+  font-size: {$biggerfontsize};
+  padding: 4px;
+}
+
+.phui-big-info-actions {
+  padding: 24px 0 0;
+}
+
+.phui-big-info-button {
+  display: inline-block;
+}
+
+.phui-big-info-button + .phui-big-info-button {
+  margin-left: 12px;
+}

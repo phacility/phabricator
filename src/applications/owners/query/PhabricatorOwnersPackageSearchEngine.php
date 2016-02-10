@@ -21,19 +21,33 @@ final class PhabricatorOwnersPackageSearchEngine
         ->setLabel(pht('Authority'))
         ->setKey('authorityPHIDs')
         ->setAliases(array('authority', 'authorities'))
+        ->setConduitKey('owners')
+        ->setDescription(
+          pht('Search for packages with specific owners.'))
         ->setDatasource(new PhabricatorProjectOrUserDatasource()),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name')
+        ->setDescription(pht('Search for packages by name substrings.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
+        ->setConduitKey('repositories')
         ->setAliases(array('repository', 'repositories'))
+        ->setDescription(
+          pht('Search for packages by included repositories.'))
         ->setDatasource(new DiffusionRepositoryDatasource()),
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Paths'))
         ->setKey('paths')
-        ->setAliases(array('path')),
+        ->setAliases(array('path'))
+        ->setDescription(
+          pht('Search for packages affecting specific paths.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Status'))
+        ->setDescription(
+          pht('Search for active or archived packages.'))
         ->setOptions(
           id(new PhabricatorOwnersPackage())
             ->getStatusNameMap()),
@@ -57,6 +71,10 @@ final class PhabricatorOwnersPackageSearchEngine
 
     if ($map['statuses']) {
       $query->withStatuses($map['statuses']);
+    }
+
+    if (strlen($map['name'])) {
+      $query->withNameNgrams($map['name']);
     }
 
     return $query;
@@ -136,4 +154,25 @@ final class PhabricatorOwnersPackageSearchEngine
     return $result;
 
   }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Create a Package'))
+      ->setHref('/owners/edit/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Group sections of a codebase into packages for re-use in other '.
+        'areas of Phabricator, like Herald rules.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
+
 }

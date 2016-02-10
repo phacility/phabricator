@@ -14,7 +14,7 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     return pht('Chat with Others');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-comments';
   }
 
@@ -25,12 +25,6 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
   public function getRemarkupRules() {
     return array(
       new ConpherenceThreadRemarkupRule(),
-    );
-  }
-
-  public function getEventListeners() {
-    return array(
-      new ConpherenceHovercardEventListener(),
     );
   }
 

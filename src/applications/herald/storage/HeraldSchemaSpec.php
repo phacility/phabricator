@@ -33,6 +33,7 @@ final class HeraldSchemaSpec extends PhabricatorConfigSchemaSpec {
           'unique' => true,
         ),
       ));
+    $this->buildEdgeSchemata(new HeraldRule());
   }
 
 }

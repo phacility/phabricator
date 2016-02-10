@@ -11,7 +11,7 @@ final class PhabricatorSendGridConfigOptions
     return pht('Configure SendGrid integration.');
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-send-o';
   }
 

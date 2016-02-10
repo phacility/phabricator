@@ -16,21 +16,21 @@ final class AlmanacConsoleController extends AlmanacController {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Services'))
         ->setHref($this->getApplicationURI('service/'))
-        ->setFontIcon('fa-plug')
+        ->setIcon('fa-plug')
         ->addAttribute(pht('Manage Almanac services.')));
 
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Devices'))
         ->setHref($this->getApplicationURI('device/'))
-        ->setFontIcon('fa-server')
+        ->setIcon('fa-server')
         ->addAttribute(pht('Manage Almanac devices.')));
 
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Networks'))
         ->setHref($this->getApplicationURI('network/'))
-        ->setFontIcon('fa-globe')
+        ->setIcon('fa-globe')
         ->addAttribute(pht('Manage Almanac networks.')));
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -40,14 +40,14 @@ final class AlmanacConsoleController extends AlmanacController {
       ->setHeaderText(pht('Console'))
       ->setObjectList($menu);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title'  => pht('Almanac Console'),
+    return $this->newPage()
+      ->setTitle(pht('Almanac Console'))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
       ));
+
   }
 
 }

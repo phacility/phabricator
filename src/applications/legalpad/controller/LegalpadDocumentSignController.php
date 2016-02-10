@@ -250,9 +250,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-pencil'))
+          ->setIcon('fa-pencil')
           ->setText(pht('Manage'))
           ->setHref($manage_uri)
           ->setDisabled(!$can_edit)
@@ -331,7 +329,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
       ),
       array(
         'title' => $title,
-        'class' => 'pro-white-background',
         'pageObjects' => array($document->getPHID()),
       ));
   }

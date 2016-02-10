@@ -103,6 +103,24 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   protected function getOptions() {
     $capability = $this->capability;
     $policies = $this->policies;
+    $viewer = $this->getUser();
+
+    // Check if we're missing the policy for the current control value. This
+    // is unusual, but can occur if the user is submitting a form and selected
+    // an unusual project as a policy but the change has not been saved yet.
+    $policy_map = mpull($policies, null, 'getPHID');
+    $value = $this->getValue();
+    if ($value && empty($policy_map[$value])) {
+      $handle = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($value))
+        ->executeOne();
+      if ($handle->isComplete()) {
+        $policies[] = PhabricatorPolicy::newFromPolicyAndHandle(
+          $value,
+          $handle);
+      }
+    }
 
     // Exclude object policies which don't make sense here. This primarily
     // filters object policies associated from template capabilities (like
@@ -143,12 +161,32 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'name' => $policy_short_name,
         'full' => $policy->getName(),
         'icon' => $policy->getIcon(),
+        'sort' => phutil_utf8_strtolower($policy->getName()),
       );
     }
 
+    $type_project = PhabricatorPolicyType::TYPE_PROJECT;
+
+    // Make sure we have a "Projects" group before we adjust it.
+    if (empty($options[$type_project])) {
+      $options[$type_project] = array();
+    }
+
+    $options[$type_project] = isort($options[$type_project], 'sort');
+
+    $placeholder = id(new PhabricatorPolicy())
+      ->setName(pht('Other Project...'))
+      ->setIcon('fa-search');
+
+    $options[$type_project][$this->getSelectProjectKey()] = array(
+      'name' => $placeholder->getName(),
+      'full' => $placeholder->getName(),
+      'icon' => $placeholder->getIcon(),
+    );
+
     // If we were passed several custom policy options, throw away the ones
     // which aren't the value for this capability. For example, an object might
-    // have a custom view pollicy and a custom edit policy. When we render
+    // have a custom view policy and a custom edit policy. When we render
     // the selector for "Can View", we don't want to show the "Can Edit"
     // custom policy -- if we did, the menu would look like this:
     //
@@ -172,7 +210,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     if (empty($options[$type_custom])) {
       $placeholder = new PhabricatorPolicy();
       $placeholder->setName(pht('Custom Policy...'));
-      $options[$type_custom][$this->getCustomPolicyPlaceholder()] = array(
+      $options[$type_custom][$this->getSelectCustomKey()] = array(
         'name' => $placeholder->getName(),
         'full' => $placeholder->getName(),
         'icon' => $placeholder->getIcon(),
@@ -242,7 +280,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     $icons = array();
     foreach (igroup($flat_options, 'icon') as $icon => $ignored) {
       $icons[$icon] = id(new PHUIIconView())
-        ->setIconFont($icon);
+        ->setIcon($icon);
     }
 
 
@@ -266,12 +304,13 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'options' => $flat_options,
         'groups' => array_keys($options),
         'order' => $order,
-        'icons' => $icons,
         'labels' => $labels,
         'value' => $this->getValue(),
         'capability' => $this->capability,
         'editURI' => '/policy/edit/'.$context_path,
-        'customPlaceholder' => $this->getCustomPolicyPlaceholder(),
+        'customKey' => $this->getSelectCustomKey(),
+        'projectKey' => $this->getSelectProjectKey(),
+        'disabled' => $this->getDisabled(),
       ));
 
     $selected = idx($flat_options, $this->getValue(), array());
@@ -321,8 +360,12 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
       ));
   }
 
-  private function getCustomPolicyPlaceholder() {
-    return 'custom:placeholder';
+  public static function getSelectCustomKey() {
+    return 'select:custom';
+  }
+
+  public static function getSelectProjectKey() {
+    return 'select:project';
   }
 
   private function buildSpacesControl() {
@@ -350,6 +393,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         $viewer,
         $space_phid),
       array(
+        'disabled' => ($this->getDisabled() ? 'disabled' : null),
         'name' => 'spacePHID',
         'class' => 'aphront-space-select-control-knob',
       ));

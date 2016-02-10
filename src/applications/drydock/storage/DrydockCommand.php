@@ -5,6 +5,7 @@ final class DrydockCommand
   implements PhabricatorPolicyInterface {
 
   const COMMAND_RELEASE = 'release';
+  const COMMAND_RECLAIM = 'reclaim';
 
   protected $authorPHID;
   protected $targetPHID;

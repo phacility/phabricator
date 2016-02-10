@@ -1,8 +1,5 @@
 <?php
 
-/**
- * group paste
- */
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private $highlightMap;
@@ -37,6 +34,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needContent(true)
+      ->needRawContent(true)
       ->executeOne();
     if (!$paste) {
       return new Aphront404Response();
@@ -66,28 +64,20 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ),
       $source_code);
 
+    $monogram = $paste->getMonogram();
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
+      ->addTextCrumb($monogram, '/'.$monogram);
 
     $timeline = $this->buildTransactionTimeline(
       $paste,
       new PhabricatorPasteTransactionQuery());
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    $comment_view = id(new PhabricatorPasteEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($paste);
 
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Eat Paste');
-
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $paste->getPHID());
-
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($paste->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
 
     return $this->newPage()
       ->setTitle($paste->getFullName())
@@ -101,7 +91,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           $object_box,
           $source_code,
           $timeline,
-          $add_comment_form,
+          $comment_view,
         ));
   }
 
@@ -139,22 +129,42 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $id = $paste->getID();
 
-    return id(new PhabricatorActionListView())
+    $action_list = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($paste)
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->addAction(
+      ->setObject($paste);
+
+    $action_list->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Paste'))
           ->setIcon('fa-pencil')
           ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit)
-          ->setHref($this->getApplicationURI("edit/{$id}/")))
-      ->addAction(
+          ->setHref($this->getApplicationURI("edit/{$id}/")));
+
+    if ($paste->isArchived()) {
+      $action_list->addAction(
+        id(new PhabricatorActionView())
+            ->setName(pht('Activate Paste'))
+            ->setIcon('fa-check')
+            ->setDisabled(!$can_edit)
+            ->setWorkflow($can_edit)
+            ->setHref($this->getApplicationURI("archive/{$id}/")));
+    } else {
+      $action_list->addAction(
+        id(new PhabricatorActionView())
+            ->setName(pht('Archive Paste'))
+            ->setIcon('fa-ban')
+            ->setDisabled(!$can_edit)
+            ->setWorkflow($can_edit)
+            ->setHref($this->getApplicationURI("archive/{$id}/")));
+    }
+
+    $action_list->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))
           ->setIcon('fa-file-text-o')
           ->setHref($this->getApplicationURI("raw/{$id}/")));
+
+    return $action_list;
   }
 
   private function buildPropertyView(

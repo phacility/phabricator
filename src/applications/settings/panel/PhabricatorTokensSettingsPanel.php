@@ -75,15 +75,12 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
         'action',
       ));
 
-
-    $terminate_icon = id(new PHUIIconView())
-      ->setIconFont('fa-exclamation-triangle');
     $terminate_button = id(new PHUIButtonView())
       ->setText(pht('Revoke All'))
       ->setHref('/auth/token/revoke/all/')
       ->setTag('a')
       ->setWorkflow(true)
-      ->setIcon($terminate_icon);
+      ->setIcon('fa-exclamation-triangle');
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Temporary Tokens'))

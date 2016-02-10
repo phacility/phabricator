@@ -8,28 +8,9 @@ final class PhabricatorBadgesListController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $query_key = $request->getURIData('queryKey');
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($query_key)
-      ->setSearchEngine(new PhabricatorBadgesSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
-  }
-
-  public function buildSideNavView() {
-    $user = $this->getRequest()->getUser();
-
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    id(new PhabricatorBadgesSearchEngine())
-      ->setViewer($user)
-      ->addNavigationItems($nav->getMenu());
-
-    $nav->selectFilter(null);
-
-    return $nav;
+    return id(new PhabricatorBadgesSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
   protected function buildApplicationCrumbs() {

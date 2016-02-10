@@ -37,4 +37,8 @@ final class PhabricatorSearchCheckboxesField
     return $control;
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringListParameterType();
+  }
+
 }

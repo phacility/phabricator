@@ -261,7 +261,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       'refresh-csrf',
       array(
         'tokenName' => AphrontRequest::getCSRFTokenName(),
-        'header'    => AphrontRequest::getCSRFHeaderName(),
+        'header' => AphrontRequest::getCSRFHeaderName(),
+        'viaHeader' => AphrontRequest::getViaHeaderName(),
         'current'   => $current_token,
       ));
 
@@ -477,6 +478,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     $body = parent::getBody();
 
+    $footer = $this->renderFooter();
+
     $nav = $this->getNavigation();
     if ($nav) {
       $crumbs = $this->getCrumbs();
@@ -484,18 +487,25 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         $nav->setCrumbs($crumbs);
       }
       $nav->appendChild($body);
-      $body = phutil_implode_html('', array($nav->render()));
+      $nav->appendFooter($footer);
+      $content = phutil_implode_html('', array($nav->render()));
     } else {
+      $contnet = array();
+
       $crumbs = $this->getCrumbs();
       if ($crumbs) {
-        $body = phutil_implode_html('', array($crumbs, $body));
+        $content[] = $crumbs;
       }
+
+      $content[] = $body;
+      $content[] = $footer;
+
+      $content = phutil_implode_html('', $content);
     }
 
     return array(
       ($console ? hsprintf('<darkconsole />') : null),
-      $body,
-      $this->renderFooter(),
+      $content,
     );
   }
 
@@ -737,7 +747,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       if ($application) {
         $application_class = get_class($application);
         if ($application->getApplicationSearchDocumentTypes()) {
-          $application_search_icon = $application->getFontIcon();
+          $application_search_icon = $application->getIcon();
         }
       }
     }

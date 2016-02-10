@@ -91,4 +91,23 @@ final class PhabricatorPhurlURLSearchEngine
 
     return $result;
   }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Shorten a URL'))
+      ->setHref('/phurl/url/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('Create reusable, memorable, shorter URLs for easy accessibility.'))
+      ->addAction($create_button);
+
+      return $view;
+  }
 }

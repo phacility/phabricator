@@ -38,8 +38,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       ->setHeader($title);
 
     $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObjectURI($request->getRequestURI());
+      ->setUser($viewer);
 
     $edit_uri = $subscription->getEditURI();
 
@@ -194,9 +193,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setIcon(
-            id(new PHUIIconView())
-              ->setIconFont('fa-list'))
+          ->setIcon('fa-list')
           ->setHref($invoices_uri)
           ->setText(pht('View All Invoices')));
 

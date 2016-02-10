@@ -123,6 +123,16 @@ final class PhabricatorStorageManagementAPI extends Phobject {
         'SELECT patch FROM %T',
         self::TABLE_STATUS);
       return ipull($applied, 'patch');
+    } catch (AphrontAccessDeniedQueryException $ex) {
+      throw new PhutilProxyException(
+        pht(
+          'Failed while trying to read schema status: the database "%s" '.
+          'exists, but the current user ("%s") does not have permission to '.
+          'access it. GRANT the current user more permissions, or use a '.
+          'different user.',
+          $this->getDatabaseName('meta_data'),
+          $this->getUser()),
+        $ex);
     } catch (AphrontQueryException $ex) {
       return null;
     }
@@ -246,10 +256,19 @@ final class PhabricatorStorageManagementAPI extends Phobject {
         $query = str_replace('{$'.$key.'}', $value, $query);
       }
 
-      queryfx(
-        $conn,
-        '%Q',
-        $query);
+      try {
+        queryfx($conn, '%Q', $query);
+      } catch (AphrontAccessDeniedQueryException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            'Unable to access a required database or table. This almost '.
+            'always means that the user you are connecting with ("%s") does '.
+            'not have sufficient permissions granted in MySQL. You can '.
+            'use `bin/storage databases` to get a list of all databases '.
+            'permission is required on.',
+            $this->getUser()),
+          $ex);
+      }
     }
   }
 

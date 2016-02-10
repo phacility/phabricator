@@ -34,7 +34,7 @@ final class PhabricatorProjectSearchField
 
     if ($slugs) {
       $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->requireViewer())
+        ->setViewer($this->getViewer())
         ->withSlugs($slugs)
         ->execute();
       foreach ($projects as $project) {
@@ -45,6 +45,10 @@ final class PhabricatorProjectSearchField
 
     return $phids;
 
+  }
+
+  protected function newConduitParameterType() {
+    return new ConduitProjectListParameterType();
   }
 
 }

@@ -1,0 +1,91 @@
+/**
+ * @provides project-view-css
+ */
+
+.project-view-home {
+  background: #fff;
+  padding-bottom: 64px;
+}
+
+.project-view-header-tag {
+  margin-left: 8px;
+  font-size: {$normalfontsize};
+  color: {$bluetext};
+  font-family: {$fontfamily};
+  font-weight: normal;
+}
+
+.device-phone .project-view-header-tag {
+  display: block;
+  margin-left: -4px;
+}
+
+.project-view-header-tag .phui-icon-view {
+  color: {$bluetext};
+}
+
+.phui-box.phui-box-grey.project-view-properties {
+  margin: 0 16px 0 16px;
+  padding: 4px 12px;
+}
+
+.device-phone .phui-box.phui-box-grey.project-view-properties {
+  margin: 0 12px 0 12px;
+}
+
+.project-view-properties .phui-property-list-key {
+  width: auto;
+  margin-left: 4px;
+}
+
+.project-view-properties .phui-property-list-section-header {
+  border: none;
+  padding: 12px 4px 0;
+}
+
+.project-view-feed .phui-object-box.phui-box-border {
+  border: none;
+  padding: 8px;
+}
+
+.project-view-feed .phui-object-box .phui-header-shell {
+  padding: 8px 4px;
+}
+
+.project-view-feed .phui-header-header {
+  font-size: {$biggerfontsize};
+  margin-left: 8px;
+}
+
+.device-desktop .project-view-feed .phui-feed-story,
+.device-tablet .project-view-feed .phui-feed-story {
+  padding-left: 22px;
+}
+
+.project-view-home .phui-box-grey {
+  padding: 0;
+}
+
+.project-view-home .phui-box-grey .phui-header-shell {
+  padding: 8px 8px 8px 12px;
+}
+
+.project-view-home .phui-box-grey .phui-header-header {
+  font-size: {$biggerfontsize};
+}
+
+.project-view-home .phui-box-grey .phui-object-item-list-view {
+  padding: 8px;
+}
+
+.device-desktop .phui-two-column-view.project-view-badges .phui-side-column {
+  width: 364px;
+}
+
+.project-view-home .phui-box-grey .phui-object-item-attribute .phui-icon-view {
+  color: {$lightgreytext};
+}
+
+.profile-no-badges {
+  padding: 24px 0;
+}

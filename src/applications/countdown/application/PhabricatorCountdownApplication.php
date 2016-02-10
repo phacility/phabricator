@@ -6,7 +6,7 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
     return '/countdown/';
   }
 
-  public function getFontIcon() {
+  public function getIcon() {
     return 'fa-rocket';
   }
 
@@ -47,6 +47,8 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
         'comment/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownCommentController',
         'edit/(?:(?P<id>[1-9]\d*)/)?'
+          => 'PhabricatorCountdownEditController',
+        'create/'
           => 'PhabricatorCountdownEditController',
         'delete/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownDeleteController',

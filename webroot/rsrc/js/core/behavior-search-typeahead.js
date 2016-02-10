@@ -8,6 +8,7 @@
  *           javelin-util
  *           javelin-stratcom
  *           phabricator-prefab
+ *           phuix-icon-view
  */
 
 JX.behavior('phabricator-search-typeahead', function(config) {
@@ -25,12 +26,22 @@ JX.behavior('phabricator-search-typeahead', function(config) {
       attr.style = {backgroundImage: 'url('+object.imageURI+')'};
     }
 
+    var icon = null;
+    if (object.icon) {
+      icon = new JX.PHUIXIconView()
+        .setIcon(object.icon)
+        .setColor('lightgreytext')
+        .getNode();
+      icon = [icon, ' '];
+    }
+
     var render = JX.$N(
       'span',
       attr,
       [
         JX.$N('span', {className: object.sprite}),
         JX.$N('span', {className: 'result-name'}, object.displayName),
+        icon,
         JX.$N('span', {className: 'result-type'}, object.type)
       ]);
 
@@ -54,7 +65,8 @@ JX.behavior('phabricator-search-typeahead', function(config) {
       'apps' : 2,
       'proj' : 3,
       'user' : 4,
-      'symb' : 5
+      'repo' : 5,
+      'symb' : 6
     };
 
     var tokens = this.tokenize(value);

@@ -74,7 +74,6 @@ final class DrydockResourceViewController extends DrydockResourceController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($resource);
 
     $can_release = $resource->canRelease();
@@ -169,7 +168,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
         id(new PHUIButtonView())
           ->setTag('a')
           ->setHref($leases_uri)
-          ->setIconFont('fa-search')
+          ->setIcon('fa-search')
           ->setText(pht('View All')));
 
     $lease_list = id(new DrydockLeaseListView())

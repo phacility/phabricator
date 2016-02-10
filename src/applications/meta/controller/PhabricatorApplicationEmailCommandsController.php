@@ -147,7 +147,6 @@ final class PhabricatorApplicationEmailCommandsController
       ),
       array(
         'title' => $title,
-        'class' => 'pro-white-background',
       ));
 
   }

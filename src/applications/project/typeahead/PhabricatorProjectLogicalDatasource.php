@@ -18,7 +18,7 @@ final class PhabricatorProjectLogicalDatasource
   public function getComponentDatasources() {
     return array(
       new PhabricatorProjectNoProjectsDatasource(),
-      new PhabricatorProjectLogicalAndDatasource(),
+      new PhabricatorProjectLogicalAncestorDatasource(),
       new PhabricatorProjectLogicalOrNotDatasource(),
       new PhabricatorProjectLogicalViewerDatasource(),
       new PhabricatorProjectLogicalUserDatasource(),

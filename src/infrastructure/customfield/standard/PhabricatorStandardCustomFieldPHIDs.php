@@ -34,14 +34,21 @@ abstract class PhabricatorStandardCustomFieldPHIDs
   }
 
   public function setValueFromStorage($value) {
+    // NOTE: We're accepting either a JSON string (a real storage value) or
+    // an array (from HTTP parameter prefilling). This is a little hacky, but
+    // should hold until this can get cleaned up more thoroughly.
+    // TODO: Clean this up.
+
     $result = array();
-    if ($value) {
+    if (!is_array($value)) {
       $value = json_decode($value, true);
       if (is_array($value)) {
         $result = array_values($value);
       }
     }
+
     $this->setFieldValue($value);
+
     return $this;
   }
 
@@ -76,7 +83,7 @@ abstract class PhabricatorStandardCustomFieldPHIDs
       return null;
     }
 
-    $handles = mpull($handles, 'renderLink');
+    $handles = mpull($handles, 'renderHovercardLink');
     $handles = phutil_implode_html(', ', $handles);
     return $handles;
   }
@@ -131,6 +138,46 @@ abstract class PhabricatorStandardCustomFieldPHIDs
         '%s updated %s, added %s: %s; removed %s: %s.',
         $xaction->renderHandleLink($author_phid),
         $this->getFieldName(),
+        phutil_count($add),
+        $xaction->renderHandleList($add),
+        phutil_count($rem),
+        $xaction->renderHandleList($rem));
+    }
+  }
+
+  public function getApplicationTransactionTitleForFeed(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $object_phid = $xaction->getObjectPHID();
+
+    $old = $this->decodeValue($xaction->getOldValue());
+    $new = $this->decodeValue($xaction->getNewValue());
+
+    $add = array_diff($new, $old);
+    $rem = array_diff($old, $new);
+
+    if ($add && !$rem) {
+      return pht(
+        '%s updated %s for %s, added %d: %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $xaction->renderHandleLink($object_phid),
+        phutil_count($add),
+        $xaction->renderHandleList($add));
+    } else if ($rem && !$add) {
+      return pht(
+        '%s updated %s for %s, removed %s: %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $xaction->renderHandleLink($object_phid),
+        phutil_count($rem),
+        $xaction->renderHandleList($rem));
+    } else {
+      return pht(
+        '%s updated %s for %s, added %s: %s; removed %s: %s.',
+        $xaction->renderHandleLink($author_phid),
+        $this->getFieldName(),
+        $xaction->renderHandleLink($object_phid),
         phutil_count($add),
         $xaction->renderHandleList($add),
         phutil_count($rem),
@@ -211,6 +258,10 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     }
 
     return $value;
+  }
+
+  protected function getHTTPParameterType() {
+    return new AphrontPHIDListHTTPParameterType();
   }
 
 }

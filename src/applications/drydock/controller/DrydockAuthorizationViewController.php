@@ -67,7 +67,6 @@ final class DrydockAuthorizationViewController
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($authorization);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
