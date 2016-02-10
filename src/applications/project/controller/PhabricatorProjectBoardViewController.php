@@ -126,11 +126,21 @@ final class PhabricatorProjectBoardViewController
 
     $columns = $layout_engine->getColumns($board_phid);
     if (!$columns || !$project->getHasWorkboard()) {
+      $has_normal_columns = false;
+
+      foreach ($columns as $column) {
+        if (!$column->getProxyPHID()) {
+          $has_normal_columns = true;
+          break;
+        }
+      }
+
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $project,
         PhabricatorPolicyCapability::CAN_EDIT);
-      if (!$columns) {
+
+      if (!$has_normal_columns) {
         if (!$can_edit) {
           $content = $this->buildNoAccessContent($project);
         } else {

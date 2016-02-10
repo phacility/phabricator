@@ -366,7 +366,12 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       if ($board->getHasMilestones() || $board->getHasSubprojects()) {
         $child_projects = idx($children, $board_phid, array());
 
-        $next_sequence = last($board_columns)->getSequence() + 1;
+        if ($board_columns) {
+          $next_sequence = last($board_columns)->getSequence() + 1;
+        } else {
+          $next_sequence = 1;
+        }
+
         $proxy_columns = mpull($board_columns, null, 'getProxyPHID');
         foreach ($child_projects as $child_phid => $child) {
           if (isset($proxy_columns[$child_phid])) {
@@ -433,6 +438,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     $position_groups = mgroup($positions, 'getObjectPHID');
 
     $layout = array();
+    $default_phid = null;
     foreach ($columns as $column) {
       $column_phid = $column->getPHID();
       $layout[$column_phid] = array();
@@ -565,8 +571,9 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
           }
         }
 
-        // If the object has no position, put it on the default column.
-        if (!$positions) {
+        // If the object has no position, put it on the default column if
+        // one exists.
+        if (!$positions && $default_phid) {
           $new_position = id(new PhabricatorProjectColumnPosition())
             ->setBoardPHID($board_phid)
             ->setColumnPHID($default_phid)
