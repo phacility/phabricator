@@ -129,7 +129,7 @@ try {
       throw new Exception(
         pht(
           'Invalid device name ("%s"). There is no device with this name.',
-          $device->getName()));
+          $device_name));
     }
 
     // We're authenticated as a device, but we're going to read the user out of
