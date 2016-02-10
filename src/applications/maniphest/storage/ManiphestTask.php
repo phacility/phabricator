@@ -221,6 +221,39 @@ final class ManiphestTask extends ManiphestDAO
     );
   }
 
+  private function comparePriorityTo(ManiphestTask $other) {
+    $upri = $this->getPriority();
+    $vpri = $other->getPriority();
+
+    if ($upri != $vpri) {
+      return ($upri - $vpri);
+    }
+
+    $usub = $this->getSubpriority();
+    $vsub = $other->getSubpriority();
+
+    if ($usub != $vsub) {
+      return ($usub - $vsub);
+    }
+
+    $uid = $this->getID();
+    $vid = $other->getID();
+
+    if ($uid != $vid) {
+      return ($uid - $vid);
+    }
+
+    return 0;
+  }
+
+  public function isLowerPriorityThan(ManiphestTask $other) {
+    return ($this->comparePriorityTo($other) < 0);
+  }
+
+  public function isHigherPriorityThan(ManiphestTask $other) {
+    return ($this->comparePriorityTo($other) > 0);
+  }
+
   public function getWorkboardProperties() {
     return array(
       'status' => $this->getStatus(),
