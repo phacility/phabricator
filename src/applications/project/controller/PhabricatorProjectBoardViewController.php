@@ -373,6 +373,9 @@ final class PhabricatorProjectBoardViewController
       ->addClass('project-board-wrapper');
 
     $nav = $this->getProfileMenu();
+    $divider = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_DIVIDER);
+    $fullscreen = $this->buildFullscreenMenu();
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Workboard'));
@@ -380,7 +383,9 @@ final class PhabricatorProjectBoardViewController
 
     $crumbs->addAction($sort_menu);
     $crumbs->addAction($filter_menu);
+    $crumbs->addAction($divider);
     $crumbs->addAction($manage_menu);
+    $crumbs->addAction($fullscreen);
 
     return $this->newPage()
       ->setTitle(
@@ -460,7 +465,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $sort_button = id(new PHUIListItemView())
-      ->setName(pht('Sort: %s', $active_order))
+      ->setName($active_order)
       ->setIcon('fa-sort-amount-asc')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
@@ -534,7 +539,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $filter_button = id(new PHUIListItemView())
-      ->setName(pht('Filter: %s', $active_filter))
+      ->setName($active_filter)
       ->setIcon('fa-search')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
@@ -624,16 +629,36 @@ final class PhabricatorProjectBoardViewController
     }
 
     $manage_button = id(new PHUIListItemView())
-      ->setName(pht('Manage Board'))
       ->setIcon('fa-cog')
       ->setHref('#')
       ->addSigil('boards-dropdown-menu')
+      ->addSigil('has-tooltip')
       ->setMetadata(
         array(
+          'tip' => pht('Manage'),
+          'align' => 'S',
           'items' => hsprintf('%s', $manage_menu),
         ));
 
     return $manage_button;
+  }
+
+  private function buildFullscreenMenu() {
+
+    $up = id(new PHUIListItemView())
+      ->setIcon('fa-arrows-alt')
+      ->setHref('#')
+      ->addClass('phui-workboard-expand-icon')
+      ->addSigil('jx-toggle-class')
+      ->addSigil('has-tooltip')
+      ->setMetaData(array(
+        'tip' => pht('Fullscreen'),
+        'map' => array(
+          'phabricator-standard-page' => 'phui-workboard-fullscreen',
+        ),
+      ));
+
+    return $up;
   }
 
   private function buildColumnMenu(

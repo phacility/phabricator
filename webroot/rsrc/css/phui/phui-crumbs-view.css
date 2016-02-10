@@ -89,12 +89,15 @@
 }
 
 a.phui-crumbs-action .phui-icon-view {
-  margin-right: 5px;
   color: {$darkbluetext};
 }
 
+a.phui-crumbs-action .phui-crumbs-action-name {
+  margin-left: 6px;
+}
+
 .device-phone a.phui-crumbs-action .phui-icon-view {
-  margin-left: 5px;
+  margin-left: 4px;
 }
 
 .phui-crumb-divider {
@@ -111,4 +114,12 @@ body .phui-crumbs-view + .phui-object-box {
 
 body .phui-crumbs-view + .phui-object-item-list-view {
   padding-top: 0;
+}
+
+.phui-crumb-action-divider {
+  border-left: 1px solid {$lightgreyborder};
+}
+
+.phui-crumbs-action-icon + .phui-crumbs-action-icon {
+  padding-left: 4px;
 }
