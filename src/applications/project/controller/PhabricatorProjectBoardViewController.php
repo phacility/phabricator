@@ -238,20 +238,6 @@ final class PhabricatorProjectBoardViewController
           'boardPHID' => $project->getPHID(),
         ));
 
-    $behavior_config = array(
-      'boardID' => $board_id,
-      'projectPHID' => $project->getPHID(),
-      'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
-      'createURI' => $this->getCreateURI(),
-      'uploadURI' => '/file/dropupload/',
-      'coverURI' => $this->getApplicationURI('cover/'),
-      'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
-      'order' => $this->sortKey,
-    );
-    $this->initBehavior(
-      'project-boards',
-      $behavior_config);
-
     $visible_columns = array();
     $column_phids = array();
     $visible_phids = array();
@@ -297,6 +283,9 @@ final class PhabricatorProjectBoardViewController
       ->setEditMap($task_can_edit_map)
       ->setExcludedProjectPHIDs($select_phids);
 
+    $templates = array();
+    $column_maps = array();
+    $all_tasks = array();
     foreach ($visible_columns as $column_phid => $column) {
       $column_tasks = $column_phids[$column_phid];
 
@@ -356,13 +345,34 @@ final class PhabricatorProjectBoardViewController
           ));
 
       foreach ($column_tasks as $task) {
-        $card = $rendering_engine->renderCard($task->getPHID());
-        $cards->addItem($card->getItem());
+        $object_phid = $task->getPHID();
+
+        $card = $rendering_engine->renderCard($object_phid);
+        $templates[$object_phid] = hsprintf('%s', $card->getItem());
+        $column_maps[$column_phid][] = $object_phid;
+
+        $all_tasks[$object_phid] = $task;
       }
 
       $panel->setCards($cards);
       $board->addPanel($panel);
     }
+
+    $behavior_config = array(
+      'boardID' => $board_id,
+      'projectPHID' => $project->getPHID(),
+      'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
+      'createURI' => $this->getCreateURI(),
+      'uploadURI' => '/file/dropupload/',
+      'coverURI' => $this->getApplicationURI('cover/'),
+      'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
+      'order' => $this->sortKey,
+      'templateMap' => $templates,
+      'columnMaps' => $column_maps,
+      'orderMaps' => mpull($all_tasks, 'getWorkboardOrderVectors'),
+    );
+    $this->initBehavior('project-boards', $behavior_config);
+
 
     $sort_menu = $this->buildSortMenu(
       $viewer,

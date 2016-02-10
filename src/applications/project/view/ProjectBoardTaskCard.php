@@ -78,10 +78,6 @@ final class ProjectBoardTaskCard extends Phobject {
       ->setHref('/T'.$task->getID())
       ->addSigil('project-card')
       ->setDisabled($task->isClosed())
-      ->setMetadata(
-        array(
-          'objectPHID' => $task->getPHID(),
-        ))
       ->addAction(
         id(new PHUIListItemView())
         ->setName(pht('Edit'))
@@ -114,6 +110,8 @@ final class ProjectBoardTaskCard extends Phobject {
         ->setHandles($project_handles);
       $card->addAttribute($tag_list);
     }
+
+    $card->addClass('phui-workcard');
 
     return $card;
   }

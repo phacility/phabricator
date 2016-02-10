@@ -194,14 +194,6 @@ final class ManiphestTask extends ManiphestDAO
     return ManiphestTaskStatus::isClosedStatus($this->getStatus());
   }
 
-  public function getPrioritySortVector() {
-    return array(
-      $this->getPriority(),
-      -$this->getSubpriority(),
-      $this->getID(),
-    );
-  }
-
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
@@ -217,6 +209,16 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getCoverImageThumbnailPHID() {
     return idx($this->properties, 'cover.thumbnailPHID');
+  }
+
+  public function getWorkboardOrderVectors() {
+    return array(
+      PhabricatorProjectColumn::ORDER_PRIORITY => array(
+        (int)-$this->getPriority(),
+        (double)-$this->getSubpriority(),
+        (int)-$this->getID(),
+      ),
+    );
   }
 
 

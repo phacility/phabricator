@@ -6,9 +6,7 @@
  *           javelin-vector
  *           javelin-stratcom
  *           javelin-workflow
- *           phabricator-draggable-list
- *           phabricator-drag-and-drop-file-upload
- *           javelin-workboard
+ *           javelin-workboard-controller
  */
 
 JX.behavior('project-boards', function(config, statics) {
@@ -61,66 +59,6 @@ JX.behavior('project-boards', function(config, statics) {
     }
   }
 
-
-  function colsort(u, v) {
-    var ud = JX.Stratcom.getData(u).sort || [];
-    var vd = JX.Stratcom.getData(v).sort || [];
-
-    for (var ii = 0; ii < ud.length; ii++) {
-
-      if (parseInt(ud[ii]) < parseInt(vd[ii])) {
-        return 1;
-      }
-      if (parseInt(ud[ii]) > parseInt(vd[ii])) {
-        return -1;
-      }
-    }
-
-    return 0;
-  }
-
-  function onedit(column, r) {
-    var new_card = JX.$H(r.tasks).getNode();
-    var new_data = JX.Stratcom.getData(new_card);
-    var items = finditems(column);
-    var edited = false;
-    var remove_index = null;
-
-    for (var ii = 0; ii < items.length; ii++) {
-      var item = items[ii];
-
-      var data = JX.Stratcom.getData(item);
-      var phid = data.objectPHID;
-
-      if (phid == new_data.objectPHID) {
-        if (r.data.removeFromBoard) {
-          remove_index = ii;
-        }
-        items[ii] = new_card;
-        data = new_data;
-        edited = true;
-      }
-
-      data.sort = r.data.sortMap[data.objectPHID] || data.sort;
-    }
-
-    // this is an add then...!
-    if (!edited) {
-      items[items.length + 1] = new_card;
-      new_data.sort = r.data.sortMap[new_data.objectPHID] || new_data.sort;
-    }
-
-    if (remove_index !== null) {
-      items.splice(remove_index, 1);
-    }
-
-    items.sort(colsort);
-
-    JX.DOM.setContent(column, items);
-
-    onupdate(column);
-  };
-
   function update_statics(update_config) {
     statics.boardID = update_config.boardID;
     statics.projectPHID = update_config.projectPHID;
@@ -130,56 +68,6 @@ JX.behavior('project-boards', function(config, statics) {
   }
 
   function setup() {
-
-    JX.Stratcom.listen(
-      'click',
-      ['edit-project-card'],
-      function(e) {
-        e.kill();
-        var column = e.getNode('project-column');
-        var request_data = {
-          responseType: 'card',
-          columnPHID: JX.Stratcom.getData(column).columnPHID,
-          order: statics.order
-        };
-        new JX.Workflow(e.getNode('tag:a').href, request_data)
-          .setHandler(JX.bind(null, onedit, column))
-          .start();
-      });
-
-    JX.Stratcom.listen(
-      'click',
-      ['column-add-task'],
-      function (e) {
-
-        // We want the 'boards-dropdown-menu' behavior to see this event and
-        // close the dropdown, but don't want to follow the link.
-        e.prevent();
-
-        var column_data = e.getNodeData('column-add-task');
-        var column_phid = column_data.columnPHID;
-
-        var request_data = {
-          responseType: 'card',
-          columnPHID: column_phid,
-          projects: column_data.projectPHID,
-          order: statics.order
-        };
-
-        var cols = getcolumns();
-        var ii;
-        var column;
-        for (ii = 0; ii < cols.length; ii++) {
-          if (JX.Stratcom.getData(cols[ii]).columnPHID == column_phid) {
-            column = cols[ii];
-            break;
-          }
-        }
-        new JX.Workflow(statics.createURI, request_data)
-          .setHandler(JX.bind(null, onedit, column))
-          .start();
-      });
-
     JX.Stratcom.listen('click', 'boards-dropdown-menu', function(e) {
       var data = e.getNodeData('boards-dropdown-menu');
       if (data.menu) {
@@ -234,14 +122,40 @@ JX.behavior('project-boards', function(config, statics) {
   }
 
   if (!statics.workboard) {
-    statics.workboard = new JX.Workboard(config)
+    statics.workboard = new JX.WorkboardController()
       .setUploadURI(config.uploadURI)
       .setCoverURI(config.coverURI)
       .setMoveURI(config.moveURI)
+      .setCreateURI(config.createURI)
       .setChunkThreshold(config.chunkThreshold)
       .start();
   }
 
-  statics.workboard.addBoard(config.projectPHID, JX.$(config.boardID));
+  var board_phid = config.projectPHID;
+  var board_node = JX.$(config.boardID);
+
+  var board = statics.workboard.newBoard(board_phid, board_node)
+    .setOrder(config.order);
+
+  var templates = config.templateMap;
+  for (var k in templates) {
+    board.setCardTemplate(k, templates[k]);
+  }
+
+  var column_maps = config.columnMaps;
+  for (var column_phid in column_maps) {
+    var column = board.getColumn(column_phid);
+    var column_map = column_maps[column_phid];
+    for (var ii = 0; ii < column_map.length; ii++) {
+      column.newCard(column_map[ii]);
+    }
+  }
+
+  var order_maps = config.orderMaps;
+  for (var object_phid in order_maps) {
+    board.setOrderMap(object_phid, order_maps[object_phid]);
+  }
+
+  board.start();
 
 });
