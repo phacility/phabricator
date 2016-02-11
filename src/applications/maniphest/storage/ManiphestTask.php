@@ -462,6 +462,10 @@ final class ManiphestTask extends ManiphestDAO
         ->setKey('priority')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about task priority.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('points')
+        ->setType('points')
+        ->setDescription(pht('Point value of the task.')),
     );
   }
 
@@ -488,6 +492,7 @@ final class ManiphestTask extends ManiphestDAO
       'ownerPHID' => $this->getOwnerPHID(),
       'status' => $status_info,
       'priority' => $priority_info,
+      'points' => $this->getPoints(),
     );
   }
 
