@@ -54,10 +54,10 @@ Operating at Scale
 This storage design is aimed at large installs that may need more than one
 physical database server to handle the load the install generates.
 
-The primary reason we a database per application is to allow large installs to
-scale up by spreading database load across more hardware. A large organization
-with many thousands of active users may find themselves limited by the capacity
-of a single database backend.
+The primary reason we use a separate database for each application is to allow
+large installs to scale up by spreading database load across more hardware. A
+large organization with many thousands of active users may find themselves
+limited by the capacity of a single database backend.
 
 If so, they can launch a second backend, move some applications over to it, and
 continue piling on more users.
@@ -80,30 +80,29 @@ Ease of Development
 ===================
 
 This design is also easier for us to work with, and easier for users who
-want to work with the raw database data to understand and interact with.
+want to work with the raw data in the database.
 
 We have a large number of tables (more than 400) and we can not reasonably
 reduce the number of tables very much (each table generally represents some
-meaningful type of object in some application0. It's easier to develop with
+meaningful type of object in some application). It's easier to develop with
 tables which are organized into separate application databases, just like it's
 easier to work with a large project if you organize source files into
 directories.
 
 If you aren't developing Phabricator and never look at the data in the
-database, you probably don't benefit from this organization. However, if you
+database, you probably won't benefit from this organization. However, if you
 are a developer or want to extend Phabricator or look under the hood, it's
-easier to find what you're looking for and work with the tables and data when
-they're organized by application.
+easier to find what you're looking for and work with the tables when they're
+organized by application.
 
 
-Databases Have No Cost
-======================
+More Databases Cost Nothing
+===========================
 
-In almost all cases, creating databases has zero cost, just like organizing
-source code into directories has zero cost.
-
-Even if we didn't derive enormous benefits from this approach at scale, there
-is little reason //not// to organize storage like this.
+In almost all cases, creating more databases has zero cost, just like
+organizing source code into directories has zero cost. Even if we didn't derive
+enormous benefits from this approach at scale, there is little reason //not//
+to organize storage like this.
 
 There are a handful of administrative tasks which are very slightly more
 complex to perform on multiple databases, but these are all either automated
