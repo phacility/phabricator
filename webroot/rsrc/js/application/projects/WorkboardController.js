@@ -158,14 +158,14 @@ JX.install('WorkboardController', {
       var column_data = e.getNodeData('column-add-task');
       var column_phid = column_data.columnPHID;
 
-      var board_phid = column_data.projectPHID;
+      var board_phid = column_data.boardPHID;
       var board = this._getBoard(board_phid);
       var column = board.getColumn(column_phid);
 
       var request_data = {
         responseType: 'card',
         columnPHID: column.getPHID(),
-        projects: board.getPHID(),
+        projects: column_data.projectPHID,
         visiblePHIDs: column.getCardPHIDs(),
         order: board.getOrder()
       };
