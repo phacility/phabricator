@@ -971,8 +971,11 @@ final class ManiphestTransactionEditor
     // If the task is not assigned, not being assigned, currently open, and
     // being closed, try to assign the actor as the owner.
     if ($is_unassigned && !$any_assign && $is_open && $is_closing) {
+      $is_claim = ManiphestTaskStatus::isClaimStatus($new_status);
+
       // Don't assign the actor if they aren't a real user.
-      if ($actor_phid) {
+      // Don't claim the task if the status is configured to not claim.
+      if ($actor_phid && $is_claim) {
         $results[] = id(new ManiphestTransaction())
           ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
           ->setNewValue($actor_phid);
