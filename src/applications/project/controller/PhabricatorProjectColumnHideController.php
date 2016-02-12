@@ -91,6 +91,7 @@ final class PhabricatorProjectColumnHideController
         $editor = id(new PhabricatorProjectColumnTransactionEditor())
           ->setActor($viewer)
           ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true)
           ->setContentSourceFromRequest($request)
           ->applyTransactions($column, $xactions);
       }
