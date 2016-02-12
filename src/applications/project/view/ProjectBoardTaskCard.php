@@ -95,6 +95,18 @@ final class ProjectBoardTaskCard extends Phobject {
       $card->setCoverImage($cover_file->getBestURI());
     }
 
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $points = $task->getPoints();
+      if ($points !== null) {
+        $points_tag = id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setShade(PHUITagView::COLOR_BLUE)
+          ->setSlimShady(true)
+          ->setName($points);
+        $card->addAttribute($points_tag);
+      }
+    }
+
     if ($task->isClosed()) {
       $icon = ManiphestTaskStatus::getStatusIcon($task->getStatus());
       $icon = id(new PHUIIconView())

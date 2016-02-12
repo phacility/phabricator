@@ -129,6 +129,10 @@ final class PhabricatorStandardCustomFieldBool
     );
   }
 
+  public function getHeraldFieldStandardType() {
+    return HeraldField::STANDARD_BOOL;
+  }
+
   protected function getHTTPParameterType() {
     return new AphrontBoolHTTPParameterType();
   }

@@ -47,10 +47,12 @@ final class PhabricatorProjectColumnTransactionEditor
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
       case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
-        if ($xaction->getNewValue()) {
+        $value = $xaction->getNewValue();
+        if (strlen($value)) {
           return (int)$xaction->getNewValue();
+        } else {
+          return null;
         }
-        return null;
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -104,7 +106,9 @@ final class PhabricatorProjectColumnTransactionEditor
             $errors[] = new PhabricatorApplicationTransactionValidationError(
               $type,
               pht('Invalid'),
-              pht('Column point limit must be empty, or a positive integer.'),
+              pht(
+                'Column point limit must either be empty or a nonnegative '.
+                'integer.'),
               $xaction);
           }
         }

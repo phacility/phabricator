@@ -88,15 +88,11 @@ final class PhabricatorProjectEditEngine
 
   protected function getObjectCreateCancelURI($object) {
     $parent = $this->getParentProject();
-    if ($parent) {
-      $id = $parent->getID();
-      return "/project/subprojects/{$id}/";
-    }
-
     $milestone = $this->getMilestoneProject();
-    if ($milestone) {
-      $id = $milestone->getID();
-      return "/project/milestones/{$id}/";
+
+    if ($parent || $milestone) {
+      $id = nonempty($parent, $milestone)->getID();
+      return "/project/subprojects/{$id}/";
     }
 
     return parent::getObjectCreateCancelURI($object);

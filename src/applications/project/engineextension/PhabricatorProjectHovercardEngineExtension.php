@@ -1,6 +1,6 @@
 <?php
 
-final class ProjectHovercardEngineExtension
+final class PhabricatorProjectHovercardEngineExtension
   extends PhabricatorHovercardEngineExtension {
 
   const EXTENSIONKEY = 'project.card';

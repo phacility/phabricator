@@ -1446,5 +1446,19 @@ abstract class PhabricatorCustomField extends Phobject {
     return null;
   }
 
+  public function getHeraldFieldStandardType() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldFieldStandardType();
+    }
+    return null;
+  }
+
+  public function getHeraldDatasource() {
+    if ($this->proxy) {
+      return $this->proxy->getHeraldDatasource();
+    }
+    return null;
+  }
+
 
 }

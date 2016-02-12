@@ -720,6 +720,7 @@ final class PhabricatorProjectBoardViewController
       ->setMetadata(
         array(
           'columnPHID' => $column->getPHID(),
+          'boardPHID' => $project->getPHID(),
           'projectPHID' => $default_phid,
         ));
 

@@ -255,6 +255,42 @@ EOTEXT
     );
     $fields_json = id(new PhutilJSON())->encodeFormatted($fields_example);
 
+    $points_type = 'custom:ManiphestPointsConfigOptionType';
+
+    $points_example_1 = array(
+      'enabled' => true,
+      'label' => pht('Story Points'),
+      'action' => pht('Change Story Points'),
+    );
+    $points_json_1 = id(new PhutilJSON())->encodeFormatted($points_example_1);
+
+    $points_example_2 = array(
+      'enabled' => true,
+      'label' => pht('Estimated Hours'),
+      'action' => pht('Change Estimate'),
+    );
+    $points_json_2 = id(new PhutilJSON())->encodeFormatted($points_example_2);
+
+    $points_description = $this->deformat(pht(<<<EOTEXT
+Activates a points field on tasks. You can use points for estimation or
+planning. If configured, points will appear on workboards.
+
+To activate points, set this value to a map with these keys:
+
+  - `enabled` //Optional bool.// Use `true` to enable points, or
+    `false` to disable them.
+  - `label` //Optional string.// Label for points, like "Story Points" or
+    "Estimated Hours". If omitted, points will be called "Points".
+  - `action` //Optional string.// Label for the action which changes points
+    in Maniphest, like "Change Estimate". If omitted, the action will
+    be called "Change Points".
+
+See the example below for a starting point.
+EOTEXT
+));
+
+
+
     return array(
       $this->newOption('maniphest.custom-field-definitions', 'wild', array())
         ->setSummary(pht('Custom Maniphest fields.'))
@@ -336,9 +372,11 @@ EOTEXT
             '"Needs Triage" panel on the home page. You should adjust this if '.
             'you adjust priorities using `%s`.',
             'maniphest.priorities')),
-      $this->newOption('maniphest.points', 'map<string, wild>', array())
-        ->setDescription(
-          pht('PROTOTYPE! Very hot. Burns user. Do not touch!')),
+      $this->newOption('maniphest.points', $points_type, array())
+        ->setSummary(pht('Configure point values for tasks.'))
+        ->setDescription($points_description)
+        ->addExample($points_json_1, pht('Points Config'))
+        ->addExample($points_json_2, pht('Hours Config')),
     );
   }
 

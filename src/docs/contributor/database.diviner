@@ -28,11 +28,10 @@ Databases
 =========
 
 Each Phabricator application has its own database. The names are prefixed by
-`phabricator_` (this is configurable). This design has two advantages:
+`phabricator_` (this is configurable).
 
-  - Each database is easier to comprehend and to maintain.
-  - We don't do cross-database joins so each database can live on its own
-    machine. This gives us flexibility in sharding data later.
+Phabricator uses a separate database for each application. To understand why,
+see @{article:Why does Phabricator need so many databases?}.
 
 Connections
 ===========

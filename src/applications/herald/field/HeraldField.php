@@ -47,6 +47,7 @@ abstract class HeraldField extends Phobject {
           HeraldAdapter::CONDITION_IS,
           HeraldAdapter::CONDITION_IS_NOT,
           HeraldAdapter::CONDITION_REGEXP,
+          HeraldAdapter::CONDITION_NOT_REGEXP,
         );
       case self::STANDARD_PHID:
         return array(
@@ -76,12 +77,16 @@ abstract class HeraldField extends Phobject {
       case self::STANDARD_TEXT_LIST:
         return array(
           HeraldAdapter::CONDITION_CONTAINS,
+          HeraldAdapter::CONDITION_NOT_CONTAINS,
           HeraldAdapter::CONDITION_REGEXP,
+          HeraldAdapter::CONDITION_NOT_REGEXP,
         );
       case self::STANDARD_TEXT_MAP:
         return array(
           HeraldAdapter::CONDITION_CONTAINS,
+          HeraldAdapter::CONDITION_NOT_CONTAINS,
           HeraldAdapter::CONDITION_REGEXP,
+          HeraldAdapter::CONDITION_NOT_REGEXP,
           HeraldAdapter::CONDITION_REGEXP_PAIR,
         );
     }
