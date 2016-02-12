@@ -169,11 +169,12 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_NAME:
         // First, add the old name as a secondary slug; this is helpful
         // for renames and generally a good thing to do.
-        if ($old !== null) {
-          $this->addSlug($object, $old, false);
+        if (!$this->getIsMilestone()) {
+          if ($old !== null) {
+            $this->addSlug($object, $old, false);
+          }
+          $this->addSlug($object, $new, false);
         }
-        $this->addSlug($object, $new, false);
-
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         $old = $xaction->getOldValue();
