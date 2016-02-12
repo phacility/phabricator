@@ -427,11 +427,14 @@ final class DiffusionServeController extends DiffusionController {
           '$PATH'));
     }
 
+    // NOTE: We do not set HTTP_CONTENT_ENCODING here, because we already
+    // decompressed the request when we read the request body, so the body is
+    // just plain data with no encoding.
+
     $env = array(
       'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
       'QUERY_STRING' => $query_string,
       'CONTENT_TYPE' => $request->getHTTPHeader('Content-Type'),
-      'HTTP_CONTENT_ENCODING' => $request->getHTTPHeader('Content-Encoding'),
       'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'],
       'GIT_PROJECT_ROOT' => $repository_root,
       'GIT_HTTP_EXPORT_ALL' => '1',
