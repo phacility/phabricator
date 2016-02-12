@@ -175,8 +175,20 @@ final class PhabricatorEditEngineConfiguration
   }
 
   private function reorderFields(array $fields) {
+    // Fields which can not be reordered are fixed in order at the top of the
+    // form. These are used to show instructions or contextual information.
+
+    $fixed = array();
+    foreach ($fields as $key => $field) {
+      if (!$field->getIsReorderable()) {
+        $fixed[$key] = $field;
+      }
+    }
+
     $keys = $this->getFieldOrder();
-    $fields = array_select_keys($fields, $keys) + $fields;
+
+    $fields = $fixed + array_select_keys($fields, $keys) + $fields;
+
     return $fields;
   }
 

@@ -20,6 +20,8 @@ final class PhabricatorProjectQuery
   private $hasSubprojects;
   private $minDepth;
   private $maxDepth;
+  private $minMilestoneNumber;
+  private $maxMilestoneNumber;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -108,6 +110,12 @@ final class PhabricatorProjectQuery
   public function withDepthBetween($min, $max) {
     $this->minDepth = $min;
     $this->maxDepth = $max;
+    return $this;
+  }
+
+  public function withMilestoneNumberBetween($min, $max) {
+    $this->minMilestoneNumber = $min;
+    $this->maxMilestoneNumber = $max;
     return $this;
   }
 
@@ -494,6 +502,7 @@ final class PhabricatorProjectQuery
       }
     }
 
+
     if ($this->hasSubprojects !== null) {
       $where[] = qsprintf(
         $conn,
@@ -513,6 +522,20 @@ final class PhabricatorProjectQuery
         $conn,
         'projectDepth <= %d',
         $this->maxDepth);
+    }
+
+    if ($this->minMilestoneNumber !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'milestoneNumber >= %d',
+        $this->minMilestoneNumber);
+    }
+
+    if ($this->maxMilestoneNumber !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'milestoneNumber <= %d',
+        $this->maxMilestoneNumber);
     }
 
     return $where;
