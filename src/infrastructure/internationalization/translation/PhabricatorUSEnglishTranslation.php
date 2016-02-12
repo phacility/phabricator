@@ -1514,6 +1514,20 @@ final class PhabricatorUSEnglishTranslation
         'Permanently destroyed %s object.',
         'Permanently destroyed %s objects.',
       ),
+
+      '%s added %s watcher(s) for %s: %s.' => array(
+        array(
+          '%s added a watcher for %3$s: %4$s.',
+          '%s added watchers for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %s watcher(s) for %s: %s.' => array(
+        array(
+          '%s removed a watcher for %3$s: %4$s.',
+          '%s removed watchers for %3$s: %4$s.',
+        ),
+      ),
     );
   }
 
