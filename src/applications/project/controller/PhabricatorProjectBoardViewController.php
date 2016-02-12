@@ -8,7 +8,6 @@ final class PhabricatorProjectBoardViewController
   private $id;
   private $slug;
   private $queryKey;
-  private $filter;
   private $sortKey;
   private $showHidden;
 
@@ -56,10 +55,18 @@ final class PhabricatorProjectBoardViewController
           $search_engine->getQueryResultsPageURI($saved->getQueryKey())));
     }
 
-    $query_key = $request->getURIData('queryKey');
-    if (!$query_key) {
-      $query_key = 'open';
+    $query_key = $this->getDefaultFilter($project);
+
+    $request_query = $request->getStr('filter');
+    if (strlen($request_query)) {
+      $query_key = $request_query;
     }
+
+    $uri_query = $request->getURIData('queryKey');
+    if (strlen($uri_query)) {
+      $query_key = $uri_query;
+    }
+
     $this->queryKey = $query_key;
 
     $custom_query = null;
@@ -382,10 +389,12 @@ final class PhabricatorProjectBoardViewController
 
     $sort_menu = $this->buildSortMenu(
       $viewer,
+      $project,
       $this->sortKey);
 
     $filter_menu = $this->buildFilterMenu(
       $viewer,
+      $project,
       $custom_query,
       $search_engine,
       $query_key);
@@ -445,20 +454,49 @@ final class PhabricatorProjectBoardViewController
     $this->showHidden = $request->getBool('hidden');
     $this->id = $project->getID();
 
-    $sort_key = $request->getStr('order');
-    switch ($sort_key) {
+    $sort_key = $this->getDefaultSort($project);
+
+    $request_sort = $request->getStr('order');
+    if ($this->isValidSort($request_sort)) {
+      $sort_key = $request_sort;
+    }
+
+    $this->sortKey = $sort_key;
+  }
+
+  private function getDefaultSort(PhabricatorProject $project) {
+    $default_sort = $project->getDefaultWorkboardSort();
+
+    if ($this->isValidSort($default_sort)) {
+      return $default_sort;
+    }
+
+    return PhabricatorProjectColumn::DEFAULT_ORDER;
+  }
+
+  private function getDefaultFilter(PhabricatorProject $project) {
+    $default_filter = $project->getDefaultWorkboardFilter();
+
+    if (strlen($default_filter)) {
+      return $default_filter;
+    }
+
+    return 'open';
+  }
+
+  private function isValidSort($sort) {
+    switch ($sort) {
       case PhabricatorProjectColumn::ORDER_NATURAL:
       case PhabricatorProjectColumn::ORDER_PRIORITY:
-        break;
-      default:
-        $sort_key = PhabricatorProjectColumn::DEFAULT_ORDER;
-        break;
+        return true;
     }
-    $this->sortKey = $sort_key;
+
+    return false;
   }
 
   private function buildSortMenu(
     PhabricatorUser $viewer,
+    PhabricatorProject $project,
     $sort_key) {
 
     $sort_icon = id(new PHUIIconView())
@@ -489,6 +527,24 @@ final class PhabricatorProjectBoardViewController
       $items[] = $item;
     }
 
+    $id = $project->getID();
+
+    $save_uri = "default/{$id}/sort/";
+    $save_uri = $this->getApplicationURI($save_uri);
+    $save_uri = $this->getURIWithState($save_uri, $force = true);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-floppy-o')
+      ->setName(pht('Save as Default'))
+      ->setHref($save_uri)
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit);
+
     $sort_menu = id(new PhabricatorActionListView())
       ->setUser($viewer);
     foreach ($items as $item) {
@@ -507,8 +563,10 @@ final class PhabricatorProjectBoardViewController
 
     return $sort_button;
   }
+
   private function buildFilterMenu(
     PhabricatorUser $viewer,
+    PhabricatorProject $project,
     $custom_query,
     PhabricatorApplicationSearchEngine $engine,
     $query_key) {
@@ -551,17 +609,39 @@ final class PhabricatorProjectBoardViewController
         $uri = $engine->getQueryResultsPageURI($key);
       }
 
-      $uri = $this->getURIWithState($uri);
+      $uri = $this->getURIWithState($uri)
+        ->setQueryParam('filter', null);
       $item->setHref($uri);
 
       $items[] = $item;
     }
 
+    $id = $project->getID();
+
+    $filter_uri = $this->getApplicationURI("board/{$id}/filter/");
+    $filter_uri = $this->getURIWithState($filter_uri, $force = true);
+
     $items[] = id(new PhabricatorActionView())
       ->setIcon('fa-cog')
-      ->setHref($this->getApplicationURI('board/'.$this->id.'/filter/'))
+      ->setHref($filter_uri)
       ->setWorkflow(true)
       ->setName(pht('Advanced Filter...'));
+
+    $save_uri = "default/{$id}/filter/";
+    $save_uri = $this->getApplicationURI($save_uri);
+    $save_uri = $this->getURIWithState($save_uri, $force = true);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-floppy-o')
+      ->setName(pht('Save as Default'))
+      ->setHref($save_uri)
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit);
 
     $filter_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
@@ -793,20 +873,29 @@ final class PhabricatorProjectBoardViewController
    * the rest of the board state persistent. If no URI is provided, this method
    * starts with the request URI.
    *
-   * @param string|null   URI to add state parameters to.
-   * @return PhutilURI    URI with state parameters.
+   * @param string|null URI to add state parameters to.
+   * @param bool True to explicitly include all state.
+   * @return PhutilURI URI with state parameters.
    */
-  private function getURIWithState($base = null) {
+  private function getURIWithState($base = null, $force = false) {
+    $project = $this->getProject();
+
     if ($base === null) {
       $base = $this->getRequest()->getRequestURI();
     }
 
     $base = new PhutilURI($base);
 
-    if ($this->sortKey != PhabricatorProjectColumn::DEFAULT_ORDER) {
+    if ($force || ($this->sortKey != $this->getDefaultSort($project))) {
       $base->setQueryParam('order', $this->sortKey);
     } else {
       $base->setQueryParam('order', null);
+    }
+
+    if ($force || ($this->queryKey != $this->getDefaultFilter($project))) {
+      $base->setQueryParam('filter', $this->queryKey);
+    } else {
+      $base->setQueryParam('filter', null);
     }
 
     $base->setQueryParam('hidden', $this->showHidden ? 'true' : null);

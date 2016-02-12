@@ -36,6 +36,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $projectDepth;
   protected $projectPathKey;
 
+  protected $properties = array();
+
   private $memberPHIDs = self::ATTACHABLE;
   private $watcherPHIDs = self::ATTACHABLE;
   private $sparseWatchers = self::ATTACHABLE;
@@ -198,6 +200,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort128',
         'status' => 'text32',
@@ -547,6 +552,31 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     );
 
     return idx($map, $color, $color);
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getDefaultWorkboardSort() {
+    return $this->getProperty('workboard.sort.default');
+  }
+
+  public function setDefaultWorkboardSort($sort) {
+    return $this->setProperty('workboard.sort.default', $sort);
+  }
+
+  public function getDefaultWorkboardFilter() {
+    return $this->getProperty('workboard.filter.default');
+  }
+
+  public function setDefaultWorkboardFilter($filter) {
+    return $this->setProperty('workboard.filter.default', $filter);
   }
 
 

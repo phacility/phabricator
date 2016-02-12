@@ -40,6 +40,8 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_PARENT;
     $types[] = PhabricatorProjectTransaction::TYPE_MILESTONE;
     $types[] = PhabricatorProjectTransaction::TYPE_HASWORKBOARD;
+    $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_SORT;
+    $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER;
 
     return $types;
   }
@@ -71,6 +73,10 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
         return null;
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
+        return $object->getDefaultWorkboardSort();
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
+        return $object->getDefaultWorkboardFilter();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -89,6 +95,8 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
         return $xaction->getNewValue();
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
         return (int)$xaction->getNewValue();
@@ -139,6 +147,12 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
         $object->setHasWorkboard($xaction->getNewValue());
         return;
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
+        $object->setDefaultWorkboardSort($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
+        $object->setDefaultWorkboardFilter($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -181,6 +195,8 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_PARENT:
       case PhabricatorProjectTransaction::TYPE_MILESTONE:
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
+      case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
         return;
      }
 
@@ -866,8 +882,16 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    // Herald rules may run on behalf of other users and need to execute
+    // membership checks against ancestors.
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($object->getPHID()))
+      ->needAncestorMembers(true)
+      ->executeOne();
+
     return id(new PhabricatorProjectHeraldAdapter())
-      ->setProject($object);
+      ->setProject($project);
   }
 
 }
