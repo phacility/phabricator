@@ -1013,6 +1013,51 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertColumns($expect, $user, $board, $task);
   }
 
+  public function testColumnExtendedPolicies() {
+    $user = $this->createUser();
+    $user->save();
+
+    $board = $this->createProject($user);
+    $column = $this->addColumn($user, $board, 0);
+
+    // At first, the user should be able to view and edit the column.
+    $column = $this->refreshColumn($user, $column);
+    $this->assertTrue((bool)$column);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $column,
+      PhabricatorPolicyCapability::CAN_EDIT);
+    $this->assertTrue($can_edit);
+
+    // Now, set the project edit policy to "Members of Project". This should
+    // disable editing.
+    $members_policy = id(new PhabricatorProjectMembersPolicyRule())
+      ->getObjectPolicyFullKey();
+    $board->setEditPolicy($members_policy)->save();
+
+    $column = $this->refreshColumn($user, $column);
+    $this->assertTrue((bool)$column);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $column,
+      PhabricatorPolicyCapability::CAN_EDIT);
+    $this->assertFalse($can_edit);
+
+    // Now, join the project. This should make the column editable again.
+    $this->joinProject($board, $user);
+
+    $column = $this->refreshColumn($user, $column);
+    $this->assertTrue((bool)$column);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $column,
+      PhabricatorPolicyCapability::CAN_EDIT);
+    $this->assertTrue($can_edit);
+  }
+
   private function moveToColumn(
     PhabricatorUser $viewer,
     PhabricatorProject $board,
@@ -1242,6 +1287,22 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       ->needMembers($need_members)
       ->needWatchers($need_watchers)
       ->withIDs(array($project->getID()))
+      ->execute();
+
+    if ($results) {
+      return head($results);
+    } else {
+      return null;
+    }
+  }
+
+  private function refreshColumn(
+    PhabricatorUser $viewer,
+    PhabricatorProjectColumn $column) {
+
+    $results = id(new PhabricatorProjectColumnQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($column->getID()))
       ->execute();
 
     if ($results) {

@@ -73,8 +73,7 @@ final class PhabricatorProjectColumnDetailController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($column->getDisplayName())
-      ->setPolicyObject($column);
+      ->setHeader($column->getDisplayName());
 
     if ($column->isHidden()) {
       $header->setStatus('fa-ban', 'dark', pht('Hidden'));

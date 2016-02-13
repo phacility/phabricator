@@ -5,7 +5,8 @@ final class PhabricatorProjectColumn
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorExtendedPolicyInterface {
 
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
@@ -219,7 +220,14 @@ final class PhabricatorProjectColumn
   }
 
   public function getPolicy($capability) {
-    return $this->getProject()->getPolicy($capability);
+    // NOTE: Column policies are enforced as an extended policy which makes
+    // them the same as the project's policies.
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_USER;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
@@ -230,6 +238,16 @@ final class PhabricatorProjectColumn
 
   public function describeAutomaticCapability($capability) {
     return pht('Users must be able to see a project to see its board.');
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    return array(
+      array($this->getProject(), $capability),
+    );
   }
 
 

@@ -7305,6 +7305,7 @@ phutil_register_library_map(array(
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
+      'PhabricatorExtendedPolicyInterface',
     ),
     'PhabricatorProjectColumnDetailController' => 'PhabricatorProjectBoardController',
     'PhabricatorProjectColumnEditController' => 'PhabricatorProjectBoardController',
