@@ -169,14 +169,16 @@ final class PhabricatorProjectColumn
     // Normal columns and subproject columns go first, in a user-controlled
     // order.
 
-    // All the milestone columns go last, in their sequential order.
+    // All the milestone columns go last, in reverse order (newest on the
+    // left) so that you don't have to scroll across older milestones to get
+    // to the newest ones.
 
     if (!$proxy || !$proxy->isMilestone()) {
       $group = 'A';
       $sequence = $this->getSequence();
     } else {
       $group = 'B';
-      $sequence = $proxy->getMilestoneNumber();
+      $sequence = (10000000 - $proxy->getMilestoneNumber());
     }
 
     return sprintf('%s%012d', $group, $sequence);
