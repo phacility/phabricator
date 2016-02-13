@@ -142,7 +142,7 @@ final class PhabricatorProjectProfileController
     }
 
     $view = id(new PHUIBoxView())
-      ->setColor(PHUIBoxView::GREY)
+      ->setBorder(true)
       ->appendChild($view)
       ->addClass('project-view-properties');
 

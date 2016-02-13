@@ -59,8 +59,8 @@ button.grey,
 input[type="submit"].grey,
 a.grey,
 a.grey:visited {
-  background-color: rgba(71, 87, 120, 0.06);
-  border-color: rgba(71, 87, 120, 0.12);
+  background-color: #F7F7F9;
+  border: 1px solid rgba(55,55,55,.1);
   color: {$darkgreytext};
 }
 
@@ -106,8 +106,8 @@ button:hover {
 
 a.button.grey:hover,
 button.grey:hover {
-  background-color: rgba(71, 87, 120, 0.12);
-  border-color: rgba(71, 87, 120, 0.2);
+  background-color: rgba(71, 87, 120, 0.1);
+  border-color: rgba(71, 87, 120, 0.15);
   transition: 0.1s;
 }
 

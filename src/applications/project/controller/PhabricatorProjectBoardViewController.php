@@ -427,6 +427,11 @@ final class PhabricatorProjectBoardViewController
     $crumbs->addAction($manage_menu);
     $crumbs->addAction($fullscreen);
 
+    // TODO: Wire to Workboard Preferences
+    // require_celerity_resource('phui-workboard-color-css');
+    // ->addClass('phui-workboard-color')
+    // ->addClass('phui-workboard-bluegrey')
+
     return $this->newPage()
       ->setTitle(
         array(
