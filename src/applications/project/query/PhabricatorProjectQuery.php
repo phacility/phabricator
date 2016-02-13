@@ -170,6 +170,11 @@ final class PhabricatorProjectQuery
         'type' => 'string',
         'unique' => true,
       ),
+      'milestoneNumber' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'milestoneNumber',
+        'type' => 'int',
+      ),
     );
   }
 

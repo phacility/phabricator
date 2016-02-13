@@ -43,7 +43,7 @@ final class PhabricatorProjectSubprojectsController
         ->withParentProjectPHIDs(array($project->getPHID()))
         ->needImages(true)
         ->withIsMilestone(true)
-        ->setOrder('newest')
+        ->setOrderVector(array('milestoneNumber', 'id'))
         ->execute();
     } else {
       $milestones = array();

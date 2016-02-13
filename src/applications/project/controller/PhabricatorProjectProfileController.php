@@ -205,7 +205,7 @@ final class PhabricatorProjectProfileController
         array(
           PhabricatorProjectStatus::STATUS_ACTIVE,
         ))
-      ->setOrder('newest')
+      ->setOrderVector(array('milestoneNumber', 'id'))
       ->execute();
     if (!$milestones) {
       return null;
