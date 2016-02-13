@@ -7,6 +7,7 @@ final class ProjectBoardTaskCard extends Phobject {
   private $task;
   private $owner;
   private $canEdit;
+  private $coverImageFile;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -23,6 +24,15 @@ final class ProjectBoardTaskCard extends Phobject {
 
   public function getProjectHandles() {
     return $this->projectHandles;
+  }
+
+  public function setCoverImageFile(PhabricatorFile $cover_image_file) {
+    $this->coverImageFile = $cover_image_file;
+    return $this;
+  }
+
+  public function getCoverImageFile() {
+    return $this->coverImageFile;
   }
 
   public function setTask(ManiphestTask $task) {
@@ -68,10 +78,6 @@ final class ProjectBoardTaskCard extends Phobject {
       ->setHref('/T'.$task->getID())
       ->addSigil('project-card')
       ->setDisabled($task->isClosed())
-      ->setMetadata(
-        array(
-          'objectPHID' => $task->getPHID(),
-        ))
       ->addAction(
         id(new PHUIListItemView())
         ->setName(pht('Edit'))
@@ -82,6 +88,23 @@ final class ProjectBoardTaskCard extends Phobject {
 
     if ($owner) {
       $card->addHandleIcon($owner, $owner->getName());
+    }
+
+    $cover_file = $this->getCoverImageFile();
+    if ($cover_file) {
+      $card->setCoverImage($cover_file->getBestURI());
+    }
+
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $points = $task->getPoints();
+      if ($points !== null) {
+        $points_tag = id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setShade(PHUITagView::COLOR_BLUE)
+          ->setSlimShady(true)
+          ->setName($points);
+        $card->addAttribute($points_tag);
+      }
     }
 
     if ($task->isClosed()) {
@@ -99,6 +122,8 @@ final class ProjectBoardTaskCard extends Phobject {
         ->setHandles($project_handles);
       $card->addAttribute($tag_list);
     }
+
+    $card->addClass('phui-workcard');
 
     return $card;
   }

@@ -149,6 +149,25 @@
   color: {$menu.profile.text};
 }
 
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-error {
+  color: {$greytext};
+  font-size: {$smallerfontsize};
+  padding: 18px 15px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-profile-segment-bar {
+  color: {$menu.profile.text};
+  font-size: {$smallerfontsize};
+  -webkit-font-smoothing: antialiased;
+  padding: 8px 12px 16px;
+}
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-segment-bar {
+    padding: 8px 8px 16px;
+}
+
+
 .phui-profile-menu .phabricator-side-menu .phui-profile-menu-spacer {
   box-sizing: border-box;
   height: {$menu.profile.item.height};
@@ -299,4 +318,8 @@
     width: {$menu.profile.width};
     max-width: {$menu.profile.width};
   }
+}
+
+!print .phui-profile-menu .phabricator-side-menu {
+  display: none;
 }

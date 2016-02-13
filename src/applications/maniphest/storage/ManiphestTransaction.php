@@ -16,6 +16,8 @@ final class ManiphestTransaction
   const TYPE_UNBLOCK = 'unblock';
   const TYPE_PARENT = 'parent';
   const TYPE_COLUMN = 'column';
+  const TYPE_COVER_IMAGE = 'cover-image';
+  const TYPE_POINTS = 'points';
 
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
@@ -162,9 +164,25 @@ final class ManiphestTransaction
         sort($new_cols);
 
         return ($old_cols === $new_cols);
+      case self::TYPE_COVER_IMAGE:
+        // At least for now, don't show these.
+        return true;
+      case self::TYPE_POINTS:
+        if (!ManiphestTaskPoints::getIsEnabled()) {
+          return true;
+        }
     }
 
     return parent::shouldHide();
+  }
+
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_POINTS:
+        return true;
+    }
+
+    return parent::shouldHideForMail($xactions);
   }
 
   public function shouldHideForFeed() {
@@ -177,6 +195,8 @@ final class ManiphestTransaction
           return true;
         }
         break;
+      case self::TYPE_POINTS:
+        return true;
     }
 
     return parent::shouldHideForFeed();
@@ -620,6 +640,23 @@ final class ManiphestTransaction
           $this->renderHandleList($new));
         break;
 
+      case self::TYPE_POINTS:
+        if ($old === null) {
+          return pht(
+            '%s set the point value for this task to %s.',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else if ($new === null) {
+          return pht(
+            '%s removed the point value for this task.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s changed the point value for this task from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
 
     }
 

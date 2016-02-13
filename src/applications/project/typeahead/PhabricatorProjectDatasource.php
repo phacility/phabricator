@@ -38,6 +38,8 @@ final class PhabricatorProjectDatasource
       $query->withIsMilestone(false);
     }
 
+    $for_autocomplete = $this->getParameter('autocomplete');
+
     $projs = $this->executeQuery($query);
 
     $projs = mpull($projs, null, 'getPHID');
@@ -58,6 +60,23 @@ final class PhabricatorProjectDatasource
       if (!isset($has_cols[$proj->getPHID()])) {
         continue;
       }
+
+      $slug = $proj->getPrimarySlug();
+      if (!strlen($slug)) {
+        foreach ($proj->getSlugs() as $slug_object) {
+          $slug = $slug_object->getSlug();
+          if (strlen($slug)) {
+            break;
+          }
+        }
+      }
+
+      // If we're building results for the autocompleter and this project
+      // doesn't have any usable slugs, don't return it as a result.
+      if ($for_autocomplete && !strlen($slug)) {
+        continue;
+      }
+
       $closed = null;
       if ($proj->isArchived()) {
         $closed = pht('Archived');
@@ -78,7 +97,6 @@ final class PhabricatorProjectDatasource
         ->setPriorityType('proj')
         ->setClosed($closed);
 
-      $slug = $proj->getPrimarySlug();
       if (strlen($slug)) {
         $proj_result->setAutocomplete('#'.$slug);
       }

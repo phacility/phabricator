@@ -147,4 +147,21 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     return $this;
   }
 
+  protected function newCardResponse($board_phid, $object_phid) {
+    $viewer = $this->getViewer();
+
+    $request = $this->getRequest();
+    $visible_phids = $request->getStrList('visiblePHIDs');
+    if (!$visible_phids) {
+      $visible_phids = array();
+    }
+
+    return id(new PhabricatorBoardResponseEngine())
+      ->setViewer($viewer)
+      ->setBoardPHID($board_phid)
+      ->setObjectPHID($object_phid)
+      ->setVisiblePHIDs($visible_phids)
+      ->buildResponse();
+  }
+
 }

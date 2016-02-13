@@ -130,7 +130,10 @@ final class PhabricatorPeopleProfileViewController
       ->setViewer($viewer)
       ->withMemberPHIDs(array($user->getPHID()))
       ->needImages(true)
-      ->withStatus(PhabricatorProjectQuery::STATUS_OPEN)
+      ->withStatuses(
+        array(
+          PhabricatorProjectStatus::STATUS_ACTIVE,
+        ))
       ->execute();
 
     $header = id(new PHUIHeaderView())

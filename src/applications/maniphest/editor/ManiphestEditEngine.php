@@ -77,7 +77,7 @@ final class ManiphestEditEngine
       $owner_value = array($this->getViewer()->getPHID());
     }
 
-    return array(
+    $fields = array(
       id(new PhabricatorHandlesEditField())
         ->setKey('parent')
         ->setLabel(pht('Parent Task'))
@@ -149,18 +149,37 @@ final class ManiphestEditEngine
         ->setValue($object->getPriority())
         ->setOptions($priority_map)
         ->setCommentActionLabel(pht('Change Priority')),
-      id(new PhabricatorRemarkupEditField())
-        ->setKey('description')
-        ->setLabel(pht('Description'))
-        ->setDescription(pht('Task description.'))
-        ->setConduitDescription(pht('Update the task description.'))
-        ->setConduitTypeDescription(pht('New task description.'))
-        ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
-        ->setValue($object->getDescription())
-        ->setPreviewPanel(
-          id(new PHUIRemarkupPreviewPanel())
-            ->setHeader(pht('Description Preview'))),
     );
+
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $points_label = ManiphestTaskPoints::getPointsLabel();
+      $action_label = ManiphestTaskPoints::getPointsActionLabel();
+
+      $fields[] = id(new PhabricatorPointsEditField())
+        ->setKey('points')
+        ->setLabel($points_label)
+        ->setDescription(pht('Point value of the task.'))
+        ->setConduitDescription(pht('Change the task point value.'))
+        ->setConduitTypeDescription(pht('New task point value.'))
+        ->setTransactionType(ManiphestTransaction::TYPE_POINTS)
+        ->setIsCopyable(true)
+        ->setValue($object->getPoints())
+        ->setCommentActionLabel($action_label);
+    }
+
+    $fields[] = id(new PhabricatorRemarkupEditField())
+      ->setKey('description')
+      ->setLabel(pht('Description'))
+      ->setDescription(pht('Task description.'))
+      ->setConduitDescription(pht('Update the task description.'))
+      ->setConduitTypeDescription(pht('New task description.'))
+      ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+      ->setValue($object->getDescription())
+      ->setPreviewPanel(
+        id(new PHUIRemarkupPreviewPanel())
+          ->setHeader(pht('Description Preview')));
+
+    return $fields;
   }
 
   private function getTaskStatusMap(ManiphestTask $task) {
@@ -270,7 +289,11 @@ final class ManiphestEditEngine
     $viewer = $request->getViewer();
 
     $column_phid = $request->getStr('columnPHID');
-    $order = $request->getStr('order');
+
+    $visible_phids = $request->getStrList('visiblePHIDs');
+    if (!$visible_phids) {
+      $visible_phids = array();
+    }
 
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
@@ -280,93 +303,15 @@ final class ManiphestEditEngine
       return new Aphront404Response();
     }
 
-    // If the workboard's project and all descendant projects have been removed
-    // from the card's project list, we are going to remove it from the board
-    // completely.
+    $board_phid = $column->getProjectPHID();
+    $object_phid = $task->getPHID();
 
-    // TODO: If the user did something sneaky and changed a subproject, we'll
-    // currently leave the card where it was but should really move it to the
-    // proper new column.
-
-    $descendant_projects = id(new PhabricatorProjectQuery())
+    return id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
-      ->withAncestorProjectPHIDs(array($column->getProjectPHID()))
-      ->execute();
-    $board_phids = mpull($descendant_projects, 'getPHID', 'getPHID');
-    $board_phids[$column->getProjectPHID()] = $column->getProjectPHID();
-
-    $project_map = array_fuse($task->getProjectPHIDs());
-    $remove_card = !array_intersect_key($board_phids, $project_map);
-
-    $positions = id(new PhabricatorProjectColumnPositionQuery())
-      ->setViewer($viewer)
-      ->withBoardPHIDs(array($column->getProjectPHID()))
-      ->withColumnPHIDs(array($column->getPHID()))
-      ->execute();
-    $task_phids = mpull($positions, 'getObjectPHID');
-
-    $column_tasks = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($task_phids)
-      ->needProjectPHIDs(true)
-      ->execute();
-
-    if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
-      // TODO: This is a little bit awkward, because PHP and JS use
-      // slightly different sort order parameters to achieve the same
-      // effect. It would be good to unify this a bit at some point.
-      $sort_map = array();
-      foreach ($positions as $position) {
-        $sort_map[$position->getObjectPHID()] = array(
-          -$position->getSequence(),
-          $position->getID(),
-        );
-      }
-    } else {
-      $sort_map = mpull(
-        $column_tasks,
-        'getPrioritySortVector',
-        'getPHID');
-    }
-
-    $data = array(
-      'removeFromBoard' => $remove_card,
-      'sortMap' => $sort_map,
-    );
-
-    // TODO: This should just use HandlePool once we get through the EditEngine
-    // transition.
-    $owner = null;
-    if ($task->getOwnerPHID()) {
-      $owner = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($task->getOwnerPHID()))
-        ->executeOne();
-    }
-
-    $handle_phids = $task->getProjectPHIDs();
-    $handle_phids = array_fuse($handle_phids);
-    $handle_phids = array_diff_key($handle_phids, $board_phids);
-
-    $project_handles = $viewer->loadHandles($handle_phids);
-    $project_handles = iterator_to_array($project_handles);
-
-    $tasks = id(new ProjectBoardTaskCard())
-      ->setViewer($viewer)
-      ->setTask($task)
-      ->setOwner($owner)
-      ->setProjectHandles($project_handles)
-      ->setCanEdit(true)
-      ->getItem();
-
-    $tasks->addClass('phui-workcard');
-
-    $payload = array(
-      'tasks' => $tasks,
-      'data' => $data,
-    );
-
-    return id(new AphrontAjaxResponse())->setContent($payload);
+      ->setBoardPHID($board_phid)
+      ->setObjectPHID($object_phid)
+      ->setVisiblePHIDs($visible_phids)
+      ->buildResponse();
   }
 
 

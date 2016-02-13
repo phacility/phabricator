@@ -40,7 +40,8 @@ JX.install('DraggableList', {
   properties : {
     findItemsHandler: null,
     canDragX: false,
-    outerContainer: null
+    outerContainer: null,
+    hasInfiniteHeight: false
   },
 
   members : {
@@ -286,12 +287,22 @@ JX.install('DraggableList', {
 
     _getTargetList : function(p) {
       var target_list;
+      var infinity;
       if (this._hasGroup()) {
         var group = this._group;
         for (var ii = 0; ii < group.length; ii++) {
           var root = group[ii].getRootNode();
           var rp = JX.$V(root);
           var rd = JX.Vector.getDim(root);
+
+          if (group[ii].getHasInfiniteHeight()) {
+            // The math doesn't work out quite right if we actually use
+            // Math.Infinity, so approximate infinity as the document height.
+            infinity = infinity || JX.Vector.getDocument().y;
+
+            rp.y = 0;
+            rd.y = infinity;
+          }
 
           var is_target = false;
           if (p.x >= rp.x && p.y >= rp.y) {
@@ -308,6 +319,10 @@ JX.install('DraggableList', {
       }
 
       return target_list;
+    },
+
+    _getTarget: function() {
+      return this._target;
     },
 
     _setTarget : function(cur_target) {
@@ -433,8 +448,6 @@ JX.install('DraggableList', {
           this._cursorOrigin.y - (this._cursorScroll.y - s.y));
       }
 
-      this._updateAutoscroll(this._cursorPosition);
-
       var p = JX.$V(this._cursorPosition.x, this._cursorPosition.y);
 
       var group = this._group;
@@ -459,6 +472,8 @@ JX.install('DraggableList', {
         }
       }
 
+      this._updateAutoscroll(this._cursorPosition);
+
       var f = JX.$V(this._frame);
       p.x -= f.x;
       p.y -= f.y;
@@ -475,7 +490,7 @@ JX.install('DraggableList', {
     },
 
     _updateAutoscroll: function(p) {
-      var container = this._dragging.parentNode;
+      var container = this._getScrollAnchor().parentNode;
       var autoscroll = {};
 
       var outer = this.getOuterContainer();
@@ -595,6 +610,22 @@ JX.install('DraggableList', {
       this.invoke('didEndDrag', dragging);
     },
 
+    _getScrollAnchor: function() {
+      // If you drag an item from column "A" into column "B", then move the
+      // mouse to the top or bottom of the screen, we need to scroll the target
+      // column (column "B"), not the original column.
+
+      var group = this._group;
+      for (var ii = 0; ii < group.length; ii++) {
+        var target = group[ii]._getTarget();
+        if (target) {
+          return group[ii]._ghostNode;
+        }
+      }
+
+      return this._dragging;
+    },
+
     _onautoscroll: function() {
       var u = this._autoscroll.up;
       var d = this._autoscroll.down;
@@ -613,20 +644,22 @@ JX.install('DraggableList', {
 
       var amount = 12 * (delta / 10);
 
+      var anchor = this._getScrollAnchor();
+
       if (u && (u != d)) {
-        this._tryScroll(this._dragging, u, 'scrollTop', amount);
+        this._tryScroll(anchor, u, 'scrollTop', amount);
       }
 
       if (d && (d != u)) {
-        this._tryScroll(this._dragging, d, 'scrollTop', -amount);
+        this._tryScroll(anchor, d, 'scrollTop', -amount);
       }
 
       if (l && (l != r)) {
-        this._tryScroll(this._dragging, l, 'scrollLeft', amount);
+        this._tryScroll(anchor, l, 'scrollLeft', amount);
       }
 
       if (r && (r != l)) {
-        this._tryScroll(this._dragging, r, 'scrollLeft', -amount);
+        this._tryScroll(anchor, r, 'scrollLeft', -amount);
       }
     },
 
@@ -639,19 +672,41 @@ JX.install('DraggableList', {
 
       var container = from.parentNode;
       while (container) {
-        // Read the current scroll value.
-        value = container[property];
 
-        // Try to scroll.
-        container[property] -= amount;
+        // In Safari, we'll eventually reach `window.document`, which is not
+        // sufficently node-like to support sigil tests.
+        var lock = false;
+        if (container === window.document) {
+          lock = false;
+        } else {
+          // Some elements may respond to, e.g., `scrollTop` adjustment, even
+          // though they are not scrollable. This sigil disables adjustment
+          // for them.
+          var lock_sigil;
+          if (property == 'scrollTop') {
+            lock_sigil = 'lock-scroll-y-while-dragging';
+          }
 
-        // If we scrolled it, we're all done.
-        if (container[property] != value) {
-          break;
+          if (lock_sigil) {
+            lock = JX.Stratcom.hasSigil(container, lock_sigil);
+          }
         }
 
-        if (container == to) {
-          break;
+        if (!lock) {
+          // Read the current scroll value.
+          value = container[property];
+
+          // Try to scroll.
+          container[property] -= amount;
+
+          // If we scrolled it, we're all done.
+          if (container[property] != value) {
+            break;
+          }
+
+          if (container == to) {
+            break;
+          }
         }
 
         container = container.parentNode;

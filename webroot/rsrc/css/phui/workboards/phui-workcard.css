@@ -100,6 +100,20 @@
   margin-bottom: 8px;
 }
 
+.phui-workcard .phui-object-item-cover-image {
+  display: block;
+  padding: 8px 8px 0 8px;
+  width: 263px;
+}
+
+.phui-workcard.phui-object-item.phui-workcard-upload-target {
+  background-color: {$sh-greenbackground};
+}
+
+.phui-object-item-list-view .phui-workcard:last-child {
+  margin-bottom: 0;
+}
+
 
 /* - Draggable Colors --------------------------------------------------------*/
 

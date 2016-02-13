@@ -155,6 +155,10 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return false;
   }
 
+  public static function isClaimStatus($status) {
+    return self::getStatusAttribute($status, 'claim', true);
+  }
+
   public static function isClosedStatus($status) {
     return !self::isOpenStatus($status);
   }
@@ -279,6 +283,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'suffixes' => 'optional list<string>',
           'keywords' => 'optional list<string>',
           'disabled' => 'optional bool',
+          'claim' => 'optional bool',
         ));
     }
 

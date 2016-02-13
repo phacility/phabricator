@@ -9,6 +9,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
   private $columnMap = array();
   private $objectColumnMap = array();
   private $boardLayout = array();
+  private $fetchAllBoards;
 
   private $remQueue = array();
   private $addQueue = array();
@@ -38,6 +39,18 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
 
   public function getObjectPHIDs() {
     return $this->objectPHIDs;
+  }
+
+  /**
+   * Fetch all boards, even if the board is disabled.
+   */
+  public function setFetchAllBoards($fetch_all) {
+    $this->fetchAllBoards = $fetch_all;
+    return $this;
+  }
+
+  public function getFetchAllBoards() {
+    return $this->fetchAllBoards;
   }
 
   public function executeLayout() {
@@ -73,9 +86,14 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     return array_select_keys($this->columnMap, array_keys($columns));
   }
 
-  public function getColumnObjectPHIDs($board_phid, $column_phid) {
+  public function getColumnObjectPositions($board_phid, $column_phid) {
     $columns = idx($this->boardLayout, $board_phid, array());
-    $positions = idx($columns, $column_phid, array());
+    return idx($columns, $column_phid, array());
+  }
+
+
+  public function getColumnObjectPHIDs($board_phid, $column_phid) {
+    $positions = $this->getColumnObjectPositions($board_phid, $column_phid);
     return mpull($positions, 'getObjectPHID');
   }
 
@@ -301,9 +319,11 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       ->execute();
     $boards = mpull($boards, null, 'getPHID');
 
-    foreach ($boards as $key => $board) {
-      if (!$board->getHasWorkboard()) {
-        unset($boards[$key]);
+    if (!$this->fetchAllBoards) {
+      foreach ($boards as $key => $board) {
+        if (!$board->getHasWorkboard()) {
+          unset($boards[$key]);
+        }
       }
     }
 
@@ -346,7 +366,12 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       if ($board->getHasMilestones() || $board->getHasSubprojects()) {
         $child_projects = idx($children, $board_phid, array());
 
-        $next_sequence = last($board_columns)->getSequence() + 1;
+        if ($board_columns) {
+          $next_sequence = last($board_columns)->getSequence() + 1;
+        } else {
+          $next_sequence = 1;
+        }
+
         $proxy_columns = mpull($board_columns, null, 'getProxyPHID');
         foreach ($child_projects as $child_phid => $child) {
           if (isset($proxy_columns[$child_phid])) {
@@ -413,6 +438,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
     $position_groups = mgroup($positions, 'getObjectPHID');
 
     $layout = array();
+    $default_phid = null;
     foreach ($columns as $column) {
       $column_phid = $column->getPHID();
       $layout[$column_phid] = array();
@@ -435,7 +461,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
 
     // If we have proxies, we need to force cards into the correct proxy
     // columns.
-    if ($proxy_map) {
+    if ($proxy_map && $object_phids) {
       $edge_query = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs($object_phids)
         ->withEdgeTypes(
@@ -545,8 +571,9 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
           }
         }
 
-        // If the object has no position, put it on the default column.
-        if (!$positions) {
+        // If the object has no position, put it on the default column if
+        // one exists.
+        if (!$positions && $default_phid) {
           $new_position = id(new PhabricatorProjectColumnPosition())
             ->setBoardPHID($board_phid)
             ->setColumnPHID($default_phid)

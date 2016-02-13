@@ -92,10 +92,9 @@ final class DiffusionCommitController extends DiffusionController {
       $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
       $engine->setConfig('viewer', $user);
 
-      require_celerity_resource('phabricator-remarkup-css');
-
       $headsup_view = id(new PHUIHeaderView())
-        ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')));
+        ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')))
+        ->setSubheader(pht('Commit: %s', $commit->getCommitIdentifier()));
 
       $headsup_actions = $this->renderHeadsupActionList($commit, $repository);
 

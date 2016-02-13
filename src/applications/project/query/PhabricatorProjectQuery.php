@@ -20,6 +20,8 @@ final class PhabricatorProjectQuery
   private $hasSubprojects;
   private $minDepth;
   private $maxDepth;
+  private $minMilestoneNumber;
+  private $maxMilestoneNumber;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -27,6 +29,7 @@ final class PhabricatorProjectQuery
   const STATUS_CLOSED   = 'status-closed';
   const STATUS_ACTIVE   = 'status-active';
   const STATUS_ARCHIVED = 'status-archived';
+  private $statuses;
 
   private $needSlugs;
   private $needMembers;
@@ -46,6 +49,11 @@ final class PhabricatorProjectQuery
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -102,6 +110,12 @@ final class PhabricatorProjectQuery
   public function withDepthBetween($min, $max) {
     $this->minDepth = $min;
     $this->maxDepth = $max;
+    return $this;
+  }
+
+  public function withMilestoneNumberBetween($min, $max) {
+    $this->minMilestoneNumber = $min;
+    $this->maxMilestoneNumber = $max;
     return $this;
   }
 
@@ -387,6 +401,13 @@ final class PhabricatorProjectQuery
         $filter);
     }
 
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
+    }
+
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
@@ -481,6 +502,7 @@ final class PhabricatorProjectQuery
       }
     }
 
+
     if ($this->hasSubprojects !== null) {
       $where[] = qsprintf(
         $conn,
@@ -500,6 +522,20 @@ final class PhabricatorProjectQuery
         $conn,
         'projectDepth <= %d',
         $this->maxDepth);
+    }
+
+    if ($this->minMilestoneNumber !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'milestoneNumber >= %d',
+        $this->minMilestoneNumber);
+    }
+
+    if ($this->maxMilestoneNumber !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'milestoneNumber <= %d',
+        $this->maxMilestoneNumber);
     }
 
     return $where;

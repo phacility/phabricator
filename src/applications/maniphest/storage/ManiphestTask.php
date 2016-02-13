@@ -34,18 +34,15 @@ final class ManiphestTask extends ManiphestDAO
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
 
-  protected $projectPHIDs = array();
-
   protected $ownerOrdering;
   protected $spacePHID;
+  protected $properties = array();
+  protected $points;
 
   private $subscriberPHIDs = self::ATTACHABLE;
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
   private $edgeProjectPHIDs = self::ATTACHABLE;
-
-  // TODO: This field is unused and should eventually be removed.
-  protected $attached = array();
 
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -71,9 +68,7 @@ final class ManiphestTask extends ManiphestDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'ccPHIDs' => self::SERIALIZATION_JSON,
-        'attached' => self::SERIALIZATION_JSON,
-        'projectPHIDs' => self::SERIALIZATION_JSON,
+        'properties' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'ownerPHID' => 'phid?',
@@ -86,11 +81,7 @@ final class ManiphestTask extends ManiphestDAO
         'ownerOrdering' => 'text64?',
         'originalEmailSource' => 'text255?',
         'subpriority' => 'double',
-
-        // T6203/NULLABILITY
-        // This should not be nullable. It's going away soon anyway.
-        'ccPHIDs' => 'text?',
-
+        'points' => 'double?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -139,10 +130,6 @@ final class ManiphestTask extends ManiphestDAO
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getPHID(),
       ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
-  }
-
-  public function getAttachedPHIDs($type) {
-    return array_keys(idx($this->attached, $type, array()));
   }
 
   public function generatePHID() {
@@ -207,11 +194,70 @@ final class ManiphestTask extends ManiphestDAO
     return ManiphestTaskStatus::isClosedStatus($this->getStatus());
   }
 
-  public function getPrioritySortVector() {
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function getCoverImageFilePHID() {
+    return idx($this->properties, 'cover.filePHID');
+  }
+
+  public function getCoverImageThumbnailPHID() {
+    return idx($this->properties, 'cover.thumbnailPHID');
+  }
+
+  public function getWorkboardOrderVectors() {
     return array(
-      $this->getPriority(),
-      -$this->getSubpriority(),
-      $this->getID(),
+      PhabricatorProjectColumn::ORDER_PRIORITY => array(
+        (int)-$this->getPriority(),
+        (double)-$this->getSubpriority(),
+        (int)-$this->getID(),
+      ),
+    );
+  }
+
+  private function comparePriorityTo(ManiphestTask $other) {
+    $upri = $this->getPriority();
+    $vpri = $other->getPriority();
+
+    if ($upri != $vpri) {
+      return ($upri - $vpri);
+    }
+
+    $usub = $this->getSubpriority();
+    $vsub = $other->getSubpriority();
+
+    if ($usub != $vsub) {
+      return ($usub - $vsub);
+    }
+
+    $uid = $this->getID();
+    $vid = $other->getID();
+
+    if ($uid != $vid) {
+      return ($uid - $vid);
+    }
+
+    return 0;
+  }
+
+  public function isLowerPriorityThan(ManiphestTask $other) {
+    return ($this->comparePriorityTo($other) < 0);
+  }
+
+  public function isHigherPriorityThan(ManiphestTask $other) {
+    return ($this->comparePriorityTo($other) > 0);
+  }
+
+  public function getWorkboardProperties() {
+    return array(
+      'status' => $this->getStatus(),
+      'points' => (double)$this->getPoints(),
     );
   }
 
@@ -416,6 +462,10 @@ final class ManiphestTask extends ManiphestDAO
         ->setKey('priority')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about task priority.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('points')
+        ->setType('points')
+        ->setDescription(pht('Point value of the task.')),
     );
   }
 
@@ -442,6 +492,7 @@ final class ManiphestTask extends ManiphestDAO
       'ownerPHID' => $this->getOwnerPHID(),
       'status' => $status_info,
       'priority' => $priority_info,
+      'points' => $this->getPoints(),
     );
   }
 

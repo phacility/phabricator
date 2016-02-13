@@ -229,6 +229,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view->addProperty(pht('Author'), $author);
 
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $points = $task->getPoints();
+      if ($points !== null) {
+        $view->addProperty(
+          ManiphestTaskPoints::getPointsLabel(),
+          $task->getPoints());
+      }
+    }
+
     $source = $task->getOriginalEmailSource();
     if ($source) {
       $subject = '[T'.$task->getID().'] '.$task->getTitle();

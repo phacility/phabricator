@@ -50,6 +50,10 @@ final class PhabricatorProjectBoardImportController
         if ($import_column->isHidden()) {
           continue;
         }
+        if ($import_column->getProxy()) {
+          continue;
+        }
+
         $new_column = PhabricatorProjectColumn::initializeNewColumn($viewer)
           ->setSequence($import_column->getSequence())
           ->setProjectPHID($project->getPHID())

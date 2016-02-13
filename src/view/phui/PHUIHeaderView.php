@@ -22,6 +22,7 @@ final class PHUIHeaderView extends AphrontTagView {
   private $epoch;
   private $actionIcons = array();
   private $badges = array();
+  private $href;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -145,6 +146,15 @@ final class PHUIHeaderView extends AphrontTagView {
 
     $this->setStatus('fa-clock-o bluegrey', null, pht('Updated %s', $when));
     return $this;
+  }
+
+  public function setHref($href) {
+    $this->href = $href;
+    return $this;
+  }
+
+  public function getHref() {
+    return $this->href;
   }
 
   protected function getTagName() {
@@ -290,12 +300,25 @@ final class PHUIHeaderView extends AphrontTagView {
         ->setIcon($this->headerIcon);
       $left[] = $icon;
     }
+
+    $header_content = $this->header;
+
+    $href = $this->getHref();
+    if ($href !== null) {
+      $header_content = phutil_tag(
+        'a',
+        array(
+          'href' => $href,
+        ),
+        $header_content);
+    }
+
     $left[] = phutil_tag(
       'span',
       array(
         'class' => 'phui-header-header',
       ),
-      $this->header);
+      $header_content);
 
     if ($this->subheader || $this->badges) {
       $badges = null;

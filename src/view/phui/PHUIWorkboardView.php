@@ -25,12 +25,13 @@ final class PHUIWorkboardView extends AphrontTagView {
       $view->addColumn($panel);
     }
 
-    $board = phutil_tag(
+    $board = javelin_tag(
       'div',
-        array(
-          'class' => 'phui-workboard-view-shadow',
-        ),
-        $view);
+      array(
+        'class' => 'phui-workboard-view-shadow',
+        'sigil' => 'workboard-shadow lock-scroll-y-while-dragging',
+      ),
+      $view);
 
     return $board;
   }

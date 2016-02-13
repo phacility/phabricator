@@ -1,0 +1,76 @@
+/**
+ * @provides phui-segment-bar-view-css
+ */
+
+.phui-segment-bar-label {
+  font-size: {$smallerfontsize};
+  margin-bottom: 4px;
+}
+
+.phui-profile-menu-collapsed .phui-segment-bar-label {
+  width: 74px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phui-segment-bar-segments {
+  background: {$lightgreybackground};
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  height: 8px;
+}
+
+.phui-segment-bar-segment-view {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin-left: -5px;
+  border-right: 5px solid;
+  border-radius: 0 4px 4px 0;
+}
+
+.phui-segment-bar-segment-view.red {
+  background: {$red};
+  border-color: {$red};
+}
+
+.phui-segment-bar-segment-view.orange {
+  background: {$orange};
+  border-color: {$orange};
+}
+
+.phui-segment-bar-segment-view.yellow {
+  background: {$yellow};
+  border-color: {$yellow}
+}
+
+.phui-segment-bar-segment-view.green {
+  background: {$green};
+  border-color: {$green};
+}
+
+.phui-segment-bar-segment-view.blue {
+  background: {$blue};
+  border-color: {$blue};
+}
+
+.phui-segment-bar-segment-view.indigo {
+  background: {$indigo};
+  border-color: {$indigo};
+}
+
+.phui-segment-bar-segment-view.violet {
+  background: {$violet};
+  border-color: {$violet};
+}
+
+.phui-segment-bar-segment-view.pink {
+  background: {$pink};
+  border-color: {$pink};
+}
+
+.phui-segment-bar-segment-view.sky {
+  background: {$sky};
+  border-color: {$sky};
+}

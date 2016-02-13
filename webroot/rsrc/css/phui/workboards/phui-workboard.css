@@ -12,6 +12,7 @@
 
 .device-desktop .phui-workboard-view-shadow {
   overflow-x: auto;
+  overflow-y: hidden;
   position: absolute;
   top: 79px;
   bottom: 0;
@@ -34,8 +35,8 @@
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
-  height: 12px;
-  width: 12px;
+  height: 8px;
+  width: 8px;
   background: rgba(200,200,200,.6);
 }
 
@@ -52,6 +53,16 @@
   left: {$menu.profile.width.collapsed};
 }
 
+!print .project-board-wrapper .phui-workboard-view-shadow {
+  position: static;
+}
+
+!print .project-board-wrapper .aphront-multi-column-column-outer {
+  display: block;
+  margin: 0 0 18px;
+  page-break-inside: avoid;
+}
+
 .device-desktop .phui-workboard-view .aphront-multi-column-fixed
   .aphront-multi-column-inner {
     margin-left: 0;
@@ -59,4 +70,38 @@
 
 .device .project-board-wrapper {
   margin: 16px;
+}
+
+.device-desktop .phui-workboard-view .aphront-multi-column-view {
+  pointer-events: none;
+}
+
+.device-desktop .phui-workpanel-view {
+  pointer-events: auto;
+  cursor: auto;
+}
+
+/* Fullscreen */
+
+.device-desktop .phui-workboard-fullscreen .phabricator-main-menu {
+  display: none;
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phui-workboard-view-shadow {
+    top: 35px;
+    left: 0;
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-workpanel-body-content {
+  max-height: calc(100vh - 120px);
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phabricator-nav-local {
+    display: none;
+}
+
+.device .phui-workboard-expand-icon {
+  display: none;
 }

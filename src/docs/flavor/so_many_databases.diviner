@@ -1,0 +1,130 @@
+@title Why does Phabricator need so many databases?
+@group lore
+
+Phabricator uses about 60 databases (and we may have added more by the time you
+read this document). This sometimes comes as a surprise, since you might assume
+it would only use one database.
+
+The approach we use is designed to work at scale for huge installs with many
+thousands of users. We care a lot about working well for large installs, and
+about scaling up gracefully to meet the needs of growing organizations. We want
+small startups to be able to install Phabricator and have it grow with them as
+they expand to many thousands of employees.
+
+A cost of this approach is that it makes Phabricator more difficult to install
+on shared hosts which require a lot of work to create or authorize access to
+each database. However, Phabricator does a lot of advanced or complex things
+which are difficult to configure or manage on shared hosts, and we don't
+recommend installing it on a shared host. The install documentation explicitly
+discouarges installing on shared hosts.
+
+Broadly, in cases where we must choose between operating well at scale for
+growing organizations and installing easily on shared hosts, we prioritize
+operating at scale.
+
+
+Listing Databases
+=================
+
+You can get a full list of the databases Phabricator needs with `bin/storage
+databases`. It will look something like this:
+
+```
+$ /core/lib/phabricator/bin/storage databases
+secure_audit
+secure_calendar
+secure_chatlog
+secure_conduit
+secure_countdown
+secure_daemon
+secure_differential
+secure_draft
+secure_drydock
+secure_feed
+...<dozens more databases>...
+```
+
+Roughly, each application has its own database, and then there are some
+databases which support internal systems or shared infrastructure.
+
+
+Operating at Scale
+==================
+
+This storage design is aimed at large installs that may need more than one
+physical database server to handle the load the install generates.
+
+The primary reason we use a separate database for each application is to allow
+large installs to scale up by spreading database load across more hardware. A
+large organization with many thousands of active users may find themselves
+limited by the capacity of a single database backend.
+
+If so, they can launch a second backend, move some applications over to it, and
+continue piling on more users.
+
+This can't continue forever, but provides a substantial amount of headroom for
+large installs to spread the workload across more hardware and continue scaling
+up.
+
+To make this possible, we put each application in its own database and use
+database boundaries to enforce the logical constraints that the application
+must have in order for this to work. For example, we can not perform joins
+between separable tables, because they may not be on the same hardware.
+
+Establishing boundaries with application databases is a simple, straightforward
+way to partition storage and make administrative operations like spreading load
+realistic.
+
+
+Ease of Development
+===================
+
+This design is also easier for us to work with, and easier for users who
+want to work with the raw data in the database.
+
+We have a large number of tables (more than 400) and we can not reasonably
+reduce the number of tables very much (each table generally represents some
+meaningful type of object in some application). It's easier to develop with
+tables which are organized into separate application databases, just like it's
+easier to work with a large project if you organize source files into
+directories.
+
+If you aren't developing Phabricator and never look at the data in the
+database, you probably won't benefit from this organization. However, if you
+are a developer or want to extend Phabricator or look under the hood, it's
+easier to find what you're looking for and work with the tables when they're
+organized by application.
+
+
+More Databases Cost Nothing
+===========================
+
+In almost all cases, creating more databases has zero cost, just like
+organizing source code into directories has zero cost. Even if we didn't derive
+enormous benefits from this approach at scale, there is little reason //not//
+to organize storage like this.
+
+There are a handful of administrative tasks which are very slightly more
+complex to perform on multiple databases, but these are all either automated
+with `bin/storage` or easy to build on top of the list of databases emitted by
+`bin/storage databases`.
+
+For example, you can dump all the databases with `bin/storage dump`, and you
+can destroy all the databases with `bin/storage destroy`.
+
+As mentioned above, an exception to this is that if you're installing on a
+shared host and need to jump through hoops to individually authorize access to
+each database, databases do cost something.
+
+However, this cost is an artificial cost imposed by the selected environment,
+and this is only the first of many issues you'll run into trying to install and
+run Phabricator on a shared host. These issues are why we strongly discourage
+using shared hosts, and recommend against them in the install guide.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - learning more about databases in @{article:Database Schema}.

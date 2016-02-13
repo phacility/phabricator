@@ -86,6 +86,11 @@ final class PhabricatorProjectColumn
   }
 
   public function isHidden() {
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->isArchived();
+    }
+
     return ($this->getStatus() == self::STATUS_HIDDEN);
   }
 

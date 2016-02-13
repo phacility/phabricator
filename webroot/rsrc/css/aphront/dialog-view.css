@@ -10,13 +10,17 @@
   background-color: #fff;
 }
 
+.jx-client-dialog .aphront-dialog-view {
+  box-shadow: {$dropshadow};
+}
+
 .device-phone .aphront-dialog-view {
   margin: 16px;
   width: auto;
 }
 
 .aphront-dialog-view-standalone {
-  margin: auto;
+  margin: 32px auto;
 }
 
 .aphront-dialog-head {
@@ -33,6 +37,7 @@
 
 .aphront-dialog-view-width-full {
   width: 90%;
+  max-width: 1040px;
 }
 
 .aphront-dialog-body {

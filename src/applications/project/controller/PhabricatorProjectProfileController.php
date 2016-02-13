@@ -201,6 +201,10 @@ final class PhabricatorProjectProfileController
       ->withParentProjectPHIDs(array($project->getPHID()))
       ->needImages(true)
       ->withIsMilestone(true)
+      ->withStatuses(
+        array(
+          PhabricatorProjectStatus::STATUS_ACTIVE,
+        ))
       ->setOrder('newest')
       ->execute();
     if (!$milestones) {
@@ -244,6 +248,10 @@ final class PhabricatorProjectProfileController
       ->setViewer($viewer)
       ->withParentProjectPHIDs(array($project->getPHID()))
       ->needImages(true)
+      ->withStatuses(
+        array(
+          PhabricatorProjectStatus::STATUS_ACTIVE,
+        ))
       ->withIsMilestone(false)
       ->setLimit($limit)
       ->execute();
