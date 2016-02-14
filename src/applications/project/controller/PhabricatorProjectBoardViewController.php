@@ -692,7 +692,7 @@ final class PhabricatorProjectBoardViewController
       ->setName(pht('Add Column'))
       ->setHref($add_uri)
       ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
+      ->setWorkflow(true);
 
     $manage_items[] = id(new PhabricatorActionView())
       ->setIcon('fa-exchange')
