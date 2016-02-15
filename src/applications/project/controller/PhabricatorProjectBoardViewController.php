@@ -124,10 +124,14 @@ final class PhabricatorProjectBoardViewController
 
     $board_phid = $project->getPHID();
 
+    // Regardless of display order, pass tasks to the layout engine in ID order
+    // so layout is consistent.
+    $board_tasks = msort($tasks, 'getID');
+
     $layout_engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
       ->setBoardPHIDs(array($board_phid))
-      ->setObjectPHIDs(array_keys($tasks))
+      ->setObjectPHIDs(array_keys($board_tasks))
       ->setFetchAllBoards(true)
       ->executeLayout();
 

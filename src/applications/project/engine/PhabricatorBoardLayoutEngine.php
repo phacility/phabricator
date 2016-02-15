@@ -506,6 +506,7 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
       }
     }
 
+    $view_sequence = 1;
     foreach ($object_phids as $object_phid) {
       $positions = idx($position_groups, $object_phid, array());
 
@@ -554,7 +555,8 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
             ->setBoardPHID($board_phid)
             ->setColumnPHID($proxy_hit)
             ->setObjectPHID($object_phid)
-            ->setSequence(0);
+            ->setSequence(0)
+            ->setViewSequence($view_sequence++);
 
           $this->addQueue[] = $new_position;
 
@@ -578,7 +580,8 @@ final class PhabricatorBoardLayoutEngine extends Phobject {
             ->setBoardPHID($board_phid)
             ->setColumnPHID($default_phid)
             ->setObjectPHID($object_phid)
-            ->setSequence(0);
+            ->setSequence(0)
+            ->setViewSequence($view_sequence++);
 
           $this->addQueue[] = $new_position;
 
