@@ -97,7 +97,20 @@ final class PhabricatorSlowvoteTransaction
     return parent::getTitle();
   }
 
-    public function getTitleForFeed() {
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case self::TYPE_DESCRIPTION:
+        $blocks[] = $this->getNewValue();
+        break;
+    }
+
+    return $blocks;
+  }
+
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
