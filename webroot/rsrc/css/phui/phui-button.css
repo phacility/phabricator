@@ -60,7 +60,7 @@ input[type="submit"].grey,
 a.grey,
 a.grey:visited {
   background-color: #F7F7F9;
-  border: 1px solid rgba(55,55,55,.1);
+  border: 1px solid rgba({$alphagrey},.1);
   color: {$darkgreytext};
 }
 
@@ -106,8 +106,8 @@ button:hover {
 
 a.button.grey:hover,
 button.grey:hover {
-  background-color: rgba(71, 87, 120, 0.1);
-  border-color: rgba(71, 87, 120, 0.15);
+  background-color: rgba({$alphablue}, 0.1);
+  border-color: rgba({$alphablue}, 0.15);
   transition: 0.1s;
 }
 
@@ -315,7 +315,7 @@ a.policy-control .caret {
 
 .phui-button-bar-borderless .button .phui-icon-view {
   font-size: 15px;
-  color: rgba(55,55,55,.4);
+  color: rgba({$alphagrey},.4);
 }
 
 .phui-button-bar-borderless .button:hover {
@@ -324,7 +324,7 @@ a.policy-control .caret {
 }
 
 .phui-button-bar-borderless .button:hover .phui-icon-view {
-  color: rgba(55,55,55,.9);
+  color: rgba({$alphagrey},.9);
 }
 
 .phui-button-bar-borderless .button {

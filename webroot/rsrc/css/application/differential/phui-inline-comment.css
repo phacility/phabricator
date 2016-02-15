@@ -340,7 +340,7 @@
 }
 
 .ghost-icon {
-  background: rgba(55,55,55,.07);
+  background: rgba({$alphagrey},.07);
   float: left;
   padding: 2px 4px 2px 2px;
   position: absolute;
@@ -389,7 +389,7 @@
 }
 
 .inline-button-divider {
-  border-left: 1px solid rgba(55,55,55,.25);
+  border-left: 1px solid rgba({$alphagrey},.25);
   margin-left: 8px;
 }
 

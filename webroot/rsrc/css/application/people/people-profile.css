@@ -38,7 +38,7 @@ form.compose-dialog {
 }
 
 .compose-dialog .compose-icon-bg {
-  color: rgba(255,255,255,0.8);
+  color: rgba({$alphawhite},0.8);
   line-height: 50px;
   width: 50px;
   text-align: center;

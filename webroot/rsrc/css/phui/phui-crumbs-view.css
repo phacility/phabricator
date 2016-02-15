@@ -105,7 +105,7 @@ a.phui-crumbs-action .phui-crumbs-action-name {
 }
 
 .phui-crumbs-view.phui-crumbs-border {
-  border-bottom: 1px solid rgba(55,55,55,.1);
+  border-bottom: 1px solid rgba({$alphagrey},.1);
 }
 
 body .phui-crumbs-view + .phui-object-box {

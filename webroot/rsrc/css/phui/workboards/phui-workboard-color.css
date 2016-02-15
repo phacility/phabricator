@@ -7,14 +7,14 @@
 }
 
 .phui-workboard-color .phui-crumbs-view {
-  background-color: rgba(55,55,55,.15);
+  background-color: rgba({$alphagrey},.15);
   border: none;
-  color: rgba(255,255,255,.8);
+  color: rgba({$alphawhite},.8);
 }
 
 .phui-workboard-color .phui-crumbs-view a,
 .phui-workboard-color .phui-crumbs-view .phui-icon-view {
-    color: rgba(255,255,255,.85);
+    color: rgba({$alphawhite},.85);
 }
 
 .phui-workboard-color .phui-crumbs-view a:hover,
@@ -23,11 +23,11 @@
 }
 
 .phui-workboard-color .phuix-dropdown-menu {
-  background-color: rgba(255,255,255,.9);
+  background-color: rgba({$alphawhite},.9);
 }
 
 .phui-workboard-color .phui-workpanel-view .phui-box-grey {
-  background-color: rgba(255,255,255,.6);
+  background-color: rgba({$alphawhite},.6);
 }
 
 .phui-workboard-color-preview {

@@ -117,7 +117,7 @@
 }
 
 .conpherence-menu .conpherence-selected {
-  background: rgba(0,0,0,0.05);
+  background: rgba({$alphablack},0.05);
   border-left: 4px solid {$sky};
 }
 
@@ -127,7 +127,7 @@
 
 .device-desktop .conpherence-menu
  .conpherence-selected.conpherence-menu-item-view:hover {
-  background-color: rgba(0,0,0,0.07);
+  background-color: rgba({$alphablack},0.07);
 }
 
 .conpherence-menu .loading {
@@ -135,7 +135,7 @@
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba({$alphablack},0.05);
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-image {

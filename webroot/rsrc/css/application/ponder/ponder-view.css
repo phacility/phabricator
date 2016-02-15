@@ -63,7 +63,7 @@
   margin-right: 8px;
   color: {$anchor};
   display: inline-block;
-  background-color: rgba(71, 87, 120, 0.06);
+  background-color: rgba({$alphablue}, 0.06);
 }
 
 .ponder-footer-view .ponder-footer-action.ponder-footer-action-helpful {
@@ -82,5 +82,5 @@
 
 .ponder-footer-view a:hover {
   text-decoration: none;
-  background-color: rgba(71, 87, 120, 0.10);
+  background-color: rgba({$alphablue}, 0.10);
 }

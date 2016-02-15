@@ -15,7 +15,7 @@
 .phui-box-grey {
   background-color: #F7F7F9;
   border-radius: 3px;
-  border-color: rgba(55,55,55,.1);
+  border-color: rgba({$alphagrey},.1);
 }
 
 .phui-box-blue {
@@ -44,7 +44,7 @@
 }
 
 .phui-box-grey .phui-header-shell {
-  border-color: rgba(55,55,55,.1);
+  border-color: rgba({$alphagrey},.1);
 }
 
 .phui-object-box.phui-box-blue div.phui-info-severity-nodata,

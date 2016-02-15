@@ -116,8 +116,8 @@
 }
 
 .pholio-mock-reticle-selection {
-  border: 1px solid rgba(0,0,0,.5);
-  box-shadow: 0 0 0 4px rgba(255,255,255,.5);
+  border: 1px solid rgba({$alphablack},.5);
+  box-shadow: 0 0 0 4px rgba({$alphawhite},.5);
 }
 
 .pholio-mock-comment-icon {
@@ -132,21 +132,21 @@
 .pholio-mock-reticle-draft .pholio-mock-comment-icon {
   font-size: 2.2em;
   color: {$yellow};
-  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 3px 8px rgba({$alphablack}, 0.35);
   -webkit-text-stroke: 1px white;
 }
 
 .pholio-mock-reticle-final .pholio-mock-comment-icon {
   font-size: 2.2em;
   color: {$pink};
-  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 3px 8px rgba({$alphablack}, 0.35);
   -webkit-text-stroke: 1px white;
 }
 
 .pholio-mock-reticle-draft:hover,
 .pholio-mock-reticle-final:hover {
-  border: 1px solid rgba(0,0,0,.5);
-  box-shadow: 0 0 0 4px rgba(255,255,255,.5);
+  border: 1px solid rgba({$alphablack},.5);
+  box-shadow: 0 0 0 4px rgba({$alphawhite},.5);
   cursor: pointer;
 }
 
@@ -170,7 +170,7 @@
   right: 0;
   font-size: 14px;
   padding: 4px 8px;
-  background: rgba(255,255,255,.6);
+  background: rgba({$alphawhite},.6);
   color: {$greytext};
 }
 

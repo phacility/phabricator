@@ -34,7 +34,7 @@
 
 .phui-profile-menu .phabricator-side-menu {
   background: #525867;
-  box-shadow: inset -2px 0 2px rgba(0, 0, 0, 0.150);
+  box-shadow: inset -2px 0 2px rgba({$alphablack}, 0.150);
   width: 240px;
 }
 
@@ -107,7 +107,7 @@
 
 .device-desktop .phui-profile-menu .phabricator-side-menu
   .phui-list-item-href:hover {
-  background-color: rgba(0,0,0,0.15);
+  background-color: rgba({$alphablack},0.15);
   color: {$menu.profile.text.selected};
 }
 
@@ -122,18 +122,18 @@
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-selected
   .phui-list-item-href {
-  background-color: rgba(0,0,0,0.3);
+  background-color: rgba({$alphablack},0.3);
   color: {$menu.profile.text.selected};
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-selected
   .phui-list-item-href:hover {
-  background-color: rgba(0,0,0,0.45);
+  background-color: rgba({$alphablack},0.45);
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-divider {
   margin: 4px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba({$alphablack}, 0.2);
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-motivator {

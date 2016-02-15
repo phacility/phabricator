@@ -15,7 +15,7 @@
   padding: 18px 0;
 
   color: #ffffff;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba({$alphablack}, 0.8);
   border-radius: 18px;
 
 }
