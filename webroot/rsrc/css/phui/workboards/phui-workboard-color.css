@@ -30,59 +30,105 @@
   background-color: rgba(255,255,255,.6);
 }
 
-/* Colors */
+/* Gradients */
 
-.phui-workboard-red {
+.phui-workboard-gradient-red {
   background-color: #e53935;
   background-image: linear-gradient(to left, #e53935, #e35d5b);
 }
 
-.phui-workboard-orange {
+.phui-workboard-gradient-orange {
   background-color: #f46b45;
   background-image: linear-gradient(to left, #f46b45, #eea849);
 }
 
-.phui-workboard-yellow {
+.phui-workboard-gradient-yellow {
   background-color: #FF8008;
   background-image: linear-gradient(to left, #FF8008, #FFC837);
 }
 
-.phui-workboard-blue {
-  background-color: #73a5c3;
-  background-image: linear-gradient(90deg, #73a5c3 0, #6875be);
-}
-
-.phui-workboard-bluegrey {
-  background-color: #517fa4;
-  background-image: linear-gradient(to left, #517fa4, #243949);
-}
-
-.phui-workboard-green {
+.phui-workboard-gradient-green {
   background-color: #2fa0ac;
   background-image: linear-gradient(90deg, #2fa0ac 0, #58cca6);
 }
 
-.phui-workboard-indigo {
+.phui-workboard-gradient-blue {
+  background-color: #73a5c3;
+  background-image: linear-gradient(90deg, #73a5c3 0, #6875be);
+}
+
+.phui-workboard-gradient-bluegrey {
+  background-color: #517fa4;
+  background-image: linear-gradient(to left, #517fa4, #243949);
+}
+
+.phui-workboard-gradient-indigo {
   background-color: #4776E6;
   background-image: linear-gradient(to left, #4776E6, #8E54E9);
 }
 
-.phui-workboard-violet {
+.phui-workboard-gradient-violet {
   background-color: #9f73c3;
   background-image: linear-gradient(90deg, #9f73c3 0, #6875be);
 }
 
-.phui-workboard-sky {
+.phui-workboard-gradient-sky {
   background-color: #7474BF;
   background-image: linear-gradient(to left, #7474BF, #348AC7);
 }
 
-.phui-workboard-pink {
+.phui-workboard-gradient-pink {
   background-color: #EA2A90;
   background-image: linear-gradient(to left, #EA2A90, #79164B);
 }
 
-.phui-workboard-grey {
+.phui-workboard-gradient-grey {
   background-color: #283048;
   background-image: linear-gradient(to left, #283048, #859398);
+}
+
+/* Colors */
+
+.phui-workboard-red {
+  background-color: {$red};
+}
+
+.phui-workboard-orange {
+  background-color: {$orange};
+}
+
+.phui-workboard-yellow {
+  background-color: {$yellow};
+}
+
+.phui-workboard-green {
+  background-color: {$green};
+}
+
+.phui-workboard-blue {
+  background-color: {$blue};
+}
+
+.phui-workboard-indigo {
+  background-color: {$indigo};
+}
+
+.phui-workboard-violet {
+  background-color: {$violet};
+}
+
+.phui-workboard-sky {
+  background-color: {$sky};
+}
+
+.phui-workboard-pink {
+  background-color: {$pink};
+}
+
+.phui-workboard-fire {
+  background-color: {$fire};
+}
+
+.phui-workboard-grey {
+  background-color: {$greytext};
 }
