@@ -181,6 +181,9 @@ final class PhabricatorProjectSubprojectsController
     $viewer = $this->getViewer();
     $id = $project->getID();
 
+    $can_create = $this->hasApplicationCapability(
+      ProjectCreateProjectsCapability::CAPABILITY);
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $project,
@@ -198,7 +201,7 @@ final class PhabricatorProjectSubprojectsController
       $milestone_text = pht('Create Milestone');
     }
 
-    $can_milestone = ($can_edit && $allows_milestones);
+    $can_milestone = ($can_create && $can_edit && $allows_milestones);
     $milestone_href = "/project/edit/?milestone={$id}";
 
     $view->addAction(
@@ -209,7 +212,7 @@ final class PhabricatorProjectSubprojectsController
         ->setDisabled(!$can_milestone)
         ->setWorkflow(!$can_milestone));
 
-    $can_subproject = ($can_edit && $allows_subprojects);
+    $can_subproject = ($can_create && $can_edit && $allows_subprojects);
 
     // If we're offering to create the first subproject, we're going to warn
     // the user about the effects before moving forward.
