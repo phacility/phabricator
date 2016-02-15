@@ -97,17 +97,19 @@
   list-style: lower-roman;
 }
 
-.phabricator-remarkup ul.remarkup-list-with-checkmarks {
+.phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item,
+.phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-unchecked-item {
   list-style: none;
-  margin-left: 18px;
+  margin-left: -18px;
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks input {
   margin-right: 2px;
+  opacity: 1;
 }
 
 .phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item {
-  color: {$greytext};
+  text-decoration: line-through;
 }
 
 .phabricator-remarkup ul.remarkup-list ol.remarkup-list,
