@@ -211,8 +211,10 @@ final class PhabricatorOwnersDetailController
   private function buildPackageActionView(PhabricatorOwnersPackage $package) {
     $viewer = $this->getViewer();
 
-    // TODO: Implement this capability.
-    $can_edit = true;
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $package,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $id = $package->getID();
     $edit_uri = $this->getApplicationURI("/edit/{$id}/");
