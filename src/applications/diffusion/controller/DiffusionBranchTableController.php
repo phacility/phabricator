@@ -19,13 +19,19 @@ final class DiffusionBranchTableController extends DiffusionController {
     $pager = id(new PHUIPagerView())
       ->readFromRequest($request);
 
-    // TODO: Add support for branches that contain commit
+    $params = array(
+      'offset' => $pager->getOffset(),
+      'limit' => $pager->getPageSize() + 1,
+    );
+
+    $contains = $drequest->getSymbolicCommit();
+    if (strlen($contains)) {
+      $params['contains'] = $contains;
+    }
+
     $branches = $this->callConduitWithDiffusionRequest(
       'diffusion.branchquery',
-      array(
-        'offset' => $pager->getOffset(),
-        'limit' => $pager->getPageSize() + 1,
-      ));
+      $params);
     $branches = $pager->sliceResults($branches);
 
     $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
