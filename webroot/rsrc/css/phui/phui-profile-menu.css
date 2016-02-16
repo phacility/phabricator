@@ -150,9 +150,16 @@
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-profile-menu-error {
-  color: {$greytext};
+  color: rgba({$alphawhite}, 0.5);
   font-size: {$smallerfontsize};
   padding: 18px 15px;
+}
+
+.phui-profile-menu .phabricator-side-menu .phui-list-item-disabled
+  .phui-list-item-href,
+.phui-profile-menu .phui-list-sidenav .phui-list-item-disabled
+  .phui-list-item-href {
+  color: rgba({$alphawhite}, 0.5);
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-profile-segment-bar {

@@ -456,7 +456,7 @@ final class PhabricatorProjectBoardViewController
       $background_color_class = "phui-workboard-{$background}";
 
       $page->addClass('phui-workboard-color');
-      $nav->addClass($background_color_class);
+      $page->addClass($background_color_class);
     }
 
     return $page;
