@@ -680,9 +680,8 @@ final class PhabricatorProjectBoardViewController
 
     $id = $project->getID();
 
-    $disable_uri = $this->getApplicationURI("board/{$id}/disable/");
+    $manage_uri = $this->getApplicationURI("board/{$id}/manage/");
     $add_uri = $this->getApplicationURI("board/{$id}/edit/");
-    $reorder_uri = $this->getApplicationURI("board/{$id}/reorder/");
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -699,11 +698,9 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true);
 
     $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-exchange')
-      ->setName(pht('Reorder Columns'))
-      ->setHref($reorder_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(true);
+      ->setIcon('fa-pencil')
+      ->setName(pht('Manage Board'))
+      ->setHref($manage_uri);
 
     if ($show_hidden) {
       $hidden_uri = $this->getURIWithState()
@@ -734,13 +731,6 @@ final class PhabricatorProjectBoardViewController
       ->setName(pht('Batch Edit Visible Tasks...'))
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
-
-    $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-ban')
-      ->setName(pht('Disable Workboard'))
-      ->setHref($disable_uri)
-      ->setWorkflow(true)
-      ->setDisabled(!$can_edit);
 
     $manage_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
@@ -825,14 +815,6 @@ final class PhabricatorProjectBoardViewController
       ->setName(pht('Batch Edit Tasks...'))
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
-
-    $detail_uri = $this->getApplicationURI(
-      'board/'.$this->id.'/column/'.$column->getID().'/');
-
-    $column_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-columns')
-      ->setName(pht('Column Details'))
-      ->setHref($detail_uri);
 
     $can_hide = ($can_edit && !$column->isDefaultColumn());
     $hide_uri = 'board/'.$this->id.'/hide/'.$column->getID().'/';
