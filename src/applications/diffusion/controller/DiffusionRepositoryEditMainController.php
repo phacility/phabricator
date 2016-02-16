@@ -309,10 +309,7 @@ final class DiffusionRepositoryEditMainController
     if (!strlen($description)) {
       $description = phutil_tag('em', array(), pht('No description provided.'));
     } else {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        $repository,
-        'description',
-        $viewer);
+      $description = new PHUIRemarkupView($viewer, $description);
     }
     $view->addTextContent($description);
 

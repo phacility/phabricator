@@ -39,12 +39,7 @@ final class PhabricatorStandardCustomFieldRemarkup
     // end of the world.
 
     $viewer = $this->getViewer();
-    return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setContent($value)
-        ->setPReserveLinebreaks(true),
-      'default',
-      $viewer);
+    return new PHUIRemarkupView($viewer, $value);
   }
 
   public function getApplicationTransactionTitle(

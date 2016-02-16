@@ -341,23 +341,14 @@ final class PhabricatorConfigWelcomeController
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Welcome to Phabricator'));
 
-    $setup_header = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setContent(pht('=Setup and Configuration')),
-      'default',
-      $viewer);
+    $setup_header = new PHUIRemarkupView(
+      $viewer, pht('=Setup and Configuration'));
 
-    $explore_header = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setContent(pht('=Explore Phabricator')),
-      'default',
-      $viewer);
+    $explore_header = new PHUIRemarkupView(
+      $viewer, pht('=Explore Phabricator'));
 
-    $quick_header = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setContent(pht('=Quick Start Guides')),
-      'default',
-      $viewer);
+    $quick_header = new PHUIRemarkupView(
+      $viewer, pht('=Quick Start Guide'));
 
     return id(new PHUIDocumentView())
       ->setHeader($header)
@@ -376,10 +367,7 @@ final class PhabricatorConfigWelcomeController
     $icon = id(new PHUIIconView())
       ->setIcon($icon.' fa-2x');
 
-    $content = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($content),
-      'default',
-      $viewer);
+    $content = new PHUIRemarkupView($viewer, $content);
 
     $icon = phutil_tag(
       'div',

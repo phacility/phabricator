@@ -290,10 +290,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $description = $repository->getDetail('description');
     if (strlen($description)) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        $repository,
-        'description',
-        $user);
+      $description = new PHUIRemarkupView($user, $description);
       $view->addSectionHeader(
         pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($description);

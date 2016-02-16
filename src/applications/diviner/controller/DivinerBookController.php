@@ -94,11 +94,7 @@ final class DivinerBookController extends DivinerController {
     $preface = $book->getPreface();
     $preface_view = null;
     if (strlen($preface)) {
-      $preface_view =
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent($preface),
-          'default',
-          $viewer);
+      $preface_view = new PHUIRemarkupView($viewer, $preface);
     }
 
     $document->appendChild($preface_view);

@@ -189,13 +189,10 @@ final class PhabricatorOwnersDetailController
 
     $description = $package->getDescription();
     if (strlen($description)) {
+      $description = new PHUIRemarkupView($viewer, $description);
       $view->addSectionHeader(
         pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
-      $view->addTextContent(
-        $output = PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent($description),
-          'default',
-          $viewer));
+      $view->addTextContent($description);
     }
 
     $view->invokeWillRenderEvent();

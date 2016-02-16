@@ -74,11 +74,8 @@ class PHUIFormPageView extends AphrontView {
   }
 
   public function addRemarkupInstructions($remarkup, $before = null) {
-    return $this->addInstructions(
-      PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($remarkup),
-        'default',
-        $this->getUser()), $before);
+    $remarkup = new PHUIRemarkupView($this->getUser(), $remarkup);
+    return $this->addInstructions($remarkup, $before);
   }
 
   public function addControl(AphrontFormControl $control) {
