@@ -247,7 +247,7 @@ final class PhabricatorProjectQuery
 
     $all_graph = $this->getAllReachableAncestors($projects);
 
-    if ($this->needAncestorMembers) {
+    if ($this->needAncestorMembers || $this->needWatchers) {
       $src_projects = $all_graph;
     } else {
       $src_projects = $projects;
@@ -255,11 +255,13 @@ final class PhabricatorProjectQuery
 
     $all_sources = array();
     foreach ($src_projects as $project) {
+      // For milestones, we need parent members.
       if ($project->isMilestone()) {
-        $phid = $project->getParentProjectPHID();
-      } else {
-        $phid = $project->getPHID();
+        $parent_phid = $project->getParentProjectPHID();
+        $all_sources[$parent_phid] = $parent_phid;
       }
+
+      $phid = $project->getPHID();
       $all_sources[$phid] = $phid;
     }
 
@@ -318,7 +320,7 @@ final class PhabricatorProjectQuery
 
       if ($this->needWatchers) {
         $watcher_phids = $edge_query->getDestinationPHIDs(
-          $source_phids,
+          array($project_phid),
           array($watcher_type));
         $project->attachWatcherPHIDs($watcher_phids);
         $project->setIsUserWatcher(

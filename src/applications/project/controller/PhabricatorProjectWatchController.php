@@ -25,6 +25,23 @@ final class PhabricatorProjectWatchController
       $done_uri = "/project/members/{$id}/";
     }
 
+    $is_watcher = $project->isUserWatcher($viewer->getPHID());
+    $is_ancestor = $project->isUserAncestorWatcher($viewer->getPHID());
+    if ($is_ancestor && !$is_watcher) {
+      $ancestor_phid = $project->getWatchedAncestorPHID($viewer->getPHID());
+      $handles = $viewer->loadHandles(array($ancestor_phid));
+      $ancestor_handle = $handles[$ancestor_phid];
+
+      return $this->newDialog()
+        ->setTitle(pht('Watching Ancestor'))
+        ->appendParagraph(
+          pht(
+            'You are already watching %s, an ancestor of this project, and '.
+            'are thus watching all of its subprojects.',
+            $ancestor_handle->renderTag()->render()))
+        ->addCancelbutton($done_uri);
+    }
+
     if ($request->isDialogFormPost()) {
       $edge_action = null;
       switch ($action) {
@@ -61,10 +78,14 @@ final class PhabricatorProjectWatchController
     switch ($action) {
       case 'watch':
         $title = pht('Watch Project?');
-        $body = pht(
+        $body = array();
+        $body[] = pht(
           'Watching a project will let you monitor it closely. You will '.
           'receive email and notifications about changes to every object '.
-          'associated with projects you watch.');
+          'tagged with projects you watch.');
+        $body[] = pht(
+          'Watching a project also watches all subprojects and milestones of '.
+          'that project.');
         $submit = pht('Watch Project');
         break;
       case 'unwatch':
@@ -78,12 +99,17 @@ final class PhabricatorProjectWatchController
         return new Aphront404Response();
     }
 
-    return $this->newDialog()
+    $dialog = $this->newDialog()
       ->setTitle($title)
       ->addHiddenInput('via', $via)
-      ->appendParagraph($body)
       ->addCancelButton($done_uri)
       ->addSubmitButton($submit);
+
+    foreach ((array)$body as $paragraph) {
+      $dialog->appendParagraph($paragraph);
+    }
+
+    return $dialog;
   }
 
 }
