@@ -579,6 +579,31 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->setProperty('workboard.filter.default', $filter);
   }
 
+  public function getWorkboardBackgroundColor() {
+    return $this->getProperty('workboard.background');
+  }
+
+  public function setWorkboardBackgroundColor($color) {
+    return $this->setProperty('workboard.background', $color);
+  }
+
+  public function getDisplayWorkboardBackgroundColor() {
+    $color = $this->getWorkboardBackgroundColor();
+
+    if ($color === null) {
+      $parent = $this->getParentProject();
+      if ($parent) {
+        return $parent->getDisplayWorkboardBackgroundColor();
+      }
+    }
+
+    if ($color === 'none') {
+      $color = null;
+    }
+
+    return $color;
+  }
+
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

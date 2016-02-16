@@ -96,6 +96,16 @@ final class PhabricatorProjectBoardManageController
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
+    $background_uri = $this->getApplicationURI("board/{$id}/background/");
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-paint-brush')
+        ->setName(pht('Change Background Color'))
+        ->setHref($background_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     $disable_uri = $this->getApplicationURI("board/{$id}/disable/");
 
     $actions->addAction(
@@ -116,6 +126,15 @@ final class PhabricatorProjectBoardManageController
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($board);
+
+    $background = $board->getDisplayWorkboardBackgroundColor();
+    if ($background !== null) {
+      $map = PhabricatorProjectWorkboardBackgroundColor::getOptions();
+      $map = ipull($map, 'name');
+
+      $name = idx($map, $background, $background);
+      $properties->addProperty(pht('Background Color'), $name);
+    }
 
     return $properties;
   }

@@ -431,12 +431,7 @@ final class PhabricatorProjectBoardViewController
     $crumbs->addAction($manage_menu);
     $crumbs->addAction($fullscreen);
 
-    // TODO: Wire to Workboard Preferences
-    // require_celerity_resource('phui-workboard-color-css');
-    // ->addClass('phui-workboard-color')
-    // ->addClass('phui-workboard-bluegrey')
-
-    return $this->newPage()
+    $page = $this->newPage()
       ->setTitle(
         array(
           $project->getDisplayName(),
@@ -454,6 +449,17 @@ final class PhabricatorProjectBoardViewController
         array(
           $board_box,
         ));
+
+    $background = $project->getDisplayWorkboardBackgroundColor();
+    if ($background !== null) {
+      require_celerity_resource('phui-workboard-color-css');
+      $background_color_class = "phui-workboard-{$background}";
+
+      $page->addClass('phui-workboard-color');
+      $nav->addClass($background_color_class);
+    }
+
+    return $page;
   }
 
   private function readRequestState() {
