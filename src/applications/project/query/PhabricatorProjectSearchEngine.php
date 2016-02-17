@@ -26,6 +26,10 @@ final class PhabricatorProjectSearchEngine
         ->setLabel(pht('Members'))
         ->setKey('memberPHIDs')
         ->setAliases(array('member', 'members')),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Watchers'))
+        ->setKey('watcherPHIDs')
+        ->setAliases(array('watcher', 'watchers')),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Status'))
         ->setKey('status')
@@ -52,6 +56,10 @@ final class PhabricatorProjectSearchEngine
 
     if ($map['memberPHIDs']) {
       $query->withMemberPHIDs($map['memberPHIDs']);
+    }
+
+    if ($map['watcherPHIDs']) {
+      $query->withWatcherPHIDs($map['watcherPHIDs']);
     }
 
     if ($map['status']) {

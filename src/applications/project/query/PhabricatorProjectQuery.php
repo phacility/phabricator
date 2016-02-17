@@ -6,6 +6,7 @@ final class PhabricatorProjectQuery
   private $ids;
   private $phids;
   private $memberPHIDs;
+  private $watcherPHIDs;
   private $slugs;
   private $slugNormals;
   private $slugMap;
@@ -59,6 +60,11 @@ final class PhabricatorProjectQuery
 
   public function withMemberPHIDs(array $member_phids) {
     $this->memberPHIDs = $member_phids;
+    return $this;
+  }
+
+  public function withWatcherPHIDs(array $watcher_phids) {
+    $this->watcherPHIDs = $watcher_phids;
     return $this;
   }
 
@@ -436,6 +442,13 @@ final class PhabricatorProjectQuery
         $this->memberPHIDs);
     }
 
+    if ($this->watcherPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'w.dst IN (%Ls)',
+        $this->watcherPHIDs);
+    }
+
     if ($this->slugs !== null) {
       $where[] = qsprintf(
         $conn,
@@ -549,7 +562,7 @@ final class PhabricatorProjectQuery
   }
 
   protected function shouldGroupQueryResultRows() {
-    if ($this->memberPHIDs || $this->nameTokens) {
+    if ($this->memberPHIDs || $this->watcherPHIDs || $this->nameTokens) {
       return true;
     }
     return parent::shouldGroupQueryResultRows();
@@ -564,6 +577,14 @@ final class PhabricatorProjectQuery
         'JOIN %T e ON e.src = p.phid AND e.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectMaterializedMemberEdgeType::EDGECONST);
+    }
+
+    if ($this->watcherPHIDs !== null) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T w ON w.src = p.phid AND w.type = %d',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorObjectHasWatcherEdgeType::EDGECONST);
     }
 
     if ($this->slugs !== null) {
