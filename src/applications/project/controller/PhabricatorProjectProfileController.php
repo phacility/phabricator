@@ -83,8 +83,11 @@ final class PhabricatorProjectProfileController
 
     $feed = $this->renderStories($stories);
     $feed = phutil_tag_div('project-view-feed', $feed);
+    require_celerity_resource('project-view-css');
 
-    $columns = id(new PHUITwoColumnView())
+    $home = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->addClass('project-view-home')
       ->setMainColumn(
         array(
           $properties,
@@ -100,17 +103,6 @@ final class PhabricatorProjectProfileController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
-
-    require_celerity_resource('project-view-css');
-    $home = phutil_tag(
-      'div',
-      array(
-        'class' => 'project-view-home',
-      ),
-      array(
-        $header,
-        $columns,
-      ));
 
     return $this->newPage()
       ->setNavigation($nav)
