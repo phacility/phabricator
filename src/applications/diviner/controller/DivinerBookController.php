@@ -29,20 +29,12 @@ final class DivinerBookController extends DivinerController {
       $book->getShortTitle(),
       '/book/'.$book->getName().'/');
 
-    $action_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Actions'))
-      ->setHref('#')
-      ->setIcon('fa-bars')
-      ->addClass('phui-mobile-menu')
-      ->setDropdownMenu($actions);
-
     $header = id(new PHUIHeaderView())
       ->setHeader($book->getTitle())
       ->setUser($viewer)
       ->setPolicyObject($book)
       ->setEpoch($book->getDateModified())
-      ->addActionLink($action_button);
+      ->setActionList($actions);
 
     // TODO: This could probably look better.
     if ($book->getRepositoryPHID()) {
