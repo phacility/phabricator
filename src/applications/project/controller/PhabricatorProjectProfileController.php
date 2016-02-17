@@ -59,14 +59,14 @@ final class PhabricatorProjectProfileController
       ->setUser($viewer)
       ->setProject($project)
       ->setLimit(5)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setUserPHIDs($project->getMemberPHIDs());
 
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
       ->setLimit(5)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setUserPHIDs($project->getWatcherPHIDs());
 
     $nav = $this->getProfileMenu();
@@ -244,7 +244,7 @@ final class PhabricatorProjectProfileController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setObjectList($milestone_list);
   }
 
@@ -292,7 +292,7 @@ final class PhabricatorProjectProfileController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setObjectList($subproject_list);
   }
 

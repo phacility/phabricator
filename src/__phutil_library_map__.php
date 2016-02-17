@@ -5711,7 +5711,7 @@ phutil_register_library_map(array(
     'PHUIListView' => 'AphrontTagView',
     'PHUIListViewTestCase' => 'PhabricatorTestCase',
     'PHUIMainMenuView' => 'AphrontView',
-    'PHUIObjectBoxView' => 'AphrontView',
+    'PHUIObjectBoxView' => 'AphrontTagView',
     'PHUIObjectItemListExample' => 'PhabricatorUIExample',
     'PHUIObjectItemListView' => 'AphrontTagView',
     'PHUIObjectItemView' => 'AphrontTagView',

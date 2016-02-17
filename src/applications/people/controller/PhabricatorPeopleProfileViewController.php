@@ -174,7 +174,7 @@ final class PhabricatorPeopleProfileViewController
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($list)
-      ->setBackground(PHUIBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::GREY);
 
     return $box;
   }
@@ -218,7 +218,7 @@ final class PhabricatorPeopleProfileViewController
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Badges'))
       ->appendChild($flex)
-      ->setBackground(PHUIBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::GREY);
 
     return $box;
   }
