@@ -101,6 +101,9 @@ final class PhabricatorPolicyEditEngineExtension
         if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
           $type_space = PhabricatorTransactions::TYPE_SPACE;
           if (isset($types[$type_space])) {
+            $space_phid = PhabricatorSpacesNamespaceQuery::getObjectSpacePHID(
+              $object);
+
             $space_field = id(new PhabricatorSpaceEditField())
               ->setKey('spacePHID')
               ->setLabel(pht('Space'))
@@ -114,7 +117,7 @@ final class PhabricatorPolicyEditEngineExtension
               ->setConduitDescription(
                 pht('Shift the object between spaces.'))
               ->setConduitTypeDescription(pht('New space PHID.'))
-              ->setValue($object->getSpacePHID());
+              ->setValue($space_phid);
             $fields[] = $space_field;
 
             $space_field->setPolicyField($policy_field);
