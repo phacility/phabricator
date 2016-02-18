@@ -317,14 +317,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public static function isValidRepositorySlug($slug) {
     try {
-      self::asssertValidRepositorySlug($slug);
+      self::assertValidRepositorySlug($slug);
       return true;
     } catch (Exception $ex) {
       return false;
     }
   }
 
-  public static function asssertValidRepositorySlug($slug) {
+  public static function assertValidRepositorySlug($slug) {
     if (!strlen($slug)) {
       throw new Exception(
         pht(
@@ -388,6 +388,30 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'The name "%s" is not a valid repository short name. Repository '.
           'short names may not contain only numbers.',
           $slug));
+    }
+  }
+
+  public static function assertValidCallsign($callsign) {
+    if (!strlen($callsign)) {
+      throw new Exception(
+        pht(
+          'A repository callsign must be at least one character long.'));
+    }
+
+    if (strlen($callsign) > 32) {
+      throw new Exception(
+        pht(
+          'The callsign "%s" is not a valid repository callsign. Callsigns '.
+          'must be no more than 32 bytes long.',
+          $callsign));
+    }
+
+    if (!preg_match('/^[A-Z]+\z/', $callsign)) {
+      throw new Exception(
+        pht(
+          'The callsign "%s" is not a valid repository callsign. Callsigns '.
+          'may only contain UPPERCASE letters.',
+          $callsign));
     }
   }
 

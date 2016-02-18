@@ -29,6 +29,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_SYMBOLS_LANGUAGE = 'repo:symbol-language';
   const TYPE_STAGING_URI = 'repo:staging-uri';
   const TYPE_AUTOMATION_BLUEPRINTS = 'repo:automation-blueprints';
+  const TYPE_CALLSIGN = 'repo:callsign';
 
   // TODO: Clean up these legacy transaction types.
   const TYPE_SSH_LOGIN = 'repo:ssh-login';
@@ -466,6 +467,26 @@ final class PhabricatorRepositoryTransaction
             new PhutilNumber(count($rem)),
             $this->renderHandleList($rem));
         }
+
+      case self::TYPE_CALLSIGN:
+        if ($old === null) {
+          return pht(
+            '%s set the callsign for this repository to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else if ($new === null) {
+          return pht(
+            '%s removed the callsign ("%s") for this repository.',
+            $this->renderHandleLink($author_phid),
+            $old);
+        } else {
+          return pht(
+            '%s changed the callsign for this repository from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
+
     }
 
     return parent::getTitle();
