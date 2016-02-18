@@ -6,7 +6,7 @@ require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
 $args->setSynopsis(<<<EOSYNOPSIS
-**clear_repository_symbols.php** [__options__] __callsign__
+**clear_repository_symbols.php** [__options__] __repository__
 
   Clear repository symbols.
 EOSYNOPSIS
@@ -15,24 +15,26 @@ $args->parseStandardArguments();
 $args->parse(
   array(
     array(
-      'name'      => 'callsign',
+      'name'      => 'repository',
       'wildcard'  => true,
     ),
   ));
 
-$callsigns = $args->getArg('callsign');
-if (count($callsigns) !== 1) {
+$identifiers = $args->getArg('repository');
+if (count($identifiers) !== 1) {
   $args->printHelpAndExit();
 }
 
-$callsign = head($callsigns);
+$identifier = head($identifiers);
 $repository = id(new PhabricatorRepositoryQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
-  ->withCallsigns($callsigns)
+  ->withIdentifiers($identifiers)
   ->executeOne();
 
 if (!$repository) {
-  echo pht("Repository '%s' does not exist.", $callsign);
+  echo tsprintf(
+    "%s\n",
+    pht('Repository "%s" does not exist.', $identifier));
   exit(1);
 }
 
