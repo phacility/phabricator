@@ -689,7 +689,7 @@ phutil_register_library_map(array(
     'DiffusionPreCommitRefRepositoryHeraldField' => 'applications/diffusion/herald/DiffusionPreCommitRefRepositoryHeraldField.php',
     'DiffusionPreCommitRefRepositoryProjectsHeraldField' => 'applications/diffusion/herald/DiffusionPreCommitRefRepositoryProjectsHeraldField.php',
     'DiffusionPreCommitRefTypeHeraldField' => 'applications/diffusion/herald/DiffusionPreCommitRefTypeHeraldField.php',
-    'DiffusionPullEventGarbageCollector' => 'applications/diffusion/DiffusionPullEventGarbageCollector.php',
+    'DiffusionPullEventGarbageCollector' => 'applications/diffusion/garbagecollector/DiffusionPullEventGarbageCollector.php',
     'DiffusionPushCapability' => 'applications/diffusion/capability/DiffusionPushCapability.php',
     'DiffusionPushEventViewController' => 'applications/diffusion/controller/DiffusionPushEventViewController.php',
     'DiffusionPushLogController' => 'applications/diffusion/controller/DiffusionPushLogController.php',

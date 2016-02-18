@@ -64,7 +64,11 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DiffusionPushLogListController',
           'view/(?P<id>\d+)/' => 'DiffusionPushEventViewController',
         ),
-        '(?P<repositoryCallsign>[A-Z]+)/' => array(
+        '(?:'.
+          '(?P<repositoryCallsign>[A-Z]+)'.
+          '|'.
+          '(?P<repositoryID>[1-9]\d*)'.
+        ')/' => array(
           '' => 'DiffusionRepositoryController',
 
           'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
@@ -115,8 +119,9 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         // catch-all for serving repositories over HTTP. We must accept
         // requests without the trailing "/" because SVN commands don't
         // necessarily include it.
-        '(?P<repositoryCallsign>[A-Z]+)(?:/.*)?' =>
-          'DiffusionRepositoryDefaultController',
+        '(?:(?P<repositoryCallsign>[A-Z]+)|(?P<repositoryID>[1-9]\d*))'.
+          '(?:/.*)?'
+          => 'DiffusionRepositoryDefaultController',
 
         'inline/' => array(
           'edit/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',

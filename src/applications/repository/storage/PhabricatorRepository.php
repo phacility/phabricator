@@ -687,6 +687,55 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return "/r{$callsign}{$identifier}";
   }
 
+  public function getCanonicalPath($request_path) {
+    $standard_pattern =
+      '(^'.
+        '(?P<prefix>/diffusion/)'.
+        '(?P<identifier>[^/]+)'.
+        '(?P<suffix>(?:/.*)?)'.
+      '\z)';
+
+    $matches = null;
+    if (preg_match($standard_pattern, $request_path, $matches)) {
+      $prefix = $matches['prefix'];
+
+      $callsign = $this->getCallsign();
+      if ($callsign) {
+        $identifier = $callsign;
+      } else {
+        $identifier = $this->getID();
+      }
+
+      $suffix = $matches['suffix'];
+      if (!strlen($suffix)) {
+        $suffix = '/';
+      }
+
+      return $prefix.$identifier.$suffix;
+    }
+
+    $commit_pattern =
+      '(^'.
+        '(?P<prefix>/)'.
+        '(?P<monogram>'.
+          '(?:'.
+            'r(?P<repositoryCallsign>[A-Z]+)'.
+            '|'.
+            'R(?P<repositoryID>[1-9]\d*):'.
+          ')'.
+          '(?P<commit>[a-f0-9]+)'.
+        ')'.
+      '\z)';
+
+    $matches = null;
+    if (preg_match($commit_pattern, $request_path, $matches)) {
+      $commit = $matches['commit'];
+      return $this->getCommitURI($commit);
+    }
+
+    return null;
+  }
+
   public function generateURI(array $params) {
     $req_branch = false;
     $req_commit = false;
