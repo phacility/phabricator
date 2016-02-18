@@ -284,7 +284,12 @@ final class DiffusionRepositoryEditMainController
       $repository->getVersionControlSystem());
 
     $view->addProperty(pht('Type'), $type);
-    $view->addProperty(pht('Callsign'), $repository->getCallsign());
+
+    $callsign = $repository->getCallsign();
+    if (!strlen($callsign)) {
+      $callsign = phutil_tag('em', array(), pht('No Callsign'));
+    }
+    $view->addProperty(pht('Callsign'), $callsign);
 
     $short_name = $repository->getRepositorySlug();
     if ($short_name === null) {

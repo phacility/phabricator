@@ -93,7 +93,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort255',
-        'callsign' => 'sort32',
+        'callsign' => 'sort32?',
         'repositorySlug' => 'sort64?',
         'versionControlSystem' => 'text32',
         'uuid' => 'text64?',
@@ -149,13 +149,21 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getMonogram() {
-    return 'r'.$this->getCallsign();
+    $callsign = $this->getCallsign();
+    if (strlen($callsign)) {
+      return "r{$callsign}";
+    }
+
+    $id = $this->getID();
+    return "R{$id}";
   }
 
   public function getDisplayName() {
-    // TODO: This is intended to produce a human-readable name that is not
-    // necessarily a global, unique identifier. Eventually, it may just return
-    // a string like "skynet" instead of "rSKYNET".
+    $slug = $this->getRepositorySlug();
+    if (strlen($slug)) {
+      return $slug;
+    }
+
     return $this->getMonogram();
   }
 
@@ -699,7 +707,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getURI() {
-    return '/diffusion/'.$this->getCallsign().'/';
+    $callsign = $this->getCallsign();
+    if (strlen($callsign)) {
+      return "/diffusion/{$callsign}/";
+    }
+
+    $id = $this->getID();
+    return "/diffusion/{$id}/";
   }
 
   public function getPathURI($path) {
@@ -708,7 +722,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getCommitURI($identifier) {
     $callsign = $this->getCallsign();
-    return "/r{$callsign}{$identifier}";
+    if (strlen($callsign)) {
+      return "/r{$callsign}{$identifier}";
+    }
+
+    $id = $this->getID();
+    return "/R{$id}:{$identifier}";
   }
 
   public static function parseRepositoryServicePath($request_path) {
@@ -1063,7 +1082,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     if ($need_scope) {
-      $scope = 'r'.$this->getCallsign();
+      $callsign = $this->getCallsign();
+      if ($callsign) {
+        $scope = "r{$callsign}";
+      } else {
+        $id = $this->getID();
+        $scope = "R{$id}:";
+      }
       $name = $scope.$name;
     }
 
