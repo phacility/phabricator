@@ -134,7 +134,6 @@ final class DiffusionRepositoryCreateController
         $type_name = PhabricatorRepositoryTransaction::TYPE_NAME;
         $type_vcs = PhabricatorRepositoryTransaction::TYPE_VCS;
         $type_activate = PhabricatorRepositoryTransaction::TYPE_ACTIVATE;
-        $type_local_path = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
         $type_remote_uri = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
         $type_hosting = PhabricatorRepositoryTransaction::TYPE_HOSTING;
         $type_http = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP;
@@ -179,16 +178,6 @@ final class DiffusionRepositoryCreateController
               ->setTransactionType($type_service)
               ->setNewValue($service->getPHID());
           }
-
-          $default_local_path = PhabricatorEnv::getEnvConfig(
-            'repository.default-local-path');
-
-          $default_local_path = rtrim($default_local_path, '/');
-          $default_local_path = $default_local_path.'/'.$callsign.'/';
-
-          $xactions[] = id(clone $template)
-            ->setTransactionType($type_local_path)
-            ->setNewValue($default_local_path);
         }
 
         if ($is_init) {

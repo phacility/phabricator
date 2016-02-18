@@ -522,4 +522,27 @@ final class PhabricatorRepositoryEditor
     return true;
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // If the repository does not have a local path yet, assign it one based
+    // on its ID. We can't do this earlier because we won't have an ID yet.
+    $local_path = $object->getDetail('local-path');
+    if (!strlen($local_path)) {
+      $local_key = 'repository.default-local-path';
+
+      $local_root = PhabricatorEnv::getEnvConfig($local_key);
+      $local_root = rtrim($local_root, '/');
+
+      $id = $object->getID();
+      $local_path = "{$local_root}/{$id}/";
+
+      $object->setDetail('local-path', $local_path);
+      $object->save();
+    }
+
+    return $xactions;
+  }
+
 }
