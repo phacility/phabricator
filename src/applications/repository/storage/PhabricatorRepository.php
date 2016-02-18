@@ -687,6 +687,41 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return "/r{$callsign}{$identifier}";
   }
 
+  public static function parseRepositoryServicePath($request_path) {
+    // NOTE: In Mercurial over SSH, the path will begin without a leading "/",
+    // so we're matching it optionally.
+
+    $patterns = array(
+      '(^'.
+        '(?P<base>/?diffusion/(?P<identifier>[A-Z]+|[0-9]\d*))'.
+        '(?P<path>(?:/.*)?)'.
+      '\z)',
+    );
+
+    $identifier = null;
+    foreach ($patterns as $pattern) {
+      $matches = null;
+      if (!preg_match($pattern, $request_path, $matches)) {
+        continue;
+      }
+
+      $identifier = $matches['identifier'];
+      $base = $matches['base'];
+      $path = $matches['path'];
+      break;
+    }
+
+    if ($identifier === null) {
+      return null;
+    }
+
+    return array(
+      'identifier' => $identifier,
+      'base' => $base,
+      'path' => $path,
+    );
+  }
+
   public function getCanonicalPath($request_path) {
     $standard_pattern =
       '(^'.
