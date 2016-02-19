@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '7935f211',
-    'core.pkg.js' => 'd7daa6d8',
+    'core.pkg.js' => '298d5888',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
     'differential.pkg.js' => 'd0cd0df6',
@@ -501,7 +501,7 @@ return array(
     'rsrc/js/core/behavior-time-typeahead.js' => 'f80d6bf0',
     'rsrc/js/core/behavior-toggle-class.js' => '5d7c9f33',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
-    'rsrc/js/core/behavior-tooltip.js' => '3ee3408b',
+    'rsrc/js/core/behavior-tooltip.js' => '42fcb747',
     'rsrc/js/core/behavior-watch-anchor.js' => '9f36c42d',
     'rsrc/js/core/behavior-workflow.js' => '0a3f3021',
     'rsrc/js/core/phtize.js' => 'd254d646',
@@ -648,7 +648,7 @@ return array(
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '06c32383',
     'javelin-behavior-phabricator-show-older-transactions' => 'dbbf48b6',
-    'javelin-behavior-phabricator-tooltips' => '3ee3408b',
+    'javelin-behavior-phabricator-tooltips' => '42fcb747',
     'javelin-behavior-phabricator-transaction-comment-form' => 'b23b49e6',
     'javelin-behavior-phabricator-transaction-list' => '13c739ea',
     'javelin-behavior-phabricator-watch-anchor' => '9f36c42d',
@@ -1119,12 +1119,6 @@ return array(
       'javelin-util',
       'javelin-uri',
     ),
-    '3ee3408b' => array(
-      'javelin-behavior',
-      'javelin-behavior-device',
-      'javelin-stratcom',
-      'phabricator-tooltip',
-    ),
     '3f5d6dbf' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1139,6 +1133,12 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'javelin-request',
+    ),
+    '42fcb747' => array(
+      'javelin-behavior',
+      'javelin-behavior-device',
+      'javelin-stratcom',
+      'phabricator-tooltip',
     ),
     '44959b73' => array(
       'javelin-util',
