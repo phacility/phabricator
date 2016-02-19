@@ -16,7 +16,7 @@ a.phui-tag-view:hover {
 
 .phui-tag-core-closed {
   text-decoration: line-through;
-  color: rgba(0,0,0,0.5);
+  color: rgba({$alphablack},0.5);
 }
 
 .phui-tag-core-closed:hover {

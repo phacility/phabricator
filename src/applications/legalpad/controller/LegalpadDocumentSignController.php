@@ -258,11 +258,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     $preamble_box = null;
     if (strlen($document->getPreamble())) {
-      $preamble_text = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent(
-          $document->getPreamble()),
-        'default',
-        $viewer);
+      $preamble_text = new PHUIRemarkupView($viewer, $document->getPreamble());
 
       // NOTE: We're avoiding `setObject()` here so we don't pick up extra UI
       // elements like "Subscribers". This information is available on the

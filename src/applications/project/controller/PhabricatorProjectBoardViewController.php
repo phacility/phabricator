@@ -124,10 +124,14 @@ final class PhabricatorProjectBoardViewController
 
     $board_phid = $project->getPHID();
 
+    // Regardless of display order, pass tasks to the layout engine in ID order
+    // so layout is consistent.
+    $board_tasks = msort($tasks, 'getID');
+
     $layout_engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
       ->setBoardPHIDs(array($board_phid))
-      ->setObjectPHIDs(array_keys($tasks))
+      ->setObjectPHIDs(array_keys($board_tasks))
       ->setFetchAllBoards(true)
       ->executeLayout();
 
@@ -427,7 +431,7 @@ final class PhabricatorProjectBoardViewController
     $crumbs->addAction($manage_menu);
     $crumbs->addAction($fullscreen);
 
-    return $this->newPage()
+    $page = $this->newPage()
       ->setTitle(
         array(
           $project->getDisplayName(),
@@ -445,6 +449,17 @@ final class PhabricatorProjectBoardViewController
         array(
           $board_box,
         ));
+
+    $background = $project->getDisplayWorkboardBackgroundColor();
+    if ($background !== null) {
+      require_celerity_resource('phui-workboard-color-css');
+      $background_color_class = "phui-workboard-{$background}";
+
+      $page->addClass('phui-workboard-color');
+      $page->addClass($background_color_class);
+    }
+
+    return $page;
   }
 
   private function readRequestState() {
@@ -671,9 +686,8 @@ final class PhabricatorProjectBoardViewController
 
     $id = $project->getID();
 
-    $disable_uri = $this->getApplicationURI("board/{$id}/disable/");
+    $manage_uri = $this->getApplicationURI("board/{$id}/manage/");
     $add_uri = $this->getApplicationURI("board/{$id}/edit/");
-    $reorder_uri = $this->getApplicationURI("board/{$id}/reorder/");
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -687,14 +701,12 @@ final class PhabricatorProjectBoardViewController
       ->setName(pht('Add Column'))
       ->setHref($add_uri)
       ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
+      ->setWorkflow(true);
 
     $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-exchange')
-      ->setName(pht('Reorder Columns'))
-      ->setHref($reorder_uri)
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(true);
+      ->setIcon('fa-pencil')
+      ->setName(pht('Manage Board'))
+      ->setHref($manage_uri);
 
     if ($show_hidden) {
       $hidden_uri = $this->getURIWithState()
@@ -725,13 +737,6 @@ final class PhabricatorProjectBoardViewController
       ->setName(pht('Batch Edit Visible Tasks...'))
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
-
-    $manage_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-ban')
-      ->setName(pht('Disable Workboard'))
-      ->setHref($disable_uri)
-      ->setWorkflow(true)
-      ->setDisabled(!$can_edit);
 
     $manage_menu = id(new PhabricatorActionListView())
         ->setUser($viewer);
@@ -816,14 +821,6 @@ final class PhabricatorProjectBoardViewController
       ->setName(pht('Batch Edit Tasks...'))
       ->setHref($batch_edit_uri)
       ->setDisabled(!$can_batch_edit);
-
-    $detail_uri = $this->getApplicationURI(
-      'board/'.$this->id.'/column/'.$column->getID().'/');
-
-    $column_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-columns')
-      ->setName(pht('Column Details'))
-      ->setHref($detail_uri);
 
     $can_hide = ($can_edit && !$column->isDefaultColumn());
     $hide_uri = 'board/'.$this->id.'/hide/'.$column->getID().'/';

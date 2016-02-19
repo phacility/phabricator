@@ -287,6 +287,32 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this->assertAttachedKey($this->sparseWatchers, $user_phid);
   }
 
+  public function isUserAncestorWatcher($user_phid) {
+    $is_watcher = $this->isUserWatcher($user_phid);
+
+    if (!$is_watcher) {
+      $parent = $this->getParentProject();
+      if ($parent) {
+        return $parent->isUserWatcher($user_phid);
+      }
+    }
+
+    return $is_watcher;
+  }
+
+  public function getWatchedAncestorPHID($user_phid) {
+    if ($this->isUserWatcher($user_phid)) {
+      return $this->getPHID();
+    }
+
+    $parent = $this->getParentProject();
+    if ($parent) {
+      return $parent->getWatchedAncestorPHID($user_phid);
+    }
+
+    return null;
+  }
+
   public function setIsUserWatcher($user_phid, $is_watcher) {
     if ($this->sparseWatchers === self::ATTACHABLE) {
       $this->sparseWatchers = array();
@@ -302,6 +328,21 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getWatcherPHIDs() {
     return $this->assertAttached($this->watcherPHIDs);
+  }
+
+  public function getAllAncestorWatcherPHIDs() {
+    $parent = $this->getParentProject();
+    if ($parent) {
+      $watchers = $parent->getAllAncestorWatcherPHIDs();
+    } else {
+      $watchers = array();
+    }
+
+    foreach ($this->getWatcherPHIDs() as $phid) {
+      $watchers[$phid] = $phid;
+    }
+
+    return $watchers;
   }
 
   public function attachSlugs(array $slugs) {
@@ -577,6 +618,31 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function setDefaultWorkboardFilter($filter) {
     return $this->setProperty('workboard.filter.default', $filter);
+  }
+
+  public function getWorkboardBackgroundColor() {
+    return $this->getProperty('workboard.background');
+  }
+
+  public function setWorkboardBackgroundColor($color) {
+    return $this->setProperty('workboard.background', $color);
+  }
+
+  public function getDisplayWorkboardBackgroundColor() {
+    $color = $this->getWorkboardBackgroundColor();
+
+    if ($color === null) {
+      $parent = $this->getParentProject();
+      if ($parent) {
+        return $parent->getDisplayWorkboardBackgroundColor();
+      }
+    }
+
+    if ($color === 'none') {
+      $color = null;
+    }
+
+    return $color;
   }
 
 

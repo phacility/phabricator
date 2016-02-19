@@ -117,10 +117,7 @@ final class PhabricatorApplicationEmailCommandsController
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
 
-    $content_box = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($content),
-      'default',
-      $viewer);
+    $content_box = new PHUIRemarkupView($viewer, $content);
 
     $info_view = null;
     if (!PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain')) {

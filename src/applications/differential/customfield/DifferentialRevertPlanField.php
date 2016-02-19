@@ -44,12 +44,7 @@ final class DifferentialRevertPlanField
       return null;
     }
 
-    return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setPreserveLinebreaks(true)
-        ->setContent($this->getValue()),
-      'default',
-      $this->getViewer());
+    return new PHUIRemarkupView($this->getViewer(), $this->getValue());
   }
 
   public function shouldAppearInGlobalSearch() {

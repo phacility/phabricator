@@ -42,13 +42,6 @@ final class PhabricatorMacroApplication extends PhabricatorApplication {
     );
   }
 
-  public function getRemarkupRules() {
-    return array(
-      new PhabricatorIconRemarkupRule(),
-      new PhabricatorEmojiRemarkupRule(),
-    );
-  }
-
   protected function getCustomCapabilities() {
     return array(
       PhabricatorMacroManageCapability::CAPABILITY => array(

@@ -59,14 +59,14 @@ final class PhabricatorProjectProfileController
       ->setUser($viewer)
       ->setProject($project)
       ->setLimit(5)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setUserPHIDs($project->getMemberPHIDs());
 
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
       ->setLimit(5)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setUserPHIDs($project->getWatcherPHIDs());
 
     $nav = $this->getProfileMenu();
@@ -83,8 +83,11 @@ final class PhabricatorProjectProfileController
 
     $feed = $this->renderStories($stories);
     $feed = phutil_tag_div('project-view-feed', $feed);
+    require_celerity_resource('project-view-css');
 
-    $columns = id(new PHUITwoColumnView())
+    $home = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->addClass('project-view-home')
       ->setMainColumn(
         array(
           $properties,
@@ -100,17 +103,6 @@ final class PhabricatorProjectProfileController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);
-
-    require_celerity_resource('project-view-css');
-    $home = phutil_tag(
-      'div',
-      array(
-        'class' => 'project-view-home',
-      ),
-      array(
-        $header,
-        $columns,
-      ));
 
     return $this->newPage()
       ->setNavigation($nav)
@@ -142,7 +134,7 @@ final class PhabricatorProjectProfileController
     }
 
     $view = id(new PHUIBoxView())
-      ->setColor(PHUIBoxView::GREY)
+      ->setBorder(true)
       ->appendChild($view)
       ->addClass('project-view-properties');
 
@@ -162,19 +154,32 @@ final class PhabricatorProjectProfileController
 
   private function renderWatchAction(PhabricatorProject $project) {
     $viewer = $this->getViewer();
-    $viewer_phid = $viewer->getPHID();
     $id = $project->getID();
 
-    $is_watcher = ($viewer_phid && $project->isUserWatcher($viewer_phid));
+    if (!$viewer->isLoggedIn()) {
+      $is_watcher = false;
+      $is_ancestor = false;
+    } else {
+      $viewer_phid = $viewer->getPHID();
+      $is_watcher = $project->isUserWatcher($viewer_phid);
+      $is_ancestor = $project->isUserAncestorWatcher($viewer_phid);
+    }
 
-    if (!$is_watcher) {
+    if ($is_ancestor && !$is_watcher) {
+      $watch_icon = 'fa-eye';
+      $watch_text = pht('Watching Ancestor');
+      $watch_href = "/project/watch/{$id}/?via=profile";
+      $watch_disabled = true;
+    } else if (!$is_watcher) {
       $watch_icon = 'fa-eye';
       $watch_text = pht('Watch Project');
       $watch_href = "/project/watch/{$id}/?via=profile";
+      $watch_disabled = false;
     } else {
       $watch_icon = 'fa-eye-slash';
       $watch_text = pht('Unwatch Project');
       $watch_href = "/project/unwatch/{$id}/?via=profile";
+      $watch_disabled = false;
     }
 
     $watch_icon = id(new PHUIIconView())
@@ -185,7 +190,8 @@ final class PhabricatorProjectProfileController
       ->setWorkflow(true)
       ->setIcon($watch_icon)
       ->setText($watch_text)
-      ->setHref($watch_href);
+      ->setHref($watch_href)
+      ->setDisabled($watch_disabled);
   }
 
   private function buildMilestoneList(PhabricatorProject $project) {
@@ -205,7 +211,7 @@ final class PhabricatorProjectProfileController
         array(
           PhabricatorProjectStatus::STATUS_ACTIVE,
         ))
-      ->setOrder('newest')
+      ->setOrderVector(array('milestoneNumber', 'id'))
       ->execute();
     if (!$milestones) {
       return null;
@@ -230,7 +236,7 @@ final class PhabricatorProjectProfileController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setObjectList($milestone_list);
   }
 
@@ -278,7 +284,7 @@ final class PhabricatorProjectProfileController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setBackground(PHUIBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::GREY)
       ->setObjectList($subproject_list);
   }
 

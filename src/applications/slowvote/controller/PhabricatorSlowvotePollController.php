@@ -122,13 +122,13 @@ final class PhabricatorSlowvotePollController
 
     $view->invokeWillRenderEvent();
 
-    if (strlen($poll->getDescription())) {
-      $view->addTextContent(
-        $output = PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent(
-            $poll->getDescription()),
-          'default',
-          $viewer));
+    $description = $poll->getDescription();
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($viewer, $description);
+      $view->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent($description);
     }
 
     return $view;

@@ -21,6 +21,9 @@ final class PhabricatorOwnersPackageTransactionEditor
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_PATHS;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_STATUS;
 
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+
     return $types;
   }
 

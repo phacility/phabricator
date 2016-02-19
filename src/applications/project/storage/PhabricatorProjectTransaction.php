@@ -15,6 +15,7 @@ final class PhabricatorProjectTransaction
   const TYPE_HASWORKBOARD = 'project:hasworkboard';
   const TYPE_DEFAULT_SORT = 'project:sort';
   const TYPE_DEFAULT_FILTER = 'project:filter';
+  const TYPE_BACKGROUND = 'project:background';
 
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
@@ -73,6 +74,7 @@ final class PhabricatorProjectTransaction
       case self::TYPE_HASWORKBOARD:
       case self::TYPE_DEFAULT_SORT:
       case self::TYPE_DEFAULT_FILTER:
+      case self::TYPE_BACKGROUND:
         return true;
     }
 
@@ -84,6 +86,7 @@ final class PhabricatorProjectTransaction
       case self::TYPE_HASWORKBOARD:
       case self::TYPE_DEFAULT_SORT:
       case self::TYPE_DEFAULT_FILTER:
+      case self::TYPE_BACKGROUND:
         return true;
     }
 
@@ -290,6 +293,11 @@ final class PhabricatorProjectTransaction
       case self::TYPE_DEFAULT_FILTER:
         return pht(
           '%s changed the default filter for the project workboard.',
+          $author_handle);
+
+      case self::TYPE_BACKGROUND:
+        return pht(
+          '%s changed the background color of the project workboard.',
           $author_handle);
     }
 

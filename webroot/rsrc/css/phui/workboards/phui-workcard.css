@@ -42,7 +42,7 @@
 }
 
 .phui-object-item-disabled.phui-workcard {
-  background-color: rgba(255,255,255,.67);
+  background-color: rgba({$alphawhite},.67);
 }
 
 .phui-object-item-disabled.phui-workcard .phui-object-item-link {

@@ -181,16 +181,10 @@ final class HarbormasterBuildViewController
       if ($step) {
         $description = $step->getDescription();
         if ($description) {
-          $rendered = PhabricatorMarkupEngine::renderOneObject(
-            id(new PhabricatorMarkupOneOff())
-              ->setContent($description)
-              ->setPreserveLinebreaks(true),
-            'default',
-            $viewer);
-
+          $description = new PHUIRemarkupView($viewer, $description);
           $properties->addSectionHeader(
             pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
-          $properties->addTextContent($rendered);
+          $properties->addTextContent($description);
         }
       } else {
         $target_box->setFormErrors(

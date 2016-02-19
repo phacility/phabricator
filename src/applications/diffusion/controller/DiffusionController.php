@@ -64,6 +64,20 @@ abstract class DiffusionController extends PhabricatorController {
       return new Aphront404Response();
     }
 
+    // If the client is making a request like "/diffusion/1/...", but the
+    // repository has a different canonical path like "/diffusion/XYZ/...",
+    // redirect them to the canonical path.
+
+    $request_path = $request->getPath();
+    $repository = $drequest->getRepository();
+
+    $canonical_path = $repository->getCanonicalPath($request_path);
+    if ($canonical_path !== null) {
+      if ($canonical_path != $request_path) {
+        return id(new AphrontRedirectResponse())->setURI($canonical_path);
+      }
+    }
+
     $this->diffusionRequest = $drequest;
 
     return null;

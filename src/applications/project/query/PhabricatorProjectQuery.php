@@ -6,6 +6,7 @@ final class PhabricatorProjectQuery
   private $ids;
   private $phids;
   private $memberPHIDs;
+  private $watcherPHIDs;
   private $slugs;
   private $slugNormals;
   private $slugMap;
@@ -59,6 +60,11 @@ final class PhabricatorProjectQuery
 
   public function withMemberPHIDs(array $member_phids) {
     $this->memberPHIDs = $member_phids;
+    return $this;
+  }
+
+  public function withWatcherPHIDs(array $watcher_phids) {
+    $this->watcherPHIDs = $watcher_phids;
     return $this;
   }
 
@@ -170,6 +176,11 @@ final class PhabricatorProjectQuery
         'type' => 'string',
         'unique' => true,
       ),
+      'milestoneNumber' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'milestoneNumber',
+        'type' => 'int',
+      ),
     );
   }
 
@@ -242,7 +253,7 @@ final class PhabricatorProjectQuery
 
     $all_graph = $this->getAllReachableAncestors($projects);
 
-    if ($this->needAncestorMembers) {
+    if ($this->needAncestorMembers || $this->needWatchers) {
       $src_projects = $all_graph;
     } else {
       $src_projects = $projects;
@@ -250,11 +261,13 @@ final class PhabricatorProjectQuery
 
     $all_sources = array();
     foreach ($src_projects as $project) {
+      // For milestones, we need parent members.
       if ($project->isMilestone()) {
-        $phid = $project->getParentProjectPHID();
-      } else {
-        $phid = $project->getPHID();
+        $parent_phid = $project->getParentProjectPHID();
+        $all_sources[$parent_phid] = $parent_phid;
       }
+
+      $phid = $project->getPHID();
       $all_sources[$phid] = $phid;
     }
 
@@ -313,7 +326,7 @@ final class PhabricatorProjectQuery
 
       if ($this->needWatchers) {
         $watcher_phids = $edge_query->getDestinationPHIDs(
-          $source_phids,
+          array($project_phid),
           array($watcher_type));
         $project->attachWatcherPHIDs($watcher_phids);
         $project->setIsUserWatcher(
@@ -429,6 +442,13 @@ final class PhabricatorProjectQuery
         $this->memberPHIDs);
     }
 
+    if ($this->watcherPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'w.dst IN (%Ls)',
+        $this->watcherPHIDs);
+    }
+
     if ($this->slugs !== null) {
       $where[] = qsprintf(
         $conn,
@@ -542,7 +562,7 @@ final class PhabricatorProjectQuery
   }
 
   protected function shouldGroupQueryResultRows() {
-    if ($this->memberPHIDs || $this->nameTokens) {
+    if ($this->memberPHIDs || $this->watcherPHIDs || $this->nameTokens) {
       return true;
     }
     return parent::shouldGroupQueryResultRows();
@@ -557,6 +577,14 @@ final class PhabricatorProjectQuery
         'JOIN %T e ON e.src = p.phid AND e.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
         PhabricatorProjectMaterializedMemberEdgeType::EDGECONST);
+    }
+
+    if ($this->watcherPHIDs !== null) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T w ON w.src = p.phid AND w.type = %d',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorObjectHasWatcherEdgeType::EDGECONST);
     }
 
     if ($this->slugs !== null) {

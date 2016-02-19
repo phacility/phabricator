@@ -2607,14 +2607,19 @@ abstract class PhabricatorApplicationTransactionEditor
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
 
       if ($project_phids) {
-        $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($project_phids)
+          ->needWatchers(true)
+          ->execute();
 
-        $query = id(new PhabricatorEdgeQuery())
-          ->withSourcePHIDs($project_phids)
-          ->withEdgeTypes(array($watcher_type));
-        $query->execute();
+        $watcher_phids = array();
+        foreach ($projects as $project) {
+          foreach ($project->getAllAncestorWatcherPHIDs() as $phid) {
+            $watcher_phids[$phid] = $phid;
+          }
+        }
 
-        $watcher_phids = $query->getDestinationPHIDs();
         if ($watcher_phids) {
           // We need to do a visibility check for all the watchers, as
           // watching a project is not a guarantee that you can see objects

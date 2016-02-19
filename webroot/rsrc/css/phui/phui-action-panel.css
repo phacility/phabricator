@@ -22,7 +22,7 @@
 
 .device-desktop .phui-action-panel-hitarea:hover {
   text-decoration: none;
-  background-color: rgba(255,255,255,.25);
+  background-color: rgba({$alphawhite},.25);
 }
 
 .device-desktop .phui-action-panel-hitarea:hover .phui-icon-view {

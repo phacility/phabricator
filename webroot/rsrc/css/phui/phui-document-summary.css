@@ -4,7 +4,7 @@
 
 .phui-document-summary-view {
   margin-top: 8px;
-  border-bottom: 1px solid rgba(55,55,55,.1);
+  border-bottom: 1px solid rgba({$alphagrey},.1);
 }
 
 .phui-document-summary-view.is-draft {

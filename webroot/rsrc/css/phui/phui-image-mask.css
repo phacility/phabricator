@@ -17,7 +17,7 @@
 }
 
 .phui-image-mask-mask {
-  border: 300px solid rgba(0, 0, 0, 0.5);
+  border: 300px solid rgba({$alphablack}, 0.5);
   background-clip: content-box;
   position: absolute;
 }

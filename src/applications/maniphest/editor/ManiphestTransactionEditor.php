@@ -289,8 +289,14 @@ final class ManiphestTransactionEditor
             array($select_phids))
           ->execute();
 
-        $object_phids = mpull($board_tasks, 'getPHID');
-        $object_phids[] = $object_phid;
+        $board_tasks = mpull($board_tasks, null, 'getPHID');
+        $board_tasks[$object_phid] = $object;
+
+        // Make sure tasks are sorted by ID, so we lay out new positions in
+        // a consistent way.
+        $board_tasks = msort($board_tasks, 'getID');
+
+        $object_phids = array_keys($board_tasks);
 
         $engine = id(new PhabricatorBoardLayoutEngine())
           ->setViewer($omnipotent_viewer)

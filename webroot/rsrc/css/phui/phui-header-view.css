@@ -146,7 +146,7 @@ body .phui-header-shell.phui-bleed-header
   display: block;
   position: absolute;
   left: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba({$alphablack},0.4);
   color: #fff;
   font-weight: normal;
   bottom: 4px;
@@ -179,7 +179,7 @@ body .phui-header-shell.phui-bleed-header
 .phui-header-subheader .phui-header-status {
   padding: 3px 9px;
   border-radius: 3px;
-  background: rgba(71, 87, 120, 0.06);
+  background: rgba({$alphablue}, 0.06);
   margin-right: 8px;
 }
 

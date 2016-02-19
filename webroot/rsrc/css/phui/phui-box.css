@@ -13,15 +13,15 @@
 }
 
 .phui-box-grey {
-  background-color: {$page.background};
+  background-color: #F7F7F9;
   border-radius: 3px;
-  border: none;
+  border-color: rgba({$alphagrey},.1);
 }
 
 .phui-box-blue {
   background-color: {$bluebackground};
   border-radius: 3px;
-  border: none;
+  border-color: {$thinblueborder};
 }
 
 .phui-box-blue .phui-object-item,
@@ -34,15 +34,23 @@
   color: {$darkbluetext};
 }
 
-.phui-box-blue .phui-header-shell,
+.phui-box-blue .phui-object-item-list-view,
+.phui-box-grey .phui-object-item-list-view {
+  background-color: #fff;
+}
+
+.phui-box-blue .phui-header-shell {
+  border-color: {$thinblueborder};
+}
+
 .phui-box-grey .phui-header-shell {
-  border-bottom: 2px solid #fff;
+  border-color: rgba({$alphagrey},.1);
 }
 
 .phui-object-box.phui-box-blue div.phui-info-severity-nodata,
 .phui-object-box.phui-box-grey div.phui-info-severity-nodata {
   background: transparent;
-  padding: 12px 4px;
+  padding: 20px 4px 24px;
   text-align: center;
   border: none;
   color: {$greytext};

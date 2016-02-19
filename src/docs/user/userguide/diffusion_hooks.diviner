@@ -42,7 +42,7 @@ These hooks act like normal `pre-commit` or `pre-receive` hooks:
 These additional variables will be available in the environment, in addition
 to the variables the VCS normally provides:
 
-  - `PHABRICATOR_REPOSITORY` The callsign of the repository the hook is
+  - `PHABRICATOR_REPOSITORY` The PHID of the repository the hook is
     executing for.
   - `PHABRICATOR_USER` The Phabricator username that the session is
     authenticated under.

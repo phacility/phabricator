@@ -24,6 +24,11 @@ final class PhabricatorProjectEditController
 
     $id = $request->getURIData('id');
     if (!$id) {
+      // This capability is checked again later, but checking it here
+      // explicitly gives us a better error message.
+      $this->requireApplicationCapability(
+        ProjectCreateProjectsCapability::CAPABILITY);
+
       $parent_id = head($request->getArr('parent'));
       if (!$parent_id) {
         $parent_id = $request->getStr('parent');

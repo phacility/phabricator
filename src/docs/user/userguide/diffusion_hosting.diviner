@@ -371,6 +371,41 @@ with `sudoers` configuration.
     is caused by SVN wiping the environment (including PATH) when invoking
     commit hooks.
 
+No Direct Pushes
+================
+
+You may get an error about "No Direct Pushes" when trying to push. This means
+you are pushing directly to the repository instead of pushing through
+Phabricator. This is not supported: writes to hosted repositories must go
+through Phabricator so it can perform authentication, enforce permissions,
+write logs, proxy requests, apply rewriting, etc.
+
+One way to do a direct push by mistake is to use a `file:///` URI to interact
+with the repository from the same machine. This is not supported. Instead, use
+one of the repository URIs provided in the web interface, even if you're
+working on the same machine.
+
+Another way to do a direct push is to misconfigure SSH (or not configure it at
+all) so that none of the logic described above runs and you just connect
+normally as a system user. In this case, the `ssh` test described above will
+fail (you'll get a command prompt when you connect, instead of the message you
+are supposed to get, as described above).
+
+If you encounter this error: make sure you're using a remote URI given to
+you by Diffusion in the web interface, then run through the troubleshooting
+steps above carefully.
+
+Sometimes users encounter this problem because they skip this whole document
+assuming they don't need to configure anything. This will not work, and you
+MUST configure things as described above for hosted repositories to work.
+
+The technical reason this error occurs is that the `PHABRICATOR_USER` variable
+is not defined in the environment when commit hooks run. This variable is set
+by Phabricator when a request passes through the authentication layer that this
+document provides instructions for configuring. Its absence indicates that the
+request did not pass through Phabricator.
+
+
 = Next Steps =
 
 Once hosted repositories are set up:

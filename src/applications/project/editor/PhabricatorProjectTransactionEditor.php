@@ -42,6 +42,7 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_HASWORKBOARD;
     $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_SORT;
     $types[] = PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER;
+    $types[] = PhabricatorProjectTransaction::TYPE_BACKGROUND;
 
     return $types;
   }
@@ -77,6 +78,8 @@ final class PhabricatorProjectTransactionEditor
         return $object->getDefaultWorkboardSort();
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
         return $object->getDefaultWorkboardFilter();
+      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
+        return $object->getWorkboardBackgroundColor();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -100,6 +103,12 @@ final class PhabricatorProjectTransactionEditor
         return $xaction->getNewValue();
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
         return (int)$xaction->getNewValue();
+      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
+        $value = $xaction->getNewValue();
+        if (!strlen($value)) {
+          return null;
+        }
+        return $value;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         return $this->normalizeSlugs($xaction->getNewValue());
     }
@@ -153,6 +162,9 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
         $object->setDefaultWorkboardFilter($xaction->getNewValue());
         return;
+      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
+        $object->setWorkboardBackgroundColor($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -198,6 +210,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_HASWORKBOARD:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_SORT:
       case PhabricatorProjectTransaction::TYPE_DEFAULT_FILTER:
+      case PhabricatorProjectTransaction::TYPE_BACKGROUND:
         return;
      }
 

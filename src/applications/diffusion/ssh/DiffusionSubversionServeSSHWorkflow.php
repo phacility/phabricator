@@ -377,14 +377,12 @@ final class DiffusionSubversionServeSSHWorkflow
     $repository = $this->getRepository();
 
     $path = $this->getPathFromSubversionURI($uri_string);
-    $path = preg_replace(
-      '(^/diffusion/[A-Z]+)',
-      rtrim($repository->getLocalPath(), '/'),
-      $path);
+    $external_base = $this->getBaseRequestPath();
 
-    if (preg_match('(^/diffusion/[A-Z]+/\z)', $path)) {
-      $path = rtrim($path, '/');
-    }
+    // Replace "/diffusion/X" in the request with the repository local path,
+    // so "/diffusion/X/master/" becomes "/path/to/repository/X/master/".
+    $local_path = rtrim($repository->getLocalPath(), '/');
+    $path = $local_path.substr($path, strlen($external_base));
 
     // NOTE: We are intentionally NOT removing username information from the
     // URI. Subversion retains it over the course of the request and considers
@@ -398,7 +396,7 @@ final class DiffusionSubversionServeSSHWorkflow
     if ($this->externalBaseURI === null) {
       $pre = (string)id(clone $uri)->setPath('');
 
-      $external_path = '/diffusion/'.$repository->getCallsign();
+      $external_path = $external_base;
       $external_path = $this->normalizeSVNPath($external_path);
       $this->externalBaseURI = $pre.$external_path;
 

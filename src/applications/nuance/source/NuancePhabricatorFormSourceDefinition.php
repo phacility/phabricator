@@ -120,11 +120,7 @@ final class NuancePhabricatorFormSourceDefinition
     PHUIPropertyListView $view) {
 
     $complaint = $item->getNuanceProperty('complaint');
-    $complaint = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($complaint),
-      'default',
-      $viewer);
-
+    $complaint = new PHUIRemarkupView($viewer, $complaint);
     $view->addSectionHeader(
       pht('Complaint'), 'fa-exclamation-circle');
     $view->addTextContent($complaint);

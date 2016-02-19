@@ -192,7 +192,7 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function getHookContextIdentifier(PhabricatorRepository $repository) {
-    $identifier = $repository->getCallsign();
+    $identifier = $repository->getPHID();
 
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
     if (strlen($instance)) {
