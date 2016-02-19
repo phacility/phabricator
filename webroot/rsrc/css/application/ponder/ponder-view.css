@@ -14,14 +14,6 @@
   border-right: 1px solid {$lightblueborder};
 }
 
-.ponder-question-view .phui-property-list-properties-wrap {
-  width: 66%;
-}
-
-.ponder-question-view .phui-property-list-actions {
-  width: 30%;
-}
-
 .ponder-answer-view {
   margin-top: 16px;
 }

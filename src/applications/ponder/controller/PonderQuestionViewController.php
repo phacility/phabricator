@@ -44,7 +44,6 @@ final class PonderQuestionViewController extends PonderController {
 
     $actions = $this->buildActionListView($question);
     $properties = $this->buildPropertyListView($question, $actions);
-    $sidebar = $this->buildSidebar($question);
 
     $content_id = celerity_generate_unique_node_id();
     $timeline = $this->buildTransactionTimeline(
@@ -81,20 +80,6 @@ final class PonderQuestionViewController extends PonderController {
       ->addPropertyList($properties)
       ->appendChild($footer);
 
-    if ($viewer->getPHID() == $question->getAuthorPHID()) {
-      $status = $question->getStatus();
-      $answers_list = $question->getAnswers();
-      if ($answers_list && ($status == PonderQuestionStatus::STATUS_OPEN)) {
-        $info_view = id(new PHUIInfoView())
-          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-          ->appendChild(
-            pht(
-              'If this question has been resolved, please consider closing
-              the question and marking the answer as helpful.'));
-        $object_box->setInfoView($info_view);
-      }
-    }
-
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addTextCrumb('Q'.$id, '/Q'.$id);
 
@@ -107,21 +92,14 @@ final class PonderQuestionViewController extends PonderController {
         ->appendChild($answer);
     }
 
-    $ponder_view = id(new PHUITwoColumnView())
-      ->setMainColumn(array(
-          $object_box,
-          $comment_view,
-          $answer_wiki,
-          $answers,
-          $answer_add_panel,
-        ))
-      ->setSideColumn($sidebar)
-      ->addClass('ponder-question-view');
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $ponder_view,
+        $object_box,
+        $comment_view,
+        $answer_wiki,
+        $answers,
+        $answer_add_panel,
       ),
       array(
         'title' => 'Q'.$question->getID().' '.$question->getTitle(),
@@ -259,50 +237,6 @@ final class PonderQuestionViewController extends PonderController {
     }
 
     return $view;
-  }
-
-  private function buildSidebar(PonderQuestion $question) {
-    $viewer = $this->getViewer();
-    $status = $question->getStatus();
-    $id = $question->getID();
-
-    $questions = id(new PonderQuestionQuery())
-      ->setViewer($viewer)
-      ->withStatuses(array($status))
-      ->withEdgeLogicPHIDs(
-        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-        PhabricatorQueryConstraint::OPERATOR_OR,
-        $question->getProjectPHIDs())
-      ->setLimit(10)
-      ->execute();
-
-    $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer)
-      ->setNoDataString(pht('No similar questions found.'));
-
-    foreach ($questions as $question) {
-      if ($id == $question->getID()) {
-        continue;
-      }
-      $item = new PHUIObjectItemView();
-      $item->setObjectName('Q'.$question->getID());
-      $item->setHeader($question->getTitle());
-      $item->setHref('/Q'.$question->getID());
-      $item->setObject($question);
-
-      $item->addAttribute(
-        pht(
-          '%s Answer(s)',
-          new PhutilNumber($question->getAnswerCount())));
-
-      $list->addItem($item);
-    }
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Similar Questions'))
-      ->setObjectList($list);
-
-    return $box;
   }
 
 }
