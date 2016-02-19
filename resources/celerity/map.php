@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '7935f211',
-    'core.pkg.js' => '298d5888',
+    'core.pkg.js' => '7d8faf57',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '2de124c9',
     'differential.pkg.js' => 'd0cd0df6',
@@ -462,7 +462,7 @@ return array(
     'rsrc/js/core/Notification.js' => 'ccf1cbf8',
     'rsrc/js/core/Prefab.js' => 'e67df814',
     'rsrc/js/core/ShapedRequest.js' => '7cbe244b',
-    'rsrc/js/core/TextAreaUtils.js' => '9e54692d',
+    'rsrc/js/core/TextAreaUtils.js' => '5813016a',
     'rsrc/js/core/Title.js' => 'df5e11d2',
     'rsrc/js/core/ToolTip.js' => '6323f942',
     'rsrc/js/core/behavior-active-nav.js' => 'e379b58e',
@@ -775,7 +775,7 @@ return array(
     'phabricator-slowvote-css' => 'da0afb1b',
     'phabricator-source-code-view-css' => 'cbeef983',
     'phabricator-standard-page-view' => 'e709f6d0',
-    'phabricator-textareautils' => '9e54692d',
+    'phabricator-textareautils' => '5813016a',
     'phabricator-title' => 'df5e11d2',
     'phabricator-tooltip' => '6323f942',
     'phabricator-ui-example-css' => '528b19de',
@@ -1275,6 +1275,11 @@ return array(
       'javelin-request',
       'javelin-util',
     ),
+    '5813016a' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-vector',
+    ),
     '59a7976a' => array(
       'javelin-install',
       'javelin-dom',
@@ -1620,11 +1625,6 @@ return array(
       'phuix-action-view',
       'phabricator-phtize',
       'changeset-view-manager',
-    ),
-    '9e54692d' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-vector',
     ),
     '9f36c42d' => array(
       'javelin-behavior',
