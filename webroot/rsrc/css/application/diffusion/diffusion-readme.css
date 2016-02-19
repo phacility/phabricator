@@ -2,13 +2,12 @@
  * @provides diffusion-readme-css
  */
 
-.device .diffusion-readme-view {
-  margin: 16px 8px 0;
-  background-color: #fff;
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+.device-desktop .diffusion-readme-view .phui-document-fluid
+  .phui-document-view {
+    margin: 0;
+    padding: 0 8px;
 }
 
-.device-tablet .diffusion-readme-view {
-  margin: 16px;
+.diffusion-readme-view .phui-document-container {
+  border: none;
 }
