@@ -133,6 +133,52 @@ controls who can create services with names like `a.mycompany.com` and
 `b.mycompany.com`.
 
 
+Namespaces
+==========
+
+Almanac namespaces allow you to control who can create services and devices
+with certain names.
+
+If you keep a list of cattle as devices with names like
+`cow001.herd.myranch.com`, `cow002.herd.myranch.moo`, you might have some
+applications which query for all devices in `*.herd.myranch.moo`, and thus
+want to limit who can create devices there in order to prevent mistakes.
+
+If a namespace like `herd.myranch.moo` exists, users must have permission to
+edit the namespace in order to create new services, devices, or namespaces
+within it. For example, a user can not create `cow003.herd.myranch.moo` if
+they do not have edit permission on the `herd.myranch.moo` namespace.
+
+When you try to create a `cow003.herd.myranch.moo` service (or rename an
+existing service to have that name), Almanac looks for these namespaces, then
+checks the policy of the first one it finds:
+
+| Namespace |
+|----|-----
+| `cow003.herd.ranch.moo` | //"Nearest" namespace, considered first.//
+| `herd.ranch.moo` | |
+| `ranch.moo` | |
+| `moo` | //"Farthest" namespace, considered last.//
+
+Note that namespaces treat names as lists of domain parts, not as strict
+substrings, so the namespace `herd.myranch.moo` does not prevent
+someone from creating `goatherd.myranch.moo` or `goat001.goatherd.myranch.moo`.
+The name `goatherd.myranch.moo` is not part of the `herd.myranch.moo` namespace
+because the initial subdomain differs.
+
+If a name belongs to multiple namespaces, the policy of the nearest namespace
+is controlling. For example, if `myranch.moo` has a very restrictive edit
+policy but `shed.myranch.moo` has a more open one, users can create devices and
+services like `rake.shed.myranch.moo` as long as they can pass the policy check
+for `shed.myranch.moo`, even if they do not have permission under the policy
+for `myranch.moo`.
+
+Users can edit services and devices within a namespace if they have edit
+permission on the service or device itself, as long as they don't try to rename
+the service or device to move it into a namespace they don't have permission
+to access.
+
+
 Locking and Unlocking Services
 ==============================
 

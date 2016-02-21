@@ -68,6 +68,51 @@ final class AlmanacNamespace
     return '/almanac/namespace/view/'.$this->getName().'/';
   }
 
+  public function getNameLength() {
+    return strlen($this->getName());
+  }
+
+  /**
+   * Load the namespace which prevents use of an Almanac name, if one exists.
+   */
+  public static function loadRestrictedNamespace(
+    PhabricatorUser $viewer,
+    $name) {
+
+    // For a name like "x.y.z", produce a list of controlling namespaces like
+    // ("z", "y.x", "x.y.z").
+    $names = array();
+    $parts = explode('.', $name);
+    for ($ii = 0; $ii < count($parts); $ii++) {
+      $names[] = implode('.', array_slice($parts, -($ii + 1)));
+    }
+
+    // Load all the possible controlling namespaces.
+    $namespaces = id(new AlmanacNamespaceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withNames($names)
+      ->execute();
+    if (!$namespaces) {
+      return null;
+    }
+
+    // Find the "nearest" (longest) namespace that exists. If both
+    // "sub.domain.com" and "domain.com" exist, we only care about the policy
+    // on the former.
+    $namespaces = msort($namespaces, 'getNameLength');
+    $namespace = last($namespaces);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $namespace,
+      PhabricatorPolicyCapability::CAN_EDIT);
+    if ($can_edit) {
+      return null;
+    }
+
+    return $namespace;
+  }
+
 
 /* -(  AlmanacPropertyInterface  )------------------------------------------- */
 

@@ -123,11 +123,31 @@ final class AlmanacNamespaceEditor
             if ($other && ($other->getID() != $object->getID())) {
               $error = new PhabricatorApplicationTransactionValidationError(
                 $type,
-                pht('Invalid'),
+                pht('Not Unique'),
                 pht(
                   'The namespace name "%s" is already in use by another '.
                   'namespace. Each namespace must have a unique name.',
                   $name),
+                $xaction);
+              $errors[] = $error;
+              continue;
+            }
+
+            if ($name === $object->getName()) {
+              continue;
+            }
+
+            $namespace = AlmanacNamespace::loadRestrictedNamespace(
+              $this->getActor(),
+              $name);
+            if ($namespace) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Restricted'),
+                pht(
+                  'You do not have permission to create Almanac namespaces '.
+                  'within the "%s" namespace.',
+                  $namespace->getName()),
                 $xaction);
               $errors[] = $error;
               continue;

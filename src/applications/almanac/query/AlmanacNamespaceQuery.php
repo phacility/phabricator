@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacNamespaceQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+  extends AlmanacQuery {
 
   private $ids;
   private $phids;

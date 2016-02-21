@@ -4079,7 +4079,7 @@ phutil_register_library_map(array(
     'AlmanacNamespaceListController' => 'AlmanacNamespaceController',
     'AlmanacNamespaceNameNgrams' => 'PhabricatorSearchNgrams',
     'AlmanacNamespacePHIDType' => 'PhabricatorPHIDType',
-    'AlmanacNamespaceQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'AlmanacNamespaceQuery' => 'AlmanacQuery',
     'AlmanacNamespaceSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'AlmanacNamespaceTransaction' => 'PhabricatorApplicationTransaction',
     'AlmanacNamespaceTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
