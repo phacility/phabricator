@@ -8,7 +8,8 @@ final class AlmanacService
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     AlmanacPropertyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $nameIndex;
@@ -229,6 +230,17 @@ final class AlmanacService
     }
 
     $this->delete();
+  }
+
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new AlmanacServiceNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

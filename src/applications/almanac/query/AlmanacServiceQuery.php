@@ -54,6 +54,12 @@ final class AlmanacServiceQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new AlmanacServiceNameNgrams(),
+      $ngrams);
+  }
+
   public function needBindings($need_bindings) {
     $this->needBindings = $need_bindings;
     return $this;
@@ -66,7 +72,7 @@ final class AlmanacServiceQuery
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $joins = parent::buildJoinClauseParts($conn);
 
-    if ($this->devicePHIDs !== null) {
+    if ($this->shouldJoinBindingTable()) {
       $joins[] = qsprintf(
         $conn,
         'JOIN %T binding ON service.phid = binding.servicePHID',
@@ -176,6 +182,18 @@ final class AlmanacServiceQuery
     }
 
     return parent::didFilterPage($services);
+  }
+
+  private function shouldJoinBindingTable() {
+    return ($this->devicePHIDs !== null);
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldJoinBindingTable()) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
   }
 
   protected function getPrimaryTableAlias() {

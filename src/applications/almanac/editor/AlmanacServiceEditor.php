@@ -11,6 +11,10 @@ final class AlmanacServiceEditor
     return pht('Almanac Service');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
