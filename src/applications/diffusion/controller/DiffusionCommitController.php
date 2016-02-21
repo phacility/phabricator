@@ -790,8 +790,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $actions = array();
     $actions[PhabricatorAuditActionConstants::COMMENT] = true;
-    $actions[PhabricatorAuditActionConstants::ADD_CCS] = true;
-    $actions[PhabricatorAuditActionConstants::ADD_AUDITORS] = true;
 
     // We allow you to accept your own commits. A use case here is that you
     // notice an issue with your own commit and "Raise Concern" as an indicator
@@ -800,7 +798,6 @@ final class DiffusionCommitController extends DiffusionController {
     // however.
     $actions[PhabricatorAuditActionConstants::ACCEPT]  = true;
     $actions[PhabricatorAuditActionConstants::CONCERN] = true;
-
 
     // To resign, a user must have authority on some request and not be the
     // commit's author.
@@ -836,6 +833,9 @@ final class DiffusionCommitController extends DiffusionController {
     if ($can_close_option && $user_is_author && $concern_raised) {
       $actions[PhabricatorAuditActionConstants::CLOSE] = true;
     }
+
+    $actions[PhabricatorAuditActionConstants::ADD_AUDITORS] = true;
+    $actions[PhabricatorAuditActionConstants::ADD_CCS] = true;
 
     foreach ($actions as $constant => $ignored) {
       $actions[$constant] =
