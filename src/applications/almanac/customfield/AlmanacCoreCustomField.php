@@ -17,6 +17,9 @@ final class AlmanacCoreCustomField
   }
 
   public function createFields($object) {
+    if (!$object->getID()) {
+      return array();
+    }
 
     $specs = $object->getAlmanacPropertyFieldSpecifications();
 

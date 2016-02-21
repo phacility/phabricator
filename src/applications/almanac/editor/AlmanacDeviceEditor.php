@@ -11,6 +11,10 @@ final class AlmanacDeviceEditor
     return pht('Almanac Device');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -302,7 +306,5 @@ final class AlmanacDeviceEditor
 
     return $errors;
   }
-
-
 
 }
