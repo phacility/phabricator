@@ -136,7 +136,7 @@ final class AlmanacDeviceEditor
             $name = $xaction->getNewValue();
 
             try {
-              AlmanacNames::validateServiceOrDeviceName($name);
+              AlmanacNames::validateName($name);
             } catch (Exception $ex) {
               $message = $ex->getMessage();
             }

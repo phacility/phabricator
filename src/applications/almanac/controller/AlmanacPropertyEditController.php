@@ -55,7 +55,7 @@ final class AlmanacPropertyEditController
         } else {
           $caught = null;
           try {
-            AlmanacNames::validateServiceOrDeviceName($name);
+            AlmanacNames::validateName($name);
           } catch (Exception $ex) {
             $caught = $ex;
           }
@@ -92,7 +92,7 @@ final class AlmanacPropertyEditController
 
     // Make sure property key is appropriate.
     // TODO: It would be cleaner to put this safety check in the Editor.
-    AlmanacNames::validateServiceOrDeviceName($property_key);
+    AlmanacNames::validateName($property_key);
 
     // If we're adding a new property, put a placeholder on the object so
     // that we can build a CustomField for it.

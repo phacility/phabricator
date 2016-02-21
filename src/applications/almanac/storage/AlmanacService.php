@@ -62,7 +62,7 @@ final class AlmanacService
   }
 
   public function save() {
-    AlmanacNames::validateServiceOrDeviceName($this->getName());
+    AlmanacNames::validateName($this->getName());
 
     $this->nameIndex = PhabricatorHash::digestForIndex($this->getName());
 

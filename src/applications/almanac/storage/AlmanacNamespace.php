@@ -1,13 +1,12 @@
 <?php
 
-final class AlmanacDevice
+final class AlmanacNamespace
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorSSHPublicKeyInterface,
     AlmanacPropertyInterface,
     PhabricatorDestructibleInterface,
     PhabricatorNgramsInterface {
@@ -17,17 +16,15 @@ final class AlmanacDevice
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
-  protected $isLocked;
 
   private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
 
-  public static function initializeNewDevice() {
-    return id(new AlmanacDevice())
+  public static function initializeNewNamespace() {
+    return id(new self())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
-      ->attachAlmanacProperties(array())
-      ->setIsLocked(0);
+      ->attachAlmanacProperties(array());
   }
 
   protected function getConfiguration() {
@@ -37,14 +34,13 @@ final class AlmanacDevice
         'name' => 'text128',
         'nameIndex' => 'bytes12',
         'mailKey' => 'bytes20',
-        'isLocked' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_name' => array(
+        'key_nameindex' => array(
           'columns' => array('nameIndex'),
           'unique' => true,
         ),
-        'key_nametext' => array(
+        'key_name' => array(
           'columns' => array('name'),
         ),
       ),
@@ -52,7 +48,8 @@ final class AlmanacDevice
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(AlmanacDevicePHIDType::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(
+      AlmanacNamespacePHIDType::TYPECONST);
   }
 
   public function save() {
@@ -68,38 +65,7 @@ final class AlmanacDevice
   }
 
   public function getURI() {
-    return '/almanac/device/view/'.$this->getName().'/';
-  }
-
-
-  /**
-   * Find locked services which are bound to this device, updating the device
-   * lock flag if necessary.
-   *
-   * @return list<phid> List of locking service PHIDs.
-   */
-  public function rebuildDeviceLocks() {
-    $services = id(new AlmanacServiceQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withDevicePHIDs(array($this->getPHID()))
-      ->withLocked(true)
-      ->execute();
-
-    $locked = (bool)count($services);
-
-    if ($locked != $this->getIsLocked()) {
-      $this->setIsLocked((int)$locked);
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        queryfx(
-          $this->establishConnection('w'),
-          'UPDATE %T SET isLocked = %d WHERE id = %d',
-          $this->getTableName(),
-          $this->getIsLocked(),
-          $this->getID());
-      unset($unguarded);
-    }
-
-    return $this;
+    return '/almanac/namespace/view/'.$this->getName().'/';
   }
 
 
@@ -153,11 +119,7 @@ final class AlmanacDevice
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsLocked()) {
-          return PhabricatorPolicies::POLICY_NOONE;
-        } else {
-          return $this->getEditPolicy();
-        }
+        return $this->getEditPolicy();
     }
   }
 
@@ -166,14 +128,6 @@ final class AlmanacDevice
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
-      if ($this->getIsLocked()) {
-        return pht(
-          'This device is bound to a locked service, so it can not '.
-          'be edited.');
-      }
-    }
-
     return null;
   }
 
@@ -203,7 +157,7 @@ final class AlmanacDevice
 
 
   public function getApplicationTransactionEditor() {
-    return new AlmanacDeviceEditor();
+    return new AlmanacNamespaceEditor();
   }
 
   public function getApplicationTransactionObject() {
@@ -211,26 +165,13 @@ final class AlmanacDevice
   }
 
   public function getApplicationTransactionTemplate() {
-    return new AlmanacDeviceTransaction();
+    return new AlmanacNamespaceTransaction();
   }
 
   public function willRenderTimeline(
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
-
     return $timeline;
-  }
-
-
-/* -(  PhabricatorSSHPublicKeyInterface  )----------------------------------- */
-
-
-  public function getSSHPublicKeyManagementURI(PhabricatorUser $viewer) {
-    return $this->getURI();
-  }
-
-  public function getSSHKeyDefaultName() {
-    return $this->getName();
   }
 
 
@@ -239,15 +180,6 @@ final class AlmanacDevice
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
-
-    $interfaces = id(new AlmanacInterfaceQuery())
-      ->setViewer($engine->getViewer())
-      ->withDevicePHIDs(array($this->getPHID()))
-      ->execute();
-    foreach ($interfaces as $interface) {
-      $engine->destroyObject($interface);
-    }
-
     $this->delete();
   }
 
@@ -257,7 +189,7 @@ final class AlmanacDevice
 
   public function newNgrams() {
     return array(
-      id(new AlmanacDeviceNameNgrams())
+      id(new AlmanacNamespaceNameNgrams())
         ->setValue($this->getName()),
     );
   }

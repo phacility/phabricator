@@ -1,10 +1,10 @@
 <?php
 
-final class AlmanacNetworkSearchEngine
+final class AlmanacNamespaceSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Almanac Networks');
+    return pht('Almanac Namespaces');
   }
 
   public function getApplicationClassName() {
@@ -12,7 +12,7 @@ final class AlmanacNetworkSearchEngine
   }
 
   public function newQuery() {
-    return new AlmanacNetworkQuery();
+    return new AlmanacNamespaceQuery();
   }
 
   protected function buildCustomSearchFields() {
@@ -20,7 +20,7 @@ final class AlmanacNetworkSearchEngine
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Name Contains'))
         ->setKey('match')
-        ->setDescription(pht('Search for networks by name substring.')),
+        ->setDescription(pht('Search for namespaces by name substring.')),
     );
   }
 
@@ -35,12 +35,12 @@ final class AlmanacNetworkSearchEngine
   }
 
   protected function getURI($path) {
-    return '/almanac/network/'.$path;
+    return '/almanac/namespace/'.$path;
   }
 
   protected function getBuiltinQueryNames() {
     $names = array(
-      'all' => pht('All Networks'),
+      'all' => pht('All Namespaces'),
     );
 
     return $names;
@@ -60,30 +60,30 @@ final class AlmanacNetworkSearchEngine
   }
 
   protected function renderResultList(
-    array $networks,
+    array $namespaces,
     PhabricatorSavedQuery $query,
     array $handles) {
-    assert_instances_of($networks, 'AlmanacNetwork');
+    assert_instances_of($namespaces, 'AlmanacNamespace');
 
     $viewer = $this->requireViewer();
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
-    foreach ($networks as $network) {
-      $id = $network->getID();
+    foreach ($namespaces as $namespace) {
+      $id = $namespace->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Network %d', $id))
-        ->setHeader($network->getName())
-        ->setHref($this->getApplicationURI("network/{$id}/"))
-        ->setObject($network);
+        ->setObjectName(pht('Namespace %d', $id))
+        ->setHeader($namespace->getName())
+        ->setHref($this->getApplicationURI("namespace/{$id}/"))
+        ->setObject($namespace);
 
       $list->addItem($item);
     }
 
     $result = new PhabricatorApplicationSearchResultView();
     $result->setObjectList($list);
-    $result->setNoDataString(pht('No Almanac Networks found.'));
+    $result->setNoDataString(pht('No Almanac namespaces found.'));
 
     return $result;
   }

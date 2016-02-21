@@ -14,24 +14,50 @@ final class AlmanacConsoleController extends AlmanacController {
 
     $menu->addItem(
       id(new PHUIObjectItemView())
-        ->setHeader(pht('Services'))
-        ->setHref($this->getApplicationURI('service/'))
-        ->setIcon('fa-plug')
-        ->addAttribute(pht('Manage Almanac services.')));
-
-    $menu->addItem(
-      id(new PHUIObjectItemView())
         ->setHeader(pht('Devices'))
         ->setHref($this->getApplicationURI('device/'))
         ->setIcon('fa-server')
-        ->addAttribute(pht('Manage Almanac devices.')));
+        ->addAttribute(
+          pht(
+            'Create an inventory of physical and virtual hosts and '.
+            'devices.')));
+
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Services'))
+        ->setHref($this->getApplicationURI('service/'))
+        ->setIcon('fa-plug')
+        ->addAttribute(
+          pht(
+            'Create and update services, and map them to interfaces on '.
+            'devices.')));
 
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Networks'))
         ->setHref($this->getApplicationURI('network/'))
         ->setIcon('fa-globe')
-        ->addAttribute(pht('Manage Almanac networks.')));
+        ->addAttribute(
+          pht(
+            'Manage public and private networks.')));
+
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Namespaces'))
+        ->setHref($this->getApplicationURI('namespace/'))
+        ->setIcon('fa-asterisk')
+        ->addAttribute(
+          pht('Control who can create new named services and devices.')));
+
+    $docs_uri = PhabricatorEnv::getDoclink(
+      'Almanac User Guide');
+
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Documentation'))
+        ->setHref($docs_uri)
+        ->setIcon('fa-book')
+        ->addAttribute(pht('Browse documentation for Almanac.')));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));

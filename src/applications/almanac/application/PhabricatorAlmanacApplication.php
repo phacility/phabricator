@@ -29,7 +29,7 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
     return array(
       array(
-        'name' => pht('Alamanac User Guide'),
+        'name' => pht('Almanac User Guide'),
         'href' => PhabricatorEnv::getDoclink('Almanac User Guide'),
       ),
     );
@@ -44,12 +44,12 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
       '/almanac/' => array(
         '' => 'AlmanacConsoleController',
         'service/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacServiceListController',
+          $this->getQueryRoutePattern() => 'AlmanacServiceListController',
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacServiceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacServiceViewController',
         ),
         'device/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacDeviceListController',
+          $this->getQueryRoutePattern() => 'AlmanacDeviceListController',
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacDeviceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacDeviceViewController',
         ),
@@ -61,13 +61,19 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
           '(?P<id>\d+)/' => 'AlmanacBindingViewController',
         ),
         'network/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacNetworkListController',
+          $this->getQueryRoutePattern()  => 'AlmanacNetworkListController',
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacNetworkEditController',
           '(?P<id>\d+)/' => 'AlmanacNetworkViewController',
         ),
         'property/' => array(
           'edit/' => 'AlmanacPropertyEditController',
           'delete/' => 'AlmanacPropertyDeleteController',
+        ),
+        'namespace/' => array(
+          $this->getQueryRoutePattern() => 'AlmanacNamespaceListController',
+          $this->getEditRoutePattern('edit/')
+            => 'AlmanacNamespaceEditController',
+          '(?P<id>\d+)/' => 'AlmanacNamespaceViewController',
         ),
       ),
     );
@@ -82,6 +88,9 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
       AlmanacCreateNetworksCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      AlmanacCreateNamespacesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
       AlmanacCreateClusterServicesCapability::CAPABILITY => array(

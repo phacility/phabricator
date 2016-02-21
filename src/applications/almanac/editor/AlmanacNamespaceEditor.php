@@ -1,6 +1,6 @@
 <?php
 
-final class AlmanacServiceEditor
+final class AlmanacNamespaceEditor
   extends PhabricatorApplicationTransactionEditor {
 
   public function getEditorApplicationClass() {
@@ -8,7 +8,7 @@ final class AlmanacServiceEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Almanac Service');
+    return pht('Almanac Namespace');
   }
 
   protected function supportsSearch() {
@@ -18,9 +18,7 @@ final class AlmanacServiceEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = AlmanacServiceTransaction::TYPE_NAME;
-    $types[] = AlmanacServiceTransaction::TYPE_LOCK;
-
+    $types[] = AlmanacNamespaceTransaction::TYPE_NAME;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -31,10 +29,8 @@ final class AlmanacServiceEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacNamespaceTransaction::TYPE_NAME:
         return $object->getName();
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        return (bool)$object->getIsLocked();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -45,10 +41,8 @@ final class AlmanacServiceEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacNamespaceTransaction::TYPE_NAME:
         return $xaction->getNewValue();
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        return (bool)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -59,11 +53,8 @@ final class AlmanacServiceEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacNamespaceTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
-        return;
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        $object->setIsLocked((int)$xaction->getNewValue());
         return;
     }
 
@@ -75,24 +66,7 @@ final class AlmanacServiceEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
-        return;
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        $service = id(new AlmanacServiceQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPHIDs(array($object->getPHID()))
-          ->needBindings(true)
-          ->executeOne();
-
-        $devices = array();
-        foreach ($service->getBindings() as $binding) {
-          $device = $binding->getInterface()->getDevice();
-          $devices[$device->getPHID()] = $device;
-        }
-
-        foreach ($devices as $device) {
-          $device->rebuildDeviceLocks();
-        }
+      case AlmanacNamespaceTransaction::TYPE_NAME:
         return;
     }
 
@@ -107,7 +81,7 @@ final class AlmanacServiceEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacNamespaceTransaction::TYPE_NAME:
         $missing = $this->validateIsEmptyTextField(
           $object->getName(),
           $xactions);
@@ -116,17 +90,16 @@ final class AlmanacServiceEditor
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),
-            pht('Service name is required.'),
+            pht('Namespace name is required.'),
             nonempty(last($xactions), null));
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         } else {
           foreach ($xactions as $xaction) {
-            $message = null;
-
             $name = $xaction->getNewValue();
 
+            $message = null;
             try {
               AlmanacNames::validateName($name);
             } catch (Exception $ex) {
@@ -140,22 +113,25 @@ final class AlmanacServiceEditor
                 $message,
                 $xaction);
               $errors[] = $error;
+              continue;
             }
-          }
-        }
 
-        if ($xactions) {
-          $duplicate = id(new AlmanacServiceQuery())
-            ->setViewer(PhabricatorUser::getOmnipotentUser())
-            ->withNames(array(last($xactions)->getNewValue()))
-            ->executeOne();
-          if ($duplicate && ($duplicate->getID() != $object->getID())) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Not Unique'),
-              pht('Almanac services must have unique names.'),
-              last($xactions));
-            $errors[] = $error;
+            $other = id(new AlmanacNamespaceQuery())
+              ->setViewer(PhabricatorUser::getOmnipotentUser())
+              ->withNames(array($name))
+              ->executeOne();
+            if ($other && ($other->getID() != $object->getID())) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid'),
+                pht(
+                  'The namespace name "%s" is already in use by another '.
+                  'namespace. Each namespace must have a unique name.',
+                  $name),
+                $xaction);
+              $errors[] = $error;
+              continue;
+            }
           }
         }
 
@@ -165,6 +141,22 @@ final class AlmanacServiceEditor
     return $errors;
   }
 
+  protected function didCatchDuplicateKeyException(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    Exception $ex) {
 
+    $errors = array();
+
+    $errors[] = new PhabricatorApplicationTransactionValidationError(
+      null,
+      pht('Invalid'),
+      pht(
+        'Another namespace with this name already exists. Each namespace '.
+        'must have a unique name.'),
+      null);
+
+    throw new PhabricatorApplicationTransactionValidationException($errors);
+  }
 
 }
