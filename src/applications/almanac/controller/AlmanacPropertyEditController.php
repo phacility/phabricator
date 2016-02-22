@@ -1,27 +1,17 @@
 <?php
 
 final class AlmanacPropertyEditController
-  extends AlmanacDeviceController {
+  extends AlmanacPropertyController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $object = id(new PhabricatorObjectQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($request->getStr('objectPHID')))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$object) {
-      return new Aphront404Response();
+    $response = $this->loadPropertyObject();
+    if ($response) {
+      return $response;
     }
 
-    if (!($object instanceof AlmanacPropertyInterface)) {
-      return new Aphront404Response();
-    }
+    $object = $this->getPropertyObject();
 
     $cancel_uri = $object->getURI();
     $property_key = $request->getStr('key');

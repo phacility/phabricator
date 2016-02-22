@@ -15,6 +15,7 @@ final class AlmanacBindingViewController
     $binding = id(new AlmanacBindingQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needProperties(true)
       ->executeOne();
     if (!$binding) {
       return new Aphront404Response();

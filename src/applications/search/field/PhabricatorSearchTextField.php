@@ -15,4 +15,8 @@ final class PhabricatorSearchTextField
     return new AphrontFormTextControl();
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

@@ -8,7 +8,7 @@ abstract class AlmanacConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodStatus() {
-    return self::METHOD_STATUS_UNSTABLE;
+    return self::METHOD_STATUS_DEPRECATED;
   }
 
   public function getMethodStatusDescription() {

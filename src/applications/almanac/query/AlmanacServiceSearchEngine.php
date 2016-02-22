@@ -26,6 +26,14 @@ final class AlmanacServiceSearchEngine
       $query->withNameNgrams($map['match']);
     }
 
+    if ($map['names']) {
+      $query->withNames($map['names']);
+    }
+
+    if ($map['devicePHIDs']) {
+      $query->withDevicePHIDs($map['devicePHIDs']);
+    }
+
     return $query;
   }
 
@@ -36,6 +44,15 @@ final class AlmanacServiceSearchEngine
         ->setLabel(pht('Name Contains'))
         ->setKey('match')
         ->setDescription(pht('Search for services by name substring.')),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Exact Names'))
+        ->setKey('names')
+        ->setDescription(pht('Search for services with specific names.')),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Devices'))
+        ->setKey('devicePHIDs')
+        ->setDescription(
+          pht('Search for services bound to particular devices.')),
     );
   }
 

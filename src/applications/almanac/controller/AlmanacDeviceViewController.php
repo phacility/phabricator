@@ -15,6 +15,7 @@ final class AlmanacDeviceViewController
     $device = id(new AlmanacDeviceQuery())
       ->setViewer($viewer)
       ->withNames(array($name))
+      ->needProperties(true)
       ->executeOne();
     if (!$device) {
       return new Aphront404Response();

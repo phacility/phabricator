@@ -8,7 +8,8 @@ final class AlmanacService
     PhabricatorProjectInterface,
     AlmanacPropertyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorNgramsInterface {
+    PhabricatorNgramsInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $nameIndex;
@@ -221,6 +222,34 @@ final class AlmanacService
     return array(
       id(new AlmanacServiceNameNgrams())
         ->setValue($this->getName()),
+    );
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the service.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new AlmanacPropertiesSearchEngineAttachment())
+        ->setAttachmentKey('properties'),
+      id(new AlmanacBindingsSearchEngineAttachment())
+        ->setAttachmentKey('bindings'),
     );
   }
 

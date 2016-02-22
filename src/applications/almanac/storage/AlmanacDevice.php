@@ -9,7 +9,8 @@ final class AlmanacDevice
     PhabricatorSSHPublicKeyInterface,
     AlmanacPropertyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorNgramsInterface {
+    PhabricatorNgramsInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $nameIndex;
@@ -240,6 +241,32 @@ final class AlmanacDevice
     return array(
       id(new AlmanacDeviceNameNgrams())
         ->setValue($this->getName()),
+    );
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the device.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new AlmanacPropertiesSearchEngineAttachment())
+        ->setAttachmentKey('properties'),
     );
   }
 

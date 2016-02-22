@@ -21,6 +21,10 @@ final class AlmanacDeviceSearchEngine
         ->setLabel(pht('Name Contains'))
         ->setKey('match')
         ->setDescription(pht('Search for devices by name substring.')),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Exact Names'))
+        ->setKey('names')
+        ->setDescription(pht('Search for devices with specific names.')),
     );
   }
 
@@ -29,6 +33,10 @@ final class AlmanacDeviceSearchEngine
 
     if ($map['match'] !== null) {
       $query->withNameNgrams($map['match']);
+    }
+
+    if ($map['names']) {
+      $query->withNames($map['names']);
     }
 
     return $query;

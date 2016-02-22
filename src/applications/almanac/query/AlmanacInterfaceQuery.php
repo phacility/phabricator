@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacInterfaceQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+  extends AlmanacQuery {
 
   private $ids;
   private $phids;
@@ -50,6 +50,7 @@ final class AlmanacInterfaceQuery
       ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($network_phids)
+      ->needProperties($this->getNeedProperties())
       ->execute();
     $networks = mpull($networks, null, 'getPHID');
 
@@ -57,6 +58,7 @@ final class AlmanacInterfaceQuery
       ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($device_phids)
+      ->needProperties($this->getNeedProperties())
       ->execute();
     $devices = mpull($devices, null, 'getPHID');
 

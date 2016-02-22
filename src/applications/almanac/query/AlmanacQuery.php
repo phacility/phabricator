@@ -3,21 +3,25 @@
 abstract class AlmanacQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  protected function didFilterPage(array $objects) {
-    if (head($objects) instanceof AlmanacPropertyInterface) {
-      // NOTE: We load properties for obsolete historical reasons. It may make
-      // sense to re-examine that assumption shortly.
+  private $needProperties;
 
+  public function needProperties($need_properties) {
+    $this->needProperties = $need_properties;
+    return $this;
+  }
+
+  protected function getNeedProperties() {
+    return $this->needProperties;
+  }
+
+  protected function didFilterPage(array $objects) {
+    $has_properties = (head($objects) instanceof AlmanacPropertyInterface);
+
+    if ($has_properties && $this->needProperties) {
       $property_query = id(new AlmanacPropertyQuery())
         ->setViewer($this->getViewer())
         ->setParentQuery($this)
-        ->withObjectPHIDs(mpull($objects, 'getPHID'));
-
-      // NOTE: We disable policy filtering and object attachment to avoid
-      // a cyclic dependency where objects need their properties and properties
-      // need their objects. We'll attach the objects below, and have already
-      // implicitly checked the necessary policies.
-      $property_query->setDisablePolicyFilteringAndAttachment(true);
+        ->withObjects($objects);
 
       $properties = $property_query->execute();
 

@@ -65,8 +65,12 @@ final class AlmanacServiceQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new AlmanacService();
+  }
+
   protected function loadPage() {
-    return $this->loadStandardPage(new AlmanacService());
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
@@ -172,6 +176,7 @@ final class AlmanacServiceQuery
       $bindings = id(new AlmanacBindingQuery())
         ->setViewer($this->getViewer())
         ->withServicePHIDs($service_phids)
+        ->needProperties($this->getNeedProperties())
         ->execute();
       $bindings = mgroup($bindings, 'getServicePHID');
 

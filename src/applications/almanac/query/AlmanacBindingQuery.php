@@ -34,19 +34,12 @@ final class AlmanacBindingQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new AlmanacBinding();
+  }
+
   protected function loadPage() {
-    $table = new AlmanacBinding();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $bindings) {
@@ -58,6 +51,7 @@ final class AlmanacBindingQuery
       ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($service_phids)
+      ->needProperties($this->getNeedProperties())
       ->execute();
     $services = mpull($services, null, 'getPHID');
 
@@ -65,6 +59,7 @@ final class AlmanacBindingQuery
       ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($device_phids)
+      ->needProperties($this->getNeedProperties())
       ->execute();
     $devices = mpull($devices, null, 'getPHID');
 
@@ -72,6 +67,7 @@ final class AlmanacBindingQuery
       ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($interface_phids)
+      ->needProperties($this->getNeedProperties())
       ->execute();
     $interfaces = mpull($interfaces, null, 'getPHID');
 
@@ -93,47 +89,45 @@ final class AlmanacBindingQuery
     return $bindings;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->servicePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'servicePHID IN (%Ls)',
         $this->servicePHIDs);
     }
 
     if ($this->devicePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'devicePHID IN (%Ls)',
         $this->devicePHIDs);
     }
 
     if ($this->interfacePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'interfacePHID IN (%Ls)',
         $this->interfacePHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
 }
