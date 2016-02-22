@@ -73,8 +73,7 @@ final class PhabricatorProjectColumnDetailController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($column->getDisplayName())
-      ->setPolicyObject($column);
+      ->setHeader($column->getDisplayName());
 
     if ($column->isHidden()) {
       $header->setStatus('fa-ban', 'dark', pht('Hidden'));
@@ -120,9 +119,12 @@ final class PhabricatorProjectColumnDetailController
       ->setActionList($actions);
 
     $limit = $column->getPointLimit();
-    $properties->addProperty(
-      pht('Point Limit'),
-      $limit ? $limit : pht('No Limit'));
+    if ($limit === null) {
+      $limit_text = pht('No Limit');
+    } else {
+      $limit_text = $limit;
+    }
+    $properties->addProperty(pht('Point Limit'), $limit_text);
 
     return $properties;
   }

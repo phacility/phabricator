@@ -289,7 +289,11 @@ final class ManiphestEditEngine
     $viewer = $request->getViewer();
 
     $column_phid = $request->getStr('columnPHID');
-    $order = $request->getStr('order');
+
+    $visible_phids = $request->getStrList('visiblePHIDs');
+    if (!$visible_phids) {
+      $visible_phids = array();
+    }
 
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
@@ -299,98 +303,15 @@ final class ManiphestEditEngine
       return new Aphront404Response();
     }
 
-    // If the workboard's project and all descendant projects have been removed
-    // from the card's project list, we are going to remove it from the board
-    // completely.
-
-    // TODO: If the user did something sneaky and changed a subproject, we'll
-    // currently leave the card where it was but should really move it to the
-    // proper new column.
-
     $board_phid = $column->getProjectPHID();
+    $object_phid = $task->getPHID();
 
-    $descendant_projects = id(new PhabricatorProjectQuery())
+    return id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
-      ->withAncestorProjectPHIDs(array($column->getProjectPHID()))
-      ->execute();
-    $board_phids = mpull($descendant_projects, 'getPHID', 'getPHID');
-    $board_phids[$board_phid] = $board_phid;
-
-    $project_map = array_fuse($task->getProjectPHIDs());
-    $remove_card = !array_intersect_key($board_phids, $project_map);
-
-    // TODO: Maybe the caller should pass a list of visible task PHIDs so we
-    // know which ones we need to reorder? This is a HUGE overfetch.
-    $objects = id(new ManiphestTaskQuery())
-      ->setViewer($viewer)
-      ->withEdgeLogicPHIDs(
-        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-        PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
-        array($board_phids))
-      ->setViewer($viewer)
-      ->execute();
-    $objects = mpull($objects, null, 'getPHID');
-
-    $layout_engine = id(new PhabricatorBoardLayoutEngine())
-      ->setViewer($viewer)
-      ->setBoardPHIDs(array($board_phid))
-      ->setObjectPHIDs(array_keys($objects))
-      ->executeLayout();
-
-    $positions = $layout_engine->getColumnObjectPositions(
-      $board_phid,
-      $column_phid);
-
-    $column_phids = $layout_engine->getColumnObjectPHIDs(
-      $board_phid,
-      $column_phid);
-
-    $column_tasks = array_select_keys($objects, $column_phids);
-
-    if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
-      // TODO: This is a little bit awkward, because PHP and JS use
-      // slightly different sort order parameters to achieve the same
-      // effect. It would be good to unify this a bit at some point.
-      $sort_map = array();
-      foreach ($positions as $position) {
-        $sort_map[$position->getObjectPHID()] = array(
-          -$position->getSequence(),
-          $position->getID(),
-        );
-      }
-    } else {
-      $sort_map = mpull(
-        $column_tasks,
-        'getPrioritySortVector',
-        'getPHID');
-    }
-
-    $data = array(
-      'removeFromBoard' => $remove_card,
-      'sortMap' => $sort_map,
-    );
-
-    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
-      ->setViewer($viewer)
-      ->setObjects(array($task))
-      ->setExcludedProjectPHIDs($board_phids);
-
-    $card = $rendering_engine->renderCard($task->getPHID());
-
-    $item = $card->getItem();
-    $item->addClass('phui-workcard');
-
-    $payload = array(
-      'tasks' => $item,
-      'data' => $data,
-    );
-
-    return id(new AphrontAjaxResponse())
-      ->setContent(
-        array(
-          'tasks' => $item,
-          'data' => $data,
-        ));
+      ->setBoardPHID($board_phid)
+      ->setObjectPHID($object_phid)
+      ->setVisiblePHIDs($visible_phids)
+      ->buildResponse();
   }
 
 

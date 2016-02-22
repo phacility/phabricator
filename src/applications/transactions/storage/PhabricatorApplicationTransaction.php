@@ -527,6 +527,11 @@ abstract class PhabricatorApplicationTransaction
         // TODO: Remove this eventually, this is handling old changes during
         // object creation prior to the introduction of "create" and "default"
         // transaction display flags.
+
+        // NOTE: We can also hit this case with Space transactions that later
+        // update a default space (`null`) to an explicit space, so handling
+        // the Space case may require some finesse.
+
         if ($this->getOldValue() === null) {
           return true;
         } else {

@@ -65,8 +65,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => $this->getPanelRouting('PhabricatorProjectPanelController'),
         'subprojects/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectsController',
-        'milestones/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorProjectMilestonesController',
         'board/(?P<id>[1-9]\d*)/'.
           '(?P<filter>filter/)?'.
           '(?:query/(?P<queryKey>[^/]+)/)?'
@@ -86,6 +84,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardReorderController',
           'disable/'
             => 'PhabricatorProjectBoardDisableController',
+          'manage/'
+            => 'PhabricatorProjectBoardManageController',
+          'background/'
+            => 'PhabricatorProjectBoardBackgroundController',
         ),
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
@@ -96,6 +98,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectSilenceController',
         'warning/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectWarningController',
+        'default/(?P<projectID>[1-9]\d*)/(?P<target>[^/]+)/'
+          => 'PhabricatorProjectDefaultController',
       ),
       '/tag/' => array(
         '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',

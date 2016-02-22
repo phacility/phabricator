@@ -31,7 +31,7 @@
 .dark-console-panel,
 .dark-console-load {
   border-left: 1px solid #111111;
-  box-shadow: -2px 0px 2px rgba(0, 0, 0, 0.25);
+  box-shadow: -2px 0px 2px rgba({$alphablack}, 0.25);
 }
 
 .dark-console-requests {

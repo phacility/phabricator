@@ -64,6 +64,20 @@ abstract class DiffusionController extends PhabricatorController {
       return new Aphront404Response();
     }
 
+    // If the client is making a request like "/diffusion/1/...", but the
+    // repository has a different canonical path like "/diffusion/XYZ/...",
+    // redirect them to the canonical path.
+
+    $request_path = $request->getPath();
+    $repository = $drequest->getRepository();
+
+    $canonical_path = $repository->getCanonicalPath($request_path);
+    if ($canonical_path !== null) {
+      if ($canonical_path != $request_path) {
+        return id(new AphrontRedirectResponse())->setURI($canonical_path);
+      }
+    }
+
     $this->diffusionRequest = $drequest;
 
     return null;
@@ -147,7 +161,7 @@ abstract class DiffusionController extends PhabricatorController {
     $crumb_list[] = $crumb;
 
     $stable_commit = $drequest->getStableCommit();
-    $commit_name = $repository->formatCommitName($stable_commit);
+    $commit_name = $repository->formatCommitName($stable_commit, $local = true);
     $commit_uri = $repository->getCommitURI($stable_commit);
 
     if ($spec['tags']) {
@@ -171,8 +185,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     if ($spec['commit']) {
       $crumb = id(new PHUICrumbView())
-        ->setName($commit_name)
-        ->setHref($commit_uri);
+        ->setName($commit_name);
       $crumb_list[] = $crumb;
       return $crumb_list;
     }

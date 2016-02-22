@@ -150,50 +150,18 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   protected function newCardResponse($board_phid, $object_phid) {
     $viewer = $this->getViewer();
 
-    $project = id(new PhabricatorProjectQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($board_phid))
-      ->executeOne();
-    if (!$project) {
-      return new Aphront404Response();
+    $request = $this->getRequest();
+    $visible_phids = $request->getStrList('visiblePHIDs');
+    if (!$visible_phids) {
+      $visible_phids = array();
     }
 
-    // Reload the object so it reflects edits which have been applied.
-    $object = id(new ManiphestTaskQuery())
+    return id(new PhabricatorBoardResponseEngine())
       ->setViewer($viewer)
-      ->withPHIDs(array($object_phid))
-      ->needProjectPHIDs(true)
-      ->executeOne();
-    if (!$object) {
-      return new Aphront404Response();
-    }
-
-    $except_phids = array($board_phid);
-    if ($project->getHasSubprojects() || $project->getHasMilestones()) {
-      $descendants = id(new PhabricatorProjectQuery())
-        ->setViewer($viewer)
-        ->withAncestorProjectPHIDs($except_phids)
-        ->execute();
-      foreach ($descendants as $descendant) {
-        $except_phids[] = $descendant->getPHID();
-      }
-    }
-
-    $rendering_engine = id(new PhabricatorBoardRenderingEngine())
-      ->setViewer($viewer)
-      ->setObjects(array($object))
-      ->setExcludedProjectPHIDs($except_phids);
-
-    $card = $rendering_engine->renderCard($object->getPHID());
-
-    $item = $card->getItem();
-    $item->addClass('phui-workcard');
-
-    return id(new AphrontAjaxResponse())
-      ->setContent(
-        array(
-          'task' => $item,
-        ));
+      ->setBoardPHID($board_phid)
+      ->setObjectPHID($object_phid)
+      ->setVisiblePHIDs($visible_phids)
+      ->buildResponse();
   }
 
 }

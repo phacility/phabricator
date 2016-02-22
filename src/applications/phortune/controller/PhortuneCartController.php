@@ -48,12 +48,7 @@ abstract class PhortuneCartController
       return null;
     }
 
-    $output = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setPreserveLinebreaks(true)
-        ->setContent($description),
-      'default',
-      $this->getViewer());
+    $output = new PHUIRemarkupView($this->getUser(), $description);
 
     $box = id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)

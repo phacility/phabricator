@@ -39,12 +39,7 @@ final class PhabricatorStandardCustomFieldRemarkup
     // end of the world.
 
     $viewer = $this->getViewer();
-    return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setContent($value)
-        ->setPReserveLinebreaks(true),
-      'default',
-      $viewer);
+    return new PHUIRemarkupView($viewer, $value);
   }
 
   public function getApplicationTransactionTitle(
@@ -92,7 +87,12 @@ final class PhabricatorStandardCustomFieldRemarkup
       HeraldAdapter::CONDITION_IS,
       HeraldAdapter::CONDITION_IS_NOT,
       HeraldAdapter::CONDITION_REGEXP,
+      HeraldAdapter::CONDITION_NOT_REGEXP,
     );
+  }
+
+  public function getHeraldFieldStandardType() {
+    return HeraldField::STANDARD_TEXT;
   }
 
   protected function getHTTPParameterType() {

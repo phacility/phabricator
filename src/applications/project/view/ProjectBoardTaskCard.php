@@ -78,10 +78,6 @@ final class ProjectBoardTaskCard extends Phobject {
       ->setHref('/T'.$task->getID())
       ->addSigil('project-card')
       ->setDisabled($task->isClosed())
-      ->setMetadata(
-        array(
-          'objectPHID' => $task->getPHID(),
-        ))
       ->addAction(
         id(new PHUIListItemView())
         ->setName(pht('Edit'))
@@ -99,6 +95,18 @@ final class ProjectBoardTaskCard extends Phobject {
       $card->setCoverImage($cover_file->getBestURI());
     }
 
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $points = $task->getPoints();
+      if ($points !== null) {
+        $points_tag = id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setShade(PHUITagView::COLOR_BLUE)
+          ->setSlimShady(true)
+          ->setName($points);
+        $card->addAttribute($points_tag);
+      }
+    }
+
     if ($task->isClosed()) {
       $icon = ManiphestTaskStatus::getStatusIcon($task->getStatus());
       $icon = id(new PHUIIconView())
@@ -114,6 +122,8 @@ final class ProjectBoardTaskCard extends Phobject {
         ->setHandles($project_handles);
       $card->addAttribute($tag_list);
     }
+
+    $card->addClass('phui-workcard');
 
     return $card;
   }

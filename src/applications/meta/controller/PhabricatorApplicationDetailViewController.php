@@ -104,14 +104,11 @@ final class PhabricatorApplicationDetailViewController
     }
 
     $overview = $application->getOverview();
-    if ($overview) {
+    if (strlen($overview)) {
+      $overview = new PHUIRemarkupView($viewer, $overview);
       $properties->addSectionHeader(
         pht('Overview'), PHUIPropertyListView::ICON_SUMMARY);
-      $properties->addTextContent(
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent($overview),
-          'default',
-          $viewer));
+      $properties->addTextContent($overview);
     }
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(

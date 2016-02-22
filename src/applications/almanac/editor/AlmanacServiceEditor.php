@@ -11,6 +11,10 @@ final class AlmanacServiceEditor
     return pht('Almanac Service');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -124,7 +128,7 @@ final class AlmanacServiceEditor
             $name = $xaction->getNewValue();
 
             try {
-              AlmanacNames::validateServiceOrDeviceName($name);
+              AlmanacNames::validateName($name);
             } catch (Exception $ex) {
               $message = $ex->getMessage();
             }
@@ -136,22 +140,42 @@ final class AlmanacServiceEditor
                 $message,
                 $xaction);
               $errors[] = $error;
+              continue;
             }
-          }
-        }
 
-        if ($xactions) {
-          $duplicate = id(new AlmanacServiceQuery())
-            ->setViewer(PhabricatorUser::getOmnipotentUser())
-            ->withNames(array(last($xactions)->getNewValue()))
-            ->executeOne();
-          if ($duplicate && ($duplicate->getID() != $object->getID())) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Not Unique'),
-              pht('Almanac services must have unique names.'),
-              last($xactions));
-            $errors[] = $error;
+            $other = id(new AlmanacServiceQuery())
+              ->setViewer(PhabricatorUser::getOmnipotentUser())
+              ->withNames(array($name))
+              ->executeOne();
+            if ($other && ($other->getID() != $object->getID())) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Not Unique'),
+                pht('Almanac services must have unique names.'),
+                last($xactions));
+              $errors[] = $error;
+              continue;
+            }
+
+            if ($name === $object->getName()) {
+              continue;
+            }
+
+            $namespace = AlmanacNamespace::loadRestrictedNamespace(
+              $this->getActor(),
+              $name);
+            if ($namespace) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Restricted'),
+                pht(
+                  'You do not have permission to create Almanac services '.
+                  'within the "%s" namespace.',
+                  $namespace->getName()),
+                $xaction);
+              $errors[] = $error;
+              continue;
+            }
           }
         }
 

@@ -85,10 +85,8 @@ final class AphrontFormView extends AphrontView {
 
   public function appendRemarkupInstructions($remarkup) {
     return $this->appendInstructions(
-      PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($remarkup),
-        'default',
-        $this->getUser()));
+      new PHUIRemarkupView($this->getUser(), $remarkup));
+
   }
 
   public function buildLayoutView() {

@@ -9,6 +9,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       ->addContextParameter('responseType')
       ->addContextParameter('columnPHID')
       ->addContextParameter('order')
+      ->addContextParameter('visiblePHIDs')
       ->buildResponse();
   }
 

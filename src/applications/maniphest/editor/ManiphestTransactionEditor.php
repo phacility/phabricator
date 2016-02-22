@@ -289,8 +289,14 @@ final class ManiphestTransactionEditor
             array($select_phids))
           ->execute();
 
-        $object_phids = mpull($board_tasks, 'getPHID');
-        $object_phids[] = $object_phid;
+        $board_tasks = mpull($board_tasks, null, 'getPHID');
+        $board_tasks[$object_phid] = $object;
+
+        // Make sure tasks are sorted by ID, so we lay out new positions in
+        // a consistent way.
+        $board_tasks = msort($board_tasks, 'getID');
+
+        $object_phids = array_keys($board_tasks);
 
         $engine = id(new PhabricatorBoardLayoutEngine())
           ->setViewer($omnipotent_viewer)
@@ -971,8 +977,11 @@ final class ManiphestTransactionEditor
     // If the task is not assigned, not being assigned, currently open, and
     // being closed, try to assign the actor as the owner.
     if ($is_unassigned && !$any_assign && $is_open && $is_closing) {
+      $is_claim = ManiphestTaskStatus::isClaimStatus($new_status);
+
       // Don't assign the actor if they aren't a real user.
-      if ($actor_phid) {
+      // Don't claim the task if the status is configured to not claim.
+      if ($actor_phid && $is_claim) {
         $results[] = id(new ManiphestTransaction())
           ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
           ->setNewValue($actor_phid);

@@ -65,7 +65,7 @@
 }
 
 .device-desktop .phabricator-main-menu-brand:hover {
-  background-color: rgba(55,55,55,.2);
+  background-color: rgba({$alphagrey},.2);
   cursor: hand;
 }
 

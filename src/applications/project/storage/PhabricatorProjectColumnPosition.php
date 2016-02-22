@@ -9,6 +9,7 @@ final class PhabricatorProjectColumnPosition extends PhabricatorProjectDAO
   protected $sequence;
 
   private $column = self::ATTACHABLE;
+  private $viewSequence = 0;
 
   protected function getConfiguration() {
     return array(
@@ -40,18 +41,30 @@ final class PhabricatorProjectColumnPosition extends PhabricatorProjectDAO
     return $this;
   }
 
-  public function getOrderingKey() {
-    if (!$this->getID() && !$this->getSequence()) {
-      return 0;
-    }
+  public function setViewSequence($view_sequence) {
+    $this->viewSequence = $view_sequence;
+    return $this;
+  }
 
-    // Low sequence numbers go above high sequence numbers.
-    // High position IDs go above low position IDs.
-    // Broadly, this makes newly added stuff float to the top.
+  public function getOrderingKey() {
+    // We're ordering both real positions and "virtual" positions which we have
+    // created but not saved yet.
+
+    // Low sequence numbers go above high sequence numbers. Virtual positions
+    // will have sequence number 0.
+
+    // High virtual sequence numbers go above low virtual sequence numbers.
+    // The layout engine gets objects in ID order, and this puts them in
+    // reverse ID order.
+
+    // High IDs go above low IDs.
+
+    // Broadly, this collectively makes newly added stuff float to the top.
 
     return sprintf(
-      '~%012d%012d',
+      '~%012d%012d%012d',
       $this->getSequence(),
+      ((1 << 31) - $this->viewSequence),
       ((1 << 31) - $this->getID()));
   }
 

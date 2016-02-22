@@ -72,6 +72,12 @@ final class CelerityDefaultPostprocessor
       'hoverselectedblue' => '#e6e9ee',
       'borderinset' => 'inset 0 0 0 1px rgba(55,55,55,.15)',
 
+      // Alphas
+      'alphawhite'          => '255,255,255',
+      'alphagrey'           => '55,55,55',
+      'alphablue'           => '71,87,120',
+      'alphablack'          => '0,0,0',
+
       // Base Greys
       'lightgreyborder'     => '#C7CCD9',
       'greyborder'          => '#A1A6B0',

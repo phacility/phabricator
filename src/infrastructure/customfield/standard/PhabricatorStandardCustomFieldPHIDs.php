@@ -241,6 +241,10 @@ abstract class PhabricatorStandardCustomFieldPHIDs
     );
   }
 
+  public function getHeraldFieldStandardType() {
+    return HeraldField::STANDARD_PHID_NULLABLE;
+  }
+
   public function getHeraldFieldValue() {
     // If the field has a `null` value, make sure we hand an `array()` to
     // Herald.

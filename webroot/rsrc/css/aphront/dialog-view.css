@@ -8,6 +8,9 @@
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
   background-color: #fff;
+}
+
+.jx-client-dialog .aphront-dialog-view {
   box-shadow: {$dropshadow};
 }
 

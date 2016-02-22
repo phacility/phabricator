@@ -134,16 +134,12 @@ final class PhabricatorPhurlURLViewController
 
     $properties->invokeWillRenderEvent();
 
-    if (strlen($url->getDescription())) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($url->getDescription()),
-        'default',
-        $viewer);
-
+    $description = $url->getDescription();
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($viewer, $description);
       $properties->addSectionHeader(
         pht('Description'),
         PHUIPropertyListView::ICON_SUMMARY);
-
       $properties->addTextContent($description);
     }
 

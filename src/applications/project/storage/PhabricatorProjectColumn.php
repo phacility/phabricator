@@ -5,7 +5,8 @@ final class PhabricatorProjectColumn
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorExtendedPolicyInterface {
 
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
@@ -86,6 +87,11 @@ final class PhabricatorProjectColumn
   }
 
   public function isHidden() {
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->isArchived();
+    }
+
     return ($this->getStatus() == self::STATUS_HIDDEN);
   }
 
@@ -164,14 +170,16 @@ final class PhabricatorProjectColumn
     // Normal columns and subproject columns go first, in a user-controlled
     // order.
 
-    // All the milestone columns go last, in their sequential order.
+    // All the milestone columns go last, in reverse order (newest on the
+    // left) so that you don't have to scroll across older milestones to get
+    // to the newest ones.
 
     if (!$proxy || !$proxy->isMilestone()) {
       $group = 'A';
       $sequence = $this->getSequence();
     } else {
       $group = 'B';
-      $sequence = $proxy->getMilestoneNumber();
+      $sequence = (10000000 - $proxy->getMilestoneNumber());
     }
 
     return sprintf('%s%012d', $group, $sequence);
@@ -212,7 +220,14 @@ final class PhabricatorProjectColumn
   }
 
   public function getPolicy($capability) {
-    return $this->getProject()->getPolicy($capability);
+    // NOTE: Column policies are enforced as an extended policy which makes
+    // them the same as the project's policies.
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_USER;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
@@ -223,6 +238,16 @@ final class PhabricatorProjectColumn
 
   public function describeAutomaticCapability($capability) {
     return pht('Users must be able to see a project to see its board.');
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    return array(
+      array($this->getProject(), $capability),
+    );
   }
 
 

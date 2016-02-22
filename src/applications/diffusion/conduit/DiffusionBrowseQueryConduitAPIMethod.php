@@ -246,7 +246,16 @@ final class DiffusionBrowseQueryConduitAPIMethod
           DiffusionBrowseResultSet::REASON_IS_FILE);
         return $result;
       }
+
       $parts = explode('/', $remainder);
+      $name = reset($parts);
+
+      // If we've already seen this path component, we're looking at a file
+      // inside a directory we already processed. Just move on.
+      if (isset($results[$name])) {
+        continue;
+      }
+
       if (count($parts) == 1) {
         $type = DifferentialChangeType::FILE_NORMAL;
       } else {
@@ -254,7 +263,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       }
 
       if ($count >= $offset) {
-        $results[reset($parts)] = $type;
+        $results[$name] = $type;
       }
 
       $count++;

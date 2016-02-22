@@ -9,7 +9,8 @@ final class AlmanacDevice
     PhabricatorProjectInterface,
     PhabricatorSSHPublicKeyInterface,
     AlmanacPropertyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $nameIndex;
@@ -55,7 +56,7 @@ final class AlmanacDevice
   }
 
   public function save() {
-    AlmanacNames::validateServiceOrDeviceName($this->getName());
+    AlmanacNames::validateName($this->getName());
 
     $this->nameIndex = PhabricatorHash::digestForIndex($this->getName());
 
@@ -248,6 +249,17 @@ final class AlmanacDevice
     }
 
     $this->delete();
+  }
+
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new AlmanacDeviceNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

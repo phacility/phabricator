@@ -2,7 +2,7 @@
  * @provides phui-two-column-view-css
  */
 
-.phui-two-column-view {
+.phui-two-column-content {
   display: table;
   width: 100%;
 }

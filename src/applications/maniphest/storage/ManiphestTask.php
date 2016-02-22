@@ -194,14 +194,6 @@ final class ManiphestTask extends ManiphestDAO
     return ManiphestTaskStatus::isClosedStatus($this->getStatus());
   }
 
-  public function getPrioritySortVector() {
-    return array(
-      $this->getPriority(),
-      -$this->getSubpriority(),
-      $this->getID(),
-    );
-  }
-
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
@@ -217,6 +209,56 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getCoverImageThumbnailPHID() {
     return idx($this->properties, 'cover.thumbnailPHID');
+  }
+
+  public function getWorkboardOrderVectors() {
+    return array(
+      PhabricatorProjectColumn::ORDER_PRIORITY => array(
+        (int)-$this->getPriority(),
+        (double)-$this->getSubpriority(),
+        (int)-$this->getID(),
+      ),
+    );
+  }
+
+  private function comparePriorityTo(ManiphestTask $other) {
+    $upri = $this->getPriority();
+    $vpri = $other->getPriority();
+
+    if ($upri != $vpri) {
+      return ($upri - $vpri);
+    }
+
+    $usub = $this->getSubpriority();
+    $vsub = $other->getSubpriority();
+
+    if ($usub != $vsub) {
+      return ($usub - $vsub);
+    }
+
+    $uid = $this->getID();
+    $vid = $other->getID();
+
+    if ($uid != $vid) {
+      return ($uid - $vid);
+    }
+
+    return 0;
+  }
+
+  public function isLowerPriorityThan(ManiphestTask $other) {
+    return ($this->comparePriorityTo($other) < 0);
+  }
+
+  public function isHigherPriorityThan(ManiphestTask $other) {
+    return ($this->comparePriorityTo($other) > 0);
+  }
+
+  public function getWorkboardProperties() {
+    return array(
+      'status' => $this->getStatus(),
+      'points' => (double)$this->getPoints(),
+    );
   }
 
 
@@ -420,6 +462,10 @@ final class ManiphestTask extends ManiphestDAO
         ->setKey('priority')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about task priority.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('points')
+        ->setType('points')
+        ->setDescription(pht('Point value of the task.')),
     );
   }
 
@@ -446,6 +492,7 @@ final class ManiphestTask extends ManiphestDAO
       'ownerPHID' => $this->getOwnerPHID(),
       'status' => $status_info,
       'priority' => $priority_info,
+      'points' => $this->getPoints(),
     );
   }
 

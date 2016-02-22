@@ -50,10 +50,7 @@ final class PhabricatorApplicationTransactionCommentRawController
             $details_text = pht(
               'For full details, run `/bin/mail show-outbound --id %d`',
               $source_id);
-            $addendum = PhabricatorMarkupEngine::renderOneObject(
-              id(new PhabricatorMarkupOneOff())->setContent($details_text),
-              'default',
-              $viewer);
+            $addendum = new PHUIRemarkupView($viewer, $details_text);
           }
         }
       }

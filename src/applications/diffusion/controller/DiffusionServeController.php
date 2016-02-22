@@ -262,17 +262,23 @@ final class DiffusionServeController extends DiffusionController {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $result = new PhabricatorVCSResponse(
             500,
-            pht('This is not a Git repository.'));
+            pht(
+              'This repository ("%s") is not a Git repository.',
+              $repository->getDisplayName()));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $result = new PhabricatorVCSResponse(
             500,
-            pht('This is not a Mercurial repository.'));
+            pht(
+              'This repository ("%s") is not a Mercurial repository.',
+              $repository->getDisplayName()));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           $result = new PhabricatorVCSResponse(
             500,
-            pht('This is not a Subversion repository.'));
+            pht(
+              'This repository ("%s") is not a Subversion repository.',
+              $repository->getDisplayName()));
           break;
         default:
           $result = new PhabricatorVCSResponse(
@@ -427,11 +433,14 @@ final class DiffusionServeController extends DiffusionController {
           '$PATH'));
     }
 
+    // NOTE: We do not set HTTP_CONTENT_ENCODING here, because we already
+    // decompressed the request when we read the request body, so the body is
+    // just plain data with no encoding.
+
     $env = array(
       'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
       'QUERY_STRING' => $query_string,
       'CONTENT_TYPE' => $request->getHTTPHeader('Content-Type'),
-      'HTTP_CONTENT_ENCODING' => $request->getHTTPHeader('Content-Encoding'),
       'REMOTE_ADDR' => $_SERVER['REMOTE_ADDR'],
       'GIT_PROJECT_ROOT' => $repository_root,
       'GIT_HTTP_EXPORT_ALL' => '1',
@@ -477,7 +486,9 @@ final class DiffusionServeController extends DiffusionController {
   private function getRequestDirectoryPath(PhabricatorRepository $repository) {
     $request = $this->getRequest();
     $request_path = $request->getRequestURI()->getPath();
-    $base_path = preg_replace('@^/diffusion/[A-Z]+@', '', $request_path);
+
+    $info = PhabricatorRepository::parseRepositoryServicePath($request_path);
+    $base_path = $info['path'];
 
     // For Git repositories, strip an optional directory component if it
     // isn't the name of a known Git resource. This allows users to clone

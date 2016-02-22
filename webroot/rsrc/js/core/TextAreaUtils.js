@@ -33,7 +33,14 @@ JX.install('TextAreaUtils', {
 
     setSelectionRange : function(area, start, end) {
       if ('setSelectionRange' in area) {
+
+        // Chrome scrolls the textarea to the bottom as a side effect of
+        // calling focus(), so save the scroll position, focus, then restore
+        // the scroll position.
+        var scroll_top = area.scrollTop;
         area.focus();
+        area.scrollTop = scroll_top;
+
         area.setSelectionRange(start, end);
       }
     },

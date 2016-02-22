@@ -136,21 +136,13 @@ final class PhabricatorProjectColumnEditController
       $submit = pht('Save Column');
     }
 
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->setValue($submit)
-        ->addCancelButton($view_uri));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setValidationException($validation_exception)
-      ->setForm($form);
-
-    $nav = $this->getProfileMenu();
-
-    return $this->newPage()
+    return $this->newDialog()
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle($title)
-      ->setNavigation($nav)
-      ->appendChild($form_box);
+      ->appendForm($form)
+      ->setValidationException($validation_exception)
+      ->addCancelButton($view_uri)
+      ->addSubmitButton($submit);
+
   }
 }

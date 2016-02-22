@@ -14,6 +14,7 @@ abstract class HeraldAdapter extends Phobject {
   const CONDITION_IS_ME           = 'me';
   const CONDITION_IS_NOT_ME       = '!me';
   const CONDITION_REGEXP          = 'regexp';
+  const CONDITION_NOT_REGEXP      = '!regexp';
   const CONDITION_RULE            = 'conditions';
   const CONDITION_NOT_RULE        = '!conditions';
   const CONDITION_EXISTS          = 'exists';
@@ -322,6 +323,7 @@ abstract class HeraldAdapter extends Phobject {
       self::CONDITION_IS_ME           => pht('is myself'),
       self::CONDITION_IS_NOT_ME       => pht('is not myself'),
       self::CONDITION_REGEXP          => pht('matches regexp'),
+      self::CONDITION_NOT_REGEXP      => pht('does not match regexp'),
       self::CONDITION_RULE            => pht('matches:'),
       self::CONDITION_NOT_RULE        => pht('does not match:'),
       self::CONDITION_EXISTS          => pht('exists'),
@@ -364,16 +366,18 @@ abstract class HeraldAdapter extends Phobject {
 
     switch ($condition_type) {
       case self::CONDITION_CONTAINS:
-        // "Contains" can take an array of strings, as in "Any changed
-        // filename" for diffs.
+      case self::CONDITION_NOT_CONTAINS:
+        // "Contains and "does not contain" can take an array of strings, as in
+        // "Any changed filename" for diffs.
+
+        $result_if_match = ($condition_type == self::CONDITION_CONTAINS);
+
         foreach ((array)$field_value as $value) {
           if (stripos($value, $condition_value) !== false) {
-            return true;
+            return $result_if_match;
           }
         }
-        return false;
-      case self::CONDITION_NOT_CONTAINS:
-        return (stripos($field_value, $condition_value) === false);
+        return !$result_if_match;
       case self::CONDITION_IS:
         return ($field_value == $condition_value);
       case self::CONDITION_IS_NOT:
@@ -427,6 +431,9 @@ abstract class HeraldAdapter extends Phobject {
       case self::CONDITION_NEVER:
         return false;
       case self::CONDITION_REGEXP:
+      case self::CONDITION_NOT_REGEXP:
+        $result_if_match = ($condition_type == self::CONDITION_REGEXP);
+
         foreach ((array)$field_value as $value) {
           // We add the 'S' flag because we use the regexp multiple times.
           // It shouldn't cause any troubles if the flag is already there
@@ -437,10 +444,10 @@ abstract class HeraldAdapter extends Phobject {
               pht('Regular expression is not valid!'));
           }
           if ($result) {
-            return true;
+            return $result_if_match;
           }
         }
-        return false;
+        return !$result_if_match;
       case self::CONDITION_REGEXP_PAIR:
         // Match a JSON-encoded pair of regular expressions against a
         // dictionary. The first regexp must match the dictionary key, and the
@@ -509,6 +516,7 @@ abstract class HeraldAdapter extends Phobject {
 
     switch ($condition_type) {
       case self::CONDITION_REGEXP:
+      case self::CONDITION_NOT_REGEXP:
         $ok = @preg_match($condition_value, '');
         if ($ok === false) {
           throw new HeraldInvalidConditionException(

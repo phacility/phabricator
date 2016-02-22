@@ -65,8 +65,20 @@ final class PhabricatorCustomFieldHeraldField extends HeraldField {
     return $this->getCustomField()->getHeraldFieldConditions();
   }
 
+  protected function getHeraldFieldStandardType() {
+    return $this->getCustomField()->getHeraldFieldStandardType();
+  }
+
   public function getHeraldFieldValueType($condition) {
+    if ($this->getHeraldFieldStandardType()) {
+      return parent::getHeraldFieldValueType($condition);
+    }
+
     return $this->getCustomField()->getHeraldFieldValueType($condition);
+  }
+
+  protected function getDatasource() {
+    return $this->getCustomField()->getHeraldDatasource();
   }
 
 }

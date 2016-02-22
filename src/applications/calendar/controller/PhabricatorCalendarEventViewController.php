@@ -363,11 +363,7 @@ final class PhabricatorCalendarEventViewController
         ->getIconLabel($event->getIcon()));
 
     if (strlen($event->getDescription())) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($event->getDescription()),
-        'default',
-        $viewer);
-
+      $description = new PHUIRemarkupView($viewer, $event->getDescription());
       $properties->addSectionHeader(
         pht('Description'),
         PHUIPropertyListView::ICON_SUMMARY);

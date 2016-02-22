@@ -86,16 +86,13 @@ final class PholioInlineController extends PholioController {
         ),
         $author_handle->renderLink());
 
+      $inline_content = new PHUIRemarkupView($viewer, $inline->getContent());
       $comment_body = phutil_tag(
         'div',
         array(
           'class' => 'pholio-inline-comment-body',
         ),
-        PhabricatorMarkupEngine::renderOneObject(
-            id(new PhabricatorMarkupOneOff())
-              ->setContent($inline->getContent()),
-            'default',
-            $viewer));
+        $inline_content);
 
       return $this->newDialog()
         ->setTitle(pht('Inline Comment'))

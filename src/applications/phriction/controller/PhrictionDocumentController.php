@@ -203,19 +203,11 @@ final class PhrictionDocumentController
       $crumbs->addCrumb($view);
     }
 
-    $action_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Actions'))
-      ->setHref('#')
-      ->setIcon('fa-bars')
-      ->addClass('phui-mobile-menu')
-      ->setDropdownMenu($actions);
-
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($document)
       ->setHeader($page_title)
-      ->addActionLink($action_button);
+      ->setActionList($actions);
 
     if ($content) {
       $header->setEpoch($content->getDateCreated());

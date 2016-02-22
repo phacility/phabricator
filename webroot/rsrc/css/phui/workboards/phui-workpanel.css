@@ -36,7 +36,7 @@
 }
 
 .phui-workpanel-view .phui-box-grey {
-  background-color: rgba(71,87,120,0.1);
+  background-color: rgba({$alphablue},0.1);
 }
 
 .phui-workpanel-view.phui-workboard-column-milestone .phui-box-grey {
@@ -85,6 +85,7 @@
 
 .phui-workpanel-body .phui-object-item-list-view {
   min-height: 54px;
+  background-color: transparent;
 }
 
 .device .aphront-multi-column-outer
@@ -105,17 +106,17 @@
 .device-desktop .phui-workpanel-body-content::-webkit-scrollbar {
   height: 8px;
   width: 8px;
-  background: rgba(71,87,120,0.2);
+  background: rgba({$alphablue},0.2);
   border-radius: 4px;
 }
 
 .device-desktop .phui-workpanel-body-content::-webkit-scrollbar-thumb {
-  background: rgba(71,87,120,0.4);
+  background: rgba({$alphablue},0.4);
   border-radius: 4px;
 }
 
 .project-panel-empty .phui-object-item-list-view {
-  background: {$sh-indigobackground};
+  background: rgba(234, 230, 247, 0.85);
   border-radius: 3px;
   margin-bottom: 4px;
   border: 1px dashed {$sh-indigoborder};
@@ -126,7 +127,7 @@
 }
 
 .project-panel-empty .phui-object-item-list-view.drag-target-list {
-  background: rgba(255,255,255,.7);
+  background: rgba({$alphawhite},.7);
 }
 
 .phui-workpanel-view.project-panel-over-limit .phui-header-header {
