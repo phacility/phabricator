@@ -4,7 +4,6 @@ final class AlmanacDevice
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     PhabricatorSSHPublicKeyInterface,
@@ -19,7 +18,6 @@ final class AlmanacDevice
   protected $editPolicy;
   protected $isLocked;
 
-  private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
 
   public static function initializeNewDevice() {
@@ -137,6 +135,10 @@ final class AlmanacDevice
     return array();
   }
 
+  public function newAlmanacPropertyEditEngine() {
+    return new AlmanacDevicePropertyEditEngine();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -175,27 +177,6 @@ final class AlmanacDevice
     }
 
     return null;
-  }
-
-
-/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
-
-
-  public function getCustomFieldSpecificationForRole($role) {
-    return array();
-  }
-
-  public function getCustomFieldBaseClass() {
-    return 'AlmanacCustomField';
-  }
-
-  public function getCustomFields() {
-    return $this->assertAttached($this->customFields);
-  }
-
-  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
-    $this->customFields = $fields;
-    return $this;
   }
 
 

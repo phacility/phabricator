@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacDeviceTransaction
-  extends PhabricatorApplicationTransaction {
+  extends AlmanacTransaction {
 
   const TYPE_NAME = 'almanac:device:name';
   const TYPE_INTERFACE = 'almanac:device:interface';

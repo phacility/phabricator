@@ -4,7 +4,6 @@ final class AlmanacBinding
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     AlmanacPropertyInterface,
     PhabricatorDestructibleInterface {
@@ -17,7 +16,6 @@ final class AlmanacBinding
   private $service = self::ATTACHABLE;
   private $device = self::ATTACHABLE;
   private $interface = self::ATTACHABLE;
-  private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
 
   public static function initializeNewBinding(AlmanacService $service) {
@@ -56,6 +54,10 @@ final class AlmanacBinding
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
     return parent::save();
+  }
+
+  public function getName() {
+    return pht('Binding %s', $this->getID());
   }
 
   public function getURI() {
@@ -124,6 +126,10 @@ final class AlmanacBinding
     return array();
   }
 
+  public function newAlmanacPropertyEditEngine() {
+    return new AlmanacBindingPropertyEditEngine();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -159,27 +165,6 @@ final class AlmanacBinding
     }
 
     return $notes;
-  }
-
-
-/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
-
-
-  public function getCustomFieldSpecificationForRole($role) {
-    return array();
-  }
-
-  public function getCustomFieldBaseClass() {
-    return 'AlmanacCustomField';
-  }
-
-  public function getCustomFields() {
-    return $this->assertAttached($this->customFields);
-  }
-
-  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
-    $this->customFields = $fields;
-    return $this;
   }
 
 

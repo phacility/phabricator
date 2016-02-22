@@ -11,4 +11,14 @@ abstract class AlmanacServiceController extends AlmanacController {
     return $crumbs;
   }
 
+  protected function getPropertyDeleteURI($object) {
+    $id = $object->getID();
+    return "/almanac/service/delete/{$id}/";
+  }
+
+  protected function getPropertyUpdateURI($object) {
+    $id = $object->getID();
+    return "/almanac/service/property/{$id}/";
+  }
+
 }

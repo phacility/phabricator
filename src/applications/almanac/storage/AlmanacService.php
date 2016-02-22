@@ -4,7 +4,6 @@ final class AlmanacService
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     AlmanacPropertyInterface,
@@ -19,7 +18,6 @@ final class AlmanacService
   protected $serviceClass;
   protected $isLocked;
 
-  private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
   private $bindings = self::ATTACHABLE;
   private $serviceType = self::ATTACHABLE;
@@ -130,6 +128,10 @@ final class AlmanacService
     return $this->getServiceType()->getFieldSpecifications();
   }
 
+  public function newAlmanacPropertyEditEngine() {
+    return new AlmanacServicePropertyEditEngine();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -168,27 +170,6 @@ final class AlmanacService
     }
 
     return null;
-  }
-
-
-/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
-
-
-  public function getCustomFieldSpecificationForRole($role) {
-    return array();
-  }
-
-  public function getCustomFieldBaseClass() {
-    return 'AlmanacCustomField';
-  }
-
-  public function getCustomFields() {
-    return $this->assertAttached($this->customFields);
-  }
-
-  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
-    $this->customFields = $fields;
-    return $this;
   }
 
 

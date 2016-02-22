@@ -43,12 +43,12 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return array(
       '/almanac/' => array(
         '' => 'AlmanacConsoleController',
-        'service/' => array(
+        '(?P<objectType>service)/' => array(
           $this->getQueryRoutePattern() => 'AlmanacServiceListController',
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacServiceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacServiceViewController',
         ),
-        'device/' => array(
+        '(?P<objectType>device)/' => array(
           $this->getQueryRoutePattern() => 'AlmanacDeviceListController',
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacDeviceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacDeviceViewController',
@@ -65,15 +65,15 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacNetworkEditController',
           '(?P<id>\d+)/' => 'AlmanacNetworkViewController',
         ),
-        'property/' => array(
-          'edit/' => 'AlmanacPropertyEditController',
-          'delete/' => 'AlmanacPropertyDeleteController',
-        ),
         'namespace/' => array(
           $this->getQueryRoutePattern() => 'AlmanacNamespaceListController',
           $this->getEditRoutePattern('edit/')
             => 'AlmanacNamespaceEditController',
           '(?P<id>\d+)/' => 'AlmanacNamespaceViewController',
+        ),
+        'property/' => array(
+          'delete/' => 'AlmanacPropertyDeleteController',
+          'update/' => 'AlmanacPropertyEditController',
         ),
       ),
     );

@@ -16,8 +16,4 @@ final class AlmanacClusterDatabaseServiceType
       'Defines a database service for use in a Phabricator cluster.');
   }
 
-  public function getFieldSpecifications() {
-    return array();
-  }
-
 }

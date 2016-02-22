@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacBindingTransaction
-  extends PhabricatorApplicationTransaction {
+  extends AlmanacTransaction {
 
   const TYPE_INTERFACE = 'almanac:binding:interface';
 

@@ -18,16 +18,7 @@ final class AlmanacClusterRepositoryServiceType
 
   public function getFieldSpecifications() {
     return array(
-      'closed' => array(
-        'type' => 'bool',
-        'name' => pht('Closed'),
-        'default' => false,
-        'strings' => array(
-          'edit.checkbox' => pht(
-            'Prevent new repositories from being allocated on this '.
-            'service.'),
-        ),
-      ),
+      'closed' => id(new PhabricatorTextEditField()),
     );
   }
 

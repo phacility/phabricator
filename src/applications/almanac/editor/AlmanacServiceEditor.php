@@ -1,18 +1,10 @@
 <?php
 
 final class AlmanacServiceEditor
-  extends PhabricatorApplicationTransactionEditor {
-
-  public function getEditorApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
-  }
+  extends AlmanacEditor {
 
   public function getEditorObjectsDescription() {
     return pht('Almanac Service');
-  }
-
-  protected function supportsSearch() {
-    return true;
   }
 
   public function getTransactionTypes() {
@@ -184,7 +176,5 @@ final class AlmanacServiceEditor
 
     return $errors;
   }
-
-
 
 }

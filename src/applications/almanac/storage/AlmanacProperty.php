@@ -1,25 +1,33 @@
 <?php
 
 final class AlmanacProperty
-  extends PhabricatorCustomFieldStorage
+  extends AlmanacDAO
   implements PhabricatorPolicyInterface {
 
+  protected $objectPHID;
+  protected $fieldIndex;
   protected $fieldName;
+  protected $fieldValue;
 
   private $object = self::ATTACHABLE;
 
-  public function getApplicationName() {
-    return 'almanac';
-  }
-
   protected function getConfiguration() {
-    $config = parent::getConfiguration();
-
-    $config[self::CONFIG_COLUMN_SCHEMA] += array(
-      'fieldName' => 'text128',
-    );
-
-    return $config;
+    return array(
+      self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_SERIALIZATION => array(
+        'fieldValue' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'fieldIndex' => 'bytes12',
+        'fieldName' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'objectPHID' => array(
+          'columns' => array('objectPHID', 'fieldIndex'),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
   }
 
   public function getObject() {
@@ -31,37 +39,11 @@ final class AlmanacProperty
     return $this;
   }
 
-  public static function buildTransactions(
-    AlmanacPropertyInterface $object,
-    array $properties) {
+  public function save() {
+    $hash = PhabricatorHash::digestForIndex($this->getFieldName());
+    $this->setFieldIndex($hash);
 
-    $template = $object->getApplicationTransactionTemplate();
-
-    $attached_properties = $object->getAlmanacProperties();
-    foreach ($properties as $key => $value) {
-      if (empty($attached_properties[$key])) {
-        $attached_properties[] = id(new AlmanacProperty())
-          ->setObjectPHID($object->getPHID())
-          ->setFieldName($key);
-      }
-    }
-    $object->attachAlmanacProperties($attached_properties);
-
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $object,
-      PhabricatorCustomField::ROLE_DEFAULT);
-    $fields = $field_list->getFields();
-
-    $xactions = array();
-    foreach ($properties as $name => $property) {
-      $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
-        ->setMetadataValue('customfield:key', $name)
-        ->setOldValue($object->getAlmanacPropertyValue($name))
-        ->setNewValue($property);
-    }
-
-    return $xactions;
+    return parent::save();
   }
 
 
