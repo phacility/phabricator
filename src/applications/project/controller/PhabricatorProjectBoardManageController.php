@@ -152,6 +152,11 @@ final class PhabricatorProjectBoardManageController
     foreach ($columns as $column) {
       $column_id = $column->getID();
 
+      $proxy = $column->getProxy();
+      if ($proxy && !$proxy->isMilestone()) {
+        continue;
+      }
+
       $detail_uri = "/project/board/{$board_id}/column/{$column_id}/";
 
       $item = id(new PHUIObjectItemView())
