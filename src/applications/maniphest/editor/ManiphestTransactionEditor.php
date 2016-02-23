@@ -1033,16 +1033,22 @@ final class ManiphestTransactionEditor
             ));
         break;
       case ManiphestTransaction::TYPE_OWNER:
+        // If this is a no-op update, don't expand it.
+        $old_value = $object->getOwnerPHID();
+        $new_value = $xaction->getNewValue();
+        if ($old_value === $new_value) {
+          continue;
+        }
+
         // When a task is reassigned, move the old owner to the subscriber
         // list so they're still in the loop.
-        $owner_phid = $object->getOwnerPHID();
-        if ($owner_phid) {
+        if ($old_value) {
           $results[] = id(new ManiphestTransaction())
             ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
             ->setIgnoreOnNoEffect(true)
             ->setNewValue(
               array(
-                '+' => array($owner_phid => $owner_phid),
+                '+' => array($old_value => $old_value),
               ));
         }
         break;
