@@ -117,7 +117,8 @@ final class PhameBlogManageController extends PhameBlogController {
 
     $properties->invokeWillRenderEvent();
 
-    if (strlen($blog->getDescription())) {
+    $description = $blog->getDescription();
+    if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
       $properties->addSectionHeader(
         pht('Description'),
