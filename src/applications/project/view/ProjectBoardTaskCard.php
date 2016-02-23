@@ -116,6 +116,16 @@ final class ProjectBoardTaskCard extends Phobject {
     }
 
     $project_handles = $this->getProjectHandles();
+
+    // Remove any archived projects from the list.
+    if ($project_handles) {
+      foreach ($project_handles as $key => $handle) {
+        if ($handle->getStatus() == PhabricatorObjectHandle::STATUS_CLOSED) {
+          unset($project_handles[$key]);
+        }
+      }
+    }
+
     if ($project_handles) {
       $tag_list = id(new PHUIHandleTagListView())
         ->setSlim(true)

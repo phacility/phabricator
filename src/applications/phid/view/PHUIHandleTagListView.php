@@ -52,13 +52,6 @@ final class PHUIHandleTagListView extends AphrontTagView {
   protected function getTagContent() {
     $handles = $this->handles;
 
-    // Remove any archived projects from the list.
-    foreach ($handles as $key => $handle) {
-      if ($handle->getStatus() == PhabricatorObjectHandle::STATUS_CLOSED) {
-        unset($handles[$key]);
-      }
-    }
-
     // If the list is empty, we may render a "No Projects" tag.
     if (!$handles) {
       if (strlen($this->noDataString)) {
