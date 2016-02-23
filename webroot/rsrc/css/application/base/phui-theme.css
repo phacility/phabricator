@@ -61,17 +61,3 @@
   background: #122916;
 }
 
-
-/*--- Dark "Classic Phabricator" ---------------------------------------------*/
-
-.phui-theme-dark {
-  background-color: {$page.background.dark};
-}
-
-.phui-theme-dark .phui-box-border {
-  border-color: {$lightblueborder};
-}
-
-.phui-theme-dark .phui-box-grey {
-  background-color: {$page.background.dark};
-}
