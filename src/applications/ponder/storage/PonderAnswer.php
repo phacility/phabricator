@@ -4,7 +4,6 @@ final class PonderAnswer extends PonderDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorMarkupInterface,
-    PonderVotableInterface,
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorSubscribableInterface,
@@ -18,13 +17,9 @@ final class PonderAnswer extends PonderDAO
   protected $content;
   protected $mailKey;
   protected $status;
-  protected $voteCount;
 
-  private $vote;
   private $question = self::ATTACHABLE;
   private $comments;
-
-  private $userVotes = array();
 
   public static function initializeNewAnswer(
     PhabricatorUser $actor,
@@ -39,7 +34,7 @@ final class PonderAnswer extends PonderDAO
       ->setContent('')
       ->attachQuestion($question)
       ->setAuthorPHID($actor->getPHID())
-      ->setVoteCount(0)
+      ->setVoteCount('0')
       ->setStatus(PonderAnswerStatus::ANSWER_STATUS_VISIBLE);
 
   }
@@ -55,23 +50,6 @@ final class PonderAnswer extends PonderDAO
 
   public function getURI() {
     return '/Q'.$this->getQuestionID().'#A'.$this->getID();
-  }
-
-  public function setUserVote($vote) {
-    $this->vote = $vote['data'];
-    if (!$this->vote) {
-      $this->vote = PonderVote::VOTE_NONE;
-    }
-    return $this;
-  }
-
-  public function attachUserVote($user_phid, $vote) {
-    $this->vote = $vote;
-    return $this;
-  }
-
-  public function getUserVote() {
-    return $this->vote;
   }
 
   public function setComments($comments) {
@@ -179,15 +157,6 @@ final class PonderAnswer extends PonderDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getID();
-  }
-
-  // votable interface
-  public function getUserVoteEdgeType() {
-    return PonderVotingUserHasAnswerEdgeType::EDGECONST;
-  }
-
-  public function getVotablePHID() {
-    return $this->getPHID();
   }
 
 

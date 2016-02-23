@@ -85,12 +85,9 @@
   padding: 4px 8px 0 8px;
 }
 
-.device-desktop .phui-two-column-view.project-view-badges .phui-side-column {
-  width: 366px;
-}
-
 .project-view-badges .phui-badge-flex-view {
   background-color: #fff;
+  width: 340px;
 }
 
 .project-view-home .phui-box-grey .phui-object-item-attribute .phui-icon-view {

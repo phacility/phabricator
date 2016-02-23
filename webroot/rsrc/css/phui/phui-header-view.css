@@ -98,6 +98,12 @@ body .phui-header-shell.phui-bleed-header
   font-size: {$normalfontsize};
 }
 
+.phui-header-action-link {
+  margin-bottom: 4px;
+  margin-top: 4px;
+  float: right;
+}
+
 .device-phone .phui-header-action-link .phui-button-text {
   visibility: hidden;
   width: 0;

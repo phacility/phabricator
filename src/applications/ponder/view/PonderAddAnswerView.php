@@ -42,42 +42,16 @@ final class PonderAddAnswerView extends AphrontView {
     }
 
     $box_style = null;
-    $own_question = null;
-    $hide_action_id = celerity_generate_unique_node_id();
-    $show_action_id = celerity_generate_unique_node_id();
-    if ($question->getAuthorPHID() == $viewer->getPHID()) {
-      $box_style = 'display: none;';
-      $open_link = javelin_tag(
-        'a',
-        array(
-          'sigil' => 'reveal-content',
-          'class' => 'mml',
-          'id' => $hide_action_id,
-          'href' => '#',
-          'meta' => array(
-            'showIDs' => array($show_action_id),
-            'hideIDs' => array($hide_action_id),
-          ),
-        ),
-        pht('Add an answer.'));
-      $own_question = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-        ->setID($hide_action_id)
-        ->appendChild(
-          pht(
-            'This is your own question. You are welcome to provide
-            an answer if you have found a resolution.'))
-        ->appendChild($open_link);
-    }
-
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Add Answer'));
+      ->setHeader(pht('New Answer'))
+      ->addClass('ponder-add-answer-header');
 
     $form = new AphrontFormView();
     $form
       ->setUser($this->user)
       ->setAction($this->actionURI)
       ->setWorkflow(true)
+      ->setFullWidth(true)
       ->addHiddenInput('question_id', $question->getID())
       ->appendChild(
         id(new PhabricatorRemarkupControl())
@@ -103,22 +77,14 @@ final class PonderAddAnswerView extends AphrontView {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->appendChild($form);
+      ->appendChild($form)
+      ->setBackground(PHUIObjectBoxView::GREY)
+      ->addClass('ponder-add-answer-view');
 
     if ($info_panel) {
       $box->setInfoView($info_panel);
     }
 
-    $box = phutil_tag(
-      'div',
-      array(
-        'style' => $box_style,
-        'class' => 'mlt',
-        'id' => $show_action_id,
-      ),
-      $box);
-
-    return array($own_question, $box);
+    return array($header, $box);
   }
 }

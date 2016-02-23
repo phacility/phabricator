@@ -5,6 +5,7 @@ final class PHUITwoColumnView extends AphrontTagView {
   private $mainColumn;
   private $sideColumn;
   private $display;
+  private $fluid;
   private $header;
 
   const DISPLAY_LEFT = 'phui-side-column-left';
@@ -25,12 +26,17 @@ final class PHUITwoColumnView extends AphrontTagView {
     return $this;
   }
 
+  public function setFluid($fluid) {
+    $this->fluid = $fluid;
+    return $this;
+  }
+
   public function setDisplay($display) {
     $this->display = $display;
     return $this;
   }
 
-  public function getDisplay() {
+  private function getDisplay() {
     if ($this->display) {
       return $this->display;
     } else {
@@ -42,6 +48,10 @@ final class PHUITwoColumnView extends AphrontTagView {
     $classes = array();
     $classes[] = 'phui-two-column-view';
     $classes[] = $this->getDisplay();
+
+    if ($this->fluid) {
+      $classes[] = 'phui-two-column-fluid';
+    }
 
     return array(
       'class' => implode(' ', $classes),
@@ -79,6 +89,14 @@ final class PHUITwoColumnView extends AphrontTagView {
       $header = phutil_tag_div('phui-two-column-header', $this->header);
     }
 
-    return array($header, $table);
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-two-column-container',
+      ),
+      array(
+        $header,
+        $table,
+      ));
   }
 }

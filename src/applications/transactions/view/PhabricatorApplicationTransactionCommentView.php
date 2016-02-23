@@ -19,6 +19,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $objectPHID;
   private $headerText;
   private $noPermission;
+  private $fullWidth;
 
   private $currentVersion;
   private $versionedDraft;
@@ -99,6 +100,11 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
   public function setHeaderText($text) {
     $this->headerText = $text;
+    return $this;
+  }
+
+  public function setFullWidth($fw) {
+    $this->fullWidth = $fw;
     return $this;
   }
 
@@ -209,6 +215,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->setUser($this->getUser())
       ->addSigil('transaction-append')
       ->setWorkflow(true)
+      ->setFullWidth($this->fullWidth)
       ->setMetadata(
         array(
           'objectPHID' => $this->getObjectPHID(),
