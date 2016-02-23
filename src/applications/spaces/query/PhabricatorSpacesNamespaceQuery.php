@@ -184,6 +184,7 @@ final class PhabricatorSpacesNamespaceQuery
     $space_phid) {
 
     $viewer_spaces = self::getViewerSpaces($viewer);
+    $viewer_spaces = msort($viewer_spaces, 'getNamespaceName');
 
     $map = array();
     foreach ($viewer_spaces as $space) {
@@ -200,7 +201,6 @@ final class PhabricatorSpacesNamespaceQuery
         $space->getMonogram(),
         $space->getNamespaceName());
     }
-    asort($map);
 
     return $map;
   }
