@@ -2038,6 +2038,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($service_phid))
       ->needBindings(true)
+      ->needProperties(true)
       ->executeOne();
     if (!$service) {
       throw new Exception(

@@ -51,6 +51,7 @@ final class DiffusionRepositoryCreateController
             array(
               'AlmanacClusterRepositoryServiceType',
             ))
+          ->needProperties(true)
           ->execute();
         if ($services) {
           // Filter out services which do not permit new allocations.
