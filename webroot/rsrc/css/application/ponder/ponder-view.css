@@ -169,7 +169,7 @@
 }
 
 .ponder-answer-view .ponder-footer-view {
-  margin-top: 24px;
+  margin-top: 16px;
   border-top: 1px solid rgba({$alphagrey}, .15);
   border-bottom: none;
 }
@@ -184,6 +184,10 @@ body .phui-main-column .ponder-question-content .ponder-answer-view
   padding: 8px 0;
   margin-right: 8px;
   display: inline-block;
+}
+
+.ponder-answer-section {
+  margin-top: 32px;
 }
 
 .ponder-add-answer-header {

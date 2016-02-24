@@ -322,7 +322,12 @@ final class PonderQuestionViewController extends PonderController {
 
       $header = id(new PHUIHeaderView())
         ->setHeader('Answers');
-      return array($header, $view);
+
+
+      return id(new PHUIBoxView())
+        ->addClass('ponder-answer-section')
+        ->appendChild($header)
+        ->appendChild($view);
     }
 
     return null;

@@ -17,6 +17,7 @@ final class PonderAnswer extends PonderDAO
   protected $content;
   protected $mailKey;
   protected $status;
+  protected $voteCount;
 
   private $question = self::ATTACHABLE;
   private $comments;
@@ -34,7 +35,7 @@ final class PonderAnswer extends PonderDAO
       ->setContent('')
       ->attachQuestion($question)
       ->setAuthorPHID($actor->getPHID())
-      ->setVoteCount('0')
+      ->setVoteCount(0)
       ->setStatus(PonderAnswerStatus::ANSWER_STATUS_VISIBLE);
 
   }
