@@ -36,15 +36,13 @@ final class AlmanacServiceViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
-    $messages = $service->getServiceType()->getStatusMessages($service);
-    if ($messages) {
-      $box->setFormErrors($messages);
-    }
-
-    if ($service->getIsLocked()) {
-      $this->addLockMessage(
+    if ($service->isClusterService()) {
+      $this->addClusterMessage(
         $box,
-        pht('This service is locked, and can not be edited.'));
+        pht('This is a cluster service.'),
+        pht(
+          'This service is a cluster service. You do not have permission to '.
+          'edit cluster services, so you can not edit this service.'));
     }
 
     $bindings = $this->buildBindingList($service);

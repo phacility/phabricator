@@ -84,6 +84,10 @@ final class AlmanacDeviceSearchEngine
         ->setHref($device->getURI())
         ->setObject($device);
 
+      if ($device->isClusterDevice()) {
+        $item->addIcon('fa-sitemap', pht('Cluster Device'));
+      }
+
       $list->addItem($item);
     }
 

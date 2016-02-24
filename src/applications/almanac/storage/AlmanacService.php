@@ -9,7 +9,8 @@ final class AlmanacService
     AlmanacPropertyInterface,
     PhabricatorDestructibleInterface,
     PhabricatorNgramsInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorExtendedPolicyInterface {
 
   protected $name;
   protected $nameIndex;
@@ -17,7 +18,6 @@ final class AlmanacService
   protected $viewPolicy;
   protected $editPolicy;
   protected $serviceClass;
-  protected $isLocked;
 
   private $almanacProperties = self::ATTACHABLE;
   private $bindings = self::ATTACHABLE;
@@ -27,8 +27,7 @@ final class AlmanacService
     return id(new AlmanacService())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
-      ->attachAlmanacProperties(array())
-      ->setIsLocked(0);
+      ->attachAlmanacProperties(array());
   }
 
   protected function getConfiguration() {
@@ -39,7 +38,6 @@ final class AlmanacService
         'nameIndex' => 'bytes12',
         'mailKey' => 'bytes20',
         'serviceClass' => 'text64',
-        'isLocked' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
@@ -92,6 +90,10 @@ final class AlmanacService
   public function attachServiceType(AlmanacServiceType $type) {
     $this->serviceType = $type;
     return $this;
+  }
+
+  public function isClusterService() {
+    return $this->getServiceType()->isClusterServiceType();
   }
 
 
@@ -149,11 +151,7 @@ final class AlmanacService
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsLocked()) {
-          return PhabricatorPolicies::POLICY_NOONE;
-        } else {
-          return $this->getEditPolicy();
-        }
+        return $this->getEditPolicy();
     }
   }
 
@@ -162,15 +160,28 @@ final class AlmanacService
   }
 
   public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsLocked()) {
-          return pht('This service is locked and can not be edited.');
+        if ($this->isClusterService()) {
+          return array(
+            array(
+              new PhabricatorAlmanacApplication(),
+              AlmanacManageClusterServicesCapability::CAPABILITY,
+            ),
+          );
         }
         break;
     }
 
-    return null;
+    return array();
   }
 
 

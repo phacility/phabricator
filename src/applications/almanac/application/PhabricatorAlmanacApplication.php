@@ -93,7 +93,7 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
       AlmanacCreateNamespacesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
-      AlmanacCreateClusterServicesCapability::CAPABILITY => array(
+      AlmanacManageClusterServicesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );

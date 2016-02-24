@@ -39,11 +39,13 @@ final class AlmanacBindingViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
-    if ($binding->getService()->getIsLocked()) {
-      $this->addLockMessage(
+    if ($binding->getService()->isClusterService()) {
+      $this->addClusterMessage(
         $box,
+        pht('The service for this binding is a cluster service.'),
         pht(
-          'This service for this binding is locked, so the binding can '.
+          'The service for this binding is a cluster service. You do not '.
+          'have permission to manage cluster services, so this binding can '.
           'not be edited.'));
     }
 

@@ -101,15 +101,6 @@ final class AlmanacServiceSearchEngine
           $service->getServiceType()->getServiceTypeIcon(),
           $service->getServiceType()->getServiceTypeShortName());
 
-      if ($service->getIsLocked() ||
-          $service->getServiceType()->isClusterServiceType()) {
-        if ($service->getIsLocked()) {
-          $item->addIcon('fa-lock', pht('Locked'));
-        } else {
-          $item->addIcon('fa-unlock-alt red', pht('Unlocked'));
-        }
-      }
-
       $list->addItem($item);
     }
 

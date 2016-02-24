@@ -43,7 +43,7 @@ final class AlmanacServiceEditController
       $service_type = $service_types[$service_class];
       if ($service_type->isClusterServiceType()) {
         $this->requireApplicationCapability(
-          AlmanacCreateClusterServicesCapability::CAPABILITY);
+          AlmanacManageClusterServicesCapability::CAPABILITY);
       }
 
       $service = AlmanacService::initializeNewService();
@@ -190,7 +190,7 @@ final class AlmanacServiceEditController
     }
 
     list($can_cluster, $cluster_link) = $this->explainApplicationCapability(
-      AlmanacCreateClusterServicesCapability::CAPABILITY,
+      AlmanacManageClusterServicesCapability::CAPABILITY,
       pht('You have permission to create cluster services.'),
       pht('You do not have permission to create new cluster services.'));
 

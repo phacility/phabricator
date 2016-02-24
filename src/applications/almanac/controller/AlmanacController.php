@@ -166,7 +166,14 @@ abstract class AlmanacController
       ->setTable($table);
   }
 
-  protected function addLockMessage(PHUIObjectBoxView $box, $message) {
+  protected function addClusterMessage(
+    PHUIObjectBoxView $box,
+    $positive,
+    $negative) {
+
+    $can_manage = $this->hasApplicationCapability(
+      AlmanacManageClusterServicesCapability::CAPABILITY);
+
     $doc_link = phutil_tag(
       'a',
       array(
@@ -175,11 +182,22 @@ abstract class AlmanacController
       ),
       pht('Learn More'));
 
+    if ($can_manage) {
+      $severity = PHUIInfoView::SEVERITY_NOTICE;
+      $message = $positive;
+    } else {
+      $severity = PHUIInfoView::SEVERITY_WARNING;
+      $message = $negative;
+    }
+
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-sitemap');
+
     $error_view = id(new PHUIInfoView())
-      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+      ->setSeverity($severity)
       ->setErrors(
         array(
-          array($message, ' ', $doc_link),
+          array($icon, ' ', $message, ' ', $doc_link),
         ));
 
     $box->setInfoView($error_view);

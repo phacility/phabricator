@@ -11,7 +11,6 @@ final class AlmanacServiceEditor
     $types = parent::getTransactionTypes();
 
     $types[] = AlmanacServiceTransaction::TYPE_NAME;
-    $types[] = AlmanacServiceTransaction::TYPE_LOCK;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -25,8 +24,6 @@ final class AlmanacServiceEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacServiceTransaction::TYPE_NAME:
         return $object->getName();
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        return (bool)$object->getIsLocked();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -39,8 +36,6 @@ final class AlmanacServiceEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacServiceTransaction::TYPE_NAME:
         return $xaction->getNewValue();
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        return (bool)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -54,9 +49,6 @@ final class AlmanacServiceEditor
       case AlmanacServiceTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        $object->setIsLocked((int)$xaction->getNewValue());
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -68,23 +60,6 @@ final class AlmanacServiceEditor
 
     switch ($xaction->getTransactionType()) {
       case AlmanacServiceTransaction::TYPE_NAME:
-        return;
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        $service = id(new AlmanacServiceQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPHIDs(array($object->getPHID()))
-          ->needBindings(true)
-          ->executeOne();
-
-        $devices = array();
-        foreach ($service->getBindings() as $binding) {
-          $device = $binding->getInterface()->getDevice();
-          $devices[$device->getPHID()] = $device;
-        }
-
-        foreach ($devices as $device) {
-          $device->rebuildDeviceLocks();
-        }
         return;
     }
 

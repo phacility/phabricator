@@ -21,10 +21,6 @@ final class AlmanacDeviceViewController
       return new Aphront404Response();
     }
 
-    // We rebuild locks on a device when viewing the detail page, so they
-    // automatically get corrected if they fall out of sync.
-    $device->rebuildDeviceLocks();
-
     $title = pht('Device %s', $device->getName());
 
     $property_list = $this->buildPropertyList($device);
@@ -40,12 +36,14 @@ final class AlmanacDeviceViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
-    if ($device->getIsLocked()) {
-      $this->addLockMessage(
+    if ($device->isClusterDevice()) {
+      $this->addClusterMessage(
         $box,
+        pht('This device is bound to a cluster service.'),
         pht(
-          'This device is bound to a locked service, so it can not be '.
-          'edited.'));
+          'This device is bound to a cluster service. You do not have '.
+          'permission to manage cluster services, so the device can not '.
+          'be edited.'));
     }
 
     $interfaces = $this->buildInterfaceList($device);
@@ -219,14 +217,14 @@ final class AlmanacDeviceViewController
 
     $handles = $viewer->loadHandles(mpull($services, 'getPHID'));
 
-    $icon_lock = id(new PHUIIconView())
-      ->setIcon('fa-lock');
+    $icon_cluster = id(new PHUIIconView())
+      ->setIcon('fa-sitemap');
 
     $rows = array();
     foreach ($services as $service) {
       $rows[] = array(
-        ($service->getIsLocked()
-          ? $icon_lock
+        ($service->isClusterService()
+          ? $icon_cluster
           : null),
         $handles->renderHandle($service->getPHID()),
       );

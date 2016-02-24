@@ -381,10 +381,13 @@ final class PhabricatorPolicyFilter extends Phobject {
           $reject = $extended_objects[$extended_key];
           unset($extended_objects[$extended_key]);
 
-          // TODO: This isn't as user-friendly as it could be. It's possible
-          // that we're rejecting this object for multiple capability/policy
-          // failures, though.
-          $this->rejectObject($reject, false, '<extended>');
+          // It's possible that we're rejecting this object for multiple
+          // capability/policy failures, but just pick the first one to show
+          // to the user.
+          $first_capability = head($capabilities);
+          $first_policy = $object_in->getPolicy($first_capability);
+
+          $this->rejectObject($reject, $first_policy, $first_capability);
         }
       }
     }

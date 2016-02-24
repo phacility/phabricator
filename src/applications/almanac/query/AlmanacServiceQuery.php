@@ -8,7 +8,6 @@ final class AlmanacServiceQuery
   private $names;
   private $serviceClasses;
   private $devicePHIDs;
-  private $locked;
   private $namePrefix;
   private $nameSuffix;
 
@@ -36,11 +35,6 @@ final class AlmanacServiceQuery
 
   public function withDevicePHIDs(array $phids) {
     $this->devicePHIDs = $phids;
-    return $this;
-  }
-
-  public function withLocked($locked) {
-    $this->locked = $locked;
     return $this;
   }
 
@@ -127,13 +121,6 @@ final class AlmanacServiceQuery
         $conn,
         'binding.devicePHID IN (%Ls)',
         $this->devicePHIDs);
-    }
-
-    if ($this->locked !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'service.isLocked = %d',
-        (int)$this->locked);
     }
 
     if ($this->namePrefix !== null) {

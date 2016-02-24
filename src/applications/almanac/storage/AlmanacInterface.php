@@ -101,13 +101,6 @@ final class AlmanacInterface
         'view the interface.'),
     );
 
-    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
-      if ($this->getDevice()->getIsLocked()) {
-        $notes[] = pht(
-          'The device for this interface is locked, so it can not be edited.');
-      }
-    }
-
     return $notes;
   }
 

@@ -3,6 +3,8 @@
 final class AlmanacBindingEditor
   extends AlmanacEditor {
 
+  private $devicePHID;
+
   public function getEditorObjectsDescription() {
     return pht('Almanac Binding');
   }
@@ -62,6 +64,34 @@ final class AlmanacBindingEditor
 
     switch ($xaction->getTransactionType()) {
       case AlmanacBindingTransaction::TYPE_INTERFACE:
+        $interface_phids = array();
+
+        $interface_phids[] = $xaction->getOldValue();
+        $interface_phids[] = $xaction->getNewValue();
+
+        $interface_phids = array_filter($interface_phids);
+        $interface_phids = array_unique($interface_phids);
+
+        $interfaces = id(new AlmanacInterfaceQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($interface_phids)
+          ->execute();
+
+        $device_phids = array();
+        foreach ($interfaces as $interface) {
+          $device_phids[] = $interface->getDevicePHID();
+        }
+
+        $device_phids = array_unique($device_phids);
+
+        $devices = id(new AlmanacDeviceQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($device_phids)
+          ->execute();
+
+        foreach ($devices as $device) {
+          $device->rebuildClusterBindingStatus();
+        }
         return;
     }
 

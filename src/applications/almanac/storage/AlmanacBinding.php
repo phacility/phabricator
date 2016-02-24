@@ -6,7 +6,8 @@ final class AlmanacBinding
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
     AlmanacPropertyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorExtendedPolicyInterface {
 
   protected $servicePHID;
   protected $devicePHID;
@@ -157,16 +158,29 @@ final class AlmanacBinding
         'interface.'),
     );
 
-    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
-      if ($this->getService()->getIsLocked()) {
-        $notes[] = pht(
-          'The service for this binding is locked, so it can not be edited.');
-      }
-    }
-
     return $notes;
   }
 
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        if ($this->getService()->isClusterService()) {
+          return array(
+            array(
+              new PhabricatorAlmanacApplication(),
+              AlmanacManageClusterServicesCapability::CAPABILITY,
+            ),
+          );
+        }
+        break;
+    }
+
+    return array();
+  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
