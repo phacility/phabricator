@@ -84,7 +84,7 @@ final class PhabricatorAuditAddCommentController
 
     $monogram = $commit->getRepository()->getMonogram();
     $identifier = $commit->getCommitIdentifier();
-    $uri = '/'.$monogram.$identifier;
+    $uri = '/'.$monogram.':'.$identifier;
 
     return id(new AphrontRedirectResponse())->setURI($uri);
   }
