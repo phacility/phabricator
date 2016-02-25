@@ -69,7 +69,7 @@ final class AlmanacDeviceTransaction
           return pht(
             '%s removed the interface %s from this device.',
             $this->renderHandleLink($author_phid),
-            $this->describeInterface($new));
+            $this->describeInterface($old));
         } else if ($new) {
           return pht(
             '%s added the interface %s to this device.',

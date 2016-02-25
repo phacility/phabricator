@@ -28,6 +28,7 @@ abstract class AlmanacSearchEngineAttachment
       'phid' => $binding->getPHID(),
       'properties' => $this->getAlmanacPropertyList($binding),
       'interface' => $this->getAlmanacInterfaceDictionary($interface),
+      'disabled' => (bool)$binding->getIsDisabled(),
     );
   }
 

@@ -177,7 +177,8 @@ abstract class AlmanacController
     $doc_link = phutil_tag(
       'a',
       array(
-        'href' => PhabricatorEnv::getDoclink('Almanac User Guide'),
+        'href' => PhabricatorEnv::getDoclink(
+          'User Guide: Phabricator Clusters'),
         'target' => '_blank',
       ),
       pht('Learn More'));

@@ -4,6 +4,7 @@ final class AlmanacBindingTransaction
   extends AlmanacTransaction {
 
   const TYPE_INTERFACE = 'almanac:binding:interface';
+  const TYPE_DISABLE = 'almanac:binding:disable';
 
   public function getApplicationName() {
     return 'almanac';
@@ -55,6 +56,17 @@ final class AlmanacBindingTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($old),
             $this->renderHandleLink($new));
+        }
+        break;
+      case self::TYPE_DISABLE:
+        if ($new) {
+          return pht(
+            '%s disabled this binding.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s enabled this binding.',
+            $this->renderHandleLink($author_phid));
         }
         break;
     }

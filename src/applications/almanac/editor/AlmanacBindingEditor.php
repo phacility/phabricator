@@ -13,6 +13,7 @@ final class AlmanacBindingEditor
     $types = parent::getTransactionTypes();
 
     $types[] = AlmanacBindingTransaction::TYPE_INTERFACE;
+    $types[] = AlmanacBindingTransaction::TYPE_DISABLE;
 
     return $types;
   }
@@ -23,6 +24,8 @@ final class AlmanacBindingEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacBindingTransaction::TYPE_INTERFACE:
         return $object->getInterfacePHID();
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        return $object->getIsDisabled();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -35,6 +38,8 @@ final class AlmanacBindingEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacBindingTransaction::TYPE_INTERFACE:
         return $xaction->getNewValue();
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        return (int)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -53,6 +58,9 @@ final class AlmanacBindingEditor
         $object->setDevicePHID($interface->getDevicePHID());
         $object->setInterfacePHID($interface->getPHID());
         return;
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        $object->setIsDisabled($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -63,6 +71,8 @@ final class AlmanacBindingEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        return;
       case AlmanacBindingTransaction::TYPE_INTERFACE:
         $interface_phids = array();
 

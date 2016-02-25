@@ -310,6 +310,19 @@ final class AlmanacDeviceEditor
                 pht('You can not edit an invalid or restricted interface.'),
                 $xaction);
               $errors[] = $error;
+              continue;
+            }
+
+            $new = $xaction->getNewValue();
+            if (!$new) {
+              if ($interface->loadIsInUse()) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('In Use'),
+                  pht('You can not delete an interface which is still in use.'),
+                  $xaction);
+                $errors[] = $error;
+              }
             }
           }
         }

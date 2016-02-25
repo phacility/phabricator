@@ -13,6 +13,7 @@ final class AlmanacBinding
   protected $devicePHID;
   protected $interfacePHID;
   protected $mailKey;
+  protected $isDisabled;
 
   private $service = self::ATTACHABLE;
   private $device = self::ATTACHABLE;
@@ -22,7 +23,8 @@ final class AlmanacBinding
   public static function initializeNewBinding(AlmanacService $service) {
     return id(new AlmanacBinding())
       ->setServicePHID($service->getPHID())
-      ->attachAlmanacProperties(array());
+      ->attachAlmanacProperties(array())
+      ->setIsDisabled(0);
   }
 
   protected function getConfiguration() {
@@ -30,6 +32,7 @@ final class AlmanacBinding
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'mailKey' => 'bytes20',
+        'isDisabled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_service' => array(

@@ -267,6 +267,11 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
 
       $free = array();
       foreach ($bindings as $binding) {
+        // Don't consider disabled bindings to be available.
+        if ($binding->getIsDisabled()) {
+          continue;
+        }
+
         if (empty($allocated_phids[$binding->getPHID()])) {
           $free[] = $binding;
         }

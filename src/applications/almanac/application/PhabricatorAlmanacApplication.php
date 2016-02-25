@@ -55,9 +55,11 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
         ),
         'interface/' => array(
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacInterfaceEditController',
+          'delete/(?:(?P<id>\d+)/)?' => 'AlmanacInterfaceDeleteController',
         ),
         'binding/' => array(
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacBindingEditController',
+          'disable/(?:(?P<id>\d+)/)?' => 'AlmanacBindingDisableController',
           '(?P<id>\d+)/' => 'AlmanacBindingViewController',
         ),
         'network/' => array(
@@ -80,6 +82,17 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
   }
 
   protected function getCustomCapabilities() {
+    $cluster_caption = pht(
+      'This permission is very dangerous. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => PhabricatorEnv::getDoclink(
+            'User Guide: Phabricator Clusters'),
+          'target' => '_blank',
+        ),
+        pht('Learn More')));
+
     return array(
       AlmanacCreateServicesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
@@ -94,7 +107,8 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
       AlmanacManageClusterServicesCapability::CAPABILITY => array(
-        'default' => PhabricatorPolicies::POLICY_ADMIN,
+        'default' => PhabricatorPolicies::POLICY_NOONE,
+        'caption' => $cluster_caption,
       ),
     );
   }

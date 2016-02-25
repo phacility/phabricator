@@ -122,7 +122,8 @@ final class AlmanacServiceViewController
       ->setNoDataString(
         pht('This service has not been bound to any device interfaces yet.'))
       ->setUser($viewer)
-      ->setBindings($bindings);
+      ->setBindings($bindings)
+      ->setHideServiceColumn(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Service Bindings'))
