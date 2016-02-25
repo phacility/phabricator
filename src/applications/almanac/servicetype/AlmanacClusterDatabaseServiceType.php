@@ -3,6 +3,8 @@
 final class AlmanacClusterDatabaseServiceType
   extends AlmanacClusterServiceType {
 
+  const SERVICETYPE = 'cluster.database';
+
   public function getServiceTypeShortName() {
     return pht('Cluster Database');
   }

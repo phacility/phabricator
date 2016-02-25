@@ -39,6 +39,46 @@ final class AlmanacProperty
     return $this;
   }
 
+  public static function newPropertyUpdateTransactions(
+    AlmanacPropertyInterface $object,
+    array $properties,
+    $only_builtins = false) {
+
+    $template = $object->getApplicationTransactionTemplate();
+    $builtins = $object->getAlmanacPropertyFieldSpecifications();
+
+    $xactions = array();
+    foreach ($properties as $name => $property) {
+      if ($only_builtins && empty($builtins[$name])) {
+        continue;
+      }
+
+      $xactions[] = id(clone $template)
+        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_UPDATE)
+        ->setMetadataValue('almanac.property', $name)
+        ->setNewValue($property);
+    }
+
+    return $xactions;
+  }
+
+  public static function newPropertyRemoveTransactions(
+    AlmanacPropertyInterface $object,
+    array $properties) {
+
+    $template = $object->getApplicationTransactionTemplate();
+
+    $xactions = array();
+    foreach ($properties as $property) {
+      $xactions[] = id(clone $template)
+        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_REMOVE)
+        ->setMetadataValue('almanac.property', $property)
+        ->setNewValue(null);
+    }
+
+    return $xactions;
+  }
+
   public function save() {
     $hash = PhabricatorHash::digestForIndex($this->getFieldName());
     $this->setFieldIndex($hash);

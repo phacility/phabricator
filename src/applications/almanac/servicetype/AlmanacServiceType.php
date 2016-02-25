@@ -30,6 +30,11 @@ abstract class AlmanacServiceType extends Phobject {
   abstract public function getServiceTypeDescription();
 
 
+  final public function getServiceTypeConstant() {
+    return $this->getPhobjectClassConstant('SERVICETYPE', 64);
+  }
+
+
   public function getServiceTypeIcon() {
     return 'fa-cog';
   }
@@ -38,7 +43,7 @@ abstract class AlmanacServiceType extends Phobject {
    * Return `true` if this service type is a Phabricator cluster service type.
    *
    * These special services change the behavior of Phabricator, and require
-   * elevated permission to create.
+   * elevated permission to create and edit.
    *
    * @return bool True if this is a Phabricator cluster service type.
    */
@@ -63,6 +68,7 @@ abstract class AlmanacServiceType extends Phobject {
   public static function getAllServiceTypes() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getServiceTypeConstant')
       ->setSortMethod('getServiceTypeName')
       ->execute();
   }

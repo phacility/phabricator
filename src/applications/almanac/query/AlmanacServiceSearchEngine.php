@@ -16,7 +16,7 @@ final class AlmanacServiceSearchEngine
   }
 
   public function newResultObject() {
-    return AlmanacService::initializeNewService();
+    return new AlmanacService();
   }
 
   protected function buildQueryFromParameters(array $map) {
@@ -34,6 +34,10 @@ final class AlmanacServiceSearchEngine
       $query->withDevicePHIDs($map['devicePHIDs']);
     }
 
+    if ($map['serviceTypes']) {
+      $query->withServiceTypes($map['serviceTypes']);
+    }
+
     return $query;
   }
 
@@ -48,6 +52,11 @@ final class AlmanacServiceSearchEngine
         ->setLabel(pht('Exact Names'))
         ->setKey('names')
         ->setDescription(pht('Search for services with specific names.')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Service Types'))
+        ->setKey('serviceTypes')
+        ->setDescription(pht('Find services by type.'))
+        ->setDatasource(id(new AlmanacServiceTypeDatasource())),
       id(new PhabricatorPHIDsSearchField())
         ->setLabel(pht('Devices'))
         ->setKey('devicePHIDs')
@@ -98,8 +107,8 @@ final class AlmanacServiceSearchEngine
         ->setHref($service->getURI())
         ->setObject($service)
         ->addIcon(
-          $service->getServiceType()->getServiceTypeIcon(),
-          $service->getServiceType()->getServiceTypeShortName());
+          $service->getServiceImplementation()->getServiceTypeIcon(),
+          $service->getServiceImplementation()->getServiceTypeShortName());
 
       $list->addItem($item);
     }

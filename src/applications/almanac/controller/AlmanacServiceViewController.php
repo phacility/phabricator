@@ -76,7 +76,7 @@ final class AlmanacServiceViewController
 
     $properties->addProperty(
       pht('Service Type'),
-      $service->getServiceType()->getServiceTypeShortName());
+      $service->getServiceImplementation()->getServiceTypeShortName());
 
     return $properties;
   }

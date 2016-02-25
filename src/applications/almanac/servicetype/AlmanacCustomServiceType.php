@@ -2,6 +2,8 @@
 
 final class AlmanacCustomServiceType extends AlmanacServiceType {
 
+  const SERVICETYPE = 'almanac.custom';
+
   public function getServiceTypeShortName() {
     return pht('Custom');
   }

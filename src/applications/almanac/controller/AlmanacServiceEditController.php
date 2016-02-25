@@ -34,21 +34,19 @@ final class AlmanacServiceEditController
       $this->requireApplicationCapability(
         AlmanacCreateServicesCapability::CAPABILITY);
 
-      $service_class = $request->getStr('serviceClass');
-      $service_types = AlmanacServiceType::getAllServiceTypes();
-      if (empty($service_types[$service_class])) {
-        return $this->buildServiceTypeResponse($service_types, $cancel_uri);
+      $service_type = $request->getStr('serviceType');
+
+      try {
+        $service = AlmanacService::initializeNewService($service_type);
+      } catch (Exception $ex) {
+        return $this->buildServiceTypeResponse($cancel_uri);
       }
 
-      $service_type = $service_types[$service_class];
-      if ($service_type->isClusterServiceType()) {
+      if ($service->isClusterService()) {
         $this->requireApplicationCapability(
           AlmanacManageClusterServicesCapability::CAPABILITY);
       }
 
-      $service = AlmanacService::initializeNewService();
-      $service->setServiceClass($service_class);
-      $service->attachServiceType($service_type);
       $is_new = true;
 
       $title = pht('Create Service');
@@ -125,7 +123,7 @@ final class AlmanacServiceEditController
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('edit', true)
-      ->addHiddenInput('serviceClass', $service->getServiceClass())
+      ->addHiddenInput('serviceType', $service->getServiceType())
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -177,7 +175,9 @@ final class AlmanacServiceEditController
       ));
   }
 
-  private function buildServiceTypeResponse(array $service_types, $cancel_uri) {
+  private function buildServiceTypeResponse($cancel_uri) {
+    $service_types = AlmanacServiceType::getAllServiceTypes();
+
     $request = $this->getRequest();
     $viewer = $this->getViewer();
 
@@ -197,7 +197,7 @@ final class AlmanacServiceEditController
 
     $type_control = id(new AphrontFormRadioButtonControl())
       ->setLabel(pht('Service Type'))
-      ->setName('serviceClass')
+      ->setName('serviceType')
       ->setError($e_service);
 
     foreach ($service_types as $service_type) {
@@ -211,7 +211,7 @@ final class AlmanacServiceEditController
       }
 
       $type_control->addButton(
-        get_class($service_type),
+        $service_type->getServiceTypeConstant(),
         $service_type->getServiceTypeName(),
         array(
           $service_type->getServiceTypeDescription(),

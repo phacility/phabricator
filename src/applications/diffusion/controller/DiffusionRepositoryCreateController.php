@@ -47,9 +47,9 @@ final class DiffusionRepositoryCreateController
         // allocations, we fail.
         $services = id(new AlmanacServiceQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withServiceClasses(
+          ->withServiceTypes(
             array(
-              'AlmanacClusterRepositoryServiceType',
+              AlmanacClusterRepositoryServiceType::SERVICETYPE,
             ))
           ->needProperties(true)
           ->execute();

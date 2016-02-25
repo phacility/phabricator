@@ -6,7 +6,7 @@ final class AlmanacServiceQuery
   private $ids;
   private $phids;
   private $names;
-  private $serviceClasses;
+  private $serviceTypes;
   private $devicePHIDs;
   private $namePrefix;
   private $nameSuffix;
@@ -28,8 +28,8 @@ final class AlmanacServiceQuery
     return $this;
   }
 
-  public function withServiceClasses(array $classes) {
-    $this->serviceClasses = $classes;
+  public function withServiceTypes(array $types) {
+    $this->serviceTypes = $types;
     return $this;
   }
 
@@ -109,11 +109,11 @@ final class AlmanacServiceQuery
         $hashes);
     }
 
-    if ($this->serviceClasses !== null) {
+    if ($this->serviceTypes !== null) {
       $where[] = qsprintf(
         $conn,
-        'service.serviceClass IN (%Ls)',
-        $this->serviceClasses);
+        'service.serviceType IN (%Ls)',
+        $this->serviceTypes);
     }
 
     if ($this->devicePHIDs !== null) {
@@ -141,17 +141,19 @@ final class AlmanacServiceQuery
   }
 
   protected function willFilterPage(array $services) {
-    $service_types = AlmanacServiceType::getAllServiceTypes();
+    $service_map = AlmanacServiceType::getAllServiceTypes();
 
     foreach ($services as $key => $service) {
-      $service_class = $service->getServiceClass();
-      $service_type = idx($service_types, $service_class);
-      if (!$service_type) {
+      $implementation = idx($service_map, $service->getServiceType());
+
+      if (!$implementation) {
         $this->didRejectResult($service);
         unset($services[$key]);
         continue;
       }
-      $service->attachServiceType($service_type);
+
+      $implementation = clone $implementation;
+      $service->attachServiceImplementation($implementation);
     }
 
     return $services;

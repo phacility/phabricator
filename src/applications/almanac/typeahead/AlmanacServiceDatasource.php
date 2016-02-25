@@ -28,9 +28,9 @@ final class AlmanacServiceDatasource
     // selected, or show all services but mark the invalid ones disabled and
     // prevent their selection.
 
-    $service_classes = $this->getParameter('serviceClasses');
-    if ($service_classes) {
-      $services->withServiceClasses($service_classes);
+    $service_types = $this->getParameter('serviceTypes');
+    if ($service_types) {
+      $services->withServiceTypes($service_types);
     }
 
     $services = $this->executeQuery($services);

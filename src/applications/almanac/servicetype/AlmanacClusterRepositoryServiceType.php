@@ -3,6 +3,8 @@
 final class AlmanacClusterRepositoryServiceType
   extends AlmanacClusterServiceType {
 
+  const SERVICETYPE = 'cluster.repository';
+
   public function getServiceTypeShortName() {
     return pht('Cluster Repository');
   }
