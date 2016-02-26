@@ -29,7 +29,7 @@ final class HarbormasterBuildablePHIDType extends PhabricatorPHIDType {
     array $handles,
     array $objects) {
 
-    $viewer = $this->getViewer();
+    $viewer = $query->getViewer();
 
     $target_phids = array();
     foreach ($objects as $phid => $object) {

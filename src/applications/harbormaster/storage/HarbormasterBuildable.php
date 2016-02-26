@@ -20,16 +20,16 @@ final class HarbormasterBuildable extends HarbormasterDAO
   const STATUS_FAILED = 'failed';
 
   public static function getBuildableStatusName($status) {
-    switch ($status) {
-      case self::STATUS_BUILDING:
-        return pht('Building');
-      case self::STATUS_PASSED:
-        return pht('Passed');
-      case self::STATUS_FAILED:
-        return pht('Failed');
-      default:
-        return pht('Unknown');
-    }
+    $map = self::getBuildStatusMap();
+    return idx($map, $status, pht('Unknown ("%s")', $status));
+  }
+
+  public static function getBuildStatusMap() {
+    return array(
+      self::STATUS_BUILDING => pht('Building'),
+      self::STATUS_PASSED => pht('Passed'),
+      self::STATUS_FAILED => pht('Failed'),
+    );
   }
 
   public static function getBuildableStatusIcon($status) {

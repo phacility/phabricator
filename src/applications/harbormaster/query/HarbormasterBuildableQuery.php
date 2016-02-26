@@ -7,6 +7,7 @@ final class HarbormasterBuildableQuery
   private $phids;
   private $buildablePHIDs;
   private $containerPHIDs;
+  private $statuses;
   private $manualBuildables;
 
   private $needContainerObjects;
@@ -40,6 +41,11 @@ final class HarbormasterBuildableQuery
 
   public function needContainerObjects($need) {
     $this->needContainerObjects = $need;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -152,6 +158,13 @@ final class HarbormasterBuildableQuery
         $conn,
         'containerPHID in (%Ls)',
         $this->containerPHIDs);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'buildableStatus in (%Ls)',
+        $this->statuses);
     }
 
     if ($this->manualBuildables !== null) {
