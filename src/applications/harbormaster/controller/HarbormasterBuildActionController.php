@@ -39,6 +39,8 @@ final class HarbormasterBuildActionController
         return new Aphront400Response();
     }
 
+    $build->assertCanIssueCommand($viewer, $action);
+
     switch ($via) {
       case 'buildable':
         $return_uri = '/'.$build->getBuildable()->getMonogram();

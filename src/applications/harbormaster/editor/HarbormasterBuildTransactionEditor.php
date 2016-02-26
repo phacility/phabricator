@@ -88,6 +88,11 @@ final class HarbormasterBuildTransactionEditor
       return;
     }
 
+    $actor = $this->getActor();
+    if (!$build->canIssueCommand($actor, $command)) {
+      return;
+    }
+
     id(new HarbormasterBuildCommand())
       ->setAuthorPHID($xaction->getAuthorPHID())
       ->setTargetPHID($build->getPHID())
