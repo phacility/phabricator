@@ -60,7 +60,8 @@ input[type="submit"].grey,
 a.grey,
 a.grey:visited {
   background-color: #F7F7F9;
-  border: 1px solid rgba({$alphagrey},.1);
+  background-image: linear-gradient(to bottom, #ffffff, #f1f0f1);
+  border: 1px solid rgba({$alphablue},.2);
   color: {$darkgreytext};
 }
 
@@ -106,8 +107,8 @@ button:hover {
 
 a.button.grey:hover,
 button.grey:hover {
-  background-color: rgba({$alphablue}, 0.1);
-  border-color: rgba({$alphablue}, 0.15);
+  background-image: linear-gradient(to bottom, #ffffff, #eeebec);
+  border-color: rgba({$alphablue}, 0.3);
   transition: 0.1s;
 }
 

@@ -51,7 +51,6 @@ final class PonderAddAnswerView extends AphrontView {
       ->setUser($this->user)
       ->setAction($this->actionURI)
       ->setWorkflow(true)
-      ->setFullWidth(true)
       ->addHiddenInput('question_id', $question->getID())
       ->appendChild(
         id(new PhabricatorRemarkupControl())
@@ -78,7 +77,7 @@ final class PonderAddAnswerView extends AphrontView {
 
     $box = id(new PHUIObjectBoxView())
       ->appendChild($form)
-      ->setBackground(PHUIObjectBoxView::GREY)
+      ->setHeaderText('Answer')
       ->addClass('ponder-add-answer-view');
 
     if ($info_panel) {

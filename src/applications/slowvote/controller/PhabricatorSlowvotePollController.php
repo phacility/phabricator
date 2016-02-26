@@ -23,7 +23,6 @@ final class PhabricatorSlowvotePollController
     }
 
     $poll_view = id(new SlowvoteEmbedView())
-      ->setHeadless(true)
       ->setUser($viewer)
       ->setPoll($poll);
 
@@ -47,19 +46,30 @@ final class PhabricatorSlowvotePollController
       ->setPolicyObject($poll);
 
     $actions = $this->buildActionView($poll);
-    $properties = $this->buildPropertyView($poll, $actions);
+    $properties = $this->buildPropertyView($poll);
+    $subheader = $this->buildSubheaderView($poll);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb('V'.$poll->getID());
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $poll,
       new PhabricatorSlowvoteTransactionQuery());
     $add_comment = $this->buildCommentForm($poll);
 
-    $object_box = id(new PHUIObjectBoxView())
+    $poll_content = array(
+      $poll_view,
+      $timeline,
+      $add_comment,
+    );
+
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->setSubheader($subheader)
+      ->setMainColumn($poll_content)
+      ->setPropertyList($properties)
+      ->setActionList($actions);
 
     return $this->newPage()
       ->setTitle('V'.$poll->getID().' '.$poll->getQuestion())
@@ -67,10 +77,7 @@ final class PhabricatorSlowvotePollController
       ->setPageObjectPHIDs(array($poll->getPHID()))
       ->appendChild(
         array(
-          $object_box,
-          $poll_view,
-          $timeline,
-          $add_comment,
+          $view,
       ));
   }
 
@@ -110,28 +117,40 @@ final class PhabricatorSlowvotePollController
   }
 
   private function buildPropertyView(
-    PhabricatorSlowvotePoll $poll,
-    PhabricatorActionListView $actions) {
+    PhabricatorSlowvotePoll $poll) {
 
     $viewer = $this->getRequest()->getUser();
-
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($poll)
-      ->setActionList($actions);
-
+      ->setObject($poll);
     $view->invokeWillRenderEvent();
 
-    $description = $poll->getDescription();
-    if (strlen($description)) {
-      $description = new PHUIRemarkupView($viewer, $description);
-      $view->addSectionHeader(
-        pht('Description'),
-        PHUIPropertyListView::ICON_SUMMARY);
-      $view->addTextContent($description);
-    }
-
     return $view;
+  }
+
+  private function buildSubheaderView(
+    PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getViewer();
+
+    $author = $viewer->renderHandle($poll->getAuthorPHID())->render();
+    $date = phabricator_datetime($poll->getDateCreated(), $viewer);
+    $author = phutil_tag('strong', array(), $author);
+
+    $person = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($poll->getAuthorPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
+
+    $image_uri = $person->getProfileImageURI();
+    $image_href = '/p/'.$person->getUsername();
+
+    $content = pht('Asked by %s on %s.', $author, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
   }
 
   private function buildCommentForm(PhabricatorSlowvotePoll $poll) {

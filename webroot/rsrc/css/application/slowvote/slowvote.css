@@ -2,22 +2,8 @@
  * @provides phabricator-slowvote-css
  */
 
-.slowvote-embed {
-  background: #fff;
-  border-color: {$lightblueborder};
-  border-radius: 3px;
-}
-
-.slowvote-header {
-  font-weight: bold;
-  line-height: 16px;
-  border-bottom: 1px solid #bbbbbb;
-}
-
 .slowvote-description {
-  color: {$greytext};
-  font-size: {$biggerfontsize};
-  padding: 12px 4px 4px;
+  padding: 12px 16px 4px;
 }
 
 .slowvote-header-content {
@@ -25,7 +11,7 @@
 }
 
 .slowvote-body-content {
-  padding: 8px 4px 0;
+  padding: 8px 16px;
 }
 
 .slowvote-option-label {
@@ -121,7 +107,7 @@
 }
 
 .slowvote-footer-content {
-  padding: 8px;
+  padding: 8px 16px;
   overflow: hidden;
 }
 

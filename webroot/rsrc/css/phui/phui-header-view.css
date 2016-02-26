@@ -185,7 +185,7 @@ body .phui-header-shell.phui-bleed-header
 .phui-header-subheader .phui-header-status {
   padding: 3px 9px;
   border-radius: 3px;
-  background: rgba({$alphablue}, 0.06);
+  background: rgba({$alphablue}, 0.08);
   margin-right: 8px;
 }
 

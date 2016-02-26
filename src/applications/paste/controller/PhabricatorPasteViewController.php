@@ -48,25 +48,16 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($viewer, $paste);
-    $properties = $this->buildPropertyView($paste, $fork_phids, $actions);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
-
+    $properties = $this->buildPropertyView($paste, $fork_phids);
+    $subheader = $this->buildSubheaderView($paste);
     $source_code = $this->buildSourceCodeView($paste, $this->highlightMap);
 
     require_celerity_resource('paste-css');
-    $source_code = phutil_tag(
-      'div',
-      array(
-        'class' => 'container-of-paste',
-      ),
-      $source_code);
 
     $monogram = $paste->getMonogram();
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($monogram, '/'.$monogram);
+      ->addTextCrumb($monogram)
+      ->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $paste,
@@ -79,6 +70,18 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $timeline->setQuoteRef($monogram);
     $comment_view->setTransactionTimeline($timeline);
 
+    $paste_view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setSubheader($subheader)
+      ->setMainColumn(array(
+          $source_code,
+          $timeline,
+          $comment_view,
+        ))
+      ->setPropertyList($properties)
+      ->setActionList($actions)
+      ->addClass('ponder-question-view');
+
     return $this->newPage()
       ->setTitle($paste->getFullName())
       ->setCrumbs($crumbs)
@@ -86,13 +89,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         array(
           $paste->getPHID(),
         ))
-      ->appendChild(
-        array(
-          $object_box,
-          $source_code,
-          $timeline,
-          $comment_view,
-        ));
+      ->appendChild($paste_view);
   }
 
   private function buildHeaderView(PhabricatorPaste $paste) {
@@ -167,24 +164,40 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     return $action_list;
   }
 
+
+  private function buildSubheaderView(
+    PhabricatorPaste $paste) {
+    $viewer = $this->getViewer();
+
+    $author = $viewer->renderHandle($paste->getAuthorPHID())->render();
+    $date = phabricator_datetime($paste->getDateCreated(), $viewer);
+    $author = phutil_tag('strong', array(), $author);
+
+    $author_info = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($paste->getAuthorPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
+
+    $image_uri = $author_info->getProfileImageURI();
+    $image_href = '/p/'.$author_info->getUsername();
+
+    $content = pht('Authored by %s on %s.', $author, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
+  }
+
   private function buildPropertyView(
     PhabricatorPaste $paste,
-    array $child_phids,
-    PhabricatorActionListView $actions) {
+    array $child_phids) {
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($paste)
-      ->setActionList($actions);
-
-    $properties->addProperty(
-      pht('Author'),
-      $viewer->renderHandle($paste->getAuthorPHID()));
-
-    $properties->addProperty(
-      pht('Created'),
-      phabricator_datetime($paste->getDateCreated(), $viewer));
+      ->setObject($paste);
 
     if ($paste->getParentPHID()) {
       $properties->addProperty(

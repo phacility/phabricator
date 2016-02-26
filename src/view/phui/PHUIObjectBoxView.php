@@ -36,6 +36,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
   const COLOR_YELLOW = 'yellow';
 
   const BLUE = 'phui-box-blue';
+  const BLUE_PROPERTY = 'phui-box-blue-property';
   const GREY = 'phui-box-grey';
 
   public function addPropertyList(

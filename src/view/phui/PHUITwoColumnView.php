@@ -3,10 +3,13 @@
 final class PHUITwoColumnView extends AphrontTagView {
 
   private $mainColumn;
-  private $sideColumn;
+  private $sideColumn = null;
   private $display;
   private $fluid;
   private $header;
+  private $subheader;
+  private $actionList;
+  private $propertyList;
 
   const DISPLAY_LEFT = 'phui-side-column-left';
   const DISPLAY_RIGHT = 'phui-side-column-right';
@@ -23,6 +26,21 @@ final class PHUITwoColumnView extends AphrontTagView {
 
   public function setHeader(PHUIHeaderView $header) {
     $this->header = $header;
+    return $this;
+  }
+
+  public function setSubheader($subheader) {
+    $this->subheader = $subheader;
+    return $this;
+  }
+
+  public function setActionList(PhabricatorActionListView $list) {
+    $this->actionList = $list;
+    return $this;
+  }
+
+  public function setPropertyList(PHUIPropertyListView $list) {
+    $this->propertyList = $list;
     return $this;
   }
 
@@ -53,6 +71,10 @@ final class PHUITwoColumnView extends AphrontTagView {
       $classes[] = 'phui-two-column-fluid';
     }
 
+    if ($this->subheader) {
+      $classes[] = 'with-subheader';
+    }
+
     return array(
       'class' => implode(' ', $classes),
     );
@@ -68,25 +90,25 @@ final class PHUITwoColumnView extends AphrontTagView {
       ),
       $this->mainColumn);
 
-    $side = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-side-column',
-      ),
-      $this->sideColumn);
+    $side = $this->buildSideColumn();
+    $order = array($side, $main);
 
-    if ($this->getDisplay() == self::DISPLAY_LEFT) {
-      $order = array($side, $main);
-    } else {
-      $order = array($main, $side);
-    }
-
-    $inner = phutil_tag_div('phui-two-column-row', $order);
+    $inner = phutil_tag_div('phui-two-column-row grouped', $order);
     $table = phutil_tag_div('phui-two-column-content', $inner);
 
     $header = null;
     if ($this->header) {
-      $header = phutil_tag_div('phui-two-column-header', $this->header);
+      if ($this->actionList) {
+        $this->header->setActionList($this->actionList);
+      }
+      $header = phutil_tag_div(
+        'phui-two-column-header', $this->header);
+    }
+
+    $subheader = null;
+    if ($this->subheader) {
+      $subheader = phutil_tag_div(
+        'phui-two-column-subheader', $this->subheader);
     }
 
     return phutil_tag(
@@ -96,7 +118,35 @@ final class PHUITwoColumnView extends AphrontTagView {
       ),
       array(
         $header,
+        $subheader,
         $table,
+      ));
+  }
+
+  private function buildSideColumn() {
+    $property_list = $this->propertyList;
+    $action_list = $this->actionList;
+
+    $properties = null;
+    if ($property_list || $action_list) {
+      if ($property_list) {
+        $property_list->setStacked(true);
+      }
+
+      $properties = id(new PHUIObjectBoxView())
+        ->appendChild($action_list)
+        ->appendChild($property_list)
+        ->addClass('phui-two-column-properties');
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-side-column',
+      ),
+      array(
+        $properties,
+        $this->sideColumn,
       ));
   }
 }
