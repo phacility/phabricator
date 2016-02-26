@@ -9,7 +9,12 @@ final class HarbormasterBuildStepCoreCustomField
   }
 
   public function createFields($object) {
-    $impl = $object->getStepImplementation();
+    try {
+      $impl = $object->getStepImplementation();
+    } catch (Exception $ex) {
+      return array();
+    }
+
     $specs = $impl->getFieldSpecifications();
 
     if ($impl->supportsWaitForMessage()) {

@@ -18,8 +18,6 @@ final class HarbormasterStepViewController extends HarbormasterController {
     $plan_id = $plan->getID();
     $plan_uri = $this->getApplicationURI("plan/{$plan_id}/");
 
-    $implementation = $step->getStepImplementation();
-
     $field_list = PhabricatorCustomField::getObjectFields(
       $step,
       PhabricatorCustomField::ROLE_VIEW);
@@ -64,6 +62,25 @@ final class HarbormasterStepViewController extends HarbormasterController {
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($step);
+
+    try {
+      $implementation = $step->getStepImplementation();
+    } catch (Exception $ex) {
+      $implementation = null;
+    }
+
+    if ($implementation) {
+      $type = $implementation->getName();
+    } else {
+      $type = phutil_tag(
+        'em',
+        array(),
+        pht(
+          'Invalid Implementation ("%s")!',
+          $step->getClassName()));
+    }
+
+    $view->addProperty(pht('Step Type'), $type);
 
     $view->addProperty(
       pht('Created'),

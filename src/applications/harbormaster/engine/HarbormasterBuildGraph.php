@@ -48,7 +48,12 @@ final class HarbormasterBuildGraph extends AbstractDirectedGraph {
     $map = array();
     foreach ($nodes as $node) {
       $step = $this->stepMap[$node];
-      $deps = $step->getStepImplementation()->getDependencies($step);
+
+      try {
+        $deps = $step->getStepImplementation()->getDependencies($step);
+      } catch (Exception $ex) {
+        $deps = array();
+      }
 
       $map[$node] = array();
       foreach ($deps as $dep) {
