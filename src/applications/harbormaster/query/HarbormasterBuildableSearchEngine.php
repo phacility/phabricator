@@ -58,9 +58,7 @@ final class HarbormasterBuildableSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new HarbormasterBuildableQuery())
-      ->needContainerHandles(true)
-      ->needBuildableHandles(true);
+    $query = id(new HarbormasterBuildableQuery());
 
     $container_phids = $saved->getParameter('containerPHIDs', array());
     if ($container_phids) {
@@ -185,22 +183,35 @@ final class HarbormasterBuildableSearchEngine
 
     $viewer = $this->requireViewer();
 
+    $phids = array();
+    foreach ($buildables as $buildable) {
+      $phids[] = $buildable->getContainerPHID();
+      $phids[] = $buildable->getBuildablePHID();
+    }
+    $handles = $viewer->loadHandles($phids);
+
+
     $list = new PHUIObjectItemListView();
     foreach ($buildables as $buildable) {
       $id = $buildable->getID();
 
+      $container_phid = $buildable->getContainerPHID();
+      $buildable_phid = $buildable->getBuildablePHID();
+
       $item = id(new PHUIObjectItemView())
         ->setHeader(pht('Buildable %d', $buildable->getID()));
-      if ($buildable->getContainerHandle() !== null) {
-        $item->addAttribute($buildable->getContainerHandle()->getName());
-      }
-      if ($buildable->getBuildableHandle() !== null) {
-        $item->addAttribute($buildable->getBuildableHandle()->getFullName());
+
+      if ($container_phid) {
+        $handle = $handles[$container_phid];
+        $item->addAttribute($handle->getName());
       }
 
-      if ($id) {
-        $item->setHref("/B{$id}");
+      if ($buildable_phid) {
+        $handle = $handles[$buildable_phid];
+        $item->addAttribute($handle->getFullName());
       }
+
+      $item->setHref($buildable->getURI());
 
       if ($buildable->getIsManualBuildable()) {
         $item->addIcon('fa-wrench grey', pht('Manual'));

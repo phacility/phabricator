@@ -6,7 +6,6 @@ interface HarbormasterBuildableInterface {
   public function getHarbormasterContainerPHID();
 
   public function getBuildVariables();
-
   public function getAvailableBuildVariables();
 
 }

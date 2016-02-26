@@ -9,8 +9,6 @@ final class HarbormasterBuildableViewController
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
-      ->needBuildableHandles(true)
-      ->needContainerHandles(true)
       ->executeOne();
     if (!$buildable) {
       return new Aphront404Response();
@@ -167,15 +165,18 @@ final class HarbormasterBuildableViewController
       ->setActionList($actions);
     $box->addPropertyList($properties);
 
-    if ($buildable->getContainerHandle() !== null) {
+    $container_phid = $buildable->getContainerPHID();
+    $buildable_phid = $buildable->getBuildablePHID();
+
+    if ($container_phid) {
       $properties->addProperty(
         pht('Container'),
-        $buildable->getContainerHandle()->renderLink());
+        $viewer->renderHandle($container_phid));
     }
 
     $properties->addProperty(
       pht('Buildable'),
-      $buildable->getBuildableHandle()->renderLink());
+      $viewer->renderHandle($buildable_phid));
 
     $properties->addProperty(
       pht('Origin'),

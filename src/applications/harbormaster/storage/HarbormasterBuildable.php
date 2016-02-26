@@ -13,8 +13,6 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   private $buildableObject = self::ATTACHABLE;
   private $containerObject = self::ATTACHABLE;
-  private $buildableHandle = self::ATTACHABLE;
-  private $containerHandle = self::ATTACHABLE;
   private $builds = self::ATTACHABLE;
 
   const STATUS_BUILDING = 'building';
@@ -68,6 +66,10 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public function getMonogram() {
     return 'B'.$this->getID();
+  }
+
+  public function getURI() {
+    return '/'.$this->getMonogram();
   }
 
   /**
@@ -235,24 +237,6 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public function getContainerObject() {
     return $this->assertAttached($this->containerObject);
-  }
-
-  public function attachContainerHandle($container_handle) {
-    $this->containerHandle = $container_handle;
-    return $this;
-  }
-
-  public function getContainerHandle() {
-    return $this->assertAttached($this->containerHandle);
-  }
-
-  public function attachBuildableHandle($buildable_handle) {
-    $this->buildableHandle = $buildable_handle;
-    return $this;
-  }
-
-  public function getBuildableHandle() {
-    return $this->assertAttached($this->buildableHandle);
   }
 
   public function attachBuilds(array $builds) {
