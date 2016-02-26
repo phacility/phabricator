@@ -370,6 +370,10 @@ final class PhabricatorRepositoryCommit
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
 
+  public function getHarbormasterBuildableDisplayPHID() {
+    return $this->getHarbormasterBuildablePHID();
+  }
+
   public function getHarbormasterBuildablePHID() {
     return $this->getPHID();
   }

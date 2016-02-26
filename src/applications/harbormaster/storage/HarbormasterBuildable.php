@@ -302,6 +302,10 @@ final class HarbormasterBuildable extends HarbormasterDAO
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
 
+  public function getHarbormasterBuildableDisplayPHID() {
+    return $this->getBuildableObject()->getHarbormasterBuildableDisplayPHID();
+  }
+
   public function getHarbormasterBuildablePHID() {
     // NOTE: This is essentially just for convenience, as it allows you create
     // a copy of a buildable by specifying `B123` without bothering to go

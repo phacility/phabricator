@@ -429,6 +429,15 @@ final class DifferentialDiff
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
 
+  public function getHarbormasterBuildableDisplayPHID() {
+    $container_phid = $this->getHarbormasterContainerPHID();
+    if ($container_phid) {
+      return $container_phid;
+    }
+
+    return $this->getHarbormasterBuildablePHID();
+  }
+
   public function getHarbormasterBuildablePHID() {
     return $this->getPHID();
   }

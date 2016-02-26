@@ -185,6 +185,9 @@ final class HarbormasterBuildableSearchEngine
 
     $phids = array();
     foreach ($buildables as $buildable) {
+      $phids[] = $buildable->getBuildableObject()
+        ->getHarbormasterBuildableDisplayPHID();
+
       $phids[] = $buildable->getContainerPHID();
       $phids[] = $buildable->getBuildablePHID();
     }
@@ -195,18 +198,26 @@ final class HarbormasterBuildableSearchEngine
     foreach ($buildables as $buildable) {
       $id = $buildable->getID();
 
+      $display_phid = $buildable->getBuildableObject()
+        ->getHarbormasterBuildableDisplayPHID();
+
       $container_phid = $buildable->getContainerPHID();
       $buildable_phid = $buildable->getBuildablePHID();
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader(pht('Buildable %d', $buildable->getID()));
+        ->setObjectName(pht('Buildable %d', $buildable->getID()));
 
-      if ($container_phid) {
+      if ($display_phid) {
+        $handle = $handles[$display_phid];
+        $item->setHeader($handle->getFullName());
+      }
+
+      if ($container_phid && ($container_phid != $display_phid)) {
         $handle = $handles[$container_phid];
         $item->addAttribute($handle->getName());
       }
 
-      if ($buildable_phid) {
+      if ($buildable_phid && ($buildable_phid != $display_phid)) {
         $handle = $handles[$buildable_phid];
         $item->addAttribute($handle->getFullName());
       }
@@ -217,14 +228,15 @@ final class HarbormasterBuildableSearchEngine
         $item->addIcon('fa-wrench grey', pht('Manual'));
       }
 
-      $item->setStatusIcon('fa-wrench '.
-        HarbormasterBuildable::getBuildableStatusColor(
-        $buildable->getBuildableStatus()));
-      $item->addByline(HarbormasterBuildable::getBuildableStatusName(
-        $buildable->getBuildableStatus()));
+      $status = $buildable->getBuildableStatus();
+
+      $status_icon = HarbormasterBuildable::getBuildableStatusIcon($status);
+      $status_color = HarbormasterBuildable::getBuildableStatusColor($status);
+      $status_label = HarbormasterBuildable::getBuildableStatusName($status);
+
+      $item->setStatusIcon("{$status_icon} {$status_color}", $status_label);
 
       $list->addItem($item);
-
     }
 
     $result = new PhabricatorApplicationSearchResultView();
