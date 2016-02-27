@@ -30,9 +30,8 @@
   position: absolute;
 }
 
-.phame-blog-description + .phui-property-list-section {
+.phame-blog-description + .phui-document-view-pro-box {
   border-top: 1px solid rgba({$alphablue}, 0.20);
-  padding-top: 16px;
 }
 
 .phame-home-view .phui-document-view.phui-document-view-pro {

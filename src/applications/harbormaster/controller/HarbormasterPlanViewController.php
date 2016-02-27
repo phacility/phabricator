@@ -105,31 +105,31 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         $i++;
       }
 
+      $step_id = $step->getID();
+      $view_uri = $this->getApplicationURI("step/view/{$step_id}/");
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Step %d.%d', $depth, $i))
+        ->setHeader($step->getName())
+        ->setHref($view_uri);
+
+      $step_list->addItem($item);
+
       $implementation = null;
       try {
         $implementation = $step->getStepImplementation();
       } catch (Exception $ex) {
         // We can't initialize the implementation. This might be because
         // it's been renamed or no longer exists.
-        $item = id(new PHUIObjectItemView())
-          ->setObjectName(pht('Step %d.%d', $depth, $i))
-          ->setHeader(pht('Unknown Implementation'))
+        $item
           ->setStatusIcon('fa-warning red')
           ->addAttribute(pht(
             'This step has an invalid implementation (%s).',
             $step->getClassName()));
-        $step_list->addItem($item);
         continue;
       }
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Step %d.%d', $depth, $i))
-        ->setHeader($step->getName());
 
       $item->addAttribute($implementation->getDescription());
-
-      $step_id = $step->getID();
-
-      $view_uri = $this->getApplicationURI("step/view/{$step_id}/");
       $item->setHref($view_uri);
 
       $depends = $step->getStepImplementation()->getDependencies($step);

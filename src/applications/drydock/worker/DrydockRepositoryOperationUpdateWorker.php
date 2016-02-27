@@ -138,10 +138,10 @@ final class DrydockRepositoryOperationUpdateWorker
     }
 
     if (!$lease->isActive()) {
-      $vcs_error = $working_copy->getWorkingCopyVCSError($lease);
+      $vcs_error = $working_copy->getCommandError($lease);
       if ($vcs_error) {
         $operation
-          ->setWorkingCopyVCSError($vcs_error)
+          ->setCommandError($vcs_error)
           ->save();
       }
 

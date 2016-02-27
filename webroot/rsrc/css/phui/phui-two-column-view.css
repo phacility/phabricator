@@ -2,6 +2,27 @@
  * @provides phui-two-column-view-css
  */
 
+.phui-two-column-view {
+  background-color: #fff;
+}
+
+.phui-two-column-container {
+  max-width: 1024px;
+  margin: 0 auto;
+}
+
+.phui-two-column-view .phui-two-column-header .phui-header-shell {
+  padding-bottom: 32px;
+}
+
+.device-phone .phui-two-column-view .phui-two-column-header .phui-header-shell {
+  padding-bottom: 20px;
+}
+
+.phui-two-column-fluid .phui-two-column-container {
+  max-width: 100%;
+}
+
 .phui-two-column-content {
   display: table;
   width: 100%;

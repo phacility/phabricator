@@ -218,6 +218,7 @@ final class PhrictionDocumentController
       $prop_list = new PHUIPropertyGroupView();
       $prop_list->addPropertyList($properties);
     }
+    $prop_list = phutil_tag_div('phui-document-view-pro-box', $prop_list);
 
     $page_content = id(new PHUIDocumentViewPro())
       ->setHeader($header)

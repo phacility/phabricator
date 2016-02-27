@@ -20,13 +20,20 @@
   margin: 0 auto;
 }
 
-.phui-property-list-section {
-  max-width: 800px;
+.device .phui-document-view-pro-box {
+  margin: 0 8px;
+}
+
+.phui-document-view-pro-box .phui-property-list-section {
   margin: 16px auto;
 }
 
-.device .phui-property-list-section {
+.device .phui-document-view-pro-box .phui-property-list-section {
   margin: 0 8px 16px;
+}
+
+.device .phui-document-view-pro-box .phui-property-list-container {
+  padding: 24px 0 0 0;
 }
 
 .device-phone .phui-document-view.phui-document-view-pro {

@@ -23,6 +23,7 @@ abstract class PhabricatorEditEngine
   private $isCreate;
   private $editEngineConfiguration;
   private $contextParameters = array();
+  private $targetObject;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -61,6 +62,22 @@ abstract class PhabricatorEditEngine
     return true;
   }
 
+  public function isEngineExtensible() {
+    return true;
+  }
+
+  /**
+   * Force the engine to edit a particular object.
+   */
+  public function setTargetObject($target_object) {
+    $this->targetObject = $target_object;
+    return $this;
+  }
+
+  public function getTargetObject() {
+    return $this->targetObject;
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 
@@ -94,7 +111,12 @@ abstract class PhabricatorEditEngine
 
     $fields = mpull($fields, null, 'getKey');
 
-    $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    if ($this->isEngineExtensible()) {
+      $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    } else {
+      $extensions = array();
+    }
+
     foreach ($extensions as $extension) {
       $extension->setViewer($viewer);
 
@@ -720,23 +742,28 @@ abstract class PhabricatorEditEngine
         break;
     }
 
-    $id = $request->getURIData('id');
+    $object = $this->getTargetObject();
+    if (!$object) {
+      $id = $request->getURIData('id');
 
-    if ($id) {
-      $this->setIsCreate(false);
-      $object = $this->newObjectFromID($id, $capabilities);
-      if (!$object) {
-        return new Aphront404Response();
+      if ($id) {
+        $this->setIsCreate(false);
+        $object = $this->newObjectFromID($id, $capabilities);
+        if (!$object) {
+          return new Aphront404Response();
+        }
+      } else {
+        // Make sure the viewer has permission to create new objects of
+        // this type if we're going to create a new object.
+        if ($require_create) {
+          $this->requireCreateCapability();
+        }
+
+        $this->setIsCreate(true);
+        $object = $this->newEditableObject();
       }
     } else {
-      // Make sure the viewer has permission to create new objects of
-      // this type if we're going to create a new object.
-      if ($require_create) {
-        $this->requireCreateCapability();
-      }
-
-      $this->setIsCreate(true);
-      $object = $this->newEditableObject();
+      $id = $object->getID();
     }
 
     $this->validateObject($object);
@@ -831,7 +858,7 @@ abstract class PhabricatorEditEngine
     $template = $object->getApplicationTransactionTemplate();
 
     $validation_exception = null;
-    if ($request->isFormPost()) {
+    if ($request->isFormPost() && $request->getBool('editEngine')) {
       $submit_fields = $fields;
 
       foreach ($submit_fields as $key => $field) {
@@ -1044,7 +1071,8 @@ abstract class PhabricatorEditEngine
     $request = $controller->getRequest();
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->addHiddenInput('editEngine', 'true');
 
     foreach ($this->contextParameters as $param) {
       $form->addHiddenInput($param, $request->getStr($param));

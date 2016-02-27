@@ -15,6 +15,7 @@ final class AlmanacServiceViewController
     $service = id(new AlmanacServiceQuery())
       ->setViewer($viewer)
       ->withNames(array($name))
+      ->needProperties(true)
       ->executeOne();
     if (!$service) {
       return new Aphront404Response();
@@ -35,15 +36,13 @@ final class AlmanacServiceViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
-    $messages = $service->getServiceType()->getStatusMessages($service);
-    if ($messages) {
-      $box->setFormErrors($messages);
-    }
-
-    if ($service->getIsLocked()) {
-      $this->addLockMessage(
+    if ($service->isClusterService()) {
+      $this->addClusterMessage(
         $box,
-        pht('This service is locked, and can not be edited.'));
+        pht('This is a cluster service.'),
+        pht(
+          'This service is a cluster service. You do not have permission to '.
+          'edit cluster services, so you can not edit this service.'));
     }
 
     $bindings = $this->buildBindingList($service);
@@ -77,7 +76,7 @@ final class AlmanacServiceViewController
 
     $properties->addProperty(
       pht('Service Type'),
-      $service->getServiceType()->getServiceTypeShortName());
+      $service->getServiceImplementation()->getServiceTypeShortName());
 
     return $properties;
   }
@@ -123,7 +122,8 @@ final class AlmanacServiceViewController
       ->setNoDataString(
         pht('This service has not been bound to any device interfaces yet.'))
       ->setUser($viewer)
-      ->setBindings($bindings);
+      ->setBindings($bindings)
+      ->setHideServiceColumn(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Service Bindings'))

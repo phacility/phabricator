@@ -450,6 +450,42 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $this;
   }
 
+  public function canIssueCommand(PhabricatorUser $viewer, $command) {
+    try {
+      $this->assertCanIssueCommand($viewer, $command);
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+  public function assertCanIssueCommand(PhabricatorUser $viewer, $command) {
+    $need_edit = false;
+    switch ($command) {
+      case HarbormasterBuildCommand::COMMAND_RESTART:
+        break;
+      case HarbormasterBuildCommand::COMMAND_PAUSE:
+      case HarbormasterBuildCommand::COMMAND_RESUME:
+      case HarbormasterBuildCommand::COMMAND_ABORT:
+        $need_edit = true;
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'Invalid Harbormaster build command "%s".',
+            $command));
+    }
+
+    // Issuing these commands requires that you be able to edit the build, to
+    // prevent enemy engineers from sabotaging your builds. See T9614.
+    if ($need_edit) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $this->getBuildPlan(),
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

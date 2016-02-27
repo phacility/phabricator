@@ -5,6 +5,8 @@ final class AlmanacBindingTableView extends AphrontView {
   private $bindings;
   private $noDataString;
 
+  private $hideServiceColumn;
+
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
     return $this;
@@ -23,6 +25,15 @@ final class AlmanacBindingTableView extends AphrontView {
     return $this->bindings;
   }
 
+  public function setHideServiceColumn($hide_service_column) {
+    $this->hideServiceColumn = $hide_service_column;
+    return $this;
+  }
+
+  public function getHideServiceColumn() {
+    return $this->hideServiceColumn;
+  }
+
   public function render() {
     $bindings = $this->getBindings();
     $viewer = $this->getUser();
@@ -35,6 +46,22 @@ final class AlmanacBindingTableView extends AphrontView {
     }
     $handles = $viewer->loadHandles($phids);
 
+    $icon_disabled = id(new PHUIIconView())
+      ->setIcon('fa-ban')
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => pht('Disabled'),
+        ));
+
+    $icon_active = id(new PHUIIconView())
+      ->setIcon('fa-check')
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => pht('Active'),
+        ));
+
     $rows = array();
     foreach ($bindings as $binding) {
       $addr = $binding->getInterface()->getAddress();
@@ -42,6 +69,7 @@ final class AlmanacBindingTableView extends AphrontView {
 
       $rows[] = array(
         $binding->getID(),
+        ($binding->getIsDisabled() ? $icon_disabled : $icon_active),
         $handles->renderHandle($binding->getServicePHID()),
         $handles->renderHandle($binding->getDevicePHID()),
         $handles->renderHandle($binding->getInterface()->getNetworkPHID()),
@@ -61,6 +89,7 @@ final class AlmanacBindingTableView extends AphrontView {
       ->setHeaders(
         array(
           pht('ID'),
+          null,
           pht('Service'),
           pht('Device'),
           pht('Network'),
@@ -70,11 +99,18 @@ final class AlmanacBindingTableView extends AphrontView {
       ->setColumnClasses(
         array(
           '',
+          'icon',
           '',
           '',
           '',
           'wide',
           'action',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          true,
+          !$this->getHideServiceColumn(),
         ));
 
     return $table;

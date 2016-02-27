@@ -47,10 +47,11 @@ final class DiffusionRepositoryCreateController
         // allocations, we fail.
         $services = id(new AlmanacServiceQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withServiceClasses(
+          ->withServiceTypes(
             array(
-              'AlmanacClusterRepositoryServiceType',
+              AlmanacClusterRepositoryServiceType::SERVICETYPE,
             ))
+          ->needProperties(true)
           ->execute();
         if ($services) {
           // Filter out services which do not permit new allocations.

@@ -1,11 +1,7 @@
 <?php
 
 final class AlmanacDeviceEditor
-  extends PhabricatorApplicationTransactionEditor {
-
-  public function getEditorApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
-  }
+  extends AlmanacEditor {
 
   public function getEditorObjectsDescription() {
     return pht('Almanac Device');
@@ -132,7 +128,7 @@ final class AlmanacDeviceEditor
             $name = $xaction->getNewValue();
 
             try {
-              AlmanacNames::validateServiceOrDeviceName($name);
+              AlmanacNames::validateName($name);
             } catch (Exception $ex) {
               $message = $ex->getMessage();
             }
@@ -144,22 +140,42 @@ final class AlmanacDeviceEditor
                 $message,
                 $xaction);
               $errors[] = $error;
+              continue;
             }
-          }
-        }
 
-        if ($xactions) {
-          $duplicate = id(new AlmanacDeviceQuery())
-            ->setViewer(PhabricatorUser::getOmnipotentUser())
-            ->withNames(array(last($xactions)->getNewValue()))
-            ->executeOne();
-          if ($duplicate && ($duplicate->getID() != $object->getID())) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Not Unique'),
-              pht('Almanac devices must have unique names.'),
-              last($xactions));
-            $errors[] = $error;
+            $other = id(new AlmanacDeviceQuery())
+              ->setViewer(PhabricatorUser::getOmnipotentUser())
+              ->withNames(array($name))
+              ->executeOne();
+            if ($other && ($other->getID() != $object->getID())) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Not Unique'),
+                pht('Almanac devices must have unique names.'),
+                $xaction);
+              $errors[] = $error;
+              continue;
+            }
+
+            if ($name === $object->getName()) {
+              continue;
+            }
+
+            $namespace = AlmanacNamespace::loadRestrictedNamespace(
+              $this->getActor(),
+              $name);
+            if ($namespace) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Restricted'),
+                pht(
+                  'You do not have permission to create Almanac devices '.
+                  'within the "%s" namespace.',
+                  $namespace->getName()),
+                $xaction);
+              $errors[] = $error;
+              continue;
+            }
           }
         }
 
@@ -294,6 +310,19 @@ final class AlmanacDeviceEditor
                 pht('You can not edit an invalid or restricted interface.'),
                 $xaction);
               $errors[] = $error;
+              continue;
+            }
+
+            $new = $xaction->getNewValue();
+            if (!$new) {
+              if ($interface->loadIsInUse()) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('In Use'),
+                  pht('You can not delete an interface which is still in use.'),
+                  $xaction);
+                $errors[] = $error;
+              }
             }
           }
         }
@@ -302,7 +331,5 @@ final class AlmanacDeviceEditor
 
     return $errors;
   }
-
-
 
 }

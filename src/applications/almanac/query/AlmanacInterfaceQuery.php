@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacInterfaceQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+  extends AlmanacQuery {
 
   private $ids;
   private $phids;
@@ -34,19 +34,12 @@ final class AlmanacInterfaceQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new AlmanacInterface();
+  }
+
   protected function loadPage() {
-    $table = new AlmanacInterface();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $interfaces) {
@@ -57,6 +50,7 @@ final class AlmanacInterfaceQuery
       ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($network_phids)
+      ->needProperties($this->getNeedProperties())
       ->execute();
     $networks = mpull($networks, null, 'getPHID');
 
@@ -64,6 +58,7 @@ final class AlmanacInterfaceQuery
       ->setParentQuery($this)
       ->setViewer($this->getViewer())
       ->withPHIDs($device_phids)
+      ->needProperties($this->getNeedProperties())
       ->execute();
     $devices = mpull($devices, null, 'getPHID');
 
@@ -83,34 +78,34 @@ final class AlmanacInterfaceQuery
     return $interfaces;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'id IN (%Ld)',
+        $conn,
+        'interface.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'phid IN (%Ls)',
+        $conn,
+        'interface.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->networkPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'networkPHID IN (%Ls)',
+        $conn,
+        'interface.networkPHID IN (%Ls)',
         $this->networkPHIDs);
     }
 
     if ($this->devicePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'devicePHID IN (%Ls)',
+        $conn,
+        'interface.devicePHID IN (%Ls)',
         $this->devicePHIDs);
     }
 
@@ -118,8 +113,10 @@ final class AlmanacInterfaceQuery
       $parts = array();
       foreach ($this->addresses as $address) {
         $parts[] = qsprintf(
-          $conn_r,
-          '(networkPHID = %s AND address = %s AND port = %d)',
+          $conn,
+          '(interface.networkPHID = %s '.
+            'AND interface.address = %s '.
+            'AND interface.port = %d)',
           $address->getNetworkPHID(),
           $address->getAddress(),
           $address->getPort());
@@ -127,13 +124,77 @@ final class AlmanacInterfaceQuery
       $where[] = implode(' OR ', $parts);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    return $where;
+  }
 
-    return $this->formatWhereClause($where);
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->shouldJoinDeviceTable()) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T device ON device.phid = interface.devicePHID',
+        id(new AlmanacDevice())->getTableName());
+    }
+
+    return $joins;
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldJoinDeviceTable()) {
+      return true;
+    }
+
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  private function shouldJoinDeviceTable() {
+    $vector = $this->getOrderVector();
+
+    if ($vector->containsKey('name')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'interface';
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorAlmanacApplication';
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name', 'id'),
+        'name' => pht('Device Name'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'table' => 'device',
+        'column' => 'name',
+        'type' => 'string',
+        'reverse' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $interface = $this->loadCursorObject($cursor);
+
+    $map = array(
+      'id' => $interface->getID(),
+      'name' => $interface->getDevice()->getName(),
+    );
+
+    return $map;
   }
 
 }
