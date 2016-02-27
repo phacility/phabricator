@@ -90,7 +90,7 @@ final class HarbormasterBuildPlanEditor
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),
-            pht('Plan name is required.'),
+            pht('You must choose a name for your build plan.'),
             last($xactions));
 
           $error->setIsMissingFieldError(true);

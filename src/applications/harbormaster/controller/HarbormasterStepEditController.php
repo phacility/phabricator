@@ -1,6 +1,7 @@
 <?php
 
-final class HarbormasterStepEditController extends HarbormasterController {
+final class HarbormasterStepEditController
+  extends HarbormasterPlanController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();

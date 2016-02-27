@@ -7,34 +7,21 @@ final class HarbormasterBuildableListController extends HarbormasterController {
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($request->getURIData('queryKey'))
-      ->setSearchEngine(new HarbormasterBuildableSearchEngine())
-      ->setNavigation($this->buildSideNavView());
+    $items = array();
 
-    return $this->delegateToController($controller);
-  }
+    $items[] = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LABEL)
+      ->setName(pht('Build Plans'));
 
-  public function buildSideNavView($for_app = false) {
-    $user = $this->getRequest()->getUser();
+    $items[] = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LINK)
+      ->setName(pht('Manage Build Plans'))
+      ->setHref($this->getApplicationURI('plan/'));
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    id(new HarbormasterBuildableSearchEngine())
-      ->setViewer($user)
-      ->addNavigationItems($nav->getMenu());
-
-    $nav->addLabel(pht('Build Plans'));
-    $nav->addFilter('plan/', pht('Manage Build Plans'));
-
-    $nav->selectFilter(null);
-
-    return $nav;
-  }
-
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView(true)->getMenu();
+    return id(new HarbormasterBuildableSearchEngine())
+      ->setController($this)
+      ->setNavigationItems($items)
+      ->buildResponse();
   }
 
 }
