@@ -8,7 +8,8 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
-    PhabricatorNgramsInterface {
+    PhabricatorNgramsInterface,
+    PhabricatorProjectInterface {
 
   protected $name;
   protected $planStatus;

@@ -84,12 +84,24 @@ final class HarbormasterBuildPlanSearchEngine
 
     $viewer = $this->requireViewer();
 
+
+    if ($plans) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($plans, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+
+      $edge_query->execute();
+    }
+
     $list = new PHUIObjectItemListView();
     foreach ($plans as $plan) {
       $id = $plan->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Plan %d', $plan->getID()))
+        ->setObjectName(pht('Plan %d', $id))
         ->setHeader($plan->getName());
 
       if ($plan->isDisabled()) {
@@ -101,6 +113,17 @@ final class HarbormasterBuildPlanSearchEngine
       }
 
       $item->setHref($this->getApplicationURI("plan/{$id}/"));
+
+      $phid = $plan->getPHID();
+      $project_phids = $edge_query->getDestinationPHIDs(array($phid));
+      $project_handles = $viewer->loadHandles($project_phids);
+
+      $item->addAttribute(
+        id(new PHUIHandleTagListView())
+          ->setLimit(4)
+          ->setNoDataString(pht('No Projects'))
+          ->setSlim(true)
+          ->setHandles($project_handles));
 
       $list->addItem($item);
     }

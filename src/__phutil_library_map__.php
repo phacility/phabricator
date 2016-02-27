@@ -5201,6 +5201,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorNgramsInterface',
+      'PhabricatorProjectInterface',
     ),
     'HarbormasterBuildPlanDatasource' => 'PhabricatorTypeaheadDatasource',
     'HarbormasterBuildPlanDefaultEditCapability' => 'PhabricatorPolicyCapability',
