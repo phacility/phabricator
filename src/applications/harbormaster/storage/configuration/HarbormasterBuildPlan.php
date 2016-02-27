@@ -7,7 +7,8 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorSubscribableInterface {
+    PhabricatorSubscribableInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $planStatus;
@@ -196,6 +197,17 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     }
 
     return $messages;
+  }
+
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new HarbormasterBuildPlanNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

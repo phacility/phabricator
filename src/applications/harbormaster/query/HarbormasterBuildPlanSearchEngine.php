@@ -17,6 +17,10 @@ final class HarbormasterBuildPlanSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for namespaces by name substring.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setLabel(pht('Status'))
         ->setKey('status')
@@ -31,6 +35,10 @@ final class HarbormasterBuildPlanSearchEngine
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
+
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
 
     if ($map['status']) {
       $query->withStatuses($map['status']);
