@@ -19,7 +19,11 @@
   table-layout: fixed;
 }
 
-.aphront-table-view td.aphront-table-notice {
+.aphront-table-view-fixed th {
+  box-sizing: border-box;
+}
+
+.aphront-table-notice {
   padding: 12px 16px;
   font-size: {$normalfontsize};
   color: {$darkbluetext};

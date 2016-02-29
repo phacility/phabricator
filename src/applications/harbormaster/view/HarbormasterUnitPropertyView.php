@@ -6,6 +6,7 @@ final class HarbormasterUnitPropertyView extends AphrontView {
   private $unitMessages = array();
   private $limit;
   private $fullResultsURI;
+  private $notice;
 
   public function setPathURIMap(array $map) {
     $this->pathURIMap = $map;
@@ -27,6 +28,12 @@ final class HarbormasterUnitPropertyView extends AphrontView {
     $this->fullResultsURI = $full_results_uri;
     return $this;
   }
+
+  public function setNotice($notice) {
+    $this->notice = $notice;
+    return $this;
+  }
+
 
   public function render() {
     require_celerity_resource('harbormaster-css');
@@ -68,12 +75,14 @@ final class HarbormasterUnitPropertyView extends AphrontView {
       $name = $message->getUnitMessageDisplayName();
       $id = $message->getID();
 
-      $name = phutil_tag(
-        'a',
-        array(
-          'href' => "/harbormaster/unit/view/{$id}/",
-        ),
-        $name);
+      if ($id) {
+        $name = phutil_tag(
+          'a',
+          array(
+            'href' => "/harbormaster/unit/view/{$id}/",
+          ),
+          $name);
+      }
 
       $details = $message->getUnitMessageDetails();
       if (strlen($details)) {
@@ -127,8 +136,8 @@ final class HarbormasterUnitPropertyView extends AphrontView {
         ))
       ->setColumnClasses(
         array(
-          'top',
-          'top',
+          'top center',
+          'top right',
           'top wide',
         ))
       ->setColumnWidths(
@@ -141,6 +150,10 @@ final class HarbormasterUnitPropertyView extends AphrontView {
           true,
           $any_duration,
         ));
+
+    if ($this->notice) {
+      $table->setNotice($this->notice);
+    }
 
     return $table;
   }

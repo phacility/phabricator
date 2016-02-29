@@ -157,21 +157,6 @@ final class AphrontTableView extends AphrontView {
         $sort_values[] = null;
       }
 
-      if ($this->notice) {
-        $colspan = max(count(array_filter($visibility)), 1);
-        $table[] = phutil_tag(
-          'tr',
-          array(),
-          phutil_tag(
-            'td',
-            array(
-              'colspan' => $colspan,
-              'class' => 'aphront-table-notice',
-            ),
-            $this->notice));
-
-      }
-
       $tr = array();
       foreach ($headers as $col_num => $header) {
         if (!$visibility[$col_num]) {
@@ -350,13 +335,29 @@ final class AphrontTableView extends AphrontView {
       $classes[] = 'aphront-table-view-fixed';
     }
 
+    $notice = null;
+    if ($this->notice) {
+      $notice = phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-table-notice',
+        ),
+        $this->notice);
+    }
+
     $html = phutil_tag(
       'table',
       array(
         'class' => implode(' ', $classes),
       ),
       $table);
-    return phutil_tag_div('aphront-table-wrap', $html);
+
+    return phutil_tag_div(
+      'aphront-table-wrap',
+      array(
+        $notice,
+        $html,
+      ));
   }
 
   public static function renderSingleDisplayLine($line) {

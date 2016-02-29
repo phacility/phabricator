@@ -40,6 +40,8 @@ final class DifferentialDiff
   private $properties = array();
   private $buildable = self::ATTACHABLE;
 
+  private $unitMessages = self::ATTACHABLE;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -334,6 +336,20 @@ final class DifferentialDiff
     return $this->assertAttachedKey($this->properties, $key);
   }
 
+  public function hasDiffProperty($key) {
+    $properties = $this->getDiffProperties();
+    return array_key_exists($key, $properties);
+  }
+
+  public function attachDiffProperties(array $properties) {
+    $this->properties = $properties;
+    return $this;
+  }
+
+  public function getDiffProperties() {
+    return $this->assertAttached($this->properties);
+  }
+
   public function attachBuildable(HarbormasterBuildable $buildable = null) {
     $this->buildable = $buildable;
     return $this;
@@ -388,6 +404,17 @@ final class DifferentialDiff
   public function getURI() {
     $id = $this->getID();
     return "/differential/diff/{$id}/";
+  }
+
+
+  public function attachUnitMessages(array $unit_messages) {
+    $this->unitMessages = $unit_messages;
+    return $this;
+  }
+
+
+  public function getUnitMessages() {
+    return $this->assertAttached($this->unitMessages);
   }
 
 
