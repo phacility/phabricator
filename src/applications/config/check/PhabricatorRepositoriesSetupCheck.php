@@ -10,9 +10,9 @@ final class PhabricatorRepositoriesSetupCheck extends PhabricatorSetupCheck {
 
     $cluster_services = id(new AlmanacServiceQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withServiceClasses(
+      ->withServiceTypes(
         array(
-          'AlmanacClusterRepositoryServiceType',
+          AlmanacClusterRepositoryServiceType::SERVICETYPE,
         ))
       ->setLimit(1)
       ->execute();

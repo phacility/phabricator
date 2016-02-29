@@ -6,9 +6,8 @@ final class AlmanacServiceQuery
   private $ids;
   private $phids;
   private $names;
-  private $serviceClasses;
+  private $serviceTypes;
   private $devicePHIDs;
-  private $locked;
   private $namePrefix;
   private $nameSuffix;
 
@@ -29,18 +28,13 @@ final class AlmanacServiceQuery
     return $this;
   }
 
-  public function withServiceClasses(array $classes) {
-    $this->serviceClasses = $classes;
+  public function withServiceTypes(array $types) {
+    $this->serviceTypes = $types;
     return $this;
   }
 
   public function withDevicePHIDs(array $phids) {
     $this->devicePHIDs = $phids;
-    return $this;
-  }
-
-  public function withLocked($locked) {
-    $this->locked = $locked;
     return $this;
   }
 
@@ -65,8 +59,12 @@ final class AlmanacServiceQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new AlmanacService();
+  }
+
   protected function loadPage() {
-    return $this->loadStandardPage(new AlmanacService());
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
@@ -111,11 +109,11 @@ final class AlmanacServiceQuery
         $hashes);
     }
 
-    if ($this->serviceClasses !== null) {
+    if ($this->serviceTypes !== null) {
       $where[] = qsprintf(
         $conn,
-        'service.serviceClass IN (%Ls)',
-        $this->serviceClasses);
+        'service.serviceType IN (%Ls)',
+        $this->serviceTypes);
     }
 
     if ($this->devicePHIDs !== null) {
@@ -123,13 +121,6 @@ final class AlmanacServiceQuery
         $conn,
         'binding.devicePHID IN (%Ls)',
         $this->devicePHIDs);
-    }
-
-    if ($this->locked !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'service.isLocked = %d',
-        (int)$this->locked);
     }
 
     if ($this->namePrefix !== null) {
@@ -150,17 +141,19 @@ final class AlmanacServiceQuery
   }
 
   protected function willFilterPage(array $services) {
-    $service_types = AlmanacServiceType::getAllServiceTypes();
+    $service_map = AlmanacServiceType::getAllServiceTypes();
 
     foreach ($services as $key => $service) {
-      $service_class = $service->getServiceClass();
-      $service_type = idx($service_types, $service_class);
-      if (!$service_type) {
+      $implementation = idx($service_map, $service->getServiceType());
+
+      if (!$implementation) {
         $this->didRejectResult($service);
         unset($services[$key]);
         continue;
       }
-      $service->attachServiceType($service_type);
+
+      $implementation = clone $implementation;
+      $service->attachServiceImplementation($implementation);
     }
 
     return $services;
@@ -172,6 +165,7 @@ final class AlmanacServiceQuery
       $bindings = id(new AlmanacBindingQuery())
         ->setViewer($this->getViewer())
         ->withServicePHIDs($service_phids)
+        ->needProperties($this->getNeedProperties())
         ->execute();
       $bindings = mgroup($bindings, 'getServicePHID');
 

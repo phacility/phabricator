@@ -13,8 +13,6 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   private $buildableObject = self::ATTACHABLE;
   private $containerObject = self::ATTACHABLE;
-  private $buildableHandle = self::ATTACHABLE;
-  private $containerHandle = self::ATTACHABLE;
   private $builds = self::ATTACHABLE;
 
   const STATUS_BUILDING = 'building';
@@ -22,16 +20,16 @@ final class HarbormasterBuildable extends HarbormasterDAO
   const STATUS_FAILED = 'failed';
 
   public static function getBuildableStatusName($status) {
-    switch ($status) {
-      case self::STATUS_BUILDING:
-        return pht('Building');
-      case self::STATUS_PASSED:
-        return pht('Passed');
-      case self::STATUS_FAILED:
-        return pht('Failed');
-      default:
-        return pht('Unknown');
-    }
+    $map = self::getBuildStatusMap();
+    return idx($map, $status, pht('Unknown ("%s")', $status));
+  }
+
+  public static function getBuildStatusMap() {
+    return array(
+      self::STATUS_BUILDING => pht('Building'),
+      self::STATUS_PASSED => pht('Passed'),
+      self::STATUS_FAILED => pht('Failed'),
+    );
   }
 
   public static function getBuildableStatusIcon($status) {
@@ -68,6 +66,10 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public function getMonogram() {
     return 'B'.$this->getID();
+  }
+
+  public function getURI() {
+    return '/'.$this->getMonogram();
   }
 
   /**
@@ -237,24 +239,6 @@ final class HarbormasterBuildable extends HarbormasterDAO
     return $this->assertAttached($this->containerObject);
   }
 
-  public function attachContainerHandle($container_handle) {
-    $this->containerHandle = $container_handle;
-    return $this;
-  }
-
-  public function getContainerHandle() {
-    return $this->assertAttached($this->containerHandle);
-  }
-
-  public function attachBuildableHandle($buildable_handle) {
-    $this->buildableHandle = $buildable_handle;
-    return $this;
-  }
-
-  public function getBuildableHandle() {
-    return $this->assertAttached($this->buildableHandle);
-  }
-
   public function attachBuilds(array $builds) {
     assert_instances_of($builds, 'HarbormasterBuild');
     $this->builds = $builds;
@@ -317,6 +301,10 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
+
+  public function getHarbormasterBuildableDisplayPHID() {
+    return $this->getBuildableObject()->getHarbormasterBuildableDisplayPHID();
+  }
 
   public function getHarbormasterBuildablePHID() {
     // NOTE: This is essentially just for convenience, as it allows you create

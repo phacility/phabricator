@@ -2038,6 +2038,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($service_phid))
       ->needBindings(true)
+      ->needProperties(true)
       ->executeOne();
     if (!$service) {
       throw new Exception(
@@ -2046,7 +2047,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'be loaded.'));
     }
 
-    $service_type = $service->getServiceType();
+    $service_type = $service->getServiceImplementation();
     if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
       throw new Exception(
         pht(

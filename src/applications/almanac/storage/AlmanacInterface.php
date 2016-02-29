@@ -4,7 +4,8 @@ final class AlmanacInterface
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorExtendedPolicyInterface {
 
   protected $devicePHID;
   protected $networkPHID;
@@ -74,6 +75,16 @@ final class AlmanacInterface
     return $this->getAddress().':'.$this->getPort();
   }
 
+  public function loadIsInUse() {
+    $binding = id(new AlmanacBindingQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withInterfacePHIDs(array($this->getPHID()))
+      ->setLimit(1)
+      ->executeOne();
+
+    return (bool)$binding;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -101,14 +112,28 @@ final class AlmanacInterface
         'view the interface.'),
     );
 
-    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
-      if ($this->getDevice()->getIsLocked()) {
-        $notes[] = pht(
-          'The device for this interface is locked, so it can not be edited.');
-      }
+    return $notes;
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        if ($this->getDevice()->isClusterDevice()) {
+          return array(
+            array(
+              new PhabricatorAlmanacApplication(),
+              AlmanacManageClusterServicesCapability::CAPABILITY,
+            ),
+          );
+        }
+        break;
     }
 
-    return $notes;
+    return array();
   }
 
 

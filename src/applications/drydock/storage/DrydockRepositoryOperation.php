@@ -178,11 +178,11 @@ final class DrydockRepositoryOperation extends DrydockDAO
     return $this->getProperty('exec.leasePHID');
   }
 
-  public function setWorkingCopyVCSError(array $error) {
+  public function setCommandError(array $error) {
     return $this->setProperty('exec.workingcopy.error', $error);
   }
 
-  public function getWorkingCopyVCSError() {
+  public function getCommandError() {
     return $this->getProperty('exec.workingcopy.error');
   }
 

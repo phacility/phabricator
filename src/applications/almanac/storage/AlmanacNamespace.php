@@ -4,7 +4,6 @@ final class AlmanacNamespace
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     AlmanacPropertyInterface,
@@ -17,7 +16,6 @@ final class AlmanacNamespace
   protected $viewPolicy;
   protected $editPolicy;
 
-  private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
 
   public static function initializeNewNamespace() {
@@ -148,6 +146,10 @@ final class AlmanacNamespace
     return array();
   }
 
+  public function newAlmanacPropertyEditEngine() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -174,27 +176,6 @@ final class AlmanacNamespace
 
   public function describeAutomaticCapability($capability) {
     return null;
-  }
-
-
-/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
-
-
-  public function getCustomFieldSpecificationForRole($role) {
-    return array();
-  }
-
-  public function getCustomFieldBaseClass() {
-    return 'AlmanacCustomField';
-  }
-
-  public function getCustomFields() {
-    return $this->assertAttached($this->customFields);
-  }
-
-  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
-    $this->customFields = $fields;
-    return $this;
   }
 
 

@@ -456,8 +456,14 @@ abstract class PhabricatorApplicationTransaction
           return null;
         }
 
+        $object = $this->getObject();
+
+        if (!($object instanceof PhabricatorCustomFieldInterface)) {
+          return null;
+        }
+
         $field = PhabricatorCustomField::getObjectField(
-          $this->getObject(),
+          $object,
           PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
           $key);
         if (!$field) {

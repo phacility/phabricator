@@ -1,18 +1,10 @@
 <?php
 
 final class AlmanacDeviceEditor
-  extends PhabricatorApplicationTransactionEditor {
-
-  public function getEditorApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
-  }
+  extends AlmanacEditor {
 
   public function getEditorObjectsDescription() {
     return pht('Almanac Device');
-  }
-
-  protected function supportsSearch() {
-    return true;
   }
 
   public function getTransactionTypes() {
@@ -318,6 +310,19 @@ final class AlmanacDeviceEditor
                 pht('You can not edit an invalid or restricted interface.'),
                 $xaction);
               $errors[] = $error;
+              continue;
+            }
+
+            $new = $xaction->getNewValue();
+            if (!$new) {
+              if ($interface->loadIsInUse()) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('In Use'),
+                  pht('You can not delete an interface which is still in use.'),
+                  $xaction);
+                $errors[] = $error;
+              }
             }
           }
         }

@@ -95,7 +95,7 @@ final class PonderAnswerView extends AphrontTagView {
     $content = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-remarkup mlt mlb msr msl',
+        'class' => 'phabricator-remarkup',
       ),
       PhabricatorMarkupEngine::renderOneObject(
         $answer,
@@ -110,26 +110,14 @@ final class PonderAnswerView extends AphrontTagView {
       ->setContentID($content_id)
       ->setCount(count($this->transactions));
 
-    $votes = $answer->getVoteCount();
-    $vote_class = null;
-    if ($votes > 0) {
-      $vote_class = 'ponder-footer-action-helpful';
-    }
-    $icon = id(new PHUIIconView())
-      ->setIcon('fa-thumbs-up msr');
-    $helpful = phutil_tag(
-      'span',
-      array(
-        'class' => 'ponder-footer-action '.$vote_class,
-      ),
-      array($icon, $votes));
-    $footer->addAction($helpful);
+    $content = phutil_tag_div(
+      'ponder-answer-content', array($anchor, $content, $footer));
 
     $answer_view = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($anchor)
-      ->appendChild($content)
-      ->appendChild($footer);
+      ->setBackground(PHUIObjectBoxView::GREY)
+      ->addClass('ponder-answer')
+      ->appendChild($content);
 
     $comment_view = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
@@ -169,28 +157,6 @@ final class PonderAnswerView extends AphrontTagView {
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->setObject($answer);
-
-    $user_marked = $answer->getUserVote();
-    $can_vote = $viewer->isLoggedIn();
-
-    if ($user_marked) {
-      $helpful_uri = "/ponder/answer/helpful/remove/{$id}/";
-      $helpful_icon = 'fa-times';
-      $helpful_text = pht('Remove Helpful');
-    } else {
-      $helpful_uri = "/ponder/answer/helpful/add/{$id}/";
-      $helpful_icon = 'fa-thumbs-up';
-      $helpful_text = pht('Mark as Helpful');
-    }
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon($helpful_icon)
-        ->setName($helpful_text)
-        ->setHref($helpful_uri)
-        ->setRenderAsForm(true)
-        ->setDisabled(!$can_vote)
-        ->setWorkflow($can_vote));
 
     $view->addAction(
       id(new PhabricatorActionView())

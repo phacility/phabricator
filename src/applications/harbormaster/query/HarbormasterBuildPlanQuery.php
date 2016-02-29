@@ -35,6 +35,12 @@ final class HarbormasterBuildPlanQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new HarbormasterBuildPlanNameNgrams(),
+      $ngrams);
+  }
+
   public function needBuildSteps($need) {
     $this->needBuildSteps = $need;
     return $this;
@@ -74,39 +80,43 @@ final class HarbormasterBuildPlanQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'plan.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'plan.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'planStatus IN (%Ls)',
+        'plan.planStatus IN (%Ls)',
         $this->statuses);
     }
 
     if (strlen($this->datasourceQuery)) {
       $where[] = qsprintf(
         $conn,
-        'name LIKE %>',
+        'plan.name LIKE %>',
         $this->datasourceQuery);
     }
 
     if ($this->planAutoKeys !== null) {
       $where[] = qsprintf(
         $conn,
-        'planAutoKey IN (%Ls)',
+        'plan.planAutoKey IN (%Ls)',
         $this->planAutoKeys);
     }
 
     return $where;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'plan';
   }
 
   public function getQueryApplicationClass() {

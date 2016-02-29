@@ -1,27 +1,17 @@
 <?php
 
 final class AlmanacPropertyDeleteController
-  extends AlmanacDeviceController {
+  extends AlmanacPropertyController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $object = id(new PhabricatorObjectQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($request->getStr('objectPHID')))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$object) {
-      return new Aphront404Response();
+    $response = $this->loadPropertyObject();
+    if ($response) {
+      return $response;
     }
 
-    if (!($object instanceof AlmanacPropertyInterface)) {
-      return new Aphront404Response();
-    }
+    $object = $this->getPropertyObject();
 
     $key = $request->getStr('key');
     if (!strlen($key)) {
@@ -34,53 +24,24 @@ final class AlmanacPropertyDeleteController
     $is_builtin = isset($builtins[$key]);
 
     if ($is_builtin) {
-      // This is a builtin property, so we're going to reset it to the
-      // default value.
-      $field_list = PhabricatorCustomField::getObjectFields(
-        $object,
-        PhabricatorCustomField::ROLE_DEFAULT);
-
-      // Note that we're NOT loading field values from the object: we just want
-      // to get the field's default value so we can reset it.
-
-      $fields = $field_list->getFields();
-      $field = $fields[$key];
-
-      $is_delete = false;
-      $new_value = $field->getValueForStorage();
-
-      // Now, load the field to get the old value.
-
-      $field_list
-        ->setViewer($viewer)
-        ->readFieldsFromStorage($object);
-
-      $old_value = $field->getValueForStorage();
-
       $title = pht('Reset Property');
-      $body = pht('Reset this property to its default value?');
-      $submit_text = pht('Reset');
+      $body = pht(
+        'Reset property "%s" to its default value?',
+        $key);
+      $submit_text = pht('Reset Property');
     } else {
-      // This is a custom property, so we're going to delete it outright.
-      $is_delete = true;
-      $old_value = $object->getAlmanacPropertyValue($key);
-      $new_value = null;
-
       $title = pht('Delete Property');
-      $body = pht('Delete this property? TODO: DOES NOT WORK YET');
-      $submit_text = pht('Delete');
+      $body = pht(
+        'Delete property "%s"?',
+        $key);
+      $submit_text = pht('Delete Property');
     }
 
     $validation_exception = null;
     if ($request->isFormPost()) {
       $xaction = $object->getApplicationTransactionTemplate()
-        ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
-        ->setMetadataValue('customfield:key', $key)
-        ->setOldValue($old_value)
-        ->setNewValue($new_value);
-
-      // TODO: We aren't really deleting properties that we claim to delete
-      // yet, but that needs to be specialized a little bit.
+        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_REMOVE)
+        ->setMetadataValue('almanac.property', $key);
 
       $editor = $object->getApplicationTransactionEditor()
         ->setActor($viewer)

@@ -136,6 +136,7 @@ final class PhamePostViewController
 
     $document->setFoot($next_view);
     $crumbs = $this->buildApplicationCrumbs();
+    $properties = phutil_tag_div('phui-document-view-pro-box', $properties);
 
     $page = $this->newPage()
       ->setTitle($post->getTitle())

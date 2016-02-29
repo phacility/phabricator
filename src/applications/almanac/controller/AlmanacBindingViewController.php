@@ -15,6 +15,7 @@ final class AlmanacBindingViewController
     $binding = id(new AlmanacBindingQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needProperties(true)
       ->executeOne();
     if (!$binding) {
       return new Aphront404Response();
@@ -34,15 +35,21 @@ final class AlmanacBindingViewController
       ->setHeader($title)
       ->setPolicyObject($binding);
 
+    if ($binding->getIsDisabled()) {
+      $header->setStatus('fa-ban', 'red', pht('Disabled'));
+    }
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($property_list);
 
-    if ($binding->getService()->getIsLocked()) {
-      $this->addLockMessage(
+    if ($binding->getService()->isClusterService()) {
+      $this->addClusterMessage(
         $box,
+        pht('The service for this binding is a cluster service.'),
         pht(
-          'This service for this binding is locked, so the binding can '.
+          'The service for this binding is a cluster service. You do not '.
+          'have permission to manage cluster services, so this binding can '.
           'not be edited.'));
     }
 
@@ -109,6 +116,24 @@ final class AlmanacBindingViewController
         ->setName(pht('Edit Binding'))
         ->setHref($this->getApplicationURI("binding/edit/{$id}/"))
         ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
+
+    if ($binding->getIsDisabled()) {
+      $disable_icon = 'fa-check';
+      $disable_text = pht('Enable Binding');
+    } else {
+      $disable_icon = 'fa-ban';
+      $disable_text = pht('Disable Binding');
+    }
+
+    $disable_href = $this->getApplicationURI("binding/disable/{$id}/");
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon($disable_icon)
+        ->setName($disable_text)
+        ->setHref($disable_href)
+        ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
     return $actions;

@@ -4,6 +4,7 @@ final class DrydockLandRepositoryOperation
   extends DrydockRepositoryOperationType {
 
   const OPCONST = 'land';
+  const PHASE_PUSH = 'push';
 
   public function getOperationDescription(
     DrydockRepositoryOperation $operation,
@@ -122,10 +123,23 @@ final class DrydockLandRepositoryOperation
       ->write($commit_message)
       ->resolvex();
 
-    $interface->execx(
+    try {
+        $interface->execx(
+          'git push origin -- %s:%s',
+          'HEAD',
+          $push_dst);
+    } catch (CommandException $ex) {
+      $show_command = csprintf(
       'git push origin -- %s:%s',
       'HEAD',
       $push_dst);
+      $error = DrydockCommandError::newFromCommandException(
+        self::PHASE_PUSH,
+        $show_command,
+        $ex);
+      $operation->setCommandError($error);
+      throw $ex;
+    }
   }
 
   private function getCommitterInfo(DrydockRepositoryOperation $operation) {

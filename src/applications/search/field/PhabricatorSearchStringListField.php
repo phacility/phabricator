@@ -3,6 +3,17 @@
 final class PhabricatorSearchStringListField
   extends PhabricatorSearchField {
 
+  private $placeholder;
+
+  public function setPlaceholder($placeholder) {
+    $this->placeholder = $placeholder;
+    return $this;
+  }
+
+  public function getPlaceholder() {
+    return $this->placeholder;
+  }
+
   protected function getDefaultValue() {
     return array();
   }
@@ -12,7 +23,14 @@ final class PhabricatorSearchStringListField
   }
 
   protected function newControl() {
-    return new AphrontFormTextControl();
+    $control = new AphrontFormTextControl();
+
+    $placeholder = $this->getPlaceholder();
+    if ($placeholder !== null) {
+      $control->setPlaceholder($placeholder);
+    }
+
+    return $control;
   }
 
   protected function getValueForControl() {

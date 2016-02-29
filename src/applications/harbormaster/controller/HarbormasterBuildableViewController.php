@@ -9,8 +9,6 @@ final class HarbormasterBuildableViewController
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
-      ->needBuildableHandles(true)
-      ->needContainerHandles(true)
       ->executeOne();
     if (!$buildable) {
       return new Aphront404Response();
@@ -86,18 +84,31 @@ final class HarbormasterBuildableViewController
     $can_pause = false;
     $can_abort = false;
 
+    $command_restart = HarbormasterBuildCommand::COMMAND_RESTART;
+    $command_resume = HarbormasterBuildCommand::COMMAND_RESUME;
+    $command_pause = HarbormasterBuildCommand::COMMAND_PAUSE;
+    $command_abort = HarbormasterBuildCommand::COMMAND_ABORT;
+
     foreach ($buildable->getBuilds() as $build) {
       if ($build->canRestartBuild()) {
-        $can_restart = true;
+        if ($build->canIssueCommand($viewer, $command_restart)) {
+          $can_restart = true;
+        }
       }
       if ($build->canResumeBuild()) {
-        $can_resume = true;
+        if ($build->canIssueCommand($viewer, $command_resume)) {
+          $can_resume = true;
+        }
       }
       if ($build->canPauseBuild()) {
-        $can_pause = true;
+        if ($build->canIssueCommand($viewer, $command_pause)) {
+          $can_pause = true;
+        }
       }
       if ($build->canAbortBuild()) {
-        $can_abort = true;
+        if ($build->canIssueCommand($viewer, $command_abort)) {
+          $can_abort = true;
+        }
       }
     }
 
@@ -154,15 +165,18 @@ final class HarbormasterBuildableViewController
       ->setActionList($actions);
     $box->addPropertyList($properties);
 
-    if ($buildable->getContainerHandle() !== null) {
+    $container_phid = $buildable->getContainerPHID();
+    $buildable_phid = $buildable->getBuildablePHID();
+
+    if ($container_phid) {
       $properties->addProperty(
         pht('Container'),
-        $buildable->getContainerHandle()->renderLink());
+        $viewer->renderHandle($container_phid));
     }
 
     $properties->addProperty(
       pht('Buildable'),
-      $buildable->getBuildableHandle()->renderLink());
+      $viewer->renderHandle($buildable_phid));
 
     $properties->addProperty(
       pht('Origin'),

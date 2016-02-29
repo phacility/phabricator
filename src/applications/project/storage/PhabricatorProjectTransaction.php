@@ -69,6 +69,21 @@ final class PhabricatorProjectTransaction
     return parent::getColor();
   }
 
+  public function shouldHide() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDGE:
+        $edge_type = $this->getMetadataValue('edge:type');
+        switch ($edge_type) {
+          case PhabricatorProjectSilencedEdgeType::EDGECONST:
+            return true;
+          default:
+            break;
+        }
+    }
+
+    return parent::shouldHide();
+  }
+
   public function shouldHideForFeed() {
     switch ($this->getTransactionType()) {
       case self::TYPE_HASWORKBOARD:

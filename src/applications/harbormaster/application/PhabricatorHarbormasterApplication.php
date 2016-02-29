@@ -76,9 +76,9 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
             => 'HarbormasterBuildActionController',
         ),
         'plan/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'HarbormasterPlanListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'HarbormasterPlanEditController',
+          $this->getQueryRoutePattern() => 'HarbormasterPlanListController',
+          $this->getEditRoutePattern('edit/')
+            => 'HarbormasterPlanEditController',
           'order/(?:(?P<id>\d+)/)?' => 'HarbormasterPlanOrderController',
           'disable/(?P<id>\d+)/' => 'HarbormasterPlanDisableController',
           'run/(?P<id>\d+)/' => 'HarbormasterPlanRunController',

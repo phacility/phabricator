@@ -1,25 +1,33 @@
 <?php
 
 final class AlmanacProperty
-  extends PhabricatorCustomFieldStorage
+  extends AlmanacDAO
   implements PhabricatorPolicyInterface {
 
+  protected $objectPHID;
+  protected $fieldIndex;
   protected $fieldName;
+  protected $fieldValue;
 
   private $object = self::ATTACHABLE;
 
-  public function getApplicationName() {
-    return 'almanac';
-  }
-
   protected function getConfiguration() {
-    $config = parent::getConfiguration();
-
-    $config[self::CONFIG_COLUMN_SCHEMA] += array(
-      'fieldName' => 'text128',
-    );
-
-    return $config;
+    return array(
+      self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_SERIALIZATION => array(
+        'fieldValue' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'fieldIndex' => 'bytes12',
+        'fieldName' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'objectPHID' => array(
+          'columns' => array('objectPHID', 'fieldIndex'),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
   }
 
   public function getObject() {
@@ -31,37 +39,51 @@ final class AlmanacProperty
     return $this;
   }
 
-  public static function buildTransactions(
+  public static function newPropertyUpdateTransactions(
+    AlmanacPropertyInterface $object,
+    array $properties,
+    $only_builtins = false) {
+
+    $template = $object->getApplicationTransactionTemplate();
+    $builtins = $object->getAlmanacPropertyFieldSpecifications();
+
+    $xactions = array();
+    foreach ($properties as $name => $property) {
+      if ($only_builtins && empty($builtins[$name])) {
+        continue;
+      }
+
+      $xactions[] = id(clone $template)
+        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_UPDATE)
+        ->setMetadataValue('almanac.property', $name)
+        ->setNewValue($property);
+    }
+
+    return $xactions;
+  }
+
+  public static function newPropertyRemoveTransactions(
     AlmanacPropertyInterface $object,
     array $properties) {
 
     $template = $object->getApplicationTransactionTemplate();
 
-    $attached_properties = $object->getAlmanacProperties();
-    foreach ($properties as $key => $value) {
-      if (empty($attached_properties[$key])) {
-        $attached_properties[] = id(new AlmanacProperty())
-          ->setObjectPHID($object->getPHID())
-          ->setFieldName($key);
-      }
-    }
-    $object->attachAlmanacProperties($attached_properties);
-
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $object,
-      PhabricatorCustomField::ROLE_DEFAULT);
-    $fields = $field_list->getFields();
-
     $xactions = array();
-    foreach ($properties as $name => $property) {
+    foreach ($properties as $property) {
       $xactions[] = id(clone $template)
-        ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
-        ->setMetadataValue('customfield:key', $name)
-        ->setOldValue($object->getAlmanacPropertyValue($name))
-        ->setNewValue($property);
+        ->setTransactionType(AlmanacTransaction::TYPE_PROPERTY_REMOVE)
+        ->setMetadataValue('almanac.property', $property)
+        ->setNewValue(null);
     }
 
     return $xactions;
+  }
+
+  public function save() {
+    $hash = PhabricatorHash::digestForIndex($this->getFieldName());
+    $this->setFieldIndex($hash);
+
+    return parent::save();
   }
 
 

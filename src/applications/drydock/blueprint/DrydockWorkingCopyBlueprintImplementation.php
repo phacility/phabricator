@@ -448,35 +448,17 @@ final class DrydockWorkingCopyBlueprintImplementation
     try {
       $interface->execx('%C', $real_command);
     } catch (CommandException $ex) {
-      $this->setWorkingCopyVCSErrorFromCommandException(
-        $lease,
+      $error = DrydockCommandError::newFromCommandException(
         self::PHASE_SQUASHMERGE,
         $show_command,
         $ex);
 
+      $lease->setAttribute('workingcopy.vcs.error', $error);
       throw $ex;
     }
   }
 
-  protected function setWorkingCopyVCSErrorFromCommandException(
-    DrydockLease $lease,
-    $phase,
-    $command,
-    CommandException $ex) {
-
-    $error = array(
-      'phase' => $phase,
-      'command' => (string)$command,
-      'raw' => (string)$ex->getCommand(),
-      'err' => $ex->getError(),
-      'stdout' => $ex->getStdout(),
-      'stderr' => $ex->getStderr(),
-    );
-
-    $lease->setAttribute('workingcopy.vcs.error', $error);
-  }
-
-  public function getWorkingCopyVCSError(DrydockLease $lease) {
+  public function getCommandError(DrydockLease $lease) {
     $error = $lease->getAttribute('workingcopy.vcs.error');
     if (!$error) {
       return null;

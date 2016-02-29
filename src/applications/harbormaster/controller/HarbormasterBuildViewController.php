@@ -441,10 +441,29 @@ final class HarbormasterBuildViewController
       ->setUser($viewer)
       ->setObject($build);
 
-    $can_restart = $build->canRestartBuild();
-    $can_pause = $build->canPauseBuild();
-    $can_resume = $build->canResumeBuild();
-    $can_abort = $build->canAbortBuild();
+    $can_restart =
+      $build->canRestartBuild() &&
+      $build->canIssueCommand(
+        $viewer,
+        HarbormasterBuildCommand::COMMAND_RESTART);
+
+    $can_pause =
+      $build->canPauseBuild() &&
+      $build->canIssueCommand(
+        $viewer,
+        HarbormasterBuildCommand::COMMAND_PAUSE);
+
+    $can_resume =
+      $build->canResumeBuild() &&
+      $build->canIssueCommand(
+        $viewer,
+        HarbormasterBuildCommand::COMMAND_RESUME);
+
+    $can_abort =
+      $build->canAbortBuild() &&
+      $build->canIssueCommand(
+        $viewer,
+        HarbormasterBuildCommand::COMMAND_ABORT);
 
     $list->addAction(
       id(new PhabricatorActionView())

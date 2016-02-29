@@ -74,13 +74,19 @@ final class DrydockRepositoryOperationStatusView
     if ($state != DrydockRepositoryOperation::STATE_FAIL) {
       $item->addAttribute($operation->getOperationCurrentStatus($viewer));
     } else {
-      $vcs_error = $operation->getWorkingCopyVCSError();
+      $vcs_error = $operation->getCommandError();
       if ($vcs_error) {
         switch ($vcs_error['phase']) {
           case DrydockWorkingCopyBlueprintImplementation::PHASE_SQUASHMERGE:
             $message = pht(
               'This change did not merge cleanly. This usually indicates '.
               'that the change is out of date and needs to be updated.');
+            break;
+          case DrydockLandRepositoryOperation::PHASE_PUSH:
+            $message = pht(
+              'The push failed. This usually indicates '.
+              'that the change is breaking some rules or '.
+              'some custom commit hook has failed.');
             break;
           default:
             $message = pht(

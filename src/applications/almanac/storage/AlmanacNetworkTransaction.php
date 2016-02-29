@@ -24,19 +24,16 @@ final class AlmanacNetworkTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this network.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
-        if ($old === null) {
-          return pht(
-            '%s created this network.',
-            $this->renderHandleLink($author_phid));
-        } else {
-          return pht(
-            '%s renamed this network from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $old,
-            $new);
-        }
-        break;
+        return pht(
+          '%s renamed this network from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $old,
+          $new);
     }
 
     return parent::getTitle();
