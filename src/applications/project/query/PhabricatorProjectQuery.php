@@ -187,6 +187,7 @@ final class PhabricatorProjectQuery
   protected function getPagingValueMap($cursor, array $keys) {
     $project = $this->loadCursorObject($cursor);
     return array(
+      'id' => $project->getID(),
       'name' => $project->getName(),
     );
   }
