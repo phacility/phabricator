@@ -5,6 +5,7 @@ final class HarbormasterUnitPropertyView extends AphrontView {
   private $pathURIMap = array();
   private $unitMessages = array();
   private $limit;
+  private $fullResultsURI;
 
   public function setPathURIMap(array $map) {
     $this->pathURIMap = $map;
@@ -22,18 +23,39 @@ final class HarbormasterUnitPropertyView extends AphrontView {
     return $this;
   }
 
+  public function setFullResultsURI($full_results_uri) {
+    $this->fullResultsURI = $full_results_uri;
+    return $this;
+  }
+
   public function render() {
     $messages = $this->unitMessages;
     $messages = msort($messages, 'getSortKey');
 
+    $limit = $this->limit;
+
     if ($this->limit) {
-      $messages = array_slice($messages, 0, $this->limit);
+      $display_messages = array_slice($messages, 0, $limit);
+    } else {
+      $display_messages = $messages;
     }
 
     $rows = array();
     $any_duration = false;
-    foreach ($messages as $message) {
-      $result = $this->renderResult($message->getResult());
+    foreach ($display_messages as $message) {
+      $status = $message->getResult();
+
+      $icon_icon = HarbormasterUnitStatus::getUnitStatusIcon($status);
+      $icon_color = HarbormasterUnitStatus::getUnitStatusColor($status);
+      $icon_label = HarbormasterUnitStatus::getUnitStatusLabel($status);
+
+      $result_icon = id(new PHUIIconView())
+        ->setIcon("{$icon_icon} {$icon_color}")
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $icon_label,
+          ));
 
       $duration = $message->getDuration();
       if ($duration !== null) {
@@ -54,16 +76,44 @@ final class HarbormasterUnitPropertyView extends AphrontView {
       }
 
       $rows[] = array(
-        $result,
+        $result_icon,
         $duration,
         $name,
       );
     }
 
+    $full_uri = $this->fullResultsURI;
+    if ($full_uri && (count($messages) > $limit)) {
+      $counts = array();
+
+      $groups = mgroup($messages, 'getResult');
+      foreach ($groups as $status => $group) {
+        $counts[] = HarbormasterUnitStatus::getUnitStatusCountLabel(
+          $status,
+          count($group));
+      }
+
+      $link_text = pht(
+        'View Full Test Results (%s)',
+        implode(" \xC2\xB7 ", $counts));
+
+      $full_link = phutil_tag(
+        'a',
+        array(
+          'href' => $full_uri,
+        ),
+        $link_text);
+
+      $link_icon = id(new PHUIIconView())
+        ->setIcon('fa-ellipsis-h lightgreytext');
+
+      $rows[] = array($link_icon, null, $full_link);
+    }
+
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
-          pht('Result'),
+          null,
           pht('Time'),
           pht('Test'),
         ))
@@ -80,21 +130,6 @@ final class HarbormasterUnitPropertyView extends AphrontView {
         ));
 
     return $table;
-  }
-
-  private function renderResult($result) {
-    $names = array(
-      ArcanistUnitTestResult::RESULT_BROKEN     => pht('Broken'),
-      ArcanistUnitTestResult::RESULT_FAIL       => pht('Failed'),
-      ArcanistUnitTestResult::RESULT_UNSOUND    => pht('Unsound'),
-      ArcanistUnitTestResult::RESULT_SKIP       => pht('Skipped'),
-      ArcanistUnitTestResult::RESULT_PASS       => pht('Passed'),
-    );
-    $result = idx($names, $result, $result);
-
-    // TODO: Add some color.
-
-    return $result;
   }
 
 }

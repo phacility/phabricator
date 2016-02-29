@@ -136,18 +136,11 @@ final class HarbormasterBuildUnitMessage
   }
 
   public function getSortKey() {
-    // TODO: Maybe use more numeric values after T6861.
-    $map = array(
-      ArcanistUnitTestResult::RESULT_FAIL => 'A',
-      ArcanistUnitTestResult::RESULT_BROKEN => 'B',
-      ArcanistUnitTestResult::RESULT_UNSOUND => 'C',
-      ArcanistUnitTestResult::RESULT_PASS => 'Z',
-    );
-
-    $result = idx($map, $this->getResult(), 'N');
+    $status = $this->getResult();
+    $sort = HarbormasterUnitStatus::getUnitStatusSort($status);
 
     $parts = array(
-      $result,
+      $sort,
       $this->getEngine(),
       $this->getNamespace(),
       $this->getName(),

@@ -336,15 +336,32 @@ final class HarbormasterBuildableViewController
     }
 
     if ($unit_data) {
+      $unit_href = $this->getApplicationURI('unit/'.$buildable->getID().'/');
+
       $unit_table = id(new HarbormasterUnitPropertyView())
         ->setUser($viewer)
-        ->setLimit(25)
-        ->setUnitMessages($unit_data);
+        ->setLimit(5)
+        ->setUnitMessages($unit_data)
+        ->setFullResultsURI($unit_href);
 
-      $unit_href = $this->getApplicationURI('unit/'.$buildable->getID().'/');
+      $unit_data = msort($unit_data, 'getSortKey');
+      $head_unit = head($unit_data);
+      if ($head_unit) {
+        $status = $head_unit->getResult();
+
+        $tag_text = HarbormasterUnitStatus::getUnitStatusLabel($status);
+        $tag_color = HarbormasterUnitStatus::getUnitStatusColor($status);
+        $tag_icon = HarbormasterUnitStatus::getUnitStatusIcon($status);
+
+      } else {
+        $tag_text = pht('No Unit Tests');
+        $tag_color = 'grey';
+        $tag_icon = 'fa-ban';
+      }
 
       $unit_header = id(new PHUIHeaderView())
         ->setHeader(pht('Unit Tests'))
+        ->setStatus($tag_icon, $tag_color, $tag_text)
         ->addActionLink(
           id(new PHUIButtonView())
             ->setTag('a')

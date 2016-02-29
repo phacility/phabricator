@@ -54,7 +54,9 @@ final class DifferentialUnitField
       $this->getModernUnitMessageDictionary($message));
   }
 
-  protected function newHarbormasterMessageView(array $messages) {
+  protected function newHarbormasterMessageView(array $all_messages) {
+    $messages = $all_messages;
+
     foreach ($messages as $key => $message) {
       switch ($message->getResult()) {
         case ArcanistUnitTestResult::RESULT_PASS:
@@ -71,9 +73,18 @@ final class DifferentialUnitField
       return null;
     }
 
-    return id(new HarbormasterUnitPropertyView())
-      ->setLimit(10)
-      ->setUnitMessages($messages);
+    $table = id(new HarbormasterUnitPropertyView())
+      ->setLimit(5)
+      ->setUnitMessages($all_messages);
+
+    $diff = $this->getObject()->getActiveDiff();
+    $buildable = $diff->getBuildable();
+    if ($buildable) {
+      $full_results = '/harbormaster/unit/'.$buildable->getID().'/';
+      $table->setFullResultsURI($full_results);
+    }
+
+    return $table;
   }
 
   public function getWarningsForDetailView() {
@@ -111,53 +122,6 @@ final class DifferentialUnitField
     $message = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
 
     $note = array();
-
-    $groups = mgroup($messages, 'getResult');
-
-    $groups = array_select_keys(
-      $groups,
-      array(
-        ArcanistUnitTestResult::RESULT_FAIL,
-        ArcanistUnitTestResult::RESULT_BROKEN,
-        ArcanistUnitTestResult::RESULT_UNSOUND,
-        ArcanistUnitTestResult::RESULT_SKIP,
-        ArcanistUnitTestResult::RESULT_PASS,
-      )) + $groups;
-
-    foreach ($groups as $result => $group) {
-      $count = phutil_count($group);
-      switch ($result) {
-        case ArcanistUnitTestResult::RESULT_PASS:
-          $note[] = pht('%s Passed Test(s)', $count);
-          break;
-        case ArcanistUnitTestResult::RESULT_FAIL:
-          $note[] = pht('%s Failed Test(s)', $count);
-          break;
-        case ArcanistUnitTestResult::RESULT_SKIP:
-          $note[] = pht('%s Skipped Test(s)', $count);
-          break;
-        case ArcanistUnitTestResult::RESULT_BROKEN:
-          $note[] = pht('%s Broken Test(s)', $count);
-          break;
-        case ArcanistUnitTestResult::RESULT_UNSOUND:
-          $note[] = pht('%s Unsound Test(s)', $count);
-          break;
-        default:
-          $note[] = pht('%s Other Test(s)', $count);
-          break;
-      }
-    }
-
-    $buildable = $diff->getBuildable();
-    if ($buildable) {
-      $full_results = '/harbormaster/unit/'.$buildable->getID().'/';
-      $note[] = phutil_tag(
-        'a',
-        array(
-          'href' => $full_results,
-        ),
-        pht('View Full Results'));
-    }
 
     $excuse = $diff->getProperty('arc:unit-excuse');
     if (strlen($excuse)) {
