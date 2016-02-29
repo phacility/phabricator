@@ -15,6 +15,8 @@ final class AphrontTableView extends AphrontView {
   protected $columnVisibility = array();
   private $deviceVisibility = array();
 
+  private $columnWidths = array();
+
   protected $sortURI;
   protected $sortParam;
   protected $sortSelected;
@@ -43,6 +45,11 @@ final class AphrontTableView extends AphrontView {
 
   public function setCellClasses(array $cell_classes) {
     $this->cellClasses = $cell_classes;
+    return $this;
+  }
+
+  public function setColumnWidths(array $widths) {
+    $this->columnWidths = $widths;
     return $this;
   }
 
@@ -130,6 +137,8 @@ final class AphrontTableView extends AphrontView {
 
     $visibility = array_values($this->columnVisibility);
     $device_visibility = array_values($this->deviceVisibility);
+
+    $column_widths = $this->columnWidths;
 
     $headers = $this->headers;
     $short_headers = $this->shortHeaders;
@@ -236,7 +245,18 @@ final class AphrontTableView extends AphrontView {
           $header = hsprintf('%s %s', $header_nodevice, $header_device);
         }
 
-        $tr[] = phutil_tag('th', array('class' => $class), $header);
+        $style = null;
+        if (isset($column_widths[$col_num])) {
+          $style = 'width: '.$column_widths[$col_num].';';
+        }
+
+        $tr[] = phutil_tag(
+          'th',
+          array(
+            'class' => $class,
+            'style' => $style,
+          ),
+          $header);
       }
       $table[] = phutil_tag('tr', array(), $tr);
     }
@@ -283,7 +303,13 @@ final class AphrontTableView extends AphrontView {
           if (!empty($this->cellClasses[$row_num][$col_num])) {
             $class = trim($class.' '.$this->cellClasses[$row_num][$col_num]);
           }
-          $tr[] = phutil_tag('td', array('class' => $class), $value);
+
+          $tr[] = phutil_tag(
+            'td',
+            array(
+              'class' => $class,
+            ),
+            $value);
           ++$col_num;
         }
 
@@ -315,8 +341,13 @@ final class AphrontTableView extends AphrontView {
     if ($this->className !== null) {
       $classes[] = $this->className;
     }
+
     if ($this->deviceReadyTable) {
       $classes[] = 'aphront-table-view-device-ready';
+    }
+
+    if ($this->columnWidths) {
+      $classes[] = 'aphront-table-view-fixed';
     }
 
     $html = phutil_tag(

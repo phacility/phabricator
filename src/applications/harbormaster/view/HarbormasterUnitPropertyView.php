@@ -29,6 +29,8 @@ final class HarbormasterUnitPropertyView extends AphrontView {
   }
 
   public function render() {
+    require_celerity_resource('harbormaster-css');
+
     $messages = $this->unitMessages;
     $messages = msort($messages, 'getSortKey');
 
@@ -63,16 +65,22 @@ final class HarbormasterUnitPropertyView extends AphrontView {
         $duration = pht('%s ms', new PhutilNumber((int)(1000 * $duration)));
       }
 
-      $name = $message->getName();
+      $name = $message->getUnitMessageDisplayName();
+      $id = $message->getID();
 
-      $namespace = $message->getNamespace();
-      if (strlen($namespace)) {
-        $name = $namespace.'::'.$name;
-      }
+      $name = phutil_tag(
+        'a',
+        array(
+          'href' => "/harbormaster/unit/view/{$id}/",
+        ),
+        $name);
 
-      $engine = $message->getEngine();
-      if (strlen($engine)) {
-        $name = $engine.' > '.$name;
+      $details = $message->getUnitMessageDetails();
+      if (strlen($details)) {
+        $name = array(
+          $name,
+          $this->renderUnitTestDetails($details),
+        );
       }
 
       $rows[] = array(
@@ -119,9 +127,14 @@ final class HarbormasterUnitPropertyView extends AphrontView {
         ))
       ->setColumnClasses(
         array(
-          null,
-          null,
-          'pri wide',
+          'top',
+          'top',
+          'top wide',
+        ))
+      ->setColumnWidths(
+        array(
+          '32px',
+          '64px',
         ))
       ->setColumnVisibility(
         array(
@@ -130,6 +143,27 @@ final class HarbormasterUnitPropertyView extends AphrontView {
         ));
 
     return $table;
+  }
+
+  private function renderUnitTestDetails($full_details) {
+    $details = id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes(2048)
+      ->truncateString($full_details);
+    $details = phutil_split_lines($details);
+
+    $limit = 3;
+    if (count($details) > $limit) {
+      $details = array_slice($details, 0, $limit);
+    }
+
+    $details = implode('', $details);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'PhabricatorMonospaced harbormaster-unit-details',
+      ),
+      $details);
   }
 
 }

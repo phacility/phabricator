@@ -1,6 +1,6 @@
 <?php
 
-final class HarbormasterUnitMessagesController
+final class HarbormasterUnitMessageListController
   extends HarbormasterController {
 
   public function handleRequest(AphrontRequest $request) {

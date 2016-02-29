@@ -61,6 +61,11 @@ final class HarbormasterBuildUnitMessage
         'description' => pht(
           'Coverage information for this test.'),
       ),
+      'details' => array(
+        'type' => 'optional string',
+        'description' => pht(
+          'Additional human-readable information about the failure.'),
+      ),
     );
   }
 
@@ -92,6 +97,11 @@ final class HarbormasterBuildUnitMessage
     $coverage = idx($dict, 'coverage');
     if ($coverage) {
       $obj->setProperty('coverage', $coverage);
+    }
+
+    $details = idx($dict, 'details');
+    if ($details) {
+      $obj->setProperty('details', $details);
     }
 
     return $obj;
@@ -133,6 +143,30 @@ final class HarbormasterBuildUnitMessage
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
+  }
+
+  public function getUnitMessageDetails() {
+    return $this->getProperty('details', '');
+  }
+
+  public function getUnitMessageDisplayName() {
+    $name = $this->getName();
+
+    $namespace = $this->getNamespace();
+    if (strlen($namespace)) {
+      $name = $namespace.'::'.$name;
+    }
+
+    $engine = $this->getEngine();
+    if (strlen($engine)) {
+      $name = $engine.' > '.$name;
+    }
+
+    if (!strlen($name)) {
+      return pht('Nameless Test (%d)', $this->getID());
+    }
+
+    return $name;
   }
 
   public function getSortKey() {

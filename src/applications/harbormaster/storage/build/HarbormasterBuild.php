@@ -323,6 +323,11 @@ final class HarbormasterBuild extends HarbormasterDAO
     return ($this->getBuildStatus() == self::STATUS_PAUSED);
   }
 
+  public function getURI() {
+    $id = $this->getID();
+    return "/harbormaster/build/{$id}/";
+  }
+
 
 /* -(  Build Commands  )----------------------------------------------------- */
 
