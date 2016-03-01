@@ -52,9 +52,9 @@ final class HarbormasterBuildLog
       throw new Exception(pht('This build log is not open!'));
     }
 
-    // TODO: Encode the log contents in a gzipped format.
-
-    $this->reload();
+    if ($this->canCompressLog()) {
+      $this->compressLog();
+    }
 
     $start = $this->getDateCreated();
     $now = PhabricatorTime::getNow();
@@ -135,20 +135,15 @@ final class HarbormasterBuildLog
       }
 
       $conn_w = $this->establishConnection('w');
-      $tail = queryfx_one(
-        $conn_w,
-        'SELECT id, size, encoding FROM %T WHERE logID = %d
-          ORDER BY id DESC LIMIT 1',
-        $chunk_table,
-        $this->getID());
+      $last = $this->loadLastChunkInfo();
 
       $can_append =
-        ($tail) &&
-        ($tail['encoding'] == $encoding_text) &&
-        ($tail['size'] < $chunk_limit);
+        ($last) &&
+        ($last['encoding'] == $encoding_text) &&
+        ($last['size'] < $chunk_limit);
       if ($can_append) {
-        $append_id = $tail['id'];
-        $prefix_size = $tail['size'];
+        $append_id = $last['id'];
+        $prefix_size = $last['size'];
       } else {
         $append_id = null;
         $prefix_size = 0;
@@ -167,23 +162,28 @@ final class HarbormasterBuildLog
           $prefix_size + $data_size,
           $append_id);
       } else {
-        queryfx(
-          $conn_w,
-          'INSERT INTO %T (logID, encoding, size, chunk)
-            VALUES (%d, %s, %d, %B)',
-          $chunk_table,
-          $this->getID(),
-          $encoding_text,
-          $data_size,
-          $append_data);
+        $this->writeChunk($encoding_text, $data_size, $append_data);
       }
 
-      $rope->removeBytesFromHead(strlen($append_data));
+      $rope->removeBytesFromHead($data_size);
     }
   }
 
   public function newChunkIterator() {
-    return new HarbormasterBuildLogChunkIterator($this);
+    return id(new HarbormasterBuildLogChunkIterator($this))
+      ->setPageSize(32);
+  }
+
+  private function loadLastChunkInfo() {
+    $chunk_table = new HarbormasterBuildLogChunk();
+    $conn_w = $chunk_table->establishConnection('w');
+
+    return queryfx_one(
+      $conn_w,
+      'SELECT id, size, encoding FROM %T WHERE logID = %d
+        ORDER BY id DESC LIMIT 1',
+      $chunk_table->getTableName(),
+      $this->getID());
   }
 
   public function getLogText() {
@@ -197,6 +197,82 @@ final class HarbormasterBuildLog
     }
 
     return implode('', $full_text);
+  }
+
+  private function canCompressLog() {
+    return function_exists('gzdeflate');
+  }
+
+  public function compressLog() {
+    $this->processLog(HarbormasterBuildLogChunk::CHUNK_ENCODING_GZIP);
+  }
+
+  public function decompressLog() {
+    $this->processLog(HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT);
+  }
+
+  private function processLog($mode) {
+    $chunks = $this->newChunkIterator();
+
+    // NOTE: Because we're going to insert new chunks, we need to stop the
+    // iterator once it hits the final chunk which currently exists. Otherwise,
+    // it may start consuming chunks we just wrote and run forever.
+    $last = $this->loadLastChunkInfo();
+    if ($last) {
+      $chunks->setRange(null, $last['id']);
+    }
+
+    $byte_limit = self::CHUNK_BYTE_LIMIT;
+    $rope = new PhutilRope();
+
+    $this->openTransaction();
+
+    foreach ($chunks as $chunk) {
+      $rope->append($chunk->getChunkDisplayText());
+      $chunk->delete();
+
+      while ($rope->getByteLength() > $byte_limit) {
+        $this->writeEncodedChunk($rope, $byte_limit, $mode);
+      }
+    }
+
+    while ($rope->getByteLength()) {
+      $this->writeEncodedChunk($rope, $byte_limit, $mode);
+    }
+
+    $this->saveTransaction();
+  }
+
+  private function writeEncodedChunk(PhutilRope $rope, $length, $mode) {
+    $data = $rope->getPrefixBytes($length);
+    $size = strlen($data);
+
+    switch ($mode) {
+      case HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT:
+        // Do nothing.
+        break;
+      case HarbormasterBuildLogChunk::CHUNK_ENCODING_GZIP:
+        $data = gzdeflate($data);
+        if ($data === false) {
+          throw new Exception(pht('Failed to gzdeflate() log data!'));
+        }
+        break;
+      default:
+        throw new Exception(pht('Unknown chunk encoding "%s"!', $mode));
+    }
+
+    $this->writeChunk($mode, $size, $data);
+
+    $rope->removeBytesFromHead($size);
+  }
+
+  private function writeChunk($encoding, $raw_size, $data) {
+    return id(new HarbormasterBuildLogChunk())
+      ->setLogID($this->getID())
+      ->setEncoding($encoding)
+      ->setSize($raw_size)
+      ->setChunk($data)
+      ->save();
   }
 
 

@@ -8,15 +8,15 @@ final class HarbormasterBuildLogChunk
   protected $size;
   protected $chunk;
 
-
-  /**
-   * The log is encoded as plain text.
-   */
   const CHUNK_ENCODING_TEXT = 'text';
+  const CHUNK_ENCODING_GZIP = 'gzip';
 
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_BINARY => array(
+        'chunk' => true,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'logID' => 'id',
         'encoding' => 'text32',
@@ -42,6 +42,12 @@ final class HarbormasterBuildLogChunk
     switch ($encoding) {
       case self::CHUNK_ENCODING_TEXT:
         // Do nothing, data is already plaintext.
+        break;
+      case self::CHUNK_ENCODING_GZIP:
+        $data = gzinflate($data);
+        if ($data === false) {
+          throw new Exception(pht('Unable to inflate log chunk!'));
+        }
         break;
       default:
         throw new Exception(
