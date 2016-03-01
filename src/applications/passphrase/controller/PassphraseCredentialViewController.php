@@ -34,12 +34,13 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $actions = $this->buildActionView($credential, $type);
     $properties = $this->buildPropertyView($credential, $type);
     $subheader = $this->buildSubheaderView($credential);
-    $content = $this->buildDetailsView($credential, $type);
+    $content = $this->buildPropertySectionView($credential, $type);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
-      ->setMainColumn(array($content, $timeline))
+      ->setMainColumn($timeline)
+      ->addPropertySection(pht('PROPERTIES'), $content)
       ->setPropertyList($properties)
       ->setActionList($actions);
 
@@ -186,7 +187,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
     return $actions;
   }
 
-  private function buildDetailsView(
+  private function buildPropertySectionView(
     PassphraseCredential $credential,
     PassphraseCredentialType $type) {
     $viewer = $this->getRequest()->getUser();
@@ -231,10 +232,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
         new PHUIRemarkupView($viewer, $description));
     }
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('PROPERTIES'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($properties);
+    return $properties;
   }
 
   private function buildPropertyView(

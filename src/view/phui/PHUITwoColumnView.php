@@ -8,6 +8,7 @@ final class PHUITwoColumnView extends AphrontTagView {
   private $fluid;
   private $header;
   private $subheader;
+  private $propertySection = array();
   private $actionList;
   private $propertyList;
 
@@ -31,6 +32,11 @@ final class PHUITwoColumnView extends AphrontTagView {
 
   public function setSubheader($subheader) {
     $this->subheader = $subheader;
+    return $this;
+  }
+
+  public function addPropertySection($title, $section) {
+    $this->propertySection[] = array($title, $section);
     return $this;
   }
 
@@ -83,13 +89,7 @@ final class PHUITwoColumnView extends AphrontTagView {
   protected function getTagContent() {
     require_celerity_resource('phui-two-column-view-css');
 
-    $main = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-main-column',
-      ),
-      $this->mainColumn);
-
+    $main = $this->buildMainColumn();
     $side = $this->buildSideColumn();
     $order = array($side, $main);
 
@@ -120,6 +120,31 @@ final class PHUITwoColumnView extends AphrontTagView {
         $header,
         $subheader,
         $table,
+      ));
+  }
+
+  private function buildMainColumn() {
+
+    $view = array();
+    $sections = $this->propertySection;
+
+    if ($sections) {
+      foreach ($sections as $content) {
+        $view[] = id(new PHUIObjectBoxView())
+          ->setHeaderText($content[0])
+          ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+          ->appendChild($content[1]);
+      }
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-main-column',
+      ),
+      array(
+        $view,
+        $this->mainColumn,
       ));
   }
 

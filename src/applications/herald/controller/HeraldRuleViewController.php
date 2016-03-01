@@ -34,7 +34,7 @@ final class HeraldRuleViewController extends HeraldController {
 
     $actions = $this->buildActionView($rule);
     $properties = $this->buildPropertyView($rule);
-    $details = $this->buildDetailsView($rule);
+    $details = $this->buildPropertySectionView($rule);
 
     $id = $rule->getID();
 
@@ -55,10 +55,8 @@ final class HeraldRuleViewController extends HeraldController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setMainColumn(array(
-        $details,
-        $timeline,
-      ))
+      ->setMainColumn($timeline)
+      ->addPropertySection(pht('DETAILS'), $details)
       ->setPropertyList($properties)
       ->setActionList($actions);
 
@@ -127,7 +125,7 @@ final class HeraldRuleViewController extends HeraldController {
     return $view;
   }
 
-    private function buildDetailsView(
+    private function buildPropertySectionView(
     HeraldRule $rule) {
 
     $viewer = $this->getRequest()->getUser();
@@ -167,10 +165,7 @@ final class HeraldRuleViewController extends HeraldController {
       $view->addTextContent($rule_text);
     }
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($view);
+    return $view;
   }
 
 }

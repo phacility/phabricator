@@ -44,7 +44,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $properties = $this->buildPropertyListView($question);
     $actions = $this->buildActionListView($question);
-    $details = $this->buildDetailsPropertyView($question);
+    $details = $this->buildPropertySectionView($question);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -107,7 +107,6 @@ final class PonderQuestionViewController extends PonderController {
         'class'  => 'ponder-question-content',
       ),
       array(
-        $details,
         $footer,
         $comment_view,
         $answer_wiki,
@@ -120,6 +119,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setSubheader($subheader)
       ->setMainColumn($ponder_content)
       ->setPropertyList($properties)
+      ->addPropertySection(pht('DETAILS'), $details)
       ->setActionList($actions)
       ->addClass('ponder-question-view');
 
@@ -222,7 +222,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setContent($content);
   }
 
-  private function buildDetailsPropertyView(
+  private function buildPropertySectionView(
     PonderQuestion $question) {
     $viewer = $this->getViewer();
 
@@ -241,11 +241,7 @@ final class PonderQuestionViewController extends PonderController {
     $question_details = phutil_tag_div(
       'phabricator-remarkup ml', $question_details);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setFlush(true)
-      ->appendChild($question_details);
+    return $question_details;
   }
 
   /**
@@ -273,7 +269,6 @@ final class PonderQuestionViewController extends PonderController {
           id(new PonderAnswerTransactionQuery())
           ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
         $xactions = $timeline->getTransactions();
-
 
         $view[] = id(new PonderAnswerView())
           ->setUser($viewer)
