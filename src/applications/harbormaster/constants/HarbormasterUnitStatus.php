@@ -43,10 +43,10 @@ final class HarbormasterUnitStatus
         return pht('%s Broken Test(s)', $count);
       case ArcanistUnitTestResult::RESULT_UNSOUND:
         return pht('%s Unsound Test(s)', $count);
-      case ArcanistUnitTestResult::RESULT_SKIP:
-        return pht('%s Skipped Test(s)', $count);
       case ArcanistUnitTestResult::RESULT_PASS:
         return pht('%s Passed Test(s)', $count);
+      case ArcanistUnitTestResult::RESULT_SKIP:
+        return pht('%s Skipped Test(s)', $count);
     }
 
     return pht('%s Other Test(s)', $count);
@@ -72,16 +72,17 @@ final class HarbormasterUnitStatus
         'color' => 'yellow',
         'sort' => 'C',
       ),
-      ArcanistUnitTestResult::RESULT_SKIP => array(
-        'label' => pht('Skipped'),
-        'icon' => 'fa-fast-forward',
-        'color' => 'blue',
-      ),
       ArcanistUnitTestResult::RESULT_PASS => array(
         'label' => pht('Passed'),
         'icon' => 'fa-check',
         'color' => 'green',
-        'sort' => 'Z',
+        'sort' => 'D',
+      ),
+      ArcanistUnitTestResult::RESULT_SKIP => array(
+        'label' => pht('Skipped'),
+        'icon' => 'fa-fast-forward',
+        'color' => 'blue',
+        'sort' => 'E',
       ),
     );
   }
