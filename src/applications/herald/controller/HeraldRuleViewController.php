@@ -33,12 +33,14 @@ final class HeraldRuleViewController extends HeraldController {
     }
 
     $actions = $this->buildActionView($rule);
-    $properties = $this->buildPropertyView($rule, $actions);
+    $properties = $this->buildPropertyView($rule);
+    $details = $this->buildDetailsView($rule);
 
     $id = $rule->getID();
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb("H{$id}");
+    $crumbs->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -51,13 +53,21 @@ final class HeraldRuleViewController extends HeraldController {
 
     $title = $rule->getName();
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+        $details,
+        $timeline,
+      ))
+      ->setPropertyList($properties)
+      ->setActionList($actions);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $timeline,
+          $view,
       ));
   }
 
@@ -105,15 +115,24 @@ final class HeraldRuleViewController extends HeraldController {
   }
 
   private function buildPropertyView(
-    HeraldRule $rule,
-    PhabricatorActionListView $actions) {
+    HeraldRule $rule) {
 
     $viewer = $this->getRequest()->getUser();
-
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($rule)
-      ->setActionList($actions);
+      ->setObject($rule);
+
+    $view->invokeWillRenderEvent();
+
+    return $view;
+  }
+
+    private function buildDetailsView(
+    HeraldRule $rule) {
+
+    $viewer = $this->getRequest()->getUser();
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
 
     $view->addProperty(
       pht('Rule Type'),
@@ -139,8 +158,6 @@ final class HeraldRuleViewController extends HeraldController {
           $viewer->renderHandle($rule->getTriggerObjectPHID()));
       }
 
-      $view->invokeWillRenderEvent();
-
       $view->addSectionHeader(
         pht('Rule Description'),
         PHUIPropertyListView::ICON_SUMMARY);
@@ -150,7 +167,10 @@ final class HeraldRuleViewController extends HeraldController {
       $view->addTextContent($rule_text);
     }
 
-    return $view;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('DETAILS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($view);
   }
 
 }
