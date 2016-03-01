@@ -15,7 +15,6 @@ final class HarbormasterBuildLog
   private $isOpen;
 
   const CHUNK_BYTE_LIMIT = 102400;
-  const CHUNK_TABLE = 'harbormaster_buildlogchunk';
 
   /**
    * The log is encoded as plain text.
@@ -128,7 +127,7 @@ final class HarbormasterBuildLog
     // caller writes a single character over and over again, we'll currently
     // spend a lot of time flushing that.
 
-    $chunk_table = self::CHUNK_TABLE;
+    $chunk_table = id(new HarbormasterBuildLogChunk())->getTableName();
     $chunk_limit = self::CHUNK_BYTE_LIMIT;
     $rope = $this->rope;
 
@@ -198,9 +197,10 @@ final class HarbormasterBuildLog
     $result = queryfx_all(
       $conn,
       'SELECT chunk '.
-      'FROM harbormaster_buildlogchunk '.
+      'FROM %T '.
       'WHERE logID = %d '.
       'ORDER BY id ASC',
+      id(new HarbormasterBuildLogChunk())->getTableName(),
       $this->getID());
 
     $content = '';
