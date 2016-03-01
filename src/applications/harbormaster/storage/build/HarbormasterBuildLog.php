@@ -1,6 +1,7 @@
 <?php
 
-final class HarbormasterBuildLog extends HarbormasterDAO
+final class HarbormasterBuildLog
+  extends HarbormasterDAO
   implements PhabricatorPolicyInterface {
 
   protected $buildTargetPHID;
@@ -10,7 +11,6 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   protected $live;
 
   private $buildTarget = self::ATTACHABLE;
-  private $start;
 
   const CHUNK_BYTE_LIMIT = 102400;
 
@@ -20,8 +20,8 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   const ENCODING_TEXT = 'text';
 
   public function __destruct() {
-    if ($this->start) {
-      $this->finalize($this->start);
+    if ($this->getLive()) {
+      $this->closeBuildLog();
     }
   }
 
@@ -33,6 +33,35 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       ->setDuration(null)
       ->setLive(0);
   }
+
+  public function openBuildLog() {
+    if ($this->getLive()) {
+      throw new Exception(pht('This build log is already open!'));
+    }
+
+    return $this
+      ->setLive(1)
+      ->save();
+  }
+
+  public function closeBuildLog() {
+    if (!$this->getLive()) {
+      throw new Exception(pht('This build log is not open!'));
+    }
+
+    // TODO: Encode the log contents in a gzipped format.
+
+    $this->reload();
+
+    $start = $this->getDateCreated();
+    $now = PhabricatorTime::getNow();
+
+    return $this
+      ->setDuration($now - $start)
+      ->setLive(0)
+      ->save();
+  }
+
 
   protected function getConfiguration() {
     return array(
@@ -73,26 +102,13 @@ final class HarbormasterBuildLog extends HarbormasterDAO
     return pht('Build Log');
   }
 
-  public function start() {
-    if ($this->getLive()) {
-      throw new Exception(
-        pht('Live logging has already started for this log.'));
-    }
-
-    $this->setLive(1);
-    $this->save();
-
-    $this->start = PhabricatorTime::getNow();
-
-    return time();
-  }
-
   public function append($content) {
     if (!$this->getLive()) {
-      throw new Exception(
-        pht('Start logging before appending data to the log.'));
+      throw new PhutilInvalidStateException('openBuildLog');
     }
-    if (strlen($content) === 0) {
+
+    $content = (string)$content;
+    if (!strlen($content)) {
       return;
     }
 
@@ -150,21 +166,6 @@ final class HarbormasterBuildLog extends HarbormasterDAO
         $content,
         $result[0]['id']);
     }
-  }
-
-  public function finalize($start = 0) {
-    if (!$this->getLive()) {
-      // TODO: Clean up this API.
-      return;
-    }
-
-    // TODO: Encode the log contents in a gzipped format.
-    $this->reload();
-    if ($start > 0) {
-      $this->setDuration(time() - $start);
-    }
-    $this->setLive(0);
-    $this->save();
   }
 
   public function getLogText() {
