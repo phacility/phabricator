@@ -24,7 +24,7 @@ final class HarbormasterSchemaSpec extends PhabricatorConfigSchemaSpec {
 
     $this->buildRawSchema(
       id(new HarbormasterBuildable())->getApplicationName(),
-      'harbormaster_buildlogchunk',
+      HarbormasterBuildLog::CHUNK_TABLE,
       array(
         'id' => 'auto',
         'logID' => 'id',

@@ -11,16 +11,23 @@ final class HarbormasterBuildLog
   protected $live;
 
   private $buildTarget = self::ATTACHABLE;
+  private $rope;
+  private $isOpen;
 
   const CHUNK_BYTE_LIMIT = 102400;
+  const CHUNK_TABLE = 'harbormaster_buildlogchunk';
 
   /**
    * The log is encoded as plain text.
    */
   const ENCODING_TEXT = 'text';
 
+  public function __construct() {
+    $this->rope = new PhutilRope();
+  }
+
   public function __destruct() {
-    if ($this->getLive()) {
+    if ($this->isOpen) {
       $this->closeBuildLog();
     }
   }
@@ -35,9 +42,11 @@ final class HarbormasterBuildLog
   }
 
   public function openBuildLog() {
-    if ($this->getLive()) {
+    if ($this->isOpen) {
       throw new Exception(pht('This build log is already open!'));
     }
+
+    $this->isOpen = true;
 
     return $this
       ->setLive(1)
@@ -45,7 +54,7 @@ final class HarbormasterBuildLog
   }
 
   public function closeBuildLog() {
-    if (!$this->getLive()) {
+    if (!$this->isOpen) {
       throw new Exception(pht('This build log is not open!'));
     }
 
@@ -108,63 +117,72 @@ final class HarbormasterBuildLog
     }
 
     $content = (string)$content;
-    if (!strlen($content)) {
-      return;
-    }
 
-    // If the length of the content is greater than the chunk size limit,
-    // then we can never fit the content in a single record. We need to
-    // split our content out and call append on it for as many parts as there
-    // are to the content.
-    if (strlen($content) > self::CHUNK_BYTE_LIMIT) {
-      $current = $content;
-      while (strlen($current) > self::CHUNK_BYTE_LIMIT) {
-        $part = substr($current, 0, self::CHUNK_BYTE_LIMIT);
-        $current = substr($current, self::CHUNK_BYTE_LIMIT);
-        $this->append($part);
+    $this->rope->append($content);
+    $this->flush();
+  }
+
+  private function flush() {
+
+    // TODO: Maybe don't flush more than a couple of times per second. If a
+    // caller writes a single character over and over again, we'll currently
+    // spend a lot of time flushing that.
+
+    $chunk_table = self::CHUNK_TABLE;
+    $chunk_limit = self::CHUNK_BYTE_LIMIT;
+    $rope = $this->rope;
+
+    while (true) {
+      $length = $rope->getByteLength();
+      if (!$length) {
+        break;
       }
-      $this->append($current);
-      return;
-    }
 
-    // Retrieve the size of last chunk from the DB for this log. If the
-    // chunk is over 500K, then we need to create a new log entry.
-    $conn = $this->establishConnection('w');
-    $result = queryfx_all(
-      $conn,
-      'SELECT id, size, encoding '.
-      'FROM harbormaster_buildlogchunk '.
-      'WHERE logID = %d '.
-      'ORDER BY id DESC '.
-      'LIMIT 1',
-      $this->getID());
-    if (count($result) === 0 ||
-      $result[0]['size'] + strlen($content) > self::CHUNK_BYTE_LIMIT ||
-      $result[0]['encoding'] !== self::ENCODING_TEXT) {
+      $conn_w = $this->establishConnection('w');
+      $tail = queryfx_one(
+        $conn_w,
+        'SELECT id, size, encoding FROM %T WHERE logID = %d
+          ORDER BY id DESC LIMIT 1',
+        $chunk_table,
+        $this->getID());
 
-      // We must insert a new chunk because the data we are appending
-      // won't fit into the existing one, or we don't have any existing
-      // chunk data.
-      queryfx(
-        $conn,
-        'INSERT INTO harbormaster_buildlogchunk '.
-        '(logID, encoding, size, chunk) '.
-        'VALUES '.
-        '(%d, %s, %d, %B)',
-        $this->getID(),
-        self::ENCODING_TEXT,
-        strlen($content),
-        $content);
-    } else {
-      // We have a resulting record that we can append our content onto.
-      queryfx(
-        $conn,
-        'UPDATE harbormaster_buildlogchunk '.
-        'SET chunk = CONCAT(chunk, %B), size = LENGTH(CONCAT(chunk, %B))'.
-        'WHERE id = %d',
-        $content,
-        $content,
-        $result[0]['id']);
+      $can_append =
+        ($tail) &&
+        ($tail['encoding'] == self::ENCODING_TEXT) &&
+        ($tail['size'] < $chunk_limit);
+      if ($can_append) {
+        $append_id = $tail['id'];
+        $prefix_size = $tail['size'];
+      } else {
+        $append_id = null;
+        $prefix_size = 0;
+      }
+
+      $data_limit = ($chunk_limit - $prefix_size);
+      $append_data = $rope->getPrefixBytes($data_limit);
+      $data_size = strlen($append_data);
+
+      if ($append_id) {
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET chunk = CONCAT(chunk, %B), size = %d WHERE id = %d',
+          $chunk_table,
+          $append_data,
+          $prefix_size + $data_size,
+          $append_id);
+      } else {
+        queryfx(
+          $conn_w,
+          'INSERT INTO %T (logID, encoding, size, chunk)
+            VALUES (%d, %s, %d, %B)',
+          $chunk_table,
+          $this->getID(),
+          self::ENCODING_TEXT,
+          $data_size,
+          $append_data);
+      }
+
+      $rope->removeBytesFromHead(strlen($append_data));
     }
   }
 
