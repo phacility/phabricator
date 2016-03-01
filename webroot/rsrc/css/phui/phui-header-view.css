@@ -272,8 +272,14 @@ body .phui-header-shell.phui-bleed-header
   font-size: 18px;
 }
 
-.spaces-name .phui-handle {
+.spaces-name .phui-handle,
+.spaces-name a.phui-handle {
   color: {$sh-redtext};
+}
+
+.device-desktop .spaces-name a.phui-handle:hover {
+  color: {$sh-redtext};
+  text-decoration: underline;
 }
 
 .phui-header-subheader .phui-badge-flex-view {
