@@ -1045,6 +1045,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildLintMessage' => 'applications/harbormaster/storage/build/HarbormasterBuildLintMessage.php',
     'HarbormasterBuildLog' => 'applications/harbormaster/storage/build/HarbormasterBuildLog.php',
     'HarbormasterBuildLogChunk' => 'applications/harbormaster/storage/build/HarbormasterBuildLogChunk.php',
+    'HarbormasterBuildLogChunkIterator' => 'applications/harbormaster/storage/build/HarbormasterBuildLogChunkIterator.php',
     'HarbormasterBuildLogPHIDType' => 'applications/harbormaster/phid/HarbormasterBuildLogPHIDType.php',
     'HarbormasterBuildLogQuery' => 'applications/harbormaster/query/HarbormasterBuildLogQuery.php',
     'HarbormasterBuildMessage' => 'applications/harbormaster/storage/HarbormasterBuildMessage.php',
@@ -5193,6 +5194,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
     ),
     'HarbormasterBuildLogChunk' => 'HarbormasterDAO',
+    'HarbormasterBuildLogChunkIterator' => 'PhutilBufferedIterator',
     'HarbormasterBuildLogPHIDType' => 'PhabricatorPHIDType',
     'HarbormasterBuildLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildMessage' => array(

@@ -8,6 +8,12 @@ final class HarbormasterBuildLogChunk
   protected $size;
   protected $chunk;
 
+
+  /**
+   * The log is encoded as plain text.
+   */
+  const CHUNK_ENCODING_TEXT = 'text';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
@@ -28,5 +34,22 @@ final class HarbormasterBuildLogChunk
       ),
     ) + parent::getConfiguration();
   }
+
+  public function getChunkDisplayText() {
+    $data = $this->getChunk();
+    $encoding = $this->getEncoding();
+
+    switch ($encoding) {
+      case self::CHUNK_ENCODING_TEXT:
+        // Do nothing, data is already plaintext.
+        break;
+      default:
+        throw new Exception(
+          pht('Unknown log chunk encoding ("%s")!', $encoding));
+    }
+
+    return $data;
+  }
+
 
 }

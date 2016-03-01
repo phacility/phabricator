@@ -16,11 +16,6 @@ final class HarbormasterBuildLog
 
   const CHUNK_BYTE_LIMIT = 102400;
 
-  /**
-   * The log is encoded as plain text.
-   */
-  const ENCODING_TEXT = 'text';
-
   public function __construct() {
     $this->rope = new PhutilRope();
   }
@@ -129,6 +124,8 @@ final class HarbormasterBuildLog
 
     $chunk_table = id(new HarbormasterBuildLogChunk())->getTableName();
     $chunk_limit = self::CHUNK_BYTE_LIMIT;
+    $encoding_text = HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT;
+
     $rope = $this->rope;
 
     while (true) {
@@ -147,7 +144,7 @@ final class HarbormasterBuildLog
 
       $can_append =
         ($tail) &&
-        ($tail['encoding'] == self::ENCODING_TEXT) &&
+        ($tail['encoding'] == $encoding_text) &&
         ($tail['size'] < $chunk_limit);
       if ($can_append) {
         $append_id = $tail['id'];
@@ -176,7 +173,7 @@ final class HarbormasterBuildLog
             VALUES (%d, %s, %d, %B)',
           $chunk_table,
           $this->getID(),
-          self::ENCODING_TEXT,
+          $encoding_text,
           $data_size,
           $append_data);
       }
@@ -185,29 +182,21 @@ final class HarbormasterBuildLog
     }
   }
 
+  public function newChunkIterator() {
+    return new HarbormasterBuildLogChunkIterator($this);
+  }
+
   public function getLogText() {
-    // TODO: This won't cope very well if we're pulling like a 700MB
-    // log file out of the DB. We should probably implement some sort
-    // of optional limit parameter so that when we're rendering out only
-    // 25 lines in the UI, we don't wastefully read in the whole log.
+    // TODO: Remove this method since it won't scale for big logs.
 
-    // We have to read our content out of the database and stitch all of
-    // the log data back together.
-    $conn = $this->establishConnection('r');
-    $result = queryfx_all(
-      $conn,
-      'SELECT chunk '.
-      'FROM %T '.
-      'WHERE logID = %d '.
-      'ORDER BY id ASC',
-      id(new HarbormasterBuildLogChunk())->getTableName(),
-      $this->getID());
+    $all_chunks = $this->newChunkIterator();
 
-    $content = '';
-    foreach ($result as $row) {
-      $content .= $row['chunk'];
+    $full_text = array();
+    foreach ($all_chunks as $chunk) {
+      $full_text[] = $chunk->getChunkDisplayText();
     }
-    return $content;
+
+    return implode('', $full_text);
   }
 
 
