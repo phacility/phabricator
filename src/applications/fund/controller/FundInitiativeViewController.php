@@ -7,7 +7,6 @@ final class FundInitiativeViewController
     return true;
   }
 
-
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -22,6 +21,7 @@ final class FundInitiativeViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($initiative->getMonogram());
+    $crumbs->setBorder(true);
 
     $title = pht(
       '%s %s',
@@ -43,32 +43,32 @@ final class FundInitiativeViewController
       ->setHeader($initiative->getName())
       ->setUser($viewer)
       ->setPolicyObject($initiative)
-      ->setStatus($status_icon, $status_color, $status_name);
+      ->setStatus($status_icon, $status_color, $status_name)
+      ->setHeaderIcon('fa-heart');
 
     $properties = $this->buildPropertyListView($initiative);
     $actions = $this->buildActionListView($initiative);
-    $properties->setActionList($actions);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
-
+    $details = $this->buildPropertySectionView($initiative);
 
     $timeline = $this->buildTransactionTimeline(
       $initiative,
       new FundInitiativeTransactionQuery());
-    $timeline
-      ->setShouldTerminate(true);
+    $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $timeline,
-      ),
-      array(
-        'title' => $title,
-        'pageObjects' => array($initiative->getPHID()),
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn($timeline)
+      ->setPropertyList($properties)
+      ->addPropertySection(pht('DETAILS'), $details)
+      ->setActionList($actions);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($initiative->getPHID()))
+      ->appendChild(
+        array(
+          $view,
       ));
   }
 
@@ -78,6 +78,17 @@ final class FundInitiativeViewController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($initiative);
+
+    $view->invokeWillRenderEvent();
+
+    return $view;
+  }
+
+  private function buildPropertySectionView(FundInitiative $initiative) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
 
     $owner_phid = $initiative->getOwnerPHID();
     $merchant_phid = $initiative->getMerchantPHID();
@@ -93,8 +104,6 @@ final class FundInitiativeViewController
     $view->addProperty(
       pht('Total Funding'),
       $initiative->getTotalAsCurrency()->formatForDisplay());
-
-    $view->invokeWillRenderEvent();
 
     $description = $initiative->getDescription();
     if (strlen($description)) {
