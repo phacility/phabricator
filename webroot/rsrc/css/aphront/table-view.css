@@ -248,10 +248,11 @@ span.single-display-line-content {
 }
 
 .aphront-table-view tr.no-data td {
-  padding: 12px;
+  padding: 16px;
   text-align: center;
   color: {$lightgreytext};
   font-style: italic;
+  font-size: {$normalfontsize};
 }
 
 .aphront-table-view td.thumb img {

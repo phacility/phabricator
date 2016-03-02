@@ -313,10 +313,11 @@ final class PHUIHeaderView extends AphrontTagView {
           $action_list);
     }
 
+    $icon = null;
     if ($this->headerIcon) {
       $icon = id(new PHUIIconView())
-        ->setIcon($this->headerIcon);
-      $left[] = $icon;
+        ->setIcon($this->headerIcon)
+        ->addClass('phui-header-icon');
     }
 
     $header_content = $this->header;
@@ -338,6 +339,7 @@ final class PHUIHeaderView extends AphrontTagView {
       ),
       array(
         $space_header,
+        $icon,
         $header_content,
       ));
 

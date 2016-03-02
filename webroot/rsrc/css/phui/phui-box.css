@@ -66,6 +66,11 @@
   padding: 0;
 }
 
+.phui-box.phui-box-blue-property .phui-header-action-link {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .device .phui-box.phui-box-blue-property {
   padding: 0;
 }

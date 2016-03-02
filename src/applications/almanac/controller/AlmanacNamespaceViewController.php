@@ -21,42 +21,49 @@ final class AlmanacNamespaceViewController
 
     $title = pht('Namespace %s', $namespace->getName());
 
-    $property_list = $this->buildPropertyList($namespace);
-    $action_list = $this->buildActionList($namespace);
-    $property_list->setActionList($action_list);
+    $properties = $this->buildPropertyList($namespace);
+    $actions = $this->buildActionList($namespace);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($namespace->getName())
-      ->setPolicyObject($namespace);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($property_list);
+      ->setPolicyObject($namespace)
+      ->setHeaderIcon('fa-asterisk');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($namespace->getName());
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $namespace,
       new AlmanacNamespaceTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+          $timeline,
+        ))
+      ->setPropertyList($properties)
+      ->setActionList($actions);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $box,
-          $timeline,
-      ));
+          $view,
+        ));
   }
 
   private function buildPropertyList(AlmanacNamespace $namespace) {
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setObject($namespace);
+
+    $properties->invokeWillRenderEvent();
 
     return $properties;
   }
