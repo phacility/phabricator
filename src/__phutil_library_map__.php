@@ -6123,7 +6123,7 @@ phutil_register_library_map(array(
     'PhabricatorBadgesMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PhabricatorBadgesPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorBadgesQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
-    'PhabricatorBadgesRecipientsListView' => 'AphrontTagView',
+    'PhabricatorBadgesRecipientsListView' => 'AphrontView',
     'PhabricatorBadgesRemoveRecipientsController' => 'PhabricatorBadgesController',
     'PhabricatorBadgesReplyHandler' => 'PhabricatorApplicationTransactionReplyHandler',
     'PhabricatorBadgesSchemaSpec' => 'PhabricatorConfigSchemaSpec',

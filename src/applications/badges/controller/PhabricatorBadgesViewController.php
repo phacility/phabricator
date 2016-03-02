@@ -22,6 +22,7 @@ final class PhabricatorBadgesViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($badge->getName());
+    $crumbs->setBorder(true);
     $title = $badge->getName();
 
     if ($badge->isArchived()) {
@@ -39,15 +40,12 @@ final class PhabricatorBadgesViewController
       ->setHeader($badge->getName())
       ->setUser($viewer)
       ->setPolicyObject($badge)
-      ->setStatus($status_icon, $status_color, $status_name);
+      ->setStatus($status_icon, $status_color, $status_name)
+      ->setHeaderIcon('fa-trophy');
 
     $properties = $this->buildPropertyListView($badge);
     $actions = $this->buildActionListView($badge);
-    $properties->setActionList($actions);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $details = $this->buildDetailsView($badge);
 
     $timeline = $this->buildTransactionTimeline(
       $badge,
@@ -64,25 +62,46 @@ final class PhabricatorBadgesViewController
 
     $add_comment = $this->buildCommentForm($badge);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+          $recipient_list,
+          $timeline,
+          $add_comment,
+        ))
+      ->setPropertyList($properties)
+      ->setActionList($actions)
+      ->addPropertySection(pht('BADGE DETAILS'), $details);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($badge->getPHID()))
       ->appendChild(
         array(
-          $box,
-          $recipient_list,
-          $timeline,
-          $add_comment,
+          $view,
       ));
   }
 
-  private function buildPropertyListView(PhabricatorBadgesBadge $badge) {
+  private function buildPropertyListView(
+    PhabricatorBadgesBadge $badge) {
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($badge);
+
+    $view->invokeWillRenderEvent();
+
+    return $view;
+  }
+
+  private function buildDetailsView(
+    PhabricatorBadgesBadge $badge) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
 
     $quality = idx($badge->getQualityNameMap(), $badge->getQuality());
 
@@ -98,8 +117,6 @@ final class PhabricatorBadgesViewController
     $view->addProperty(
       pht('Flavor'),
       $badge->getFlavor());
-
-    $view->invokeWillRenderEvent();
 
     $description = $badge->getDescription();
     if (strlen($description)) {
@@ -160,9 +177,10 @@ final class PhabricatorBadgesViewController
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName('Manage Recipients')
+        ->setName('Add Recipients')
         ->setIcon('fa-users')
         ->setDisabled(!$can_edit)
+        ->setWorkflow(true)
         ->setHref($this->getApplicationURI("/recipients/{$id}/")));
 
     return $view;
