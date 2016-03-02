@@ -46,12 +46,24 @@ final class PhameBlogEditEngine
     return pht('Create Blog');
   }
 
+  protected function getObjectCreateCancelURI($object) {
+    return $this->getApplication()->getApplicationURI('blog/');
+  }
+
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('blog/edit/');
+  }
+
   protected function getObjectViewURI($object) {
     return $object->getManageURI();
   }
 
-  protected function buildCustomEditFields($object) {
+  protected function getCreateNewObjectPolicy() {
+    return $this->getApplication()->getPolicy(
+      PhameBlogCreateCapability::CAPABILITY);
+  }
 
+  protected function buildCustomEditFields($object) {
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')

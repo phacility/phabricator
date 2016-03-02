@@ -6,6 +6,16 @@ final class PhameHomeController extends PhamePostController {
     return true;
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    id(new PhameBlogEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
+
+    return $crumbs;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
@@ -44,7 +54,7 @@ final class PhameHomeController extends PhamePostController {
       $create_button = id(new PHUIButtonView())
         ->setTag('a')
         ->setText(pht('Create a Blog'))
-        ->setHref('/phame/blog/new/')
+        ->setHref('/phame/blog/edit/')
         ->setColor(PHUIButtonView::GREEN);
 
       $post_list = id(new PHUIBigInfoView())
@@ -116,27 +126,6 @@ final class PhameHomeController extends PhamePostController {
         array(
           $phame_home,
       ));
-
-
-  }
-
-  private function renderBlogs($viewer, $blogs) {}
-
-  protected function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-
-    $can_create = $this->hasApplicationCapability(
-      PhameBlogCreateCapability::CAPABILITY);
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('New Blog'))
-        ->setHref($this->getApplicationURI('/blog/new/'))
-        ->setIcon('fa-plus-square')
-        ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create));
-
-    return $crumbs;
   }
 
 }
