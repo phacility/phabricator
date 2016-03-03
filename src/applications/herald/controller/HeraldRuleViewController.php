@@ -18,7 +18,8 @@ final class HeraldRuleViewController extends HeraldController {
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($rule->getName())
-      ->setPolicyObject($rule);
+      ->setPolicyObject($rule)
+      ->setHeaderIcon('fa-bullhorn');
 
     if ($rule->getIsDisabled()) {
       $header->setStatus(
@@ -35,6 +36,7 @@ final class HeraldRuleViewController extends HeraldController {
     $actions = $this->buildActionView($rule);
     $properties = $this->buildPropertyView($rule);
     $details = $this->buildPropertySectionView($rule);
+    $description = $this->buildDescriptionView($rule);
 
     $id = $rule->getID();
 
@@ -57,6 +59,7 @@ final class HeraldRuleViewController extends HeraldController {
       ->setHeader($header)
       ->setMainColumn($timeline)
       ->addPropertySection(pht('DETAILS'), $details)
+      ->addPropertySection(pht('DESCRIPTION'), $description)
       ->setPropertyList($properties)
       ->setActionList($actions);
 
@@ -155,17 +158,24 @@ final class HeraldRuleViewController extends HeraldController {
           pht('Trigger Object'),
           $viewer->renderHandle($rule->getTriggerObjectPHID()));
       }
-
-      $view->addSectionHeader(
-        pht('Rule Description'),
-        PHUIPropertyListView::ICON_SUMMARY);
-
-      $handles = $viewer->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
-      $rule_text = $adapter->renderRuleAsText($rule, $handles, $viewer);
-      $view->addTextContent($rule_text);
     }
 
     return $view;
+  }
+
+  private function buildDescriptionView(HeraldRule $rule) {
+    $viewer = $this->getRequest()->getUser();
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
+    if ($adapter) {
+      $handles = $viewer->loadHandles(HeraldAdapter::getHandlePHIDs($rule));
+      $rule_text = $adapter->renderRuleAsText($rule, $handles, $viewer);
+      $view->addTextContent($rule_text);
+      return $view;
+    }
+    return null;
   }
 
 }

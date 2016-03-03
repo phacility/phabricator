@@ -130,10 +130,12 @@ final class PHUITwoColumnView extends AphrontTagView {
 
     if ($sections) {
       foreach ($sections as $content) {
-        $view[] = id(new PHUIObjectBoxView())
-          ->setHeaderText($content[0])
-          ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-          ->appendChild($content[1]);
+        if ($content[1]) {
+          $view[] = id(new PHUIObjectBoxView())
+            ->setHeaderText($content[0])
+            ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+            ->appendChild($content[1]);
+        }
       }
     }
 
