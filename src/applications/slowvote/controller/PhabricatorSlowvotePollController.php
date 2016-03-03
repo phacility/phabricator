@@ -43,7 +43,8 @@ final class PhabricatorSlowvotePollController
       ->setHeader($poll->getQuestion())
       ->setUser($viewer)
       ->setStatus($header_icon, $header_color, $header_name)
-      ->setPolicyObject($poll);
+      ->setPolicyObject($poll)
+      ->setHeaderIcon('fa-bar-chart');
 
     $actions = $this->buildActionView($poll);
     $properties = $this->buildPropertyView($poll);

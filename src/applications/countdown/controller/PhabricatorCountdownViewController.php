@@ -46,7 +46,8 @@ final class PhabricatorCountdownViewController
       ->setHeader($title)
       ->setUser($viewer)
       ->setPolicyObject($countdown)
-      ->setStatus($icon, $color, $status);
+      ->setStatus($icon, $color, $status)
+      ->setHeaderIcon('fa-rocket');
 
     $actions = $this->buildActionListView($countdown);
     $properties = $this->buildPropertyListView($countdown);

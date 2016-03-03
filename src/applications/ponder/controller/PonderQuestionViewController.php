@@ -31,6 +31,7 @@ final class PonderQuestionViewController extends PonderController {
     $header->setHeader($question->getTitle());
     $header->setUser($viewer);
     $header->setPolicyObject($question);
+    $header->setHeaderIcon('fa-university');
 
     if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
       $header->setStatus('fa-square-o', 'bluegrey', pht('Open'));
