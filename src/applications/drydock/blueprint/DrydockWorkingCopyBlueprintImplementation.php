@@ -13,6 +13,10 @@ final class DrydockWorkingCopyBlueprintImplementation
     return pht('Working Copy');
   }
 
+  public function getBlueprintIcon() {
+    return 'fa-folder-open';
+  }
+
   public function getDescription() {
     return pht('Allows Drydock to check out working copies of repositories.');
   }

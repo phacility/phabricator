@@ -84,7 +84,6 @@ final class HarbormasterBuildPlanSearchEngine
 
     $viewer = $this->requireViewer();
 
-
     if ($plans) {
       $edge_query = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs(mpull($plans, 'getPHID'))

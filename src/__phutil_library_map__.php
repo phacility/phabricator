@@ -966,6 +966,7 @@ phutil_register_library_map(array(
     'DrydockResourceViewController' => 'applications/drydock/controller/DrydockResourceViewController.php',
     'DrydockSFTPFilesystemInterface' => 'applications/drydock/interface/filesystem/DrydockSFTPFilesystemInterface.php',
     'DrydockSSHCommandInterface' => 'applications/drydock/interface/command/DrydockSSHCommandInterface.php',
+    'DrydockSchemaSpec' => 'applications/drydock/storage/DrydockSchemaSpec.php',
     'DrydockSlotLock' => 'applications/drydock/storage/DrydockSlotLock.php',
     'DrydockSlotLockException' => 'applications/drydock/exception/DrydockSlotLockException.php',
     'DrydockSlotLockFailureLogType' => 'applications/drydock/logtype/DrydockSlotLockFailureLogType.php',
@@ -4975,6 +4976,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
       'PhabricatorNgramsInterface',
+      'PhabricatorProjectInterface',
     ),
     'DrydockBlueprintController' => 'DrydockController',
     'DrydockBlueprintCoreCustomField' => array(
@@ -5094,6 +5096,7 @@ phutil_register_library_map(array(
     'DrydockResourceViewController' => 'DrydockResourceController',
     'DrydockSFTPFilesystemInterface' => 'DrydockFilesystemInterface',
     'DrydockSSHCommandInterface' => 'DrydockCommandInterface',
+    'DrydockSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'DrydockSlotLock' => 'DrydockDAO',
     'DrydockSlotLockException' => 'Exception',
     'DrydockSlotLockFailureLogType' => 'DrydockLogType',

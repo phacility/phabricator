@@ -127,8 +127,12 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
   private function buildPropertyListView(
     DrydockBlueprint $blueprint,
     PhabricatorActionListView $actions) {
+    $viewer = $this->getViewer();
 
-    $view = new PHUIPropertyListView();
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($blueprint);
+
     $view->setActionList($actions);
 
     $view->addProperty(

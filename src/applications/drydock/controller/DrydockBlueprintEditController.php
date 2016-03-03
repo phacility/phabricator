@@ -52,9 +52,15 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
     foreach ($implementations as $implementation_name => $implementation) {
       $disabled = !$implementation->isEnabled();
 
+      $impl_icon = $implementation->getBlueprintIcon();
+      $impl_name = $implementation->getBlueprintName();
+
+      $impl_icon = id(new PHUIIconView())
+        ->setIcon($impl_icon, 'lightgreytext');
+
       $control->addButton(
         $implementation_name,
-        $implementation->getBlueprintName(),
+        array($impl_icon, ' ', $impl_name),
         array(
           pht('Provides: %s', $implementation->getType()),
           phutil_tag('br'),

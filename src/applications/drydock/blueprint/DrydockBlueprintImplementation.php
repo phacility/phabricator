@@ -15,6 +15,10 @@ abstract class DrydockBlueprintImplementation extends Phobject {
   abstract public function getBlueprintName();
   abstract public function getDescription();
 
+  public function getBlueprintIcon() {
+    return 'fa-map-o';
+  }
+
   public function getFieldSpecifications() {
     $fields = array();
 
