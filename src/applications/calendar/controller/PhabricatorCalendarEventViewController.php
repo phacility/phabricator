@@ -52,7 +52,8 @@ final class PhabricatorCalendarEventViewController
       $title = 'E'.$event->getID();
       $page_title = $title.' '.$event->getName();
       $crumbs = $this->buildApplicationCrumbs();
-      $crumbs->addTextCrumb($title, '/E'.$event->getID());
+      $crumbs->addTextCrumb($title);
+      $crumbs->setBorder(true);
     }
 
     if (!$event->getIsGhostEvent()) {
@@ -63,12 +64,9 @@ final class PhabricatorCalendarEventViewController
 
     $header = $this->buildHeaderView($event);
     $actions = $this->buildActionView($event);
-    $properties = $this->buildPropertyView($event);
-
-    $properties->setActionList($actions);
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $properties = $this->buildPropertyListView($event);
+    $details = $this->buildPropertySection($event);
+    $description = $this->buildDescriptionView($event);
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $add_comment_header = $is_serious
@@ -90,26 +88,32 @@ final class PhabricatorCalendarEventViewController
       ->setAction($comment_uri)
       ->setSubmitButtonName(pht('Add Comment'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $timeline,
-        $add_comment_form,
-      ),
-      array(
-        'title' => $page_title,
-        'pageObjects' => array($event->getPHID()),
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn($timeline)
+      ->setPropertyList($properties)
+      ->addPropertySection(pht('DETAILS'), $details)
+      ->addPropertySection(pht('DESCRIPTION'), $description)
+      ->setActionList($actions);
+
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($event->getPHID()))
+      ->appendChild(
+        array(
+          $view,
       ));
   }
 
-  private function buildHeaderView(PhabricatorCalendarEvent $event) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildHeaderView(
+    PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
     $id = $event->getID();
 
     $is_cancelled = $event->getIsCancelled();
-    $icon = $is_cancelled ? ('fa-times') : ('fa-calendar');
-    $color = $is_cancelled ? ('grey') : ('green');
+    $icon = $is_cancelled ? ('fa-ban') : ('fa-check');
+    $color = $is_cancelled ? ('red') : ('bluegrey');
     $status = $is_cancelled ? pht('Cancelled') : pht('Active');
 
     $invite_status = $event->getUserInviteStatus($viewer->getPHID());
@@ -120,7 +124,8 @@ final class PhabricatorCalendarEventViewController
       ->setUser($viewer)
       ->setHeader($event->getName())
       ->setStatus($icon, $color, $status)
-      ->setPolicyObject($event);
+      ->setPolicyObject($event)
+      ->setHeaderIcon('fa-calendar');
 
     if ($is_invite_pending) {
       $decline_button = id(new PHUIButtonView())
@@ -245,12 +250,25 @@ final class PhabricatorCalendarEventViewController
     return $actions;
   }
 
-  private function buildPropertyView(PhabricatorCalendarEvent $event) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildPropertyListView(
+    PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($event);
+
+    $properties->invokeWillRenderEvent();
+
+    return $properties;
+  }
+
+  private function buildPropertySection(
+    PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer);
 
     if ($event->getIsAllDay()) {
       $date_start = phabricator_date($event->getDateFrom(), $viewer);
@@ -362,16 +380,23 @@ final class PhabricatorCalendarEventViewController
       id(new PhabricatorCalendarIconSet())
         ->getIconLabel($event->getIcon()));
 
+    return $properties;
+  }
+
+  private function buildDescriptionView(
+    PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
     if (strlen($event->getDescription())) {
       $description = new PHUIRemarkupView($viewer, $event->getDescription());
-      $properties->addSectionHeader(
-        pht('Description'),
-        PHUIPropertyListView::ICON_SUMMARY);
-
       $properties->addTextContent($description);
+      return $properties;
     }
 
-    return $properties;
+    return null;
   }
 
 }

@@ -108,7 +108,7 @@
 
 .device-desktop .phui-main-column .phui-property-list-value {
   margin-left: 8px;
-  width: auto;
+  width: calc(100% - 180px);
 }
 
 
