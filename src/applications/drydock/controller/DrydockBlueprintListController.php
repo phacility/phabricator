@@ -13,17 +13,12 @@ final class DrydockBlueprintListController extends DrydockBlueprintController {
   }
 
   protected function buildApplicationCrumbs() {
-    $can_create = $this->hasApplicationCapability(
-      DrydockCreateBlueprintsCapability::CAPABILITY);
-
     $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('New Blueprint'))
-        ->setHref($this->getApplicationURI('/blueprint/create/'))
-        ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create)
-        ->setIcon('fa-plus-square'));
+
+    id(new DrydockBlueprintEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
+
     return $crumbs;
   }
 
