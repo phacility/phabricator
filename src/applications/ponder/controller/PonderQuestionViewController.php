@@ -108,9 +108,9 @@ final class PonderQuestionViewController extends PonderController {
         'class'  => 'ponder-question-content',
       ),
       array(
+        $answer_wiki,
         $footer,
         $comment_view,
-        $answer_wiki,
         $answers,
         $answer_add_panel,
       ));
