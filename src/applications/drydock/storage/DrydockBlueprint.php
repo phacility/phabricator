@@ -8,7 +8,8 @@ final class DrydockBlueprint extends DrydockDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorNgramsInterface {
 
   protected $className;
   protected $blueprintName;
@@ -342,5 +343,15 @@ final class DrydockBlueprint extends DrydockDAO
     return $this;
   }
 
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new DrydockBlueprintNameNgrams())
+        ->setValue($this->getBlueprintName()),
+    );
+  }
 
 }

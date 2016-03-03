@@ -7,15 +7,9 @@ final class DrydockBlueprintListController extends DrydockBlueprintController {
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $querykey = $request->getURIData('queryKey');
-
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($querykey)
-      ->setSearchEngine(new DrydockBlueprintSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
+    return id(new DrydockBlueprintSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
   protected function buildApplicationCrumbs() {

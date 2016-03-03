@@ -18,6 +18,10 @@ final class DrydockBlueprintSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
+
     if ($map['isDisabled'] !== null) {
       $query->withDisabled($map['isDisabled']);
     }
@@ -27,6 +31,10 @@ final class DrydockBlueprintSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for blueprints by name substring.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Disabled'))
         ->setKey('isDisabled')

@@ -11,6 +11,10 @@ final class DrydockBlueprintEditor
     return pht('Drydock Blueprints');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
