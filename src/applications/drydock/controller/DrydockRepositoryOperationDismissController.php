@@ -1,7 +1,7 @@
 <?php
 
 final class DrydockRepositoryOperationDismissController
-  extends DrydockController {
+  extends DrydockRepositoryOperationController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();

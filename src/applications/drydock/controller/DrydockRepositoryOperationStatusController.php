@@ -1,7 +1,7 @@
 <?php
 
 final class DrydockRepositoryOperationStatusController
-  extends DrydockController {
+  extends DrydockRepositoryOperationController {
 
   public function shouldAllowPublic() {
     return true;
