@@ -3,168 +3,95 @@
 final class DrydockBlueprintEditController extends DrydockBlueprintController {
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
+    $engine = id(new DrydockBlueprintEditEngine())
+      ->setController($this);
+
     $id = $request->getURIData('id');
-
-    if ($id) {
-      $blueprint = id(new DrydockBlueprintQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($id))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
-      if (!$blueprint) {
-        return new Aphront404Response();
-      }
-
-      $impl = $blueprint->getImplementation();
-      $cancel_uri = $this->getApplicationURI('blueprint/'.$id.'/');
-    } else {
+    if (!$id) {
       $this->requireApplicationCapability(
         DrydockCreateBlueprintsCapability::CAPABILITY);
 
-      $class = $request->getStr('class');
+      $type = $request->getStr('blueprintType');
 
-      $impl = DrydockBlueprintImplementation::getNamedImplementation($class);
+      $impl = DrydockBlueprintImplementation::getNamedImplementation($type);
       if (!$impl || !$impl->isEnabled()) {
-        return new Aphront400Response();
+        return $this->buildTypeSelectionResponse();
       }
 
-      $blueprint = DrydockBlueprint::initializeNewBlueprint($viewer)
-        ->setClassName($class)
-        ->attachImplementation($impl);
-
-      $cancel_uri = $this->getApplicationURI('blueprint/');
+      $engine
+        ->addContextParameter('blueprintType', $type)
+        ->setBlueprintImplementation($impl);
     }
 
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $blueprint,
-      PhabricatorCustomField::ROLE_EDIT);
-    $field_list
-      ->setViewer($viewer)
-      ->readFieldsFromStorage($blueprint);
+    return $engine->buildResponse();
+  }
 
-    $v_name = $blueprint->getBlueprintName();
-    $e_name = true;
+  private function buildTypeSelectionResponse() {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $implementations =
+      DrydockBlueprintImplementation::getAllBlueprintImplementations();
+
     $errors = array();
-    $validation_exception = null;
+    $e_blueprint = null;
 
     if ($request->isFormPost()) {
-      $v_view_policy = $request->getStr('viewPolicy');
-      $v_edit_policy = $request->getStr('editPolicy');
-      $v_name = $request->getStr('name');
-      if (!strlen($v_name)) {
-        $e_name = pht('Required');
-        $errors[] = pht('You must name this blueprint.');
-      }
-
-      if (!$errors) {
-        $xactions = array();
-
-        $xactions = $field_list->buildFieldTransactionsFromRequest(
-          new DrydockBlueprintTransaction(),
-          $request);
-
-        $xactions[] = id(new DrydockBlueprintTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-          ->setNewValue($v_view_policy);
-
-        $xactions[] = id(new DrydockBlueprintTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-          ->setNewValue($v_edit_policy);
-
-        $xactions[] = id(new DrydockBlueprintTransaction())
-          ->setTransactionType(DrydockBlueprintTransaction::TYPE_NAME)
-          ->setNewValue($v_name);
-
-        $editor = id(new DrydockBlueprintEditor())
-          ->setActor($viewer)
-          ->setContentSourceFromRequest($request)
-          ->setContinueOnNoEffect(true);
-
-        try {
-          $editor->applyTransactions($blueprint, $xactions);
-
-          $id = $blueprint->getID();
-          $save_uri = $this->getApplicationURI("blueprint/{$id}/");
-
-          return id(new AphrontRedirectResponse())->setURI($save_uri);
-        } catch (PhabricatorApplicationTransactionValidationException $ex) {
-          $validation_exception = $ex;
-        }
+      $class = $request->getStr('blueprintType');
+      if (!isset($implementations[$class])) {
+        $e_blueprint = pht('Required');
+        $errors[] = pht('You must choose a blueprint type.');
       }
     }
 
-    $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($viewer)
-      ->setObject($blueprint)
-      ->execute();
+    $control = id(new AphrontFormRadioButtonControl())
+      ->setName('blueprintType')
+      ->setLabel(pht('Blueprint Type'))
+      ->setError($e_blueprint);
+
+    foreach ($implementations as $implementation_name => $implementation) {
+      $disabled = !$implementation->isEnabled();
+
+      $impl_icon = $implementation->getBlueprintIcon();
+      $impl_name = $implementation->getBlueprintName();
+
+      $impl_icon = id(new PHUIIconView())
+        ->setIcon($impl_icon, 'lightgreytext');
+
+      $control->addButton(
+        $implementation_name,
+        array($impl_icon, ' ', $impl_name),
+        array(
+          pht('Provides: %s', $implementation->getType()),
+          phutil_tag('br'),
+          phutil_tag('br'),
+          $implementation->getDescription(),
+        ),
+        $disabled ? 'disabled' : null,
+        $disabled);
+    }
+
+    $title = pht('Create New Blueprint');
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('New Blueprint'));
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->addHiddenInput('class', $request->getStr('class'))
+      ->appendChild($control)
       ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Name'))
-          ->setName('name')
-          ->setValue($v_name)
-          ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Blueprint Type'))
-          ->setValue($impl->getBlueprintName()))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setName('viewPolicy')
-          ->setPolicyObject($blueprint)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-          ->setPolicies($policies))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setName('editPolicy')
-          ->setPolicyObject($blueprint)
-          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-          ->setPolicies($policies));
-
-    $field_list->appendFieldsToForm($form);
-
-    $crumbs = $this->buildApplicationCrumbs();
-
-    if ($blueprint->getID()) {
-      $title = pht('Edit Blueprint');
-      $header = pht('Edit Blueprint %d', $blueprint->getID());
-      $crumbs->addTextCrumb(pht('Blueprint %d', $blueprint->getID()));
-      $crumbs->addTextCrumb(pht('Edit'));
-      $submit = pht('Save Blueprint');
-    } else {
-      $title = pht('New Blueprint');
-      $header = pht('New Blueprint');
-      $crumbs->addTextCrumb(pht('New Blueprint'));
-      $submit = pht('Create Blueprint');
-    }
-
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->setValue($submit)
-        ->addCancelButton($cancel_uri));
+        id(new AphrontFormSubmitControl())
+          ->addCancelButton($this->getApplicationURI('blueprint/'))
+          ->setValue(pht('Continue')));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
-      ->setValidationException($validation_exception)
       ->setFormErrors($errors)
+      ->setHeaderText($title)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
   }
 
 }

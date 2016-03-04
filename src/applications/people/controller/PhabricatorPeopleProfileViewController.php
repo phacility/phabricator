@@ -52,7 +52,10 @@ final class PhabricatorPeopleProfileViewController
     $name = $user->getUsername();
 
     $feed = $this->buildPeopleFeed($user, $viewer);
-    $feed = phutil_tag_div('project-view-feed', $feed);
+    $feed = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Recent Activity'))
+      ->addClass('project-view-feed')
+      ->appendChild($feed);
 
     $projects = $this->buildProjectsView($user);
     $badges = $this->buildBadgesView($user);
@@ -106,8 +109,7 @@ final class PhabricatorPeopleProfileViewController
       return null;
     }
 
-    $view = id(new PHUIBoxView())
-      ->setBorder(true)
+    $view = id(new PHUIObjectBoxView())
       ->appendChild($view)
       ->addClass('project-view-properties');
 

@@ -23,22 +23,19 @@ final class AlmanacServiceViewController
 
     $title = pht('Service %s', $service->getName());
 
-    $property_list = $this->buildPropertyList($service);
-    $action_list = $this->buildActionList($service);
-    $property_list->setActionList($action_list);
+    $properties = $this->buildPropertyList($service);
+    $actions = $this->buildActionList($service);
+    $details = $this->buildPropertySection($service);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($service->getName())
-      ->setPolicyObject($service);
+      ->setPolicyObject($service)
+      ->setHeaderIcon('fa-plug');
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($property_list);
-
+    $issue = null;
     if ($service->isClusterService()) {
-      $this->addClusterMessage(
-        $box,
+      $issue = $this->addClusterMessage(
         pht('This is a cluster service.'),
         pht(
           'This service is a cluster service. You do not have permission to '.
@@ -49,36 +46,62 @@ final class AlmanacServiceViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName());
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $service,
       new AlmanacServiceTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+          $issue,
+          $details,
+          $bindings,
+          $this->buildAlmanacPropertiesTable($service),
+          $timeline,
+        ))
+      ->setPropertyList($properties)
+      ->setActionList($actions);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $box,
-          $bindings,
-          $this->buildAlmanacPropertiesTable($service),
-          $timeline,
-    ));
+          $view,
+        ));
   }
 
-  private function buildPropertyList(AlmanacService $service) {
+  private function buildPropertyList(
+    AlmanacService $service) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($service);
+
+    $view->invokeWillRenderEvent();
+
+    return $view;
+  }
+
+  private function buildPropertySection(
+    AlmanacService $service) {
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($service);
+      ->setUser($viewer);
 
     $properties->addProperty(
       pht('Service Type'),
       $service->getServiceImplementation()->getServiceTypeShortName());
 
-    return $properties;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('DETAILS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($properties);
   }
 
   private function buildActionList(AlmanacService $service) {
@@ -126,7 +149,7 @@ final class AlmanacServiceViewController
       ->setHideServiceColumn(true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Service Bindings'))
+      ->setHeader(pht('SERVICE BINDINGS'))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
@@ -138,6 +161,7 @@ final class AlmanacServiceViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

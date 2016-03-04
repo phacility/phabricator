@@ -52,4 +52,16 @@ abstract class PhabricatorStandardCustomFieldTokenizer
     return $this->getDatasource();
   }
 
+  protected function getHTTPParameterType() {
+    return new AphrontPHIDListHTTPParameterType();
+  }
+
+  protected function newConduitSearchParameterType() {
+    return new ConduitPHIDListParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitPHIDListParameterType();
+  }
+
 }

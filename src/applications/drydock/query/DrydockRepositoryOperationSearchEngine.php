@@ -70,7 +70,8 @@ final class DrydockRepositoryOperationSearchEngine
       $icon = DrydockRepositoryOperation::getOperationStateIcon($state);
       $name = DrydockRepositoryOperation::getOperationStateName($state);
 
-      $item->addIcon($icon, $name);
+      $item->setStatusIcon($icon, $name);
+
       $item->addByline(
         array(
           pht('Via:'),
@@ -78,13 +79,14 @@ final class DrydockRepositoryOperationSearchEngine
           $viewer->renderHandle($operation->getAuthorPHID()),
         ));
 
-      $item->addAttribute(
-        $viewer->renderHandle(
-          $operation->getObjectPHID()));
+      $object_phid = $operation->getObjectPHID();
+      $repository_phid = $operation->getRepositoryPHID();
 
-      $item->addAttribute(
-        $viewer->renderHandle(
-          $operation->getRepositoryPHID()));
+      $item->addAttribute($viewer->renderHandle($object_phid));
+
+      if ($repository_phid !== $object_phid) {
+        $item->addAttribute($viewer->renderHandle($repository_phid));
+      }
 
       $view->addItem($item);
     }

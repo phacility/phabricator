@@ -1,46 +1,31 @@
 <?php
 
-final class PhabricatorCountdownView extends AphrontTagView {
+final class PhabricatorCountdownView extends AphrontView {
 
   private $countdown;
-  private $headless;
-
-
-  public function setHeadless($headless) {
-    $this->headless = $headless;
-    return $this;
-  }
 
   public function setCountdown(PhabricatorCountdown $countdown) {
     $this->countdown = $countdown;
     return $this;
   }
 
-
-  protected function getTagContent() {
+  public function render() {
     $countdown = $this->countdown;
-
     require_celerity_resource('phabricator-countdown-css');
 
-    $header = null;
-    if (!$this->headless) {
-      $header = phutil_tag(
-        'div',
+    $header_text = array(
+      'C'.$countdown->getID(),
+      ' ',
+      phutil_tag(
+        'a',
         array(
-          'class' => 'phabricator-timer-header',
+          'href' => '/countdown/'.$countdown->getID(),
         ),
-        array(
-          'C'.$countdown->getID(),
-          ' ',
-          phutil_tag(
-            'a',
-            array(
-              'href' => '/countdown/'.$countdown->getID(),
-            ),
-            $countdown->getTitle()),
-        ));
-    }
+        $countdown->getTitle()),
+    );
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text);
 
     $ths = array(
       phutil_tag('th', array(), pht('Days')),
@@ -66,12 +51,23 @@ final class PhabricatorCountdownView extends AphrontTagView {
       ),
       $launch_date);
 
+    $description = $countdown->getDescription();
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($this->getUser(), $description);
+      $description = phutil_tag(
+        'div',
+        array(
+          'class' => 'countdown-description phabricator-remarkup',
+        ),
+        $description);
+    }
+
     $container = celerity_generate_unique_node_id();
     $content = phutil_tag(
       'div',
       array('class' => 'phabricator-timer', 'id' => $container),
       array(
-        $header,
+        $description,
         phutil_tag('table', array('class' => 'phabricator-timer-table'), array(
           phutil_tag('tr', array(), $ths),
           phutil_tag('tr', array(), $dashes),
@@ -84,7 +80,11 @@ final class PhabricatorCountdownView extends AphrontTagView {
       'container' => $container,
     ));
 
-    return $content;
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addClass('phabricator-timer-view')
+      ->appendChild($content);
   }
 
 }

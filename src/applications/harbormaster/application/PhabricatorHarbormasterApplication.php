@@ -85,7 +85,8 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
           '(?P<id>\d+)/' => 'HarbormasterPlanViewController',
         ),
         'unit/' => array(
-          '(?P<id>\d+)/' => 'HarbormasterUnitMessagesController',
+          '(?P<id>\d+)/' => 'HarbormasterUnitMessageListController',
+          'view/(?P<id>\d+)/' => 'HarbormasterUnitMessageViewController',
         ),
         'lint/' => array(
           '(?P<id>\d+)/' => 'HarbormasterLintMessagesController',

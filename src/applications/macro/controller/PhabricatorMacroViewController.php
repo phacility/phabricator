@@ -20,29 +20,18 @@ final class PhabricatorMacroViewController
       return new Aphront404Response();
     }
 
-    $file = $macro->getFile();
-
     $title_short = pht('Macro "%s"', $macro->getName());
     $title_long  = pht('Image Macro "%s"', $macro->getName());
 
     $actions = $this->buildActionView($macro);
+    $subheader = $this->buildSubheaderView($macro);
+    $properties = $this->buildPropertyView($macro);
+    $file = $this->buildFileView($macro);
+    $details = $this->buildPropertySectionView($macro);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      $title_short,
-      $this->getApplicationURI('/view/'.$macro->getID().'/'));
-
-    $properties = $this->buildPropertyView($macro, $actions);
-    if ($file) {
-      $file_view = new PHUIPropertyListView();
-      $file_view->addImageContent(
-        phutil_tag(
-          'img',
-          array(
-            'src'     => $file->getViewURI(),
-            'class'   => 'phabricator-image-macro-hero',
-          )));
-    }
+    $crumbs->addTextCrumb($macro->getName());
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $macro,
@@ -75,28 +64,30 @@ final class PhabricatorMacroViewController
       ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
       ->setSubmitButtonName(pht('Add Comment'));
 
-    $object_box = id(new PHUIObjectBoxView())
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->addPropertyList($properties);
-
-    if ($file_view) {
-      $object_box->addPropertyList($file_view);
-    }
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
+      ->setSubheader($subheader)
+      ->setMainColumn(array(
         $timeline,
         $add_comment_form,
-      ),
-      array(
-        'title' => $title_short,
-        'pageObjects' => array($macro->getPHID()),
+      ))
+      ->addPropertySection(pht('MACRO'), $file)
+      ->addPropertySection(pht('DETAILS'), $details)
+      ->setPropertyList($properties)
+      ->setActionList($actions);
+
+    return $this->newPage()
+      ->setTitle($title_short)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($macro->getPHID()))
+      ->appendChild(
+        array(
+          $view,
       ));
   }
 
-  private function buildActionView(PhabricatorFileImageMacro $macro) {
+  private function buildActionView(
+    PhabricatorFileImageMacro $macro) {
     $can_manage = $this->hasApplicationCapability(
       PhabricatorMacroManageCapability::CAPABILITY);
 
@@ -141,15 +132,34 @@ final class PhabricatorMacroViewController
     return $view;
   }
 
-  private function buildPropertyView(
-    PhabricatorFileImageMacro $macro,
-    PhabricatorActionListView $actions) {
+  private function buildSubheaderView(
+    PhabricatorFileImageMacro $macro) {
+    $viewer = $this->getViewer();
+
+    $author_phid = $macro->getAuthorPHID();
+
+    $author = $viewer->renderHandle($author_phid)->render();
+    $date = phabricator_datetime($macro->getDateCreated(), $viewer);
+    $author = phutil_tag('strong', array(), $author);
+
+    $handles = $viewer->loadHandles(array($author_phid));
+    $image_uri = $handles[$author_phid]->getImageURI();
+    $image_href = $handles[$author_phid]->getURI();
+
+    $content = pht('Masterfully imagined by %s on %s.', $author, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
+  }
+
+  private function buildPropertySectionView(
+    PhabricatorFileImageMacro $macro) {
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($this->getRequest()->getUser())
-      ->setObject($macro)
-      ->setActionList($actions);
+      ->setUser($viewer);
 
     switch ($macro->getAudioBehavior()) {
       case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
@@ -166,6 +176,38 @@ final class PhabricatorMacroViewController
         pht('Audio'),
         $viewer->renderHandle($audio_phid));
     }
+
+    return $view;
+  }
+
+  private function buildFileView(
+    PhabricatorFileImageMacro $macro) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $file = $macro->getFile();
+    if ($file) {
+      $view->addImageContent(
+        phutil_tag(
+          'img',
+          array(
+            'src'     => $file->getViewURI(),
+            'class'   => 'phabricator-image-macro-hero',
+          )));
+      return $view;
+    }
+    return null;
+  }
+
+  private function buildPropertyView(
+    PhabricatorFileImageMacro $macro) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($this->getRequest()->getUser())
+      ->setObject($macro);
 
     $view->invokeWillRenderEvent();
 

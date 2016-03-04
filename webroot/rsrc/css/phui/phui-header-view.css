@@ -75,6 +75,11 @@ body .phui-header-shell.phui-bleed-header
   color: {$darkbluetext};
 }
 
+.phui-header-header .phui-header-icon {
+  margin-right: 8px;
+  color: {$lightbluetext};
+}
+
 .phui-object-box .phui-header-tall .phui-header-header,
 .phui-document-view .phui-header-tall .phui-header-header {
   font-size: 18px;
@@ -185,7 +190,7 @@ body .phui-header-shell.phui-bleed-header
 .phui-header-subheader .phui-header-status {
   padding: 3px 9px;
   border-radius: 3px;
-  background: rgba({$alphablue}, 0.06);
+  background: rgba({$alphablue}, 0.08);
   margin-right: 8px;
 }
 
@@ -272,8 +277,14 @@ body .phui-header-shell.phui-bleed-header
   font-size: 18px;
 }
 
-.spaces-name .phui-handle {
+.spaces-name .phui-handle,
+.spaces-name a.phui-handle {
   color: {$sh-redtext};
+}
+
+.device-desktop .spaces-name a.phui-handle:hover {
+  color: {$sh-redtext};
+  text-decoration: underline;
 }
 
 .phui-header-subheader .phui-badge-flex-view {

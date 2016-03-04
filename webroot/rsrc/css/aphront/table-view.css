@@ -15,7 +15,15 @@
   border-bottom: 1px solid {$blueborder};
 }
 
-.aphront-table-view td.aphront-table-notice {
+.aphront-table-view-fixed {
+  table-layout: fixed;
+}
+
+.aphront-table-view-fixed th {
+  box-sizing: border-box;
+}
+
+.aphront-table-notice {
   padding: 12px 16px;
   font-size: {$normalfontsize};
   color: {$darkbluetext};
@@ -240,10 +248,11 @@ span.single-display-line-content {
 }
 
 .aphront-table-view tr.no-data td {
-  padding: 12px;
+  padding: 16px;
   text-align: center;
   color: {$lightgreytext};
   font-style: italic;
+  font-size: {$normalfontsize};
 }
 
 .aphront-table-view td.thumb img {

@@ -158,16 +158,16 @@ abstract class AlmanacController
       ->setIcon('fa-plus');
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Properties'))
+      ->setHeader(pht('PROPERTIES'))
       ->addActionLink($add_button);
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 
   protected function addClusterMessage(
-    PHUIObjectBoxView $box,
     $positive,
     $negative) {
 
@@ -194,14 +194,13 @@ abstract class AlmanacController
     $icon = id(new PHUIIconView())
       ->setIcon('fa-sitemap');
 
-    $error_view = id(new PHUIInfoView())
+    return id(new PHUIInfoView())
       ->setSeverity($severity)
       ->setErrors(
         array(
           array($icon, ' ', $message, ' ', $doc_link),
         ));
 
-    $box->setInfoView($error_view);
   }
 
   protected function getPropertyDeleteURI($object) {

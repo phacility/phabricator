@@ -1,6 +1,6 @@
 <?php
 
-final class HarbormasterUnitMessagesController
+final class HarbormasterUnitMessageListController
   extends HarbormasterController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -34,13 +34,9 @@ final class HarbormasterUnitMessagesController
       $unit_data = array();
     }
 
-    $unit_table = id(new HarbormasterUnitPropertyView())
-      ->setUser($viewer)
+    $unit = id(new HarbormasterUnitSummaryView())
+      ->setBuildable($buildable)
       ->setUnitMessages($unit_data);
-
-    $unit = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Unit Tests'))
-      ->setTable($unit_table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $this->addBuildableCrumb($crumbs, $buildable);

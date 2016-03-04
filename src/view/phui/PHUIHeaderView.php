@@ -253,8 +253,9 @@ final class PHUIHeaderView extends AphrontTagView {
     $left = array();
     $right = array();
 
+    $space_header = null;
     if ($viewer) {
-      $left[] = id(new PHUISpacesNamespaceContextView())
+      $space_header = id(new PHUISpacesNamespaceContextView())
         ->setUser($viewer)
         ->setObject($this->policyObject);
     }
@@ -312,10 +313,11 @@ final class PHUIHeaderView extends AphrontTagView {
           $action_list);
     }
 
+    $icon = null;
     if ($this->headerIcon) {
       $icon = id(new PHUIIconView())
-        ->setIcon($this->headerIcon);
-      $left[] = $icon;
+        ->setIcon($this->headerIcon)
+        ->addClass('phui-header-icon');
     }
 
     $header_content = $this->header;
@@ -335,7 +337,11 @@ final class PHUIHeaderView extends AphrontTagView {
       array(
         'class' => 'phui-header-header',
       ),
-      $header_content);
+      array(
+        $space_header,
+        $icon,
+        $header_content,
+      ));
 
     if ($this->subheader || $this->badges) {
       $badges = null;

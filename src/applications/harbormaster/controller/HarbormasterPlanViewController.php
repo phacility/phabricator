@@ -187,8 +187,6 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
       if ($is_deadlocking) {
         $item->setStatusIcon('fa-warning red');
       }
-
-      $step_list->addItem($item);
     }
 
     $step_list->setFlush(true);
