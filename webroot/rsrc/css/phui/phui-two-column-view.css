@@ -8,6 +8,10 @@
   margin-bottom: 24px;
 }
 
+.device .phui-two-column-view .phui-two-column-header {
+  margin-bottom: 12px;
+}
+
 .phui-two-column-view.with-subheader .phui-two-column-header {
   margin-bottom: 0;
 }
@@ -99,6 +103,10 @@
   margin: 0;
 }
 
+.phui-main-column > .phui-timeline-view {
+  border-top: 1px solid {$thinblueborder};
+}
+
 /* Main Column Properties */
 
 .device-desktop .phui-main-column .phui-property-list-key {
@@ -144,7 +152,13 @@
     padding: 0 4px;
 }
 
-.device-desktop .phui-two-column-properties .phui-property-list-container {
+.device .phui-two-column-properties .phui-property-list-stacked
+  .phui-property-list-properties .phui-property-list-value {
+  margin-bottom: 12px;
+}
+
+.device-desktop .phui-two-column-properties .phui-property-list-container,
+.device .phui-two-column-properties .phui-property-list-container {
   padding: 0;
 }
 
@@ -153,10 +167,6 @@
     margin: 12px 0 4px 0;
     padding: 0;
     border: none;
-}
-
-.device .phui-two-column-properties .phui-property-list-container {
-  padding: 0 0 12px 0;
 }
 
 .device .phui-two-column-content .phui-two-column-properties.phui-object-box {

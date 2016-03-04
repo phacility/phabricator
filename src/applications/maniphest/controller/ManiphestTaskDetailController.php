@@ -65,24 +65,16 @@ final class ManiphestTaskDetailController extends ManiphestController {
       new ManiphestTransactionQuery(),
       $engine);
 
-    $actions = $this->buildActionView($task);
-
     $monogram = $task->getMonogram();
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($monogram, '/'.$monogram);
+      ->addTextCrumb($monogram)
+      ->setBorder(true);
 
     $header = $this->buildHeaderView($task);
-    $properties = $this->buildPropertyView(
-      $task, $field_list, $edges, $actions, $handles);
+    $details = $this->buildPropertyView($task, $field_list, $edges, $handles);
     $description = $this->buildDescriptionView($task, $engine);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
-
-    if ($description) {
-      $object_box->addPropertyList($description);
-    }
+    $actions = $this->buildActionView($task);
+    $properties = $this->buildPropertyListView($task, $handles);
 
     $title = pht('%s %s', $monogram, $task->getTitle());
 
@@ -93,6 +85,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $timeline->setQuoteRef($monogram);
     $comment_view->setTransactionTimeline($timeline);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+        $timeline,
+        $comment_view,
+      ))
+      ->addPropertySection(pht('DETAILS'), $details)
+      ->addPropertySection(pht('DESCRIPTION'), $description)
+      ->setPropertyList($properties)
+      ->setActionList($actions);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
@@ -102,10 +105,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ))
       ->appendChild(
         array(
-          $object_box,
-          $timeline,
-          $comment_view,
-        ));
+          $view,
+      ));
+
   }
 
   private function buildHeaderView(ManiphestTask $task) {
@@ -114,10 +116,33 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setUser($this->getRequest()->getUser())
       ->setPolicyObject($task);
 
-    $status = $task->getStatus();
-    $status_name = ManiphestTaskStatus::renderFullDescription($status);
+    $priority_name = ManiphestTaskPriority::getTaskPriorityName(
+      $task->getPriority());
+    $priority_color = ManiphestTaskPriority::getTaskPriorityColor(
+      $task->getPriority());
 
+    $status = $task->getStatus();
+    $status_name = ManiphestTaskStatus::renderFullDescription(
+      $status, $priority_name, $priority_color);
     $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
+
+    $view->setHeaderIcon(ManiphestTaskStatus::getStatusIcon(
+      $task->getStatus()).' '.$priority_color);
+
+    if (ManiphestTaskPoints::getIsEnabled()) {
+      $points = $task->getPoints();
+      if ($points !== null) {
+        $points_name = pht('%s %s',
+          $task->getPoints(),
+          ManiphestTaskPoints::getPointsLabel());
+        $tag = id(new PHUITagView())
+          ->setName($points_name)
+          ->setShade('blue')
+          ->setType(PHUITagView::TYPE_SHADE);
+
+        $view->addTag($tag);
+      }
+    }
 
     return $view;
   }
@@ -198,45 +223,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     ManiphestTask $task,
     PhabricatorCustomFieldList $field_list,
     array $edges,
-    PhabricatorActionListView $actions,
     $handles) {
 
     $viewer = $this->getRequest()->getUser();
-
     $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($task)
-      ->setActionList($actions);
-
-    $owner_phid = $task->getOwnerPHID();
-    if ($owner_phid) {
-      $assigned_to = $handles
-        ->renderHandle($owner_phid)
-        ->setShowHovercard(true);
-    } else {
-      $assigned_to = phutil_tag('em', array(), pht('None'));
-    }
-
-    $view->addProperty(pht('Assigned To'), $assigned_to);
-
-    $view->addProperty(
-      pht('Priority'),
-      ManiphestTaskPriority::getTaskPriorityName($task->getPriority()));
-
-    $author = $handles
-      ->renderHandle($task->getAuthorPHID())
-      ->setShowHovercard(true);
-
-    $view->addProperty(pht('Author'), $author);
-
-    if (ManiphestTaskPoints::getIsEnabled()) {
-      $points = $task->getPoints();
-      if ($points !== null) {
-        $view->addProperty(
-          ManiphestTaskPoints::getPointsLabel(),
-          $task->getPoints());
-      }
-    }
+      ->setUser($viewer);
 
     $source = $task->getOriginalEmailSource();
     if ($source) {
@@ -304,12 +295,45 @@ final class ManiphestTaskDetailController extends ManiphestController {
         phutil_implode_html(phutil_tag('br'), $revisions_commits));
     }
 
-    $view->invokeWillRenderEvent();
-
     $field_list->appendFieldsToPropertyList(
       $task,
       $viewer,
       $view);
+
+    if ($view->hasAnyProperties()) {
+      return $view;
+    }
+
+    return null;
+  }
+
+  private function buildPropertyListView(ManiphestTask $task, $handles) {
+    $viewer = $this->getRequest()->getUser();
+    $view =  id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($task);
+
+    $view->invokeWillRenderEvent();
+
+    $owner_phid = $task->getOwnerPHID();
+    if ($owner_phid) {
+      $assigned_to = $handles
+        ->renderHandle($owner_phid)
+        ->setShowHovercard(true);
+    } else {
+      $assigned_to = phutil_tag('em', array(), pht('None'));
+    }
+
+    $view->addProperty(pht('Assigned To'), $assigned_to);
+
+    $author_phid = $task->getAuthorPHID();
+    $author = $handles
+      ->renderHandle($author_phid)
+      ->setShowHovercard(true);
+
+    $date = phabricator_datetime($task->getDateCreated(), $viewer);
+
+    $view->addProperty(pht('Author'), $author);
 
     return $view;
   }
@@ -321,9 +345,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $section = null;
     if (strlen($task->getDescription())) {
       $section = new PHUIPropertyListView();
-      $section->addSectionHeader(
-        pht('Description'),
-        PHUIPropertyListView::ICON_SUMMARY);
       $section->addTextContent(
         phutil_tag(
           'div',

@@ -148,7 +148,7 @@
 }
 .phui-icon-view.lightgreytext,
 .phui-icon-view.grey {
-  color: {$lightgreytext};
+  color: rgba({$alphagrey},0.3);
 }
 
 /* Hovers */

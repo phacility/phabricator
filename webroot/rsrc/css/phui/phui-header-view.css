@@ -175,7 +175,8 @@ body .phui-header-shell.phui-bleed-header
   margin-top: 8px;
 }
 
-.phui-header-subheader .phui-icon-view {
+.phui-header-subheader .phui-tag-view .phui-icon-view,
+.phui-header-subheader .policy-header-callout .phui-icon-view {
   display: inline-block;
   margin: -2px 4px -2px 0;
   font-size: 15px;
@@ -187,11 +188,18 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .policy-header-callout,
-.phui-header-subheader .phui-header-status {
+.phui-header-subheader .phui-tag-core {
   padding: 3px 9px;
   border-radius: 3px;
-  background: rgba({$alphablue}, 0.08);
+  background: rgba({$alphablue}, 0.1);
   margin-right: 8px;
+  -webkit-font-smoothing: auto;
+  border-color: transparent;
+}
+
+.phui-header-subheader .phui-tag-type-shade .phui-tag-core {
+  border: none;
+  -webkit-font-smoothing: auto;
 }
 
 .policy-header-callout.policy-adjusted-weaker {
@@ -219,26 +227,6 @@ body .phui-header-shell.phui-bleed-header
 .policy-header-callout.policy-adjusted-different .policy-link,
 .policy-header-callout.policy-adjusted-different .phui-icon-view {
   color: {$sh-orangetext};
-}
-
-.phui-header-subheader .phui-header-status-dark {
-  color: {$sh-indigotext};
-  background: {$sh-indigobackground};
-  margin-right: 8px;
-}
-
-.phui-header-subheader .phui-header-status-dark .phui-icon-view {
-  color: {$sh-indigotext};
-}
-
-.phui-header-subheader .phui-header-status-red {
-  color: {$sh-redtext};
-  background: {$sh-redbackground};
-}
-
-.phui-header-subheader .phui-header-status-green {
-  color: {$sh-greentext};
-  background: {$sh-greenbackground};
 }
 
 .phui-header-action-links .phui-mobile-menu {
