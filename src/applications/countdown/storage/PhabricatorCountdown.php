@@ -70,9 +70,6 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     return ($phid == $this->getAuthorPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

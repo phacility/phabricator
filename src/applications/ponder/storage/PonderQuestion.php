@@ -248,10 +248,6 @@ final class PonderQuestion extends PonderDAO
     return ($phid == $this->getAuthorPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

@@ -485,10 +485,6 @@ final class DifferentialRevision extends DifferentialDAO
     return false;
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

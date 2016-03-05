@@ -194,9 +194,6 @@ final class PhrictionDocument extends PhrictionDAO
     return false;
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

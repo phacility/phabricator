@@ -127,10 +127,6 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return false;
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

@@ -178,10 +178,6 @@ final class FundInitiative extends FundDAO
     return ($phid == $this->getOwnerPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenRecevierInterface  )---------------------------------- */
 

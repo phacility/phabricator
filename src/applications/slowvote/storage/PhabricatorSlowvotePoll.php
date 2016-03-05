@@ -179,10 +179,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return ($phid == $this->getAuthorPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

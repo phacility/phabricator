@@ -531,10 +531,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return ($phid == $this->getUserPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
 

@@ -218,10 +218,6 @@ final class PhabricatorWorkerBulkJob
     return false;
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
