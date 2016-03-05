@@ -2,6 +2,11 @@
 
 abstract class AlmanacDeviceController extends AlmanacController {
 
+  public function buildApplicationMenu() {
+    return $this->newApplicationMenu()
+      ->setSearchEngine(new AlmanacDeviceSearchEngine());
+  }
+
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 

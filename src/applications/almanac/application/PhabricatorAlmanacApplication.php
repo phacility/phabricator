@@ -50,7 +50,7 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
         ),
         '(?P<objectType>device)/' => array(
           $this->getQueryRoutePattern() => 'AlmanacDeviceListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacDeviceEditController',
+          $this->getEditRoutePattern('edit/') => 'AlmanacDeviceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacDeviceViewController',
         ),
         'interface/' => array(
