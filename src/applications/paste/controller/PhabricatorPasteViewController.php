@@ -110,7 +110,8 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->setHeader($title)
       ->setUser($this->getRequest()->getUser())
       ->setStatus($header_icon, $header_color, $header_name)
-      ->setPolicyObject($paste);
+      ->setPolicyObject($paste)
+      ->setHeaderIcon('fa-clipboard');
 
     return $header;
   }

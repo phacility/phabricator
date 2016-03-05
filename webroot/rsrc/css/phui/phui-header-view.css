@@ -175,6 +175,10 @@ body .phui-header-shell.phui-bleed-header
   margin-top: 8px;
 }
 
+.phui-header-subheader .phui-icon-view {
+  margin-right: 4px;
+}
+
 .phui-header-subheader .phui-tag-view .phui-icon-view,
 .phui-header-subheader .policy-header-callout .phui-icon-view {
   display: inline-block;

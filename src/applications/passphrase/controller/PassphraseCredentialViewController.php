@@ -59,7 +59,8 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($credential->getName())
-      ->setPolicyObject($credential);
+      ->setPolicyObject($credential)
+      ->setHeaderIcon('fa-user-secret');
 
     if ($credential->getIsDestroyed()) {
       $header->setStatus('fa-ban', 'red', pht('Destroyed'));

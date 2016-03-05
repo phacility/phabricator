@@ -106,7 +106,7 @@ final class PHUIHovercardView extends AphrontTagView {
     $header->setHeader($title);
     if ($this->tags) {
       foreach ($this->tags as $tag) {
-        $header->addTag($tag);
+        $header->addActionItem($tag);
       }
     }
 
