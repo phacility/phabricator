@@ -40,7 +40,8 @@ final class PhabricatorMacroViewController
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($macro)
-      ->setHeader($title_long);
+      ->setHeader($macro->getName())
+      ->setHeaderIcon('fa-file-image-o');
 
     if (!$macro->getIsDisabled()) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
@@ -177,7 +178,11 @@ final class PhabricatorMacroViewController
         $viewer->renderHandle($audio_phid));
     }
 
-    return $view;
+    if ($view->hasAnyProperties()) {
+      return $view;
+    }
+
+    return null;
   }
 
   private function buildFileView(
