@@ -468,7 +468,26 @@ abstract class PhabricatorController extends AphrontController {
 
   public function newApplicationMenu() {
     return id(new PHUIApplicationMenuView())
-      ->setViewer($this->getRequest()->getUser());
+      ->setViewer($this->getViewer());
+  }
+
+  public function newCurtainView($object) {
+    $viewer = $this->getViewer();
+
+    $action_list = id(new PhabricatorActionListView())
+      ->setViewer($viewer)
+      ->setObject($object);
+
+    $curtain = id(new PHUICurtainView())
+      ->setViewer($viewer)
+      ->setActionList($action_list);
+
+    $panels = PHUICurtainExtension::buildExtensionPanels($viewer, $object);
+    foreach ($panels as $panel) {
+      $curtain->addPanel($panel);
+    }
+
+    return $curtain;
   }
 
   protected function buildTransactionTimeline(

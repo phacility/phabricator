@@ -1,0 +1,22 @@
+/**
+ * @provides phui-curtain-view-css
+ */
+
+.phui-curtain-panel {
+  margin: 4px;
+  padding: 4px 0;
+}
+
+.device-desktop .phui-curtain-panel {
+  border-top: 1px solid {$lightblueborder};
+}
+
+.phui-curtain-panel-header {
+  padding: 4px 0 0;
+  color: {$bluetext};
+  font-weight: bold;
+}
+
+.phui-curtain-panel-body {
+  padding: 4px 0 0;
+}
