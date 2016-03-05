@@ -45,7 +45,7 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
         '' => 'AlmanacConsoleController',
         '(?P<objectType>service)/' => array(
           $this->getQueryRoutePattern() => 'AlmanacServiceListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacServiceEditController',
+          $this->getEditRoutePattern('edit/') => 'AlmanacServiceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacServiceViewController',
         ),
         '(?P<objectType>device)/' => array(
