@@ -83,16 +83,16 @@ final class PHUIWorkpanelView extends AphrontTagView {
       ->setHeader($this->header)
       ->setSubheader($this->subheader);
 
-    if ($this->headerIcon) {
-      $header->setHeaderIcon($this->headerIcon);
+    foreach ($this->headerActions as $action) {
+      $header->addActionItem($action);
     }
 
     if ($this->headerTag) {
-      $header->addTag($this->headerTag);
+      $header->addActionItem($this->headerTag);
     }
 
-    foreach ($this->headerActions as $action) {
-      $header->addActionIcon($action);
+    if ($this->headerIcon) {
+      $header->setHeaderIcon($this->headerIcon);
     }
 
     $href = $this->getHref();

@@ -103,7 +103,7 @@
   margin: 0;
 }
 
-.phui-main-column > .phui-timeline-view {
+.phui-main-column > .phui-timeline-view:first-child {
   border-top: 1px solid {$thinblueborder};
 }
 

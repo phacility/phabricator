@@ -197,8 +197,11 @@ body .phui-header-shell.phui-bleed-header
   border-color: transparent;
 }
 
+
+.phui-header-subheader .phui-tag-view,
 .phui-header-subheader .phui-tag-type-shade .phui-tag-core {
   border: none;
+  font-weight: normal;
   -webkit-font-smoothing: auto;
 }
 
@@ -246,12 +249,9 @@ body .phui-header-shell.phui-bleed-header
   float: right;
 }
 
-.phui-header-action-list li.phui-header-action-icon {
+.phui-header-action-list .phui-header-action-item .phui-icon-view {
   height: 18px;
   width: 16px;
-}
-
-.phui-header-action-list .phui-header-action-icon .phui-icon-view {
   font-size: 16px;
   line-height: 20px;
   display: block;
