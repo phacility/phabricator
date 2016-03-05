@@ -30,10 +30,6 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
     return array(
       array(
