@@ -28,23 +28,28 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $title = pht('%s %s', 'K'.$credential->getID(), $credential->getName());
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb('K'.$credential->getID());
+    $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($credential);
     $actions = $this->buildActionView($credential, $type);
-    $properties = $this->buildPropertyView($credential, $type, $actions);
+    $properties = $this->buildPropertyView($credential, $type);
+    $subheader = $this->buildSubheaderView($credential);
+    $content = $this->buildPropertySectionView($credential, $type);
 
-    $box = id(new PHUIObjectBoxView())
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->setSubheader($subheader)
+      ->setMainColumn($timeline)
+      ->addPropertySection(pht('PROPERTIES'), $content)
+      ->setPropertyList($properties)
+      ->setActionList($actions);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $timeline,
-      ),
-      array(
-        'title' => $title,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
   }
 
@@ -61,6 +66,35 @@ final class PassphraseCredentialViewController extends PassphraseController {
     }
 
     return $header;
+  }
+
+  private function buildSubheaderView(
+    PassphraseCredential $credential) {
+    $viewer = $this->getViewer();
+
+    $author = $viewer->renderHandle($credential->getAuthorPHID())->render();
+    $date = phabricator_datetime($credential->getDateCreated(), $viewer);
+    $author = phutil_tag('strong', array(), $author);
+
+    $person = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($credential->getAuthorPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
+
+    if (!$person) {
+      return null;
+    }
+
+    $image_uri = $person->getProfileImageURI();
+    $image_href = '/p/'.$credential->getUsername();
+
+    $content = pht('Created by %s on %s.', $author, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
   }
 
   private function buildActionView(
@@ -153,16 +187,13 @@ final class PassphraseCredentialViewController extends PassphraseController {
     return $actions;
   }
 
-  private function buildPropertyView(
+  private function buildPropertySectionView(
     PassphraseCredential $credential,
-    PassphraseCredentialType $type,
-    PhabricatorActionListView $actions) {
+    PassphraseCredentialType $type) {
     $viewer = $this->getRequest()->getUser();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($credential)
-      ->setActionList($actions);
+      ->setUser($viewer);
 
     $properties->addProperty(
       pht('Credential Type'),
@@ -192,8 +223,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
         $viewer->renderHandleList($used_by_phids));
     }
 
-    $properties->invokeWillRenderEvent();
-
     $description = $credential->getDescription();
     if (strlen($description)) {
       $properties->addSectionHeader(
@@ -203,6 +232,19 @@ final class PassphraseCredentialViewController extends PassphraseController {
         new PHUIRemarkupView($viewer, $description));
     }
 
+    return $properties;
+  }
+
+  private function buildPropertyView(
+    PassphraseCredential $credential,
+    PassphraseCredentialType $type) {
+    $viewer = $this->getRequest()->getUser();
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($credential);
+
+    $properties->invokeWillRenderEvent();
     return $properties;
   }
 

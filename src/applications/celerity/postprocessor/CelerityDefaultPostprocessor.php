@@ -192,10 +192,7 @@ final class CelerityDefaultPostprocessor
       'sh-disabledbackground'   => '#f3f3f3',
 
       // Background color for "most" themes.
-      'page.background' => '#f1f1f4',
-
-      // Background color for "dark" themes.
-      'page.background.dark' => '#ebecee',
+      'page.background' => '#f8f8fb',
 
       'menu.profile.text' => 'rgba(255,255,255,.8)',
       'menu.profile.text.selected' => 'rgba(255,255,255,1)',

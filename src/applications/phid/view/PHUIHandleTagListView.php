@@ -53,7 +53,7 @@ final class PHUIHandleTagListView extends AphrontTagView {
     $handles = $this->handles;
 
     // If the list is empty, we may render a "No Projects" tag.
-    if (!$handles) {
+    if (!count($handles)) {
       if (strlen($this->noDataString)) {
         $no_data_tag = $this->newPlaceholderTag()
           ->setName($this->noDataString);
@@ -61,7 +61,10 @@ final class PHUIHandleTagListView extends AphrontTagView {
       }
     }
 
-    if ($this->limit) {
+    if ($this->limit && ($this->limit > count($handles))) {
+      if (!is_array($handles)) {
+        $handles = iterator_to_array($handles);
+      }
       $handles = array_slice($handles, 0, $this->limit);
     }
 

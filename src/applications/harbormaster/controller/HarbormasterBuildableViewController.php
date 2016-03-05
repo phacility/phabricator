@@ -9,8 +9,6 @@ final class HarbormasterBuildableViewController
     $buildable = id(new HarbormasterBuildableQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
-      ->needBuildableHandles(true)
-      ->needContainerHandles(true)
       ->executeOne();
     if (!$buildable) {
       return new Aphront404Response();
@@ -167,15 +165,18 @@ final class HarbormasterBuildableViewController
       ->setActionList($actions);
     $box->addPropertyList($properties);
 
-    if ($buildable->getContainerHandle() !== null) {
+    $container_phid = $buildable->getContainerPHID();
+    $buildable_phid = $buildable->getBuildablePHID();
+
+    if ($container_phid) {
       $properties->addProperty(
         pht('Container'),
-        $buildable->getContainerHandle()->renderLink());
+        $viewer->renderHandle($container_phid));
     }
 
     $properties->addProperty(
       pht('Buildable'),
-      $buildable->getBuildableHandle()->renderLink());
+      $viewer->renderHandle($buildable_phid));
 
     $properties->addProperty(
       pht('Origin'),
@@ -335,25 +336,11 @@ final class HarbormasterBuildableViewController
     }
 
     if ($unit_data) {
-      $unit_table = id(new HarbormasterUnitPropertyView())
-        ->setUser($viewer)
-        ->setLimit(25)
-        ->setUnitMessages($unit_data);
-
-      $unit_href = $this->getApplicationURI('unit/'.$buildable->getID().'/');
-
-      $unit_header = id(new PHUIHeaderView())
-        ->setHeader(pht('Unit Tests'))
-        ->addActionLink(
-          id(new PHUIButtonView())
-            ->setTag('a')
-            ->setHref($unit_href)
-            ->setIcon('fa-list-ul')
-            ->setText('View All'));
-
-      $unit = id(new PHUIObjectBoxView())
-        ->setHeader($unit_header)
-        ->setTable($unit_table);
+      $unit = id(new HarbormasterUnitSummaryView())
+        ->setBuildable($buildable)
+        ->setUnitMessages($unit_data)
+        ->setShowViewAll(true)
+        ->setLimit(5);
     } else {
       $unit = null;
     }

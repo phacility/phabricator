@@ -17,6 +17,10 @@ final class HarbormasterBuildPlanSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for namespaces by name substring.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setLabel(pht('Status'))
         ->setKey('status')
@@ -31,6 +35,10 @@ final class HarbormasterBuildPlanSearchEngine
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
+
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
 
     if ($map['status']) {
       $query->withStatuses($map['status']);
@@ -76,12 +84,23 @@ final class HarbormasterBuildPlanSearchEngine
 
     $viewer = $this->requireViewer();
 
+    if ($plans) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($plans, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+
+      $edge_query->execute();
+    }
+
     $list = new PHUIObjectItemListView();
     foreach ($plans as $plan) {
       $id = $plan->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Plan %d', $plan->getID()))
+        ->setObjectName(pht('Plan %d', $id))
         ->setHeader($plan->getName());
 
       if ($plan->isDisabled()) {
@@ -93,6 +112,17 @@ final class HarbormasterBuildPlanSearchEngine
       }
 
       $item->setHref($this->getApplicationURI("plan/{$id}/"));
+
+      $phid = $plan->getPHID();
+      $project_phids = $edge_query->getDestinationPHIDs(array($phid));
+      $project_handles = $viewer->loadHandles($project_phids);
+
+      $item->addAttribute(
+        id(new PHUIHandleTagListView())
+          ->setLimit(4)
+          ->setNoDataString(pht('No Projects'))
+          ->setSlim(true)
+          ->setHandles($project_handles));
 
       $list->addItem($item);
     }

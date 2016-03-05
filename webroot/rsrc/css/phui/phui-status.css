@@ -7,10 +7,9 @@
 }
 
 .phui-status-list-view .phui-icon-view {
-  display: block;
   width: 14px;
   height: 14px;
-  margin: 3px 4px;
+  margin: 2px 4px 2px 0;
 }
 
 .phui-status-item-target {

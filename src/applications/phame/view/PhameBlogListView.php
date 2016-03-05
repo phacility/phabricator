@@ -72,7 +72,7 @@ final class PhameBlogListView extends AphrontTagView {
       $list = phutil_tag(
         'a',
         array(
-          'href' => '/phame/blog/new/',
+          'href' => '/phame/blog/edit/',
         ),
         pht('Create a Blog'));
     }

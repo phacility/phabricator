@@ -234,23 +234,6 @@ final class HarbormasterBuild extends HarbormasterDAO
     return ($this->getPlanAutoKey() !== null);
   }
 
-  public function createLog(
-    HarbormasterBuildTarget $build_target,
-    $log_source,
-    $log_type) {
-
-    $log_source = id(new PhutilUTF8StringTruncator())
-      ->setMaximumBytes(250)
-      ->truncateString($log_source);
-
-    $log = HarbormasterBuildLog::initializeNewBuildLog($build_target)
-      ->setLogSource($log_source)
-      ->setLogType($log_type)
-      ->save();
-
-    return $log;
-  }
-
   public function retrieveVariablesFromBuild() {
     $results = array(
       'buildable.diff' => null,
@@ -321,6 +304,11 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function isPaused() {
     return ($this->getBuildStatus() == self::STATUS_PAUSED);
+  }
+
+  public function getURI() {
+    $id = $this->getID();
+    return "/harbormaster/build/{$id}/";
   }
 
 

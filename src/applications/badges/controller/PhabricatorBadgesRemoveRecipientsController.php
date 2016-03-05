@@ -28,8 +28,7 @@ final class PhabricatorBadgesRemoveRecipientsController
       return new Aphront404Response();
     }
 
-    $recipients_uri =
-      $this->getApplicationURI('recipients/'.$badge->getID().'/');
+    $view_uri = $this->getApplicationURI('view/'.$badge->getID().'/');
 
     if ($request->isFormPost()) {
       $recipient_spec = array();
@@ -52,7 +51,7 @@ final class PhabricatorBadgesRemoveRecipientsController
         ->applyTransactions($badge, $xactions);
 
       return id(new AphrontRedirectResponse())
-        ->setURI($recipients_uri);
+        ->setURI($view_uri);
     }
 
     $handle = id(new PhabricatorHandleQuery())
@@ -68,7 +67,7 @@ final class PhabricatorBadgesRemoveRecipientsController
           'Really revoke the badge "%s" from %s?',
           phutil_tag('strong', array(), $badge->getName()),
           phutil_tag('strong', array(), $handle->getName())))
-      ->addCancelButton($recipients_uri)
+      ->addCancelButton($view_uri)
       ->addSubmitButton(pht('Revoke Badge'));
 
     return $dialog;

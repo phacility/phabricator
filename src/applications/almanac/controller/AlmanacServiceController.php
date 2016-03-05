@@ -11,6 +11,11 @@ abstract class AlmanacServiceController extends AlmanacController {
     return $crumbs;
   }
 
+  public function buildApplicationMenu() {
+    return $this->newApplicationMenu()
+      ->setSearchEngine(new AlmanacServiceSearchEngine());
+  }
+
   protected function getPropertyDeleteURI($object) {
     $id = $object->getID();
     return "/almanac/service/delete/{$id}/";

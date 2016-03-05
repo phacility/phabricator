@@ -4,9 +4,6 @@
 
 .phabricator-timer {
   margin: 16px 16px 0 16px;
-  border: 1px solid {$lightblueborder};
-  border-radius: 3px;
-  background: #ffffff;
 }
 
 .device .phabricator-timer {
@@ -14,25 +11,18 @@
   margin-right: 8px;
 }
 
-.phabricator-remarkup .phabricator-timer {
-  max-width: 360px;
+.phabricator-remarkup .phabricator-timer-view {
+  max-width: 460px;
   margin: 0 0 12px 0;
+}
+
+.phabricator-timer .countdown-description {
+  border-bottom: 1px solid {$thinblueborder};
+  padding-bottom: 16px;
 }
 
 .device-phone .phabricator-remarkup .phabricator-timer {
   width: auto;
-}
-
-.phabricator-timer-header {
-  font-weight: bold;
-  padding: 8px;
-  background: {$bluebackground};
-  border-radius: 3px 3px 0 0;
-}
-
-.phabricator-timer-header a {
-  color: {$darkbluetext};
-  font-weight: normal;
 }
 
 .phabricator-timer-table {
@@ -60,12 +50,11 @@
 }
 
 .phabricator-timer-table td.phabricator-timer-foot {
-  font-size: {$normalfontsize};
+  font-size: {$biggerfontsize};
   line-height: 16px;
   border-top: 1px solid {$thinblueborder};
   color: {$bluetext};
-  font-weight: normal;
-  padding: 8px;
+  padding: 12px 0;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
   text-align: center;

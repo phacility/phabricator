@@ -15,7 +15,7 @@
 .phui-box-grey {
   background-color: #F7F7F9;
   border-radius: 3px;
-  border-color: rgba({$alphagrey},.1);
+  border-color: rgba({$alphagrey},.2);
 }
 
 .phui-box-blue {
@@ -54,4 +54,39 @@
   text-align: center;
   border: none;
   color: {$greytext};
+}
+
+
+/* Property Boxes */
+
+.phui-box.phui-box-blue-property {
+  border-radius: 3px;
+  border-color: {$lightblueborder};
+  margin: 0;
+  padding: 0;
+}
+
+.phui-box.phui-box-blue-property .phui-header-action-link {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.device .phui-box.phui-box-blue-property {
+  padding: 0;
+}
+
+.phui-box.phui-object-box.phui-box-blue-property .phui-header-shell {
+  background-color: #eff3fc;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  padding: 6px 16px;
+}
+
+.device .phui-box.phui-box-blue-property .phui-header-shell {
+  padding: 6px 12px;
+}
+
+.phui-box.phui-box-blue-property .phui-header-header {
+  font-size: 13px;
+  color: {$bluetext};
 }

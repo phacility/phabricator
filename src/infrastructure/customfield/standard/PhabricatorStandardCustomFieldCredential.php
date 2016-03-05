@@ -135,4 +135,16 @@ final class PhabricatorStandardCustomFieldCredential
   }
 
 
+  protected function getHTTPParameterType() {
+    return new AphrontPHIDHTTPParameterType();
+  }
+
+  protected function newConduitSearchParameterType() {
+    return new ConduitPHIDParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitPHIDParameterType();
+  }
+
 }

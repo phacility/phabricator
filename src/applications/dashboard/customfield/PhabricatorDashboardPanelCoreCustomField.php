@@ -21,6 +21,7 @@ final class PhabricatorDashboardPanelCoreCustomField
   public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
     $key = $this->getProxy()->getRawStandardFieldKey();
     $this->setValueFromStorage($object->getProperty($key));
+    $this->didSetValueFromStorage();
   }
 
   public function applyApplicationTransactionInternalEffects(

@@ -120,6 +120,10 @@ div.phui-object-box.phui-object-box-flush {
   margin: 0;
 }
 
+.phui-object-box .phui-box-border.phui-box-blue-property {
+  border-width: 1px;
+}
+
 .phui-object-box .phui-object-box .phui-header-shell .phui-header-header {
   font-size: {$normalfontsize};
   margin: 0;

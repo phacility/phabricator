@@ -2,6 +2,11 @@
 
 abstract class HarbormasterPlanController extends HarbormasterController {
 
+  public function buildApplicationMenu() {
+    return $this->newApplicationMenu()
+      ->setSearchEngine(new HarbormasterBuildPlanSearchEngine());
+  }
+
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 

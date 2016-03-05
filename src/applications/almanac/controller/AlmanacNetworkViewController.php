@@ -21,34 +21,38 @@ final class AlmanacNetworkViewController
 
     $title = pht('Network %s', $network->getName());
 
-    $property_list = $this->buildPropertyList($network);
-    $action_list = $this->buildActionList($network);
-    $property_list->setActionList($action_list);
+    $properties = $this->buildPropertyList($network);
+    $actions = $this->buildActionList($network);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($network->getName())
+      ->setHeaderIcon('fa-globe')
       ->setPolicyObject($network);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($property_list);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($network->getName());
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $network,
       new AlmanacNetworkTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+          $timeline,
+        ))
+      ->setPropertyList($properties)
+      ->setActionList($actions);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $box,
-          $timeline,
+          $view,
       ));
   }
 
@@ -56,7 +60,10 @@ final class AlmanacNetworkViewController
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setObject($network);
+
+    $properties->invokeWillRenderEvent();
 
     return $properties;
   }

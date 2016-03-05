@@ -22,6 +22,7 @@ final class PhabricatorBadgesEditRecipientsController
     }
 
     $recipient_phids = $badge->getRecipientPHIDs();
+    $view_uri = $this->getApplicationURI('view/'.$badge->getID().'/');
 
     if ($request->isFormPost()) {
       $recipient_spec = array();
@@ -53,7 +54,7 @@ final class PhabricatorBadgesEditRecipientsController
         ->applyTransactions($badge, $xactions);
 
       return id(new AphrontRedirectResponse())
-        ->setURI($request->getRequestURI());
+        ->setURI($view_uri);
     }
 
     $recipient_phids = array_reverse($recipient_phids);
@@ -76,44 +77,26 @@ final class PhabricatorBadgesEditRecipientsController
     $title = pht('Add Recipient');
     if ($can_edit) {
       $header_name = pht('Edit Recipients');
-      $view_uri = $this->getApplicationURI('view/'.$badge->getID().'/');
 
       $form = new AphrontFormView();
       $form
         ->setUser($viewer)
+        ->setFullWidth(true)
         ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setName('phids')
             ->setLabel(pht('Add Recipients'))
-            ->setDatasource(new PhabricatorPeopleDatasource()))
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->addCancelButton($view_uri)
-            ->setValue(pht('Add Recipients')));
-      $form_box = id(new PHUIObjectBoxView())
-        ->setHeaderText($title)
-        ->setForm($form);
+            ->setDatasource(new PhabricatorPeopleDatasource()));
     }
 
-    $recipient_list = id(new PhabricatorBadgesRecipientsListView())
-      ->setBadge($badge)
-      ->setHandles($handles)
-      ->setUser($viewer);
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->setTitle(pht('Award Badges'))
+      ->appendForm($form)
+      ->addCancelButton($view_uri)
+      ->addSubmitButton(pht('Add Recipients'));
 
-    $badge_url = $this->getApplicationURI('view/'.$id.'/');
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($badge->getName(), $badge_url);
-    $crumbs->addTextCrumb(pht('Recipients'));
-
-    return $this->newPage()
-      ->setTitle($title)
-      ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $form_box,
-          $recipient_list,
-      ));
+    return $dialog;
   }
 
 }

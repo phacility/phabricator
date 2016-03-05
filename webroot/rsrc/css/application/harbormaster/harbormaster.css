@@ -20,3 +20,11 @@
   padding: 12px;
   color: {$darkgreytext};
 }
+
+.harbormaster-unit-details {
+  margin: 8px 0 4px;
+  overflow: hidden;
+  white-space: pre;
+  text-overflow: ellipsis;
+  color: {$lightgreytext};
+}

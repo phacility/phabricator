@@ -15,6 +15,10 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     return pht('Almanac Hosts');
   }
 
+  public function getBlueprintIcon() {
+    return 'fa-server';
+  }
+
   public function getDescription() {
     return pht(
       'Allows Drydock to lease existing hosts defined in an Almanac service '.
