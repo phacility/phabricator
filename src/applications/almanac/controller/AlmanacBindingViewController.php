@@ -26,26 +26,23 @@ final class AlmanacBindingViewController
 
     $title = pht('Binding %s', $binding->getID());
 
-    $property_list = $this->buildPropertyList($binding);
-    $action_list = $this->buildActionList($binding);
-    $property_list->setActionList($action_list);
+    $properties = $this->buildPropertyList($binding);
+    $details = $this->buildPropertySection($binding);
+    $actions = $this->buildActionList($binding);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($title)
-      ->setPolicyObject($binding);
+      ->setPolicyObject($binding)
+      ->setHeaderIcon('fa-object-group');
 
     if ($binding->getIsDisabled()) {
       $header->setStatus('fa-ban', 'red', pht('Disabled'));
     }
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($property_list);
-
+    $issue = null;
     if ($binding->getService()->isClusterService()) {
-      $this->addClusterMessage(
-        $box,
+      $issue = $this->addClusterMessage(
         pht('The service for this binding is a cluster service.'),
         pht(
           'The service for this binding is a cluster service. You do not '.
@@ -56,24 +53,34 @@ final class AlmanacBindingViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName(), $service_uri);
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $binding,
       new AlmanacBindingTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+          $issue,
+          $this->buildAlmanacPropertiesTable($binding),
+          $timeline,
+        ))
+      ->setPropertyList($properties)
+      ->addPropertySection(pht('DETAILS'), $details)
+      ->setActionList($actions);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $box,
-          $this->buildAlmanacPropertiesTable($binding),
-          $timeline,
+          $view,
       ));
   }
 
-  private function buildPropertyList(AlmanacBinding $binding) {
+  private function buildPropertySection(AlmanacBinding $binding) {
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
@@ -94,6 +101,17 @@ final class AlmanacBindingViewController
     $properties->addProperty(
       pht('Interface'),
       $binding->getInterface()->renderDisplayAddress());
+
+    return $properties;
+  }
+
+  private function buildPropertyList(AlmanacBinding $binding) {
+    $viewer = $this->getViewer();
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($binding);
+    $properties->invokeWillRenderEvent();
 
     return $properties;
   }
