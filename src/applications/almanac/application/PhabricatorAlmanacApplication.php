@@ -35,10 +35,6 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     );
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getRoutes() {
     return array(
       '/almanac/' => array(
