@@ -31,26 +31,21 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($credential);
-    $actions = $this->buildActionView($credential, $type);
-    $properties = $this->buildPropertyView($credential, $type);
+    $curtain = $this->buildCurtain($credential, $type);
     $subheader = $this->buildSubheaderView($credential);
     $content = $this->buildPropertySectionView($credential, $type);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
+      ->setCurtain($curtain)
       ->setMainColumn($timeline)
-      ->addPropertySection(pht('PROPERTIES'), $content)
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+      ->addPropertySection(pht('PROPERTIES'), $content);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->appendChild($view);
   }
 
   private function buildHeaderView(PassphraseCredential $credential) {
@@ -98,10 +93,10 @@ final class PassphraseCredentialViewController extends PassphraseController {
       ->setContent($content);
   }
 
-  private function buildActionView(
+  private function buildCurtain(
     PassphraseCredential $credential,
     PassphraseCredentialType $type) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $id = $credential->getID();
 
@@ -123,16 +118,14 @@ final class PassphraseCredentialViewController extends PassphraseController {
       $credential_conduit_icon = 'fa-wrench';
     }
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObject($credential)
-      ->setUser($viewer);
-
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $credential,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($credential);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Credential'))
         ->setIcon('fa-pencil')
@@ -141,7 +134,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
         ->setWorkflow(!$can_edit));
 
     if (!$credential->getIsDestroyed()) {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Destroy Credential'))
           ->setIcon('fa-times')
@@ -149,7 +142,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
 
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Show Secret'))
           ->setIcon('fa-eye')
@@ -158,7 +151,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setWorkflow(true));
 
       if ($type->hasPublicKey()) {
-        $actions->addAction(
+        $curtain->addAction(
           id(new PhabricatorActionView())
             ->setName(pht('Show Public Key'))
             ->setIcon('fa-download')
@@ -167,7 +160,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
             ->setWorkflow(true));
       }
 
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($credential_conduit_text)
           ->setIcon($credential_conduit_icon)
@@ -175,7 +168,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
 
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($credential_lock_text)
           ->setIcon($credential_lock_icon)
@@ -184,8 +177,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setWorkflow(true));
     }
 
-
-    return $actions;
+    return $curtain;
   }
 
   private function buildPropertySectionView(
@@ -233,19 +225,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
         new PHUIRemarkupView($viewer, $description));
     }
 
-    return $properties;
-  }
-
-  private function buildPropertyView(
-    PassphraseCredential $credential,
-    PassphraseCredentialType $type) {
-    $viewer = $this->getRequest()->getUser();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($credential);
-
-    $properties->invokeWillRenderEvent();
     return $properties;
   }
 

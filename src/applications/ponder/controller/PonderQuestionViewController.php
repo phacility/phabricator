@@ -43,8 +43,7 @@ final class PonderQuestionViewController extends PonderController {
       $header->setStatus($icon, 'dark', $text);
     }
 
-    $properties = $this->buildPropertyListView($question);
-    $actions = $this->buildActionListView($question);
+    $curtain = $this->buildCurtain($question);
     $details = $this->buildPropertySectionView($question);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -118,29 +117,24 @@ final class PonderQuestionViewController extends PonderController {
     $ponder_view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
+      ->setCurtain($curtain)
       ->setMainColumn($ponder_content)
-      ->setPropertyList($properties)
       ->addPropertySection(pht('DETAILS'), $details)
-      ->setActionList($actions)
       ->addClass('ponder-question-view');
 
     $page_objects = array_merge(
-          array($question->getPHID()),
-          mpull($question->getAnswers(), 'getPHID'));
+      array($question->getPHID()),
+      mpull($question->getAnswers(), 'getPHID'));
 
     return $this->newPage()
       ->setTitle('Q'.$question->getID().' '.$question->getTitle())
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs($page_objects)
-      ->appendChild(
-        array(
-          $ponder_view,
-        ));
+      ->appendChild($ponder_view);
   }
 
-  private function buildActionListView(PonderQuestion $question) {
+  private function buildCurtain(PonderQuestion $question) {
     $viewer = $this->getViewer();
-    $request = $this->getRequest();
     $id = $question->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -148,9 +142,7 @@ final class PonderQuestionViewController extends PonderController {
       $question,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($question);
+    $curtain = $this->newCurtainView($question);
 
     if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
       $name = pht('Close Question');
@@ -160,7 +152,7 @@ final class PonderQuestionViewController extends PonderController {
       $icon = 'fa-square-o';
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
       ->setIcon('fa-pencil')
       ->setName(pht('Edit Question'))
@@ -168,7 +160,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($name)
         ->setIcon($icon)
@@ -176,26 +168,13 @@ final class PonderQuestionViewController extends PonderController {
         ->setDisabled(!$can_edit)
         ->setHref($this->getApplicationURI("/question/status/{$id}/")));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-list')
         ->setName(pht('View History'))
         ->setHref($this->getApplicationURI("/question/history/{$id}/")));
 
-    return $view;
-  }
-
-  private function buildPropertyListView(
-    PonderQuestion $question) {
-
-    $viewer = $this->getViewer();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($question);
-
-    $view->invokeWillRenderEvent();
-
-    return $view;
+    return $curtain;
   }
 
   private function buildSubheaderView(

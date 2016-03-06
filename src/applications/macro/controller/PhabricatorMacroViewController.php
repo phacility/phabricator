@@ -23,9 +23,8 @@ final class PhabricatorMacroViewController
     $title_short = pht('Macro "%s"', $macro->getName());
     $title_long  = pht('Image Macro "%s"', $macro->getName());
 
-    $actions = $this->buildActionView($macro);
+    $curtain = $this->buildCurtain($macro);
     $subheader = $this->buildSubheaderView($macro);
-    $properties = $this->buildPropertyView($macro);
     $file = $this->buildFileView($macro);
     $details = $this->buildPropertySectionView($macro);
 
@@ -68,35 +67,29 @@ final class PhabricatorMacroViewController
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
+      ->setCurtain($curtain)
       ->setMainColumn(array(
         $timeline,
         $add_comment_form,
       ))
       ->addPropertySection(pht('MACRO'), $file)
-      ->addPropertySection(pht('DETAILS'), $details)
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+      ->addPropertySection(pht('DETAILS'), $details);
 
     return $this->newPage()
       ->setTitle($title_short)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($macro->getPHID()))
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->appendChild($view);
   }
 
-  private function buildActionView(
+  private function buildCurtain(
     PhabricatorFileImageMacro $macro) {
     $can_manage = $this->hasApplicationCapability(
       PhabricatorMacroManageCapability::CAPABILITY);
 
-    $request = $this->getRequest();
-    $view = id(new PhabricatorActionListView())
-      ->setUser($request->getUser())
-      ->setObject($macro)
-      ->addAction(
+    $curtain = $this->newCurtainView($macro);
+
+    $curtain->addAction(
         id(new PhabricatorActionView())
         ->setName(pht('Edit Macro'))
         ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
@@ -104,7 +97,7 @@ final class PhabricatorMacroViewController
         ->setWorkflow(!$can_manage)
         ->setIcon('fa-pencil'));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Audio'))
         ->setHref($this->getApplicationURI('/audio/'.$macro->getID().'/'))
@@ -113,7 +106,7 @@ final class PhabricatorMacroViewController
         ->setIcon('fa-music'));
 
     if ($macro->getIsDisabled()) {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Activate Macro'))
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
@@ -121,7 +114,7 @@ final class PhabricatorMacroViewController
           ->setDisabled(!$can_manage)
           ->setIcon('fa-check'));
     } else {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Archive Macro'))
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
@@ -130,7 +123,7 @@ final class PhabricatorMacroViewController
           ->setIcon('fa-ban'));
     }
 
-    return $view;
+    return $curtain;
   }
 
   private function buildSubheaderView(
@@ -204,19 +197,6 @@ final class PhabricatorMacroViewController
       return $view;
     }
     return null;
-  }
-
-  private function buildPropertyView(
-    PhabricatorFileImageMacro $macro) {
-    $viewer = $this->getViewer();
-
-    $view = id(new PHUIPropertyListView())
-      ->setUser($this->getRequest()->getUser())
-      ->setObject($macro);
-
-    $view->invokeWillRenderEvent();
-
-    return $view;
   }
 
 }

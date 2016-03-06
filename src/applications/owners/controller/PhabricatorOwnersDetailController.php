@@ -43,8 +43,7 @@ final class PhabricatorOwnersDetailController
       ->setViewer($viewer)
       ->readFieldsFromStorage($package);
 
-    $actions = $this->buildPackageActionView($package);
-    $properties = $this->buildPackagePropertyView($package, $field_list);
+    $curtain = $this->buildCurtain($package);
     $details = $this->buildPackageDetailView($package, $field_list);
 
     if ($package->isArchived()) {
@@ -155,35 +154,18 @@ final class PhabricatorOwnersDetailController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setCurtain($curtain)
       ->setMainColumn(array(
         $this->renderPathsTable($paths, $repositories),
         $commit_panels,
         $timeline,
       ))
-      ->addPropertySection(pht('Details'), $details)
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+      ->addPropertySection(pht('Details'), $details);
 
     return $this->newPage()
       ->setTitle($package->getName())
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-      ));
-  }
-
-  private function buildPackagePropertyView(
-    PhabricatorOwnersPackage $package,
-    PhabricatorCustomFieldList $field_list) {
-
-    $viewer = $this->getViewer();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($package);
-    $view->invokeWillRenderEvent();
-
-    return $view;
+      ->appendChild($view);
   }
 
   private function buildPackageDetailView(
@@ -224,7 +206,7 @@ final class PhabricatorOwnersDetailController
     return $view;
   }
 
-  private function buildPackageActionView(PhabricatorOwnersPackage $package) {
+  private function buildCurtain(PhabricatorOwnersPackage $package) {
     $viewer = $this->getViewer();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -236,45 +218,43 @@ final class PhabricatorOwnersDetailController
     $edit_uri = $this->getApplicationURI("/edit/{$id}/");
     $paths_uri = $this->getApplicationURI("/paths/{$id}/");
 
-    $action_list = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($package);
+    $curtain = $this->newCurtainView($package);
 
-    $action_list->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Edit Package'))
-          ->setIcon('fa-pencil')
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit)
-          ->setHref($edit_uri));
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Package'))
+        ->setIcon('fa-pencil')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit)
+        ->setHref($edit_uri));
 
     if ($package->isArchived()) {
-      $action_list->addAction(
-          id(new PhabricatorActionView())
-            ->setName(pht('Activate Package'))
-            ->setIcon('fa-check')
-            ->setDisabled(!$can_edit)
-            ->setWorkflow($can_edit)
-            ->setHref($this->getApplicationURI("/archive/{$id}/")));
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Activate Package'))
+          ->setIcon('fa-check')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit)
+          ->setHref($this->getApplicationURI("/archive/{$id}/")));
     } else {
-      $action_list->addAction(
-          id(new PhabricatorActionView())
-            ->setName(pht('Archive Package'))
-            ->setIcon('fa-ban')
-            ->setDisabled(!$can_edit)
-            ->setWorkflow($can_edit)
-            ->setHref($this->getApplicationURI("/archive/{$id}/")));
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Package'))
+          ->setIcon('fa-ban')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit)
+          ->setHref($this->getApplicationURI("/archive/{$id}/")));
     }
 
-    $action_list->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Edit Paths'))
-          ->setIcon('fa-folder-open')
-          ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit)
-          ->setHref($paths_uri));
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Paths'))
+        ->setIcon('fa-folder-open')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit)
+        ->setHref($paths_uri));
 
-    return $action_list;
+    return $curtain;
   }
 
   private function renderPathsTable(array $paths, array $repositories) {

@@ -33,8 +33,7 @@ final class HeraldRuleViewController extends HeraldController {
         pht('Active'));
     }
 
-    $actions = $this->buildActionView($rule);
-    $properties = $this->buildPropertyView($rule);
+    $curtain = $this->buildCurtain($rule);
     $details = $this->buildPropertySectionView($rule);
     $description = $this->buildDescriptionView($rule);
 
@@ -43,10 +42,6 @@ final class HeraldRuleViewController extends HeraldController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb("H{$id}");
     $crumbs->setBorder(true);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
 
     $timeline = $this->buildTransactionTimeline(
       $rule,
@@ -57,35 +52,30 @@ final class HeraldRuleViewController extends HeraldController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setCurtain($curtain)
       ->setMainColumn($timeline)
       ->addPropertySection(pht('DETAILS'), $details)
-      ->addPropertySection(pht('DESCRIPTION'), $description)
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+      ->addPropertySection(pht('DESCRIPTION'), $description);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->appendChild($view);
   }
 
-  private function buildActionView(HeraldRule $rule) {
-    $viewer = $this->getRequest()->getUser();
-    $id = $rule->getID();
+  private function buildCurtain(HeraldRule $rule) {
+    $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($rule);
+    $id = $rule->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $rule,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view->addAction(
+    $curtain = $this->newCurtainView($rule);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Rule'))
         ->setHref($this->getApplicationURI("edit/{$id}/"))
@@ -103,7 +93,7 @@ final class HeraldRuleViewController extends HeraldController {
       $disable_name = pht('Archive Rule');
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Disable Rule'))
         ->setHref($this->getApplicationURI($disable_uri))
@@ -112,23 +102,10 @@ final class HeraldRuleViewController extends HeraldController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    return $view;
+    return $curtain;
   }
 
-  private function buildPropertyView(
-    HeraldRule $rule) {
-
-    $viewer = $this->getRequest()->getUser();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($rule);
-
-    $view->invokeWillRenderEvent();
-
-    return $view;
-  }
-
-    private function buildPropertySectionView(
+  private function buildPropertySectionView(
     HeraldRule $rule) {
 
     $viewer = $this->getRequest()->getUser();
