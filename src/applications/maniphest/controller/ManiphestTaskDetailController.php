@@ -91,8 +91,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $timeline,
         $comment_view,
       ))
-      ->addPropertySection(pht('DETAILS'), $details)
-      ->addPropertySection(pht('DESCRIPTION'), $description);
+      ->addPropertySection(pht('DESCRIPTION'), $description)
+      ->addPropertySection(pht('DETAILS'), $details);
 
     return $this->newPage()
       ->setTitle($title)
@@ -214,10 +214,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
 
     $owner_phid = $task->getOwnerPHID();
+    $author_phid = $task->getAuthorPHID();
+    $handles = $viewer->loadHandles(array($owner_phid, $author_phid));
+
     if ($owner_phid) {
-      $assigned_to = $viewer
-        ->renderHandle($owner_phid)
-        ->setShowHovercard(true);
+      $image_uri = $handles[$owner_phid]->getImageURI();
+      $image_href = $handles[$owner_phid]->getURI();
+      $owner = $viewer->renderHandle($owner_phid)->render();
+      $content = phutil_tag('strong', array(), $owner);
+      $assigned_to = id(new PHUIHeadThingView())
+        ->setImage($image_uri)
+        ->setImageHref($image_href)
+        ->setContent($content);
     } else {
       $assigned_to = phutil_tag('em', array(), pht('None'));
     }
@@ -226,14 +234,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setHeaderText(pht('Assigned To'))
       ->appendChild($assigned_to);
 
-    $author_phid = $task->getAuthorPHID();
-    $author = $viewer
-      ->renderHandle($author_phid)
-      ->setShowHovercard(true);
+    $author_uri = $handles[$author_phid]->getImageURI();
+    $author_href = $handles[$author_phid]->getURI();
+    $author = $viewer->renderHandle($author_phid)->render();
+    $content = phutil_tag('strong', array(), $author);
+    $authored_by = id(new PHUIHeadThingView())
+      ->setImage($author_uri)
+      ->setImageHref($author_href)
+      ->setContent($content);
 
     $curtain->newPanel()
-      ->setHeaderText(pht('Author'))
-      ->appendChild($author);
+      ->setHeaderText(pht('Authored By'))
+      ->appendChild($authored_by);
 
     return $curtain;
   }

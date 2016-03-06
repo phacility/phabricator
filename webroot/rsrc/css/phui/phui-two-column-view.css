@@ -139,36 +139,6 @@
   border: 1px solid rgba({$alphablue}, .2);
 }
 
-.phui-two-column-properties .phui-property-list-stacked
-  .phui-property-list-properties .phui-property-list-key {
-    margin: 4px 0 8px 0;
-    padding: 20px 4px 0;
-    border-top: 1px solid rgba({$alphablue}, .2);
-}
-
-.phui-two-column-properties .phui-property-list-stacked
-  .phui-property-list-properties .phui-property-list-value {
-    margin: 0 0 20px 0;
-    padding: 0 4px;
-}
-
-.device .phui-two-column-properties .phui-property-list-stacked
-  .phui-property-list-properties .phui-property-list-value {
-  margin-bottom: 12px;
-}
-
-.device-desktop .phui-two-column-properties .phui-property-list-container,
-.device .phui-two-column-properties .phui-property-list-container {
-  padding: 0;
-}
-
-.device .phui-two-column-properties .phui-property-list-stacked
-  .phui-property-list-properties .phui-property-list-key {
-    margin: 12px 0 4px 0;
-    padding: 0;
-    border: none;
-}
-
 .device .phui-two-column-content .phui-two-column-properties.phui-object-box {
   padding: 0 12px;
 }
