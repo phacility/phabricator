@@ -44,7 +44,7 @@
 .herald-list-description {
   color: {$bluetext};
   font-weight: bold;
-  padding: 8px 0;
+  padding: 12px 0;
 }
 
 .herald-list-icon {
@@ -52,6 +52,6 @@
 }
 
 .herald-list-item {
-  padding-bottom: 20px;
+  padding-bottom: 4px;
   color: {$darkbluetext};
 }
