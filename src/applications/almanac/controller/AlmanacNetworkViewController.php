@@ -21,8 +21,7 @@ final class AlmanacNetworkViewController
 
     $title = pht('Network %s', $network->getName());
 
-    $properties = $this->buildPropertyList($network);
-    $actions = $this->buildActionList($network);
+    $curtain = $this->buildCurtain($network);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
@@ -41,11 +40,10 @@ final class AlmanacNetworkViewController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setCurtain($curtain)
       ->setMainColumn(array(
           $timeline,
-        ))
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+        ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -56,39 +54,29 @@ final class AlmanacNetworkViewController
       ));
   }
 
-  private function buildPropertyList(AlmanacNetwork $network) {
+
+  private function buildCurtain(AlmanacNetwork $network) {
     $viewer = $this->getViewer();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($network);
-
-    $properties->invokeWillRenderEvent();
-
-    return $properties;
-  }
-
-  private function buildActionList(AlmanacNetwork $network) {
-    $viewer = $this->getViewer();
-    $id = $network->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $network,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $id = $network->getID();
+    $edit_uri = $this->getApplicationURI("network/edit/{$id}/");
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($network);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Network'))
-        ->setHref($this->getApplicationURI("network/edit/{$id}/"))
+        ->setHref($edit_uri)
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
 }

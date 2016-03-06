@@ -28,7 +28,7 @@ final class AlmanacBindingViewController
 
     $properties = $this->buildPropertyList($binding);
     $details = $this->buildPropertySection($binding);
-    $actions = $this->buildActionList($binding);
+    $curtain = $this->buildCurtain($binding);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
@@ -62,14 +62,13 @@ final class AlmanacBindingViewController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setCurtain($curtain)
       ->setMainColumn(array(
           $issue,
           $this->buildAlmanacPropertiesTable($binding),
           $timeline,
         ))
-      ->setPropertyList($properties)
-      ->addPropertySection(pht('DETAILS'), $details)
-      ->setActionList($actions);
+      ->addPropertySection(pht('DETAILS'), $details);
 
     return $this->newPage()
       ->setTitle($title)
@@ -116,23 +115,25 @@ final class AlmanacBindingViewController
     return $properties;
   }
 
-  private function buildActionList(AlmanacBinding $binding) {
+  private function buildCurtain(AlmanacBinding $binding) {
     $viewer = $this->getViewer();
-    $id = $binding->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $binding,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $id = $binding->getID();
+    $edit_uri = $this->getApplicationURI("binding/edit/{$id}/");
+    $disable_uri = $this->getApplicationURI("binding/disable/{$id}/");
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($binding);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Binding'))
-        ->setHref($this->getApplicationURI("binding/edit/{$id}/"))
+        ->setHref($edit_uri)
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
@@ -144,17 +145,15 @@ final class AlmanacBindingViewController
       $disable_text = pht('Disable Binding');
     }
 
-    $disable_href = $this->getApplicationURI("binding/disable/{$id}/");
-
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon($disable_icon)
         ->setName($disable_text)
-        ->setHref($disable_href)
+        ->setHref($disable_uri)
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
 }
