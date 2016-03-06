@@ -4,7 +4,9 @@ final class DrydockLandRepositoryOperation
   extends DrydockRepositoryOperationType {
 
   const OPCONST = 'land';
-  const PHASE_PUSH = 'push';
+
+  const PHASE_PUSH = 'op.land.push';
+  const PHASE_COMMIT = 'op.land.commit';
 
   public function getOperationDescription(
     DrydockRepositoryOperation $operation,
@@ -119,25 +121,42 @@ final class DrydockLandRepositoryOperation
       $committer_info['email'],
       "{$author_name} <{$author_email}>");
 
-    $future
-      ->write($commit_message)
-      ->resolvex();
+    $future->write($commit_message);
 
     try {
-        $interface->execx(
-          'git push origin -- %s:%s',
-          'HEAD',
-          $push_dst);
+      $future->resolvex();
     } catch (CommandException $ex) {
-      $show_command = csprintf(
-      'git push origin -- %s:%s',
-      'HEAD',
-      $push_dst);
-      $error = DrydockCommandError::newFromCommandException(
-        self::PHASE_PUSH,
-        $show_command,
-        $ex);
-      $operation->setCommandError($error);
+      $display_command = csprintf('git commit');
+
+      // TODO: One reason this can fail is if the changes have already been
+      // merged. We could try to detect that.
+
+      $error = DrydockCommandError::newFromCommandException($ex)
+        ->setPhase(self::PHASE_COMMIT)
+        ->setDisplayCommand($display_command);
+
+      $operation->setCommandError($error->toDictionary());
+
+      throw $ex;
+    }
+
+    try {
+      $interface->execx(
+        'git push origin -- %s:%s',
+        'HEAD',
+        $push_dst);
+    } catch (CommandException $ex) {
+      $display_command = csprintf(
+        'git push origin %R:%R',
+        'HEAD',
+        $push_dst);
+
+      $error = DrydockCommandError::newFromCommandException($ex)
+        ->setPhase(self::PHASE_PUSH)
+        ->setDisplayCommand($display_command);
+
+      $operation->setCommandError($error->toDictionary());
+
       throw $ex;
     }
   }
