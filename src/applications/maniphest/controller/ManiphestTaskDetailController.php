@@ -73,8 +73,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $header = $this->buildHeaderView($task);
     $details = $this->buildPropertyView($task, $field_list, $edges, $handles);
     $description = $this->buildDescriptionView($task, $engine);
-    $actions = $this->buildActionView($task);
-    $properties = $this->buildPropertyListView($task, $handles);
+    $curtain = $this->buildCurtain($task);
 
     $title = pht('%s %s', $monogram, $task->getTitle());
 
@@ -87,14 +86,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setCurtain($curtain)
       ->setMainColumn(array(
         $timeline,
         $comment_view,
       ))
       ->addPropertySection(pht('DETAILS'), $details)
-      ->addPropertySection(pht('DESCRIPTION'), $description)
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+      ->addPropertySection(pht('DESCRIPTION'), $description);
 
     return $this->newPage()
       ->setTitle($title)
@@ -148,8 +146,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
   }
 
 
-  private function buildActionView(ManiphestTask $task) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildCurtain(ManiphestTask $task) {
+    $viewer = $this->getViewer();
 
     $id = $task->getID();
     $phid = $task->getPHID();
@@ -159,11 +157,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $task,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($task);
+    $curtain = $this->newCurtainView($task);
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Task'))
         ->setIcon('fa-pencil')
@@ -171,7 +167,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Merge Duplicates In'))
         ->setHref("/search/attach/{$phid}/TASK/merge/")
@@ -199,7 +195,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $edit_uri = $this->getApplicationURI($edit_uri);
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Create Subtask'))
         ->setHref($edit_uri)
@@ -207,7 +203,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_create)
         ->setWorkflow(!$can_create));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Blocking Tasks'))
         ->setHref("/search/attach/{$phid}/TASK/blocks/")
@@ -216,7 +212,30 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    return $view;
+
+    $owner_phid = $task->getOwnerPHID();
+    if ($owner_phid) {
+      $assigned_to = $viewer
+        ->renderHandle($owner_phid)
+        ->setShowHovercard(true);
+    } else {
+      $assigned_to = phutil_tag('em', array(), pht('None'));
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Assigned To'))
+      ->appendChild($assigned_to);
+
+    $author_phid = $task->getAuthorPHID();
+    $author = $viewer
+      ->renderHandle($author_phid)
+      ->setShowHovercard(true);
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Author'))
+      ->appendChild($author);
+
+    return $curtain;
   }
 
   private function buildPropertyView(
@@ -305,37 +324,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     return null;
-  }
-
-  private function buildPropertyListView(ManiphestTask $task, $handles) {
-    $viewer = $this->getRequest()->getUser();
-    $view =  id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($task);
-
-    $view->invokeWillRenderEvent();
-
-    $owner_phid = $task->getOwnerPHID();
-    if ($owner_phid) {
-      $assigned_to = $handles
-        ->renderHandle($owner_phid)
-        ->setShowHovercard(true);
-    } else {
-      $assigned_to = phutil_tag('em', array(), pht('None'));
-    }
-
-    $view->addProperty(pht('Assigned To'), $assigned_to);
-
-    $author_phid = $task->getAuthorPHID();
-    $author = $handles
-      ->renderHandle($author_phid)
-      ->setShowHovercard(true);
-
-    $date = phabricator_datetime($task->getDateCreated(), $viewer);
-
-    $view->addProperty(pht('Author'), $author);
-
-    return $view;
   }
 
   private function buildDescriptionView(

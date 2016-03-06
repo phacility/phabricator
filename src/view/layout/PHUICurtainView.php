@@ -15,6 +15,17 @@ final class PHUICurtainView extends AphrontTagView {
     return $this;
   }
 
+  public function newPanel() {
+    $panel = new PHUICurtainPanelView();
+    $this->addPanel($panel);
+
+    // By default, application panels go at the bottom of the curtain, below
+    // extension panels.
+    $panel->setOrder(100000);
+
+    return $panel;
+  }
+
   public function setActionList(PhabricatorActionListView $action_list) {
     $this->actionList = $action_list;
     return $this;
