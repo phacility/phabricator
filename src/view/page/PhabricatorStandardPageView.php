@@ -490,7 +490,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       $nav->appendFooter($footer);
       $content = phutil_implode_html('', array($nav->render()));
     } else {
-      $contnet = array();
+      $content = array();
 
       $crumbs = $this->getCrumbs();
       if ($crumbs) {
