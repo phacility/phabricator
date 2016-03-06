@@ -199,9 +199,6 @@ final class AphrontSideNavFilterView extends AphrontView {
   }
 
   private function renderFlexNav() {
-
-    $user = $this->user;
-
     require_celerity_resource('phabricator-nav-view-css');
 
     $nav_classes = array();

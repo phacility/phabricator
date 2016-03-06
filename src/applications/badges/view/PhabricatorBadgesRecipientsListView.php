@@ -16,8 +16,7 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
   }
 
   public function render() {
-
-    $viewer = $this->user;
+    $viewer = $this->getViewer();
 
     $badge = $this->badge;
     $handles = $this->handles;

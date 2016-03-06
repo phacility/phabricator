@@ -172,8 +172,8 @@ final class PHUIFeedStoryView extends AphrontView {
     if ($this->epoch) {
       // TODO: This is really bad; when rendering through Conduit and via
       // renderText() we don't have a user.
-      if ($this->user) {
-        $foot = phabricator_datetime($this->epoch, $this->user);
+      if ($this->hasViewer()) {
+        $foot = phabricator_datetime($this->epoch, $this->getViewer());
       } else {
         $foot = null;
       }

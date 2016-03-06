@@ -90,8 +90,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     }
 
     $username = null;
-    if ($this->user) {
-      $username = $this->user->getUsername();
+    if ($this->hasViewer()) {
+      $username = $this->getViewer()->getUsername();
     }
 
     $datasource_uri = $datasource->getDatasourceURI();
