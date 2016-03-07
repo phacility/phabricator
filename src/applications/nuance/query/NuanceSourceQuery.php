@@ -22,20 +22,12 @@ final class NuanceSourceQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new NuanceSource();
+  }
+
   protected function loadPage() {
-    $table = new NuanceSource();
-    $conn = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn,
-      '%Q FROM %T %Q %Q %Q',
-      $this->buildSelectClause($conn),
-      $table->getTableName(),
-      $this->buildWhereClause($conn),
-      $this->buildOrderClause($conn),
-      $this->buildLimitClause($conn));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {

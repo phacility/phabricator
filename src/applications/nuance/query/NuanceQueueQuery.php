@@ -16,20 +16,12 @@ final class NuanceQueueQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new NuanceQueue();
+  }
+
   protected function loadPage() {
-    $table = new NuanceQueue();
-    $conn = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn,
-      '%Q FROM %T %Q %Q %Q',
-      $this->buildSelectClause($conn),
-      $table->getTableName(),
-      $this->buildWhereClause($conn),
-      $this->buildOrderClause($conn),
-      $this->buildLimitClause($conn));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {

@@ -11,21 +11,19 @@ final class NuanceQueueSearchEngine
     return pht('Nuance Queues');
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+  public function newQuery() {
+    return new NuanceQueueQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new NuanceQueueQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {}
+  protected function buildCustomSearchFields() {
+    return array();
+  }
 
   protected function getURI($path) {
     return '/nuance/queue/'.$path;
