@@ -6,7 +6,9 @@ final class DifferentialDiffQuery
   private $ids;
   private $phids;
   private $revisionIDs;
+
   private $needChangesets = false;
+  private $needProperties;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -28,19 +30,17 @@ final class DifferentialDiffQuery
     return $this;
   }
 
+  public function needProperties($need_properties) {
+    $this->needProperties = $need_properties;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new DifferentialDiff();
+  }
+
   protected function loadPage() {
-    $table = new DifferentialDiff();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $diffs) {
@@ -76,6 +76,23 @@ final class DifferentialDiffQuery
     return $diffs;
   }
 
+  protected function didFilterPage(array $diffs) {
+    if ($this->needProperties) {
+      $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+        'diffID IN (%Ld)',
+        mpull($diffs, 'getID'));
+
+      $properties = mgroup($properties, 'getDiffID');
+      foreach ($diffs as $diff) {
+        $map = idx($properties, $diff->getID(), array());
+        $map = mpull($map, 'getData', 'getName');
+        $diff->attachDiffProperties($map);
+      }
+    }
+
+    return $diffs;
+  }
+
   private function loadChangesets(array $diffs) {
     id(new DifferentialChangesetQuery())
       ->setViewer($this->getViewer())
@@ -88,32 +105,31 @@ final class DifferentialDiffQuery
     return $diffs;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->revisionIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'revisionID IN (%Ld)',
         $this->revisionIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

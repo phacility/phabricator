@@ -114,6 +114,8 @@ final class HarbormasterBuildLog
 
     $this->rope->append($content);
     $this->flush();
+
+    return $this;
   }
 
   private function flush() {
