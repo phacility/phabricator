@@ -158,8 +158,10 @@ abstract class PhabricatorDaemonManagementWorkflow
 
     $this->printLaunchingDaemons($daemons, $debug);
 
+    $trace = PhutilArgumentParser::isTraceModeEnabled();
+
     $flags = array();
-    if ($debug || PhabricatorEnv::getEnvConfig('phd.trace')) {
+    if ($trace || PhabricatorEnv::getEnvConfig('phd.trace')) {
       $flags[] = '--trace';
     }
 
