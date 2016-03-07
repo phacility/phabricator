@@ -1,6 +1,7 @@
 <?php
 
-final class NuanceSourceViewController extends NuanceController {
+final class NuanceSourceViewController
+  extends NuanceSourceController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();

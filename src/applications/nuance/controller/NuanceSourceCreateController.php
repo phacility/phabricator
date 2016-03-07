@@ -1,6 +1,7 @@
 <?php
 
-final class NuanceSourceCreateController extends NuanceController {
+final class NuanceSourceCreateController
+  extends NuanceSourceController {
 
   public function handleRequest(AphrontRequest $request) {
     $can_edit = $this->requireApplicationCapability(

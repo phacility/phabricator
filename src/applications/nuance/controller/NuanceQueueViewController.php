@@ -1,6 +1,7 @@
 <?php
 
-final class NuanceQueueViewController extends NuanceController {
+final class NuanceQueueViewController
+  extends NuanceQueueController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
