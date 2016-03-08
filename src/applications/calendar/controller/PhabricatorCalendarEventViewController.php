@@ -89,7 +89,10 @@ final class PhabricatorCalendarEventViewController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setMainColumn($timeline)
+      ->setMainColumn(array(
+          $timeline,
+          $add_comment_form,
+        ))
       ->setCurtain($curtain)
       ->addPropertySection(pht('DETAILS'), $details)
       ->addPropertySection(pht('DESCRIPTION'), $description);
