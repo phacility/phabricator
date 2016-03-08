@@ -40,6 +40,7 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
       '/nuance/' => array(
         '' => 'NuanceConsoleController',
         'item/' => array(
+          $this->getQueryRoutePattern() => 'NuanceItemListController',
           'view/(?P<id>[1-9]\d*)/' => 'NuanceItemViewController',
           'edit/(?P<id>[1-9]\d*)/' => 'NuanceItemEditController',
           'new/'                   => 'NuanceItemEditController',

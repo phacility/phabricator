@@ -5,6 +5,7 @@ abstract class NuanceImportCursor extends Phobject {
   private $cursorData;
   private $cursorKey;
   private $source;
+  private $viewer;
 
   abstract protected function shouldPullDataFromSource();
   abstract protected function pullDataFromSource();
@@ -38,6 +39,15 @@ abstract class NuanceImportCursor extends Phobject {
 
   public function getCursorKey() {
     return $this->cursorKey;
+  }
+
+  public function setViewer($viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
   }
 
   final public function importFromSource() {

@@ -1,7 +1,8 @@
 <?php
 
 final class NuanceImportCursorData
-  extends NuanceDAO {
+  extends NuanceDAO
+  implements PhabricatorPolicyInterface {
 
   protected $sourcePHID;
   protected $cursorKey;
@@ -39,6 +40,31 @@ final class NuanceImportCursorData
   public function setCursorProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

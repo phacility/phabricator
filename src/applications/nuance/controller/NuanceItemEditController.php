@@ -74,7 +74,7 @@ final class NuanceItemEditController extends NuanceController {
       $viewer->renderHandle($item->getQueuePHID()));
 
     $source = $item->getSource();
-    $definition = $source->requireDefinition();
+    $definition = $source->getDefinition();
 
     $definition->renderItemEditProperties(
       $viewer,

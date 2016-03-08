@@ -26,6 +26,13 @@ final class NuanceConsoleController extends NuanceController {
         ->setIcon('fa-filter')
         ->addAttribute(pht('Manage Nuance sources.')));
 
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Items'))
+        ->setHref($this->getApplicationURI('item/'))
+        ->setIcon('fa-clone')
+        ->addAttribute(pht('Manage Nuance items.')));
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
 

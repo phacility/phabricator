@@ -6,18 +6,21 @@ final class NuanceItem
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface {
 
-  const STATUS_OPEN     = 0;
-  const STATUS_ASSIGNED = 10;
-  const STATUS_CLOSED   = 20;
+  const STATUS_IMPORTING = 'importing';
+  const STATUS_OPEN = 'open';
+  const STATUS_ASSIGNED = 'assigned';
+  const STATUS_CLOSED = 'closed';
 
   protected $status;
   protected $ownerPHID;
   protected $requestorPHID;
   protected $sourcePHID;
-  protected $sourceLabel;
+  protected $queuePHID;
+  protected $itemType;
+  protected $itemKey;
+  protected $itemContainerKey;
   protected $data = array();
   protected $mailKey;
-  protected $queuePHID;
 
   private $source = self::ATTACHABLE;
 
@@ -34,8 +37,12 @@ final class NuanceItem
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'ownerPHID' => 'phid?',
-        'sourceLabel' => 'text255?',
-        'status' => 'uint32',
+        'requestorPHID' => 'phid?',
+        'queuePHID' => 'phid?',
+        'itemType' => 'text64',
+        'itemKey' => 'text64',
+        'itemContainerKey' => 'text64?',
+        'status' => 'text32',
         'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -50,6 +57,13 @@ final class NuanceItem
         ),
         'key_queue' => array(
           'columns' => array('queuePHID', 'status'),
+        ),
+        'key_container' => array(
+          'columns' => array('sourcePHID', 'itemContainerKey'),
+        ),
+        'key_item' => array(
+          'columns' => array('sourcePHID', 'itemKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -72,15 +86,7 @@ final class NuanceItem
   }
 
   public function getLabel(PhabricatorUser $viewer) {
-    // this is generated at the time the item is created based on
-    // the configuration from the item source. It is typically
-    // something like 'Twitter'.
-    $source_label = $this->getSourceLabel();
-
-    return pht(
-      'Item via %s @ %s.',
-      $source_label,
-      phabricator_datetime($this->getDateCreated(), $viewer));
+    return pht('TODO: An Item');
   }
 
   public function getRequestor() {
@@ -99,11 +105,11 @@ final class NuanceItem
     $this->source = $source;
   }
 
-  public function getNuanceProperty($key, $default = null) {
+  public function getItemProperty($key, $default = null) {
     return idx($this->data, $key, $default);
   }
 
-  public function setNuanceProperty($key, $value) {
+  public function setItemProperty($key, $value) {
     $this->data[$key] = $value;
     return $this;
   }
@@ -135,17 +141,8 @@ final class NuanceItem
     return null;
   }
 
-  public function toDictionary() {
-    return array(
-      'id' => $this->getID(),
-      'phid' => $this->getPHID(),
-      'ownerPHID' => $this->getOwnerPHID(),
-      'requestorPHID' => $this->getRequestorPHID(),
-      'sourcePHID' => $this->getSourcePHID(),
-      'sourceLabel' => $this->getSourceLabel(),
-      'dateCreated' => $this->getDateCreated(),
-      'dateModified' => $this->getDateModified(),
-    );
+  public function getDisplayName() {
+    return pht('An Item');
   }
 
 

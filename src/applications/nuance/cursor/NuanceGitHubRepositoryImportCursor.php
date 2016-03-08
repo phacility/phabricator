@@ -37,44 +37,146 @@ final class NuanceGitHubRepositoryImportCursor
   }
 
   protected function pullDataFromSource() {
+    $viewer = $this->getViewer();
+    $now = PhabricatorTime::getNow();
+
     $source = $this->getSource();
 
     $user = $source->getSourceProperty('github.user');
     $repository = $source->getSourceProperty('github.repository');
     $api_token = $source->getSourceProperty('github.token');
 
-    $uri = "/repos/{$user}/{$repository}/events";
-    $data = array();
+    // This API only supports fetching 10 pages of 30 events each, for a total
+    // of 300 events.
+    $etag = null;
+    $new_items = array();
+    $hit_known_items = false;
+    for ($page = 1; $page <= 10; $page++) {
+      $uri = "/repos/{$user}/{$repository}/events";
+      $data = array(
+        'page' => $page,
+      );
 
-    $future = id(new PhutilGitHubFuture())
-      ->setAccessToken($api_token)
-      ->setRawGitHubQuery($uri, $data);
+      $future = id(new PhutilGitHubFuture())
+        ->setAccessToken($api_token)
+        ->setRawGitHubQuery($uri, $data);
 
-    $etag = $this->getCursorProperty('github.poll.etag');
-    if ($etag) {
-      $future->addHeader('If-None-Match', $etag);
+      if ($page == 1) {
+        $cursor_etag = $this->getCursorProperty('github.poll.etag');
+        if ($cursor_etag) {
+          $future->addHeader('If-None-Match', $cursor_etag);
+        }
+      }
+
+      $this->logInfo(
+        pht(
+          'Polling GitHub Repository API endpoint "%s".',
+          $uri));
+      $response = $future->resolve();
+
+      // Do this first: if we hit the rate limit, we get a response but the
+      // body isn't valid.
+      $this->updateRateLimits($response);
+
+      if ($response->getStatus()->getStatusCode() == 304) {
+        $this->logInfo(
+          pht(
+            'Received a 304 Not Modified from GitHub, no new events.'));
+      }
+
+      // This means we hit a rate limit or a "Not Modified" because of the
+      // "ETag" header. In either case, we should bail out.
+      if ($response->getStatus()->isError()) {
+        $this->updatePolling($response, $now, false);
+        $this->getCursorData()->save();
+        return false;
+      }
+
+      if ($page == 1) {
+        $etag = $response->getHeaderValue('ETag');
+      }
+
+      $records = $response->getBody();
+      foreach ($records as $record) {
+        $item = $this->newNuanceItemFromGitHubEvent($record);
+        $item_key = $item->getItemKey();
+
+        $this->logInfo(
+          pht(
+            'Fetched event "%s".',
+            $item_key));
+
+        $new_items[$item->getItemKey()] = $item;
+      }
+
+      if ($new_items) {
+        $existing = id(new NuanceItemQuery())
+          ->setViewer($viewer)
+          ->withSourcePHIDs(array($source->getPHID()))
+          ->withItemKeys(array_keys($new_items))
+          ->execute();
+        $existing = mpull($existing, null, 'getItemKey');
+        foreach ($new_items as $key => $new_item) {
+          if (isset($existing[$key])) {
+            unset($new_items[$key]);
+            $hit_known_items = true;
+
+            $this->logInfo(
+              pht(
+                'Event "%s" is previously known.',
+                $key));
+          }
+        }
+      }
+
+      if ($hit_known_items) {
+        break;
+      }
+
+      if (count($records) < 30) {
+        break;
+      }
     }
 
-    $this->logInfo(
-      pht(
-        'Polling GitHub Repository API endpoint "%s".',
-        $uri));
-    $response = $future->resolve();
-
-    // Do this first: if we hit the rate limit, we get a response but the
-    // body isn't valid.
-    $this->updateRateLimits($response);
-
-    // This means we hit a rate limit or a "Not Modified" because of the "ETag"
-    // header. In either case, we should bail out.
-    if ($response->getStatus()->isError()) {
-      // TODO: Save cursor data!
-      return false;
+    // TODO: When we go through the whole queue without hitting anything we
+    // have seen before, we should record some sort of global event so we
+    // can tell the user when the bridging started or was interrupted?
+    if (!$hit_known_items) {
+      $already_polled = $this->getCursorProperty('github.polled');
+      if ($already_polled) {
+        // TODO: This is bad: we missed some items, maybe because too much
+        // stuff happened too fast or the daemons were broken for a long
+        // time.
+      } else {
+        // TODO: This is OK, we're doing the initial import.
+      }
     }
 
-    $this->updateETag($response);
+    if ($etag !== null) {
+      $this->updateETag($etag);
+    }
 
-    var_dump($response->getBody());
+    $this->updatePolling($response, $now, true);
+
+    $source->openTransaction();
+      foreach ($new_items as $new_item) {
+        $new_item->save();
+      }
+      $this->getCursorData()->save();
+    $source->saveTransaction();
+
+    foreach ($new_items as $new_item) {
+      PhabricatorWorker::scheduleTask(
+        'NuanceImportWorker',
+        array(
+          'itemPHID' => $new_item->getPHID(),
+        ),
+        array(
+          'objectPHID' => $new_item->getPHID(),
+        ));
+    }
+
+    return false;
   }
 
   private function updateRateLimits(PhutilGitHubResponse $response) {
@@ -100,8 +202,7 @@ final class NuanceGitHubRepositoryImportCursor
         new PhutilNumber($limit_reset - $now)));
   }
 
-  private function updateETag(PhutilGitHubResponse $response) {
-    $etag = $response->getHeaderValue('ETag');
+  private function updateETag($etag) {
 
     $this->setCursorProperty('github.poll.etag', $etag);
 
@@ -109,6 +210,56 @@ final class NuanceGitHubRepositoryImportCursor
       pht(
         'ETag for this request was "%s".',
         $etag));
+  }
+
+  private function updatePolling(
+    PhutilGitHubResponse $response,
+    $start,
+    $success) {
+
+    if ($success) {
+      $this->setCursorProperty('github.polled', true);
+    }
+
+    $poll_interval = (int)$response->getHeaderValue('X-Poll-Interval');
+    $poll_ttl = $start + $poll_interval;
+    $this->setCursorProperty('github.poll.ttl', $poll_ttl);
+
+    $now = PhabricatorTime::getNow();
+
+    $this->logInfo(
+      pht(
+        'Set API poll TTL to +%s second(s) (%s second(s) from now).',
+        new PhutilNumber($poll_interval),
+        new PhutilNumber($poll_ttl - $now)));
+  }
+
+  private function newNuanceItemFromGitHubEvent(array $record) {
+    $source = $this->getSource();
+
+    $id = $record['id'];
+    $item_key = "github.event.{$id}";
+
+    $container_key = null;
+
+    $issue_id = idxv(
+      $record,
+      array(
+        'payload',
+        'issue',
+        'id',
+      ));
+    if ($issue_id) {
+      $container_key = "github.issue.{$issue_id}";
+    }
+
+    return NuanceItem::initializeNewItem()
+      ->setStatus(NuanceItem::STATUS_IMPORTING)
+      ->setSourcePHID($source->getPHID())
+      ->setItemType('github.event')
+      ->setItemKey($item_key)
+      ->setItemContainerKey($container_key)
+      ->setItemProperty('api.raw', $record);
   }
 
 }

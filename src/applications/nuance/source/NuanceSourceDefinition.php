@@ -53,14 +53,15 @@ abstract class NuanceSourceDefinition extends Phobject {
         pht('This source has no input cursors.'));
     }
 
+    $viewer = PhabricatorUser::getOmnipotentUser();
     $source = $this->getSource();
     $cursors = $this->newImportCursors();
 
     $data = id(new NuanceImportCursorDataQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($viewer)
       ->withSourcePHIDs(array($source->getPHID()))
       ->execute();
-    $data = mpull($data, 'getCursorKey');
+    $data = mpull($data, null, 'getCursorKey');
 
     $map = array();
     foreach ($cursors as $cursor) {
@@ -102,14 +103,15 @@ abstract class NuanceSourceDefinition extends Phobject {
 
       $map[$key] = $cursor;
 
-      $cursor->setSource($source);
-
       $cursor_data = idx($data, $key);
       if (!$cursor_data) {
         $cursor_data = $cursor->newEmptyCursorData($source);
       }
 
-      $cursor->setCursorData($cursor_data);
+      $cursor
+        ->setViewer($viewer)
+        ->setSource($source)
+        ->setCursorData($cursor_data);
     }
 
     return $cursors;
