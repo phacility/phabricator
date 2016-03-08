@@ -12,18 +12,6 @@ final class NuanceQueueTransaction extends NuanceTransaction {
     return new NuanceQueueTransactionComment();
   }
 
-  public function shouldHide() {
-    $old = $this->getOldValue();
-    $type = $this->getTransactionType();
-
-    switch ($type) {
-      case self::TYPE_NAME:
-        return ($old === null);
-    }
-
-    return parent::shouldHide();
-  }
-
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
@@ -32,6 +20,10 @@ final class NuanceQueueTransaction extends NuanceTransaction {
     $author_phid = $this->getAuthorPHID();
 
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this queue.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
         return pht(
           '%s renamed this queue from "%s" to "%s".',
