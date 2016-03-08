@@ -32,4 +32,13 @@ final class NuanceImportCursorData
       NuanceImportCursorPHIDType::TYPECONST);
   }
 
+  public function getCursorProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setCursorProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
 }

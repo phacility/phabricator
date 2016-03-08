@@ -8,7 +8,7 @@ final class NuanceSource extends NuanceDAO
 
   protected $name;
   protected $type;
-  protected $data;
+  protected $data = array();
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
@@ -79,6 +79,15 @@ final class NuanceSource extends NuanceDAO
 
   public function attachDefinition(NuanceSourceDefinition $definition) {
     $this->definition = $definition;
+    return $this;
+  }
+
+  public function getSourceProperty($key, $default = null) {
+    return idx($this->data, $key, $default);
+  }
+
+  public function setSourceProperty($key, $value) {
+    $this->data[$key] = $value;
     return $this;
   }
 

@@ -53,7 +53,66 @@ abstract class NuanceSourceDefinition extends Phobject {
         pht('This source has no input cursors.'));
     }
 
-    return $this->newImportCursors();
+    $source = $this->getSource();
+    $cursors = $this->newImportCursors();
+
+    $data = id(new NuanceImportCursorDataQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withSourcePHIDs(array($source->getPHID()))
+      ->execute();
+    $data = mpull($data, 'getCursorKey');
+
+    $map = array();
+    foreach ($cursors as $cursor) {
+      if (!($cursor instanceof NuanceImportCursor)) {
+        throw new Exception(
+          pht(
+            'Source "%s" (of class "%s") returned an invalid value from '.
+            'method "%s": all values must be objects of class "%s".',
+            $this->getName(),
+            get_class($this),
+            'newImportCursors()',
+            'NuanceImportCursor'));
+      }
+
+      $key = $cursor->getCursorKey();
+      if (!strlen($key)) {
+        throw new Exception(
+          pht(
+            'Source "%s" (of class "%s") returned an import cursor with '.
+            'a missing key from "%s". Each cursor must have a unique, '.
+            'nonempty key.',
+            $this->getName(),
+            get_class($this),
+            'newImportCursors()'));
+      }
+
+      $other = idx($map, $key);
+      if ($other) {
+        throw new Exception(
+          pht(
+            'Source "%s" (of class "%s") returned two cursors from method '.
+            '"%s" with the same key ("%s"). Each cursor must have a unique '.
+            'key.',
+            $this->getName(),
+            get_class($this),
+            'newImportCursors()',
+            $key));
+      }
+
+      $map[$key] = $cursor;
+
+      $cursor->setSource($source);
+
+      $cursor_data = idx($data, $key);
+      if (!$cursor_data) {
+        $cursor_data = $cursor->newEmptyCursorData($source);
+      }
+
+      $cursor->setCursorData($cursor_data);
+    }
+
+    return $cursors;
   }
 
   protected function newImportCursors() {
@@ -79,21 +138,13 @@ abstract class NuanceSourceDefinition extends Phobject {
    */
   abstract public function getSourceTypeConstant();
 
-  /**
-   * Code to create and update @{class:NuanceItem}s and
-   * @{class:NuanceRequestor}s via daemons goes here.
-   *
-   * If that does not make sense for the @{class:NuanceSource} you are
-   * defining, simply return null. For example,
-   * @{class:NuancePhabricatorFormSourceDefinition} since these are one-way
-   * contact forms.
-   */
-  abstract public function updateItems();
+  public function renderView() {
+    return null;
+  }
 
-  abstract public function renderView();
-
-  abstract public function renderListView();
-
+  public function renderListView() {
+    return null;
+  }
 
   protected function newItemFromProperties(
     NuanceRequestor $requestor,

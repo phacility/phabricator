@@ -40,9 +40,9 @@ final class NuanceManagementImportWorkflow
           $source->getName()));
     }
 
-    echo tsprintf(
-      "%s\n",
-      pht('OK, but actual importing is not implemented yet.'));
+    foreach ($cursors as $cursor) {
+      $cursor->importFromSource();
+    }
 
     return 0;
   }

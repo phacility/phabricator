@@ -26,15 +26,6 @@ final class NuancePhabricatorFormSourceDefinition
     return $actions;
   }
 
-  public function updateItems() {
-    return null;
-  }
-
-  public function renderView() {}
-
-  public function renderListView() {}
-
-
   public function handleActionRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
