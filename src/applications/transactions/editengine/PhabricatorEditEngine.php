@@ -821,7 +821,7 @@ abstract class PhabricatorEditEngine
   }
 
   private function buildCrumbs($object, $final = false) {
-    $controller = $this->getcontroller();
+    $controller = $this->getController();
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
     if ($this->getIsCreate()) {
@@ -1178,6 +1178,60 @@ abstract class PhabricatorEditEngine
 
     return $actions;
   }
+
+
+  /**
+   * Test if the viewer could apply a certain type of change by using the
+   * normal "Edit" form.
+   *
+   * This method returns `true` if the user has access to an edit form and
+   * that edit form has a field which applied the specified transaction type,
+   * and that field is visible and editable for the user.
+   *
+   * For example, you can use it to test if a user is able to reassign tasks
+   * or not, prior to rendering dedicated UI for task reassingment.
+   *
+   * Note that this method does NOT test if the user can actually edit the
+   * current object, just if they have access to the related field.
+   *
+   * @param const Transaction type to test for.
+   * @return bool True if the user could "Edit" to apply the transaction type.
+   */
+  final public function hasEditAccessToTransaction($xaction_type) {
+    $viewer = $this->getViewer();
+
+    $config = $this->loadDefaultEditConfiguration();
+    if (!$config) {
+      return false;
+    }
+
+    $object = $this->getTargetObject();
+    if (!$object) {
+      $object = $this->newEditableObject();
+    }
+
+    $fields = $this->buildEditFields($object);
+
+    $field = null;
+    foreach ($fields as $form_field) {
+      $field_xaction_type = $form_field->getTransactionType();
+      if ($field_xaction_type === $xaction_type) {
+        $field = $form_field;
+        break;
+      }
+    }
+
+    if (!$field) {
+      return false;
+    }
+
+    if (!$field->shouldReadValueFromSubmit()) {
+      return false;
+    }
+
+    return true;
+  }
+
 
   final public function addActionToCrumbs(PHUICrumbsView $crumbs) {
     $viewer = $this->getViewer();

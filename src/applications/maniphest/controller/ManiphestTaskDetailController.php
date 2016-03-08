@@ -26,6 +26,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setViewer($viewer)
       ->readFieldsFromStorage($task);
 
+    $edit_engine = id(new ManiphestEditEngine())
+      ->setViewer($viewer)
+      ->setTargetObject($task);
+
     $e_commit = ManiphestTaskHasCommitEdgeType::EDGECONST;
     $e_dep_on = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
     $e_dep_by = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
@@ -73,12 +77,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $header = $this->buildHeaderView($task);
     $details = $this->buildPropertyView($task, $field_list, $edges, $handles);
     $description = $this->buildDescriptionView($task, $engine);
-    $curtain = $this->buildCurtain($task);
+    $curtain = $this->buildCurtain($task, $edit_engine);
 
     $title = pht('%s %s', $monogram, $task->getTitle());
 
-    $comment_view = id(new ManiphestEditEngine())
-      ->setViewer($viewer)
+    $comment_view = $edit_engine
       ->buildEditEngineCommentView($task);
 
     $timeline->setQuoteRef($monogram);
@@ -146,7 +149,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
   }
 
 
-  private function buildCurtain(ManiphestTask $task) {
+  private function buildCurtain(
+    ManiphestTask $task,
+    PhabricatorEditEngine $edit_engine) {
     $viewer = $this->getViewer();
 
     $id = $task->getID();
@@ -176,11 +181,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    $edit_config = id(new ManiphestEditEngine())
-      ->setViewer($viewer)
-      ->loadDefaultEditConfiguration();
-
+    $edit_config = $edit_engine->loadDefaultEditConfiguration();
     $can_create = (bool)$edit_config;
+
+    $can_reassign = $edit_engine->hasEditAccessToTransaction(
+      ManiphestTransaction::TYPE_OWNER);
+
     if ($can_create) {
       $form_key = $edit_config->getIdentifier();
       $edit_uri = id(new PhutilURI("/task/edit/form/{$form_key}/"))
