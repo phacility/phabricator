@@ -166,14 +166,7 @@ final class NuanceGitHubRepositoryImportCursor
     $source->saveTransaction();
 
     foreach ($new_items as $new_item) {
-      PhabricatorWorker::scheduleTask(
-        'NuanceImportWorker',
-        array(
-          'itemPHID' => $new_item->getPHID(),
-        ),
-        array(
-          'objectPHID' => $new_item->getPHID(),
-        ));
+      $new_item->scheduleUpdate();
     }
 
     return false;
@@ -256,7 +249,7 @@ final class NuanceGitHubRepositoryImportCursor
     return NuanceItem::initializeNewItem()
       ->setStatus(NuanceItem::STATUS_IMPORTING)
       ->setSourcePHID($source->getPHID())
-      ->setItemType('github.event')
+      ->setItemType(NuanceGitHubEventItemType::ITEMTYPE)
       ->setItemKey($item_key)
       ->setItemContainerKey($container_key)
       ->setItemProperty('api.raw', $record);

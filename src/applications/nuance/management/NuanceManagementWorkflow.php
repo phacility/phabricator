@@ -64,4 +64,54 @@ abstract class NuanceManagementWorkflow
     return head($sources);
   }
 
+  protected function loadITem(PhutilArgumentParser $argv, $key) {
+    $item = $argv->getArg($key);
+    if (!strlen($item)) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify a item with %s.',
+          '--'.$key));
+    }
+
+    $query = id(new NuanceItemQuery())
+      ->setViewer($this->getViewer())
+      ->setRaisePolicyExceptions(true);
+
+    $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
+
+    if (ctype_digit($item)) {
+      $kind = 'id';
+      $query->withIDs(array($item));
+    } else if (phid_get_type($item) !== $type_unknown) {
+      $kind = 'phid';
+      $query->withPHIDs($item);
+    } else {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify the ID or PHID of an item to update. Parameter "%s" '.
+          'is not an ID or PHID.',
+          $item));
+    }
+
+    $items = $query->execute();
+
+    if (!$items) {
+      switch ($kind) {
+        case 'id':
+          $message = pht(
+            'No item exists with ID "%s".',
+            $item);
+          break;
+        case 'phid':
+          $message = pht(
+            'No item exists with PHID "%s".',
+            $item);
+          break;
+      }
+
+      throw new PhutilArgumentUsageException($message);
+    }
+
+    return head($items);
+  }
 }

@@ -70,6 +70,17 @@ final class NuanceItemQuery
       $item->attachSource($source);
     }
 
+    $type_map = NuanceItemType::getAllItemTypes();
+    foreach ($items as $key => $item) {
+      $type = idx($type_map, $item->getItemType());
+      if (!$type) {
+        $this->didRejectResult($items[$key]);
+        unset($items[$key]);
+        continue;
+      }
+      $item->attachImplementation($type);
+    }
+
     return $items;
   }
 

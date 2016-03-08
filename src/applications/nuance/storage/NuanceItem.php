@@ -7,6 +7,7 @@ final class NuanceItem
     PhabricatorApplicationTransactionInterface {
 
   const STATUS_IMPORTING = 'importing';
+  const STATUS_ROUTING = 'routing';
   const STATUS_OPEN = 'open';
   const STATUS_ASSIGNED = 'assigned';
   const STATUS_CLOSED = 'closed';
@@ -23,6 +24,7 @@ final class NuanceItem
   protected $mailKey;
 
   private $source = self::ATTACHABLE;
+  private $implementation = self::ATTACHABLE;
 
   public static function initializeNewItem() {
     return id(new NuanceItem())
@@ -143,6 +145,26 @@ final class NuanceItem
 
   public function getDisplayName() {
     return pht('An Item');
+  }
+
+  public function scheduleUpdate() {
+    PhabricatorWorker::scheduleTask(
+      'NuanceItemUpdateWorker',
+      array(
+        'itemPHID' => $this->getPHID(),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+      ));
+  }
+
+  public function getImplementation() {
+    return $this->assertAttached($this->implementation);
+  }
+
+  public function attachImplementation(NuanceItemType $type) {
+    $this->implementation = $type;
+    return $this;
   }
 
 

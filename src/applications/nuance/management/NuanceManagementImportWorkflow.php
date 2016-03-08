@@ -6,7 +6,7 @@ final class NuanceManagementImportWorkflow
   protected function didConstruct() {
     $this
       ->setName('import')
-      ->setExamples('**import** [__options__]')
+      ->setExamples('**import** --source __source__ [__options__]')
       ->setSynopsis(pht('Import data from a source.'))
       ->setArguments(
         array(
