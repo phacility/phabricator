@@ -13,7 +13,7 @@ final class NuanceSource extends NuanceDAO
   protected $editPolicy;
   protected $defaultQueuePHID;
 
-  private $definition;
+  private $definition = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -49,7 +49,9 @@ final class NuanceSource extends NuanceDAO
     return '/nuance/source/view/'.$this->getID().'/';
   }
 
-  public static function initializeNewSource(PhabricatorUser $actor) {
+  public static function initializeNewSource(
+    PhabricatorUser $actor,
+    NuanceSourceDefinition $definition) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
       ->withClasses(array('PhabricatorNuanceApplication'))
@@ -62,32 +64,18 @@ final class NuanceSource extends NuanceDAO
 
     return id(new NuanceSource())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setType($definition->getSourceTypeConstant())
+      ->attachDefinition($definition);
   }
 
   public function getDefinition() {
-    if ($this->definition === null) {
-      $definitions = NuanceSourceDefinition::getAllDefinitions();
-      if (isset($definitions[$this->getType()])) {
-        $definition = clone $definitions[$this->getType()];
-        $definition->setSourceObject($this);
-        $this->definition = $definition;
-      }
-    }
-
-    return $this->definition;
+    return $this->assertAttached($this->definition);
   }
 
-  public function requireDefinition() {
-    $definition = $this->getDefinition();
-    if (!$definition) {
-      throw new Exception(
-        pht(
-          'Unable to load source definition implementation for source '.
-          'type "%s".',
-          $this->getType()));
-    }
-    return $definition;
+  public function attachDefinition(NuanceSourceDefinition $definition) {
+    $this->definition = $definition;
+    return $this;
   }
 
 

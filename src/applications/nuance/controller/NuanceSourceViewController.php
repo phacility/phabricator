@@ -84,7 +84,12 @@ final class NuanceSourceViewController
         ->setWorkflow(!$can_edit));
 
     $request = $this->getRequest();
-    $definition = $source->requireDefinition();
+    $definition = $source->getDefinition();
+
+    $definition
+      ->setViewer($viewer)
+      ->setSource($source);
+
     $source_actions = $definition->getSourceViewActions($request);
     foreach ($source_actions as $source_action) {
       $curtain->addAction($source_action);
@@ -100,7 +105,8 @@ final class NuanceSourceViewController
     $properties = id(new PHUIPropertyListView())
       ->setViewer($viewer);
 
-    $definition = $source->requireDefinition();
+    $definition = $source->getDefinition();
+
     $properties->addProperty(
       pht('Source Type'),
       $definition->getName());

@@ -30,6 +30,23 @@ final class NuanceSourceQuery
     return $this->loadStandardPage($this->newResultObject());
   }
 
+  protected function willFilterPage(array $sources) {
+    $all_types = NuanceSourceDefinition::getAllDefinitions();
+
+    foreach ($sources as $key => $source) {
+      $definition = idx($all_types, $source->getType());
+      if (!$definition) {
+        $this->didRejectResult($source);
+        unset($sources[$key]);
+        continue;
+      }
+      $source->attachDefinition($definition);
+    }
+
+    return $sources;
+  }
+
+
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 

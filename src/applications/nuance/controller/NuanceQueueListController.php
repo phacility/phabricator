@@ -12,16 +12,9 @@ final class NuanceQueueListController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    // TODO: Maybe use SourceManage capability?
-    $can_create = true;
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Queue'))
-        ->setHref($this->getApplicationURI('queue/new/'))
-        ->setIcon('fa-plus-square')
-        ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create));
+    id(new NuanceQueueEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

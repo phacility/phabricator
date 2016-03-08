@@ -12,16 +12,9 @@ final class NuanceSourceListController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $can_create = $this->hasApplicationCapability(
-      NuanceSourceManageCapability::CAPABILITY);
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Source'))
-        ->setHref($this->getApplicationURI('source/create/'))
-        ->setIcon('fa-plus-square')
-        ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create));
+    id(new NuanceSourceEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

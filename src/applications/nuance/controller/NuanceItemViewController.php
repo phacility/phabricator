@@ -49,7 +49,7 @@ final class NuanceItemViewController extends NuanceController {
       phabricator_datetime($item->getDateCreated(), $viewer));
 
     $source = $item->getSource();
-    $definition = $source->requireDefinition();
+    $definition = $source->getDefinition();
 
     $definition->renderItemViewProperties(
       $viewer,
