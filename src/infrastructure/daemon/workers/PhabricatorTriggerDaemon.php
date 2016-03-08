@@ -430,7 +430,12 @@ final class PhabricatorTriggerDaemon
     // cursors.
     if (!$this->nuanceCursors) {
       $source = array_pop($this->nuanceSources);
-      $cursors = $source->getImportCursors();
+
+      $definition = $source->getDefinition()
+        ->setViewer($this->getViewer())
+        ->setSource($source);
+
+      $cursors = $definition->getImportCursors();
       $this->nuanceCursors = array_reverse($cursors);
     }
 

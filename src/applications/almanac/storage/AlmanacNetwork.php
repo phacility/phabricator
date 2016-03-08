@@ -116,7 +116,7 @@ final class AlmanacNetwork
   }
 
 
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 
 
   public function newNgrams() {

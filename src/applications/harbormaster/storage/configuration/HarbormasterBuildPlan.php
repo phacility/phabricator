@@ -197,7 +197,7 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   }
 
 
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 
 
   public function newNgrams() {

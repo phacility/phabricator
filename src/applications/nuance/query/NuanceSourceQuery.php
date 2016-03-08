@@ -34,8 +34,18 @@ final class NuanceSourceQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new NuanceSourceNameNgrams(),
+      $ngrams);
+  }
+
   public function newResultObject() {
     return new NuanceSource();
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'source';
   }
 
   protected function loadPage() {
@@ -65,28 +75,28 @@ final class NuanceSourceQuery
     if ($this->types !== null) {
       $where[] = qsprintf(
         $conn,
-        'type IN (%Ls)',
+        'source.type IN (%Ls)',
         $this->types);
     }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'source.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'source.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->isDisabled !== null) {
       $where[] = qsprintf(
         $conn,
-        'isDisabled = %d',
+        'source.isDisabled = %d',
         (int)$this->isDisabled);
     }
 
@@ -106,7 +116,7 @@ final class NuanceSourceQuery
         } else {
           $where[] = qsprintf(
             $conn,
-            'type IN (%Ls)',
+            'source.type IN (%Ls)',
             $cursor_types);
         }
       } else {
@@ -115,7 +125,7 @@ final class NuanceSourceQuery
         } else {
           $where[] = qsprintf(
             $conn,
-            'type NOT IN (%Ls)',
+            'source.type NOT IN (%Ls)',
             $cursor_types);
         }
       }

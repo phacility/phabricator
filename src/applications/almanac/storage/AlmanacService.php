@@ -251,7 +251,7 @@ final class AlmanacService
   }
 
 
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 
 
   public function newNgrams() {

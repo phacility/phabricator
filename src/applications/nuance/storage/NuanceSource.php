@@ -3,7 +3,8 @@
 final class NuanceSource extends NuanceDAO
   implements
     PhabricatorApplicationTransactionInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $type;
@@ -23,7 +24,7 @@ final class NuanceSource extends NuanceDAO
         'data' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255?',
+        'name' => 'sort255',
         'type' => 'text32',
         'mailKey' => 'bytes20',
         'isDisabled' => 'bool',
@@ -130,6 +131,17 @@ final class NuanceSource extends NuanceDAO
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
+
+
+  public function newNgrams() {
+    return array(
+      id(new NuanceSourceNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

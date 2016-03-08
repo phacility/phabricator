@@ -18,11 +18,20 @@ final class NuanceSourceSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for sources by name substring.')),
+    );
   }
 
   protected function getURI($path) {
