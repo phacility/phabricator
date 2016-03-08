@@ -19,29 +19,25 @@ final class NuanceQueueViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Queues'), $this->getApplicationURI('queue/'));
     $crumbs->addTextCrumb($queue->getName());
+    $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($queue);
-    $actions = $this->buildActionView($queue);
-    $properties = $this->buildPropertyView($queue, $actions);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $curtain = $this->buildCurtain($queue);
 
     $timeline = $this->buildTransactionTimeline(
       $queue,
       new NuanceQueueTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $timeline,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn($timeline);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildHeaderView(NuanceQueue $queue) {
@@ -55,19 +51,18 @@ final class NuanceQueueViewController
     return $header;
   }
 
-  private function buildActionView(NuanceQueue $queue) {
+  private function buildCurtain(NuanceQueue $queue) {
     $viewer = $this->getViewer();
     $id = $queue->getID();
-
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $queue,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($queue);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Queue'))
         ->setIcon('fa-pencil')
@@ -75,19 +70,7 @@ final class NuanceQueueViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
-  private function buildPropertyView(
-    NuanceQueue $queue,
-    PhabricatorActionListView $actions) {
-    $viewer = $this->getViewer();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($queue)
-      ->setActionList($actions);
-
-    return $properties;
-  }
 }
