@@ -12,6 +12,7 @@ final class NuanceSource extends NuanceDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $defaultQueuePHID;
+  protected $isDisabled;
 
   private $definition = self::ATTACHABLE;
 
@@ -25,6 +26,7 @@ final class NuanceSource extends NuanceDAO
         'name' => 'text255?',
         'type' => 'text32',
         'mailKey' => 'bytes20',
+        'isDisabled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_type' => array(
@@ -66,7 +68,8 @@ final class NuanceSource extends NuanceDAO
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setType($definition->getSourceTypeConstant())
-      ->attachDefinition($definition);
+      ->attachDefinition($definition)
+      ->setIsDisabled(0);
   }
 
   public function getDefinition() {

@@ -43,6 +43,23 @@ abstract class NuanceSourceDefinition extends Phobject {
       ->execute();
   }
 
+  public function hasImportCursors() {
+    return false;
+  }
+
+  final public function getImportCursors() {
+    if (!$this->hasImportCursors()) {
+      throw new Exception(
+        pht('This source has no input cursors.'));
+    }
+
+    return $this->newImportCursors();
+  }
+
+  protected function newImportCursors() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
   /**
    * A human readable string like "Twitter" or "Phabricator Form".
    */

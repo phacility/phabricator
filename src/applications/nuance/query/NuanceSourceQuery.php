@@ -6,6 +6,8 @@ final class NuanceSourceQuery
   private $ids;
   private $phids;
   private $types;
+  private $isDisabled;
+  private $hasCursors;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +21,16 @@ final class NuanceSourceQuery
 
   public function withTypes($types) {
     $this->types = $types;
+    return $this;
+  }
+
+  public function withIsDisabled($disabled) {
+    $this->isDisabled = $disabled;
+    return $this;
+  }
+
+  public function withHasImportCursors($has_cursors) {
+    $this->hasCursors = $has_cursors;
     return $this;
   }
 
@@ -69,6 +81,44 @@ final class NuanceSourceQuery
         $conn,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->isDisabled !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isDisabled = %d',
+        (int)$this->isDisabled);
+    }
+
+    if ($this->hasCursors !== null) {
+      $cursor_types = array();
+
+      $definitions = NuanceSourceDefinition::getAllDefinitions();
+      foreach ($definitions as $key => $definition) {
+        if ($definition->hasImportCursors()) {
+          $cursor_types[] = $key;
+        }
+      }
+
+      if ($this->hasCursors) {
+        if (!$cursor_types) {
+          throw new PhabricatorEmptyQueryException();
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            'type IN (%Ls)',
+            $cursor_types);
+        }
+      } else {
+        if (!$cursor_types) {
+          // Apply no constraint.
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            'type NOT IN (%Ls)',
+            $cursor_types);
+        }
+      }
     }
 
     return $where;
