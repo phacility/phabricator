@@ -61,7 +61,19 @@
       "type": "spelling"
     },
     "text": {
-      "type": "text"
+      "type": "text",
+      "exclude": [
+        "(^src/(.*/)?__tests__/[^/]+/.*\\.(txt|json))"
+      ]
+    },
+    "text-without-length": {
+      "type": "text",
+      "include": [
+        "(^src/(.*/)?__tests__/[^/]+/.*\\.(txt|json))"
+      ],
+      "severity": {
+        "3": "disabled"
+      }
     },
     "xhpast": {
       "type": "xhpast",

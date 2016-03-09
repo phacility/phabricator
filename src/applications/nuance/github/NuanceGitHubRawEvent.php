@@ -30,14 +30,35 @@ final class NuanceGitHubRawEvent extends Phobject {
 
     switch ($this->getIssueRawKind()) {
       case 'IssuesEvent':
-      case 'IssuesCommentEvent':
         return true;
+      case 'IssueCommentEvent':
+        if (!$this->getRawPullRequestData()) {
+          return true;
+        }
+        break;
     }
 
     return false;
   }
 
   public function isPullRequestEvent() {
+    if ($this->type == self::TYPE_ISSUE) {
+      // TODO: This is wrong, some of these are pull events.
+      return false;
+    }
+
+    $raw = $this->raw;
+
+    switch ($this->getIssueRawKind()) {
+      case 'PullRequestEvent':
+        return true;
+      case 'IssueCommentEvent':
+        if ($this->getRawPullRequestData()) {
+          return true;
+        }
+        break;
+    }
+
     return false;
   }
 
@@ -46,6 +67,47 @@ final class NuanceGitHubRawEvent extends Phobject {
       return null;
     }
 
+    return $this->getRawIssueNumber();
+  }
+
+  public function getPullRequestNumber() {
+    if (!$this->isPullRequestEvent()) {
+      return null;
+    }
+
+    return $this->getRawIssueNumber();
+  }
+
+  private function getRepositoryFullRawName() {
+    $raw = $this->raw;
+
+    $full = idxv($raw, array('repo', 'name'));
+    if (strlen($full)) {
+      return $full;
+    }
+
+    // For issue events, the repository is not identified explicitly in the
+    // response body. Parse it out of the URI.
+
+    $matches = null;
+    $ok = preg_match(
+      '(/repos/((?:[^/]+)/(?:[^/]+))/issues/events/)',
+      idx($raw, 'url'),
+      $matches);
+
+    if ($ok) {
+      return $matches[1];
+    }
+
+    return null;
+  }
+
+  private function getIssueRawKind() {
+    $raw = $this->raw;
+    return idxv($raw, array('type'));
+  }
+
+  private function getRawIssueNumber() {
     $raw = $this->raw;
 
     if ($this->type == self::TYPE_ISSUE) {
@@ -53,20 +115,23 @@ final class NuanceGitHubRawEvent extends Phobject {
     }
 
     if ($this->type == self::TYPE_REPOSITORY) {
-      return idxv($raw, array('payload', 'issue', 'number'));
+      $issue_number = idxv($raw, array('payload', 'issue', 'number'));
+      if ($issue_number) {
+        return $issue_number;
+      }
+
+      $pull_number = idxv($raw, array('payload', 'number'));
+      if ($pull_number) {
+        return $pull_number;
+      }
     }
 
     return null;
   }
 
-  private function getRepositoryFullRawName() {
+  private function getRawPullRequestData() {
     $raw = $this->raw;
-    return idxv($raw, array('repo', 'name'));
-  }
-
-  private function getIssueRawKind() {
-    $raw = $this->raw;
-    return idxv($raw, array('type'));
+    return idxv($raw, array('payload', 'issue', 'pull_request'));
   }
 
 }
