@@ -274,7 +274,7 @@ final class HeraldEngine extends Phobject {
     } else {
       foreach ($conditions as $condition) {
         try {
-          $object->getHeraldField($condition->getFieldName());
+          $this->getConditionObjectValue($condition, $object);
         } catch (Exception $ex) {
           $reason = pht(
             'Field "%s" does not exist!',
@@ -366,14 +366,11 @@ final class HeraldEngine extends Phobject {
   }
 
   public function getObjectFieldValue($field) {
-    if (isset($this->fieldCache[$field])) {
-      return $this->fieldCache[$field];
+    if (!array_key_exists($field, $this->fieldCache)) {
+      $this->fieldCache[$field] = $this->object->getHeraldField($field);
     }
 
-    $result = $this->object->getHeraldField($field);
-
-    $this->fieldCache[$field] = $result;
-    return $result;
+    return $this->fieldCache[$field];
   }
 
   protected function getRuleEffects(
