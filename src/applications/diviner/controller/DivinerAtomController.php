@@ -238,6 +238,8 @@ final class DivinerAtomController extends DivinerController {
       $document->setToc($side);
     }
 
+    $prop_list = phutil_tag_div('phui-document-view-pro-box', $prop_list);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,

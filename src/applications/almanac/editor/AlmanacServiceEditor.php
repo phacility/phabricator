@@ -1,11 +1,7 @@
 <?php
 
 final class AlmanacServiceEditor
-  extends PhabricatorApplicationTransactionEditor {
-
-  public function getEditorApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
-  }
+  extends AlmanacEditor {
 
   public function getEditorObjectsDescription() {
     return pht('Almanac Service');
@@ -15,7 +11,6 @@ final class AlmanacServiceEditor
     $types = parent::getTransactionTypes();
 
     $types[] = AlmanacServiceTransaction::TYPE_NAME;
-    $types[] = AlmanacServiceTransaction::TYPE_LOCK;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -29,8 +24,6 @@ final class AlmanacServiceEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacServiceTransaction::TYPE_NAME:
         return $object->getName();
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        return (bool)$object->getIsLocked();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -43,8 +36,6 @@ final class AlmanacServiceEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacServiceTransaction::TYPE_NAME:
         return $xaction->getNewValue();
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        return (bool)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -58,9 +49,6 @@ final class AlmanacServiceEditor
       case AlmanacServiceTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        $object->setIsLocked((int)$xaction->getNewValue());
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -72,23 +60,6 @@ final class AlmanacServiceEditor
 
     switch ($xaction->getTransactionType()) {
       case AlmanacServiceTransaction::TYPE_NAME:
-        return;
-      case AlmanacServiceTransaction::TYPE_LOCK:
-        $service = id(new AlmanacServiceQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPHIDs(array($object->getPHID()))
-          ->needBindings(true)
-          ->executeOne();
-
-        $devices = array();
-        foreach ($service->getBindings() as $binding) {
-          $device = $binding->getInterface()->getDevice();
-          $devices[$device->getPHID()] = $device;
-        }
-
-        foreach ($devices as $device) {
-          $device->rebuildDeviceLocks();
-        }
         return;
     }
 
@@ -124,7 +95,7 @@ final class AlmanacServiceEditor
             $name = $xaction->getNewValue();
 
             try {
-              AlmanacNames::validateServiceOrDeviceName($name);
+              AlmanacNames::validateName($name);
             } catch (Exception $ex) {
               $message = $ex->getMessage();
             }
@@ -136,22 +107,42 @@ final class AlmanacServiceEditor
                 $message,
                 $xaction);
               $errors[] = $error;
+              continue;
             }
-          }
-        }
 
-        if ($xactions) {
-          $duplicate = id(new AlmanacServiceQuery())
-            ->setViewer(PhabricatorUser::getOmnipotentUser())
-            ->withNames(array(last($xactions)->getNewValue()))
-            ->executeOne();
-          if ($duplicate && ($duplicate->getID() != $object->getID())) {
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Not Unique'),
-              pht('Almanac services must have unique names.'),
-              last($xactions));
-            $errors[] = $error;
+            $other = id(new AlmanacServiceQuery())
+              ->setViewer(PhabricatorUser::getOmnipotentUser())
+              ->withNames(array($name))
+              ->executeOne();
+            if ($other && ($other->getID() != $object->getID())) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Not Unique'),
+                pht('Almanac services must have unique names.'),
+                last($xactions));
+              $errors[] = $error;
+              continue;
+            }
+
+            if ($name === $object->getName()) {
+              continue;
+            }
+
+            $namespace = AlmanacNamespace::loadRestrictedNamespace(
+              $this->getActor(),
+              $name);
+            if ($namespace) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Restricted'),
+                pht(
+                  'You do not have permission to create Almanac services '.
+                  'within the "%s" namespace.',
+                  $namespace->getName()),
+                $xaction);
+              $errors[] = $error;
+              continue;
+            }
           }
         }
 
@@ -162,5 +153,27 @@ final class AlmanacServiceEditor
   }
 
 
+  protected function validateAllTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $errors = parent::validateAllTransactions($object, $xactions);
+
+    if ($object->isClusterService()) {
+      $can_manage = PhabricatorPolicyFilter::hasCapability(
+        $this->getActor(),
+        new PhabricatorAlmanacApplication(),
+        AlmanacManageClusterServicesCapability::CAPABILITY);
+      if (!$can_manage) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          null,
+          pht('Restricted'),
+          pht('You do not have permission to manage cluster services.'),
+          null);
+      }
+    }
+
+    return $errors;
+  }
 
 }

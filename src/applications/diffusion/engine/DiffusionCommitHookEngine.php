@@ -10,6 +10,7 @@
  */
 final class DiffusionCommitHookEngine extends Phobject {
 
+  const ENV_REPOSITORY = 'PHABRICATOR_REPOSITORY';
   const ENV_USER = 'PHABRICATOR_USER';
   const ENV_REMOTE_ADDRESS = 'PHABRICATOR_REMOTE_ADDRESS';
   const ENV_REMOTE_PROTOCOL = 'PHABRICATOR_REMOTE_PROTOCOL';
@@ -610,7 +611,7 @@ final class DiffusionCommitHookEngine extends Phobject {
     $console = PhutilConsole::getConsole();
 
     $env = array(
-      'PHABRICATOR_REPOSITORY' => $this->getRepository()->getCallsign(),
+      self::ENV_REPOSITORY => $this->getRepository()->getPHID(),
       self::ENV_USER => $this->getViewer()->getUsername(),
       self::ENV_REMOTE_PROTOCOL => $this->getRemoteProtocol(),
       self::ENV_REMOTE_ADDRESS => $this->getRemoteAddress(),

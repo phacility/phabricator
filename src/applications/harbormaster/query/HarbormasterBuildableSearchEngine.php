@@ -11,148 +11,87 @@ final class HarbormasterBuildableSearchEngine
     return 'PhabricatorHarbormasterApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $revisions = $this->readPHIDsFromRequest(
-      $request,
-      'revisions',
-      array(
-        DifferentialRevisionPHIDType::TYPECONST,
-      ));
-
-    $repositories = $this->readPHIDsFromRequest(
-      $request,
-      'repositories',
-      array(
-        PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
-      ));
-
-    $container_phids = array_merge($revisions, $repositories);
-    $saved->setParameter('containerPHIDs', $container_phids);
-
-    $commits = $this->readPHIDsFromRequest(
-      $request,
-      'commits',
-      array(
-        PhabricatorRepositoryCommitPHIDType::TYPECONST,
-      ));
-
-    $diffs = $this->readListFromRequest($request, 'diffs');
-    if ($diffs) {
-      $diffs = id(new DifferentialDiffQuery())
-        ->setViewer($this->requireViewer())
-        ->withIDs($diffs)
-        ->execute();
-      $diffs = mpull($diffs, 'getPHID', 'getPHID');
-    }
-
-    $buildable_phids = array_merge($commits, $diffs);
-    $saved->setParameter('buildablePHIDs', $buildable_phids);
-
-    $saved->setParameter(
-      'manual',
-      $this->readBoolFromRequest($request, 'manual'));
-
-    return $saved;
+  public function newQuery() {
+    return new HarbormasterBuildableQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new HarbormasterBuildableQuery())
-      ->needContainerHandles(true)
-      ->needBuildableHandles(true);
-
-    $container_phids = $saved->getParameter('containerPHIDs', array());
-    if ($container_phids) {
-      $query->withContainerPHIDs($container_phids);
-    }
-
-    $buildable_phids = $saved->getParameter('buildablePHIDs', array());
-
-    if ($buildable_phids) {
-      $query->withBuildablePHIDs($buildable_phids);
-    }
-
-    $manual = $saved->getParameter('manual');
-    if ($manual !== null) {
-      $query->withManualBuildables($manual);
-    }
-
-    return $query;
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchStringListField())
+        ->setKey('objectPHIDs')
+        ->setAliases(array('objects'))
+        ->setLabel(pht('Objects'))
+        ->setPlaceholder(pht('rXabcdef, PHID-DIFF-1234, ...'))
+        ->setDescription(pht('Search for builds of particular objects.')),
+      id(new PhabricatorSearchStringListField())
+        ->setKey('containerPHIDs')
+        ->setAliases(array('containers'))
+        ->setLabel(pht('Containers'))
+        ->setPlaceholder(pht('rXYZ, R123, D456, ...'))
+        ->setDescription(
+          pht('Search for builds by containing revision or repository.')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('statuses')
+        ->setLabel(pht('Statuses'))
+        ->setOptions(HarbormasterBuildable::getBuildStatusMap())
+        ->setDescription(pht('Search for builds by buildable status.')),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Manual'))
+        ->setKey('manual')
+        ->setDescription(
+          pht('Search for only manual or automatic buildables.'))
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Manual Builds'),
+          pht('Show Only Automated Builds')),
+    );
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
+  private function resolvePHIDs(array $names) {
+    $viewer = $this->requireViewer();
 
-    $container_phids = $saved_query->getParameter('containerPHIDs', array());
-    $buildable_phids = $saved_query->getParameter('buildablePHIDs', array());
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withNames($names)
+      ->execute();
 
-    $all_phids = array_merge($container_phids, $buildable_phids);
+    // TODO: Instead of using string lists, we should ideally be using some
+    // kind of smart field with resolver logic that can help users type the
+    // right stuff. For now, just return a bogus value here so nothing matches
+    // but the form doesn't explode.
+    if (!$objects) {
+      return array('-');
+    }
 
-    $revision_names = array();
-    $diff_names = array();
-    $repository_names = array();
-    $commit_names = array();
+    return mpull($objects, 'getPHID');
+  }
 
-    if ($all_phids) {
-      $objects = id(new PhabricatorObjectQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-      foreach ($all_phids as $phid) {
-        $object = idx($objects, $phid);
-        if (!$object) {
-          continue;
-        }
-
-        if ($object instanceof DifferentialRevision) {
-          $revision_names[] = 'D'.$object->getID();
-        } else if ($object instanceof DifferentialDiff) {
-          $diff_names[] = $object->getID();
-        } else if ($object instanceof PhabricatorRepository) {
-          $repository_names[] = $object->getMonogram();
-        } else if ($object instanceof PhabricatorRepositoryCommit) {
-          $repository = $object->getRepository();
-          $commit_names[] = $repository->formatCommitName(
-            $object->getCommitIdentifier());
-        }
+    if ($map['objectPHIDs']) {
+      $phids = $this->resolvePHIDs($map['objectPHIDs']);
+      if ($phids) {
+        $query->withBuildablePHIDs($phids);
       }
     }
 
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Differential Revisions'))
-          ->setName('revisions')
-          ->setValue(implode(', ', $revision_names)))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Differential Diffs'))
-          ->setName('diffs')
-          ->setValue(implode(', ', $diff_names)))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Repositories'))
-          ->setName('repositories')
-          ->setValue(implode(', ', $repository_names)))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Commits'))
-          ->setName('commits')
-          ->setValue(implode(', ', $commit_names)))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Origin'))
-          ->setName('manual')
-          ->setValue($this->getBoolFromQuery($saved_query, 'manual'))
-          ->setOptions(
-            array(
-              '' => pht('(All Origins)'),
-              'true' => pht('Manual Buildables'),
-              'false' => pht('Automatic Buildables'),
-            )));
+    if ($map['containerPHIDs']) {
+      $phids = $this->resolvePHIDs($map['containerPHIDs']);
+      if ($phids) {
+        $query->withContainerPHIDs($phids);
+      }
+    }
+
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
+    }
+
+    if ($map['manual'] !== null) {
+      $query->withManualBuildables($map['manual']);
+    }
+
+    return $query;
   }
 
   protected function getURI($path) {
@@ -185,35 +124,60 @@ final class HarbormasterBuildableSearchEngine
 
     $viewer = $this->requireViewer();
 
+    $phids = array();
+    foreach ($buildables as $buildable) {
+      $phids[] = $buildable->getBuildableObject()
+        ->getHarbormasterBuildableDisplayPHID();
+
+      $phids[] = $buildable->getContainerPHID();
+      $phids[] = $buildable->getBuildablePHID();
+    }
+    $handles = $viewer->loadHandles($phids);
+
+
     $list = new PHUIObjectItemListView();
     foreach ($buildables as $buildable) {
       $id = $buildable->getID();
 
+      $display_phid = $buildable->getBuildableObject()
+        ->getHarbormasterBuildableDisplayPHID();
+
+      $container_phid = $buildable->getContainerPHID();
+      $buildable_phid = $buildable->getBuildablePHID();
+
       $item = id(new PHUIObjectItemView())
-        ->setHeader(pht('Buildable %d', $buildable->getID()));
-      if ($buildable->getContainerHandle() !== null) {
-        $item->addAttribute($buildable->getContainerHandle()->getName());
-      }
-      if ($buildable->getBuildableHandle() !== null) {
-        $item->addAttribute($buildable->getBuildableHandle()->getFullName());
+        ->setObjectName(pht('Buildable %d', $buildable->getID()));
+
+      if ($display_phid) {
+        $handle = $handles[$display_phid];
+        $item->setHeader($handle->getFullName());
       }
 
-      if ($id) {
-        $item->setHref("/B{$id}");
+      if ($container_phid && ($container_phid != $display_phid)) {
+        $handle = $handles[$container_phid];
+        $item->addAttribute($handle->getName());
       }
+
+      if ($buildable_phid && ($buildable_phid != $display_phid)) {
+        $handle = $handles[$buildable_phid];
+        $item->addAttribute($handle->getFullName());
+      }
+
+      $item->setHref($buildable->getURI());
 
       if ($buildable->getIsManualBuildable()) {
         $item->addIcon('fa-wrench grey', pht('Manual'));
       }
 
-      $item->setStatusIcon('fa-wrench '.
-        HarbormasterBuildable::getBuildableStatusColor(
-        $buildable->getBuildableStatus()));
-      $item->addByline(HarbormasterBuildable::getBuildableStatusName(
-        $buildable->getBuildableStatus()));
+      $status = $buildable->getBuildableStatus();
+
+      $status_icon = HarbormasterBuildable::getBuildableStatusIcon($status);
+      $status_color = HarbormasterBuildable::getBuildableStatusColor($status);
+      $status_label = HarbormasterBuildable::getBuildableStatusName($status);
+
+      $item->setStatusIcon("{$status_icon} {$status_color}", $status_label);
 
       $list->addItem($item);
-
     }
 
     $result = new PhabricatorApplicationSearchResultView();

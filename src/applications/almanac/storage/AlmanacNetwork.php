@@ -5,7 +5,8 @@ final class AlmanacNetwork
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $mailKey;
@@ -112,6 +113,17 @@ final class AlmanacNetwork
     }
 
     $this->delete();
+  }
+
+
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
+
+
+  public function newNgrams() {
+    return array(
+      id(new AlmanacNetworkNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

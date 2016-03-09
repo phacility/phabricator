@@ -71,6 +71,13 @@ final class CelerityDefaultPostprocessor
       'hoverselectedgrey' => '#bbc4ca',
       'hoverselectedblue' => '#e6e9ee',
       'borderinset' => 'inset 0 0 0 1px rgba(55,55,55,.15)',
+      'timeline'    => '#d5d8e1',
+
+      // Alphas
+      'alphawhite'          => '255,255,255',
+      'alphagrey'           => '55,55,55',
+      'alphablue'           => '71,87,120',
+      'alphablack'          => '0,0,0',
 
       // Base Greys
       'lightgreyborder'     => '#C7CCD9',
@@ -186,10 +193,7 @@ final class CelerityDefaultPostprocessor
       'sh-disabledbackground'   => '#f3f3f3',
 
       // Background color for "most" themes.
-      'page.background' => '#f1f1f4',
-
-      // Background color for "dark" themes.
-      'page.background.dark' => '#ebecee',
+      'page.background' => '#f8f8fb',
 
       'menu.profile.text' => 'rgba(255,255,255,.8)',
       'menu.profile.text.selected' => 'rgba(255,255,255,1)',

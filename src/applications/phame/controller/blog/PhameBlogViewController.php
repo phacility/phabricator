@@ -44,16 +44,7 @@ final class PhameBlogViewController extends PhameLiveController {
       $header->setStatus($header_icon, $header_color, $header_name);
 
       $actions = $this->renderActions($blog);
-      $action_button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setText(pht('Actions'))
-        ->setHref('#')
-        ->setIcon('fa-bars')
-        ->addClass('phui-mobile-menu')
-        ->setDropdownMenu($actions);
-
-      $header->addActionLink($action_button);
-
+      $header->setActionList($actions);
       $header->setPolicyObject($blog);
     }
 

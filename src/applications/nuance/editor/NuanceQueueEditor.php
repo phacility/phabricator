@@ -68,6 +68,7 @@ final class NuanceQueueEditor
 
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
+
   protected function validateTransaction(
     PhabricatorLiskDAO $object,
     $type,

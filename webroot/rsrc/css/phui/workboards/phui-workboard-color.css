@@ -1,0 +1,152 @@
+/**
+ * @provides phui-workboard-color-css
+ */
+
+.phui-workboard-color .phabricator-nav-content .phui-workboard-view-shadow {
+  background-color: transparent;
+}
+
+.phui-workboard-color .phui-crumbs-view {
+  background-color: rgba({$alphagrey},.15);
+  border: none;
+  color: rgba({$alphawhite},.8);
+}
+
+.phui-workboard-color .phui-crumbs-view a,
+.phui-workboard-color .phui-crumbs-view .phui-icon-view {
+    color: rgba({$alphawhite},.85);
+}
+
+.phui-workboard-color .phui-crumbs-view a:hover,
+.phui-workboard-color .phui-crumbs-view a:hover .phui-icon-view {
+  color: #fff;
+}
+
+.phui-workboard-color .phuix-dropdown-menu {
+  background-color: rgba({$alphawhite},.9);
+}
+
+.phui-workboard-color .phui-workpanel-view .phui-box-grey {
+  background-color: rgba({$alphawhite},.6);
+}
+
+body.phui-workboard-color .phui-profile-menu .phabricator-side-menu {
+  background-color: rgba({$alphagrey},.3);
+}
+
+body.phui-workboard-color .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background-color: transparent;
+}
+
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu {
+  box-shadow: none;
+}
+
+.phui-workboard-color-preview {
+  width: 50px;
+  height: 50px;
+  font-size: 34px;
+}
+
+/* Gradients */
+
+.phui-workboard-gradient-red {
+  background-color: #e53935;
+  background-image: linear-gradient(to left, #e53935, #e35d5b);
+}
+
+.phui-workboard-gradient-orange {
+  background-color: #f46b45;
+  background-image: linear-gradient(to left, #f46b45, #eea849);
+}
+
+.phui-workboard-gradient-yellow {
+  background-color: #FF8008;
+  background-image: linear-gradient(to left, #FF8008, #FFC837);
+}
+
+.phui-workboard-gradient-green {
+  background-color: #2fa0ac;
+  background-image: linear-gradient(90deg, #2fa0ac 0, #58cca6);
+}
+
+.phui-workboard-gradient-blue {
+  background-color: #73a5c3;
+  background-image: linear-gradient(90deg, #73a5c3 0, #6875be);
+}
+
+.phui-workboard-gradient-bluegrey {
+  background-color: #517fa4;
+  background-image: linear-gradient(to left, #517fa4, #243949);
+}
+
+.phui-workboard-gradient-indigo {
+  background-color: #4776E6;
+  background-image: linear-gradient(to left, #4776E6, #8E54E9);
+}
+
+.phui-workboard-gradient-violet {
+  background-color: #9f73c3;
+  background-image: linear-gradient(90deg, #9f73c3 0, #6875be);
+}
+
+.phui-workboard-gradient-sky {
+  background-color: #7474BF;
+  background-image: linear-gradient(to left, #7474BF, #348AC7);
+}
+
+.phui-workboard-gradient-pink {
+  background-color: #EA2A90;
+  background-image: linear-gradient(to left, #EA2A90, #79164B);
+}
+
+.phui-workboard-gradient-grey {
+  background-color: #283048;
+  background-image: linear-gradient(to left, #283048, #859398);
+}
+
+/* Colors */
+
+.phui-workboard-red {
+  background-color: {$red};
+}
+
+.phui-workboard-orange {
+  background-color: {$orange};
+}
+
+.phui-workboard-yellow {
+  background-color: {$yellow};
+}
+
+.phui-workboard-green {
+  background-color: {$green};
+}
+
+.phui-workboard-blue {
+  background-color: {$blue};
+}
+
+.phui-workboard-indigo {
+  background-color: {$indigo};
+}
+
+.phui-workboard-violet {
+  background-color: {$violet};
+}
+
+.phui-workboard-sky {
+  background-color: {$sky};
+}
+
+.phui-workboard-pink {
+  background-color: {$pink};
+}
+
+.phui-workboard-fire {
+  background-color: {$fire};
+}
+
+.phui-workboard-grey {
+  background-color: {$greytext};
+}

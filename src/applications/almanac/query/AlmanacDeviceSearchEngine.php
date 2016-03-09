@@ -11,21 +11,36 @@ final class AlmanacDeviceSearchEngine
     return 'PhabricatorAlmanacApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+  public function newQuery() {
+    return new AlmanacDeviceQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new AlmanacDeviceQuery());
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for devices by name substring.')),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Exact Names'))
+        ->setKey('names')
+        ->setDescription(pht('Search for devices with specific names.')),
+    );
+  }
+
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
+
+    if ($map['names']) {
+      $query->withNames($map['names']);
+    }
 
     return $query;
   }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {}
 
   protected function getURI($path) {
     return '/almanac/device/'.$path;
@@ -52,12 +67,6 @@ final class AlmanacDeviceSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $devices,
-    PhabricatorSavedQuery $query) {
-    return array();
-  }
-
   protected function renderResultList(
     array $devices,
     PhabricatorSavedQuery $query,
@@ -74,6 +83,10 @@ final class AlmanacDeviceSearchEngine
         ->setHeader($device->getName())
         ->setHref($device->getURI())
         ->setObject($device);
+
+      if ($device->isClusterDevice()) {
+        $item->addIcon('fa-sitemap', pht('Cluster Device'));
+      }
 
       $list->addItem($item);
     }

@@ -26,11 +26,20 @@ final class DrydockBlueprintDatasource
       ->execute();
 
     $results = array();
-    foreach ($handles as $handle) {
-      $results[] = id(new PhabricatorTypeaheadResult())
-        ->setName($handle->getName())
+    foreach ($blueprints as $blueprint) {
+      $handle = $handles[$blueprint->getPHID()];
+
+      $result = id(new PhabricatorTypeaheadResult())
+        ->setName($handle->getFullName())
         ->setPHID($handle->getPHID());
+
+      if ($blueprint->getIsDisabled()) {
+        $result->setClosed(pht('Disabled'));
+      }
+
+      $results[] = $result;
     }
+
     return $results;
   }
 }

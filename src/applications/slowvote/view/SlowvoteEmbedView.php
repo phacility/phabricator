@@ -4,12 +4,6 @@ final class SlowvoteEmbedView extends AphrontView {
 
   private $poll;
   private $handles;
-  private $headless;
-
-  public function setHeadless($headless) {
-    $this->headless = $headless;
-    return $this;
-  }
 
   public function setPoll(PhabricatorSlowvotePoll $poll) {
     $this->poll = $poll;
@@ -68,32 +62,24 @@ final class SlowvoteEmbedView extends AphrontView {
       ),
       $poll->getQuestion());
 
-    if ($this->headless) {
-      $header = null;
-    } else {
-      $header = id(new PHUIHeaderView())
-        ->setHeader($link_to_slowvote);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($link_to_slowvote);
 
-      $description = null;
-      if ($poll->getDescription()) {
-        $description = PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent(
-            $poll->getDescription()),
-          'default',
-          $this->getUser());
-        $description = phutil_tag(
-          'div',
-          array(
-            'class' => 'slowvote-description',
-          ),
-          $description);
-      }
-
-      $header = array(
-        $header,
-        $description,
-      );
+    $description = $poll->getDescription();
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($this->getUser(), $description);
+      $description = phutil_tag(
+        'div',
+        array(
+          'class' => 'slowvote-description',
+        ),
+        $description);
     }
+
+    $header = array(
+      $header,
+      $description,
+    );
 
     $vis = $poll->getResponseVisibility();
     if ($this->areResultsVisible()) {
@@ -167,8 +153,10 @@ final class SlowvoteEmbedView extends AphrontView {
       array($body));
 
     return id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setHeader($header)
-      ->appendChild($embed);
+      ->appendChild($embed)
+      ->addClass('slowvote-poll-view');
   }
 
   private function renderLabel(PhabricatorSlowvoteOption $option, $selected) {

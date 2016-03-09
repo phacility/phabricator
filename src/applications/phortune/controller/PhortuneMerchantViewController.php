@@ -136,11 +136,7 @@ final class PhortuneMerchantViewController
 
     $description = $merchant->getDescription();
     if (strlen($description)) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($description),
-        'default',
-        $viewer);
-
+      $description = new PHUIRemarkupView($viewer, $description);
       $view->addSectionHeader(
         pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($description);

@@ -13,8 +13,11 @@ final class NuanceSourceActionController extends NuanceController {
       return new Aphront404Response();
     }
 
-    $def = $source->requireDefinition();
-    $def->setActor($viewer);
+    $def = $source->getDefinition();
+
+    $def
+      ->setViewer($viewer)
+      ->setSource($source);
 
     $response = $def->handleActionRequest($request);
     if ($response instanceof AphrontResponse) {
@@ -25,14 +28,10 @@ final class NuanceSourceActionController extends NuanceController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $response,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($response);
   }
 
 }

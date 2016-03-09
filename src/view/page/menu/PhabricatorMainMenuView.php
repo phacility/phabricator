@@ -24,7 +24,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   public function render() {
-    $user = $this->user;
+    $viewer = $this->getViewer();
 
     require_celerity_resource('phabricator-main-menu-view');
 
@@ -35,7 +35,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $app_button = '';
     $aural = null;
 
-    if ($user->isLoggedIn() && $user->isUserActivated()) {
+    if ($viewer->isLoggedIn() && $viewer->isUserActivated()) {
       list($menu, $dropdowns, $aural) = $this->renderNotificationMenu();
       if (array_filter($menu)) {
         $alerts[] = $menu;
@@ -77,10 +77,10 @@ final class PhabricatorMainMenuView extends AphrontView {
     $controller = $this->getController();
     foreach ($applications as $application) {
       $app_actions = $application->buildMainMenuItems(
-        $user,
+        $viewer,
         $controller);
       $app_extra = $application->buildMainMenuExtraNodes(
-        $user,
+        $viewer,
         $controller);
 
       foreach ($app_actions as $action) {
@@ -97,7 +97,7 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $extensions = PhabricatorMainMenuBarExtension::getAllEnabledExtensions();
     foreach ($extensions as $extension) {
-      $extension->setViewer($user);
+      $extension->setViewer($viewer);
 
       $controller = $this->getController();
       if ($controller) {
@@ -158,7 +158,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderSearch() {
-    $user = $this->user;
+    $viewer = $this->getViewer();
 
     $result = null;
 
@@ -166,15 +166,15 @@ final class PhabricatorMainMenuView extends AphrontView {
       'helpURI' => '/help/keyboardshortcut/',
     );
 
-    if ($user->isLoggedIn()) {
-      $show_search = $user->isUserActivated();
+    if ($viewer->isLoggedIn()) {
+      $show_search = $viewer->isUserActivated();
     } else {
       $show_search = PhabricatorEnv::getEnvConfig('policy.allow-public');
     }
 
     if ($show_search) {
       $search = new PhabricatorMainMenuSearchView();
-      $search->setUser($user);
+      $search->setViewer($viewer);
 
       $application = null;
       $controller = $this->getController();
@@ -188,7 +188,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       $result = $search;
 
       $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
-      if ($user->loadPreferences()->getPreference($pref_shortcut, true)) {
+      if ($viewer->loadPreferences()->getPreference($pref_shortcut, true)) {
         $keyboard_config['searchID'] = $search->getID();
       }
     }
@@ -230,7 +230,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderApplicationMenu(array $bar_items) {
-    $user = $this->getUser();
+    $viewer = $this->getViewer();
 
     $view = $this->getApplicationMenu();
 
@@ -302,7 +302,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       $logo_uri = $cache->getKey($cache_key_logo);
       if (!$logo_uri) {
         $file = id(new PhabricatorFileQuery())
-          ->setViewer($this->getUser())
+          ->setViewer($this->getViewer())
           ->withPHIDs(array($custom_header))
           ->executeOne();
         if ($file) {
@@ -355,7 +355,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderNotificationMenu() {
-    $user = $this->user;
+    $viewer = $this->getViewer();
 
     require_celerity_resource('phabricator-notification-css');
     require_celerity_resource('phabricator-notification-menu-css');
@@ -364,7 +364,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $aural = array();
 
     $dropdown_query = id(new AphlictDropdownDataQuery())
-      ->setViewer($user);
+      ->setViewer($viewer);
     $dropdown_data = $dropdown_query->execute();
 
     $message_tag = '';

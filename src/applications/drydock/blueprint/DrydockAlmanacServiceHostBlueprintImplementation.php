@@ -15,6 +15,10 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     return pht('Almanac Hosts');
   }
 
+  public function getBlueprintIcon() {
+    return 'fa-server';
+  }
+
   public function getDescription() {
     return pht(
       'Allows Drydock to lease existing hosts defined in an Almanac service '.
@@ -184,7 +188,7 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
         'type' => 'datasource',
         'datasource.class' => 'AlmanacServiceDatasource',
         'datasource.parameters' => array(
-          'serviceClasses' => $this->getAlmanacServiceClasses(),
+          'serviceTypes' => $this->getAlmanacServiceTypes(),
         ),
         'required' => true,
       ),
@@ -213,7 +217,7 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
       $services = id(new AlmanacServiceQuery())
         ->setViewer($viewer)
         ->withPHIDs($service_phids)
-        ->withServiceClasses($this->getAlmanacServiceClasses())
+        ->withServiceTypes($this->getAlmanacServiceTypes())
         ->needBindings(true)
         ->execute();
       $services = mpull($services, null, 'getPHID');
@@ -267,6 +271,11 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
 
       $free = array();
       foreach ($bindings as $binding) {
+        // Don't consider disabled bindings to be available.
+        if ($binding->getIsDisabled()) {
+          continue;
+        }
+
         if (empty($allocated_phids[$binding->getPHID()])) {
           $free[] = $binding;
         }
@@ -278,9 +287,9 @@ final class DrydockAlmanacServiceHostBlueprintImplementation
     return $this->freeBindings;
   }
 
-  private function getAlmanacServiceClasses() {
+  private function getAlmanacServiceTypes() {
     return array(
-      'AlmanacDrydockPoolServiceType',
+      AlmanacDrydockPoolServiceType::SERVICETYPE,
     );
   }
 

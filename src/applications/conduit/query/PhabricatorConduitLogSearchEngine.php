@@ -37,7 +37,7 @@ final class PhabricatorConduitLogSearchEngine
     return array(
       id(new PhabricatorUsersSearchField())
         ->setKey('callerPHIDs')
-        ->setLabel(pht('Methods'))
+        ->setLabel(pht('Callers'))
         ->setAliases(array('caller', 'callers'))
         ->setDescription(pht('Find calls by specific users.')),
       id(new PhabricatorSearchStringListField())

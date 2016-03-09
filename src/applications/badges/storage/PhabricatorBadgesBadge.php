@@ -181,10 +181,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return ($this->creatorPHID == $phid);
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

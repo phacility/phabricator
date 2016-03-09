@@ -18,6 +18,8 @@ final class PhabricatorOwnersPackage
   protected $primaryOwnerPHID;
   protected $mailKey;
   protected $status;
+  protected $viewPolicy;
+  protected $editPolicy;
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -27,8 +29,20 @@ final class PhabricatorOwnersPackage
   const STATUS_ARCHIVED = 'archived';
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorOwnersApplication'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      PhabricatorOwnersDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(
+      PhabricatorOwnersDefaultEditCapability::CAPABILITY);
+
     return id(new PhabricatorOwnersPackage())
       ->setAuditingEnabled(0)
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy)
       ->attachPaths(array())
       ->setStatus(self::STATUS_ACTIVE)
       ->attachOwners(array())
@@ -287,8 +301,12 @@ final class PhabricatorOwnersPackage
   }
 
   public function getPolicy($capability) {
-    // TODO: Implement proper policies.
-    return PhabricatorPolicies::POLICY_USER;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
@@ -433,7 +451,7 @@ final class PhabricatorOwnersPackage
   }
 
 
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 
 
   public function newNgrams() {

@@ -4,31 +4,42 @@ final class AlmanacService
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     AlmanacPropertyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorNgramsInterface,
+    PhabricatorConduitResultInterface,
+    PhabricatorExtendedPolicyInterface {
 
   protected $name;
   protected $nameIndex;
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
-  protected $serviceClass;
-  protected $isLocked;
+  protected $serviceType;
 
-  private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
   private $bindings = self::ATTACHABLE;
-  private $serviceType = self::ATTACHABLE;
+  private $serviceImplementation = self::ATTACHABLE;
 
-  public static function initializeNewService() {
+  public static function initializeNewService($type) {
+    $type_map = AlmanacServiceType::getAllServiceTypes();
+
+    $implementation = idx($type_map, $type);
+    if (!$implementation) {
+      throw new Exception(
+        pht(
+          'No Almanac service type "%s" exists!',
+          $type));
+    }
+
     return id(new AlmanacService())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
       ->attachAlmanacProperties(array())
-      ->setIsLocked(0);
+      ->setServiceType($type)
+      ->attachServiceImplementation($implementation);
   }
 
   protected function getConfiguration() {
@@ -38,8 +49,7 @@ final class AlmanacService
         'name' => 'text128',
         'nameIndex' => 'bytes12',
         'mailKey' => 'bytes20',
-        'serviceClass' => 'text64',
-        'isLocked' => 'bool',
+        'serviceType' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
@@ -49,8 +59,8 @@ final class AlmanacService
         'key_nametext' => array(
           'columns' => array('name'),
         ),
-        'key_class' => array(
-          'columns' => array('serviceClass'),
+        'key_servicetype' => array(
+          'columns' => array('serviceType'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -61,7 +71,7 @@ final class AlmanacService
   }
 
   public function save() {
-    AlmanacNames::validateServiceOrDeviceName($this->getName());
+    AlmanacNames::validateName($this->getName());
 
     $this->nameIndex = PhabricatorHash::digestForIndex($this->getName());
 
@@ -80,18 +90,35 @@ final class AlmanacService
     return $this->assertAttached($this->bindings);
   }
 
+  public function getActiveBindings() {
+    $bindings = $this->getBindings();
+
+    // Filter out disabled bindings.
+    foreach ($bindings as $key => $binding) {
+      if ($binding->getIsDisabled()) {
+        unset($bindings[$key]);
+      }
+    }
+
+    return $bindings;
+  }
+
   public function attachBindings(array $bindings) {
     $this->bindings = $bindings;
     return $this;
   }
 
-  public function getServiceType() {
-    return $this->assertAttached($this->serviceType);
+  public function getServiceImplementation() {
+    return $this->assertAttached($this->serviceImplementation);
   }
 
-  public function attachServiceType(AlmanacServiceType $type) {
-    $this->serviceType = $type;
+  public function attachServiceImplementation(AlmanacServiceType $type) {
+    $this->serviceImplementation = $type;
     return $this;
+  }
+
+  public function isClusterService() {
+    return $this->getServiceImplementation()->isClusterServiceType();
   }
 
 
@@ -126,7 +153,11 @@ final class AlmanacService
   }
 
   public function getAlmanacPropertyFieldSpecifications() {
-    return $this->getServiceType()->getFieldSpecifications();
+    return $this->getServiceImplementation()->getFieldSpecifications();
+  }
+
+  public function newAlmanacPropertyEditEngine() {
+    return new AlmanacServicePropertyEditEngine();
   }
 
 
@@ -145,11 +176,7 @@ final class AlmanacService
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsLocked()) {
-          return PhabricatorPolicies::POLICY_NOONE;
-        } else {
-          return $this->getEditPolicy();
-        }
+        return $this->getEditPolicy();
     }
   }
 
@@ -158,36 +185,28 @@ final class AlmanacService
   }
 
   public function describeAutomaticCapability($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsLocked()) {
-          return pht('This service is locked and can not be edited.');
-        }
-        break;
-    }
-
     return null;
   }
 
 
-/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
 
 
-  public function getCustomFieldSpecificationForRole($role) {
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        if ($this->isClusterService()) {
+          return array(
+            array(
+              new PhabricatorAlmanacApplication(),
+              AlmanacManageClusterServicesCapability::CAPABILITY,
+            ),
+          );
+        }
+        break;
+    }
+
     return array();
-  }
-
-  public function getCustomFieldBaseClass() {
-    return 'AlmanacCustomField';
-  }
-
-  public function getCustomFields() {
-    return $this->assertAttached($this->customFields);
-  }
-
-  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
-    $this->customFields = $fields;
-    return $this;
   }
 
 
@@ -229,6 +248,50 @@ final class AlmanacService
     }
 
     $this->delete();
+  }
+
+
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
+
+
+  public function newNgrams() {
+    return array(
+      id(new AlmanacServiceNameNgrams())
+        ->setValue($this->getName()),
+    );
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the service.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('serviceType')
+        ->setType('string')
+        ->setDescription(pht('The service type constant.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'serviceType' => $this->getServiceType(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new AlmanacPropertiesSearchEngineAttachment())
+        ->setAttachmentKey('properties'),
+      id(new AlmanacBindingsSearchEngineAttachment())
+        ->setAttachmentKey('bindings'),
+    );
   }
 
 }

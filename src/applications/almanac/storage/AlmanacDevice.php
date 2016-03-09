@@ -4,21 +4,22 @@ final class AlmanacDevice
   extends AlmanacDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     PhabricatorSSHPublicKeyInterface,
     AlmanacPropertyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorNgramsInterface,
+    PhabricatorConduitResultInterface,
+    PhabricatorExtendedPolicyInterface {
 
   protected $name;
   protected $nameIndex;
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
-  protected $isLocked;
+  protected $isBoundToClusterService;
 
-  private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
 
   public static function initializeNewDevice() {
@@ -26,7 +27,7 @@ final class AlmanacDevice
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
       ->attachAlmanacProperties(array())
-      ->setIsLocked(0);
+      ->setIsBoundToClusterService(0);
   }
 
   protected function getConfiguration() {
@@ -36,7 +37,7 @@ final class AlmanacDevice
         'name' => 'text128',
         'nameIndex' => 'bytes12',
         'mailKey' => 'bytes20',
-        'isLocked' => 'bool',
+        'isBoundToClusterService' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
@@ -55,7 +56,7 @@ final class AlmanacDevice
   }
 
   public function save() {
-    AlmanacNames::validateServiceOrDeviceName($this->getName());
+    AlmanacNames::validateName($this->getName());
 
     $this->nameIndex = PhabricatorHash::digestForIndex($this->getName());
 
@@ -70,35 +71,37 @@ final class AlmanacDevice
     return '/almanac/device/view/'.$this->getName().'/';
   }
 
-
-  /**
-   * Find locked services which are bound to this device, updating the device
-   * lock flag if necessary.
-   *
-   * @return list<phid> List of locking service PHIDs.
-   */
-  public function rebuildDeviceLocks() {
+  public function rebuildClusterBindingStatus() {
     $services = id(new AlmanacServiceQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withDevicePHIDs(array($this->getPHID()))
-      ->withLocked(true)
       ->execute();
 
-    $locked = (bool)count($services);
+    $is_cluster = false;
+    foreach ($services as $service) {
+      if ($service->isClusterService()) {
+        $is_cluster = true;
+        break;
+      }
+    }
 
-    if ($locked != $this->getIsLocked()) {
-      $this->setIsLocked((int)$locked);
+    if ($is_cluster != $this->getIsBoundToClusterService()) {
+      $this->setIsBoundToClusterService((int)$is_cluster);
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         queryfx(
           $this->establishConnection('w'),
-          'UPDATE %T SET isLocked = %d WHERE id = %d',
+          'UPDATE %T SET isBoundToClusterService = %d WHERE id = %d',
           $this->getTableName(),
-          $this->getIsLocked(),
+          $this->getIsBoundToClusterService(),
           $this->getID());
       unset($unguarded);
     }
 
     return $this;
+  }
+
+  public function isClusterDevice() {
+    return $this->getIsBoundToClusterService();
   }
 
 
@@ -136,6 +139,10 @@ final class AlmanacDevice
     return array();
   }
 
+  public function newAlmanacPropertyEditEngine() {
+    return new AlmanacDevicePropertyEditEngine();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -152,11 +159,7 @@ final class AlmanacDevice
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsLocked()) {
-          return PhabricatorPolicies::POLICY_NOONE;
-        } else {
-          return $this->getEditPolicy();
-        }
+        return $this->getEditPolicy();
     }
   }
 
@@ -165,36 +168,28 @@ final class AlmanacDevice
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
-      if ($this->getIsLocked()) {
-        return pht(
-          'This device is bound to a locked service, so it can not '.
-          'be edited.');
-      }
-    }
-
     return null;
   }
 
 
-/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
 
 
-  public function getCustomFieldSpecificationForRole($role) {
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        if ($this->isClusterDevice()) {
+          return array(
+            array(
+              new PhabricatorAlmanacApplication(),
+              AlmanacManageClusterServicesCapability::CAPABILITY,
+            ),
+          );
+        }
+        break;
+    }
+
     return array();
-  }
-
-  public function getCustomFieldBaseClass() {
-    return 'AlmanacCustomField';
-  }
-
-  public function getCustomFields() {
-    return $this->assertAttached($this->customFields);
-  }
-
-  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
-    $this->customFields = $fields;
-    return $this;
   }
 
 
@@ -248,6 +243,43 @@ final class AlmanacDevice
     }
 
     $this->delete();
+  }
+
+
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
+
+
+  public function newNgrams() {
+    return array(
+      id(new AlmanacDeviceNameNgrams())
+        ->setValue($this->getName()),
+    );
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the device.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new AlmanacPropertiesSearchEngineAttachment())
+        ->setAttachmentKey('properties'),
+    );
   }
 
 }

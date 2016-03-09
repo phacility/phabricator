@@ -3,16 +3,10 @@
 final class PhameBlogListView extends AphrontTagView {
 
   private $blogs;
-  private $viewer;
 
   public function setBlogs($blogs) {
     assert_instances_of($blogs, 'PhameBlog');
     $this->blogs = $blogs;
-    return $this;
-  }
-
-  public function setViewer($viewer) {
-    $this->viewer = $viewer;
     return $this;
   }
 
@@ -72,7 +66,7 @@ final class PhameBlogListView extends AphrontTagView {
       $list = phutil_tag(
         'a',
         array(
-          'href' => '/phame/blog/new/',
+          'href' => '/phame/blog/edit/',
         ),
         pht('Create a Blog'));
     }

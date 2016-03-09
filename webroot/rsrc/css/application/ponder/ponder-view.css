@@ -2,24 +2,42 @@
  * @provides ponder-view-css
  */
 
-.ponder-show-comments {
-  text-align: center;
-  padding: 8px;
-  margin: 0 16px;
-  float: right;
-  font-weight: bold;
-  background: #fff;
-  border-bottom: 1px solid {$blueborder};
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
+.ponder-question-container {
+  border-top: 1px solid {$thinblueborder};
 }
 
-.ponder-question-view .phui-property-list-properties-wrap {
-  width: 66%;
+.device .ponder-view-properties {
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
 }
 
-.ponder-question-view .phui-property-list-actions {
-  width: 30%;
+.device .ponder-question-view .phui-timeline-view,
+.device .ponder-question-view .phui-timeline-event-view {
+  margin: 0;
+  padding: 0;
+}
+
+.ponder-view-properties .phui-property-list-container {
+  margin: 0;
+  padding: 0;
+}
+
+.ponder-question-view .phui-document-container {
+  border: none;
+}
+
+.phui-two-column-view .phui-main-column .ponder-question-content
+  .phui-box.ponder-answer-wiki {
+    margin: 24px 0;
+}
+
+.ponder-answer-wiki .phabricator-remarkup {
+  padding: 16px;
+}
+
+.ponder-question-content .phui-timeline-view {
+  padding-right: 0;
 }
 
 .ponder-answer-view {
@@ -35,52 +53,93 @@
   margin-left: 12px;
 }
 
-.ponder-answer-view .phui-header-shell {
-  padding-bottom: 8px;
+.ponder-question-view .ponder-answer .phui-header-shell {
+  padding: 4px 8px 3px 8px;
+}
+
+.ponder-answer-view .phui-header-image-href {
+  display: flex;
 }
 
 .ponder-answer-view .phui-header-view .phui-header-header {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .ponder-answer-view .phui-header-col1 {
-  width: 45px;
+  width: 40px;
+}
+
+.ponder-answer-view .ponder-answer-content {
+  background-color: #fff;
+  padding: 16px 16px 0 16px;
+}
+
+.device-phone .ponder-answer-view .ponder-answer-content {
+  padding: 12px 12px 0 12px;
 }
 
 .ponder-answer-view .phui-header-image {
-  height: 35px;
-  width: 35px;
+  height: 30px;
+  width: 30px;
   border-radius: 3px;
 }
 
+.ponder-answer-wiki-header {
+  font-weight: bold;
+  border-bottom: 1px solid {$lightblueborder};
+  color: {$bluetext};
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
 .ponder-footer-view {
-  margin: 0 0 -4px;
   text-align: left;
+  margin-top: 16px;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.ponder-answer-view .ponder-footer-view {
+  margin-top: 16px;
+  border-top: 1px solid rgba({$alphagrey}, .15);
+  border-bottom: none;
+}
+
+body .phui-main-column .ponder-question-content .ponder-answer-view
+  .phui-object-box.ponder-answer {
+    margin: 0;
+    padding: 0;
 }
 
 .ponder-footer-view .ponder-footer-action {
-  padding: 4px 8px;
+  padding: 8px 0;
   margin-right: 8px;
-  color: {$anchor};
   display: inline-block;
-  background-color: rgba(71, 87, 120, 0.06);
 }
 
-.ponder-footer-view .ponder-footer-action.ponder-footer-action-helpful {
-  background-color: {$lightyellow};
-  color: {$bluetext};
+.ponder-answer-section {
+  margin-top: 48px;
 }
 
-.ponder-footer-view .ponder-footer-action.ponder-footer-action-helpful
-  .phui-icon-view {
-    color: {$bluetext};
+.ponder-add-answer-header {
+  margin-top: 64px;
+  margin-bottom: 20px;
 }
 
-.ponder-footer-view .ponder-footer-action .phui-icon-view {
-  color: {$anchor};
+.ponder-add-answer-view {
+  margin-top: 16px;
 }
 
-.ponder-footer-view a:hover {
-  text-decoration: none;
-  background-color: rgba(71, 87, 120, 0.10);
+.ponder-question-content div.ponder-question-add-comment-view
+  div.phui-box.phui-object-box {
+    margin-right: 0;
+    margin-left: 62px;
+}
+
+.device .ponder-question-content div.ponder-question-add-comment-view
+  div.phui-box.phui-object-box {
+  margin: 0;
+}
+
+.ponder-question-add-comment-view .remarkup-assist-textarea {
+  height: 8em;
 }

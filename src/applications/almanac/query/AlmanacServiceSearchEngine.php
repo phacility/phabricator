@@ -15,22 +15,50 @@ final class AlmanacServiceSearchEngine
     return new AlmanacServiceQuery();
   }
 
-  public function newResultObject() {
-    // NOTE: We need to attach a service type in order to generate custom
-    // field definitions.
-    return AlmanacService::initializeNewService()
-      ->attachServiceType(new AlmanacCustomServiceType());
-  }
-
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
+
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
+
+    if ($map['names']) {
+      $query->withNames($map['names']);
+    }
+
+    if ($map['devicePHIDs']) {
+      $query->withDevicePHIDs($map['devicePHIDs']);
+    }
+
+    if ($map['serviceTypes']) {
+      $query->withServiceTypes($map['serviceTypes']);
+    }
 
     return $query;
   }
 
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for services by name substring.')),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Exact Names'))
+        ->setKey('names')
+        ->setDescription(pht('Search for services with specific names.')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Service Types'))
+        ->setKey('serviceTypes')
+        ->setDescription(pht('Find services by type.'))
+        ->setDatasource(id(new AlmanacServiceTypeDatasource())),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Devices'))
+        ->setKey('devicePHIDs')
+        ->setDescription(
+          pht('Search for services bound to particular devices.')),
+    );
   }
 
   protected function getURI($path) {
@@ -75,17 +103,8 @@ final class AlmanacServiceSearchEngine
         ->setHref($service->getURI())
         ->setObject($service)
         ->addIcon(
-          $service->getServiceType()->getServiceTypeIcon(),
-          $service->getServiceType()->getServiceTypeShortName());
-
-      if ($service->getIsLocked() ||
-          $service->getServiceType()->isClusterServiceType()) {
-        if ($service->getIsLocked()) {
-          $item->addIcon('fa-lock', pht('Locked'));
-        } else {
-          $item->addIcon('fa-unlock-alt red', pht('Unlocked'));
-        }
-      }
+          $service->getServiceImplementation()->getServiceTypeIcon(),
+          $service->getServiceImplementation()->getServiceTypeShortName());
 
       $list->addItem($item);
     }

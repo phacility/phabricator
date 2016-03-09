@@ -102,10 +102,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    $props = id(new DifferentialDiffProperty())->loadAllWhere(
-      'diffID = %d',
-      $target_manual->getID());
-    $props = mpull($props, 'getData', 'getName');
+    $this->loadDiffProperties($diffs);
+    $props = $target_manual->getDiffProperties();
 
     $object_phids = array_merge(
       $revision->getReviewers(),
@@ -256,22 +254,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
       array($diff_vs, $target->getID()));
     $detail_diffs = mpull($detail_diffs, null, 'getPHID');
 
-    $buildables = id(new HarbormasterBuildableQuery())
-      ->setViewer($viewer)
-      ->withBuildablePHIDs(array_keys($detail_diffs))
-      ->withManualBuildables(false)
-      ->needBuilds(true)
-      ->needTargets(true)
-      ->execute();
-    $buildables = mpull($buildables, null, 'getBuildablePHID');
-    foreach ($detail_diffs as $diff_phid => $detail_diff) {
-      $detail_diff->attachBuildable(idx($buildables, $diff_phid));
-    }
+    $this->loadHarbormasterData($detail_diffs);
 
     $diff_detail_box = $this->buildDiffDetailView(
       $detail_diffs,
       $revision,
       $field_list);
+
+    $unit_box = $this->buildUnitMessagesView(
+      $target,
+      $revision);
 
     $comment_view = $this->buildTransactions(
       $revision,
@@ -469,6 +461,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $operations_box,
       $revision_detail_box,
       $diff_detail_box,
+      $unit_box,
       $page_pane,
     );
 
@@ -972,18 +965,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       return null;
     }
 
-    // Make sure we're only going to render unique diffs.
-    $diffs = mpull($diffs, null, 'getID');
-    $labels = array(pht('Left'), pht('Right'));
-
     $property_lists = array();
-    foreach ($diffs as $diff) {
-      if (count($diffs) == 2) {
-        $label = array_shift($labels);
-        $label = pht('%s (Diff %d)', $label, $diff->getID());
-      } else {
-        $label = pht('Diff %d', $diff->getID());
-      }
+    foreach ($this->getDiffTabLabels($diffs) as $tab) {
+      list($label, $diff) = $tab;
 
       $property_lists[] = array(
         $label,
@@ -1082,5 +1066,45 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setBoxView($box_view)
       ->setOperation($operation);
   }
+
+  private function buildUnitMessagesView(
+    $diff,
+    DifferentialRevision $revision) {
+    $viewer = $this->getViewer();
+
+    if (!$diff->getUnitMessages()) {
+      return null;
+    }
+
+    $interesting_messages = array();
+    foreach ($diff->getUnitMessages() as $message) {
+      switch ($message->getResult()) {
+        case ArcanistUnitTestResult::RESULT_PASS:
+        case ArcanistUnitTestResult::RESULT_SKIP:
+          break;
+        default:
+          $interesting_messages[] = $message;
+          break;
+      }
+    }
+
+    if (!$interesting_messages) {
+      return null;
+    }
+
+    $excuse = null;
+    if ($diff->hasDiffProperty('arc:unit-excuse')) {
+      $excuse = $diff->getProperty('arc:unit-excuse');
+    }
+
+    return id(new HarbormasterUnitSummaryView())
+      ->setUser($viewer)
+      ->setExcuse($excuse)
+      ->setBuildable($diff->getBuildable())
+      ->setUnitMessages($diff->getUnitMessages())
+      ->setLimit(5)
+      ->setShowViewAll(true);
+  }
+
 
 }

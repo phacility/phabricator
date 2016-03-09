@@ -28,24 +28,24 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $title = pht('%s %s', 'K'.$credential->getID(), $credential->getName());
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb('K'.$credential->getID());
+    $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($credential);
-    $actions = $this->buildActionView($credential, $type);
-    $properties = $this->buildPropertyView($credential, $type, $actions);
+    $curtain = $this->buildCurtain($credential, $type);
+    $subheader = $this->buildSubheaderView($credential);
+    $content = $this->buildPropertySectionView($credential, $type);
 
-    $box = id(new PHUIObjectBoxView())
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->setSubheader($subheader)
+      ->setCurtain($curtain)
+      ->setMainColumn($timeline)
+      ->addPropertySection(pht('PROPERTIES'), $content);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $timeline,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildHeaderView(PassphraseCredential $credential) {
@@ -54,7 +54,8 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($credential->getName())
-      ->setPolicyObject($credential);
+      ->setPolicyObject($credential)
+      ->setHeaderIcon('fa-user-secret');
 
     if ($credential->getIsDestroyed()) {
       $header->setStatus('fa-ban', 'red', pht('Destroyed'));
@@ -63,10 +64,39 @@ final class PassphraseCredentialViewController extends PassphraseController {
     return $header;
   }
 
-  private function buildActionView(
+  private function buildSubheaderView(
+    PassphraseCredential $credential) {
+    $viewer = $this->getViewer();
+
+    $author = $viewer->renderHandle($credential->getAuthorPHID())->render();
+    $date = phabricator_datetime($credential->getDateCreated(), $viewer);
+    $author = phutil_tag('strong', array(), $author);
+
+    $person = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($credential->getAuthorPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
+
+    if (!$person) {
+      return null;
+    }
+
+    $image_uri = $person->getProfileImageURI();
+    $image_href = '/p/'.$credential->getUsername();
+
+    $content = pht('Created by %s on %s.', $author, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
+  }
+
+  private function buildCurtain(
     PassphraseCredential $credential,
     PassphraseCredentialType $type) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $id = $credential->getID();
 
@@ -88,16 +118,14 @@ final class PassphraseCredentialViewController extends PassphraseController {
       $credential_conduit_icon = 'fa-wrench';
     }
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObject($credential)
-      ->setUser($viewer);
-
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $credential,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($credential);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Credential'))
         ->setIcon('fa-pencil')
@@ -106,7 +134,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
         ->setWorkflow(!$can_edit));
 
     if (!$credential->getIsDestroyed()) {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Destroy Credential'))
           ->setIcon('fa-times')
@@ -114,7 +142,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
 
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Show Secret'))
           ->setIcon('fa-eye')
@@ -123,7 +151,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setWorkflow(true));
 
       if ($type->hasPublicKey()) {
-        $actions->addAction(
+        $curtain->addAction(
           id(new PhabricatorActionView())
             ->setName(pht('Show Public Key'))
             ->setIcon('fa-download')
@@ -132,7 +160,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
             ->setWorkflow(true));
       }
 
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($credential_conduit_text)
           ->setIcon($credential_conduit_icon)
@@ -140,7 +168,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
 
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($credential_lock_text)
           ->setIcon($credential_lock_icon)
@@ -149,20 +177,16 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setWorkflow(true));
     }
 
-
-    return $actions;
+    return $curtain;
   }
 
-  private function buildPropertyView(
+  private function buildPropertySectionView(
     PassphraseCredential $credential,
-    PassphraseCredentialType $type,
-    PhabricatorActionListView $actions) {
+    PassphraseCredentialType $type) {
     $viewer = $this->getRequest()->getUser();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($credential)
-      ->setActionList($actions);
+      ->setUser($viewer);
 
     $properties->addProperty(
       pht('Credential Type'),
@@ -191,8 +215,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
         pht('Used By'),
         $viewer->renderHandleList($used_by_phids));
     }
-
-    $properties->invokeWillRenderEvent();
 
     $description = $credential->getDescription();
     if (strlen($description)) {

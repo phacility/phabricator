@@ -284,7 +284,12 @@ final class DiffusionRepositoryEditMainController
       $repository->getVersionControlSystem());
 
     $view->addProperty(pht('Type'), $type);
-    $view->addProperty(pht('Callsign'), $repository->getCallsign());
+
+    $callsign = $repository->getCallsign();
+    if (!strlen($callsign)) {
+      $callsign = phutil_tag('em', array(), pht('No Callsign'));
+    }
+    $view->addProperty(pht('Callsign'), $callsign);
 
     $short_name = $repository->getRepositorySlug();
     if ($short_name === null) {
@@ -309,10 +314,7 @@ final class DiffusionRepositoryEditMainController
     if (!strlen($description)) {
       $description = phutil_tag('em', array(), pht('No description provided.'));
     } else {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        $repository,
-        'description',
-        $viewer);
+      $description = new PHUIRemarkupView($viewer, $description);
     }
     $view->addTextContent($description);
 

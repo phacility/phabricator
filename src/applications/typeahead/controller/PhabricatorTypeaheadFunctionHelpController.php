@@ -121,11 +121,7 @@ final class PhabricatorTypeaheadFunctionHelpController
     }
 
     $content = implode("\n\n", $content);
-
-    $content_box = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($content),
-      'default',
-      $viewer);
+    $content_box = new PHUIRemarkupView($viewer, $content);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title);

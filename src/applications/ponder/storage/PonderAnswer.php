@@ -4,7 +4,6 @@ final class PonderAnswer extends PonderDAO
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorMarkupInterface,
-    PonderVotableInterface,
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorSubscribableInterface,
@@ -20,11 +19,8 @@ final class PonderAnswer extends PonderDAO
   protected $status;
   protected $voteCount;
 
-  private $vote;
   private $question = self::ATTACHABLE;
   private $comments;
-
-  private $userVotes = array();
 
   public static function initializeNewAnswer(
     PhabricatorUser $actor,
@@ -55,23 +51,6 @@ final class PonderAnswer extends PonderDAO
 
   public function getURI() {
     return '/Q'.$this->getQuestionID().'#A'.$this->getID();
-  }
-
-  public function setUserVote($vote) {
-    $this->vote = $vote['data'];
-    if (!$this->vote) {
-      $this->vote = PonderVote::VOTE_NONE;
-    }
-    return $this;
-  }
-
-  public function attachUserVote($user_phid, $vote) {
-    $this->vote = $vote;
-    return $this;
-  }
-
-  public function getUserVote() {
-    return $this->vote;
   }
 
   public function setComments($comments) {
@@ -181,15 +160,6 @@ final class PonderAnswer extends PonderDAO
     return (bool)$this->getID();
   }
 
-  // votable interface
-  public function getUserVoteEdgeType() {
-    return PonderVotingUserHasAnswerEdgeType::EDGECONST;
-  }
-
-  public function getVotablePHID() {
-    return $this->getPHID();
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -247,10 +217,6 @@ final class PonderAnswer extends PonderDAO
 
   public function isAutomaticallySubscribed($phid) {
     return ($phid == $this->getAuthorPHID());
-  }
-
-  public function shouldShowSubscribersProperty() {
-    return true;
   }
 
 

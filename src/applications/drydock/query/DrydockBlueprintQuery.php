@@ -39,6 +39,12 @@ final class DrydockBlueprintQuery extends DrydockQuery {
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new DrydockBlueprintNameNgrams(),
+      $ngrams);
+  }
+
   public function newResultObject() {
     return new DrydockBlueprint();
   }

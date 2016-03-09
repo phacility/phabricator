@@ -1,21 +1,13 @@
 <?php
 
 final class AlmanacServiceTransaction
-  extends PhabricatorApplicationTransaction {
+  extends AlmanacTransaction {
 
   const TYPE_NAME = 'almanac:service:name';
   const TYPE_LOCK = 'almanac:service:lock';
 
-  public function getApplicationName() {
-    return 'almanac';
-  }
-
   public function getApplicationTransactionType() {
     return AlmanacServicePHIDType::TYPECONST;
-  }
-
-  public function getApplicationTransactionCommentObject() {
-    return null;
   }
 
   public function getTitle() {

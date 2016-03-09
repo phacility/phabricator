@@ -256,9 +256,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
 
     $log = HarbormasterBuildLog::initializeNewBuildLog($this)
       ->setLogSource($log_source)
-      ->setLogType($log_type);
-
-    $log->start();
+      ->setLogType($log_type)
+      ->openBuildLog();
 
     return $log;
   }

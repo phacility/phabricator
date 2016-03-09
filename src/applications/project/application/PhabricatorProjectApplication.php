@@ -84,6 +84,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardReorderController',
           'disable/'
             => 'PhabricatorProjectBoardDisableController',
+          'manage/'
+            => 'PhabricatorProjectBoardManageController',
+          'background/'
+            => 'PhabricatorProjectBoardBackgroundController',
         ),
         'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
@@ -94,6 +98,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectSilenceController',
         'warning/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectWarningController',
+        'default/(?P<projectID>[1-9]\d*)/(?P<target>[^/]+)/'
+          => 'PhabricatorProjectDefaultController',
       ),
       '/tag/' => array(
         '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',

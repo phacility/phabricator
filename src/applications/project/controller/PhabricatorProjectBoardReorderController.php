@@ -23,13 +23,13 @@ final class PhabricatorProjectBoardReorderController
     $this->setProject($project);
     $project_id = $project->getID();
 
-    $board_uri = $this->getApplicationURI("board/{$project_id}/");
+    $manage_uri = $this->getApplicationURI("board/{$project_id}/manage/");
     $reorder_uri = $this->getApplicationURI("board/{$project_id}/reorder/");
 
     if ($request->isFormPost()) {
       // User clicked "Done", make sure the page reloads to show the new
       // column order.
-      return id(new AphrontRedirectResponse())->setURI($board_uri);
+      return id(new AphrontRedirectResponse())->setURI($manage_uri);
     }
 
     $columns = id(new PhabricatorProjectColumnQuery())

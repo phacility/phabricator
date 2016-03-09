@@ -43,17 +43,7 @@ final class PhabricatorProjectEditEngine
   }
 
   protected function newEditableObject() {
-    $project = PhabricatorProject::initializeNewProject($this->getViewer());
-
-    $milestone = $this->getMilestoneProject();
-    if ($milestone) {
-      $default_name = pht(
-        'Milestone %s',
-        new PhutilNumber($milestone->loadNextMilestoneNumber()));
-      $project->setName($default_name);
-    }
-
-    return $project;
+    return PhabricatorProject::initializeNewProject($this->getViewer());
   }
 
   protected function newObjectQuery() {
@@ -139,6 +129,7 @@ final class PhabricatorProjectEditEngine
         array(
           'parent',
           'milestone',
+          'milestone.previous',
           'name',
           'std:project:internal:description',
           'icon',
@@ -166,8 +157,26 @@ final class PhabricatorProjectEditEngine
       $parent_phid = null;
     }
 
+    $previous_milestone_phid = null;
     if ($milestone) {
       $milestone_phid = $milestone->getPHID();
+
+      // Load the current milestone so we can show the user a hint about what
+      // it was called, so they don't have to remember if the next one should
+      // be "Sprint 287" or "Sprint 278".
+
+      $number = ($milestone->loadNextMilestoneNumber() - 1);
+      if ($number > 0) {
+        $previous_milestone = id(new PhabricatorProjectQuery())
+          ->setViewer($this->getViewer())
+          ->withParentProjectPHIDs(array($milestone->getPHID()))
+          ->withIsMilestone(true)
+          ->withMilestoneNumberBetween($number, $number)
+          ->executeOne();
+        if ($previous_milestone) {
+          $previous_milestone_phid = $previous_milestone->getPHID();
+        }
+      }
     } else {
       $milestone_phid = null;
     }
@@ -199,6 +208,14 @@ final class PhabricatorProjectEditEngine
         ->setTransactionType(PhabricatorProjectTransaction::TYPE_MILESTONE)
         ->setHandleParameterType(new AphrontPHIDHTTPParameterType())
         ->setSingleValue($milestone_phid)
+        ->setIsReorderable(false)
+        ->setIsDefaultable(false)
+        ->setIsLockable(false)
+        ->setIsLocked(true),
+      id(new PhabricatorHandlesEditField())
+        ->setKey('milestone.previous')
+        ->setLabel(pht('Previous Milestone'))
+        ->setSingleValue($previous_milestone_phid)
         ->setIsReorderable(false)
         ->setIsDefaultable(false)
         ->setIsLockable(false)

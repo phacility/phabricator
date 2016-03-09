@@ -2,6 +2,8 @@
 
 final class AlmanacDrydockPoolServiceType extends AlmanacServiceType {
 
+  const SERVICETYPE = 'drydock.pool';
+
   public function getServiceTypeShortName() {
     return pht('Drydock Pool');
   }

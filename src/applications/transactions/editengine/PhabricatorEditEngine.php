@@ -23,6 +23,7 @@ abstract class PhabricatorEditEngine
   private $isCreate;
   private $editEngineConfiguration;
   private $contextParameters = array();
+  private $targetObject;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -61,6 +62,22 @@ abstract class PhabricatorEditEngine
     return true;
   }
 
+  public function isEngineExtensible() {
+    return true;
+  }
+
+  /**
+   * Force the engine to edit a particular object.
+   */
+  public function setTargetObject($target_object) {
+    $this->targetObject = $target_object;
+    return $this;
+  }
+
+  public function getTargetObject() {
+    return $this->targetObject;
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 
@@ -94,7 +111,12 @@ abstract class PhabricatorEditEngine
 
     $fields = mpull($fields, null, 'getKey');
 
-    $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    if ($this->isEngineExtensible()) {
+      $extensions = PhabricatorEditEngineExtension::getAllEnabledExtensions();
+    } else {
+      $extensions = array();
+    }
+
     foreach ($extensions as $extension) {
       $extension->setViewer($viewer);
 
@@ -720,23 +742,28 @@ abstract class PhabricatorEditEngine
         break;
     }
 
-    $id = $request->getURIData('id');
+    $object = $this->getTargetObject();
+    if (!$object) {
+      $id = $request->getURIData('id');
 
-    if ($id) {
-      $this->setIsCreate(false);
-      $object = $this->newObjectFromID($id, $capabilities);
-      if (!$object) {
-        return new Aphront404Response();
+      if ($id) {
+        $this->setIsCreate(false);
+        $object = $this->newObjectFromID($id, $capabilities);
+        if (!$object) {
+          return new Aphront404Response();
+        }
+      } else {
+        // Make sure the viewer has permission to create new objects of
+        // this type if we're going to create a new object.
+        if ($require_create) {
+          $this->requireCreateCapability();
+        }
+
+        $this->setIsCreate(true);
+        $object = $this->newEditableObject();
       }
     } else {
-      // Make sure the viewer has permission to create new objects of
-      // this type if we're going to create a new object.
-      if ($require_create) {
-        $this->requireCreateCapability();
-      }
-
-      $this->setIsCreate(true);
-      $object = $this->newEditableObject();
+      $id = $object->getID();
     }
 
     $this->validateObject($object);
@@ -794,7 +821,7 @@ abstract class PhabricatorEditEngine
   }
 
   private function buildCrumbs($object, $final = false) {
-    $controller = $this->getcontroller();
+    $controller = $this->getController();
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
     if ($this->getIsCreate()) {
@@ -831,7 +858,7 @@ abstract class PhabricatorEditEngine
     $template = $object->getApplicationTransactionTemplate();
 
     $validation_exception = null;
-    if ($request->isFormPost()) {
+    if ($request->isFormPost() && $request->getBool('editEngine')) {
       $submit_fields = $fields;
 
       foreach ($submit_fields as $key => $field) {
@@ -1044,7 +1071,8 @@ abstract class PhabricatorEditEngine
     $request = $controller->getRequest();
 
     $form = id(new AphrontFormView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->addHiddenInput('editEngine', 'true');
 
     foreach ($this->contextParameters as $param) {
       $form->addHiddenInput($param, $request->getStr($param));
@@ -1150,6 +1178,60 @@ abstract class PhabricatorEditEngine
 
     return $actions;
   }
+
+
+  /**
+   * Test if the viewer could apply a certain type of change by using the
+   * normal "Edit" form.
+   *
+   * This method returns `true` if the user has access to an edit form and
+   * that edit form has a field which applied the specified transaction type,
+   * and that field is visible and editable for the user.
+   *
+   * For example, you can use it to test if a user is able to reassign tasks
+   * or not, prior to rendering dedicated UI for task reassingment.
+   *
+   * Note that this method does NOT test if the user can actually edit the
+   * current object, just if they have access to the related field.
+   *
+   * @param const Transaction type to test for.
+   * @return bool True if the user could "Edit" to apply the transaction type.
+   */
+  final public function hasEditAccessToTransaction($xaction_type) {
+    $viewer = $this->getViewer();
+
+    $config = $this->loadDefaultEditConfiguration();
+    if (!$config) {
+      return false;
+    }
+
+    $object = $this->getTargetObject();
+    if (!$object) {
+      $object = $this->newEditableObject();
+    }
+
+    $fields = $this->buildEditFields($object);
+
+    $field = null;
+    foreach ($fields as $form_field) {
+      $field_xaction_type = $form_field->getTransactionType();
+      if ($field_xaction_type === $xaction_type) {
+        $field = $form_field;
+        break;
+      }
+    }
+
+    if (!$field) {
+      return false;
+    }
+
+    if (!$field->shouldReadValueFromSubmit()) {
+      return false;
+    }
+
+    return true;
+  }
+
 
   final public function addActionToCrumbs(PHUICrumbsView $crumbs) {
     $viewer = $this->getViewer();

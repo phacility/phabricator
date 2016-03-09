@@ -24,17 +24,8 @@ final class PhamePostViewController
 
     if (!$is_external) {
       $actions = $this->renderActions($post);
-
-      $action_button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setText(pht('Actions'))
-        ->setHref('#')
-        ->setIcon('fa-bars')
-        ->addClass('phui-mobile-menu')
-        ->setDropdownMenu($actions);
-
       $header->setPolicyObject($post);
-      $header->addActionLink($action_button);
+      $header->setActionList($actions);
     }
 
     $document = id(new PHUIDocumentViewPro())
@@ -145,6 +136,7 @@ final class PhamePostViewController
 
     $document->setFoot($next_view);
     $crumbs = $this->buildApplicationCrumbs();
+    $properties = phutil_tag_div('phui-document-view-pro-box', $properties);
 
     $page = $this->newPage()
       ->setTitle($post->getTitle())

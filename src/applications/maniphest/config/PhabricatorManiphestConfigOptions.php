@@ -77,6 +77,7 @@ final class PhabricatorManiphestConfigOptions
         'name.full' => pht('Closed, Resolved'),
         'closed' => true,
         'special' => ManiphestTaskStatus::SPECIAL_CLOSED,
+        'transaction.icon' => 'fa-check-circle',
         'prefixes' => array(
           'closed',
           'closes',
@@ -97,6 +98,7 @@ final class PhabricatorManiphestConfigOptions
       'wontfix' => array(
         'name' => pht('Wontfix'),
         'name.full' => pht('Closed, Wontfix'),
+        'transaction.icon' => 'fa-ban',
         'closed' => true,
         'prefixes' => array(
           'wontfix',
@@ -110,7 +112,9 @@ final class PhabricatorManiphestConfigOptions
       'invalid' => array(
         'name' => pht('Invalid'),
         'name.full' => pht('Closed, Invalid'),
+        'transaction.icon' => 'fa-minus-circle',
         'closed' => true,
+        'claim' => false,
         'prefixes' => array(
           'invalidate',
           'invalidates',
@@ -126,6 +130,7 @@ final class PhabricatorManiphestConfigOptions
         'transaction.icon' => 'fa-files-o',
         'special' => ManiphestTaskStatus::SPECIAL_DUPLICATE,
         'closed' => true,
+        'claim' => false,
       ),
       'spite' => array(
         'name' => pht('Spite'),
@@ -202,6 +207,9 @@ The keys you can provide in a specification are:
     tasks can not be created or edited to have this status. Existing tasks with
     this status will not be affected, but you can batch edit them or let them
     die out on their own.
+  - `claim` //Optional bool.// By default, closing an unassigned task claims
+    it. You can set this to `false` to disable this behavior for a particular
+    status.
 
 Statuses will appear in the UI in the order specified. Note the status marked
 `special` as `duplicate` is not settable directly and will not appear in UI
@@ -288,8 +296,6 @@ To activate points, set this value to a map with these keys:
 See the example below for a starting point.
 EOTEXT
 ));
-
-
 
     return array(
       $this->newOption('maniphest.custom-field-definitions', 'wild', array())

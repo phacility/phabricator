@@ -21,67 +21,62 @@ final class AlmanacNetworkViewController
 
     $title = pht('Network %s', $network->getName());
 
-    $property_list = $this->buildPropertyList($network);
-    $action_list = $this->buildActionList($network);
-    $property_list->setActionList($action_list);
+    $curtain = $this->buildCurtain($network);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($network->getName())
+      ->setHeaderIcon('fa-globe')
       ->setPolicyObject($network);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($property_list);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($network->getName());
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $network,
       new AlmanacNetworkTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+          $timeline,
+        ));
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $box,
-          $timeline,
+          $view,
       ));
   }
 
-  private function buildPropertyList(AlmanacNetwork $network) {
+
+  private function buildCurtain(AlmanacNetwork $network) {
     $viewer = $this->getViewer();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer);
-
-    return $properties;
-  }
-
-  private function buildActionList(AlmanacNetwork $network) {
-    $viewer = $this->getViewer();
-    $id = $network->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $network,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $id = $network->getID();
+    $edit_uri = $this->getApplicationURI("network/edit/{$id}/");
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($network);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Network'))
-        ->setHref($this->getApplicationURI("network/edit/{$id}/"))
+        ->setHref($edit_uri)
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
 }

@@ -432,6 +432,10 @@ final class DifferentialRevision extends DifferentialDAO
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
 
+  public function getHarbormasterBuildableDisplayPHID() {
+    return $this->getHarbormasterContainerPHID();
+  }
+
   public function getHarbormasterBuildablePHID() {
     return $this->loadActiveDiff()->getPHID();
   }
@@ -479,10 +483,6 @@ final class DifferentialRevision extends DifferentialDAO
     }
 
     return false;
-  }
-
-  public function shouldShowSubscribersProperty() {
-    return true;
   }
 
 

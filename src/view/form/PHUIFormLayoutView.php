@@ -35,11 +35,10 @@ final class PHUIFormLayoutView extends AphrontView {
       throw new PhutilInvalidStateException('setUser');
     }
 
-    return $this->appendInstructions(
-      PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($remarkup),
-        'default',
-        $this->getUser()));
+    $viewer = $this->getUser();
+    $instructions = new PHUIRemarkupView($viewer, $remarkup);
+
+    return $this->appendInstructions($instructions);
   }
 
   public function render() {

@@ -27,7 +27,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
           ),
           array(
             'name' => 'repository',
-            'param' => 'callsign',
+            'param' => 'identifier',
             'help' => pht('Repository that the documentation belongs to.'),
           ),
         ));
@@ -192,19 +192,19 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     }
     $publisher = newv($publisher_class, array());
 
-    $callsign = $args->getArg('repository');
+    $identifier = $args->getArg('repository');
     $repository = null;
-    if ($callsign) {
+    if (strlen($identifier)) {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withCallsigns(array($callsign))
+        ->withIdentifiers(array($identifier))
         ->executeOne();
 
       if (!$repository) {
         throw new PhutilArgumentUsageException(
           pht(
-            "Repository '%s' does not exist.",
-            $callsign));
+            'Repository "%s" does not exist.',
+            $identifier));
       }
 
       $publisher->setRepositoryPHID($repository->getPHID());

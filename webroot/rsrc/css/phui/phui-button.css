@@ -26,8 +26,9 @@ button,
 a.button,
 a.button:visited,
 input[type="submit"] {
-  background-color: {$blue};
-  border: 1px solid {$blue};
+  background-color: #2980b9;
+  border: 1px solid #2980b9;
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
   color: white;
   cursor: pointer;
   font-weight: bold;
@@ -53,14 +54,16 @@ a.green,
 a.green:visited {
   background-color: {$green};
   border-color: {$green};
+  background-image: linear-gradient(to bottom, #23BB5B, #139543);
 }
 
 button.grey,
 input[type="submit"].grey,
 a.grey,
 a.grey:visited {
-  background-color: rgba(71, 87, 120, 0.06);
-  border-color: rgba(71, 87, 120, 0.12);
+  background-color: #F7F7F9;
+  background-image: linear-gradient(to bottom, #ffffff, #f1f0f1);
+  border: 1px solid rgba({$alphablue},.2);
   color: {$darkgreytext};
 }
 
@@ -100,26 +103,31 @@ a.phuix-dropdown-open {
 a.button:hover,
 button:hover {
   text-decoration: none;
-  background-color: {$sky};
+  background-color: #2980b9;
+  background-image: linear-gradient(to bottom, #3498db, #1b6ba0);
+  border-color: #115988;
   transition: 0.1s;
 }
 
 a.button.grey:hover,
 button.grey:hover {
-  background-color: rgba(71, 87, 120, 0.12);
-  border-color: rgba(71, 87, 120, 0.2);
+  background-image: linear-gradient(to bottom, #ffffff, #eeebec);
+  border-color: rgba({$alphablue}, 0.3);
   transition: 0.1s;
 }
 
 a.button.green:hover,
 button.green:hover {
+  border-color: #127336;
   background-color: #0DAD48;
+  background-image: linear-gradient(to bottom, #23BB5B, #178841);
   transition: 0.1s;
 }
 
 a.button.simple:hover,
 button.simple:hover {
   background-color: {$blue};
+  background-image: linear-gradient(to bottom, {$blue}, {$blue});
   color: #fff;
   transition: 0.1s;
 }
@@ -164,6 +172,7 @@ button.link {
   display: inline;
   border: none;
   background: transparent;
+  background-image: none;
   font-weight: normal;
   padding: 0;
   margin: 0;
@@ -309,22 +318,24 @@ a.policy-control .caret {
 .phui-button-bar-borderless .button {
   border: 0;
   background-color: transparent;
+  background-image: none;
   padding-left: 10px;
   padding-right: 10px;
 }
 
 .phui-button-bar-borderless .button .phui-icon-view {
   font-size: 15px;
-  color: rgba(55,55,55,.4);
+  color: rgba({$alphagrey},.4);
 }
 
 .phui-button-bar-borderless .button:hover {
   background-color: transparent;
+  background-image: none;
   border-radius: 3px;
 }
 
 .phui-button-bar-borderless .button:hover .phui-icon-view {
-  color: rgba(55,55,55,.9);
+  color: rgba({$alphagrey},.9);
 }
 
 .phui-button-bar-borderless .button {
@@ -356,10 +367,12 @@ a.policy-control .caret {
 .phui-button-bar .button.simple:hover {
   border-color: {$lightblueborder};
   background-color: #fff;
+  background-image: none;
   color: {$sky};
 }
 
 .phui-button-bar .button.simple:hover .phui-icon-view {
   border-color: {$lightblueborder};
   color: {$sky};
+  background-image: none;
 }

@@ -11,6 +11,10 @@ final class AlmanacNetworkEditor
     return pht('Almanac Network');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

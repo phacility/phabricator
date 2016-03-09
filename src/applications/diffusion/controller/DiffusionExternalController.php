@@ -103,7 +103,7 @@ final class DiffusionExternalController extends DiffusionController {
             array(
               'href' => $href,
             ),
-            $commit->getMonogram()),
+            $commit->getURI()),
           $commit->loadCommitData()->getSummary(),
         );
       }

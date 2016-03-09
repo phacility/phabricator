@@ -83,17 +83,15 @@ final class PHUIStatusItemView extends AphrontTagView {
       }
     }
 
-    $icon_cell = phutil_tag(
-      'td',
-      array(),
-      $icon);
-
     $target_cell = phutil_tag(
       'td',
       array(
         'class' => 'phui-status-item-target',
       ),
-      $this->target);
+      array(
+        $icon,
+        $this->target,
+      ));
 
     $note_cell = phutil_tag(
       'td',
@@ -103,7 +101,6 @@ final class PHUIStatusItemView extends AphrontTagView {
       $this->note);
 
     return array(
-      $icon_cell,
       $target_cell,
       $note_cell,
     );

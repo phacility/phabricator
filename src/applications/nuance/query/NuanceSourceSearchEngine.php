@@ -11,21 +11,28 @@ final class NuanceSourceSearchEngine
     return pht('Nuance Sources');
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+  public function newQuery() {
+    return new NuanceSourceQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new NuanceSourceQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {}
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for sources by name substring.')),
+    );
+  }
 
   protected function getURI($path) {
     return '/nuance/source/'.$path;

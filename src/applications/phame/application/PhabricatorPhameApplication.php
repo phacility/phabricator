@@ -60,11 +60,11 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
         'blog/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhameBlogListController',
           'archive/(?P<id>[^/]+)/' => 'PhameBlogArchiveController',
-          'edit/(?P<id>[^/]+)/' => 'PhameBlogEditController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhameBlogEditController',
           'view/(?P<blogID>\d+)/' => 'PhameBlogViewController',
           'manage/(?P<id>[^/]+)/' => 'PhameBlogManageController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
-          'new/' => 'PhameBlogEditController',
           'picture/(?P<id>[1-9]\d*)/' => 'PhameBlogProfilePictureController',
         ),
       ) + $this->getResourceSubroutes(),

@@ -33,12 +33,16 @@ final class AlmanacNamesTestCase extends PhabricatorTestCase {
       'db.phacility.instance' => true,
       'web002.useast.example.com' => true,
       'master.example-corp.com' => true,
+
+      // Maximum length is 100.
+      str_repeat('a', 100) => true,
+      str_repeat('a', 101) => false,
     );
 
     foreach ($map as $input => $expect) {
       $caught = null;
       try {
-        AlmanacNames::validateServiceOrDeviceName($input);
+        AlmanacNames::validateName($input);
       } catch (Exception $ex) {
         $caught = $ex;
       }

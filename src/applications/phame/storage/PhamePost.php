@@ -282,10 +282,6 @@ final class PhamePost extends PhameDAO
     return ($this->bloggerPHID == $phid);
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorConduitResultInterface  )---------------------------------- */
 

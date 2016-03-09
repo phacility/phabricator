@@ -184,10 +184,6 @@ final class PholioMock extends PholioDAO
     return ($this->authorPHID == $phid);
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

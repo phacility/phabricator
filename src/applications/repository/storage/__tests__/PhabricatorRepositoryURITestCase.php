@@ -9,6 +9,47 @@ final class PhabricatorRepositoryURITestCase
     );
   }
 
+  public function testRepositoryURICanonicalization() {
+    $repo = id(new PhabricatorRepository())
+      ->makeEphemeral()
+      ->setID(123);
+
+    $tests = array(
+      '/diffusion/123' => '/diffusion/123/',
+      '/diffusion/123/' => '/diffusion/123/',
+      '/diffusion/123/browse/master/' => '/diffusion/123/browse/master/',
+      '/kangaroo/' => null,
+    );
+
+    foreach ($tests as $input => $expect) {
+      $this->assertEqual(
+        $expect,
+        $repo->getCanonicalPath($input),
+        pht('Canonical Path (ID, No Callsign): %s', $input));
+    }
+
+    $repo->setCallsign('XYZ');
+
+    $tests = array(
+      '/diffusion/123' => '/diffusion/XYZ/',
+      '/diffusion/123/' => '/diffusion/XYZ/',
+      '/diffusion/123/browse/master/' => '/diffusion/XYZ/browse/master/',
+      '/diffusion/XYZ' => '/diffusion/XYZ/',
+      '/diffusion/XYZ/' => '/diffusion/XYZ/',
+      '/diffusion/XYZ/browse/master/' => '/diffusion/XYZ/browse/master/',
+      '/diffusion/ABC/' => '/diffusion/XYZ/',
+      '/kangaroo/' => null,
+      '/R1:abcdef' => '/rXYZabcdef',
+    );
+
+    foreach ($tests as $input => $expect) {
+      $this->assertEqual(
+        $expect,
+        $repo->getCanonicalPath($input),
+        pht('Canonical Path (ID, Callsign): %s', $input));
+    }
+  }
+
   public function testURIGeneration() {
     $svn = PhabricatorRepositoryType::REPOSITORY_TYPE_SVN;
     $git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;

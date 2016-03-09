@@ -13,6 +13,9 @@ final class PhabricatorProjectTransaction
   const TYPE_PARENT = 'project:parent';
   const TYPE_MILESTONE = 'project:milestone';
   const TYPE_HASWORKBOARD = 'project:hasworkboard';
+  const TYPE_DEFAULT_SORT = 'project:sort';
+  const TYPE_DEFAULT_FILTER = 'project:filter';
+  const TYPE_BACKGROUND = 'project:background';
 
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
@@ -66,8 +69,46 @@ final class PhabricatorProjectTransaction
     return parent::getColor();
   }
 
-  public function getIcon() {
+  public function shouldHide() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDGE:
+        $edge_type = $this->getMetadataValue('edge:type');
+        switch ($edge_type) {
+          case PhabricatorProjectSilencedEdgeType::EDGECONST:
+            return true;
+          default:
+            break;
+        }
+    }
 
+    return parent::shouldHide();
+  }
+
+  public function shouldHideForFeed() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_HASWORKBOARD:
+      case self::TYPE_DEFAULT_SORT:
+      case self::TYPE_DEFAULT_FILTER:
+      case self::TYPE_BACKGROUND:
+        return true;
+    }
+
+    return parent::shouldHideForFeed();
+  }
+
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_HASWORKBOARD:
+      case self::TYPE_DEFAULT_SORT:
+      case self::TYPE_DEFAULT_FILTER:
+      case self::TYPE_BACKGROUND:
+        return true;
+    }
+
+    return parent::shouldHideForMail($xactions);
+  }
+
+  public function getIcon() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
@@ -258,6 +299,21 @@ final class PhabricatorProjectTransaction
             '%s disabled the workboard for this project.',
             $author_handle);
         }
+
+      case self::TYPE_DEFAULT_SORT:
+        return pht(
+          '%s changed the default sort order for the project workboard.',
+          $author_handle);
+
+      case self::TYPE_DEFAULT_FILTER:
+        return pht(
+          '%s changed the default filter for the project workboard.',
+          $author_handle);
+
+      case self::TYPE_BACKGROUND:
+        return pht(
+          '%s changed the background color of the project workboard.',
+          $author_handle);
     }
 
     return parent::getTitle();
@@ -377,19 +433,6 @@ final class PhabricatorProjectTransaction
             count($rem),
             $object_handle,
             $this->renderSlugList($rem));
-        }
-
-      case self::TYPE_HASWORKBOARD:
-        if ($new) {
-          return pht(
-            '%s enabled the workboard for %s.',
-            $author_handle,
-            $object_handle);
-        } else {
-          return pht(
-            '%s disabled the workboard for %s.',
-            $author_handle,
-            $object_handle);
         }
 
     }

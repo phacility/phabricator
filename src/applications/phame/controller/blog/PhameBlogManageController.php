@@ -117,11 +117,9 @@ final class PhameBlogManageController extends PhameBlogController {
 
     $properties->invokeWillRenderEvent();
 
-    if (strlen($blog->getDescription())) {
-      $description = PhabricatorMarkupEngine::renderOneObject(
-        id(new PhabricatorMarkupOneOff())->setContent($blog->getDescription()),
-        'default',
-        $viewer);
+    $description = $blog->getDescription();
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($viewer, $description);
       $properties->addSectionHeader(
         pht('Description'),
         PHUIPropertyListView::ICON_SUMMARY);

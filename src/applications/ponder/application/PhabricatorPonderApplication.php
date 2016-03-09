@@ -49,8 +49,6 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
           => 'PonderAnswerCommentController',
         'answer/history/(?P<id>\d+)/'
           => 'PonderAnswerHistoryController',
-        'answer/helpful/(?P<action>add|remove)/(?P<id>[1-9]\d*)/'
-          => 'PonderHelpfulSaveController',
         'question/edit/(?:(?P<id>\d+)/)?'
           => 'PonderQuestionEditController',
         'question/create/'

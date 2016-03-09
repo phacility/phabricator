@@ -61,6 +61,11 @@ final class HarbormasterBuildUnitMessage
         'description' => pht(
           'Coverage information for this test.'),
       ),
+      'details' => array(
+        'type' => 'optional string',
+        'description' => pht(
+          'Additional human-readable information about the failure.'),
+      ),
     );
   }
 
@@ -92,6 +97,11 @@ final class HarbormasterBuildUnitMessage
     $coverage = idx($dict, 'coverage');
     if ($coverage) {
       $obj->setProperty('coverage', $coverage);
+    }
+
+    $details = idx($dict, 'details');
+    if ($details) {
+      $obj->setProperty('details', $details);
     }
 
     return $obj;
@@ -135,19 +145,36 @@ final class HarbormasterBuildUnitMessage
     return $this;
   }
 
-  public function getSortKey() {
-    // TODO: Maybe use more numeric values after T6861.
-    $map = array(
-      ArcanistUnitTestResult::RESULT_FAIL => 'A',
-      ArcanistUnitTestResult::RESULT_BROKEN => 'B',
-      ArcanistUnitTestResult::RESULT_UNSOUND => 'C',
-      ArcanistUnitTestResult::RESULT_PASS => 'Z',
-    );
+  public function getUnitMessageDetails() {
+    return $this->getProperty('details', '');
+  }
 
-    $result = idx($map, $this->getResult(), 'N');
+  public function getUnitMessageDisplayName() {
+    $name = $this->getName();
+
+    $namespace = $this->getNamespace();
+    if (strlen($namespace)) {
+      $name = $namespace.'::'.$name;
+    }
+
+    $engine = $this->getEngine();
+    if (strlen($engine)) {
+      $name = $engine.' > '.$name;
+    }
+
+    if (!strlen($name)) {
+      return pht('Nameless Test (%d)', $this->getID());
+    }
+
+    return $name;
+  }
+
+  public function getSortKey() {
+    $status = $this->getResult();
+    $sort = HarbormasterUnitStatus::getUnitStatusSort($status);
 
     $parts = array(
-      $result,
+      $sort,
       $this->getEngine(),
       $this->getNamespace(),
       $this->getName(),

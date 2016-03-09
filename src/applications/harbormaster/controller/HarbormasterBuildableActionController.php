@@ -51,6 +51,14 @@ final class HarbormasterBuildableActionController
       }
     }
 
+    $restricted = false;
+    foreach ($issuable as $key => $build) {
+      if (!$build->canIssueCommand($viewer, $action)) {
+        $restricted = true;
+        unset($issuable[$key]);
+      }
+    }
+
     $return_uri = '/'.$buildable->getMonogram();
     if ($request->isDialogFormPost() && $issuable) {
       $editor = id(new HarbormasterBuildableTransactionEditor())
@@ -84,49 +92,101 @@ final class HarbormasterBuildableActionController
     switch ($action) {
       case HarbormasterBuildCommand::COMMAND_RESTART:
         if ($issuable) {
-          $title = pht('Really restart all builds?');
-          $body = pht(
-            'Progress on all builds will be discarded, and all builds will '.
-            'restart. Side effects of the builds will occur again. Really '.
-            'restart all builds?');
-          $submit = pht('Restart All Builds');
+          $title = pht('Really restart builds?');
+
+          if ($restricted) {
+            $body = pht(
+              'You only have permission to restart some builds. Progress '.
+              'on builds you have permission to restart will be discarded '.
+              'and they will restart. Side effects of these builds will '.
+              'occur again. Really restart all builds?');
+          } else {
+            $body = pht(
+              'Progress on all builds will be discarded, and all builds will '.
+              'restart. Side effects of the builds will occur again. Really '.
+              'restart all builds?');
+          }
+
+          $submit = pht('Restart Builds');
         } else {
           $title = pht('Unable to Restart Builds');
-          $body = pht('No builds can be restarted.');
+
+          if ($restricted) {
+            $body = pht('You do not have permission to restart any builds.');
+          } else {
+            $body = pht('No builds can be restarted.');
+          }
         }
         break;
       case HarbormasterBuildCommand::COMMAND_PAUSE:
         if ($issuable) {
-          $title = pht('Really pause all builds?');
-          $body = pht(
-            'If you pause all builds, work will halt once the current steps '.
-            'complete. You can resume the builds later.');
-          $submit = pht('Pause All Builds');
+          $title = pht('Really pause builds?');
+
+          if ($restricted) {
+            $body = pht(
+              'You only have permission to pause some builds. Once the '.
+              'current steps complete, work will halt on builds you have '.
+              'permission to pause. You can resume the builds later.');
+          } else {
+            $body = pht(
+              'If you pause all builds, work will halt once the current steps '.
+              'complete. You can resume the builds later.');
+          }
+          $submit = pht('Pause Builds');
         } else {
           $title = pht('Unable to Pause Builds');
-          $body = pht('No builds can be paused.');
+
+          if ($restricted) {
+            $body = pht('You do not have permission to pause any builds.');
+          } else {
+            $body = pht('No builds can be paused.');
+          }
         }
         break;
       case HarbormasterBuildCommand::COMMAND_ABORT:
         if ($issuable) {
-          $title = pht('Really abort all builds?');
-          $body = pht(
-            'If you abort all builds, work will halt immediately. Work '.
-            'will be discarded, and builds must be completely restarted.');
-          $submit = pht('Abort All Builds');
+          $title = pht('Really abort builds?');
+          if ($restricted) {
+            $body = pht(
+              'You only have permission to abort some builds. Work will '.
+              'halt immediately on builds you have permission to abort. '.
+              'Progress will be discarded, and builds must be completely '.
+              'restarted if you want them to complete.');
+          } else {
+            $body = pht(
+              'If you abort all builds, work will halt immediately. Work '.
+              'will be discarded, and builds must be completely restarted.');
+          }
+          $submit = pht('Abort Builds');
         } else {
           $title = pht('Unable to Abort Builds');
-          $body = pht('No builds can be aborted.');
+
+          if ($restricted) {
+            $body = pht('You do not have permission to abort any builds.');
+          } else {
+            $body = pht('No builds can be aborted.');
+          }
         }
         break;
       case HarbormasterBuildCommand::COMMAND_RESUME:
         if ($issuable) {
-          $title = pht('Really resume all builds?');
-          $body = pht('Work will continue on all builds. Really resume?');
-          $submit = pht('Resume All Builds');
+          $title = pht('Really resume builds?');
+          if ($restricted) {
+            $body = pht(
+              'You only have permission to resume some builds. Work will '.
+              'continue on builds you have permission to resume.');
+          } else {
+            $body = pht('Work will continue on all builds. Really resume?');
+          }
+
+          $submit = pht('Resume Builds');
         } else {
           $title = pht('Unable to Resume Builds');
-          $body = pht('No builds can be resumed.');
+          if ($restricted) {
+            $body = pht('You do not have permission to resume any builds.');
+          } else {
+            $body = pht('No builds can be resumed.');
+          }
         }
         break;
     }

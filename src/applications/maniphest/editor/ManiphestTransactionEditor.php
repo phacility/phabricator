@@ -289,8 +289,14 @@ final class ManiphestTransactionEditor
             array($select_phids))
           ->execute();
 
-        $object_phids = mpull($board_tasks, 'getPHID');
-        $object_phids[] = $object_phid;
+        $board_tasks = mpull($board_tasks, null, 'getPHID');
+        $board_tasks[$object_phid] = $object;
+
+        // Make sure tasks are sorted by ID, so we lay out new positions in
+        // a consistent way.
+        $board_tasks = msort($board_tasks, 'getID');
+
+        $object_phids = array_keys($board_tasks);
 
         $engine = id(new PhabricatorBoardLayoutEngine())
           ->setViewer($omnipotent_viewer)
@@ -971,8 +977,11 @@ final class ManiphestTransactionEditor
     // If the task is not assigned, not being assigned, currently open, and
     // being closed, try to assign the actor as the owner.
     if ($is_unassigned && !$any_assign && $is_open && $is_closing) {
+      $is_claim = ManiphestTaskStatus::isClaimStatus($new_status);
+
       // Don't assign the actor if they aren't a real user.
-      if ($actor_phid) {
+      // Don't claim the task if the status is configured to not claim.
+      if ($actor_phid && $is_claim) {
         $results[] = id(new ManiphestTransaction())
           ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
           ->setNewValue($actor_phid);
@@ -1024,16 +1033,22 @@ final class ManiphestTransactionEditor
             ));
         break;
       case ManiphestTransaction::TYPE_OWNER:
+        // If this is a no-op update, don't expand it.
+        $old_value = $object->getOwnerPHID();
+        $new_value = $xaction->getNewValue();
+        if ($old_value === $new_value) {
+          continue;
+        }
+
         // When a task is reassigned, move the old owner to the subscriber
         // list so they're still in the loop.
-        $owner_phid = $object->getOwnerPHID();
-        if ($owner_phid) {
+        if ($old_value) {
           $results[] = id(new ManiphestTransaction())
             ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
             ->setIgnoreOnNoEffect(true)
             ->setNewValue(
               array(
-                '+' => array($owner_phid => $owner_phid),
+                '+' => array($old_value => $old_value),
               ));
         }
         break;

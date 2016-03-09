@@ -30,12 +30,8 @@ final class PhabricatorProjectManageController
       $header->setStatus('fa-ban', 'red', pht('Archived'));
     }
 
-    $actions = $this->buildActionListView($project);
-    $properties = $this->buildPropertyListView($project, $actions);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $curtain = $this->buildCurtain($project);
+    $properties = $this->buildPropertyListView($project);
 
     $timeline = $this->buildTransactionTimeline(
       $project,
@@ -47,6 +43,16 @@ final class PhabricatorProjectManageController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Manage'));
+    $crumbs->setBorder(true);
+
+    $manage = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->addPropertySection(pht('DETAILS'), $properties)
+      ->setMainColumn(
+        array(
+          $timeline,
+        ));
 
     return $this->newPage()
       ->setNavigation($nav)
@@ -58,26 +64,22 @@ final class PhabricatorProjectManageController
         ))
       ->appendChild(
         array(
-          $object_box,
-          $timeline,
+          $manage,
         ));
   }
 
-  private function buildActionListView(PhabricatorProject $project) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  private function buildCurtain(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
 
     $id = $project->getID();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
-
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view->addAction(
+    $curtain = $this->newCurtainView($project);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Details'))
         ->setIcon('fa-pencil')
@@ -85,7 +87,7 @@ final class PhabricatorProjectManageController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Menu'))
         ->setIcon('fa-th-list')
@@ -93,7 +95,7 @@ final class PhabricatorProjectManageController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Picture'))
         ->setIcon('fa-picture-o')
@@ -102,7 +104,7 @@ final class PhabricatorProjectManageController
         ->setWorkflow(!$can_edit));
 
     if ($project->isArchived()) {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Activate Project'))
           ->setIcon('fa-check')
@@ -110,7 +112,7 @@ final class PhabricatorProjectManageController
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     } else {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Archive Project'))
           ->setIcon('fa-ban')
@@ -119,18 +121,15 @@ final class PhabricatorProjectManageController
           ->setWorkflow(true));
     }
 
-    return $view;
+    return $curtain;
   }
 
   private function buildPropertyListView(
-    PhabricatorProject $project,
-    PhabricatorActionListView $actions) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    PhabricatorProject $project) {
+    $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setActionList($actions);
+      ->setUser($viewer);
 
     $view->addProperty(
       pht('Looks Like'),

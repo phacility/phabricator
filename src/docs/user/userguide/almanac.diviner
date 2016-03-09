@@ -1,40 +1,182 @@
 @title Almanac User Guide
 @group userguide
 
-Using Almanac to manage services.
+Using Almanac to manage devices and services.
 
-= Overview =
+Overview
+========
 
-IMPORTANT: Almanac is a prototype application. See
-@{article:User Guide: Prototype Applications}.
+Almanac is a device and service inventory application. It allows you to create
+lists of //devices// and //services// that humans and other applications can
+use to keep track of what is running where.
 
-Locking and Unlocking Services
-==============================
+Almanac is an infrastructure application that will normally be used by
+administrators to configure advanced Phabricator features. In most cases,
+normal users will very rarely interact with Almanac directly.
 
-Services can be locked to prevent edits from the web UI. This primarily hardens
-Almanac against attacks involving account compromise. Notably, locking cluster
-services prevents an attacker from modifying the Phabricator cluster definition.
-For more details on this scenario, see
-@{article:User Guide: Phabricator Clusters}.
+At a very high level, Almanac can be thought of as a bit like a DNS server.
+Callers ask it for information about services, and it responds with details
+about which devices host those services. However, it can respond to a broader
+range of queries and provide more detailed responses than DNS alone can.
 
-Beyond hardening cluster definitions, you might also want to lock a service to
-prevent accidental edits.
+Today, the primary use cases for Almanac are internal to Phabricator:
 
-To lock a service, run:
+  - Providing a list of build servers to Drydock so it can run build and
+    integration tasks.
+  - Configuring Phabricator to operate in a cluster setup.
 
-  phabricator/ $ ./bin/almanac lock <service>
+Beyond internal uses, Almanac is a general-purpose service and device inventory
+application and can be used to configure and manage other types of service and
+hardware inventories, but these use cases are currently considered experimental
+and you should be exercise caution in pursuing them.
 
-To unlock a service later, run:
 
-  phabricator/ $ ./bin/almanac unlock <service>
+Example: Drydock Build Pool
+================================
 
-Locking a service also locks all of the service's bindings and properties, as
-well as the devices connected to the service. Generally, no part of the
-service definition can be modified while it is locked.
+Here's a quick example of how you might configure Almanac to solve a real-world
+problem. This section describes configuration at a high level to give you an
+introduction to Almanac concepts and a better idea of how the pieces fit
+together.
 
-Devices (and their properties) will remain locked as long as they are bound to
-at least one locked service. To edit a device, you'll need to unlock all the
-services it is bound to.
+In this scenario, we want to use Drydock to run some sort of build process. To
+do this, Drydock needs hardware to run on. We're going to use Almanac to give
+Drydock a list of hosts it should use.
 
-Locked services and devices will show that they are locked in the web UI, and
-editing options will be unavailable.
+In this scenario, Almanac will work a bit like a DNS server. When we're done,
+Drydock will be able to query Almanac for information about a service (like
+`build.mycompany.com`) and get back information about which hosts are part of
+that service and which addresses/ports it should connect to.
+
+Before getting started, we need to create a **network**. For simplicity, let's
+suppose everything will be connected through the public internet. If you
+haven't already, you'd create a "Public Internet" network first.
+
+Once we have a network, we create the actual physical or virtual hosts by
+launching instances in EC2, or racking and powering on some servers, or already
+having some hardware on hand we want to use. We set the hosts up normally and
+connect them to the internet (or another network).
+
+After the hosts exist, we add them to Almanac as **devices**, like
+`build001.mycompany.com`, `build002.mycompany.com`, and so on. In Almanac,
+devices are usually physical or virtual hosts, although you could also use it
+to inventory other types of devices and hardware.
+
+For each **device**, we add an **interface**. This is just an address and port
+on a particular network. Since we're going to connect to these hosts over
+SSH, we'll add interfaces on the standard SSH port 22. An example configuration
+might look a little bit like this:
+
+| Device | Network | Address | Port |
+|--------|---------|---------|------|
+| `build001.mycompany.com` | Public Internet | 58.8.9.10 | 22
+| `build002.mycompany.com` | Public Internet | 58.8.9.11 | 22
+| ... | Public Internet | ... | 22
+
+Now, we create the **service**. This is what we'll tell Drydock about, and
+it can query for information about this service to find connected devices.
+Here, we'll call it `build.mycompany.com`.
+
+After creating the service, add **bindings** to the interfaces we configured
+above. This will tell Drydock where it should actually connect to.
+
+Once this is complete, we're done in Almanac and can continue configuration in
+Drydock, which is outside the scope of this example. Once everything is fully
+configured, this is how Almanac will be used by Drydock:
+
+  - Drydock will query information about `build.mycompany.com` from Almanac.
+  - Drydock will get back a list of bound interfaces, among other data.
+  - The interfaces provide information about addresses and ports that Drydock
+    can use to connect to the actual devices.
+
+You can now add and remove devices to the pool by binding them and unbinding
+them from the service.
+
+
+Concepts
+========
+
+The major concepts in Almanac are **devices**, **interfaces**, **services**,
+**bindings**, **networks**, and **namespaces**.
+
+**Devices**: Almanac devices represent physical or virtual devices.
+Usually, they are hosts (like `web001.mycompany.net`), although you could
+use devices to keep inventory of any other kind of device or physical asset
+(like phones, laptops, or office chairs).
+
+Each device has a name, and may have properties and interfaces.
+
+**Interfaces**: Interfaces are listening address/port combinations on devices.
+For example, if you have a webserver host device named `web001.mycompany.net`,
+you might add an interface on port `80`.
+
+Interfaces tell users and applications where they should connect to to access
+services and devices.
+
+**Services**: These are named services like `build.mycompany.net` that work
+a bit like DNS. Humans or other applications can look up a service to find
+configuration information and learn which devices are hosting the service.
+
+Each service has a name, and may have properties and bindings.
+
+**Bindings**: Bindings are connections between services and interfaces. They
+tell callers which devices host a named service.
+
+**Networks**: Networks allow Almanac to distingiush between addresses on
+different networks, like VPNs vs the public internet.
+
+If you have hosts in different VPNs or on private networks, you might have
+multiple devices which share the same IP address (like `10.0.0.3`). Networks
+allow Almanac to distinguish between devices with the same address on different
+sections of the network.
+
+**Namespaces**: Namespaces let you control who is permitted to create devices
+and services with particular names. For example, the namespace `mycompany.com`
+controls who can create services with names like `a.mycompany.com` and
+`b.mycompany.com`.
+
+
+Namespaces
+==========
+
+Almanac namespaces allow you to control who can create services and devices
+with certain names.
+
+If you keep a list of cattle as devices with names like
+`cow001.herd.myranch.com`, `cow002.herd.myranch.moo`, you might have some
+applications which query for all devices in `*.herd.myranch.moo`, and thus
+want to limit who can create devices there in order to prevent mistakes.
+
+If a namespace like `herd.myranch.moo` exists, users must have permission to
+edit the namespace in order to create new services, devices, or namespaces
+within it. For example, a user can not create `cow003.herd.myranch.moo` if
+they do not have edit permission on the `herd.myranch.moo` namespace.
+
+When you try to create a `cow003.herd.myranch.moo` service (or rename an
+existing service to have that name), Almanac looks for these namespaces, then
+checks the policy of the first one it finds:
+
+| Namespace |
+|----|-----
+| `cow003.herd.ranch.moo` | //"Nearest" namespace, considered first.//
+| `herd.ranch.moo` | |
+| `ranch.moo` | |
+| `moo` | //"Farthest" namespace, considered last.//
+
+Note that namespaces treat names as lists of domain parts, not as strict
+substrings, so the namespace `herd.myranch.moo` does not prevent
+someone from creating `goatherd.myranch.moo` or `goat001.goatherd.myranch.moo`.
+The name `goatherd.myranch.moo` is not part of the `herd.myranch.moo` namespace
+because the initial subdomain differs.
+
+If a name belongs to multiple namespaces, the policy of the nearest namespace
+is controlling. For example, if `myranch.moo` has a very restrictive edit
+policy but `shed.myranch.moo` has a more open one, users can create devices and
+services like `rake.shed.myranch.moo` as long as they can pass the policy check
+for `shed.myranch.moo`, even if they do not have permission under the policy
+for `myranch.moo`.
+
+Users can edit services and devices within a namespace if they have edit
+permission on the service or device itself, as long as they don't try to rename
+the service or device to move it into a namespace they don't have permission
+to access.

@@ -58,10 +58,12 @@ final class PhabricatorTokenGivenQuery
   }
 
   protected function willFilterPage(array $results) {
+    $viewer = $this->getViewer();
+
     $object_phids = mpull($results, 'getObjectPHID');
 
     $objects = id(new PhabricatorObjectQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($viewer)
       ->withPHIDs($object_phids)
       ->execute();
     $objects = mpull($objects, null, 'getPHID');
@@ -78,6 +80,31 @@ final class PhabricatorTokenGivenQuery
 
       $this->didRejectResult($result);
       unset($results[$key]);
+    }
+
+    if (!$results) {
+      return $results;
+    }
+
+    $token_phids = mpull($results, 'getTokenPHID');
+
+    $tokens = id(new PhabricatorTokenQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($token_phids)
+      ->execute();
+    $tokens = mpull($tokens, null, 'getPHID');
+
+    foreach ($results as $key => $result) {
+      $token_phid = $result->getTokenPHID();
+
+      $token = idx($tokens, $token_phid);
+      if (!$token) {
+        $this->didRejectResult($result);
+        unset($results[$key]);
+        continue;
+      }
+
+      $result->attachToken($token);
     }
 
     return $results;

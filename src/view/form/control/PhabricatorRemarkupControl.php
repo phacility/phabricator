@@ -45,7 +45,11 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     $root_id = celerity_generate_unique_node_id();
 
     $user_datasource = new PhabricatorPeopleDatasource();
-    $proj_datasource = new PhabricatorProjectDatasource();
+    $proj_datasource = id(new PhabricatorProjectDatasource())
+      ->setParameters(
+        array(
+          'autocomplete' => 1,
+        ));
 
     Javelin::initBehavior(
       'phabricator-remarkup-assist',

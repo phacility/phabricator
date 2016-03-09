@@ -21,7 +21,7 @@
   text-align: right;
   margin: 44px 16px 16px;
   padding: 12px 0;
-  border-top: 1px solid rgba(55,55,55,.1);
+  border-top: 1px solid rgba({$alphagrey},.1);
   color: {$greytext};
 }
 

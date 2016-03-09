@@ -13,15 +13,6 @@ interface PhabricatorSubscribableInterface {
    */
   public function isAutomaticallySubscribed($phid);
 
-
-  /**
-   * Return `true` to indicate that "Subscribers:" should be shown when
-   * rendering property lists for this object, or `false` to omit the property.
-   *
-   * @return bool True to show the "Subscribers:" property.
-   */
-  public function shouldShowSubscribersProperty();
-
 }
 
 // TEMPLATE IMPLEMENTATION /////////////////////////////////////////////////////
@@ -31,10 +22,6 @@ interface PhabricatorSubscribableInterface {
 
   public function isAutomaticallySubscribed($phid) {
     return false;
-  }
-
-  public function shouldShowSubscribersProperty() {
-    return true;
   }
 
 */

@@ -1,6 +1,6 @@
 <?php
 
-final class PHUIObjectBoxView extends AphrontView {
+final class PHUIObjectBoxView extends AphrontTagView {
 
   private $headerText;
   private $color;
@@ -12,9 +12,6 @@ final class PHUIObjectBoxView extends AphrontView {
   private $validationException;
   private $header;
   private $flush;
-  private $id;
-  private $sigils = array();
-  private $metadata;
   private $actionListID;
   private $objectList;
   private $table;
@@ -28,22 +25,19 @@ final class PHUIObjectBoxView extends AphrontView {
   private $showHideOpen;
 
   private $tabs = array();
+  private $tabMap = null;
+  private $tabLists = array();
   private $propertyLists = array();
+  private $propertyList = null;
 
   const COLOR_RED = 'red';
   const COLOR_BLUE = 'blue';
   const COLOR_GREEN = 'green';
   const COLOR_YELLOW = 'yellow';
 
-  public function addSigil($sigil) {
-    $this->sigils[] = $sigil;
-    return $this;
-  }
-
-  public function setMetadata(array $metadata) {
-    $this->metadata = $metadata;
-    return $this;
-  }
+  const BLUE = 'phui-box-blue';
+  const BLUE_PROPERTY = 'phui-box-blue-property';
+  const GREY = 'phui-box-grey';
 
   public function addPropertyList(
     PHUIPropertyListView $property_list,
@@ -144,11 +138,6 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function setID($id) {
-    $this->id = $id;
-    return $this;
-  }
-
   public function setHeader($header) {
     $this->header = $header;
     return $this;
@@ -195,7 +184,109 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  public function willRender() {
+    $tab_lists = array();
+    $property_lists = array();
+    $tab_map = array();
+
+    $default_key = 'tab.default';
+
+    // Find the selected tab, or select the first tab if none are selected.
+    if ($this->tabs) {
+      $selected_tab = null;
+      foreach ($this->tabs as $key => $tab) {
+        if ($tab->getSelected()) {
+          $selected_tab = $key;
+          break;
+        }
+      }
+      if ($selected_tab === null) {
+        head($this->tabs)->setSelected(true);
+        $selected_tab = head_key($this->tabs);
+      }
+    }
+
+    foreach ($this->propertyLists as $key => $list) {
+      $group = new PHUIPropertyGroupView();
+      $i = 0;
+      foreach ($list as $item) {
+        $group->addPropertyList($item);
+        if ($i > 0) {
+          $item->addClass('phui-property-list-section-noninitial');
+        }
+        $i++;
+      }
+
+      if ($this->tabs && $key != $default_key) {
+        $tab_id = celerity_generate_unique_node_id();
+        $tab_map[$key] = $tab_id;
+
+        if ($key === $selected_tab) {
+          $style = null;
+        } else {
+          $style = 'display: none';
+        }
+
+        $tab_lists[] = phutil_tag(
+          'div',
+          array(
+            'style' => $style,
+            'id' => $tab_id,
+          ),
+          $group);
+      } else {
+        if ($this->tabs) {
+          $group->addClass('phui-property-group-noninitial');
+        }
+        $property_lists[] = $group;
+      }
+      $this->propertyList = $property_lists;
+      $this->tabMap = $tab_map;
+      $this->tabLists = $tab_lists;
+    }
+  }
+
+  protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'phui-box';
+    $classes[] = 'phui-box-border';
+    $classes[] = 'phui-object-box';
+    $classes[] = 'mlt mll mlr';
+
+    if ($this->color) {
+      $classes[] = 'phui-object-box-'.$this->color;
+    }
+
+    if ($this->collapsed) {
+      $classes[] = 'phui-object-box-collapsed';
+    }
+
+    if ($this->flush) {
+      $classes[] = 'phui-object-box-flush';
+    }
+
+    if ($this->background) {
+      $classes[] = $this->background;
+    }
+
+    $sigil = null;
+    $metadata = null;
+    if ($this->tabs) {
+      $sigil = 'phui-object-box';
+      $metadata = array(
+        'tabMap' => $this->tabMap,
+      );
+    }
+
+    return array(
+      'class' => implode(' ', $classes),
+      'sigil' => $sigil,
+      'meta' => $metadata,
+    );
+  }
+
+  protected function getTagContent() {
+    require_celerity_resource('phui-box-css');
     require_celerity_resource('phui-object-box-css');
 
     $header = $this->header;
@@ -296,63 +387,6 @@ final class PHUIObjectBoxView extends AphrontView {
       }
     }
 
-    $tab_lists = array();
-    $property_lists = array();
-    $tab_map = array();
-
-    $default_key = 'tab.default';
-
-    // Find the selected tab, or select the first tab if none are selected.
-    if ($this->tabs) {
-      $selected_tab = null;
-      foreach ($this->tabs as $key => $tab) {
-        if ($tab->getSelected()) {
-          $selected_tab = $key;
-          break;
-        }
-      }
-      if ($selected_tab === null) {
-        head($this->tabs)->setSelected(true);
-        $selected_tab = head_key($this->tabs);
-      }
-    }
-
-    foreach ($this->propertyLists as $key => $list) {
-      $group = new PHUIPropertyGroupView();
-      $i = 0;
-      foreach ($list as $item) {
-        $group->addPropertyList($item);
-        if ($i > 0) {
-          $item->addClass('phui-property-list-section-noninitial');
-        }
-        $i++;
-      }
-
-      if ($this->tabs && $key != $default_key) {
-        $tab_id = celerity_generate_unique_node_id();
-        $tab_map[$key] = $tab_id;
-
-        if ($key === $selected_tab) {
-          $style = null;
-        } else {
-          $style = 'display: none';
-        }
-
-        $tab_lists[] = phutil_tag(
-          'div',
-          array(
-            'style' => $style,
-            'id' => $tab_id,
-          ),
-          $group);
-      } else {
-        if ($this->tabs) {
-          $group->addClass('phui-property-group-noninitial');
-        }
-        $property_lists[] = $group;
-      }
-    }
-
     $tabs = null;
     if ($this->tabs) {
       $tabs = id(new PHUIListView())
@@ -360,69 +394,28 @@ final class PHUIObjectBoxView extends AphrontView {
       foreach ($this->tabs as $tab) {
         $tabs->addMenuItem($tab);
       }
-
       Javelin::initBehavior('phui-object-box-tabs');
     }
 
-    $content = id(new PHUIBoxView())
-      ->appendChild(
-        array(
-          ($this->showHideOpen == false ? $this->anchor : null),
-          $header,
-          $this->infoView,
-          $this->formErrors,
-          $this->formSaved,
-          $exception_errors,
-          $this->form,
-          $tabs,
-          $tab_lists,
-          $showhide,
-          ($this->showHideOpen == true ? $this->anchor : null),
-          $property_lists,
-          $this->table,
-          $this->renderChildren(),
-        ))
-      ->setBorder(true)
-      ->setID($this->id)
-      ->addMargin(PHUI::MARGIN_LARGE_TOP)
-      ->addMargin(PHUI::MARGIN_LARGE_LEFT)
-      ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
-      ->addClass('phui-object-box');
-
-    if ($this->color) {
-      $content->addClass('phui-object-box-'.$this->color);
-    }
-
-    if ($this->background) {
-      $content->setColor($this->background);
-    }
-
-    if ($this->collapsed) {
-      $content->addClass('phui-object-box-collapsed');
-    }
-
-    if ($this->tabs) {
-      $content->addSigil('phui-object-box');
-      $content->setMetadata(
-        array(
-          'tabMap' => $tab_map,
-        ));
-    }
-
-    if ($this->flush) {
-      $content->addClass('phui-object-box-flush');
-    }
-
-    foreach ($this->sigils as $sigil) {
-      $content->addSigil($sigil);
-    }
-
-    if ($this->metadata !== null) {
-      $content->setMetadata($this->metadata);
-    }
+    $content = array(
+      ($this->showHideOpen == false ? $this->anchor : null),
+      $header,
+      $this->infoView,
+      $this->formErrors,
+      $this->formSaved,
+      $exception_errors,
+      $this->form,
+      $tabs,
+      $this->tabLists,
+      $showhide,
+      ($this->showHideOpen == true ? $this->anchor : null),
+      $this->propertyList,
+      $this->table,
+      $this->renderChildren(),
+    );
 
     if ($this->objectList) {
-      $content->appendChild($this->objectList);
+      $content[] = $this->objectList;
     }
 
     return $content;

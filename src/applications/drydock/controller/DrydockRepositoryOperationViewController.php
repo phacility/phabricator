@@ -1,7 +1,7 @@
 <?php
 
 final class DrydockRepositoryOperationViewController
-  extends DrydockController {
+  extends DrydockRepositoryOperationController {
 
   public function shouldAllowPublic() {
     return true;
@@ -50,16 +50,14 @@ final class DrydockRepositoryOperationViewController
       ->setUser($viewer)
       ->setOperation($operation);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $status_view,
-      ),
-      array(
-        'title' => $title,
-      ));
-
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $object_box,
+          $status_view,
+        ));
   }
 
   private function buildActionListView(DrydockRepositoryOperation $operation) {

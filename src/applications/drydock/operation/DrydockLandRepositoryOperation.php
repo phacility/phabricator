@@ -5,6 +5,9 @@ final class DrydockLandRepositoryOperation
 
   const OPCONST = 'land';
 
+  const PHASE_PUSH = 'op.land.push';
+  const PHASE_COMMIT = 'op.land.commit';
+
   public function getOperationDescription(
     DrydockRepositoryOperation $operation,
     PhabricatorUser $viewer) {
@@ -118,14 +121,44 @@ final class DrydockLandRepositoryOperation
       $committer_info['email'],
       "{$author_name} <{$author_email}>");
 
-    $future
-      ->write($commit_message)
-      ->resolvex();
+    $future->write($commit_message);
 
-    $interface->execx(
-      'git push origin -- %s:%s',
-      'HEAD',
-      $push_dst);
+    try {
+      $future->resolvex();
+    } catch (CommandException $ex) {
+      $display_command = csprintf('git commit');
+
+      // TODO: One reason this can fail is if the changes have already been
+      // merged. We could try to detect that.
+
+      $error = DrydockCommandError::newFromCommandException($ex)
+        ->setPhase(self::PHASE_COMMIT)
+        ->setDisplayCommand($display_command);
+
+      $operation->setCommandError($error->toDictionary());
+
+      throw $ex;
+    }
+
+    try {
+      $interface->execx(
+        'git push origin -- %s:%s',
+        'HEAD',
+        $push_dst);
+    } catch (CommandException $ex) {
+      $display_command = csprintf(
+        'git push origin %R:%R',
+        'HEAD',
+        $push_dst);
+
+      $error = DrydockCommandError::newFromCommandException($ex)
+        ->setPhase(self::PHASE_PUSH)
+        ->setDisplayCommand($display_command);
+
+      $operation->setCommandError($error->toDictionary());
+
+      throw $ex;
+    }
   }
 
   private function getCommitterInfo(DrydockRepositoryOperation $operation) {
@@ -215,6 +248,29 @@ final class DrydockLandRepositoryOperation
       );
     }
 
+    // Check if this diff was pushed to a staging area.
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($revision->getActiveDiff()->getID()))
+      ->needProperties(true)
+      ->executeOne();
+
+    // Older diffs won't have this property. They may still have been pushed.
+    // At least for now, assume staging changes are present if the property
+    // is missing. This should smooth the transition to the more formal
+    // approach.
+    $has_staging = $diff->hasDiffProperty('arc.staging');
+    if ($has_staging) {
+      $staging = $diff->getProperty('arc.staging');
+      if (!is_array($staging)) {
+        $staging = array();
+      }
+      $status = idx($staging, 'status');
+      if ($status != ArcanistDiffWorkflow::STAGING_PUSHED) {
+        return $this->getBarrierToLandingFromStagingStatus($status);
+      }
+    }
+
     // TODO: At some point we should allow installs to give "land reviewed
     // code" permission to more users than "push any commit", because it is
     // a much less powerful operation. For now, just require push so this
@@ -301,6 +357,87 @@ final class DrydockLandRepositoryOperation
     }
 
     return null;
+  }
+
+  private function getBarrierToLandingFromStagingStatus($status) {
+    switch ($status) {
+      case ArcanistDiffWorkflow::STAGING_USER_SKIP:
+        return array(
+          'title' => pht('Staging Area Skipped'),
+          'body' => pht(
+            'The diff author used the %s flag to skip pushing this change to '.
+            'staging. Changes must be pushed to staging before they can be '.
+            'landed from the web.',
+            phutil_tag('tt', array(), '--skip-staging')),
+        );
+      case ArcanistDiffWorkflow::STAGING_DIFF_RAW:
+        return array(
+          'title' => pht('Raw Diff Source'),
+          'body' => pht(
+            'The diff was generated from a raw input source, so the change '.
+            'could not be pushed to staging. Changes must be pushed to '.
+            'staging before they can be landed from the web.'),
+        );
+      case ArcanistDiffWorkflow::STAGING_REPOSITORY_UNKNOWN:
+        return array(
+          'title' => pht('Unknown Repository'),
+          'body' => pht(
+            'When the diff was generated, the client was not able to '.
+            'determine which repository it belonged to, so the change '.
+            'was not pushed to staging. Changes must be pushed to staging '.
+            'before they can be landed from the web.'),
+        );
+      case ArcanistDiffWorkflow::STAGING_REPOSITORY_UNAVAILABLE:
+        return array(
+          'title' => pht('Staging Unavailable'),
+          'body' => pht(
+            'When this diff was generated, the server was running an older '.
+            'version of Phabricator which did not support staging areas, so '.
+            'the change was not pushed to staging. Changes must be pushed '.
+            'to staging before they can be landed from the web.'),
+        );
+      case ArcanistDiffWorkflow::STAGING_REPOSITORY_UNSUPPORTED:
+        return array(
+          'title' => pht('Repository Unsupported'),
+          'body' => pht(
+            'When this diff was generated, the server was running an older '.
+            'version of Phabricator which did not support staging areas for '.
+            'this version control system, so the chagne was not pushed to '.
+            'staging. Changes must be pushed to staging before they can be '.
+            'landed from the web.'),
+        );
+
+      case ArcanistDiffWorkflow::STAGING_REPOSITORY_UNCONFIGURED:
+        return array(
+          'title' => pht('Repository Unconfigured'),
+          'body' => pht(
+            'When this diff was generated, the repository was not configured '.
+            'with a staging area, so the change was not pushed to staging. '.
+            'Changes must be pushed to staging before they can be landed '.
+            'from the web.'),
+        );
+      case ArcanistDiffWorkflow::STAGING_CLIENT_UNSUPPORTED:
+        return array(
+          'title' => pht('Client Support Unavailable'),
+          'body' => pht(
+            'When this diff was generated, the client did not support '.
+            'staging areas for this version control system, so the change '.
+            'was not pushed to staging. Changes must be pushed to staging '.
+            'before they can be landed from the web. Updating the client '.
+            'may resolve this issue.'),
+        );
+      default:
+        return array(
+          'title' => pht('Unknown Error'),
+          'body' => pht(
+            'When this diff was generated, it was not pushed to staging for '.
+            'an unknown reason (the status code was "%s"). Changes must be '.
+            'pushed to staging before they can be landed from the web. '.
+            'The server may be running an out-of-date version of Phabricator, '.
+            'and updating may provide more information about this error.',
+            $status),
+        );
+    }
   }
 
 }

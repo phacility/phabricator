@@ -370,6 +370,10 @@ final class PhabricatorRepositoryCommit
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
 
 
+  public function getHarbormasterBuildableDisplayPHID() {
+    return $this->getHarbormasterBuildablePHID();
+  }
+
   public function getHarbormasterBuildablePHID() {
     return $this->getPHID();
   }
@@ -437,10 +441,6 @@ final class PhabricatorRepositoryCommit
     // right now because we are not guaranteed to have the data.
 
     return ($phid == $this->getAuthorPHID());
-  }
-
-  public function shouldShowSubscribersProperty() {
-    return true;
   }
 
 

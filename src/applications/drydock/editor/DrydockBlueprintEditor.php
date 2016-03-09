@@ -11,6 +11,10 @@ final class DrydockBlueprintEditor
     return pht('Drydock Blueprints');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -78,6 +82,38 @@ final class DrydockBlueprintEditor
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
+  }
+
+
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case DrydockBlueprintTransaction::TYPE_NAME:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getBlueprintName(),
+          $xactions);
+
+        if ($missing) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('You must choose a name for this blueprint.'),
+            nonempty(last($xactions), null));
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+          continue;
+        }
+
+        break;
+    }
+
+    return $errors;
   }
 
 }

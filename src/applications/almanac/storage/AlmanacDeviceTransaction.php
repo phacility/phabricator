@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacDeviceTransaction
-  extends PhabricatorApplicationTransaction {
+  extends AlmanacTransaction {
 
   const TYPE_NAME = 'almanac:device:name';
   const TYPE_INTERFACE = 'almanac:device:interface';
@@ -69,7 +69,7 @@ final class AlmanacDeviceTransaction
           return pht(
             '%s removed the interface %s from this device.',
             $this->renderHandleLink($author_phid),
-            $this->describeInterface($new));
+            $this->describeInterface($old));
         } else if ($new) {
           return pht(
             '%s added the interface %s to this device.',

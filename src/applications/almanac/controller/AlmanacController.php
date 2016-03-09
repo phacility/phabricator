@@ -10,27 +10,14 @@ abstract class AlmanacController
     $properties = $object->getAlmanacProperties();
 
     $this->requireResource('almanac-css');
+    Javelin::initBehavior('phabricator-tooltips', array());
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $object,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $object,
-      PhabricatorCustomField::ROLE_DEFAULT);
-
-    // Before reading values from the object, read defaults.
-    $defaults = mpull(
-      $field_list->getFields(),
-      'getValueForStorage',
-      'getFieldKey');
-
-    $field_list
-      ->setViewer($viewer)
-      ->readFieldsFromStorage($object);
-
-    Javelin::initBehavior('phabricator-tooltips', array());
+    $properties = $object->getAlmanacProperties();
 
     $icon_builtin = id(new PHUIIconView())
       ->setIcon('fa-circle')
@@ -51,45 +38,46 @@ abstract class AlmanacController
         ));
 
     $builtins = $object->getAlmanacPropertyFieldSpecifications();
+    $defaults = mpull($builtins, null, 'getValueForTransaction');
 
     // Sort fields so builtin fields appear first, then fields are ordered
     // alphabetically.
-    $fields = $field_list->getFields();
-    $fields = msort($fields, 'getFieldKey');
+    $properties = msort($properties, 'getFieldName');
 
     $head = array();
     $tail = array();
-    foreach ($fields as $field) {
-      $key = $field->getFieldKey();
+    foreach ($properties as $property) {
+      $key = $property->getFieldName();
       if (isset($builtins[$key])) {
-        $head[$key] = $field;
+        $head[$key] = $property;
       } else {
-        $tail[$key] = $field;
+        $tail[$key] = $property;
       }
     }
 
-    $fields = $head + $tail;
+    $properties = $head + $tail;
+
+    $delete_base = $this->getApplicationURI('property/delete/');
+    $edit_base = $this->getApplicationURI('property/update/');
 
     $rows = array();
-    foreach ($fields as $key => $field) {
-      $value = $field->getValueForStorage();
+    foreach ($properties as $key => $property) {
+      $value = $property->getFieldValue();
 
       $is_builtin = isset($builtins[$key]);
 
-      $delete_uri = $this->getApplicationURI('property/delete/');
-      $delete_uri = id(new PhutilURI($delete_uri))
+      $delete_uri = id(new PhutilURI($delete_base))
         ->setQueryParams(
           array(
-            'objectPHID' => $object->getPHID(),
             'key' => $key,
+            'objectPHID' => $object->getPHID(),
           ));
 
-      $edit_uri = $this->getApplicationURI('property/edit/');
-      $edit_uri = id(new PhutilURI($edit_uri))
+      $edit_uri = id(new PhutilURI($edit_base))
         ->setQueryParams(
           array(
-            'objectPHID' => $object->getPHID(),
             'key' => $key,
+            'objectPHID' => $object->getPHID(),
           ));
 
       $delete = javelin_tag(
@@ -153,7 +141,8 @@ abstract class AlmanacController
         ));
 
     $phid = $object->getPHID();
-    $add_uri = $this->getApplicationURI("property/edit/?objectPHID={$phid}");
+    $add_uri = id(new PhutilURI($edit_base))
+      ->setQueryParam('objectPHID', $object->getPHID());
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -169,31 +158,57 @@ abstract class AlmanacController
       ->setIcon('fa-plus');
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Properties'))
+      ->setHeader(pht('PROPERTIES'))
       ->addActionLink($add_button);
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 
-  protected function addLockMessage(PHUIObjectBoxView $box, $message) {
+  protected function addClusterMessage(
+    $positive,
+    $negative) {
+
+    $can_manage = $this->hasApplicationCapability(
+      AlmanacManageClusterServicesCapability::CAPABILITY);
+
     $doc_link = phutil_tag(
       'a',
       array(
-        'href' => PhabricatorEnv::getDoclink('Almanac User Guide'),
+        'href' => PhabricatorEnv::getDoclink(
+          'User Guide: Phabricator Clusters'),
         'target' => '_blank',
       ),
       pht('Learn More'));
 
-    $error_view = id(new PHUIInfoView())
-      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+    if ($can_manage) {
+      $severity = PHUIInfoView::SEVERITY_NOTICE;
+      $message = $positive;
+    } else {
+      $severity = PHUIInfoView::SEVERITY_WARNING;
+      $message = $negative;
+    }
+
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-sitemap');
+
+    return id(new PHUIInfoView())
+      ->setSeverity($severity)
       ->setErrors(
         array(
-          array($message, ' ', $doc_link),
+          array($icon, ' ', $message, ' ', $doc_link),
         ));
 
-    $box->setInfoView($error_view);
+  }
+
+  protected function getPropertyDeleteURI($object) {
+    return null;
+  }
+
+  protected function getPropertyUpdateURI($object) {
+    return null;
   }
 
 }

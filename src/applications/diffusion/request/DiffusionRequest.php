@@ -243,10 +243,6 @@ abstract class DiffusionRequest extends Phobject {
     return $this->repository;
   }
 
-  public function getCallsign() {
-    return $this->getRepository()->getCallsign();
-  }
-
   public function setPath($path) {
     $this->path = $path;
     return $this;

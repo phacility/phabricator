@@ -23,16 +23,15 @@
   display: inline-block;
   background-repeat: no-repeat;
   background-size: 100%;
-  box-shadow: inset 0 0 0 1px rgba(55,55,55,.15);
+  box-shadow: inset 0 0 0 1px rgba({$alphagrey},.15);
   width: 40px;
   height: 40px;
   border-radius: 3px;
   position: absolute;
 }
 
-.phame-blog-description + .phui-property-list-section {
-  border-top: 1px solid rgba(71, 87, 120, 0.20);
-  padding-top: 16px;
+.phame-blog-description + .phui-document-view-pro-box {
+  border-top: 1px solid rgba({$alphablue}, 0.20);
 }
 
 .phame-home-view .phui-document-view.phui-document-view-pro {
@@ -45,7 +44,7 @@
 
 .phame-home-view {
   background-color: #fff;
-  border-bottom: 1px solid rgba(55,55,55,.1);
+  border-bottom: 1px solid rgba({$alphagrey},.1);
 }
 
 .phame-home-view .phame-home-container {
@@ -100,7 +99,7 @@
   display: inline-block;
   background-repeat: no-repeat;
   background-size: 100%;
-  box-shadow: inset 0 0 0 1px rgba(55,55,55,.15);
+  box-shadow: inset 0 0 0 1px rgba({$alphagrey},.15);
   width: 24px;
   height: 24px;
   border-radius: 3px;

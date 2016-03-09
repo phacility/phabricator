@@ -96,11 +96,6 @@ final class PhabricatorSubscriptionsUIEventListener
       return;
     }
 
-    if (!$object->shouldShowSubscribersProperty()) {
-      // This object doesn't render subscribers in its property list.
-      return;
-    }
-
     $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $object->getPHID());
     if ($subscribers) {

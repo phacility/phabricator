@@ -31,24 +31,7 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
     // Block until all previous builds of the same build plan have
     // finished.
     $plan = $build->getBuildPlan();
-
-    $existing_logs = id(new HarbormasterBuildLogQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withBuildTargetPHIDs(array($build_target->getPHID()))
-      ->execute();
-
-    if ($existing_logs) {
-      $log = head($existing_logs);
-    } else {
-      $log = $build->createLog($build_target, 'waiting', 'blockers');
-    }
-
     $blockers = $this->getBlockers($object, $plan, $build);
-    if ($blockers) {
-      $log->start();
-      $log->append(pht("Blocked by: %s\n", implode(',', $blockers)));
-      $log->finalize();
-    }
 
     if ($blockers) {
       throw new PhabricatorWorkerYieldException(15);

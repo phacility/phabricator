@@ -1,11 +1,9 @@
 <?php
 
 final class AlmanacBindingEditor
-  extends PhabricatorApplicationTransactionEditor {
+  extends AlmanacEditor {
 
-  public function getEditorApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
-  }
+  private $devicePHID;
 
   public function getEditorObjectsDescription() {
     return pht('Almanac Binding');
@@ -15,6 +13,7 @@ final class AlmanacBindingEditor
     $types = parent::getTransactionTypes();
 
     $types[] = AlmanacBindingTransaction::TYPE_INTERFACE;
+    $types[] = AlmanacBindingTransaction::TYPE_DISABLE;
 
     return $types;
   }
@@ -25,6 +24,8 @@ final class AlmanacBindingEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacBindingTransaction::TYPE_INTERFACE:
         return $object->getInterfacePHID();
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        return $object->getIsDisabled();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -37,6 +38,8 @@ final class AlmanacBindingEditor
     switch ($xaction->getTransactionType()) {
       case AlmanacBindingTransaction::TYPE_INTERFACE:
         return $xaction->getNewValue();
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        return (int)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -55,6 +58,9 @@ final class AlmanacBindingEditor
         $object->setDevicePHID($interface->getDevicePHID());
         $object->setInterfacePHID($interface->getPHID());
         return;
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        $object->setIsDisabled($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -65,7 +71,37 @@ final class AlmanacBindingEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case AlmanacBindingTransaction::TYPE_DISABLE:
+        return;
       case AlmanacBindingTransaction::TYPE_INTERFACE:
+        $interface_phids = array();
+
+        $interface_phids[] = $xaction->getOldValue();
+        $interface_phids[] = $xaction->getNewValue();
+
+        $interface_phids = array_filter($interface_phids);
+        $interface_phids = array_unique($interface_phids);
+
+        $interfaces = id(new AlmanacInterfaceQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($interface_phids)
+          ->execute();
+
+        $device_phids = array();
+        foreach ($interfaces as $interface) {
+          $device_phids[] = $interface->getDevicePHID();
+        }
+
+        $device_phids = array_unique($device_phids);
+
+        $devices = id(new AlmanacDeviceQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($device_phids)
+          ->execute();
+
+        foreach ($devices as $device) {
+          $device->rebuildClusterBindingStatus();
+        }
         return;
     }
 

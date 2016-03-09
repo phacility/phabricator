@@ -26,34 +26,6 @@ final class NuancePhabricatorFormSourceDefinition
     return $actions;
   }
 
-  public function updateItems() {
-    return null;
-  }
-
-  protected function augmentEditForm(
-    AphrontFormView $form,
-    PhabricatorApplicationTransactionValidationException $ex = null) {
-
-    /* TODO - add a box to allow for custom fields to be defined here, so that
-     * these NuanceSource objects made from this definition can be used to
-     * capture arbitrary data */
-
-    return $form;
-  }
-
-  protected function buildTransactions(AphrontRequest $request) {
-    $transactions = parent::buildTransactions($request);
-
-    // TODO -- as above
-
-    return $transactions;
-  }
-
-  public function renderView() {}
-
-  public function renderListView() {}
-
-
   public function handleActionRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
@@ -100,13 +72,6 @@ final class NuancePhabricatorFormSourceDefinition
     return $box;
   }
 
-  public function renderItemViewProperties(
-    PhabricatorUser $viewer,
-    NuanceItem $item,
-    PHUIPropertyListView $view) {
-    $this->renderItemCommonProperties($viewer, $item, $view);
-  }
-
   public function renderItemEditProperties(
     PhabricatorUser $viewer,
     NuanceItem $item,
@@ -120,11 +85,7 @@ final class NuancePhabricatorFormSourceDefinition
     PHUIPropertyListView $view) {
 
     $complaint = $item->getNuanceProperty('complaint');
-    $complaint = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($complaint),
-      'default',
-      $viewer);
-
+    $complaint = new PHUIRemarkupView($viewer, $complaint);
     $view->addSectionHeader(
       pht('Complaint'), 'fa-exclamation-circle');
     $view->addTextContent($complaint);

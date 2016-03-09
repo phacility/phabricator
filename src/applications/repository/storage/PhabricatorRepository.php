@@ -93,7 +93,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'sort255',
-        'callsign' => 'sort32',
+        'callsign' => 'sort32?',
         'repositorySlug' => 'sort64?',
         'versionControlSystem' => 'text32',
         'uuid' => 'text64?',
@@ -149,13 +149,21 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getMonogram() {
-    return 'r'.$this->getCallsign();
+    $callsign = $this->getCallsign();
+    if (strlen($callsign)) {
+      return "r{$callsign}";
+    }
+
+    $id = $this->getID();
+    return "R{$id}";
   }
 
   public function getDisplayName() {
-    // TODO: This is intended to produce a human-readable name that is not
-    // necessarily a global, unique identifier. Eventually, it may just return
-    // a string like "skynet" instead of "rSKYNET".
+    $slug = $this->getRepositorySlug();
+    if (strlen($slug)) {
+      return $slug;
+    }
+
     return $this->getMonogram();
   }
 
@@ -317,14 +325,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public static function isValidRepositorySlug($slug) {
     try {
-      self::asssertValidRepositorySlug($slug);
+      self::assertValidRepositorySlug($slug);
       return true;
     } catch (Exception $ex) {
       return false;
     }
   }
 
-  public static function asssertValidRepositorySlug($slug) {
+  public static function assertValidRepositorySlug($slug) {
     if (!strlen($slug)) {
       throw new Exception(
         pht(
@@ -388,6 +396,30 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'The name "%s" is not a valid repository short name. Repository '.
           'short names may not contain only numbers.',
           $slug));
+    }
+  }
+
+  public static function assertValidCallsign($callsign) {
+    if (!strlen($callsign)) {
+      throw new Exception(
+        pht(
+          'A repository callsign must be at least one character long.'));
+    }
+
+    if (strlen($callsign) > 32) {
+      throw new Exception(
+        pht(
+          'The callsign "%s" is not a valid repository callsign. Callsigns '.
+          'must be no more than 32 bytes long.',
+          $callsign));
+    }
+
+    if (!preg_match('/^[A-Z]+\z/', $callsign)) {
+      throw new Exception(
+        pht(
+          'The callsign "%s" is not a valid repository callsign. Callsigns '.
+          'may only contain UPPERCASE letters.',
+          $callsign));
     }
   }
 
@@ -675,7 +707,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getURI() {
-    return '/diffusion/'.$this->getCallsign().'/';
+    $callsign = $this->getCallsign();
+    if (strlen($callsign)) {
+      return "/diffusion/{$callsign}/";
+    }
+
+    $id = $this->getID();
+    return "/diffusion/{$id}/";
   }
 
   public function getPathURI($path) {
@@ -684,7 +722,96 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getCommitURI($identifier) {
     $callsign = $this->getCallsign();
-    return "/r{$callsign}{$identifier}";
+    if (strlen($callsign)) {
+      return "/r{$callsign}{$identifier}";
+    }
+
+    $id = $this->getID();
+    return "/R{$id}:{$identifier}";
+  }
+
+  public static function parseRepositoryServicePath($request_path) {
+    // NOTE: In Mercurial over SSH, the path will begin without a leading "/",
+    // so we're matching it optionally.
+
+    $patterns = array(
+      '(^'.
+        '(?P<base>/?diffusion/(?P<identifier>[A-Z]+|[0-9]\d*))'.
+        '(?P<path>(?:/.*)?)'.
+      '\z)',
+    );
+
+    $identifier = null;
+    foreach ($patterns as $pattern) {
+      $matches = null;
+      if (!preg_match($pattern, $request_path, $matches)) {
+        continue;
+      }
+
+      $identifier = $matches['identifier'];
+      $base = $matches['base'];
+      $path = $matches['path'];
+      break;
+    }
+
+    if ($identifier === null) {
+      return null;
+    }
+
+    return array(
+      'identifier' => $identifier,
+      'base' => $base,
+      'path' => $path,
+    );
+  }
+
+  public function getCanonicalPath($request_path) {
+    $standard_pattern =
+      '(^'.
+        '(?P<prefix>/diffusion/)'.
+        '(?P<identifier>[^/]+)'.
+        '(?P<suffix>(?:/.*)?)'.
+      '\z)';
+
+    $matches = null;
+    if (preg_match($standard_pattern, $request_path, $matches)) {
+      $prefix = $matches['prefix'];
+
+      $callsign = $this->getCallsign();
+      if ($callsign) {
+        $identifier = $callsign;
+      } else {
+        $identifier = $this->getID();
+      }
+
+      $suffix = $matches['suffix'];
+      if (!strlen($suffix)) {
+        $suffix = '/';
+      }
+
+      return $prefix.$identifier.$suffix;
+    }
+
+    $commit_pattern =
+      '(^'.
+        '(?P<prefix>/)'.
+        '(?P<monogram>'.
+          '(?:'.
+            'r(?P<repositoryCallsign>[A-Z]+)'.
+            '|'.
+            'R(?P<repositoryID>[1-9]\d*):'.
+          ')'.
+          '(?P<commit>[a-f0-9]+)'.
+        ')'.
+      '\z)';
+
+    $matches = null;
+    if (preg_match($commit_pattern, $request_path, $matches)) {
+      $commit = $matches['commit'];
+      return $this->getCommitURI($commit);
+    }
+
+    return null;
   }
 
   public function generateURI(array $params) {
@@ -955,7 +1082,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     if ($need_scope) {
-      $scope = 'r'.$this->getCallsign();
+      $callsign = $this->getCallsign();
+      if ($callsign) {
+        $scope = "r{$callsign}";
+      } else {
+        $id = $this->getID();
+        $scope = "R{$id}:";
+      }
       $name = $scope.$name;
     }
 
@@ -1905,6 +2038,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($service_phid))
       ->needBindings(true)
+      ->needProperties(true)
       ->executeOne();
     if (!$service) {
       throw new Exception(
@@ -1913,7 +2047,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'be loaded.'));
     }
 
-    $service_type = $service->getServiceType();
+    $service_type = $service->getServiceImplementation();
     if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
       throw new Exception(
         pht(

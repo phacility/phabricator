@@ -456,8 +456,14 @@ abstract class PhabricatorApplicationTransaction
           return null;
         }
 
+        $object = $this->getObject();
+
+        if (!($object instanceof PhabricatorCustomFieldInterface)) {
+          return null;
+        }
+
         $field = PhabricatorCustomField::getObjectField(
-          $this->getObject(),
+          $object,
           PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
           $key);
         if (!$field) {
@@ -527,6 +533,11 @@ abstract class PhabricatorApplicationTransaction
         // TODO: Remove this eventually, this is handling old changes during
         // object creation prior to the introduction of "create" and "default"
         // transaction display flags.
+
+        // NOTE: We can also hit this case with Space transactions that later
+        // update a default space (`null`) to an explicit space, so handling
+        // the Space case may require some finesse.
+
         if ($this->getOldValue() === null) {
           return true;
         } else {
@@ -594,24 +605,27 @@ abstract class PhabricatorApplicationTransaction
         break;
     }
 
-    // If a transaction publishes an inline comment:
-    //
-    //   - Don't show it if there are other kinds of transactions. The
-    //     rationale here is that application mail will make the presence
-    //     of inline comments obvious enough by including them prominently
-    //     in the body. We could change this in the future if the obviousness
-    //     needs to be increased.
-    //   - If there are only inline transactions, only show the first
-    //     transaction. The rationale is that seeing multiple "added an inline
-    //     comment" transactions is not useful.
-
     if ($this->isInlineCommentTransaction()) {
+      $inlines = array();
+
+      // If there's a normal comment, we don't need to publish the inline
+      // transaction, since the normal comment covers things.
       foreach ($xactions as $xaction) {
-        if (!$xaction->isInlineCommentTransaction()) {
+        if ($xaction->isInlineCommentTransaction()) {
+          $inlines[] = $xaction;
+          continue;
+        }
+
+        // We found a normal comment, so hide this inline transaction.
+        if ($xaction->hasComment()) {
           return true;
         }
       }
-      return ($this !== head($xactions));
+
+      // If there are several inline comments, only publish the first one.
+      if ($this !== head($inlines)) {
+        return true;
+      }
     }
 
     return $this->shouldHide();

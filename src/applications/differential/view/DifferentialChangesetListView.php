@@ -113,6 +113,8 @@ final class DifferentialChangesetListView extends AphrontView {
   }
 
   public function render() {
+    $viewer = $this->getViewer();
+
     $this->requireResource('differential-changeset-view-css');
 
     $changesets = $this->changesets;
@@ -148,7 +150,7 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
 
     $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
-      $this->getUser());
+      $viewer);
 
     $output = array();
     $ids = array();
@@ -163,7 +165,7 @@ final class DifferentialChangesetListView extends AphrontView {
       $ref = $this->references[$key];
 
       $detail = id(new DifferentialChangesetDetailView())
-        ->setUser($this->getUser());
+        ->setUser($viewer);
 
       $uniq_id = 'diff-'.$changeset->getAnchorName();
       $detail->setID($uniq_id);
@@ -261,6 +263,7 @@ final class DifferentialChangesetListView extends AphrontView {
     DifferentialChangesetDetailView $detail,
     $ref,
     DifferentialChangeset $changeset) {
+    $viewer = $this->getViewer();
 
     $meta = array();
 
@@ -280,7 +283,7 @@ final class DifferentialChangesetListView extends AphrontView {
       try {
         $meta['diffusionURI'] =
           (string)$repository->getDiffusionBrowseURIForPath(
-            $this->user,
+            $viewer,
             $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
             idx($changeset->getMetadata(), 'line:first'),
             $this->getBranch());
@@ -308,13 +311,12 @@ final class DifferentialChangesetListView extends AphrontView {
       }
     }
 
-    $user = $this->user;
-    if ($user && $repository) {
+    if ($viewer && $repository) {
       $path = ltrim(
         $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
         '/');
       $line = idx($changeset->getMetadata(), 'line:first', 1);
-      $editor_link = $user->loadEditorLink($path, $line, $repository);
+      $editor_link = $viewer->loadEditorLink($path, $line, $repository);
       if ($editor_link) {
         $meta['editor'] = $editor_link;
       } else {

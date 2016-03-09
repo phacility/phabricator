@@ -90,13 +90,10 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
       $target->setDateCompleted(PhabricatorTime::getNow());
       $target->save();
     } catch (Exception $ex) {
-      phlog($ex);
-
       try {
-        $log = $build->createLog($target, 'core', 'exception');
-        $start = $log->start();
-        $log->append((string)$ex);
-        $log->finalize($start);
+        $log = $target->newLog('core', 'exception')
+          ->append($ex)
+          ->closeBuildLog();
       } catch (Exception $log_ex) {
         phlog($log_ex);
       }

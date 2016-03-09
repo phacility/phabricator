@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorBadgesRecipientsListView extends AphrontTagView {
+final class PhabricatorBadgesRecipientsListView extends AphrontView {
 
   private $badge;
   private $handles;
@@ -15,9 +15,8 @@ final class PhabricatorBadgesRecipientsListView extends AphrontTagView {
     return $this;
   }
 
-  protected function getTagContent() {
-
-    $viewer = $this->user;
+  public function render() {
+    $viewer = $this->getViewer();
 
     $badge = $this->badge;
     $handles = $this->handles;

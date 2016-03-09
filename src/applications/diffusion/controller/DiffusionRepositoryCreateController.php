@@ -47,10 +47,11 @@ final class DiffusionRepositoryCreateController
         // allocations, we fail.
         $services = id(new AlmanacServiceQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withServiceClasses(
+          ->withServiceTypes(
             array(
-              'AlmanacClusterRepositoryServiceType',
+              AlmanacClusterRepositoryServiceType::SERVICETYPE,
             ))
+          ->needProperties(true)
           ->execute();
         if ($services) {
           // Filter out services which do not permit new allocations.
@@ -134,7 +135,6 @@ final class DiffusionRepositoryCreateController
         $type_name = PhabricatorRepositoryTransaction::TYPE_NAME;
         $type_vcs = PhabricatorRepositoryTransaction::TYPE_VCS;
         $type_activate = PhabricatorRepositoryTransaction::TYPE_ACTIVATE;
-        $type_local_path = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
         $type_remote_uri = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
         $type_hosting = PhabricatorRepositoryTransaction::TYPE_HOSTING;
         $type_http = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP;
@@ -150,14 +150,6 @@ final class DiffusionRepositoryCreateController
 
         // If we're creating a new repository, set all this core stuff.
         if ($is_create) {
-          $callsign = $form->getPage('name')
-            ->getControl('callsign')->getValue();
-
-          // We must set this to a unique value to save the repository
-          // initially, and it's immutable, so we don't bother using
-          // transactions to apply this change.
-          $repository->setCallsign($callsign);
-
           $xactions[] = id(clone $template)
             ->setTransactionType($type_name)
             ->setNewValue(
@@ -179,16 +171,6 @@ final class DiffusionRepositoryCreateController
               ->setTransactionType($type_service)
               ->setNewValue($service->getPHID());
           }
-
-          $default_local_path = PhabricatorEnv::getEnvConfig(
-            'repository.default-local-path');
-
-          $default_local_path = rtrim($default_local_path, '/');
-          $default_local_path = $default_local_path.'/'.$callsign.'/';
-
-          $xactions[] = id(clone $template)
-            ->setTransactionType($type_local_path)
-            ->setNewValue($default_local_path);
         }
 
         if ($is_init) {
@@ -354,7 +336,7 @@ final class DiffusionRepositoryCreateController
   }
 
 
-/* -(  Page: Name and Callsign  )-------------------------------------------- */
+/* -(  Page: Name  )--------------------------------------------------------- */
 
 
   private function buildNamePage() {
@@ -370,23 +352,7 @@ final class DiffusionRepositoryCreateController
       ->addControl(
         id(new AphrontFormTextControl())
           ->setName('name')
-          ->setLabel(pht('Name'))
-          ->setCaption(pht('Human-readable repository name.')))
-      ->addRemarkupInstructions(
-        pht(
-          '**Choose a "Callsign" for the repository.** This is a short, '.
-          'unique string which identifies commits elsewhere in Phabricator. '.
-          'For example, you might use `M` for your mobile app repository '.
-          'and `B` for your backend repository.'.
-          "\n\n".
-          '**Callsigns must be UPPERCASE**, and can not be edited after the '.
-          'repository is created. Generally, you should choose short '.
-          'callsigns.'))
-      ->addControl(
-        id(new AphrontFormTextControl())
-          ->setName('callsign')
-          ->setLabel(pht('Callsign'))
-          ->setCaption(pht('Short UPPERCASE identifier.')));
+          ->setLabel(pht('Name')));
   }
 
   public function validateNamePage(PHUIFormPageView $page) {
@@ -398,38 +364,7 @@ final class DiffusionRepositoryCreateController
         pht('You must choose a name for this repository.'));
     }
 
-    $c_call = $page->getControl('callsign');
-    $v_call = $c_call->getValue();
-    if (!strlen($v_call)) {
-      $c_call->setError(pht('Required'));
-      $page->addPageError(
-        pht('You must choose a callsign for this repository.'));
-    } else if (!preg_match('/^[A-Z]+\z/', $v_call)) {
-      $c_call->setError(pht('Invalid'));
-      $page->addPageError(
-        pht('The callsign must contain only UPPERCASE letters.'));
-    } else {
-      $exists = false;
-      try {
-        $repo = id(new PhabricatorRepositoryQuery())
-          ->setViewer($this->getRequest()->getUser())
-          ->withCallsigns(array($v_call))
-          ->executeOne();
-        $exists = (bool)$repo;
-      } catch (PhabricatorPolicyException $ex) {
-        $exists = true;
-      }
-      if ($exists) {
-        $c_call->setError(pht('Not Unique'));
-        $page->addPageError(
-          pht(
-            'Another repository already uses that callsign. You must choose '.
-            'a unique callsign.'));
-      }
-    }
-
-    return $c_name->isValid() &&
-           $c_call->isValid();
+    return $c_name->isValid();
   }
 
 

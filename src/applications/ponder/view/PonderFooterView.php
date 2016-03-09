@@ -36,12 +36,8 @@ final class PonderFooterView extends AphrontTagView {
     $content_id = $this->contentID;
 
     if ($this->count == 0) {
-      $icon = id(new PHUIIconView())
-        ->setIcon('fa-comments msr');
       $text = pht('Add a Comment');
     } else {
-      $icon = id(new PHUIIconView())
-        ->setIcon('fa-comments msr');
       $text = pht('Show %d Comment(s)', new PhutilNumber($this->count));
     }
 
@@ -58,7 +54,7 @@ final class PonderFooterView extends AphrontTagView {
           'hideIDs' => array($hide_action_id),
         ),
       ),
-      array($icon, $text));
+      array($text));
 
     $show_action = javelin_tag(
       'a',
@@ -73,7 +69,7 @@ final class PonderFooterView extends AphrontTagView {
           'hideIDs' => array($content_id, $show_action_id),
         ),
       ),
-      array($icon, pht('Hide Comments')));
+      array(pht('Hide Comments')));
 
     $actions[] = $hide_action;
     $actions[] = $show_action;

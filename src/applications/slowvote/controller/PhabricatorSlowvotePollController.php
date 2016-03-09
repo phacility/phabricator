@@ -23,7 +23,6 @@ final class PhabricatorSlowvotePollController
     }
 
     $poll_view = id(new SlowvoteEmbedView())
-      ->setHeadless(true)
       ->setUser($viewer)
       ->setPoll($poll);
 
@@ -44,53 +43,55 @@ final class PhabricatorSlowvotePollController
       ->setHeader($poll->getQuestion())
       ->setUser($viewer)
       ->setStatus($header_icon, $header_color, $header_name)
-      ->setPolicyObject($poll);
+      ->setPolicyObject($poll)
+      ->setHeaderIcon('fa-bar-chart');
 
-    $actions = $this->buildActionView($poll);
-    $properties = $this->buildPropertyView($poll, $actions);
+    $curtain = $this->buildCurtain($poll);
+    $subheader = $this->buildSubheaderView($poll);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb('V'.$poll->getID());
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $poll,
       new PhabricatorSlowvoteTransactionQuery());
     $add_comment = $this->buildCommentForm($poll);
 
-    $object_box = id(new PHUIObjectBoxView())
+    $poll_content = array(
+      $poll_view,
+      $timeline,
+      $add_comment,
+    );
+
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->setSubheader($subheader)
+      ->setCurtain($curtain)
+      ->setMainColumn($poll_content);
 
     return $this->newPage()
       ->setTitle('V'.$poll->getID().' '.$poll->getQuestion())
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($poll->getPHID()))
-      ->appendChild(
-        array(
-          $object_box,
-          $poll_view,
-          $timeline,
-          $add_comment,
-      ));
+      ->appendChild($view);
   }
 
-  private function buildActionView(PhabricatorSlowvotePoll $poll) {
-    $viewer = $this->getRequest()->getUser();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($poll);
+  private function buildCurtain(PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getViewer();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $poll,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $curtain = $this->newCurtainView($poll);
+
     $is_closed = $poll->getIsClosed();
     $close_poll_text = $is_closed ? pht('Reopen Poll') : pht('Close Poll');
     $close_poll_icon = $is_closed ? 'fa-play-circle-o' : 'fa-ban';
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Poll'))
         ->setIcon('fa-pencil')
@@ -98,7 +99,7 @@ final class PhabricatorSlowvotePollController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($close_poll_text)
         ->setIcon($close_poll_icon)
@@ -106,32 +107,32 @@ final class PhabricatorSlowvotePollController
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    return $view;
+    return $curtain;
   }
 
-  private function buildPropertyView(
-    PhabricatorSlowvotePoll $poll,
-    PhabricatorActionListView $actions) {
+  private function buildSubheaderView(
+    PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getViewer();
 
-    $viewer = $this->getRequest()->getUser();
+    $author = $viewer->renderHandle($poll->getAuthorPHID())->render();
+    $date = phabricator_datetime($poll->getDateCreated(), $viewer);
+    $author = phutil_tag('strong', array(), $author);
 
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($poll)
-      ->setActionList($actions);
+    $person = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($poll->getAuthorPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
 
-    $view->invokeWillRenderEvent();
+    $image_uri = $person->getProfileImageURI();
+    $image_href = '/p/'.$person->getUsername();
 
-    if (strlen($poll->getDescription())) {
-      $view->addTextContent(
-        $output = PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent(
-            $poll->getDescription()),
-          'default',
-          $viewer));
-    }
+    $content = pht('Asked by %s on %s.', $author, $date);
 
-    return $view;
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
   }
 
   private function buildCommentForm(PhabricatorSlowvotePoll $poll) {

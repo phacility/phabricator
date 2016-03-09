@@ -81,14 +81,15 @@ final class PhabricatorProjectColumnEditController
 
       $xactions = array();
 
+      $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
+      $type_limit = PhabricatorProjectColumnTransaction::TYPE_LIMIT;
+
       if (!$column->getProxy()) {
-        $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
         $xactions[] = id(new PhabricatorProjectColumnTransaction())
           ->setTransactionType($type_name)
           ->setNewValue($v_name);
       }
 
-      $type_limit = PhabricatorProjectColumnTransaction::TYPE_LIMIT;
       $xactions[] = id(new PhabricatorProjectColumnTransaction())
         ->setTransactionType($type_limit)
         ->setNewValue($v_limit);
@@ -97,6 +98,7 @@ final class PhabricatorProjectColumnEditController
         $editor = id(new PhabricatorProjectColumnTransactionEditor())
           ->setActor($viewer)
           ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true)
           ->setContentSourceFromRequest($request)
           ->applyTransactions($column, $xactions);
         return id(new AphrontRedirectResponse())->setURI($view_uri);
@@ -136,21 +138,13 @@ final class PhabricatorProjectColumnEditController
       $submit = pht('Save Column');
     }
 
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->setValue($submit)
-        ->addCancelButton($view_uri));
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setValidationException($validation_exception)
-      ->setForm($form);
-
-    $nav = $this->getProfileMenu();
-
-    return $this->newPage()
+    return $this->newDialog()
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle($title)
-      ->setNavigation($nav)
-      ->appendChild($form_box);
+      ->appendForm($form)
+      ->setValidationException($validation_exception)
+      ->addCancelButton($view_uri)
+      ->addSubmitButton($submit);
+
   }
 }

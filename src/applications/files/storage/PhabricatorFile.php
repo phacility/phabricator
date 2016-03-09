@@ -1348,10 +1348,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return ($this->authorPHID == $phid);
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
