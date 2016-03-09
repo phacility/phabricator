@@ -91,7 +91,6 @@ final class PhabricatorProjectProfileController
 
     $home = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFluid(true)
       ->addClass('project-view-home')
       ->setMainColumn(
         array(
