@@ -257,6 +257,26 @@ a.phui-tag-view:hover.phui-tag-shade-blue .phui-tag-core,
   border-color: {$sh-blueborder};
 }
 
+/* - Sky ------------------------------------------------------------------- */
+
+.phui-tag-shade-sky .phui-tag-core,
+.jx-tokenizer-token.sky {
+  background: #E0F0FA;
+  border-color: {$sh-lightblueborder};
+  color: {$sh-bluetext};
+}
+
+.phui-tag-shade-sky .phui-icon-view,
+.jx-tokenizer-token.sky .phui-icon-view,
+.jx-tokenizer-token.sky .jx-tokenizer-x {
+  color: {$sh-blueicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-sky .phui-tag-core,
+.jx-tokenizer-token.sky:hover {
+  border-color: {$sh-blueborder};
+}
+
 /* - Indigo ----------------------------------------------------------------- */
 
 .phui-tag-shade-indigo .phui-tag-core,

@@ -11,11 +11,9 @@ final class PhabricatorDaemonLogListView extends AphrontView {
   }
 
   public function render() {
-    $rows = array();
+    $viewer = $this->getViewer();
 
-    if (!$this->user) {
-      throw new PhutilInvalidStateException('setUser');
-    }
+    $rows = array();
 
     $list = new PHUIObjectItemListView();
     $list->setFlush(true);
@@ -27,7 +25,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
         ->setObjectName(pht('Daemon %s', $id))
         ->setHeader($log->getDaemon())
         ->setHref("/daemon/log/{$id}/")
-        ->addIcon('none', phabricator_datetime($epoch, $this->user));
+        ->addIcon('none', phabricator_datetime($epoch, $viewer));
 
       $status = $log->getStatus();
       switch ($status) {

@@ -4,7 +4,6 @@ final class PhameDraftListView extends AphrontTagView {
 
   private $posts;
   private $blogs;
-  private $viewer;
 
   public function setPosts($posts) {
     assert_instances_of($posts, 'PhamePost');
@@ -15,11 +14,6 @@ final class PhameDraftListView extends AphrontTagView {
   public function setBlogs($blogs) {
     assert_instances_of($blogs, 'PhameBlog');
     $this->blogs = $blogs;
-    return $this;
-  }
-
-  public function setViewer($viewer) {
-    $this->viewer = $viewer;
     return $this;
   }
 

@@ -15,10 +15,6 @@ final class AlmanacServiceSearchEngine
     return new AlmanacServiceQuery();
   }
 
-  public function newResultObject() {
-    return new AlmanacService();
-  }
-
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 

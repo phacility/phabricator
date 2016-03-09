@@ -27,7 +27,9 @@ final class NuanceQueue
   }
 
   public static function initializeNewQueue() {
-    return new NuanceQueue();
+    return id(new self())
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
   }
 
   public function save() {

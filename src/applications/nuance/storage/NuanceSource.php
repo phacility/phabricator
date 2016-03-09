@@ -3,17 +3,19 @@
 final class NuanceSource extends NuanceDAO
   implements
     PhabricatorApplicationTransactionInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $type;
-  protected $data;
+  protected $data = array();
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
   protected $defaultQueuePHID;
+  protected $isDisabled;
 
-  private $definition;
+  private $definition = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -22,9 +24,10 @@ final class NuanceSource extends NuanceDAO
         'data' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255?',
+        'name' => 'sort255',
         'type' => 'text32',
         'mailKey' => 'bytes20',
+        'isDisabled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_type' => array(
@@ -49,7 +52,9 @@ final class NuanceSource extends NuanceDAO
     return '/nuance/source/view/'.$this->getID().'/';
   }
 
-  public static function initializeNewSource(PhabricatorUser $actor) {
+  public static function initializeNewSource(
+    PhabricatorUser $actor,
+    NuanceSourceDefinition $definition) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
       ->withClasses(array('PhabricatorNuanceApplication'))
@@ -62,32 +67,28 @@ final class NuanceSource extends NuanceDAO
 
     return id(new NuanceSource())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->setType($definition->getSourceTypeConstant())
+      ->attachDefinition($definition)
+      ->setIsDisabled(0);
   }
 
   public function getDefinition() {
-    if ($this->definition === null) {
-      $definitions = NuanceSourceDefinition::getAllDefinitions();
-      if (isset($definitions[$this->getType()])) {
-        $definition = clone $definitions[$this->getType()];
-        $definition->setSourceObject($this);
-        $this->definition = $definition;
-      }
-    }
-
-    return $this->definition;
+    return $this->assertAttached($this->definition);
   }
 
-  public function requireDefinition() {
-    $definition = $this->getDefinition();
-    if (!$definition) {
-      throw new Exception(
-        pht(
-          'Unable to load source definition implementation for source '.
-          'type "%s".',
-          $this->getType()));
-    }
-    return $definition;
+  public function attachDefinition(NuanceSourceDefinition $definition) {
+    $this->definition = $definition;
+    return $this;
+  }
+
+  public function getSourceProperty($key, $default = null) {
+    return idx($this->data, $key, $default);
+  }
+
+  public function setSourceProperty($key, $value) {
+    $this->data[$key] = $value;
+    return $this;
   }
 
 
@@ -139,6 +140,17 @@ final class NuanceSource extends NuanceDAO
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
+
+
+  public function newNgrams() {
+    return array(
+      id(new NuanceSourceNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

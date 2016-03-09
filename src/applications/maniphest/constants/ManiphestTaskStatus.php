@@ -82,29 +82,22 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return self::getStatusAttribute($status, 'name', pht('Unknown Status'));
   }
 
-  public static function renderFullDescription($status) {
+  public static function renderFullDescription($status, $priority) {
     if (self::isOpenStatus($status)) {
-      $color = 'status';
-      $icon_color = 'bluegrey';
+      $name = pht('%s, %s', self::getTaskStatusFullName($status), $priority);
+      $color = 'grey';
+      $icon = 'fa-square-o';
     } else {
-      $color = 'status-dark';
-      $icon_color = '';
+      $name = self::getTaskStatusFullName($status);
+      $color = 'indigo';
+      $icon = 'fa-check-square-o';
     }
 
-    $icon = self::getStatusIcon($status);
-
-    $img = id(new PHUIIconView())
-      ->setIcon($icon.' '.$icon_color);
-
-    $tag = phutil_tag(
-      'span',
-      array(
-        'class' => 'phui-header-status phui-header-'.$color,
-      ),
-      array(
-        $img,
-        self::getTaskStatusFullName($status),
-      ));
+    $tag = id(new PHUITagView())
+      ->setName($name)
+      ->setIcon($icon)
+      ->setType(PHUITagView::TYPE_SHADE)
+      ->setShade($color);
 
     return $tag;
   }

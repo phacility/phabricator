@@ -35,22 +35,18 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     );
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getRoutes() {
     return array(
       '/almanac/' => array(
         '' => 'AlmanacConsoleController',
         '(?P<objectType>service)/' => array(
           $this->getQueryRoutePattern() => 'AlmanacServiceListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacServiceEditController',
+          $this->getEditRoutePattern('edit/') => 'AlmanacServiceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacServiceViewController',
         ),
         '(?P<objectType>device)/' => array(
           $this->getQueryRoutePattern() => 'AlmanacDeviceListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacDeviceEditController',
+          $this->getEditRoutePattern('edit/') => 'AlmanacDeviceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacDeviceViewController',
         ),
         'interface/' => array(

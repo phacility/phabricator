@@ -100,7 +100,7 @@ final class DiffusionTagListView extends DiffusionView {
         $build,
         $author,
         $description,
-        phabricator_datetime($tag->getEpoch(), $this->user),
+        phabricator_datetime($tag->getEpoch(), $this->getViewer()),
       );
     }
 

@@ -6,6 +6,9 @@ final class NuanceItemQuery
   private $ids;
   private $phids;
   private $sourcePHIDs;
+  private $itemTypes;
+  private $itemKeys;
+  private $containerKeys;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +22,21 @@ final class NuanceItemQuery
 
   public function withSourcePHIDs(array $source_phids) {
     $this->sourcePHIDs = $source_phids;
+    return $this;
+  }
+
+  public function withItemTypes(array $item_types) {
+    $this->itemTypes = $item_types;
+    return $this;
+  }
+
+  public function withItemKeys(array $item_keys) {
+    $this->itemKeys = $item_keys;
+    return $this;
+  }
+
+  public function withItemContainerKeys(array $container_keys) {
+    $this->containerKeys = $container_keys;
     return $this;
   }
 
@@ -52,6 +70,17 @@ final class NuanceItemQuery
       $item->attachSource($source);
     }
 
+    $type_map = NuanceItemType::getAllItemTypes();
+    foreach ($items as $key => $item) {
+      $type = idx($type_map, $item->getItemType());
+      if (!$type) {
+        $this->didRejectResult($items[$key]);
+        unset($items[$key]);
+        continue;
+      }
+      $item->attachImplementation($type);
+    }
+
     return $items;
   }
 
@@ -77,6 +106,27 @@ final class NuanceItemQuery
         $conn,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->itemTypes !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'itemType IN (%Ls)',
+        $this->itemTypes);
+    }
+
+    if ($this->itemKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'itemKey IN (%Ls)',
+        $this->itemKeys);
+    }
+
+    if ($this->containerKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'itemContainerKey IN (%Ls)',
+        $this->containerKeys);
     }
 
     return $where;

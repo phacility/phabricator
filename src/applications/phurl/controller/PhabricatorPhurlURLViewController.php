@@ -24,24 +24,20 @@ final class PhabricatorPhurlURLViewController
     $title = $url->getMonogram();
     $page_title = $title.' '.$url->getName();
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title, $url->getURI());
+    $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $url,
       new PhabricatorPhurlURLTransactionQuery());
 
     $header = $this->buildHeaderView($url);
-    $actions = $this->buildActionView($url);
-    $properties = $this->buildPropertyView($url);
+    $curtain = $this->buildCurtain($url);
+    $details = $this->buildPropertySectionView($url);
 
-    $properties->setActionList($actions);
     $url_error = id(new PHUIInfoView())
       ->setErrors(array(pht('This URL is invalid due to a bad protocol.')))
       ->setIsHidden($url->isValid());
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties)
-      ->setInfoView($url_error);
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $add_comment_header = $is_serious
@@ -58,71 +54,80 @@ final class PhabricatorPhurlURLViewController
       ->setAction($comment_uri)
       ->setSubmitButtonName(pht('Add Comment'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $url_error,
+        $details,
         $timeline,
         $add_comment_form,
-      ),
-      array(
-        'title' => $page_title,
-        'pageObjects' => array($url->getPHID()),
       ));
+
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($url->getPHID()))
+      ->appendChild(
+        array(
+          $view,
+      ));
+
   }
 
   private function buildHeaderView(PhabricatorPhurlURL $url) {
     $viewer = $this->getViewer();
-    $icon = 'fa-compress';
-    $color = 'green';
+    $icon = 'fa-check';
+    $color = 'bluegrey';
     $status = pht('Active');
+    $id = $url->getID();
+
+    $visit = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Visit URL'))
+      ->setIcon('fa-external-link')
+      ->setHref("u/{$id}")
+      ->setDisabled(!$url->isValid());
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($url->getDisplayName())
       ->setStatus($icon, $color, $status)
-      ->setPolicyObject($url);
+      ->setPolicyObject($url)
+      ->setHeaderIcon('fa-compress')
+      ->addActionLink($visit);
 
     return $header;
   }
 
-  private function buildActionView(PhabricatorPhurlURL $url) {
+  private function buildCurtain(PhabricatorPhurlURL $url) {
     $viewer = $this->getViewer();
     $id = $url->getID();
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($url);
+    $curtain = $this->newCurtainView($url);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $url,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions
+    $curtain
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit'))
           ->setIcon('fa-pencil')
           ->setHref($this->getApplicationURI("url/edit/{$id}/"))
           ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Visit URL'))
-          ->setIcon('fa-external-link')
-          ->setHref("u/{$id}")
-          ->setDisabled(!$url->isValid()));
+          ->setWorkflow(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
-  private function buildPropertyView(PhabricatorPhurlURL $url) {
+  private function buildPropertySectionView(PhabricatorPhurlURL $url) {
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($url);
+      ->setUser($viewer);
 
     $properties->addProperty(
       pht('Original URL'),
@@ -132,18 +137,17 @@ final class PhabricatorPhurlURLViewController
       pht('Alias'),
       $url->getAlias());
 
-    $properties->invokeWillRenderEvent();
-
     $description = $url->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
-      $properties->addSectionHeader(
-        pht('Description'),
-        PHUIPropertyListView::ICON_SUMMARY);
+      $properties->addSectionHeader(pht('Description'));
       $properties->addTextContent($description);
     }
 
-    return $properties;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('DETAILS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($properties);
   }
 
 }

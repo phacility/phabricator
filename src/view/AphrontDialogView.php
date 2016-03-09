@@ -236,11 +236,11 @@ final class AphrontDialogView
         $this->cancelText);
     }
 
-    if (!$this->user) {
+    if (!$this->hasViewer()) {
       throw new Exception(
         pht(
           'You must call %s when rendering an %s.',
-          'setUser()',
+          'setViewer()',
           __CLASS__));
     }
 
@@ -308,7 +308,7 @@ final class AphrontDialogView
     if (!$this->renderAsForm) {
       $buttons = array(
         phabricator_form(
-          $this->user,
+          $this->getViewer(),
           $form_attributes,
           array_merge($hidden_inputs, $buttons)),
       );
@@ -376,7 +376,7 @@ final class AphrontDialogView
 
     if ($this->renderAsForm) {
       return phabricator_form(
-        $this->user,
+        $this->getViewer(),
         $form_attributes + $attributes,
         array($hidden_inputs, $content));
     } else {

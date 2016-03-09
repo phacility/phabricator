@@ -26,26 +26,23 @@ final class AlmanacBindingViewController
 
     $title = pht('Binding %s', $binding->getID());
 
-    $property_list = $this->buildPropertyList($binding);
-    $action_list = $this->buildActionList($binding);
-    $property_list->setActionList($action_list);
+    $properties = $this->buildPropertyList($binding);
+    $details = $this->buildPropertySection($binding);
+    $curtain = $this->buildCurtain($binding);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($title)
-      ->setPolicyObject($binding);
+      ->setPolicyObject($binding)
+      ->setHeaderIcon('fa-object-group');
 
     if ($binding->getIsDisabled()) {
       $header->setStatus('fa-ban', 'red', pht('Disabled'));
     }
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($property_list);
-
+    $issue = null;
     if ($binding->getService()->isClusterService()) {
-      $this->addClusterMessage(
-        $box,
+      $issue = $this->addClusterMessage(
         pht('The service for this binding is a cluster service.'),
         pht(
           'The service for this binding is a cluster service. You do not '.
@@ -56,24 +53,33 @@ final class AlmanacBindingViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName(), $service_uri);
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $binding,
       new AlmanacBindingTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+          $issue,
+          $this->buildAlmanacPropertiesTable($binding),
+          $timeline,
+        ))
+      ->addPropertySection(pht('DETAILS'), $details);
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $box,
-          $this->buildAlmanacPropertiesTable($binding),
-          $timeline,
+          $view,
       ));
   }
 
-  private function buildPropertyList(AlmanacBinding $binding) {
+  private function buildPropertySection(AlmanacBinding $binding) {
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
@@ -98,23 +104,36 @@ final class AlmanacBindingViewController
     return $properties;
   }
 
-  private function buildActionList(AlmanacBinding $binding) {
+  private function buildPropertyList(AlmanacBinding $binding) {
     $viewer = $this->getViewer();
-    $id = $binding->getID();
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($binding);
+    $properties->invokeWillRenderEvent();
+
+    return $properties;
+  }
+
+  private function buildCurtain(AlmanacBinding $binding) {
+    $viewer = $this->getViewer();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $binding,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $id = $binding->getID();
+    $edit_uri = $this->getApplicationURI("binding/edit/{$id}/");
+    $disable_uri = $this->getApplicationURI("binding/disable/{$id}/");
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($binding);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Binding'))
-        ->setHref($this->getApplicationURI("binding/edit/{$id}/"))
+        ->setHref($edit_uri)
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
@@ -126,17 +145,15 @@ final class AlmanacBindingViewController
       $disable_text = pht('Disable Binding');
     }
 
-    $disable_href = $this->getApplicationURI("binding/disable/{$id}/");
-
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon($disable_icon)
         ->setName($disable_text)
-        ->setHref($disable_href)
+        ->setHref($disable_uri)
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
 }

@@ -85,13 +85,13 @@ final class AphrontFormView extends AphrontView {
 
   public function appendRemarkupInstructions($remarkup) {
     return $this->appendInstructions(
-      new PHUIRemarkupView($this->getUser(), $remarkup));
+      new PHUIRemarkupView($this->getViewer(), $remarkup));
 
   }
 
   public function buildLayoutView() {
     foreach ($this->controls as $control) {
-      $control->setUser($this->getUser());
+      $control->setViewer($this->getViewer());
       $control->willRender();
     }
 
@@ -123,7 +123,7 @@ final class AphrontFormView extends AphrontView {
 
     $layout = $this->buildLayoutView();
 
-    if (!$this->user) {
+    if (!$this->hasViewer()) {
       throw new Exception(
         pht(
           'You must pass the user to %s.',
@@ -136,7 +136,7 @@ final class AphrontFormView extends AphrontView {
     }
 
     return phabricator_form(
-      $this->user,
+      $this->getViewer(),
       array(
         'class'   => $this->shaded ? 'phui-form-shaded' : null,
         'action'  => $this->action,

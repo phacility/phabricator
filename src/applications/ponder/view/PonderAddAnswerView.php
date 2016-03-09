@@ -18,7 +18,7 @@ final class PonderAddAnswerView extends AphrontView {
 
   public function render() {
     $question = $this->question;
-    $viewer = $this->user;
+    $viewer = $this->getViewer();
 
     $authors = mpull($question->getAnswers(), null, 'getAuthorPHID');
     if (isset($authors[$viewer->getPHID()])) {
@@ -49,7 +49,7 @@ final class PonderAddAnswerView extends AphrontView {
 
     $form = new AphrontFormView();
     $form
-      ->setUser($this->user)
+      ->setViewer($viewer)
       ->setAction($this->actionURI)
       ->setWorkflow(true)
       ->addHiddenInput('question_id', $question->getID())
@@ -59,7 +59,7 @@ final class PonderAddAnswerView extends AphrontView {
           ->setLabel(pht('Answer'))
           ->setError(true)
           ->setID('answer-content')
-          ->setUser($this->user))
+          ->setViewer($viewer))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Add Answer')));

@@ -46,8 +46,7 @@ final class PhabricatorSlowvotePollController
       ->setPolicyObject($poll)
       ->setHeaderIcon('fa-bar-chart');
 
-    $actions = $this->buildActionView($poll);
-    $properties = $this->buildPropertyView($poll);
+    $curtain = $this->buildCurtain($poll);
     $subheader = $this->buildSubheaderView($poll);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -68,37 +67,31 @@ final class PhabricatorSlowvotePollController
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
-      ->setMainColumn($poll_content)
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+      ->setCurtain($curtain)
+      ->setMainColumn($poll_content);
 
     return $this->newPage()
       ->setTitle('V'.$poll->getID().' '.$poll->getQuestion())
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($poll->getPHID()))
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->appendChild($view);
   }
 
-  private function buildActionView(PhabricatorSlowvotePoll $poll) {
-    $viewer = $this->getRequest()->getUser();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($poll);
+  private function buildCurtain(PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getViewer();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $poll,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $curtain = $this->newCurtainView($poll);
+
     $is_closed = $poll->getIsClosed();
     $close_poll_text = $is_closed ? pht('Reopen Poll') : pht('Close Poll');
     $close_poll_icon = $is_closed ? 'fa-play-circle-o' : 'fa-ban';
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Poll'))
         ->setIcon('fa-pencil')
@@ -106,7 +99,7 @@ final class PhabricatorSlowvotePollController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($close_poll_text)
         ->setIcon($close_poll_icon)
@@ -114,19 +107,7 @@ final class PhabricatorSlowvotePollController
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    return $view;
-  }
-
-  private function buildPropertyView(
-    PhabricatorSlowvotePoll $poll) {
-
-    $viewer = $this->getRequest()->getUser();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($poll);
-    $view->invokeWillRenderEvent();
-
-    return $view;
+    return $curtain;
   }
 
   private function buildSubheaderView(

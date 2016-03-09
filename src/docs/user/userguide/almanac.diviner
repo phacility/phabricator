@@ -6,21 +6,24 @@ Using Almanac to manage devices and services.
 Overview
 ========
 
-IMPORTANT: Almanac is a prototype application. See
-@{article:User Guide: Prototype Applications}.
-
 Almanac is a device and service inventory application. It allows you to create
 lists of //devices// and //services// that humans and other applications can
 use to keep track of what is running where.
+
+Almanac is an infrastructure application that will normally be used by
+administrators to configure advanced Phabricator features. In most cases,
+normal users will very rarely interact with Almanac directly.
 
 At a very high level, Almanac can be thought of as a bit like a DNS server.
 Callers ask it for information about services, and it responds with details
 about which devices host those services. However, it can respond to a broader
 range of queries and provide more detailed responses than DNS alone can.
 
-Today, the primary use cases for Almanac involve configuring Phabricator
-itself: Almanac is used to configure Phabricator to operate in a cluster setup,
-and to expose hardware to Drydock so it can run build and integration tasks.
+Today, the primary use cases for Almanac are internal to Phabricator:
+
+  - Providing a list of build servers to Drydock so it can run build and
+    integration tasks.
+  - Configuring Phabricator to operate in a cluster setup.
 
 Beyond internal uses, Almanac is a general-purpose service and device inventory
 application and can be used to configure and manage other types of service and
@@ -37,13 +40,13 @@ introduction to Almanac concepts and a better idea of how the pieces fit
 together.
 
 In this scenario, we want to use Drydock to run some sort of build process. To
-do this, Drydock needs hardware to run on. We're going to use Almanac to tell
-Drydock about the hardware it should use.
+do this, Drydock needs hardware to run on. We're going to use Almanac to give
+Drydock a list of hosts it should use.
 
 In this scenario, Almanac will work a bit like a DNS server. When we're done,
 Drydock will be able to query Almanac for information about a service (like
 `build.mycompany.com`) and get back information about which hosts are part of
-that service and where it should connect to.
+that service and which addresses/ports it should connect to.
 
 Before getting started, we need to create a **network**. For simplicity, let's
 suppose everything will be connected through the public internet. If you
@@ -52,7 +55,7 @@ haven't already, you'd create a "Public Internet" network first.
 Once we have a network, we create the actual physical or virtual hosts by
 launching instances in EC2, or racking and powering on some servers, or already
 having some hardware on hand we want to use. We set the hosts up normally and
-connect them to the internet or network.
+connect them to the internet (or another network).
 
 After the hosts exist, we add them to Almanac as **devices**, like
 `build001.mycompany.com`, `build002.mycompany.com`, and so on. In Almanac,
@@ -93,7 +96,7 @@ them from the service.
 Concepts
 ========
 
-The major concepts in Almanac are **devices*, **interfaces**, **services**,
+The major concepts in Almanac are **devices**, **interfaces**, **services**,
 **bindings**, **networks**, and **namespaces**.
 
 **Devices**: Almanac devices represent physical or virtual devices.

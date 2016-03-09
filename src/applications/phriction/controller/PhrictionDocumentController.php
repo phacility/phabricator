@@ -151,7 +151,7 @@ final class PhrictionDocumentController
               array(),
               pht(
                 'This document has been moved. You can edit it to put new '.
-                'contne here, or use history to revert to an earlier '.
+                'content here, or use history to revert to an earlier '.
                 'version.')));
         }
 

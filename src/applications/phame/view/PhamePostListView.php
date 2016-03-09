@@ -4,7 +4,6 @@ final class PhamePostListView extends AphrontTagView {
 
   private $posts;
   private $nodata;
-  private $viewer;
   private $showBlog = false;
   private $isExternal;
   private $isLive;
@@ -22,11 +21,6 @@ final class PhamePostListView extends AphrontTagView {
 
   public function showBlog($show) {
     $this->showBlog = $show;
-    return $this;
-  }
-
-  public function setViewer($viewer) {
-    $this->viewer = $viewer;
     return $this;
   }
 
@@ -53,7 +47,7 @@ final class PhamePostListView extends AphrontTagView {
   }
 
   protected function getTagContent() {
-    $viewer = $this->viewer;
+    $viewer = $this->getViewer();
     $posts = $this->posts;
     $nodata = $this->nodata;
 

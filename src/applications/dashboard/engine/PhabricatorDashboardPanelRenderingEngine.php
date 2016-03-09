@@ -253,7 +253,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       ->setIcon('fa-pencil')
       ->setWorkflow(true)
       ->setHref((string)$edit_uri);
-    $header->addActionIcon($action_edit);
+    $header->addActionItem($action_edit);
 
     if ($dashboard_id) {
       $uri = id(new PhutilURI(
@@ -263,7 +263,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         ->setIcon('fa-trash-o')
         ->setHref((string)$uri)
         ->setWorkflow(true);
-      $header->addActionIcon($action_remove);
+      $header->addActionItem($action_remove);
     }
     return $header;
   }

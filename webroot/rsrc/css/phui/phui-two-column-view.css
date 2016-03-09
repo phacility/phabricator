@@ -8,6 +8,10 @@
   margin-bottom: 24px;
 }
 
+.device .phui-two-column-view .phui-two-column-header {
+  margin-bottom: 12px;
+}
+
 .phui-two-column-view.with-subheader .phui-two-column-header {
   margin-bottom: 0;
 }
@@ -83,7 +87,7 @@
 
 .phui-two-column-view .phui-timeline-view {
   padding: 0;
-  background-position: 78px;
+  background-position: 80px;
 }
 
 .phui-two-column-view .phui-main-column .phui-object-box + .phui-timeline-view {
@@ -96,6 +100,14 @@
 }
 
 .device-phone .phui-two-column-view .phui-timeline-event-view {
+  margin: 0;
+}
+
+.phui-main-column > .phui-timeline-view:first-child {
+  border-top: 1px solid {$thinblueborder};
+}
+
+.device-phone .phui-main-column .phui-timeline-older-transactions-are-hidden {
   margin: 0;
 }
 
@@ -129,34 +141,6 @@
 
 .phui-two-column-properties.phui-object-box {
   border: 1px solid rgba({$alphablue}, .2);
-}
-
-.phui-two-column-properties .phui-property-list-stacked
-  .phui-property-list-properties .phui-property-list-key {
-    margin: 4px 0 8px 0;
-    padding: 20px 4px 0;
-    border-top: 1px solid rgba({$alphablue}, .2);
-}
-
-.phui-two-column-properties .phui-property-list-stacked
-  .phui-property-list-properties .phui-property-list-value {
-    margin: 0 0 20px 0;
-    padding: 0 4px;
-}
-
-.device-desktop .phui-two-column-properties .phui-property-list-container {
-  padding: 0;
-}
-
-.device .phui-two-column-properties .phui-property-list-stacked
-  .phui-property-list-properties .phui-property-list-key {
-    margin: 12px 0 4px 0;
-    padding: 0;
-    border: none;
-}
-
-.device .phui-two-column-properties .phui-property-list-container {
-  padding: 0 0 12px 0;
 }
 
 .device .phui-two-column-content .phui-two-column-properties.phui-object-box {

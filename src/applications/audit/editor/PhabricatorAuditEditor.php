@@ -636,6 +636,8 @@ final class PhabricatorAuditEditor
       }
     }
 
+    $phids[] = $this->getActingAsPHID();
+
     return $phids;
   }
 

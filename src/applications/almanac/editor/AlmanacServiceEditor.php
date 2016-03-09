@@ -152,4 +152,28 @@ final class AlmanacServiceEditor
     return $errors;
   }
 
+
+  protected function validateAllTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $errors = parent::validateAllTransactions($object, $xactions);
+
+    if ($object->isClusterService()) {
+      $can_manage = PhabricatorPolicyFilter::hasCapability(
+        $this->getActor(),
+        new PhabricatorAlmanacApplication(),
+        AlmanacManageClusterServicesCapability::CAPABILITY);
+      if (!$can_manage) {
+        $errors[] = new PhabricatorApplicationTransactionValidationError(
+          null,
+          pht('Restricted'),
+          pht('You do not have permission to manage cluster services.'),
+          null);
+      }
+    }
+
+    return $errors;
+  }
+
 }

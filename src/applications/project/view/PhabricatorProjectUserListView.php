@@ -45,7 +45,7 @@ abstract class PhabricatorProjectUserListView extends AphrontView {
   abstract protected function getHeaderText();
 
   public function render() {
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
     $project = $this->getProject();
     $user_phids = $this->getUserPHIDs();
 

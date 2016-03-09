@@ -119,7 +119,7 @@ final class PhabricatorDashboardQueryPanelType
     $icon = id(new PHUIIconView())
         ->setIcon('fa-search')
         ->setHref($href);
-    $header->addActionIcon($icon);
+    $header->addActionItem($icon);
 
     return $header;
   }

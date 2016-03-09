@@ -11,6 +11,7 @@ final class PHUITwoColumnView extends AphrontTagView {
   private $propertySection = array();
   private $actionList;
   private $propertyList;
+  private $curtain;
 
   const DISPLAY_LEFT = 'phui-side-column-left';
   const DISPLAY_RIGHT = 'phui-side-column-right';
@@ -48,6 +49,15 @@ final class PHUITwoColumnView extends AphrontTagView {
   public function setPropertyList(PHUIPropertyListView $list) {
     $this->propertyList = $list;
     return $this;
+  }
+
+  public function setCurtain(PHUICurtainView $curtain) {
+    $this->curtain = $curtain;
+    return $this;
+  }
+
+  public function getCurtain() {
+    return $this->curtain;
   }
 
   public function setFluid($fluid) {
@@ -98,9 +108,17 @@ final class PHUITwoColumnView extends AphrontTagView {
 
     $header = null;
     if ($this->header) {
-      if ($this->actionList) {
-        $this->header->setActionList($this->actionList);
+      $curtain = $this->getCurtain();
+      if ($curtain) {
+        $action_list = $curtain->getActionList();
+      } else {
+        $action_list = $this->actionList;
       }
+
+      if ($action_list) {
+        $this->header->setActionList($action_list);
+      }
+
       $header = phutil_tag_div(
         'phui-two-column-header', $this->header);
     }
@@ -166,6 +184,8 @@ final class PHUITwoColumnView extends AphrontTagView {
         ->addClass('phui-two-column-properties');
     }
 
+    $curtain = $this->getCurtain();
+
     return phutil_tag(
       'div',
       array(
@@ -173,6 +193,7 @@ final class PHUITwoColumnView extends AphrontTagView {
       ),
       array(
         $properties,
+        $curtain,
         $this->sideColumn,
       ));
   }

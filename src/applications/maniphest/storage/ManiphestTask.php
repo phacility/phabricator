@@ -269,10 +269,6 @@ final class ManiphestTask extends ManiphestDAO
     return ($phid == $this->getOwnerPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 

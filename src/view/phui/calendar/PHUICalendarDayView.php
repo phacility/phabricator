@@ -278,7 +278,7 @@ final class PHUICalendarDayView extends AphrontView {
       ->addClass('calendar-day-view-sidebar');
 
     $list = id(new PHUICalendarListView())
-      ->setUser($this->user)
+      ->setUser($this->getViewer())
       ->setView('day');
 
     if (count($events) == 0) {
@@ -304,7 +304,7 @@ final class PHUICalendarDayView extends AphrontView {
 
     $box_start_time = clone $display_start_day;
 
-    $today_time = PhabricatorTime::getTodayMidnightDateTime($this->user);
+    $today_time = PhabricatorTime::getTodayMidnightDateTime($this->getViewer());
     $tomorrow_time = clone $today_time;
     $tomorrow_time->modify('+1 day');
 
@@ -437,7 +437,7 @@ final class PHUICalendarDayView extends AphrontView {
   }
 
   private function getDateTime() {
-    $user = $this->user;
+    $user = $this->getViewer();
     $timezone = new DateTimeZone($user->getTimezoneIdentifier());
 
     $day = $this->day;
