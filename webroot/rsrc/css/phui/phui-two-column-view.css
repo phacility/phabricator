@@ -87,7 +87,7 @@
 
 .phui-two-column-view .phui-timeline-view {
   padding: 0;
-  background-position: 78px;
+  background-position: 80px;
 }
 
 .phui-two-column-view .phui-main-column .phui-object-box + .phui-timeline-view {
@@ -105,6 +105,10 @@
 
 .phui-main-column > .phui-timeline-view:first-child {
   border-top: 1px solid {$thinblueborder};
+}
+
+.device-phone .phui-main-column .phui-timeline-older-transactions-are-hidden {
+  margin: 0;
 }
 
 /* Main Column Properties */
