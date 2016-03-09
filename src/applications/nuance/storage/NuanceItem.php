@@ -87,10 +87,6 @@ final class NuanceItem
     return '/nuance/item/view/'.$this->getID().'/';
   }
 
-  public function getLabel(PhabricatorUser $viewer) {
-    return pht('TODO: An Item');
-  }
-
   public function getRequestor() {
     return $this->assertAttached($this->requestor);
   }
@@ -144,7 +140,7 @@ final class NuanceItem
   }
 
   public function getDisplayName() {
-    return pht('An Item');
+    return $this->getImplementation()->getItemDisplayName($this);
   }
 
   public function scheduleUpdate() {

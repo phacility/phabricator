@@ -193,13 +193,6 @@ abstract class NuanceSourceDefinition extends Phobject {
     return $item;
   }
 
-  public function renderItemViewProperties(
-    PhabricatorUser $viewer,
-    NuanceItem $item,
-    PHUIPropertyListView $view) {
-    return;
-  }
-
   public function renderItemEditProperties(
     PhabricatorUser $viewer,
     NuanceItem $item,

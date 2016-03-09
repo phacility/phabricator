@@ -3,9 +3,35 @@
 abstract class NuanceItemType
   extends Phobject {
 
+  private $viewer;
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
+
   public function canUpdateItems() {
     return false;
   }
+
+  final public function buildItemView(NuanceItem $item) {
+    return $this->newItemView($item);
+  }
+
+  protected function newItemView() {
+    return null;
+  }
+
+  public function getItemTypeDisplayIcon() {
+    return null;
+  }
+
+  abstract public function getItemTypeDisplayName();
+  abstract public function getItemDisplayName(NuanceItem $item);
 
   final public function updateItem(NuanceItem $item) {
     if (!$this->canUpdateItems()) {

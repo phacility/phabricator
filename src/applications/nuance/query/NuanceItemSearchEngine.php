@@ -61,12 +61,16 @@ final class NuanceItemSearchEngine
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
     foreach ($items as $item) {
+      $impl = $item->getImplementation();
+
       $view = id(new PHUIObjectItemView())
         ->setObjectName(pht('Item %d', $item->getID()))
         ->setHeader($item->getDisplayName())
         ->setHref($item->getURI());
 
-      $view->addIcon('none', $item->getItemType());
+      $view->addIcon(
+        $impl->getItemTypeDisplayIcon(),
+        $impl->getItemTypeDisplayName());
 
       $list->addItem($view);
     }

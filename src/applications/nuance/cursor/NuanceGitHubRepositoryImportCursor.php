@@ -158,6 +158,9 @@ final class NuanceGitHubRepositoryImportCursor
 
     $this->updatePolling($response, $now, true);
 
+    // Reverse the new items so we insert them in chronological order.
+    $new_items = array_reverse($new_items);
+
     $source->openTransaction();
       foreach ($new_items as $new_item) {
         $new_item->save();

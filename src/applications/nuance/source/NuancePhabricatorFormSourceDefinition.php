@@ -72,13 +72,6 @@ final class NuancePhabricatorFormSourceDefinition
     return $box;
   }
 
-  public function renderItemViewProperties(
-    PhabricatorUser $viewer,
-    NuanceItem $item,
-    PHUIPropertyListView $view) {
-    $this->renderItemCommonProperties($viewer, $item, $view);
-  }
-
   public function renderItemEditProperties(
     PhabricatorUser $viewer,
     NuanceItem $item,
