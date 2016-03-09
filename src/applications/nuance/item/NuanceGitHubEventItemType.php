@@ -74,13 +74,74 @@ final class NuanceGitHubEventItemType
   }
 
   protected function updateItemFromSource(NuanceItem $item) {
+    $viewer = $this->getViewer();
+    $is_dirty = false;
+
     // TODO: Link up the requestor, etc.
 
-    if ($item->getStatus() == NuanceItem::STATUS_IMPORTING) {
-      $item
-        ->setStatus(NuanceItem::STATUS_ROUTING)
-        ->save();
+    $source = $item->getSource();
+    $token = $source->getSourceProperty('github.token');
+    $token = new PhutilOpaqueEnvelope($token);
+
+    $ref = $this->getDoorkeeperRef($item);
+    if ($ref) {
+      $ref = id(new DoorkeeperImportEngine())
+        ->setViewer($viewer)
+        ->setRefs(array($ref))
+        ->setThrowOnMissingLink(true)
+        ->setContextProperty('github.token', $token)
+        ->executeOne();
+
+      if ($ref->getSyncFailed()) {
+        $xobj = null;
+      } else {
+        $xobj = $ref->getExternalObject();
+      }
+
+      if ($xobj) {
+        $item->setItemProperty('doorkeeper.xobj.phid', $xobj->getPHID());
+        $is_dirty = true;
+      }
     }
+
+    if ($item->getStatus() == NuanceItem::STATUS_IMPORTING) {
+      $item->setStatus(NuanceItem::STATUS_ROUTING);
+      $is_dirty = true;
+    }
+
+    if ($is_dirty) {
+      $item->save();
+    }
+  }
+
+  private function getDoorkeeperRef(NuanceItem $item) {
+    $raw = $this->newRawEvent($item);
+
+    $full_repository = $raw->getRepositoryFullName();
+    if (!strlen($full_repository)) {
+      return null;
+    }
+
+    if ($raw->isIssueEvent()) {
+      $ref_type = DoorkeeperBridgeGitHubIssue::OBJTYPE_GITHUB_ISSUE;
+      $issue_number = $raw->getIssueNumber();
+      $full_ref = "{$full_repository}#{$issue_number}";
+    } else {
+      return null;
+    }
+
+    return id(new DoorkeeperObjectRef())
+      ->setApplicationType(DoorkeeperBridgeGitHub::APPTYPE_GITHUB)
+      ->setApplicationDomain(DoorkeeperBridgeGitHub::APPDOMAIN_GITHUB)
+      ->setObjectType($ref_type)
+      ->setObjectID($full_ref);
+  }
+
+  private function newRawEvent(NuanceItem $item) {
+    $type = $item->getItemProperty('api.type');
+    $raw = $item->getItemProperty('api.raw', array());
+
+    return NuanceGitHubRawEvent::newEvent($type, $raw);
   }
 
 }

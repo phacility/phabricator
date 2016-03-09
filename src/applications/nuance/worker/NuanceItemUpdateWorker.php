@@ -25,9 +25,14 @@ final class NuanceItemUpdateWorker
 
   private function updateItem(NuanceItem $item) {
     $impl = $item->getImplementation();
-    if ($impl->canUpdateItems()) {
-      $impl->updateItem($item);
+    if (!$impl->canUpdateItems()) {
+      return null;
     }
+
+    $viewer = $this->getViewer();
+
+    $impl->setViewer($viewer);
+    $impl->updateItem($item);
   }
 
   private function routeItem(NuanceItem $item) {
