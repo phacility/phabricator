@@ -114,7 +114,7 @@ abstract class NuanceSourceDefinition extends Phobject {
         ->setCursorData($cursor_data);
     }
 
-    return $cursors;
+    return $map;
   }
 
   protected function newImportCursors() {

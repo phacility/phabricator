@@ -1,40 +1,21 @@
 <?php
 
-final class NuanceGitHubRepositoryImportCursor
+final class NuanceGitHubIssuesImportCursor
   extends NuanceGitHubImportCursor {
 
-  const CURSORTYPE = 'github.repository';
+  const CURSORTYPE = 'github.issues';
 
   protected function getGitHubAPIEndpointURI($user, $repository) {
-    return "/repos/{$user}/{$repository}/events";
-  }
-
-  protected function getMaximumPage() {
-    return 10;
-  }
-
-  protected function getPageSize() {
-    return 30;
+    return "/repos/{$user}/{$repository}/issues/events";
   }
 
   protected function newNuanceItemFromGitHubRecord(array $record) {
     $source = $this->getSource();
 
     $id = $record['id'];
-    $item_key = "github.event.{$id}";
+    $item_key = "github.issueevent.{$id}";
 
     $container_key = null;
-
-    $issue_id = idxv(
-      $record,
-      array(
-        'payload',
-        'issue',
-        'id',
-      ));
-    if ($issue_id) {
-      $container_key = "github.issue.{$issue_id}";
-    }
 
     return NuanceItem::initializeNewItem()
       ->setStatus(NuanceItem::STATUS_IMPORTING)
@@ -42,7 +23,7 @@ final class NuanceGitHubRepositoryImportCursor
       ->setItemType(NuanceGitHubEventItemType::ITEMTYPE)
       ->setItemKey($item_key)
       ->setItemContainerKey($container_key)
-      ->setItemProperty('api.type', 'repository')
+      ->setItemProperty('api.type', 'issue')
       ->setItemProperty('api.raw', $record);
   }
 

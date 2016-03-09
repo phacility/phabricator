@@ -23,6 +23,8 @@ final class NuanceGitHubRepositorySourceDefinition
     return array(
       id(new NuanceGitHubRepositoryImportCursor())
         ->setCursorKey('events.repository'),
+      id(new NuanceGitHubIssuesImportCursor())
+        ->setCursorKey('events.issues'),
     );
   }
 

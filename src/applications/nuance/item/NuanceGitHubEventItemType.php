@@ -14,6 +14,27 @@ final class NuanceGitHubEventItemType
   }
 
   public function getItemDisplayName(NuanceItem $item) {
+    $api_type = $item->getItemProperty('api.type');
+    switch ($api_type) {
+      case 'issue':
+        return $this->getGitHubIssueAPIEventDisplayName($item);
+      case 'repository':
+        return $this->getGitHubRepositoryAPIEventDisplayName($item);
+      default:
+        return pht('GitHub Event (Unknown API Type "%s")', $api_type);
+    }
+  }
+
+  private function getGitHubIssueAPIEventDisplayName(NuanceItem $item) {
+    $raw = $item->getItemProperty('api.raw', array());
+
+    $action = idxv($raw, array('event'));
+    $number = idxv($raw, array('issue', 'number'));
+
+    return pht('GitHub Issue #%d (%s)', $number, $action);
+  }
+
+  private function getGitHubRepositoryAPIEventDisplayName(NuanceItem $item) {
     $raw = $item->getItemProperty('api.raw', array());
 
     $repo = idxv($raw, array('repo', 'name'), pht('<unknown/unknown>'));
