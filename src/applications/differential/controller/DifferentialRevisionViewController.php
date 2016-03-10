@@ -481,19 +481,21 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
         ->setCollapsed((bool)$collapsed)
         ->build($changesets);
-      $nav->appendChild($content);
-      $nav->setCrumbs($crumbs);
-      $content = $nav;
     } else {
-      array_unshift($content, $crumbs);
+      $nav = null;
     }
 
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => $object_id.' '.$revision->getTitle(),
-        'pageObjects' => array($revision->getPHID()),
-      ));
+    $page = $this->newPage()
+      ->setTitle($object_id.' '.$revision->getTitle())
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($revision->getPHID()))
+      ->appendChild($content);
+
+    if ($nav) {
+      $page->setNavigation($nav);
+    }
+
+    return $page;
   }
 
   private function getRevisionActions(DifferentialRevision $revision) {
