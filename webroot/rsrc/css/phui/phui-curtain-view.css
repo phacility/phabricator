@@ -29,3 +29,13 @@
 .device .phui-curtain-panel-body {
   padding: 0;
 }
+
+/* Project tags */
+
+.phui-curtain-panel-body .phabricator-handle-tag-list-item {
+  line-height: 21px;
+}
+
+.phui-side-column .phui-curtain-panel-body .phui-tag-view {
+  white-space: pre-wrap;
+}
