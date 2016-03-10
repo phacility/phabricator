@@ -244,6 +244,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $author_href = $handles[$author_phid]->getURI();
     $author = $viewer->renderHandle($author_phid)->render();
     $content = phutil_tag('strong', array(), $author);
+    $date = phabricator_date($task->getDateCreated(), $viewer);
+    $content = pht('%s, %s', $content, $date);
     $authored_by = id(new PHUIHeadThingView())
       ->setImage($author_uri)
       ->setImageHref($author_href)
