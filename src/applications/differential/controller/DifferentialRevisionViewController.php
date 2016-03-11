@@ -1078,6 +1078,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
       return null;
     }
 
+    if (!$diff->getBuildable()) {
+      return null;
+    }
+
     $interesting_messages = array();
     foreach ($diff->getUnitMessages() as $message) {
       switch ($message->getResult()) {
