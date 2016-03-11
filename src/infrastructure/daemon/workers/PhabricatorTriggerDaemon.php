@@ -411,7 +411,7 @@ final class PhabricatorTriggerDaemon
     }
 
     // If we haven't loaded sources yet, load them first.
-    if (!$this->nuanceSources) {
+    if (!$this->nuanceSources && !$this->nuanceCursors) {
       $this->anyNuanceData = false;
 
       $sources = id(new NuanceSourceQuery())
