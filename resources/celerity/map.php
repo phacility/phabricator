@@ -421,7 +421,7 @@ return array(
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '5e9f347c',
     'rsrc/js/application/projects/WorkboardBoard.js' => '52291776',
     'rsrc/js/application/projects/WorkboardCard.js' => 'c587b80f',
-    'rsrc/js/application/projects/WorkboardColumn.js' => 'f05d6e5d',
+    'rsrc/js/application/projects/WorkboardColumn.js' => 'bae58312',
     'rsrc/js/application/projects/WorkboardController.js' => '55baf5ed',
     'rsrc/js/application/projects/behavior-project-boards.js' => '14a1faae',
     'rsrc/js/application/projects/behavior-project-create.js' => '065227cc',
@@ -732,7 +732,7 @@ return array(
     'javelin-websocket' => 'e292eaf4',
     'javelin-workboard-board' => '52291776',
     'javelin-workboard-card' => 'c587b80f',
-    'javelin-workboard-column' => 'f05d6e5d',
+    'javelin-workboard-column' => 'bae58312',
     'javelin-workboard-controller' => '55baf5ed',
     'javelin-workflow' => '5b2e3e2b',
     'lightbox-attachment-css' => '7acac05d',
@@ -1794,6 +1794,10 @@ return array(
     'b6b0d1bb' => array(
       'phui-inline-comment-view-css',
     ),
+    'bae58312' => array(
+      'javelin-install',
+      'javelin-workboard-card',
+    ),
     'bcaccd64' => array(
       'javelin-behavior',
       'javelin-behavior-device',
@@ -2061,10 +2065,6 @@ return array(
       'javelin-util',
       'javelin-workflow',
       'javelin-json',
-    ),
-    'f05d6e5d' => array(
-      'javelin-install',
-      'javelin-workboard-card',
     ),
     'f411b6ae' => array(
       'javelin-behavior',
