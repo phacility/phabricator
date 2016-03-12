@@ -137,12 +137,12 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   private function getTimeFormat() {
-    return $this->getUser()
+    return $this->getViewer()
       ->getPreference(PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
   }
 
   private function getDateFormat() {
-    return $this->getUser()
+    return $this->getViewer()
       ->getPreference(PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT);
   }
 
@@ -153,7 +153,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
   private function formatTime($epoch, $fmt) {
     return phabricator_format_local_time(
       $epoch,
-      $this->user,
+      $this->getViewer(),
       $fmt);
   }
 
@@ -259,7 +259,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       $time_sel);
 
-    $preferences = $this->user->loadPreferences();
+    $preferences = $this->getViewer()->loadPreferences();
     $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
     $week_start = $preferences->getPreference($pref_week_start, 0);
 
@@ -300,12 +300,9 @@ final class AphrontFormDateControl extends AphrontFormControl {
       return $this->zone;
     }
 
-    $user = $this->getUser();
-    if (!$this->getUser()) {
-      throw new PhutilInvalidStateException('setUser');
-    }
+    $viewer = $this->getViewer();
 
-    $user_zone = $user->getTimezoneIdentifier();
+    $user_zone = $viewer->getTimezoneIdentifier();
     $this->zone = new DateTimeZone($user_zone);
     return $this->zone;
   }

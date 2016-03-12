@@ -169,9 +169,6 @@ final class PhabricatorPhurlURL extends PhabricatorPhurlDAO
     return ($phid == $this->getAuthorPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

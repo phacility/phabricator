@@ -78,12 +78,11 @@ final class PHUIDiffInlineCommentEditView
     if (!$this->uri) {
       throw new PhutilInvalidStateException('setSubmitURI');
     }
-    if (!$this->user) {
-      throw new PhutilInvalidStateException('setUser');
-    }
+
+    $viewer = $this->getViewer();
 
     $content = phabricator_form(
-      $this->user,
+      $viewer,
       array(
         'action'    => $this->uri,
         'method'    => 'POST',

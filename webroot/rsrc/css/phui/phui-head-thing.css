@@ -10,7 +10,7 @@
   padding-left: 32px;
 }
 
-.device-phone .phui-head-thing-view {
+.device-phone .phui-two-column-subheader .phui-head-thing-view {
   min-height: 24px;
   height: auto;
   line-height: inherit;

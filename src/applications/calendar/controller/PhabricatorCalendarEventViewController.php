@@ -63,8 +63,7 @@ final class PhabricatorCalendarEventViewController
     }
 
     $header = $this->buildHeaderView($event);
-    $actions = $this->buildActionView($event);
-    $properties = $this->buildPropertyListView($event);
+    $curtain = $this->buildCurtain($event);
     $details = $this->buildPropertySection($event);
     $description = $this->buildDescriptionView($event);
 
@@ -90,11 +89,13 @@ final class PhabricatorCalendarEventViewController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setMainColumn($timeline)
-      ->setPropertyList($properties)
+      ->setMainColumn(array(
+          $timeline,
+          $add_comment_form,
+        ))
+      ->setCurtain($curtain)
       ->addPropertySection(pht('DETAILS'), $details)
-      ->addPropertySection(pht('DESCRIPTION'), $description)
-      ->setActionList($actions);
+      ->addPropertySection(pht('DESCRIPTION'), $description);
 
     return $this->newPage()
       ->setTitle($page_title)
@@ -148,15 +149,11 @@ final class PhabricatorCalendarEventViewController
     return $header;
   }
 
-  private function buildActionView(PhabricatorCalendarEvent $event) {
+  private function buildCurtain(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
     $id = $event->getID();
     $is_cancelled = $event->getIsCancelled();
     $is_attending = $event->getIsUserAttending($viewer->getPHID());
-
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($event);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -178,8 +175,10 @@ final class PhabricatorCalendarEventViewController
       $edit_uri = "event/edit/{$id}/";
     }
 
+    $curtain = $this->newCurtainView($event);
+
     if ($edit_label && $edit_uri) {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($edit_label)
           ->setIcon('fa-pencil')
@@ -189,14 +188,14 @@ final class PhabricatorCalendarEventViewController
     }
 
     if ($is_attending) {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Decline Event'))
           ->setIcon('fa-user-times')
           ->setHref($this->getApplicationURI("event/join/{$id}/"))
           ->setWorkflow(true));
     } else {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Join Event'))
           ->setIcon('fa-user-plus')
@@ -230,7 +229,7 @@ final class PhabricatorCalendarEventViewController
     }
 
     if ($is_cancelled) {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($reinstate_label)
           ->setIcon('fa-plus')
@@ -238,7 +237,7 @@ final class PhabricatorCalendarEventViewController
           ->setDisabled($cancel_disabled)
           ->setWorkflow(true));
     } else {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($cancel_label)
           ->setIcon('fa-times')
@@ -247,20 +246,7 @@ final class PhabricatorCalendarEventViewController
           ->setWorkflow(true));
     }
 
-    return $actions;
-  }
-
-  private function buildPropertyListView(
-    PhabricatorCalendarEvent $event) {
-    $viewer = $this->getViewer();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($event);
-
-    $properties->invokeWillRenderEvent();
-
-    return $properties;
+    return $curtain;
   }
 
   private function buildPropertySection(

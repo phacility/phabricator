@@ -3,6 +3,7 @@
 abstract class DoorkeeperBridge extends Phobject {
 
   private $viewer;
+  private $context = array();
   private $throwOnMissingLink;
 
   public function setThrowOnMissingLink($throw_on_missing_link) {
@@ -17,6 +18,15 @@ abstract class DoorkeeperBridge extends Phobject {
 
   final public function getViewer() {
     return $this->viewer;
+  }
+
+  final public function setContext($context) {
+    $this->context = $context;
+    return $this;
+  }
+
+  final public function getContextProperty($key, $default = null) {
+    return idx($this->context, $key, $default);
   }
 
   public function isEnabled() {

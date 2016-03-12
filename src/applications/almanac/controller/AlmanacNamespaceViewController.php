@@ -21,8 +21,7 @@ final class AlmanacNamespaceViewController
 
     $title = pht('Namespace %s', $namespace->getName());
 
-    $properties = $this->buildPropertyList($namespace);
-    $actions = $this->buildActionList($namespace);
+    $curtain = $this->buildCurtain($namespace);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
@@ -41,11 +40,10 @@ final class AlmanacNamespaceViewController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setCurtain($curtain)
       ->setMainColumn(array(
           $timeline,
-        ))
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+        ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -56,39 +54,28 @@ final class AlmanacNamespaceViewController
         ));
   }
 
-  private function buildPropertyList(AlmanacNamespace $namespace) {
+  private function buildCurtain(AlmanacNamespace $namespace) {
     $viewer = $this->getViewer();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($namespace);
-
-    $properties->invokeWillRenderEvent();
-
-    return $properties;
-  }
-
-  private function buildActionList(AlmanacNamespace $namespace) {
-    $viewer = $this->getViewer();
-    $id = $namespace->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $namespace,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $id = $namespace->getID();
+    $edit_uri = $this->getApplicationURI("namespace/edit/{$id}/");
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($namespace);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Namespace'))
-        ->setHref($this->getApplicationURI("namespace/edit/{$id}/"))
+        ->setHref($edit_uri)
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
 }

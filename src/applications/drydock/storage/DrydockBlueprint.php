@@ -350,7 +350,7 @@ final class DrydockBlueprint extends DrydockDAO
   }
 
 
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 
 
   public function newNgrams() {

@@ -77,6 +77,7 @@ final class PhabricatorManiphestConfigOptions
         'name.full' => pht('Closed, Resolved'),
         'closed' => true,
         'special' => ManiphestTaskStatus::SPECIAL_CLOSED,
+        'transaction.icon' => 'fa-check-circle',
         'prefixes' => array(
           'closed',
           'closes',
@@ -97,6 +98,7 @@ final class PhabricatorManiphestConfigOptions
       'wontfix' => array(
         'name' => pht('Wontfix'),
         'name.full' => pht('Closed, Wontfix'),
+        'transaction.icon' => 'fa-ban',
         'closed' => true,
         'prefixes' => array(
           'wontfix',
@@ -110,6 +112,7 @@ final class PhabricatorManiphestConfigOptions
       'invalid' => array(
         'name' => pht('Invalid'),
         'name.full' => pht('Closed, Invalid'),
+        'transaction.icon' => 'fa-minus-circle',
         'closed' => true,
         'claim' => false,
         'prefixes' => array(

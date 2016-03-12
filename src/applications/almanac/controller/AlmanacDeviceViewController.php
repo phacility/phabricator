@@ -23,8 +23,7 @@ final class AlmanacDeviceViewController
 
     $title = pht('Device %s', $device->getName());
 
-    $properties = $this->buildPropertyList($device);
-    $actions = $this->buildActionList($device);
+    $curtain = $this->buildCurtain($device);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
@@ -55,6 +54,7 @@ final class AlmanacDeviceViewController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setCurtain($curtain)
       ->setMainColumn(array(
           $issue,
           $interfaces,
@@ -62,9 +62,7 @@ final class AlmanacDeviceViewController
           $this->buildSSHKeysTable($device),
           $this->buildServicesTable($device),
           $timeline,
-        ))
-      ->setPropertyList($properties)
-      ->setActionList($actions);
+        ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -75,37 +73,28 @@ final class AlmanacDeviceViewController
         ));
   }
 
-  private function buildPropertyList(AlmanacDevice $device) {
+  private function buildCurtain(AlmanacDevice $device) {
     $viewer = $this->getViewer();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($device);
-
-    return $properties;
-  }
-
-  private function buildActionList(AlmanacDevice $device) {
-    $viewer = $this->getViewer();
-    $id = $device->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $device,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $id = $device->getID();
+    $edit_uri = $this->getApplicationURI("device/edit/{$id}/");
 
-    $actions->addAction(
+    $curtain = $this->newCurtainView($device);
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Device'))
-        ->setHref($this->getApplicationURI("device/edit/{$id}/"))
+        ->setHref($edit_uri)
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
-    return $actions;
+    return $curtain;
   }
 
   private function buildInterfaceList(AlmanacDevice $device) {

@@ -221,6 +221,7 @@ JX.install('WorkboardColumn', {
       var board = this.getBoard();
 
       var points = {};
+      var count = 0;
       for (var phid in cards) {
         var card = cards[phid];
 
@@ -238,6 +239,8 @@ JX.install('WorkboardColumn', {
           }
           points[status] += card_points;
         }
+
+        count++;
       }
 
       var total_points = 0;
@@ -252,6 +255,10 @@ JX.install('WorkboardColumn', {
         display_value = total_points + ' / ' + limit;
       } else {
         display_value = total_points;
+      }
+
+      if (board.getPointsEnabled()) {
+        display_value = count + ' | ' + display_value;
       }
 
       var over_limit = ((limit !== null) && (total_points > limit));

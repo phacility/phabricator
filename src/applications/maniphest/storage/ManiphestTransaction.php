@@ -301,7 +301,7 @@ final class ManiphestTransaction
         if ($this->getAuthorPHID() == $new) {
           return pht('Claimed');
         } else if (!$new) {
-          return pht('Up For Grabs');
+          return pht('Unassigned');
         } else if (!$old) {
           return pht('Assigned');
         } else {
@@ -547,8 +547,9 @@ final class ManiphestTransaction
             $this->renderHandleLink($author_phid));
         } else if (!$new) {
           return pht(
-            '%s placed this task up for grabs.',
-            $this->renderHandleLink($author_phid));
+            '%s removed %s as the assignee of this task.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old));
         } else if (!$old) {
           return pht(
             '%s assigned this task to %s.',

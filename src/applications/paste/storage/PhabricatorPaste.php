@@ -155,10 +155,6 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return ($this->authorPHID == $phid);
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

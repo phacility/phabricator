@@ -22,9 +22,7 @@ final class PhabricatorActionListView extends AphrontView {
   }
 
   public function render() {
-    if (!$this->user) {
-      throw new PhutilInvalidStateException('setUser');
-    }
+    $viewer = $this->getViewer();
 
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS,
@@ -32,7 +30,7 @@ final class PhabricatorActionListView extends AphrontView {
         'object'  => $this->object,
         'actions' => $this->actions,
       ));
-    $event->setUser($this->user);
+    $event->setUser($viewer);
     PhutilEventEngine::dispatchEvent($event);
 
     $actions = $event->getValue('actions');
@@ -41,7 +39,7 @@ final class PhabricatorActionListView extends AphrontView {
     }
 
     foreach ($actions as $action) {
-      $action->setUser($this->user);
+      $action->setViewer($viewer);
     }
 
     require_celerity_resource('phabricator-action-list-view-css');

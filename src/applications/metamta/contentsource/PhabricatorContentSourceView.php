@@ -9,6 +9,13 @@ final class PhabricatorContentSourceView extends AphrontView {
     return $this;
   }
 
+  public function getSourceName() {
+    $map = PhabricatorContentSource::getSourceNameMap();
+    $source = $this->contentSource->getSource();
+    return idx($map, $source, null);
+
+  }
+
   public function render() {
     require_celerity_resource('phabricator-content-source-view-css');
 

@@ -96,7 +96,7 @@ them from the service.
 Concepts
 ========
 
-The major concepts in Almanac are **devices*, **interfaces**, **services**,
+The major concepts in Almanac are **devices**, **interfaces**, **services**,
 **bindings**, **networks**, and **namespaces**.
 
 **Devices**: Almanac devices represent physical or virtual devices.

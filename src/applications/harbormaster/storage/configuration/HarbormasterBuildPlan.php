@@ -127,10 +127,6 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return false;
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -201,7 +197,7 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   }
 
 
-/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 
 
   public function newNgrams() {

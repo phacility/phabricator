@@ -8,9 +8,9 @@ final class PHUITwoColumnView extends AphrontTagView {
   private $fluid;
   private $header;
   private $subheader;
+  private $footer;
   private $propertySection = array();
-  private $actionList;
-  private $propertyList;
+  private $curtain;
 
   const DISPLAY_LEFT = 'phui-side-column-left';
   const DISPLAY_RIGHT = 'phui-side-column-right';
@@ -35,19 +35,23 @@ final class PHUITwoColumnView extends AphrontTagView {
     return $this;
   }
 
+  public function setFooter($footer) {
+    $this->footer = $footer;
+    return $this;
+  }
+
   public function addPropertySection($title, $section) {
     $this->propertySection[] = array($title, $section);
     return $this;
   }
 
-  public function setActionList(PhabricatorActionListView $list) {
-    $this->actionList = $list;
+  public function setCurtain(PHUICurtainView $curtain) {
+    $this->curtain = $curtain;
     return $this;
   }
 
-  public function setPropertyList(PHUIPropertyListView $list) {
-    $this->propertyList = $list;
-    return $this;
+  public function getCurtain() {
+    return $this->curtain;
   }
 
   public function setFluid($fluid) {
@@ -91,6 +95,8 @@ final class PHUITwoColumnView extends AphrontTagView {
 
     $main = $this->buildMainColumn();
     $side = $this->buildSideColumn();
+    $footer = $this->buildFooter();
+
     $order = array($side, $main);
 
     $inner = phutil_tag_div('phui-two-column-row grouped', $order);
@@ -98,9 +104,12 @@ final class PHUITwoColumnView extends AphrontTagView {
 
     $header = null;
     if ($this->header) {
-      if ($this->actionList) {
-        $this->header->setActionList($this->actionList);
+      $curtain = $this->getCurtain();
+      if ($curtain) {
+        $action_list = $curtain->getActionList();
+        $this->header->setActionList($action_list);
       }
+
       $header = phutil_tag_div(
         'phui-two-column-header', $this->header);
     }
@@ -120,6 +129,7 @@ final class PHUITwoColumnView extends AphrontTagView {
         $header,
         $subheader,
         $table,
+        $footer,
       ));
   }
 
@@ -151,20 +161,8 @@ final class PHUITwoColumnView extends AphrontTagView {
   }
 
   private function buildSideColumn() {
-    $property_list = $this->propertyList;
-    $action_list = $this->actionList;
 
-    $properties = null;
-    if ($property_list || $action_list) {
-      if ($property_list) {
-        $property_list->setStacked(true);
-      }
-
-      $properties = id(new PHUIObjectBoxView())
-        ->appendChild($action_list)
-        ->appendChild($property_list)
-        ->addClass('phui-two-column-properties');
-    }
+    $curtain = $this->getCurtain();
 
     return phutil_tag(
       'div',
@@ -172,8 +170,23 @@ final class PHUITwoColumnView extends AphrontTagView {
         'class' => 'phui-side-column',
       ),
       array(
-        $properties,
+        $curtain,
         $this->sideColumn,
       ));
+  }
+
+  private function buildFooter() {
+
+    $footer = $this->footer;
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-two-column-content phui-two-column-footer',
+      ),
+      array(
+        $footer,
+      ));
+
   }
 }

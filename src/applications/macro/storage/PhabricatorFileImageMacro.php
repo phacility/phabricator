@@ -111,10 +111,6 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
     return false;
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenRecevierInterface  )---------------------------------- */
 
