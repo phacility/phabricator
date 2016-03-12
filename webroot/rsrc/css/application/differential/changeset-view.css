@@ -6,7 +6,7 @@
 .differential-changeset {
   position: relative;
   margin: 0;
-  padding-top: 32px;
+  padding-top: 16px;
   overflow-x: auto;
 
   /* Fixes what seems to be a layout bug in Firefox which causes scrollbars,
@@ -265,7 +265,7 @@ td.cov-I {
 
 .differential-changeset h1 {
   font-size: {$biggestfontsize};
-  padding: 2px 0 12px 12px;
+  padding: 2px 0 20px 12px;
   line-height: 20px;
   color: #000;
 }
@@ -322,7 +322,7 @@ td.cov-I {
 
 .differential-changeset-buttons {
   float: right;
-  margin-right: 8px;
+  margin-right: 12px;
 }
 
 .device-phone .differential-changeset-buttons {
@@ -361,4 +361,8 @@ tr.differential-inline-hidden {
 
 tr.differential-inline-loading {
   opacity: 0.5;
+}
+
+.differential-review-stage {
+  position: relative;
 }

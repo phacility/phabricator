@@ -11,6 +11,7 @@ final class DifferentialRevisionListView extends AphrontView {
   private $header;
   private $noDataString;
   private $noBox;
+  private $background = null;
 
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
@@ -35,6 +36,11 @@ final class DifferentialRevisionListView extends AphrontView {
 
   public function setNoBox($box) {
     $this->noBox = $box;
+    return $this;
+  }
+
+  public function setBackground($background) {
+    $this->background = $background;
     return $this;
   }
 
@@ -192,6 +198,7 @@ final class DifferentialRevisionListView extends AphrontView {
     if ($this->header && !$this->noBox) {
       $list->setFlush(true);
       $list = id(new PHUIObjectBoxView())
+        ->setBackground($this->background)
         ->setObjectList($list);
 
       if ($this->header instanceof PHUIHeaderView) {

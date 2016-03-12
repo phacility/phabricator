@@ -163,7 +163,7 @@ final class DifferentialAddCommentView extends AphrontView {
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $header_text = $is_serious
       ? pht('Add Comment')
-      : pht('Leap Into Action');
+      : pht('Leap Into Action!');
 
     $header = id(new PHUIHeaderView())
       ->setHeader($header_text);
