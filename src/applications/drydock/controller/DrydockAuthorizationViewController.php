@@ -26,16 +26,14 @@ final class DrydockAuthorizationViewController
       ->setUser($viewer)
       ->setPolicyObject($authorization);
 
-
     $state = $authorization->getBlueprintAuthorizationState();
     $icon = DrydockAuthorization::getBlueprintStateIcon($state);
     $name = DrydockAuthorization::getBlueprintStateName($state);
 
     $header->setStatus($icon, null, $name);
 
-    $actions = $this->buildActionListView($authorization);
+    $curtain = $this->buildCurtain($authorization);
     $properties = $this->buildPropertyListView($authorization);
-    $properties->setActionList($actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
@@ -45,29 +43,32 @@ final class DrydockAuthorizationViewController
       $blueprint->getBlueprintName(),
       $this->getApplicationURI("blueprint/{$blueprint_id}/"));
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->addPropertySection(pht('Properties'), $properties);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
 
   }
 
-  private function buildActionListView(DrydockAuthorization $authorization) {
+  private function buildCurtain(DrydockAuthorization $authorization) {
     $viewer = $this->getViewer();
     $id = $authorization->getID();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($authorization);
+    $curtain = $this->newCurtainView($authorization);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -84,7 +85,7 @@ final class DrydockAuthorizationViewController
     $can_authorize = $can_edit && ($state != $state_authorized);
     $can_decline = $can_edit && ($state != $state_declined);
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setHref($authorize_uri)
         ->setName(pht('Approve Authorization'))
@@ -92,7 +93,7 @@ final class DrydockAuthorizationViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_authorize));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setHref($decline_uri)
         ->setName(pht('Decline Authorization'))
@@ -100,7 +101,7 @@ final class DrydockAuthorizationViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_decline));
 
-    return $view;
+    return $curtain;
   }
 
   private function buildPropertyListView(DrydockAuthorization $authorization) {
