@@ -127,6 +127,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Local Commits'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

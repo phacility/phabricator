@@ -182,12 +182,12 @@
 
 /* Info View */
 
-.phui-two-column-view .phui-two-column-content .phui-info-view {
+.phui-two-column-view .phui-two-column-row .phui-info-view {
   margin: 0 0 20px 0;
   padding: 16px;
 }
 
-.phui-two-column-view .phui-two-column-content .phui-object-box
+.phui-two-column-view .phui-two-column-row .phui-object-box
   .phui-info-view {
     margin: 0;
 }

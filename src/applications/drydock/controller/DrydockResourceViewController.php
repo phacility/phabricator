@@ -23,14 +23,15 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($resource)
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setHeaderIcon('fa-map');
 
     if ($resource->isReleasing()) {
       $header->setStatus('fa-exclamation-triangle', 'red', pht('Releasing'));
     }
 
-    $actions = $this->buildActionListView($resource);
-    $properties = $this->buildPropertyListView($resource, $actions);
+    $curtain = $this->buildCurtain($resource);
+    $properties = $this->buildPropertyListView($resource);
 
     $id = $resource->getID();
     $resource_uri = $this->getApplicationURI("resource/{$id}/");
@@ -44,37 +45,42 @@ final class DrydockResourceViewController extends DrydockResourceController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Resource %d', $resource->getID()));
+    $crumbs->setBorder(true);
 
     $locks = $this->buildLocksTab($resource->getPHID());
     $commands = $this->buildCommandsTab($resource->getPHID());
+    $lease_box = $this->buildLeaseBox($resource);
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Properties'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties, pht('Properties'))
       ->addPropertyList($locks, pht('Slot Locks'))
       ->addPropertyList($commands, pht('Commands'));
 
-    $lease_box = $this->buildLeaseBox($resource);
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
         $object_box,
         $lease_box,
         $log_box,
-      ),
-      array(
-        'title'   => $title,
+      ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
 
   }
 
-  private function buildActionListView(DrydockResource $resource) {
+  private function buildCurtain(DrydockResource $resource) {
     $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($resource);
+    $curtain = $this->newCurtainView($resource);
 
     $can_release = $resource->canRelease();
     if ($resource->isReleasing()) {
@@ -89,7 +95,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
     $uri = '/resource/'.$resource->getID().'/release/';
     $uri = $this->getApplicationURI($uri);
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setHref($uri)
         ->setName(pht('Release Resource'))
@@ -97,17 +103,14 @@ final class DrydockResourceViewController extends DrydockResourceController {
         ->setWorkflow(true)
         ->setDisabled(!$can_release || !$can_edit));
 
-    return $view;
+    return $curtain;
   }
 
   private function buildPropertyListView(
-    DrydockResource $resource,
-    PhabricatorActionListView $actions) {
+    DrydockResource $resource) {
     $viewer = $this->getViewer();
 
-    $view = id(new PHUIPropertyListView())
-      ->setActionList($actions);
-
+    $view = new PHUIPropertyListView();
     $status = $resource->getStatus();
     $status = DrydockResourceStatus::getNameForStatus($status);
 
@@ -179,6 +182,7 @@ final class DrydockResourceViewController extends DrydockResourceController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($lease_header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($lease_list);
   }
 

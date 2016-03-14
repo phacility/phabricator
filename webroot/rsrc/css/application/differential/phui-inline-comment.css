@@ -61,7 +61,7 @@
 
 /* Tighten up spacing on replies */
 .differential-inline-comment.inline-comment-is-reply {
-  margin-top: -4px;
+  margin-top: -12px;
 }
 
 .differential-inline-comment .inline-head-right {

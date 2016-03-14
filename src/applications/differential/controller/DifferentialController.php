@@ -28,7 +28,8 @@ abstract class DifferentialController extends PhabricatorController {
     $viewer = $this->getViewer();
 
     $toc_view = id(new PHUIDiffTableOfContentsListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     $have_owners = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorOwnersApplication',
@@ -188,6 +189,12 @@ abstract class DifferentialController extends PhabricatorController {
       if ($value === null) {
         unset($map[$key]);
       }
+    }
+
+    // Cast duration to a float since it used to be a string in some
+    // cases.
+    if (isset($map['duration'])) {
+      $map['duration'] = (double)$map['duration'];
     }
 
     return $map;

@@ -19,7 +19,8 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($blueprint);
+      ->setPolicyObject($blueprint)
+      ->setHeaderIcon('fa-map-o');
 
     if ($blueprint->getIsDisabled()) {
       $header->setStatus('fa-ban', 'red', pht('Disabled'));
@@ -27,15 +28,12 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     }
 
-    $actions = $this->buildActionListView($blueprint);
-    $properties = $this->buildPropertyListView($blueprint, $actions);
+    $curtain = $this->buildCurtain($blueprint);
+    $properties = $this->buildPropertyListView($blueprint);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Blueprint %d', $blueprint->getID()));
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $crumbs->setBorder(true);
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $blueprint,
@@ -49,9 +47,8 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       $viewer,
       $properties);
 
-    $resource_box = $this->buildResourceBox($blueprint);
-
-    $authorizations_box = $this->buildAuthorizationsBox($blueprint);
+    $resources = $this->buildResourceBox($blueprint);
+    $authorizations = $this->buildAuthorizationsBox($blueprint);
 
     $timeline = $this->buildTransactionTimeline(
       $blueprint,
@@ -61,33 +58,36 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
     $log_query = id(new DrydockLogQuery())
       ->withBlueprintPHIDs(array($blueprint->getPHID()));
 
-    $log_box = $this->buildLogBox(
+    $logs = $this->buildLogBox(
       $log_query,
       $this->getApplicationURI("blueprint/{$id}/logs/query/all/"));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $resource_box,
-        $authorizations_box,
-        $log_box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->addPropertySection(pht('Properties'), $properties)
+      ->setMainColumn(array(
+        $resources,
+        $authorizations,
+        $logs,
         $timeline,
-      ),
-      array(
-        'title'   => $title,
+      ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
 
   }
 
-  private function buildActionListView(DrydockBlueprint $blueprint) {
+  private function buildCurtain(DrydockBlueprint $blueprint) {
     $viewer = $this->getViewer();
     $id = $blueprint->getID();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($blueprint);
-
+    $curtain = $this->newCurtainView($blueprint);
     $edit_uri = $this->getApplicationURI("blueprint/edit/{$id}/");
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -95,7 +95,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       $blueprint,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setHref($edit_uri)
         ->setName(pht('Edit Blueprint'))
@@ -113,7 +113,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       $disable_uri = $this->getApplicationURI("blueprint/{$id}/enable/");
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setHref($disable_uri)
         ->setName($disable_name)
@@ -121,19 +121,15 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
-    return $view;
+    return $curtain;
   }
 
   private function buildPropertyListView(
-    DrydockBlueprint $blueprint,
-    PhabricatorActionListView $actions) {
+    DrydockBlueprint $blueprint) {
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($blueprint);
-
-    $view->setActionList($actions);
+      ->setUser($viewer);
 
     $view->addProperty(
       pht('Type'),
@@ -177,6 +173,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($resource_header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($resource_list);
   }
 
@@ -242,6 +239,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($authorizations_header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($authorization_list);
 
   }

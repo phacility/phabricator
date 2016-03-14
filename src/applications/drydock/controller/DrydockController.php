@@ -102,6 +102,7 @@ abstract class DrydockController extends PhabricatorController {
           ->setText(pht('View All')));
 
     return id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setHeader($log_header)
       ->setTable($log_table);
   }

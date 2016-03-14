@@ -126,27 +126,40 @@ final class DifferentialDiffViewController extends DifferentialController {
       ->setRenderingReferences($refs)
       ->setStandaloneURI('/differential/changeset/')
       ->setDiff($diff)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTitle(pht('Diff %d', $diff->getID()))
       ->setUser($request->getUser());
 
+    $title = pht('Diff %d', $diff->getID());
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Diff %d', $diff->getID()));
+    $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
 
     $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($property_head)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($property_view)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+
+      ))
+      ->setFooter(array(
         $prop_box,
         $table_of_contents,
         $details,
-      ),
-      array(
-        'title' => pht('Diff View'),
       ));
+
+    $page =  $this->newPage()
+      ->setTitle(pht('Diff View'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+    return $page;
   }
 
   private function loadSelectableRevisions(

@@ -4,6 +4,9 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
 
   private $items = array();
   private $authorityPackages;
+  private $header;
+  private $infoView;
+  private $background;
 
   public function addItem(PHUIDiffTableOfContentsItemView $item) {
     $this->items[] = $item;
@@ -18,6 +21,21 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
 
   public function getAuthorityPackages() {
     return $this->authorityPackages;
+  }
+
+  public function setBackground($background) {
+    $this->background = $background;
+    return $this;
+  }
+
+  public function setHeader(PHUIHeaderView $header) {
+    $this->header = $header;
+    return $this;
+  }
+
+  public function setInfoView(PHUIInfoView $infoview) {
+    $this->infoView = $infoview;
+    return $this;
   }
 
   public function render() {
@@ -142,11 +160,24 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
       ->setAnchorName('toc')
       ->setNavigationMarker(true);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Table of Contents'))
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Table of Contents'));
+
+    if ($this->header) {
+      $header = $this->header;
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground($this->background)
       ->setTable($table)
       ->appendChild($anchor)
       ->appendChild($buttons);
+
+    if ($this->infoView) {
+      $box->setInfoView($this->infoView);
+    }
+    return $box;
   }
 
 }

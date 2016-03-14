@@ -8,6 +8,7 @@ final class DifferentialChangesetListView extends AphrontView {
   private $inlineURI;
   private $renderURI = '/differential/changeset/';
   private $whitespace;
+  private $background;
 
   private $standaloneURI;
   private $leftRawFileURI;
@@ -109,6 +110,11 @@ final class DifferentialChangesetListView extends AphrontView {
   public function setRawFileURIs($l, $r) {
     $this->leftRawFileURI = $l;
     $this->rightRawFileURI = $r;
+    return $this;
+  }
+
+  public function setBackground($background) {
+    $this->background = $background;
     return $this;
   }
 
@@ -254,6 +260,7 @@ final class DifferentialChangesetListView extends AphrontView {
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setCollapsed(true)
+      ->setBackground($this->background)
       ->appendChild($content);
 
     return $object_box;

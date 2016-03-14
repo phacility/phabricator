@@ -214,13 +214,11 @@ final class DiffusionCommitController extends DiffusionController {
       // changes inline even if there are more than the soft limit.
       $show_all_details = $request->getBool('show_all');
 
-      $change_panel = new PHUIObjectBoxView();
-      $header = new PHUIHeaderView();
-      $header->setHeader(pht('Changes (%s)', new PhutilNumber($count)));
-      $change_panel->setID('toc');
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Changes (%s)', new PhutilNumber($count)));
 
+      $warning_view = null;
       if ($count > self::CHANGES_LIMIT && !$show_all_details) {
-
         $button = id(new PHUIButtonView())
           ->setText(pht('Show All Changes'))
           ->setHref('?show_all=true')
@@ -230,11 +228,9 @@ final class DiffusionCommitController extends DiffusionController {
         $warning_view = id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle(pht('Very Large Commit'))
+          ->addButton($button)
           ->appendChild(
             pht('This commit is very large. Load each file individually.'));
-
-        $change_panel->setInfoView($warning_view);
-        $header->addActionLink($button);
       }
 
       $changesets = DiffusionPathChange::convertToDifferentialChangesets(
@@ -244,12 +240,11 @@ final class DiffusionCommitController extends DiffusionController {
       // TODO: This table and panel shouldn't really be separate, but we need
       // to clean up the "Load All Files" interaction first.
       $change_table = $this->buildTableOfContents(
-        $changesets);
+        $changesets,
+        $header,
+        $warning_view);
 
-      $change_panel->setTable($change_table);
-      $change_panel->setHeader($header);
-
-      $content[] = $change_panel;
+      $content[] = $change_table;
 
       $vcs = $repository->getVersionControlSystem();
       switch ($vcs) {
@@ -1017,12 +1012,21 @@ final class DiffusionCommitController extends DiffusionController {
     return $parser->processCorpus($corpus);
   }
 
-  private function buildTableOfContents(array $changesets) {
+  private function buildTableOfContents(
+    array $changesets,
+    $header,
+    $info_view) {
+
     $drequest = $this->getDiffusionRequest();
     $viewer = $this->getViewer();
 
     $toc_view = id(new PHUIDiffTableOfContentsListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setHeader($header);
+
+    if ($info_view) {
+      $toc_view->setInfoView($info_view);
+    }
 
     // TODO: This is hacky, we just want access to the linkX() methods on
     // DiffusionView.

@@ -305,7 +305,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Revision Update History'))
-      ->setFlush(true)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($content);
   }
 
