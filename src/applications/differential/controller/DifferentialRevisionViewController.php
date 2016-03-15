@@ -1131,6 +1131,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
     DifferentialRevision $revision) {
     $viewer = $this->getViewer();
 
+    if (!$diff->getBuildable()) {
+      return null;
+    }
+
     if (!$diff->getUnitMessages()) {
       return null;
     }
