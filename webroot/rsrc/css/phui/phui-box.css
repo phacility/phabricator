@@ -94,3 +94,7 @@
   font-size: 13px;
   color: {$bluetext};
 }
+
+.phui-box-blue-property .phui-object-item-list-view.phui-object-list-flush {
+  padding: 2px 8px;
+}
