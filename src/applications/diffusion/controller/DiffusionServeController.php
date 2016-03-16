@@ -5,6 +5,9 @@ final class DiffusionServeController extends DiffusionController {
   private $serviceViewer;
   private $serviceRepository;
 
+  private $isGitLFSRequest;
+  private $gitLFSToken;
+
   public function setServiceViewer(PhabricatorUser $viewer) {
     $this->serviceViewer = $viewer;
     return $this;
@@ -23,6 +26,14 @@ final class DiffusionServeController extends DiffusionController {
     return $this->serviceRepository;
   }
 
+  public function getIsGitLFSRequest() {
+    return $this->isGitLFSRequest;
+  }
+
+  public function getGitLFSToken() {
+    return $this->gitLFSToken;
+  }
+
   public function isVCSRequest(AphrontRequest $request) {
     $identifier = $this->getRepositoryIdentifierFromRequest($request);
     if ($identifier === null) {
@@ -31,6 +42,9 @@ final class DiffusionServeController extends DiffusionController {
 
     $content_type = $request->getHTTPHeader('Content-Type');
     $user_agent = idx($_SERVER, 'HTTP_USER_AGENT');
+
+    // This may have a "charset" suffix, so only match the prefix.
+    $lfs_pattern = '(^application/vnd\\.git-lfs\\+json(;|\z))';
 
     $vcs = null;
     if ($request->getExists('service')) {
@@ -46,6 +60,10 @@ final class DiffusionServeController extends DiffusionController {
     } else if ($content_type == 'application/x-git-receive-pack-request') {
       // We get this for `git-receive-pack`.
       $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+    } else if (preg_match($lfs_pattern, $content_type)) {
+      // This is a Git LFS HTTP API request.
+      $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+      $this->isGitLFSRequest = true;
     } else if ($request->getExists('cmd')) {
       // Mercurial also sends an Accept header like
       // "application/mercurial-0.1", and a User-Agent like
@@ -142,7 +160,17 @@ final class DiffusionServeController extends DiffusionController {
       $username = $_SERVER['PHP_AUTH_USER'];
       $password = new PhutilOpaqueEnvelope($_SERVER['PHP_AUTH_PW']);
 
-      $viewer = $this->authenticateHTTPRepositoryUser($username, $password);
+      // Try Git LFS auth first since we can usually reject it without doing
+      // any queries, since the username won't match the one we expect or the
+      // request won't be LFS.
+      $viewer = $this->authenticateGitLFSUser($username, $password);
+
+      // If that failed, try normal auth. Note that we can use normal auth on
+      // LFS requests, so this isn't strictly an alternative to LFS auth.
+      if (!$viewer) {
+        $viewer = $this->authenticateHTTPRepositoryUser($username, $password);
+      }
+
       if (!$viewer) {
         return new PhabricatorVCSResponse(
           403,
@@ -202,6 +230,11 @@ final class DiffusionServeController extends DiffusionController {
       }
     }
 
+    $response = $this->validateGitLFSRequest($repository, $viewer);
+    if ($response) {
+      return $response;
+    }
+
     $this->setServiceRepository($repository);
 
     if (!$repository->isTracked()) {
@@ -212,46 +245,57 @@ final class DiffusionServeController extends DiffusionController {
 
     $is_push = !$this->isReadOnlyRequest($repository);
 
-    switch ($repository->getServeOverHTTP()) {
-      case PhabricatorRepository::SERVE_READONLY:
-        if ($is_push) {
+    if ($this->getIsGitLFSRequest() && $this->getGitLFSToken()) {
+      // We allow git LFS requests over HTTP even if the repository does not
+      // otherwise support HTTP reads or writes, as long as the user is using a
+      // token from SSH. If they're using HTTP username + password auth, they
+      // have to obey the normal HTTP rules.
+    } else {
+      switch ($repository->getServeOverHTTP()) {
+        case PhabricatorRepository::SERVE_READONLY:
+          if ($is_push) {
+            return new PhabricatorVCSResponse(
+              403,
+              pht('This repository is read-only over HTTP.'));
+          }
+          break;
+        case PhabricatorRepository::SERVE_READWRITE:
+          // We'll check for push capability below.
+          break;
+        case PhabricatorRepository::SERVE_OFF:
+        default:
           return new PhabricatorVCSResponse(
             403,
-            pht('This repository is read-only over HTTP.'));
-        }
-        break;
-      case PhabricatorRepository::SERVE_READWRITE:
-        if ($is_push) {
-          $can_push = PhabricatorPolicyFilter::hasCapability(
-            $viewer,
-            $repository,
-            DiffusionPushCapability::CAPABILITY);
-          if (!$can_push) {
-            if ($viewer->isLoggedIn()) {
-              return new PhabricatorVCSResponse(
-                403,
-                pht('You do not have permission to push to this repository.'));
-            } else {
-              if ($allow_auth) {
-                return new PhabricatorVCSResponse(
-                  401,
-                  pht('You must log in to push to this repository.'));
-              } else {
-                return new PhabricatorVCSResponse(
-                  403,
-                  pht(
-                    'Pushing to this repository requires authentication, '.
-                    'which is forbidden over HTTP.'));
-              }
-            }
+            pht('This repository is not available over HTTP.'));
+      }
+    }
+
+    if ($is_push) {
+      $can_push = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $repository,
+        DiffusionPushCapability::CAPABILITY);
+      if (!$can_push) {
+        if ($viewer->isLoggedIn()) {
+          return new PhabricatorVCSResponse(
+            403,
+            pht(
+              'You do not have permission to push to this '.
+              'repository.'));
+        } else {
+          if ($allow_auth) {
+            return new PhabricatorVCSResponse(
+              401,
+              pht('You must log in to push to this repository.'));
+          } else {
+            return new PhabricatorVCSResponse(
+              403,
+              pht(
+                'Pushing to this repository requires authentication, '.
+                'which is forbidden over HTTP.'));
           }
         }
-        break;
-      case PhabricatorRepository::SERVE_OFF:
-      default:
-        return new PhabricatorVCSResponse(
-          403,
-          pht('This repository is not available over HTTP.'));
+      }
     }
 
     $vcs_type = $repository->getVersionControlSystem();
@@ -324,6 +368,14 @@ final class DiffusionServeController extends DiffusionController {
     PhabricatorRepository $repository,
     PhabricatorUser $viewer) {
 
+    // We can serve Git LFS requests first, since we don't need to proxy them.
+    // It's also important that LFS requests never fall through to standard
+    // service pathways, because that would let you use LFS tokens to read
+    // normal repository data.
+    if ($this->getIsGitLFSRequest()) {
+      return $this->serveGitLFSRequest($repository, $viewer);
+    }
+
     // If this repository is hosted on a service, we need to proxy the request
     // to a host which can serve it.
     $is_cluster_request = $this->getRequest()->isProxiedClusterRequest();
@@ -362,6 +414,8 @@ final class DiffusionServeController extends DiffusionController {
     $method = $_SERVER['REQUEST_METHOD'];
 
     // TODO: This implementation is safe by default, but very incomplete.
+
+    // TODO: This doesn't get the right result for Git LFS yet.
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -512,6 +566,52 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     return $base_path;
+  }
+
+  private function authenticateGitLFSUser(
+    $username,
+    PhutilOpaqueEnvelope $password) {
+
+    // Never accept these credentials for requests which aren't LFS requests.
+    if (!$this->getIsGitLFSRequest()) {
+      return null;
+    }
+
+    // If we have the wrong username, don't bother checking if the token
+    // is right.
+    if ($username !== DiffusionGitLFSTemporaryTokenType::HTTP_USERNAME) {
+      return null;
+    }
+
+    $lfs_pass = $password->openEnvelope();
+    $lfs_hash = PhabricatorHash::digest($lfs_pass);
+
+    $token = id(new PhabricatorAuthTemporaryTokenQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withTokenTypes(array(DiffusionGitLFSTemporaryTokenType::TOKENTYPE))
+      ->withTokenCodes(array($lfs_hash))
+      ->withExpired(false)
+      ->executeOne();
+    if (!$token) {
+      return null;
+    }
+
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($token->getUserPHID()))
+      ->executeOne();
+
+    if (!$user) {
+      return null;
+    }
+
+    if (!$user->isUserActivated()) {
+      return null;
+    }
+
+    $this->gitLFSToken = $token;
+
+    return $user;
   }
 
   private function authenticateHTTPRepositoryUser(
@@ -737,6 +837,70 @@ final class DiffusionServeController extends DiffusionController {
       DiffusionCommitHookEngine::ENV_REMOTE_ADDRESS => $remote_address,
       DiffusionCommitHookEngine::ENV_REMOTE_PROTOCOL => 'http',
     );
+  }
+
+  private function validateGitLFSRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
+    if (!$this->getIsGitLFSRequest()) {
+      return null;
+    }
+
+    if (!$repository->canUseGitLFS()) {
+      return new PhabricatorVCSResponse(
+        403,
+        pht(
+          'The requested repository ("%s") does not support Git LFS.',
+          $repository->getDisplayName()));
+    }
+
+    // If this is using an LFS token, sanity check that we're using it on the
+    // correct repository. This shouldn't really matter since the user could
+    // just request a proper token anyway, but it suspicious and should not
+    // be permitted.
+
+    $token = $this->getGitLFSToken();
+    if ($token) {
+      $resource = $token->getTokenResource();
+      if ($resource !== $repository->getPHID()) {
+        return new PhabricatorVCSResponse(
+          403,
+          pht(
+            'The authentication token provided in the request is bound to '.
+            'a different repository than the requested repository ("%s").',
+            $repository->getDisplayName()));
+      }
+    }
+
+    return null;
+  }
+
+  private function serveGitLFSRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
+
+    if (!$this->getIsGitLFSRequest()) {
+      throw new Exception(pht('This is not a Git LFS request!'));
+    }
+
+    $path = $this->getGitLFSRequestPath($repository);
+
+    return DiffusionGitLFSResponse::newErrorResponse(
+      404,
+      pht(
+        'Git LFS operation "%s" is not supported by this server.',
+        $path));
+  }
+
+  private function getGitLFSRequestPath(PhabricatorRepository $repository) {
+    $request_path = $this->getRequestDirectoryPath($repository);
+
+    $matches = null;
+    if (preg_match('(^/info/lfs(?:\z|/)(.*))', $request_path, $matches)) {
+      return $matches[1];
+    }
+
+    return null;
   }
 
 }
