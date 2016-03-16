@@ -3,6 +3,7 @@
 abstract class PhabricatorAuthTemporaryTokenType
   extends Phobject {
 
+  abstract public function getTokenTypeDisplayName();
   abstract public function getTokenReadableTypeName(
     PhabricatorAuthTemporaryToken $token);
 

@@ -5,6 +5,10 @@ final class PhabricatorAuthPasswordResetTemporaryTokenType
 
   const TOKENTYPE = 'login:password';
 
+  public function getTokenTypeDisplayName() {
+    return pht('Password Reset');
+  }
+
   public function getTokenReadableTypeName(
     PhabricatorAuthTemporaryToken $token) {
     return pht('Password Reset Token');
