@@ -31,14 +31,21 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
     ) + parent::getConfiguration();
   }
 
+  private function newTokenTypeImplementation() {
+    $types = PhabricatorAuthTemporaryTokenType::getAllTypes();
+
+    $type = idx($types, $this->tokenType);
+    if ($type) {
+      return clone $type;
+    }
+
+    return null;
+  }
+
   public function getTokenReadableTypeName() {
-    // Eventually, it would be nice to let applications implement token types
-    // so we can put this in modular subclasses.
-    switch ($this->tokenType) {
-      case PhabricatorAuthSessionEngine::ONETIME_TEMPORARY_TOKEN_TYPE:
-        return pht('One-Time Login Token');
-      case PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE:
-        return pht('Password Reset Token');
+    $type = $this->newTokenTypeImplementation();
+    if ($type) {
+      return $type->getTokenReadableTypeName($this);
     }
 
     return $this->tokenType;
@@ -49,10 +56,9 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
       return false;
     }
 
-    switch ($this->tokenType) {
-      case PhabricatorAuthSessionEngine::ONETIME_TEMPORARY_TOKEN_TYPE:
-      case PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE:
-        return true;
+    $type = $this->newTokenTypeImplementation();
+    if ($type) {
+      return $type->isTokenRevocable($this);
     }
 
     return false;
