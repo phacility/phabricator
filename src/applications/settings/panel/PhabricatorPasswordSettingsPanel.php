@@ -46,7 +46,7 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     if ($key) {
       $token = id(new PhabricatorAuthTemporaryTokenQuery())
         ->setViewer($user)
-        ->withObjectPHIDs(array($user->getPHID()))
+        ->withTokenResources(array($user->getPHID()))
         ->withTokenTypes(array($password_type))
         ->withTokenCodes(array(PhabricatorHash::digest($key)))
         ->withExpired(false)

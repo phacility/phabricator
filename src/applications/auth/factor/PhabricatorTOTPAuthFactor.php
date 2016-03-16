@@ -36,7 +36,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
       $temporary_token = id(new PhabricatorAuthTemporaryTokenQuery())
         ->setViewer($user)
-        ->withObjectPHIDs(array($user->getPHID()))
+        ->withTokenResources(array($user->getPHID()))
         ->withTokenTypes(array(self::TEMPORARY_TOKEN_TYPE))
         ->withExpired(false)
         ->withTokenCodes(array(PhabricatorHash::digest($key)))
@@ -55,7 +55,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         id(new PhabricatorAuthTemporaryToken())
-          ->setObjectPHID($user->getPHID())
+          ->setTokenResource($user->getPHID())
           ->setTokenType(self::TEMPORARY_TOKEN_TYPE)
           ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
           ->setTokenCode(PhabricatorHash::digest($key))

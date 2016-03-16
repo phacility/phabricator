@@ -3,29 +3,38 @@
 final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
   implements PhabricatorPolicyInterface {
 
-  // TODO: OAuth1 stores a client identifier here, which is not a real PHID.
-  // At some point, we should rename this column to be a little more generic.
-  protected $objectPHID;
-
+  // NOTE: This is usually a PHID, but may be some other kind of resource
+  // identifier for some token types.
+  protected $tokenResource;
   protected $tokenType;
   protected $tokenExpires;
   protected $tokenCode;
+  protected $userPHID;
+  protected $properties;
 
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
+        'tokenResource' => 'phid',
         'tokenType' => 'text64',
         'tokenExpires' => 'epoch',
         'tokenCode' => 'text64',
+        'userPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_token' => array(
-          'columns' => array('objectPHID', 'tokenType', 'tokenCode'),
+          'columns' => array('tokenResource', 'tokenType', 'tokenCode'),
           'unique' => true,
         ),
         'key_expires' => array(
           'columns' => array('tokenExpires'),
+        ),
+        'key_user' => array(
+          'columns' => array('userPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -73,12 +82,12 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
 
   public static function revokeTokens(
     PhabricatorUser $viewer,
-    array $object_phids,
+    array $token_resources,
     array $token_types) {
 
     $tokens = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer($viewer)
-      ->withObjectPHIDs($object_phids)
+      ->withTokenResources($token_resources)
       ->withTokenTypes($token_types)
       ->withExpired(false)
       ->execute();
@@ -86,6 +95,15 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
     foreach ($tokens as $token) {
       $token->revokeToken();
     }
+  }
+
+  public function getTemporaryTokenProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setTemporaryTokenProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

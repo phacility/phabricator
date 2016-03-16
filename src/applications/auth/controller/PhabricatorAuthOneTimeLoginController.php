@@ -132,7 +132,7 @@ final class PhabricatorAuthOneTimeLoginController
 
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
           id(new PhabricatorAuthTemporaryToken())
-            ->setObjectPHID($target_user->getPHID())
+            ->setTokenResource($target_user->getPHID())
             ->setTokenType($password_type)
             ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
             ->setTokenCode(PhabricatorHash::digest($key))

@@ -23,7 +23,7 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
 
     $tokens = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer($viewer)
-      ->withObjectPHIDs(array($viewer->getPHID()))
+      ->withTokenResources(array($viewer->getPHID()))
       ->execute();
 
     $rows = array();

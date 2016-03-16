@@ -1123,7 +1123,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     // Save the new secret.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       $token = id(new PhabricatorAuthTemporaryToken())
-        ->setObjectPHID($this->getPHID())
+        ->setTokenResource($this->getPHID())
         ->setTokenType(self::ONETIME_TEMPORARY_TOKEN_TYPE)
         ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
         ->setTokenCode(PhabricatorHash::digest($key))
@@ -1136,7 +1136,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function validateOneTimeToken($token_code) {
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withObjectPHIDs(array($this->getPHID()))
+      ->withTokenResources(array($this->getPHID()))
       ->withTokenTypes(array(self::ONETIME_TEMPORARY_TOKEN_TYPE))
       ->withExpired(false)
       ->withTokenCodes(array(PhabricatorHash::digest($token_code)))

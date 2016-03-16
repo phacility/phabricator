@@ -635,7 +635,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       id(new PhabricatorAuthTemporaryToken())
-        ->setObjectPHID($user->getPHID())
+        ->setTokenResource($user->getPHID())
         ->setTokenType($onetime_type)
         ->setTokenExpires(time() + phutil_units('1 day in seconds'))
         ->setTokenCode($key_hash)
@@ -679,7 +679,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     return id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer($user)
-      ->withObjectPHIDs(array($user->getPHID()))
+      ->withTokenResources(array($user->getPHID()))
       ->withTokenTypes(array($onetime_type))
       ->withTokenCodes(array($key_hash))
       ->withExpired(false)

@@ -221,7 +221,7 @@ abstract class PhabricatorOAuth1AuthProvider
     // Wipe out an existing token, if one exists.
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withObjectPHIDs(array($key))
+      ->withTokenResources(array($key))
       ->withTokenTypes(array($type))
       ->executeOne();
     if ($token) {
@@ -230,7 +230,7 @@ abstract class PhabricatorOAuth1AuthProvider
 
     // Save the new secret.
     id(new PhabricatorAuthTemporaryToken())
-      ->setObjectPHID($key)
+      ->setTokenResource($key)
       ->setTokenType($type)
       ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
       ->setTokenCode($secret)
@@ -243,7 +243,7 @@ abstract class PhabricatorOAuth1AuthProvider
 
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withObjectPHIDs(array($key))
+      ->withTokenResources(array($key))
       ->withTokenTypes(array($type))
       ->withExpired(false)
       ->executeOne();
