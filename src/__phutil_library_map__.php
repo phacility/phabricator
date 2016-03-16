@@ -2672,6 +2672,7 @@ phutil_register_library_map(array(
     'PhabricatorNotificationsApplication' => 'applications/notification/application/PhabricatorNotificationsApplication.php',
     'PhabricatorNuanceApplication' => 'applications/nuance/application/PhabricatorNuanceApplication.php',
     'PhabricatorOAuth1AuthProvider' => 'applications/auth/provider/PhabricatorOAuth1AuthProvider.php',
+    'PhabricatorOAuth1SecretTemporaryTokenType' => 'applications/auth/provider/PhabricatorOAuth1SecretTemporaryTokenType.php',
     'PhabricatorOAuth2AuthProvider' => 'applications/auth/provider/PhabricatorOAuth2AuthProvider.php',
     'PhabricatorOAuthAuthProvider' => 'applications/auth/provider/PhabricatorOAuthAuthProvider.php',
     'PhabricatorOAuthClientAuthorization' => 'applications/oauthserver/storage/PhabricatorOAuthClientAuthorization.php',
@@ -7122,6 +7123,7 @@ phutil_register_library_map(array(
     'PhabricatorNotificationsApplication' => 'PhabricatorApplication',
     'PhabricatorNuanceApplication' => 'PhabricatorApplication',
     'PhabricatorOAuth1AuthProvider' => 'PhabricatorOAuthAuthProvider',
+    'PhabricatorOAuth1SecretTemporaryTokenType' => 'PhabricatorAuthTemporaryTokenType',
     'PhabricatorOAuth2AuthProvider' => 'PhabricatorOAuthAuthProvider',
     'PhabricatorOAuthAuthProvider' => 'PhabricatorAuthProvider',
     'PhabricatorOAuthClientAuthorization' => array(

@@ -9,8 +9,6 @@ abstract class PhabricatorOAuth1AuthProvider
   const PROPERTY_CONSUMER_SECRET = 'oauth1:consumer:secret';
   const PROPERTY_PRIVATE_KEY = 'oauth1:private:key';
 
-  const TEMPORARY_TOKEN_TYPE = 'oauth1:request:secret';
-
   protected function getIDKey() {
     return self::PROPERTY_CONSUMER_KEY;
   }
@@ -215,8 +213,9 @@ abstract class PhabricatorOAuth1AuthProvider
 
 
   private function saveHandshakeTokenSecret($client_code, $secret) {
+    $secret_type = PhabricatorOAuth1SecretTemporaryTokenType::TOKENTYPE;
     $key = $this->getHandshakeTokenKeyFromClientCode($client_code);
-    $type = $this->getTemporaryTokenType(self::TEMPORARY_TOKEN_TYPE);
+    $type = $this->getTemporaryTokenType($secret_type);
 
     // Wipe out an existing token, if one exists.
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
@@ -238,8 +237,9 @@ abstract class PhabricatorOAuth1AuthProvider
   }
 
   private function loadHandshakeTokenSecret($client_code) {
+    $secret_type = PhabricatorOAuth1SecretTemporaryTokenType::TOKENTYPE;
     $key = $this->getHandshakeTokenKeyFromClientCode($client_code);
-    $type = $this->getTemporaryTokenType(self::TEMPORARY_TOKEN_TYPE);
+    $type = $this->getTemporaryTokenType($secret_type);
 
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -262,6 +262,9 @@ abstract class PhabricatorOAuth1AuthProvider
     // Namespace the type so that multiple providers don't step on each
     // others' toes if a user starts Mediawiki and Bitbucket auth at the
     // same time.
+
+    // TODO: This isn't really a proper use of the table and should get
+    // cleaned up some day: the type should be constant.
 
     return $core_type.':'.$this->getProviderConfig()->getID();
   }
