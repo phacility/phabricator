@@ -20,3 +20,11 @@ input.diffusion-clone-uri {
 .diffusion-link-icon + .diffusion-link-icon {
   margin-left: 6px;
 }
+
+.diffusion-search-boxen {
+  padding: 16px;
+}
+
+.diffusion-search-boxen .phui-form-view {
+  padding: 0;
+}

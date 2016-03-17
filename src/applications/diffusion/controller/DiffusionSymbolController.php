@@ -134,17 +134,24 @@ final class DiffusionSymbolController extends DiffusionController {
     $table->setNoDataString(
       pht('No matching symbol could be found in any indexed repository.'));
 
-    $panel = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Similar Symbols'))
-      ->setTable($table);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Similar Symbols'))
+      ->setHeaderIcon('fa-bullseye');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Find Symbol'));
+    $crumbs->setBorder(true);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $table,
+      ));
 
     return $this->newPage()
       ->setTitle(pht('Find Symbol'))
       ->setCrumbs($crumbs)
-      ->appendChild($panel);
+      ->appendChild($view);
   }
 
 }

@@ -90,7 +90,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $browse_link,
         idx($dict, 'lint'),
         $dict['commit'],
-        $dict['author'],
         $dict['details'],
         $dict['date'],
       );
@@ -120,14 +119,12 @@ final class DiffusionBrowseTableView extends DiffusionView {
         pht('Path'),
         ($lint ? $lint : pht('Lint')),
         pht('Modified'),
-        pht('Author/Committer'),
         pht('Details'),
         pht('Committed'),
       ));
     $view->setColumnClasses(
       array(
         'nudgeright',
-        '',
         '',
         '',
         '',
@@ -142,7 +139,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
         true,
         true,
         true,
-        true,
       ));
 
     $view->setDeviceVisibility(
@@ -150,7 +146,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
         true,
         true,
         false,
-        true,
         false,
         true,
         false,

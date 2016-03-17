@@ -9,6 +9,7 @@ final class DifferentialChangesetListView extends AphrontView {
   private $renderURI = '/differential/changeset/';
   private $whitespace;
   private $background;
+  private $header;
 
   private $standaloneURI;
   private $leftRawFileURI;
@@ -115,6 +116,11 @@ final class DifferentialChangesetListView extends AphrontView {
 
   public function setBackground($background) {
     $this->background = $background;
+    return $this;
+  }
+
+  public function setHeader($header) {
+    $this->header = $header;
     return $this;
   }
 
@@ -246,8 +252,12 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($this->getTitle());
+    if ($this->header) {
+      $header = $this->header;
+    } else {
+      $header = id(new PHUIHeaderView())
+        ->setHeader($this->getTitle());
+    }
 
     $content = phutil_tag(
       'div',
@@ -259,8 +269,8 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setCollapsed(true)
       ->setBackground($this->background)
+      ->setCollapsed(true)
       ->appendChild($content);
 
     return $object_box;
