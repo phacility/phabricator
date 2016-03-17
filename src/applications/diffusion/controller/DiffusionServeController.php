@@ -9,6 +9,8 @@ final class DiffusionServeController extends DiffusionController {
   private $gitLFSToken;
 
   public function setServiceViewer(PhabricatorUser $viewer) {
+    $this->getRequest()->setUser($viewer);
+
     $this->serviceViewer = $viewer;
     return $this;
   }
@@ -42,6 +44,7 @@ final class DiffusionServeController extends DiffusionController {
 
     $content_type = $request->getHTTPHeader('Content-Type');
     $user_agent = idx($_SERVER, 'HTTP_USER_AGENT');
+    $request_type = $request->getHTTPHeader('X-Phabricator-Request-Type');
 
     // This may have a "charset" suffix, so only match the prefix.
     $lfs_pattern = '(^application/vnd\\.git-lfs\\+json(;|\z))';
@@ -62,6 +65,10 @@ final class DiffusionServeController extends DiffusionController {
       $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
     } else if (preg_match($lfs_pattern, $content_type)) {
       // This is a Git LFS HTTP API request.
+      $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+      $this->isGitLFSRequest = true;
+    } else if ($request_type == 'git-lfs') {
+      // This is a Git LFS object content request.
       $vcs = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
       $this->isGitLFSRequest = true;
     } else if ($request->getExists('cmd')) {
@@ -884,12 +891,140 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     $path = $this->getGitLFSRequestPath($repository);
+    if ($path == 'objects/batch') {
+      return $this->serveGitLFSBatchRequest($repository, $viewer);
+    } else {
+      return DiffusionGitLFSResponse::newErrorResponse(
+        404,
+        pht(
+          'Git LFS operation "%s" is not supported by this server.',
+          $path));
+    }
+  }
 
-    return DiffusionGitLFSResponse::newErrorResponse(
-      404,
-      pht(
-        'Git LFS operation "%s" is not supported by this server.',
-        $path));
+  private function serveGitLFSBatchRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
+
+    $input = PhabricatorStartup::getRawInput();
+    $input = phutil_json_decode($input);
+
+    $operation = idx($input, 'operation');
+    switch ($operation) {
+      case 'upload':
+        $want_upload = true;
+        break;
+      case 'download':
+        $want_upload = false;
+        break;
+      default:
+        return DiffusionGitLFSResponse::newErrorResponse(
+          404,
+          pht(
+            'Git LFS batch operation "%s" is not supported by this server.',
+            $operation));
+    }
+
+    $objects = idx($input, 'objects', array());
+
+    $hashes = array();
+    foreach ($objects as $object) {
+      $hashes[] = idx($object, 'oid');
+    }
+
+    if ($hashes) {
+      $refs = id(new PhabricatorRepositoryGitLFSRefQuery())
+        ->setViewer($viewer)
+        ->withRepositoryPHIDs(array($repository->getPHID()))
+        ->withObjectHashes($hashes)
+        ->execute();
+      $refs = mpull($refs, null, 'getObjectHash');
+    } else {
+      $refs = array();
+    }
+
+    $file_phids = mpull($refs, 'getFilePHID');
+    if ($file_phids) {
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($file_phids))
+        ->execute();
+      $files = mpull($files, null, 'getPHID');
+    } else {
+      $files = array();
+    }
+
+    $authorization = null;
+    $output = array();
+    foreach ($objects as $object) {
+      $oid = idx($object, 'oid');
+      $size = idx($object, 'size');
+      $ref = idx($refs, $oid);
+
+      // NOTE: If we already have a ref for this object, we only emit a
+      // "download" action. The client should not upload the file again.
+
+      $actions = array();
+      if ($ref) {
+        $file = idx($files, $ref->getFilePHID());
+        if ($file) {
+          $get_uri = $file->getCDNURIWithToken();
+          $actions['download'] = array(
+            'href' => $get_uri,
+          );
+        }
+      } else if ($want_upload) {
+        if (!$authorization) {
+          // Here, we could reuse the existing authorization if we have one,
+          // but it's a little simpler to just generate a new one
+          // unconditionally.
+          $authorization = $this->newGitLFSHTTPAuthorization(
+            $repository,
+            $viewer,
+            $operation);
+        }
+
+        $put_uri = $repository->getGitLFSURI("info/lfs/upload/{$oid}");
+
+        $actions['upload'] = array(
+          'href' => $put_uri,
+          'header' => array(
+            'Authorization' => $authorization,
+            'X-Phabricator-Request-Type' => 'git-lfs',
+          ),
+        );
+      }
+
+      $output[] = array(
+        'oid' => $oid,
+        'size' => $size,
+        'actions' => $actions,
+      );
+    }
+
+    $output = array(
+      'objects' => $output,
+    );
+
+    return id(new DiffusionGitLFSResponse())
+      ->setContent($output);
+  }
+
+  private function newGitLFSHTTPAuthorization(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer,
+    $operation) {
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+    $authorization = DiffusionGitLFSTemporaryTokenType::newHTTPAuthorization(
+      $repository,
+      $viewer,
+      $operation);
+
+    unset($unguarded);
+
+    return $authorization;
   }
 
   private function getGitLFSRequestPath(PhabricatorRepository $repository) {
