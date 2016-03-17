@@ -117,10 +117,35 @@ final class PhabricatorAuditTransaction
             return 'red';
           case PhabricatorAuditActionConstants::ACCEPT:
             return 'green';
+          case PhabricatorAuditActionConstants::RESIGN:
+            return 'black';
+          case PhabricatorAuditActionConstants::CLOSE:
+            return 'indigo';
         }
     }
 
     return parent::getColor();
+  }
+
+  public function getIcon() {
+
+    $type = $this->getTransactionType();
+
+    switch ($type) {
+      case PhabricatorAuditActionConstants::ACTION:
+        switch ($this->getNewValue()) {
+          case PhabricatorAuditActionConstants::CONCERN:
+            return 'fa-exclamation-circle';
+          case PhabricatorAuditActionConstants::ACCEPT:
+            return 'fa-check';
+          case PhabricatorAuditActionConstants::RESIGN:
+            return 'fa-plane';
+          case PhabricatorAuditActionConstants::CLOSE:
+            return 'fa-check';
+        }
+    }
+
+    return parent::getIcon();
   }
 
   public function getTitle() {
