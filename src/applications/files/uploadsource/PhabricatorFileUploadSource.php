@@ -72,7 +72,9 @@ abstract class PhabricatorFileUploadSource
       $data->rewind();
       $this->didRewind = true;
     } else {
-      $data->next();
+      if ($data->valid()) {
+        $data->next();
+      }
     }
 
     if (!$data->valid()) {

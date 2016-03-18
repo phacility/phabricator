@@ -891,7 +891,12 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     $path = $this->getGitLFSRequestPath($repository);
-    if ($path == 'objects/batch') {
+    $matches = null;
+
+    if (preg_match('(^upload/(.*)\z)', $path, $matches)) {
+      $oid = $matches[1];
+      return $this->serveGitLFSUploadRequest($repository, $viewer, $oid);
+    } else if ($path == 'objects/batch') {
       return $this->serveGitLFSBatchRequest($repository, $viewer);
     } else {
       return DiffusionGitLFSResponse::newErrorResponse(
@@ -947,7 +952,7 @@ final class DiffusionServeController extends DiffusionController {
     if ($file_phids) {
       $files = id(new PhabricatorFileQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($file_phids))
+        ->withPHIDs($file_phids)
         ->execute();
       $files = mpull($files, null, 'getPHID');
     } else {
@@ -960,6 +965,7 @@ final class DiffusionServeController extends DiffusionController {
       $oid = idx($object, 'oid');
       $size = idx($object, 'size');
       $ref = idx($refs, $oid);
+      $error = null;
 
       // NOTE: If we already have a ref for this object, we only emit a
       // "download" action. The client should not upload the file again.
@@ -968,9 +974,26 @@ final class DiffusionServeController extends DiffusionController {
       if ($ref) {
         $file = idx($files, $ref->getFilePHID());
         if ($file) {
+          // Git LFS may prompt users for authentication if the action does
+          // not provide an "Authorization" header and does not have a query
+          // parameter named "token". See here for discussion:
+          // <https://github.com/github/git-lfs/issues/1088>
+          $no_authorization = 'Basic '.base64_encode('none');
+
           $get_uri = $file->getCDNURIWithToken();
           $actions['download'] = array(
             'href' => $get_uri,
+            'header' => array(
+              'Authorization' => $no_authorization,
+            ),
+          );
+        } else {
+          $error = array(
+            'code' => 404,
+            'message' => pht(
+              'Object "%s" was previously uploaded, but no longer exists '.
+              'on this server.',
+              $oid),
           );
         }
       } else if ($want_upload) {
@@ -995,11 +1018,20 @@ final class DiffusionServeController extends DiffusionController {
         );
       }
 
-      $output[] = array(
+      $object = array(
         'oid' => $oid,
         'size' => $size,
-        'actions' => $actions,
       );
+
+      if ($actions) {
+        $object['actions'] = $actions;
+      }
+
+      if ($error) {
+        $object['error'] = $error;
+      }
+
+      $output[] = $object;
     }
 
     $output = array(
@@ -1008,6 +1040,69 @@ final class DiffusionServeController extends DiffusionController {
 
     return id(new DiffusionGitLFSResponse())
       ->setContent($output);
+  }
+
+  private function serveGitLFSUploadRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer,
+    $oid) {
+
+    $ref = id(new PhabricatorRepositoryGitLFSRefQuery())
+      ->setViewer($viewer)
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->withObjectHashes(array($oid))
+      ->executeOne();
+    if ($ref) {
+      return DiffusionGitLFSResponse::newErrorResponse(
+        405,
+        pht(
+          'Content for object "%s" is already known to this server. It can '.
+          'not be uploaded again.',
+          $oid));
+    }
+
+    $request_stream = new AphrontRequestStream();
+    $request_iterator = $request_stream->getIterator();
+    $hashing_iterator = id(new PhutilHashingIterator($request_iterator))
+      ->setAlgorithm('sha256');
+
+    $source = id(new PhabricatorIteratorFileUploadSource())
+      ->setName('lfs-'.$oid)
+      ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE)
+      ->setIterator($hashing_iterator);
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $file = $source->uploadFile();
+    unset($unguarded);
+
+    $hash = $hashing_iterator->getHash();
+    if ($hash !== $oid) {
+      return DiffusionGitLFSResponse::newErrorResponse(
+        400,
+        pht(
+          'Uploaded data is corrupt or invalid. Expected hash "%s", actual '.
+          'hash "%s".',
+          $oid,
+          $hash));
+    }
+
+    $ref = id(new PhabricatorRepositoryGitLFSRef())
+      ->setRepositoryPHID($repository->getPHID())
+      ->setObjectHash($hash)
+      ->setByteSize($file->getByteSize())
+      ->setAuthorPHID($viewer->getPHID())
+      ->setFilePHID($file->getPHID());
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      // Attach the file to the repository to give users permission
+      // to access it.
+      $file->attachToObject($repository->getPHID());
+      $ref->save();
+    unset($unguarded);
+
+    // This is just a plain HTTP 200 with no content, which is what `git lfs`
+    // expects.
+    return new DiffusionGitLFSResponse();
   }
 
   private function newGitLFSHTTPAuthorization(
