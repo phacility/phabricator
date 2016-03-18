@@ -192,7 +192,25 @@ final class DiffusionBrowseController extends DiffusionController {
       }
 
       $data = $file->loadFileData();
-      if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
+
+      $ref = $this->getGitLFSRef($repository, $data);
+      if ($ref) {
+        if ($view == 'git-lfs') {
+          $file = $this->loadGitLFSFile($ref);
+
+          // Rename the file locally so we generate a better vanity URI for
+          // it. In storage, it just has a name like "lfs-13f9a94c0923...",
+          // since we don't get any hints about possible human-readable names
+          // at upload time.
+          $basename = basename($drequest->getPath());
+          $file->makeEphemeral();
+          $file->setName($basename);
+
+          return $file->getRedirectResponse();
+        } else {
+          $corpus = $this->buildGitLFSCorpus($ref);
+        }
+      } else if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
         $file_uri = $file->getBestURI();
 
         if ($file->isViewableImage()) {
@@ -930,7 +948,7 @@ final class DiffusionBrowseController extends DiffusionController {
     return $button;
   }
 
-  private function renderFileButton($file_uri = null) {
+  private function renderFileButton($file_uri = null, $label = null) {
 
     $base_uri = $this->getRequest()->getRequestURI();
 
@@ -944,6 +962,10 @@ final class DiffusionBrowseController extends DiffusionController {
       $icon = 'fa-file-text';
     }
 
+    if ($label !== null) {
+      $text = $label;
+    }
+
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText($text)
@@ -953,6 +975,21 @@ final class DiffusionBrowseController extends DiffusionController {
     return $button;
   }
 
+  private function renderGitLFSButton() {
+    $viewer = $this->getViewer();
+
+    $uri = $this->getRequest()->getRequestURI();
+    $href = $uri->alter('view', 'git-lfs');
+
+    $text = pht('Download from Git LFS');
+    $icon = 'fa-download';
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText($text)
+      ->setHref($href)
+      ->setIcon($icon);
+  }
 
   private function buildDisplayRows(
     array $lines,
@@ -1888,5 +1925,91 @@ final class DiffusionBrowseController extends DiffusionController {
       ),
       $corpus);
   }
+
+  private function getGitLFSRef(PhabricatorRepository $repository, $data) {
+    if (!$repository->canUseGitLFS()) {
+      return null;
+    }
+
+    $lfs_pattern = '(^version https://git-lfs\\.github\\.com/spec/v1[\r\n])';
+    if (!preg_match($lfs_pattern, $data)) {
+      return null;
+    }
+
+    $matches = null;
+    if (!preg_match('(^oid sha256:(.*)$)m', $data, $matches)) {
+      return null;
+    }
+
+    $hash = $matches[1];
+    $hash = trim($hash);
+
+    return id(new PhabricatorRepositoryGitLFSRefQuery())
+      ->setViewer($this->getViewer())
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->withObjectHashes(array($hash))
+      ->executeOne();
+  }
+
+  private function buildGitLFSCorpus(PhabricatorRepositoryGitLFSRef $ref) {
+    // TODO: We should probably test if we can load the file PHID here and
+    // show the user an error if we can't, rather than making them click
+    // through to hit an error.
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(basename($this->getDiffusionRequest()->getPath()))
+      ->setHeaderIcon('fa-archive');
+
+    $severity = PHUIInfoView::SEVERITY_NOTICE;
+
+    $messages = array();
+    $messages[] = pht(
+      'This %s file is stored in Git Large File Storage.',
+      phutil_format_bytes($ref->getByteSize()));
+
+    try {
+      $file = $this->loadGitLFSFile($ref);
+      $data = $this->renderGitLFSButton();
+      $header->addActionLink($data);
+    } catch (Exception $ex) {
+      $severity = PHUIInfoView::SEVERITY_ERROR;
+      $messages[] = pht('The data for this file could not be loaded.');
+    }
+
+    $raw = $this->renderFileButton(null, pht('View Raw LFS Pointer'));
+    $header->addActionLink($raw);
+
+    $corpus = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setCollapsed(true);
+
+    if ($messages) {
+      $corpus->setInfoView(
+        id(new PHUIInfoView())
+          ->setSeverity($severity)
+          ->setErrors($messages));
+    }
+
+    return $corpus;
+  }
+
+  private function loadGitLFSFile(PhabricatorRepositoryGitLFSRef $ref) {
+    $viewer = $this->getViewer();
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($ref->getFilePHID()))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to load file object for Git LFS ref "%s"!',
+          $ref->getObjectHash()));
+    }
+
+    return $file;
+  }
+
 
 }
