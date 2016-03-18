@@ -742,6 +742,38 @@ final class PhabricatorUser
     return new DateTimeZone($this->getTimezoneIdentifier());
   }
 
+  public function formatShortDateTime($when, $now = null) {
+    if ($now === null) {
+      $now = PhabricatorTime::getNow();
+    }
+
+    try {
+      $when = new DateTime('@'.$when);
+      $now = new DateTime('@'.$now);
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    $zone = $this->getTimeZone();
+
+    $when->setTimeZone($zone);
+    $now->setTimeZone($zone);
+
+    if ($when->format('Y') !== $now->format('Y')) {
+      // Different year, so show "Feb 31 2075".
+      $format = 'M j Y';
+    } else if ($when->format('Ymd') !== $now->format('Ymd')) {
+      // Same year but different month and day, so show "Feb 31".
+      $format = 'M j';
+    } else {
+      // Same year, month and day so show a time of day.
+      $pref_time = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
+      $format = $this->getPreference($pref_time);
+    }
+
+    return $when->format($format);
+  }
+
   public function getPreference($key) {
     $preferences = $this->loadPreferences();
 

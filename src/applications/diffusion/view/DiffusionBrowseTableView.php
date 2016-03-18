@@ -129,7 +129,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         '',
         '',
         'wide',
-        '',
+        'right',
       ));
     $view->setColumnVisibility(
       array(
