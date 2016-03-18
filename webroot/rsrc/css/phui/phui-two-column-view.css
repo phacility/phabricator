@@ -131,6 +131,11 @@
   padding: 16px 0;
 }
 
+.device-desktop .phui-two-column-view
+  .phui-property-list-properties-wrap.phui-property-list-stacked {
+  padding: 0 16px;
+}
+
 .device .phui-two-column-view .phui-property-list-container {
   padding: 12px 8px;
 }
@@ -191,8 +196,4 @@
 .phui-two-column-view .phui-two-column-row .phui-object-box
   .phui-info-view {
     margin: 0;
-}
-
-.phui-two-column-view .phui-object-box .phui-header-shell + .phui-info-view {
-  margin: 16px 16px 0 16px;
 }

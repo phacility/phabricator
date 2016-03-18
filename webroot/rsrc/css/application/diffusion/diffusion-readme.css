@@ -2,6 +2,7 @@
  * @provides diffusion-readme-css
  */
 
+.device .diffusion-readme-view .phui-document-fluid .phui-document-view,
 .device-desktop .diffusion-readme-view .phui-document-fluid
   .phui-document-view {
     margin: 0;

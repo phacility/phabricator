@@ -635,6 +635,8 @@ final class DiffusionCommitController extends DiffusionController {
       $author = $author_name;
       $image_uri = null;
       $image_href = null;
+    } else {
+      return null;
     }
 
     $author = phutil_tag('strong', array(), $author);
