@@ -2435,6 +2435,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $engine->destroyObject($atom);
       }
 
+      $lfs_refs = id(new PhabricatorRepositoryGitLFSRefQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($phid))
+        ->execute();
+      foreach ($lfs_refs as $ref) {
+        $engine->destroyObject($ref);
+      }
+
     $this->saveTransaction();
   }
 

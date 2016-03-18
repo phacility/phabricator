@@ -2,7 +2,9 @@
 
 final class PhabricatorRepositoryGitLFSRef
   extends PhabricatorRepositoryDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $repositoryPHID;
   protected $objectHash;
@@ -47,5 +49,24 @@ final class PhabricatorRepositoryGitLFSRef
     return null;
   }
 
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $file_phid = $this->getFilePHID();
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($engine->getViewer())
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if ($file) {
+      $engine->destroyObject($file);
+    }
+
+    $this->delete();
+  }
 
 }

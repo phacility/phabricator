@@ -7672,6 +7672,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryGitLFSRef' => array(
       'PhabricatorRepositoryDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorRepositoryGitLFSRefQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositoryGraphCache' => 'Phobject',
