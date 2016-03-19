@@ -6,6 +6,9 @@
   height: 24px;
   line-height: 22px;
   color: {$greytext};
+}
+
+.phui-head-thing-view.phui-head-has-image {
   position: relative;
   padding-left: 32px;
 }

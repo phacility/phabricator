@@ -291,6 +291,7 @@ abstract class DiffusionController extends PhabricatorController {
     return id(new PHUIInfoView())
       ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
       ->setTitle($title)
+      ->setFlush(true)
       ->appendChild($body);
   }
 
@@ -298,6 +299,27 @@ abstract class DiffusionController extends PhabricatorController {
     return id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)
       ->appendChild($pager);
+  }
+
+  protected function renderCommitHashTag(DiffusionRequest $drequest) {
+    $stable_commit = $drequest->getStableCommit();
+    $commit = phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'commit',
+              'commit' => $stable_commit,
+            )),
+        ),
+      $drequest->getRepository()->formatCommitName($stable_commit, true));
+
+    $tag = id(new PHUITagView())
+      ->setName($commit)
+      ->setShade('indigo')
+      ->setType(PHUITagView::TYPE_SHADE);
+
+    return $tag;
   }
 
   protected function renderDirectoryReadme(DiffusionBrowseResultSet $browse) {

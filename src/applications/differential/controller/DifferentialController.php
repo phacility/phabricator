@@ -28,7 +28,8 @@ abstract class DifferentialController extends PhabricatorController {
     $viewer = $this->getViewer();
 
     $toc_view = id(new PHUIDiffTableOfContentsListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     $have_owners = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorOwnersApplication',

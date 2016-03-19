@@ -15,8 +15,6 @@ final class DiffusionChangeController extends DiffusionController {
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
 
-    $content = array();
-
     $data = $this->callConduitWithDiffusionRequest(
       'diffusion.diffquery',
       array(
@@ -42,9 +40,11 @@ final class DiffusionChangeController extends DiffusionController {
       0 => $changeset,
     );
 
+    $changeset_header = $this->buildChangesetHeader($drequest);
+
     $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setTitle(pht('Change'));
     $changeset_view->setChangesets($changesets);
+    $changeset_view->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
       array(
@@ -68,11 +68,11 @@ final class DiffusionChangeController extends DiffusionController {
     $changeset_view->setWhitespace(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
     $changeset_view->setUser($viewer);
+    $changeset_view->setHeader($changeset_header);
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
-    $content[] = $changeset_view->render();
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -80,19 +80,18 @@ final class DiffusionChangeController extends DiffusionController {
         'path'   => true,
         'view'   => 'change',
       ));
+    $crumbs->setBorder(true);
 
     $links = $this->renderPathLinks($drequest, $mode = 'browse');
+    $header = $this->buildHeader($drequest, $links);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($links)
-      ->setUser($viewer)
-      ->setPolicyObject($drequest->getRepository());
-    $actions = $this->buildActionView($drequest);
-    $properties = $this->buildPropertyView($drequest, $actions);
-
-    $object_box = id(new PHUIObjectBoxView())
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->addPropertyList($properties);
+      ->setMainColumn(array(
+      ))
+      ->setFooter(array(
+        $changeset_view,
+      ));
 
     return $this->newPage()
       ->setTitle(
@@ -103,25 +102,41 @@ final class DiffusionChangeController extends DiffusionController {
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $content,
+          $view,
         ));
   }
 
-  private function buildActionView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildHeader(
+    DiffusionRequest $drequest,
+    $links) {
+    $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $tag = $this->renderCommitHashTag($drequest);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($links)
+      ->setUser($viewer)
+      ->setPolicyObject($drequest->getRepository())
+      ->addTag($tag);
+
+    return $header;
+  }
+
+  private function buildChangesetHeader(DiffusionRequest $drequest) {
+    $viewer = $this->getViewer();
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Changes'));
 
     $history_uri = $drequest->generateURI(
       array(
         'action' => 'history',
       ));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View History'))
+    $header->addActionLink(
+      id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('View History'))
         ->setHref($history_uri)
         ->setIcon('fa-clock-o'));
 
@@ -130,13 +145,14 @@ final class DiffusionChangeController extends DiffusionController {
         'action' => 'browse',
       ));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Browse Content'))
+    $header->addActionLink(
+      id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Browse Content'))
         ->setHref($browse_uri)
         ->setIcon('fa-files-o'));
 
-    return $view;
+    return $header;
   }
 
   protected function buildPropertyView(

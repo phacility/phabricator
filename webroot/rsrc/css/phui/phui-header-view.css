@@ -324,3 +324,7 @@ body .phui-header-shell.phui-bleed-header
 .phui-profile-header .phui-header-col3 {
   vertical-align: top;
 }
+
+.phui-header-view .phui-tag-shade-indigo a {
+  color: {$sh-indigotext};
+}

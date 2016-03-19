@@ -48,6 +48,7 @@ final class DrydockRepositoryOperationStatusView
     $box_view = $this->getBoxView();
     if (!$box_view) {
       $box_view = id(new PHUIObjectBoxView())
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setHeaderText(pht('Operation Status'));
     }
     $box_view->setObjectList($list);

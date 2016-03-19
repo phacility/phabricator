@@ -1518,6 +1518,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return null;
     }
 
+    return $this->getRawHTTPCloneURIObject();
+  }
+
+  private function getRawHTTPCloneURIObject() {
     $uri = PhabricatorEnv::getProductionURI($this->getURI());
     $uri = new PhutilURI($uri);
 
@@ -1817,6 +1821,38 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function canUsePathTree() {
     return !$this->isSVN();
+  }
+
+  public function canUseGitLFS() {
+    if (!$this->isGit()) {
+      return false;
+    }
+
+    if (!$this->isHosted()) {
+      return false;
+    }
+
+    // TODO: Unprototype this feature.
+    if (!PhabricatorEnv::getEnvConfig('phabricator.show-prototypes')) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function getGitLFSURI($path = null) {
+    if (!$this->canUseGitLFS()) {
+      throw new Exception(
+        pht(
+          'This repository does not support Git LFS, so Git LFS URIs can '.
+          'not be generated for it.'));
+    }
+
+    $uri = $this->getRawHTTPCloneURIObject();
+    $uri = (string)$uri;
+    $uri = $uri.'/'.$path;
+
+    return $uri;
   }
 
   public function canMirror() {
@@ -2397,6 +2433,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ->execute();
       foreach ($atoms as $atom) {
         $engine->destroyObject($atom);
+      }
+
+      $lfs_refs = id(new PhabricatorRepositoryGitLFSRefQuery())
+        ->setViewer($engine->getViewer())
+        ->withRepositoryPHIDs(array($phid))
+        ->execute();
+      foreach ($lfs_refs as $ref) {
+        $engine->destroyObject($ref);
       }
 
     $this->saveTransaction();

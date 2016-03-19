@@ -70,8 +70,6 @@ final class DifferentialHovercardEngineExtension
       $hovercard->addField(pht('Summary'), $summary);
     }
 
-    $tag = DifferentialRevisionDetailView::renderTagForRevision($revision);
-    $hovercard->addTag($tag);
   }
 
 }

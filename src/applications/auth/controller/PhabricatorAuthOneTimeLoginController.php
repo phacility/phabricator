@@ -105,23 +105,17 @@ final class PhabricatorAuthOneTimeLoginController
       // the link in the "Welcome" email is good enough, without requiring users
       // to go through a second round of email verification.
 
+      $editor = id(new PhabricatorUserEditor())
+        ->setActor($target_user);
+
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         // Nuke the token and all other outstanding password reset tokens.
         // There is no particular security benefit to destroying them all, but
         // it should reduce HackerOne reports of nebulous harm.
-
-        PhabricatorAuthTemporaryToken::revokeTokens(
-          $target_user,
-          array($target_user->getPHID()),
-          array(
-            PhabricatorAuthSessionEngine::ONETIME_TEMPORARY_TOKEN_TYPE,
-            PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE,
-          ));
+        $editor->revokePasswordResetLinks($target_user);
 
         if ($target_email) {
-          id(new PhabricatorUserEditor())
-            ->setActor($target_user)
-            ->verifyEmail($target_user, $target_email);
+          $editor->verifyEmail($target_user, $target_email);
         }
       unset($unguarded);
 
@@ -133,12 +127,13 @@ final class PhabricatorAuthOneTimeLoginController
         // We're going to let the user reset their password without knowing
         // the old one. Generate a one-time token for that.
         $key = Filesystem::readRandomCharacters(16);
+        $password_type =
+          PhabricatorAuthPasswordResetTemporaryTokenType::TOKENTYPE;
 
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
           id(new PhabricatorAuthTemporaryToken())
-            ->setObjectPHID($target_user->getPHID())
-            ->setTokenType(
-              PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE)
+            ->setTokenResource($target_user->getPHID())
+            ->setTokenType($password_type)
             ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
             ->setTokenCode(PhabricatorHash::digest($key))
             ->save();

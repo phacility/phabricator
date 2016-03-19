@@ -25,50 +25,52 @@ final class DrydockRepositoryOperationViewController
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($operation);
+      ->setPolicyObject($operation)
+      ->setHeaderIcon('fa-fighter-jet');
 
     $state = $operation->getOperationState();
     $icon = DrydockRepositoryOperation::getOperationStateIcon($state);
     $name = DrydockRepositoryOperation::getOperationStateName($state);
     $header->setStatus($icon, null, $name);
 
-    $actions = $this->buildActionListView($operation);
+    $curtain = $this->buildCurtain($operation);
     $properties = $this->buildPropertyListView($operation);
-    $properties->setActionList($actions);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       pht('Operations'),
       $this->getApplicationURI('operation/'));
     $crumbs->addTextCrumb($title);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $crumbs->setBorder(true);
 
     $status_view = id(new DrydockRepositoryOperationStatusView())
       ->setUser($viewer)
       ->setOperation($operation);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->addPropertySection(pht('Properties'), $properties)
+      ->setMainColumn(array(
+        $status_view,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $status_view,
-        ));
+          $view,
+      ));
   }
 
-  private function buildActionListView(DrydockRepositoryOperation $operation) {
+  private function buildCurtain(DrydockRepositoryOperation $operation) {
     $viewer = $this->getViewer();
     $id = $operation->getID();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($operation);
+    $curtain = $this->newCurtainView($operation);
 
-    return $view;
+    return $curtain;
   }
 
   private function buildPropertyListView(

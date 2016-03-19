@@ -263,6 +263,7 @@ final class PHUIPagedFormView extends AphrontView {
     $form->appendChild($submit);
 
     $box = id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setFormErrors($errors)
       ->setForm($form);
 

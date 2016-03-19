@@ -21,53 +21,59 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $title = pht('Lease %d', $lease->getID());
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setHeaderIcon('fa-link');
 
     if ($lease->isReleasing()) {
       $header->setStatus('fa-exclamation-triangle', 'red', pht('Releasing'));
     }
 
-    $actions = $this->buildActionListView($lease);
-    $properties = $this->buildPropertyListView($lease, $actions);
+    $curtain = $this->buildCurtain($lease);
+    $properties = $this->buildPropertyListView($lease);
 
     $log_query = id(new DrydockLogQuery())
       ->withLeasePHIDs(array($lease->getPHID()));
 
-    $log_box = $this->buildLogBox(
+    $logs = $this->buildLogBox(
       $log_query,
       $this->getApplicationURI("lease/{$id}/logs/query/all/"));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, $lease_uri);
+    $crumbs->setBorder(true);
 
     $locks = $this->buildLocksTab($lease->getPHID());
     $commands = $this->buildCommandsTab($lease->getPHID());
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Properties'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties, pht('Properties'))
       ->addPropertyList($locks, pht('Slot Locks'))
       ->addPropertyList($commands, pht('Commands'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
         $object_box,
-        $log_box,
-      ),
-      array(
-        'title' => $title,
+        $logs,
+      ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
 
   }
 
-  private function buildActionListView(DrydockLease $lease) {
+  private function buildCurtain(DrydockLease $lease) {
     $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($lease);
-
+    $curtain = $this->newCurtainView($lease);
     $id = $lease->getID();
 
     $can_release = $lease->canRelease();
@@ -80,7 +86,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
       $lease,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Release Lease'))
         ->setIcon('fa-times')
@@ -88,16 +94,14 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
         ->setWorkflow(true)
         ->setDisabled(!$can_release || !$can_edit));
 
-    return $view;
+    return $curtain;
   }
 
   private function buildPropertyListView(
-    DrydockLease $lease,
-    PhabricatorActionListView $actions) {
+    DrydockLease $lease) {
     $viewer = $this->getViewer();
 
     $view = new PHUIPropertyListView();
-    $view->setActionList($actions);
 
     $view->addProperty(
       pht('Status'),

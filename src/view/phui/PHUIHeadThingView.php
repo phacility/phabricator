@@ -35,6 +35,9 @@ final class PHUIHeadThingView extends AphrontTagView {
 
     $classes = array();
     $classes[] = 'phui-head-thing-view';
+    if ($this->image) {
+      $classes[] = 'phui-head-has-image';
+    }
 
     if ($this->size) {
       $classes[] = $this->size;
@@ -57,8 +60,11 @@ final class PHUIHeadThingView extends AphrontTagView {
         'href' => $this->imageHref,
       ));
 
-    return array($image, $this->content);
-
+    if ($this->image) {
+      return array($image, $this->content);
+    } else {
+      return $this->content;
+    }
 
   }
 

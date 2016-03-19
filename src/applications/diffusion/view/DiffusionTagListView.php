@@ -28,6 +28,7 @@ final class DiffusionTagListView extends DiffusionView {
   public function render() {
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
+    $viewer = $this->getViewer();
 
     $buildables = $this->loadBuildables($this->commits);
     $has_builds = false;
@@ -100,7 +101,7 @@ final class DiffusionTagListView extends DiffusionView {
         $build,
         $author,
         $description,
-        phabricator_datetime($tag->getEpoch(), $this->getViewer()),
+        $viewer->formatShortDateTime($tag->getEpoch()),
       );
     }
 
@@ -123,6 +124,7 @@ final class DiffusionTagListView extends DiffusionView {
           '',
           '',
           'wide',
+          'right',
         ))
       ->setColumnVisibility(
         array(

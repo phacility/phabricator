@@ -494,6 +494,7 @@ final class PhabricatorMarkupEngine extends Phobject {
 
     $rules[] = new PhabricatorIconRemarkupRule();
     $rules[] = new PhabricatorEmojiRemarkupRule();
+    $rules[] = new PhabricatorHandleRemarkupRule();
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
     foreach ($applications as $application) {

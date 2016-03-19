@@ -20,7 +20,7 @@ final class DifferentialAuthorField
   }
 
   public function shouldAppearInPropertyView() {
-    return true;
+    return false;
   }
 
   public function renderPropertyViewLabel() {

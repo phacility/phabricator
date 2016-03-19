@@ -14,6 +14,7 @@ final class PHUIInfoView extends AphrontView {
   private $id;
   private $buttons = array();
   private $isHidden;
+  private $flush;
 
   public function setTitle($title) {
     $this->title = $title;
@@ -37,6 +38,11 @@ final class PHUIInfoView extends AphrontView {
 
   public function setIsHidden($bool) {
     $this->isHidden = $bool;
+    return $this;
+  }
+
+  public function setFlush($flush) {
+    $this->flush = $flush;
     return $this;
   }
 
@@ -87,6 +93,9 @@ final class PHUIInfoView extends AphrontView {
     $classes[] = 'phui-info-view';
     $classes[] = 'phui-info-severity-'.$this->severity;
     $classes[] = 'grouped';
+    if ($this->flush) {
+      $classes[] = 'phui-info-view-flush';
+    }
     $classes = implode(' ', $classes);
 
     $children = $this->renderChildren();

@@ -39,7 +39,7 @@ final class DiffusionBranchTableView extends DiffusionView {
       $commit = idx($commits, $branch->getCommitIdentifier());
       if ($commit) {
         $details = $commit->getSummary();
-        $datetime = phabricator_datetime($commit->getEpoch(), $viewer);
+        $datetime = $viewer->formatShortDateTime($commit->getEpoch());
         $buildable = idx($buildables, $commit->getPHID());
         if ($buildable) {
           $build_status = $this->renderBuildable($buildable);
@@ -147,7 +147,7 @@ final class DiffusionBranchTableView extends DiffusionView {
         '',
         'wide',
         '',
-        '',
+        'right',
       ));
     $view->setColumnVisibility(
       array(

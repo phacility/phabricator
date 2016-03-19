@@ -81,6 +81,21 @@ final class DifferentialChangeType extends Phobject {
     return idx($icons, $type, 'fa-file');
   }
 
+  public static function getIconColorForFileType($type) {
+    static $icons = array(
+      self::FILE_TEXT => 'black',
+      self::FILE_IMAGE => 'black',
+      self::FILE_BINARY => 'green',
+      self::FILE_DIRECTORY => 'blue',
+      self::FILE_SYMLINK => 'blue',
+      self::FILE_DELETED => 'red',
+      self::FILE_NORMAL => 'black',
+      self::FILE_SUBMODULE => 'blue',
+    );
+
+    return idx($icons, $type, 'black');
+  }
+
   public static function isOldLocationChangeType($type) {
     static $types = array(
       self::TYPE_MOVE_AWAY  => true,

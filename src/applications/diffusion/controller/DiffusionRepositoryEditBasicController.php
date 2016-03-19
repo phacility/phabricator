@@ -105,6 +105,10 @@ final class DiffusionRepositoryEditBasicController
 
     $title = pht('Edit %s', $repository->getName());
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -144,16 +148,23 @@ final class DiffusionRepositoryEditBasicController
       ->appendChild(id(new PHUIFormDividerControl()))
       ->appendRemarkupInstructions($this->getReadmeInstructions());
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Basic Information'))
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form)
       ->setFormErrors($errors);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($object_box);
+      ->appendChild($view);
   }
 
   private function getReadmeInstructions() {
