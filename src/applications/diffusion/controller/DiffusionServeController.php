@@ -7,6 +7,7 @@ final class DiffusionServeController extends DiffusionController {
 
   private $isGitLFSRequest;
   private $gitLFSToken;
+  private $gitLFSInput;
 
   public function setServiceViewer(PhabricatorUser $viewer) {
     $this->getRequest()->setUser($viewer);
@@ -284,11 +285,20 @@ final class DiffusionServeController extends DiffusionController {
         DiffusionPushCapability::CAPABILITY);
       if (!$can_push) {
         if ($viewer->isLoggedIn()) {
-          return new PhabricatorVCSResponse(
-            403,
-            pht(
-              'You do not have permission to push to this '.
-              'repository.'));
+          $error_code = 403;
+          $error_message = pht(
+            'You do not have permission to push to this repository ("%s").',
+            $repository->getDisplayName());
+
+          if ($this->getIsGitLFSRequest()) {
+            return DiffusionGitLFSResponse::newErrorResponse(
+              $error_code,
+              $error_message);
+          } else {
+            return new PhabricatorVCSResponse(
+              $error_code,
+              $error_message);
+          }
         } else {
           if ($allow_auth) {
             return new PhabricatorVCSResponse(
@@ -422,7 +432,9 @@ final class DiffusionServeController extends DiffusionController {
 
     // TODO: This implementation is safe by default, but very incomplete.
 
-    // TODO: This doesn't get the right result for Git LFS yet.
+    if ($this->getIsGitLFSRequest()) {
+      return $this->isGitLFSReadOnlyRequest($repository);
+    }
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -911,8 +923,7 @@ final class DiffusionServeController extends DiffusionController {
     PhabricatorRepository $repository,
     PhabricatorUser $viewer) {
 
-    $input = PhabricatorStartup::getRawInput();
-    $input = phutil_json_decode($input);
+    $input = $this->getGitLFSInput();
 
     $operation = idx($input, 'operation');
     switch ($operation) {
@@ -1061,6 +1072,10 @@ final class DiffusionServeController extends DiffusionController {
           $oid));
     }
 
+    // Remove the execution time limit because uploading large files may take
+    // a while.
+    set_time_limit(0);
+
     $request_stream = new AphrontRequestStream();
     $request_iterator = $request_stream->getIterator();
     $hashing_iterator = id(new PhutilHashingIterator($request_iterator))
@@ -1132,5 +1147,37 @@ final class DiffusionServeController extends DiffusionController {
 
     return null;
   }
+
+  private function getGitLFSInput() {
+    if (!$this->gitLFSInput) {
+      $input = PhabricatorStartup::getRawInput();
+      $input = phutil_json_decode($input);
+      $this->gitLFSInput = $input;
+    }
+
+    return $this->gitLFSInput;
+  }
+
+  private function isGitLFSReadOnlyRequest(PhabricatorRepository $repository) {
+    if (!$this->getIsGitLFSRequest()) {
+      return false;
+    }
+
+    $path = $this->getGitLFSRequestPath($repository);
+
+    if ($path === 'objects/batch') {
+      $input = $this->getGitLFSInput();
+      $operation = idx($input, 'operation');
+      switch ($operation) {
+        case 'download':
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    return false;
+  }
+
 
 }
