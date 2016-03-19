@@ -496,9 +496,11 @@ final class DiffusionCommitController extends DiffusionController {
       $committed_info->setTarget($author_name);
     }
 
+    $committed_list = new PHUIStatusListView();
+    $committed_list->addItem($committed_info);
     $view->addProperty(
       pht('Committed'),
-      $committed_info);
+      $committed_list);
 
     if ($push_logs) {
       $pushed_list = new PHUIStatusListView();
