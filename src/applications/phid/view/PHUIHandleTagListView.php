@@ -61,7 +61,7 @@ final class PHUIHandleTagListView extends AphrontTagView {
       }
     }
 
-    if ($this->limit && ($this->limit > count($handles))) {
+    if ($this->limit && (count($handles) > $this->limit)) {
       if (!is_array($handles)) {
         $handles = iterator_to_array($handles);
       }
@@ -85,7 +85,7 @@ final class PHUIHandleTagListView extends AphrontTagView {
     }
 
     if ($this->limit) {
-      if ($this->limit < count($this->handles)) {
+      if (count($this->handles) > $this->limit) {
         $tip_text = implode(', ', mpull($this->handles, 'getName'));
 
         $more = $this->newPlaceholderTag()

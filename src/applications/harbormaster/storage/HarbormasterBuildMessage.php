@@ -17,8 +17,13 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
   private $buildTarget = self::ATTACHABLE;
 
   public static function initializeNewMessage(PhabricatorUser $actor) {
+    $actor_phid = $actor->getPHID();
+    if (!$actor_phid) {
+      $actor_phid = id(new PhabricatorHarbormasterApplication())->getPHID();
+    }
+
     return id(new HarbormasterBuildMessage())
-      ->setAuthorPHID($actor->getPHID())
+      ->setAuthorPHID($actor_phid)
       ->setIsConsumed(0);
   }
 

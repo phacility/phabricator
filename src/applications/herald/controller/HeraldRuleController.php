@@ -364,43 +364,6 @@ final class HeraldRuleController extends HeraldController {
     array $handles,
     HeraldAdapter $adapter) {
 
-    $serial_conditions = array(
-      array('default', 'default', ''),
-    );
-
-    if ($rule->getConditions()) {
-      $serial_conditions = array();
-      foreach ($rule->getConditions() as $condition) {
-        $value = $adapter->getEditorValueForCondition(
-          $this->getViewer(),
-          $condition);
-
-        $serial_conditions[] = array(
-          $condition->getFieldName(),
-          $condition->getFieldCondition(),
-          $value,
-        );
-      }
-    }
-
-    $serial_actions = array(
-      array('default', ''),
-    );
-
-    if ($rule->getActions()) {
-      $serial_actions = array();
-      foreach ($rule->getActions() as $action) {
-        $value = $adapter->getEditorValueForAction(
-          $this->getViewer(),
-          $action);
-
-        $serial_actions[] = array(
-          $action->getAction(),
-          $value,
-        );
-      }
-    }
-
     $all_rules = $this->loadRulesThisRuleMayDependUpon($rule);
     $all_rules = mpull($all_rules, 'getName', 'getPHID');
     asort($all_rules);
@@ -492,10 +455,58 @@ final class HeraldRuleController extends HeraldController {
       $config_info['targets'][$action] = $value_key;
     }
 
+    $default_group = head($config_info['fields']);
+    $default_field = head_key($default_group['options']);
+    $default_condition = head($config_info['conditionMap'][$default_field]);
+    $default_actions = head($config_info['actions']);
+    $default_action = head_key($default_actions['options']);
+
+    if ($rule->getConditions()) {
+      $serial_conditions = array();
+      foreach ($rule->getConditions() as $condition) {
+        $value = $adapter->getEditorValueForCondition(
+          $this->getViewer(),
+          $condition);
+
+        $serial_conditions[] = array(
+          $condition->getFieldName(),
+          $condition->getFieldCondition(),
+          $value,
+        );
+      }
+    } else {
+      $serial_conditions = array(
+        array($default_field, $default_condition, null),
+      );
+    }
+
+    if ($rule->getActions()) {
+      $serial_actions = array();
+      foreach ($rule->getActions() as $action) {
+        $value = $adapter->getEditorValueForAction(
+          $this->getViewer(),
+          $action);
+
+        $serial_actions[] = array(
+          $action->getAction(),
+          $value,
+        );
+      }
+    } else {
+      $serial_actions = array(
+        array($default_action, null),
+      );
+    }
+
     Javelin::initBehavior(
       'herald-rule-editor',
       array(
         'root' => 'herald-rule-edit-form',
+        'default' => array(
+          'field' => $default_field,
+          'condition' => $default_condition,
+          'action' => $default_action,
+        ),
         'conditions' => (object)$serial_conditions,
         'actions' => (object)$serial_actions,
         'template' => $this->buildTokenizerTemplates() + array(

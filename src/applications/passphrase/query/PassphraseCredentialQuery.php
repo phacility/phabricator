@@ -89,6 +89,17 @@ final class PassphraseCredentialQuery
       }
     }
 
+    foreach ($page as $key => $credential) {
+      $type = PassphraseCredentialType::getTypeByConstant(
+        $credential->getCredentialType());
+      if (!$type) {
+        unset($page[$key]);
+        continue;
+      }
+
+      $credential->attachImplementation(clone $type);
+    }
+
     return $page;
   }
 
