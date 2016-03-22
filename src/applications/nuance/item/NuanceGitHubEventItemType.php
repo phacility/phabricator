@@ -144,4 +144,46 @@ final class NuanceGitHubEventItemType
     return NuanceGitHubRawEvent::newEvent($type, $raw);
   }
 
+  public function getItemActions(NuanceItem $item) {
+    $actions = array();
+
+    $actions[] = $this->newItemAction($item, 'raw')
+      ->setName(pht('View Raw Event'))
+      ->setWorkflow(true)
+      ->setIcon('fa-code');
+
+    return $actions;
+  }
+
+  protected function handleAction(NuanceItem $item, $action) {
+    $controller = $this->getController();
+
+    switch ($action) {
+      case 'raw':
+        $raw = array(
+          'api.type' => $item->getItemProperty('api.type'),
+          'api.raw' => $item->getItemProperty('api.raw'),
+        );
+
+        $raw_output = id(new PhutilJSON())->encodeFormatted($raw);
+
+        $raw_box = id(new AphrontFormTextAreaControl())
+          ->setCustomClass('PhabricatorMonospaced')
+          ->setLabel(pht('Raw Event'))
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+          ->setValue($raw_output);
+
+        $form = id(new AphrontFormView())
+          ->appendChild($raw_box);
+
+        return $controller->newDialog()
+          ->setWidth(AphrontDialogView::WIDTH_FULL)
+          ->setTitle(pht('GitHub Raw Event'))
+          ->appendForm($form)
+          ->addCancelButton($item->getURI(), pht('Done'));
+    }
+
+    return null;
+  }
+
 }

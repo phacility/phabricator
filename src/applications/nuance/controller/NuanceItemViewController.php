@@ -58,6 +58,13 @@ final class NuanceItemViewController extends NuanceController {
         ->setIcon('fa-cogs')
         ->setHref($this->getApplicationURI("item/manage/{$id}/")));
 
+    $impl = $item->getImplementation();
+    $impl->setViewer($viewer);
+
+    foreach ($impl->getItemActions($item) as $action) {
+      $curtain->addAction($action);
+    }
+
     return $curtain;
   }
 
