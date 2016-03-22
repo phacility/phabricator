@@ -93,15 +93,7 @@ final class NuanceGitHubRawEvent extends Phobject {
   public function getURI() {
     $raw = $this->raw;
 
-    if ($this->isIssueEvent()) {
-      if ($this->type == self::TYPE_ISSUE) {
-        $uri = idxv($raw, array('issue', 'html_url'));
-        $uri = $uri.'#event-'.$this->getID();
-      } else {
-        $uri = idxv($raw, array('payload', 'issue', 'html_url'));
-        $uri = $uri.'#event-'.$this->getID();
-      }
-    } else if ($this->isPullRequestEvent()) {
+    if ($this->isIssueEvent() || $this->isPullRequestEvent()) {
       if ($this->type == self::TYPE_ISSUE) {
         $uri = idxv($raw, array('issue', 'html_url'));
         $uri = $uri.'#event-'.$this->getID();
@@ -109,10 +101,23 @@ final class NuanceGitHubRawEvent extends Phobject {
         // The format of pull request events varies so we need to fish around
         // a bit to find the correct URI.
         $uri = idxv($raw, array('payload', 'pull_request', 'html_url'));
+        $need_anchor = true;
+
+        // For comments, we get a different anchor to link to the comment. In
+        // this case, the URI comes with an anchor already.
+        if (!$uri) {
+          $uri = idxv($raw, array('payload', 'comment', 'html_url'));
+          $need_anchor = false;
+        }
+
         if (!$uri) {
           $uri = idxv($raw, array('payload', 'issue', 'html_url'));
+          $need_anchor = true;
         }
-        $uri = $uri.'#event-'.$this->getID();
+
+        if ($need_anchor) {
+          $uri = $uri.'#event-'.$this->getID();
+        }
       }
     } else {
       switch ($this->getIssueRawKind()) {
