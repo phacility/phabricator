@@ -76,9 +76,6 @@ final class DoorkeeperBridgeGitHubIssue
       $ref->setAttribute('name', $body['title']);
 
       $obj = $ref->getExternalObject();
-      if ($obj->getID()) {
-        continue;
-      }
 
       $this->fillObjectFromData($obj, $result);
 
@@ -92,6 +89,19 @@ final class DoorkeeperBridgeGitHubIssue
     $body = $result->getBody();
     $uri = $body['html_url'];
     $obj->setObjectURI($uri);
+
+    $title = idx($body, 'title');
+    $description = idx($body, 'body');
+
+    $created = idx($body, 'created_at');
+    $created = strtotime($created);
+
+    $state = idx($body, 'state');
+
+    $obj->setProperty('task.title', $title);
+    $obj->setProperty('task.description', $description);
+    $obj->setProperty('task.created', $created);
+    $obj->setProperty('task.state', $state);
   }
 
 }

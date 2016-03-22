@@ -131,7 +131,9 @@ abstract class NuanceItemType
       ->applyTransactions($item, array($xaction));
   }
 
-  protected function handleCommand(NuanceItem $item, $action) {
+  protected function handleCommand(
+    NuanceItem $item,
+    NuanceItemCommand $command) {
     return null;
   }
 

@@ -90,6 +90,10 @@ final class NuanceGitHubRawEvent extends Phobject {
     return null;
   }
 
+  public function getComment() {
+    return 'TODO: Actually extract comment text.';
+  }
+
   public function getURI() {
     $raw = $this->raw;
 
