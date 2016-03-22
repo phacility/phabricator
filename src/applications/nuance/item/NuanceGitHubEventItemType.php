@@ -186,4 +186,47 @@ final class NuanceGitHubEventItemType
     return null;
   }
 
+  protected function newItemView(NuanceItem $item) {
+    $content = array();
+
+    $content[] = $this->newGitHubEventItemPropertyBox($item);
+
+    return $content;
+  }
+
+  private function newGitHubEventItemPropertyBox($item) {
+    $viewer = $this->getViewer();
+
+    $property_list = id(new PHUIPropertyListView())
+      ->setViewer($viewer);
+
+    $event = $this->newRawEvent($item);
+
+    $property_list->addProperty(
+      pht('GitHub Event ID'),
+      $event->getID());
+
+    $event_uri = $event->getURI();
+    if ($event_uri && PhabricatorEnv::isValidRemoteURIForLink($event_uri)) {
+      $event_uri = phutil_tag(
+        'a',
+        array(
+          'href' => $event_uri,
+        ),
+        $event_uri);
+    }
+
+    if ($event_uri) {
+      $property_list->addProperty(
+        pht('GitHub Event URI'),
+        $event_uri);
+    }
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Event Properties'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($property_list);
+  }
+
+
 }

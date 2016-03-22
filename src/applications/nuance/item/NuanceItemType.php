@@ -32,7 +32,7 @@ abstract class NuanceItemType
     return $this->newItemView($item);
   }
 
-  protected function newItemView() {
+  protected function newItemView(NuanceItem $item) {
     return null;
   }
 

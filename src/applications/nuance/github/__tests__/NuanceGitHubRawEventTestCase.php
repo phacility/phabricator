@@ -48,6 +48,8 @@ final class NuanceGitHubRawEventTestCase
       'is.pull' => $event->isPullRequestEvent(),
       'issue.number' => $event->getIssueNumber(),
       'pull.number' => $event->getPullRequestNumber(),
+      'id' => $event->getID(),
+      'uri' => $event->getURI(),
     );
 
     // Only verify the keys which are actually present in the test. This

@@ -78,6 +78,68 @@ final class NuanceGitHubRawEvent extends Phobject {
     return $this->getRawIssueNumber();
   }
 
+
+  public function getID() {
+    $raw = $this->raw;
+
+    $id = idx($raw, 'id');
+    if ($id) {
+      return (int)$id;
+    }
+
+    return null;
+  }
+
+  public function getURI() {
+    $raw = $this->raw;
+
+    if ($this->isIssueEvent()) {
+      if ($this->type == self::TYPE_ISSUE) {
+        $uri = idxv($raw, array('issue', 'html_url'));
+        $uri = $uri.'#event-'.$this->getID();
+      } else {
+        $uri = idxv($raw, array('payload', 'issue', 'html_url'));
+        $uri = $uri.'#event-'.$this->getID();
+      }
+    } else if ($this->isPullRequestEvent()) {
+      if ($this->type == self::TYPE_ISSUE) {
+        $uri = idxv($raw, array('issue', 'html_url'));
+        $uri = $uri.'#event-'.$this->getID();
+      } else {
+        // The format of pull request events varies so we need to fish around
+        // a bit to find the correct URI.
+        $uri = idxv($raw, array('payload', 'pull_request', 'html_url'));
+        if (!$uri) {
+          $uri = idxv($raw, array('payload', 'issue', 'html_url'));
+        }
+        $uri = $uri.'#event-'.$this->getID();
+      }
+    } else {
+      switch ($this->getIssueRawKind()) {
+        case 'PushEvent':
+          // These don't really have a URI since there may be multiple commits
+          // involved and GitHub doesn't bundle the push as an object on its
+          // own. Just try to find the URI for the log. The API also does
+          // not return any HTML URI for these events.
+
+          $head = idxv($raw, array('payload', 'head'));
+          if ($head === null) {
+            return null;
+          }
+
+          $repo = $this->getRepositoryFullRawName();
+          return "https://github.com/{$repo}/commits/{$head}";
+        case 'WatchEvent':
+          // These have no reasonable URI.
+          return null;
+        default:
+          return null;
+      }
+    }
+
+    return $uri;
+  }
+
   private function getRepositoryFullRawName() {
     $raw = $this->raw;
 
