@@ -7,6 +7,7 @@ final class HarbormasterUnitSummaryView extends AphrontView {
   private $limit;
   private $excuse;
   private $showViewAll;
+  private $background;
 
   public function setBuildable(HarbormasterBuildable $buildable) {
     $this->buildable = $buildable;
@@ -33,6 +34,11 @@ final class HarbormasterUnitSummaryView extends AphrontView {
     return $this;
   }
 
+  public function setBackground($background) {
+    $this->background = $background;
+    return $this;
+  }
+
   public function render() {
     $messages = $this->messages;
     $buildable = $this->buildable;
@@ -54,9 +60,14 @@ final class HarbormasterUnitSummaryView extends AphrontView {
       $tag_icon = 'fa-ban';
     }
 
+    $tag = id(new PHUITagView())
+      ->setType(PHUITagView::TYPE_SHADE)
+      ->setShade($tag_color)
+      ->setIcon($tag_icon)
+      ->setName($tag_text);
+
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Unit Tests'))
-      ->setStatus($tag_icon, $tag_color, $tag_text);
+      ->setHeader(array(pht('Unit Tests'), $tag));
 
     if ($this->showViewAll) {
       $view_all = id(new PHUIButtonView())
@@ -97,6 +108,10 @@ final class HarbormasterUnitSummaryView extends AphrontView {
     }
 
     $box->setTable($table);
+
+    if ($this->background) {
+      $box->setBackground($this->background);
+    }
 
     return $box;
   }

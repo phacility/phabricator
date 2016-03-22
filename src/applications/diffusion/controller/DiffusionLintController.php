@@ -157,6 +157,7 @@ final class DiffusionLintController extends DiffusionController {
 
     $content[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Lint'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     $title = array('Lint');
@@ -179,7 +180,7 @@ final class DiffusionLintController extends DiffusionController {
       $header = id(new PHUIHeaderView())
         ->setHeader($this->renderPathLinks($drequest, 'lint'))
         ->setUser($viewer)
-        ->setPolicyObject($drequest->getRepository());
+        ->setHeaderIcon('fa-code');
       $actions = $this->buildActionView($drequest);
       $properties = $this->buildPropertyView(
         $drequest,
@@ -189,18 +190,28 @@ final class DiffusionLintController extends DiffusionController {
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->addPropertyList($properties);
     } else {
       $object_box = null;
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('All Lint'))
+        ->setHeaderIcon('fa-code');
     }
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $object_box,
+        $content,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $content,
+          $view,
         ));
   }
 
@@ -444,6 +455,7 @@ final class DiffusionLintController extends DiffusionController {
 
     $content[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Lint Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     $crumbs = $this->buildCrumbs(
@@ -454,6 +466,16 @@ final class DiffusionLintController extends DiffusionController {
       ));
 
     $pager_box = $this->renderTablePagerBox($pager);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Lint: %s', $drequest->getRepository()->getDisplayName()))
+      ->setHeaderIcon('fa-code');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $content,
+        $pager_box,
+      ));
 
     return $this->newPage()
       ->setTitle(
@@ -464,8 +486,7 @@ final class DiffusionLintController extends DiffusionController {
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $content,
-          $pager_box,
+          $view,
         ));
   }
 

@@ -52,6 +52,16 @@ div.phui-object-box.phui-object-box-flush {
   margin: 8px 8px 0 8px;
 }
 
+.phui-object-box .phui-header-header .phui-tag-view {
+  margin-left: 8px;
+}
+
+.phui-object-box .phui-header-header .phui-tag-core {
+  border-color: transparent;
+  padding: 1px 6px;
+  font-size: {$normalfontsize};
+}
+
 /* - Object Box Colors ------------------------------------------------------ */
 
 .phui-box-border.phui-object-box-green {

@@ -11,7 +11,7 @@ final class PhabricatorAuthRevokeTokenController
 
     $query = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer($viewer)
-      ->withObjectPHIDs(array($viewer->getPHID()));
+      ->withTokenResources(array($viewer->getPHID()));
     if (!$is_all) {
       $query->withIDs(array($id));
     }

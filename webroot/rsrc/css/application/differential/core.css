@@ -3,7 +3,7 @@
  */
 
 .differential-primary-pane {
-  margin-bottom: 32px;
+  margin-top: -20px;
 }
 
 .differential-panel {
@@ -22,4 +22,8 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.differential-content-hidden {
+  margin: 0 0 24px 0;
 }

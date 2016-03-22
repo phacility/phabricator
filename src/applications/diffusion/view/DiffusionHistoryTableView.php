@@ -95,7 +95,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
       $epoch = $history->getEpoch();
 
       if ($epoch) {
-        $committed = phabricator_datetime($epoch, $viewer);
+        $committed = $viewer->formatShortDateTime($epoch);
       } else {
         $committed = null;
       }
@@ -195,7 +195,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         '',
         '',
         'wide',
-        '',
+        'right',
       ));
     $view->setColumnVisibility(
       array(

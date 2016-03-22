@@ -40,8 +40,6 @@ final class DiffusionHistoryController extends DiffusionController {
     $history = $pager->sliceResults($history);
 
     $show_graph = !strlen($drequest->getPath());
-    $content = array();
-
     $history_table = id(new DiffusionHistoryTableView())
       ->setUser($request->getUser())
       ->setDiffusionRequest($drequest)
@@ -55,23 +53,13 @@ final class DiffusionHistoryController extends DiffusionController {
       $history_table->setIsTail(!$pager->getHasMorePages());
     }
 
-    $history_panel = new PHUIObjectBoxView();
-    $history_panel->setHeaderText(pht('History'));
-    $history_panel->setTable($history_table);
+    $history_header = $this->buildHistoryHeader($drequest);
+    $history_panel = id(new PHUIObjectBoxView())
+      ->setHeader($history_header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($history_table);
 
-    $content[] = $history_panel;
-
-    $header = id(new PHUIHeaderView())
-      ->setUser($viewer)
-      ->setPolicyObject($repository)
-      ->setHeader($this->renderPathLinks($drequest, $mode = 'history'));
-
-    $actions = $this->buildActionView($drequest);
-    $properties = $this->buildPropertyView($drequest, $actions);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $header = $this->buildHeader($drequest, $repository);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -79,8 +67,16 @@ final class DiffusionHistoryController extends DiffusionController {
         'path'   => true,
         'view'   => 'history',
       ));
+    $crumbs->setBorder(true);
 
     $pager_box = $this->renderTablePagerBox($pager);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $history_panel,
+        $pager_box,
+      ));
 
     return $this->newPage()
       ->setTitle(
@@ -91,28 +87,39 @@ final class DiffusionHistoryController extends DiffusionController {
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $content,
-          $pager_box,
+          $view,
         ));
   }
 
-  private function buildActionView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildHeader(DiffusionRequest $drequest) {
+    $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $tag = $this->renderCommitHashTag($drequest);
+
+    $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setPolicyObject($drequest->getRepository())
+      ->addTag($tag)
+      ->setHeader($this->renderPathLinks($drequest, $mode = 'history'))
+      ->setHeaderIcon('fa-clock-o');
+
+    return $header;
+
+  }
+
+  private function buildHistoryHeader(DiffusionRequest $drequest) {
+    $viewer = $this->getViewer();
 
     $browse_uri = $drequest->generateURI(
       array(
         'action' => 'browse',
       ));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Browse Content'))
-        ->setHref($browse_uri)
-        ->setIcon('fa-files-o'));
+    $browse_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Browse'))
+      ->setHref($browse_uri)
+      ->setIcon('fa-files-o');
 
     // TODO: Sometimes we do have a change view, we need to look at the most
     // recent history entry to figure it out.
@@ -130,41 +137,18 @@ final class DiffusionHistoryController extends DiffusionController {
         ->alter('copies', true);
     }
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName($branch_name)
-        ->setIcon('fa-code-fork')
-        ->setHref($branch_uri));
+    $branch_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText($branch_name)
+      ->setIcon('fa-code-fork')
+      ->setHref($branch_uri);
 
-    return $view;
-  }
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('History'))
+      ->addActionLink($browse_button)
+      ->addActionLink($branch_button);
 
-  protected function buildPropertyView(
-    DiffusionRequest $drequest,
-    PhabricatorActionListView $actions) {
-
-    $viewer = $this->getRequest()->getUser();
-
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setActionList($actions);
-
-    $stable_commit = $drequest->getStableCommit();
-
-    $view->addProperty(
-      pht('Commit'),
-      phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
-            array(
-              'action' => 'commit',
-              'commit' => $stable_commit,
-            )),
-        ),
-        $drequest->getRepository()->formatCommitName($stable_commit)));
-
-    return $view;
+    return $header;
   }
 
 }

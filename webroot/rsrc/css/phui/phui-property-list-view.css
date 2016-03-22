@@ -199,7 +199,6 @@
 .phui-property-list-image-content img {
   margin: 20px auto;
   background: url('/rsrc/image/checker_light.png');
-  border: 1px solid {$lightblueborder};
 }
 
 .device-desktop .phui-property-list-image-content img:hover {

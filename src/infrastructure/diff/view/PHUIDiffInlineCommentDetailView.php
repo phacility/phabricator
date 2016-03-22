@@ -176,7 +176,7 @@ final class PHUIDiffInlineCommentDetailView
     if ($inline->getHasReplies()) {
       $classes[] = 'inline-comment-has-reply';
     }
-    // I think this is unused
+
     if ($inline->getReplyToCommentPHID()) {
       $classes[] = 'inline-comment-is-reply';
     }

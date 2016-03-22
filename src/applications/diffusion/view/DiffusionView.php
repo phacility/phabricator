@@ -95,7 +95,9 @@ abstract class DiffusionView extends AphrontView {
     }
 
     $icon = DifferentialChangeType::getIconForFileType($file_type);
-    $icon_view = id(new PHUIIconView())->setIcon($icon);
+    $color = DifferentialChangeType::getIconColorForFileType($file_type);
+    $icon_view = id(new PHUIIconView())
+      ->setIcon($icon.' '.$color);
 
     // If we're rendering a file or directory name, don't show the tooltip.
     if ($display_name !== null) {

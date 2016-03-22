@@ -55,20 +55,17 @@ final class DiffusionBrowseController extends DiffusionController {
   }
 
   private function browseSearch() {
+
     $drequest = $this->getDiffusionRequest();
+    $header = $this->buildHeaderView($drequest);
 
-    $actions = $this->buildActionView($drequest);
-    $properties = $this->buildPropertyView($drequest, $actions);
+    $search_form = $this->renderSearchForm();
+    $search_results = $this->renderSearchResults();
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderView($drequest))
-      ->addPropertyList($properties);
-
-    $content = array();
-
-    $content[] = $object_box;
-    $content[] = $this->renderSearchForm($collapsed = false);
-    $content[] = $this->renderSearchResults();
+    $search_form = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Search'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($search_form);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -76,6 +73,14 @@ final class DiffusionBrowseController extends DiffusionController {
         'path'   => true,
         'view'   => 'browse',
       ));
+    $crumbs->setBorder(true);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+          $search_form,
+          $search_results,
+        ));
 
     return $this->newPage()
       ->setTitle(
@@ -84,7 +89,7 @@ final class DiffusionBrowseController extends DiffusionController {
           $drequest->getRepository()->getDisplayName(),
         ))
       ->setCrumbs($crumbs)
-      ->appendChild($content);
+      ->appendChild($view);
   }
 
   private function browseFile() {
@@ -187,7 +192,25 @@ final class DiffusionBrowseController extends DiffusionController {
       }
 
       $data = $file->loadFileData();
-      if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
+
+      $ref = $this->getGitLFSRef($repository, $data);
+      if ($ref) {
+        if ($view == 'git-lfs') {
+          $file = $this->loadGitLFSFile($ref);
+
+          // Rename the file locally so we generate a better vanity URI for
+          // it. In storage, it just has a name like "lfs-13f9a94c0923...",
+          // since we don't get any hints about possible human-readable names
+          // at upload time.
+          $basename = basename($drequest->getPath());
+          $file->makeEphemeral();
+          $file->setName($basename);
+
+          return $file->getRedirectResponse();
+        } else {
+          $corpus = $this->buildGitLFSCorpus($ref);
+        }
+      } else if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
         $file_uri = $file->getBestURI();
 
         if ($file->isViewableImage()) {
@@ -218,20 +241,18 @@ final class DiffusionBrowseController extends DiffusionController {
     require_celerity_resource('diffusion-source-css');
 
     // Render the page.
-    $view = $this->buildActionView($drequest);
-    $action_list = $this->enrichActionView(
+    $view = $this->buildCurtain($drequest);
+    $curtain = $this->enrichCurtain(
       $view,
       $drequest,
       $show_blame,
       $show_color);
 
-    $properties = $this->buildPropertyView($drequest, $action_list);
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderView($drequest))
-      ->addPropertyList($properties);
+    $properties = $this->buildPropertyView($drequest);
+    $header = $this->buildHeaderView($drequest);
+    $header->setHeaderIcon('fa-file-code-o');
 
     $content = array();
-    $content[] = $object_box;
 
     $follow  = $request->getStr('follow');
     if ($follow) {
@@ -277,17 +298,31 @@ final class DiffusionBrowseController extends DiffusionController {
         'path'   => true,
         'view'   => 'browse',
       ));
+    $crumbs->setBorder(true);
 
     $basename = basename($this->getDiffusionRequest()->getPath());
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $content,
+        ));
+
+    if ($properties) {
+      $view->addPropertySection(pht('DETAILS'), $properties);
+    }
+
+    $title = array($basename, $repository->getDisplayName());
+
     return $this->newPage()
-      ->setTitle(
-        array(
-          $basename,
-          $repository->getDisplayName(),
-        ))
+      ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($content);
+      ->appendChild(
+        array(
+          $view,
+      ));
+
   }
 
   public function browseDirectory(
@@ -300,23 +335,21 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $reason = $results->getReasonForEmptyResultSet();
 
-    $content = array();
-    $actions = $this->buildActionView($drequest);
-    $properties = $this->buildPropertyView($drequest, $actions);
+    $curtain = $this->buildCurtain($drequest);
+    $details = $this->buildPropertyView($drequest);
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderView($drequest))
-      ->addPropertyList($properties);
+    $header = $this->buildHeaderView($drequest);
+    $header->setHeaderIcon('fa-folder-open');
 
-    $content[] = $object_box;
-    $content[] = $this->renderSearchForm($collapsed = true);
+    $search_form = $this->renderSearchForm();
 
+    $empty_result = null;
+    $browse_panel = null;
     if (!$results->isValidResults()) {
       $empty_result = new DiffusionEmptyResultView();
       $empty_result->setDiffusionRequest($drequest);
       $empty_result->setDiffusionBrowseResultSet($results);
       $empty_result->setView($request->getStr('view'));
-      $content[] = $empty_result;
     } else {
       $phids = array();
       foreach ($results->getPaths() as $result) {
@@ -331,21 +364,30 @@ final class DiffusionBrowseController extends DiffusionController {
       $phids = array_keys($phids);
       $handles = $this->loadViewerHandles($phids);
 
-      $browse_table = new DiffusionBrowseTableView();
-      $browse_table->setDiffusionRequest($drequest);
-      $browse_table->setHandles($handles);
-      $browse_table->setPaths($results->getPaths());
-      $browse_table->setUser($request->getUser());
+      $browse_table = id(new DiffusionBrowseTableView())
+        ->setDiffusionRequest($drequest)
+        ->setHandles($handles)
+        ->setPaths($results->getPaths())
+        ->setUser($request->getUser());
 
-      $browse_panel = new PHUIObjectBoxView();
-      $browse_panel->setHeaderText($drequest->getPath(), '/');
-      $browse_panel->setTable($browse_table);
+      $browse_header = id(new PHUIHeaderView())
+        ->setHeader(nonempty(basename($drequest->getPath()), '/'))
+        ->setHeaderIcon('fa-folder-open');
 
-      $content[] = $browse_panel;
+      $browse_panel = id(new PHUIObjectBoxView())
+        ->setHeader($browse_header)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->setTable($browse_table);
+
+      $browse_panel->setShowHide(
+        array(pht('Show Search')),
+        pht('Hide Search'),
+        $search_form,
+        '#');
     }
 
-    $content[] = $this->buildOpenRevisions();
-    $content[] = $this->renderDirectoryReadme($results);
+    $open_revisions = $this->buildOpenRevisions();
+    $readme = $this->renderDirectoryReadme($results);
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -355,18 +397,34 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
 
     $pager_box = $this->renderTablePagerBox($pager);
+    $crumbs->setBorder(true);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $empty_result,
+        $browse_panel,
+      ))
+      ->setFooter(array(
+          $open_revisions,
+          $readme,
+          $pager_box,
+      ));
+
+    if ($details) {
+      $view->addPropertySection(pht('DETAILS'), $details);
+    }
 
     return $this->newPage()
-      ->setTitle(
-        array(
+      ->setTitle(array(
           nonempty(basename($drequest->getPath()), '/'),
           $repository->getDisplayName(),
         ))
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $content,
-          $pager_box,
+          $view,
         ));
   }
 
@@ -431,6 +489,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     $pager_box = $this->renderTablePagerBox($pager);
@@ -697,12 +756,14 @@ final class DiffusionBrowseController extends DiffusionController {
     $edit = $this->renderEditButton();
     $file = $this->renderFileButton();
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('File Contents'))
+      ->setHeader(basename($this->getDiffusionRequest()->getPath()))
+      ->setHeaderIcon('fa-file-code-o')
       ->addActionLink($edit)
       ->addActionLink($file);
 
     $corpus = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($corpus)
       ->setCollapsed(true);
 
@@ -737,16 +798,16 @@ final class DiffusionBrowseController extends DiffusionController {
     return $corpus;
   }
 
-  private function enrichActionView(
-    PhabricatorActionListView $view,
+  private function enrichCurtain(
+    PHUICurtainView $curtain,
     DiffusionRequest $drequest,
     $show_blame,
     $show_color) {
 
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
     $base_uri = $this->getRequest()->getRequestURI();
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Show Last Change'))
         ->setHref(
@@ -766,7 +827,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $blame_value = 1;
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($blame_text)
         ->setHref($base_uri->alter('blame', $blame_value))
@@ -784,7 +845,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $highlight_value = 1;
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($highlight_text)
         ->setHref($base_uri->alter('color', $highlight_value))
@@ -809,14 +870,57 @@ final class DiffusionBrowseController extends DiffusionController {
       ))->alter('lint', '');
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($lint_text)
         ->setHref($href)
         ->setIcon('fa-exclamation-triangle')
         ->setDisabled(!$href));
 
-    return $view;
+
+    $repository = $drequest->getRepository();
+
+    $owners = 'PhabricatorOwnersApplication';
+    if (PhabricatorApplication::isClassInstalled($owners)) {
+      $package_query = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($viewer)
+        ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
+        ->withControl(
+          $repository->getPHID(),
+          array(
+            $drequest->getPath(),
+          ));
+
+      $package_query->execute();
+
+      $packages = $package_query->getControllingPackagesForPath(
+        $repository->getPHID(),
+        $drequest->getPath());
+
+      if ($packages) {
+        $ownership = id(new PHUIStatusListView())
+          ->setUser($viewer);
+
+        foreach ($packages as $package) {
+          $icon = 'fa-list-alt';
+          $color = 'grey';
+
+          $item = id(new PHUIStatusItemView())
+            ->setIcon($icon, $color)
+            ->setTarget($viewer->renderHandle($package->getPHID()));
+
+          $ownership->addItem($item);
+        }
+      } else {
+        $ownership = phutil_tag('em', array(), pht('None'));
+      }
+
+      $curtain->newPanel()
+        ->setHeaderText(pht('Owners'))
+        ->appendChild($ownership);
+    }
+
+    return $curtain;
   }
 
   private function renderEditButton() {
@@ -844,7 +948,7 @@ final class DiffusionBrowseController extends DiffusionController {
     return $button;
   }
 
-  private function renderFileButton($file_uri = null) {
+  private function renderFileButton($file_uri = null, $label = null) {
 
     $base_uri = $this->getRequest()->getRequestURI();
 
@@ -858,6 +962,10 @@ final class DiffusionBrowseController extends DiffusionController {
       $icon = 'fa-file-text';
     }
 
+    if ($label !== null) {
+      $text = $label;
+    }
+
     $button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText($text)
@@ -867,6 +975,21 @@ final class DiffusionBrowseController extends DiffusionController {
     return $button;
   }
 
+  private function renderGitLFSButton() {
+    $viewer = $this->getViewer();
+
+    $uri = $this->getRequest()->getRequestURI();
+    $href = $uri->alter('view', 'git-lfs');
+
+    $text = pht('Download from Git LFS');
+    $icon = 'fa-download';
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText($text)
+      ->setHref($href)
+      ->setIcon($icon);
+  }
 
   private function buildDisplayRows(
     array $lines,
@@ -1265,11 +1388,13 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $file = $this->renderFileButton($file_uri);
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Image'))
-      ->addActionLink($file);
+      ->setHeader(basename($this->getDiffusionRequest()->getPath()))
+      ->addActionLink($file)
+      ->setHeaderIcon('fa-file-image-o');
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
   }
 
@@ -1282,11 +1407,12 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $file = $this->renderFileButton($file_uri);
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Details'))
+      ->setHeader(pht('DETAILS'))
       ->addActionLink($file);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($text);
 
     return $box;
@@ -1298,7 +1424,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->appendChild($message);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Details'));
+      ->setHeader(pht('DETAILS'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -1461,12 +1587,12 @@ final class DiffusionBrowseController extends DiffusionController {
     return "{$summary}\n{$date} \xC2\xB7 {$author}";
   }
 
-  protected function renderSearchForm($collapsed) {
+  protected function renderSearchForm() {
     $drequest = $this->getDiffusionRequest();
 
     $forms = array();
     $form = id(new AphrontFormView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($this->getViewer())
       ->setMethod('GET');
 
     switch ($drequest->getRepository()->getVersionControlSystem()) {
@@ -1492,22 +1618,10 @@ final class DiffusionBrowseController extends DiffusionController {
         break;
     }
 
-    $filter = new AphrontListFilterView();
-    $filter->appendChild($forms);
+    require_celerity_resource('diffusion-icons-css');
+    $form_box = phutil_tag_div('diffusion-search-boxen', $forms);
 
-    if ($collapsed) {
-      $filter->setCollapsed(
-        pht('Show Search'),
-        pht('Hide Search'),
-        pht('Search for file names or content in this directory.'),
-        '#');
-    }
-
-    $filter = id(new PHUIBoxView())
-      ->addClass('mlt mlb')
-      ->appendChild($filter);
-
-    return $filter;
+    return $form_box;
   }
 
   protected function markupText($text) {
@@ -1526,28 +1640,29 @@ final class DiffusionBrowseController extends DiffusionController {
   }
 
   protected function buildHeaderView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
+
+    $tag = $this->renderCommitHashTag($drequest);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($this->renderPathLinks($drequest, $mode = 'browse'))
-      ->setPolicyObject($drequest->getRepository());
+      ->addTag($tag);
 
     return $header;
   }
 
-  protected function buildActionView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
+  protected function buildCurtain(DiffusionRequest $drequest) {
+    $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $curtain = $this->newCurtainView($drequest);
 
     $history_uri = $drequest->generateURI(
       array(
         'action' => 'history',
       ));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
@@ -1559,40 +1674,22 @@ final class DiffusionBrowseController extends DiffusionController {
         'commit' => '',
         'action' => 'browse',
       ));
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Jump to HEAD'))
         ->setHref($head_uri)
         ->setIcon('fa-home')
         ->setDisabled(!$behind_head));
 
-    return $view;
+    return $curtain;
   }
 
   protected function buildPropertyView(
-    DiffusionRequest $drequest,
-    PhabricatorActionListView $actions) {
+    DiffusionRequest $drequest) {
 
     $viewer = $this->getViewer();
-
     $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setActionList($actions);
-
-    $stable_commit = $drequest->getStableCommit();
-
-    $view->addProperty(
-      pht('Commit'),
-      phutil_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(
-            array(
-              'action' => 'commit',
-              'commit' => $stable_commit,
-            )),
-        ),
-        $drequest->getRepository()->formatCommitName($stable_commit)));
+      ->setUser($viewer);
 
     if ($drequest->getSymbolicType() == 'tag') {
       $symbolic = $drequest->getSymbolicCommit();
@@ -1616,47 +1713,11 @@ final class DiffusionBrowseController extends DiffusionController {
       }
     }
 
-    $repository = $drequest->getRepository();
-
-    $owners = 'PhabricatorOwnersApplication';
-    if (PhabricatorApplication::isClassInstalled($owners)) {
-      $package_query = id(new PhabricatorOwnersPackageQuery())
-        ->setViewer($viewer)
-        ->withStatuses(array(PhabricatorOwnersPackage::STATUS_ACTIVE))
-        ->withControl(
-          $repository->getPHID(),
-          array(
-            $drequest->getPath(),
-          ));
-
-      $package_query->execute();
-
-      $packages = $package_query->getControllingPackagesForPath(
-        $repository->getPHID(),
-        $drequest->getPath());
-
-      if ($packages) {
-        $ownership = id(new PHUIStatusListView())
-          ->setUser($viewer);
-
-        foreach ($packages as $package) {
-          $icon = 'fa-list-alt';
-          $color = 'grey';
-
-          $item = id(new PHUIStatusItemView())
-            ->setIcon($icon, $color)
-            ->setTarget($viewer->renderHandle($package->getPHID()));
-
-          $ownership->addItem($item);
-        }
-      } else {
-        $ownership = phutil_tag('em', array(), pht('None'));
-      }
-
-      $view->addProperty(pht('Packages'), $ownership);
+    if ($view->hasAnyProperties()) {
+      return $view;
     }
 
-    return $view;
+    return null;
   }
 
   private function buildOpenRevisions() {
@@ -1864,5 +1925,91 @@ final class DiffusionBrowseController extends DiffusionController {
       ),
       $corpus);
   }
+
+  private function getGitLFSRef(PhabricatorRepository $repository, $data) {
+    if (!$repository->canUseGitLFS()) {
+      return null;
+    }
+
+    $lfs_pattern = '(^version https://git-lfs\\.github\\.com/spec/v1[\r\n])';
+    if (!preg_match($lfs_pattern, $data)) {
+      return null;
+    }
+
+    $matches = null;
+    if (!preg_match('(^oid sha256:(.*)$)m', $data, $matches)) {
+      return null;
+    }
+
+    $hash = $matches[1];
+    $hash = trim($hash);
+
+    return id(new PhabricatorRepositoryGitLFSRefQuery())
+      ->setViewer($this->getViewer())
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->withObjectHashes(array($hash))
+      ->executeOne();
+  }
+
+  private function buildGitLFSCorpus(PhabricatorRepositoryGitLFSRef $ref) {
+    // TODO: We should probably test if we can load the file PHID here and
+    // show the user an error if we can't, rather than making them click
+    // through to hit an error.
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(basename($this->getDiffusionRequest()->getPath()))
+      ->setHeaderIcon('fa-archive');
+
+    $severity = PHUIInfoView::SEVERITY_NOTICE;
+
+    $messages = array();
+    $messages[] = pht(
+      'This %s file is stored in Git Large File Storage.',
+      phutil_format_bytes($ref->getByteSize()));
+
+    try {
+      $file = $this->loadGitLFSFile($ref);
+      $data = $this->renderGitLFSButton();
+      $header->addActionLink($data);
+    } catch (Exception $ex) {
+      $severity = PHUIInfoView::SEVERITY_ERROR;
+      $messages[] = pht('The data for this file could not be loaded.');
+    }
+
+    $raw = $this->renderFileButton(null, pht('View Raw LFS Pointer'));
+    $header->addActionLink($raw);
+
+    $corpus = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setCollapsed(true);
+
+    if ($messages) {
+      $corpus->setInfoView(
+        id(new PHUIInfoView())
+          ->setSeverity($severity)
+          ->setErrors($messages));
+    }
+
+    return $corpus;
+  }
+
+  private function loadGitLFSFile(PhabricatorRepositoryGitLFSRef $ref) {
+    $viewer = $this->getViewer();
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($ref->getFilePHID()))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to load file object for Git LFS ref "%s"!',
+          $ref->getObjectHash()));
+    }
+
+    return $file;
+  }
+
 
 }

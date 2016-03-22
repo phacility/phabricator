@@ -98,6 +98,9 @@ final class DiffusionRepositoryEditBranchesController
     $crumbs->addTextCrumb(pht('Edit Branches'));
 
     $title = pht('Edit Branches (%s)', $repository->getName());
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
@@ -213,14 +216,21 @@ final class DiffusionRepositoryEditBranchesController
         ->addCancelButton($edit_uri));
 
     $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Branches'))
       ->setValidationException($validation_exception)
-      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($form_box);
+      ->appendChild($view);
   }
 
   private function processBranches($string) {

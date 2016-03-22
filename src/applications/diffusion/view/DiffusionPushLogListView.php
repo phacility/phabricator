@@ -88,7 +88,7 @@ final class DiffusionPushLogListView extends AphrontView {
         // TODO: Make these human-readable.
         $log->getChangeFlags(),
         $log->getPushEvent()->getRejectCode(),
-        phabricator_datetime($log->getEpoch(), $viewer),
+        $viewer->formatShortDateTime($log->getEpoch()),
       );
     }
 
@@ -119,7 +119,7 @@ final class DiffusionPushLogListView extends AphrontView {
           'wide',
           'n',
           'n',
-          'date',
+          'right',
         ));
 
     return $table;

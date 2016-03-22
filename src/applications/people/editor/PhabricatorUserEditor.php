@@ -700,7 +700,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     }
   }
 
-  private function revokePasswordResetLinks(PhabricatorUser $user) {
+  public function revokePasswordResetLinks(PhabricatorUser $user) {
     // Revoke any outstanding password reset links. If an attacker compromises
     // an account, changes the email address, and sends themselves a password
     // reset link, it could otherwise remain live for a short period of time
@@ -710,8 +710,8 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $user,
       array($user->getPHID()),
       array(
-        PhabricatorAuthSessionEngine::ONETIME_TEMPORARY_TOKEN_TYPE,
-        PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE,
+        PhabricatorAuthOneTimeLoginTemporaryTokenType::TOKENTYPE,
+        PhabricatorAuthPasswordResetTemporaryTokenType::TOKENTYPE,
       ));
   }
 

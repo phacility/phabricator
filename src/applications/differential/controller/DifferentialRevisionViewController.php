@@ -40,7 +40,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $revision->attachActiveDiff(last($diffs));
 
     $diff_vs = $request->getInt('vs');
-
     $target_id = $request->getInt('id');
     $target = idx($diffs, $target_id, end($diffs));
 
@@ -210,14 +209,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $commits_for_links = array();
     }
 
-    $revision_detail = id(new DifferentialRevisionDetailView())
-      ->setUser($viewer)
-      ->setRevision($revision)
-      ->setDiff(end($diffs))
-      ->setCustomFields($field_list)
-      ->setURI($request->getRequestURI());
-
-    $actions = $this->getRevisionActions($revision);
+    $header = $this->buildHeader($revision);
+    $subheader = $this->buildSubheaderView($revision);
+    $details = $this->buildDetails($revision, $field_list);
+    $curtain = $this->buildCurtain($revision);
 
     $whitespace = $request->getStr(
       'whitespace',
@@ -232,21 +227,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $symbol_indexes = array();
     }
 
-    $revision_detail->setActions($actions);
-    $revision_detail->setUser($viewer);
-
-    $revision_detail_box = $revision_detail->render();
-
     $revision_warnings = $this->buildRevisionWarnings(
       $revision,
       $field_list,
       $warning_handle_map,
       $handles);
+    $info_view = null;
     if ($revision_warnings) {
-      $revision_warnings = id(new PHUIInfoView())
+      $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->setErrors($revision_warnings);
-      $revision_detail_box->setInfoView($revision_warnings);
     }
 
     $detail_diffs = array_select_keys(
@@ -277,38 +267,30 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $comment_view->setQuoteTargetID('comment-content');
     }
 
-    $wrap_id = celerity_generate_unique_node_id();
-    $comment_view = phutil_tag(
-      'div',
-      array(
-        'id' => $wrap_id,
-      ),
-      $comment_view);
+    $changeset_view = id(new DifferentialChangesetListView())
+      ->setChangesets($changesets)
+      ->setVisibleChangesets($visible_changesets)
+      ->setStandaloneURI('/differential/changeset/')
+      ->setRawFileURIs(
+        '/differential/changeset/?view=old',
+        '/differential/changeset/?view=new')
+      ->setUser($viewer)
+      ->setDiff($target)
+      ->setRenderingReferences($rendering_references)
+      ->setVsMap($vs_map)
+      ->setWhitespace($whitespace)
+      ->setSymbolIndexes($symbol_indexes)
+      ->setTitle(pht('Diff %s', $target->getID()))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
-    $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setChangesets($changesets);
-    $changeset_view->setVisibleChangesets($visible_changesets);
+    if ($repository) {
+      $changeset_view->setRepository($repository);
+    }
 
     if (!$viewer_is_anonymous) {
       $changeset_view->setInlineCommentControllerURI(
         '/differential/comment/inline/edit/'.$revision->getID().'/');
     }
-
-    $changeset_view->setStandaloneURI('/differential/changeset/');
-    $changeset_view->setRawFileURIs(
-      '/differential/changeset/?view=old',
-      '/differential/changeset/?view=new');
-
-    $changeset_view->setUser($viewer);
-    $changeset_view->setDiff($target);
-    $changeset_view->setRenderingReferences($rendering_references);
-    $changeset_view->setVsMap($vs_map);
-    $changeset_view->setWhitespace($whitespace);
-    if ($repository) {
-      $changeset_view->setRepository($repository);
-    }
-    $changeset_view->setSymbolIndexes($symbol_indexes);
-    $changeset_view->setTitle(pht('Diff %s', $target->getID()));
 
     $diff_history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($viewer)
@@ -344,70 +326,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $comment_form = null;
     if (!$viewer_is_anonymous) {
-      $draft = id(new PhabricatorDraft())->loadOneWhere(
-        'authorPHID = %s AND draftKey = %s',
-        $viewer->getPHID(),
-        'differential-comment-'.$revision->getID());
-
-      $reviewers = array();
-      $ccs = array();
-      if ($draft) {
-        $reviewers = idx($draft->getMetadata(), 'reviewers', array());
-        $ccs = idx($draft->getMetadata(), 'ccs', array());
-        if ($reviewers || $ccs) {
-          $handles = $this->loadViewerHandles(array_merge($reviewers, $ccs));
-          $reviewers = array_select_keys($handles, $reviewers);
-          $ccs = array_select_keys($handles, $ccs);
-        }
-      }
-
-      $comment_form = new DifferentialAddCommentView();
-      $comment_form->setRevision($revision);
-
-      $review_warnings = array();
-      foreach ($field_list->getFields() as $field) {
-        $review_warnings[] = $field->getWarningsForDetailView();
-      }
-      $review_warnings = array_mergev($review_warnings);
-
-      if ($review_warnings) {
-        $review_warnings_panel = id(new PHUIInfoView())
-          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-          ->setErrors($review_warnings);
-        $comment_form->setInfoView($review_warnings_panel);
-      }
-
-      $comment_form->setActions($this->getRevisionCommentActions($revision));
-      $action_uri = $this->getApplicationURI(
-        'comment/save/'.$revision->getID().'/');
-
-      $comment_form->setActionURI($action_uri);
-      $comment_form->setUser($viewer);
-      $comment_form->setDraft($draft);
-      $comment_form->setReviewers(mpull($reviewers, 'getFullName', 'getPHID'));
-      $comment_form->setCCs(mpull($ccs, 'getFullName', 'getPHID'));
-
-      // TODO: This just makes the "Z" key work. Generalize this and remove
-      // it at some point.
-      $comment_form = phutil_tag(
-        'div',
-        array(
-          'class' => 'differential-add-comment-panel',
-        ),
-        $comment_form);
+      $comment_form = $this->buildCommentForm($revision, $field_list);
     }
-
-    $pane_id = celerity_generate_unique_node_id();
-    Javelin::initBehavior(
-      'differential-keyboard-navigation',
-      array(
-        'haunt' => $pane_id,
-      ));
-    Javelin::initBehavior('differential-user-select');
-
-    $page_pane = id(new DifferentialPrimaryPaneView())
-      ->setID($pane_id)
-      ->appendChild($comment_view);
 
     $signatures = DifferentialRequiredSignaturesField::loadForRevision(
       $revision);
@@ -418,21 +338,17 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
+    $footer = array();
+    $signature_message = null;
     if ($missing_signatures) {
       $signature_message = id(new PHUIInfoView())
-        ->setErrors(
-          array(
-            array(
-              phutil_tag('strong', array(), pht('Content Hidden:')),
-              ' ',
-              pht(
-                'The content of this revision is hidden until the author has '.
-                'signed all of the required legal agreements.'),
-            ),
-          ));
-      $page_pane->appendChild($signature_message);
+        ->setTitle(pht('Content Hidden'))
+        ->appendChild(
+          pht(
+            'The content of this revision is hidden until the author has '.
+            'signed all of the required legal agreements.'));
     } else {
-      $page_pane->appendChild(
+      $footer[] =
         array(
           $diff_history,
           $warning,
@@ -440,37 +356,28 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $toc_view,
           $other_view,
           $changeset_view,
-        ));
+        );
     }
 
     if ($comment_form) {
-      $page_pane->appendChild($comment_form);
+      $footer[] = $comment_form;
     } else {
       // TODO: For now, just use this to get "Login to Comment".
-      $page_pane->appendChild(
-        id(new PhabricatorApplicationTransactionCommentView())
-          ->setUser($viewer)
-          ->setRequestURI($request->getRequestURI()));
+      $footer[] = id(new PhabricatorApplicationTransactionCommentView())
+        ->setUser($viewer)
+        ->setRequestURI($request->getRequestURI());
     }
 
     $object_id = 'D'.$revision->getID();
-
     $operations_box = $this->buildOperationsBox($revision);
-
-    $content = array(
-      $operations_box,
-      $revision_detail_box,
-      $diff_detail_box,
-      $unit_box,
-      $page_pane,
-    );
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($object_id, '/'.$object_id);
+    $crumbs->setBorder(true);
 
     $prefs = $viewer->loadPreferences();
-
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
+    $nav = null;
     if ($prefs->getPreference($pref_filetree)) {
       $collapsed = $prefs->getPreference(
         PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED,
@@ -481,74 +388,223 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
         ->setCollapsed((bool)$collapsed)
         ->build($changesets);
-      $nav->appendChild($content);
-      $nav->setCrumbs($crumbs);
-      $content = $nav;
-    } else {
-      array_unshift($content, $crumbs);
     }
 
-    return $this->buildApplicationPage(
-      $content,
+    // Haunt Mode
+    $pane_id = celerity_generate_unique_node_id();
+    Javelin::initBehavior(
+      'differential-keyboard-navigation',
       array(
-        'title' => $object_id.' '.$revision->getTitle(),
-        'pageObjects' => array($revision->getPHID()),
+        'haunt' => $pane_id,
       ));
+    Javelin::initBehavior('differential-user-select');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setSubheader($subheader)
+      ->setCurtain($curtain)
+      ->setID($pane_id)
+      ->setMainColumn(array(
+        $operations_box,
+        $info_view,
+        $details,
+        $diff_detail_box,
+        $unit_box,
+        $comment_view,
+        $signature_message,
+      ))
+      ->setFooter($footer);
+
+    $page =  $this->newPage()
+      ->setTitle($object_id.' '.$revision->getTitle())
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($revision->getPHID()))
+      ->appendChild($view);
+
+    if ($nav) {
+      $page->setNavigation($nav);
+    }
+
+    return $page;
   }
 
-  private function getRevisionActions(DifferentialRevision $revision) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildHeader(DifferentialRevision $revision) {
+    $view = id(new PHUIHeaderView())
+      ->setHeader($revision->getTitle($revision))
+      ->setUser($this->getViewer())
+      ->setPolicyObject($revision)
+      ->setHeaderIcon('fa-cog');
+
+    $status = $revision->getStatus();
+    $status_name =
+      DifferentialRevisionStatus::renderFullDescription($status);
+
+    $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
+
+    return $view;
+  }
+
+  private function buildSubheaderView(DifferentialRevision $revision) {
+    $viewer = $this->getViewer();
+
+    $author_phid = $revision->getAuthorPHID();
+
+    $author = $viewer->renderHandle($author_phid)->render();
+    $date = phabricator_datetime($revision->getDateCreated(), $viewer);
+    $author = phutil_tag('strong', array(), $author);
+
+    $handles = $viewer->loadHandles(array($author_phid));
+    $image_uri = $handles[$author_phid]->getImageURI();
+    $image_href = $handles[$author_phid]->getURI();
+
+    $content = pht('Authored by %s on %s.', $author, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
+  }
+
+  private function buildDetails(
+    DifferentialRevision $revision,
+    $custom_fields) {
+    $viewer = $this->getViewer();
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    if ($custom_fields) {
+      $custom_fields->appendFieldsToPropertyList(
+        $revision,
+        $viewer,
+        $properties);
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('DETAILS'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($properties);
+  }
+
+  private function buildCurtain(DifferentialRevision $revision) {
+    $viewer = $this->getViewer();
     $revision_id = $revision->getID();
     $revision_phid = $revision->getPHID();
+    $curtain = $this->newCurtainView($revision);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $revision,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions = array();
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setHref("/differential/revision/edit/{$revision_id}/")
+        ->setName(pht('Edit Revision'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
-    $actions[] = id(new PhabricatorActionView())
-      ->setIcon('fa-pencil')
-      ->setHref("/differential/revision/edit/{$revision_id}/")
-      ->setName(pht('Edit Revision'))
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
-
-    $actions[] = id(new PhabricatorActionView())
-      ->setIcon('fa-upload')
-      ->setHref("/differential/revision/update/{$revision_id}/")
-      ->setName(pht('Update Diff'))
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(!$can_edit);
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-upload')
+        ->setHref("/differential/revision/update/{$revision_id}/")
+        ->setName(pht('Update Diff'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     $this->requireResource('phabricator-object-selector-css');
     $this->requireResource('javelin-behavior-phabricator-object-selector');
 
-    $actions[] = id(new PhabricatorActionView())
-      ->setIcon('fa-link')
-      ->setName(pht('Edit Dependencies'))
-      ->setHref("/search/attach/{$revision_phid}/DREV/dependencies/")
-      ->setWorkflow(true)
-      ->setDisabled(!$can_edit);
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-link')
+        ->setName(pht('Edit Dependencies'))
+        ->setHref("/search/attach/{$revision_phid}/DREV/dependencies/")
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit));
 
     $maniphest = 'PhabricatorManiphestApplication';
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
-      $actions[] = id(new PhabricatorActionView())
-        ->setIcon('fa-anchor')
-        ->setName(pht('Edit Maniphest Tasks'))
-        ->setHref("/search/attach/{$revision_phid}/TASK/")
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit);
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-anchor')
+          ->setName(pht('Edit Maniphest Tasks'))
+          ->setHref("/search/attach/{$revision_phid}/TASK/")
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit));
     }
 
     $request_uri = $this->getRequest()->getRequestURI();
-    $actions[] = id(new PhabricatorActionView())
-      ->setIcon('fa-download')
-      ->setName(pht('Download Raw Diff'))
-      ->setHref($request_uri->alter('download', 'true'));
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-download')
+        ->setName(pht('Download Raw Diff'))
+        ->setHref($request_uri->alter('download', 'true')));
 
-    return $actions;
+    return $curtain;
+  }
+
+  private function buildCommentForm(
+    DifferentialRevision $revision,
+    $field_list) {
+
+    $viewer = $this->getViewer();
+
+    $draft = id(new PhabricatorDraft())->loadOneWhere(
+      'authorPHID = %s AND draftKey = %s',
+      $viewer->getPHID(),
+      'differential-comment-'.$revision->getID());
+
+    $reviewers = array();
+    $ccs = array();
+    if ($draft) {
+      $reviewers = idx($draft->getMetadata(), 'reviewers', array());
+      $ccs = idx($draft->getMetadata(), 'ccs', array());
+      if ($reviewers || $ccs) {
+        $handles = $this->loadViewerHandles(array_merge($reviewers, $ccs));
+        $reviewers = array_select_keys($handles, $reviewers);
+        $ccs = array_select_keys($handles, $ccs);
+      }
+    }
+
+    $comment_form = id(new DifferentialAddCommentView())
+      ->setRevision($revision);
+
+    $review_warnings = array();
+    foreach ($field_list->getFields() as $field) {
+      $review_warnings[] = $field->getWarningsForDetailView();
+    }
+    $review_warnings = array_mergev($review_warnings);
+
+    if ($review_warnings) {
+      $review_warnings_panel = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors($review_warnings);
+      $comment_form->setInfoView($review_warnings_panel);
+    }
+
+    $action_uri = $this->getApplicationURI(
+      'comment/save/'.$revision->getID().'/');
+
+    $comment_form->setActions($this->getRevisionCommentActions($revision))
+      ->setActionURI($action_uri)
+      ->setUser($viewer)
+      ->setDraft($draft)
+      ->setReviewers(mpull($reviewers, 'getFullName', 'getPHID'))
+      ->setCCs(mpull($ccs, 'getFullName', 'getPHID'));
+
+    // TODO: This just makes the "Z" key work. Generalize this and remove
+    // it at some point.
+    $comment_form = phutil_tag(
+      'div',
+      array(
+        'class' => 'differential-add-comment-panel',
+      ),
+      $comment_form);
+    return $comment_form;
   }
 
   private function getRevisionCommentActions(DifferentialRevision $revision) {
@@ -556,7 +612,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       DifferentialAction::ACTION_COMMENT => true,
     );
 
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
     $viewer_phid = $viewer->getPHID();
     $viewer_is_owner = ($viewer_phid == $revision->getAuthorPHID());
     $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
@@ -812,11 +868,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $viewer = $this->getViewer();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recent Similar Open Revisions'));
+      ->setHeader(pht('Recent Similar Revisions'));
 
     $view = id(new DifferentialRevisionListView())
       ->setHeader($header)
       ->setRevisions($revisions)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUser($viewer);
 
     $phids = $view->getRequiredHandlePHIDs();
@@ -843,7 +900,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     assert_instances_of($changesets,    'DifferentialChangeset');
     assert_instances_of($vs_changesets, 'DifferentialChangeset');
 
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     id(new DifferentialHunkQuery())
       ->setViewer($viewer)
@@ -976,7 +1033,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Diff Detail'))
+      ->setHeaderText(pht('DIFF DETAIL'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUser($viewer);
 
     $last_tab = null;
@@ -1059,7 +1117,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $box_view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Active Operations'));
+      ->setHeaderText(pht('ACTIVE OPERATIONS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return id(new DrydockRepositoryOperationStatusView())
       ->setUser($viewer)
@@ -1071,6 +1130,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $diff,
     DifferentialRevision $revision) {
     $viewer = $this->getViewer();
+
+    if (!$diff->getBuildable()) {
+      return null;
+    }
 
     if (!$diff->getUnitMessages()) {
       return null;
@@ -1103,6 +1166,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setBuildable($diff->getBuildable())
       ->setUnitMessages($diff->getUnitMessages())
       ->setLimit(5)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setShowViewAll(true);
   }
 

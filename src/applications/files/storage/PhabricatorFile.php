@@ -26,7 +26,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface {
 
-  const ONETIME_TEMPORARY_TOKEN_TYPE = 'file:onetime';
   const STORAGE_FORMAT_RAW  = 'raw';
 
   const METADATA_IMAGE_WIDTH  = 'width';
@@ -1119,12 +1118,13 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   protected function generateOneTimeToken() {
     $key = Filesystem::readRandomCharacters(16);
+    $token_type = PhabricatorFileAccessTemporaryTokenType::TOKENTYPE;
 
     // Save the new secret.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       $token = id(new PhabricatorAuthTemporaryToken())
-        ->setObjectPHID($this->getPHID())
-        ->setTokenType(self::ONETIME_TEMPORARY_TOKEN_TYPE)
+        ->setTokenResource($this->getPHID())
+        ->setTokenType($token_type)
         ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
         ->setTokenCode(PhabricatorHash::digest($key))
         ->save();
@@ -1134,10 +1134,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function validateOneTimeToken($token_code) {
+    $token_type = PhabricatorFileAccessTemporaryTokenType::TOKENTYPE;
+
     $token = id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withObjectPHIDs(array($this->getPHID()))
-      ->withTokenTypes(array(self::ONETIME_TEMPORARY_TOKEN_TYPE))
+      ->withTokenResources(array($this->getPHID()))
+      ->withTokenTypes(array($token_type))
       ->withExpired(false)
       ->withTokenCodes(array(PhabricatorHash::digest($token_code)))
       ->executeOne();

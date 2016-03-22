@@ -25,11 +25,18 @@ class AphrontDefaultApplicationConfiguration
     $content_type = idx($_SERVER, 'CONTENT_TYPE');
     $is_form_data = preg_match('@^multipart/form-data@i', $content_type);
 
-    $raw_input = PhabricatorStartup::getRawInput();
-    if (strlen($raw_input) && !$is_form_data) {
-      $data += $parser->parseQueryString($raw_input);
-    } else if ($_POST) {
-      $data += $_POST;
+    $request_method = idx($_SERVER, 'REQUEST_METHOD');
+    if ($request_method === 'PUT') {
+      // For PUT requests, do nothing: in particular, do NOT read input. This
+      // allows us to stream input later and process very large PUT requests,
+      // like those coming from Git LFS.
+    } else {
+      $raw_input = PhabricatorStartup::getRawInput();
+      if (strlen($raw_input) && !$is_form_data) {
+        $data += $parser->parseQueryString($raw_input);
+      } else if ($_POST) {
+        $data += $_POST;
+      }
     }
 
     $data += $parser->parseQueryString(idx($_SERVER, 'QUERY_STRING', ''));
