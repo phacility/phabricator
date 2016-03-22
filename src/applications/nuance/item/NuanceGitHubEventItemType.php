@@ -147,6 +147,12 @@ final class NuanceGitHubEventItemType
   public function getItemActions(NuanceItem $item) {
     $actions = array();
 
+    $actions[] = $this->newItemAction($item, 'sync')
+      ->setName(pht('Import to Maniphest'))
+      ->setIcon('fa-anchor')
+      ->setWorkflow(true)
+      ->setRenderAsForm(true);
+
     $actions[] = $this->newItemAction($item, 'raw')
       ->setName(pht('View Raw Event'))
       ->setWorkflow(true)
@@ -156,6 +162,7 @@ final class NuanceGitHubEventItemType
   }
 
   protected function handleAction(NuanceItem $item, $action) {
+    $viewer = $this->getViewer();
     $controller = $this->getController();
 
     switch ($action) {
@@ -181,6 +188,9 @@ final class NuanceGitHubEventItemType
           ->setTitle(pht('GitHub Raw Event'))
           ->appendForm($form)
           ->addCancelButton($item->getURI(), pht('Done'));
+      case 'sync':
+        $item->issueCommand($viewer->getPHID(), $action);
+        return id(new AphrontRedirectResponse())->setURI($item->getURI());
     }
 
     return null;
@@ -226,6 +236,10 @@ final class NuanceGitHubEventItemType
       ->setHeaderText(pht('Event Properties'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($property_list);
+  }
+
+  protected function handleCommand(NuanceItem $item, $action) {
+    return null;
   }
 
 

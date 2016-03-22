@@ -96,4 +96,43 @@ abstract class NuanceItemType
     return null;
   }
 
+  final public function applyCommand(
+    NuanceItem $item,
+    NuanceItemCommand $command) {
+
+    $result = $this->handleCommand($item, $command);
+
+    if ($result === null) {
+      return;
+    }
+
+    $xaction = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_COMMAND)
+      ->setNewValue(
+        array(
+          'command' => $command->getCommand(),
+          'parameters' => $command->getParameters(),
+          'result' => $result,
+        ));
+
+    $viewer = $this->getViewer();
+
+    // TODO: Maybe preserve the actor's original content source?
+    $source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_DAEMON,
+      array());
+
+    $editor = id(new NuanceItemEditor())
+      ->setActor($viewer)
+      ->setActingAsPHID($command->getAuthorPHID())
+      ->setContentSource($source)
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($item, array($xaction));
+  }
+
+  protected function handleCommand(NuanceItem $item, $action) {
+    return null;
+  }
+
 }
