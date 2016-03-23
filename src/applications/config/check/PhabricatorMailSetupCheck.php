@@ -64,6 +64,19 @@ final class PhabricatorMailSetupCheck extends PhabricatorSetupCheck {
             ->addPhabricatorConfig('amazon-ses.secret-key');
         }
 
+        if (!PhabricatorEnv::getEnvConfig('amazon-ses.endpoint')) {
+          $message = pht(
+            'Amazon SES is selected as the mail adapter, but no SES endpoint '.
+            'is configured. Provide an SES endpoint or choose a different '.
+            'mail adapter.');
+
+          $this->newIssue('config.amazon-ses.endpoint')
+            ->setName(pht('Amazon SES Endpoint Not Set'))
+            ->setMessage($message)
+            ->addRelatedPhabricatorConfig('metamta.mail-adapter')
+            ->addPhabricatorConfig('amazon-ses.endpoint');
+        }
+
         $address_key = 'metamta.default-address';
         $options = PhabricatorApplicationConfigOptions::loadAllOptions();
         $default = $options[$address_key]->getDefault();
