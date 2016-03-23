@@ -17,6 +17,7 @@ final class PhortuneMerchantViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($merchant->getName());
+    $crumbs->setBorder(true);
 
     $title = pht(
       'Merchant %d %s',
@@ -26,43 +27,44 @@ final class PhortuneMerchantViewController
     $header = id(new PHUIHeaderView())
       ->setHeader($merchant->getName())
       ->setUser($viewer)
-      ->setPolicyObject($merchant);
+      ->setPolicyObject($merchant)
+      ->setHeaderIcon('fa-bank');
 
     $providers = id(new PhortunePaymentProviderConfigQuery())
       ->setViewer($viewer)
       ->withMerchantPHIDs(array($merchant->getPHID()))
       ->execute();
 
-    $properties = $this->buildPropertyListView($merchant, $providers);
-    $actions = $this->buildActionListView($merchant);
-    $properties->setActionList($actions);
+    $details = $this->buildDetailsView($merchant, $providers);
+    $description = $this->buildDescriptionView($merchant);
+    $curtain = $this->buildCurtainView($merchant);
 
     $provider_list = $this->buildProviderList(
       $merchant,
       $providers);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
 
     $timeline = $this->buildTransactionTimeline(
       $merchant,
       new PhortuneMerchantTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $details,
+        $description,
         $provider_list,
         $timeline,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
-  private function buildPropertyListView(
+  private function buildDetailsView(
     PhortuneMerchant $merchant,
     array $providers) {
 
@@ -128,24 +130,31 @@ final class PhortuneMerchantViewController
 
     $view->addProperty(pht('Status'), $status_view);
 
-    $view->addProperty(
-      pht('Members'),
-      $viewer->renderHandleList($merchant->getMemberPHIDs()));
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('DETAILS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($view);
+  }
 
-    $view->invokeWillRenderEvent();
+  private function buildDescriptionView(PhortuneMerchant $merchant) {
+    $viewer = $this->getViewer();
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
 
     $description = $merchant->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
-      $view->addSectionHeader(
-        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($description);
+      return id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('DESCRIPTION'))
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->appendChild($view);
     }
 
-    return $view;
+    return null;
   }
 
-  private function buildActionListView(PhortuneMerchant $merchant) {
+  private function buildCurtainView(PhortuneMerchant $merchant) {
     $viewer = $this->getRequest()->getUser();
     $id = $merchant->getID();
 
@@ -154,11 +163,9 @@ final class PhortuneMerchantViewController
       $merchant,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($merchant);
+    $curtain = $this->newCurtainView($merchant);
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Merchant'))
         ->setIcon('fa-pencil')
@@ -166,7 +173,7 @@ final class PhortuneMerchantViewController
         ->setWorkflow(!$can_edit)
         ->setHref($this->getApplicationURI("merchant/edit/{$id}/")));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View Orders'))
         ->setIcon('fa-shopping-cart')
@@ -174,7 +181,7 @@ final class PhortuneMerchantViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View Subscriptions'))
         ->setIcon('fa-moon-o')
@@ -182,8 +189,7 @@ final class PhortuneMerchantViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('New Invoice'))
         ->setIcon('fa-fax')
@@ -191,7 +197,30 @@ final class PhortuneMerchantViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    return $view;
+    $member_phids = $merchant->getMemberPHIDs();
+    $handles = $viewer->loadHandles($member_phids);
+
+    $member_list = id(new PHUIObjectItemListView())
+      ->setSimple(true);
+
+    foreach ($member_phids as $member_phid) {
+      $image_uri = $handles[$member_phid]->getImageURI();
+      $image_href = $handles[$member_phid]->getURI();
+      $person = $handles[$member_phid];
+
+      $member = id(new PHUIObjectItemView())
+        ->setImageURI($image_uri)
+        ->setHref($image_href)
+        ->setHeader($person->getFullName());
+
+      $member_list->addItem($member);
+    }
+
+    $curtain->newPanel()
+      ->setHeaderText(pht('Members'))
+      ->appendChild($member_list);
+
+    return $curtain;
   }
 
   private function buildProviderList(
@@ -283,6 +312,7 @@ final class PhortuneMerchantViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($provider_list);
   }
 

@@ -17,12 +17,10 @@ final class PhortuneProductViewController extends PhortuneController {
     $title = pht('Product: %s', $product->getProductName());
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($product->getProductName());
+      ->setHeader($product->getProductName())
+      ->setHeaderIcon('fa-gift');
 
     $edit_uri = $this->getApplicationURI('product/edit/'.$product->getID().'/');
-
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
@@ -31,26 +29,30 @@ final class PhortuneProductViewController extends PhortuneController {
     $crumbs->addTextCrumb(
       pht('#%d', $product->getID()),
       $request->getRequestURI());
+    $crumbs->setBorder(true);
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setActionList($actions)
       ->addProperty(
         pht('Price'),
         $product->getPriceAsCurrency()->formatForDisplay());
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('DETAILS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $object_box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }
