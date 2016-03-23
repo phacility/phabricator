@@ -63,6 +63,9 @@ final class DiffusionRepositoryEditSubversionController
     $crumbs->addTextCrumb(pht('Edit Subversion Info'));
 
     $title = pht('Edit Subversion Info (%s)', $repository->getName());
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
@@ -96,13 +99,20 @@ final class DiffusionRepositoryEditSubversionController
           ->addCancelButton($edit_uri));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Subversion'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($form_box);
+      ->appendChild($view);
   }
 
 }

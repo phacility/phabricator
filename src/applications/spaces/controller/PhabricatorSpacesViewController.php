@@ -18,9 +18,9 @@ final class PhabricatorSpacesViewController
       return new Aphront404Response();
     }
 
-    $action_list = $this->buildActionListView($space);
+    $curtain = $this->buildCurtain($space);
     $property_list = $this->buildPropertyListView($space);
-    $property_list->setActionList($action_list);
+    $title = array($space->getMonogram(), $space->getNamespaceName());
 
     $xactions = id(new PhabricatorSpacesNamespaceTransactionQuery())
       ->setViewer($viewer)
@@ -35,7 +35,8 @@ final class PhabricatorSpacesViewController
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($space->getNamespaceName())
-      ->setPolicyObject($space);
+      ->setPolicyObject($space)
+      ->setHeaderIcon('fa-th-large');
 
     if ($space->getIsArchived()) {
       $header->setStatus('fa-ban', 'red', pht('Archived'));
@@ -44,21 +45,27 @@ final class PhabricatorSpacesViewController
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('DETAILS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($property_list);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($space->getMonogram());
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $timeline,
-      ),
-      array(
-        'title' => array($space->getMonogram(), $space->getNamespaceName()),
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+          $box,
+          $timeline,
+        ))
+      ->setCurtain($curtain);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function buildPropertyListView(PhabricatorSpacesNamespace $space) {
@@ -93,18 +100,17 @@ final class PhabricatorSpacesViewController
     return $list;
   }
 
-  private function buildActionListView(PhabricatorSpacesNamespace $space) {
+  private function buildCurtain(PhabricatorSpacesNamespace $space) {
     $viewer = $this->getRequest()->getUser();
 
-    $list = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $curtain = $this->newCurtainView($space);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $space,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Space'))
         ->setIcon('fa-pencil')
@@ -115,7 +121,7 @@ final class PhabricatorSpacesViewController
     $id = $space->getID();
 
     if ($space->getIsArchived()) {
-      $list->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Activate Space'))
           ->setIcon('fa-check')
@@ -123,7 +129,7 @@ final class PhabricatorSpacesViewController
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     } else {
-      $list->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Archive Space'))
           ->setIcon('fa-ban')
@@ -132,7 +138,7 @@ final class PhabricatorSpacesViewController
           ->setWorkflow(true));
     }
 
-    return $list;
+    return $curtain;
   }
 
 }

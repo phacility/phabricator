@@ -144,4 +144,103 @@ final class NuanceGitHubEventItemType
     return NuanceGitHubRawEvent::newEvent($type, $raw);
   }
 
+  public function getItemActions(NuanceItem $item) {
+    $actions = array();
+
+    $actions[] = $this->newItemAction($item, 'sync')
+      ->setName(pht('Import to Maniphest'))
+      ->setIcon('fa-anchor')
+      ->setWorkflow(true)
+      ->setRenderAsForm(true);
+
+    $actions[] = $this->newItemAction($item, 'raw')
+      ->setName(pht('View Raw Event'))
+      ->setWorkflow(true)
+      ->setIcon('fa-code');
+
+    return $actions;
+  }
+
+  protected function handleAction(NuanceItem $item, $action) {
+    $viewer = $this->getViewer();
+    $controller = $this->getController();
+
+    switch ($action) {
+      case 'raw':
+        $raw = array(
+          'api.type' => $item->getItemProperty('api.type'),
+          'api.raw' => $item->getItemProperty('api.raw'),
+        );
+
+        $raw_output = id(new PhutilJSON())->encodeFormatted($raw);
+
+        $raw_box = id(new AphrontFormTextAreaControl())
+          ->setCustomClass('PhabricatorMonospaced')
+          ->setLabel(pht('Raw Event'))
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+          ->setValue($raw_output);
+
+        $form = id(new AphrontFormView())
+          ->appendChild($raw_box);
+
+        return $controller->newDialog()
+          ->setWidth(AphrontDialogView::WIDTH_FULL)
+          ->setTitle(pht('GitHub Raw Event'))
+          ->appendForm($form)
+          ->addCancelButton($item->getURI(), pht('Done'));
+      case 'sync':
+        $item->issueCommand($viewer->getPHID(), $action);
+        return id(new AphrontRedirectResponse())->setURI($item->getURI());
+    }
+
+    return null;
+  }
+
+  protected function newItemView(NuanceItem $item) {
+    $content = array();
+
+    $content[] = $this->newGitHubEventItemPropertyBox($item);
+
+    return $content;
+  }
+
+  private function newGitHubEventItemPropertyBox($item) {
+    $viewer = $this->getViewer();
+
+    $property_list = id(new PHUIPropertyListView())
+      ->setViewer($viewer);
+
+    $event = $this->newRawEvent($item);
+
+    $property_list->addProperty(
+      pht('GitHub Event ID'),
+      $event->getID());
+
+    $event_uri = $event->getURI();
+    if ($event_uri && PhabricatorEnv::isValidRemoteURIForLink($event_uri)) {
+      $event_uri = phutil_tag(
+        'a',
+        array(
+          'href' => $event_uri,
+        ),
+        $event_uri);
+    }
+
+    if ($event_uri) {
+      $property_list->addProperty(
+        pht('GitHub Event URI'),
+        $event_uri);
+    }
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Event Properties'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($property_list);
+  }
+
+  protected function handleCommand(NuanceItem $item, $action) {
+    return null;
+  }
+
+
 }

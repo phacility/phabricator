@@ -155,9 +155,6 @@ final class PhabricatorRepositorySchemaSpec
         'repositoryID' => array(
           'columns' => array('repositoryID', 'pathID', 'commitSequence'),
         ),
-        'key_history' => array(
-          'columns' => array('commitID', 'isDirect', 'changeType'),
-        ),
       ));
 
     $this->buildRawSchema(

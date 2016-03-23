@@ -59,15 +59,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $phids = array_keys($phids);
     $handles = $viewer->loadHandles($phids);
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer)
-      ->setContextObject($task)
-      ->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
-
     $timeline = $this->buildTransactionTimeline(
       $task,
-      new ManiphestTransactionQuery(),
-      $engine);
+      new ManiphestTransactionQuery());
 
     $monogram = $task->getMonogram();
     $crumbs = $this->buildApplicationCrumbs()
@@ -76,7 +70,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $header = $this->buildHeaderView($task);
     $details = $this->buildPropertyView($task, $field_list, $edges, $handles);
-    $description = $this->buildDescriptionView($task, $engine);
+    $description = $this->buildDescriptionView($task);
     $curtain = $this->buildCurtain($task, $edit_engine);
 
     $title = pht('%s %s', $monogram, $task->getTitle());
@@ -346,12 +340,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
     return null;
   }
 
-  private function buildDescriptionView(
-    ManiphestTask $task,
-    PhabricatorMarkupEngine $engine) {
+  private function buildDescriptionView(ManiphestTask $task) {
+    $viewer = $this->getViewer();
 
     $section = null;
-    if (strlen($task->getDescription())) {
+
+    $description = $task->getDescription();
+    if (strlen($description)) {
       $section = new PHUIPropertyListView();
       $section->addTextContent(
         phutil_tag(
@@ -359,7 +354,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
           array(
             'class' => 'phabricator-remarkup',
           ),
-          $engine->getOutput($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION)));
+          id(new PHUIRemarkupView($viewer, $description))
+            ->setContextObject($task)));
     }
 
     return $section;

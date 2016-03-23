@@ -4,6 +4,7 @@ abstract class NuanceItemType
   extends Phobject {
 
   private $viewer;
+  private $controller;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -14,6 +15,15 @@ abstract class NuanceItemType
     return $this->viewer;
   }
 
+  public function setController(PhabricatorController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  public function getController() {
+    return $this->controller;
+  }
+
   public function canUpdateItems() {
     return false;
   }
@@ -22,12 +32,16 @@ abstract class NuanceItemType
     return $this->newItemView($item);
   }
 
-  protected function newItemView() {
+  protected function newItemView(NuanceItem $item) {
     return null;
   }
 
   public function getItemTypeDisplayIcon() {
     return null;
+  }
+
+  public function getItemActions(NuanceItem $item) {
+    return array();
   }
 
   abstract public function getItemTypeDisplayName();
@@ -58,6 +72,67 @@ abstract class NuanceItemType
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getItemTypeConstant')
       ->execute();
+  }
+
+  final protected function newItemAction(NuanceItem $item, $key) {
+    $id = $item->getID();
+    $action_uri = "/nuance/item/action/{$id}/{$key}/";
+
+    return id(new PhabricatorActionView())
+      ->setHref($action_uri);
+  }
+
+  final public function buildActionResponse(NuanceItem $item, $action) {
+    $response = $this->handleAction($item, $action);
+
+    if ($response === null) {
+      return new Aphront404Response();
+    }
+
+    return $response;
+  }
+
+  protected function handleAction(NuanceItem $item, $action) {
+    return null;
+  }
+
+  final public function applyCommand(
+    NuanceItem $item,
+    NuanceItemCommand $command) {
+
+    $result = $this->handleCommand($item, $command);
+
+    if ($result === null) {
+      return;
+    }
+
+    $xaction = id(new NuanceItemTransaction())
+      ->setTransactionType(NuanceItemTransaction::TYPE_COMMAND)
+      ->setNewValue(
+        array(
+          'command' => $command->getCommand(),
+          'parameters' => $command->getParameters(),
+          'result' => $result,
+        ));
+
+    $viewer = $this->getViewer();
+
+    // TODO: Maybe preserve the actor's original content source?
+    $source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_DAEMON,
+      array());
+
+    $editor = id(new NuanceItemEditor())
+      ->setActor($viewer)
+      ->setActingAsPHID($command->getAuthorPHID())
+      ->setContentSource($source)
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true)
+      ->applyTransactions($item, array($xaction));
+  }
+
+  protected function handleCommand(NuanceItem $item, $action) {
+    return null;
   }
 
 }

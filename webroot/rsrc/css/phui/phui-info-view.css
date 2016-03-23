@@ -10,6 +10,10 @@
   border-radius: 3px;
 }
 
+.phui-info-view.phui-info-view-flush {
+  margin: 0 0 20px 0;
+}
+
 .device .phui-info-view {
   margin: 8px;
 }

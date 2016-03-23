@@ -19,6 +19,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $dateModifiedBefore;
   private $subpriorityMin;
   private $subpriorityMax;
+  private $bridgedObjectPHIDs;
 
   private $fullTextSearch   = '';
 
@@ -205,6 +206,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function needProjectPHIDs($bool) {
     $this->needProjectPHIDs = $bool;
+    return $this;
+  }
+
+  public function withBridgedObjectPHIDs(array $phids) {
+    $this->bridgedObjectPHIDs = $phids;
     return $this;
   }
 
@@ -415,6 +421,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn,
         'task.subpriority <= %f',
         $this->subpriorityMax);
+    }
+
+    if ($this->bridgedObjectPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.bridgedObjectPHID IN (%Ls)',
+        $this->bridgedObjectPHIDs);
     }
 
     return $where;

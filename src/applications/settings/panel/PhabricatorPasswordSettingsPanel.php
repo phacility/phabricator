@@ -40,13 +40,14 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     // the workflow from a password reset email.
 
     $key = $request->getStr('key');
+    $password_type = PhabricatorAuthPasswordResetTemporaryTokenType::TOKENTYPE;
+
     $token = null;
     if ($key) {
       $token = id(new PhabricatorAuthTemporaryTokenQuery())
         ->setViewer($user)
-        ->withObjectPHIDs(array($user->getPHID()))
-        ->withTokenTypes(
-          array(PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE))
+        ->withTokenResources(array($user->getPHID()))
+        ->withTokenTypes(array($password_type))
         ->withTokenCodes(array(PhabricatorHash::digest($key)))
         ->withExpired(false)
         ->executeOne();

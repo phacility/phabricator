@@ -20,6 +20,7 @@ abstract class DiffusionRepositoryEditController
         $crumbs->addTextCrumb(pht('Edit'), $edit_uri);
       }
     }
+    $crumbs->setBorder(true);
 
     return $crumbs;
   }

@@ -15,7 +15,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorProjectInterface,
     PhabricatorSpacesInterface,
     PhabricatorConduitResultInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    DoorkeeperBridgedObjectInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -36,6 +37,7 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $ownerOrdering;
   protected $spacePHID;
+  protected $bridgedObjectPHID;
   protected $properties = array();
   protected $points;
 
@@ -43,6 +45,7 @@ final class ManiphestTask extends ManiphestDAO
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
   private $edgeProjectPHIDs = self::ATTACHABLE;
+  private $bridgedObject = self::ATTACHABLE;
 
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -82,6 +85,7 @@ final class ManiphestTask extends ManiphestDAO
         'originalEmailSource' => 'text255?',
         'subpriority' => 'double',
         'points' => 'double?',
+        'bridgedObjectPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -115,6 +119,10 @@ final class ManiphestTask extends ManiphestDAO
         ),
         'key_title' => array(
           'columns' => array('title(64)'),
+        ),
+        'key_bridgedobject' => array(
+          'columns' => array('bridgedObjectPHID'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -502,6 +510,20 @@ final class ManiphestTask extends ManiphestDAO
 
   public function newFulltextEngine() {
     return new ManiphestTaskFulltextEngine();
+  }
+
+
+/* -(  DoorkeeperBridgedObjectInterface  )----------------------------------- */
+
+
+  public function getBridgedObject() {
+    return $this->assertAttached($this->bridgedObject);
+  }
+
+  public function attachBridgedObject(
+    DoorkeeperExternalObject $object = null) {
+    $this->bridgedObject = $object;
+    return $this;
   }
 
 }

@@ -13,6 +13,7 @@ final class PHUIRemarkupView extends AphrontView {
 
   private $corpus;
   private $markupType;
+  private $contextObject;
 
   const DOCUMENT = 'document';
 
@@ -26,16 +27,27 @@ final class PHUIRemarkupView extends AphrontView {
     return $this;
   }
 
+  public function setContextObject($context_object) {
+    $this->contextObject = $context_object;
+    return $this;
+  }
+
+  public function getContextObject() {
+    return $this->contextObject;
+  }
+
   public function render() {
     $viewer = $this->getUser();
     $corpus = $this->corpus;
+    $context = $this->getContextObject();
 
     $content = PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())
         ->setPreserveLinebreaks(true)
         ->setContent($corpus),
       'default',
-      $viewer);
+      $viewer,
+      $context);
 
     if ($this->markupType == self::DOCUMENT) {
       return phutil_tag(

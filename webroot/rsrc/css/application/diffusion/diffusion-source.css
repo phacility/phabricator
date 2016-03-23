@@ -4,7 +4,6 @@
 
 .diffusion-source {
   width: 100%;
-  font: 10px/13px "Menlo", "Consolas", "Monaco", monospace;
   background: #fff;
 }
 
@@ -21,13 +20,12 @@
 }
 
 .diffusion-source td {
-  letter-spacing:     0.0083334px;
-  vertical-align:     top;
-  white-space:        pre-wrap;
-  padding-bottom:     1px;
-  padding-left:       8px;
-  line-height:        16px;
-  width:              100%;
+  vertical-align: top;
+  white-space: pre-wrap;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 8px;
+  width: 100%;
 }
 
 .diffusion-browse-type-form {

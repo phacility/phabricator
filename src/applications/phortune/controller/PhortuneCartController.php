@@ -48,7 +48,7 @@ abstract class PhortuneCartController
       return null;
     }
 
-    $output = new PHUIRemarkupView($this->getUser(), $description);
+    $output = new PHUIRemarkupView($this->getViewer(), $description);
 
     $box = id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)

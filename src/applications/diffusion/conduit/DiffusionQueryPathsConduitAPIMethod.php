@@ -79,7 +79,8 @@ final class DiffusionQueryPathsConduitAPIMethod
     $offset = (int)$request->getValue('offset');
 
     if (strlen($pattern)) {
-      $pattern = '/'.preg_quote($pattern, '/').'/';
+      // Add delimiters to the regex pattern.
+      $pattern = '('.$pattern.')';
     }
 
     $results = array();

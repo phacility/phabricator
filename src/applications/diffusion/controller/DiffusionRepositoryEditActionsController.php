@@ -53,6 +53,10 @@ final class DiffusionRepositoryEditActionsController
 
     $title = pht('Edit Actions (%s)', $repository->getName());
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
       ->setObject($repository)
@@ -97,13 +101,21 @@ final class DiffusionRepositoryEditActionsController
           ->addCancelButton($edit_uri));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Actions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($form_box);
+      ->appendChild($view);
+
   }
 
 }

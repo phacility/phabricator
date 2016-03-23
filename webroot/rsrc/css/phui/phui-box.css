@@ -86,11 +86,30 @@
   padding: 6px 16px;
 }
 
-.device .phui-box.phui-box-blue-property .phui-header-shell {
-  padding: 6px 12px;
+.device .phui-box.phui-box-blue-property .phui-header-shell,
+.device .phui-box-blue-property.phui-object-box.phui-object-box-collapsed
+  .phui-header-shell {
+    padding: 6px 12px;
 }
 
 .phui-box.phui-box-blue-property .phui-header-header {
   font-size: 13px;
   color: {$bluetext};
+}
+
+.phui-box-blue-property .phui-object-item-list-view.phui-object-list-flush {
+  padding: 2px 8px;
+}
+
+body .phui-box-blue-property.phui-object-box.phui-object-box-collapsed {
+  padding: 0;
+}
+
+body .phui-box-blue-property .phui-header-shell + .phui-object-box {
+  margin-bottom: 0;
+}
+
+.phui-box-blue-property .phui-header-shell + .phui-object-box
+  .phui-header-shell {
+    background: #fff;
 }

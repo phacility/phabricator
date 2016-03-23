@@ -22,6 +22,9 @@ final class DiffusionRepositoryEditStorageController
     $crumbs->addTextCrumb(pht('Edit Storage'));
 
     $title = pht('Edit %s', $repository->getName());
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
 
     $service_phid = $repository->getAlmanacServicePHID();
     if ($service_phid) {
@@ -57,15 +60,21 @@ final class DiffusionRepositoryEditStorageController
         id(new AphrontFormSubmitControl())
           ->addCancelButton($edit_uri, pht('Done')));
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setForm($form)
-      ->setFormErrors($errors);
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Storage'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($object_box);
+      ->appendChild($view);
   }
 
 }

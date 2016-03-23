@@ -39,17 +39,6 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   const KIND_UNKNOWN   = '?';
 
 
-  /**
-   * Temporary tokens for one time logins.
-   */
-  const ONETIME_TEMPORARY_TOKEN_TYPE = 'login:onetime';
-
-
-  /**
-   * Temporary tokens for password recovery after one time login.
-   */
-  const PASSWORD_TEMPORARY_TOKEN_TYPE = 'login:password';
-
   const ONETIME_RECOVER = 'recover';
   const ONETIME_RESET = 'reset';
   const ONETIME_WELCOME = 'welcome';
@@ -642,11 +631,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $key = Filesystem::readRandomCharacters(32);
     $key_hash = $this->getOneTimeLoginKeyHash($user, $email, $key);
+    $onetime_type = PhabricatorAuthOneTimeLoginTemporaryTokenType::TOKENTYPE;
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       id(new PhabricatorAuthTemporaryToken())
-        ->setObjectPHID($user->getPHID())
-        ->setTokenType(self::ONETIME_TEMPORARY_TOKEN_TYPE)
+        ->setTokenResource($user->getPHID())
+        ->setTokenType($onetime_type)
         ->setTokenExpires(time() + phutil_units('1 day in seconds'))
         ->setTokenCode($key_hash)
         ->save();
@@ -685,11 +675,12 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $key = null) {
 
     $key_hash = $this->getOneTimeLoginKeyHash($user, $email, $key);
+    $onetime_type = PhabricatorAuthOneTimeLoginTemporaryTokenType::TOKENTYPE;
 
     return id(new PhabricatorAuthTemporaryTokenQuery())
       ->setViewer($user)
-      ->withObjectPHIDs(array($user->getPHID()))
-      ->withTokenTypes(array(self::ONETIME_TEMPORARY_TOKEN_TYPE))
+      ->withTokenResources(array($user->getPHID()))
+      ->withTokenTypes(array($onetime_type))
       ->withTokenCodes(array($key_hash))
       ->withExpired(false)
       ->executeOne();

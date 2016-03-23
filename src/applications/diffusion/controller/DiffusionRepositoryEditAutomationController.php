@@ -49,6 +49,10 @@ final class DiffusionRepositoryEditAutomationController
 
     $title = pht('Edit %s', $repository->getName());
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendRemarkupInstructions(
@@ -69,14 +73,21 @@ final class DiffusionRepositoryEditAutomationController
           ->setValue(pht('Save'))
           ->addCancelButton($edit_uri));
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Automation'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($object_box);
+      ->appendChild($view);
   }
 
 }

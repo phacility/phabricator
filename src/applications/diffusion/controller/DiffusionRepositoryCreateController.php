@@ -262,10 +262,26 @@ final class DiffusionRepositoryCreateController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
+    $form_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form,
+      ));
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($form);
+      ->appendChild($view);
+
   }
 
 

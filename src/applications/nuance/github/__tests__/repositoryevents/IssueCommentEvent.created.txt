@@ -94,5 +94,7 @@
   "repository.name.full": "epriestley/poems",
   "is.issue": true,
   "is.pull": false,
-  "issue.number": 1
+  "issue.number": 1,
+  "id": 3733510485,
+  "uri": "https://github.com/epriestley/poems/issues/1#issuecomment-193528669"
 }

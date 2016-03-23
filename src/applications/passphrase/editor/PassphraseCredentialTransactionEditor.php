@@ -174,7 +174,7 @@ final class PassphraseCredentialTransactionEditor
         }
         break;
       case PassphraseCredentialTransaction::TYPE_USERNAME:
-        $credential_type = $object->getCredentialTypeImplementation();
+        $credential_type = $object->getImplementation();
         if (!$credential_type->shouldRequireUsername()) {
           break;
         }

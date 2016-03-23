@@ -18,7 +18,9 @@ final class PhabricatorPhurlLinkRemarkupRule extends PhutilRemarkupRule {
   public function markupLink(array $matches) {
     $engine = $this->getEngine();
     $viewer = $engine->getConfig('viewer');
+
     $text_mode = $engine->isTextMode();
+    $html_mode = $engine->isHTMLMailMode();
 
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
@@ -28,46 +30,45 @@ final class PhabricatorPhurlLinkRemarkupRule extends PhutilRemarkupRule {
     $monogram = null;
     $is_monogram = '/^U(?P<id>[1-9]\d*)/';
 
+    $query = id(new PhabricatorPhurlURLQuery())
+      ->setViewer($viewer);
+
     if (preg_match($is_monogram, $ref, $monogram)) {
-      $phurls = id(new PhabricatorPhurlURLQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($monogram[1]))
-        ->execute();
+      $query->withIDs(array($monogram[1]));
     } else if (ctype_digit($ref)) {
-      $phurls = id(new PhabricatorPhurlURLQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($ref))
-        ->execute();
+      $query->withIDs(array($ref));
     } else {
-      $phurls = id(new PhabricatorPhurlURLQuery())
-        ->setViewer($viewer)
-        ->withAliases(array($ref))
-        ->execute();
+      $query->withAliases(array($ref));
     }
 
-    $phurl = head($phurls);
+    $phurl = $query->executeOne();
+    if (!$phurl) {
+      return $matches[0];
+    }
 
-    if ($phurl) {
-      if ($text_mode) {
-        return $phurl->getDisplayName().
-          ' <'.
-          $phurl->getRedirectURI().
-          '>';
-      }
+    $uri = $phurl->getRedirectURI();
+    $name = $phurl->getDisplayName();
 
+    if ($text_mode || $html_mode) {
+      $uri = PhabricatorEnv::getProductionURI($uri);
+    }
+
+    if ($text_mode) {
+      return pht(
+        '%s <%s>',
+        $name,
+        $uri);
+    } else {
       $link = phutil_tag(
         'a',
         array(
-          'href' => $phurl->getRedirectURI(),
+          'href' => $uri,
           'target' => '_blank',
         ),
-        $phurl->getDisplayName());
-
-      return $this->getEngine()->storeText($link);
-    } else {
-      return $matches[0];
+        $name);
     }
-  }
 
+    return $this->getEngine()->storeText($link);
+  }
 
 }

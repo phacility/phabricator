@@ -103,7 +103,7 @@ final class DiffusionLastModifiedController extends DiffusionController {
       $modified = DiffusionView::linkCommit(
         $drequest->getRepository(),
         $commit->getCommitIdentifier());
-      $date = phabricator_datetime($epoch, $viewer);
+      $date = $viewer->formatShortDateTime($epoch);
     } else {
       $modified = '';
       $date = '';

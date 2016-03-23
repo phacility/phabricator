@@ -4,8 +4,9 @@ final class PhabricatorAuthTemporaryTokenQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
-  private $objectPHIDs;
+  private $tokenResources;
   private $tokenTypes;
+  private $userPHIDs;
   private $expired;
   private $tokenCodes;
 
@@ -14,8 +15,8 @@ final class PhabricatorAuthTemporaryTokenQuery
     return $this;
   }
 
-  public function withObjectPHIDs(array $object_phids) {
-    $this->objectPHIDs = $object_phids;
+  public function withTokenResources(array $resources) {
+    $this->tokenResources = $resources;
     return $this;
   }
 
@@ -34,41 +35,39 @@ final class PhabricatorAuthTemporaryTokenQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new PhabricatorAuthTemporaryToken();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function withUserPHIDs(array $phids) {
+    $this->userPHIDs = $phids;
+    return $this;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  public function newResultObject() {
+    return new PhabricatorAuthTemporaryToken();
+  }
+
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->objectPHIDs !== null) {
+    if ($this->tokenResources !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'objectPHID IN (%Ls)',
-        $this->objectPHIDs);
+        $conn,
+        'tokenResource IN (%Ls)',
+        $this->tokenResources);
     }
 
     if ($this->tokenTypes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'tokenType IN (%Ls)',
         $this->tokenTypes);
     }
@@ -76,12 +75,12 @@ final class PhabricatorAuthTemporaryTokenQuery
     if ($this->expired !== null) {
       if ($this->expired) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'tokenExpires <= %d',
           time());
       } else {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'tokenExpires > %d',
           time());
       }
@@ -89,14 +88,19 @@ final class PhabricatorAuthTemporaryTokenQuery
 
     if ($this->tokenCodes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'tokenCode IN (%Ls)',
         $this->tokenCodes);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->userPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'userPHID IN (%Ls)',
+        $this->userPHIDs);
+    }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {
