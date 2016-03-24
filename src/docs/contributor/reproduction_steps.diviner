@@ -144,7 +144,7 @@ complete, and that the root cause isn't custom code or local extensions. Using
 a test instance will avoid disrupting other users on your install.
 
 **Test Repositories**: There are several test repositories on
-`secure.phabriactor.com` which you can push commits to if you need to build
+`secure.phabricator.com` which you can push commits to if you need to build
 an example to demonstrate a problem.
 
 For example, if you're seeing an issue with a certain filename but the commit
