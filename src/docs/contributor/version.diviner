@@ -1,0 +1,57 @@
+@title Providing Version Information
+@group detail
+
+How to provide version information with reports made to the upstream.
+
+Overview
+========
+
+When you submit a bug report, we require that you include version information.
+
+Despite our insistence that users update before reporting issues, many reports
+we receive describe issues which have already been resolved. Including version
+information in your report allows us to quickly determine that you are out of
+date and that updating will fix your issue.
+
+That said, your report must also include reproduction steps, and you should be
+unable to generate valid reproduction steps for an issue which has already been
+resolved because valid reproduction steps must also reproduce against a clean,
+up-to-date install. See @{article:Providing Reproduction Steps} for details.
+
+
+Phabricator Version
+===================
+
+To get Phabricator version information:
+
+  - Go to the {nav Config} application. You can type "Config" into the global
+    search box, or navigate to `https://your.install.com/config/`. You must
+    be an administrator to access this application.
+  - Click {nav Versions} in the left menu.
+  - Copy and paste all of the information on the page into your report.
+
+
+Arcanist Version
+================
+
+To get Arcanist version information:
+
+  - Run `arc version`.
+  - Copy and paste all of the output into your report.
+
+
+Other Versions
+==============
+
+In general, we use `git` commit hashes as version identifiers, so you can
+identify the version of something by running `git show` and copy/pasting the
+hash from the output. This may be useful if you're encountering an issue which
+prevents you from reaching the version reporting screen.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Contributing Bug Reports}.
