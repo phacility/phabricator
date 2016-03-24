@@ -68,5 +68,6 @@
   "is.pull": false,
   "issue.number": 1,
   "id": 3740908680,
-  "uri": "https://github.com/epriestley/poems/issues/1#event-3740908680"
+  "uri": "https://github.com/epriestley/poems/issues/1#event-3740908680",
+  "title.full": "GitHub epriestley/poems Issue #1 (Reopened)"
 }

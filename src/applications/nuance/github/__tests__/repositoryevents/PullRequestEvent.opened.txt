@@ -332,5 +332,6 @@
   "issue.number": null,
   "pull.number": 2,
   "id": 3740936638,
-  "uri": "https://github.com/epriestley/poems/pull/2#event-3740936638"
+  "uri": "https://github.com/epriestley/poems/pull/2#event-3740936638",
+  "title.full": "GitHub epriestley/poems Pull Request #2 (Created)"
 }
