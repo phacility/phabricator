@@ -375,7 +375,7 @@ final class HarbormasterBuildViewController
         'div',
         array(
           'id' => $hide_id,
-          'class' => 'harbormaster-empty-logs-are-hidden mlr mlt mll',
+          'class' => 'harbormaster-empty-logs-are-hidden',
         ),
         array(
           pht(
