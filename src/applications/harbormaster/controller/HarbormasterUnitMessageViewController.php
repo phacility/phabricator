@@ -41,7 +41,8 @@ final class HarbormasterUnitMessageViewController
     $curtain = $this->buildCurtainView($message, $build);
 
     $unit = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('TEST RESULT'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $crumbs = $this->buildApplicationCrumbs();
