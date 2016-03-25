@@ -184,14 +184,19 @@ final class HarbormasterStepEditController
 
     if ($is_new) {
       $submit = pht('Create Build Step');
-      $header = pht('New Step: %s', $implementation->getName());
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('New Step: %s', $implementation->getName()))
+        ->setHeaderIcon('fa-plus-square');
       $crumbs->addTextCrumb(pht('Add Step'));
     } else {
       $submit = pht('Save Build Step');
-      $header = pht('Edit Step: %s', $implementation->getName());
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Edit Step: %s', $implementation->getName()))
+        ->setHeaderIcon('fa-pencil');
       $crumbs->addTextCrumb(pht('Step %d', $step->getID()), $cancel_uri);
       $crumbs->addTextCrumb(pht('Edit Step'));
     }
+    $crumbs->setBorder(true);
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
@@ -199,8 +204,9 @@ final class HarbormasterStepEditController
         ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
+      ->setHeaderText(pht('Step'))
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $variables = $this->renderBuildVariablesTable();
@@ -215,16 +221,19 @@ final class HarbormasterStepEditController
       $timeline->setShouldTerminate(true);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
         $variables,
         $timeline,
-      ),
-      array(
-        'title' => $implementation->getName(),
       ));
+
+    return $this->newPage()
+      ->setTitle($implementation->getName())
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function renderBuildVariablesTable() {
@@ -254,6 +263,7 @@ final class HarbormasterStepEditController
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Build Variables'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
   }
 
