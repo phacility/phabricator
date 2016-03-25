@@ -147,7 +147,7 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
 
     id(new ConpherenceEditor())
       ->setActor($creator)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($conpherence, $xactions);
 
@@ -166,7 +166,7 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
 
     id(new ConpherenceEditor())
       ->setActor($actor)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($room, $xactions);
   }

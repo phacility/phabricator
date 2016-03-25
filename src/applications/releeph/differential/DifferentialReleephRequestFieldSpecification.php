@@ -301,8 +301,7 @@ final class DifferentialReleephRequestFieldSpecification extends Phobject {
         ->setContinueOnNoEffect(true)
         ->setContentSource(
           PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_UNKNOWN,
-            array()));
+            PhabricatorUnknownContentSource::SOURCECONST));
 
       $editor->applyTransactions($releeph_request, $xactions);
     }

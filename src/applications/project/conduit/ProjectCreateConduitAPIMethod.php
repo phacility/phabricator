@@ -71,7 +71,7 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
     $editor = id(new PhabricatorProjectTransactionEditor())
       ->setActor($user)
       ->setContinueOnNoEffect(true)
-      ->setContentSourceFromConduitRequest($request);
+      ->setContentSource($request->newContentSource());
 
     $editor->applyTransactions($project, $xactions);
 

@@ -10,8 +10,7 @@ $dst_table = 'audit_transaction_comment';
 echo pht('Migrating Audit inline comments to new format...')."\n";
 
 $content_source = PhabricatorContentSource::newForSource(
-  PhabricatorContentSource::SOURCE_LEGACY,
-  array())->serialize();
+  PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
 $rows = new LiskRawMigrationIterator($conn_w, $src_table);
 foreach ($rows as $row) {

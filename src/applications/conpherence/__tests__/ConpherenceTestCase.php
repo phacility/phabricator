@@ -14,7 +14,7 @@ abstract class ConpherenceTestCase extends PhabricatorTestCase {
     );
     $editor = id(new ConpherenceEditor())
       ->setActor($actor)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->applyTransactions($conpherence, $xactions);
 
   }
@@ -31,7 +31,7 @@ abstract class ConpherenceTestCase extends PhabricatorTestCase {
     );
     $editor = id(new ConpherenceEditor())
       ->setActor($actor)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->applyTransactions($conpherence, $xactions);
   }
 
@@ -45,7 +45,7 @@ abstract class ConpherenceTestCase extends PhabricatorTestCase {
 
     $editor = id(new ConpherenceEditor())
       ->setActor($actor)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource());
+      ->setContentSource($this->newContentSource());
 
     $xactions = $editor->generateTransactionsFromText(
       $actor,

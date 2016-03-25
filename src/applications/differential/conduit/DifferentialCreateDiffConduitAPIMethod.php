@@ -144,7 +144,7 @@ final class DifferentialCreateDiffConduitAPIMethod
 
     id(new DifferentialDiffEditor())
       ->setActor($viewer)
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($diff, $xactions);
 

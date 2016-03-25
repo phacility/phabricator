@@ -57,4 +57,9 @@ final class ConduitAPIRequest extends Phobject {
     return $this->isClusterRequest;
   }
 
+  public function newContentSource() {
+    return PhabricatorContentSource::newForSource(
+      PhabricatorConduitContentSource::SOURCECONST);
+  }
+
 }

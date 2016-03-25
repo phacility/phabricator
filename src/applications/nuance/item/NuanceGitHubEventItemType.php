@@ -323,10 +323,9 @@ final class NuanceGitHubEventItemType
 
     // TODO: Preserve the item's original source.
     $source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
+      PhabricatorDaemonContentSource::SOURCECONST);
 
-    // TOOD: This should really be the external source.
+    // TODO: This should really be the external source.
     $acting_phid = $nuance_phid;
 
     $editor = id(new ManiphestTransactionEditor())

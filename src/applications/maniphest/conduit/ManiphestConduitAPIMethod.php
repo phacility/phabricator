@@ -192,9 +192,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
       return;
     }
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
-      array());
+    $content_source = $request->newContentSource();
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($request->getUser())

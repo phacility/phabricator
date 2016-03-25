@@ -138,7 +138,7 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
 
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
 

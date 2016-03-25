@@ -1684,7 +1684,7 @@ abstract class PhabricatorEditEngine
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setContinueOnNoEffect(true);
 
     if (!$this->getIsCreate()) {

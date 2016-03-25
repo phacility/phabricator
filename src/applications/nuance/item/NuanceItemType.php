@@ -119,8 +119,7 @@ abstract class NuanceItemType
 
     // TODO: Maybe preserve the actor's original content source?
     $source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
+      PhabricatorDaemonContentSource::SOURCECONST);
 
     $editor = id(new NuanceItemEditor())
       ->setActor($viewer)

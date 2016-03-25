@@ -215,7 +215,7 @@ final class PhabricatorSpacesTestCase extends PhabricatorTestCase {
         ->setNewValue($is_default);
     }
 
-    $content_source = PhabricatorContentSource::newConsoleSource();
+    $content_source = $this->newContentSource();
 
     $editor = id(new PhabricatorSpacesNamespaceEditor())
       ->setActor($actor)

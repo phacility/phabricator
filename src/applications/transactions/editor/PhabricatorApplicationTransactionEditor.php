@@ -733,16 +733,6 @@ abstract class PhabricatorApplicationTransactionEditor
       PhabricatorContentSource::newFromRequest($request));
   }
 
-  public function setContentSourceFromConduitRequest(
-    ConduitAPIRequest $request) {
-
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
-      array());
-
-    return $this->setContentSource($content_source);
-  }
-
   public function getContentSource() {
     return $this->contentSource;
   }
@@ -979,8 +969,7 @@ abstract class PhabricatorApplicationTransactionEditor
         // out from transcripts, but it would be cleaner if you didn't have to.
 
         $herald_source = PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_HERALD,
-          array());
+          PhabricatorHeraldContentSource::SOURCECONST);
 
         $herald_editor = newv(get_class($this), array())
           ->setContinueOnNoEffect(true)

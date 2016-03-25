@@ -4,8 +4,7 @@ $conn_w = id(new PhabricatorAuditTransaction())->establishConnection('w');
 $rows = new LiskRawMigrationIterator($conn_w, 'audit_comment');
 
 $content_source = PhabricatorContentSource::newForSource(
-  PhabricatorContentSource::SOURCE_LEGACY,
-  array())->serialize();
+  PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
 echo pht('Migrating Audit comments to modern storage...')."\n";
 foreach ($rows as $row) {

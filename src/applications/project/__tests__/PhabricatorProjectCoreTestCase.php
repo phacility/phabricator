@@ -1087,7 +1087,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($task, $xactions);
   }
@@ -1203,7 +1203,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($task, $xactions);
   }
@@ -1239,7 +1239,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($task, $xactions);
 
@@ -1464,7 +1464,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $editor = id(new PhabricatorProjectTransactionEditor())
       ->setActor($user)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($project, $xactions);
   }
