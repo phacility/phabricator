@@ -89,6 +89,7 @@ final class PhortuneMerchantInvoiceCreateController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($merchant->getName());
+    $crumbs->setBorder(true);
 
     $v_title = $request->getStr('title');
     $e_title = true;
@@ -229,18 +230,25 @@ final class PhortuneMerchantInvoiceCreateController
           ->setValue(pht('Send Invoice')));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('New Invoice'))
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setFormErrors($errors)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

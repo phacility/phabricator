@@ -782,3 +782,44 @@ ul.phui-object-item-list-view .phui-object-item-selected
   padding: 0 8px 8px;
   text-align: left;
 }
+
+/* - Simple List------------------------------------------------------------- */
+
+.phui-object-list-simple .phui-object-item-with-image .phui-object-item-frame {
+  min-height: 26px;
+}
+
+.phui-object-list-simple .phui-object-item-image {
+  height: 26px;
+  width: 26px;
+  margin: 0;
+}
+
+.phui-object-list-simple .phui-object-item-with-image
+  .phui-object-item-content-box {
+    margin-left: 32px;
+}
+
+.phui-object-list-simple .phui-object-item-name {
+  padding: 2px 0;
+}
+
+.phui-object-list-simple .phui-object-item-name a {
+  color: {$darkbluetext};
+}
+
+.phui-object-item-list-view.phui-object-list-simple .phui-object-item-frame {
+  border: none;
+  margin-bottom: 4px;
+}
+
+.phui-object-item-list-view.phui-object-list-simple li:last-child
+  .phui-object-item-frame {
+    margin: 0;
+}
+
+.phui-object-list-simple .phui-object-item-actions {
+  top: 2px;
+  bottom: 2px;
+  right: 2px;
+}

@@ -14,20 +14,16 @@ final class PassphraseCredentialViewController extends PassphraseController {
       return new Aphront404Response();
     }
 
-    $type = PassphraseCredentialType::getTypeByConstant(
-      $credential->getCredentialType());
-    if (!$type) {
-      throw new Exception(pht('Credential has invalid type "%s"!', $type));
-    }
+    $type = $credential->getImplementation();
 
     $timeline = $this->buildTransactionTimeline(
       $credential,
       new PassphraseCredentialTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $title = pht('%s %s', 'K'.$credential->getID(), $credential->getName());
+    $title = pht('%s %s', $credential->getMonogram(), $credential->getName());
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb('K'.$credential->getID());
+    $crumbs->addTextCrumb($credential->getMonogram());
     $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($credential);

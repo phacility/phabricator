@@ -58,22 +58,31 @@ final class PhortunePaymentMethodEditController
           ->setValue(pht('Save Changes')));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edit Payment Method'))
+      ->setHeaderText(pht('Payment Method'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($account->getName(), $account_uri);
     $crumbs->addTextCrumb($method->getDisplayName());
     $crumbs->addTextCrumb(pht('Edit'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Payment Method'))
+      ->setHeaderIcon('fa-pencil');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => pht('Edit Payment Method'),
       ));
+
+    return $this->newPage()
+      ->setTitle(pht('Edit Payment Method'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

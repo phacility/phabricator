@@ -69,6 +69,10 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
     return $this->getGenericDescription();
   }
 
+  public function getEditInstructions() {
+    return null;
+  }
+
   /**
    * Run the build target against the specified build.
    */
@@ -264,6 +268,37 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
     }
 
   }
+
+  protected function logHTTPResponse(
+    HarbormasterBuild $build,
+    HarbormasterBuildTarget $build_target,
+    BaseHTTPFuture $future,
+    $label) {
+
+    list($status, $body, $headers) = $future->resolve();
+
+    $header_lines = array();
+
+    // TODO: We don't currently preserve the entire "HTTP" response header, but
+    // should. Once we do, reproduce it here faithfully.
+    $status_code = $status->getStatusCode();
+    $header_lines[] = "HTTP {$status_code}";
+
+    foreach ($headers as $header) {
+      list($head, $tail) = $header;
+      $header_lines[] = "{$head}: {$tail}";
+    }
+    $header_lines = implode("\n", $header_lines);
+
+    $build_target
+      ->newLog($label, 'http.head')
+      ->append($header_lines);
+
+    $build_target
+      ->newLog($label, 'http.body')
+      ->append($body);
+  }
+
 
 
 /* -(  Automatic Targets  )-------------------------------------------------- */

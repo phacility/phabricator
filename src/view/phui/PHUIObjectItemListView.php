@@ -7,6 +7,7 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $pager;
   private $noDataString;
   private $flush;
+  private $simple;
   private $allowEmptyList;
   private $states;
   private $itemClass = 'phui-object-item-standard';
@@ -32,6 +33,11 @@ final class PHUIObjectItemListView extends AphrontTagView {
 
   public function setPager($pager) {
     $this->pager = $pager;
+    return $this;
+  }
+
+  public function setSimple($simple) {
+    $this->simple = $simple;
     return $this;
   }
 
@@ -68,6 +74,9 @@ final class PHUIObjectItemListView extends AphrontTagView {
     }
     if ($this->flush) {
       $classes[] = 'phui-object-list-flush';
+    }
+    if ($this->simple) {
+      $classes[] = 'phui-object-list-simple';
     }
 
     return array(

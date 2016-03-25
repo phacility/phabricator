@@ -154,6 +154,23 @@ final class NuanceItem
       ));
   }
 
+  public function issueCommand(
+    $author_phid,
+    $command,
+    array $parameters = array()) {
+
+    $command = id(NuanceItemCommand::initializeNewCommand())
+      ->setItemPHID($this->getPHID())
+      ->setAuthorPHID($author_phid)
+      ->setCommand($command)
+      ->setParameters($parameters)
+      ->save();
+
+    $this->scheduleUpdate();
+
+    return $this;
+  }
+
   public function getImplementation() {
     return $this->assertAttached($this->implementation);
   }

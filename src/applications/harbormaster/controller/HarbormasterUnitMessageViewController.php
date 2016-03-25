@@ -38,12 +38,11 @@ final class HarbormasterUnitMessageViewController
       ->setStatus($status_icon, $status_color, $status_label);
 
     $properties = $this->buildPropertyListView($message);
-    $actions = $this->buildActionView($message, $build);
-
-    $properties->setActionList($actions);
+    $curtain = $this->buildCurtainView($message, $build);
 
     $unit = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('TEST RESULT'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -54,22 +53,29 @@ final class HarbormasterUnitMessageViewController
       "/harbormaster/unit/{$buildable_id}/");
 
     $crumbs->addTextCrumb(pht('Unit %d', $id));
+    $crumbs->setBorder(true);
 
     $title = array(
       $display_name,
       $buildable->getMonogram(),
     );
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $unit,
+      ));
+
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($unit);
+      ->appendChild($view);
   }
 
   private function buildPropertyListView(
     HarbormasterBuildUnitMessage $message) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
@@ -81,6 +87,7 @@ final class HarbormasterUnitMessageViewController
     $details = $message->getUnitMessageDetails();
     if (strlen($details)) {
       // TODO: Use the log view here, once it gets cleaned up.
+      // Shenanigans below.
       $details = phutil_tag(
         'div',
         array(
@@ -103,20 +110,19 @@ final class HarbormasterUnitMessageViewController
     return $view;
   }
 
-  private function buildActionView(
+  private function buildCurtainView(
     HarbormasterBuildUnitMessage $message,
     HarbormasterBuild $build) {
     $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $curtain = $this->newCurtainView($build);
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View Build'))
         ->setHref($build->getURI())
         ->setIcon('fa-wrench'));
 
-    return $view;
+    return $curtain;
   }
 }

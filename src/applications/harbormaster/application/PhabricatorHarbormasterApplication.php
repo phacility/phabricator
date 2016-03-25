@@ -91,6 +91,9 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
         'lint/' => array(
           '(?P<id>\d+)/' => 'HarbormasterLintMessagesController',
         ),
+        'hook/' => array(
+          'circleci/' => 'HarbormasterCircleCIHookController',
+        ),
       ),
     );
   }

@@ -10,6 +10,7 @@ final class NuanceItemTransaction
   const TYPE_SOURCE = 'nuance.item.source';
   const TYPE_PROPERTY = 'nuance.item.property';
   const TYPE_QUEUE = 'nuance.item.queue';
+  const TYPE_COMMAND = 'nuance.item.command';
 
   public function getApplicationTransactionType() {
     return NuanceItemPHIDType::TYPECONST;
@@ -65,6 +66,12 @@ final class NuanceItemTransaction
           '%s routed this item to the %s queue.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($new));
+      case self::TYPE_COMMAND:
+        // TODO: Give item types a chance to render this properly.
+        return pht(
+          '%s applied command "%s" to this item.',
+          $this->renderHandleLink($author_phid),
+          idx($new, 'command'));
     }
 
     return parent::getTitle();

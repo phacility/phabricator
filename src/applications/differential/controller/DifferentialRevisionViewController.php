@@ -1166,7 +1166,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setBuildable($diff->getBuildable())
       ->setUnitMessages($diff->getUnitMessages())
       ->setLimit(5)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setShowViewAll(true);
   }
 

@@ -74,6 +74,7 @@ final class PhortuneAccountEditController extends PhortuneController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     if ($is_new) {
       $cancel_uri = $this->getApplicationURI('account/');
@@ -112,18 +113,25 @@ final class PhortuneAccountEditController extends PhortuneController {
           ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Account'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setValidationException($validation_exception)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

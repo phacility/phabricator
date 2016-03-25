@@ -35,44 +35,44 @@ final class HarbormasterBuildableViewController
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($buildable);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header);
+      ->setPolicyObject($buildable)
+      ->setHeaderIcon('fa-recycle');
 
     $timeline = $this->buildTransactionTimeline(
       $buildable,
       new HarbormasterBuildableTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    $actions = $this->buildActionList($buildable);
-    $this->buildPropertyLists($box, $buildable, $actions);
+    $curtain = $this->buildCurtainView($buildable);
+    $properties = $this->buildPropertyList($buildable);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($buildable->getMonogram());
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $properties,
         $lint,
         $unit,
         $build_list,
         $timeline,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
-  private function buildActionList(HarbormasterBuildable $buildable) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  private function buildCurtainView(HarbormasterBuildable $buildable) {
+    $viewer = $this->getViewer();
     $id = $buildable->getID();
 
-    $list = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($buildable);
+    $curtain = $this->newCurtainView($buildable);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -117,7 +117,7 @@ final class HarbormasterBuildableViewController
     $resume_uri = "buildable/{$id}/resume/";
     $abort_uri = "buildable/{$id}/abort/";
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-repeat')
         ->setName(pht('Restart All Builds'))
@@ -125,7 +125,7 @@ final class HarbormasterBuildableViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_restart || !$can_edit));
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pause')
         ->setName(pht('Pause All Builds'))
@@ -133,7 +133,7 @@ final class HarbormasterBuildableViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_pause || !$can_edit));
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-play')
         ->setName(pht('Resume All Builds'))
@@ -141,7 +141,7 @@ final class HarbormasterBuildableViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_resume || !$can_edit));
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-exclamation-triangle')
         ->setName(pht('Abort All Builds'))
@@ -149,21 +149,14 @@ final class HarbormasterBuildableViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_abort || !$can_edit));
 
-    return $list;
+    return $curtain;
   }
 
-  private function buildPropertyLists(
-    PHUIObjectBoxView $box,
-    HarbormasterBuildable $buildable,
-    PhabricatorActionListView $actions) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  private function buildPropertyList(HarbormasterBuildable $buildable) {
+    $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($buildable)
-      ->setActionList($actions);
-    $box->addPropertyList($properties);
+      ->setUser($viewer);
 
     $container_phid = $buildable->getContainerPHID();
     $buildable_phid = $buildable->getBuildablePHID();
@@ -184,6 +177,10 @@ final class HarbormasterBuildableViewController
         ? pht('Manual Buildable')
         : pht('Automatic Buildable'));
 
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('PROPERTIES'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($properties);
   }
 
   private function buildBuildList(HarbormasterBuildable $buildable) {
@@ -279,6 +276,7 @@ final class HarbormasterBuildableViewController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Builds'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($build_list);
 
     return $box;
@@ -330,6 +328,7 @@ final class HarbormasterBuildableViewController
 
       $lint = id(new PHUIObjectBoxView())
         ->setHeader($lint_header)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setTable($lint_table);
     } else {
       $lint = null;

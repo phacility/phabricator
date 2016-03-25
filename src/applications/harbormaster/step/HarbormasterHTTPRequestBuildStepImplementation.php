@@ -72,29 +72,9 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       $build_target,
       array($future));
 
-    list($status, $body, $headers) = $future->resolve();
+    $this->logHTTPResponse($build, $build_target, $future, $uri);
 
-    $header_lines = array();
-
-    // TODO: We don't currently preserve the entire "HTTP" response header, but
-    // should. Once we do, reproduce it here faithfully.
-    $status_code = $status->getStatusCode();
-    $header_lines[] = "HTTP {$status_code}";
-
-    foreach ($headers as $header) {
-      list($head, $tail) = $header;
-      $header_lines[] = "{$head}: {$tail}";
-    }
-    $header_lines = implode("\n", $header_lines);
-
-    $build_target
-      ->newLog($uri, 'http.head')
-      ->append($header_lines);
-
-    $build_target
-      ->newLog($uri, 'http.body')
-      ->append($body);
-
+    list($status) = $future->resolve();
     if ($status->isError()) {
       throw new HarbormasterBuildFailureException();
     }

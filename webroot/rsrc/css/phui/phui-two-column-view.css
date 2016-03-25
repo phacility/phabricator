@@ -197,3 +197,8 @@
   .phui-info-view {
     margin: 0;
 }
+
+.phui-two-column-view .phui-box-blue-property
+  .phui-header-shell + .phui-info-view {
+    margin: 16px;
+}
