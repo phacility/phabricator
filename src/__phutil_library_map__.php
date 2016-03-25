@@ -845,6 +845,7 @@ phutil_register_library_map(array(
     'DoorkeeperBridgeGitHubIssue' => 'applications/doorkeeper/bridge/DoorkeeperBridgeGitHubIssue.php',
     'DoorkeeperBridgeJIRA' => 'applications/doorkeeper/bridge/DoorkeeperBridgeJIRA.php',
     'DoorkeeperBridgeJIRATestCase' => 'applications/doorkeeper/bridge/__tests__/DoorkeeperBridgeJIRATestCase.php',
+    'DoorkeeperBridgedObjectCurtainExtension' => 'applications/doorkeeper/engineextension/DoorkeeperBridgedObjectCurtainExtension.php',
     'DoorkeeperBridgedObjectInterface' => 'applications/doorkeeper/bridge/DoorkeeperBridgedObjectInterface.php',
     'DoorkeeperDAO' => 'applications/doorkeeper/storage/DoorkeeperDAO.php',
     'DoorkeeperExternalObject' => 'applications/doorkeeper/storage/DoorkeeperExternalObject.php',
@@ -5001,6 +5002,7 @@ phutil_register_library_map(array(
     'DoorkeeperBridgeGitHubIssue' => 'DoorkeeperBridgeGitHub',
     'DoorkeeperBridgeJIRA' => 'DoorkeeperBridge',
     'DoorkeeperBridgeJIRATestCase' => 'PhabricatorTestCase',
+    'DoorkeeperBridgedObjectCurtainExtension' => 'PHUICurtainExtension',
     'DoorkeeperDAO' => 'PhabricatorLiskDAO',
     'DoorkeeperExternalObject' => array(
       'DoorkeeperDAO',
