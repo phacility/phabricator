@@ -106,9 +106,7 @@ final class HarbormasterUnitMessageViewController
       PHUIPropertyListView::ICON_TESTPLAN);
     $view->addTextContent($details);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('PROPERTIES'))
-      ->appendChild($view);
+    return $view;
   }
 
   private function buildCurtainView(
