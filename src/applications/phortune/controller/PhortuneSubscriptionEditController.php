@@ -21,7 +21,7 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
       $request,
-      $this->getApplicationURI($subscription->getEditURI()));
+      $subscription->getURI());
     $merchant = $subscription->getMerchant();
     $account = $subscription->getAccount();
 
@@ -140,18 +140,26 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
 
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
-      ->setHeaderText(pht('Edit %s', $subscription->getSubscriptionName()))
+      ->setHeaderText(pht('Subscription'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setFormErrors($errors)
       ->appendChild($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit %s', $subscription->getSubscriptionName()))
+      ->setHeaderIcon('fa-pencil');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 

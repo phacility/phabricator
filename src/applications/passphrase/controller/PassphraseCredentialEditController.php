@@ -36,7 +36,8 @@ final class PassphraseCredentialEditController extends PassphraseController {
 
       $credential = PassphraseCredential::initializeNewCredential($viewer)
         ->setCredentialType($type->getCredentialType())
-        ->setProvidesType($type->getProvidesType());
+        ->setProvidesType($type->getProvidesType())
+        ->attachImplementation($type);
 
       $is_new = true;
 

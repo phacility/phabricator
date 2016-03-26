@@ -24,6 +24,7 @@ final class PhortuneAccountListController extends PhortuneController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Accounts'));
+    $crumbs->setBorder(true);
 
     $payment_list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
@@ -34,10 +35,11 @@ final class PhortuneAccountListController extends PhortuneController {
 
     foreach ($accounts as $account) {
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Account %d', $account->getID()))
+        ->setSubhead(pht('Account %d', $account->getID()))
         ->setHeader($account->getName())
         ->setHref($this->getApplicationURI($account->getID().'/'))
-        ->setObject($account);
+        ->setObject($account)
+        ->setIcon('fa-credit-card');
 
       $payment_list->addItem($item);
     }
@@ -53,6 +55,7 @@ final class PhortuneAccountListController extends PhortuneController {
 
     $payment_box = id(new PHUIObjectBoxView())
       ->setHeader($payment_header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($payment_list);
 
     $merchant_list = id(new PHUIObjectItemListView())
@@ -64,10 +67,11 @@ final class PhortuneAccountListController extends PhortuneController {
 
     foreach ($merchants as $merchant) {
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Merchant %d', $merchant->getID()))
+        ->setSubhead(pht('Merchant %d', $merchant->getID()))
         ->setHeader($merchant->getName())
         ->setHref($this->getApplicationURI('/merchant/'.$merchant->getID().'/'))
-        ->setObject($merchant);
+        ->setObject($merchant)
+        ->setIcon('fa-bank');
 
       $merchant_list->addItem($item);
     }
@@ -83,17 +87,24 @@ final class PhortuneAccountListController extends PhortuneController {
 
     $merchant_box = id(new PHUIObjectBoxView())
       ->setHeader($merchant_header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($merchant_list);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Accounts'));
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $payment_box,
         $merchant_box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

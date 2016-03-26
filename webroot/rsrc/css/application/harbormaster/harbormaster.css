@@ -18,6 +18,8 @@
   border: 1px solid {$yellow};
   text-align: center;
   padding: 12px;
+  margin: 0 0 20px 0;
+  border-radius: 3px;
   color: {$darkgreytext};
 }
 

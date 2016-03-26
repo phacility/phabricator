@@ -26,6 +26,17 @@ final class NuanceItemViewController extends NuanceController {
 
     $curtain = $this->buildCurtain($item);
     $content = $this->buildContent($item);
+    $commands = $this->buildCommands($item);
+
+    $timeline = $this->buildTransactionTimeline(
+      $item,
+      new NuanceItemTransactionQuery());
+
+    $main = array(
+      $commands,
+      $content,
+      $timeline,
+    );
 
     $header = id(new PHUIHeaderView())
       ->setHeader($name);
@@ -33,7 +44,7 @@ final class NuanceItemViewController extends NuanceController {
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn($content);
+      ->setMainColumn($main);
 
     return $this->newPage()
       ->setTitle($title)
@@ -58,6 +69,13 @@ final class NuanceItemViewController extends NuanceController {
         ->setIcon('fa-cogs')
         ->setHref($this->getApplicationURI("item/manage/{$id}/")));
 
+    $impl = $item->getImplementation();
+    $impl->setViewer($viewer);
+
+    foreach ($impl->getItemActions($item) as $action) {
+      $curtain->addAction($action);
+    }
+
     return $curtain;
   }
 
@@ -67,6 +85,38 @@ final class NuanceItemViewController extends NuanceController {
 
     $impl->setViewer($viewer);
     return $impl->buildItemView($item);
+  }
+
+  private function buildCommands(NuanceItem $item) {
+    $viewer = $this->getViewer();
+
+    $commands = id(new NuanceItemCommandQuery())
+      ->setViewer($viewer)
+      ->withItemPHIDs(array($item->getPHID()))
+      ->execute();
+    $commands = msort($commands, 'getID');
+
+    if (!$commands) {
+      return null;
+    }
+
+    $rows = array();
+    foreach ($commands as $command) {
+      $rows[] = array(
+        $command->getCommand(),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Command'),
+        ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Pending Commands'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($table);
   }
 
 }

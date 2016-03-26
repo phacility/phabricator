@@ -15,6 +15,7 @@ final class NuanceItemUpdateWorker
       $item = $this->loadItem($item_phid);
       $this->updateItem($item);
       $this->routeItem($item);
+      $this->applyCommands($item);
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
@@ -49,6 +50,24 @@ final class NuanceItemUpdateWorker
       ->setQueuePHID($source->getDefaultQueuePHID())
       ->setStatus(NuanceItem::STATUS_OPEN)
       ->save();
+  }
+
+  private function applyCommands(NuanceItem $item) {
+    $viewer = $this->getViewer();
+
+    $impl = $item->getImplementation();
+    $impl->setViewer($viewer);
+
+    $commands = id(new NuanceItemCommandQuery())
+      ->setViewer($viewer)
+      ->withItemPHIDs(array($item->getPHID()))
+      ->execute();
+    $commands = msort($commands, 'getID');
+
+    foreach ($commands as $command) {
+      $impl->applyCommand($item, $command);
+      $command->delete();
+    }
   }
 
 }

@@ -135,6 +135,7 @@ To configure Phabricator to use Amazon SES, set these configuration keys:
     "PhabricatorMailImplementationAmazonSESAdapter".
   - **amazon-ses.access-key**: set to your Amazon SES access key.
   - **amazon-ses.secret-key**: set to your Amazon SES secret key.
+  - **amazon-ses.endpoint**: Set to your Amazon SES endpoint.
 
 NOTE: Amazon SES **requires you to verify your "From" address**. Configure which
 "From" address to use by setting "`metamta.default-address`" in your config,

@@ -158,20 +158,29 @@ final class PhortunePaymentMethodCreateController
           ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($provider->getPaymentMethodDescription())
+      ->setHeaderText(pht('Method'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Add Payment Method'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Add Payment Method'))
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => $provider->getPaymentMethodDescription(),
       ));
+
+    return $this->newPage()
+      ->setTitle($provider->getPaymentMethodDescription())
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function renderSelectProvider(

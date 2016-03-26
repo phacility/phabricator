@@ -234,6 +234,9 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
       if ($page) {
         $maybe_visible = $this->willFilterPage($page);
+        if ($maybe_visible) {
+          $maybe_visible = $this->applyWillFilterPageExtensions($maybe_visible);
+        }
       } else {
         $maybe_visible = array();
       }
@@ -670,6 +673,54 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
     $viewer = $this->getViewer();
     return PhabricatorApplication::isClassInstalledForViewer($class, $viewer);
+  }
+
+  private function applyWillFilterPageExtensions(array $page) {
+    $bridges = array();
+    foreach ($page as $key => $object) {
+      if ($object instanceof DoorkeeperBridgedObjectInterface) {
+        $bridges[$key] = $object;
+      }
+    }
+
+    if ($bridges) {
+      $external_phids = array();
+      foreach ($bridges as $bridge) {
+        $external_phid = $bridge->getBridgedObjectPHID();
+        if ($external_phid) {
+          $external_phids[$key] = $external_phid;
+        }
+      }
+
+      if ($external_phids) {
+        $external_objects = id(new DoorkeeperExternalObjectQuery())
+          ->setViewer($this->getViewer())
+          ->withPHIDs($external_phids)
+          ->execute();
+        $external_objects = mpull($external_objects, null, 'getPHID');
+      } else {
+        $external_objects = array();
+      }
+
+      foreach ($bridges as $key => $bridge) {
+        $external_phid = idx($external_phids, $key);
+        if (!$external_phid) {
+          $bridge->attachBridgedObject(null);
+          continue;
+        }
+
+        $external_object = idx($external_objects, $external_phid);
+        if (!$external_object) {
+          $this->didRejectResult($bridge);
+          unset($page[$key]);
+          continue;
+        }
+
+        $bridge->attachBridgedObject($external_object);
+      }
+    }
+
+    return $page;
   }
 
 }
