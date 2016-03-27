@@ -183,26 +183,37 @@ final class PonderQuestionEditController extends PonderController {
       $crumbs->addTextCrumb("Q{$id}", "/Q{$id}");
       $crumbs->addTextCrumb(pht('Edit'));
       $title = pht('Edit Question');
+      $header = id(new PHUIHeaderView())
+        ->setHeader($title)
+        ->setHeaderIcon('fa-pencil');
     } else {
       $crumbs->addTextCrumb(pht('Ask Question'));
       $title = pht('Ask New Question');
+      $header = id(new PHUIHeaderView())
+        ->setHeader($title)
+        ->setHeaderIcon('fa-plus-square');
     }
+    $crumbs->setBorder(true);
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Question'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
         $preview,
         $answer_preview,
-      ),
-      array(
-        'title'  => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }
