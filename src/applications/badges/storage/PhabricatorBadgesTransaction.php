@@ -109,6 +109,26 @@ final class PhabricatorBadgesTransaction
             $qual_new);
         }
         break;
+      case self::TYPE_AWARD:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s awarded this badge to %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          new PhutilNumber(count($new)),
+          $handles);
+      case self::TYPE_REVOKE:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s revoked this badge from %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          new PhutilNumber(count($new)),
+          $handles);
     }
 
     return parent::getTitle();
@@ -222,5 +242,25 @@ final class PhabricatorBadgesTransaction
       $viewer,
       $this->getOldValue(),
       $this->getNewValue());
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+       case self::TYPE_AWARD:
+       case self::TYPE_REVOKE:
+        $new = $this->getNewValue();
+        if (!is_array($new)) {
+          $new = array();
+        }
+        foreach ($new as $phid) {
+          $phids[] = $phid;
+        }
+        break;
+    }
+
+    return $phids;
   }
 }
