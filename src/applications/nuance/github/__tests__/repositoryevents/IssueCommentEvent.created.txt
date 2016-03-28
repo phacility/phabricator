@@ -97,5 +97,6 @@
   "issue.number": 1,
   "id": 3733510485,
   "uri": "https://github.com/epriestley/poems/issues/1#issuecomment-193528669",
-  "title.full": "GitHub epriestley/poems Issue #1 (Comment)"
+  "title.full": "GitHub epriestley/poems Issue #1 (Comment)",
+  "comment": "comment on issue"
 }

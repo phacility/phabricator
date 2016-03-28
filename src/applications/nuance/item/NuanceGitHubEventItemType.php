@@ -154,6 +154,29 @@ final class NuanceGitHubEventItemType
     return $actions;
   }
 
+  public function getItemCurtainPanels(NuanceItem $item) {
+    $viewer = $this->getViewer();
+
+    $panels = array();
+
+    $xobj = $this->getExternalObject($item);
+    if ($xobj) {
+      $xobj_phid = $xobj->getPHID();
+
+      $task = id(new ManiphestTaskQuery())
+        ->setViewer($viewer)
+        ->withBridgedObjectPHIDs(array($xobj_phid))
+        ->executeOne();
+      if ($task) {
+        $panels[] = $this->newCurtainPanel($item)
+          ->setHeaderText(pht('Imported As'))
+          ->appendChild($viewer->renderHandle($task->getPHID()));
+      }
+    }
+
+    return $panels;
+  }
+
   protected function handleAction(NuanceItem $item, $action) {
     $viewer = $this->getViewer();
     $controller = $this->getController();

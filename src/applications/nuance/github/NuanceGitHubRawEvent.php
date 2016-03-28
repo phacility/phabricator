@@ -91,7 +91,13 @@ final class NuanceGitHubRawEvent extends Phobject {
   }
 
   public function getComment() {
-    return 'TODO: Actually extract comment text.';
+    if (!$this->isIssueEvent() && !$this->isPullRequestEvent()) {
+      return null;
+    }
+
+    $raw = $this->raw;
+
+    return idxv($raw, array('payload', 'comment', 'body'));
   }
 
   public function getURI() {
