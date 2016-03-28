@@ -342,6 +342,8 @@ final class PHUITimelineEventView extends AphrontView {
     // Render "extra" information (timestamp, etc).
     $extra = $this->renderExtra($events);
 
+    $show_badges = false;
+
     $group_titles = array();
     $group_items = array();
     $group_children = array();
@@ -358,6 +360,7 @@ final class PHUITimelineEventView extends AphrontView {
 
       if ($event->hasChildren()) {
         $group_children[] = $event->renderChildren();
+        $show_badges = true;
       }
     }
 
@@ -382,7 +385,7 @@ final class PHUITimelineEventView extends AphrontView {
           'href' => $this->userHandle->getURI(),
         ),
         '');
-      if ($this->badges) {
+      if ($this->badges && $show_badges) {
         $flex = new PHUIBadgeBoxView();
         $flex->addItems($this->badges);
         $flex->setCollapsed(true);

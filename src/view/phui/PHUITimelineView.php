@@ -224,12 +224,6 @@ final class PHUITimelineView extends AphrontView {
 
     $user_phids = array();
     foreach ($events as $key => $event) {
-      if (!$event->hasChildren()) {
-        // This is a minor event, so we don't have space to show badges.
-        unset($events[$key]);
-        continue;
-      }
-
       $author_phid = $event->getAuthorPHID();
       if (!$author_phid) {
         unset($events[$key]);
@@ -259,7 +253,9 @@ final class PHUITimelineView extends AphrontView {
     $awards = mgroup($awards, 'getRecipientPHID');
 
     foreach ($events as $event) {
+
       $author_awards = idx($awards, $event->getAuthorPHID(), array());
+
       $badges = array();
       foreach ($author_awards as $award) {
         $badge = $award->getBadge();
