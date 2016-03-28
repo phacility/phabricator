@@ -12,8 +12,7 @@ abstract class PhortuneProductImplementation extends Phobject {
 
   protected function getContentSource() {
     return PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_PHORTUNE,
-      array());
+      PhabricatorPhortuneContentSource::SOURCECONST);
   }
 
   public function getPurchaseName(

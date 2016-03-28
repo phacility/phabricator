@@ -60,6 +60,10 @@ final class PhamePostEditEngine
     return pht('Create Post');
   }
 
+  protected function getObjectName() {
+    return pht('Post');
+  }
+
   protected function getObjectViewURI($object) {
     return $object->getViewURI();
   }

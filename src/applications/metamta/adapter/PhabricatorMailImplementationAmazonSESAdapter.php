@@ -23,12 +23,13 @@ final class PhabricatorMailImplementationAmazonSESAdapter
   public function executeSend($body) {
     $key = PhabricatorEnv::getEnvConfig('amazon-ses.access-key');
     $secret = PhabricatorEnv::getEnvConfig('amazon-ses.secret-key');
+    $endpoint = PhabricatorEnv::getEnvConfig('amazon-ses.endpoint');
 
     $root = phutil_get_library_root('phabricator');
     $root = dirname($root);
     require_once $root.'/externals/amazon-ses/ses.php';
 
-    $service = new SimpleEmailService($key, $secret);
+    $service = new SimpleEmailService($key, $secret, $endpoint);
     $service->enableUseExceptions(true);
     return $service->sendRawEmail($body);
   }

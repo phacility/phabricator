@@ -40,15 +40,13 @@ final class HarbormasterStepAddController
     }
 
     $groups = mgroup($all, 'getBuildStepGroupKey');
-    $lists = array();
+    $boxes = array();
 
     $enabled_groups = HarbormasterBuildStepGroup::getAllEnabledGroups();
     foreach ($enabled_groups as $group) {
       $list = id(new PHUIObjectItemListView())
-        ->setHeader($group->getGroupName())
         ->setNoDataString(
-          pht(
-            'This group has no available build steps.'));
+          pht('This group has no available build steps.'));
 
       $steps = idx($groups, $group->getGroupKey(), array());
 
@@ -76,28 +74,36 @@ final class HarbormasterStepAddController
         $list->addItem($item);
       }
 
-      $lists[] = $list;
+      $box = id(new PHUIObjectBoxView())
+        ->setHeaderText($group->getGroupName())
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->appendChild($list);
+
+      $boxes[] = $box;
     }
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb($plan_title, $cancel_uri)
-      ->addTextCrumb(pht('Add Build Step'));
+      ->addTextCrumb(pht('Add Build Step'))
+      ->setBorder(true);
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Add Build Step'))
-      ->appendChild($lists);
+    $title = array($plan_title, pht('Add Build Step'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => array(
-          $plan_title,
-          pht('Add Build Step'),
-        ),
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Add Build Step'))
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $boxes,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

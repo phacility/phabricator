@@ -155,20 +155,17 @@ final class PhabricatorPeopleQuery
     }
 
     if ($this->needBadges) {
-      $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($users, 'getPHID'))
-        ->withEdgeTypes(
-          array(
-            PhabricatorRecipientHasBadgeEdgeType::EDGECONST,
-          ));
-      $edge_query->execute();
+      $awards = id(new PhabricatorBadgesAwardQuery())
+        ->setViewer($this->getViewer())
+        ->withRecipientPHIDs(mpull($users, 'getPHID'))
+        ->execute();
+
+      $awards = mgroup($awards, 'getRecipientPHID');
 
       foreach ($users as $user) {
-        $phids = $edge_query->getDestinationPHIDs(
-          array(
-            $user->getPHID(),
-          ));
-        $user->attachBadgePHIDs($phids);
+        $user_awards = idx($awards, $user->getPHID(), array());
+        $badge_phids = mpull($user_awards, 'getBadgePHID');
+        $user->attachBadgePHIDs($badge_phids);
       }
     }
 

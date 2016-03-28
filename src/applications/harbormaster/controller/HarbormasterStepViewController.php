@@ -29,30 +29,33 @@ final class HarbormasterStepViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Plan %d', $plan_id), $plan_uri);
     $crumbs->addTextCrumb(pht('Step %d', $id));
+    $crumbs->setBorder(true);
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Build Step %d: %s', $id, $step->getName()));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Build Step %d: %s', $id, $step->getName()))
+      ->setHeaderIcon('fa-chevron-circle-right');
 
     $properties = $this->buildPropertyList($step, $field_list);
-    $actions = $this->buildActionList($step);
-    $properties->setActionList($actions);
-
-    $box->addPropertyList($properties);
+    $curtain = $this->buildCurtainView($step);
 
     $timeline = $this->buildTransactionTimeline(
       $step,
       new HarbormasterBuildStepTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $properties,
         $timeline,
-      ),
-      array(
-        'title' => pht('Step %d', $id),
       ));
+
+    return $this->newPage()
+      ->setTitle(pht('Step %d', $id))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function buildPropertyList(
@@ -61,8 +64,7 @@ final class HarbormasterStepViewController
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($step);
+      ->setUser($viewer);
 
     try {
       $implementation = $step->getStepImplementation();
@@ -92,8 +94,6 @@ final class HarbormasterStepViewController
       $viewer,
       $view);
 
-    $view->invokeWillRenderEvent();
-
     $description = $step->getDescription();
     if (strlen($description)) {
       $view->addSectionHeader(
@@ -103,24 +103,25 @@ final class HarbormasterStepViewController
         new PHUIRemarkupView($viewer, $description));
     }
 
-    return $view;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('PROPERTIES'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($view);
   }
 
 
-  private function buildActionList(HarbormasterBuildStep $step) {
+  private function buildCurtainView(HarbormasterBuildStep $step) {
     $viewer = $this->getViewer();
     $id = $step->getID();
 
-    $list = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($step);
+    $curtain = $this->newCurtainView($step);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $step,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Step'))
         ->setHref($this->getApplicationURI("step/edit/{$id}/"))
@@ -128,7 +129,7 @@ final class HarbormasterStepViewController
         ->setDisabled(!$can_edit)
         ->setIcon('fa-pencil'));
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Delete Step'))
         ->setHref($this->getApplicationURI("step/delete/{$id}/"))
@@ -136,7 +137,7 @@ final class HarbormasterStepViewController
         ->setDisabled(!$can_edit)
         ->setIcon('fa-times'));
 
-    return $list;
+    return $curtain;
   }
 
 

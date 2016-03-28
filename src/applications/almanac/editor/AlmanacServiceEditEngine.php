@@ -65,6 +65,10 @@ final class AlmanacServiceEditEngine
     return pht('Create Service');
   }
 
+  protected function getObjectName() {
+    return pht('Service');
+  }
+
   protected function getEditorURI() {
     return '/almanac/service/edit/';
   }

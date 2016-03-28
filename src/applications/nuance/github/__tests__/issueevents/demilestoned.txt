@@ -77,5 +77,6 @@
   "is.pull": false,
   "issue.number": 1,
   "id": 583218613,
-  "uri": "https://github.com/epriestley/poems/issues/1#event-583218613"
+  "uri": "https://github.com/epriestley/poems/issues/1#event-583218613",
+  "title.full": "GitHub epriestley/poems Issue #1 (Removed Milestone: b)"
 }

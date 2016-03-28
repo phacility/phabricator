@@ -7,7 +7,6 @@ final class HarbormasterUnitSummaryView extends AphrontView {
   private $limit;
   private $excuse;
   private $showViewAll;
-  private $background;
 
   public function setBuildable(HarbormasterBuildable $buildable) {
     $this->buildable = $buildable;
@@ -31,11 +30,6 @@ final class HarbormasterUnitSummaryView extends AphrontView {
 
   public function setShowViewAll($show_view_all) {
     $this->showViewAll = $show_view_all;
-    return $this;
-  }
-
-  public function setBackground($background) {
-    $this->background = $background;
     return $this;
   }
 
@@ -79,7 +73,8 @@ final class HarbormasterUnitSummaryView extends AphrontView {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($header);
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     $table = id(new HarbormasterUnitPropertyView())
       ->setUnitMessages($messages);
@@ -108,10 +103,6 @@ final class HarbormasterUnitSummaryView extends AphrontView {
     }
 
     $box->setTable($table);
-
-    if ($this->background) {
-      $box->setBackground($this->background);
-    }
 
     return $box;
   }

@@ -46,6 +46,10 @@ final class PhabricatorPasteEditEngine
     return pht('Create Paste');
   }
 
+  protected function getObjectName() {
+    return pht('Paste');
+  }
+
   protected function getCommentViewHeaderText($object) {
     return pht('Eat Paste');
   }

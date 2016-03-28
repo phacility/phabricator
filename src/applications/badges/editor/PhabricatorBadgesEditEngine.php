@@ -34,7 +34,7 @@ final class PhabricatorBadgesEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit %s', $object->getName());
+    return pht('Edit Badge: %s', $object->getName());
   }
 
   protected function getObjectEditShortText($object) {
@@ -43,6 +43,10 @@ final class PhabricatorBadgesEditEngine
 
   protected function getObjectCreateShortText() {
     return pht('Create Badge');
+  }
+
+  protected function getObjectName() {
+    return pht('Badge');
   }
 
   protected function getCommentViewHeaderText($object) {

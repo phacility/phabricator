@@ -192,7 +192,7 @@ JX.install('Workflow', {
         // Use more space if the dialog is large (at least roughly the size
         // of the viewport).
         var offset = Math.min(Math.max(20, (v.y - d.y) / 2), 100);
-        JX.$V((v.x - d.x) / 2, s.y + offset).setPos(this._root);
+        JX.$V(0, s.y + offset).setPos(this._root);
 
         try {
           JX.DOM.focus(JX.DOM.find(this._root, 'button', '__default__'));

@@ -56,6 +56,7 @@ abstract class PhortuneCartController
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Description'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($box);
   }
 

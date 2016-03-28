@@ -458,8 +458,7 @@ final class HarbormasterBuildEngine extends Phobject {
       ->getPHID();
 
     $daemon_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
+      PhabricatorDaemonContentSource::SOURCECONST);
 
     $editor = $object->getApplicationTransactionEditor()
       ->setActor($viewer)

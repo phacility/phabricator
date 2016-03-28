@@ -65,10 +65,7 @@ final class ReleephWorkRecordConduitAPIMethod
     $editor = id(new ReleephRequestTransactionalEditor())
       ->setActor($request->getUser())
       ->setContinueOnNoEffect(true)
-      ->setContentSource(
-        PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_CONDUIT,
-          array()));
+      ->setContentSource($request->newContentSource());
 
     $editor->applyTransactions($releeph_request, $xactions);
   }

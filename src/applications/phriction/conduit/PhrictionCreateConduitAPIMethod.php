@@ -55,7 +55,7 @@ final class PhrictionCreateConduitAPIMethod extends PhrictionConduitAPIMethod {
 
     $editor = id(new PhrictionTransactionEditor())
       ->setActor($request->getUser())
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setContinueOnNoEffect(true)
       ->setDescription($request->getValue('description'));
 

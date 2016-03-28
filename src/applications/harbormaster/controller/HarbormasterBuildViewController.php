@@ -22,30 +22,33 @@ final class HarbormasterBuildViewController
 
     $title = pht('Build %d', $id);
 
-    $header = id(new PHUIHeaderView())
+    $page_header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($build);
+      ->setPolicyObject($build)
+      ->setHeaderIcon('fa-cubes');
 
     if ($build->isRestarting()) {
-      $header->setStatus('fa-exclamation-triangle', 'red', pht('Restarting'));
+      $page_header->setStatus(
+        'fa-exclamation-triangle', 'red', pht('Restarting'));
     } else if ($build->isPausing()) {
-      $header->setStatus('fa-exclamation-triangle', 'red', pht('Pausing'));
+      $page_header->setStatus(
+        'fa-exclamation-triangle', 'red', pht('Pausing'));
     } else if ($build->isResuming()) {
-      $header->setStatus('fa-exclamation-triangle', 'red', pht('Resuming'));
+      $page_header->setStatus(
+        'fa-exclamation-triangle', 'red', pht('Resuming'));
     } else if ($build->isAborting()) {
-      $header->setStatus('fa-exclamation-triangle', 'red', pht('Aborting'));
+      $page_header->setStatus(
+        'fa-exclamation-triangle', 'red', pht('Aborting'));
     }
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header);
-
-    $actions = $this->buildActionList($build);
-    $this->buildPropertyLists($box, $build, $actions);
+    $curtain = $this->buildCurtainView($build);
+    $properties = $this->buildPropertyList($build);
 
     $crumbs = $this->buildApplicationCrumbs();
     $this->addBuildableCrumb($crumbs, $build->getBuildable());
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     if ($generation === null || $generation > $build->getBuildGeneration() ||
       $generation < 0) {
@@ -85,12 +88,14 @@ final class HarbormasterBuildViewController
     foreach ($build_targets as $build_target) {
       $header = id(new PHUIHeaderView())
         ->setHeader($build_target->getName())
-        ->setUser($viewer);
+        ->setUser($viewer)
+        ->setHeaderIcon('fa-bullseye');
 
       $target_box = id(new PHUIObjectBoxView())
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setHeader($header);
 
-      $properties = new PHUIPropertyListView();
+      $property_list = new PHUIPropertyListView();
 
       $target_artifacts = idx($artifacts, $build_target->getPHID(), array());
 
@@ -107,13 +112,12 @@ final class HarbormasterBuildViewController
 
       if ($links) {
         $links = phutil_implode_html(phutil_tag('br'), $links);
-        $properties->addProperty(
+        $property_list->addProperty(
           pht('External Link'),
           $links);
       }
 
       $status_view = new PHUIStatusListView();
-
       $item = new PHUIStatusItemView();
 
       $status = $build_target->getTargetStatus();
@@ -168,13 +172,13 @@ final class HarbormasterBuildViewController
         }
       }
 
-      $properties->addProperty(
+      $property_list->addProperty(
         pht('When'),
         phutil_implode_html(" \xC2\xB7 ", $when));
 
-      $properties->addProperty(pht('Status'), $status_view);
+      $property_list->addProperty(pht('Status'), $status_view);
 
-      $target_box->addPropertyList($properties, pht('Overview'));
+      $target_box->addPropertyList($property_list, pht('Overview'));
 
       $step = $build_target->getBuildStep();
 
@@ -182,9 +186,9 @@ final class HarbormasterBuildViewController
         $description = $step->getDescription();
         if ($description) {
           $description = new PHUIRemarkupView($viewer, $description);
-          $properties->addSectionHeader(
+          $property_list->addSectionHeader(
             pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
-          $properties->addTextContent($description);
+          $property_list->addTextContent($description);
         }
       } else {
         $target_box->setFormErrors(
@@ -196,35 +200,35 @@ final class HarbormasterBuildViewController
       }
 
       $details = $build_target->getDetails();
-      $properties = new PHUIPropertyListView();
+      $property_list = new PHUIPropertyListView();
       foreach ($details as $key => $value) {
-        $properties->addProperty($key, $value);
+        $property_list->addProperty($key, $value);
       }
-      $target_box->addPropertyList($properties, pht('Configuration'));
+      $target_box->addPropertyList($property_list, pht('Configuration'));
 
       $variables = $build_target->getVariables();
-      $properties = new PHUIPropertyListView();
-      $properties->addRawContent($this->buildProperties($variables));
-      $target_box->addPropertyList($properties, pht('Variables'));
+      $property_list = new PHUIPropertyListView();
+      $property_list->addRawContent($this->buildProperties($variables));
+      $target_box->addPropertyList($property_list, pht('Variables'));
 
       $artifacts_tab = $this->buildArtifacts($build_target, $target_artifacts);
-      $properties = new PHUIPropertyListView();
-      $properties->addRawContent($artifacts_tab);
-      $target_box->addPropertyList($properties, pht('Artifacts'));
+      $property_list = new PHUIPropertyListView();
+      $property_list->addRawContent($artifacts_tab);
+      $target_box->addPropertyList($property_list, pht('Artifacts'));
 
       $build_messages = idx($messages, $build_target->getPHID(), array());
-      $properties = new PHUIPropertyListView();
-      $properties->addRawContent($this->buildMessages($build_messages));
-      $target_box->addPropertyList($properties, pht('Messages'));
+      $property_list = new PHUIPropertyListView();
+      $property_list->addRawContent($this->buildMessages($build_messages));
+      $target_box->addPropertyList($property_list, pht('Messages'));
 
-      $properties = new PHUIPropertyListView();
-      $properties->addProperty(
+      $property_list = new PHUIPropertyListView();
+      $property_list->addProperty(
         pht('Build Target ID'),
         $build_target->getID());
-      $properties->addProperty(
+      $property_list->addProperty(
         pht('Build Target PHID'),
         $build_target->getPHID());
-      $target_box->addPropertyList($properties, pht('Metadata'));
+      $target_box->addPropertyList($property_list, pht('Metadata'));
 
       $targets[] = $target_box;
 
@@ -236,16 +240,20 @@ final class HarbormasterBuildViewController
       new HarbormasterBuildTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($page_header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $properties,
         $targets,
         $timeline,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function buildArtifacts(
@@ -342,6 +350,7 @@ final class HarbormasterBuildViewController
 
       $log_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setForm($log_view);
 
       if ($is_empty) {
@@ -366,7 +375,7 @@ final class HarbormasterBuildViewController
         'div',
         array(
           'id' => $hide_id,
-          'class' => 'harbormaster-empty-logs-are-hidden mlr mlt mll',
+          'class' => 'harbormaster-empty-logs-are-hidden',
         ),
         array(
           pht(
@@ -432,14 +441,11 @@ final class HarbormasterBuildViewController
       ));
   }
 
-  private function buildActionList(HarbormasterBuild $build) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  private function buildCurtainView(HarbormasterBuild $build) {
+    $viewer = $this->getViewer();
     $id = $build->getID();
 
-    $list = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($build);
+    $curtain = $this->newCurtainView($build);
 
     $can_restart =
       $build->canRestartBuild() &&
@@ -465,7 +471,7 @@ final class HarbormasterBuildViewController
         $viewer,
         HarbormasterBuildCommand::COMMAND_ABORT);
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Restart Build'))
         ->setIcon('fa-repeat')
@@ -474,7 +480,7 @@ final class HarbormasterBuildViewController
         ->setWorkflow(true));
 
     if ($build->canResumeBuild()) {
-      $list->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Resume Build'))
           ->setIcon('fa-play')
@@ -482,7 +488,7 @@ final class HarbormasterBuildViewController
           ->setDisabled(!$can_resume)
           ->setWorkflow(true));
     } else {
-      $list->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Pause Build'))
           ->setIcon('fa-pause')
@@ -491,7 +497,7 @@ final class HarbormasterBuildViewController
           ->setWorkflow(true));
     }
 
-    $list->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Abort Build'))
         ->setIcon('fa-exclamation-triangle')
@@ -499,21 +505,14 @@ final class HarbormasterBuildViewController
         ->setDisabled(!$can_abort)
         ->setWorkflow(true));
 
-    return $list;
+    return $curtain;
   }
 
-  private function buildPropertyLists(
-    PHUIObjectBoxView $box,
-    HarbormasterBuild $build,
-    PhabricatorActionListView $actions) {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  private function buildPropertyList(HarbormasterBuild $build) {
+    $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($build)
-      ->setActionList($actions);
-    $box->addPropertyList($properties);
+      ->setUser($viewer);
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
@@ -538,6 +537,12 @@ final class HarbormasterBuildViewController
     $properties->addProperty(
       pht('Status'),
       $this->getStatus($build));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('PROPERTIES'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($properties);
+
   }
 
   private function getStatus(HarbormasterBuild $build) {

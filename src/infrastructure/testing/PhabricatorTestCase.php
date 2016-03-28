@@ -229,5 +229,9 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
     }
   }
 
+  protected function newContentSource() {
+    return PhabricatorContentSource::newForSource(
+      PhabricatorUnitTestContentSource::SOURCECONST);
+  }
 
 }

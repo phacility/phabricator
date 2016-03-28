@@ -34,8 +34,7 @@ foreach ($rows as $row) {
     'null',
     $row['filePHID'],
     PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LEGACY,
-      array())->serialize(),
+      PhabricatorOldWorldContentSource::SOURCECONST)->serialize(),
     '[]',
     $row['dateCreated'],
     $row['dateCreated'],

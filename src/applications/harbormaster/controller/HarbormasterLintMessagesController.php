@@ -45,20 +45,27 @@ final class HarbormasterLintMessagesController
     $crumbs = $this->buildApplicationCrumbs();
     $this->addBuildableCrumb($crumbs, $buildable);
     $crumbs->addTextCrumb(pht('Lint'));
+    $crumbs->setBorder(true);
 
     $title = array(
       $buildable->getMonogram(),
       pht('Lint'),
     );
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $lint,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

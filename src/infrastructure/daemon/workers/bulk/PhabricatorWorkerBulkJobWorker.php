@@ -121,9 +121,7 @@ abstract class PhabricatorWorkerBulkJobWorker
       ->setTransactionType($type_status)
       ->setNewValue($status);
 
-    $daemon_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
+    $daemon_source = $this->newContentSource();
 
     $app_phid = id(new PhabricatorDaemonsApplication())->getPHID();
 

@@ -99,25 +99,35 @@ final class AlmanacBindingEditController
 
     $box = id(new PHUIObjectBoxView())
       ->setValidationException($validation_exception)
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Binding'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName(), $service_uri);
     if ($is_new) {
       $crumbs->addTextCrumb(pht('Create Binding'));
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Create Binding'))
+        ->setHeaderIcon('fa-plus-square');
     } else {
       $crumbs->addTextCrumb(pht('Edit Binding'));
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Create Binding'))
+        ->setHeaderIcon('fa-pencil');
     }
+    $crumbs->setBorder(true);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $box,
-      ));
-
+      ->appendChild($view);
   }
 
 }

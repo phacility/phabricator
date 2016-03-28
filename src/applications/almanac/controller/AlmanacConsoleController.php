@@ -61,18 +61,25 @@ final class AlmanacConsoleController extends AlmanacController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
+    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Console'))
       ->setObjectList($menu);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Almanac Console'))
+      ->setHeaderIcon('fa-server');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
+      ));
 
     return $this->newPage()
       ->setTitle(pht('Almanac Console'))
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $box,
-      ));
+      ->appendChild($view);
 
   }
 

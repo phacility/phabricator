@@ -112,5 +112,6 @@
   "is.pull": false,
   "issue.number": 1,
   "id": 583217900,
-  "uri": "https://github.com/epriestley/poems/issues/1#event-583217900"
+  "uri": "https://github.com/epriestley/poems/issues/1#event-583217900",
+  "title.full": "GitHub epriestley/poems Issue #1 (Assigned: epriestley)"
 }

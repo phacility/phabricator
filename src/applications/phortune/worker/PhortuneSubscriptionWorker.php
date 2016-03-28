@@ -96,8 +96,7 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
       ->setNewValue(true);
 
     $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_PHORTUNE,
-      array());
+      PhabricatorPhortuneContentSource::SOURCECONST);
 
     $acting_phid = id(new PhabricatorPhortuneApplication())->getPHID();
     $editor = id(new PhortuneCartEditor())

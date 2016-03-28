@@ -53,6 +53,10 @@ final class AlmanacNamespaceEditEngine
     return pht('Create Namespace');
   }
 
+  protected function getObjectName() {
+    return pht('Namespace');
+  }
+
   protected function getEditorURI() {
     return '/almanac/namespace/edit/';
   }

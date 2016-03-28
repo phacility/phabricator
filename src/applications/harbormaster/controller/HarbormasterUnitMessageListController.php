@@ -41,20 +41,27 @@ final class HarbormasterUnitMessageListController
     $crumbs = $this->buildApplicationCrumbs();
     $this->addBuildableCrumb($crumbs, $buildable);
     $crumbs->addTextCrumb(pht('Unit Tests'));
+    $crumbs->setBorder(true);
 
     $title = array(
       $buildable->getMonogram(),
       pht('Unit Tests'),
     );
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($buildable->getMonogram().' '.pht('Unit Tests'));
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $unit,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

@@ -91,10 +91,16 @@ final class PonderAnswerEditController extends PonderController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb("Q{$qid}", $answer_uri);
     $crumbs->addTextCrumb(pht('Edit Answer'));
+    $crumbs->setBorder(true);
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edit Answer'))
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Answer'))
+      ->setHeaderIcon('fa-pencil');
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Answer'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
@@ -102,15 +108,17 @@ final class PonderAnswerEditController extends PonderController {
       ->setControlID($answer_content_id)
       ->setPreviewURI($this->getApplicationURI('preview/'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
         $preview,
-      ),
-      array(
-        'title' => pht('Edit Answer'),
       ));
+
+    return $this->newPage()
+      ->setTitle(pht('Edit Answer'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
 
   }
 }

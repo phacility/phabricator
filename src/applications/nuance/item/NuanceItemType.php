@@ -119,8 +119,7 @@ abstract class NuanceItemType
 
     // TODO: Maybe preserve the actor's original content source?
     $source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
+      PhabricatorDaemonContentSource::SOURCECONST);
 
     $editor = id(new NuanceItemEditor())
       ->setActor($viewer)
@@ -131,7 +130,9 @@ abstract class NuanceItemType
       ->applyTransactions($item, array($xaction));
   }
 
-  protected function handleCommand(NuanceItem $item, $action) {
+  protected function handleCommand(
+    NuanceItem $item,
+    NuanceItemCommand $command) {
     return null;
   }
 

@@ -53,6 +53,10 @@ final class AlmanacNetworkEditEngine
     return pht('Create Network');
   }
 
+  protected function getObjectName() {
+    return pht('Network');
+  }
+
   protected function getEditorURI() {
     return '/almanac/network/edit/';
   }

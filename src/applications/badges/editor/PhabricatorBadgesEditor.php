@@ -20,6 +20,8 @@ final class PhabricatorBadgesEditor
     $types[] = PhabricatorBadgesTransaction::TYPE_ICON;
     $types[] = PhabricatorBadgesTransaction::TYPE_STATUS;
     $types[] = PhabricatorBadgesTransaction::TYPE_QUALITY;
+    $types[] = PhabricatorBadgesTransaction::TYPE_AWARD;
+    $types[] = PhabricatorBadgesTransaction::TYPE_REVOKE;
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
@@ -44,6 +46,11 @@ final class PhabricatorBadgesEditor
         return $object->getQuality();
       case PhabricatorBadgesTransaction::TYPE_STATUS:
         return $object->getStatus();
+      case PhabricatorBadgesTransaction::TYPE_AWARD:
+        $award_phids = mpull($object->getAwards(), 'getRecipientPHID');
+        return $award_phids;
+      case PhabricatorBadgesTransaction::TYPE_REVOKE:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -60,6 +67,8 @@ final class PhabricatorBadgesEditor
       case PhabricatorBadgesTransaction::TYPE_ICON:
       case PhabricatorBadgesTransaction::TYPE_STATUS:
       case PhabricatorBadgesTransaction::TYPE_QUALITY:
+      case PhabricatorBadgesTransaction::TYPE_AWARD:
+      case PhabricatorBadgesTransaction::TYPE_REVOKE:
         return $xaction->getNewValue();
     }
 
@@ -90,6 +99,9 @@ final class PhabricatorBadgesEditor
       case PhabricatorBadgesTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         return;
+      case PhabricatorBadgesTransaction::TYPE_AWARD:
+      case PhabricatorBadgesTransaction::TYPE_REVOKE:
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -107,6 +119,34 @@ final class PhabricatorBadgesEditor
       case PhabricatorBadgesTransaction::TYPE_ICON:
       case PhabricatorBadgesTransaction::TYPE_STATUS:
       case PhabricatorBadgesTransaction::TYPE_QUALITY:
+        return;
+      case PhabricatorBadgesTransaction::TYPE_REVOKE:
+        $revoked_recipient_phids = $xaction->getNewValue();
+        $awards = $object->getAwards();
+        $awards = mpull($awards, null, 'getRecipientPHID');
+
+        foreach ($revoked_recipient_phids as $phid) {
+          $awards[$phid]->delete();
+        }
+        $object->attachAwards($awards);
+        return;
+      case PhabricatorBadgesTransaction::TYPE_AWARD:
+        $recipient_phids = $xaction->getNewValue();
+        $awards = $object->getAwards();
+        $awards = mpull($awards, null, 'getRecipientPHID');
+
+        foreach ($recipient_phids as $phid) {
+          $award = idx($awards, $phid);
+          if (!$award) {
+            $award = PhabricatorBadgesAward::initializeNewBadgesAward(
+              $this->getActor(),
+              $object,
+              $phid);
+            $award->save();
+            $awards[] = $award;
+          }
+        }
+        $object->attachAwards($awards);
         return;
     }
 

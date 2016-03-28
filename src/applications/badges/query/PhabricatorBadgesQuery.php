@@ -50,22 +50,17 @@ final class PhabricatorBadgesQuery
   }
 
   protected function didFilterPage(array $badges) {
-
     if ($this->needRecipients) {
-      $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($badges, 'getPHID'))
-        ->withEdgeTypes(
-          array(
-            PhabricatorBadgeHasRecipientEdgeType::EDGECONST,
-          ));
-      $edge_query->execute();
+      $query = id(new PhabricatorBadgesAwardQuery())
+        ->setViewer($this->getViewer())
+        ->withBadgePHIDs(mpull($badges, 'getPHID'))
+        ->execute();
+
+      $awards = mgroup($query, 'getBadgePHID');
 
       foreach ($badges as $badge) {
-        $phids = $edge_query->getDestinationPHIDs(
-          array(
-            $badge->getPHID(),
-          ));
-        $badge->attachRecipientPHIDs($phids);
+        $badge_awards = idx($awards, $badge->getPHID(), array());
+        $badge->attachAwards($badge_awards);
       }
     }
 
