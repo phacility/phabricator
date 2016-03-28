@@ -191,6 +191,28 @@ final class PhabricatorBadgesTransaction
               $this->renderHandleLink($object_phid));
         }
         break;
+      case self::TYPE_AWARD:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s awarded %s to %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          new PhutilNumber(count($new)),
+          $handles);
+      case self::TYPE_REVOKE:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s revoked %s from %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          new PhutilNumber(count($new)),
+          $handles);
     }
 
     return parent::getTitleForFeed();
