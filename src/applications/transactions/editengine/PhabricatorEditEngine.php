@@ -191,6 +191,12 @@ abstract class PhabricatorEditEngine
   /**
    * @task text
    */
+  abstract protected function getObjectName();
+
+
+  /**
+   * @task text
+   */
   abstract protected function getObjectEditShortText($object);
 
 
@@ -988,8 +994,10 @@ abstract class PhabricatorEditEngine
 
     if ($this->getIsCreate()) {
       $header_text = $this->getFormHeaderText($object);
+      $header_icon = 'fa-plus-square';
     } else {
       $header_text = $this->getObjectEditTitleText($object);
+      $header_icon = 'fa-pencil';
     }
 
     $show_preview = !$request->isAjax();
@@ -1036,25 +1044,34 @@ abstract class PhabricatorEditEngine
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($header_text);
+      ->setHeader($header_text)
+      ->setHeaderIcon($header_icon);
 
     if ($action_button) {
       $header->addActionLink($action_button);
     }
 
     $crumbs = $this->buildCrumbs($object, $final = true);
+    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
-      ->setHeader($header)
+      ->setHeaderText($this->getObjectName())
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
+        $previews,
+      ));
 
     return $controller->newPage()
       ->setTitle($header_text)
       ->setCrumbs($crumbs)
-      ->appendChild($box)
-      ->appendChild($previews);
+      ->appendChild($view);
   }
 
   protected function newEditResponse(

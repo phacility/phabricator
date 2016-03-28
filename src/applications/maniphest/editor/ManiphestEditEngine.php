@@ -34,7 +34,7 @@ final class ManiphestEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit %s %s', $object->getMonogram(), $object->getTitle());
+    return pht('Edit Task: %s', $object->getTitle());
   }
 
   protected function getObjectEditShortText($object) {
@@ -43,6 +43,10 @@ final class ManiphestEditEngine
 
   protected function getObjectCreateShortText() {
     return pht('Create Task');
+  }
+
+  protected function getObjectName() {
+    return pht('Task');
   }
 
   protected function getEditorURI() {

@@ -86,7 +86,7 @@ final class PhabricatorEditEngineConfigurationDefaultsController
           ->addCancelButton($cancel_uri));
 
     $info = id(new PHUIInfoView())
-      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
       ->setErrors(
         array(
           pht('You are editing the default values for this form.'),
@@ -94,18 +94,30 @@ final class PhabricatorEditEngineConfigurationDefaultsController
 
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setInfoView($info)
+      ->setHeaderText(pht('Form'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Form %d', $config->getID()), $cancel_uri);
     $crumbs->addTextCrumb(pht('Edit Defaults'));
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Form Defaults'))
+      ->setHeaderIcon('fa-pencil');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $info,
+        $box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
+      ->appendChild($view);
   }
 
 }

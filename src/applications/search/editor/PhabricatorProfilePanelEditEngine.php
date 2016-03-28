@@ -108,6 +108,10 @@ final class PhabricatorProfilePanelEditEngine
     return pht('Edit Menu Item');
   }
 
+  protected function getObjectName() {
+    return pht('Menu Item');
+  }
+
   protected function getObjectCreateCancelURI($object) {
     return $this->getPanelEngine()->getConfigureURI();
   }

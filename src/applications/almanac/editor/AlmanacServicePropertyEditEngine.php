@@ -13,4 +13,8 @@ final class AlmanacServicePropertyEditEngine
     return $object->getURI();
   }
 
+  protected function getObjectName() {
+    return pht('Property');
+  }
+
 }

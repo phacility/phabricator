@@ -53,6 +53,10 @@ final class AlmanacDeviceEditEngine
     return pht('Create Device');
   }
 
+  protected function getObjectName() {
+    return pht('Device');
+  }
+
   protected function getEditorURI() {
     return '/almanac/device/edit/';
   }
