@@ -73,6 +73,18 @@ final class PhabricatorBadgesTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhabricatorBadgesBadge::STATUS_ACTIVE:
+            return pht(
+              '%s activated this badge.',
+              $this->renderHandleLink($author_phid));
+          case PhabricatorBadgesBadge::STATUS_ARCHIVED:
+            return pht(
+              '%s archived this badge.',
+              $this->renderHandleLink($author_phid));
+        }
+        break;
       case self::TYPE_ICON:
         if ($old === null) {
           return pht(
