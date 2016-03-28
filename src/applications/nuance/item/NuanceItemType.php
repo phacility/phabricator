@@ -144,4 +144,19 @@ abstract class NuanceItemType
     return null;
   }
 
+  final protected function newContentSource(
+    NuanceItem $item,
+    $agent_phid) {
+    return PhabricatorContentSource::newForSource(
+      NuanceContentSource::SOURCECONST,
+      array(
+        'itemPHID' => $item->getPHID(),
+        'agentPHID' => $agent_phid,
+      ));
+  }
+
+  protected function getActingAsPHID(NuanceItem $item) {
+    return id(new PhabricatorNuanceApplication())->getPHID();
+  }
+
 }

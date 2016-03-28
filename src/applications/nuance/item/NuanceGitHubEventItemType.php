@@ -297,7 +297,7 @@ final class NuanceGitHubEventItemType
           $xobj_phid));
     }
 
-    $nuance_phid = id(new PhabricatorNuanceApplication())->getPHID();
+    $acting_as_phid = $this->getActingAsPHID($item);
 
     $xactions = array();
 
@@ -307,7 +307,7 @@ final class NuanceGitHubEventItemType
       ->executeOne();
     if (!$task) {
       $task = ManiphestTask::initializeNewTask($viewer)
-        ->setAuthorPHID($nuance_phid)
+        ->setAuthorPHID($acting_as_phid)
         ->setBridgedObjectPHID($xobj_phid);
 
       $title = $xobj->getProperty('task.title');
@@ -344,16 +344,12 @@ final class NuanceGitHubEventItemType
             ->setContent($comment));
     }
 
-    // TODO: Preserve the item's original source.
-    $source = PhabricatorContentSource::newForSource(
-      PhabricatorDaemonContentSource::SOURCECONST);
-
-    // TODO: This should really be the external source.
-    $acting_phid = $nuance_phid;
+    $agent_phid = $command->getAuthorPHID();
+    $source = $this->newContentSource($item, $agent_phid);
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setActingAsPHID($acting_phid)
+      ->setActingAsPHID($acting_as_phid)
       ->setContentSource($source)
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
@@ -366,5 +362,10 @@ final class NuanceGitHubEventItemType
     );
   }
 
+  protected function getActingAsPHID(NuanceItem $item) {
+    // TODO: This should be an external account PHID representing the original
+    // GitHub user.
+    return parent::getActingAsPHID($item);
+  }
 
 }
