@@ -236,6 +236,11 @@ final class NuanceGitHubRawEvent extends Phobject {
       $title);
   }
 
+  public function getActorGitHubUserID() {
+    $raw = $this->raw;
+    return (int)idxv($raw, array('actor', 'id'));
+  }
+
   private function getTargetObjectName() {
     if ($this->isPullRequestEvent()) {
       $number = $this->getRawIssueNumber();

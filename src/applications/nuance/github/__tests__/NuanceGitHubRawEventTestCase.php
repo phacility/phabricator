@@ -52,6 +52,7 @@ final class NuanceGitHubRawEventTestCase
       'uri' => $event->getURI(),
       'title.full' => $event->getEventFullTitle(),
       'comment' => $event->getComment(),
+      'actor.id' => $event->getActorGitHubUserID(),
     );
 
     // Only verify the keys which are actually present in the test. This
