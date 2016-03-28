@@ -10,8 +10,6 @@ final class PhabricatorPHIDConstants extends Phobject {
 
   const PHID_TYPE_XCMT    = 'XCMT';
 
-  const PHID_TYPE_XOBJ    = 'XOBJ';
-
   const PHID_TYPE_VOID    = 'VOID';
   const PHID_VOID         = 'PHID-VOID-00000000000000000000';
 
