@@ -275,6 +275,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ->setRenderURI('/differential/changeset/')
       ->setDiff($diff)
       ->setTitle(pht('Standalone View'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setParser($parser);
 
     if ($revision_id) {
@@ -296,16 +297,20 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $crumbs->addTextCrumb($changeset->getDisplayFilename());
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $detail,
-      ),
-      array(
-        'title' => pht('Changeset View'),
-        'device' => false,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Changeset View'))
+      ->setHeaderIcon('fa-gear');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($detail);
+
+    return $this->newPage()
+      ->setTitle(pht('Changeset View'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildRawFileResponse(
