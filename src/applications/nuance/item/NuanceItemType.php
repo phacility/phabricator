@@ -44,6 +44,10 @@ abstract class NuanceItemType
     return array();
   }
 
+  public function getItemCurtainPanels(NuanceItem $item) {
+    return array();
+  }
+
   abstract public function getItemTypeDisplayName();
   abstract public function getItemDisplayName(NuanceItem $item);
 
@@ -80,6 +84,10 @@ abstract class NuanceItemType
 
     return id(new PhabricatorActionView())
       ->setHref($action_uri);
+  }
+
+  final protected function newCurtainPanel(NuanceItem $item) {
+    return id(new PHUICurtainPanelView());
   }
 
   final public function buildActionResponse(NuanceItem $item, $action) {
@@ -134,6 +142,21 @@ abstract class NuanceItemType
     NuanceItem $item,
     NuanceItemCommand $command) {
     return null;
+  }
+
+  final protected function newContentSource(
+    NuanceItem $item,
+    $agent_phid) {
+    return PhabricatorContentSource::newForSource(
+      NuanceContentSource::SOURCECONST,
+      array(
+        'itemPHID' => $item->getPHID(),
+        'agentPHID' => $agent_phid,
+      ));
+  }
+
+  protected function getActingAsPHID(NuanceItem $item) {
+    return id(new PhabricatorNuanceApplication())->getPHID();
   }
 
 }

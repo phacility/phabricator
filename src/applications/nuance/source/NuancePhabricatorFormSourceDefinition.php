@@ -38,12 +38,7 @@ final class NuancePhabricatorFormSourceDefinition
 
       $content_source = PhabricatorContentSource::newFromRequest($request);
 
-      $requestor = NuanceRequestor::newFromPhabricatorUser(
-        $viewer,
-        $content_source);
-
       $item = $this->newItemFromProperties(
-        $requestor,
         $properties,
         $content_source);
 

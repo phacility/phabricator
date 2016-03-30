@@ -259,18 +259,15 @@ final class HeraldRuleController extends HeraldController {
   }
 
   private function saveRule(HeraldAdapter $adapter, $rule, $request) {
-    $rule->setName($request->getStr('name'));
+    $new_name = $request->getStr('name');
     $match_all = ($request->getStr('must_match') == 'all');
-    $rule->setMustMatchAll((int)$match_all);
 
     $repetition_policy_param = $request->getStr('repetition_policy');
-    $rule->setRepetitionPolicy(
-      HeraldRepetitionPolicyConfig::toInt($repetition_policy_param));
 
     $e_name = true;
     $errors = array();
 
-    if (!strlen($rule->getName())) {
+    if (!strlen($new_name)) {
       $e_name = pht('Required');
       $errors[] = pht('Rule must have a name.');
     }
@@ -343,18 +340,40 @@ final class HeraldRuleController extends HeraldController {
       $actions[] = $obj;
     }
 
+    if (!$errors) {
+      $new_state = id(new HeraldRuleSerializer())->serializeRuleComponents(
+        $match_all,
+        $conditions,
+        $actions,
+        $repetition_policy_param);
+
+      $xactions = array();
+      $xactions[] = id(new HeraldRuleTransaction())
+        ->setTransactionType(HeraldRuleTransaction::TYPE_EDIT)
+        ->setNewValue($new_state);
+      $xactions[] = id(new HeraldRuleTransaction())
+        ->setTransactionType(HeraldRuleTransaction::TYPE_NAME)
+        ->setNewValue($new_name);
+
+      try {
+        id(new HeraldRuleEditor())
+          ->setActor($this->getViewer())
+          ->setContinueOnNoEffect(true)
+          ->setContentSourceFromRequest($request)
+          ->applyTransactions($rule, $xactions);
+        return array(null, null);
+      } catch (Exception $ex) {
+        $errors[] = $ex->getMessage();
+      }
+    }
+
+    // mutate current rule, so it would be sent to the client in the right state
+    $rule->setMustMatchAll((int)$match_all);
+    $rule->setName($new_name);
+    $rule->setRepetitionPolicy(
+      HeraldRepetitionPolicyConfig::toInt($repetition_policy_param));
     $rule->attachConditions($conditions);
     $rule->attachActions($actions);
-
-    if (!$errors) {
-      $edit_action = $rule->getID() ? 'edit' : 'create';
-
-      $rule->openTransaction();
-        $rule->save();
-        $rule->saveConditions($conditions);
-        $rule->saveActions($actions);
-      $rule->saveTransaction();
-    }
 
     return array($e_name, $errors);
   }

@@ -113,5 +113,6 @@
   "issue.number": 1,
   "id": 583218511,
   "uri": "https://github.com/epriestley/poems/issues/1#event-583218511",
-  "title.full": "GitHub epriestley/poems Issue #1 (Unassigned: epriestley)"
+  "title.full": "GitHub epriestley/poems Issue #1 (Unassigned: epriestley)",
+  "actor.id": 102631
 }

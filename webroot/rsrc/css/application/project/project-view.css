@@ -91,3 +91,7 @@
 .profile-no-badges {
   padding: 24px 0;
 }
+
+.project-view-home .phabricator-remarkup .remarkup-code-block pre {
+  white-space: pre-wrap;
+}

@@ -188,7 +188,11 @@ final class PhabricatorPeopleProfileViewController
         ->withPHIDs($badge_phids)
         ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
         ->execute();
+    } else {
+      $badges = array();
+    }
 
+    if (count($badges)) {
       $flex = new PHUIBadgeBoxView();
       foreach ($badges as $badge) {
         $item = id(new PHUIBadgeView())
@@ -198,7 +202,6 @@ final class PhabricatorPeopleProfileViewController
           ->setQuality($badge->getQuality());
         $flex->addItem($item);
       }
-
     } else {
       $error = id(new PHUIBoxView())
         ->addClass('mlb')

@@ -73,6 +73,18 @@ final class PhabricatorBadgesTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhabricatorBadgesBadge::STATUS_ACTIVE:
+            return pht(
+              '%s activated this badge.',
+              $this->renderHandleLink($author_phid));
+          case PhabricatorBadgesBadge::STATUS_ARCHIVED:
+            return pht(
+              '%s archived this badge.',
+              $this->renderHandleLink($author_phid));
+        }
+        break;
       case self::TYPE_ICON:
         if ($old === null) {
           return pht(
@@ -191,6 +203,28 @@ final class PhabricatorBadgesTransaction
               $this->renderHandleLink($object_phid));
         }
         break;
+      case self::TYPE_AWARD:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s awarded %s to %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          new PhutilNumber(count($new)),
+          $handles);
+      case self::TYPE_REVOKE:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s revoked %s from %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          new PhutilNumber(count($new)),
+          $handles);
     }
 
     return parent::getTitleForFeed();

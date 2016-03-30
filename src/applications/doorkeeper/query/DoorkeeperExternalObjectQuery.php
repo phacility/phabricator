@@ -16,40 +16,32 @@ final class DoorkeeperExternalObjectQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new DoorkeeperExternalObject();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function newResultObject() {
+    return new DoorkeeperExternalObject();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    if ($this->phids) {
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->objectKeys) {
+    if ($this->objectKeys !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'objectKey IN (%Ls)',
         $this->objectKeys);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {
