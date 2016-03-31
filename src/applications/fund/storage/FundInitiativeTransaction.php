@@ -27,7 +27,7 @@ final class FundInitiativeTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    return null;
+    return new FundInitiativeTransactionComment();
   }
 
   public function getRequiredHandlePHIDs() {

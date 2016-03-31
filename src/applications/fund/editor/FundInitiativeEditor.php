@@ -23,6 +23,7 @@ final class FundInitiativeEditor
     $types[] = FundInitiativeTransaction::TYPE_MERCHANT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;
   }
