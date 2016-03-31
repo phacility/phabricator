@@ -70,7 +70,7 @@ final class PhabricatorBadgesViewController
           $timeline,
           $add_comment,
         ))
-      ->addPropertySection(pht('BADGE DETAILS'), $details);
+      ->addPropertySection(pht('DESCRIPTION'), $details);
 
     return $this->newPage()
       ->setTitle($title)
@@ -86,26 +86,8 @@ final class PhabricatorBadgesViewController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    $quality_name = PhabricatorBadgesQuality::getQualityName(
-      $badge->getQuality());
-
-    $view->addProperty(
-      pht('Quality'),
-      $quality_name);
-
-    $view->addProperty(
-      pht('Icon'),
-      id(new PhabricatorBadgesIconSet())
-        ->getIconLabel($badge->getIcon()));
-
-    $view->addProperty(
-      pht('Flavor'),
-      $badge->getFlavor());
-
     $description = $badge->getDescription();
     if (strlen($description)) {
-      $view->addSectionHeader(
-        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent(
         new PHUIRemarkupView($viewer, $description));
     }

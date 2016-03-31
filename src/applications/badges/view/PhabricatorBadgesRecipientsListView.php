@@ -27,7 +27,8 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $list = id(new PHUIObjectItemListView())
-      ->setNoDataString(pht('This badge does not have any recipients.'));
+      ->setNoDataString(pht('This badge does not have any recipients.'))
+      ->setFlush(true);
 
     foreach ($handles as $handle) {
       $remove_uri = '/badges/recipients/'.
@@ -51,7 +52,8 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recipients'))
+      ->setHeaderText(pht('RECIPIENTS'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
     return $box;
