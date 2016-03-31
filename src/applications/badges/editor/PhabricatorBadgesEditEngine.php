@@ -89,7 +89,7 @@ final class PhabricatorBadgesEditEngine
         ->setLabel(pht('Quality'))
         ->setValue($object->getQuality())
         ->setTransactionType(PhabricatorBadgesTransaction::TYPE_QUALITY)
-        ->setOptions($object->getQualityNameMap()),
+        ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))

@@ -111,9 +111,8 @@ final class PhabricatorBadgesTransaction
             $this->renderHandleLink($author_phid),
             $new);
         } else {
-          $qual_map = PhabricatorBadgesBadge::getQualityNameMap();
-          $qual_new = idx($qual_map, $new, $new);
-          $qual_old = idx($qual_map, $old, $old);
+          $qual_new = PhabricatorBadgesQuality::getQualityName($new);
+          $qual_old = PhabricatorBadgesQuality::getQualityName($old);
           return pht(
             '%s updated the quality for this badge from "%s" to "%s".',
             $this->renderHandleLink($author_phid),

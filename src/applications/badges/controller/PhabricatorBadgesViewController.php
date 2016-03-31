@@ -86,11 +86,12 @@ final class PhabricatorBadgesViewController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    $quality = idx($badge->getQualityNameMap(), $badge->getQuality());
+    $quality_name = PhabricatorBadgesQuality::getQualityName(
+      $badge->getQuality());
 
     $view->addProperty(
       pht('Quality'),
-      $quality);
+      $quality_name);
 
     $view->addProperty(
       pht('Icon'),
