@@ -236,7 +236,6 @@ final class PhabricatorAuthLoginController
     $content) {
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setBorder(true);
 
     if ($this->getRequest()->getUser()->isLoggedIn()) {
       $crumbs->addTextCrumb(pht('Link Account'), $provider->getSettingsURI());
@@ -245,15 +244,12 @@ final class PhabricatorAuthLoginController
     }
 
     $crumbs->addTextCrumb($provider->getProviderName());
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-      ),
-      array(
-        'title' => pht('Login'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Login'))
+      ->setCrumbs($crumbs)
+      ->appendChild($content);
   }
 
   public function buildProviderErrorResponse(

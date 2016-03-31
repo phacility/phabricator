@@ -176,13 +176,31 @@ final class PhabricatorAuthEditController
         $button = pht('Add Provider');
       }
       $crumb = pht('Add Provider');
-      $title = pht('Add Authentication Provider');
+      $title = pht('Add Auth Provider');
+      $header_icon = 'fa-plus-square';
       $cancel_uri = $this->getApplicationURI('/config/new/');
     } else {
       $button = pht('Save');
       $crumb = pht('Edit Provider');
-      $title = pht('Edit Authentication Provider');
+      $title = pht('Edit Auth Provider');
+      $header_icon = 'fa-pencil';
       $cancel_uri = $this->getApplicationURI();
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('%s: %s', $title, $provider->getProviderName()))
+      ->setHeaderIcon($header_icon);
+
+    if ($config->getIsEnabled()) {
+      $status_name = pht('Enabled');
+      $status_color = 'green';
+      $status_icon = 'fa-check';
+      $header->setStatus($status_icon, $status_color, $status_name);
+    } else if (!$is_new) {
+      $status_name = pht('Disabled');
+      $status_color = 'indigo';
+      $status_icon = 'fa-ban';
+      $header->setStatus($status_icon, $status_color, $status_name);
     }
 
     $config_name = 'auth.email-domains';
@@ -253,32 +271,8 @@ final class PhabricatorAuthEditController
         'Phabricator will automatically login with this provider if it is '.
         'the only available provider.'));
 
-    $status_tag = id(new PHUITagView())
-      ->setType(PHUITagView::TYPE_STATE);
-    if ($is_new) {
-      $status_tag
-        ->setName(pht('New Provider'))
-        ->setBackgroundColor('blue');
-    } else if ($config->getIsEnabled()) {
-      $status_tag
-        ->setName(pht('Enabled'))
-        ->setBackgroundColor('green');
-    } else {
-      $status_tag
-        ->setName(pht('Disabled'))
-        ->setBackgroundColor('red');
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Provider'))
-          ->setValue($provider->getProviderName()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Status'))
-          ->setValue($status_tag))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->setLabel(pht('Allow'))
@@ -348,6 +342,7 @@ final class PhabricatorAuthEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($crumb);
+    $crumbs->setBorder(true);
 
     $timeline = null;
     if (!$is_new) {
@@ -358,23 +353,28 @@ final class PhabricatorAuthEditController
       foreach ($xactions as $xaction) {
         $xaction->setProvider($provider);
       }
+      $timeline->setShouldTerminate(true);
     }
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Provider'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
         $footer,
         $timeline,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

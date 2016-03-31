@@ -80,21 +80,32 @@ final class PhabricatorAuthNewController
           ->setValue(pht('Continue')));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Add Authentication Provider'))
+      ->setHeaderText(pht('Provider'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Add Provider'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $title = pht('Add Auth Provider');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
-      ),
-      array(
-        'title' => pht('Add Authentication Provider'),
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }
