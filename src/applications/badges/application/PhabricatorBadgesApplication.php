@@ -39,6 +39,8 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
       '/badges/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorBadgesListController',
+        'award/(?:(?P<id>\d+)/)?'
+          => 'PhabricatorBadgesAwardController',
         'create/'
           => 'PhabricatorBadgesEditController',
         'comment/(?P<id>[1-9]\d*)/'

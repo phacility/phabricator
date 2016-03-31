@@ -1865,6 +1865,7 @@ phutil_register_library_map(array(
     'PhabricatorBadgesApplication' => 'applications/badges/application/PhabricatorBadgesApplication.php',
     'PhabricatorBadgesArchiveController' => 'applications/badges/controller/PhabricatorBadgesArchiveController.php',
     'PhabricatorBadgesAward' => 'applications/badges/storage/PhabricatorBadgesAward.php',
+    'PhabricatorBadgesAwardController' => 'applications/badges/controller/PhabricatorBadgesAwardController.php',
     'PhabricatorBadgesAwardQuery' => 'applications/badges/query/PhabricatorBadgesAwardQuery.php',
     'PhabricatorBadgesBadge' => 'applications/badges/storage/PhabricatorBadgesBadge.php',
     'PhabricatorBadgesCommentController' => 'applications/badges/controller/PhabricatorBadgesCommentController.php',
@@ -6223,6 +6224,7 @@ phutil_register_library_map(array(
       'PhabricatorDestructibleInterface',
       'PhabricatorPolicyInterface',
     ),
+    'PhabricatorBadgesAwardController' => 'PhabricatorBadgesController',
     'PhabricatorBadgesAwardQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorBadgesBadge' => array(
       'PhabricatorBadgesDAO',
