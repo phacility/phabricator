@@ -105,4 +105,36 @@ final class PhabricatorBadgesQuery
     return 'PhabricatorBadgesApplication';
   }
 
+  public function getBuiltinOrders() {
+    return array(
+      'quality' => array(
+        'vector' => array('quality', 'id'),
+        'name' => pht('Rarity (Rarest First)'),
+      ),
+      'shoddiness' => array(
+        'vector' => array('-quality', '-id'),
+        'name' => pht('Rarity (Most Common First)'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'quality' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'quality',
+        'reverse' => true,
+        'type' => 'int',
+      ),
+    ) + parent::getOrderableColumns();
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $badge = $this->loadCursorObject($cursor);
+    return array(
+      'quality' => $badge->getQuality(),
+      'id' => $badge->getID(),
+    );
+  }
+
 }
