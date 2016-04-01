@@ -8,7 +8,6 @@ final class PhabricatorCountdownEditController
     $id = $request->getURIData('id');
 
     if ($id) {
-      $page_title = pht('Edit Countdown');
       $countdown = id(new PhabricatorCountdownQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
@@ -28,8 +27,9 @@ final class PhabricatorCountdownEditController
         $countdown->getPHID(),
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
+      $title = pht('Edit Countdown: %s', $countdown->getTitle());
     } else {
-      $page_title = pht('Create Countdown');
+      $title = pht('Create Countdown');
       $countdown = PhabricatorCountdown::initializeNewCountdown($viewer);
       $date_value = AphrontFormDateControlValue::newFromEpoch(
         $viewer, PhabricatorTime::getNow());
@@ -116,6 +116,7 @@ final class PhabricatorCountdownEditController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     $cancel_uri = '/countdown/';
     if ($countdown->getID()) {
@@ -123,9 +124,11 @@ final class PhabricatorCountdownEditController
       $crumbs->addTextCrumb('C'.$countdown->getID(), $cancel_uri);
       $crumbs->addTextCrumb(pht('Edit'));
       $submit_label = pht('Save Changes');
+      $header_icon = 'fa-pencil';
     } else {
       $crumbs->addTextCrumb(pht('Create Countdown'));
       $submit_label = pht('Create Countdown');
+      $header_icon = 'fa-plus-square';
     }
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -180,16 +183,25 @@ final class PhabricatorCountdownEditController
           ->setValue($submit_label));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($page_title)
+      ->setHeaderText(pht('Countdown'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
+
     return $this->newPage()
-      ->setTitle($page_title)
+      ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $form_box,
+          $view,
         ));
   }
 

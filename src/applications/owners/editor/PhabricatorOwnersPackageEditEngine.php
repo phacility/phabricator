@@ -35,7 +35,7 @@ final class PhabricatorOwnersPackageEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit Package %s', $object->getName());
+    return pht('Edit Package: %s', $object->getName());
   }
 
   protected function getObjectEditShortText($object) {
@@ -44,6 +44,10 @@ final class PhabricatorOwnersPackageEditEngine
 
   protected function getObjectCreateShortText() {
     return pht('Create Package');
+  }
+
+  protected function getObjectName() {
+    return pht('Package');
   }
 
   protected function getObjectViewURI($object) {

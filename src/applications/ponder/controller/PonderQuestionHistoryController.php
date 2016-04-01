@@ -29,15 +29,20 @@ final class PonderQuestionHistoryController extends PonderController {
     $crumbs->setBorder(true);
     $crumbs->addTextCrumb("Q{$qid}", "/Q{$qid}");
     $crumbs->addTextCrumb(pht('History'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $timeline,
-      ),
-      array(
-        'title' => pht('Question History'),
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($question->getTitle())
+      ->setHeaderIcon('fa-history');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($timeline);
+
+    return $this->newPage()
+      ->setTitle(pht('Question History'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

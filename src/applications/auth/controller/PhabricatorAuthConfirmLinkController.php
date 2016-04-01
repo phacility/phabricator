@@ -66,15 +66,12 @@ final class PhabricatorAuthConfirmLinkController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Confirm Link'), $panel_uri);
     $crumbs->addTextCrumb($provider->getProviderName());
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $dialog,
-      ),
-      array(
-        'title' => pht('Confirm External Account Link'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Confirm External Account Link'))
+      ->setCrumbs($crumbs)
+      ->appendChild($dialog);
   }
 
 

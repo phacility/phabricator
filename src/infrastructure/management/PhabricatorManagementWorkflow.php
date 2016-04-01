@@ -26,4 +26,9 @@ abstract class PhabricatorManagementWorkflow extends PhutilArgumentWorkflow {
     return $epoch;
   }
 
+  protected function newContentSource() {
+    return PhabricatorContentSource::newForSource(
+      PhabricatorConsoleContentSource::SOURCECONST);
+  }
+
 }

@@ -18,11 +18,7 @@ abstract class PhabricatorApplicationTransactionReplyHandler
   }
 
   private function newEditor(PhabricatorMetaMTAReceivedMail $mail) {
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_EMAIL,
-      array(
-        'id' => $mail->getID(),
-      ));
+    $content_source = $mail->newContentSource();
 
     $editor = $this->getMailReceiver()
       ->getApplicationTransactionEditor()

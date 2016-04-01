@@ -74,6 +74,10 @@ final class NuanceSourceEditEngine
     return pht('Create Source');
   }
 
+  protected function getObjectName() {
+    return pht('Source');
+  }
+
   protected function getEditorURI() {
     return '/nuance/source/edit/';
   }

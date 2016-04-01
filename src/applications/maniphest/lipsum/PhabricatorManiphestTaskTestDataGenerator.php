@@ -15,9 +15,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
       ->setSubPriority($this->generateTaskSubPriority())
       ->setTitle($this->generateTitle());
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_UNKNOWN,
-      array());
+    $content_source = $this->getLipsumContentSource();
 
     $template = new ManiphestTransaction();
     // Accumulate Transactions

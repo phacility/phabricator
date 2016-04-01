@@ -30,9 +30,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $commit->attachRepository($repository);
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
+    $content_source = $this->newContentSource();
 
     $committer_phid = $data->getCommitDetail('committerPHID');
     $author_phid = $data->getCommitDetail('authorPHID');

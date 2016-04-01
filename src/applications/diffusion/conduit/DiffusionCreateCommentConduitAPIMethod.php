@@ -95,7 +95,7 @@ final class DiffusionCreateCommentConduitAPIMethod
 
     id(new PhabricatorAuditEditor())
       ->setActor($request->getUser())
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setDisableEmail($request->getValue('silent'))
       ->setContinueOnMissingFields(true)
       ->applyTransactions($commit, $xactions);

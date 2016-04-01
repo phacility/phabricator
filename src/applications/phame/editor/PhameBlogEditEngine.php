@@ -46,6 +46,10 @@ final class PhameBlogEditEngine
     return pht('Create Blog');
   }
 
+  protected function getObjectName() {
+    return pht('Blog');
+  }
+
   protected function getObjectCreateCancelURI($object) {
     return $this->getApplication()->getApplicationURI('blog/');
   }

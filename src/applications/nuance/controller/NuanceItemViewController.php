@@ -76,6 +76,10 @@ final class NuanceItemViewController extends NuanceController {
       $curtain->addAction($action);
     }
 
+    foreach ($impl->getItemCurtainPanels($item) as $panel) {
+      $curtain->addPanel($panel);
+    }
+
     return $curtain;
   }
 

@@ -75,6 +75,10 @@ final class DrydockBlueprintEditEngine
     return pht('Create Blueprint');
   }
 
+  protected function getObjectName() {
+    return pht('Blueprint');
+  }
+
   protected function getEditorURI() {
     return '/drydock/blueprint/edit/';
   }

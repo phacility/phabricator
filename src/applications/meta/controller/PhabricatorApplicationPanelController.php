@@ -59,9 +59,14 @@ final class PhabricatorApplicationPanelController
 
   public function buildPanelPage(
     PhabricatorApplicationConfigurationPanel $panel,
-    $content,
-    array $options) {
-    return $this->buildApplicationPage($content, $options);
+    $title,
+    $crumbs,
+    $content) {
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($content);
   }
 
 }

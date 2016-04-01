@@ -189,16 +189,17 @@ final class PhabricatorAuthStartController
     $crumbs->addTextCrumb(pht('Login'));
     $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $header,
-        $invite_message,
-        $out,
-      ),
-      array(
-        'title' => pht('Login to Phabricator'),
-      ));
+    $title = pht('Login to Phabricator');
+    $view = array(
+      $header,
+      $invite_message,
+      $out,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 

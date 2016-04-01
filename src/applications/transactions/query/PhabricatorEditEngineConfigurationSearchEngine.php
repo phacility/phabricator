@@ -116,24 +116,27 @@ final class PhabricatorEditEngineConfigurationSearchEngine
 
       $id = $config->getID();
       if ($id) {
-        $item->setObjectName(pht('Form %d', $id));
+        $item->addIcon('fa-file-text-o bluegrey', pht('Form %d', $id));
         $key = $id;
       } else {
-        $item->setObjectName(pht('Builtin'));
+        $item->addIcon('fa-file-text bluegrey', pht('Builtin'));
         $key = $config->getBuiltinKey();
       }
       $item->setHref("/transactions/editengine/{$engine_key}/view/{$key}/");
 
       if ($config->getIsDefault()) {
-        $item->addIcon('fa-plus', pht('Default'));
+        $item->addAttribute(pht('Default Create Form'));
       }
 
       if ($config->getIsEdit()) {
-        $item->addIcon('fa-pencil', pht('Edit Form'));
+        $item->addAttribute(pht('Edit Form'));
       }
 
       if ($config->getIsDisabled()) {
-        $item->addIcon('fa-ban', pht('Disabled'));
+        $item->setDisabled(true);
+        $item->setStatusIcon('fa-ban grey', pht('Disabled'));
+      } else {
+        $item->setStatusIcon('fa-file-text-o green', pht('Enabled'));
       }
 
       $list->addItem($item);

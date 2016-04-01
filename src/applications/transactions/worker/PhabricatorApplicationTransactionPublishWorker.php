@@ -62,9 +62,7 @@ final class PhabricatorApplicationTransactionPublishWorker
     PhabricatorApplicationTransactionInterface $object) {
     $data = $this->getTaskData();
 
-    $daemon_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
+    $daemon_source = $this->newContentSource();
 
     $viewer = PhabricatorUser::getOmnipotentUser();
     $editor = $object->getApplicationTransactionEditor()

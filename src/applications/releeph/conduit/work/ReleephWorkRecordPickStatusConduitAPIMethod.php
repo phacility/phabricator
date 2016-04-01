@@ -64,10 +64,7 @@ final class ReleephWorkRecordPickStatusConduitAPIMethod
     $editor = id(new ReleephRequestTransactionalEditor())
       ->setActor($request->getUser())
       ->setContinueOnNoEffect(true)
-      ->setContentSource(
-        PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_CONDUIT,
-          array()));
+      ->setContentSource($request->newContentSource());
 
     $xactions = array();
 

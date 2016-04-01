@@ -37,9 +37,9 @@ final class PhabricatorApplicationTransactionCommentRawController
     $addendum = null;
     if ($request->getExists('email')) {
       $content_source = $xaction->getContentSource();
-      $source_email = PhabricatorContentSource::SOURCE_EMAIL;
+      $source_email = PhabricatorEmailContentSource::SOURCECONST;
       if ($content_source->getSource() == $source_email) {
-        $source_id = $content_source->getParam('id');
+        $source_id = $content_source->getContentSourceParameter('id');
         if ($source_id) {
           $message = id(new PhabricatorMetaMTAReceivedMail())->loadOneWhere(
             'id = %d',

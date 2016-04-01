@@ -53,6 +53,10 @@ final class NuanceQueueEditEngine
     return pht('Create Queue');
   }
 
+  protected function getObjectName() {
+    return pht('Queue');
+  }
+
   protected function getEditorURI() {
     return '/nuance/queue/edit/';
   }

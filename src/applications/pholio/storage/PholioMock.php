@@ -227,12 +227,10 @@ final class PholioMock extends PholioDAO
 
   public function getMarkupText($field) {
     if ($this->getDescription()) {
-      $description = $this->getDescription();
-    } else {
-      $description = pht('No Description Given');
+      return $this->getDescription();
     }
 
-    return $description;
+    return null;
   }
 
   public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {

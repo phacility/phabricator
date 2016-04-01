@@ -75,8 +75,12 @@ final class AlmanacServiceEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Create Service'));
+    $crumbs->setBorder(true);
 
     $title = pht('Choose Service Type');
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Create Service'))
+      ->setHeaderIcon('fa-plus-square');
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -88,13 +92,21 @@ final class AlmanacServiceEditController
 
     $box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Service'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($box);
+      ->appendChild($view);
+
   }
 
 }

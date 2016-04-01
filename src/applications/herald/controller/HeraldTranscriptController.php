@@ -79,16 +79,25 @@ final class HeraldTranscriptController extends HeraldController {
       ->addTextCrumb(
         pht('Transcripts'),
         $this->getApplicationURI('/transcript/'))
-      ->addTextCrumb($xscript->getID());
+      ->addTextCrumb($xscript->getID())
+      ->setBorder(true);
 
-    $title = pht('Transcript');
+    $title = pht('Transcript: %s', $xscript->getID());
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-file');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($content);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $content,
+          $view,
       ));
   }
 
@@ -232,7 +241,8 @@ final class HeraldTranscriptController extends HeraldController {
     $action_map = mgroup($action_map, 'getRuleID');
 
     $rule_list = id(new PHUIObjectItemListView())
-      ->setNoDataString(pht('No Herald rules applied to this object.'));
+      ->setNoDataString(pht('No Herald rules applied to this object.'))
+      ->setFlush(true);
 
     $rule_xscripts = $xscript->getRuleTranscripts();
     $rule_xscripts = msort($rule_xscripts, 'getRuleID');

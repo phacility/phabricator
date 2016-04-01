@@ -995,8 +995,8 @@ final class DiffusionBrowseController extends DiffusionController {
     array $lines,
     array $blame_list,
     array $blame_commits,
-    $show_color,
-    $show_blame) {
+    $show_blame,
+    $show_color) {
 
     $request = $this->getRequest();
     $viewer = $this->getViewer();
@@ -1233,26 +1233,28 @@ final class DiffusionBrowseController extends DiffusionController {
           "\xC2\xAB");
       }
 
-      $row[] = phutil_tag(
-        'th',
-        array(
-          'class' => 'diffusion-blame-link',
-        ),
-        $before_link);
+      if ($show_blame) {
+        $row[] = phutil_tag(
+          'th',
+          array(
+            'class' => 'diffusion-blame-link',
+          ),
+          $before_link);
 
-      $object_links = array();
-      $object_links[] = $commit_link;
-      if ($revision_link) {
-        $object_links[] = phutil_tag('span', array(), '/');
-        $object_links[] = $revision_link;
+        $object_links = array();
+        $object_links[] = $commit_link;
+        if ($revision_link) {
+          $object_links[] = phutil_tag('span', array(), '/');
+          $object_links[] = $revision_link;
+        }
+
+        $row[] = phutil_tag(
+          'th',
+          array(
+            'class' => 'diffusion-rev-link',
+          ),
+          $object_links);
       }
-
-      $row[] = phutil_tag(
-        'th',
-        array(
-          'class' => 'diffusion-rev-link',
-        ),
-        $object_links);
 
       $line_link = phutil_tag(
         'a',

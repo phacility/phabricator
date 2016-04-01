@@ -18,7 +18,6 @@ final class PonderAnswerHistoryController extends PonderController {
       return new Aphront404Response();
     }
 
-
     $timeline = $this->buildTransactionTimeline(
       $answer,
       new PonderAnswerTransactionQuery());
@@ -32,15 +31,20 @@ final class PonderAnswerHistoryController extends PonderController {
     $crumbs->addTextCrumb("Q{$qid}", "/Q{$qid}");
     $crumbs->addTextCrumb("A{$aid}", "/Q{$qid}#{$aid}");
     $crumbs->addTextCrumb(pht('History'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $timeline,
-      ),
-      array(
-        'title' => pht('Answer History'),
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Answer History'))
+      ->setHeaderIcon('fa-history');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($timeline);
+
+    return $this->newPage()
+      ->setTitle(pht('Answer History'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

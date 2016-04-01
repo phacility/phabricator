@@ -6,6 +6,7 @@ final class NuanceGitHubEventItemType
   const ITEMTYPE = 'github.event';
 
   private $externalObject;
+  private $externalActor;
 
   public function getItemTypeDisplayName() {
     return pht('GitHub Event');
@@ -27,14 +28,15 @@ final class NuanceGitHubEventItemType
     $viewer = $this->getViewer();
     $is_dirty = false;
 
-    // TODO: Link up the requestor, etc.
-
-    $is_dirty = false;
-
     $xobj = $this->reloadExternalObject($item);
-
     if ($xobj) {
       $item->setItemProperty('doorkeeper.xobj.phid', $xobj->getPHID());
+      $is_dirty = true;
+    }
+
+    $actor = $this->reloadExternalActor($item);
+    if ($actor) {
+      $item->setRequestorPHID($actor->getPHID());
       $is_dirty = true;
     }
 
@@ -46,6 +48,21 @@ final class NuanceGitHubEventItemType
     if ($is_dirty) {
       $item->save();
     }
+  }
+
+  private function getDoorkeeperActorRef(NuanceItem $item) {
+    $raw = $this->newRawEvent($item);
+
+    $user_id = $raw->getActorGitHubUserID();
+    if (!$user_id) {
+      return null;
+    }
+
+    $ref_type = DoorkeeperBridgeGitHubUser::OBJTYPE_GITHUB_USER;
+
+    return $this->newDoorkeeperRef()
+      ->setObjectType($ref_type)
+      ->setObjectID($user_id);
   }
 
   private function getDoorkeeperRef(NuanceItem $item) {
@@ -64,11 +81,15 @@ final class NuanceGitHubEventItemType
       return null;
     }
 
-    return id(new DoorkeeperObjectRef())
-      ->setApplicationType(DoorkeeperBridgeGitHub::APPTYPE_GITHUB)
-      ->setApplicationDomain(DoorkeeperBridgeGitHub::APPDOMAIN_GITHUB)
+    return $this->newDoorkeeperRef()
       ->setObjectType($ref_type)
       ->setObjectID($full_ref);
+  }
+
+  private function newDoorkeeperRef() {
+    return id(new DoorkeeperObjectRef())
+      ->setApplicationType(DoorkeeperBridgeGitHub::APPTYPE_GITHUB)
+      ->setApplicationDomain(DoorkeeperBridgeGitHub::APPDOMAIN_GITHUB);
   }
 
   private function reloadExternalObject(NuanceItem $item, $local = false) {
@@ -76,6 +97,35 @@ final class NuanceGitHubEventItemType
     if (!$ref) {
       return null;
     }
+
+    $xobj = $this->reloadExternalRef($item, $ref, $local);
+
+    if ($xobj) {
+      $this->externalObject = $xobj;
+    }
+
+    return $xobj;
+  }
+
+  private function reloadExternalActor(NuanceItem $item, $local = false) {
+    $ref = $this->getDoorkeeperActorRef($item);
+    if (!$ref) {
+      return null;
+    }
+
+    $xobj = $this->reloadExternalRef($item, $ref, $local);
+
+    if ($xobj) {
+      $this->externalActor = $xobj;
+    }
+
+    return $xobj;
+  }
+
+  private function reloadExternalRef(
+    NuanceItem $item,
+    DoorkeeperObjectRef $ref,
+    $local) {
 
     $source = $item->getSource();
     $token = $source->getSourceProperty('github.token');
@@ -97,10 +147,6 @@ final class NuanceGitHubEventItemType
       $xobj = $ref->getExternalObject();
     }
 
-    if ($xobj) {
-      $this->externalObject = $xobj;
-    }
-
     return $xobj;
   }
 
@@ -116,6 +162,23 @@ final class NuanceGitHubEventItemType
 
     if ($this->externalObject) {
       return $this->externalObject;
+    }
+
+    return null;
+  }
+
+  private function getExternalActor(NuanceItem $item) {
+    if ($this->externalActor === null) {
+      $xobj = $this->reloadExternalActor($item, $local = true);
+      if ($xobj) {
+        $this->externalActor = $xobj;
+      } else {
+        $this->externalActor = false;
+      }
+    }
+
+    if ($this->externalActor) {
+      return $this->externalActor;
     }
 
     return null;
@@ -152,6 +215,36 @@ final class NuanceGitHubEventItemType
       ->setIcon('fa-code');
 
     return $actions;
+  }
+
+  public function getItemCurtainPanels(NuanceItem $item) {
+    $viewer = $this->getViewer();
+
+    $panels = array();
+
+    $xobj = $this->getExternalObject($item);
+    if ($xobj) {
+      $xobj_phid = $xobj->getPHID();
+
+      $task = id(new ManiphestTaskQuery())
+        ->setViewer($viewer)
+        ->withBridgedObjectPHIDs(array($xobj_phid))
+        ->executeOne();
+      if ($task) {
+        $panels[] = $this->newCurtainPanel($item)
+          ->setHeaderText(pht('Imported As'))
+          ->appendChild($viewer->renderHandle($task->getPHID()));
+      }
+    }
+
+    $xactor = $this->getExternalActor($item);
+    if ($xactor) {
+      $panels[] = $this->newCurtainPanel($item)
+        ->setHeaderText(pht('GitHub Actor'))
+        ->appendChild($viewer->renderHandle($xactor->getPHID()));
+    }
+
+    return $panels;
   }
 
   protected function handleAction(NuanceItem $item, $action) {
@@ -274,7 +367,7 @@ final class NuanceGitHubEventItemType
           $xobj_phid));
     }
 
-    $nuance_phid = id(new PhabricatorNuanceApplication())->getPHID();
+    $acting_as_phid = $this->getActingAsPHID($item);
 
     $xactions = array();
 
@@ -284,7 +377,7 @@ final class NuanceGitHubEventItemType
       ->executeOne();
     if (!$task) {
       $task = ManiphestTask::initializeNewTask($viewer)
-        ->setAuthorPHID($nuance_phid)
+        ->setAuthorPHID($acting_as_phid)
         ->setBridgedObjectPHID($xobj_phid);
 
       $title = $xobj->getProperty('task.title');
@@ -321,17 +414,12 @@ final class NuanceGitHubEventItemType
             ->setContent($comment));
     }
 
-    // TODO: Preserve the item's original source.
-    $source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_DAEMON,
-      array());
-
-    // TOOD: This should really be the external source.
-    $acting_phid = $nuance_phid;
+    $agent_phid = $command->getAuthorPHID();
+    $source = $this->newContentSource($item, $agent_phid);
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setActingAsPHID($acting_phid)
+      ->setActingAsPHID($acting_as_phid)
       ->setContentSource($source)
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
@@ -344,5 +432,14 @@ final class NuanceGitHubEventItemType
     );
   }
 
+  protected function getActingAsPHID(NuanceItem $item) {
+    $actor_phid = $item->getRequestorPHID();
+
+    if ($actor_phid) {
+      return $actor_phid;
+    }
+
+    return parent::getActingAsPHID($item);
+  }
 
 }

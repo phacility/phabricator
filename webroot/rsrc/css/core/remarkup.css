@@ -182,12 +182,20 @@
 }
 
 .phabricator-remarkup blockquote em {
+  /* In blockquote bodies, default text is italic so emphasized text should
+     be normal. */
   font-style: normal;
 }
 
 .phabricator-remarkup blockquote div.remarkup-reply-head {
   font-style: normal;
   padding-bottom: 4px;
+}
+
+.phabricator-remarkup blockquote div.remarkup-reply-head em {
+  /* In blockquote headers, default text is normal so emphasized text should
+     be italic. See T10686. */
+  font-style: italic;
 }
 
 .phabricator-remarkup blockquote div.remarkup-reply-head

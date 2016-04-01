@@ -9,6 +9,8 @@ final class PhabricatorBadgesTransaction
   const TYPE_ICON = 'badges:icon';
   const TYPE_STATUS = 'badges:status';
   const TYPE_FLAVOR = 'badges:flavor';
+  const TYPE_AWARD = 'badges:award';
+  const TYPE_REVOKE = 'badges:revoke';
 
   const MAILTAG_DETAILS = 'badges:details';
   const MAILTAG_COMMENT = 'badges:comment';
@@ -71,6 +73,18 @@ final class PhabricatorBadgesTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PhabricatorBadgesBadge::STATUS_ACTIVE:
+            return pht(
+              '%s activated this badge.',
+              $this->renderHandleLink($author_phid));
+          case PhabricatorBadgesBadge::STATUS_ARCHIVED:
+            return pht(
+              '%s archived this badge.',
+              $this->renderHandleLink($author_phid));
+        }
+        break;
       case self::TYPE_ICON:
         if ($old === null) {
           return pht(
@@ -97,9 +111,8 @@ final class PhabricatorBadgesTransaction
             $this->renderHandleLink($author_phid),
             $new);
         } else {
-          $qual_map = PhabricatorBadgesBadge::getQualityNameMap();
-          $qual_new = idx($qual_map, $new, $new);
-          $qual_old = idx($qual_map, $old, $old);
+          $qual_new = PhabricatorBadgesQuality::getQualityName($new);
+          $qual_old = PhabricatorBadgesQuality::getQualityName($old);
           return pht(
             '%s updated the quality for this badge from "%s" to "%s".',
             $this->renderHandleLink($author_phid),
@@ -107,6 +120,26 @@ final class PhabricatorBadgesTransaction
             $qual_new);
         }
         break;
+      case self::TYPE_AWARD:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s awarded this badge to %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          new PhutilNumber(count($new)),
+          $handles);
+      case self::TYPE_REVOKE:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s revoked this badge from %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          new PhutilNumber(count($new)),
+          $handles);
     }
 
     return parent::getTitle();
@@ -169,6 +202,28 @@ final class PhabricatorBadgesTransaction
               $this->renderHandleLink($object_phid));
         }
         break;
+      case self::TYPE_AWARD:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s awarded %s to %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          new PhutilNumber(count($new)),
+          $handles);
+      case self::TYPE_REVOKE:
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $handles = $this->renderHandleList($new);
+        return pht(
+          '%s revoked %s from %s recipient(s): %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          new PhutilNumber(count($new)),
+          $handles);
     }
 
     return parent::getTitleForFeed();
@@ -220,5 +275,25 @@ final class PhabricatorBadgesTransaction
       $viewer,
       $this->getOldValue(),
       $this->getNewValue());
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+       case self::TYPE_AWARD:
+       case self::TYPE_REVOKE:
+        $new = $this->getNewValue();
+        if (!is_array($new)) {
+          $new = array();
+        }
+        foreach ($new as $phid) {
+          $phids[] = $phid;
+        }
+        break;
+    }
+
+    return $phids;
   }
 }

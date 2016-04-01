@@ -263,11 +263,10 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .phui-form-inset {
-  margin: 4px 0 8px;
+  margin: 12px 0;
   padding: 8px;
   background: #f7f9fd;
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
   border-radius: 3px;
 }
 

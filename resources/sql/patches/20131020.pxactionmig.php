@@ -10,8 +10,7 @@ $dst_table = 'project_transaction';
 echo pht('Migrating Project transactions to new format...')."\n";
 
 $content_source = PhabricatorContentSource::newForSource(
-  PhabricatorContentSource::SOURCE_LEGACY,
-  array())->serialize();
+  PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
 $rows = new LiskRawMigrationIterator($conn_w, $src_table);
 foreach ($rows as $row) {

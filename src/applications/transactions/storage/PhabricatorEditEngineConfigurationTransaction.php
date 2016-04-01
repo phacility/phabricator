@@ -104,4 +104,47 @@ final class PhabricatorEditEngineConfigurationTransaction
     return parent::getTitle();
   }
 
+  public function getColor() {
+    $author_phid = $this->getAuthorPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return 'green';
+      case self::TYPE_DISABLE:
+        if ($new) {
+          return 'indigo';
+        } else {
+          return 'green';
+        }
+    }
+
+    return parent::getColor();
+  }
+
+  public function getIcon() {
+    $author_phid = $this->getAuthorPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return 'fa-plus';
+      case self::TYPE_DISABLE:
+        if ($new) {
+          return 'fa-ban';
+        } else {
+          return 'fa-check';
+        }
+    }
+
+    return parent::getIcon();
+  }
+
+
 }

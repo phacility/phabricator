@@ -131,24 +131,36 @@ final class AlmanacInterfaceEditController
 
     $box = id(new PHUIObjectBoxView())
       ->setValidationException($validation_exception)
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Interface'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($device->getName(), $device_uri);
     if ($is_new) {
       $crumbs->addTextCrumb(pht('Create Interface'));
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Create Interface'))
+        ->setHeaderIcon('fa-plus-square');
     } else {
       $crumbs->addTextCrumb(pht('Edit Interface'));
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Edit Interface'))
+        ->setHeaderIcon('fa-pencil');
     }
+    $crumbs->setBorder(true);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $box,
-      ));
+      ->appendChild($view);
+
   }
 
 }

@@ -221,9 +221,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             ->setViewer($actor)
             ->setAuthorPHID($acting_as_phid);
 
-          $content_source = PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_DAEMON,
-            array());
+          $content_source = $this->newContentSource();
 
           $update_data = $extraction_engine->updateRevisionWithCommit(
             $revision,
@@ -337,9 +335,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
       $xactions[] = $edge_xaction;
 
-      $content_source = PhabricatorContentSource::newForSource(
-        PhabricatorContentSource::SOURCE_DAEMON,
-        array());
+      $content_source = $this->newContentSource();
 
       $editor = id(new ManiphestTransactionEditor())
         ->setActor($actor)

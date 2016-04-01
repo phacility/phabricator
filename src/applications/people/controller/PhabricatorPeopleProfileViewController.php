@@ -188,7 +188,11 @@ final class PhabricatorPeopleProfileViewController
         ->withPHIDs($badge_phids)
         ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
         ->execute();
+    } else {
+      $badges = array();
+    }
 
+    if (count($badges)) {
       $flex = new PHUIBadgeBoxView();
       foreach ($badges as $badge) {
         $item = id(new PHUIBadgeView())
@@ -198,7 +202,6 @@ final class PhabricatorPeopleProfileViewController
           ->setQuality($badge->getQuality());
         $flex->addItem($item);
       }
-
     } else {
       $error = id(new PHUIBoxView())
         ->addClass('mlb')
@@ -208,8 +211,40 @@ final class PhabricatorPeopleProfileViewController
         ->appendChild($error);
     }
 
+    // Best option?
+    $badges = id(new PhabricatorBadgesQuery())
+      ->setViewer($viewer)
+      ->withStatuses(array(
+        PhabricatorBadgesBadge::STATUS_ACTIVE,
+      ))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->execute();
+
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-plus')
+      ->setText(pht('Award'))
+      ->setWorkflow(true)
+      ->setHref('/badges/award/'.$user->getID().'/');
+
+    $can_award = false;
+    if (count($badges)) {
+      $can_award = true;
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Badges'));
+
+    if (count($badges)) {
+      $header->addActionLink($button);
+    }
+
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Badges'))
+      ->setHeader($header)
       ->addClass('project-view-badges')
       ->appendChild($flex)
       ->setBackground(PHUIObjectBoxView::GREY);

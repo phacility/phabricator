@@ -61,7 +61,7 @@ final class PasteCreateConduitAPIMethod extends PasteConduitAPIMethod {
     $editor = id(new PhabricatorPasteEditor())
       ->setActor($viewer)
       ->setContinueOnNoEffect(true)
-      ->setContentSourceFromConduitRequest($request);
+      ->setContentSource($request->newContentSource());
 
     $xactions = $editor->applyTransactions($paste, $xactions);
 

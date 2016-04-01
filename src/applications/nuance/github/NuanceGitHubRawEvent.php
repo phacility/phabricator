@@ -91,7 +91,13 @@ final class NuanceGitHubRawEvent extends Phobject {
   }
 
   public function getComment() {
-    return 'TODO: Actually extract comment text.';
+    if (!$this->isIssueEvent() && !$this->isPullRequestEvent()) {
+      return null;
+    }
+
+    $raw = $this->raw;
+
+    return idxv($raw, array('payload', 'comment', 'body'));
   }
 
   public function getURI() {
@@ -228,6 +234,11 @@ final class NuanceGitHubRawEvent extends Phobject {
       $this->getRepositoryFullRawName(),
       $this->getTargetObjectName(),
       $title);
+  }
+
+  public function getActorGitHubUserID() {
+    $raw = $this->raw;
+    return (int)idxv($raw, array('actor', 'id'));
   }
 
   private function getTargetObjectName() {

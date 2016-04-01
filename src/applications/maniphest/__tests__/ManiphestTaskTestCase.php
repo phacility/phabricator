@@ -207,7 +207,7 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
     ManiphestTask $task,
     array $xactions) {
 
-    $content_source = PhabricatorContentSource::newConsoleSource();
+    $content_source = $this->newContentSource();
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)

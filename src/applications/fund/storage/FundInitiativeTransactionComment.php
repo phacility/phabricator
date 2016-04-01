@@ -1,10 +1,10 @@
 <?php
 
-final class NuanceRequestorTransactionComment
+final class FundInitiativeTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
   public function getApplicationTransactionObject() {
-    return new NuanceRequestorTransaction();
+    return new FundInitiativeTransaction();
   }
 
 }

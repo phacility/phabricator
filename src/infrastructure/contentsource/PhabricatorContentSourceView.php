@@ -10,21 +10,14 @@ final class PhabricatorContentSourceView extends AphrontView {
   }
 
   public function getSourceName() {
-    $map = PhabricatorContentSource::getSourceNameMap();
-    $source = $this->contentSource->getSource();
-    return idx($map, $source, null);
-
+    return $this->contentSource->getSourceName();
   }
 
   public function render() {
     require_celerity_resource('phabricator-content-source-view-css');
 
-    $map = PhabricatorContentSource::getSourceNameMap();
-
-    $source = $this->contentSource->getSource();
-    $type = idx($map, $source, null);
-
-    if (!$type) {
+    $name = $this->getSourceName();
+    if ($name === null) {
       return null;
     }
 
@@ -33,7 +26,7 @@ final class PhabricatorContentSourceView extends AphrontView {
       array(
         'class' => 'phabricator-content-source-view',
       ),
-      pht('Via %s', $type));
+      pht('Via %s', $name));
   }
 
 }

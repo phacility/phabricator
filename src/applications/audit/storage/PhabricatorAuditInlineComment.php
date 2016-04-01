@@ -34,8 +34,7 @@ final class PhabricatorAuditInlineComment
 
   public function getTransactionCommentForSave() {
     $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LEGACY,
-      array());
+      PhabricatorOldWorldContentSource::SOURCECONST);
 
     $this->proxy
       ->setViewPolicy('public')

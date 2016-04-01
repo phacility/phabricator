@@ -70,6 +70,10 @@ final class PhabricatorEditEngineConfigurationEditEngine
     return pht('Create Form');
   }
 
+  protected function getObjectName() {
+    return pht('Form');
+  }
+
   protected function getObjectViewURI($object) {
     $id = $object->getID();
     return $this->getURI("view/{$id}/");

@@ -21,7 +21,8 @@ final class PhabricatorBadgesRemoveRecipientsController
       return new Aphront404Response();
     }
 
-    $recipient_phids = $badge->getRecipientPHIDs();
+    $awards = $badge->getAwards();
+    $recipient_phids = mpull($awards, 'getRecipientPHID');
     $remove_phid = $request->getStr('phid');
 
     if (!in_array($remove_phid, $recipient_phids)) {
@@ -31,17 +32,10 @@ final class PhabricatorBadgesRemoveRecipientsController
     $view_uri = $this->getApplicationURI('view/'.$badge->getID().'/');
 
     if ($request->isFormPost()) {
-      $recipient_spec = array();
-      $recipient_spec['-'] = array($remove_phid => $remove_phid);
-
-      $type_recipient = PhabricatorBadgeHasRecipientEdgeType::EDGECONST;
-
       $xactions = array();
-
       $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $type_recipient)
-        ->setNewValue($recipient_spec);
+        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_REVOKE)
+        ->setNewValue(array($remove_phid));
 
       $editor = id(new PhabricatorBadgesEditor($badge))
         ->setActor($viewer)

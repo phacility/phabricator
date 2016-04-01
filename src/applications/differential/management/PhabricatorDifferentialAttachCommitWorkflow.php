@@ -68,9 +68,7 @@ final class PhabricatorDifferentialAttachCommitWorkflow
       ->setViewer($viewer)
       ->setAuthorPHID($differential_phid);
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONSOLE,
-      array());
+    $content_source = $this->newContentSource();
 
     $extraction_engine->updateRevisionWithCommit(
       $revision,
