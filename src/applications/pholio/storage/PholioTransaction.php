@@ -81,12 +81,21 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getIcon() {
+
+    $new = $this->getNewValue();
+    $old = $this->getOldValue();
+
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
         return 'fa-comment';
       case self::TYPE_NAME:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_STATUS:
+        if ($new == PholioMock::STATUS_CLOSED) {
+          return 'fa-ban';
+        } else {
+          return 'fa-check';
+        }
       case self::TYPE_IMAGE_NAME:
       case self::TYPE_IMAGE_DESCRIPTION:
       case self::TYPE_IMAGE_SEQUENCE:
@@ -153,9 +162,15 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           $this->renderHandleLink($author_phid));
         break;
       case self::TYPE_STATUS:
-        return pht(
-          "%s updated the mock's status.",
-          $this->renderHandleLink($author_phid));
+        if ($new == PholioMock::STATUS_CLOSED) {
+          return pht(
+            '%s closed this mock.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s opened this mock.',
+            $this->renderHandleLink($author_phid));
+        }
         break;
       case self::TYPE_INLINE:
         $count = 1;
@@ -260,10 +275,17 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           $this->renderHandleLink($object_phid));
         break;
       case self::TYPE_STATUS:
-        return pht(
-          '%s updated the status for %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid));
+        if ($new == PholioMock::STATUS_CLOSED) {
+          return pht(
+            '%s closed a mock %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s opened a mock %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
         break;
       case self::TYPE_INLINE:
         return pht(
@@ -347,16 +369,16 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_STATUS:
+        if ($new == PholioMock::STATUS_CLOSED) {
+          return PhabricatorTransactions::COLOR_INDIGO;
+        } else {
+          return PhabricatorTransactions::COLOR_GREEN;
+        }
       case self::TYPE_NAME:
         if ($old === null) {
           return PhabricatorTransactions::COLOR_GREEN;
         }
-      case self::TYPE_DESCRIPTION:
-      case self::TYPE_STATUS:
-      case self::TYPE_IMAGE_NAME:
-      case self::TYPE_IMAGE_DESCRIPTION:
-      case self::TYPE_IMAGE_SEQUENCE:
-        return PhabricatorTransactions::COLOR_BLUE;
       case self::TYPE_IMAGE_REPLACE:
         return PhabricatorTransactions::COLOR_YELLOW;
       case self::TYPE_IMAGE_FILE:

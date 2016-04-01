@@ -107,6 +107,7 @@ final class PholioMockThumbGridView extends AphrontView {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Mock History'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($grid);
   }
 
