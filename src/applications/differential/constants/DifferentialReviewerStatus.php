@@ -7,6 +7,7 @@ final class DifferentialReviewerStatus extends Phobject {
   const STATUS_ACCEPTED = 'accepted';
   const STATUS_REJECTED = 'rejected';
   const STATUS_COMMENTED = 'commented';
+  const STATUS_PULL_REQUEST_CREATED = 'pull-request-created';
   const STATUS_ACCEPTED_OLDER = 'accepted-older';
   const STATUS_REJECTED_OLDER = 'rejected-older';
 
@@ -26,6 +27,7 @@ final class DifferentialReviewerStatus extends Phobject {
       self::STATUS_ADDED      => 1,
 
       self::STATUS_COMMENTED  => 2,
+      self::STATUS_PULL_REQUEST_CREATED  => 2,
 
       self::STATUS_BLOCKING   => 3,
 

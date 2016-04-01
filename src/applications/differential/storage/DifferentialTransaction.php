@@ -192,6 +192,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         }
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
       case self::TYPE_INLINE:
         $tags[] = self::MAILTAG_COMMENT;
         break;

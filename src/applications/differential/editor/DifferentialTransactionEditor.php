@@ -55,6 +55,7 @@ final class DifferentialTransactionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_PULL_REQUEST;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -416,6 +417,35 @@ final class DifferentialTransactionEditor
             ->setNewValue(array('+' => $edits));
         }
         break;
+
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
+
+        $status_added = DifferentialReviewerStatus::STATUS_ADDED;
+        $status_pull_request_created = DifferentialReviewerStatus::STATUS_PULL_REQUEST_CREATED;
+
+        $data = array(
+          'status' => $status_pull_request_created,
+        );
+
+        $edits = array();
+        foreach ($object->getReviewerStatus() as $reviewer) {
+          if ($reviewer->getReviewerPHID() == $actor_phid) {
+            if ($reviewer->getStatus() == $status_added) {
+              $edits[$actor_phid] = array(
+                'data' => $data,
+              );
+            }
+          }
+        }
+
+        if ($edits) {
+          $results[] = id(new DifferentialTransaction())
+            ->setTransactionType($type_edge)
+            ->setMetadataValue('edge:type', $edge_reviewer)
+            ->setIgnoreOnNoEffect(true)
+            ->setNewValue(array('+' => $edits));
+        }
+        break;  
 
       case DifferentialTransaction::TYPE_ACTION:
         $action_type = $xaction->getNewValue();

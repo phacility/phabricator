@@ -4,6 +4,7 @@ final class DifferentialAction extends Phobject {
 
   const ACTION_CLOSE          = 'commit';
   const ACTION_COMMENT        = 'none';
+  const ACTION_PULL_REQUEST   = 'pull_request';
   const ACTION_ACCEPT         = 'accept';
   const ACTION_REJECT         = 'reject';
   const ACTION_RETHINK        = 'rethink';
@@ -27,6 +28,11 @@ final class DifferentialAction extends Phobject {
           '%s commented on this revision.',
           $author_name);
         break;
+      case self::ACTION_PULL_REQUEST:
+        $title = pht(
+          '%s created github pull request for this revision.',
+          $author_name);
+        break;  
       case self::ACTION_ACCEPT:
         $title = pht(
           '%s accepted this revision.',
@@ -122,6 +128,7 @@ final class DifferentialAction extends Phobject {
   public static function getActionVerb($action) {
     $verbs = array(
       self::ACTION_COMMENT        => pht('Comment'),
+      self::ACTION_PULL_REQUEST   => pht('Pull Request'),
       self::ACTION_ACCEPT         => pht("Accept Revision \xE2\x9C\x94"),
       self::ACTION_REJECT         => pht("Request Changes \xE2\x9C\x98"),
       self::ACTION_RETHINK        => pht("Plan Changes \xE2\x9C\x98"),
