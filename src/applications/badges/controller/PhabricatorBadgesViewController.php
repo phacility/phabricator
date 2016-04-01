@@ -60,7 +60,9 @@ final class PhabricatorBadgesViewController
       ->setHandles($handles)
       ->setUser($viewer);
 
-    $add_comment = $this->buildCommentForm($badge);
+    $comment_view = id(new PhabricatorBadgesEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($badge);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -68,7 +70,7 @@ final class PhabricatorBadgesViewController
       ->setMainColumn(array(
           $recipient_list,
           $timeline,
-          $add_comment,
+          $comment_view,
         ))
       ->addPropertySection(pht('DESCRIPTION'), $details);
 
@@ -152,26 +154,6 @@ final class PhabricatorBadgesViewController
         ->setHref($award_uri));
 
     return $curtain;
-  }
-
-  private function buildCommentForm(PhabricatorBadgesBadge $badge) {
-    $viewer = $this->getViewer();
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Render Honors');
-
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $badge->getPHID());
-
-    return id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($badge->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($this->getApplicationURI('/comment/'.$badge->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
   }
 
 }

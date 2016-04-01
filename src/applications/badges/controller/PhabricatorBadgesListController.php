@@ -16,16 +16,9 @@ final class PhabricatorBadgesListController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $can_create = $this->hasApplicationCapability(
-      PhabricatorBadgesCreateCapability::CAPABILITY);
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Badge'))
-        ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('fa-plus-square')
-        ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create));
+    id(new PhabricatorBadgesEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }
