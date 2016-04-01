@@ -235,26 +235,34 @@ final class HeraldRuleController extends HeraldController {
     $this->setupEditorBehavior($rule, $handles, $adapter);
 
     $title = $rule->getID()
-        ? pht('Edit Herald Rule')
-        : pht('Create Herald Rule');
+        ? pht('Edit Herald Rule: %s', $rule->getName())
+        : pht('Create Herald Rule: %s', idx($content_type_map, $content_type));
+
+    $icon = $rule->getID() ? 'fa-pencil' : 'fa-plus-square';
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
       ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb($title);
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
-    $title = pht('Edit Rule');
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $form_box,
+          $view,
       ));
   }
 
