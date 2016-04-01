@@ -171,22 +171,27 @@ final class PhabricatorApplicationEditController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($application->getName(), $view_uri);
     $crumbs->addTextCrumb(pht('Edit Policies'));
+    $crumbs->setBorder(true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Edit Policies: %s', $application->getName()));
+      ->setHeader(pht('Edit Policies: %s', $application->getName()))
+      ->setHeaderIcon('fa-pencil');
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Policies'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $object_box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

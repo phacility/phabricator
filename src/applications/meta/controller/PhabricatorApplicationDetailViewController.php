@@ -123,8 +123,7 @@ final class PhabricatorApplicationDetailViewController
     PhabricatorApplication $application) {
 
     $viewer = $this->getViewer();
-    $properties = id(new PHUIPropertyListView())
-      ->setStacked(true);
+    $properties = id(new PHUIPropertyListView());
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('POLICIES'))
