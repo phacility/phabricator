@@ -17,9 +17,9 @@ final class PhabricatorDaemonLogEventViewController
       ->setCombinedLog(true)
       ->setShowFullMessage(true);
 
-    $log_panel = new PHUIObjectBoxView();
-    $log_panel->setHeaderText(pht('Combined Log'));
-    $log_panel->appendChild($event_view);
+    $log_panel = id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($event_view);
 
     $daemon_id = $event->getLogID();
 
@@ -27,17 +27,21 @@ final class PhabricatorDaemonLogEventViewController
       ->addTextCrumb(
         pht('Daemon %s', $daemon_id),
         $this->getApplicationURI("log/{$daemon_id}/"))
-      ->addTextCrumb(pht('Event %s', $event->getID()));
+      ->addTextCrumb(pht('Event %s', $event->getID()))
+      ->setBorder(true);
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Combined Log'))
+      ->setHeaderIcon('fa-file-text');
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $log_panel,
-      ),
-      array(
-        'title' => pht('Combined Daemon Log'),
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($log_panel);
+
+    return $this->newPage()
+      ->setTitle(pht('Combined Daemon Log'))
+      ->appendChild($view);
+
   }
 
 }
