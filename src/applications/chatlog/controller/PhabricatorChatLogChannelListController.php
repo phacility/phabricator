@@ -32,13 +32,10 @@ final class PhabricatorChatLogChannelListController
       ->setHeaderText('Channel List')
       ->setObjectList($list);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => pht('Channel List'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Channel List'))
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
+
   }
 }
