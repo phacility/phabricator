@@ -230,16 +230,14 @@ final class PhrictionDocumentController
           $core_content,
         ));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs->render(),
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($document->getPHID()))
+      ->appendChild(array(
         $page_content,
         $prop_list,
         $children,
-      ),
-      array(
-        'pageObjects' => array($document->getPHID()),
-        'title' => $page_title,
       ));
 
   }
