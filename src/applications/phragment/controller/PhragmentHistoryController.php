@@ -2,21 +2,15 @@
 
 final class PhragmentHistoryController extends PhragmentController {
 
-  private $dblob;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, 'dblob', '');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $dblob = $request->getURIData('dblob');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $parents = $this->loadParentFragments($this->dblob);
+    $parents = $this->loadParentFragments($dblob);
     if ($parents === null) {
       return new Aphront404Response();
     }
@@ -97,16 +91,19 @@ final class PhragmentHistoryController extends PhragmentController {
       $first = false;
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $current_box,
-        $list,
-      ),
-      array(
-        'title' => pht('Fragment History'),
-      ));
+    $title = pht('Fragment History');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $current_box,
+      $list,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

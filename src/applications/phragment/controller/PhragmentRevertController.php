@@ -2,21 +2,14 @@
 
 final class PhragmentRevertController extends PhragmentController {
 
-  private $dblob;
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->dblob = $data['dblob'];
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $dblob = $request->getURIData('dblob');
 
     $fragment = id(new PhragmentFragmentQuery())
       ->setViewer($viewer)
-      ->withPaths(array($this->dblob))
+      ->withPaths(array($dblob))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -30,7 +23,7 @@ final class PhragmentRevertController extends PhragmentController {
     $version = id(new PhragmentFragmentVersionQuery())
       ->setViewer($viewer)
       ->withFragmentPHIDs(array($fragment->getPHID()))
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if ($version === null) {
       return new Aphront404Response();
@@ -58,7 +51,7 @@ final class PhragmentRevertController extends PhragmentController {
       }
 
       return id(new AphrontRedirectResponse())
-        ->setURI($this->getApplicationURI('/history/'.$this->dblob));
+        ->setURI($this->getApplicationURI('/history/'.$dblob));
     }
 
     return $this->createDialog($fragment, $version);
@@ -68,12 +61,11 @@ final class PhragmentRevertController extends PhragmentController {
     PhragmentFragment $fragment,
     PhragmentFragmentVersion $version) {
 
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $dialog = id(new AphrontDialogView())
       ->setTitle(pht('Really revert this fragment?'))
-      ->setUser($request->getUser())
+      ->setUser($this->getViewer())
       ->addSubmitButton(pht('Revert'))
       ->addCancelButton(pht('Cancel'))
       ->appendParagraph(pht(

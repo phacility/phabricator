@@ -2,23 +2,17 @@
 
 final class PhragmentSnapshotViewController extends PhragmentController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id', '');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $snapshot = id(new PhragmentSnapshotQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if ($snapshot === null) {
       return new Aphront404Response();
@@ -71,16 +65,18 @@ final class PhragmentSnapshotViewController extends PhragmentController {
       $list->addItem($item);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $box,
-        $list,
-      ),
-      array(
-        'title' => pht('View Snapshot'),
-      ));
+    $title = pht('View Snapshot');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $box,
+      $list,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   protected function createSnapshotView($snapshot) {

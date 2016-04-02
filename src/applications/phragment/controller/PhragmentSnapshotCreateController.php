@@ -2,17 +2,11 @@
 
 final class PhragmentSnapshotCreateController extends PhragmentController {
 
-  private $dblob;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $dblob = $request->getURIData('dblob');
 
-  public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, 'dblob', '');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $parents = $this->loadParentFragments($this->dblob);
+    $parents = $this->loadParentFragments($dblob);
     if ($parents === null) {
       return new Aphront404Response();
     }
@@ -159,15 +153,18 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       ->setFormErrors($errors)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $box,
-      ),
-      array(
-        'title' => pht('Create Fragment'),
-      ));
+    $title = pht('Create Snapshot');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $box,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }
