@@ -28,14 +28,14 @@ final class PhabricatorMetaMTAMailgunReceiveController
         pht('Mail signature is not valid. Check your Mailgun API key.'));
     }
 
-    $user = $request->getUser();
-
-    $raw_headers = $request->getStr('headers');
-    $raw_headers = explode("\n", rtrim($raw_headers));
+    $raw_headers = $request->getStr('message-headers');
     $raw_dict = array();
-    foreach (array_filter($raw_headers) as $header) {
-      list($name, $value) = explode(':', $header, 2);
-      $raw_dict[$name] = ltrim($value);
+    if (strlen($raw_headers)) {
+      $raw_headers = phutil_json_decode($raw_headers);
+      foreach ($raw_headers as $raw_header) {
+        list($name, $value) = $raw_header;
+        $raw_dict[$name] = $value;
+      }
     }
 
     $headers = array(
@@ -65,9 +65,25 @@ final class PhabricatorMetaMTAMailgunReceiveController
       }
     }
     $received->setAttachments($file_phids);
-    $received->save();
 
-    $received->processReceivedMail();
+    try {
+      $received->save();
+      $received->processReceivedMail();
+    } catch (Exception $ex) {
+      // We can get exceptions here in two cases.
+
+      // First, saving the message may throw if we have already received a
+      // message with the same Message ID. In this case, we're declining to
+      // process a duplicate message, so failing silently is correct.
+
+      // Second, processing the message may throw (for example, if it contains
+      // an invalid !command). This will generate an email as a side effect,
+      // so we don't need to explicitly handle the exception here.
+
+      // In these cases, we want to return HTTP 200. If we do not, MailGun will
+      // re-transmit the message later.
+      phlog($ex);
+    }
 
     $response = new AphrontWebpageResponse();
     $response->setContent(pht("Got it! Thanks, Mailgun!\n"));
