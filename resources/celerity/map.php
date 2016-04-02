@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '2d0339fc',
+    'core.pkg.css' => '5de0f7af',
     'core.pkg.js' => 'e5484f37',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '7ba78475',
@@ -54,7 +54,7 @@ return array(
     'rsrc/css/application/contentsource/content-source-view.css' => '4b8b05d4',
     'rsrc/css/application/countdown/timer.css' => '96696f21',
     'rsrc/css/application/daemon/bulk-job.css' => 'df9c1d4a',
-    'rsrc/css/application/dashboard/dashboard.css' => 'eb458607',
+    'rsrc/css/application/dashboard/dashboard.css' => 'bc6f2127',
     'rsrc/css/application/diff/inline-comment-summary.css' => '51efda3a',
     'rsrc/css/application/differential/add-comment.css' => 'c47f8c40',
     'rsrc/css/application/differential/changeset-view.css' => '3e3b0b76',
@@ -753,7 +753,7 @@ return array(
     'phabricator-content-source-view-css' => '4b8b05d4',
     'phabricator-core-css' => 'd0801452',
     'phabricator-countdown-css' => '96696f21',
-    'phabricator-dashboard-css' => 'eb458607',
+    'phabricator-dashboard-css' => 'bc6f2127',
     'phabricator-drag-and-drop-file-upload' => '81f182b5',
     'phabricator-draggable-list' => '5a13c79f',
     'phabricator-fatal-config-template-css' => '8e6c6fcd',

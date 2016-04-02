@@ -55,8 +55,8 @@
 .aphront-multi-column-column.dashboard-column-empty
 .dashboard-panel-placeholder {
   display: block;
-  padding: 24px;
-  margin: 16px 16px 0px 16px;
+  padding: 20px;
+  margin: 0 0 12px 0;
   text-decoration: none;
   border: 1px {$greyborder} dashed;
   color: {$greytext};
@@ -72,4 +72,10 @@
 .aphront-multi-column-column-outer
 .aphront-multi-column-column .phui-info-view {
   margin: 0;
+}
+
+.dashboard-preview-box {
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  background-color: rgba(255,255,255,.33);
 }

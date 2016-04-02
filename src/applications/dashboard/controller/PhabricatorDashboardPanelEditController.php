@@ -90,18 +90,18 @@ final class PhabricatorDashboardPanelEditController
     }
 
     if ($is_create) {
-      $title = pht('New Panel');
-      $header = pht('Create New Panel');
+      $title = pht('Create New Panel');
       $button = pht('Create Panel');
+      $header_icon = 'fa-plus-square';
       if ($dashboard) {
         $cancel_uri = $manage_uri;
       } else {
         $cancel_uri = $this->getApplicationURI('panel/');
       }
     } else {
-      $title = pht('Edit %s', $panel->getMonogram());
-      $header = pht('Edit %s %s', $panel->getMonogram(), $panel->getName());
+      $title = pht('Edit Panel: %s', $panel->getName());
       $button = pht('Save Panel');
+      $header_icon = 'fa-pencil';
       if ($dashboard) {
         $cancel_uri = $manage_uri;
       } else {
@@ -260,10 +260,11 @@ final class PhabricatorDashboardPanelEditController
         '/'.$panel->getMonogram());
       $crumbs->addTextCrumb(pht('Edit'));
     }
+    $crumbs->setBorder(true);
 
     if ($request->isAjax()) {
       return $this->newDialog()
-        ->setTitle($header)
+        ->setTitle($title)
         ->setSubmitURI($submit_uri)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setValidationException($validation_exception)
@@ -279,18 +280,23 @@ final class PhabricatorDashboardPanelEditController
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
+      ->setHeaderText(pht('Panel'))
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function processPanelTypeRequest(AphrontRequest $request) {
@@ -349,26 +355,33 @@ final class PhabricatorDashboardPanelEditController
     }
 
     $title = pht('Create Dashboard Panel');
+    $header_icon = 'fa-plus-square';
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       pht('Panels'),
       $this->getApplicationURI('panel/'));
     $crumbs->addTextCrumb(pht('New Panel'));
+    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Panel'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function processPanelCloneRequest(
