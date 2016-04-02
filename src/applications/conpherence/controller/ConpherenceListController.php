@@ -127,11 +127,9 @@ final class ConpherenceListController extends ConpherenceController {
         $layout->setHeader($this->buildHeaderPaneContent(
             $conpherence,
             $policy_objects));
-        $response = $this->buildApplicationPage(
-          $layout,
-          array(
-            'title' => $title,
-          ));
+        $response = $this->newPage()
+          ->setTitle($title)
+          ->appendChild($layout);
         break;
     }
 
