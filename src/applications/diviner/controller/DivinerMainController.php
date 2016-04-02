@@ -65,13 +65,11 @@ final class DivinerMainController extends DivinerController {
       $document->appendChild($text);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    return $this->newPage()
+      ->setTitle(pht('Documentation Books'))
+      ->setCrumbs($crumbs)
+      ->appendChild(array(
         $document,
-      ),
-      array(
-        'title' => pht('Documentation Books'),
       ));
   }
 }
