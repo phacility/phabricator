@@ -181,26 +181,48 @@ final class PhabricatorPeopleProfileViewController
       return null;
     }
 
-    $badge_phids = $user->getBadgePHIDs();
-    if ($badge_phids) {
+    $awards = array();
+    $badges = array();
+    if ($user->getBadgePHIDs()) {
+      $awards = id(new PhabricatorBadgesAwardQuery())
+        ->setViewer($viewer)
+        ->withRecipientPHIDs(array($user->getPHID()))
+        ->execute();
+      $awards = mpull($awards, null, 'getBadgePHID');
+
+      $badge_phids = mpull($awards, 'getBadgePHID');
       $badges = id(new PhabricatorBadgesQuery())
         ->setViewer($viewer)
         ->withPHIDs($badge_phids)
         ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
         ->execute();
-    } else {
-      $badges = array();
+      $badges = mpull($badges, null, 'getPHID');
     }
 
     if (count($badges)) {
       $flex = new PHUIBadgeBoxView();
+
       foreach ($badges as $badge) {
-        $item = id(new PHUIBadgeView())
-          ->setIcon($badge->getIcon())
-          ->setHeader($badge->getName())
-          ->setSubhead($badge->getFlavor())
-          ->setQuality($badge->getQuality());
-        $flex->addItem($item);
+        if ($badge) {
+          $awarder_info = array();
+
+          $award = idx($awards, $badge->getPHID(), null);
+          $awarder_phid = $award->getAwarderPHID();
+          $awarder_handle = $viewer->renderHandle($awarder_phid);
+
+          $awarder_info = pht(
+            'Awarded by %s',
+            $awarder_handle->render());
+
+          $item = id(new PHUIBadgeView())
+            ->setIcon($badge->getIcon())
+            ->setHeader($badge->getName())
+            ->setSubhead($badge->getFlavor())
+            ->setQuality($badge->getQuality())
+            ->addByLine($awarder_info);
+
+          $flex->addItem($item);
+        }
       }
     } else {
       $error = id(new PHUIBoxView())
