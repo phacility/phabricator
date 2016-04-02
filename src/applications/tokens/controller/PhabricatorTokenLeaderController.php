@@ -55,11 +55,10 @@ final class PhabricatorTokenLeaderController
     $nav->appendChild($box);
     $nav->appendChild($pager);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
+
   }
 
 }
