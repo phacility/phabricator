@@ -395,6 +395,8 @@ final class PhabricatorConduitAPIController
         );
       }
 
+      $api_request->setOAuthToken($token);
+
       return $this->validateAuthenticatedUser(
         $api_request,
         $user);
