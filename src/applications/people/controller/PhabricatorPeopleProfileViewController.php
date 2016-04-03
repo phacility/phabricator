@@ -190,13 +190,13 @@ final class PhabricatorPeopleProfileViewController
         ->execute();
       $awards = mpull($awards, null, 'getBadgePHID');
 
-      $badge_phids = mpull($awards, 'getBadgePHID');
-      $badges = id(new PhabricatorBadgesQuery())
-        ->setViewer($viewer)
-        ->withPHIDs($badge_phids)
-        ->withStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
-        ->execute();
-      $badges = mpull($badges, null, 'getPHID');
+      $badges = array();
+      foreach ($awards as $award) {
+        $badge = $award->getBadge();
+        if ($badge->getStatus() == PhabricatorBadgesBadge::STATUS_ACTIVE) {
+          $badges[$award->getBadgePHID()] = $badge;
+        }
+      }
     }
 
     if (count($badges)) {
