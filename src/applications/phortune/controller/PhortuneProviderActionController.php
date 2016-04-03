@@ -39,11 +39,12 @@ final class PhortuneProviderActionController
       return $response;
     }
 
-    return $this->buildApplicationPage(
-      $response,
-      array(
-        'title' => pht('Phortune'),
-      ));
+    $title = pht('Phortune');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($response);
+
   }
 
 
