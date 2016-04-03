@@ -30,13 +30,14 @@ final class FundInitiativeEditController
       $title = pht('Create Initiative');
       $button_text = pht('Create Initiative');
       $cancel_uri = $this->getApplicationURI();
+      $header_icon = 'fa-plus-square';
     } else {
       $title = pht(
-        'Edit %s %s',
-        $initiative->getMonogram(),
+        'Edit Initiative: %s',
         $initiative->getName());
       $button_text = pht('Save Changes');
       $cancel_uri = '/'.$initiative->getMonogram();
+      $header_icon = 'fa-pencil';
     }
 
     $e_name = true;
@@ -230,20 +231,26 @@ final class FundInitiativeEditController
         '/'.$initiative->getMonogram());
       $crumbs->addTextCrumb(pht('Edit'));
     }
+    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
       ->setValidationException($validation_exception)
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Initiative'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }
