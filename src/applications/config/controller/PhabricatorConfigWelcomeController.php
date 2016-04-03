@@ -18,11 +18,9 @@ final class PhabricatorConfigWelcomeController
     $nav->setCrumbs($crumbs);
     $nav->appendChild($this->buildWelcomeScreen($request));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
   }
 
   public function buildWelcomeScreen(AphrontRequest $request) {

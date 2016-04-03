@@ -94,11 +94,9 @@ final class PhabricatorConfigDatabaseStatusController
     $nav->setCrumbs($crumbs);
     $nav->appendChild($body);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
   }
 
 

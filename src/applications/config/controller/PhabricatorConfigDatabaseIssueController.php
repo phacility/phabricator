@@ -159,11 +159,9 @@ final class PhabricatorConfigDatabaseIssueController
         $table_box,
       ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
   }
 
 }

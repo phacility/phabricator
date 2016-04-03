@@ -35,11 +35,9 @@ final class PhabricatorConfigListController
 
     $nav->setCrumbs($crumbs);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
   }
 
   private function buildConfigOptionsList(array $groups, $type) {
