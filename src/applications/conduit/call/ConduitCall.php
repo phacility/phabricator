@@ -65,10 +65,6 @@ final class ConduitCall extends Phobject {
     return $this->handler->shouldAllowUnguardedWrites();
   }
 
-  public function getRequiredScope() {
-    return $this->handler->getRequiredScope();
-  }
-
   public function getErrorDescription($code) {
     return $this->handler->getErrorDescription($code);
   }

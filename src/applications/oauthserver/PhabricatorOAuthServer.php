@@ -29,7 +29,6 @@
 final class PhabricatorOAuthServer extends Phobject {
 
   const AUTHORIZATION_CODE_TIMEOUT = 300;
-  const ACCESS_TOKEN_TIMEOUT       = 3600;
 
   private $user;
   private $client;
@@ -158,39 +157,35 @@ final class PhabricatorOAuthServer extends Phobject {
   /**
    * @task token
    */
-  public function validateAccessToken(
-    PhabricatorOAuthServerAccessToken $token,
-    $required_scope) {
+  public function authorizeToken(
+    PhabricatorOAuthServerAccessToken $token) {
 
-    $created_time    = $token->getDateCreated();
-    $must_be_used_by = $created_time + self::ACCESS_TOKEN_TIMEOUT;
-    $expired         = time() > $must_be_used_by;
-    $authorization   = id(new PhabricatorOAuthClientAuthorization())
-      ->loadOneWhere(
-        'userPHID = %s AND clientPHID = %s',
-        $token->getUserPHID(),
-        $token->getClientPHID());
+    $user_phid = $token->getUserPHID();
+    $client_phid = $token->getClientPHID();
 
+    $authorization = id(new PhabricatorOAuthClientAuthorizationQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUserPHIDs(array($user_phid))
+      ->withClientPHIDs(array($client_phid))
+      ->executeOne();
     if (!$authorization) {
-      return false;
-    }
-    $token_scope = $authorization->getScope();
-    if (!isset($token_scope[$required_scope])) {
-      return false;
+      return null;
     }
 
-    $valid = true;
-    if ($expired) {
-      $valid = false;
-      // check if the scope includes "offline_access", which makes the
-      // token valid despite being expired
-      if (isset(
-        $token_scope[PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS])) {
-        $valid = true;
+    // TODO: This should probably be reworked; expiration should be an
+    // exclusive property of the token. For now, this logic reads: tokens for
+    // authorizations with "offline_access" never expire.
+
+    $is_expired = $token->isExpired();
+    if ($is_expired) {
+      $offline_access = PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS;
+      $authorization_scope = $authorization->getScope();
+      if (empty($authorization_scope[$offline_access])) {
+        return null;
       }
     }
 
-    return $valid;
+    return $authorization;
   }
 
   /**

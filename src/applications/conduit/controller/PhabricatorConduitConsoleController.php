@@ -142,6 +142,36 @@ final class PhabricatorConduitConsoleController
       pht('Errors'),
       $error_description);
 
+
+    $scope = $method->getRequiredScope();
+    switch ($scope) {
+      case ConduitAPIMethod::SCOPE_ALWAYS:
+        $oauth_icon = 'fa-globe green';
+        $oauth_description = pht(
+          'OAuth clients may always call this method.');
+        break;
+      case ConduitAPIMethod::SCOPE_NEVER:
+        $oauth_icon = 'fa-ban red';
+        $oauth_description = pht(
+          'OAuth clients may never call this method.');
+        break;
+      default:
+        $oauth_icon = 'fa-unlock-alt blue';
+        $oauth_description = pht(
+          'OAuth clients may call this method after requesting access to '.
+          'the "%s" scope.',
+          $scope);
+        break;
+    }
+
+    $view->addProperty(
+      pht('OAuth Scope'),
+      array(
+        id(new PHUIIconView())->setIcon($oauth_icon),
+        ' ',
+        $oauth_description,
+      ));
+
     $view->addSectionHeader(
       pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
     $view->addTextContent(
