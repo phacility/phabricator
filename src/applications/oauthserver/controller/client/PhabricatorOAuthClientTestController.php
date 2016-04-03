@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorOAuthServerTestController
-  extends PhabricatorOAuthServerController {
+final class PhabricatorOAuthClientTestController
+  extends PhabricatorOAuthClientController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();

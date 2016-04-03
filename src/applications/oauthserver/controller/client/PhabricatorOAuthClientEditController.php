@@ -3,15 +3,14 @@
 final class PhabricatorOAuthClientEditController
   extends PhabricatorOAuthClientController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
-    $phid = $this->getClientPHID();
-    if ($phid) {
+    if ($id) {
       $client = id(new PhabricatorOAuthServerClientQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($phid))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -124,14 +123,10 @@ final class PhabricatorOAuthClientEditController
       ->setFormErrors($errors)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setCrumbs($crumbs)
+      ->setTitle($title)
+      ->appendChild($box);
   }
 
 }

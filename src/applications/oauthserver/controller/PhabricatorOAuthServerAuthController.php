@@ -3,6 +3,12 @@
 final class PhabricatorOAuthServerAuthController
   extends PhabricatorOAuthServerController {
 
+  protected function buildApplicationCrumbs() {
+    // We're specifically not putting an "OAuth Server" application crumb
+    // on the auth pages because it doesn't make sense to send users there.
+    return new PHUICrumbsView();
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 

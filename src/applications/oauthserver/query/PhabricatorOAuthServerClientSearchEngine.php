@@ -79,12 +79,6 @@ final class PhabricatorOAuthServerClientSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $clients,
-    PhabricatorSavedQuery $query) {
-    return mpull($clients, 'getCreatorPHID');
-  }
-
   protected function renderResultList(
     array $clients,
     PhabricatorSavedQuery $query,
@@ -96,14 +90,11 @@ final class PhabricatorOAuthServerClientSearchEngine
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($clients as $client) {
-      $creator = $handles[$client->getCreatorPHID()];
-
       $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Application %d', $client->getID()))
         ->setHeader($client->getName())
         ->setHref($client->getViewURI())
-        ->setObject($client)
-        ->addByline(pht('Creator: %s', $creator->renderLink()));
+        ->setObject($client);
 
       $list->addItem($item);
     }

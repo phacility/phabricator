@@ -3,13 +3,12 @@
 final class PhabricatorOAuthClientViewController
   extends PhabricatorOAuthClientController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $client = id(new PhabricatorOAuthServerClientQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array($this->getClientPHID()))
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
     if (!$client) {
       return new Aphront404Response();
@@ -27,18 +26,16 @@ final class PhabricatorOAuthClientViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => pht('OAuth Application: %s', $client->getName()),
-      ));
+    $title = pht('OAuth Application: %s', $client->getName());
+
+    return $this->newPage()
+      ->setCrumbs($crumbs)
+      ->setTitle($title)
+      ->appendChild($box);
   }
 
   private function buildHeaderView(PhabricatorOAuthServerClient $client) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
@@ -49,7 +46,7 @@ final class PhabricatorOAuthClientViewController
   }
 
   private function buildActionView(PhabricatorOAuthServerClient $client) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -63,7 +60,6 @@ final class PhabricatorOAuthClientViewController
       ->executeOne();
     $is_authorized = (bool)$authorization;
     $id = $client->getID();
-    $phid = $client->getPHID();
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer);
@@ -80,7 +76,7 @@ final class PhabricatorOAuthClientViewController
       id(new PhabricatorActionView())
         ->setName(pht('Show Application Secret'))
         ->setIcon('fa-eye')
-        ->setHref($this->getApplicationURI("client/secret/{$phid}/"))
+        ->setHref($this->getApplicationURI("client/secret/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
@@ -98,7 +94,7 @@ final class PhabricatorOAuthClientViewController
         ->setIcon('fa-wrench')
         ->setWorkflow(true)
         ->setDisabled($is_authorized)
-        ->setHref($this->getApplicationURI('test/'.$id.'/')));
+        ->setHref($this->getApplicationURI("client/test/{$id}/")));
 
     return $view;
   }
@@ -110,7 +106,7 @@ final class PhabricatorOAuthClientViewController
       ->setUser($viewer);
 
     $view->addProperty(
-      pht('Client ID'),
+      pht('Client PHID'),
       $client->getPHID());
 
     $view->addProperty(
