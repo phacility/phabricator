@@ -297,6 +297,24 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
   }
 
+  public function logoutSession(
+    PhabricatorUser $user,
+    PhabricatorAuthSession $session) {
+
+    $log = PhabricatorUserLog::initializeNewLog(
+      $user,
+      $user->getPHID(),
+      PhabricatorUserLog::ACTION_LOGOUT);
+    $log->save();
+
+    $extensions = PhabricatorAuthSessionEngineExtension::getAllExtensions();
+    foreach ($extensions as $extension) {
+      $extension->didLogout($user, array($session));
+    }
+
+    $session->delete();
+  }
+
 
 /* -(  High Security  )------------------------------------------------------ */
 
