@@ -94,6 +94,7 @@ abstract class PhabricatorEditEngineAPIMethod
     $boxes[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Transaction Types'))
       ->setCollapsed(true)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($this->buildRemarkup($summary_info))
       ->appendChild($summary_table);
 
@@ -140,6 +141,7 @@ abstract class PhabricatorEditEngineAPIMethod
       $boxes[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Transaction Type: %s', $type->getEditType()))
       ->setCollapsed(true)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($this->buildRemarkup($section))
       ->appendChild($type_table);
     }

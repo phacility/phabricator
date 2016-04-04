@@ -511,19 +511,22 @@ final class PhabricatorConduitAPIController
         'wide',
       ));
 
-    $param_panel = new PHUIObjectBoxView();
-    $param_panel->setHeaderText(pht('Method Parameters'));
-    $param_panel->setTable($param_table);
+    $param_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Method Parameters'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($param_table);
 
-    $result_panel = new PHUIObjectBoxView();
-    $result_panel->setHeaderText(pht('Method Result'));
-    $result_panel->setTable($result_table);
+    $result_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Method Result'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($result_table);
 
     $method_uri = $this->getApplicationURI('method/'.$method.'/');
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb($method, $method_uri)
-      ->addTextCrumb(pht('Call'));
+      ->addTextCrumb(pht('Call'))
+      ->setBorder(true);
 
     $example_panel = null;
     if ($request && $method_implementation) {
@@ -533,16 +536,26 @@ final class PhabricatorConduitAPIController
         $params);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $title = pht('Method Call Result');
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-exchange');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $param_panel,
         $result_panel,
         $example_panel,
-      ),
-      array(
-        'title' => pht('Method Call Result'),
       ));
+
+    $title = pht('Method Call Result');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function renderAPIValue($value) {

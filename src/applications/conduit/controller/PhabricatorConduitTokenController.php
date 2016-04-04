@@ -55,19 +55,26 @@ final class PhabricatorConduitTokenController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Install Certificate'));
+    $crumbs->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Certificate Token'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => pht('Certificate Install Token'),
-      ));
+    $title = pht('Certificate Install Token');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($object_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }
