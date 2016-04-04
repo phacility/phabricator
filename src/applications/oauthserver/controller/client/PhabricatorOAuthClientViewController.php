@@ -22,6 +22,11 @@ final class PhabricatorOAuthClientViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($client->getName());
 
+    $timeline = $this->buildTransactionTimeline(
+      $client,
+      new PhabricatorOAuthServerTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
@@ -31,7 +36,11 @@ final class PhabricatorOAuthClientViewController
     return $this->newPage()
       ->setCrumbs($crumbs)
       ->setTitle($title)
-      ->appendChild($box);
+      ->appendChild(
+        array(
+          $box,
+          $timeline,
+        ));
   }
 
   private function buildHeaderView(PhabricatorOAuthServerClient $client) {

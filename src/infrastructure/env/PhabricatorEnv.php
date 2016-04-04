@@ -575,8 +575,8 @@ final class PhabricatorEnv extends Phobject {
    * @return void
    * @task uri
    */
-  public static function requireValidRemoteURIForLink($uri) {
-    $uri = new PhutilURI($uri);
+  public static function requireValidRemoteURIForLink($raw_uri) {
+    $uri = new PhutilURI($raw_uri);
 
     $proto = $uri->getProtocol();
     if (!strlen($proto)) {
@@ -584,7 +584,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid linkable resource. A valid linkable '.
           'resource URI must specify a protocol.',
-          $uri));
+          $raw_uri));
     }
 
     $protocols = self::getEnvConfig('uri.allowed-protocols');
@@ -593,7 +593,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid linkable resource. A valid linkable '.
           'resource URI must use one of these protocols: %s.',
-          $uri,
+          $raw_uri,
           implode(', ', array_keys($protocols))));
     }
 
@@ -603,7 +603,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid linkable resource. A valid linkable '.
           'resource URI must specify a domain.',
-          $uri));
+          $raw_uri));
     }
   }
 
