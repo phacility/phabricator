@@ -195,22 +195,30 @@ final class ReleephProductEditController extends ReleephProductController {
           ->setValue(pht('Save')));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edit Releeph Product'))
+      ->setHeaderText(pht('Product'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
+
+    $title = pht('Edit Product');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit Product'));
+    $crumbs->setBorder(true);
 
-    return $this->buildStandardPageResponse(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => pht('Edit Releeph Product'),
-        'device' => true,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function getBranchHelpText() {

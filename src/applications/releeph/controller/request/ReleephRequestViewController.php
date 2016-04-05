@@ -76,17 +76,25 @@ final class ReleephRequestViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($pull->getMonogram(), '/'.$pull->getMonogram());
+    $crumbs->setBorder(true);
 
-    return $this->buildStandardPageResponse(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-flag-checkered');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $pull_box,
         $timeline,
         $add_comment_form,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 
