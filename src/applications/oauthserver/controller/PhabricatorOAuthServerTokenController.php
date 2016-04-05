@@ -154,8 +154,7 @@ final class PhabricatorOAuthServerTokenController
       unset($unguarded);
       $result = array(
         'access_token' => $access_token->getToken(),
-        'token_type'   => 'Bearer',
-        'expires_in'   => $access_token->getExpiresDuration(),
+        'token_type' => 'Bearer',
       );
       return $response->setContent($result);
     } catch (Exception $e) {
