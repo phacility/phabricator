@@ -16,6 +16,7 @@ final class PhabricatorOAuthServerEditor
 
     $types[] = PhabricatorOAuthServerTransaction::TYPE_NAME;
     $types[] = PhabricatorOAuthServerTransaction::TYPE_REDIRECT_URI;
+    $types[] = PhabricatorOAuthServerTransaction::TYPE_DISABLED;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -32,6 +33,8 @@ final class PhabricatorOAuthServerEditor
         return $object->getName();
       case PhabricatorOAuthServerTransaction::TYPE_REDIRECT_URI:
         return $object->getRedirectURI();
+      case PhabricatorOAuthServerTransaction::TYPE_DISABLED:
+        return $object->getIsDisabled();
     }
   }
 
@@ -43,6 +46,8 @@ final class PhabricatorOAuthServerEditor
       case PhabricatorOAuthServerTransaction::TYPE_NAME:
       case PhabricatorOAuthServerTransaction::TYPE_REDIRECT_URI:
         return $xaction->getNewValue();
+      case PhabricatorOAuthServerTransaction::TYPE_DISABLED:
+        return (int)$xaction->getNewValue();
     }
   }
 
@@ -57,6 +62,9 @@ final class PhabricatorOAuthServerEditor
       case PhabricatorOAuthServerTransaction::TYPE_REDIRECT_URI:
         $object->setRedirectURI($xaction->getNewValue());
         return;
+      case PhabricatorOAuthServerTransaction::TYPE_DISABLED:
+        $object->setIsDisabled($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -69,6 +77,7 @@ final class PhabricatorOAuthServerEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorOAuthServerTransaction::TYPE_NAME:
       case PhabricatorOAuthServerTransaction::TYPE_REDIRECT_URI:
+      case PhabricatorOAuthServerTransaction::TYPE_DISABLED:
         return;
     }
 

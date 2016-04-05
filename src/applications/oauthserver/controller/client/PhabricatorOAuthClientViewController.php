@@ -51,6 +51,12 @@ final class PhabricatorOAuthClientViewController
       ->setHeader(pht('OAuth Application: %s', $client->getName()))
       ->setPolicyObject($client);
 
+    if ($client->getIsDisabled()) {
+      $header->setStatus('fa-ban', 'indigo', pht('Disabled'));
+    } else {
+      $header->setStatus('fa-check', 'green', pht('Enabled'));
+    }
+
     return $header;
   }
 
@@ -62,12 +68,6 @@ final class PhabricatorOAuthClientViewController
       $client,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $authorization = id(new PhabricatorOAuthClientAuthorizationQuery())
-      ->setViewer($viewer)
-      ->withUserPHIDs(array($viewer->getPHID()))
-      ->withClientPHIDs(array($client->getPHID()))
-      ->executeOne();
-    $is_authorized = (bool)$authorization;
     $id = $client->getID();
 
     $view = id(new PhabricatorActionListView())
@@ -89,20 +89,30 @@ final class PhabricatorOAuthClientViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Delete Application'))
-        ->setIcon('fa-times')
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit)
-        ->setHref($client->getDeleteURI()));
+    $is_disabled = $client->getIsDisabled();
+    if ($is_disabled) {
+      $disable_text = pht('Enable Application');
+      $disable_icon = 'fa-check';
+    } else {
+      $disable_text = pht('Disable Application');
+      $disable_icon = 'fa-ban';
+    }
+
+    $disable_uri = $this->getApplicationURI("client/disable/{$id}/");
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Create Test Authorization'))
-        ->setIcon('fa-wrench')
+        ->setName($disable_text)
+        ->setIcon($disable_icon)
         ->setWorkflow(true)
-        ->setDisabled($is_authorized)
+        ->setDisabled(!$can_edit)
+        ->setHref($disable_uri));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Generate Test Token'))
+        ->setIcon('fa-plus')
+        ->setWorkflow(true)
         ->setHref($this->getApplicationURI("client/test/{$id}/")));
 
     return $view;

@@ -11,9 +11,10 @@ final class PhabricatorOAuthServerClient
   protected $name;
   protected $redirectURI;
   protected $creatorPHID;
-  protected $isTrusted = 0;
+  protected $isTrusted;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $isDisabled;
 
   public function getEditURI() {
     $id = $this->getID();
@@ -25,17 +26,14 @@ final class PhabricatorOAuthServerClient
     return "/oauthserver/client/view/{$id}/";
   }
 
-  public function getDeleteURI() {
-    $id = $this->getID();
-    return "/oauthserver/client/delete/{$id}/";
-  }
-
   public static function initializeNewClient(PhabricatorUser $actor) {
     return id(new PhabricatorOAuthServerClient())
       ->setCreatorPHID($actor->getPHID())
       ->setSecret(Filesystem::readRandomCharacters(32))
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy($actor->getPHID());
+      ->setEditPolicy($actor->getPHID())
+      ->setIsDisabled(0)
+      ->setIsTrusted(0);
   }
 
   protected function getConfiguration() {
@@ -46,13 +44,9 @@ final class PhabricatorOAuthServerClient
         'secret' => 'text32',
         'redirectURI' => 'text255',
         'isTrusted' => 'bool',
+        'isDisabled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'creatorPHID' => array(
           'columns' => array('creatorPHID'),
         ),

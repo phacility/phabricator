@@ -62,6 +62,15 @@ final class PhabricatorOAuthServerAuthController
             phutil_tag('strong', array(), 'client_id')));
       }
 
+      if ($client->getIsDisabled()) {
+        return $this->buildErrorResponse(
+          'invalid_request',
+          pht('Application Disabled'),
+          pht(
+            'The %s OAuth application has been disabled.',
+            phutil_tag('strong', array(), 'client_id')));
+      }
+
       $name = $client->getName();
       $server->setClient($client);
       if ($redirect_uri) {

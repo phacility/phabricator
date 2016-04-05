@@ -5,6 +5,7 @@ final class PhabricatorOAuthServerTransaction
 
   const TYPE_NAME = 'oauthserver.name';
   const TYPE_REDIRECT_URI = 'oauthserver.redirect-uri';
+  const TYPE_DISABLED = 'oauthserver.disabled';
 
   public function getApplicationName() {
     return 'oauth_server';
@@ -44,6 +45,16 @@ final class PhabricatorOAuthServerTransaction
           $this->renderHandleLink($author_phid),
           $old,
           $new);
+      case self::TYPE_DISABLED:
+        if ($new) {
+          return pht(
+            '%s disabled this application.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s enabled this application.',
+            $this->renderHandleLink($author_phid));
+        }
     }
 
     return parent::getTitle();

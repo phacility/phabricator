@@ -15,36 +15,41 @@ final class PhabricatorOAuthClientTestController
       return new Aphront404Response();
     }
 
-    $view_uri = $client->getViewURI();
-
-    // Look for an existing authorization.
-    $authorization = id(new PhabricatorOAuthClientAuthorizationQuery())
-      ->setViewer($viewer)
-      ->withUserPHIDs(array($viewer->getPHID()))
-      ->withClientPHIDs(array($client->getPHID()))
-      ->executeOne();
-    if ($authorization) {
-      return $this->newDialog()
-        ->setTitle(pht('Already Authorized'))
-        ->appendParagraph(
-          pht(
-            'You have already authorized this application to access your '.
-            'account.'))
-        ->addCancelButton($view_uri, pht('Close'));
-    }
+    $done_uri = $client->getViewURI();
 
     if ($request->isFormPost()) {
       $server = id(new PhabricatorOAuthServer())
         ->setUser($viewer)
         ->setClient($client);
 
-      $scope = array();
-      $authorization = $server->authorizeClient($scope);
+      // Create an authorization if we don't already have one.
+      $authorization = id(new PhabricatorOAuthClientAuthorizationQuery())
+        ->setViewer($viewer)
+        ->withUserPHIDs(array($viewer->getPHID()))
+        ->withClientPHIDs(array($client->getPHID()))
+        ->executeOne();
+      if (!$authorization) {
+        $scope = array();
+        $authorization = $server->authorizeClient($scope);
+      }
 
-      $id = $authorization->getID();
-      $panel_uri = '/settings/panel/oauthorizations/?id='.$id;
+      $access_token = $server->generateAccessToken();
 
-      return id(new AphrontRedirectResponse())->setURI($panel_uri);
+      $form = id(new AphrontFormView())
+        ->setViewer($viewer)
+        ->appendInstructions(
+          pht(
+            'Keep this token private, it allows any bearer to access '.
+            'your account on behalf of this application.'))
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel(pht('Token'))
+            ->setValue($access_token->getToken()));
+
+      return $this->newDialog()
+        ->setTitle(pht('OAuth Access Token'))
+        ->appendForm($form)
+        ->addCancelButton($done_uri, pht('Close'));
     }
 
     // TODO: It would be nice to put scope options in this dialog, maybe?
@@ -53,10 +58,10 @@ final class PhabricatorOAuthClientTestController
       ->setTitle(pht('Authorize Application?'))
       ->appendParagraph(
         pht(
-          'This will create an authorization, permitting %s to access '.
-          'your account.',
+          'This will create an authorization and OAuth token, permitting %s '.
+          'to access your account.',
           phutil_tag('strong', array(), $client->getName())))
-      ->addCancelButton($view_uri)
+      ->addCancelButton($done_uri)
       ->addSubmitButton(pht('Authorize Application'));
   }
 }
