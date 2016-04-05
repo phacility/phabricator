@@ -81,6 +81,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Upload'), $request->getRequestURI());
+    $crumbs->setBorder(true);
 
     $title = pht('Upload File');
 
@@ -89,19 +90,26 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       ->setShowIfSupportedID($support_id);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('File'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-upload');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
         $global_upload,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }
