@@ -38,14 +38,10 @@ final class PhabricatorHelpDocumentationController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $list,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($list);
   }
 
 

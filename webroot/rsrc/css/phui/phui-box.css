@@ -97,7 +97,7 @@
   color: {$bluetext};
 }
 
-.phui-box-blue-property .phui-object-item-list-view.phui-object-list-flush {
+.phui-box-blue-property .phui-object-item-list-view {
   padding: 2px 8px;
 }
 

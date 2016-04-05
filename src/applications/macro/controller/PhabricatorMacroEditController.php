@@ -233,16 +233,19 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
     $crumbs = $this->buildApplicationCrumbs();
 
     if ($macro->getID()) {
-      $title = pht('Edit Image Macro');
+      $title = pht('Edit Macro: %s', $macro->getName());
       $crumb = pht('Edit Macro');
+      $header_icon = 'fa-pencil';
 
-      $crumbs->addTextCrumb(pht('Macro "%s"', $macro->getName()), $view_uri);
+      $crumbs->addTextCrumb(pht('Macro: %s', $macro->getName()), $view_uri);
     } else {
       $title = pht('Create Image Macro');
       $crumb = pht('Create Macro');
+      $header_icon = 'fa-plus-square';
     }
 
     $crumbs->addTextCrumb($crumb, $request->getRequestURI());
+    $crumbs->setBorder(true);
 
     $upload = null;
     if ($macro->getID()) {
@@ -267,23 +270,32 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
       $upload = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Upload New File'))
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setForm($upload_form);
     }
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Macro'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
         $upload,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

@@ -44,9 +44,9 @@ final class PhabricatorAuthProviderConfigTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_ENABLE:
         if ($new) {
-          return 'fa-play';
+          return 'fa-check';
         } else {
-          return 'fa-pause';
+          return 'fa-ban';
         }
     }
 
@@ -62,7 +62,7 @@ final class PhabricatorAuthProviderConfigTransaction
         if ($new) {
           return 'green';
         } else {
-          return 'red';
+          return 'indigo';
         }
     }
 

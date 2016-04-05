@@ -77,15 +77,13 @@ final class PhabricatorEmailVerificationController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Verify Email'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $dialog,
-      ),
-      array(
-        'title' => pht('Verify Email'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Verify Email'))
+      ->setCrumbs($crumbs)
+      ->appendChild($dialog);
+
   }
 
 }

@@ -7,7 +7,7 @@ final class PhabricatorOAuthClientAuthorizationQuery
   private $userPHIDs;
   private $clientPHIDs;
 
-  public function witHPHIDs(array $phids) {
+  public function withPHIDs(array $phids) {
     $this->phids = $phids;
     return $this;
   }
@@ -22,19 +22,12 @@ final class PhabricatorOAuthClientAuthorizationQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorOAuthClientAuthorization();
+  }
+
   protected function loadPage() {
-    $table  = new PhabricatorOAuthClientAuthorization();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T auth %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $authorizations) {
@@ -49,43 +42,44 @@ final class PhabricatorOAuthClientAuthorizationQuery
 
     foreach ($authorizations as $key => $authorization) {
       $client = idx($clients, $authorization->getClientPHID());
+
       if (!$client) {
+        $this->didRejectResult($authorization);
         unset($authorizations[$key]);
         continue;
       }
+
       $authorization->attachClient($client);
     }
 
     return $authorizations;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->userPHIDs) {
+    if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
-    if ($this->clientPHIDs) {
+    if ($this->clientPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'clientPHID IN (%Ls)',
         $this->clientPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

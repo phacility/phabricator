@@ -3,13 +3,12 @@
 final class PhabricatorOAuthClientDeleteController
   extends PhabricatorOAuthClientController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $client = id(new PhabricatorOAuthServerClientQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array($this->getClientPHID()))
+      ->withIDs(array($request->getURIData('id')))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -20,14 +19,15 @@ final class PhabricatorOAuthClientDeleteController
       return new Aphront404Response();
     }
 
+    // TODO: This should be "disable", not "delete"!
+
     if ($request->isFormPost()) {
       $client->delete();
       $app_uri = $this->getApplicationURI();
       return id(new AphrontRedirectResponse())->setURI($app_uri);
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('Delete OAuth Application?'))
       ->appendParagraph(
         pht(
@@ -35,8 +35,6 @@ final class PhabricatorOAuthClientDeleteController
           phutil_tag('strong', array(), $client->getName())))
       ->addCancelButton($client->getViewURI())
       ->addSubmitButton(pht('Delete Application'));
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

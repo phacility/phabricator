@@ -194,24 +194,33 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Batch Editor'))
+      ->setHeaderIcon('fa-pencil-square-o');
 
     $task_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Selected Tasks'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Batch Editor'))
+      ->setHeaderText(pht('Actions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $task_box,
         $form_box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

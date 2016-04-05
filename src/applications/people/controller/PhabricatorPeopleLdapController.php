@@ -42,7 +42,6 @@ final class PhabricatorPeopleLdapController
       $this->getApplicationURI('/ldap/'));
 
     $nav = $this->buildSideNavView();
-    $nav->setCrumbs($crumbs);
     $nav->selectFilter('ldap');
     $nav->appendChild($content);
 
@@ -56,11 +55,10 @@ final class PhabricatorPeopleLdapController
       $nav->appendChild($this->processSearchRequest($request));
     }
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title'  => pht('Import Ldap Users'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Import Ldap Users'))
+      ->setCrumbs($crumbs)
+      ->setNavigation($nav);
   }
 
   private function processImportRequest($request) {

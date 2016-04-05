@@ -62,19 +62,25 @@ final class DrydockConsoleController extends DrydockController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
+    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Drydock Console'))
       ->setObjectList($menu);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title'  => pht('Drydock Console'),
-      ));
+    $title = pht('Drydock Console');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-truck');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

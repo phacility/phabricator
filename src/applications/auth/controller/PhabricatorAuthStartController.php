@@ -29,6 +29,7 @@ final class PhabricatorAuthStartController
     // it and warn the user they may need to nuke their cookies.
 
     $session_token = $request->getCookie(PhabricatorCookies::COOKIE_SESSION);
+    $did_clear = $request->getStr('cleared');
 
     if (strlen($session_token)) {
       $kind = PhabricatorAuthSessionEngine::getSessionKindFromToken(
@@ -39,16 +40,32 @@ final class PhabricatorAuthStartController
           // be logged in, so we can just continue.
           break;
         default:
-          // The session cookie is invalid, so clear it.
+          // The session cookie is invalid, so try to clear it.
           $request->clearCookie(PhabricatorCookies::COOKIE_USERNAME);
           $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
 
-          return $this->renderError(
-            pht(
-              'Your login session is invalid. Try reloading the page and '.
-              'logging in again. If that does not work, clear your browser '.
-              'cookies.'));
+          // We've previously tried to clear the cookie but we ended up back
+          // here, so it didn't work. Hard fatal instead of trying again.
+          if ($did_clear) {
+            return $this->renderError(
+              pht(
+                'Your login session is invalid, and clearing the session '.
+                'cookie was unsuccessful. Try clearing your browser cookies.'));
+          }
+
+          $redirect_uri = $request->getRequestURI();
+          $redirect_uri->setQueryParam('cleared', 1);
+          return id(new AphrontRedirectResponse())->setURI($redirect_uri);
       }
+    }
+
+    // If we just cleared the session cookie and it worked, clean up after
+    // ourselves by redirecting to get rid of the "cleared" parameter. The
+    // the workflow will continue normally.
+    if ($did_clear) {
+      $redirect_uri = $request->getRequestURI();
+      $redirect_uri->setQueryParam('cleared', null);
+      return id(new AphrontRedirectResponse())->setURI($redirect_uri);
     }
 
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();
@@ -189,16 +206,17 @@ final class PhabricatorAuthStartController
     $crumbs->addTextCrumb(pht('Login'));
     $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $header,
-        $invite_message,
-        $out,
-      ),
-      array(
-        'title' => pht('Login to Phabricator'),
-      ));
+    $title = pht('Login to Phabricator');
+    $view = array(
+      $header,
+      $invite_message,
+      $out,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 

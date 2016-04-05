@@ -7,11 +7,9 @@ abstract class PhabricatorAuthController extends PhabricatorController {
     $view->setTitle($title);
     $view->setErrors($messages);
 
-    return $this->buildApplicationPage(
-      $view,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($view);
 
   }
 

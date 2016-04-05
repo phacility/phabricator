@@ -75,24 +75,33 @@ final class PhabricatorPeopleProfileEditController
     }
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edit Profile'))
+      ->setHeaderText(pht('Profile'))
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
-
-    if ($note) {
-      $form_box->setInfoView($note);
-    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit Profile'));
+    $crumbs->setBorder(true);
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Profile: %s', $user->getFullName()))
+      ->setHeaderIcon('fa-pencil');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $note,
+        $form_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
-      ->appendChild($form_box);
+      ->appendChild($view);
   }
 }

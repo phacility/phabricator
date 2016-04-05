@@ -2,35 +2,28 @@
 
 final class PhragmentZIPController extends PhragmentController {
 
-  private $dblob;
-  private $snapshot;
-
   private $snapshotCache;
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, 'dblob', '');
-    $this->snapshot = idx($data, 'snapshot', null);
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $dblob = $request->getURIData('dblob');
+    $snapshot = $request->getURIData('snapshot');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $parents = $this->loadParentFragments($this->dblob);
+    $parents = $this->loadParentFragments($dblob);
     if ($parents === null) {
       return new Aphront404Response();
     }
     $fragment = idx($parents, count($parents) - 1, null);
 
-    if ($this->snapshot !== null) {
+    if ($snapshot !== null) {
       $snapshot = id(new PhragmentSnapshotQuery())
         ->setViewer($viewer)
         ->withPrimaryFragmentPHIDs(array($fragment->getPHID()))
-        ->withNames(array($this->snapshot))
+        ->withNames(array($snapshot))
         ->executeOne();
       if ($snapshot === null) {
         return new Aphront404Response();
@@ -63,7 +56,7 @@ final class PhragmentZIPController extends PhragmentController {
       $dialog->setTitle(pht('ZIP Extension Not Installed'));
       $dialog->appendParagraph($inst);
 
-      $dialog->addCancelButton('/phragment/browse/'.$this->dblob);
+      $dialog->addCancelButton('/phragment/browse/'.$dblob);
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
@@ -71,7 +64,8 @@ final class PhragmentZIPController extends PhragmentController {
       throw new Exception(pht('Unable to create ZIP archive!'));
     }
 
-    $mappings = $this->getFragmentMappings($fragment, $fragment->getPath());
+    $mappings = $this->getFragmentMappings(
+      $fragment, $fragment->getPath(), $snapshot);
 
     $phids = array();
     foreach ($mappings as $path => $file_phid) {
@@ -130,14 +124,17 @@ final class PhragmentZIPController extends PhragmentController {
   /**
    * Returns a list of mappings like array('some/path.txt' => 'file PHID');
    */
-  private function getFragmentMappings(PhragmentFragment $current, $base_path) {
+  private function getFragmentMappings(
+    PhragmentFragment $current,
+    $base_path,
+    $snapshot) {
     $mappings = $current->getFragmentMappings(
       $this->getRequest()->getUser(),
       $base_path);
 
     $result = array();
     foreach ($mappings as $path => $fragment) {
-      $version = $this->getVersion($fragment);
+      $version = $this->getVersion($fragment, $snapshot);
       if ($version !== null) {
         $result[$path] = $version->getFilePHID();
       }
@@ -145,8 +142,8 @@ final class PhragmentZIPController extends PhragmentController {
     return $result;
   }
 
-  private function getVersion($fragment) {
-    if ($this->snapshot === null) {
+  private function getVersion($fragment, $snapshot) {
+    if ($snapshot === null) {
       return $fragment->getLatestVersion();
     } else {
       return idx($this->snapshotCache, $fragment->getPHID(), null);

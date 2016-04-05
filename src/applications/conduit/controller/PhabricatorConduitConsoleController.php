@@ -85,37 +85,41 @@ final class PhabricatorConduitConsoleController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($method->getAPIMethodName());
+      ->setHeader($method->getAPIMethodName())
+      ->setHeaderIcon('fa-tty');
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Call Method'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
-
-    $content = array();
 
     $properties = $this->buildMethodProperties($method);
 
     $info_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('API Method: %s', $method->getAPIMethodName()))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
-
-    $content[] = $info_box;
-    $content[] = $method->getMethodDocumentation();
-    $content[] = $form_box;
-    $content[] = $this->renderExampleBox($method, null);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($method->getAPIMethodName());
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-      ),
-      array(
-        'title' => $method->getAPIMethodName(),
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $info_box,
+        $method->getMethodDocumentation(),
+        $form_box,
+        $this->renderExampleBox($method, null),
       ));
+
+    $title = $method->getAPIMethodName();
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildMethodProperties(ConduitAPIMethod $method) {
@@ -141,6 +145,36 @@ final class PhabricatorConduitConsoleController
     $view->addProperty(
       pht('Errors'),
       $error_description);
+
+
+    $scope = $method->getRequiredScope();
+    switch ($scope) {
+      case ConduitAPIMethod::SCOPE_ALWAYS:
+        $oauth_icon = 'fa-globe green';
+        $oauth_description = pht(
+          'OAuth clients may always call this method.');
+        break;
+      case ConduitAPIMethod::SCOPE_NEVER:
+        $oauth_icon = 'fa-ban red';
+        $oauth_description = pht(
+          'OAuth clients may never call this method.');
+        break;
+      default:
+        $oauth_icon = 'fa-unlock-alt blue';
+        $oauth_description = pht(
+          'OAuth clients may call this method after requesting access to '.
+          'the "%s" scope.',
+          $scope);
+        break;
+    }
+
+    $view->addProperty(
+      pht('OAuth Scope'),
+      array(
+        id(new PHUIIconView())->setIcon($oauth_icon),
+        ' ',
+        $oauth_description,
+      ));
 
     $view->addSectionHeader(
       pht('Description'), PHUIPropertyListView::ICON_SUMMARY);

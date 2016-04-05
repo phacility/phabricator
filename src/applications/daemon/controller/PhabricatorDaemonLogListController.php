@@ -31,11 +31,10 @@ final class PhabricatorDaemonLogListController
     $nav->appendChild($box);
     $nav->appendChild($pager);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('All Daemons'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('All Daemons'))
+      ->appendChild($nav);
+
   }
 
 }

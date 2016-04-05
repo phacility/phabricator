@@ -208,22 +208,28 @@ final class PhabricatorPeopleNewController
 
     $title = pht('Create New User');
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('User'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-user');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

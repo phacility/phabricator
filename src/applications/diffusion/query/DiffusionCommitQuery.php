@@ -364,7 +364,7 @@ final class DiffusionCommitQuery
 
         if ($repo === null) {
           if ($this->defaultRepository) {
-            $repo = $this->defaultRepository->getCallsign();
+            $repo = $this->defaultRepository->getPHID();
           }
         }
 
@@ -375,7 +375,7 @@ final class DiffusionCommitQuery
           $bare[] = $commit_identifier;
         } else {
           $refs[] = array(
-            'callsign' => $repo,
+            'repository' => $repo,
             'identifier' => $commit_identifier,
           );
         }
@@ -392,17 +392,16 @@ final class DiffusionCommitQuery
       }
 
       if ($refs) {
-        $callsigns = ipull($refs, 'callsign');
+        $repositories = ipull($refs, 'repository');
 
         $repos = id(new PhabricatorRepositoryQuery())
           ->setViewer($this->getViewer())
-          ->withIdentifiers($callsigns);
+          ->withIdentifiers($repositories);
         $repos->execute();
 
         $repos = $repos->getIdentifierMap();
         foreach ($refs as $key => $ref) {
-          $repo = idx($repos, $ref['callsign']);
-
+          $repo = idx($repos, $ref['repository']);
           if (!$repo) {
             continue;
           }

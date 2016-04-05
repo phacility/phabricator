@@ -56,14 +56,11 @@ final class PhabricatorLogoutController
     }
 
     if ($viewer->getPHID()) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($viewer)
+      return $this->newDialog()
         ->setTitle(pht('Log out of Phabricator?'))
         ->appendChild(pht('Are you sure you want to log out?'))
         ->addSubmitButton(pht('Logout'))
         ->addCancelButton('/');
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     return id(new AphrontRedirectResponse())->setURI('/');

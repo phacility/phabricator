@@ -45,17 +45,17 @@ final class ManiphestReportController extends ManiphestController {
         return new Aphront404Response();
     }
 
-    $nav->appendChild($core);
-    $nav->setCrumbs(
-      $this->buildApplicationCrumbs()
-        ->addTextCrumb(pht('Reports')));
+    $crumbs = $this->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Reports'));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Maniphest Reports'),
-        'device' => false,
-      ));
+    $nav->appendChild($core);
+    $title = pht('Maniphest Reports');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setNavigation($nav);
+
   }
 
   public function renderBurn() {

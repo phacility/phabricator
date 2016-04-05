@@ -66,10 +66,11 @@ final class PhabricatorBadgesEditor
       case PhabricatorBadgesTransaction::TYPE_DESCRIPTION:
       case PhabricatorBadgesTransaction::TYPE_ICON:
       case PhabricatorBadgesTransaction::TYPE_STATUS:
-      case PhabricatorBadgesTransaction::TYPE_QUALITY:
       case PhabricatorBadgesTransaction::TYPE_AWARD:
       case PhabricatorBadgesTransaction::TYPE_REVOKE:
         return $xaction->getNewValue();
+      case PhabricatorBadgesTransaction::TYPE_QUALITY:
+        return (int)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);

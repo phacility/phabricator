@@ -2,21 +2,15 @@
 
 final class PhragmentBrowseController extends PhragmentController {
 
-  private $dblob;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, 'dblob', '');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $dblob = $request->getURIData('dblob');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $parents = $this->loadParentFragments($this->dblob);
+    $parents = $this->loadParentFragments($dblob);
     if ($parents === null) {
       return new Aphront404Response();
     }
@@ -83,16 +77,19 @@ final class PhragmentBrowseController extends PhragmentController {
       $list->addItem($item);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $current_box,
-        $list,
-      ),
-      array(
-        'title' => pht('Browse Fragments'),
-      ));
+    $title = pht('Browse Fragments');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $current_box,
+      $list,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

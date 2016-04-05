@@ -40,13 +40,9 @@ final class PhabricatorConfigHistoryController
     $nav->setCrumbs($crumbs);
     $nav->appendChild($timeline);
 
-    return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
   }
 
 }

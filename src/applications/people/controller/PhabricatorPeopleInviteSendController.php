@@ -125,8 +125,10 @@ final class PhabricatorPeopleInviteSendController
     } else {
       $crumbs->addTextCrumb(pht('Invite Users'));
     }
+    $crumbs->setBorder(true);
 
     $confirm_box = null;
+    $info_view = null;
     if ($is_confirm) {
 
       $handles = array();
@@ -157,14 +159,15 @@ final class PhabricatorPeopleInviteSendController
               ->setValue(pht('Send Invitations')));
       }
 
+      $info_view = id(new PHUIInfoView())
+        ->setErrors($confirm_errors)
+        ->setSeverity($severity);
+
       $confirm_box = id(new PHUIObjectBoxView())
-        ->setInfoView(
-          id(new PHUIInfoView())
-            ->setErrors($confirm_errors)
-            ->setSeverity($severity))
         ->setHeaderText(pht('Confirm Invites'))
         ->setTable($invite_table)
-        ->appendChild($confirm_form);
+        ->appendChild($confirm_form)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     }
 
     $form = id(new AphrontFormView())
@@ -197,23 +200,32 @@ final class PhabricatorPeopleInviteSendController
               : pht('Continue'))
           ->addCancelButton($this->getApplicationURI('invite/')));
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-group');
+
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(
         $is_confirm
           ? pht('Revise Invites')
           : pht('Invite Users'))
       ->setFormErrors($errors)
-      ->setForm($form);
+      ->setForm($form)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $info_view,
         $confirm_box,
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

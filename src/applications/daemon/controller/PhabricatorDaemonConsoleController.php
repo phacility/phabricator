@@ -117,16 +117,15 @@ final class PhabricatorDaemonConsoleController
         'n',
       ));
 
-    $completed_panel = new PHUIObjectBoxView();
-    $completed_panel->setHeaderText(
-      pht('Recently Completed Tasks (Last 15m)'));
-    $completed_panel->setTable($completed_table);
+    $completed_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Recently Completed Tasks (Last 15m)'))
+      ->setTable($completed_table);
 
     $daemon_table = new PhabricatorDaemonLogListView();
     $daemon_table->setUser($viewer);
     $daemon_table->setDaemonLogs($logs);
 
-    $daemon_panel = new PHUIObjectBoxView();
+    $daemon_panel = id(new PHUIObjectBoxView());
     $daemon_panel->setHeaderText(pht('Active Daemons'));
     $daemon_panel->setObjectList($daemon_table);
 
@@ -218,11 +217,10 @@ final class PhabricatorDaemonConsoleController
         $triggers_panel,
       ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Console'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Console'))
+      ->appendChild($nav);
+
   }
 
   private function buildTriggersTable(array $triggers) {

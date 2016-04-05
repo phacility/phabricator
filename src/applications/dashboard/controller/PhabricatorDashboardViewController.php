@@ -36,14 +36,10 @@ final class PhabricatorDashboardViewController
       $rendered_dashboard = $this->buildEmptyView();
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $rendered_dashboard,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($rendered_dashboard);
   }
 
   protected function buildApplicationCrumbs() {

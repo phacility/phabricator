@@ -2,28 +2,21 @@
 
 final class PhragmentPatchController extends PhragmentController {
 
-  private $aid;
-  private $bid;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->aid = idx($data, 'aid', 0);
-    $this->bid = idx($data, 'bid', 0);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $aid = $request->getURIData('aid');
+    $bid = $request->getURIData('bid');
 
     // If "aid" is "x", then it means the user wants to generate
     // a patch of an empty file to the version specified by "bid".
 
-    $ids = array($this->aid, $this->bid);
-    if ($this->aid === 'x') {
-      $ids = array($this->bid);
+    $ids = array($aid, $bid);
+    if ($aid === 'x') {
+      $ids = array($bid);
     }
 
     $versions = id(new PhragmentFragmentVersionQuery())
@@ -32,14 +25,14 @@ final class PhragmentPatchController extends PhragmentController {
       ->execute();
 
     $version_a = null;
-    if ($this->aid !== 'x') {
-      $version_a = idx($versions, $this->aid, null);
+    if ($aid !== 'x') {
+      $version_a = idx($versions, $aid, null);
       if ($version_a === null) {
         return new Aphront404Response();
       }
     }
 
-    $version_b = idx($versions, $this->bid, null);
+    $version_b = idx($versions, $bid, null);
     if ($version_b === null) {
       return new Aphront404Response();
     }

@@ -40,14 +40,12 @@ final class PassphraseCredentialPublicController
           ->setReadOnly(true)
           ->setValue($public_key));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle(pht('Public Key (%s)', $credential->getMonogram()))
       ->appendChild($body)
       ->addCancelButton($view_uri, pht('Done'));
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

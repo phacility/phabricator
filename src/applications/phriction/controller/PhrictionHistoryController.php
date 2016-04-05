@@ -3,19 +3,17 @@
 final class PhrictionHistoryController
   extends PhrictionController {
 
-  private $slug;
-
   public function shouldAllowPublic() {
     return true;
   }
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $this->slug = $request->getURIData('slug');
+    $slug = $request->getURIData('slug');
 
     $document = id(new PhrictionDocumentQuery())
       ->setViewer($viewer)
-      ->withSlugs(array(PhabricatorSlug::normalize($this->slug)))
+      ->withSlugs(array(PhabricatorSlug::normalize($slug)))
       ->needContent(true)
       ->executeOne();
     if (!$document) {
@@ -141,6 +139,7 @@ final class PhrictionHistoryController
     $crumbs->addTextCrumb(
       pht('History'),
       PhrictionDocument::getSlugURI($document->getSlug(), 'history'));
+    $crumbs->setBorder(true);
 
     $header = new PHUIHeaderView();
     $header->setHeader(phutil_tag(
@@ -150,22 +149,30 @@ final class PhrictionHistoryController
     $header->setSubheader(pht('Document History'));
 
     $obj_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
     $pager = id(new PHUIBoxView())
       ->addClass('ml')
       ->appendChild($pager);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Document History: %s', head($history)->getTitle()))
+      ->setHeaderIcon('fa-history');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $obj_box,
         $pager,
-      ),
-      array(
-        'title'     => pht('Document History'),
       ));
+
+    $title = pht('Document History');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
 
   }
 

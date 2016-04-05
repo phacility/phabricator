@@ -34,9 +34,7 @@ final class PhabricatorBadgesSearchEngine
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('qualities')
         ->setLabel(pht('Quality'))
-        ->setOptions(
-          id(new PhabricatorBadgesBadge())
-            ->getQualityNameMap()),
+        ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Status'))
@@ -110,8 +108,9 @@ final class PhabricatorBadgesSearchEngine
 
     $list = id(new PHUIObjectItemListView());
     foreach ($badges as $badge) {
+      $quality_name = PhabricatorBadgesQuality::getQualityName(
+        $badge->getQuality());
 
-      $quality = idx($badge->getQualityNameMap(), $badge->getQuality());
       $mini_badge = id(new PHUIBadgeMiniView())
         ->setHeader($badge->getName())
         ->setIcon($badge->getIcon())
@@ -121,7 +120,7 @@ final class PhabricatorBadgesSearchEngine
         ->setHeader($badge->getName())
         ->setBadge($mini_badge)
         ->setHref('/badges/view/'.$badge->getID().'/')
-        ->addAttribute($quality)
+        ->addAttribute($quality_name)
         ->addAttribute($badge->getFlavor());
 
       if ($badge->isArchived()) {

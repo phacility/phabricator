@@ -37,6 +37,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     return $box;
@@ -81,10 +82,12 @@ final class PhabricatorMetaMTAApplicationEmailPanel
 
     $crumbs = $controller->buildPanelCrumbs($this);
     $crumbs->addTextCrumb(pht('Edit Application Emails'));
+    $crumbs->setBorder(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit Application Emails: %s', $application->getName()))
-      ->setSubheader($application->getAppEmailBlurb());
+      ->setSubheader($application->getAppEmailBlurb())
+      ->setHeaderIcon('fa-pencil');
 
     $icon = id(new PHUIIconView())
       ->setIcon('fa-plus');
@@ -97,20 +100,20 @@ final class PhabricatorMetaMTAApplicationEmailPanel
     $header->addActionLink($button);
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Emails'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     $title = $application->getName();
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($object_box);
 
     return $controller->buildPanelPage(
       $this,
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+      $title,
+      $crumbs,
+      $view);
   }
 
   private function returnNewAddressResponse(

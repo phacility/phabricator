@@ -83,7 +83,7 @@ final class PhabricatorProjectsCurtainExtension
     }
 
     return $this->newPanel()
-      ->setHeaderText(pht('Projects'))
+      ->setHeaderText(pht('Tags'))
       ->setOrder(10000)
       ->appendChild($list);
   }

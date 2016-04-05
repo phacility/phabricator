@@ -73,26 +73,35 @@ final class PhabricatorSearchEditController
 
     if ($named_query->getID()) {
       $title = pht('Edit Saved Query');
+      $header_icon = 'fa-pencil';
     } else {
       $title = pht('Save Query');
+      $header_icon = 'fa-search';
     }
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Query'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

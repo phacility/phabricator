@@ -64,12 +64,10 @@ final class PhabricatorConfigAllController
     $nav->setCrumbs($crumbs);
     $nav->appendChild($panel);
 
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
   }
 
 }

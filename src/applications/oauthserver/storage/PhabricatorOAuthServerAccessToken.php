@@ -22,4 +22,18 @@ final class PhabricatorOAuthServerAccessToken
     ) + parent::getConfiguration();
   }
 
+  public function isExpired() {
+    $now = PhabricatorTime::getNow();
+    $expires_epoch = $this->getExpiresEpoch();
+    return ($now > $expires_epoch);
+  }
+
+  public function getExpiresEpoch() {
+    return $this->getDateCreated() + 3600;
+  }
+
+  public function getExpiresDuration() {
+    return PhabricatorTime::getNow() - $this->getExpiresEpoch();
+  }
+
 }

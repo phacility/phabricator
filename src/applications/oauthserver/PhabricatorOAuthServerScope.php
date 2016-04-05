@@ -4,13 +4,7 @@ final class PhabricatorOAuthServerScope extends Phobject {
 
   const SCOPE_OFFLINE_ACCESS = 'offline_access';
   const SCOPE_WHOAMI         = 'whoami';
-  const SCOPE_NOT_ACCESSIBLE = 'not_accessible';
 
-  /*
-   * Note this does not contain SCOPE_NOT_ACCESSIBLE which is magic
-   * used to simplify code for data that is not currently accessible
-   * via OAuth.
-   */
   public static function getScopesDict() {
     return array(
       self::SCOPE_OFFLINE_ACCESS => 1,

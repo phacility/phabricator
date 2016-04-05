@@ -49,16 +49,29 @@ final class PhabricatorBadgesEditEngine
     return pht('Badge');
   }
 
+  protected function getObjectCreateCancelURI($object) {
+    return $this->getApplication()->getApplicationURI('/');
+  }
+
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('edit/');
+  }
+
   protected function getCommentViewHeaderText($object) {
-    return pht('Add Comment');
+    return pht('Render Honors');
   }
 
   protected function getCommentViewButtonText($object) {
-    return pht('Submit');
+    return pht('Salute');
   }
 
   protected function getObjectViewURI($object) {
     return $object->getViewURI();
+  }
+
+  protected function getCreateNewObjectPolicy() {
+    return $this->getApplication()->getPolicy(
+      PhabricatorBadgesCreateCapability::CAPABILITY);
   }
 
   protected function buildCustomEditFields($object) {
@@ -89,7 +102,7 @@ final class PhabricatorBadgesEditEngine
         ->setLabel(pht('Quality'))
         ->setValue($object->getQuality())
         ->setTransactionType(PhabricatorBadgesTransaction::TYPE_QUALITY)
-        ->setOptions($object->getQualityNameMap()),
+        ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))
