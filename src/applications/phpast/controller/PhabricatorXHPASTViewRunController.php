@@ -47,13 +47,24 @@ final class PhabricatorXHPASTViewRunController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Generate XHP AST'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      $form_box,
-      array(
-        'title' => pht('XHPAST View'),
+    $title = pht('XHPAST View');
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-ambulance');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($view);
+
   }
 
 }
