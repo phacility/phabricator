@@ -43,17 +43,10 @@ final class DrydockRepositoryOperationStatusController
       $this->getApplicationURI('operation/'));
     $crumbs->addTextCrumb($title);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $status_view,
-      ),
-      array(
-        'title' => array(
-          $title,
-          pht('Status'),
-        ),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Status'))
+      ->setCrumbs($crumbs)
+      ->appendChild($status_view);
   }
 
 }
