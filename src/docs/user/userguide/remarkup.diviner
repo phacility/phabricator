@@ -532,10 +532,12 @@ escape HTML and preserve line breaks).
 
 Remarkup supports simple table syntax. For example, this:
 
-  | Fruit  | Color  | Price   | Peel?
-  | -----  | -----  | -----   | -----
-  | Apple  | red    | `$0.93` | no
-  | Banana | yellow | `$0.19` | **YES**
+```
+| Fruit  | Color  | Price   | Peel?
+| -----  | -----  | -----   | -----
+| Apple  | red    | `$0.93` | no
+| Banana | yellow | `$0.19` | **YES**
+```
 
 ...produces this:
 
@@ -546,26 +548,28 @@ Remarkup supports simple table syntax. For example, this:
 
 Remarkup also supports a simplified HTML table syntax. For example, this:
 
-  <table>
-    <tr>
-      <th>Fruit</th>
-      <th>Color</th>
-      <th>Price</th>
-      <th>Peel?</th>
-    </tr>
-    <tr>
-      <td>Apple</td>
-      <td>red</td>
-      <td>`$0.93`</td>
-      <td>no</td>
-    </tr>
-    <tr>
-      <td>Banana</td>
-      <td>yellow</td>
-      <td>`$0.19`</td>
-      <td>**YES**</td>
-    </tr>
-  </table>
+```
+<table>
+  <tr>
+    <th>Fruit</th>
+    <th>Color</th>
+    <th>Price</th>
+    <th>Peel?</th>
+  </tr>
+  <tr>
+    <td>Apple</td>
+    <td>red</td>
+    <td>`$0.93`</td>
+    <td>no</td>
+  </tr>
+  <tr>
+    <td>Banana</td>
+    <td>yellow</td>
+    <td>`$0.19`</td>
+    <td>**YES**</td>
+  </tr>
+</table>
+```
 
 ...produces this:
 
