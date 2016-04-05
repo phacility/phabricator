@@ -61,17 +61,15 @@ final class PhabricatorSettingsMainController
         '/p/'.$this->getUser()->getUsername().'/');
     }
     $crumbs->addTextCrumb($panel->getPanelName());
-    $nav->appendChild(
-      array(
-        $crumbs,
-        $response,
-      ));
+    $nav->appendChild($response);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $panel->getPanelName(),
-      ));
+    $title = $panel->getPanelName();
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setNavigation($nav);
+
   }
 
   private function buildPanels() {
