@@ -23,7 +23,8 @@ final class PhabricatorMetaMTAMailViewController
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($mail);
+      ->setPolicyObject($mail)
+      ->setHeaderIcon('fa-envelope');
 
     $status = $mail->getStatus();
     $name = PhabricatorMailOutboundStatus::getStatusName($status);
@@ -32,24 +33,26 @@ final class PhabricatorMetaMTAMailViewController
     $header->setStatus($icon, $color, $name);
 
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Mail %d', $mail->getID()));
+      ->addTextCrumb(pht('Mail %d', $mail->getID()))
+      ->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Mail'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($this->buildMessageProperties($mail), pht('Message'))
       ->addPropertyList($this->buildHeaderProperties($mail), pht('Headers'))
       ->addPropertyList($this->buildDeliveryProperties($mail), pht('Delivery'))
       ->addPropertyList($this->buildMetadataProperties($mail), pht('Metadata'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-        'pageObjects' => array($mail->getPHID()),
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($object_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($mail->getPHID()))
+      ->appendChild($view);
   }
 
   private function buildMessageProperties(PhabricatorMetaMTAMail $mail) {
