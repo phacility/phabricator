@@ -172,13 +172,13 @@ final class DifferentialRevisionEditController
     if ($revision->getID()) {
       if ($diff) {
         $header_icon = 'fa-upload';
-        $title = pht('Update Differential Revision');
+        $title = pht('Update Revision');
         $crumbs->addTextCrumb(
           'D'.$revision->getID(),
           '/differential/diff/'.$diff->getID().'/');
       } else {
         $header_icon = 'fa-pencil';
-        $title = pht('Edit Differential Revision');
+        $title = pht('Edit Revision: %s', $revision->getTitle());
         $crumbs->addTextCrumb(
           'D'.$revision->getID(),
           '/D'.$revision->getID());

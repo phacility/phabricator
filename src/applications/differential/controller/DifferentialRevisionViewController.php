@@ -1033,7 +1033,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DIFF DETAIL'))
+      ->setHeaderText(pht('Diff Detail'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUser($viewer);
 
