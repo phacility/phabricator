@@ -119,22 +119,46 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       return new Aphront404Response();
     }
 
+    // We may be on the CDN domain, so we need to use a fully-qualified URI
+    // here to make sure we end up back on the main domain.
+    $info_uri = PhabricatorEnv::getURI($file->getInfoURI());
+
+
     if (!$file->validateSecretKey($this->key)) {
-      return new Aphront403Response();
+      $dialog = $this->newDialog()
+        ->setTitle(pht('Invalid Authorization'))
+        ->appendParagraph(
+          pht(
+            'The link you followed to access this file is no longer '.
+            'valid. The visibility of the file may have changed after '.
+            'the link was generated.'))
+        ->appendParagraph(
+          pht(
+            'You can continue to the file detail page to get more '.
+            'information and attempt to access the file.'))
+        ->addCancelButton($info_uri, pht('Continue'));
+
+      return id(new AphrontDialogResponse())
+        ->setDialog($dialog)
+        ->setHTTPResponseCode(404);
     }
 
     if ($file->getIsPartial()) {
-      // We may be on the CDN domain, so we need to use a fully-qualified URI
-      // here to make sure we end up back on the main domain.
-      $info_uri = PhabricatorEnv::getURI($file->getInfoURI());
-
-      return $this->newDialog()
+      $dialog = $this->newDialog()
         ->setTitle(pht('Partial Upload'))
         ->appendParagraph(
           pht(
             'This file has only been partially uploaded. It must be '.
             'uploaded completely before you can download it.'))
-        ->addCancelButton($info_uri);
+        ->appendParagraph(
+          pht(
+            'You can continue to the file detail page to monitor the '.
+            'upload progress of the file.'))
+        ->addCancelButton($info_uri, pht('Continue'));
+
+      return id(new AphrontDialogResponse())
+        ->setDialog($dialog)
+        ->setHTTPResponseCode(404);
     }
 
     $this->file = $file;
