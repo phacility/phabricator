@@ -56,6 +56,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   private $objects = self::ATTACHABLE;
   private $objectPHIDs = self::ATTACHABLE;
   private $originalFile = self::ATTACHABLE;
+  private $transforms = self::ATTACHABLE;
 
   public static function initializeNewFile() {
     $app = id(new PhabricatorApplicationQuery())
@@ -1206,6 +1207,15 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return id(new AphrontRedirectResponse())
       ->setIsExternal($is_external)
       ->setURI($uri);
+  }
+
+  public function attachTransforms(array $map) {
+    $this->transforms = $map;
+    return $this;
+  }
+
+  public function getTransform($key) {
+    return $this->assertAttachedKey($this->transforms, $key);
   }
 
 

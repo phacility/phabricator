@@ -16,6 +16,10 @@ final class PhabricatorEmbedFileRemarkupRule
     $objects = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withIDs($ids)
+      ->needTransforms(
+        array(
+          PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW,
+        ))
       ->execute();
 
     $phids_key = self::KEY_EMBED_FILE_PHIDS;
@@ -109,7 +113,15 @@ final class PhabricatorEmbedFileRemarkupRule
         default:
           $preview_key = PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW;
           $xform = PhabricatorFileTransform::getTransformByKey($preview_key);
-          $attrs['src'] = $file->getURIForTransform($xform);
+
+          $existing_xform = $file->getTransform($preview_key);
+          if ($existing_xform) {
+            $xform_uri = $existing_xform->getCDNURI();
+          } else {
+            $xform_uri = $file->getURIForTransform($xform);
+          }
+
+          $attrs['src'] = $xform_uri;
 
           $dimensions = $xform->getTransformedDimensions($file);
           if ($dimensions) {

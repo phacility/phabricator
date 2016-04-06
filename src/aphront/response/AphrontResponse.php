@@ -192,17 +192,19 @@ abstract class AphrontResponse extends Phobject {
   public function getCacheHeaders() {
     $headers = array();
     if ($this->cacheable) {
+      $cache_control = array();
+      $cache_control[] = sprintf('max-age=%d', $this->cacheable);
+
       if ($this->canCDN) {
-        $headers[] = array(
-          'Cache-Control',
-          'public',
-        );
+        $cache_control[] = 'public';
       } else {
-        $headers[] = array(
-          'Cache-Control',
-          'private',
-        );
+        $cache_control[] = 'private';
       }
+
+      $headers[] = array(
+        'Cache-Control',
+        implode(', ', $cache_control),
+      );
 
       $headers[] = array(
         'Expires',
