@@ -4,6 +4,7 @@ abstract class AphrontResponse extends Phobject {
 
   private $request;
   private $cacheable = false;
+  private $canCDN;
   private $responseCode = 200;
   private $lastModified = null;
 
@@ -63,6 +64,11 @@ abstract class AphrontResponse extends Phobject {
 
   public function setCacheDurationInSeconds($duration) {
     $this->cacheable = $duration;
+    return $this;
+  }
+
+  public function setCanCDN($can_cdn) {
+    $this->canCDN = $can_cdn;
     return $this;
   }
 
@@ -186,6 +192,18 @@ abstract class AphrontResponse extends Phobject {
   public function getCacheHeaders() {
     $headers = array();
     if ($this->cacheable) {
+      if ($this->canCDN) {
+        $headers[] = array(
+          'Cache-Control',
+          'public',
+        );
+      } else {
+        $headers[] = array(
+          'Cache-Control',
+          'private',
+        );
+      }
+
       $headers[] = array(
         'Expires',
         $this->formatEpochTimestampForHTTPHeader(time() + $this->cacheable),
@@ -193,11 +211,7 @@ abstract class AphrontResponse extends Phobject {
     } else {
       $headers[] = array(
         'Cache-Control',
-        'private, no-cache, no-store, must-revalidate',
-      );
-      $headers[] = array(
-        'Pragma',
-        'no-cache',
+        'no-store',
       );
       $headers[] = array(
         'Expires',

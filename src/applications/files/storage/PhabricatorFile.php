@@ -697,10 +697,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
         pht('You must save a file before you can generate a view URI.'));
     }
 
-    return $this->getCDNURI(null);
+    return $this->getCDNURI();
   }
 
-  private function getCDNURI($token) {
+  public function getCDNURI() {
     $name = self::normalizeFileName($this->getName());
     $name = phutil_escape_uri($name);
 
@@ -720,9 +720,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $parts[] = $this->getSecretKey();
     $parts[] = $this->getPHID();
-    if ($token) {
-      $parts[] = $token;
-    }
     $parts[] = $name;
 
     $path = '/'.implode('/', $parts);
@@ -735,19 +732,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     } else {
       return PhabricatorEnv::getCDNURI($path);
     }
-  }
-
-  /**
-   * Get the CDN URI for this file, including a one-time-use security token.
-   *
-   */
-  public function getCDNURIWithToken() {
-    if (!$this->getPHID()) {
-      throw new Exception(
-        pht('You must save a file before you can generate a CDN URI.'));
-    }
-
-    return $this->getCDNURI($this->generateOneTimeToken());
   }
 
 
@@ -1119,38 +1103,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $this->metadata[self::METADATA_PROFILE] = $value;
     return $this;
   }
-
-  protected function generateOneTimeToken() {
-    $key = Filesystem::readRandomCharacters(16);
-    $token_type = PhabricatorFileAccessTemporaryTokenType::TOKENTYPE;
-
-    // Save the new secret.
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $token = id(new PhabricatorAuthTemporaryToken())
-        ->setTokenResource($this->getPHID())
-        ->setTokenType($token_type)
-        ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
-        ->setTokenCode(PhabricatorHash::digest($key))
-        ->save();
-    unset($unguarded);
-
-    return $key;
-  }
-
-  public function validateOneTimeToken($token_code) {
-    $token_type = PhabricatorFileAccessTemporaryTokenType::TOKENTYPE;
-
-    $token = id(new PhabricatorAuthTemporaryTokenQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withTokenResources(array($this->getPHID()))
-      ->withTokenTypes(array($token_type))
-      ->withExpired(false)
-      ->withTokenCodes(array(PhabricatorHash::digest($token_code)))
-      ->executeOne();
-
-    return $token;
-  }
-
 
   /**
    * Write the policy edge between this file and some object.
