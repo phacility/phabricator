@@ -98,11 +98,13 @@ final class ManiphestEditEngine
       id(new PhabricatorHandlesEditField())
         ->setKey('column')
         ->setLabel(pht('Column'))
-        ->setDescription(pht('Workboard column to create this task into.'))
-        ->setConduitDescription(pht('Create into a workboard column.'))
-        ->setConduitTypeDescription(pht('PHID of workboard column.'))
-        ->setAliases(array('columnPHID'))
-        ->setTransactionType(ManiphestTransaction::TYPE_COLUMN)
+        ->setDescription(pht('Create a task in a workboard column.'))
+        ->setConduitDescription(
+          pht('Move a task to one or more workboard columns.'))
+        ->setConduitTypeDescription(
+          pht('PHID or PHIDs of workboard columns.'))
+        ->setAliases(array('columnPHID', 'columns', 'columnPHIDs'))
+        ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
         ->setSingleValue(null)
         ->setIsInvisible(true)
         ->setIsReorderable(false)

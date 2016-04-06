@@ -1072,18 +1072,13 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $options = array();
     }
 
+    $value = array(
+      'columnPHID' => $dst->getPHID(),
+    ) + $options;
+
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
-      ->setOldValue(
-        array(
-          'projectPHID' => $board->getPHID(),
-          'columnPHIDs' => array($src->getPHID()),
-        ))
-      ->setNewValue(
-        array(
-          'projectPHID' => $board->getPHID(),
-          'columnPHIDs' => array($dst->getPHID()),
-        ) + $options);
+      ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
+      ->setNewValue(array($value));
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)

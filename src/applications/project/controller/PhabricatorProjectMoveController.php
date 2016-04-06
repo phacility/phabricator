@@ -68,26 +68,22 @@ final class PhabricatorProjectMoveController
 
     $xactions = array();
 
+    $order_params = array();
     if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
-      $order_params = array(
-        'afterPHID' => $after_phid,
-        'beforePHID' => $before_phid,
-      );
-    } else {
-      $order_params = array();
+      if ($after_phid) {
+        $order_params['afterPHID'] = $after_phid;
+      } else if ($before_phid) {
+        $order_params['beforePHID'] = $before_phid;
+      }
     }
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
+      ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
       ->setNewValue(
         array(
-          'columnPHIDs' => array($column->getPHID()),
-          'projectPHID' => $column->getProjectPHID(),
-        ) + $order_params)
-      ->setOldValue(
-        array(
-          'columnPHIDs' => $old_column_phids,
-          'projectPHID' => $column->getProjectPHID(),
+          array(
+            'columnPHID' => $column->getPHID(),
+          ) + $order_params,
         ));
 
     if ($order == PhabricatorProjectColumn::ORDER_PRIORITY) {
