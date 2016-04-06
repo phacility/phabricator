@@ -57,7 +57,7 @@ final class PhabricatorPeopleProfileManageController
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->addPropertySection(pht('DETAILS'), $properties)
+      ->addPropertySection(pht('Details'), $properties)
       ->setMainColumn(
         array(
           $timeline,

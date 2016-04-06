@@ -145,7 +145,7 @@ final class PhabricatorPhurlURLViewController
     }
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
   }

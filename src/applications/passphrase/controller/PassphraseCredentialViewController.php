@@ -36,7 +36,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
       ->setSubheader($subheader)
       ->setCurtain($curtain)
       ->setMainColumn($timeline)
-      ->addPropertySection(pht('PROPERTIES'), $content);
+      ->addPropertySection(pht('Properties'), $content);
 
     return $this->newPage()
       ->setTitle($title)

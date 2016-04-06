@@ -63,7 +63,7 @@ final class PhabricatorApplicationDetailViewController
           $policies,
           $panels,
         ))
-      ->addPropertySection(pht('DETAILS'), $details);
+      ->addPropertySection(pht('Details'), $details);
 
     return $this->newPage()
       ->setTitle($title)

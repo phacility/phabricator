@@ -29,7 +29,7 @@ final class PhabricatorDaemonBulkJobViewController
     $curtain = $this->buildCurtainView($job);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 

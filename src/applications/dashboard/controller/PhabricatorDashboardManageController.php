@@ -198,7 +198,7 @@ final class PhabricatorDashboardManageController
       $viewer->renderHandleList($dashboard->getPanelPHIDs()));
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
   }

@@ -88,8 +88,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $timeline,
         $comment_view,
       ))
-      ->addPropertySection(pht('DESCRIPTION'), $description)
-      ->addPropertySection(pht('DETAILS'), $details);
+      ->addPropertySection(pht('Description'), $description)
+      ->addPropertySection(pht('Details'), $details);
 
     return $this->newPage()
       ->setTitle($title)

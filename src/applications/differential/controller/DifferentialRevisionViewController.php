@@ -480,7 +480,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('DETAILS'));
+      ->setHeader(pht('Details'));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

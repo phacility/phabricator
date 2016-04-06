@@ -131,7 +131,7 @@ final class PhortuneMerchantViewController
     $view->addProperty(pht('Status'), $status_view);
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($view);
   }
@@ -146,7 +146,7 @@ final class PhortuneMerchantViewController
       $description = new PHUIRemarkupView($viewer, $description);
       $view->addTextContent($description);
       return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('DESCRIPTION'))
+        ->setHeaderText(pht('Description'))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->appendChild($view);
     }

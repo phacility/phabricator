@@ -539,7 +539,7 @@ final class HarbormasterBuildViewController
       $this->getStatus($build));
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('PROPERTIES'))
+      ->setHeaderText(pht('Properties'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
 

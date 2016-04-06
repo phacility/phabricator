@@ -165,7 +165,7 @@ final class PhabricatorDashboardPanelViewController
         : phutil_tag('em', array(), $does_not_appear));
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
   }

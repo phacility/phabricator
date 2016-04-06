@@ -119,7 +119,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setSubheader($subheader)
       ->setCurtain($curtain)
       ->setMainColumn($ponder_content)
-      ->addPropertySection(pht('DETAILS'), $details)
+      ->addPropertySection(pht('Details'), $details)
       ->addClass('ponder-question-view');
 
     $page_objects = array_merge(

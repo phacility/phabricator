@@ -178,7 +178,7 @@ final class HarbormasterBuildableViewController
         : pht('Automatic Buildable'));
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('PROPERTIES'))
+      ->setHeaderText(pht('Properties'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
   }
