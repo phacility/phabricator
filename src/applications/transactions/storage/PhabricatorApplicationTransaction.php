@@ -561,6 +561,7 @@ abstract class PhabricatorApplicationTransaction
         if ($field) {
           return $field->shouldHideInApplicationTransactions($this);
         }
+        break;
       case PhabricatorTransactions::TYPE_COLUMNS:
         return !$this->getInterestingMoves($this->getNewValue());
       case PhabricatorTransactions::TYPE_EDGE:
