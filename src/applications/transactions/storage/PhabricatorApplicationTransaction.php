@@ -256,6 +256,15 @@ abstract class PhabricatorApplicationTransaction
         $phids[] = ipull($old, 'dst');
         $phids[] = ipull($new, 'dst');
         break;
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        foreach ($new as $move) {
+          $phids[] = array(
+            $move['columnPHID'],
+            $move['boardPHID'],
+          );
+          $phids[] = $move['fromColumnPHIDs'];
+        }
+        break;
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
@@ -407,6 +416,8 @@ abstract class PhabricatorApplicationTransaction
         return 'fa-trophy';
       case PhabricatorTransactions::TYPE_SPACE:
         return 'fa-th-large';
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        return 'fa-columns';
     }
 
     return 'fa-pencil';
@@ -493,6 +504,7 @@ abstract class PhabricatorApplicationTransaction
         case PhabricatorTransactions::TYPE_EDIT_POLICY:
         case PhabricatorTransactions::TYPE_JOIN_POLICY:
         case PhabricatorTransactions::TYPE_SPACE:
+        case PhabricatorTransactions::TYPE_COLUMNS:
           break;
         default:
           $old = $this->getOldValue();
@@ -501,9 +513,10 @@ abstract class PhabricatorApplicationTransaction
             return true;
           }
 
-          if (!strlen($old)) {
+          if (!is_array($old) && !strlen($old)) {
             return true;
           }
+
           break;
       }
     }
@@ -549,6 +562,8 @@ abstract class PhabricatorApplicationTransaction
         if ($field) {
           return $field->shouldHideInApplicationTransactions($this);
         }
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        return !$this->getInterestingMoves($this->getNewValue());
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
@@ -930,6 +945,44 @@ abstract class PhabricatorApplicationTransaction
         }
         break;
 
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        $moves = $this->getInterestingMoves($new);
+        if (count($moves) == 1) {
+          $move = head($moves);
+          $from_columns = $move['fromColumnPHIDs'];
+          $to_column = $move['columnPHID'];
+          $board_phid = $move['boardPHID'];
+          if (count($from_columns) == 1) {
+            return pht(
+              '%s moved this task from %s to %s on the %s board.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(head($from_columns)),
+              $this->renderHandleLink($to_column),
+              $this->renderHandleLink($board_phid));
+          } else {
+            return pht(
+              '%s moved this task to %s on the %s board.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($to_column),
+              $this->renderHandleLink($board_phid));
+          }
+        } else {
+          $fragments = array();
+          foreach ($moves as $move) {
+            $fragments[] = pht(
+              '%s (%s)',
+              $this->renderHandleLink($board_phid),
+              $this->renderHandleLink($to_column));
+          }
+
+          return pht(
+            '%s moved this task on %s board(s): %s.',
+            $this->renderHandleLink($author_phid),
+            phutil_count($moves),
+            phutil_implode_html(', ', $fragments));
+        }
+        break;
+
       default:
         return pht(
           '%s edited this %s.',
@@ -1057,6 +1110,47 @@ abstract class PhabricatorApplicationTransaction
           default:
             return null;
         }
+
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        $moves = $this->getInterestingMoves($new);
+        if (count($moves) == 1) {
+          $move = head($moves);
+          $from_columns = $move['fromColumnPHIDs'];
+          $to_column = $move['columnPHID'];
+          $board_phid = $move['boardPHID'];
+          if (count($from_columns) == 1) {
+            return pht(
+              '%s moved %s from %s to %s on the %s board.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid),
+              $this->renderHandleLink(head($from_columns)),
+              $this->renderHandleLink($to_column),
+              $this->renderHandleLink($board_phid));
+          } else {
+            return pht(
+              '%s moved %s to %s on the %s board.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid),
+              $this->renderHandleLink($to_column),
+              $this->renderHandleLink($board_phid));
+          }
+        } else {
+          $fragments = array();
+          foreach ($moves as $move) {
+            $fragments[] = pht(
+              '%s (%s)',
+              $this->renderHandleLink($board_phid),
+              $this->renderHandleLink($to_column));
+          }
+
+          return pht(
+            '%s moved %s on %s board(s): %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            phutil_count($moves),
+            phutil_implode_html(', ', $fragments));
+        }
+        break;
 
     }
 
@@ -1362,6 +1456,18 @@ abstract class PhabricatorApplicationTransaction
     }
 
     return true;
+  }
+
+  private function getInterestingMoves(array $moves) {
+    // Remove moves which only shift the position of a task within a column.
+    foreach ($moves as $key => $move) {
+      $from_phids = array_fuse($move['fromColumnPHIDs']);
+      if (isset($from_phids[$move['columnPHID']])) {
+        unset($moves[$key]);
+      }
+    }
+
+    return $moves;
   }
 
 
