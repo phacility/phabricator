@@ -139,6 +139,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return 'F'.$this->getID();
   }
 
+  public function scrambleSecret() {
+    return $this->setSecretKey($this->generateSecretKey());
+  }
+
   public static function readUploadedFileData($spec) {
     if (!$spec) {
       throw new Exception(pht('No file was uploaded!'));

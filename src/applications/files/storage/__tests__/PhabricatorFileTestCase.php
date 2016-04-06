@@ -8,6 +8,133 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     );
   }
 
+  public function testFileDirectScramble() {
+    // Changes to a file's view policy should scramble the file secret.
+
+    $engine = new PhabricatorTestStorageEngine();
+    $data = Filesystem::readRandomCharacters(64);
+
+    $author = $this->generateNewTestUser();
+
+    $params = array(
+      'name' => 'test.dat',
+      'viewPolicy' => PhabricatorPolicies::POLICY_USER,
+      'authorPHID' => $author->getPHID(),
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    $file = PhabricatorFile::newFromFileData($data, $params);
+
+    $secret1 = $file->getSecretKey();
+
+    // First, change the name: this should not scramble the secret.
+    $xactions = array();
+    $xactions[] = id(new PhabricatorFileTransaction())
+      ->setTransactionType(PhabricatorFileTransaction::TYPE_NAME)
+      ->setNewValue('test.dat2');
+
+    $engine = id(new PhabricatorFileEditor())
+      ->setActor($author)
+      ->setContentSource($this->newContentSource())
+      ->applyTransactions($file, $xactions);
+
+    $file = $file->reload();
+
+    $secret2 = $file->getSecretKey();
+
+    $this->assertEqual(
+      $secret1,
+      $secret2,
+      pht('No secret scramble on non-policy edit.'));
+
+    // Now, change the view policy. This should scramble the secret.
+    $xactions = array();
+    $xactions[] = id(new PhabricatorFileTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+      ->setNewValue($author->getPHID());
+
+    $engine = id(new PhabricatorFileEditor())
+      ->setActor($author)
+      ->setContentSource($this->newContentSource())
+      ->applyTransactions($file, $xactions);
+
+    $file = $file->reload();
+    $secret3 = $file->getSecretKey();
+
+    $this->assertTrue(
+      ($secret1 !== $secret3),
+      pht('Changing file view policy should scramble secret.'));
+  }
+
+  public function testFileIndirectScramble() {
+    // When a file is attached to an object like a task and the task view
+    // policy changes, the file secret should be scrambled. This invalidates
+    // old URIs if tasks get locked down.
+
+    $engine = new PhabricatorTestStorageEngine();
+    $data = Filesystem::readRandomCharacters(64);
+
+    $author = $this->generateNewTestUser();
+
+    $params = array(
+      'name' => 'test.dat',
+      'viewPolicy' => $author->getPHID(),
+      'authorPHID' => $author->getPHID(),
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    $file = PhabricatorFile::newFromFileData($data, $params);
+    $secret1 = $file->getSecretKey();
+
+    $task = ManiphestTask::initializeNewTask($author);
+
+    $xactions = array();
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+      ->setNewValue(pht('File Scramble Test Task'));
+
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+      ->setNewValue('{'.$file->getMonogram().'}');
+
+    id(new ManiphestTransactionEditor())
+      ->setActor($author)
+      ->setContentSource($this->newContentSource())
+      ->applyTransactions($task, $xactions);
+
+    $file = $file->reload();
+    $secret2 = $file->getSecretKey();
+
+    $this->assertEqual(
+      $secret1,
+      $secret2,
+      pht(
+        'File policy should not scramble when attached to '.
+        'newly created object.'));
+
+    $xactions = array();
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+      ->setNewValue($author->getPHID());
+
+    id(new ManiphestTransactionEditor())
+      ->setActor($author)
+      ->setContentSource($this->newContentSource())
+      ->applyTransactions($task, $xactions);
+
+    $file = $file->reload();
+    $secret3 = $file->getSecretKey();
+
+    $this->assertTrue(
+      ($secret1 !== $secret3),
+      pht('Changing attached object view policy should scramble secret.'));
+  }
+
+
   public function testFileVisibility() {
     $engine = new PhabricatorTestStorageEngine();
     $data = Filesystem::readRandomCharacters(64);
