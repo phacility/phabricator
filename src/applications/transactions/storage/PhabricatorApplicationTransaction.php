@@ -727,6 +727,10 @@ abstract class PhabricatorApplicationTransaction
         return pht('This object is already in that space.');
       case PhabricatorTransactions::TYPE_EDGE:
         return pht('Edges already exist; transaction has no effect.');
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        return pht(
+          'You have not moved this object to any columns it is not '.
+          'already in.');
     }
 
     return pht(
