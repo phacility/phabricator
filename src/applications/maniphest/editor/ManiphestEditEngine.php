@@ -163,6 +163,7 @@ EODOCS
         ->setIsDefaultable(false)
         ->setIsLockable(false)
         ->setCommentActionLabel(pht('Move on Workboard'))
+        ->setCommentActionOrder(2000)
         ->setColumnMap($column_map),
       id(new PhabricatorTextEditField())
         ->setKey('title')

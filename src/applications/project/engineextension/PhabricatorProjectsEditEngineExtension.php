@@ -50,6 +50,7 @@ final class PhabricatorProjectsEditEngineExtension
       ->setIsCopyable(true)
       ->setUseEdgeTransactions(true)
       ->setCommentActionLabel(pht('Change Project Tags'))
+      ->setCommentActionOrder(8000)
       ->setDescription(pht('Select project tags for the object.'))
       ->setTransactionType($edge_type)
       ->setMetadataValue('edge:type', $project_edge_type)
