@@ -81,6 +81,57 @@ final class ManiphestEditEngine
       $owner_value = array($this->getViewer()->getPHID());
     }
 
+    $column_documentation = pht(<<<EODOCS
+You can use this transaction type to create a task into a particular workboard
+column, or move an existing task between columns.
+
+The transaction value can be specified in several forms. Some are simpler but
+less powerful, while others are more complex and more powerful.
+
+The simplest valid value is a single column PHID:
+
+```lang=json
+"PHID-PCOL-1111"
+```
+
+This will move the task into that column, or create the task into that column
+if you are creating a new task. If the task is currently on the board, it will
+be moved out of any exclusive columns. If the task is not currently on the
+board, it will be added to the board.
+
+You can also perform multiple moves at the same time by passing a list of
+PHIDs:
+
+```lang=json
+["PHID-PCOL-2222", "PHID-PCOL-3333"]
+```
+
+This is equivalent to performing each move individually.
+
+The most complex and most powerful form uses a dictionary to provide additional
+information about the move, including an optional specific position within the
+column.
+
+The target column should be identified as `columnPHID`, and you may select a
+position by passing either `beforePHID` or `afterPHID`, specifying the PHID of
+a task currently in the column that you want to move this task before or after:
+
+```lang=json
+[
+  {
+    "columnPHID": "PHID-PCOL-4444",
+    "beforePHID": "PHID-TASK-5555"
+  }
+]
+```
+
+Note that this affects only the "natural" position of the task. The task
+position when the board is sorted by some other attribute (like priority)
+depends on that attribute value: change a task's priority to move it on
+priority-sorted boards.
+EODOCS
+      );
+
     $fields = array(
       id(new PhabricatorHandlesEditField())
         ->setKey('parent')
@@ -95,18 +146,17 @@ final class ManiphestEditEngine
         ->setIsReorderable(false)
         ->setIsDefaultable(false)
         ->setIsLockable(false),
-      id(new PhabricatorHandlesEditField())
+      id(new PhabricatorColumnsEditField())
         ->setKey('column')
         ->setLabel(pht('Column'))
         ->setDescription(pht('Create a task in a workboard column.'))
         ->setConduitDescription(
           pht('Move a task to one or more workboard columns.'))
         ->setConduitTypeDescription(
-          pht('PHID or PHIDs of workboard columns.'))
+          pht('List of columns to move the task to.'))
+        ->setConduitDocumentation($column_documentation)
         ->setAliases(array('columnPHID', 'columns', 'columnPHIDs'))
         ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
-        ->setSingleValue(null)
-        ->setIsInvisible(true)
         ->setIsReorderable(false)
         ->setIsDefaultable(false)
         ->setIsLockable(false),

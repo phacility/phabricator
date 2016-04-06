@@ -504,7 +504,6 @@ abstract class PhabricatorApplicationTransaction
         case PhabricatorTransactions::TYPE_EDIT_POLICY:
         case PhabricatorTransactions::TYPE_JOIN_POLICY:
         case PhabricatorTransactions::TYPE_SPACE:
-        case PhabricatorTransactions::TYPE_COLUMNS:
           break;
         default:
           $old = $this->getOldValue();
