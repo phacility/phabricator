@@ -394,7 +394,6 @@ EODOCS
       ->setViewer($viewer)
       ->setBoardPHIDs($board_phids)
       ->setObjectPHIDs(array($task->getPHID()))
-      ->setFetchAllBoards(true)
       ->executeLayout();
 
     $map = array();
@@ -403,6 +402,14 @@ EODOCS
       $in_columns = mpull($in_columns, null, 'getPHID');
 
       $all_columns = $layout_engine->getColumns($board_phid);
+      if (!$all_columns) {
+        // This could be a project with no workboard, or a project the viewer
+        // does not have permission to see.
+        continue;
+      }
+
+      $board = head($all_columns)->getProject();
+
       $options = array();
       foreach ($all_columns as $column) {
         $name = $column->getDisplayName();
@@ -439,7 +446,7 @@ EODOCS
       }
 
       $map[] = array(
-        'label' => head($all_columns)->getProject()->getDisplayName(),
+        'label' => $board->getDisplayName(),
         'options' => $options,
       );
     }
