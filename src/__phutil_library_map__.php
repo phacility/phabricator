@@ -2278,6 +2278,7 @@ phutil_register_library_map(array(
     'PhabricatorEdgesDestructionEngineExtension' => 'infrastructure/edges/engineextension/PhabricatorEdgesDestructionEngineExtension.php',
     'PhabricatorEditEngine' => 'applications/transactions/editengine/PhabricatorEditEngine.php',
     'PhabricatorEditEngineAPIMethod' => 'applications/transactions/editengine/PhabricatorEditEngineAPIMethod.php',
+    'PhabricatorEditEngineColumnsCommentAction' => 'applications/transactions/commentaction/PhabricatorEditEngineColumnsCommentAction.php',
     'PhabricatorEditEngineCommentAction' => 'applications/transactions/commentaction/PhabricatorEditEngineCommentAction.php',
     'PhabricatorEditEngineConfiguration' => 'applications/transactions/storage/PhabricatorEditEngineConfiguration.php',
     'PhabricatorEditEngineConfigurationDefaultCreateController' => 'applications/transactions/controller/PhabricatorEditEngineConfigurationDefaultCreateController.php',
@@ -6723,6 +6724,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
     ),
     'PhabricatorEditEngineAPIMethod' => 'ConduitAPIMethod',
+    'PhabricatorEditEngineColumnsCommentAction' => 'PhabricatorEditEngineCommentAction',
     'PhabricatorEditEngineCommentAction' => 'Phobject',
     'PhabricatorEditEngineConfiguration' => array(
       'PhabricatorSearchDAO',

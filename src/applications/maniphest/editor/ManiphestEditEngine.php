@@ -132,6 +132,8 @@ priority-sorted boards.
 EODOCS
       );
 
+    $column_map = $this->getColumnMap($object);
+
     $fields = array(
       id(new PhabricatorHandlesEditField())
         ->setKey('parent')
@@ -159,7 +161,9 @@ EODOCS
         ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
         ->setIsReorderable(false)
         ->setIsDefaultable(false)
-        ->setIsLockable(false),
+        ->setIsLockable(false)
+        ->setCommentActionLabel(pht('Move on Workboard'))
+        ->setColumnMap($column_map),
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
@@ -368,6 +372,81 @@ EODOCS
       ->setObjectPHID($object_phid)
       ->setVisiblePHIDs($visible_phids)
       ->buildResponse();
+  }
+
+  private function getColumnMap(ManiphestTask $task) {
+    $phid = $task->getPHID();
+    if (!$phid) {
+      return array();
+    }
+
+    $board_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $phid,
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+    if (!$board_phids) {
+      return array();
+    }
+
+    $viewer = $this->getViewer();
+
+    $layout_engine = id(new PhabricatorBoardLayoutEngine())
+      ->setViewer($viewer)
+      ->setBoardPHIDs($board_phids)
+      ->setObjectPHIDs(array($task->getPHID()))
+      ->setFetchAllBoards(true)
+      ->executeLayout();
+
+    $map = array();
+    foreach ($board_phids as $board_phid) {
+      $in_columns = $layout_engine->getObjectColumns($board_phid, $phid);
+      $in_columns = mpull($in_columns, null, 'getPHID');
+
+      $all_columns = $layout_engine->getColumns($board_phid);
+      $options = array();
+      foreach ($all_columns as $column) {
+        $name = $column->getDisplayName();
+
+        $is_hidden = $column->isHidden();
+        $is_selected = isset($in_columns[$column->getPHID()]);
+
+        // Don't show hidden, subproject or milestone columns in this map
+        // unless the object is currently in the column.
+        $skip_column = ($is_hidden || $column->getProxyPHID());
+        if ($skip_column) {
+          if (!$is_selected) {
+            continue;
+          }
+        }
+
+        if ($is_hidden) {
+          $name = pht('(%s)', $name);
+        }
+
+        if ($is_selected) {
+          $name = pht("\xE2\x97\x8F %s", $name);
+        } else {
+          $name = pht("\xE2\x97\x8B %s", $name);
+        }
+
+        $option = array(
+          'key' => $column->getPHID(),
+          'label' => $name,
+          'selected' => (bool)$is_selected,
+        );
+
+        $options[] = $option;
+      }
+
+      $map[] = array(
+        'label' => head($all_columns)->getProject()->getDisplayName(),
+        'options' => $options,
+      );
+    }
+
+    $map = isort($map, 'label');
+    $map = array_values($map);
+
+    return $map;
   }
 
 
