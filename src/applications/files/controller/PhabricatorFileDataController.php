@@ -82,10 +82,13 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $is_viewable = $file->isViewableInBrowser();
     $force_download = $request->getExists('download');
 
+    $request_type = $request->getHTTPHeader('X-Phabricator-Request-Type');
+    $is_lfs = ($request_type == 'git-lfs');
+
     if ($is_viewable && !$force_download) {
       $response->setMimeType($file->getViewableMimeType());
     } else {
-      if (!$request->isHTTPPost() && !$is_alternate_domain) {
+      if (!$request->isHTTPPost() && !$is_alternate_domain && !$is_lfs) {
         // NOTE: Require POST to download files from the primary domain. We'd
         // rather go full-bore and do a real CSRF check, but can't currently
         // authenticate users on the file domain. This should blunt any

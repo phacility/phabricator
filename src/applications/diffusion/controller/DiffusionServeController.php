@@ -996,6 +996,7 @@ final class DiffusionServeController extends DiffusionController {
             'href' => $get_uri,
             'header' => array(
               'Authorization' => $no_authorization,
+              'X-Phabricator-Request-Type' => 'git-lfs',
             ),
           );
         } else {
