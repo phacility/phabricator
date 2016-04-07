@@ -46,6 +46,14 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
         'description' => 'text',
         'mailKey' => 'bytes20',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_epoch' => array(
+          'columns' => array('epoch'),
+        ),
+        'key_author' => array(
+          'columns' => array('authorPHID', 'epoch'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

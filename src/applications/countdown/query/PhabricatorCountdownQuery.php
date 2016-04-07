@@ -74,4 +74,35 @@ final class PhabricatorCountdownQuery
     return 'PhabricatorCountdownApplication';
   }
 
+  public function getBuiltinOrders() {
+    return array(
+      'ending' => array(
+        'vector' => array('-epoch', '-id'),
+        'name' => pht('End Date (Past to Future)'),
+      ),
+      'unending' => array(
+        'vector' => array('epoch', 'id'),
+        'name' => pht('End Date (Future to Past)'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'epoch' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'epoch',
+        'type' => 'int',
+      ),
+    ) + parent::getOrderableColumns();
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $countdown = $this->loadCursorObject($cursor);
+    return array(
+      'epoch' => $countdown->getEpoch(),
+      'id' => $countdown->getID(),
+    );
+  }
+
 }
