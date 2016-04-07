@@ -1117,7 +1117,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $box_view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('ACTIVE OPERATIONS'))
+      ->setHeaderText(pht('Active Operations'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return id(new DrydockRepositoryOperationStatusView())
