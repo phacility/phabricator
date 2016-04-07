@@ -13,4 +13,14 @@ final class PhabricatorCountdownListController
       ->buildResponse();
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    id(new PhabricatorCountdownEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
+
+    return $crumbs;
+  }
+
 }

@@ -130,10 +130,13 @@ final class AphrontFormDateControl extends AphrontFormControl {
     $date_format = $this->getDateFormat();
     $timezone = $this->getTimezone();
 
-    $datetime = new DateTime($this->valueDate, $timezone);
-    $date = $datetime->format($date_format);
+    try {
+      $datetime = new DateTime($this->valueDate, $timezone);
+    } catch (Exception $ex) {
+      return $this->valueDate;
+    }
 
-    return $date;
+    return $datetime->format($date_format);
   }
 
   private function getTimeFormat() {

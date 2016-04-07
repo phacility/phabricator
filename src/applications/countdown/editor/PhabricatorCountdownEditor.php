@@ -120,18 +120,26 @@ final class PhabricatorCountdownEditor
         }
       break;
       case PhabricatorCountdownTransaction::TYPE_EPOCH:
-        $date_value = AphrontFormDateControlValue::newFromEpoch(
-          $this->requireActor(),
-          $object->getEpoch());
-        if (!$date_value->isValid()) {
+        if (!$object->getEpoch() && !$xactions) {
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
-            pht('Invalid'),
-            pht('You must give the countdown a valid end date.'),
-            nonempty(last($xactions), null));
-
+            pht('Required'),
+            pht('You must give the countdown an end date.'),
+            null);
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+
+        foreach ($xactions as $xaction) {
+          $value = $xaction->getNewValue();
+          if (!$value->isValid()) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('You must give the countdown a valid end date.'),
+              $xaction);
+            $errors[] = $error;
+          }
         }
       break;
     }
