@@ -36,6 +36,12 @@ final class PhabricatorBadgesQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new PhabricatorBadgesBadgeNameNgrams()),
+      $ngrams);
+  }
+
   public function needRecipients($need_recipients) {
     $this->needRecipients = $need_recipients;
     return $this;
@@ -43,6 +49,10 @@ final class PhabricatorBadgesQuery
 
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'badges';
   }
 
   public function newResultObject() {
@@ -73,28 +83,28 @@ final class PhabricatorBadgesQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'badges.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'badges.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->qualities !== null) {
       $where[] = qsprintf(
         $conn,
-        'quality IN (%Ls)',
+        'badges.quality IN (%Ls)',
         $this->qualities);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'badges.status IN (%Ls)',
         $this->statuses);
     }
 

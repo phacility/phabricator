@@ -11,6 +11,10 @@ final class PhabricatorBadgesEditor
     return pht('Badges');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

@@ -8,7 +8,8 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $flavor;
@@ -59,7 +60,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'sort255',
         'flavor' => 'text255',
         'description' => 'text',
         'icon' => 'text255',
@@ -223,6 +224,16 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorBadgesBadgeNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }
