@@ -73,6 +73,22 @@ final class PhabricatorClusterConfigOptions
             'subprocesses and commit hooks in the `%s` environmental variable.',
             'PhabricatorConfigSiteSource',
             'PHABRICATOR_INSTANCE')),
+      $this->newOption('cluster.read-only', 'bool', false)
+        ->setLocked(true)
+        ->setSummary(
+          pht(
+            'Activate read-only mode for maintenance or disaster recovery.'))
+        ->setDescription(
+          pht(
+            'WARNING: This is a prototype option and the description below '.
+            'is currently pure fantasy.'.
+            "\n\n".
+            'Switch Phabricator to read-only mode. In this mode, users will '.
+            'be unable to write new data. Normally, the cluster degrades '.
+            'into this mode automatically when it detects that the database '.
+            'master is unreachable, but you can activate it manually in '.
+            'order to perform maintenance or test configuration.')),
+
     );
   }
 

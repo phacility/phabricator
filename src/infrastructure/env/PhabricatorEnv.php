@@ -56,6 +56,7 @@ final class PhabricatorEnv extends Phobject {
   private static $requestBaseURI;
   private static $cache;
   private static $localeCode;
+  private static $readOnly;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -438,6 +439,18 @@ final class PhabricatorEnv extends Phobject {
   public static function setRequestBaseURI($uri) {
     self::$requestBaseURI = $uri;
   }
+
+  public static function isReadOnly() {
+    if (self::$readOnly !== null) {
+      return self::$readOnly;
+    }
+    return self::getEnvConfig('cluster.read-only');
+  }
+
+  public static function setReadOnly($read_only) {
+    self::$readOnly = $read_only;
+  }
+
 
 /* -(  Unit Test Support  )-------------------------------------------------- */
 

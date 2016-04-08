@@ -126,6 +126,8 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
 
     // Tests do their own stubbing/voiding for events.
     $this->env->overrideEnvConfig('phabricator.silent', false);
+
+    $this->env->overrideEnvConfig('cluster.read-only', false);
   }
 
   protected function didRunTests() {

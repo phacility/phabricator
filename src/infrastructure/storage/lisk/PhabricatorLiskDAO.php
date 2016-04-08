@@ -57,7 +57,16 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       'mysql.configuration-provider',
       array($this, $mode, $namespace));
 
-    return PhabricatorEnv::newObjectFromConfig(
+    $is_readonly = PhabricatorEnv::isReadOnly();
+    if ($is_readonly && ($mode != 'r')) {
+      throw new Exception(
+        pht(
+          'Attempting to establish write-mode connection from a read-only '.
+          'page (to database "%s").',
+          $conf->getDatabase()));
+    }
+
+    $connection = PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
       array(
         array(
@@ -69,6 +78,16 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
           'retries'   => 3,
         ),
       ));
+
+    // TODO: This should be testing if the mode is "r", but that would proably
+    // break a lot of things. Perform a more narrow test for readonly mode
+    // until we have greater certainty that this works correctly most of the
+    // time.
+    if ($is_readonly) {
+      $connection->setReadOnly(true);
+    }
+
+    return $connection;
   }
 
   /**

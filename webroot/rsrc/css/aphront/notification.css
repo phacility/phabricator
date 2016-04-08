@@ -52,6 +52,11 @@
   border: 1px solid {$violet};
 }
 
+.jx-notification-read-only {
+  background: {$greybackground};
+  border: 1px solid {$darkgreyborder};
+}
+
 .jx-notification-container .phabricator-notification {
   padding: 0;
 }
