@@ -15,12 +15,16 @@ final class PhabricatorConfigWelcomeController
       ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Welcome'));
 
-    $nav->setCrumbs($crumbs);
-    $nav->appendChild($this->buildWelcomeScreen($request));
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $this->buildWelcomeScreen($request),
+      ));
 
     return $this->newPage()
       ->setTitle($title)
-      ->appendChild($nav);
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   public function buildWelcomeScreen(AphrontRequest $request) {

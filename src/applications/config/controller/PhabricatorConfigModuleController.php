@@ -21,15 +21,17 @@ final class PhabricatorConfigModuleController
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('module/'.$key.'/');
-    $nav->appendChild(
-      array(
-        $crumbs,
+
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
         $content,
       ));
 
     return $this->newPage()
       ->setTitle($title)
-      ->appendChild($nav);
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

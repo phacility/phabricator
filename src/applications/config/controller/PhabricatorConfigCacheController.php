@@ -18,16 +18,17 @@ final class PhabricatorConfigCacheController
     $code_box = $this->renderCodeBox();
     $data_box = $this->renderDataBox();
 
-    $nav->appendChild(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
         $code_box,
         $data_box,
-      ));
+    ));
 
     return $this->newPage()
       ->setTitle($title)
-      ->appendChild($nav);
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function renderCodeBox() {
