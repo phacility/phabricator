@@ -756,6 +756,7 @@ final class AphrontRequest extends Phobject {
     foreach ($_SERVER as $key => $value) {
       if (preg_match('/^HTTP_/', $key)) {
         // Unmangle the header as best we can.
+        $key = substr($key, strlen('HTTP_'));
         $key = str_replace('_', ' ', $key);
         $key = strtolower($key);
         $key = ucwords($key);
