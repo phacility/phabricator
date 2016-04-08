@@ -29,17 +29,14 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
       return id(new AphrontRedirectResponse())->setURI('/file/');
     }
 
-    $dialog = new AphrontDialogView();
-    $dialog->setUser($viewer);
-    $dialog->setTitle(pht('Really delete file?'));
-    $dialog->appendChild(hsprintf(
+    return $this->newDialog()
+      ->setTitle(pht('Really delete file?'))
+      ->appendChild(hsprintf(
       '<p>%s</p>',
       pht(
-        "Permanently delete '%s'? This action can not be undone.",
-        $file->getName())));
-    $dialog->addSubmitButton(pht('Delete'));
-    $dialog->addCancelButton($file->getInfoURI());
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+        'Permanently delete "%s"? This action can not be undone.',
+        $file->getName())))
+        ->addSubmitButton(pht('Delete'))
+        ->addCancelButton($file->getInfoURI());
   }
 }

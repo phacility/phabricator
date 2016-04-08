@@ -29,13 +29,6 @@ final class PhabricatorLogoutController
     $viewer = $this->getViewer();
 
     if ($request->isFormPost()) {
-
-      $log = PhabricatorUserLog::initializeNewLog(
-        $viewer,
-        $viewer->getPHID(),
-        PhabricatorUserLog::ACTION_LOGOUT);
-      $log->save();
-
       // Destroy the user's session in the database so logout works even if
       // their cookies have some issues. We'll detect cookie issues when they
       // try to login again and tell them to clear any junk.
@@ -45,8 +38,10 @@ final class PhabricatorLogoutController
           ->setViewer($viewer)
           ->withSessionKeys(array($phsid))
           ->executeOne();
+
         if ($session) {
-          $session->delete();
+          $engine = new PhabricatorAuthSessionEngine();
+          $engine->logoutSession($viewer, $session);
         }
       }
       $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);

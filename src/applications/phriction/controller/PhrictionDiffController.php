@@ -98,6 +98,7 @@ final class PhrictionDiffController extends PhrictionController {
       ->setRenderingReferences(array("{$l},{$r}"))
       ->setRenderURI('/phriction/diff/'.$document->getID().'/')
       ->setTitle(pht('Changes'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setParser($parser);
 
     require_celerity_resource('phriction-document-css');
@@ -121,10 +122,9 @@ final class PhrictionDiffController extends PhrictionController {
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->setTall(true);
+      ->setHeaderIcon('fa-history');
 
     $crumbs->addTextCrumb($title, $request->getRequestURI());
-
 
     $comparison_table = $this->renderComparisonTable(
       array(
@@ -144,7 +144,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l - 1)->alter('r', $r - 1),
-            'class' => 'button simple',
+            'class' => 'button grey',
           ),
           pht("\xC2\xAB Previous Change"));
       } else {
@@ -163,7 +163,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l + 1)->alter('r', $r + 1),
-            'class' => 'button simple',
+            'class' => 'button grey',
           ),
           pht("Next Change \xC2\xBB"));
       } else {
@@ -185,7 +185,6 @@ final class PhrictionDiffController extends PhrictionController {
         )));
     }
 
-
     $output = hsprintf(
       '<div class="phriction-document-history-diff">'.
         '%s%s'.
@@ -198,20 +197,24 @@ final class PhrictionDiffController extends PhrictionController {
       $revert_l,
       $revert_r);
 
-
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Edits'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($output);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $crumbs->setBorder(true);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $object_box,
         $changes,
-      ),
-      array(
-        'title'     => pht('Document History'),
       ));
+
+    return $this->newPage()
+      ->setTitle(pht('Document History'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
 
   }
 
@@ -238,7 +241,7 @@ final class PhrictionDiffController extends PhrictionController {
         'a',
         array(
           'href'  => '/phriction/edit/'.$document_id.'/',
-          'class' => 'button simple',
+          'class' => 'button grey',
         ),
         pht('Edit Current Version'));
     }
@@ -248,7 +251,7 @@ final class PhrictionDiffController extends PhrictionController {
       'a',
       array(
         'href'  => '/phriction/edit/'.$document_id.'/?revert='.$version,
-        'class' => 'button simple',
+        'class' => 'button grey',
       ),
       pht('Revert to Version %s...', $version));
   }

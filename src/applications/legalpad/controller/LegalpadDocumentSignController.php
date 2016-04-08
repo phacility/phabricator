@@ -301,12 +301,15 @@ final class LegalpadDocumentSignController extends LegalpadController {
         case LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL:
         case LegalpadDocument::SIGNATURE_TYPE_CORPORATION:
           $box = id(new PHUIObjectBoxView())
+            ->addClass('document-sign-box')
             ->setHeaderText(pht('Agree and Sign Document'))
+            ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
             ->setForm($signature_form);
           if ($error_view) {
             $box->setInfoView($error_view);
           }
-          $signature_box = phutil_tag_div('phui-document-view-pro-box', $box);
+          $signature_box = phutil_tag_div(
+            'phui-document-view-pro-box plt', $box);
           break;
       }
 
@@ -317,15 +320,13 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $crumbs->setBorder(true);
     $crumbs->addTextCrumb($document->getMonogram());
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($document->getPHID()))
+      ->appendChild(array(
         $content,
         $signature_box,
-      ),
-      array(
-        'title' => $title,
-        'pageObjects' => array($document->getPHID()),
       ));
   }
 

@@ -480,7 +480,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('DETAILS'));
+      ->setHeader(pht('Details'));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -1033,7 +1033,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DIFF DETAIL'))
+      ->setHeaderText(pht('Diff Detail'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUser($viewer);
 
@@ -1117,7 +1117,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $box_view = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('ACTIVE OPERATIONS'))
+      ->setHeaderText(pht('Active Operations'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return id(new DrydockRepositoryOperationStatusView())

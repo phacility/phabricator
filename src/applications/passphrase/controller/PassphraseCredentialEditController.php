@@ -311,20 +311,21 @@ final class PassphraseCredentialEditController extends PassphraseController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     if ($is_new) {
-      $title = pht('Create Credential');
-      $header = pht('Create New Credential');
+      $title = pht('Create New Credential');
       $crumbs->addTextCrumb(pht('Create'));
       $cancel_uri = $this->getApplicationURI();
+      $header_icon = 'fa-plus-square';
     } else {
-      $title = pht('Edit Credential');
-      $header = pht('Edit Credential %s', 'K'.$credential->getID());
+      $title = pht('Edit Credential: %s', $credential->getName());
       $crumbs->addTextCrumb(
         'K'.$credential->getID(),
         '/K'.$credential->getID());
       $crumbs->addTextCrumb(pht('Edit'));
       $cancel_uri = '/K'.$credential->getID();
+      $header_icon = 'fa-pencil';
     }
 
     if ($request->isAjax()) {
@@ -332,16 +333,13 @@ final class PassphraseCredentialEditController extends PassphraseController {
         $errors = id(new PHUIInfoView())->setErrors($errors);
       }
 
-      $dialog = id(new AphrontDialogView())
-        ->setUser($viewer)
+      return $this->newDialog()
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setTitle($title)
         ->appendChild($errors)
         ->appendChild($form->buildLayoutView())
         ->addSubmitButton(pht('Create Credential'))
         ->addCancelButton($cancel_uri);
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     $form->appendChild(
@@ -350,19 +348,26 @@ final class PassphraseCredentialEditController extends PassphraseController {
         ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($header)
+      ->setHeaderText(pht('Credential'))
       ->setFormErrors($errors)
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function getCredentialType($type_const) {

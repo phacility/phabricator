@@ -227,11 +227,13 @@ final class PhabricatorConfigEditController
           ->setValue($examples));
     }
 
-    $title = pht('Edit %s', $key);
+    $title = pht('Edit Option: %s', $key);
+    $header_icon = 'fa-pencil';
     $short = pht('Edit');
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Config Option'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     if ($error_view) {
@@ -246,21 +248,25 @@ final class PhabricatorConfigEditController
     }
 
     $crumbs->addTextCrumb($key, '/config/edit/'.$key);
+    $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
       $config_entry,
       new PhabricatorConfigTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-        $timeline,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function readRequest(

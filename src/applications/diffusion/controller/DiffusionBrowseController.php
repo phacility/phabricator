@@ -310,7 +310,7 @@ final class DiffusionBrowseController extends DiffusionController {
         ));
 
     if ($properties) {
-      $view->addPropertySection(pht('DETAILS'), $properties);
+      $view->addPropertySection(pht('Details'), $properties);
     }
 
     $title = array($basename, $repository->getDisplayName());
@@ -413,7 +413,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
 
     if ($details) {
-      $view->addPropertySection(pht('DETAILS'), $details);
+      $view->addPropertySection(pht('Details'), $details);
     }
 
     return $this->newPage()
@@ -1409,7 +1409,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $file = $this->renderFileButton($file_uri);
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('DETAILS'))
+      ->setHeader(pht('Details'))
       ->addActionLink($file);
 
     $box = id(new PHUIObjectBoxView())
@@ -1426,7 +1426,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->appendChild($message);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('DETAILS'));
+      ->setHeader(pht('Details'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)

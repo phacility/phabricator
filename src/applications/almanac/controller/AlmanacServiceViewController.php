@@ -81,7 +81,7 @@ final class AlmanacServiceViewController
       $service->getServiceImplementation()->getServiceTypeShortName());
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
   }

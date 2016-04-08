@@ -15,6 +15,7 @@ final class PhabricatorFileQuery
   private $maxLength;
   private $names;
   private $isPartial;
+  private $needTransforms;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -117,6 +118,11 @@ final class PhabricatorFileQuery
     return $this;
   }
 
+  public function needTransforms(array $transforms) {
+    $this->needTransforms = $transforms;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorFile();
   }
@@ -213,6 +219,44 @@ final class PhabricatorFileQuery
         $original = null;
       }
       $file->attachOriginalFile($original);
+    }
+
+    return $files;
+  }
+
+  protected function didFilterPage(array $files) {
+    $xform_keys = $this->needTransforms;
+    if ($xform_keys !== null) {
+      $xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
+        'originalPHID IN (%Ls) AND transform IN (%Ls)',
+        mpull($files, 'getPHID'),
+        $xform_keys);
+
+      if ($xforms) {
+        $xfiles = id(new PhabricatorFile())->loadAllWhere(
+          'phid IN (%Ls)',
+          mpull($xforms, 'getTransformedPHID'));
+        $xfiles = mpull($xfiles, null, 'getPHID');
+      }
+
+      $xform_map = array();
+      foreach ($xforms as $xform) {
+        $xfile = idx($xfiles, $xform->getTransformedPHID());
+        if (!$xfile) {
+          continue;
+        }
+        $original_phid = $xform->getOriginalPHID();
+        $xform_key = $xform->getTransform();
+        $xform_map[$original_phid][$xform_key] = $xfile;
+      }
+
+      $default_xforms = array_fill_keys($xform_keys, null);
+
+      foreach ($files as $file) {
+        $file_xforms = idx($xform_map, $file->getPHID(), array());
+        $file_xforms += $default_xforms;
+        $file->attachTransforms($file_xforms);
+      }
     }
 
     return $files;

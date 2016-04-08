@@ -275,12 +275,14 @@ final class ReleephRequestEditController extends ReleephBranchController {
     if ($is_edit) {
       $title = pht('Edit Pull Request');
       $submit_name = pht('Save');
+      $header_icon = 'fa-pencil';
 
       $crumbs->addTextCrumb($pull->getMonogram(), '/'.$pull->getMonogram());
       $crumbs->addTextCrumb(pht('Edit'));
     } else {
       $title = pht('Create Pull Request');
       $submit_name = pht('Create Pull Request');
+      $header_icon = 'fa-plus-square';
 
       $crumbs->addTextCrumb(pht('New Pull Request'));
     }
@@ -291,18 +293,28 @@ final class ReleephRequestEditController extends ReleephBranchController {
         ->setValue($submit_name));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Request'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $notice_view,
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 }

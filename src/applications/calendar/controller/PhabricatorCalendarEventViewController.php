@@ -94,8 +94,8 @@ final class PhabricatorCalendarEventViewController
           $add_comment_form,
         ))
       ->setCurtain($curtain)
-      ->addPropertySection(pht('DETAILS'), $details)
-      ->addPropertySection(pht('DESCRIPTION'), $description);
+      ->addPropertySection(pht('Details'), $details)
+      ->addPropertySection(pht('Description'), $description);
 
     return $this->newPage()
       ->setTitle($page_title)

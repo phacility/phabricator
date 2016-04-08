@@ -991,11 +991,12 @@ final class DiffusionServeController extends DiffusionController {
           // <https://github.com/github/git-lfs/issues/1088>
           $no_authorization = 'Basic '.base64_encode('none');
 
-          $get_uri = $file->getCDNURIWithToken();
+          $get_uri = $file->getCDNURI();
           $actions['download'] = array(
             'href' => $get_uri,
             'header' => array(
               'Authorization' => $no_authorization,
+              'X-Phabricator-Request-Type' => 'git-lfs',
             ),
           );
         } else {

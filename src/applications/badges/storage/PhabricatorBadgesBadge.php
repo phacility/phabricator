@@ -7,7 +7,9 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorConduitResultInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $flavor;
@@ -49,6 +51,8 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
       ->setQuality(PhabricatorBadgesQuality::DEFAULT_QUALITY)
       ->setCreatorPHID($actor->getPHID())
       ->setEditPolicy($edit_policy)
+      ->setFlavor('')
+      ->setDescription('')
       ->setStatus(self::STATUS_ACTIVE);
   }
 
@@ -56,7 +60,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'sort255',
         'flavor' => 'text255',
         'description' => 'text',
         'icon' => 'text255',
@@ -188,6 +192,48 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     $this->openTransaction();
       $this->delete();
     $this->saveTransaction();
+  }
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the badge.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('creatorPHID')
+        ->setType('phid')
+        ->setDescription(pht('User PHID of the creator.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('string')
+        ->setDescription(pht('Active or archived status of the badge.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'creatorPHID' => $this->getCreatorPHID(),
+      'status' => $this->getStatus(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorBadgesBadgeNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }

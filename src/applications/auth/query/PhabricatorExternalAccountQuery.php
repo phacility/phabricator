@@ -62,19 +62,12 @@ final class PhabricatorExternalAccountQuery
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhabricatorExternalAccount();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorExternalAccount();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $accounts) {
@@ -116,61 +109,59 @@ final class PhabricatorExternalAccountQuery
     return $accounts;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->accountTypes) {
+    if ($this->accountTypes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'accountType IN (%Ls)',
         $this->accountTypes);
     }
 
-    if ($this->accountDomains) {
+    if ($this->accountDomains !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'accountDomain IN (%Ls)',
         $this->accountDomains);
     }
 
-    if ($this->accountIDs) {
+    if ($this->accountIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'accountID IN (%Ls)',
         $this->accountIDs);
     }
 
-    if ($this->userPHIDs) {
+    if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
     }
 
-    if ($this->accountSecrets) {
+    if ($this->accountSecrets !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'accountSecret IN (%Ls)',
         $this->accountSecrets);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

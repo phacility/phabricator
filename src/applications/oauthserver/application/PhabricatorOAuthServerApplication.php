@@ -50,14 +50,14 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorOAuthClientListController',
         'auth/' => 'PhabricatorOAuthServerAuthController',
-        'test/(?P<id>\d+)/' => 'PhabricatorOAuthServerTestController',
         'token/' => 'PhabricatorOAuthServerTokenController',
-        'client/' => array(
-          'create/' => 'PhabricatorOAuthClientEditController',
-          'delete/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientDeleteController',
-          'edit/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientEditController',
-          'view/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientViewController',
-          'secret/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientSecretController',
+        $this->getEditRoutePattern('edit/') =>
+          'PhabricatorOAuthClientEditController',
+          'client/' => array(
+          'disable/(?P<id>\d+)/' => 'PhabricatorOAuthClientDisableController',
+          'view/(?P<id>\d+)/' => 'PhabricatorOAuthClientViewController',
+          'secret/(?P<id>\d+)/' => 'PhabricatorOAuthClientSecretController',
+          'test/(?P<id>\d+)/' => 'PhabricatorOAuthClientTestController',
         ),
       ),
     );

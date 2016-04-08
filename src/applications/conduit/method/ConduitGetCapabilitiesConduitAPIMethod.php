@@ -24,6 +24,10 @@ final class ConduitGetCapabilitiesConduitAPIMethod extends ConduitAPIMethod {
     return 'dict<string, any>';
   }
 
+  public function getRequiredScope() {
+    return self::SCOPE_ALWAYS;
+  }
+
   protected function execute(ConduitAPIRequest $request) {
     $authentication = array(
       'token',

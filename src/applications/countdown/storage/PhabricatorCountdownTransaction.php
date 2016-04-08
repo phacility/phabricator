@@ -33,42 +33,20 @@ final class PhabricatorCountdownTransaction
     $type = $this->getTransactionType();
     switch ($type) {
       case self::TYPE_TITLE:
-        if ($old === null) {
-          return pht(
-            '%s created this countdown.',
-            $this->renderHandleLink($author_phid));
-        } else {
-          return pht(
-            '%s renamed this countdown from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $old,
-            $new);
-        }
-      break;
+        return pht(
+          '%s renamed this countdown from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $old,
+          $new);
       case self::TYPE_DESCRIPTION:
-        if ($old === null) {
-          return pht(
-            '%s set the description of this countdown.',
-            $this->renderHandleLink($author_phid));
-        } else {
-          return pht(
-            '%s edited the description of this countdown.',
-            $this->renderHandleLink($author_phid));
-        }
-      break;
+        return pht(
+          '%s edited the description of this countdown.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_EPOCH:
-        if ($old === null) {
-          return pht(
-            '%s set this countdown to end on %s.',
-            $this->renderHandleLink($author_phid),
-            phabricator_datetime($new, $this->getViewer()));
-        } else if ($old != $new) {
-          return pht(
-            '%s updated this countdown to end on %s.',
-            $this->renderHandleLink($author_phid),
-            phabricator_datetime($new, $this->getViewer()));
-        }
-        break;
+        return pht(
+          '%s updated this countdown to end on %s.',
+          $this->renderHandleLink($author_phid),
+          phabricator_datetime($new, $this->getViewer()));
     }
 
     return parent::getTitle();
@@ -84,47 +62,20 @@ final class PhabricatorCountdownTransaction
     $type = $this->getTransactionType();
     switch ($type) {
       case self::TYPE_TITLE:
-        if ($old === null) {
-          return pht(
-            '%s created %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-
-        } else {
-          return pht(
-            '%s renamed %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-        }
-      break;
+        return pht(
+          '%s renamed %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
       case self::TYPE_DESCRIPTION:
-        if ($old === null) {
-          return pht(
-            '%s set the description of %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-
-        } else {
-          return pht(
-            '%s edited the description of %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-        }
-      break;
+        return pht(
+          '%s edited the description of %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
       case self::TYPE_EPOCH:
-        if ($old === null) {
-          return pht(
-            '%s set the end date of %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-
-        } else {
-          return pht(
-            '%s edited the end date of %s.',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid));
-        }
-      break;
+        return pht(
+          '%s edited the end date of %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
     }
 
     return parent::getTitleForFeed();
@@ -148,15 +99,6 @@ final class PhabricatorCountdownTransaction
     }
 
     return $tags;
-  }
-
-  public function shouldHide() {
-    $old = $this->getOldValue();
-    switch ($this->getTransactionType()) {
-      case self::TYPE_DESCRIPTION:
-        return ($old === null);
-    }
-    return parent::shouldHide();
   }
 
   public function hasChangeDetails() {

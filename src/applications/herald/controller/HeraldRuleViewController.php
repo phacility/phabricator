@@ -54,8 +54,8 @@ final class HeraldRuleViewController extends HeraldController {
       ->setHeader($header)
       ->setCurtain($curtain)
       ->setMainColumn($timeline)
-      ->addPropertySection(pht('DETAILS'), $details)
-      ->addPropertySection(pht('DESCRIPTION'), $description);
+      ->addPropertySection(pht('Details'), $details)
+      ->addPropertySection(pht('Description'), $description);
 
     return $this->newPage()
       ->setTitle($title)

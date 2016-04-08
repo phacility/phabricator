@@ -264,7 +264,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('status')
         ->setType('string')
-        ->setDescription(pht('Active or arhived status of the paste.')),
+        ->setDescription(pht('Active or archived status of the paste.')),
     );
   }
 

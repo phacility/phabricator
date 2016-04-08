@@ -26,19 +26,13 @@ final class PhabricatorFeedDetailController extends PhabricatorFeedController {
 
     $title = pht('Story');
 
-    $feed_view = phutil_tag_div('phabricator-feed-frame', $feed_view);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $feed_view,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($feed_view);
   }
 
 }

@@ -2,23 +2,17 @@
 
 final class PhragmentVersionController extends PhragmentController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id', 0);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $version = id(new PhragmentFragmentVersionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if ($version === null) {
       return new Aphront404Response();
@@ -71,23 +65,23 @@ final class PhragmentVersionController extends PhragmentController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $box,
-        $this->renderPreviousVersionList($version),
-      ),
-      array(
-        'title' => pht('View Version'),
-      ));
+    $title = pht('View Version');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $box,
+      $this->renderPreviousVersionList($version),
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function renderPreviousVersionList(
     PhragmentFragmentVersion $version) {
-
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $previous_versions = id(new PhragmentFragmentVersionQuery())
       ->setViewer($viewer)

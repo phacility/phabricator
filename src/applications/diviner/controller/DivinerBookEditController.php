@@ -57,8 +57,10 @@ final class DivinerBookEditController extends DivinerController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit Basics'));
+    $crumbs->setBorder(true);
 
-    $title = pht('Edit %s', $book->getTitle());
+    $title = pht('Edit Book: %s', $book->getTitle());
+    $header_icon = 'fa-pencil';
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
@@ -104,8 +106,9 @@ final class DivinerBookEditController extends DivinerController {
           ->setValue(pht('Save'))
           ->addCancelButton($view_uri));
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Book'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $timeline = $this->buildTransactionTimeline(
@@ -113,15 +116,21 @@ final class DivinerBookEditController extends DivinerController {
       new DivinerLiveBookTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
         $timeline,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

@@ -131,12 +131,10 @@ final class ConpherenceViewController extends
       ->setLatestTransactionID($data['latest_transaction_id'])
       ->setRole('thread');
 
-   return $this->buildApplicationPage(
-      $layout,
-      array(
-        'title' => $title,
-        'pageObjects' => array($conpherence->getPHID()),
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setPageObjectPHIDs(array($conpherence->getPHID()))
+      ->appendChild($layout);
   }
 
   private function renderFormContent() {

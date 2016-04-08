@@ -7,16 +7,5 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
       ->setSearchEngine(new PhabricatorCountdownSearchEngine());
   }
 
-  protected function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Countdown'))
-        ->setHref($this->getApplicationURI('create/'))
-        ->setIcon('fa-plus-square'));
-
-    return $crumbs;
-  }
 
 }

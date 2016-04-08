@@ -67,7 +67,7 @@ final class PhabricatorOAuthServerTokenController
         $response->setError('invalid_grant');
         $response->setErrorDescription(
           pht(
-            'Authorization code %d not found.',
+            'Authorization code %s not found.',
             $code));
         return $response;
       }
@@ -102,11 +102,22 @@ final class PhabricatorOAuthServerTokenController
         $response->setError('invalid_client');
         $response->setErrorDescription(
           pht(
-            'Client with %s %d not found.',
+            'Client with %s %s not found.',
             'client_id',
             $client_phid));
         return $response;
       }
+
+      if ($client->getIsDisabled()) {
+        $response->setError('invalid_client');
+        $response->setErrorDescription(
+          pht(
+            'OAuth application "%s" has been disabled.',
+            $client->getName()));
+
+        return $response;
+      }
+
       $server->setClient($client);
 
       $user_phid = $auth_code->getUserPHID();
@@ -116,7 +127,7 @@ final class PhabricatorOAuthServerTokenController
         $response->setError('invalid_grant');
         $response->setErrorDescription(
           pht(
-            'User with PHID %d not found.',
+            'User with PHID %s not found.',
             $user_phid));
         return $response;
       }
@@ -132,7 +143,7 @@ final class PhabricatorOAuthServerTokenController
         $response->setError('invalid_grant');
         $response->setErrorDescription(
           pht(
-            'Invalid authorization code %d.',
+            'Invalid authorization code %s.',
             $code));
         return $response;
       }
@@ -143,8 +154,7 @@ final class PhabricatorOAuthServerTokenController
       unset($unguarded);
       $result = array(
         'access_token' => $access_token->getToken(),
-        'token_type'   => 'Bearer',
-        'expires_in'   => PhabricatorOAuthServer::ACCESS_TOKEN_TIMEOUT,
+        'token_type' => 'Bearer',
       );
       return $response->setContent($result);
     } catch (Exception $e) {

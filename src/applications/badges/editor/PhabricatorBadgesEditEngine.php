@@ -81,12 +81,14 @@ final class PhabricatorBadgesEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Badge name.'))
+        ->setConduitTypeDescription(pht('New badge name.'))
         ->setTransactionType(PhabricatorBadgesTransaction::TYPE_NAME)
         ->setValue($object->getName()),
       id(new PhabricatorTextEditField())
         ->setKey('flavor')
         ->setLabel(pht('Flavor text'))
         ->setDescription(pht('Short description of the badge.'))
+        ->setConduitTypeDescription(pht('New badge flavor.'))
         ->setValue($object->getFlavor())
         ->setTransactionType(PhabricatorBadgesTransaction::TYPE_FLAVOR),
       id(new PhabricatorIconSetEditField())
@@ -100,6 +102,8 @@ final class PhabricatorBadgesEditEngine
       id(new PhabricatorSelectEditField())
         ->setKey('quality')
         ->setLabel(pht('Quality'))
+        ->setDescription(pht('Color and rarity of the badge.'))
+        ->setConduitTypeDescription(pht('New badge quality.'))
         ->setValue($object->getQuality())
         ->setTransactionType(PhabricatorBadgesTransaction::TYPE_QUALITY)
         ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
@@ -107,6 +111,7 @@ final class PhabricatorBadgesEditEngine
         ->setKey('description')
         ->setLabel(pht('Description'))
         ->setDescription(pht('Badge long description.'))
+        ->setConduitTypeDescription(pht('New badge description.'))
         ->setTransactionType(PhabricatorBadgesTransaction::TYPE_DESCRIPTION)
         ->setValue($object->getDescription()),
     );

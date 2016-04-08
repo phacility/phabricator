@@ -58,18 +58,20 @@ final class PhabricatorConfigAllController
     $panel->setHeaderText(pht('Current Settings'));
     $panel->setTable($table);
 
-
     $nav = $this->buildSideNavView();
     $nav->selectFilter('all/');
-    $nav->setCrumbs($crumbs);
-    $nav->appendChild($panel);
 
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $panel,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

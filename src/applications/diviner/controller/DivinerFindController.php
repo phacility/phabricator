@@ -84,11 +84,12 @@ final class DivinerFindController extends DivinerController {
 
     $list = $this->renderAtomList($atoms);
 
-    return $this->buildApplicationPage(
-      $list,
-      array(
-        'title' => array(pht('Find'), pht('"%s"', $query_text)),
+    return $this->newPage()
+      ->setTitle(array(pht('Find'), pht('"%s"', $query_text)))
+      ->appendChild(array(
+        $list,
       ));
+
   }
 
 }

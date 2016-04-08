@@ -248,14 +248,11 @@ final class PhabricatorChatLogChannelLogController
       $form,
       '#');
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => pht('Channel Log'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Channel Log'))
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
+
   }
 
   /**

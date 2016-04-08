@@ -18,6 +18,10 @@ final class ConduitQueryConduitAPIMethod extends ConduitAPIMethod {
     return 'dict<dict>';
   }
 
+  public function getRequiredScope() {
+    return self::SCOPE_ALWAYS;
+  }
+
   protected function execute(ConduitAPIRequest $request) {
     $methods = id(new PhabricatorConduitMethodQuery())
       ->setViewer($request->getUser())

@@ -56,6 +56,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Examples'))
       ->setInfoView($info_view)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($arc_example, pht('arc call-conduit'))
       ->addPropertyList($curl_example, pht('cURL'))
       ->addPropertyList($php_example, pht('PHP'));

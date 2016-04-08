@@ -92,13 +92,11 @@ final class DivinerBookController extends DivinerController {
     $document->appendChild($preface_view);
     $document->appendChild($out);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    return $this->newPage()
+      ->setTitle($book->getTitle())
+      ->setCrumbs($crumbs)
+      ->appendChild(array(
         $document,
-      ),
-      array(
-        'title' => $book->getTitle(),
       ));
   }
 

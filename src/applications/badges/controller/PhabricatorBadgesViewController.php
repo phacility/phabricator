@@ -72,7 +72,7 @@ final class PhabricatorBadgesViewController
           $timeline,
           $comment_view,
         ))
-      ->addPropertySection(pht('DESCRIPTION'), $details);
+      ->addPropertySection(pht('Description'), $details);
 
     return $this->newPage()
       ->setTitle($title)

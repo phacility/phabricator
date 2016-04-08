@@ -230,17 +230,15 @@ final class MultimeterSampleController extends MultimeterController {
         ));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(
-        pht(
-          'Samples (%s - %s)',
-          phabricator_datetime($ago, $viewer),
-          phabricator_datetime($now, $viewer)))
+      ->setHeaderText(pht('Samples'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       pht('Samples'),
       $this->getGroupURI(array(), true));
+    $crumbs->setBorder(true);
 
     $crumb_map = array(
       'host' => pht('By Host'),
@@ -262,14 +260,23 @@ final class MultimeterSampleController extends MultimeterController {
         $this->getGroupURI($parts, true));
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => pht('Samples'),
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(
+        pht(
+          'Samples (%s - %s)',
+          phabricator_datetime($ago, $viewer),
+          phabricator_datetime($now, $viewer)))
+      ->setHeaderIcon('fa-motorcycle');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle(pht('Samples'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function renderGroupingLink(array $group, $key, $name = null) {

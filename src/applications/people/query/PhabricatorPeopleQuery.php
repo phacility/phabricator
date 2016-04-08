@@ -412,6 +412,10 @@ final class PhabricatorPeopleQuery
     $min_range = PhabricatorTime::getNow();
     $max_range = $min_range + phutil_units('72 hours in seconds');
 
+    // NOTE: We don't need to generate ghosts here, because we only care if
+    // the user is attending, and you can't attend a ghost event: RSVP'ing
+    // to it creates a real event.
+
     $events = id(new PhabricatorCalendarEventQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withInvitedPHIDs(array_keys($rebuild))

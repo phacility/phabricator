@@ -220,27 +220,30 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $submit->addCancelButton($this->getApplicationURI());
       $title = pht('Create Document');
       $short = pht('Create');
+      $header_icon = 'fa-plus-square';
     } else {
       $submit->setValue(pht('Save Document'));
       $submit->addCancelButton(
           $this->getApplicationURI('view/'.$document->getID()));
-      $title = pht('Edit Document');
+      $title = pht('Edit Document: %s', $document->getTitle());
       $short = pht('Edit');
+      $header_icon = 'fa-pencil';
 
       $crumbs->addTextCrumb(
         $document->getMonogram(),
         $this->getApplicationURI('view/'.$document->getID()));
     }
 
-    $form
-      ->appendChild($submit);
+    $form->appendChild($submit);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Document'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs->addTextCrumb($short);
+    $crumbs->setBorder(true);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader($document->getTitle())
@@ -248,15 +251,22 @@ final class LegalpadDocumentEditController extends LegalpadController {
       ->setControlID('document-text')
       ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
         $preview,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

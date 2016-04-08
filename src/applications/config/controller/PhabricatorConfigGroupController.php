@@ -17,22 +17,26 @@ final class PhabricatorConfigGroupController
     $list = $this->buildOptionList($options->getOptions());
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
       ->setObjectList($list);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Config'), $this->getApplicationURI())
-      ->addTextCrumb($options->getName(), $this->getApplicationURI());
+      ->addTextCrumb($options->getName(), $this->getApplicationURI())
+      ->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-sliders');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildOptionList(array $options) {

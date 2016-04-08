@@ -140,6 +140,7 @@ abstract class CelerityResourceController extends PhabricatorController {
   private function makeResponseCacheable(AphrontResponse $response) {
     $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
     $response->setLastModified(time());
+    $response->setCanCDN(true);
 
     return $response;
   }

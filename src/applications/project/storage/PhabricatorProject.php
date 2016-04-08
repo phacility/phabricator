@@ -573,7 +573,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function getDisplayColor() {
     if ($this->isMilestone()) {
-      return PhabricatorProjectIconSet::getDefaultColorKey();
+      return $this->getParentProject()->getColor();
     }
 
     return $this->getColor();

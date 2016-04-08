@@ -14,24 +14,24 @@ final class PhabricatorConfigModuleController
 
     $module = $all_modules[$key];
     $content = $module->renderModuleStatus($request);
-    $name = $module->getModuleName();
+    $title = $module->getModuleName();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($name);
+    $crumbs->addTextCrumb($title);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('module/'.$key.'/');
-    $nav->appendChild(
-      array(
-        $crumbs,
+
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
         $content,
       ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $name,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }
