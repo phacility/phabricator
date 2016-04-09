@@ -65,7 +65,11 @@ effect, then continue to "Monitoring and Testing" to verify the configuration.
 Monitoring and Testing
 ======================
 
-TODO: Write this part.
+You can monitor replicas in {nav Config > Cluster Databases}. This interface
+shows you a quick overview of replicas and their health, and can detect some
+common issues with replication.
+
+TODO: Write more stuff here.
 
 Degradation to Read-Only Mode
 =============================

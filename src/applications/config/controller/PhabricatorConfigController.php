@@ -22,6 +22,8 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $nav->addFilter('dbissue/', pht('Database Issues'));
     $nav->addLabel(pht('Cache'));
     $nav->addFilter('cache/', pht('Cache Status'));
+    $nav->addLabel(pht('Cluster'));
+    $nav->addFilter('cluster/databases/', pht('Cluster Databases'));
     $nav->addLabel(pht('Welcome'));
     $nav->addFilter('welcome/', pht('Welcome Screen'));
     $nav->addLabel(pht('Modules'));
