@@ -20,6 +20,20 @@ final class PhabricatorClusterConfigOptions
   }
 
   public function getOptions() {
+    $databases_type = 'custom:PhabricatorClusterDatabasesConfigOptionType';
+    $databases_help = $this->deformat(pht(<<<EOTEXT
+WARNING: This is a prototype option and the description below is currently pure
+fantasy.
+
+This option allows you to make Phabricator aware of database read replicas so
+it can monitor database health, spread load, and degrade gracefully to
+read-only mode in the event of a failure on the primary host. For help with
+configuring cluster databases, see **[[ %s | %s ]]** in the documentation.
+EOTEXT
+      ,
+      PhabricatorEnv::getDoclink('Cluster: Databases'),
+      pht('Cluster: Databases')));
+
     return array(
       $this->newOption('cluster.addresses', 'list<string>', array())
         ->setLocked(true)
@@ -88,7 +102,11 @@ final class PhabricatorClusterConfigOptions
             'into this mode automatically when it detects that the database '.
             'master is unreachable, but you can activate it manually in '.
             'order to perform maintenance or test configuration.')),
-
+      $this->newOption('cluster.databases', $databases_type, array())
+        ->setHidden(true)
+        ->setSummary(
+          pht('Configure database read replicas.'))
+        ->setDescription($databases_help),
     );
   }
 

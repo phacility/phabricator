@@ -32,6 +32,9 @@
     "conduit": {
       "name": "API Documentation"
     },
+    "cluster": {
+      "name": "Cluster Configuration"
+    },
     "fieldmanual": {
       "name": "Field Manuals"
     },

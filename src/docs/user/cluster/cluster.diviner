@@ -1,0 +1,40 @@
+@title Clustering Introduction
+@group cluster
+
+Guide to configuring Phabricator across multiple hosts for availability and
+performance.
+
+Overview
+========
+
+WARNING: This feature is a very early prototype; the features this document
+describes are mostly speculative fantasy.
+
+Phabricator can be configured to run on mulitple hosts with redundant services
+to improve its availability and scalability, and make disaster recovery much
+easier.
+
+Clustering is more complex to setup and maintain than running everything on a
+single host, but greatly reduces the cost of recovering from hardware and
+network failures.
+
+Each Phabricator service has an array of clustering options that can be
+configured independently. Configuring a cluster is inherently complex, and this
+is an advanced feature aimed at installs with large userbases and experienced
+operations personnel who need this high degree of flexibility.
+
+The remainder of this document summarizes how to add redundancy to each
+service and where your efforts are likely to have the greatest impact.
+
+Cluster: Databases
+=================
+
+Configuring multiple database hosts is moderately complex, but normally has the
+highest impact on availability and resistance to data loss. This is usually the
+most important service to make redundant if your focus is on availability and
+disaster recovery.
+
+Configuring replicas allows Phabricator to run in read-only mode if you lose
+the master, and to quickly promote the replica as a replacement.
+
+For details, see @{article:Cluster: Databases}.

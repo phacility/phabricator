@@ -1,0 +1,161 @@
+@title Cluster: Databases
+@group intro
+
+Configuring Phabricator to use multiple database hosts.
+
+Overview
+========
+
+WARNING: This feature is a very early prototype; the features this document
+describes are mostly speculative fantasy.
+
+You can deploy Phabricator with multiple database hosts, configured as a master
+and a set of replicas. The advantages of doing this are:
+
+  - faster recovery from disasters by promoting a replica;
+  - graceful degradation if the master fails;
+  - reduced load on the master; and
+  - some tools to help monitor and manage replica health.
+
+This configuration is complex, and many installs do not need to pursue it.
+
+Phabricator can not currently be configured into a multi-master mode, nor can
+it be configured to automatically promote a replica to become the new master.
+
+
+Setting up MySQL Replication
+============================
+
+TODO: Write this section.
+
+
+Configuring Replicas
+====================
+
+Once your replicas are in working order, tell Phabricator about them by
+configuring the `cluster.database` option. This option must be configured from
+the command line or in configuration files because Phabricator needs to read
+it //before// it can connect to databases.
+
+This option value will list all of the database hosts that you want Phabricator
+to interact with: your master and all your replicas. Each entry in the list
+should have these keys:
+
+  - `host`: //Required string.// The database host name.
+  - `role`: //Required string.// The cluster role of this host, one of
+    `master` or `replica`.
+  - `port`: //Optional int.// The port to connect to. If omitted, the default
+    port from `mysql.port` will be used.
+  - `user`: //Optional string.// The MySQL username to use to connect to this
+    host. If omitted, the default from `mysql.user` will be used.
+  - `pass`: //Optional string.// The password to use to connect to this host.
+    If omitted, the default from `mysql.pass` will be used.
+  - `disabled`: //Optional bool.// If set to `true`, Phabricator will not
+    connect to this host. You can use this to temporarily take a host out
+    of service.
+
+When `cluster.databases` is configured the `mysql.host` option is not used.
+The other MySQL connection configuration options (`mysql.port`, `mysql.user`,
+`mysql.pass`) are used only to provide defaults.
+
+Once you've configured this option, restart Phabricator for the changes to take
+effect, then continue to "Monitoring and Testing" to verify the configuration.
+
+
+Monitoring and Testing
+======================
+
+TODO: Write this part.
+
+Degradation to Read-Only Mode
+=============================
+
+Phabricator will degrade to read-only mode when any of these conditions occur:
+
+  - you turn it on explicitly;
+  - you configure cluster mode, but don't set up any masters;
+  - the master is misconfigured and unsafe to write to; or
+  - the master is unreachable.
+
+When Phabricator is running in read-only mode, users can still read data and
+browse and clone repositories, but they can not edit, update, or push new
+changes. For example, users can still read disaster recovery information on
+the wiki or emergency contact information on user profiles.
+
+You can enable this mode explicitly by configuring `cluster.read-only`. Some
+reasons you might want to do this include:
+
+  - to test that the mode works like you expect it to;
+  - to make sure that information you need will be available;
+  - to prevent new writes while performing database maintenance; or
+  - to permanently archive a Phabricator install.
+
+You can also enable this mode implicitly by configuring `cluster.databases`
+but disabling the master, or by not specifying any host as a master. This may
+be more convenient than turning it on explicitly during the course of
+operations work.
+
+Before writing to a master, Phabricator will verify that the host is not
+configured as a replica. This is a safety feature to prevent data loss if your
+MySQL and Phabricator configurations disagree about replica configuration. If
+your `master` is currently replicating from another host, Phabricator will
+treat it as a `replica` instead and implicitly degrade into read-only mode.
+
+Finally, if Phabricator is unable to reach the master, it will degrade into
+read-only mode. For details on how Phabricator determines that a master is
+unreachable, see "Unreachable Masters" below.
+
+If a master becomes unreachable, this normally corresponds to loss of the
+master host, a severed network link, or some other sort of disaster.
+Phabricator will degrade and continue operating in read-only mode until the
+master recovers or operations personnel can assess the situation and intervene.
+
+If you end up in a situation where you have lost the master and can not get it
+back online (or can not restore it quickly) you can promote a replica to become
+the new master. See the next section, "Promoting a Replica", for details.
+
+
+Promoting a Replica
+===================
+
+TODO: Write this, too.
+
+
+Unreachable Masters
+===================
+
+This section describes how Phabricator determines that a master has been lost,
+marks it unreachable, and degrades into read-only mode.
+
+TODO: For now, it doesn't.
+
+
+Backups
+======
+
+Even if you configure replication, you should still retain separate backup
+snapshots. Replicas protect you from data loss if you lose a host, but they do
+not let you recover from data mutation mistakes.
+
+If something issues `DELETE` or `UPDATE` statements and destroys data on the
+master, the mutation will propagate to the replicas almost immediately and the
+data will be gone forever. Normally, the only way to recover this data is from
+backup snapshots.
+
+Although you should still have a backup process, your backup process can
+safely pull dumps from a replica instead of the master. This operation can
+be slow, so offloading it to a replica can make the perforance of the master
+more consistent.
+
+To dump from a replica, wait for this TODO to be resolved and then do whatever
+it says to do:
+
+TODO: Make `bin/storage dump` replica-aware. See T10758.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Clustering Introduction}.

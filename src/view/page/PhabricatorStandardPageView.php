@@ -276,7 +276,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       Javelin::initBehavior(
         'read-only-warning',
         array(
-          'message' => pht('This install is currently in read-only mode.'),
+          'message' => pht('Phabricator is currently in read-only mode.'),
         ));
     }
 
