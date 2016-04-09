@@ -279,7 +279,7 @@ final class AphrontFormDateControlValue extends Phobject {
   }
 
   public function getDateTime() {
-    return $this->newDateTime();
+    return $this->newDateTime($this->valueDate, $this->valueTime);
   }
 
   private function getTimezone() {
