@@ -25,11 +25,15 @@ final class PhabricatorClusterExceptionHandler
 
     $title = $ex->getExceptionTitle();
 
-    return id(new AphrontDialogView())
+    $dialog =  id(new AphrontDialogView())
       ->setTitle($title)
       ->setUser($viewer)
       ->appendParagraph($ex->getMessage())
       ->addCancelButton('/', pht('Proceed With Caution'));
+
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialog)
+      ->setHTTPResponseCode(500);
   }
 
 }

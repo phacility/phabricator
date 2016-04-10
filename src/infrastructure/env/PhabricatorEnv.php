@@ -60,6 +60,8 @@ final class PhabricatorEnv extends Phobject {
   private static $readOnlyReason;
 
   const READONLY_CONFIG = 'config';
+  const READONLY_UNREACHABLE = 'unreachable';
+  const READONLY_SEVERED = 'severed';
   const READONLY_MASTERLESS = 'masterless';
 
   /**
@@ -217,6 +219,8 @@ final class PhabricatorEnv extends Phobject {
     $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
     if (!$master) {
       self::setReadOnly(true, self::READONLY_MASTERLESS);
+    } else if ($master->isSevered()) {
+      self::setReadOnly(true, self::READONLY_SEVERED);
     }
 
     try {
@@ -468,6 +472,12 @@ final class PhabricatorEnv extends Phobject {
         return pht(
           'Phabricator is in read-only mode (no writable database '.
           'is configured).');
+      case self::READONLY_UNREACHABLE:
+        return pht(
+          'Phabricator is in read-only mode (unreachable master).');
+      case self::READONLY_SEVERED:
+        return pht(
+          'Phabricator is in read-only mode (major interruption).');
     }
 
     return pht('Phabricator is in read-only mode.');

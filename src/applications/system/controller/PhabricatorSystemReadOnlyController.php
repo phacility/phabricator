@@ -8,6 +8,7 @@ final class PhabricatorSystemReadOnlyController
   }
 
   public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
     $reason = $request->getURIData('reason');
 
     $body = array();
@@ -48,14 +49,76 @@ final class PhabricatorSystemReadOnlyController
           phutil_tag('tt', array(), 'cluster.databases'));
         $button = pht('Wait Patiently');
         break;
+      case PhabricatorEnv::READONLY_UNREACHABLE:
+        $title = pht('Unable to Reach Master');
+        $body[] = pht(
+          'Phabricator was unable to connect to the writable ("master") '.
+          'database while handling this request, and automatically degraded '.
+          'into read-only mode.');
+        $body[] = pht(
+          'This may happen if there is a temporary network anomaly on the '.
+          'server side, like cosmic radiation or spooky ghosts. If this '.
+          'failure was caused by a transient service interruption, '.
+          'Phabricator will recover momentarily.');
+        $body[] = pht(
+          'This may also indicate that a more serious failure has occurred. '.
+          'If this interruption does not resolve on its own, Phabricator '.
+          'will soon detect the persistent disruption and degrade into '.
+          'read-only mode until the issue is resolved.');
+        $button = pht('Quite Unsettling');
+        break;
+      case PhabricatorEnv::READONLY_SEVERED:
+        $title = pht('Severed From Master');
+        $body[] = pht(
+          'Phabricator has consistently been unable to reach the writable '.
+          '("master") database while processing recent requests.');
+        $body[] = pht(
+          'This likely indicates a severe misconfiguration or major service '.
+          'interruption.');
+        $body[] = pht(
+          'Phabricator will periodically retry the connection and recover '.
+          'once service is restored. Most causes of persistent service '.
+          'interruption will require administrative intervention in order '.
+          'to restore service.');
+        $body[] = pht(
+          'Although this may be the result of a misconfiguration or '.
+          'operational error, this is also the state you reach if a '.
+          'meteor recently obliterated a datacenter.');
+        $button = pht('Panic!');
+        break;
       default:
         return new Aphront404Response();
+    }
+
+    switch ($reason) {
+      case PhabricatorEnv::READONLY_UNREACHABLE:
+      case PhabricatorEnv::READONLY_SEVERED:
+        $body[] = pht(
+          'This request was served from a replica database. Replica '.
+          'databases may lag behind the master, so very recent activity '.
+          'may not be reflected in the UI. This data will be restored if '.
+          'the master database is restored, but may have been lost if the '.
+          'master database has been reduced to a pile of ash.');
+        break;
     }
 
     $body[] = pht(
       'In read-only mode you can read existing information, but you will not '.
       'be able to edit objects or create new objects until this mode is '.
       'disabled.');
+
+    if ($viewer->getIsAdmin()) {
+      $body[] = pht(
+        'As an administrator, you can review status information from the '.
+        '%s control panel. This may provide more information about the '.
+        'current state of affairs.',
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/config/cluster/databases/',
+          ),
+          pht('Cluster Database Status')));
+    }
 
     $dialog = $this->newDialog()
       ->setTitle($title)

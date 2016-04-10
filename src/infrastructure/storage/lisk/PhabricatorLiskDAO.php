@@ -60,8 +60,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $this->raiseImproperWrite($database);
     }
 
-    $refs = PhabricatorDatabaseRef::loadAll();
-    if ($refs) {
+    $is_cluster = (bool)PhabricatorEnv::getEnvConfig('cluster.databases');
+    if ($is_cluster) {
       $connection = $this->newClusterConnection($database, $mode);
     } else {
       $connection = $this->newBasicConnection($database, $mode, $namespace);
@@ -99,8 +99,19 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
 
   private function newClusterConnection($database, $mode) {
     $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
-    if ($master) {
-      return $master->newApplicationConnection($database);
+
+    if ($master && !$master->isSevered()) {
+      $connection = $master->newApplicationConnection($database);
+      if ($master->isReachable($connection)) {
+        return $connection;
+      } else {
+        if ($mode == 'w') {
+          $this->raiseImpossibleWrite($database);
+        }
+        PhabricatorEnv::setReadOnly(
+          true,
+          PhabricatorEnv::READONLY_UNREACHABLE);
+      }
     }
 
     $replica = PhabricatorDatabaseRef::getReplicaDatabaseRef();
@@ -111,8 +122,11 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
 
     $connection = $replica->newApplicationConnection($database);
     $connection->setReadOnly(true);
+    if ($replica->isReachable($connection)) {
+      return $connection;
+    }
 
-    return $connection;
+    $this->raiseUnreachable($database);
   }
 
   private function raiseImproperWrite($database) {
@@ -121,6 +135,23 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
         'Unable to establish a write-mode connection (to application '.
         'database "%s") because Phabricator is in read-only mode. Whatever '.
         'you are trying to do does not function correctly in read-only mode.',
+        $database));
+  }
+
+  private function raiseImpossibleWrite($database) {
+    throw new PhabricatorClusterImpossibleWriteException(
+      pht(
+        'Unable to connect to master database ("%s"). This is a severe '.
+        'failure; your request did not complete.',
+        $database));
+  }
+
+  private function raiseUnreachable($database) {
+    throw new PhabricatorClusterStrandedException(
+      pht(
+        'Unable to establish a connection to ANY database host '.
+        '(while trying "%s"). All masters and replicas are completely '.
+        'unreachable.',
         $database));
   }
 

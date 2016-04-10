@@ -13,6 +13,8 @@ final class PhabricatorDatabaseRef
   const REPLICATION_REPLICA_NONE = 'replica-none';
   const REPLICATION_SLOW = 'replica-slow';
 
+  const KEY_REFS = 'cluster.db.refs';
+
   private $host;
   private $port;
   private $user;
@@ -27,6 +29,8 @@ final class PhabricatorDatabaseRef
   private $replicaStatus;
   private $replicaMessage;
   private $replicaDelay;
+
+  private $didFailToConnect;
 
   public function setHost($host) {
     $this->host = $host;
@@ -190,7 +194,19 @@ final class PhabricatorDatabaseRef
     );
   }
 
-  public static function loadAll() {
+  public static function getLiveRefs() {
+    $cache = PhabricatorCaches::getRequestCache();
+
+    $refs = $cache->getKey(self::KEY_REFS);
+    if (!$refs) {
+      $refs = self::newRefs();
+      $cache->setKey(self::KEY_REFS, $refs);
+    }
+
+    return $refs;
+  }
+
+  public static function newRefs() {
     $refs = array();
 
     $default_port = PhabricatorEnv::getEnvConfig('mysql.port');
@@ -232,7 +248,7 @@ final class PhabricatorDatabaseRef
   }
 
   public static function queryAll() {
-    $refs = self::loadAll();
+    $refs = self::newRefs();
 
     foreach ($refs as $ref) {
       if ($ref->getDisabled()) {
@@ -242,6 +258,7 @@ final class PhabricatorDatabaseRef
       $conn = $ref->newManagementConnection();
 
       $t_start = microtime(true);
+      $replica_status = false;
       try {
         $replica_status = queryfx_one($conn, 'SHOW SLAVE STATUS');
         $ref->setConnectionStatus(self::STATUS_OKAY);
@@ -269,33 +286,35 @@ final class PhabricatorDatabaseRef
       $t_end = microtime(true);
       $ref->setConnectionLatency($t_end - $t_start);
 
-      $is_replica = (bool)$replica_status;
-      if ($ref->getIsMaster() && $is_replica) {
-        $ref->setReplicaStatus(self::REPLICATION_MASTER_REPLICA);
-        $ref->setReplicaMessage(
-          pht(
-            'This host has a "master" role, but is replicating data from '.
-            'another host ("%s")!',
-            idx($replica_status, 'Master_Host')));
-      } else if (!$ref->getIsMaster() && !$is_replica) {
-        $ref->setReplicaStatus(self::REPLICATION_REPLICA_NONE);
-        $ref->setReplicaMessage(
-          pht(
-            'This host has a "replica" role, but is not replicating data '.
-            'from a master (no output from "SHOW SLAVE STATUS").'));
-      } else {
-        $ref->setReplicaStatus(self::REPLICATION_OKAY);
-      }
-
-      if ($is_replica) {
-        $latency = (int)idx($replica_status, 'Seconds_Behind_Master');
-        $ref->setReplicaDelay($latency);
-        if ($latency > 30) {
-          $ref->setReplicaStatus(self::REPLICATION_SLOW);
+      if ($replica_status !== false) {
+        $is_replica = (bool)$replica_status;
+        if ($ref->getIsMaster() && $is_replica) {
+          $ref->setReplicaStatus(self::REPLICATION_MASTER_REPLICA);
           $ref->setReplicaMessage(
             pht(
-              'This replica is lagging far behind the master. Data is at '.
-              'risk!'));
+              'This host has a "master" role, but is replicating data from '.
+              'another host ("%s")!',
+              idx($replica_status, 'Master_Host')));
+        } else if (!$ref->getIsMaster() && !$is_replica) {
+          $ref->setReplicaStatus(self::REPLICATION_REPLICA_NONE);
+          $ref->setReplicaMessage(
+            pht(
+              'This host has a "replica" role, but is not replicating data '.
+              'from a master (no output from "SHOW SLAVE STATUS").'));
+        } else {
+          $ref->setReplicaStatus(self::REPLICATION_OKAY);
+        }
+
+        if ($is_replica) {
+          $latency = (int)idx($replica_status, 'Seconds_Behind_Master');
+          $ref->setReplicaDelay($latency);
+          if ($latency > 30) {
+            $ref->setReplicaStatus(self::REPLICATION_SLOW);
+            $ref->setReplicaMessage(
+              pht(
+                'This replica is lagging far behind the master. Data is at '.
+                'risk!'));
+          }
         }
       }
     }
@@ -318,8 +337,31 @@ final class PhabricatorDatabaseRef
       ));
   }
 
+  public function isSevered() {
+    return $this->didFailToConnect;
+  }
+
+  public function isReachable(AphrontDatabaseConnection $connection) {
+    if ($this->isSevered()) {
+      return false;
+    }
+
+    try {
+      $connection->openConnection();
+      $reachable = true;
+    } catch (Exception $ex) {
+      $reachable = false;
+    }
+
+    if (!$reachable) {
+      $this->didFailToConnect = true;
+    }
+
+    return $reachable;
+  }
+
   public static function getMasterDatabaseRef() {
-    $refs = self::loadAll();
+    $refs = self::getLiveRefs();
 
     if (!$refs) {
       $conf = PhabricatorEnv::newObjectFromConfig(
@@ -348,7 +390,7 @@ final class PhabricatorDatabaseRef
   }
 
   public static function getReplicaDatabaseRef() {
-    $refs = self::loadAll();
+    $refs = self::getLiveRefs();
 
     if (!$refs) {
       return null;
