@@ -12,25 +12,14 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
-    $conf = PhabricatorEnv::newObjectFromConfig('mysql.configuration-provider');
-    $conn_user = $conf->getUser();
-    $conn_pass = $conf->getPassword();
-    $conn_host = $conf->getHost();
-    $conn_port = $conf->getPort();
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
+    if (!$master) {
+      // If we're implicitly in read-only mode during disaster recovery,
+      // don't bother with these setup checks.
+      return;
+    }
 
-    ini_set('mysql.connect_timeout', 2);
-
-    $config = array(
-      'user'      => $conn_user,
-      'pass'      => $conn_pass,
-      'host'      => $conn_host,
-      'port'      => $conn_port,
-      'database'  => null,
-    );
-
-    $conn_raw = PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array($config));
+    $conn_raw = $master->newManagementConnection();
 
     try {
       queryfx($conn_raw, 'SELECT 1');
@@ -88,11 +77,8 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
         ->setIsFatal(true)
         ->addCommand(hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
     } else {
-
-      $config['database'] = $namespace.'_meta_data';
-      $conn_meta = PhabricatorEnv::newObjectFromConfig(
-        'mysql.implementation',
-        array($config));
+      $conn_meta = $master->newApplicationConnection(
+        $namespace.'_meta_data');
 
       $applied = queryfx_all($conn_meta, 'SELECT patch FROM patch_status');
       $applied = ipull($applied, 'patch', 'patch');
@@ -112,7 +98,6 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
             hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
       }
     }
-
 
     $host = PhabricatorEnv::getEnvConfig('mysql.host');
     $matches = null;

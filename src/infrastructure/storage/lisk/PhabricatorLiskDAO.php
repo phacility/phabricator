@@ -52,32 +52,24 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
    */
   protected function establishLiveConnection($mode) {
     $namespace = self::getStorageNamespace();
-
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array($this, $mode, $namespace));
+    $database = $namespace.'_'.$this->getApplicationName();
 
     $is_readonly = PhabricatorEnv::isReadOnly();
+
     if ($is_readonly && ($mode != 'r')) {
       throw new Exception(
         pht(
           'Attempting to establish write-mode connection from a read-only '.
           'page (to database "%s").',
-          $conf->getDatabase()));
+          $database));
     }
 
-    $connection = PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
-        array(
-          'user'      => $conf->getUser(),
-          'pass'      => $conf->getPassword(),
-          'host'      => $conf->getHost(),
-          'port'      => $conf->getPort(),
-          'database'  => $conf->getDatabase(),
-          'retries'   => 3,
-        ),
-      ));
+    $refs = PhabricatorDatabaseRef::loadAll();
+    if ($refs) {
+      $connection = $this->newClusterConnection($database);
+    } else {
+      $connection = $this->newBasicConnection($database, $mode, $namespace);
+    }
 
     // TODO: This should be testing if the mode is "r", but that would proably
     // break a lot of things. Perform a more narrow test for readonly mode
@@ -89,6 +81,37 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
 
     return $connection;
   }
+
+  private function newBasicConnection($database, $mode, $namespace) {
+    $conf = PhabricatorEnv::newObjectFromConfig(
+      'mysql.configuration-provider',
+      array($this, $mode, $namespace));
+
+    return PhabricatorEnv::newObjectFromConfig(
+      'mysql.implementation',
+      array(
+        array(
+          'user'      => $conf->getUser(),
+          'pass'      => $conf->getPassword(),
+          'host'      => $conf->getHost(),
+          'port'      => $conf->getPort(),
+          'database'  => $database,
+          'retries'   => 3,
+        ),
+      ));
+  }
+
+  private function newClusterConnection($database) {
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
+
+    if (!$master) {
+      // TODO: Implicitly degrade to read-only mode.
+      throw new Exception(pht('No master in database cluster config!'));
+    }
+
+    return $master->newApplicationConnection($database);
+  }
+
 
   /**
    * @task config

@@ -239,7 +239,7 @@ final class PhabricatorDatabaseRef
         continue;
       }
 
-      $conn = $ref->newConnection();
+      $conn = $ref->newManagementConnection();
 
       $t_start = microtime(true);
       try {
@@ -303,18 +303,69 @@ final class PhabricatorDatabaseRef
     return $refs;
   }
 
-  protected function newConnection() {
+  public function newManagementConnection() {
+    return $this->newConnection(
+      array(
+        'retries' => 0,
+        'timeout' => 3,
+      ));
+  }
+
+  public function newApplicationConnection($database) {
+    return $this->newConnection(
+      array(
+        'database' => $database,
+      ));
+  }
+
+  public static function getMasterDatabaseRef() {
+    $refs = self::loadAll();
+
+    if (!$refs) {
+      $conf = PhabricatorEnv::newObjectFromConfig(
+        'mysql.configuration-provider',
+        array(null, 'w', null));
+
+      return id(new self())
+        ->setHost($conf->getHost())
+        ->setPort($conf->getPort())
+        ->setUser($conf->getUser())
+        ->setPass($conf->getPassword())
+        ->setIsMaster(true);
+    }
+
+    $master = null;
+    foreach ($refs as $ref) {
+      if ($ref->getDisabled()) {
+        continue;
+      }
+      if ($ref->getIsMaster()) {
+        return $ref;
+      }
+    }
+
+    return null;
+  }
+
+  private function newConnection(array $options) {
+    $spec = $options + array(
+      'user' => $this->getUser(),
+      'pass' => $this->getPass(),
+      'host' => $this->getHost(),
+      'port' => $this->getPort(),
+      'database' => null,
+      'retries' => 3,
+      'timeout' => 15,
+    );
+
+    // TODO: Remove this once the MySQL connector has proper support
+    // for it, see T6710.
+    ini_set('mysql.connect_timeout', $spec['timeout']);
+
     return PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
       array(
-        array(
-          'user'      => $this->getUser(),
-          'pass'      => $this->getPass(),
-          'host'      => $this->getHost(),
-          'port'      => $this->getPort(),
-          'database'  => null,
-          'retries'   => 0,
-        ),
+        $spec,
       ));
   }
 
