@@ -358,10 +358,6 @@ final class PhabricatorDatabaseRef
       'timeout' => 15,
     );
 
-    // TODO: Remove this once the MySQL connector has proper support
-    // for it, see T6710.
-    ini_set('mysql.connect_timeout', $spec['timeout']);
-
     return PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
       array(
