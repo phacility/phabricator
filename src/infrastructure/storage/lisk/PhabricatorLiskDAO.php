@@ -57,16 +57,12 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     $is_readonly = PhabricatorEnv::isReadOnly();
 
     if ($is_readonly && ($mode != 'r')) {
-      throw new Exception(
-        pht(
-          'Attempting to establish write-mode connection from a read-only '.
-          'page (to database "%s").',
-          $database));
+      $this->raiseImproperWrite($database);
     }
 
     $refs = PhabricatorDatabaseRef::loadAll();
     if ($refs) {
-      $connection = $this->newClusterConnection($database);
+      $connection = $this->newClusterConnection($database, $mode);
     } else {
       $connection = $this->newBasicConnection($database, $mode, $namespace);
     }
@@ -101,15 +97,31 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       ));
   }
 
-  private function newClusterConnection($database) {
+  private function newClusterConnection($database, $mode) {
     $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
-
-    if (!$master) {
-      // TODO: Implicitly degrade to read-only mode.
-      throw new Exception(pht('No master in database cluster config!'));
+    if ($master) {
+      return $master->newApplicationConnection($database);
     }
 
-    return $master->newApplicationConnection($database);
+    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRef();
+    if (!$replica) {
+      throw new Exception(
+        pht('No valid databases are configured!'));
+    }
+
+    $connection = $replica->newApplicationConnection($database);
+    $connection->setReadOnly(true);
+
+    return $connection;
+  }
+
+  private function raiseImproperWrite($database) {
+    throw new PhabricatorClusterImproperWriteException(
+      pht(
+        'Unable to establish a write-mode connection (to application '.
+        'database "%s") because Phabricator is in read-only mode. Whatever '.
+        'you are trying to do does not function correctly in read-only mode.',
+        $database));
   }
 
 

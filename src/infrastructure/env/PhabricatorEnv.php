@@ -60,6 +60,7 @@ final class PhabricatorEnv extends Phobject {
   private static $readOnlyReason;
 
   const READONLY_CONFIG = 'config';
+  const READONLY_MASTERLESS = 'masterless';
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -211,6 +212,11 @@ final class PhabricatorEnv extends Phobject {
 
     foreach ($site_sources as $site_source) {
       $stack->pushSource($site_source);
+    }
+
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
+    if (!$master) {
+      self::setReadOnly(true, self::READONLY_MASTERLESS);
     }
 
     try {
@@ -456,7 +462,15 @@ final class PhabricatorEnv extends Phobject {
   }
 
   public static function getReadOnlyMessage() {
-    return pht('Phabricator is currently in read-only mode.');
+    $reason = self::getReadOnlyReason();
+    switch ($reason) {
+      case self::READONLY_MASTERLESS:
+        return pht(
+          'Phabricator is in read-only mode (no writable database '.
+          'is configured).');
+    }
+
+    return pht('Phabricator is in read-only mode.');
   }
 
   public static function getReadOnlyURI() {

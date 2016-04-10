@@ -347,6 +347,31 @@ final class PhabricatorDatabaseRef
     return null;
   }
 
+  public static function getReplicaDatabaseRef() {
+    $refs = self::loadAll();
+
+    if (!$refs) {
+      return null;
+    }
+
+    // TODO: We may have multiple replicas to choose from, and could make
+    // more of an effort to pick the "best" one here instead of always
+    // picking the first one. Once we've picked one, we should try to use
+    // the same replica for the rest of the request, though.
+
+    foreach ($refs as $ref) {
+      if ($ref->getDisabled()) {
+        continue;
+      }
+      if ($ref->getIsMaster()) {
+        continue;
+      }
+      return $ref;
+    }
+
+    return null;
+  }
+
   private function newConnection(array $options) {
     $spec = $options + array(
       'user' => $this->getUser(),
