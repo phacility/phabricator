@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '35e4a99a',
-    'core.pkg.js' => '8a616602',
+    'core.pkg.js' => '08b41036',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '7ba78475',
     'differential.pkg.js' => 'd0cd0df6',
@@ -494,7 +494,7 @@ return array(
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
     'rsrc/js/core/behavior-phabricator-nav.js' => '56a1ca03',
     'rsrc/js/core/behavior-phabricator-remarkup-assist.js' => '340c8eff',
-    'rsrc/js/core/behavior-read-only-warning.js' => 'f8ea359c',
+    'rsrc/js/core/behavior-read-only-warning.js' => 'ba158207',
     'rsrc/js/core/behavior-refresh-csrf.js' => 'ab2f381b',
     'rsrc/js/core/behavior-remarkup-preview.js' => '4b700e9e',
     'rsrc/js/core/behavior-reorder-applications.js' => '76b9fc3e',
@@ -667,7 +667,7 @@ return array(
     'javelin-behavior-project-boards' => '14a1faae',
     'javelin-behavior-project-create' => '065227cc',
     'javelin-behavior-quicksand-blacklist' => '7927a7d3',
-    'javelin-behavior-read-only-warning' => 'f8ea359c',
+    'javelin-behavior-read-only-warning' => 'ba158207',
     'javelin-behavior-recurring-edit' => '5f1c4d5f',
     'javelin-behavior-refresh-csrf' => 'ab2f381b',
     'javelin-behavior-releeph-preview-branch' => 'b2b4fbaf',
@@ -1783,6 +1783,11 @@ return array(
       'javelin-json',
       'phabricator-draggable-list',
     ),
+    'ba158207' => array(
+      'javelin-behavior',
+      'javelin-uri',
+      'phabricator-notification',
+    ),
     'bae58312' => array(
       'javelin-install',
       'javelin-workboard-card',
@@ -2110,11 +2115,6 @@ return array(
       'javelin-mask',
       'javelin-util',
       'phabricator-busy',
-    ),
-    'f8ea359c' => array(
-      'javelin-behavior',
-      'javelin-uri',
-      'phabricator-notification',
     ),
     'fa0f4fc2' => array(
       'javelin-behavior',

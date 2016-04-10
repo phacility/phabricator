@@ -57,6 +57,9 @@ final class PhabricatorEnv extends Phobject {
   private static $cache;
   private static $localeCode;
   private static $readOnly;
+  private static $readOnlyReason;
+
+  const READONLY_CONFIG = 'config';
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -447,8 +450,31 @@ final class PhabricatorEnv extends Phobject {
     return self::getEnvConfig('cluster.read-only');
   }
 
-  public static function setReadOnly($read_only) {
+  public static function setReadOnly($read_only, $reason) {
     self::$readOnly = $read_only;
+    self::$readOnlyReason = $reason;
+  }
+
+  public static function getReadOnlyMessage() {
+    return pht('Phabricator is currently in read-only mode.');
+  }
+
+  public static function getReadOnlyURI() {
+    return urisprintf(
+      '/readonly/%s/',
+      self::getReadOnlyReason());
+  }
+
+  public static function getReadOnlyReason() {
+    if (!self::isReadOnly()) {
+      return null;
+    }
+
+    if (self::$readOnlyReason !== null) {
+      return self::$readOnlyReason;
+    }
+
+    return self::READONLY_CONFIG;
   }
 
 

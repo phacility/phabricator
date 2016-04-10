@@ -7,10 +7,17 @@
 
 JX.behavior('read-only-warning', function(config) {
 
-  new JX.Notification()
+  var n = new JX.Notification()
     .setContent(config.message)
     .setDuration(0)
-    .alterClassName('jx-notification-read-only', true)
-    .show();
+    .alterClassName('jx-notification-read-only', true);
+
+  n.listen(
+    'activate',
+    function() {
+      JX.$U(config.uri).go();
+    });
+
+  n.show();
 
 });
