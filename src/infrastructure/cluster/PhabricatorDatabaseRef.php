@@ -30,6 +30,7 @@ final class PhabricatorDatabaseRef
   private $replicaMessage;
   private $replicaDelay;
 
+  private $healthRecord;
   private $didFailToConnect;
 
   public function setHost($host) {
@@ -326,7 +327,7 @@ final class PhabricatorDatabaseRef
     return $this->newConnection(
       array(
         'retries' => 0,
-        'timeout' => 3,
+        'timeout' => 2,
       ));
   }
 
@@ -338,11 +339,24 @@ final class PhabricatorDatabaseRef
   }
 
   public function isSevered() {
-    return $this->didFailToConnect;
+    if ($this->didFailToConnect) {
+      return true;
+    }
+
+    $record = $this->getHealthRecord();
+    $is_healthy = $record->getIsHealthy();
+    if (!$is_healthy) {
+      return true;
+    }
+
+    return false;
   }
 
   public function isReachable(AphrontDatabaseConnection $connection) {
-    if ($this->isSevered()) {
+    $record = $this->getHealthRecord();
+    $should_check = $record->getShouldCheck();
+
+    if ($this->isSevered() && !$should_check) {
       return false;
     }
 
@@ -353,11 +367,35 @@ final class PhabricatorDatabaseRef
       $reachable = false;
     }
 
+    if ($should_check) {
+      $record->didHealthCheck($reachable);
+    }
+
     if (!$reachable) {
       $this->didFailToConnect = true;
     }
 
     return $reachable;
+  }
+
+  public function checkHealth() {
+    $health = $this->getHealthRecord();
+
+    $should_check = $health->getShouldCheck();
+    if ($should_check) {
+      // This does an implicit health update.
+      $connection = $this->newManagementConnection();
+      $this->isReachable($connection);
+    }
+
+    return $this;
+  }
+
+  public function getHealthRecord() {
+    if (!$this->healthRecord) {
+      $this->healthRecord = new PhabricatorDatabaseHealthRecord($this);
+    }
+    return $this->healthRecord;
   }
 
   public static function getMasterDatabaseRef() {
@@ -415,14 +453,26 @@ final class PhabricatorDatabaseRef
   }
 
   private function newConnection(array $options) {
+    // If we believe the database is unhealthy, don't spend as much time
+    // trying to connect to it, since it's likely to continue to fail and
+    // hammering it can only make the problem worse.
+    $record = $this->getHealthRecord();
+    if ($record->getIsHealthy()) {
+      $default_retries = 3;
+      $default_timeout = 10;
+    } else {
+      $default_retries = 0;
+      $default_timeout = 2;
+    }
+
     $spec = $options + array(
       'user' => $this->getUser(),
       'pass' => $this->getPass(),
       'host' => $this->getHost(),
       'port' => $this->getPort(),
       'database' => null,
-      'retries' => 3,
-      'timeout' => 15,
+      'retries' => $default_retries,
+      'timeout' => $default_timeout,
     );
 
     return PhabricatorEnv::newObjectFromConfig(

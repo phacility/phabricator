@@ -174,6 +174,11 @@ final class PhabricatorCaches extends Phobject {
    * @task setup
    */
   private static function buildSetupCaches() {
+    // If this is the CLI, just build a setup cache.
+    if (php_sapi_name() == 'cli') {
+      return array();
+    }
+
     // In most cases, we should have APC. This is an ideal cache for our
     // purposes -- it's fast and empties on server restart.
     $apc = new PhutilAPCKeyValueCache();

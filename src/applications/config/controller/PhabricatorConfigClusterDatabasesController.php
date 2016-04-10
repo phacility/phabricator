@@ -115,6 +115,29 @@ final class PhabricatorConfigClusterDatabasesController
         $replica_label,
       );
 
+      $health = $database->getHealthRecord();
+      $health_up = $health->getUpEventCount();
+      $health_down = $health->getDownEventCount();
+
+      if ($health->getIsHealthy()) {
+        $health_icon = id(new PHUIIconView())
+          ->setIcon('fa-plus green');
+      } else {
+        $health_icon = id(new PHUIIconView())
+          ->setIcon('fa-times red');
+      }
+
+      $health_count = pht(
+        '%s / %s',
+        new PhutilNumber($health_up),
+        new PhutilNumber($health_up + $health_down));
+
+      $health_status = array(
+        $health_icon,
+        ' ',
+        $health_count,
+      );
+
       $messages = array();
 
       $conn_message = $database->getConnectionMessage();
@@ -136,9 +159,11 @@ final class PhabricatorConfigClusterDatabasesController
         $database->getUser(),
         $connection,
         $replication,
+        $health_status,
         $messages,
       );
     }
+
 
     $table = id(new AphrontTableView($rows))
       ->setNoDataString(
@@ -151,10 +176,12 @@ final class PhabricatorConfigClusterDatabasesController
           pht('User'),
           pht('Connection'),
           pht('Replication'),
+          pht('Health'),
           pht('Messages'),
         ))
       ->setColumnClasses(
         array(
+          null,
           null,
           null,
           null,

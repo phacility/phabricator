@@ -220,7 +220,10 @@ final class PhabricatorEnv extends Phobject {
     if (!$master) {
       self::setReadOnly(true, self::READONLY_MASTERLESS);
     } else if ($master->isSevered()) {
-      self::setReadOnly(true, self::READONLY_SEVERED);
+      $master->checkHealth();
+      if ($master->isSevered()) {
+        self::setReadOnly(true, self::READONLY_SEVERED);
+      }
     }
 
     try {
