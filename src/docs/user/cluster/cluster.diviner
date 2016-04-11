@@ -26,6 +26,7 @@ operations personnel who need this high degree of flexibility.
 The remainder of this document summarizes how to add redundancy to each
 service and where your efforts are likely to have the greatest impact.
 
+
 Cluster: Databases
 =================
 
@@ -38,3 +39,19 @@ Configuring replicas allows Phabricator to run in read-only mode if you lose
 the master, and to quickly promote the replica as a replacement.
 
 For details, see @{article:Cluster: Databases}.
+
+
+Cluster: Repositories
+=====================
+
+Configuring multiple repository hosts is complex.
+
+Repository replicas are important for availability if you host repositories
+on Phabricator, but less important if you host repositories elsewhere
+(instead, you should focus on making that service more available).
+
+The distributed nature of Git and Mercurial tend to mean that they are
+naturally somewhat resistant to data loss: every clone of a repository includes
+the entire history.
+
+For details, see @{article:Cluster: Repositories}.

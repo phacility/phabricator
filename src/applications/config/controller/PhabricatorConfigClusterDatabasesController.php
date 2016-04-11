@@ -203,7 +203,7 @@ final class PhabricatorConfigClusterDatabasesController
           ->setIcon('fa-book')
           ->setHref($doc_href)
           ->setTag('a')
-          ->setText(pht('Database Clustering Documentation')));
+          ->setText(pht('Documentation')));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

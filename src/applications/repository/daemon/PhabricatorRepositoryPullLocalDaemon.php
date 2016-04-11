@@ -398,6 +398,10 @@ final class PhabricatorRepositoryPullLocalDaemon
         $services = id(new AlmanacServiceQuery())
           ->setViewer($this->getViewer())
           ->withPHIDs($service_phids)
+          ->withServiceTypes(
+            array(
+              AlmanacClusterRepositoryServiceType::SERVICETYPE,
+            ))
           ->needBindings(true)
           ->execute();
         $services = mpull($services, null, 'getPHID');
@@ -422,9 +426,9 @@ final class PhabricatorRepositoryPullLocalDaemon
         }
 
         $bindings = $service->getBindings();
-        $bindings = mpull($bindings, null, 'getDevicePHID');
-        $binding = idx($bindings, $device_phid);
-        if (!$binding) {
+        $bindings = mgroup($bindings, 'getDevicePHID');
+        $bindings = idx($bindings, $device_phid);
+        if (!$bindings) {
           $this->log(
             pht(
               'Repository "%s" is on cluster service "%s", but that service '.
@@ -437,7 +441,15 @@ final class PhabricatorRepositoryPullLocalDaemon
           continue;
         }
 
-        if ($binding->getIsDisabled()) {
+        $all_disabled = true;
+        foreach ($bindings as $binding) {
+          if (!$binding->getIsDisabled()) {
+            $all_disabled = false;
+            break;
+          }
+        }
+
+        if ($all_disabled) {
           $this->log(
             pht(
               'Repository "%s" is on cluster service "%s", but the binding '.
