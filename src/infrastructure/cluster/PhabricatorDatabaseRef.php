@@ -14,6 +14,7 @@ final class PhabricatorDatabaseRef
   const REPLICATION_SLOW = 'replica-slow';
 
   const KEY_REFS = 'cluster.db.refs';
+  const KEY_INDIVIDUAL = 'cluster.db.individual';
 
   private $host;
   private $port;
@@ -21,6 +22,7 @@ final class PhabricatorDatabaseRef
   private $pass;
   private $disabled;
   private $isMaster;
+  private $isIndividual;
 
   private $connectionLatency;
   private $connectionStatus;
@@ -145,6 +147,15 @@ final class PhabricatorDatabaseRef
     return $this->replicaDelay;
   }
 
+  public function setIsIndividual($is_individual) {
+    $this->isIndividual = $is_individual;
+    return $this;
+  }
+
+  public function getIsIndividual() {
+    return $this->isIndividual;
+  }
+
   public static function getConnectionStatusMap() {
     return array(
       self::STATUS_OKAY => array(
@@ -205,6 +216,18 @@ final class PhabricatorDatabaseRef
     }
 
     return $refs;
+  }
+
+  public static function getLiveIndividualRef() {
+    $cache = PhabricatorCaches::getRequestCache();
+
+    $ref = $cache->getKey(self::KEY_INDIVIDUAL);
+    if (!$ref) {
+      $ref = self::newIndividualRef();
+      $cache->setKey(self::KEY_INDIVIDUAL, $ref);
+    }
+
+    return $ref;
   }
 
   public static function newRefs() {
@@ -339,6 +362,14 @@ final class PhabricatorDatabaseRef
   }
 
   public function isSevered() {
+    // If we only have an individual database, never sever our connection to
+    // it, at least for now. It's possible that using the same severing rules
+    // might eventually make sense to help alleviate load-related failures,
+    // but we should wait for all the cluster stuff to stabilize first.
+    if ($this->getIsIndividual()) {
+      return false;
+    }
+
     if ($this->didFailToConnect) {
       return true;
     }
@@ -402,16 +433,7 @@ final class PhabricatorDatabaseRef
     $refs = self::getLiveRefs();
 
     if (!$refs) {
-      $conf = PhabricatorEnv::newObjectFromConfig(
-        'mysql.configuration-provider',
-        array(null, 'w', null));
-
-      return id(new self())
-        ->setHost($conf->getHost())
-        ->setPort($conf->getPort())
-        ->setUser($conf->getUser())
-        ->setPass($conf->getPassword())
-        ->setIsMaster(true);
+      return self::getLiveIndividualRef();
     }
 
     $master = null;
@@ -425,6 +447,20 @@ final class PhabricatorDatabaseRef
     }
 
     return null;
+  }
+
+  public static function newIndividualRef() {
+    $conf = PhabricatorEnv::newObjectFromConfig(
+      'mysql.configuration-provider',
+      array(null, 'w', null));
+
+    return id(new self())
+      ->setHost($conf->getHost())
+      ->setPort($conf->getPort())
+      ->setUser($conf->getUser())
+      ->setPass($conf->getPassword())
+      ->setIsIndividual(true)
+      ->setIsMaster(true);
   }
 
   public static function getReplicaDatabaseRef() {

@@ -35,6 +35,8 @@ final class PhabricatorConfigClusterDatabasesController
 
     $rows = array();
     foreach ($databases as $database) {
+      $messages = array();
+
       if ($database->getIsMaster()) {
         $role_icon = id(new PHUIIconView())
           ->setIcon('fa-database sky')
@@ -125,6 +127,9 @@ final class PhabricatorConfigClusterDatabasesController
       } else {
         $health_icon = id(new PHUIIconView())
           ->setIcon('fa-times red');
+        $messages[] = pht(
+          'UNHEALTHY: This database has failed recent health checks. Traffic '.
+          'will not be sent to it until it recovers.');
       }
 
       $health_count = pht(
@@ -137,8 +142,6 @@ final class PhabricatorConfigClusterDatabasesController
         ' ',
         $health_count,
       );
-
-      $messages = array();
 
       $conn_message = $database->getConnectionMessage();
       if ($conn_message) {

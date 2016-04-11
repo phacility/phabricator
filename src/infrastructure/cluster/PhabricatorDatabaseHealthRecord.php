@@ -52,6 +52,7 @@ final class PhabricatorDatabaseHealthRecord
    * the state.
    */
   public function getRequiredEventCount() {
+    // NOTE: If you change this value, update the "Cluster: Databases" docs.
     return 5;
   }
 
@@ -60,6 +61,7 @@ final class PhabricatorDatabaseHealthRecord
    * Seconds to wait between health checks.
    */
   public function getHealthCheckFrequency() {
+    // NOTE: If you change this value, update the "Cluster: Databases" docs.
     return 3;
   }
 

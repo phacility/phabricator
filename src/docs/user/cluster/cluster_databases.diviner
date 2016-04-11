@@ -22,6 +22,10 @@ This configuration is complex, and many installs do not need to pursue it.
 Phabricator can not currently be configured into a multi-master mode, nor can
 it be configured to automatically promote a replica to become the new master.
 
+If you lose the master, Phabricator can degrade automatically into read-only
+mode and remain available, but can not fully recover without operational
+intervention unless the master recovers on its own.
+
 
 Setting up MySQL Replication
 ============================
@@ -59,17 +63,109 @@ The other MySQL connection configuration options (`mysql.port`, `mysql.user`,
 `mysql.pass`) are used only to provide defaults.
 
 Once you've configured this option, restart Phabricator for the changes to take
-effect, then continue to "Monitoring and Testing" to verify the configuration.
+effect, then continue to "Monitoring Replicas" to verify the configuration.
 
 
-Monitoring and Testing
-======================
+Monitoring Replicas
+===================
 
 You can monitor replicas in {nav Config > Cluster Databases}. This interface
 shows you a quick overview of replicas and their health, and can detect some
 common issues with replication.
 
-TODO: Write more stuff here.
+The table on this page shows each database and current status.
+
+NOTE: This page runs its diagnostics //from the web server that is serving the
+request//. If you are recovering from a disaster, the view this page shows
+may be partial or misleading, and two requests served by different servers may
+see different views of the cluster.
+
+**Connection**: Phabricator tries to connect to each configured database, then
+shows the result in this column. If it fails, a brief diagnostic message with
+details about the error is shown. If it succeeds, the column shows a rough
+measurement of latency from the current webserver to the database.
+
+**Replication**: This is a summary of replication status on the database. If
+things are properly configured and stable, the replicas should be actively
+replicating and no more than a few seconds behind master, and the master
+should //not// be replicating from another database.
+
+To report this status, the user Phabricator is connecting as must have the
+`REPLICATION CLIENT` privilege (or the `SUPER` privilege) so it can run the
+`SHOW SLAVE STATUS` command. The `REPLICATION CLIENT` privilege only enables
+the user to run diagnostic commands so it should be reasonable to grant it in
+most cases, but it is not required. If you choose not to grant it, this page
+can not show any useful diagnostic information about replication status but
+everything else will still work.
+
+If a replica is more than a second behind master, this page will show the
+current replication delay. If the replication delay is more than 30 seconds,
+it will report "Slow Replication" with a warning icon.
+
+If replication is delayed, data is at risk: if you lose the master and can not
+later recover it (for example, because a meteor has obliterated the datacenter
+housing the physical host), data which did not make it to the replica will be
+lost forever.
+
+Beyond the risk of data loss, any read-only traffic sent to the replica will
+see an older view of the world which could be confusing for users: it may
+appear that their data has been lost, even if it is safe and just hasn't
+replicated yet.
+
+Phabricator will attempt to prevent clients from seeing out-of-date views, but
+sometimes sending traffic to a delayed replica is the best available option
+(for example, if the master can not be reached).
+
+**Health**: This column shows the result of recent health checks against the
+server. After several checks in a row fail, Phabricator will mark the server
+as unhealthy and stop sending traffic to it until several checks in a row
+later succeed.
+
+Note that each web server tracks database health independently, so if you have
+several servers they may have different views of database health. This is
+normal and not problematic.
+
+For more information on health checks, see "Unreachable Masters" below.
+
+**Messages**: This column has additional details about any errors shown in the
+other columns. These messages can help you understand or resolve problems.
+
+
+Testing Replicas
+================
+
+To test that your configuration can survive a disaster, turn off the master
+database. Do this with great ceremony, making a cool explosion sound as you
+run the `mysqld stop` command.
+
+If things have been set up properly, Phabricator should degrade to a temporary
+read-only mode immediately. After a brief period of unresponsiveness, it will
+degrade further into a longer-term read-only mode. For details on how this
+works interanlly, see "Unreachable Masters" below.
+
+Once satisfied, turn the master back on. After a brief delay, Phabricator
+should recognize that the master is healthy again and recover fully.
+
+Throughout this process, the {nav Cluster Databases} console will show a
+current view of the world from the perspective of the web server handling the
+request. You can use it to monitor state.
+
+You can perform a more narrow test by enabling `cluster.read-only` in
+configuration. This will put Phabricator into read-only mode immediately
+without turning off any databases.
+
+You can use this mode to understand which capabilities will and will not be
+available in read-only mode, and make sure any information you want to remain
+accessible in a disaster (like wiki pages or contact information) is really
+accessible.
+
+See the next section, "Degradation to Read Only Mode", for more details about
+when, why, and how Phabricator degrades.
+
+If you run custom code or extensions, they may not accommodate read-only mode
+properly. You should specifically test that they function correctly in
+read-only mode and do not prevent you from accessing important information.
+
 
 Degradation to Read-Only Mode
 =============================
@@ -78,8 +174,8 @@ Phabricator will degrade to read-only mode when any of these conditions occur:
 
   - you turn it on explicitly;
   - you configure cluster mode, but don't set up any masters;
-  - the master is misconfigured and unsafe to write to; or
-  - the master is unreachable.
+  - the master can not be reached while handling a request; or
+  - recent attempts to connect to the master have consistently failed.
 
 When Phabricator is running in read-only mode, users can still read data and
 browse and clone repositories, but they can not edit, update, or push new
@@ -99,20 +195,9 @@ but disabling the master, or by not specifying any host as a master. This may
 be more convenient than turning it on explicitly during the course of
 operations work.
 
-Before writing to a master, Phabricator will verify that the host is not
-configured as a replica. This is a safety feature to prevent data loss if your
-MySQL and Phabricator configurations disagree about replica configuration. If
-your `master` is currently replicating from another host, Phabricator will
-treat it as a `replica` instead and implicitly degrade into read-only mode.
-
-Finally, if Phabricator is unable to reach the master, it will degrade into
-read-only mode. For details on how Phabricator determines that a master is
-unreachable, see "Unreachable Masters" below.
-
-If a master becomes unreachable, this normally corresponds to loss of the
-master host, a severed network link, or some other sort of disaster.
-Phabricator will degrade and continue operating in read-only mode until the
-master recovers or operations personnel can assess the situation and intervene.
+If Phabricator is unable to reach the master database, it will degrade into
+read-only mode automatically. See "Unreachable Masters" below for details on
+how this process works.
 
 If you end up in a situation where you have lost the master and can not get it
 back online (or can not restore it quickly) you can promote a replica to become
@@ -122,7 +207,7 @@ the new master. See the next section, "Promoting a Replica", for details.
 Promoting a Replica
 ===================
 
-TODO: Write this, too.
+TODO: Write this section.
 
 
 Unreachable Masters
@@ -131,7 +216,67 @@ Unreachable Masters
 This section describes how Phabricator determines that a master has been lost,
 marks it unreachable, and degrades into read-only mode.
 
-TODO: For now, it doesn't.
+Phabricator degrades into read-only mode automatically in two ways: very
+briefly in response to a single connection failure, or more permanently in
+response to a series of connection failures.
+
+In the first case, if a request needs to connect to the master but is not able
+to, Phabricator will temporarily degrade into read-only mode for the remainder
+of that request. The alternative is to fail abruptly, but Phabricator can
+sometimes degrade successfully and still respond to the user's request, so it
+makes an effort to finish serving the request from replicas.
+
+If the request was a write (like posting a comment) it will fail anyway, but
+if it was a read that did not actually need to use the master it may succeed.
+
+This temporary mode is intended to recover as gracefully as possible from brief
+interruptions in service (a few seconds), like a server being restarted, a
+network link becoming temporarily unavailable, or brief periods of load-related
+disruption. If the anomaly is temporary, Phabricator should recover immediately
+(on the next request once service is restored).
+
+This mode can be slow for users (they need to wait on connection attempts to
+the master which fail) and does not reduce load on the master (requests still
+attempt to connect to it).
+
+The second way Phabricator degrades is by running periodic health checks
+against databases, and marking them unhealthy if they fail over a longer period
+of time. This mechanism is very similar to the health checks that most HTTP
+load balancers perform against web servers.
+
+If a database fails several health checks in a row, Phabricator will mark it as
+unhealthy and stop sending all traffic (except for more health checks) to it.
+This improves performance during a service interruption and reduces load on the
+master, which may help it recover from load problems.
+
+You can monitor the status of health checks in the {nav Cluster Databases}
+console. The "Health" column shows how many checks have run recently and
+how many have succeeded.
+
+Health checks run every 3 seconds, and 5 checks in a row must fail or succeed
+before Phabricator marks the database as healthy or unhealthy, so it will
+generally take about 15 seconds for a database to change state after it goes
+down or comes up.
+
+If all of the recent checks fail, Phabricator will mark the database as
+unhealthy and stop sending traffic to it. If the master was the database that
+was marked as unhealthy, Phabricator will actively degrade into read-only mode
+until it recovers.
+
+This mode only attempts to connect to the unhealthy database once every few
+seconds to see if it is recovering, so performance will be better on average
+(users rarely need to wait for bad connections to fail or time out) and the
+datbase will receive less load.
+
+Once all of the recent checks succeed, Phabricator will mark the database as
+healthy again and continue sending traffic to it.
+
+Health checks are tracked individually for each web server, so some web servers
+may see a host as healthy while others see it as unhealthy. This is normal, and
+can accurately reflect the state of the world: for example, the link between
+datacenters may have been lost, so hosts in one datacenter can no longer see
+the master, while hosts in the other datacenter still have a healthy link to
+it.
 
 
 Backups
