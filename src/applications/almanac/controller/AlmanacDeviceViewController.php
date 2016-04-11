@@ -117,7 +117,7 @@ final class AlmanacDeviceViewController
       ->setCanEdit($can_edit);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('DEVICE INTERFACES'))
+      ->setHeader(pht('Device Interfaces'))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
@@ -167,7 +167,7 @@ final class AlmanacDeviceViewController
     $upload_uri = '/auth/sshkey/upload/?objectPHID='.$device_phid;
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('SSH PUBLIC KEYS'))
+      ->setHeader(pht('SSH Public Keys'))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
@@ -238,7 +238,7 @@ final class AlmanacDeviceViewController
         ));
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('BOUND SERVICES'))
+      ->setHeaderText(pht('Bound Services'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
