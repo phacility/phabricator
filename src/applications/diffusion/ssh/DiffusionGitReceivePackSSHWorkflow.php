@@ -21,8 +21,12 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
     if ($this->shouldProxy()) {
       $command = $this->getProxyCommand();
+      $is_proxy = true;
     } else {
       $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
+      $is_proxy = false;
+
+      $repository->synchronizeWorkingCopyBeforeWrite();
     }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
@@ -39,6 +43,10 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
         PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
         PhabricatorRepositoryStatusMessage::CODE_OKAY);
       $this->waitForGitClient();
+    }
+
+    if (!$is_proxy) {
+      $repository->synchronizeWorkingCopyAfterWrite();
     }
 
     return $err;

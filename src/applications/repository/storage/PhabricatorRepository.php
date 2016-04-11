@@ -3,6 +3,7 @@
 /**
  * @task uri        Repository URI Management
  * @task autoclose  Autoclose
+ * @task sync       Cluster Synchronization
  */
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements
@@ -61,6 +62,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
   private $projectPHIDs = self::ATTACHABLE;
+
+  private $clusterWriteLock;
+  private $clusterWriteVersion;
 
   public static function initializeNewRepository(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -2259,6 +2263,161 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $client;
+  }
+
+
+/* -(  Cluster Synchronization  )-------------------------------------------- */
+
+
+  /**
+   * @task sync
+   */
+  public function synchronizeWorkingCopyBeforeRead() {
+    $device = AlmanacKeys::getLiveDevice();
+    if (!$device) {
+      return;
+    }
+
+    $repository_phid = $this->getPHID();
+    $device_phid = $device->getPHID();
+
+    $read_lock = PhabricatorRepositoryWorkingCopyVersion::getReadLock(
+      $repository_phid,
+      $device_phid);
+
+    // TODO: Raise a more useful exception if we fail to grab this lock.
+    $read_lock->lock(phutil_units('2 minutes in seconds'));
+
+    $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
+      $repository_phid);
+    $versions = mpull($versions, null, 'getDevicePHID');
+
+    $this_version = idx($versions, $device_phid);
+    if ($this_version) {
+      $this_version = (int)$this_version->getRepositoryVersion();
+    } else {
+      $this_version = 0;
+    }
+
+    if ($versions) {
+      $max_version = (int)max(mpull($versions, 'getRepositoryVersion'));
+    } else {
+      $max_version = 0;
+    }
+
+    if ($max_version > $this_version) {
+      $fetchable = array();
+      foreach ($versions as $version) {
+        if ($version->getRepositoryVersion() == $max_version) {
+          $fetchable[] = $version->getDevicePHID();
+        }
+      }
+
+      // TODO: Actualy fetch the newer version from one of the nodes which has
+      // it.
+
+      PhabricatorRepositoryWorkingCopyVersion::updateVersion(
+        $repository_phid,
+        $device_phid,
+        $max_version);
+    }
+
+    $read_lock->unlock();
+
+    return $max_version;
+  }
+
+
+  /**
+   * @task sync
+   */
+  public function synchronizeWorkingCopyBeforeWrite() {
+    $device = AlmanacKeys::getLiveDevice();
+    if (!$device) {
+      return;
+    }
+
+    $repository_phid = $this->getPHID();
+    $device_phid = $device->getPHID();
+
+    $write_lock = PhabricatorRepositoryWorkingCopyVersion::getWriteLock(
+      $repository_phid);
+
+    // TODO: Raise a more useful exception if we fail to grab this lock.
+    $write_lock->lock(phutil_units('2 minutes in seconds'));
+
+    $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
+      $repository_phid);
+    foreach ($versions as $version) {
+      if (!$version->getIsWriting()) {
+        continue;
+      }
+
+      // TODO: This should provide more help so users can resolve the issue.
+      throw new Exception(
+        pht(
+          'An incomplete write was previously performed to this repository; '.
+          'refusing new writes.'));
+    }
+
+    $max_version = $this->synchronizeWorkingCopyBeforeRead();
+
+    PhabricatorRepositoryWorkingCopyVersion::willWrite(
+      $repository_phid,
+      $device_phid);
+
+    $this->clusterWriteVersion = $max_version;
+    $this->clusterWriteLock = $write_lock;
+  }
+
+
+  /**
+   * @task sync
+   */
+  public function synchronizeWorkingCopyAfterWrite() {
+    if (!$this->clusterWriteLock) {
+      throw new Exception(
+        pht(
+          'Trying to synchronize after write, but not holding a write '.
+          'lock!'));
+    }
+
+    $device = AlmanacKeys::getLiveDevice();
+    if (!$device) {
+      throw new Exception(
+        pht(
+          'Trying to synchronize after write, but this host is not an '.
+          'Almanac device.'));
+    }
+
+    $repository_phid = $this->getPHID();
+    $device_phid = $device->getPHID();
+
+    // NOTE: This means we're still bumping the version when pushes fail. We
+    // could select only un-rejected events instead to bump a little less
+    // often.
+
+    $new_log = id(new PhabricatorRepositoryPushEventQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withRepositoryPHIDs(array($repository_phid))
+      ->setLimit(1)
+      ->executeOne();
+
+    $old_version = $this->clusterWriteVersion;
+    if ($new_log) {
+      $new_version = $new_log->getID();
+    } else {
+      $new_version = $old_version;
+    }
+
+    PhabricatorRepositoryWorkingCopyVersion::didWrite(
+      $repository_phid,
+      $device_phid,
+      $this->clusterWriteVersion,
+      $new_log->getID());
+
+    $this->clusterWriteLock->unlock();
+    $this->clusterWriteLock = null;
   }
 
 

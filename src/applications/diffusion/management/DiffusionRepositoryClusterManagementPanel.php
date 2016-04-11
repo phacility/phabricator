@@ -44,6 +44,16 @@ final class DiffusionRepositoryClusterManagementPanel
       $bindings = $service->getBindings();
       $bindings = mgroup($bindings, 'getDevicePHID');
 
+      // This is an unusual read which always comes from the master.
+      if (PhabricatorEnv::isReadOnly()) {
+        $versions = array();
+      } else {
+        $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
+          $repository->getPHID());
+      }
+
+      $versions = mpull($versions, null, 'getDevicePHID');
+
       foreach ($bindings as $binding_group) {
         $all_disabled = true;
         foreach ($binding_group as $binding) {
@@ -73,6 +83,27 @@ final class DiffusionRepositoryClusterManagementPanel
 
         $device = $any_binding->getDevice();
 
+        $version = idx($versions, $device->getPHID());
+        if ($version) {
+          $version_number = $version->getRepositoryVersion();
+          $version_number = phutil_tag(
+            'a',
+            array(
+              'href' => "/diffusion/pushlog/view/{$version_number}/",
+            ),
+            $version_number);
+        } else {
+          $version_number = '-';
+        }
+
+        if ($version && $version->getIsWriting()) {
+          $is_writing = id(new PHUIIconView())
+            ->setIcon('fa-pencil green');
+        } else {
+          $is_writing = id(new PHUIIconView())
+            ->setIcon('fa-pencil grey');
+        }
+
         $rows[] = array(
           $binding_icon,
           phutil_tag(
@@ -81,6 +112,8 @@ final class DiffusionRepositoryClusterManagementPanel
               'href' => $device->getURI(),
             ),
             $device->getName()),
+          $version_number,
+          $is_writing,
         );
       }
     }
@@ -91,11 +124,15 @@ final class DiffusionRepositoryClusterManagementPanel
         array(
           null,
           pht('Device'),
+          pht('Version'),
+          pht('Writing'),
         ))
       ->setColumnClasses(
         array(
           null,
-          'wide',
+          null,
+          null,
+          'right wide',
         ));
 
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
