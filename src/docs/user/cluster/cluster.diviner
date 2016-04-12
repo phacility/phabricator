@@ -26,6 +26,9 @@ operations personnel who need this high degree of flexibility.
 The remainder of this document summarizes how to add redundancy to each
 service and where your efforts are likely to have the greatest impact.
 
+For additional guidance on setting up a cluster, see "Overlaying Services"
+and "Cluster Recipes" at the bottom of this document.
+
 
 Cluster: Databases
 =================
@@ -44,7 +47,8 @@ For details, see @{article:Cluster: Databases}.
 Cluster: Repositories
 =====================
 
-Configuring multiple repository hosts is complex.
+Configuring multiple repository hosts is complex, but is required before you
+can add multiple daemon or web hosts.
 
 Repository replicas are important for availability if you host repositories
 on Phabricator, but less important if you host repositories elsewhere
@@ -55,3 +59,123 @@ naturally somewhat resistant to data loss: every clone of a repository includes
 the entire history.
 
 For details, see @{article:Cluster: Repositories}.
+
+
+Cluster: Daemons
+================
+
+Configuring multiple daemon hosts is straightforward, but you must configure
+repositories first.
+
+With daemons running on multiple hosts, you can transparently survive the loss
+of any subset of hosts without an interruption to daemon services, as long as
+at least one host remains alive. Daemons are stateless, so spreading daemons
+across multiple hosts provides no resistance to data loss.
+
+For details, see @{article:Cluster: Daemons}.
+
+
+Cluster: Web Servers
+====================
+
+Configuring multiple web hosts is straightforward, but you must configure
+repositories first.
+
+With multiple web hosts, you can transparently survive the loss of any subset
+of hosts as long as at least one host remains alive. Web hosts are stateless,
+so putting multiple hosts in service provides no resistance to data loss.
+
+For details, see @{article:Cluster: Web Servers}.
+
+
+Overlaying Services
+===================
+
+Although hosts can run a single dedicated service type, certain groups of
+services work well together. Phabricator clusters usually do not need to be
+very large, so deploying a small number of hosts with multiple services is a
+good place to start.
+
+In planning a cluster, consider these blended host types:
+
+**Everything**: Run HTTP, SSH, MySQL, repositories and daemons on a single
+host. This is the starting point for single-node setups, and usually also the
+best configuration when adding the second node.
+
+**Everything Except Databases**: Run HTTP, SSH, repositories and daemons on one
+host, and MySQL on a different host. MySQL uses many of the same resources that
+other services use. It's also simpler to separate than other services, and
+tends to benefit the most from dedicated hardware.
+
+**Just Databases**: Separating MySQL onto dedicated nodes
+
+Database nodes tend to benefit the most from
+
+**Repositories and Daemons**: Run repositories and daemons on the same host.
+Repository hosts //must// run daemons, and it normally makes sense to
+completely overlay repositories and daemons. These services tend to use
+different resources (repositories are heavier on I/O and lighter on CPU/RAM;
+daemons are heavier on CPU/RAM and lighter on I/O).
+
+Repositories and daemons are also both less latency sensitive than other
+service types, so there's a wider margin of error for underprovisioning them
+before performance is noticably affected.
+
+These nodes tend to use system resources in a balanced way. Individual nodes
+in this class do not need to be particularly powerful.
+
+**Frontend Servers**: Run HTTP and SSH on the same host. These are easy to set
+up, stateless, and you can scale the pool up or down easily to meet demand.
+Routing both types of ingress traffic through the same initial tier can
+simplify load balancing.
+
+These nodes tend to need relatively little RAM.
+
+
+Cluster Recipes
+===============
+
+This section provides some guidance on reasonable ways to scale up a cluster.
+
+The smallest possible cluster is **two hosts**. Run everything (web, ssh,
+database, repositories, and daemons) on each host. One host will serve as the
+master; the other will serve as a replica.
+
+Ideally, you should physically separate these hosts to reduce the chance that a
+natural disaster or infrastructure disruption could disable or destroy both
+hosts at the same time.
+
+From here, you can choose how you expand the cluster.
+
+To improve **scalability and performance**, separate loaded services onto
+dedicated hosts and then add more hosts of that type to increase capacity. If
+you have a two-node cluster, the best way to improve scalability by adding one
+host is likely to separate the master database onto its own host.
+
+Note that increasing scale may //decrease// availability by leaving you with
+too little capacity after a failure. If you have three hosts handling traffic
+and one datacenter fails, too much traffic may be sent to the single remaining
+host in the surviving datacenter. You can hedge against this by mirroring new
+hosts in other datacenters (for example, also separate the replica database
+onto its own host).
+
+After separating databases, separating repository + daemon nodes is likely
+the next step.
+
+To improve **availability**, add another copy of everything you run in one
+datacenter to a new datacenter. For example, if you have a two-node cluster,
+the best way to improve availability is to run everything on a third host in a
+third datacenter. If you have a 6-node cluster with a web node, a database node
+and a repo + daemon node in two datacenters, add 3 more nodes to create a copy
+of each node in a third datacenter.
+
+You can continue adding hosts until you run out of hosts.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - learning how Phacility configures and operates a large, multi-tenant
+    production cluster in ((cluster)).
