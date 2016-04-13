@@ -52,18 +52,33 @@ JX.install('AphlictClientServer', {
       response.end('HTTP/501 Use Websockets\n');
     },
 
+    _parseInstanceFromPath: function(path) {
+      // If there's no "~" marker in the path, it's not an instance name.
+      // Users sometimes configure nginx or Apache to proxy based on the
+      // path.
+      if (path.indexOf('~') === -1) {
+        return 'default';
+      }
+
+      var instance = path.split('~')[1];
+
+      // Remove any "/" characters.
+      instance = instance.replace(/\//g, '');
+      if (!instance.length) {
+        return 'default';
+      }
+
+      return instance;
+    },
+
     listen: function() {
       var self = this;
       var server = this._server.listen.apply(this._server, arguments);
       var wss = new WebSocket.Server({server: server});
 
       wss.on('connection', function(ws) {
-        var instance = url.parse(ws.upgradeReq.url).pathname;
-
-        instance = instance.replace(/\//g, '');
-        if (!instance.length) {
-          instance = 'default';
-        }
+        var path = url.parse(ws.upgradeReq.url).pathname;
+        var instance = self._parseInstanceFromPath(path);
 
         var listener = self.getListenerList(instance).addListener(ws);
 

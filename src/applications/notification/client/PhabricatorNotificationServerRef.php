@@ -162,7 +162,7 @@ final class PhabricatorNotificationServerRef
   public function getWebsocketURI($to_path = null) {
     $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
     if (strlen($instance)) {
-      $to_path = $to_path.$instance.'/';
+      $to_path = $to_path.'~'.$instance.'/';
     }
 
     $uri = $this->getURI($to_path);
