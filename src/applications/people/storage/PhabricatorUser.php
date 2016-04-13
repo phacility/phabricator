@@ -133,6 +133,19 @@ final class PhabricatorUser
   }
 
   public function canEstablishAPISessions() {
+    if ($this->getIsDisabled()) {
+      return false;
+    }
+
+    // Intracluster requests are permitted even if the user is logged out:
+    // in particular, public users are allowed to issue intracluster requests
+    // when browsing Diffusion.
+    if (PhabricatorEnv::isClusterRemoteAddress()) {
+      if (!$this->isLoggedIn()) {
+        return true;
+      }
+    }
+
     if (!$this->isUserActivated()) {
       return false;
     }
