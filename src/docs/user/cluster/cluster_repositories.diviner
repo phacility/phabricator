@@ -58,6 +58,32 @@ Before responding to a write, replicas obtain a global lock, perform the same
 version check and fetch if necessary, then allow the write to continue.
 
 
+HTTP vs HTTPS
+=============
+
+Intracluster requests (from the daemons to repository servers, or from
+webservers to repository servers) are permitted to use HTTP, even if you have
+set `security.require-https` in your configuration.
+
+It is common to terminate SSL at a load balancer and use plain HTTP beyond
+that, and the `security.require-https` feature is primarily focused on making
+client browser behavior more convenient for users, so it does not apply to
+intracluster traffic.
+
+Using HTTP within the cluster leaves you vulnerable to attackers who can
+observe traffic within a datacenter, or observe traffic between datacenters.
+This is normally very difficult, but within reach for state-level adversaries
+like the NSA.
+
+If you are concerned about these attackers, you can terminate HTTPS on
+repository hosts and bind to them with the "https" protocol. Just be aware that
+the `security.require-https` setting won't prevent you from making
+configuration mistakes, as it doesn't cover intracluster traffic.
+
+Other mitigations are possible, but securing a network against the NSA and
+similar agents of other rogue nations is beyond the scope of this document.
+
+
 Backups
 ======
 

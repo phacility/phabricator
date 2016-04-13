@@ -80,22 +80,25 @@ final class PhabricatorSecurityConfigOptions
           pht(
             "If the web server responds to both HTTP and HTTPS requests but ".
             "you want users to connect with only HTTPS, you can set this ".
-            "to true to make Phabricator redirect HTTP requests to HTTPS.\n\n".
-
+            "to `true` to make Phabricator redirect HTTP requests to HTTPS.".
+            "\n\n".
             "Normally, you should just configure your server not to accept ".
             "HTTP traffic, but this setting may be useful if you originally ".
             "used HTTP and have now switched to HTTPS but don't want to ".
             "break old links, or if your webserver sits behind a load ".
             "balancer which terminates HTTPS connections and you can not ".
-            "reasonably configure more granular behavior there.\n\n".
-
+            "reasonably configure more granular behavior there.".
+            "\n\n".
             "IMPORTANT: Phabricator determines if a request is HTTPS or not ".
             "by examining the PHP `%s` variable. If you run ".
             "Apache/mod_php this will probably be set correctly for you ".
             "automatically, but if you run Phabricator as CGI/FCGI (e.g., ".
             "through nginx or lighttpd), you need to configure your web ".
             "server so that it passes the value correctly based on the ".
-            "connection type.",
+            "connection type.".
+            "\n\n".
+            "If you configure Phabricator in cluster mode, note that this ".
+            "setting is ignored by intracluster requests.",
             "\$_SERVER['HTTPS']"))
         ->setBoolOptions(
           array(

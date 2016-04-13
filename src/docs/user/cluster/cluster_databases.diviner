@@ -301,6 +301,18 @@ it says to do:
 
 TODO: Make `bin/storage dump` replica-aware. See T10758.
 
+With recent versions of MySQL, it is also possible to configure a //delayed//
+replica which intentionally lags behind the master (say, by 12 hours). In the
+event of a bad mutation, this could give you a larger window of time to
+recognize the issue and recover the lost data from the delayed replica (which
+might be quick) without needing to restore backups (which might be very slow).
+
+Delayed replication is outside the scope of this document, but may be worth
+considering as an additional data security step on top of backup snapshots
+depending on your resources and needs. If you configure a delayed replica, do
+not add it to the `cluster.databases` configuration: Phabricator should never
+send traffic to it, and does not need to know about it.
+
 
 Next Steps
 ==========

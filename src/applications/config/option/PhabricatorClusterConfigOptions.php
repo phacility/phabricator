@@ -34,25 +34,32 @@ EOTEXT
       PhabricatorEnv::getDoclink('Cluster: Databases'),
       pht('Cluster: Databases')));
 
+
+    $intro_href = PhabricatorEnv::getDoclink('Clustering Introduction');
+    $intro_name = pht('Clustering Introduction');
+
     return array(
       $this->newOption('cluster.addresses', 'list<string>', array())
         ->setLocked(true)
         ->setSummary(pht('Address ranges of cluster hosts.'))
         ->setDescription(
           pht(
-            'To allow Phabricator nodes to communicate with other nodes '.
-            'in the cluster, provide an address whitelist of hosts that '.
-            'are part of the cluster.'.
+            'Define a Phabricator cluster by providing a whitelist of host '.
+            'addresses that are part of the cluster.'.
             "\n\n".
-            'Hosts on this whitelist are permitted to use special cluster '.
-            'mechanisms to authenticate requests. By default, these '.
-            'mechanisms are disabled.'.
+            'Hosts on this whitelist have special powers. These hosts are '.
+            'permitted to bend security rules, and misconfiguring this list '.
+            'can make your install less secure. For more information, '.
+            'see **[[ %s | %s ]]**.'.
             "\n\n".
             'Define a list of CIDR blocks which whitelist all hosts in the '.
-            'cluster. See the examples below for details.',
+            'cluster and no additional hosts. See the examples below for '.
+            'details.'.
             "\n\n".
             'When cluster addresses are defined, Phabricator hosts will also '.
-            'reject requests to interfaces which are not whitelisted.'))
+            'reject requests to interfaces which are not whitelisted.',
+            $intro_href,
+            $intro_name))
         ->addExample(
           array(
             '23.24.25.80/32',
