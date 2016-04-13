@@ -50,6 +50,10 @@
   background-color: {$lightbluebackground};
 }
 
+.phui-badge-card a {
+  color: {$darkbluetext};
+}
+
 .card-flipped .phui-badge-card-container {
   transform: translateX( -100% ) rotateY( -180deg );
   -webkit-transform: translateX( -100% ) rotateY( -180deg );

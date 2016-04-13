@@ -61,6 +61,8 @@ final class PHUIBadgeView extends AphrontTagView {
     require_celerity_resource('phui-badge-view-css');
     $id = celerity_generate_unique_node_id();
 
+    Javelin::initBehavior('badge-view', array());
+
     $classes = array();
     $classes[] = 'phui-badge-view';
     if ($this->quality) {
@@ -70,7 +72,7 @@ final class PHUIBadgeView extends AphrontTagView {
 
     return array(
         'class' => implode(' ', $classes),
-        'sigil' => 'jx-toggle-class',
+        'sigil' => 'jx-badge-view',
         'id'    => $id,
         'meta'  => array(
           'map' => array(
