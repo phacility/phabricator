@@ -2375,19 +2375,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @task sync
    */
   public function synchronizeWorkingCopyAfterWrite() {
+    $device = AlmanacKeys::getLiveDevice();
+    if (!$device) {
+      return;
+    }
+
     if (!$this->clusterWriteLock) {
       throw new Exception(
         pht(
           'Trying to synchronize after write, but not holding a write '.
           'lock!'));
-    }
-
-    $device = AlmanacKeys::getLiveDevice();
-    if (!$device) {
-      throw new Exception(
-        pht(
-          'Trying to synchronize after write, but this host is not an '.
-          'Almanac device.'));
     }
 
     $repository_phid = $this->getPHID();
