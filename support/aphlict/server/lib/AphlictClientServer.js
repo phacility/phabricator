@@ -12,9 +12,14 @@ var WebSocket = require('ws');
 JX.install('AphlictClientServer', {
 
   construct: function(server) {
-    this.setLogger(new JX.AphlictLog());
+    server.on('request', JX.bind(this, this._onrequest));
+
     this._server = server;
     this._lists = {};
+  },
+
+  properties: {
+    logger: null,
   },
 
   members: {
@@ -28,6 +33,25 @@ JX.install('AphlictClientServer', {
       return this._lists[path];
     },
 
+    log: function() {
+      var logger = this.getLogger();
+      if (!logger) {
+        return;
+      }
+
+      logger.log.apply(logger, arguments);
+
+      return this;
+    },
+
+    _onrequest: function(request, response) {
+      // The websocket code upgrades connections before they get here, so
+      // this only handles normal HTTP connections. We just fail them with
+      // a 501 response.
+      response.writeHead(501);
+      response.end('HTTP/501 Use Websockets\n');
+    },
+
     listen: function() {
       var self = this;
       var server = this._server.listen.apply(this._server, arguments);
@@ -38,7 +62,7 @@ JX.install('AphlictClientServer', {
         var listener = self.getListenerList(path).addListener(ws);
 
         function log() {
-          self.getLogger().log(
+          self.log(
             util.format('<%s>', listener.getDescription()) +
             ' ' +
             util.format.apply(null, arguments));
@@ -97,10 +121,6 @@ JX.install('AphlictClientServer', {
 
     },
 
-  },
-
-  properties: {
-    logger: null,
   }
 
 });

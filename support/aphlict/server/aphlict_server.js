@@ -99,7 +99,28 @@ var ssl_config = {
 if (ssl_config.enabled) {
   ssl_config.key = fs.readFileSync(config['ssl-key']);
   ssl_config.cert = fs.readFileSync(config['ssl-cert']);
+} else {
+  ssl_config.key = null;
+  ssl_config.cert = null;
 }
+
+var servers = [];
+
+servers.push({
+  type: 'client',
+  port: config['client-port'],
+  listen: config['client-host'],
+  'ssl.key': ssl_config.key,
+  'ssl.certificate': ssl_config.cert
+});
+
+servers.push({
+  type: 'admin',
+  port: config['admin-port'],
+  listen: config['admin-host'],
+  'ssl.key': null,
+  'ssl.cert': null
+});
 
 // If we're just doing a configuration test, exit here before starting any
 // servers.
@@ -109,27 +130,49 @@ if (config.test) {
   return;
 }
 
-var server;
-if (ssl_config.enabled) {
-  server = https.createServer({
-    key: ssl_config.key,
-    cert: ssl_config.cert
-  }, function(req, res) {
-    res.writeHead(501);
-    res.end('HTTP/501 Use Websockets\n');
-  });
-} else {
-  server = http.createServer(function() {});
+var aphlict_servers = [];
+var aphlict_clients = [];
+var aphlict_admins = [];
+
+var ii;
+for (ii = 0; ii < servers.length; ii++) {
+  var server = servers[ii];
+  var is_client = (server.type == 'client');
+
+  var http_server;
+  if (server['ssl.key']) {
+    var https_config = {
+      key: server['ssl.key'],
+      cert: server['ssl.cert']
+    };
+
+    http_server = https.createServer(https_config);
+  } else {
+    http_server = http.createServer();
+  }
+
+  var aphlict_server;
+  if (is_client) {
+    aphlict_server = new JX.AphlictClientServer(http_server);
+  } else {
+    aphlict_server = new JX.AphlictAdminServer(http_server);
+  }
+
+  aphlict_server.setLogger(debug);
+  aphlict_server.listen(server.port, server.listen);
+
+  aphlict_servers.push(aphlict_server);
+
+  if (is_client) {
+    aphlict_clients.push(aphlict_server);
+  } else {
+    aphlict_admins.push(aphlict_server);
+  }
 }
 
-var client_server = new JX.AphlictClientServer(server);
-var admin_server = new JX.AphlictAdminServer();
-
-client_server.setLogger(debug);
-admin_server.setLogger(debug);
-admin_server.setClientServer(client_server);
-
-client_server.listen(config['client-port'], config['client-host']);
-admin_server.listen(config['admin-port'], config['admin-host']);
+for (ii = 0; ii < aphlict_admins.length; ii++) {
+  var admin_server = aphlict_admins[ii];
+  admin_server.setClientServers(aphlict_clients);
+}
 
 debug.log('Started Server (PID %d)', process.pid);
