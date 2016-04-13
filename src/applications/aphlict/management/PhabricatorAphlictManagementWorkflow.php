@@ -7,27 +7,29 @@ abstract class PhabricatorAphlictManagementWorkflow
   private $clientHost;
   private $clientPort;
 
-  protected function didConstruct() {
-    $this
-      ->setArguments(
-        array(
-          array(
-            'name'  => 'client-host',
-            'param' => 'hostname',
-            'help'  => pht('Hostname to bind to for the client server.'),
-          ),
-          array(
-            'name'  => 'client-port',
-            'param' => 'port',
-            'help'  => pht('Port to bind to for the client server.'),
-          ),
-        ));
+  final protected function setDebug($debug) {
+    $this->debug = $debug;
+    return $this;
   }
 
-  public function execute(PhutilArgumentParser $args) {
+  protected function getLaunchArguments() {
+    return array(
+      array(
+        'name'  => 'client-host',
+        'param' => 'hostname',
+        'help'  => pht('Hostname to bind to for the client server.'),
+      ),
+      array(
+        'name'  => 'client-port',
+        'param' => 'port',
+        'help'  => pht('Port to bind to for the client server.'),
+      ),
+    );
+  }
+
+  protected function parseLaunchArguments(PhutilArgumentParser $args) {
     $this->clientHost = $args->getArg('client-host');
     $this->clientPort = $args->getArg('client-port');
-    return 0;
   }
 
   final public function getPIDPath() {
@@ -86,11 +88,6 @@ abstract class PhabricatorAphlictManagementWorkflow
     exit(1);
   }
 
-  final protected function setDebug($debug) {
-    $this->debug = $debug;
-    return $this;
-  }
-
   public static function requireExtensions() {
     self::mustHaveExtension('pcntl');
     self::mustHaveExtension('posix');
@@ -146,11 +143,8 @@ abstract class PhabricatorAphlictManagementWorkflow
     $test_argv = $this->getServerArgv();
     $test_argv[] = '--test=true';
 
-    execx(
-      '%s %s %Ls',
-      $this->getNodeBinary(),
-      $this->getAphlictScriptPath(),
-      $test_argv);
+
+    execx('%C', $this->getStartCommand($test_argv));
   }
 
   private function getServerArgv() {
@@ -189,11 +183,6 @@ abstract class PhabricatorAphlictManagementWorkflow
     return $server_argv;
   }
 
-  private function getAphlictScriptPath() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    return $root.'/support/aphlict/server/aphlict_server.js';
-  }
-
   final protected function launch() {
     $console = PhutilConsole::getConsole();
 
@@ -205,11 +194,7 @@ abstract class PhabricatorAphlictManagementWorkflow
       Filesystem::writeFile($this->getPIDPath(), getmypid());
     }
 
-    $command = csprintf(
-      '%s %s %Ls',
-      $this->getNodeBinary(),
-      $this->getAphlictScriptPath(),
-      $this->getServerArgv());
+    $command = $this->getStartCommand($this->getServerArgv());
 
     if (!$this->debug) {
       declare(ticks = 1);
@@ -267,7 +252,6 @@ abstract class PhabricatorAphlictManagementWorkflow
     fclose(STDOUT);
     fclose(STDERR);
 
-
     $this->launch();
     return 0;
   }
@@ -323,6 +307,19 @@ abstract class PhabricatorAphlictManagementWorkflow
         'nodejs',
         'node',
         '$PATH'));
+  }
+
+  private function getAphlictScriptPath() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    return $root.'/support/aphlict/server/aphlict_server.js';
+  }
+
+  private function getStartCommand(array $server_argv) {
+    return csprintf(
+      '%s %s %Ls',
+      $this->getNodeBinary(),
+      $this->getAphlictScriptPath(),
+      $server_argv);
   }
 
 }

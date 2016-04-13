@@ -6,7 +6,7 @@ final class PhabricatorAphlictManagementStatusWorkflow
   protected function didConstruct() {
     $this
       ->setName('status')
-      ->setSynopsis(pht('Show the status of the notifications server.'))
+      ->setSynopsis(pht('Show the status of the notification server.'))
       ->setArguments(array());
   }
 

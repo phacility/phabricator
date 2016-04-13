@@ -6,7 +6,7 @@ final class PhabricatorAphlictManagementStopWorkflow
   protected function didConstruct() {
     $this
       ->setName('stop')
-      ->setSynopsis(pht('Stop the notifications server.'))
+      ->setSynopsis(pht('Stop the notification server.'))
       ->setArguments(array());
   }
 
