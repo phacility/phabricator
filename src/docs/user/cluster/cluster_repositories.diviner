@@ -34,7 +34,7 @@ web hosts run. If you prefer, you can overlay these services and put web and
 repository services on the same hosts.
 
 When a user requests information about a repository that can only be satisfied
-by examining a repository working copy, the webserver receiving the reqeust
+by examining a repository working copy, the webserver receiving the request
 will make an HTTP service call to a repository server which hosts the
 repository to retrieve the data it needs. It will use the result of this query
 to respond to the user.

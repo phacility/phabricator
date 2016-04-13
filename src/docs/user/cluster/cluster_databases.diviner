@@ -141,7 +141,7 @@ run the `mysqld stop` command.
 If things have been set up properly, Phabricator should degrade to a temporary
 read-only mode immediately. After a brief period of unresponsiveness, it will
 degrade further into a longer-term read-only mode. For details on how this
-works interanlly, see "Unreachable Masters" below.
+works internally, see "Unreachable Masters" below.
 
 Once satisfied, turn the master back on. After a brief delay, Phabricator
 should recognize that the master is healthy again and recover fully.
@@ -266,7 +266,7 @@ until it recovers.
 This mode only attempts to connect to the unhealthy database once every few
 seconds to see if it is recovering, so performance will be better on average
 (users rarely need to wait for bad connections to fail or time out) and the
-datbase will receive less load.
+database will receive less load.
 
 Once all of the recent checks succeed, Phabricator will mark the database as
 healthy again and continue sending traffic to it.
@@ -293,7 +293,7 @@ backup snapshots.
 
 Although you should still have a backup process, your backup process can
 safely pull dumps from a replica instead of the master. This operation can
-be slow, so offloading it to a replica can make the perforance of the master
+be slow, so offloading it to a replica can make the performance of the master
 more consistent.
 
 To dump from a replica, wait for this TODO to be resolved and then do whatever

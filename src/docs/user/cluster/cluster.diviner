@@ -10,7 +10,7 @@ Overview
 WARNING: This feature is a very early prototype; the features this document
 describes are mostly speculative fantasy.
 
-Phabricator can be configured to run on mulitple hosts with redundant services
+Phabricator can be configured to run on multiple hosts with redundant services
 to improve its availability and scalability, and make disaster recovery much
 easier.
 
@@ -36,7 +36,7 @@ Preparing for Clustering
 To begin deploying Phabricator in cluster mode, set up `cluster.addresses`
 in your configuration.
 
-This option should contain a list of network addess blocks which are considered
+This option should contain a list of network address blocks which are considered
 to be part of the cluster. Hosts in this list are allowed to bend (or even
 break) some of the security and policy rules when they make requests to other
 hosts in the cluster, so this list should be as small as possible. See "Cluster
@@ -94,7 +94,7 @@ the user within the cluster.
 
 These mechanisms are still authenticated (and use asymmetric keys, like SSH
 does), so access to a host in the cluster address block does not mean that an
-attacker can immediately compromise the cluster. However, an overbroad cluster
+attacker can immediately compromise the cluster. However, an over-broad cluster
 address whitelist may give an attacker who gains some access additional tools
 to escalate access.
 
@@ -181,10 +181,6 @@ host, and MySQL on a different host. MySQL uses many of the same resources that
 other services use. It's also simpler to separate than other services, and
 tends to benefit the most from dedicated hardware.
 
-**Just Databases**: Separating MySQL onto dedicated nodes
-
-Database nodes tend to benefit the most from
-
 **Repositories and Daemons**: Run repositories and daemons on the same host.
 Repository hosts //must// run daemons, and it normally makes sense to
 completely overlay repositories and daemons. These services tend to use
@@ -192,8 +188,8 @@ different resources (repositories are heavier on I/O and lighter on CPU/RAM;
 daemons are heavier on CPU/RAM and lighter on I/O).
 
 Repositories and daemons are also both less latency sensitive than other
-service types, so there's a wider margin of error for underprovisioning them
-before performance is noticably affected.
+service types, so there's a wider margin of error for under provisioning them
+before performance is noticeably affected.
 
 These nodes tend to use system resources in a balanced way. Individual nodes
 in this class do not need to be particularly powerful.

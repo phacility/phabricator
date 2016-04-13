@@ -29,7 +29,7 @@ repository host according to the documentation in
 @{article:Cluster: Repositories}. These daemons are necessary: repositories
 will not fetch, update, or synchronize properly without them.
 
-If your repository clustering is redundant (you have at least two repsoitory
+If your repository clustering is redundant (you have at least two repository
 hosts), these daemons are also likely to be sufficient in most cases. If you
 want to launch additional hosts anyway (for example, to increase queue capacity
 for unusual workloads), see "Dedicated Daemon Hosts" below.
