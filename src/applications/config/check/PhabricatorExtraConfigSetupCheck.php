@@ -182,6 +182,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'Garbage collectors are now configured with "%s".',
       'bin/garbage set-policy');
 
+    $aphlict_reason = pht(
+      'Configuration of the notification server has changed substantially. '.
+      'For discussion, see T10794.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -298,6 +302,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'phd.variant-config' => pht(
         'This configuration is no longer relevant because daemons '.
         'restart automatically on configuration changes.'),
+
+      'notification.ssl-cert' => $aphlict_reason,
+      'notification.ssl-key' => $aphlict_reason,
     );
 
     return $ancient_config;

@@ -1,0 +1,18 @@
+{
+  "servers": [
+    {
+      "type": "client",
+      "port": 22280,
+      "listen": "0.0.0.0",
+      "ssl.key": null,
+      "ssl.cert": null
+    },
+    {
+      "type": "admin",
+      "port": 22281,
+      "listen": "127.0.0.1",
+      "ssl.key": null,
+      "ssl.cert": null
+    }
+  ]
+}

@@ -4,8 +4,7 @@ abstract class PhabricatorAphlictManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
   private $debug = false;
-  private $clientHost;
-  private $clientPort;
+  private $configPath;
 
   final protected function setDebug($debug) {
     $this->debug = $debug;
@@ -15,21 +14,167 @@ abstract class PhabricatorAphlictManagementWorkflow
   protected function getLaunchArguments() {
     return array(
       array(
-        'name'  => 'client-host',
-        'param' => 'hostname',
-        'help'  => pht('Hostname to bind to for the client server.'),
-      ),
-      array(
-        'name'  => 'client-port',
-        'param' => 'port',
-        'help'  => pht('Port to bind to for the client server.'),
+        'name' => 'config',
+        'param' => 'file',
+        'help' => pht(
+          'Use a specific configuration file instead of the default '.
+          'configuration.'),
       ),
     );
   }
 
   protected function parseLaunchArguments(PhutilArgumentParser $args) {
-    $this->clientHost = $args->getArg('client-host');
-    $this->clientPort = $args->getArg('client-port');
+    $config_file = $args->getArg('config');
+    if ($config_file) {
+      $full_path = Filesystem::resolvePath($config_file);
+      $show_path = $full_path;
+    } else {
+      $root = dirname(dirname(phutil_get_library_root('phabricator')));
+
+      $try = array(
+        'phabricator/conf/aphlict/aphlict.custom.json',
+        'phabricator/conf/aphlict/aphlict.default.json',
+      );
+
+      foreach ($try as $config) {
+        $full_path = $root.'/'.$config;
+        $show_path = $config;
+        if (Filesystem::pathExists($full_path)) {
+          break;
+        }
+      }
+    }
+
+    echo tsprintf(
+      "%s\n",
+      pht(
+        'Reading configuration from: %s',
+        $show_path));
+
+    try {
+      $data = Filesystem::readFile($full_path);
+    } catch (Exception $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Failed to read configuration file. %s',
+          $ex->getMessage()));
+    }
+
+    try {
+      $data = phutil_json_decode($data);
+    } catch (Exception $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file is not properly formatted JSON. %s',
+          $ex->getMessage()));
+    }
+
+    try {
+      PhutilTypeSpec::checkMap(
+        $data,
+        array(
+          'servers' => 'list<wild>',
+        ));
+    } catch (Exception $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file has improper configuration keys at top '.
+          'level. %s',
+          $ex->getMessage()));
+    }
+
+    $servers = $data['servers'];
+    $has_client = false;
+    $has_admin = false;
+    $port_map = array();
+    foreach ($servers as $index => $server) {
+      PhutilTypeSpec::checkMap(
+        $server,
+        array(
+          'type' => 'string',
+          'port' => 'int',
+          'listen' => 'optional string|null',
+          'ssl.key' => 'optional string|null',
+          'ssl.cert' => 'optional string|null',
+        ));
+
+      $port = $server['port'];
+      if (!isset($port_map[$port])) {
+        $port_map[$port] = $index;
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Two servers (at indexes "%s" and "%s") both bind to the same '.
+            'port ("%s"). Each server must bind to a unique port.',
+            $port_map[$port],
+            $index,
+            $port));
+      }
+
+      $type = $server['type'];
+      switch ($type) {
+        case 'admin':
+          $has_admin = true;
+          break;
+        case 'client':
+          $has_client = true;
+          break;
+        default:
+          throw new PhutilArgumentUsageException(
+            pht(
+              'A specified server (at index "%s", on port "%s") has an '.
+              'invalid type ("%s"). Valid types are: admin, client.',
+              $index,
+              $port,
+              $type));
+      }
+
+      $ssl_key = idx($server, 'ssl.key');
+      $ssl_cert = idx($server, 'ssl.cert');
+      if (($ssl_key && !$ssl_cert) || ($ssl_cert && !$ssl_key)) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'A specified server (at index "%s", on port "%s") specifies '.
+            'only one of "%s" and "%s". Each server must specify neither '.
+            '(to disable SSL) or specify both (to enable it).',
+            $index,
+            $port,
+            'ssl.key',
+            'ssl.cert'));
+      }
+    }
+
+    if (!$servers) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file does not specify any servers. This service '.
+          'will not be able to interact with the outside world if it does '.
+          'not listen on any ports. You must specify at least one "%s" '.
+          'server and at least one "%s" server.',
+          'admin',
+          'client'));
+    }
+
+    if (!$has_client) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file does not specify any client servers. This '.
+          'service will be unable to transmit any notifications without a '.
+          'client server. You must specify at least one server with '.
+          'type "%s".',
+          'client'));
+    }
+
+    if (!$has_admin) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file does not specify any administrative '.
+          'servers. This service will be unable to receive messages. '.
+          'You must specify at least one server with type "%s".',
+          'admin'));
+    }
+
+    $this->configPath = $full_path;
   }
 
   final public function getPIDPath() {
@@ -148,37 +293,11 @@ abstract class PhabricatorAphlictManagementWorkflow
   }
 
   private function getServerArgv() {
-    $ssl_key = PhabricatorEnv::getEnvConfig('notification.ssl-key');
-    $ssl_cert = PhabricatorEnv::getEnvConfig('notification.ssl-cert');
-
-    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
-    $server_uri = new PhutilURI($server_uri);
-
-    $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
-    $client_uri = new PhutilURI($client_uri);
-
     $log = $this->getLogPath();
 
     $server_argv = array();
-    $server_argv[] = '--client-port='.coalesce(
-      $this->clientPort,
-      $client_uri->getPort());
-    $server_argv[] = '--admin-port='.$server_uri->getPort();
-    $server_argv[] = '--admin-host='.$server_uri->getDomain();
-
-    if ($ssl_key) {
-      $server_argv[] = '--ssl-key='.$ssl_key;
-    }
-
-    if ($ssl_cert) {
-      $server_argv[] = '--ssl-cert='.$ssl_cert;
-    }
-
+    $server_argv[] = '--config='.$this->configPath;
     $server_argv[] = '--log='.$log;
-
-    if ($this->clientHost) {
-      $server_argv[] = '--client-host='.$this->clientHost;
-    }
 
     return $server_argv;
   }

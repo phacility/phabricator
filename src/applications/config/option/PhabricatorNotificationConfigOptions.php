@@ -46,14 +46,6 @@ final class PhabricatorNotificationConfigOptions
         ->setDescription(pht('Location of the notification receiver server.')),
       $this->newOption('notification.log', 'string', '/var/log/aphlict.log')
         ->setDescription(pht('Location of the server log file.')),
-      $this->newOption('notification.ssl-key', 'string', null)
-        ->setLocked(true)
-        ->setDescription(
-          pht('Path to SSL key to use for secure WebSockets.')),
-      $this->newOption('notification.ssl-cert', 'string', null)
-        ->setLocked(true)
-        ->setDescription(
-          pht('Path to SSL certificate to use for secure WebSockets.')),
       $this->newOption(
         'notification.pidfile',
         'string',

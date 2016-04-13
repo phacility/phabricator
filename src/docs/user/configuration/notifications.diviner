@@ -59,19 +59,44 @@ After installing Node.js, you can control the notification server with the
 
   phabricator/ $ bin/aphlict start
 
-The server must be able to listen on port **22280** for Aphlict to work. In
-particular, if you're running in EC2, you need to unblock this port in the
-server's security group configuration. You can change this port in the
-`notification.client-uri` config.
+By default, the server must be able to listen on port `22280`. If you're using
+a host firewall (like a security group in EC2), make sure traffic can reach the
+server.
 
-You may need to adjust these settings:
+The server configuration is controlled by a configuration file, which is
+separate from Phabricator's configuration settings. The default file can
+be found at `phabricator/conf/aphlict/aphlict.default.json`.
 
-  - `notification.ssl-cert` Point this at an SSL certificate for secure
-    WebSockets.
-  - `notification.ssl-key` Point this at an SSL keyfile for secure WebSockets.
+To make adjustments to the default configuration, either copy this file to
+create `aphlict.custom.json` in the same directory (this file will be used if
+it exists) or specify a configuration file explicitly with the `--config` flag:
 
-In particular, if your server uses HTTPS, you **must** configure these options.
-Browsers will not allow you to use non-SSL websockets from an SSL web page.
+  phabricator/ $ bin/aphlict start --config path/to/config.json
+
+The configuration file has these settings:
+
+  - `servers`: A list of servers to start.
+
+Each server in the `servers` list should be an object with these keys:
+
+  - `type`: //Required string.// The type of server to start. Options are
+    `admin` or `client`. Normally, you should run one of each.
+  - `port`: //Required int.// The port this server should listen on.
+  - `listen`: //Optional string.// Which interface to bind to. By default,
+    the `admin` server is bound to localhost (so only other services on the
+    local machine can connect to it), while the `client` server is bound
+    to `0.0.0.0` (so any client can connect.
+  - `ssl.key`: //Optional string.// If you want to use SSL on this port,
+    the path to an SSL key.
+  - `ssl.cert`: //Optional string.// If you want to use SSL on this port,
+    the path to an SSL certificate.
+
+The defaults are appropriate for simple cases, but you may need to adjust them
+if you are running a more complex configuration.
+
+
+Configuring Phabricator
+=======================
 
 You may also want to adjust these settings:
 
