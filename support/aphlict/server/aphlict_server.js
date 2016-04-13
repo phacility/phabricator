@@ -8,7 +8,6 @@ var fs = require('fs');
 
 function parse_command_line_arguments(argv) {
   var args = {
-    log: '/var/log/aphlict.log',
     test: false,
     config: null
   };
@@ -49,9 +48,9 @@ function set_exit_code(code) {
 
 process.on('uncaughtException', function(err) {
   var context = null;
-  if (err.code == 'EACCES' && err.path == args.log) {
+  if (err.code == 'EACCES') {
     context = util.format(
-      'Unable to open logfile ("%s"). Check that permissions are set ' +
+      'Unable to open file ("%s"). Check that permissions are set ' +
       'correctly.',
       err.path);
   }
@@ -67,11 +66,6 @@ process.on('uncaughtException', function(err) {
   debug.log(message.join('\n\n'));
   set_exit_code(1);
 });
-
-// Add the logfile so we'll fail if we can't write to it.
-if (args.log) {
-  debug.addLog(args.log);
-}
 
 try {
   require('ws');
@@ -89,6 +83,12 @@ require('./lib/AphlictAdminServer');
 require('./lib/AphlictClientServer');
 
 var ii;
+
+var logs = config.logs || [];
+for (ii = 0; ii < logs.length; ii++) {
+  debug.addLog(logs[ii].path);
+}
+
 var servers = [];
 for (ii = 0; ii < config.servers.length; ii++) {
   var spec = config.servers[ii];
@@ -115,6 +115,10 @@ if (args.test) {
 }
 
 debug.log('Starting servers (service PID %d).', process.pid);
+
+for (ii = 0; ii < logs.length; ii++) {
+  debug.log('Logging to "%s".', logs[ii].path);
+}
 
 var aphlict_servers = [];
 var aphlict_clients = [];

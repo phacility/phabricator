@@ -14,5 +14,11 @@
       "ssl.key": null,
       "ssl.cert": null
     }
-  ]
+  ],
+  "logs": [
+    {
+      "path": "/var/log/aphlict.log"
+    }
+  ],
+  "pidfile": "/var/tmp/aphlict/pid/aphlict.pid"
 }

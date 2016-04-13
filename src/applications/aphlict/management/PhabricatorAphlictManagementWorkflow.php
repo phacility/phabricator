@@ -4,6 +4,7 @@ abstract class PhabricatorAphlictManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
   private $debug = false;
+  private $configData;
   private $configPath;
 
   final protected function setDebug($debug) {
@@ -74,6 +75,8 @@ abstract class PhabricatorAphlictManagementWorkflow
         $data,
         array(
           'servers' => 'list<wild>',
+          'logs' => 'optional list<wild>',
+          'pidfile' => 'string',
         ));
     } catch (Exception $ex) {
       throw new PhutilArgumentUsageException(
@@ -174,43 +177,54 @@ abstract class PhabricatorAphlictManagementWorkflow
           'admin'));
     }
 
+    $logs = $data['logs'];
+    foreach ($logs as $index => $log) {
+      PhutilTypeSpec::checkMap(
+        $log,
+        array(
+          'path' => 'string',
+        ));
+
+      $path = $log['path'];
+
+      try {
+        $dir = dirname($path);
+        if (!Filesystem::pathExists($dir)) {
+          Filesystem::createDirectory($dir, 0755, true);
+        }
+      } catch (FilesystemException $ex) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Failed to create directory "%s" for specified log file (with '.
+            'index "%s"). You should manually create this directory or '.
+            'choose a different logfile location. %s',
+            $dir,
+            $ex->getMessage()));
+      }
+    }
+
+    $this->configData = $data;
     $this->configPath = $full_path;
+
+    $pid_path = $this->getPIDPath();
+    try {
+      $dir = dirname($path);
+      if (!Filesystem::pathExists($dir)) {
+        Filesystem::createDirectory($dir, 0755, true);
+      }
+    } catch (FilesystemException $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Failed to create directory "%s" for specified PID file. You '.
+          'should manually create this directory or choose a different '.
+          'PID file location. %s',
+          $dir,
+          $ex->getMessage()));
+    }
   }
 
   final public function getPIDPath() {
-    $path = PhabricatorEnv::getEnvConfig('notification.pidfile');
-
-    try {
-      $dir = dirname($path);
-      if (!Filesystem::pathExists($dir)) {
-        Filesystem::createDirectory($dir, 0755, true);
-      }
-    } catch (FilesystemException $ex) {
-      throw new Exception(
-        pht(
-          "Failed to create '%s'. You should manually create this directory.",
-          $dir));
-    }
-
-    return $path;
-  }
-
-  final public function getLogPath() {
-    $path = PhabricatorEnv::getEnvConfig('notification.log');
-
-    try {
-      $dir = dirname($path);
-      if (!Filesystem::pathExists($dir)) {
-        Filesystem::createDirectory($dir, 0755, true);
-      }
-    } catch (FilesystemException $ex) {
-      throw new Exception(
-        pht(
-          "Failed to create '%s'. You should manually create this directory.",
-          $dir));
-    }
-
-    return $path;
+    return $this->configData['pidfile'];
   }
 
   final public function getPID() {
@@ -293,12 +307,8 @@ abstract class PhabricatorAphlictManagementWorkflow
   }
 
   private function getServerArgv() {
-    $log = $this->getLogPath();
-
     $server_argv = array();
     $server_argv[] = '--config='.$this->configPath;
-    $server_argv[] = '--log='.$log;
-
     return $server_argv;
   }
 

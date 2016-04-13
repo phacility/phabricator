@@ -44,13 +44,6 @@ final class PhabricatorNotificationConfigOptions
         'string',
         'http://localhost:22281/')
         ->setDescription(pht('Location of the notification receiver server.')),
-      $this->newOption('notification.log', 'string', '/var/log/aphlict.log')
-        ->setDescription(pht('Location of the server log file.')),
-      $this->newOption(
-        'notification.pidfile',
-        'string',
-        '/var/tmp/aphlict/pid/aphlict.pid')
-        ->setDescription(pht('Location of the server PID file.')),
     );
   }
 

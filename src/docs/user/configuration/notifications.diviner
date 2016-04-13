@@ -75,7 +75,9 @@ it exists) or specify a configuration file explicitly with the `--config` flag:
 
 The configuration file has these settings:
 
-  - `servers`: A list of servers to start.
+  - `servers`: //Required list.// A list of servers to start.
+  - `logs`: //Optional list.// A list of logs to write to.
+  - `pidfile`: //Required string.// Path to a PID file.
 
 Each server in the `servers` list should be an object with these keys:
 
@@ -91,6 +93,10 @@ Each server in the `servers` list should be an object with these keys:
   - `ssl.cert`: //Optional string.// If you want to use SSL on this port,
     the path to an SSL certificate.
 
+Each log in the `logs` list should be an object with these keys:
+
+  - `path`: //Required string.// Path to the log file.
+
 The defaults are appropriate for simple cases, but you may need to adjust them
 if you are running a more complex configuration.
 
@@ -104,9 +110,6 @@ You may also want to adjust these settings:
     connect to in order to listen for notifications.
   - `notification.server-uri` Internally-facing host and port that Phabricator
     will connect to in order to publish notifications.
-  - `notification.log` Log file location for the server.
-  - `notification.pidfile` Pidfile location used to stop any running server when
-    aphlict is restarted.
 
 
 Verifying Server Status
