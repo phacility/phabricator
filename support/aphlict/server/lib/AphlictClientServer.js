@@ -26,11 +26,11 @@ JX.install('AphlictClientServer', {
     _server: null,
     _lists: null,
 
-    getListenerList: function(path) {
-      if (!this._lists[path]) {
-        this._lists[path] = new JX.AphlictListenerList(path);
+    getListenerList: function(instance) {
+      if (!this._lists[instance]) {
+        this._lists[instance] = new JX.AphlictListenerList(instance);
       }
-      return this._lists[path];
+      return this._lists[instance];
     },
 
     log: function() {
@@ -58,8 +58,14 @@ JX.install('AphlictClientServer', {
       var wss = new WebSocket.Server({server: server});
 
       wss.on('connection', function(ws) {
-        var path = url.parse(ws.upgradeReq.url).pathname;
-        var listener = self.getListenerList(path).addListener(ws);
+        var instance = url.parse(ws.upgradeReq.url).pathname;
+
+        instance = instance.replace(/\//g, '');
+        if (!instance.length) {
+          instance = 'default';
+        }
+
+        var listener = self.getListenerList(instance).addListener(ws);
 
         function log() {
           self.log(
@@ -104,23 +110,12 @@ JX.install('AphlictClientServer', {
         });
 
         ws.on('close', function() {
-          self.getListenerList(path).removeListener(listener);
+          self.getListenerList(instance).removeListener(listener);
           log('Disconnected.');
         });
-
-        wss.on('close', function() {
-          self.getListenerList(path).removeListener(listener);
-          log('Disconnected.');
-        });
-
-        wss.on('error', function(err) {
-          log('Error: %s', err.message);
-        });
-
       });
 
-    },
-
+    }
   }
 
 });

@@ -58,7 +58,7 @@ JX.install('AphlictAdminServer', {
     _onrequest: function(request, response) {
       var self = this;
       var u = url.parse(request.url, true);
-      var instance = u.query.instance || '/';
+      var instance = u.query.instance || 'default';
 
       // Publishing a notification.
       if (u.pathname == '/') {

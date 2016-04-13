@@ -7,11 +7,11 @@ final class PhabricatorConfigClusterDatabasesController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('cluster/databases/');
 
-    $title = pht('Cluster Databases');
+    $title = pht('Database Servers');
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
-      ->addTextCrumb(pht('Cluster Databases'));
+      ->addTextCrumb(pht('Database Servers'));
 
     $database_status = $this->buildClusterDatabaseStatus();
 

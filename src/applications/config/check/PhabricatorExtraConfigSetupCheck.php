@@ -307,6 +307,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'notification.ssl-key' => $aphlict_reason,
       'notification.pidfile' => $aphlict_reason,
       'notification.log' => $aphlict_reason,
+      'notification.enabled' => $aphlict_reason,
+      'notification.client-uri' => $aphlict_reason,
+      'notification.server-uri' => $aphlict_reason,
     );
 
     return $ancient_config;

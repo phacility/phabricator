@@ -4,9 +4,13 @@ final class PhabricatorDesktopNotificationsSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('notification.enabled') &&
-      PhabricatorApplication::isClassInstalled(
-        'PhabricatorNotificationsApplication');
+    $servers = PhabricatorNotificationServerRef::getEnabledAdminServers();
+    if (!$servers) {
+      return false;
+    }
+
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorNotificationsApplication');
   }
 
   public function getPanelKey() {

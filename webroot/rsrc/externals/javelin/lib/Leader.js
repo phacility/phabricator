@@ -34,6 +34,7 @@ JX.install('Leader', {
 
   statics: {
     _interval: null,
+    _timeout: null,
     _broadcastKey: 'JX.Leader.broadcast',
     _leaderKey: 'JX.Leader.id',
 
@@ -63,7 +64,7 @@ JX.install('Leader', {
      */
     start: function() {
       var self = JX.Leader;
-      self.callIfLeader(JX.bag);
+      self.call(JX.bag);
     },
 
     /**
@@ -132,8 +133,21 @@ JX.install('Leader', {
           self._becomeLeader();
           leader_callback();
         } else {
+
+          // Set a callback to try to become the leader shortly after the
+          // current lease expires. This lets us recover from cases where the
+          // leader goes missing quickly.
+          if (self._timeoout) {
+            window.clearTimeout(self._timeout);
+            self._timeout = null;
+          }
+          self._timeout = window.setTimeout(
+            self._usurp,
+            (lease.until - now) + 50);
+
           follower_callback();
         }
+
         return;
       }
 
@@ -284,6 +298,16 @@ JX.install('Leader', {
       self._isLeader = true;
       new JX.Leader().invoke('onBecomeLeader');
     },
+
+
+    /**
+     * Try to usurp leadership position after a lease expiration.
+     */
+    _usurp: function() {
+      var self = JX.Leader;
+      self.call(JX.bag);
+    },
+
 
     /**
      * Mark a message as seen.

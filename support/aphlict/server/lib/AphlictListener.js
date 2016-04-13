@@ -50,7 +50,7 @@ JX.install('AphlictListener', {
     },
 
     getDescription: function() {
-      return 'Listener/' + this.getID() + this._path;
+      return 'Listener/' + this.getID() + '/' + this._path;
     },
 
     writeMessage: function(message) {

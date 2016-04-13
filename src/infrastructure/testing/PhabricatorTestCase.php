@@ -113,8 +113,8 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
     // We can't stub this service right now, and it's not generally useful
     // to publish notifications about test execution.
     $this->env->overrideEnvConfig(
-      'notification.enabled',
-      false);
+      'notification.servers',
+      array());
 
     $this->env->overrideEnvConfig(
       'phabricator.base-uri',

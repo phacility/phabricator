@@ -69,7 +69,7 @@ effect, then continue to "Monitoring Replicas" to verify the configuration.
 Monitoring Replicas
 ===================
 
-You can monitor replicas in {nav Config > Cluster Databases}. This interface
+You can monitor replicas in {nav Config > Database Servers}. This interface
 shows you a quick overview of replicas and their health, and can detect some
 common issues with replication.
 
@@ -146,7 +146,7 @@ works internally, see "Unreachable Masters" below.
 Once satisfied, turn the master back on. After a brief delay, Phabricator
 should recognize that the master is healthy again and recover fully.
 
-Throughout this process, the {nav Cluster Databases} console will show a
+Throughout this process, the {nav Database Servers} console will show a
 current view of the world from the perspective of the web server handling the
 request. You can use it to monitor state.
 
@@ -249,7 +249,7 @@ unhealthy and stop sending all traffic (except for more health checks) to it.
 This improves performance during a service interruption and reduces load on the
 master, which may help it recover from load problems.
 
-You can monitor the status of health checks in the {nav Cluster Databases}
+You can monitor the status of health checks in the {nav Database Servers}
 console. The "Health" column shows how many checks have run recently and
 how many have succeeded.
 

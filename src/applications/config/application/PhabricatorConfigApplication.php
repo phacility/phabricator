@@ -64,6 +64,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
         ),
         'cluster/' => array(
           'databases/' => 'PhabricatorConfigClusterDatabasesController',
+          'notifications/' => 'PhabricatorConfigClusterNotificationsController',
         ),
       ),
     );

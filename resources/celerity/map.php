@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => 'ce06b6f6',
-    'core.pkg.js' => '08b41036',
+    'core.pkg.js' => 'e526f428',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '7ba78475',
     'differential.pkg.js' => 'd0cd0df6',
@@ -232,7 +232,7 @@ return array(
     'rsrc/externals/javelin/lib/DOM.js' => '805b806a',
     'rsrc/externals/javelin/lib/History.js' => 'd4505101',
     'rsrc/externals/javelin/lib/JSON.js' => '69adf288',
-    'rsrc/externals/javelin/lib/Leader.js' => '331b1611',
+    'rsrc/externals/javelin/lib/Leader.js' => 'b4ba945c',
     'rsrc/externals/javelin/lib/Mask.js' => '8a41885b',
     'rsrc/externals/javelin/lib/Quicksand.js' => '6b8ef10b',
     'rsrc/externals/javelin/lib/Request.js' => '94b750d2',
@@ -700,7 +700,7 @@ return array(
     'javelin-history' => 'd4505101',
     'javelin-install' => '05270951',
     'javelin-json' => '69adf288',
-    'javelin-leader' => '331b1611',
+    'javelin-leader' => 'b4ba945c',
     'javelin-magical-init' => '3010e992',
     'javelin-mask' => '8a41885b',
     'javelin-quicksand' => '6b8ef10b',
@@ -1107,9 +1107,6 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'javelin-workflow',
-    ),
-    '331b1611' => array(
-      'javelin-install',
     ),
     '340c8eff' => array(
       'javelin-behavior',
@@ -1751,6 +1748,9 @@ return array(
       'javelin-dom',
       'javelin-typeahead-preloaded-source',
       'javelin-util',
+    ),
+    'b4ba945c' => array(
+      'javelin-install',
     ),
     'b59e1e96' => array(
       'javelin-behavior',
