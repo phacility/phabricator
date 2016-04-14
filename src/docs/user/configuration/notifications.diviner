@@ -174,7 +174,7 @@ If you prefer not to do this, two other options are:
 
   - run the websocket through a websocket-capable loadbalancer and terminate
     SSL there; or
-  - run the websokket through `nginx` over the same socket as the rest of
+  - run the websocket through `nginx` over the same socket as the rest of
     your web traffic.
 
 See the next sections for more detail.
