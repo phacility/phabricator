@@ -51,6 +51,7 @@ final class PassphraseCredentialRevealController
             id(new AphrontFormTextAreaControl())
               ->setLabel(pht('Plaintext'))
               ->setReadOnly(true)
+              ->setCustomClass('PhabricatorMonospaced')
               ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
               ->setValue($secret->openEnvelope()));
       }
