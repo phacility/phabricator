@@ -22,21 +22,23 @@ final class PhabricatorProjectMembersViewController
     $title = pht('Members and Watchers');
 
     $properties = $this->buildProperties($project);
-    $actions = $this->buildActions($project);
-    $properties->setActionList($actions);
+    $curtain = $this->buildCurtainView($project);
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $member_list = id(new PhabricatorProjectMemberListView())
       ->setUser($viewer)
       ->setProject($project)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getMemberPHIDs());
 
     $watcher_list = id(new PhabricatorProjectWatcherListView())
       ->setUser($viewer)
       ->setProject($project)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setUserPHIDs($project->getWatcherPHIDs());
 
     $nav = $this->getProfileMenu();
@@ -44,17 +46,27 @@ final class PhabricatorProjectMembersViewController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Members'));
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-group');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $object_box,
+        $member_list,
+        $watcher_list,
+      ));
+
 
     return $this->newPage()
       ->setNavigation($nav)
       ->setCrumbs($crumbs)
-      ->setTitle(array($project->getDisplayName(), $title))
-      ->appendChild(
-        array(
-          $object_box,
-          $member_list,
-          $watcher_list,
-        ));
+      ->setTitle(array($project->getName(), $title))
+      ->appendChild($view);
   }
 
   private function buildProperties(PhabricatorProject $project) {
@@ -156,12 +168,11 @@ final class PhabricatorProjectMembersViewController
     return $view;
   }
 
-  private function buildActions(PhabricatorProject $project) {
+  private function buildCurtainView(PhabricatorProject $project) {
     $viewer = $this->getViewer();
     $id = $project->getID();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $curtain = $this->newCurtainView($project);
 
     $is_locked = $project->getIsMembershipLocked();
 
@@ -182,7 +193,7 @@ final class PhabricatorProjectMembersViewController
     $viewer_phid = $viewer->getPHID();
 
     if (!$project->isUserMember($viewer_phid)) {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setHref('/project/update/'.$project->getID().'/join/')
           ->setIcon('fa-plus')
@@ -190,7 +201,7 @@ final class PhabricatorProjectMembersViewController
           ->setWorkflow(true)
           ->setName(pht('Join Project')));
     } else {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setHref('/project/update/'.$project->getID().'/leave/')
           ->setIcon('fa-times')
@@ -200,14 +211,14 @@ final class PhabricatorProjectMembersViewController
     }
 
     if (!$project->isUserWatcher($viewer->getPHID())) {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setHref('/project/watch/'.$project->getID().'/')
           ->setIcon('fa-eye')
           ->setName(pht('Watch Project')));
     } else {
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setHref('/project/unwatch/'.$project->getID().'/')
@@ -224,7 +235,7 @@ final class PhabricatorProjectMembersViewController
       $silence_text = pht('Disable Mail');
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($silence_text)
         ->setIcon('fa-envelope-o')
@@ -234,7 +245,7 @@ final class PhabricatorProjectMembersViewController
 
     $can_add = $can_edit && $supports_edit;
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Add Members'))
         ->setIcon('fa-user-plus')
@@ -253,7 +264,7 @@ final class PhabricatorProjectMembersViewController
       $lock_icon = 'fa-lock';
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($lock_name)
         ->setIcon($lock_icon)
@@ -261,7 +272,7 @@ final class PhabricatorProjectMembersViewController
         ->setDisabled(!$can_lock)
         ->setWorkflow(true));
 
-    return $view;
+    return $curtain;
   }
 
   private function isProjectSilenced(PhabricatorProject $project) {
