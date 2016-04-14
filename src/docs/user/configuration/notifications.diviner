@@ -77,6 +77,8 @@ The configuration file has these settings:
 
   - `servers`: //Required list.// A list of servers to start.
   - `logs`: //Optional list.// A list of logs to write to.
+  - `cluster`: //Optional list.// A list of cluster peers. This is an advanced
+    feature.
   - `pidfile`: //Required string.// Path to a PID file.
 
 Each server in the `servers` list should be an object with these keys:
@@ -99,9 +101,19 @@ Each log in the `logs` list should be an object with these keys:
 
   - `path`: //Required string.// Path to the log file.
 
+Each peer in the `cluster` list should be an object with these keys:
+
+  - `host`: //Required string.// The peer host address.
+  - `port`: //Required int.// The peer port.
+  - `protocol`: //Required string.// The protocol to connect with, one of
+    `"http"` or `"https"`.
+
+Cluster configuration is an advanced topic and can be omitted for most
+installs. For more information on how to configure a cluster, see
+@{article:Clustering Introduction} and @{article:Cluster: Notifications}.
+
 The defaults are appropriate for simple cases, but you may need to adjust them
 if you are running a more complex configuration.
-
 
 Configuring Phabricator
 =======================

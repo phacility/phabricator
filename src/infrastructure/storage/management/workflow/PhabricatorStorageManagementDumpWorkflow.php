@@ -42,6 +42,8 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
+    $has_password = false;
+
     $password = $api->getPassword();
     if ($password) {
       if (strlen($password->openEnvelope())) {

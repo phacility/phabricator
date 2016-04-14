@@ -76,6 +76,7 @@ abstract class PhabricatorAphlictManagementWorkflow
         array(
           'servers' => 'list<wild>',
           'logs' => 'optional list<wild>',
+          'cluster' => 'optional list<wild>',
           'pidfile' => 'string',
         ));
     } catch (Exception $ex) {
@@ -193,7 +194,7 @@ abstract class PhabricatorAphlictManagementWorkflow
           'admin'));
     }
 
-    $logs = $data['logs'];
+    $logs = idx($data, 'logs', array());
     foreach ($logs as $index => $log) {
       PhutilTypeSpec::checkMap(
         $log,
@@ -216,6 +217,54 @@ abstract class PhabricatorAphlictManagementWorkflow
             'choose a different logfile location. %s',
             $dir,
             $ex->getMessage()));
+      }
+    }
+
+    $peer_map = array();
+
+    $cluster = idx($data, 'cluster', array());
+    foreach ($cluster as $index => $peer) {
+      PhutilTypeSpec::checkMap(
+        $peer,
+        array(
+          'host' => 'string',
+          'port' => 'int',
+          'protocol' => 'string',
+        ));
+
+      $host = $peer['host'];
+      $port = $peer['port'];
+      $protocol = $peer['protocol'];
+
+      switch ($protocol) {
+        case 'http':
+        case 'https':
+          break;
+        default:
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Configuration file specifies cluster peer ("%s", at index '.
+              '"%s") with an invalid protocol, "%s". Valid protocols are '.
+              '"%s" or "%s".',
+              $host,
+              $index,
+              $protocol,
+              'http',
+              'https'));
+      }
+
+      $peer_key = "{$host}:{$port}";
+      if (!isset($peer_map[$peer_key])) {
+        $peer_map[$peer_key] = $index;
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Configuration file specifies cluster peer "%s" more than '.
+            'once (at indexes "%s" and "%s"). Each peer must have a '.
+            'unique host and port combination.',
+            $peer_key,
+            $peer_map[$peer_key],
+            $index));
       }
     }
 

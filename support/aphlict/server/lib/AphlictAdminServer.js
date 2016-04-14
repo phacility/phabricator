@@ -22,6 +22,7 @@ JX.install('AphlictAdminServer', {
   properties: {
     clientServers: null,
     logger: null,
+    peerList: null
   },
 
   members: {
@@ -79,8 +80,7 @@ JX.install('AphlictAdminServer', {
               ++self._messagesIn;
 
               try {
-                self._transmit(instance, msg);
-                response.writeHead(200, {'Content-Type': 'text/plain'});
+                self._transmit(instance, msg, response);
               } catch (err) {
                 self.log(
                   '<%s> Internal Server Error! %s',
@@ -139,14 +139,32 @@ JX.install('AphlictAdminServer', {
     /**
      * Transmits a message to all subscribed listeners.
      */
-    _transmit: function(instance, message) {
-      var lists = this.getListenerLists(instance);
+    _transmit: function(instance, message, response) {
+      var peer_list = this.getPeerList();
 
-      for (var ii = 0; ii < lists.length; ii++) {
-        var list = lists[ii];
-        var listeners = list.getListeners();
-        this._transmitToListeners(list, listeners, message);
+      message = peer_list.addFingerprint(message);
+      if (message) {
+        var lists = this.getListenerLists(instance);
+
+        for (var ii = 0; ii < lists.length; ii++) {
+          var list = lists[ii];
+          var listeners = list.getListeners();
+          this._transmitToListeners(list, listeners, message);
+        }
+
+        peer_list.broadcastMessage(instance, message);
       }
+
+      // Respond to the caller with our fingerprint so it can stop sending
+      // us traffic we don't need to know about if it's a peer. In particular,
+      // this stops us from broadcasting messages to ourselves if we appear
+      // in the cluster list.
+      var receipt = {
+        fingerprint: this.getPeerList().getFingerprint()
+      };
+
+      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.write(JSON.stringify(receipt));
     },
 
     _transmitToListeners: function(list, listeners, message) {

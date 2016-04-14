@@ -19,6 +19,9 @@ final class PhabricatorNotificationClient extends Phobject {
 
   public static function tryToPostMessage(array $data) {
     $servers = PhabricatorNotificationServerRef::getEnabledAdminServers();
+
+    shuffle($servers);
+
     foreach ($servers as $server) {
       try {
         $server->postMessage($data);

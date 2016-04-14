@@ -81,7 +81,8 @@ try {
 
 require('./lib/AphlictAdminServer');
 require('./lib/AphlictClientServer');
-
+require('./lib/AphlictPeerList');
+require('./lib/AphlictPeer');
 
 var ii;
 
@@ -173,7 +174,26 @@ for (ii = 0; ii < servers.length; ii++) {
   }
 }
 
+var peer_list = new JX.AphlictPeerList();
+
+debug.log(
+  'This server has fingerprint "%s".',
+  peer_list.getFingerprint());
+
+var cluster = config.cluster || [];
+for (ii = 0; ii < cluster.length; ii++) {
+  var peer = cluster[ii];
+
+  var peer_client = new JX.AphlictPeer()
+    .setHost(peer.host)
+    .setPort(peer.port)
+    .setProtocol(peer.protocol);
+
+  peer_list.addPeer(peer_client);
+}
+
 for (ii = 0; ii < aphlict_admins.length; ii++) {
   var admin_server = aphlict_admins[ii];
   admin_server.setClientServers(aphlict_clients);
+  admin_server.setPeerList(peer_list);
 }

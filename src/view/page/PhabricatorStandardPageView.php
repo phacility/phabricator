@@ -539,8 +539,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     if ($servers) {
       if ($user && $user->isLoggedIn()) {
-        // TODO: We could be smarter about selecting a server if there are
-        // multiple options available.
+        // TODO: We could tell the browser about all the servers and let it
+        // do random reconnects to improve reliability.
+        shuffle($servers);
         $server = head($servers);
 
         $client_uri = $server->getWebsocketURI();

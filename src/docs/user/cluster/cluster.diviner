@@ -132,6 +132,11 @@ The distributed nature of Git and Mercurial tend to mean that they are
 naturally somewhat resistant to data loss: every clone of a repository includes
 the entire history.
 
+Repositories may become a scalability bottleneck, although this is rare unless
+your install has an unusually heavy repository read volume. Slow clones/fetches
+may hint at a repository capacity problem. Adding more repository hosts will
+provide an approximately linear increase in capacity.
+
 For details, see @{article:Cluster: Repositories}.
 
 
@@ -146,6 +151,13 @@ of any subset of hosts without an interruption to daemon services, as long as
 at least one host remains alive. Daemons are stateless, so spreading daemons
 across multiple hosts provides no resistance to data loss.
 
+Daemons can become a bottleneck, particularly if your install sees a large
+volume of write traffic to repositories. If the daemon task queue has a
+backlog, that hints at a capacity problem. If existing hosts have unused
+resources, increase `phd.taskmasters` until they are fully utilized. From
+there, adding more daemon hosts will provide an approximately linear increase
+in capacity.
+
 For details, see @{article:Cluster: Daemons}.
 
 
@@ -157,9 +169,35 @@ repositories first.
 
 With multiple web hosts, you can transparently survive the loss of any subset
 of hosts as long as at least one host remains alive. Web hosts are stateless,
-so putting multiple hosts in service provides no resistance to data loss.
+so putting multiple hosts in service provides no resistance to data loss
+because no data is at risk.
+
+Web hosts can become a bottleneck, particularly if you have a workload that is
+heavily focused on reads from the web UI (like a public install with many
+anonymous users). Slow responses to web requests may hint at a web capacity
+problem. Adding more hosts will provide an approximately linear increase in
+capacity.
 
 For details, see @{article:Cluster: Web Servers}.
+
+
+Cluster: Notifications
+======================
+
+Configuring multiple notification hosts is simple and has no pre-requisites.
+
+With multiple notification hosts, you can survive the loss of any subset of
+hosts as long as at least one host remains alive. Service may be breifly
+disrupted directly after the incident which destroys the other hosts.
+
+Notifications are noncritical, so this normally has little practical impact
+on service availability. Notifications are also stateless, so clustering this
+service provides no resistance to data loss because no data is at risk.
+
+Notification delivery normally requires very few resources, so adding more
+hosts is unlikely to have much impact on scalability.
+
+For details, see @{article:Cluster: Notifications}.
 
 
 Overlaying Services
@@ -172,14 +210,14 @@ good place to start.
 
 In planning a cluster, consider these blended host types:
 
-**Everything**: Run HTTP, SSH, MySQL, repositories and daemons on a single
-host. This is the starting point for single-node setups, and usually also the
-best configuration when adding the second node.
+**Everything**: Run HTTP, SSH, MySQL, notifications, repositories and daemons
+on a single host. This is the starting point for single-node setups, and
+usually also the best configuration when adding the second node.
 
-**Everything Except Databases**: Run HTTP, SSH, repositories and daemons on one
-host, and MySQL on a different host. MySQL uses many of the same resources that
-other services use. It's also simpler to separate than other services, and
-tends to benefit the most from dedicated hardware.
+**Everything Except Databases**: Run HTTP, SSH, notifications, repositories and
+daemons on one host, and MySQL on a different host. MySQL uses many of the same
+resources that other services use. It's also simpler to separate than other
+services, and tends to benefit the most from dedicated hardware.
 
 **Repositories and Daemons**: Run repositories and daemons on the same host.
 Repository hosts //must// run daemons, and it normally makes sense to
@@ -208,8 +246,8 @@ Cluster Recipes
 This section provides some guidance on reasonable ways to scale up a cluster.
 
 The smallest possible cluster is **two hosts**. Run everything (web, ssh,
-database, repositories, and daemons) on each host. One host will serve as the
-master; the other will serve as a replica.
+database, notifications, repositories, and daemons) on each host. One host will
+serve as the master; the other will serve as a replica.
 
 Ideally, you should physically separate these hosts to reduce the chance that a
 natural disaster or infrastructure disruption could disable or destroy both
@@ -230,7 +268,7 @@ hosts in other datacenters (for example, also separate the replica database
 onto its own host).
 
 After separating databases, separating repository + daemon nodes is likely
-the next step.
+the next step to consider.
 
 To improve **availability**, add another copy of everything you run in one
 datacenter to a new datacenter. For example, if you have a two-node cluster,
