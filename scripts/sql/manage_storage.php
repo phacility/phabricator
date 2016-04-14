@@ -31,6 +31,12 @@ try {
           'Do not prompt before performing dangerous operations.'),
       ),
       array(
+        'name' => 'host',
+        'param' => 'hostname',
+        'help' => pht(
+          'Connect to __host__ instead of the default host.'),
+      ),
+      array(
         'name'    => 'user',
         'short'   => 'u',
         'param'   => 'username',
@@ -75,10 +81,37 @@ try {
 // First, test that the Phabricator configuration is set up correctly. After
 // we know this works we'll test any administrative credentials specifically.
 
-$ref = PhabricatorDatabaseRef::getMasterDatabaseRef();
-if (!$ref) {
-  throw new Exception(
-    pht('No database master is configured.'));
+$host = $args->getArg('host');
+if (strlen($host)) {
+  $ref = null;
+
+  $refs = PhabricatorDatabaseRef::getLiveRefs();
+
+  // Include the master in case the user is just specifying a redundant
+  // "--host" flag for no reason and does not actually have a database
+  // cluster configured.
+  $refs[] = PhabricatorDatabaseRef::getMasterDatabaseRef();
+
+  foreach ($refs as $possible_ref) {
+    if ($possible_ref->getHost() == $host) {
+      $ref = $possible_ref;
+      break;
+    }
+  }
+
+  if (!$ref) {
+    throw new PhutilArgumentUsageException(
+      pht(
+        'There is no configured database on host "%s". This command can '.
+        'only interact with configured databases.',
+        $host));
+  }
+} else {
+  $ref = PhabricatorDatabaseRef::getMasterDatabaseRef();
+  if (!$ref) {
+    throw new Exception(
+      pht('No database master is configured.'));
+  }
 }
 
 $default_user = $ref->getUser();

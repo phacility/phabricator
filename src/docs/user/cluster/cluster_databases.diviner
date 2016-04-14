@@ -296,10 +296,15 @@ safely pull dumps from a replica instead of the master. This operation can
 be slow, so offloading it to a replica can make the performance of the master
 more consistent.
 
-To dump from a replica, wait for this TODO to be resolved and then do whatever
-it says to do:
+To dump from a replica, you can use `bin/storage dump --host <host>` to
+control which host the command connects to. (You may still want to execute
+this command //from// that host, to avoid sending the whole dump over the
+network).
 
-TODO: Make `bin/storage dump` replica-aware. See T10758.
+With the `--for-replica` flag, the `bin/storage dump` command creates dumps
+with `--dump-slave`, which includes a `CHANGE MASTER` statement in the output.
+This may be helpful when initially setting up new replicas, as it can make it
+easier to change the binlog coordinates to the correct position for the dump.
 
 With recent versions of MySQL, it is also possible to configure a //delayed//
 replica which intentionally lags behind the master (say, by 12 hours). In the
