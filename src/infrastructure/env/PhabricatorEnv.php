@@ -782,6 +782,11 @@ final class PhabricatorEnv extends Phobject {
   }
 
   public static function isClusterRemoteAddress() {
+    $cluster_addresses = self::getEnvConfig('cluster.addresses');
+    if (!$cluster_addresses) {
+      return false;
+    }
+
     $address = idx($_SERVER, 'REMOTE_ADDR');
     if (!$address) {
       throw new Exception(
