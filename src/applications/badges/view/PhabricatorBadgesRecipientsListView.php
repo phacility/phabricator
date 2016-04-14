@@ -62,7 +62,7 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('RECIPIENTS'))
+      ->setHeaderText(pht('Recipients'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
