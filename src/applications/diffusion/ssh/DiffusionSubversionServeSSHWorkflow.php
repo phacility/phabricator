@@ -21,6 +21,7 @@ final class DiffusionSubversionServeSSHWorkflow
   private $externalBaseURI;
   private $peekBuffer;
   private $command;
+  private $isProxying;
 
   private function getCommand() {
     return $this->command;
@@ -146,6 +147,7 @@ final class DiffusionSubversionServeSSHWorkflow
 
     if ($this->shouldProxy()) {
       $command = $this->getProxyCommand();
+      $this->isProxying = true;
     } else {
       $command = csprintf(
         'svnserve -t --tunnel-user=%s',
@@ -372,6 +374,10 @@ final class DiffusionSubversionServeSSHWorkflow
   }
 
   private function makeInternalURI($uri_string) {
+    if ($this->isProxying) {
+      return $uri_string;
+    }
+
     $uri = new PhutilURI($uri_string);
 
     $repository = $this->getRepository();
@@ -409,6 +415,10 @@ final class DiffusionSubversionServeSSHWorkflow
   }
 
   private function makeExternalURI($uri) {
+    if ($this->isProxying) {
+      return $uri;
+    }
+
     $internal = $this->internalBaseURI;
     $external = $this->externalBaseURI;
 
