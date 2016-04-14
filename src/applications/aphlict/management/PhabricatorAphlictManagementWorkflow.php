@@ -99,6 +99,7 @@ abstract class PhabricatorAphlictManagementWorkflow
           'listen' => 'optional string|null',
           'ssl.key' => 'optional string|null',
           'ssl.cert' => 'optional string|null',
+          'ssl.chain' => 'optional string|null',
         ));
 
       $port = $server['port'];
@@ -142,6 +143,21 @@ abstract class PhabricatorAphlictManagementWorkflow
             '(to disable SSL) or specify both (to enable it).',
             $index,
             $port,
+            'ssl.key',
+            'ssl.cert'));
+      }
+
+      $ssl_chain = idx($server, 'ssl.chain');
+      if ($ssl_chain && (!$ssl_key && !$ssl_cert)) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'A specified server (at index "%s", on port "%s") specifies '.
+            'a value for "%s", but no value for "%s" or "%s". Servers '.
+            'should only provide an SSL chain if they also provide an SSL '.
+            'key and SSL certificate.',
+            $index,
+            $port,
+            'ssl.chain',
             'ssl.key',
             'ssl.cert'));
       }

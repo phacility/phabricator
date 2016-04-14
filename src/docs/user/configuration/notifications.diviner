@@ -85,13 +85,15 @@ Each server in the `servers` list should be an object with these keys:
     `admin` or `client`. Normally, you should run one of each.
   - `port`: //Required int.// The port this server should listen on.
   - `listen`: //Optional string.// Which interface to bind to. By default,
-    the `admin` server is bound to localhost (so only other services on the
+    the `admin` server is bound to `127.0.0.1` (so only other services on the
     local machine can connect to it), while the `client` server is bound
-    to `0.0.0.0` (so any client can connect.
+    to `0.0.0.0` (so any client can connect).
   - `ssl.key`: //Optional string.// If you want to use SSL on this port,
     the path to an SSL key.
   - `ssl.cert`: //Optional string.// If you want to use SSL on this port,
     the path to an SSL certificate.
+  - `ssl.chain`: //Optional string.// If you have configured SSL on this
+    port, an optional path to a certificate chain file.
 
 Each log in the `logs` list should be an object with these keys:
 
