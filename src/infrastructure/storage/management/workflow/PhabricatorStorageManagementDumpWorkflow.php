@@ -13,7 +13,7 @@ final class PhabricatorStorageManagementDumpWorkflow
           array(
             'name' => 'for-replica',
             'help' => pht(
-              'Add __--dump-slave__ to the __mysqldump__ command, '.
+              'Add __--master-data__ to the __mysqldump__ command, '.
               'generating a CHANGE MASTER statement in the output.'),
           ),
         ));
@@ -57,7 +57,7 @@ final class PhabricatorStorageManagementDumpWorkflow
     $argv[] = '--default-character-set=utf8';
 
     if ($args->getArg('for-replica')) {
-      $argv[] = '--dump-slave';
+      $argv[] = '--master-data';
     }
 
     $argv[] = '-u';

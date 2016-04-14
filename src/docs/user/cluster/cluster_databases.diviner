@@ -302,7 +302,7 @@ this command //from// that host, to avoid sending the whole dump over the
 network).
 
 With the `--for-replica` flag, the `bin/storage dump` command creates dumps
-with `--dump-slave`, which includes a `CHANGE MASTER` statement in the output.
+with `--master-data`, which includes a `CHANGE MASTER` statement in the output.
 This may be helpful when initially setting up new replicas, as it can make it
 easier to change the binlog coordinates to the correct position for the dump.
 
