@@ -37,7 +37,7 @@ Configuring Replicas
 ====================
 
 Once your replicas are in working order, tell Phabricator about them by
-configuring the `cluster.database` option. This option must be configured from
+configuring the `cluster.databases` option. This option must be configured from
 the command line or in configuration files because Phabricator needs to read
 it //before// it can connect to databases.
 
