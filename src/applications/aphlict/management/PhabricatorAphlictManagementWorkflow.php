@@ -78,6 +78,7 @@ abstract class PhabricatorAphlictManagementWorkflow
           'logs' => 'optional list<wild>',
           'cluster' => 'optional list<wild>',
           'pidfile' => 'string',
+          'memory.hint' => 'optional int',
         ));
     } catch (Exception $ex) {
       throw new PhutilArgumentUsageException(
@@ -508,10 +509,22 @@ abstract class PhabricatorAphlictManagementWorkflow
     return $root.'/support/aphlict/server/aphlict_server.js';
   }
 
+  private function getNodeArgv() {
+    $argv = array();
+
+    $hint = idx($this->configData, 'memory.hint');
+    $hint = nonempty($hint, 256);
+
+    $argv[] = sprintf('--max-old-space-size=%d', $hint);
+
+    return $argv;
+  }
+
   private function getStartCommand(array $server_argv) {
     return csprintf(
-      '%s %s %Ls',
+      '%R %Ls -- %s %Ls',
       $this->getNodeBinary(),
+      $this->getNodeArgv(),
       $this->getAphlictScriptPath(),
       $server_argv);
   }

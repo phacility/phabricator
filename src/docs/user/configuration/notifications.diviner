@@ -80,6 +80,9 @@ The configuration file has these settings:
   - `cluster`: //Optional list.// A list of cluster peers. This is an advanced
     feature.
   - `pidfile`: //Required string.// Path to a PID file.
+  - `memory.hint`: //Optional int.// Suggestion to `node` about how much
+    memory to use, via `--max-old-stack-size`. In most cases, this can be
+    left unspecified.
 
 Each server in the `servers` list should be an object with these keys:
 
