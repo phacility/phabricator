@@ -7,10 +7,11 @@ final class PhabricatorAphlictManagementStopWorkflow
     $this
       ->setName('stop')
       ->setSynopsis(pht('Stop the notification server.'))
-      ->setArguments(array());
+      ->setArguments($this->getLaunchArguments());
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $this->parseLaunchArguments($args);
     return $this->executeStopCommand();
   }
 
