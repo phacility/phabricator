@@ -178,7 +178,7 @@ abstract class AlmanacController
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(
-          'User Guide: Phabricator Clusters'),
+          'Clustering Introduction'),
         'target' => '_blank',
       ),
       pht('Learn More'));

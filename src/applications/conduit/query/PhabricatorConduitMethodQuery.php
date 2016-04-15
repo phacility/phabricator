@@ -9,6 +9,7 @@ final class PhabricatorConduitMethodQuery
   private $applicationNames;
   private $nameContains;
   private $methods;
+  private $isInternal;
 
   public function withMethods(array $methods) {
     $this->methods = $methods;
@@ -37,6 +38,11 @@ final class PhabricatorConduitMethodQuery
 
   public function withIsDeprecated($is_deprecated) {
     $this->isDeprecated = $is_deprecated;
+    return $this;
+  }
+
+  public function withIsInternal($is_internal) {
+    $this->isInternal = $is_internal;
     return $this;
   }
 
@@ -107,6 +113,14 @@ final class PhabricatorConduitMethodQuery
       foreach ($methods as $key => $method) {
         $needle = $method->getAPIMethodName();
         if (empty($map[$needle])) {
+          unset($methods[$key]);
+        }
+      }
+    }
+
+    if ($this->isInternal !== null) {
+      foreach ($methods as $key => $method) {
+        if ($method->isInternalAPI() !== $this->isInternal) {
           unset($methods[$key]);
         }
       }

@@ -52,6 +52,9 @@ abstract class ConduitAPIMethod
 
   abstract protected function execute(ConduitAPIRequest $request);
 
+  public function isInternalAPI() {
+    return false;
+  }
 
   public function getParamTypes() {
     $types = $this->defineParamTypes();

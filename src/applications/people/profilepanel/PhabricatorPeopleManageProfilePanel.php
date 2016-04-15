@@ -6,7 +6,7 @@ final class PhabricatorPeopleManageProfilePanel
   const PANELKEY = 'people.manage';
 
   public function getPanelTypeName() {
-    return pht('Mangage User');
+    return pht('Manage User');
   }
 
   private function getDefaultName() {

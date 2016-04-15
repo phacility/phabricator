@@ -76,6 +76,7 @@ return array(
     'javelin-quicksand',
     'javelin-behavior-quicksand-blacklist',
     'javelin-behavior-high-security-warning',
+    'javelin-behavior-read-only-warning',
     'javelin-scrollbar',
     'javelin-behavior-scrollbar',
     'javelin-behavior-durable-column',

@@ -7,15 +7,9 @@ var util = require('util');
 var fs = require('fs');
 
 function parse_command_line_arguments(argv) {
-  var config = {
-    'client-port': 22280,
-    'admin-port': 22281,
-    'client-host': '0.0.0.0',
-    'admin-host': '127.0.0.1',
-    log: '/var/log/aphlict.log',
-    'ssl-key': null,
-    'ssl-cert': null,
-    test: false
+  var args = {
+    test: false,
+    config: null
   };
 
   for (var ii = 2; ii < argv.length; ii++) {
@@ -24,16 +18,18 @@ function parse_command_line_arguments(argv) {
     if (!matches) {
       throw new Error('Unknown argument "' + arg + '"!');
     }
-    if (!(matches[1] in config)) {
+    if (!(matches[1] in args)) {
       throw new Error('Unknown argument "' + matches[1] + '"!');
     }
-    config[matches[1]] = matches[2];
+    args[matches[1]] = matches[2];
   }
 
-  config['client-port'] = parseInt(config['client-port'], 10);
-  config['admin-port'] = parseInt(config['admin-port'], 10);
+  return args;
+}
 
-  return config;
+function parse_config(args) {
+  var data = fs.readFileSync(args.config);
+  return JSON.parse(data);
 }
 
 require('./lib/AphlictLog');
@@ -41,7 +37,8 @@ require('./lib/AphlictLog');
 var debug = new JX.AphlictLog()
   .addConsole(console);
 
-var config = parse_command_line_arguments(process.argv);
+var args = parse_command_line_arguments(process.argv);
+var config = parse_config(args);
 
 function set_exit_code(code) {
   process.on('exit', function() {
@@ -51,9 +48,9 @@ function set_exit_code(code) {
 
 process.on('uncaughtException', function(err) {
   var context = null;
-  if (err.code == 'EACCES' && err.path == config.log) {
+  if (err.code == 'EACCES') {
     context = util.format(
-      'Unable to open logfile ("%s"). Check that permissions are set ' +
+      'Unable to open file ("%s"). Check that permissions are set ' +
       'correctly.',
       err.path);
   }
@@ -70,11 +67,6 @@ process.on('uncaughtException', function(err) {
   set_exit_code(1);
 });
 
-// Add the logfile so we'll fail if we can't write to it.
-if (config.log) {
-  debug.addLog(config.log);
-}
-
 try {
   require('ws');
 } catch (ex) {
@@ -89,47 +81,119 @@ try {
 
 require('./lib/AphlictAdminServer');
 require('./lib/AphlictClientServer');
+require('./lib/AphlictPeerList');
+require('./lib/AphlictPeer');
 
-var ssl_config = {
-  enabled: (config['ssl-key'] || config['ssl-cert'])
-};
+var ii;
 
-// Load the SSL certificates (if any were provided) now, so that runs with
-// `--test` will see any errors.
-if (ssl_config.enabled) {
-  ssl_config.key = fs.readFileSync(config['ssl-key']);
-  ssl_config.cert = fs.readFileSync(config['ssl-cert']);
+var logs = config.logs || [];
+for (ii = 0; ii < logs.length; ii++) {
+  debug.addLog(logs[ii].path);
+}
+
+var servers = [];
+for (ii = 0; ii < config.servers.length; ii++) {
+  var spec = config.servers[ii];
+
+  spec.listen = spec.listen || '0.0.0.0';
+
+  if (spec['ssl.key']) {
+    spec['ssl.key'] = fs.readFileSync(spec['ssl.key']);
+  }
+
+  if (spec['ssl.cert']){
+    spec['ssl.cert'] = fs.readFileSync(spec['ssl.cert']);
+  }
+
+  if (spec['ssl.chain']){
+    spec['ssl.chain'] = fs.readFileSync(spec['ssl.chain']);
+  }
+
+  servers.push(spec);
 }
 
 // If we're just doing a configuration test, exit here before starting any
 // servers.
-if (config.test) {
+if (args.test) {
   debug.log('Configuration test OK.');
   set_exit_code(0);
   return;
 }
 
-var server;
-if (ssl_config.enabled) {
-  server = https.createServer({
-    key: ssl_config.key,
-    cert: ssl_config.cert
-  }, function(req, res) {
-    res.writeHead(501);
-    res.end('HTTP/501 Use Websockets\n');
-  });
-} else {
-  server = http.createServer(function() {});
+debug.log('Starting servers (service PID %d).', process.pid);
+
+for (ii = 0; ii < logs.length; ii++) {
+  debug.log('Logging to "%s".', logs[ii].path);
 }
 
-var client_server = new JX.AphlictClientServer(server);
-var admin_server = new JX.AphlictAdminServer();
+var aphlict_servers = [];
+var aphlict_clients = [];
+var aphlict_admins = [];
+for (ii = 0; ii < servers.length; ii++) {
+  var server = servers[ii];
+  var is_client = (server.type == 'client');
 
-client_server.setLogger(debug);
-admin_server.setLogger(debug);
-admin_server.setClientServer(client_server);
+  var http_server;
+  if (server['ssl.key']) {
+    var https_config = {
+      key: server['ssl.key'],
+      cert: server['ssl.cert'],
+    };
 
-client_server.listen(config['client-port'], config['client-host']);
-admin_server.listen(config['admin-port'], config['admin-host']);
+    if (server['ssl.chain']) {
+      https_config.ca = server['ssl.chain'];
+    }
 
-debug.log('Started Server (PID %d)', process.pid);
+    http_server = https.createServer(https_config);
+  } else {
+    http_server = http.createServer();
+  }
+
+  var aphlict_server;
+  if (is_client) {
+    aphlict_server = new JX.AphlictClientServer(http_server);
+  } else {
+    aphlict_server = new JX.AphlictAdminServer(http_server);
+  }
+
+  aphlict_server.setLogger(debug);
+  aphlict_server.listen(server.port, server.listen);
+
+  debug.log(
+    'Started %s server (Port %d, %s).',
+    server.type,
+    server.port,
+    server['ssl.key'] ? 'With SSL' : 'No SSL');
+
+  aphlict_servers.push(aphlict_server);
+
+  if (is_client) {
+    aphlict_clients.push(aphlict_server);
+  } else {
+    aphlict_admins.push(aphlict_server);
+  }
+}
+
+var peer_list = new JX.AphlictPeerList();
+
+debug.log(
+  'This server has fingerprint "%s".',
+  peer_list.getFingerprint());
+
+var cluster = config.cluster || [];
+for (ii = 0; ii < cluster.length; ii++) {
+  var peer = cluster[ii];
+
+  var peer_client = new JX.AphlictPeer()
+    .setHost(peer.host)
+    .setPort(peer.port)
+    .setProtocol(peer.protocol);
+
+  peer_list.addPeer(peer_client);
+}
+
+for (ii = 0; ii < aphlict_admins.length; ii++) {
+  var admin_server = aphlict_admins[ii];
+  admin_server.setClientServers(aphlict_clients);
+  admin_server.setPeerList(peer_list);
+}

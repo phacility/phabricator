@@ -3,14 +3,8 @@
 final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
-    $enabled = PhabricatorEnv::getEnvConfig('notification.enabled');
-    if (!$enabled) {
-      // Notifications aren't set up, so just ignore all of these checks.
-      return;
-    }
-
     try {
-      $status = PhabricatorNotificationClient::getServerStatus();
+      PhabricatorNotificationClient::tryAnyConnection();
     } catch (Exception $ex) {
       $message = pht(
         "Phabricator is configured to use a notification server, but is ".
@@ -31,8 +25,7 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
         ->setShortName(pht('Notification Server Down'))
         ->setName(pht('Unable to Connect to Notification Server'))
         ->setMessage($message)
-        ->addRelatedPhabricatorConfig('notification.enabled')
-        ->addRelatedPhabricatorConfig('notification.server-uri')
+        ->addRelatedPhabricatorConfig('notification.servers')
         ->addCommand(
           pht(
             "(To start the server, run this command.)\n%s",
@@ -40,23 +33,5 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
 
       return;
     }
-
-    $expect_version = PhabricatorNotificationClient::EXPECT_VERSION;
-    $have_version = idx($status, 'version', 1);
-    if ($have_version != $expect_version) {
-      $message = pht(
-        'The notification server is out of date. You are running server '.
-        'version %d, but Phabricator expects version %d. Restart the server '.
-        'to update it, using the command below:',
-        $have_version,
-        $expect_version);
-
-      $this->newIssue('aphlict.version')
-        ->setShortName(pht('Notification Server Version'))
-        ->setName(pht('Notification Server Out of Date'))
-        ->setMessage($message)
-        ->addCommand('phabricator/ $ ./bin/aphlict restart');
-    }
-
   }
 }

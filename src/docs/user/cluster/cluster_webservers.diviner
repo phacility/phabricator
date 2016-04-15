@@ -1,0 +1,42 @@
+@title Cluster: Web Servers
+@group intro
+
+Configuring Phabricator to use multiple web servers.
+
+Overview
+========
+
+WARNING: This feature is a very early prototype; the features this document
+describes are mostly speculative fantasy.
+
+You can run Phabricator on multiple web servers. The advantages of doing this
+are:
+
+  - you can completely survive the loss of multiple web hosts; and
+  - performance and capacity may improve.
+
+This configuration is simple, but you must configure repositories first. For
+details, see @{article:Cluster: Repositories}.
+
+
+Adding Web Hosts
+================
+
+After configuring repositories in cluster mode, you can add more web hosts
+at any time: simply deploy the Phabricator software and configuration to a
+host, start the web server, and then add the host to the load balancer pool.
+
+Phabricator web servers are stateless, so you can pull them in and out of
+production freely.
+
+You may also want to run SSH services on these hosts, since the service is very
+similar to HTTP, also stateless, and it may be simpler to load balance the
+services together.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Clustering Introduction}.

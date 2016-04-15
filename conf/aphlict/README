@@ -1,0 +1,16 @@
+To customize this configuration, you have two options: create a custom
+configuration file in this directory, or specify a path to a configuration file
+explicitly when starting Aphlict.
+
+To create a custom configuration file, copy `aphlict.default.json` in this
+directory and rename it `aphlict.custom.json`. If this file exists, it will
+be read by default.
+
+To specify a path when starting Aphlict, use the `--config` flag:
+
+  phabricator/ $ ./bin/aphlict start --config path/to/config.json
+
+Specifying a configuration file explicitly overrides default configuration.
+
+For more information about configuring notifications, see the article
+"Notifications User Guide: Setup and Configuration" in the documentation.

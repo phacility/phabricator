@@ -193,12 +193,14 @@ or when it reaches the merge-base commit.
 
 This rule works well for trees that look like this:
 
+```
   |   *  Commit B1, on branch "subfeature" (HEAD)
   |  /
   | *    Commit A1, on branch "feature"
   |/
   *      Commit M1, on branch "master"
   |
+```
 
 This tree represents using feature branches to develop one feature ("feature"),
 and then creating a sub-branch to develop a dependent feature ("subfeature").
@@ -218,6 +220,7 @@ The rule will also do the right thing when run from "feature" in this case.
 However, this rule will select the wrong commit range in some cases. For
 instance, it will do the wrong thing in this tree:
 
+```
   |
   | *    Commit A2, on branch "feature" (HEAD)
   | |
@@ -227,6 +230,7 @@ instance, it will do the wrong thing in this tree:
   |/
   *      Commit M1, on branch "master"
   |
+```
 
 This tree represents making another commit (`A2`) on "feature", on top of `A1`.
 
@@ -240,6 +244,7 @@ commits, or by rebasing "subfeature" before running `arc diff`.
 
 This rule will also select the wrong commit range in a tree like this:
 
+```
   |
   | *    Commit A1', on branch "feature", created by amending A1
   | |
@@ -249,6 +254,7 @@ This rule will also select the wrong commit range in a tree like this:
   |/
   *      Commit M1, on branch "master"
   |
+```
 
 This tree represents amending `A1` without rebasing "subfeature", so that `A1`
 is no longer on "feature" (replaced with `A1'`) but still on "subfeature". In
@@ -269,6 +275,7 @@ This rule operates like `arc:outgoing`, but then walks the commits between
 `.` and the selected base commit. It stops when it encounters a bookmark. For
 example, if you have a tree like this:
 
+```
   |
   | *  C4 (outgoing, bookmark: stripes)
   | |
@@ -278,6 +285,7 @@ example, if you have a tree like this:
   |/
   *    C1 (pushed, no bookmark)
   |
+```
 
 When run from `C4`, this rule will select just `C4`, stopping on `C3` because
 it has a different bookmark. When run from `C3`, it will select `C2` and `C3`.

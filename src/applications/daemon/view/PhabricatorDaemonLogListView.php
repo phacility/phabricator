@@ -14,65 +14,107 @@ final class PhabricatorDaemonLogListView extends AphrontView {
     $viewer = $this->getViewer();
 
     $rows = array();
+    $daemons = $this->daemonLogs;
 
-    $list = new PHUIObjectItemListView();
-    $list->setFlush(true);
-    foreach ($this->daemonLogs as $log) {
-      $id = $log->getID();
-      $epoch = $log->getDateCreated();
+    foreach ($daemons as $daemon) {
+      $id = $daemon->getID();
+      $host = $daemon->getHost();
+      $pid = $daemon->getPID();
+      $name = phutil_tag(
+        'a',
+        array(
+          'href' => "/daemon/log/{$id}/",
+        ),
+        $daemon->getDaemon());
 
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Daemon %s', $id))
-        ->setHeader($log->getDaemon())
-        ->setHref("/daemon/log/{$id}/")
-        ->addIcon('none', phabricator_datetime($epoch, $viewer));
-
-      $status = $log->getStatus();
+      $status = $daemon->getStatus();
       switch ($status) {
         case PhabricatorDaemonLog::STATUS_RUNNING:
-          $item->setStatusIcon('fa-rocket green');
-          $item->addAttribute(pht('This daemon is running.'));
+          $status_icon = 'fa-rocket green';
+          $status_label = pht('Running');
+          $status_tip = pht('This daemon is running.');
           break;
         case PhabricatorDaemonLog::STATUS_DEAD:
-          $item->setStatusIcon('fa-warning red');
-          $item->addAttribute(
-            pht(
-              'This daemon is lost or exited uncleanly, and is presumed '.
-              'dead.'));
-          $item->addIcon('fa-times grey', pht('Dead'));
+          $status_icon = 'fa-warning red';
+          $status_label = pht('Dead');
+          $status_tip = pht(
+            'This daemon has been lost or exited uncleanly, and is '.
+            'presumed dead.');
           break;
         case PhabricatorDaemonLog::STATUS_EXITING:
-          $item->addAttribute(pht('This daemon is exiting.'));
-          $item->addIcon('fa-check', pht('Exiting'));
+          $status_icon = 'fa-check';
+          $status_label = pht('Shutting Down');
+          $status_tip = pht('This daemon is shutting down.');
           break;
         case PhabricatorDaemonLog::STATUS_EXITED:
-          $item->setDisabled(true);
-          $item->addAttribute(pht('This daemon exited cleanly.'));
-          $item->addIcon('fa-check grey', pht('Exited'));
+          $status_icon = 'fa-check grey';
+          $status_label = pht('Exited');
+          $status_tip = pht('This daemon exited cleanly.');
           break;
         case PhabricatorDaemonLog::STATUS_WAIT:
-          $item->setStatusIcon('fa-clock-o blue');
-          $item->addAttribute(
-            pht(
-              'This daemon encountered an error recently and is waiting a '.
-              'moment to restart.'));
-          $item->addIcon('fa-clock-o grey', pht('Waiting'));
+          $status_icon = 'fa-clock-o blue';
+          $status_label = pht('Waiting');
+          $status_tip = pht(
+            'This daemon encountered an error recently and is waiting a '.
+            'moment to restart.');
           break;
         case PhabricatorDaemonLog::STATUS_UNKNOWN:
         default:
-          $item->setStatusIcon('fa-warning orange');
-          $item->addAttribute(
-            pht(
-              'This daemon has not reported its status recently. It may '.
-              'have exited uncleanly.'));
-          $item->addIcon('fa-warning', pht('Unknown'));
+          $status_icon = 'fa-warning orange';
+          $status_label = pht('Unknown');
+          $status_tip = pht(
+            'This daemon has not reported its status recently. It may '.
+            'have exited uncleanly.');
           break;
       }
 
-      $list->addItem($item);
+      $status = phutil_tag(
+        'span',
+        array(
+          'sigil' => 'has-tooltip',
+          'meta' => array(
+            'tip' => $status_tip,
+          ),
+        ),
+        array(
+          id(new PHUIIconView())->setIcon($status_icon),
+          ' ',
+          $status_label,
+        ));
+
+      $launched = phabricator_datetime($daemon->getDateCreated(), $viewer);
+
+      $rows[] = array(
+        $id,
+        $host,
+        $pid,
+        $name,
+        $status,
+        $launched,
+      );
     }
 
-    return $list;
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('ID'),
+          pht('Host'),
+          pht('PPID'),
+          pht('Daemon'),
+          pht('Status'),
+          pht('Launched'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          null,
+          null,
+          'pri',
+          'wide',
+          'right date',
+        ));
+
+    return $table;
   }
 
 }

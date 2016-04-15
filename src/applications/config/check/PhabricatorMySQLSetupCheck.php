@@ -20,6 +20,12 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
+    // TODO: These checks should be executed against every reachable replica?
+    // See T10759.
+    if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
     $max_allowed_packet = self::loadRawConfigValue('max_allowed_packet');
 
     // This primarily supports setting the filesize limit for MySQL to 8MB,

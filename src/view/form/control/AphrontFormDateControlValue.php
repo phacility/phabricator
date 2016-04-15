@@ -84,20 +84,14 @@ final class AphrontFormDateControlValue extends Phobject {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $request->getViewer();
 
-    $datetime = $request->getStr($key);
-    if (strlen($datetime)) {
-      $date = $datetime;
-      $time = null;
-    } else {
-      $date = $request->getStr($key.'_d');
-      $time = $request->getStr($key.'_t');
-    }
+    $date = $request->getStr($key.'_d');
+    $time = $request->getStr($key.'_t');
 
-    // If this looks like an epoch timestamp, prefix it with "@" so that
-    // DateTime() reads it as one. Assume small numbers are a "Ymd" digit
-    // string instead of an epoch timestamp for a time in 1970.
-    if (ctype_digit($date) && ($date > 30000000)) {
-      $date = '@'.$date;
+    // If we have the individual parts, we read them preferentially. If we do
+    // not, try to read the key as a raw value. This makes it so that HTTP
+    // prefilling is overwritten by the control value if the user changes it.
+    if (!strlen($date) && !strlen($time)) {
+      $date = $request->getStr($key);
       $time = null;
     }
 
@@ -239,16 +233,19 @@ final class AphrontFormDateControlValue extends Phobject {
   private function newDateTime($date, $time) {
     $date = $this->getStandardDateFormat($date);
     $time = $this->getStandardTimeFormat($time);
+
     try {
-      $datetime = new DateTime("{$date} {$time}");
+      // We need to provide the timezone in the constructor, and also set it
+      // explicitly. If the date is an epoch timestamp, the timezone in the
+      // constructor is ignored. If the date is not an epoch timestamp, it is
+      // used to parse the date.
+      $zone = $this->getTimezone();
+      $datetime = new DateTime("{$date} {$time}", $zone);
+      $datetime->setTimezone($zone);
     } catch (Exception $ex) {
       return null;
     }
 
-    // Set the timezone explicitly because it is ignored in the constructor
-    // if the date is an epoch timestamp.
-    $zone = $this->getTimezone();
-    $datetime->setTimezone($zone);
 
     return $datetime;
   }
@@ -310,6 +307,13 @@ final class AphrontFormDateControlValue extends Phobject {
 
     if (isset($colloquial[$normalized])) {
       return $colloquial[$normalized];
+    }
+
+    // If this looks like an epoch timestamp, prefix it with "@" so that
+    // DateTime() reads it as one. Assume small numbers are a "Ymd" digit
+    // string instead of an epoch timestamp for a time in 1970.
+    if (ctype_digit($date) && ($date > 30000000)) {
+      $date = '@'.$date;
     }
 
     $separator = $this->getFormatSeparator();

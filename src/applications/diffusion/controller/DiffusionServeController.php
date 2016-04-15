@@ -164,7 +164,14 @@ final class DiffusionServeController extends DiffusionController {
 
     // If authentication credentials have been provided, try to find a user
     // that actually matches those credentials.
-    if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
+
+    // We require both the username and password to be nonempty, because Git
+    // won't prompt users who provide a username but no password otherwise.
+    // See T10797 for discussion.
+
+    $have_user = strlen(idx($_SERVER, 'PHP_AUTH_USER'));
+    $have_pass = strlen(idx($_SERVER, 'PHP_AUTH_PW'));
+    if ($have_user && $have_pass) {
       $username = $_SERVER['PHP_AUTH_USER'];
       $password = new PhutilOpaqueEnvelope($_SERVER['PHP_AUTH_PW']);
 

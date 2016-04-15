@@ -1,6 +1,11 @@
 <?php
 
-abstract class PhabricatorDaemonController extends PhabricatorController {
+abstract class PhabricatorDaemonController
+  extends PhabricatorController {
+
+  public function shouldRequireAdmin() {
+    return true;
+  }
 
   protected function buildSideNavView() {
     $nav = new AphrontSideNavFilterView();

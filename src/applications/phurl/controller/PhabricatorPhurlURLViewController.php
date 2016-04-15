@@ -114,7 +114,7 @@ final class PhabricatorPhurlURLViewController
     $curtain
       ->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Edit'))
+          ->setName(pht('Edit Phurl'))
           ->setIcon('fa-pencil')
           ->setHref($this->getApplicationURI("url/edit/{$id}/"))
           ->setDisabled(!$can_edit)

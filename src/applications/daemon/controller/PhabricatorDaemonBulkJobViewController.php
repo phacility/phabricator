@@ -1,11 +1,7 @@
 <?php
 
 final class PhabricatorDaemonBulkJobViewController
-  extends PhabricatorDaemonController {
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+  extends PhabricatorDaemonBulkJobController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
@@ -21,7 +17,6 @@ final class PhabricatorDaemonBulkJobViewController
     $title = pht('Bulk Job %d', $job->getID());
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Bulk Jobs'), '/daemon/bulk/');
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
 

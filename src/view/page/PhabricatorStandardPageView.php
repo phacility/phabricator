@@ -272,6 +272,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       'high-security-warning',
       $this->getHighSecurityWarningConfig());
 
+    if (PhabricatorEnv::isReadOnly()) {
+      Javelin::initBehavior(
+        'read-only-warning',
+        array(
+          'message' => PhabricatorEnv::getReadOnlyMessage(),
+          'uri' => PhabricatorEnv::getReadOnlyURI(),
+        ));
+    }
+
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
 
@@ -519,22 +528,23 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     $response = CelerityAPI::getStaticResourceResponse();
 
-    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
+    if ($request->isHTTPS()) {
+      $with_protocol = 'https';
+    } else {
+      $with_protocol = 'http';
+    }
+
+    $servers = PhabricatorNotificationServerRef::getEnabledClientServers(
+      $with_protocol);
+
+    if ($servers) {
       if ($user && $user->isLoggedIn()) {
+        // TODO: We could tell the browser about all the servers and let it
+        // do random reconnects to improve reliability.
+        shuffle($servers);
+        $server = head($servers);
 
-        $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
-        $client_uri = new PhutilURI($client_uri);
-        if ($client_uri->getDomain() == 'localhost') {
-          $this_host = $this->getRequest()->getHost();
-          $this_host = new PhutilURI('http://'.$this_host.'/');
-          $client_uri->setDomain($this_host->getDomain());
-        }
-
-        if ($request->isHTTPS()) {
-          $client_uri->setProtocol('wss');
-        } else {
-          $client_uri->setProtocol('ws');
-        }
+        $client_uri = $server->getWebsocketURI();
 
         Javelin::initBehavior(
           'aphlict-listen',

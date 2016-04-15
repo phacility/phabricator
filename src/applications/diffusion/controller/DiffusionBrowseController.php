@@ -1187,6 +1187,19 @@ final class DiffusionBrowseController extends DiffusionController {
     $commit_links = $this->renderCommitLinks($blame_commits, $handles);
     $revision_links = $this->renderRevisionLinks($revisions, $handles);
 
+    if ($this->coverage) {
+      require_celerity_resource('differential-changeset-view-css');
+      Javelin::initBehavior(
+        'diffusion-browse-file',
+        array(
+          'labels' => array(
+            'cov-C' => pht('Covered'),
+            'cov-N' => pht('Not Covered'),
+            'cov-U' => pht('Not Executable'),
+          ),
+        ));
+    }
+
     $skip_text = pht('Skip Past This Commit');
     foreach ($display as $line_index => $line) {
       $row = array();
@@ -1304,7 +1317,6 @@ final class DiffusionBrowseController extends DiffusionController {
         ));
 
       if ($this->coverage) {
-        require_celerity_resource('differential-changeset-view-css');
         $cov_index = $line_index;
 
         if (isset($this->coverage[$cov_index])) {

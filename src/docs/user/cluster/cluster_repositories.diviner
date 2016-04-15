@@ -1,0 +1,112 @@
+@title Cluster: Repositories
+@group intro
+
+Configuring Phabricator to use multiple repository hosts.
+
+Overview
+========
+
+WARNING: This feature is a very early prototype; the features this document
+describes are mostly speculative fantasy.
+
+If you use Git or Mercurial, you can deploy Phabricator with multiple
+repository hosts, configured so that each host is readable and writable. The
+advantages of doing this are:
+
+  - you can completely survive the loss of repository hosts;
+  - reads and writes can scale across multiple machines; and
+  - read and write performance across multiple geographic regions may improve.
+
+This configuration is complex, and many installs do not need to pursue it.
+
+This configuration is not currently supported with Subversion.
+
+
+Repository Hosts
+================
+
+Repository hosts must run a complete, fully configured copy of Phabricator,
+including a webserver. If you make repositories available over SSH, they must
+also run a properly configured `sshd`.
+
+Generally, these hosts will run the same set of services and configuration that
+web hosts run. If you prefer, you can overlay these services and put web and
+repository services on the same hosts.
+
+When a user requests information about a repository that can only be satisfied
+by examining a repository working copy, the webserver receiving the request
+will make an HTTP service call to a repository server which hosts the
+repository to retrieve the data it needs. It will use the result of this query
+to respond to the user.
+
+
+How Reads and Writes Work
+=========================
+
+Phabricator repository replicas are multi-master: every node is readable and
+writable, and a cluster of nodes can (almost always) survive the loss of any
+arbitrary subset of nodes so long as at least one node is still alive.
+
+Phabricator maintains an internal version for each repository, and increments
+it when the repository is mutated.
+
+Before responding to a read, replicas make sure their version of the repository
+is up to date (no node in the cluster has a newer version of the repository).
+If it isn't, they block the read until they can complete a fetch.
+
+Before responding to a write, replicas obtain a global lock, perform the same
+version check and fetch if necessary, then allow the write to continue.
+
+
+HTTP vs HTTPS
+=============
+
+Intracluster requests (from the daemons to repository servers, or from
+webservers to repository servers) are permitted to use HTTP, even if you have
+set `security.require-https` in your configuration.
+
+It is common to terminate SSL at a load balancer and use plain HTTP beyond
+that, and the `security.require-https` feature is primarily focused on making
+client browser behavior more convenient for users, so it does not apply to
+intracluster traffic.
+
+Using HTTP within the cluster leaves you vulnerable to attackers who can
+observe traffic within a datacenter, or observe traffic between datacenters.
+This is normally very difficult, but within reach for state-level adversaries
+like the NSA.
+
+If you are concerned about these attackers, you can terminate HTTPS on
+repository hosts and bind to them with the "https" protocol. Just be aware that
+the `security.require-https` setting won't prevent you from making
+configuration mistakes, as it doesn't cover intracluster traffic.
+
+Other mitigations are possible, but securing a network against the NSA and
+similar agents of other rogue nations is beyond the scope of this document.
+
+
+Backups
+======
+
+Even if you configure clustering, you should still consider retaining separate
+backup snapshots. Replicas protect you from data loss if you lose a host, but
+they do not let you rewind time to recover from data mutation mistakes.
+
+If something issues a `--force` push that destroys branch heads, the mutation
+will propagate to the replicas.
+
+You may be able to manually restore the branches by using tools like the
+Phabricator push log or the Git reflog so it is less important to retain
+repository snapshots than database snapshots, but it is still possible for
+data to be lost permanently, especially if you don't notice the problem for
+some time.
+
+Retaining separate backup snapshots will improve your ability to recover more
+data more easily in a wider range of disaster situations.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Clustering Introduction}.

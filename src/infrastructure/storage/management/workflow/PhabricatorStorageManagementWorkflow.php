@@ -50,6 +50,17 @@ abstract class PhabricatorStorageManagementWorkflow
     $this->setDryRun($args->getArg('dryrun'));
     $this->setForce($args->getArg('force'));
 
+    if (PhabricatorEnv::isReadOnly()) {
+      if ($this->isForce()) {
+        PhabricatorEnv::setReadOnly(false, null);
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Phabricator is currently in read-only mode. Use --force to '.
+            'override this mode.'));
+      }
+    }
+
     $this->didExecute($args);
   }
 

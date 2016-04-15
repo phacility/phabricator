@@ -37,6 +37,7 @@ final class PhabricatorConduitSearchEngine
     $query->withIsStable($saved->getParameter('isStable'));
     $query->withIsUnstable($saved->getParameter('isUnstable'));
     $query->withIsDeprecated($saved->getParameter('isDeprecated'));
+    $query->withIsInternal(false);
 
     $names = $saved->getParameter('applicationNames', array());
     if ($names) {

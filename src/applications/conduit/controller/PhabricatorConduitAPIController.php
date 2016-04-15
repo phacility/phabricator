@@ -402,6 +402,23 @@ final class PhabricatorConduitAPIController
         $user);
     }
 
+
+    // For intracluster requests, use a public user if no authentication
+    // information is provided. We could do this safely for any request,
+    // but making the API fully public means there's no way to disable badly
+    // behaved clients.
+    if (PhabricatorEnv::isClusterRemoteAddress()) {
+      if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
+        $api_request->setIsClusterRequest(true);
+
+        $user = new PhabricatorUser();
+        return $this->validateAuthenticatedUser(
+          $api_request,
+          $user);
+      }
+    }
+
+
     // Handle sessionless auth.
     // TODO: This is super messy.
     // TODO: Remove this in favor of token-based auth.

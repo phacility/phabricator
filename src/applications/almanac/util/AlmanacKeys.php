@@ -19,4 +19,33 @@ final class AlmanacKeys extends Phobject {
     return null;
   }
 
+  public static function getLiveDevice() {
+    $device_id = self::getDeviceID();
+    if (!$device_id) {
+      return null;
+    }
+
+    $cache = PhabricatorCaches::getRequestCache();
+    $cache_key = 'almanac.device.self';
+
+    $device = $cache->getKey($cache_key);
+    if (!$device) {
+      $viewer = PhabricatorUser::getOmnipotentUser();
+      $device = id(new AlmanacDeviceQuery())
+        ->setViewer($viewer)
+        ->withNames(array($device_id))
+        ->executeOne();
+      if (!$device) {
+        throw new Exception(
+          pht(
+            'This host has device ID "%s", but there is no corresponding '.
+            'device record in Almanac.',
+            $device_id));
+      }
+      $cache->setKey($cache_key, $device);
+    }
+
+    return $device;
+  }
+
 }

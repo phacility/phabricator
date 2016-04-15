@@ -15,8 +15,6 @@
  * element.
  */
 JX.behavior('toggle-class', function(config, statics) {
-  statics.install = statics.install || install();
-
   function install() {
     JX.Stratcom.listen(
       ['touchstart', 'mousedown'],
@@ -42,4 +40,6 @@ JX.behavior('toggle-class', function(config, statics) {
 
     return true;
   }
+
+  statics.install = statics.install || install();
 });
