@@ -121,14 +121,13 @@ final class PhabricatorDaemonConsoleController
       ->setHeaderText(pht('Recently Completed Tasks (Last 15m)'))
       ->setTable($completed_table);
 
-    $daemon_table = new PhabricatorDaemonLogListView();
-    $daemon_table->setUser($viewer);
-    $daemon_table->setDaemonLogs($logs);
+    $daemon_table = id(new PhabricatorDaemonLogListView())
+      ->setUser($viewer)
+      ->setDaemonLogs($logs);
 
-    $daemon_panel = id(new PHUIObjectBoxView());
-    $daemon_panel->setHeaderText(pht('Active Daemons'));
-    $daemon_panel->setObjectList($daemon_table);
-
+    $daemon_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Active Daemons'))
+      ->setTable($daemon_table);
 
     $tasks = id(new PhabricatorWorkerLeaseQuery())
       ->setSkipLease(true)

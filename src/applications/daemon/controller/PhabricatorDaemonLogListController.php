@@ -4,7 +4,7 @@ final class PhabricatorDaemonLogListController
   extends PhabricatorDaemonController {
 
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
+    $viewer = $this->getViewer();
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
@@ -14,13 +14,13 @@ final class PhabricatorDaemonLogListController
       ->setAllowStatusWrites(true)
       ->executeWithCursorPager($pager);
 
-    $daemon_table = new PhabricatorDaemonLogListView();
-    $daemon_table->setUser($request->getUser());
-    $daemon_table->setDaemonLogs($logs);
+    $daemon_table = id(new PhabricatorDaemonLogListView())
+      ->setViewer($viewer)
+      ->setDaemonLogs($logs);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('All Daemons'))
-      ->appendChild($daemon_table);
+      ->setTable($daemon_table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('All Daemons'));
