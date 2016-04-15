@@ -111,7 +111,7 @@ final class ConpherenceUpdateController
             break;
           }
           $person_phid = $request->getStr('remove_person');
-          if ($person_phid && $person_phid == $user->getPHID()) {
+          if ($person_phid) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
                 ConpherenceTransaction::TYPE_PARTICIPANTS)
@@ -321,38 +321,83 @@ final class ConpherenceUpdateController
     ConpherenceThread $conpherence) {
 
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
     $remove_person = $request->getStr('remove_person');
     $participants = $conpherence->getParticipants();
 
-    $message = pht('Are you sure you want to leave this room?');
+    $removed_user = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($remove_person))
+      ->executeOne();
+    if (!$removed_user) {
+      return new Aphront404Response();
+    }
+
+    $is_self = ($viewer->getPHID() == $removed_user->getPHID());
+    $is_last = (count($participants) == 1);
+
     $test_conpherence = clone $conpherence;
     $test_conpherence->attachParticipants(array());
-    if (!PhabricatorPolicyFilter::hasCapability(
-      $user,
+    $still_visible = PhabricatorPolicyFilter::hasCapability(
+      $removed_user,
       $test_conpherence,
-      PhabricatorPolicyCapability::CAN_VIEW)) {
-      if (count($participants) == 1) {
-        $message .= ' '.pht('The room will be inaccessible forever and ever.');
+      PhabricatorPolicyCapability::CAN_VIEW);
+
+    $body = array();
+
+    if ($is_self) {
+      $title = pht('Leave Room');
+      $body[] = pht(
+        'Are you sure you want to leave this room?');
+    } else {
+      $title = pht('Banish User');
+      $body[] = pht(
+        'Banish %s from the realm?',
+        phutil_tag('strong', array(), $removed_user->getUsername()));
+    }
+
+    if ($still_visible) {
+      if ($is_self) {
+        $body[] = pht(
+          'You will be able to rejoin the room later.');
       } else {
-        $message .= ' '.pht('Someone else in the room can add you back later.');
+        $body[] = pht(
+          'This user will be able to rejoin the room later.');
+      }
+    } else {
+      if ($is_self) {
+        if ($is_last) {
+          $body[] = pht(
+            'You are the last member, so you will never be able to rejoin '.
+            'the room.');
+        } else {
+          $body[] = pht(
+            'You will not be able to rejoin the room on your own, but '.
+            'someone else can invite you later.');
+        }
+      } else {
+        $body[] = pht(
+          'This user will not be able to rejoin the room unless invited '.
+          'again.');
       }
     }
-    $body = phutil_tag(
-      'p',
-      array(),
-      $message);
 
     require_celerity_resource('conpherence-update-css');
-    return id(new AphrontDialogView())
-      ->setTitle(pht('Leave Room'))
+
+    $dialog = id(new AphrontDialogView())
+      ->setTitle($title)
       ->addHiddenInput('action', 'remove_person')
       ->addHiddenInput('remove_person', $remove_person)
       ->addHiddenInput(
         'latest_transaction_id',
         $request->getInt('latest_transaction_id'))
-      ->addHiddenInput('__continue__', true)
-      ->appendChild($body);
+      ->addHiddenInput('__continue__', true);
+
+    foreach ($body as $paragraph) {
+      $dialog->appendParagraph($paragraph);
+    }
+
+    return $dialog;
   }
 
   private function renderMetadataDialogue(

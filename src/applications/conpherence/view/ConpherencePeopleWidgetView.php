@@ -5,11 +5,11 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
   public function render() {
     $conpherence = $this->getConpherence();
     $widget_data = $conpherence->getWidgetData();
-    $user = $this->getUser();
-    $conpherence = $this->getConpherence();
+    $viewer = $this->getUser();
+
     $participants = $conpherence->getParticipants();
     $handles = $conpherence->getHandles();
-    $head_handles = array_select_keys($handles, array($user->getPHID()));
+    $head_handles = array_select_keys($handles, array($viewer->getPHID()));
     $handle_list = mpull($handles, 'getName');
     natcasesort($handle_list);
     $handles = mpull($handles, null, 'getName');
@@ -17,11 +17,16 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
     $head_handles = mpull($head_handles, null, 'getName');
     $handles = $head_handles + $handles;
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $conpherence,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $body = array();
     foreach ($handles as $handle) {
       $user_phid = $handle->getPHID();
-      $remove_html = '';
-      if ($user_phid == $user->getPHID()) {
+
+      if (($user_phid == $viewer->getPHID()) || $can_edit) {
         $icon = id(new PHUIIconView())
           ->setIcon('fa-times lightbluetext');
         $remove_html = javelin_tag(
@@ -35,7 +40,10 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
             ),
           ),
           $icon);
+      } else {
+        $remove_html = null;
       }
+
       $body[] = phutil_tag(
         'div',
         array(
