@@ -91,6 +91,7 @@ final class PhabricatorEnv extends Phobject {
   private static function initializeCommonEnvironment() {
     PhutilErrorHandler::initialize();
 
+    self::resetUmask();
     self::buildConfigurationSourceStack();
 
     // Force a valid timezone. If both PHP and Phabricator configuration are
@@ -861,6 +862,19 @@ final class PhabricatorEnv extends Phobject {
 
   private static function dropConfigCache() {
     self::$cache = array();
+  }
+
+  private static function resetUmask() {
+    // Reset the umask to the common standard umask. The umask controls default
+    // permissions when files are created and propagates to subprocesses.
+
+    // "022" is the most common umask, but sometimes it is set to something
+    // unusual by the calling environment.
+
+    // Since various things rely on this umask to work properly and we are
+    // not aware of any legitimate reasons to adjust it, unconditionally
+    // normalize it until such reasons arise. See T7475 for discussion.
+    umask(022);
   }
 
 }
