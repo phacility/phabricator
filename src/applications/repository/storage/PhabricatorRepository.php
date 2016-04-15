@@ -2269,16 +2269,30 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 /* -(  Cluster Synchronization  )-------------------------------------------- */
 
 
+  private function shouldEnableSynchronization() {
+    // TODO: This mostly works, but isn't stable enough for production yet.
+    return false;
+
+    $device = AlmanacKeys::getLiveDevice();
+    if (!$device) {
+      return false;
+    }
+
+    return true;
+  }
+
+
   /**
    * @task sync
    */
   public function synchronizeWorkingCopyBeforeRead() {
-    $device = AlmanacKeys::getLiveDevice();
-    if (!$device) {
+    if (!$this->shouldEnableSynchronization()) {
       return;
     }
 
     $repository_phid = $this->getPHID();
+
+    $device = AlmanacKeys::getLiveDevice();
     $device_phid = $device->getPHID();
 
     $read_lock = PhabricatorRepositoryWorkingCopyVersion::getReadLock(
@@ -2332,12 +2346,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @task sync
    */
   public function synchronizeWorkingCopyBeforeWrite() {
-    $device = AlmanacKeys::getLiveDevice();
-    if (!$device) {
+    if (!$this->shouldEnableSynchronization()) {
       return;
     }
 
     $repository_phid = $this->getPHID();
+
+    $device = AlmanacKeys::getLiveDevice();
     $device_phid = $device->getPHID();
 
     $write_lock = PhabricatorRepositoryWorkingCopyVersion::getWriteLock(
@@ -2375,8 +2390,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @task sync
    */
   public function synchronizeWorkingCopyAfterWrite() {
-    $device = AlmanacKeys::getLiveDevice();
-    if (!$device) {
+    if (!$this->shouldEnableSynchronization()) {
       return;
     }
 
@@ -2388,6 +2402,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $repository_phid = $this->getPHID();
+
+    $device = AlmanacKeys::getLiveDevice();
     $device_phid = $device->getPHID();
 
     // NOTE: This means we're still bumping the version when pushes fail. We
