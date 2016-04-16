@@ -13,7 +13,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorMarkupInterface,
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
-    PhabricatorSpacesInterface {
+    PhabricatorSpacesInterface,
+    PhabricatorConduitResultInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -2624,6 +2625,44 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function getSpacePHID() {
     return $this->spacePHID;
+  }
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The repository name.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('vcs')
+        ->setType('string')
+        ->setDescription(
+          pht('The VCS this repository uses ("git", "hg" or "svn").')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('callsign')
+        ->setType('string')
+        ->setDescription(pht('The repository callsign, if it has one.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('shortName')
+        ->setType('string')
+        ->setDescription(pht('Unique short name, if the repository has one.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'vcs' => $this->getVersionControlSystem(),
+      'callsign' => $this->getCallsign(),
+      'shortName' => $this->getRepositorySlug(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }

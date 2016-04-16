@@ -55,8 +55,10 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         => 'DiffusionCommitController',
 
       '/diffusion/' => array(
-        '(?:query/(?P<queryKey>[^/]+)/)?'
+        $this->getQueryRoutePattern()
           => 'DiffusionRepositoryListController',
+        $this->getEditRoutePattern('editpro/') =>
+          'DiffusionRepositoryEditproController',
         'new/' => 'DiffusionRepositoryNewController',
         '(?P<edit>create)/' => 'DiffusionRepositoryCreateController',
         '(?P<edit>import)/' => 'DiffusionRepositoryCreateController',
