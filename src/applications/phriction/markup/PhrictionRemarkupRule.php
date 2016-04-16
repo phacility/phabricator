@@ -19,7 +19,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
     $link = trim($matches[1]);
 
     // Handle relative links.
-    if (substr($link, 0, 2) === './') {
+    if ((substr($link, 0, 2) === './') || (substr($link, 0, 3) === '../')) {
       $base = null;
       $context = $this->getEngine()->getConfig('contextObject');
       if ($context !== null && $context instanceof PhrictionContent) {
@@ -33,7 +33,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       }
       if ($base !== null) {
         $base_parts = explode('/', rtrim($base, '/'));
-        $rel_parts = explode('/', substr(rtrim($link, '/'), 2));
+        $rel_parts = explode('/', rtrim($link, '/'));
         foreach ($rel_parts as $part) {
           if ($part === '.') {
             // Consume standalone dots in a relative path, and do
