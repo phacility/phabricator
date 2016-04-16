@@ -272,7 +272,7 @@ final class PhrictionEditController
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader($content->getTitle())
-      ->setPreviewURI('/phriction/preview/')
+      ->setPreviewURI('/phriction/preview/'.$document->getSlug())
       ->setControlID('document-textarea')
       ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 

@@ -27,7 +27,8 @@ final class PhrictionContent extends PhrictionDAO
     return PhabricatorMarkupEngine::renderOneObject(
       $this,
       self::MARKUP_FIELD_BODY,
-      $viewer);
+      $viewer,
+      $this);
   }
 
   protected function getConfiguration() {

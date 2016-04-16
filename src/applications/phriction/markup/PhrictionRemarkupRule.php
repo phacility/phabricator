@@ -15,6 +15,39 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
 
   public function markupDocumentLink(array $matches) {
     $link = trim($matches[1]);
+
+    // Handle relative links.
+    if (substr($link, 0, 2) === './') {
+      $base = null;
+      $context = $this->getEngine()->getConfig('contextObject');
+      if ($context !== null && $context instanceof PhrictionContent) {
+        // Handle content when it's being rendered in document view.
+        $base = $context->getSlug();
+      }
+      if ($context !== null && is_array($context) &&
+          idx($context, 'phriction.isPreview')) {
+        // Handle content when it's a preview for the Phriction editor.
+        $base = idx($context, 'phriction.slug');
+      }
+      if ($base !== null) {
+        $base_parts = explode('/', rtrim($base, '/'));
+        $rel_parts = explode('/', substr(rtrim($link, '/'), 2));
+        foreach ($rel_parts as $part) {
+          if ($part === '.') {
+            // Consume standalone dots in a relative path, and do
+            // nothing with them.
+          } else if ($part === '..') {
+            if (count($base_parts) > 0) {
+              array_pop($base_parts);
+            }
+          } else {
+            array_push($base_parts, $part);
+          }
+        }
+        $link = implode('/', $base_parts).'/';
+      }
+    }
+
     $name = trim(idx($matches, 2, $link));
     if (empty($matches[2])) {
       $name = explode('/', trim($name, '/'));
