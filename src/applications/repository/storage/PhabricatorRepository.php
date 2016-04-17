@@ -63,9 +63,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
   private $projectPHIDs = self::ATTACHABLE;
+  private $uris = self::ATTACHABLE;
 
   private $clusterWriteLock;
   private $clusterWriteVersion;
+
 
   public static function initializeNewRepository(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -2264,6 +2266,98 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $client;
+  }
+
+/* -(  Repository URIs  )---------------------------------------------------- */
+
+
+  public function attachURIs(array $uris) {
+    $custom_map = array();
+    foreach ($uris as $key => $uri) {
+      $builtin_key = $uri->getRepositoryURIBuiltinKey();
+      if ($builtin_key !== null) {
+        $custom_map[$builtin_key] = $key;
+      }
+    }
+
+    $builtin_uris = $this->newBuiltinURIs();
+    $seen_builtins = array();
+    foreach ($builtin_uris as $builtin_uri) {
+      $builtin_key = $builtin_uri->getRepositoryURIBuiltinKey();
+      $seen_builtins[$builtin_key] = true;
+
+      // If this builtin URI is disabled, don't attach it and remove the
+      // persisted version if it exists.
+      if ($builtin_uri->getIsDisabled()) {
+        if (isset($custom_map[$builtin_key])) {
+          unset($uris[$custom_map[$builtin_key]]);
+        }
+        continue;
+      }
+
+      // If we don't have a persisted version of the URI, add the builtin
+      // version.
+      if (empty($custom_map[$builtin_key])) {
+        $uris[] = $builtin_uri;
+      }
+    }
+
+    // Remove any builtins which no longer exist.
+    foreach ($custom_map as $builtin_key => $key) {
+      if (empty($seen_builtins[$builtin_key])) {
+        unset($uris[$key]);
+      }
+    }
+
+    $this->uris = $uris;
+
+    return $this;
+  }
+
+  public function getURIs() {
+    return $this->assertAttached($this->uris);
+  }
+
+  protected function newBuiltinURIs() {
+    $has_callsign = ($this->getCallsign() !== null);
+    $has_shortname = ($this->getRepositorySlug() !== null);
+
+    $identifier_map = array(
+      PhabricatorRepositoryURI::BUILTIN_IDENTIFIER_CALLSIGN => $has_callsign,
+      PhabricatorRepositoryURI::BUILTIN_IDENTIFIER_SHORTNAME => $has_shortname,
+      PhabricatorRepositoryURI::BUILTIN_IDENTIFIER_ID => true,
+    );
+
+    $allow_http = PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
+
+    $base_uri = PhabricatorEnv::getURI('/');
+    $base_uri = new PhutilURI($base_uri);
+    $has_https = ($base_uri->getProtocol() == 'https');
+    $has_https = ($has_https && $allow_http);
+
+    $has_http = !PhabricatorEnv::getEnvConfig('security.require-https');
+    $has_http = ($has_http && $allow_http);
+
+    // TODO: Maybe allow users to disable this by default somehow?
+    $has_ssh = true;
+
+    $protocol_map = array(
+      PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH => $has_ssh,
+      PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTPS => $has_https,
+      PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTP => $has_http,
+    );
+
+    $uris = array();
+    foreach ($protocol_map as $protocol => $proto_supported) {
+      foreach ($identifier_map as $identifier => $id_supported) {
+        $uris[] = PhabricatorRepositoryURI::initializeNewURI($this)
+          ->setBuiltinProtocol($protocol)
+          ->setBuiltinIdentifier($identifier)
+          ->setIsDisabled(!$proto_supported || !$id_supported);
+      }
+    }
+
+    return $uris;
   }
 
 
