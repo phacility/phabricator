@@ -25,6 +25,7 @@ final class DiffusionRepositoryBasicsManagementPanel
     $edit_uri = $repository->getPathURI('manage/');
     $activate_uri = $repository->getPathURI('edit/activate/');
     $delete_uri = $repository->getPathURI('edit/delete/');
+    $encoding_uri = $repository->getPathURI('edit/encoding/');
 
     if ($repository->isTracked()) {
       $activate_icon = 'fa-pause';
@@ -39,6 +40,12 @@ final class DiffusionRepositoryBasicsManagementPanel
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Basic Information'))
         ->setHref($edit_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit),
+      id(new PhabricatorActionView())
+        ->setIcon('fa-text-width')
+        ->setName(pht('Edit Text Encoding'))
+        ->setHref($encoding_uri)
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit),
       id(new PhabricatorActionView())
@@ -96,6 +103,12 @@ final class DiffusionRepositoryBasicsManagementPanel
       $short_name = phutil_tag('em', array(), $short_name);
     }
     $view->addProperty(pht('Short Name'), $short_name);
+
+    $encoding = $repository->getDetail('encoding');
+    if (!$encoding) {
+      $encoding = phutil_tag('em', array(), pht('Use Default (UTF-8)'));
+    }
+    $view->addProperty(pht('Encoding'), $encoding);
 
     return $view;
   }
