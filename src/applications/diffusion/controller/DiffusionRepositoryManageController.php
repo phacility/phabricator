@@ -30,7 +30,8 @@ final class DiffusionRepositoryManageController
     foreach ($panels as $panel) {
       $panel
         ->setViewer($viewer)
-        ->setRepository($repository);
+        ->setRepository($repository)
+        ->setController($this);
     }
 
     $selected = $request->getURIData('panel');
@@ -63,9 +64,29 @@ final class DiffusionRepositoryManageController
       $repository->getPathURI('manage/'));
     $crumbs->addTextCrumb($panel->getManagementPanelLabel());
 
+    $header_text = pht(
+      '%s: %s',
+      $repository->getDisplayName(),
+      $panel->getManagementPanelLabel());
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text)
+      ->setHeaderIcon('fa-pencil');
+    if ($repository->isTracked()) {
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
+    } else {
+      $header->setStatus('fa-ban', 'dark', pht('Inactive'));
+    }
+
     $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
       ->setNavigation($nav)
       ->setMainColumn($content);
+
+    $curtain = $panel->buildManagementPanelCurtain();
+    if ($curtain) {
+      $view->setCurtain($curtain);
+    }
 
     return $this->newPage()
       ->setTitle($title)
@@ -93,6 +114,15 @@ final class DiffusionRepositoryManageController
     $nav->selectFilter($selected);
 
     return $nav;
+  }
+
+  public function newTimeline(PhabricatorRepository $repository) {
+    $timeline = $this->buildTransactionTimeline(
+      $repository,
+      new PhabricatorRepositoryTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
+    return $timeline;
   }
 
 

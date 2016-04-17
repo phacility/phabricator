@@ -10,7 +10,7 @@ final class DiffusionRepositoryClusterManagementPanel
   }
 
   public function getManagementPanelOrder() {
-    return 12345;
+    return 600;
   }
 
   public function buildManagementPanelContent() {
