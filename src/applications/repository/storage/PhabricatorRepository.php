@@ -46,6 +46,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const BECAUSE_BRANCH_NOT_AUTOCLOSE = 'auto/noclose';
   const BECAUSE_AUTOCLOSE_FORCED = 'auto/forced';
 
+  const STATUS_ACTIVE = 'active';
+  const STATUS_INACTIVE = 'inactive';
+
   protected $name;
   protected $callsign;
   protected $repositorySlug;
@@ -132,6 +135,31 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST);
   }
 
+  public static function getStatusMap() {
+    return array(
+      self::STATUS_ACTIVE => array(
+        'name' => pht('Active'),
+        'isTracked' => 1,
+      ),
+      self::STATUS_INACTIVE => array(
+        'name' => pht('Inactive'),
+        'isTracked' => 0,
+      ),
+    );
+  }
+
+  public static function getStatusNameMap() {
+    return ipull(self::getStatusMap(), 'name');
+  }
+
+  public function getStatus() {
+    if ($this->isTracked()) {
+      return self::STATUS_ACTIVE;
+    } else {
+      return self::STATUS_INACTIVE;
+    }
+  }
+
   public function toDictionary() {
     return array(
       'id'          => $this->getID(),
@@ -146,13 +174,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'isActive'    => $this->isTracked(),
       'isHosted'    => $this->isHosted(),
       'isImporting' => $this->isImporting(),
-      'encoding'    => $this->getDetail('encoding'),
+      'encoding'    => $this->getDefaultTextEncoding(),
       'staging' => array(
         'supported' => $this->supportsStaging(),
         'prefix' => 'phabricator',
         'uri' => $this->getStagingURI(),
       ),
     );
+  }
+
+  public function getDefaultTextEncoding() {
+    return $this->getDetail('encoding', 'UTF-8');
   }
 
   public function getMonogram() {
@@ -994,7 +1026,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function isTracked() {
-    return $this->getDetail('tracking-enabled', false);
+    $status = $this->getDetail('tracking-enabled');
+    $map = self::getStatusMap();
+    $spec = idx($map, $status);
+
+    if (!$spec) {
+      if ($status) {
+        $status = self::STATUS_ACTIVE;
+      } else {
+        $status = self::STATUS_INACTIVE;
+      }
+      $spec = idx($map, $status);
+    }
+
+    return (bool)idx($spec, 'isTracked', false);
   }
 
   public function getDefaultBranch() {
