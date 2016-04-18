@@ -2482,7 +2482,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   /**
    * @task sync
    */
-  public function synchronizeWorkingCopyBeforeWrite() {
+  public function synchronizeWorkingCopyBeforeWrite(
+    PhabricatorUser $actor) {
     if (!$this->shouldEnableSynchronization()) {
       return;
     }
@@ -2516,7 +2517,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     PhabricatorRepositoryWorkingCopyVersion::willWrite(
       $repository_phid,
-      $device_phid);
+      $device_phid,
+      array(
+        'userPHID' => $actor->getPHID(),
+        'epoch' => PhabricatorTime::getNow(),
+        'devicePHID' => $device_phid,
+      ));
 
     $this->clusterWriteVersion = $max_version;
     $this->clusterWriteLock = $write_lock;

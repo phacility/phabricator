@@ -26,7 +26,8 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
       $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
 
       $did_synchronize = true;
-      $repository->synchronizeWorkingCopyBeforeWrite();
+      $viewer = $this->getUser();
+      $repository->synchronizeWorkingCopyBeforeWrite($viewer);
     }
 
     $caught = null;
