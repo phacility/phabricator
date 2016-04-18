@@ -487,19 +487,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   private function newRemoteCommandFuture(array $argv) {
-    $argv = $this->formatRemoteCommand($argv);
-    $future = newv('ExecFuture', $argv);
-    $future->setEnv($this->getRemoteCommandEnvironment());
-    return $future;
+    return $this->newRemoteCommandEngine($argv)
+      ->newFuture();
   }
 
   private function newRemoteCommandPassthru(array $argv) {
-    $argv = $this->formatRemoteCommand($argv);
-    $passthru = newv('PhutilExecPassthru', $argv);
-    $passthru->setEnv($this->getRemoteCommandEnvironment());
-    return $passthru;
+    return $this->newRemoteCommandEngine($argv)
+      ->setPassthru(true)
+      ->newFuture();
   }
 
+  private function newRemoteCommandEngine(array $argv) {
+    return DiffusionCommandEngine::newCommandEngine($this)
+      ->setArgv($argv)
+      ->setCredentialPHID($this->getCredentialPHID())
+      ->setProtocol($this->getRemoteProtocol());
+  }
 
 /* -(  Local Command Execution  )-------------------------------------------- */
 
@@ -527,9 +530,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   private function newLocalCommandFuture(array $argv) {
     $this->assertLocalExists();
 
-    $argv = $this->formatLocalCommand($argv);
-    $future = newv('ExecFuture', $argv);
-    $future->setEnv($this->getLocalCommandEnvironment());
+    $future = DiffusionCommandEngine::newCommandEngine($this)
+      ->setArgv($argv)
+      ->newFuture();
 
     if ($this->usesLocalWorkingCopy()) {
       $future->setCWD($this->getLocalPath());
@@ -541,208 +544,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   private function newLocalCommandPassthru(array $argv) {
     $this->assertLocalExists();
 
-    $argv = $this->formatLocalCommand($argv);
-    $future = newv('PhutilExecPassthru', $argv);
-    $future->setEnv($this->getLocalCommandEnvironment());
+    $future = DiffusionCommandEngine::newCommandEngine($this)
+      ->setArgv($argv)
+      ->setPassthru(true)
+      ->newFuture();
 
     if ($this->usesLocalWorkingCopy()) {
       $future->setCWD($this->getLocalPath());
     }
 
     return $future;
-  }
-
-
-/* -(  Command Infrastructure  )--------------------------------------------- */
-
-
-  private function getSSHWrapper() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    return $root.'/bin/ssh-connect';
-  }
-
-  private function getCommonCommandEnvironment() {
-    $env = array(
-      // NOTE: Force the language to "en_US.UTF-8", which overrides locale
-      // settings. This makes stuff print in English instead of, e.g., French,
-      // so we can parse the output of some commands, error messages, etc.
-      'LANG' => 'en_US.UTF-8',
-
-      // Propagate PHABRICATOR_ENV explicitly. For discussion, see T4155.
-      'PHABRICATOR_ENV' => PhabricatorEnv::getSelectedEnvironmentName(),
-    );
-
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        // NOTE: See T2965. Some time after Git 1.7.5.4, Git started fataling if
-        // it can not read $HOME. For many users, $HOME points at /root (this
-        // seems to be a default result of Apache setup). Instead, explicitly
-        // point $HOME at a readable, empty directory so that Git looks for the
-        // config file it's after, fails to locate it, and moves on. This is
-        // really silly, but seems like the least damaging approach to
-        // mitigating the issue.
-
-        $root = dirname(phutil_get_library_root('phabricator'));
-        $env['HOME'] = $root.'/support/empty/';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        // NOTE: This overrides certain configuration, extensions, and settings
-        // which make Mercurial commands do random unusual things.
-        $env['HGPLAIN'] = 1;
-        break;
-      default:
-        throw new Exception(pht('Unrecognized version control system.'));
-    }
-
-    return $env;
-  }
-
-  private function getLocalCommandEnvironment() {
-    return $this->getCommonCommandEnvironment();
-  }
-
-  private function getRemoteCommandEnvironment() {
-    $env = $this->getCommonCommandEnvironment();
-
-    if ($this->shouldUseSSH()) {
-      // NOTE: This is read by `bin/ssh-connect`, and tells it which credentials
-      // to use.
-      $env['PHABRICATOR_CREDENTIAL'] = $this->getCredentialPHID();
-      switch ($this->getVersionControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          // Force SVN to use `bin/ssh-connect`.
-          $env['SVN_SSH'] = $this->getSSHWrapper();
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          // Force Git to use `bin/ssh-connect`.
-          $env['GIT_SSH'] = $this->getSSHWrapper();
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          // We force Mercurial through `bin/ssh-connect` too, but it uses a
-          // command-line flag instead of an environmental variable.
-          break;
-        default:
-          throw new Exception(pht('Unrecognized version control system.'));
-      }
-    }
-
-    return $env;
-  }
-
-  private function formatRemoteCommand(array $args) {
-    $pattern = $args[0];
-    $args = array_slice($args, 1);
-
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        if ($this->shouldUseHTTP() || $this->shouldUseSVNProtocol()) {
-          $flags = array();
-          $flag_args = array();
-          $flags[] = '--non-interactive';
-          $flags[] = '--no-auth-cache';
-          if ($this->shouldUseHTTP()) {
-            $flags[] = '--trust-server-cert';
-          }
-
-          $credential_phid = $this->getCredentialPHID();
-          if ($credential_phid) {
-            $key = PassphrasePasswordKey::loadFromPHID(
-              $credential_phid,
-              PhabricatorUser::getOmnipotentUser());
-            $flags[] = '--username %P';
-            $flags[] = '--password %P';
-            $flag_args[] = $key->getUsernameEnvelope();
-            $flag_args[] = $key->getPasswordEnvelope();
-          }
-
-          $flags = implode(' ', $flags);
-          $pattern = "svn {$flags} {$pattern}";
-          $args = array_mergev(array($flag_args, $args));
-        } else {
-          $pattern = "svn --non-interactive {$pattern}";
-        }
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $pattern = "git {$pattern}";
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        if ($this->shouldUseSSH()) {
-          $pattern = "hg --config ui.ssh=%s {$pattern}";
-          array_unshift(
-            $args,
-            $this->getSSHWrapper());
-        } else {
-          $pattern = "hg {$pattern}";
-        }
-        break;
-      default:
-        throw new Exception(pht('Unrecognized version control system.'));
-    }
-
-    array_unshift($args, $pattern);
-
-    return $args;
-  }
-
-  private function formatLocalCommand(array $args) {
-    $pattern = $args[0];
-    $args = array_slice($args, 1);
-
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $pattern = "svn --non-interactive {$pattern}";
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $pattern = "git {$pattern}";
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $pattern = "hg {$pattern}";
-        break;
-      default:
-        throw new Exception(pht('Unrecognized version control system.'));
-    }
-
-    array_unshift($args, $pattern);
-
-    return $args;
-  }
-
-  /**
-   * Sanitize output of an `hg` command invoked with the `--debug` flag to make
-   * it usable.
-   *
-   * @param string Output from `hg --debug ...`
-   * @return string Usable output.
-   */
-  public static function filterMercurialDebugOutput($stdout) {
-    // When hg commands are run with `--debug` and some config file isn't
-    // trusted, Mercurial prints out a warning to stdout, twice, after Feb 2011.
-    //
-    // http://selenic.com/pipermail/mercurial-devel/2011-February/028541.html
-    //
-    // After Jan 2015, it may also fail to write to a revision branch cache.
-
-    $ignore = array(
-      'ignoring untrusted configuration option',
-      "couldn't write revision branch cache:",
-    );
-
-    foreach ($ignore as $key => $pattern) {
-      $ignore[$key] = preg_quote($pattern, '/');
-    }
-
-    $ignore = '('.implode('|', $ignore).')';
-
-    $lines = preg_split('/(?<=\n)/', $stdout);
-    $regex = '/'.$ignore.'.*\n$/';
-
-    foreach ($lines as $key => $line) {
-      $lines[$key] = preg_replace($regex, '', $line);
-    }
-
-    return implode('', $lines);
   }
 
   public function getURI() {
