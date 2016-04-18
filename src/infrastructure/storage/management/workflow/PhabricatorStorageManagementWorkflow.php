@@ -61,7 +61,7 @@ abstract class PhabricatorStorageManagementWorkflow
       }
     }
 
-    $this->didExecute($args);
+    return $this->didExecute($args);
   }
 
   public function didExecute(PhutilArgumentParser $args) {}
@@ -81,13 +81,15 @@ abstract class PhabricatorStorageManagementWorkflow
     $lock = $this->lock();
 
     try {
-      $this->doAdjustSchemata($unsafe);
+      $err = $this->doAdjustSchemata($unsafe);
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
     }
 
     $lock->unlock();
+
+    return $err;
   }
 
   final private function doAdjustSchemata($unsafe) {

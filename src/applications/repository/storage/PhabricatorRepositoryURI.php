@@ -40,6 +40,7 @@ final class PhabricatorRepositoryURI
         'uri' => 'text255',
         'builtinProtocol' => 'text32?',
         'builtinIdentifier' => 'text32?',
+        'credentialPHID' => 'phid?',
         'ioType' => 'text32',
         'displayType' => 'text32',
         'isDisabled' => 'bool',
