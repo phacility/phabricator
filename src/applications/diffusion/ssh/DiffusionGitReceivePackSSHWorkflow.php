@@ -21,22 +21,30 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
     if ($this->shouldProxy()) {
       $command = $this->getProxyCommand();
-      $is_proxy = true;
+      $did_synchronize = false;
     } else {
       $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
-      $is_proxy = false;
 
+      $did_synchronize = true;
       $repository->synchronizeWorkingCopyBeforeWrite();
     }
-    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
-    $future = id(new ExecFuture('%C', $command))
-      ->setEnv($this->getEnvironment());
+    $caught = null;
+    try {
+      $err = $this->executeRepositoryCommand($command);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
 
-    $err = $this->newPassthruCommand()
-      ->setIOChannel($this->getIOChannel())
-      ->setCommandChannelFromExecFuture($future)
-      ->execute();
+    // We've committed the write (or rejected it), so we can release the lock
+    // without waiting for the client to receive the acknowledgement.
+    if ($did_synchronize) {
+      $repository->synchronizeWorkingCopyAfterWrite();
+    }
+
+    if ($caught) {
+      throw $caught;
+    }
 
     if (!$err) {
       $repository->writeStatusMessage(
@@ -45,11 +53,20 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
       $this->waitForGitClient();
     }
 
-    if (!$is_proxy) {
-      $repository->synchronizeWorkingCopyAfterWrite();
-    }
-
     return $err;
+  }
+
+  private function executeRepositoryCommand($command) {
+    $repository = $this->getRepository();
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+
+    $future = id(new ExecFuture('%C', $command))
+      ->setEnv($this->getEnvironment());
+
+    return $this->newPassthruCommand()
+      ->setIOChannel($this->getIOChannel())
+      ->setCommandChannelFromExecFuture($future)
+      ->execute();
   }
 
 }

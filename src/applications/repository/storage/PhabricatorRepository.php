@@ -2410,9 +2410,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   private function shouldEnableSynchronization() {
-    // TODO: This mostly works, but isn't stable enough for production yet.
-    return false;
-
     $device = AlmanacKeys::getLiveDevice();
     if (!$device) {
       return false;

@@ -82,7 +82,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
       $table,
       $repository_phid,
       $device_phid,
-      1,
+      0,
       1);
   }
 
