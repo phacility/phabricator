@@ -1349,7 +1349,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $ssh_user = AlmanacKeys::getClusterSSHUser();
-    if ($ssh_user !== null) {
+    if (strlen($ssh_user)) {
       $uri->setUser($ssh_user);
     }
 
@@ -1927,31 +1927,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $never_proxy,
     array $protocols) {
 
-    $service_phid = $this->getAlmanacServicePHID();
-    if (!$service_phid) {
-      // No service, so this is a local repository.
-      return null;
-    }
-
-    $service = id(new AlmanacServiceQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array($service_phid))
-      ->needBindings(true)
-      ->needProperties(true)
-      ->executeOne();
+    $service = $this->loadAlmanacService();
     if (!$service) {
-      throw new Exception(
-        pht(
-          'The Almanac service for this repository is invalid or could not '.
-          'be loaded.'));
-    }
-
-    $service_type = $service->getServiceImplementation();
-    if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
-      throw new Exception(
-        pht(
-          'The Almanac service for this repository does not have the correct '.
-          'service type.'));
+      return null;
     }
 
     $bindings = $service->getBindings();
@@ -1990,16 +1968,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         }
       }
 
-      $protocol = $binding->getAlmanacPropertyValue('protocol');
-      if ($protocol === null) {
-        $protocol = 'https';
-      }
+      $uri = $this->getClusterRepositoryURIFromBinding($binding);
 
+      $protocol = $uri->getProtocol();
       if (empty($protocol_map[$protocol])) {
         continue;
       }
 
-      $uris[] = $protocol.'://'.$iface->renderDisplayAddress().'/';
+      $uris[] = $uri;
     }
 
     if (!$uris) {
@@ -2226,6 +2202,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return false;
     }
 
+    $service_phid = $this->getAlmanacServicePHID();
+    if (!$service_phid) {
+      return false;
+    }
+
+    // TODO: For now, this is only supported for Git.
+    if (!$this->isGit()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -2275,8 +2261,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         }
       }
 
-      // TODO: Actualy fetch the newer version from one of the nodes which has
-      // it.
+      $this->synchronizeWorkingCopyFromDevices($fetchable);
 
       PhabricatorRepositoryWorkingCopyVersion::updateVersion(
         $repository_phid,
@@ -2391,6 +2376,137 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $this->clusterWriteLock->unlock();
     $this->clusterWriteLock = null;
   }
+
+
+  /**
+   * @task sync
+   */
+  private function synchronizeWorkingCopyFromDevices(array $device_phids) {
+    $service = $this->loadAlmanacService();
+    if (!$service) {
+      throw new Exception(pht('Failed to load repository cluster service.'));
+    }
+
+    $device_map = array_fuse($device_phids);
+    $bindings = $service->getBindings();
+
+    $fetchable = array();
+    foreach ($bindings as $binding) {
+      // We can't fetch from disabled nodes.
+      if ($binding->getIsDisabled()) {
+        continue;
+      }
+
+      // We can't fetch from nodes which don't have the newest version.
+      $device_phid = $binding->getDevicePHID();
+      if (empty($device_map[$device_phid])) {
+        continue;
+      }
+
+      // TODO: For now, only fetch over SSH. We could support fetching over
+      // HTTP eventually.
+      if ($binding->getAlmanacPropertyValue('protocol') != 'ssh') {
+        continue;
+      }
+
+      $fetchable[] = $binding;
+    }
+
+    if (!$fetchable) {
+      throw new Exception(
+        pht(
+          'Leader lost: no up-to-date nodes in repository cluster are '.
+          'fetchable.'));
+    }
+
+    $caught = null;
+    foreach ($fetchable as $binding) {
+      try {
+        $this->synchronizeWorkingCopyFromBinding($binding);
+        $caught = null;
+        break;
+      } catch (Exception $ex) {
+        $caught = $ex;
+      }
+    }
+
+    if ($caught) {
+      throw $caught;
+    }
+  }
+
+  private function synchronizeWorkingCopyFromBinding($binding) {
+    $fetch_uri = $this->getClusterRepositoryURIFromBinding($binding);
+
+    if ($this->isGit()) {
+      $argv = array(
+        'fetch --prune -- %s %s',
+        $fetch_uri,
+        '+refs/*:refs/*',
+      );
+    } else {
+      throw new Exception(pht('Binding sync only supported for git!'));
+    }
+
+    $future = DiffusionCommandEngine::newCommandEngine($this)
+      ->setArgv($argv)
+      ->setConnectAsDevice(true)
+      ->setProtocol($fetch_uri->getProtocol())
+      ->newFuture();
+
+    $future->setCWD($this->getLocalPath());
+
+    $future->resolvex();
+  }
+
+  private function getClusterRepositoryURIFromBinding(
+    AlmanacBinding $binding) {
+    $protocol = $binding->getAlmanacPropertyValue('protocol');
+    if ($protocol === null) {
+      $protocol = 'https';
+    }
+
+    $iface = $binding->getInterface();
+    $address = $iface->renderDisplayAddress();
+
+    $path = $this->getURI();
+
+    return id(new PhutilURI("{$protocol}://{$address}"))
+      ->setPath($path);
+  }
+
+  private function loadAlmanacService() {
+    $service_phid = $this->getAlmanacServicePHID();
+    if (!$service_phid) {
+      // No service, so this is a local repository.
+      return null;
+    }
+
+    $service = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($service_phid))
+      ->needBindings(true)
+      ->needProperties(true)
+      ->executeOne();
+    if (!$service) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is invalid or could not '.
+          'be loaded.'));
+    }
+
+    $service_type = $service->getServiceImplementation();
+    if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository does not have the correct '.
+          'service type.'));
+    }
+
+    return $service;
+  }
+
+
 
 
 /* -(  Symbols  )-------------------------------------------------------------*/
