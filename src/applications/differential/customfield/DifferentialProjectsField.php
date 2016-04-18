@@ -8,7 +8,7 @@ final class DifferentialProjectsField
   }
 
   public function getFieldName() {
-    return pht('Projects');
+    return pht('Tags');
   }
 
   public function getFieldDescription() {
