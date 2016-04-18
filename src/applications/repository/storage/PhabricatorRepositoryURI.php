@@ -37,7 +37,7 @@ final class PhabricatorRepositoryURI
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'uri' => 'text',
+        'uri' => 'text255',
         'builtinProtocol' => 'text32?',
         'builtinIdentifier' => 'text32?',
         'ioType' => 'text32',

@@ -11,7 +11,7 @@ final class PhabricatorStorageFixtureScopeGuard extends Phobject {
     $this->name = $name;
 
     execx(
-      'php %s upgrade --force --no-adjust --namespace %s',
+      'php %s upgrade --force --namespace %s',
       $this->getStorageBinPath(),
       $this->name);
 
