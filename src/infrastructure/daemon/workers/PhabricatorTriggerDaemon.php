@@ -261,7 +261,7 @@ final class PhabricatorTriggerDaemon
    * Get the number of seconds to sleep for before starting the next scheduling
    * phase.
    *
-   * If no events are scheduled soon, we'll sleep for 60 seconds. Otherwise,
+   * If no events are scheduled soon, we'll sleep briefly. Otherwise,
    * we'll sleep until the next scheduled event.
    *
    * @return int Number of seconds to sleep for.
@@ -272,6 +272,7 @@ final class PhabricatorTriggerDaemon
     $next_triggers = id(new PhabricatorWorkerTriggerQuery())
       ->setViewer($this->getViewer())
       ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)
+      ->withNextEventBetween(0, null)
       ->setLimit(1)
       ->needEvents(true)
       ->execute();
