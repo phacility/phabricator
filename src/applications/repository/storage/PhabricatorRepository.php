@@ -1932,7 +1932,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return null;
     }
 
-    $bindings = $service->getBindings();
+    $bindings = $service->getActiveBindings();
     if (!$bindings) {
       throw new Exception(
         pht(
@@ -1954,10 +1954,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $uris = array();
     foreach ($bindings as $binding) {
-      if ($binding->getIsDisabled()) {
-        continue;
-      }
-
       $iface = $binding->getInterface();
 
       // If we're never proxying this and it's locally satisfiable, return
@@ -2228,6 +2224,37 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   /**
+   * Synchronize repository version information after creating a repository.
+   *
+   * This initializes working copy versions for all currently bound devices to
+   * 0, so that we don't get stuck making an ambiguous choice about which
+   * devices are leaders when we later synchronize before a read.
+   *
+   * @task sync
+   */
+  public function synchronizeWorkingCopyAfterCreation() {
+    if (!$this->shouldEnableSynchronization()) {
+      return;
+    }
+
+    $repository_phid = $this->getPHID();
+
+    $service = $this->loadAlmanacService();
+    if (!$service) {
+      throw new Exception(pht('Failed to load repository cluster service.'));
+    }
+
+    $bindings = $service->getActiveBindings();
+    foreach ($bindings as $binding) {
+      PhabricatorRepositoryWorkingCopyVersion::updateVersion(
+        $repository_phid,
+        $binding->getDevicePHID(),
+        0);
+    }
+  }
+
+
+  /**
    * @task sync
    */
   public function synchronizeWorkingCopyBeforeRead() {
@@ -2255,34 +2282,91 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     if ($this_version) {
       $this_version = (int)$this_version->getRepositoryVersion();
     } else {
-      $this_version = 0;
+      $this_version = -1;
     }
 
     if ($versions) {
-      $max_version = (int)max(mpull($versions, 'getRepositoryVersion'));
-    } else {
-      $max_version = 0;
-    }
+      // This is the normal case, where we have some version information and
+      // can identify which nodes are leaders. If the current node is not a
+      // leader, we want to fetch from a leader and then update our version.
 
-    if ($max_version > $this_version) {
-      $fetchable = array();
-      foreach ($versions as $version) {
-        if ($version->getRepositoryVersion() == $max_version) {
-          $fetchable[] = $version->getDevicePHID();
+      $max_version = (int)max(mpull($versions, 'getRepositoryVersion'));
+      if ($max_version > $this_version) {
+        $fetchable = array();
+        foreach ($versions as $version) {
+          if ($version->getRepositoryVersion() == $max_version) {
+            $fetchable[] = $version->getDevicePHID();
+          }
         }
+
+        $this->synchronizeWorkingCopyFromDevices($fetchable);
+
+        PhabricatorRepositoryWorkingCopyVersion::updateVersion(
+          $repository_phid,
+          $device_phid,
+          $max_version);
       }
 
-      $this->synchronizeWorkingCopyFromDevices($fetchable);
+      $result_version = $max_version;
+    } else {
+      // If no version records exist yet, we need to be careful, because we
+      // can not tell which nodes are leaders.
 
+      // There might be several nodes with arbitrary existing data, and we have
+      // no way to tell which one has the "right" data. If we pick wrong, we
+      // might erase some or all of the data in the repository.
+
+      // Since this is dangeorus, we refuse to guess unless there is only one
+      // device. If we're the only device in the group, we obviously must be
+      // a leader.
+
+      $service = $this->loadAlmanacService();
+      if (!$service) {
+        throw new Exception(pht('Failed to load repository cluster service.'));
+      }
+
+      $bindings = $service->getActiveBindings();
+      $device_map = array();
+      foreach ($bindings as $binding) {
+        $device_map[$binding->getDevicePHID()] = true;
+      }
+
+      if (count($device_map) > 1) {
+        throw new Exception(
+          pht(
+            'Repository "%s" exists on more than one device, but no device '.
+            'has any repository version information. Phabricator can not '.
+            'guess which copy of the existing data is authoritative. Remove '.
+            'all but one device from service to mark the remaining device '.
+            'as the authority.',
+            $this->getDisplayName()));
+      }
+
+      if (empty($device_map[$device->getPHID()])) {
+        throw new Exception(
+          pht(
+            'Repository "%s" is being synchronized on device "%s", but '.
+            'this device is not bound to the corresponding cluster '.
+            'service ("%s").',
+            $this->getDisplayName(),
+            $device->getName(),
+            $service->getName()));
+      }
+
+      // The current device is the only device in service, so it must be a
+      // leader. We can safely have any future nodes which come online read
+      // from it.
       PhabricatorRepositoryWorkingCopyVersion::updateVersion(
         $repository_phid,
         $device_phid,
-        $max_version);
+        0);
+
+      $result_version = 0;
     }
 
     $read_lock->unlock();
 
-    return $max_version;
+    return $result_version;
   }
 
 
@@ -2399,15 +2483,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     $device_map = array_fuse($device_phids);
-    $bindings = $service->getBindings();
+    $bindings = $service->getActiveBindings();
 
     $fetchable = array();
     foreach ($bindings as $binding) {
-      // We can't fetch from disabled nodes.
-      if ($binding->getIsDisabled()) {
-        continue;
-      }
-
       // We can't fetch from nodes which don't have the newest version.
       $device_phid = $binding->getDevicePHID();
       if (empty($device_map[$device_phid])) {
