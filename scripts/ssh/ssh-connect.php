@@ -34,7 +34,28 @@ $pattern[] = 'StrictHostKeyChecking=no';
 $pattern[] = '-o';
 $pattern[] = 'UserKnownHostsFile=/dev/null';
 
+$as_device = getenv('PHABRICATOR_AS_DEVICE');
 $credential_phid = getenv('PHABRICATOR_CREDENTIAL');
+
+if ($as_device) {
+  $device = AlmanacKeys::getLiveDevice();
+  if (!$device) {
+    throw new Exception(
+      pht(
+        'Attempting to create an SSH connection that authenticates with '.
+        'the current device, but this host is not configured as a cluster '.
+        'device.'));
+  }
+
+  if ($credential_phid) {
+    throw new Exception(
+      pht(
+        'Attempting to proxy an SSH connection that authenticates with '.
+        'both the current device and a specific credential. These options '.
+        'are mutually exclusive.'));
+  }
+}
+
 if ($credential_phid) {
   $viewer = PhabricatorUser::getOmnipotentUser();
   $key = PassphraseSSHKey::loadFromPHID($credential_phid, $viewer);
@@ -43,6 +64,13 @@ if ($credential_phid) {
   $arguments[] = $key->getUsernameEnvelope();
   $pattern[] = '-i %P';
   $arguments[] = $key->getKeyfileEnvelope();
+}
+
+if ($as_device) {
+  $pattern[] = '-l %R';
+  $arguments[] = AlmanacKeys::getClusterSSHUser();
+  $pattern[] = '-i %R';
+  $arguments[] = AlmanacKeys::getKeyPath('device.key');
 }
 
 $port = $args->getArg('port');

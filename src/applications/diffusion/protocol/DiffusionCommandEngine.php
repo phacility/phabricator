@@ -7,6 +7,7 @@ abstract class DiffusionCommandEngine extends Phobject {
   private $credentialPHID;
   private $argv;
   private $passthru;
+  private $connectAsDevice;
 
   public static function newCommandEngine(PhabricatorRepository $repository) {
     $engines = self::newCommandEngines();
@@ -82,6 +83,15 @@ abstract class DiffusionCommandEngine extends Phobject {
     return $this->passthru;
   }
 
+  public function setConnectAsDevice($connect_as_device) {
+    $this->connectAsDevice = $connect_as_device;
+    return $this;
+  }
+
+  public function getConnectAsDevice() {
+    return $this->connectAsDevice;
+  }
+
   public function newFuture() {
     $argv = $this->newCommandArgv();
     $env = $this->newCommandEnvironment();
@@ -118,6 +128,8 @@ abstract class DiffusionCommandEngine extends Phobject {
   }
 
   private function newCommonEnvironment() {
+    $repository = $this->getRepository();
+
     $env = array();
       // NOTE: Force the language to "en_US.UTF-8", which overrides locale
       // settings. This makes stuff print in English instead of, e.g., French,
@@ -127,10 +139,42 @@ abstract class DiffusionCommandEngine extends Phobject {
       // Propagate PHABRICATOR_ENV explicitly. For discussion, see T4155.
     $env['PHABRICATOR_ENV'] = PhabricatorEnv::getSelectedEnvironmentName();
 
+    $as_device = $this->getConnectAsDevice();
+    $credential_phid = $this->getCredentialPHID();
+
+    if ($as_device) {
+      $device = AlmanacKeys::getLiveDevice();
+      if (!$device) {
+        throw new Exception(
+          pht(
+            'Attempting to build a reposiory command (for repository "%s") '.
+            'as device, but this host ("%s") is not configured as a cluster '.
+            'device.',
+            $repository->getDisplayName(),
+            php_uname('n')));
+      }
+
+      if ($credential_phid) {
+        throw new Exception(
+          pht(
+            'Attempting to build a repository command (for repository "%s"), '.
+            'but the CommandEngine is configured to connect as both the '.
+            'current cluster device ("%s") and with a specific credential '.
+            '("%s"). These options are mutually exclusive. Connections must '.
+            'authenticate as one or the other, not both.',
+            $repository->getDisplayName(),
+            $device->getName(),
+            $credential_phid));
+      }
+    }
+
+
     if ($this->isAnySSHProtocol()) {
-      $credential_phid = $this->getCredentialPHID();
       if ($credential_phid) {
         $env['PHABRICATOR_CREDENTIAL'] = $credential_phid;
+      }
+      if ($as_device) {
+        $env['PHABRICATOR_AS_DEVICE'] = 1;
       }
     }
 
