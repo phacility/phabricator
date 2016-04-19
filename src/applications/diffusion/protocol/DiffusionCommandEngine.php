@@ -8,6 +8,7 @@ abstract class DiffusionCommandEngine extends Phobject {
   private $argv;
   private $passthru;
   private $connectAsDevice;
+  private $sudoAsDaemon;
 
   public static function newCommandEngine(PhabricatorRepository $repository) {
     $engines = self::newCommandEngines();
@@ -92,9 +93,24 @@ abstract class DiffusionCommandEngine extends Phobject {
     return $this->connectAsDevice;
   }
 
+  public function setSudoAsDaemon($sudo_as_daemon) {
+    $this->sudoAsDaemon = $sudo_as_daemon;
+    return $this;
+  }
+
+  public function getSudoAsDaemon() {
+    return $this->sudoAsDaemon;
+  }
+
   public function newFuture() {
     $argv = $this->newCommandArgv();
     $env = $this->newCommandEnvironment();
+
+    if ($this->getSudoAsDaemon()) {
+      $command = call_user_func_array('csprintf', $argv);
+      $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+      $argv = array('%C', $command);
+    }
 
     if ($this->getPassthru()) {
       $future = newv('PhutilExecPassthru', $argv);

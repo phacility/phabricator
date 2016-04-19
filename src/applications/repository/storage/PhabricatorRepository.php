@@ -1954,6 +1954,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $uris = array();
     foreach ($bindings as $binding) {
+      if ($binding->getIsDisabled()) {
+        continue;
+      }
+
       $iface = $binding->getInterface();
 
       // If we're never proxying this and it's locally satisfiable, return
@@ -2197,11 +2201,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   private function shouldEnableSynchronization() {
-    $device = AlmanacKeys::getLiveDevice();
-    if (!$device) {
-      return false;
-    }
-
     $service_phid = $this->getAlmanacServicePHID();
     if (!$service_phid) {
       return false;
@@ -2209,6 +2208,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     // TODO: For now, this is only supported for Git.
     if (!$this->isGit()) {
+      return false;
+    }
+
+    // TODO: It may eventually make sense to try to version and synchronize
+    // observed repositories (so that daemons don't do reads against out-of
+    // date hosts), but don't bother for now.
+    if (!$this->isHosted()) {
+      return false;
+    }
+
+    $device = AlmanacKeys::getLiveDevice();
+    if (!$device) {
       return false;
     }
 
@@ -2451,6 +2462,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $future = DiffusionCommandEngine::newCommandEngine($this)
       ->setArgv($argv)
       ->setConnectAsDevice(true)
+      ->setSudoAsDaemon(true)
       ->setProtocol($fetch_uri->getProtocol())
       ->newFuture();
 
