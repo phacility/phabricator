@@ -48,4 +48,22 @@ final class AlmanacKeys extends Phobject {
     return $device;
   }
 
+  public static function getClusterSSHUser() {
+    // NOTE: When instancing, we currently use the SSH username to figure out
+    // which instance you are connecting to. We can't use the host name because
+    // we have no way to tell which host you think you're reaching: the SSH
+    // protocol does not have a mechanism like a "Host" header.
+    $username = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($username)) {
+      return $username;
+    }
+
+    $username = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
+    if (strlen($username)) {
+      return $username;
+    }
+
+    return null;
+  }
+
 }

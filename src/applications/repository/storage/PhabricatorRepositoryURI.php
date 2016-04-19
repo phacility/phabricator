@@ -227,7 +227,7 @@ final class PhabricatorRepositoryURI
   private function getForcedUser() {
     switch ($this->getBuiltinProtocol()) {
       case self::BUILTIN_PROTOCOL_SSH:
-        return PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
+        return AlmanacKeys::getClusterSSHUser();
       default:
         return null;
     }

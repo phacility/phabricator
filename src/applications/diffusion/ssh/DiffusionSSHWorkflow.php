@@ -62,15 +62,12 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   protected function getProxyCommand() {
     $uri = new PhutilURI($this->proxyURI);
 
-    $username = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if (!strlen($username)) {
-      $username = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
-      if (!strlen($username)) {
-        throw new Exception(
-          pht(
-            'Unable to determine the username to connect with when trying '.
-            'to proxy an SSH request within the Phabricator cluster.'));
-      }
+    $username = AlmanacKeys::getClusterSSHUser();
+    if ($username === null) {
+      throw new Exception(
+        pht(
+          'Unable to determine the username to connect with when trying '.
+          'to proxy an SSH request within the Phabricator cluster.'));
     }
 
     $port = $uri->getPort();

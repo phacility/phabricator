@@ -1348,8 +1348,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $uri->setPath($uri->getPath().$this->getCloneName().'/');
     }
 
-    $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
-    if ($ssh_user) {
+    $ssh_user = AlmanacKeys::getClusterSSHUser();
+    if ($ssh_user !== null) {
       $uri->setUser($ssh_user);
     }
 
@@ -2324,7 +2324,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'refusing new writes.'));
     }
 
-    $max_version = $this->synchronizeWorkingCopyBeforeRead();
+    try {
+      $max_version = $this->synchronizeWorkingCopyBeforeRead();
+    } catch (Exception $ex) {
+      $write_lock->unlock();
+      throw $ex;
+    }
 
     PhabricatorRepositoryWorkingCopyVersion::willWrite(
       $repository_phid,
