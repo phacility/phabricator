@@ -72,8 +72,8 @@ final class PhabricatorMacroViewController
         $timeline,
         $add_comment_form,
       ))
-      ->addPropertySection(pht('MACRO'), $file)
-      ->addPropertySection(pht('DETAILS'), $details);
+      ->addPropertySection(pht('Macro'), $file)
+      ->addPropertySection(pht('Details'), $details);
 
     return $this->newPage()
       ->setTitle($title_short)

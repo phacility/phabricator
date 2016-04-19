@@ -1,11 +1,7 @@
 <?php
 
 final class PhabricatorDaemonBulkJobMonitorController
-  extends PhabricatorDaemonController {
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+  extends PhabricatorDaemonBulkJobController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();

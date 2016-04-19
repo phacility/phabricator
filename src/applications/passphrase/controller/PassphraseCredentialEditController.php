@@ -21,6 +21,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
       }
 
       $type = $this->getCredentialType($credential->getCredentialType());
+      $type_const = $type->getCredentialType();
 
       $is_new = false;
     } else {
@@ -228,6 +229,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('isInitialized', true)
+      ->addHiddenInput('type', $type_const)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')

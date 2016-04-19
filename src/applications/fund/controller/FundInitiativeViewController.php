@@ -62,7 +62,7 @@ final class FundInitiativeViewController
         $timeline,
         $add_comment,
       ))
-      ->addPropertySection(pht('DETAILS'), $details);
+      ->addPropertySection(pht('Details'), $details);
 
     return $this->newPage()
       ->setTitle($title)

@@ -68,7 +68,7 @@ final class AlmanacBindingViewController
           $this->buildAlmanacPropertiesTable($binding),
           $timeline,
         ))
-      ->addPropertySection(pht('DETAILS'), $details);
+      ->addPropertySection(pht('Details'), $details);
 
     return $this->newPage()
       ->setTitle($title)

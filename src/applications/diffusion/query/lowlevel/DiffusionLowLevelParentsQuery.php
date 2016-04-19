@@ -50,7 +50,9 @@ final class DiffusionLowLevelParentsQuery
     list($stdout) = $repository->execxLocalCommand(
       'log --debug --limit 1 --template={parents} --rev %s',
       $this->identifier);
-    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
+
+    $stdout = DiffusionMercurialCommandEngine::filterMercurialDebugOutput(
+      $stdout);
 
     $hashes = preg_split('/\s+/', trim($stdout));
     foreach ($hashes as $key => $value) {

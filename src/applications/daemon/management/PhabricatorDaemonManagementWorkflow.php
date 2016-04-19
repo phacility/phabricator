@@ -224,17 +224,18 @@ abstract class PhabricatorDaemonManagementWorkflow
           $daemon_script_dir,
           $config,
           $this->runDaemonsAsUser);
-      } catch (Exception $e) {
-        // Retry without sudo
-        $console->writeOut(
-          "%s\n",
+      } catch (Exception $ex) {
+        throw new PhutilArgumentUsageException(
           pht(
-            '%s command failed. Starting daemon as current user.',
-            'sudo'));
-        $this->executeDaemonLaunchCommand(
-          $command,
-          $daemon_script_dir,
-          $config);
+            'Daemons are configured to run as user "%s" in configuration '.
+            'option `%s`, but the current user is "%s" and `phd` was unable '.
+            'to switch to the correct user with `sudo`. Command output:'.
+            "\n\n".
+            '%s',
+            $phd_user,
+            'phd.user',
+            $current_user,
+            $ex->getMessage()));
       }
     }
   }

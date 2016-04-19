@@ -46,9 +46,7 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
           => 'PhabricatorCountdownViewController',
         'comment/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownCommentController',
-        'edit/(?:(?P<id>[1-9]\d*)/)?'
-          => 'PhabricatorCountdownEditController',
-        'create/'
+        $this->getEditRoutePattern('edit/')
           => 'PhabricatorCountdownEditController',
         'delete/(?P<id>[1-9]\d*)/'
           => 'PhabricatorCountdownDeleteController',

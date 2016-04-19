@@ -70,6 +70,16 @@
   width: 300px;
 }
 
+.device-desktop .phui-two-column-view.phui-side-column-left .phui-main-column {
+  float: right;
+  width: calc(100% - 280px);
+}
+
+.device-desktop .phui-two-column-view.phui-side-column-left .phui-side-column {
+  float: left;
+  width: 260px;
+}
+
 .device .phui-side-column {
   margin-bottom: 20px;
 }
@@ -201,4 +211,23 @@
 .phui-two-column-view .phui-box-blue-property
   .phui-header-shell + .phui-info-view {
     margin: 16px;
+}
+
+/* Navigation */
+
+.phui-two-column-view .side-has-nav .phabricator-nav-local {
+  width: auto;
+  position: static;
+  margin: 0;
+}
+
+.device .phui-two-column-view .side-has-nav {
+  display: none;
+}
+
+/* Document View */
+
+.phui-two-column-view .phui-two-column-content .phui-document-fluid
+  .phui-document-view {
+    margin: 0 0 20px 0;
 }

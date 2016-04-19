@@ -93,7 +93,7 @@
 }
 
 .phui-box.phui-box-blue-property .phui-header-header {
-  font-size: 13px;
+  font-size: {$biggerfontsize};
   color: {$bluetext};
 }
 

@@ -176,7 +176,7 @@ final class LegalpadDocumentManageController extends LegalpadController {
     }
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('PROPERTIES'))
+      ->setHeaderText(pht('Properties'))
       ->addPropertyList($properties)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
   }

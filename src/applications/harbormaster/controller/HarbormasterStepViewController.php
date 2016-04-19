@@ -104,7 +104,7 @@ final class HarbormasterStepViewController
     }
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('PROPERTIES'))
+      ->setHeaderText(pht('Properties'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($view);
   }

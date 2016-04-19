@@ -75,7 +75,7 @@ final class PHUIBoxExample extends PhabricatorUIExample {
     $badge2 = id(new PHUIBadgeMiniView())
       ->setIcon('fa-heart')
       ->setHeader(pht('Funder'))
-      ->setQuality(PHUIBadgeView::UNCOMMON);
+      ->setQuality(PhabricatorBadgesQuality::UNCOMMON);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Fancy Box'))

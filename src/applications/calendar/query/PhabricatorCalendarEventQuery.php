@@ -90,24 +90,11 @@ final class PhabricatorCalendarEventQuery
   }
 
   protected function loadPage() {
-    $table = new PhabricatorCalendarEvent();
-    $conn_r = $table->establishConnection('r');
+    $events = $this->loadStandardPage($this->newResultObject());
+
     $viewer = $this->getViewer();
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT event.* FROM %T event %Q %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildGroupClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $events = $table->loadAllFromArray($data);
-
     foreach ($events as $event) {
-      $event->applyViewerTimezone($this->getViewer());
+      $event->applyViewerTimezone($viewer);
     }
 
     if (!$this->generateGhosts) {
@@ -115,6 +102,15 @@ final class PhabricatorCalendarEventQuery
     }
 
     $enforced_end = null;
+    $raw_limit = $this->getRawResultLimit();
+
+    if (!$raw_limit && !$this->rangeEnd) {
+      throw new Exception(
+        pht(
+          'Event queries which generate ghost events must include either a '.
+          'result limit or an end date, because they may otherwise generate '.
+          'an infinite number of results. This query has neither.'));
+    }
 
     foreach ($events as $key => $event) {
       $sequence_start = 0;
@@ -176,12 +172,12 @@ final class PhabricatorCalendarEventQuery
             $sequence_end++;
             $datetime->modify($modify_key);
             $date = $datetime->format('U');
-            if ($sequence_end > $this->getRawResultLimit() + $sequence_start) {
+            if ($sequence_end > $raw_limit + $sequence_start) {
               break;
             }
           }
         } else {
-          $sequence_end = $this->getRawResultLimit() + $sequence_start;
+          $sequence_end = $raw_limit + $sequence_start;
         }
 
         $sequence_start = max(1, $sequence_start);
@@ -190,10 +186,17 @@ final class PhabricatorCalendarEventQuery
           $events[] = $event->generateNthGhost($index, $viewer);
         }
 
-        if (count($events) >= $this->getRawResultLimit()) {
-          $events = msort($events, 'getDateFrom');
-          $events = array_slice($events, 0, $this->getRawResultLimit(), true);
-          $enforced_end = last($events)->getDateFrom();
+        // NOTE: We're slicing results every time because this makes it cheaper
+        // to generate future ghosts. If we already have 100 events that occur
+        // before July 1, we know we never need to generate ghosts after that
+        // because they couldn't possibly ever appear in the result set.
+
+        if ($raw_limit) {
+          if (count($events) >= $raw_limit) {
+            $events = msort($events, 'getDateFrom');
+            $events = array_slice($events, 0, $raw_limit, true);
+            $enforced_end = last($events)->getDateFrom();
+          }
         }
       }
     }
@@ -251,61 +254,61 @@ final class PhabricatorCalendarEventQuery
     return $parts;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'event.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'event.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->rangeBegin) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'event.dateTo >= %d OR event.isRecurring = 1',
         $this->rangeBegin);
     }
 
     if ($this->rangeEnd) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'event.dateFrom <= %d',
         $this->rangeEnd);
     }
 
     if ($this->inviteePHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'invitee.inviteePHID IN (%Ls)',
         $this->inviteePHIDs);
     }
 
     if ($this->creatorPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'event.userPHID IN (%Ls)',
         $this->creatorPHIDs);
     }
 
     if ($this->isCancelled !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'event.isCancelled = %d',
         (int)$this->isCancelled);
     }
 
     if ($this->eventsWithNoParent == true) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'event.instanceOfEventPHID IS NULL');
     }
 
@@ -314,20 +317,19 @@ final class PhabricatorCalendarEventQuery
 
       foreach ($this->instanceSequencePairs as $pair) {
         $sql[] = qsprintf(
-          $conn_r,
+          $conn,
           '(event.instanceOfEventPHID = %s AND event.sequenceIndex = %d)',
           $pair[0],
           $pair[1]);
       }
+
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         '%Q',
         implode(' OR ', $sql));
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function getPrimaryTableAlias() {

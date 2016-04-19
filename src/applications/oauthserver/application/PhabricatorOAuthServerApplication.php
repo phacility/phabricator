@@ -53,8 +53,8 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
         'token/' => 'PhabricatorOAuthServerTokenController',
         $this->getEditRoutePattern('edit/') =>
           'PhabricatorOAuthClientEditController',
-        'client/' => array(
-          'delete/(?P<id>\d+)/' => 'PhabricatorOAuthClientDeleteController',
+          'client/' => array(
+          'disable/(?P<id>\d+)/' => 'PhabricatorOAuthClientDisableController',
           'view/(?P<id>\d+)/' => 'PhabricatorOAuthClientViewController',
           'secret/(?P<id>\d+)/' => 'PhabricatorOAuthClientSecretController',
           'test/(?P<id>\d+)/' => 'PhabricatorOAuthClientTestController',

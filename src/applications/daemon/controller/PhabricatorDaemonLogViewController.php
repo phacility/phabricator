@@ -16,10 +16,6 @@ final class PhabricatorDaemonLogViewController
       return new Aphront404Response();
     }
 
-    $events = id(new PhabricatorDaemonLogEvent())->loadAllWhere(
-      'logID = %d ORDER BY id DESC LIMIT 1000',
-      $log->getID());
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Daemon %s', $log->getID()));
     $crumbs->setBorder(true);
@@ -69,23 +65,15 @@ final class PhabricatorDaemonLogViewController
 
     $properties = $this->buildPropertyListView($log);
 
-    $event_view = id(new PhabricatorDaemonLogEventsView())
-      ->setUser($viewer)
-      ->setEvents($events);
-
-    $event_panel = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Events'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->appendChild($event_view);
-
     $object_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Daemon Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(array(
         $object_box,
-        $event_panel,
       ));
 
     return $this->newPage()

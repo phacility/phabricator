@@ -110,11 +110,7 @@ the entire `Authorization Code Grant` flow.
 NOTE: See "Scopes" section below for more information on what data is
 currently exposed through the OAuth Server.
 
-= Scopes =
+Scopes
+======
 
-There are only two scopes supported at this time.
-
-- **offline_access** - allows an access token to work indefinitely without
- expiring.
-- **whoami** - allows the client to access the results of Conduit.whoami on
- behalf of the resource owner.
+//This section has not been written yet.//

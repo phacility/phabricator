@@ -11,7 +11,6 @@ final class AphrontFileResponse extends AphrontResponse {
   private $rangeMin;
   private $rangeMax;
   private $allowOrigins = array();
-  private $fileToken;
 
   public function addAllowOrigin($origin) {
     $this->allowOrigins[] = $origin;
@@ -76,15 +75,6 @@ final class AphrontFileResponse extends AphrontResponse {
     return $this;
   }
 
-  public function setTemporaryFileToken(PhabricatorAuthTemporaryToken $token) {
-    $this->fileToken = $token;
-    return $this;
-  }
-
-  public function getTemporaryFileToken() {
-    return $this->fileToken;
-  }
-
   public function getHeaders() {
     $headers = array(
       array('Content-Type', $this->getMimeType()),
@@ -126,17 +116,6 @@ final class AphrontFileResponse extends AphrontResponse {
 
     $headers = array_merge(parent::getHeaders(), $headers);
     return $headers;
-  }
-
-  public function didCompleteWrite($aborted) {
-    if (!$aborted) {
-      $token = $this->getTemporaryFileToken();
-      if ($token) {
-        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-          $token->delete();
-        unset($unguarded);
-      }
-    }
   }
 
 }

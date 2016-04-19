@@ -147,7 +147,8 @@ final class PhabricatorRepositoryTestCase
     );
 
     foreach ($map as $input => $expect) {
-      $actual = PhabricatorRepository::filterMercurialDebugOutput($input);
+      $actual = DiffusionMercurialCommandEngine::filterMercurialDebugOutput(
+        $input);
       $this->assertEqual($expect, $actual, $input);
     }
   }

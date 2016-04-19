@@ -41,7 +41,7 @@ final class PhluxViewController extends PhluxController {
     $timeline->setShouldTerminate(true);
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 

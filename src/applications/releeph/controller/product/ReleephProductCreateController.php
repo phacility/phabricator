@@ -91,22 +91,30 @@ final class ReleephProductCreateController extends ReleephProductController {
           ->addCancelButton('/releeph/project/')
           ->setValue(pht('Create Release Product')));
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Create New Product'))
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Product'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+    $title = pht('Create New Product');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('New Product'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => pht('Create New Product'),
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function getRepositorySelectOptions() {

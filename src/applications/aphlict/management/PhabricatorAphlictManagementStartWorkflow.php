@@ -4,14 +4,14 @@ final class PhabricatorAphlictManagementStartWorkflow
   extends PhabricatorAphlictManagementWorkflow {
 
   protected function didConstruct() {
-    parent::didConstruct();
     $this
       ->setName('start')
-      ->setSynopsis(pht('Start the notifications server.'));
+      ->setSynopsis(pht('Start the notifications server.'))
+      ->setArguments($this->getLaunchArguments());
   }
 
   public function execute(PhutilArgumentParser $args) {
-    parent::execute($args);
+    $this->parseLaunchArguments($args);
     return $this->executeStartCommand();
   }
 

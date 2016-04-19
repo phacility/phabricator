@@ -44,8 +44,8 @@ final class PhabricatorPhurlURLSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
-      'authored' => pht('Authored'),
       'all' => pht('All URLs'),
+      'authored' => pht('Authored'),
     );
 
     return $names;
@@ -77,10 +77,16 @@ final class PhabricatorPhurlURLSearchEngine
     $handles = $viewer->loadHandles(mpull($urls, 'getAuthorPHID'));
 
     foreach ($urls as $url) {
+      $name = $url->getName();
+
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($url)
-        ->setHeader($viewer->renderHandle($url->getPHID()));
+        ->setObjectName('U'.$url->getID())
+        ->setHeader($name)
+        ->setHref('/U'.$url->getID())
+        ->addAttribute($url->getAlias())
+        ->addAttribute($url->getLongURL());
 
       $list->addItem($item);
     }

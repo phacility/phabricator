@@ -50,7 +50,18 @@ abstract class PhabricatorStorageManagementWorkflow
     $this->setDryRun($args->getArg('dryrun'));
     $this->setForce($args->getArg('force'));
 
-    $this->didExecute($args);
+    if (PhabricatorEnv::isReadOnly()) {
+      if ($this->isForce()) {
+        PhabricatorEnv::setReadOnly(false, null);
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Phabricator is currently in read-only mode. Use --force to '.
+            'override this mode.'));
+      }
+    }
+
+    return $this->didExecute($args);
   }
 
   public function didExecute(PhutilArgumentParser $args) {}
@@ -70,13 +81,15 @@ abstract class PhabricatorStorageManagementWorkflow
     $lock = $this->lock();
 
     try {
-      $this->doAdjustSchemata($unsafe);
+      $err = $this->doAdjustSchemata($unsafe);
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
     }
 
     $lock->unlock();
+
+    return $err;
   }
 
   final private function doAdjustSchemata($unsafe) {

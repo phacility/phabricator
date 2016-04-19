@@ -124,6 +124,10 @@ final class MultimeterControl extends Phobject {
   }
 
   private function writeEvents() {
+    if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
     $events = $this->events;
 
     $random = Filesystem::readRandomBytes(32);

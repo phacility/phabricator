@@ -5,7 +5,7 @@
 .phui-crumbs-view {
   overflow: hidden;
   vertical-align: top;
-  padding: 0 8px 0 16px;
+  padding: 0 20px 0 28px;
   /* TODO: Position this over the slider for Differential's file tree view.
      Remove this once that gets sorted out. */
   position: relative;

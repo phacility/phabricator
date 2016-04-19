@@ -7,38 +7,18 @@ final class PhabricatorRepositoryGitCommitChangeParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    // Check if the commit has parents. We're testing to see whether it is the
-    // first commit in history (in which case we must use "git log") or some
-    // other commit (in which case we can use "git diff"). We'd rather use
-    // "git diff" because it has the right behavior for merge commits, but
-    // it requires the commit to have a parent that we can diff against. The
-    // first commit doesn't, so "commit^" is not a valid ref.
-    list($parents) = $repository->execxLocalCommand(
-      'log -n1 --format=%s %s',
-      '%P',
-      $commit->getCommitIdentifier());
-
-    $use_log = !strlen(trim($parents));
-    if ($use_log) {
-      // This is the first commit so we need to use "log". We know it's not a
-      // merge commit because it couldn't be merging anything, so this is safe.
-
-      // NOTE: "--pretty=format: " is to disable diff output, we only want the
-      // part we get from "--raw".
-      list($raw) = $repository->execxLocalCommand(
-        'log -n1 -M -C -B --find-copies-harder --raw -t '.
-          '--pretty=format: --abbrev=40 %s',
-        $commit->getCommitIdentifier());
-    } else {
-      // Otherwise, we can use "diff", which will give us output for merges.
-      // We diff against the first parent, as this is generally the expectation
-      // and results in sensible behavior.
-      list($raw) = $repository->execxLocalCommand(
-        'diff -n1 -M -C -B --find-copies-harder --raw -t '.
-          '--abbrev=40 %s^1 %s',
-        $commit->getCommitIdentifier(),
-        $commit->getCommitIdentifier());
-    }
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $raw = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      DiffusionRequest::newFromDictionary(
+        array(
+          'repository' => $repository,
+          'user' => $viewer,
+        )),
+      'diffusion.internal.gitrawdiffquery',
+      array(
+        'commit' => $commit->getCommitIdentifier(),
+      ));
 
     $changes = array();
     $move_away = array();

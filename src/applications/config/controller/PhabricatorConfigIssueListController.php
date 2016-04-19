@@ -56,19 +56,22 @@ final class PhabricatorConfigIssueListController
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
     }
 
-    $nav->appendChild($setup_issues);
-
     $title = pht('Setup Issues');
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
       ->addTextCrumb(pht('Setup'), $this->getApplicationURI('issue/'));
 
-    $nav->setCrumbs($crumbs);
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $setup_issues,
+    ));
 
     return $this->newPage()
       ->setTitle($title)
-      ->appendChild($nav);
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildIssueList(array $issues, $group) {

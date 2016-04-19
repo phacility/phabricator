@@ -18,60 +18,52 @@ final class PhabricatorBadgesAwardController
     $view_uri = '/p/'.$user->getUsername();
 
     if ($request->isFormPost()) {
-      $xactions = array();
-      $badge_phid = $request->getStr('badgePHID');
-      $badge = id(new PhabricatorBadgesQuery())
+      $badge_phids = $request->getArr('badgePHIDs');
+      $badges = id(new PhabricatorBadgesQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($badge_phid))
+        ->withPHIDs($badge_phids)
         ->needRecipients(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_EDIT,
             PhabricatorPolicyCapability::CAN_VIEW,
           ))
-        ->executeOne();
-      if (!$badge) {
+        ->execute();
+      if (!$badges) {
         return new Aphront404Response();
       }
       $award_phids = array($user->getPHID());
 
-      $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
-        ->setNewValue($award_phids);
+      foreach ($badges as $badge) {
+        $xactions = array();
+        $xactions[] = id(new PhabricatorBadgesTransaction())
+          ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
+          ->setNewValue($award_phids);
 
-      $editor = id(new PhabricatorBadgesEditor($badge))
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true)
-        ->applyTransactions($badge, $xactions);
+        $editor = id(new PhabricatorBadgesEditor($badge))
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true)
+          ->applyTransactions($badge, $xactions);
+      }
 
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
     }
 
-    $badges = id(new PhabricatorBadgesQuery())
-      ->setViewer($viewer)
-      ->withStatuses(array(
-        PhabricatorBadgesBadge::STATUS_ACTIVE,
-      ))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->execute();
-
-    $options = mpull($badges, 'getName', 'getPHID');
-    asort($options);
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendChild(
-        id(new AphrontFormSelectControl())
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Badge'))
-          ->setName('badgePHID')
-          ->setOptions($options));
+          ->setName('badgePHIDs')
+          ->setDatasource(
+            id(new PhabricatorBadgesDatasource())
+              ->setParameters(
+                array(
+                  'recipientPHID' => $user->getPHID(),
+                  ))));
 
     $dialog = $this->newDialog()
       ->setTitle(pht('Grant Badge'))

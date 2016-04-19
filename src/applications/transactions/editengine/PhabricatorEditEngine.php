@@ -1382,6 +1382,8 @@ abstract class PhabricatorEditEngine
       $comment_actions[$key] = $comment_action;
     }
 
+    $comment_actions = msortv($comment_actions, 'getSortVector');
+
     $view->setCommentActions($comment_actions);
 
     return $view;

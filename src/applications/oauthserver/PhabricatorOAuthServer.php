@@ -172,17 +172,9 @@ final class PhabricatorOAuthServer extends Phobject {
       return null;
     }
 
-    // TODO: This should probably be reworked; expiration should be an
-    // exclusive property of the token. For now, this logic reads: tokens for
-    // authorizations with "offline_access" never expire.
-
-    $is_expired = $token->isExpired();
-    if ($is_expired) {
-      $offline_access = PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS;
-      $authorization_scope = $authorization->getScope();
-      if (empty($authorization_scope[$offline_access])) {
-        return null;
-      }
+    $application = $authorization->getClient();
+    if ($application->getIsDisabled()) {
+      return null;
     }
 
     return $authorization;

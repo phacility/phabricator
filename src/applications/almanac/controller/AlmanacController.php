@@ -158,7 +158,7 @@ abstract class AlmanacController
       ->setIcon('fa-plus');
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('PROPERTIES'))
+      ->setHeader(pht('Properties'))
       ->addActionLink($add_button);
 
     return id(new PHUIObjectBoxView())
@@ -178,7 +178,7 @@ abstract class AlmanacController
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(
-          'User Guide: Phabricator Clusters'),
+          'Clustering Introduction'),
         'target' => '_blank',
       ),
       pht('Learn More'));

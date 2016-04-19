@@ -152,8 +152,16 @@
 .phui-profile-menu .phabricator-side-menu .phui-profile-menu-error {
   color: rgba({$alphawhite}, 0.5);
   font-size: {$smallerfontsize};
-  padding: 18px 15px;
+  padding: 16px;
 }
+
+.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
+  .phui-profile-menu-error {
+  padding: 16px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-disabled
   .phui-list-item-href,

@@ -136,7 +136,10 @@ JX.behavior('time-typeahead', function(config) {
       }
 
       end_minutes = end_time%60;
-      end_minutes = (end_minutes < 9) ? end_minutes : ('0' + end_minutes);
+      if (end_minutes < 9) {
+        end_minutes = '0' + end_minutes;
+      }
+
       end_value = end_hours + ':' + end_minutes + ' ' + end_meridian;
     }
 

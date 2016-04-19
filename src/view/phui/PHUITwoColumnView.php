@@ -4,6 +4,7 @@ final class PHUITwoColumnView extends AphrontTagView {
 
   private $mainColumn;
   private $sideColumn = null;
+  private $navigation;
   private $display;
   private $fluid;
   private $header;
@@ -22,6 +23,12 @@ final class PHUITwoColumnView extends AphrontTagView {
 
   public function setSideColumn($side) {
     $this->sideColumn = $side;
+    return $this;
+  }
+
+  public function setNavigation($nav) {
+    $this->navigation = $nav;
+    $this->display = self::DISPLAY_LEFT;
     return $this;
   }
 
@@ -162,14 +169,24 @@ final class PHUITwoColumnView extends AphrontTagView {
 
   private function buildSideColumn() {
 
+    $classes = array();
+    $classes[] = 'phui-side-column';
+    $navigation = null;
+    if ($this->navigation) {
+      $classes[] = 'side-has-nav';
+      $navigation = id(new PHUIObjectBoxView())
+        ->appendChild($this->navigation);
+    }
+
     $curtain = $this->getCurtain();
 
     return phutil_tag(
       'div',
       array(
-        'class' => 'phui-side-column',
+        'class' => implode($classes, ' '),
       ),
       array(
+        $navigation,
         $curtain,
         $this->sideColumn,
       ));

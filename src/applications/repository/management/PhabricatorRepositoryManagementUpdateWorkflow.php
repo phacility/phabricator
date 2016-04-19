@@ -21,7 +21,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       ->setSynopsis(
         pht(
           'Update __repository__. This performs the __pull__, __discover__, '.
-          '__ref__ and __mirror__ operations and is primarily an internal '.
+          '__refs__ and __mirror__ operations and is primarily an internal '.
           'workflow.'))
       ->setArguments(
         array(

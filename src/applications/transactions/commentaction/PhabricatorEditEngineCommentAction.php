@@ -6,6 +6,7 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
   private $label;
   private $value;
   private $initialValue;
+  private $order;
 
   abstract public function getPHUIXControlType();
   abstract public function getPHUIXControlSpecification();
@@ -35,6 +36,20 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
 
   public function getValue() {
     return $this->value;
+  }
+
+  public function setOrder($order) {
+    $this->order = $order;
+    return $this;
+  }
+
+  public function getOrder() {
+    return $this->order;
+  }
+
+  public function getSortVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->getOrder());
   }
 
   public function setInitialValue($initial_value) {

@@ -678,6 +678,10 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $editor->save();
         break;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_SPACE:
+        $this->scrambleFileSecrets($object);
+        break;
     }
   }
 
@@ -914,7 +918,6 @@ abstract class PhabricatorApplicationTransactionEditor
       }
 
       $xactions = $this->applyFinalEffects($object, $xactions);
-
       if ($read_locking) {
         $object->endReadLocking();
         $read_locking = false;
@@ -3469,6 +3472,66 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $phids;
+  }
+
+  /**
+   * When the view policy for an object is changed, scramble the secret keys
+   * for attached files to invalidate existing URIs.
+   */
+  private function scrambleFileSecrets($object) {
+    // If this is a newly created object, we don't need to scramble anything
+    // since it couldn't have been previously published.
+    if ($this->getIsNewObject()) {
+      return;
+    }
+
+    // If the object is a file itself, scramble it.
+    if ($object instanceof PhabricatorFile) {
+      if ($this->shouldScramblePolicy($object->getViewPolicy())) {
+        $object->scrambleSecret();
+        $object->save();
+      }
+    }
+
+    $phid = $object->getPHID();
+
+    $attached_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $phid,
+      PhabricatorObjectHasFileEdgeType::EDGECONST);
+    if (!$attached_phids) {
+      return;
+    }
+
+    $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
+
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($omnipotent_viewer)
+      ->withPHIDs($attached_phids)
+      ->execute();
+    foreach ($files as $file) {
+      $view_policy = $file->getViewPolicy();
+      if ($this->shouldScramblePolicy($view_policy)) {
+        $file->scrambleSecret();
+        $file->save();
+      }
+    }
+  }
+
+
+  /**
+   * Check if a policy is strong enough to justify scrambling. Objects which
+   * are set to very open policies don't need to scramble their files, and
+   * files with very open policies don't need to be scrambled when associated
+   * objects change.
+   */
+  private function shouldScramblePolicy($policy) {
+    switch ($policy) {
+      case PhabricatorPolicies::POLICY_PUBLIC:
+      case PhabricatorPolicies::POLICY_USER:
+        return false;
+    }
+
+    return true;
   }
 
 }

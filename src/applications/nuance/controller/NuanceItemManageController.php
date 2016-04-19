@@ -40,7 +40,7 @@ final class NuanceItemManageController extends NuanceController {
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->addPropertySection(pht('DETAILS'), $properties)
+      ->addPropertySection(pht('Details'), $properties)
       ->setMainColumn($timeline);
 
     return $this->newPage()

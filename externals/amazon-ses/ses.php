@@ -80,9 +80,30 @@ class SimpleEmailService
   * @return void
   */
   public function __construct($accessKey = null, $secretKey = null, $host = 'email.us-east-1.amazonaws.com') {
+    if (!function_exists('simplexml_load_string')) {
+      throw new Exception(
+        pht(
+          'The PHP SimpleXML extension is not available, but this '.
+          'extension is required to send mail via Amazon SES, because '.
+          'Amazon SES returns API responses in XML format. Install or '.
+          'enable the SimpleXML extension.'));
+    }
+
+    // Catch mistakes with reading the wrong column out of the SES
+    // documentation. See T10728.
+    if (preg_match('(-smtp)', $host)) {
+      throw new Exception(
+        pht(
+          'Amazon SES is not configured correctly: the configured SES '.
+          'endpoint ("%s") is an SMTP endpoint. Instead, use an API (HTTPS) '.
+          'endpoint.',
+          $host));
+    }
+
     if ($accessKey !== null && $secretKey !== null) {
       $this->setAuth($accessKey, $secretKey);
     }
+
     $this->__host = $host;
   }
 
@@ -108,13 +129,6 @@ class SimpleEmailService
     $rest->setParameter('Action', 'ListVerifiedEmailAddresses');
 
     $rest = $rest->getResponse();
-    if($rest->error === false && $rest->code !== 200) {
-      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-    }
-    if($rest->error !== false) {
-      $this->__triggerError('listVerifiedEmailAddresses', $rest->error);
-      return false;
-    }
 
     $response = array();
     if(!isset($rest->body)) {
@@ -148,13 +162,6 @@ class SimpleEmailService
     $rest->setParameter('EmailAddress', $email);
 
     $rest = $rest->getResponse();
-    if($rest->error === false && $rest->code !== 200) {
-      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-    }
-    if($rest->error !== false) {
-      $this->__triggerError('verifyEmailAddress', $rest->error);
-      return false;
-    }
 
     $response['RequestId'] = (string)$rest->body->ResponseMetadata->RequestId;
     return $response;
@@ -172,13 +179,6 @@ class SimpleEmailService
     $rest->setParameter('EmailAddress', $email);
 
     $rest = $rest->getResponse();
-    if($rest->error === false && $rest->code !== 200) {
-      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-    }
-    if($rest->error !== false) {
-      $this->__triggerError('deleteVerifiedEmailAddress', $rest->error);
-      return false;
-    }
 
     $response['RequestId'] = (string)$rest->body->ResponseMetadata->RequestId;
     return $response;
@@ -195,13 +195,6 @@ class SimpleEmailService
     $rest->setParameter('Action', 'GetSendQuota');
 
     $rest = $rest->getResponse();
-    if($rest->error === false && $rest->code !== 200) {
-      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-    }
-    if($rest->error !== false) {
-      $this->__triggerError('getSendQuota', $rest->error);
-      return false;
-    }
 
     $response = array();
     if(!isset($rest->body)) {
@@ -227,13 +220,6 @@ class SimpleEmailService
     $rest->setParameter('Action', 'GetSendStatistics');
 
     $rest = $rest->getResponse();
-    if($rest->error === false && $rest->code !== 200) {
-      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-    }
-    if($rest->error !== false) {
-      $this->__triggerError('getSendStatistics', $rest->error);
-      return false;
-    }
 
     $response = array();
     if(!isset($rest->body)) {
@@ -265,13 +251,6 @@ class SimpleEmailService
     $rest->setParameter('RawMessage.Data', base64_encode($raw));
 
     $rest = $rest->getResponse();
-    if($rest->error === false && $rest->code !== 200) {
-      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-    }
-    if($rest->error !== false) {
-      $this->__triggerError('sendRawEmail', $rest->error);
-      return false;
-    }
 
     $response['MessageId'] = (string)$rest->body->SendEmailResult->MessageId;
     $response['RequestId'] = (string)$rest->body->ResponseMetadata->RequestId;
@@ -351,13 +330,6 @@ class SimpleEmailService
     }
 
     $rest = $rest->getResponse();
-    if($rest->error === false && $rest->code !== 200) {
-      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
-    }
-    if($rest->error !== false) {
-      $this->__triggerError('sendEmail', $rest->error);
-      return false;
-    }
 
     $response['MessageId'] = (string)$rest->body->SendEmailResult->MessageId;
     $response['RequestId'] = (string)$rest->body->ResponseMetadata->RequestId;
@@ -523,15 +495,22 @@ final class SimpleEmailServiceRequest
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 
     // Execute, grab errors
-    if (curl_exec($curl)) {
-      $this->response->code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    } else {
-      $this->response->error = array(
-        'curl' => true,
-        'code' => curl_errno($curl),
-        'message' => curl_error($curl),
-        'resource' => $this->resource
-      );
+    if (!curl_exec($curl)) {
+      throw new SimpleEmailServiceException(
+        pht(
+          'Encountered an error while making an HTTP request to Amazon SES '.
+          '(cURL Error #%d): %s',
+          curl_errno($curl),
+          curl_error($curl)));
+    }
+
+    $this->response->code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    if ($this->response->code != 200) {
+      throw new SimpleEmailServiceException(
+        pht(
+          'Unexpected HTTP status while making request to Amazon SES: '.
+          'expected 200, got %s.',
+          $this->response->code));
     }
 
     @curl_close($curl);

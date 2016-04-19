@@ -25,7 +25,6 @@ final class PhabricatorNotificationsApplication extends PhabricatorApplication {
           => 'PhabricatorNotificationListController',
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
-        'status/' => 'PhabricatorNotificationStatusController',
         'clear/' => 'PhabricatorNotificationClearController',
         'test/' => 'PhabricatorNotificationTestController',
       ),

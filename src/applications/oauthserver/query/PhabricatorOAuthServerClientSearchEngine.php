@@ -73,7 +73,7 @@ final class PhabricatorOAuthServerClientSearchEngine
     array $clients,
     PhabricatorSavedQuery $query,
     array $handles) {
-    assert_instances_of($clients, 'PhabricatorOauthServerClient');
+    assert_instances_of($clients, 'PhabricatorOAuthServerClient');
 
     $viewer = $this->requireViewer();
 
@@ -85,6 +85,10 @@ final class PhabricatorOAuthServerClientSearchEngine
         ->setHeader($client->getName())
         ->setHref($client->getViewURI())
         ->setObject($client);
+
+      if ($client->getIsDisabled()) {
+        $item->setDisabled(true);
+      }
 
       $list->addItem($item);
     }

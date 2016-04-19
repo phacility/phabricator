@@ -1,0 +1,47 @@
+@title Diffusion User Guide: URIs
+@group userguide
+
+Guide to configuring repository URIs for fetching, cloning and mirroring.
+
+Overview
+========
+
+WARNING: This document describes a feature which is still under development,
+and is not necessarily accurate or complete.
+
+Phabricator can host, observe, mirror, and proxy repositories. For example,
+here are some supported use cases:
+
+**Host Repositories**: Phabricator can host repositories locally. Phabricator
+maintains the writable master version of the repository, and you can push and
+pull the repository. This is the most straightforward kind of repository
+configuration, and similar to repositories on other services like GitHub or
+Bitbucket.
+
+**Observe Repositories**: Phabricator can create a copy of an repository which
+is hosted elsewhere (like GitHub or Bitbucket) and track updates to the remote
+repository. This will create a read-only copy of the repository in Phabricator.
+
+**Mirror Repositories**: Phabricator can publish any repository to mirrors,
+updating the mirrors as changes are made to the repository. This works with
+both local hosted repositories and remote repositories that Phabricator is
+observing.
+
+**Proxy Repositories**: If you are observing a repository, you can allow users
+to read Phabricator's copy of the repository. Phabricator supports granular
+read permissions, so this can let you open a private repository up a little
+bit in a flexible way.
+
+**Import Repositories**: If you have a repository elsewhere that you want to
+host on Phabricator, you can observe the remote repository first, then turn
+the tracking off once the repository fully synchronizes. This allows you to
+copy an existing repository and begin hosting it in Phabricator.
+
+You can also import repositories by creating an empty hosted repository and
+then pushing everything to the repository directly.
+
+You configure the behavior of a Phabricator repository by adding and
+configuring URIs and marking them to be fetched from, mirrored to, clonable,
+and so on. By configuring all the URIs that a repository should interact with
+and expose to users, you configure the read, write, and mirroring behavior
+of the repository.

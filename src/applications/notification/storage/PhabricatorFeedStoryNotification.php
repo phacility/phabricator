@@ -39,6 +39,10 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
     PhabricatorUser $user,
     $object_phid) {
 
+    if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
     $notification_table = new PhabricatorFeedStoryNotification();

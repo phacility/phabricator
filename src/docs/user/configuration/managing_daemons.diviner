@@ -113,25 +113,16 @@ This daemon will daemonize and run normally.
   - See @{article:Diffusion User Guide} for details about tuning the repository
     daemon.
 
-== Multiple Machines ==
 
-If you have multiple machines, you should use `phd launch` to tweak which
-daemons launch, and split daemons across machines like this:
+Multiple Hosts
+==============
 
-  - `PhabricatorRepositoryPullLocalDaemon`: Run one copy on any machine.
-    On each web frontend which is not running a normal copy, run a copy
-    with the `--no-discovery` flag.
-  - `PhabricatorTriggerDaemon`: Run one copy on any machine.
-  - `PhabricatorTaskmasterDaemon`: Run as many copies as you need to keep
-    tasks from backing up. You can run them all on one machine or split them
-    across machines.
+For information about running daemons on multiple hosts, see
+@{article:Cluster: Daemons}.
 
-A gratuitously wasteful install might have a dedicated daemon machine which
-runs `phd start` with a large pool of taskmasters set in the config, and then
-runs `phd launch PhabricatorRepositoryPullLocalDaemon -- --no-discovery` on each
-web server. This is grossly excessive in normal cases.
 
-= Next Steps =
+Next Steps
+==========
 
 Continue by:
 

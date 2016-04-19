@@ -355,8 +355,8 @@ final class DiffusionCommitController extends DiffusionController {
         $change_list,
         $add_comment,
       ))
-      ->addPropertySection(pht('DESCRIPTION'), $detail_list)
-      ->addPropertySection(pht('DETAILS'), $details)
+      ->addPropertySection(pht('Description'), $detail_list)
+      ->addPropertySection(pht('Details'), $details)
       ->setCurtain($curtain);
 
     $page = $this->newPage()
