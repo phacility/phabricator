@@ -38,6 +38,7 @@ final class DiffusionPushLogListView extends AphrontView {
     }
 
     $rows = array();
+    $any_host = false;
     foreach ($logs as $log) {
       $repository = $log->getRepository();
 
@@ -59,6 +60,14 @@ final class DiffusionPushLogListView extends AphrontView {
           $log->getRefOldShort());
       }
 
+      $device_phid = $log->getDevicePHID();
+      if ($device_phid) {
+        $device = $handles[$device_phid]->renderLink();
+        $any_host = true;
+      } else {
+        $device = null;
+      }
+
       $rows[] = array(
         phutil_tag(
           'a',
@@ -75,6 +84,7 @@ final class DiffusionPushLogListView extends AphrontView {
         $handles[$log->getPusherPHID()]->renderLink(),
         $remote_address,
         $log->getPushEvent()->getRemoteProtocol(),
+        $device,
         $log->getRefType(),
         $log->getRefName(),
         $old_ref_link,
@@ -100,6 +110,7 @@ final class DiffusionPushLogListView extends AphrontView {
           pht('Pusher'),
           pht('From'),
           pht('Via'),
+          pht('Host'),
           pht('Type'),
           pht('Name'),
           pht('Old'),
@@ -116,10 +127,20 @@ final class DiffusionPushLogListView extends AphrontView {
           '',
           '',
           '',
+          '',
           'wide',
           'n',
           'n',
           'right',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          true,
+          true,
+          true,
+          true,
+          $any_host,
         ));
 
     return $table;

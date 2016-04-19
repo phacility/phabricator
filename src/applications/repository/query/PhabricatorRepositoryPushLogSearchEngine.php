@@ -95,7 +95,12 @@ final class PhabricatorRepositoryPushLogSearchEngine
   protected function getRequiredHandlePHIDsForResultList(
     array $logs,
     PhabricatorSavedQuery $query) {
-    return mpull($logs, 'getPusherPHID');
+    $phids = array();
+    $phids[] = mpull($logs, 'getPusherPHID');
+    $phids[] = mpull($logs, 'getDevicePHID');
+    $phids = array_mergev($phids);
+    $phids = array_filter($phids);
+    return $phids;
   }
 
   protected function renderResultList(
