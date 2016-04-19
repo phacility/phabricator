@@ -179,7 +179,7 @@ final class DifferentialRevisionSearchEngine
           ->setValue($repository_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Projects'))
+          ->setLabel(pht('Tags'))
           ->setName('projects')
           ->setDatasource(new PhabricatorProjectLogicalDatasource())
           ->setValue($projects))
