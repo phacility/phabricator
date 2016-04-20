@@ -18,7 +18,7 @@ abstract class PhabricatorEditEngineAPIMethod
   public function getMethodStatusDescription() {
     return pht(
       'ApplicationEditor methods are fairly stable, but were introduced '.
-      'relativelyr cently and may continue to evolve as more applications '.
+      'relatively recently and may continue to evolve as more applications '.
       'adopt them.');
   }
 
