@@ -37,7 +37,10 @@ abstract class PhabricatorSearchEngineAPIMethod
   }
 
   public function getMethodStatusDescription() {
-    return pht('ApplicationSearch methods are highly unstable.');
+    return pht(
+      'ApplicationSearch methods are fairly stable, but were introduced '.
+      'relatively recently and may continue to evolve as more applications '.
+      'adopt them.');
   }
 
   final protected function defineParamTypes() {
