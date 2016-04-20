@@ -76,6 +76,7 @@ final class DifferentialProjectsField
 
   public function getCommitMessageLabels() {
     return array(
+      'Tags',
       'Project',
       'Projects',
     );
