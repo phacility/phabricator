@@ -2397,11 +2397,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         continue;
       }
 
-      // TODO: This should provide more help so users can resolve the issue.
       throw new Exception(
         pht(
-          'An incomplete write was previously performed to this repository; '.
-          'refusing new writes.'));
+          'An previous write to this repository was interrupted; refusing '.
+          'new writes. This issue resolves operator intervention to resolve, '.
+          'see "Write Interruptions" in the "Cluster: Repositories" in the '.
+          'documentation for instructions.'));
     }
 
     try {
@@ -2566,7 +2567,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ->setPath($path);
   }
 
-  private function loadAlmanacService() {
+  public function loadAlmanacService() {
     $service_phid = $this->getAlmanacServicePHID();
     if (!$service_phid) {
       // No service, so this is a local repository.

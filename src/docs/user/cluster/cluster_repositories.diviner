@@ -98,7 +98,7 @@ similar agents of other rogue nations is beyond the scope of this document.
 Monitoring Replication
 ======================
 
-You can review the current status of a repository on cluster nodes in
+You can review the current status of a repository on cluster devices in
 {nav Diffusion > (Repository) > Manage Repository > Cluster Configuration}.
 
 This screen shows all the configured devices which are hosting the repository
@@ -106,20 +106,20 @@ and the available version.
 
 **Version**: When a repository is mutated by a push, Phabricator increases
 an internal version number for the repository. This column shows which version
-is on disk on the corresponding node.
+is on disk on the corresponding device.
 
-After a change is pushed, the node which received the change will have a larger
-version number than the other nodes. The change should be passively replicated
-to the remaining nodes after a brief period of time, although this can take
-a while if the change was large or the network connection between nodes is
-slow or unreliable.
+After a change is pushed, the device which received the change will have a
+larger version number than the other devices. The change should be passively
+replicated to the remaining devices after a brief period of time, although this
+can take a while if the change was large or the network connection between
+devices is slow or unreliable.
 
 You can click the version number to see the corresponding push logs for that
 change. The logs contain details about what was changed, and can help you
 identify if replication is slow because a change is large or for some other
 reason.
 
-**Writing**: This shows that the node is currently holding a write lock. This
+**Writing**: This shows that the device is currently holding a write lock. This
 normally means that it is actively receiving a push, but can also mean that
 there was a write interruption. See "Write Interruptions" below for details.
 
@@ -131,43 +131,74 @@ the user whose change is holding the lock.
 currently held, this shows when the lock was acquired.
 
 
+Cluster Failure Modes
+=====================
+
+There are three major cluster failure modes:
+
+  - **Write Interruptions**: A write started but did not complete, leaving
+    the disk state and cluster state out of sync.
+  - **Loss of Leaders**: None of the devices with the most up-to-date data
+    are reachable.
+  - **Ambiguous Leaders**: The internal state of the repository is unclear.
+
+Phabricator can detect these issues, and responds by freezing the repository
+(usually preventing all reads and writes) until the issue is resolved. These
+conditions are normally rare and very little data is at risk, but Phabricator
+errs on the side of caution and requires decisions which may result in data
+loss to be confirmed by a human.
+
+The next sections cover these failure modes and appropriate responses in
+more detail. In general, you will respond to these issues by assessing the
+situation and then possibly choosing to discard some data.
+
+
 Write Interruptions
 ===================
 
 A repository cluster can be put into an inconsistent state by an interruption
-in a brief window during and immediately after a write.
+in a brief window during and immediately after a write. This looks like this:
+
+  - A change is pushed to a server.
+  - The server acquires a write lock and begins writing the change.
+  - During or immediately after the write, lightning strikes the server
+    and destroys it.
 
 Phabricator can not commit changes to a working copy (stored on disk) and to
-the global state (stored in a database) atomically, so there is a narrow window
-between committing these two different states when some tragedy (like a
-lightning strike) can befall a server, leaving the global and local views of
-the repository state possibly divergent.
+the global state (stored in a database) atomically, so there is necessarily a
+narrow window between committing these two different states when some tragedy
+can befall a server, leaving the global and local views of the repository state
+possibly divergent.
 
 In these cases, Phabricator fails into a frozen state where further writes
-are not permitted until the failure is investigated and resolved.
+are not permitted until the failure is investigated and resolved. When a
+repository is frozen in this way it remains readable.
 
 You can use the monitoring console to review the state of a frozen repository
-with a held write lock. The **Writing** column will show which node is holding
-the lock, and whoever is named in the **Last Writer** column may be able to
-help you figure out what happened by providing more information about what they
-were doing and what they observed.
+with a held write lock. The **Writing** column will show which device is
+holding the lock, and whoever is named in the **Last Writer** column may be
+able to help you figure out what happened by providing more information about
+what they were doing and what they observed.
 
-Because the push was not acknowledged, it is normally safe to demote the node:
-the user should have received an error anyway, and should not expect their push
-to have worked. However, data is technically at risk and you may want to
-investigate further and try to understand the issue in more detail before
+Because the push was not acknowledged, it is normally safe to resolve this
+issue by demoting the device. Demoting the device will undo any changes
+committed by the push, and they will be lost forever.
+
+However, the user should have received an error anyway, and should not expect
+their push to have worked. Still, data is technically at risk and you may want
+to investigate further and try to understand the issue in more detail before
 continuing.
 
 There is no way to explicitly keep the write, but if it was committed to disk
-you can recover it manually from the working copy on the device and then push
-it again.
+you can recover it manually from the working copy on the device (for example,
+by using `git format-patch`) and then push it again after recovering.
 
-If you demote the node, the in-process write will be thrown away, even if it
-was complete on disk. To demote the node and release the write lock, run this
+If you demote the device, the in-process write will be thrown away, even if it
+was complete on disk. To demote the device and release the write lock, run this
 command:
 
 ```
-phabricator/ $ ./bin/repository thaw rXYZ --demote repo002.corp.net
+phabricator/ $ ./bin/repository thaw <repository> --demote <device>
 ```
 
 {icon exclamation-triangle, color="yellow"} Any committed but unacknowledged
@@ -181,17 +212,18 @@ A more straightforward failure condition is the loss of all servers in a
 cluster which have the most up-to-date copy of a repository. This looks like
 this:
 
-  - There is a cluster setup with two nodes, X and Y.
+  - There is a cluster setup with two devices, X and Y.
   - A new change is pushed to server X.
   - Before the change can propagate to server Y, lightning strikes server X
     and destroys it.
 
-Here, all of the "leader" nodes with the most up-to-date copy of the repository
-have been lost. Phabricator will refuse to serve this repository because it
-can not serve it consistently, and can not accept writes without data loss.
+Here, all of the "leader" devices with the most up-to-date copy of the
+repository have been lost. Phabricator will freeze the repository refuse to
+serve requests because it can not serve it consistently, and can not accept new
+writes without data loss.
 
 The most straightforward way to resolve this issue is to restore any leader to
-service. The change will be able to replicate to other nodes once a leader
+service. The change will be able to replicate to other devices once a leader
 comes back online.
 
 If you are unable to restore a leader or unsure that you can restore one
@@ -201,13 +233,20 @@ push logs.
 
 If you are comfortable discarding these changes, you can instruct Phabricator
 that it can forget about the leaders in two ways: disable the service bindings
-to all of the leader nodes so they are no longer part of the cluster, or
-use `bin/repository thaw` to `--demote` the leaders explicitly.
+to all of the leader devices so they are no longer part of the cluster, or use
+`bin/repository thaw` to `--demote` the leaders explicitly.
 
 If you do this, **you will lose data**. Either action will discard any changes
-on the affected leaders which have not replicated to other nodes in the cluster.
+on the affected leaders which have not replicated to other devices in the
+cluster.
 
-To demote a device, run this command:
+To remove a device from the cluster, disable all of the bindings to it
+in Almanac, using the web UI.
+
+{icon exclamation-triangle, color="red"} Any data which is only present on
+the disabled device will be lost.
+
+To demote a device without removing it from the cluster, run this command:
 
 ```
 phabricator/ $ ./bin/repository thaw rXYZ --demote repo002.corp.net
@@ -220,24 +259,35 @@ phabricator/ $ ./bin/repository thaw rXYZ --demote repo002.corp.net
 Ambiguous Leaders
 =================
 
-Repository clusters can also freeze if the leader nodes are ambiguous. This
+Repository clusters can also freeze if the leader devices are ambiguous. This
 can happen if you replace an entire cluster with new devices suddenly, or
-make a mistake with the `--demote` flag.
+make a mistake with the `--demote` flag. This generally arises from some kind
+of operator error, like this:
 
-When Phabricator can not tell which node in a cluster is a leader, it freezes
-the cluster because it is possible that some nodes have less data and others
+  - Someone accidentally uses `bin/repository thaw ... --demote` to demote
+    every device in a cluster.
+  - Someone accidentally deletes all the version information for a repository
+    from the database by making a mistake with a `DELETE` or `UPDATE` query.
+  - Someone accidentally disable all of the devices in a cluster, then add
+    entirely new ones before repositories can propagate.
+
+When Phabricator can not tell which device in a cluster is a leader, it freezes
+the cluster because it is possible that some devices have less data and others
 have more, and if it choses a leader arbitrarily it may destroy some data
 which you would prefer to retain.
 
-To resolve this, you need to tell Phabricator which node has the most
-up-to-date data and promote that node to become a leader. If you do this,
-**you may lose data** if you promote the wrong node, and some other node
-really had more up-to-date data. If you want to double check, you can examine
-the working copies on disk before promoting, by connecting to the machines and
-using commands like `git log` to inspect state.
+To resolve this, you need to tell Phabricator which device has the most
+up-to-date data and promote that device to become a leader. If you know all
+devices have the same data, you are free to promote any device.
 
-Once you have identified a node which has data you're happy with, use
-`bin/repository thaw` to `--promote` the device:
+If you promote a device, **you may lose data** if you promote the wrong device
+and some other device really had more up-to-date data. If you want to double
+check, you can examine the working copies on disk before promoting by
+connecting to the machines and using commands like `git log` to inspect state.
+
+Once you have identified a device which has data you're happy with, use
+`bin/repository thaw` to `--promote` the device. The data on the chosen
+device will become authoritative:
 
 ```
 phabricator/ $ ./bin/repository thaw rXYZ --promote repo002.corp.net
