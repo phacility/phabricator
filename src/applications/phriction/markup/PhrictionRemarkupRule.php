@@ -107,6 +107,10 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       $name = $spec['explicitName'];
       $class = 'phriction-link';
 
+      // If the name is something meaningful to humans, we'll render this
+      // in text as: "Title" <link>. Otherwise, we'll just render: <link>.
+      $is_interesting_name = (bool)strlen($name);
+
       if (idx($existant_documents, $link) === null) {
         // The target document doesn't exist.
         if ($name === null) {
@@ -127,6 +131,8 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
           $name = $visible_documents[$link]
             ->getContent()
             ->getTitle();
+
+          $is_interesting_name = true;
         }
       }
 
@@ -143,7 +149,12 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       if ($this->getEngine()->getState('toc')) {
         $text = $name;
       } else if ($text_mode || $mail_mode) {
-        return PhabricatorEnv::getProductionURI($href);
+        $href = PhabricatorEnv::getProductionURI($href);
+        if ($is_interesting_name) {
+          $text = pht('"%s" <%s>', $name, $href);
+        } else {
+          $text = pht('<%s>', $href);
+        }
       } else {
         if ($class === 'phriction-link-lock') {
           $name = array(
@@ -164,8 +175,9 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
             'class' => $class,
           ),
           $name);
-        $this->getEngine()->overwriteStoredText($spec['token'], $text);
       }
+
+      $this->getEngine()->overwriteStoredText($spec['token'], $text);
     }
   }
 
