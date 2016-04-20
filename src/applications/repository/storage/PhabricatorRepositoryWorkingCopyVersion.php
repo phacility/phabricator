@@ -111,8 +111,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
       $conn_w,
       'UPDATE %T SET
           repositoryVersion = %d,
-          isWriting = 0,
-          writeProperties = null
+          isWriting = 0
         WHERE
           repositoryPHID = %s AND
           devicePHID = %s AND
