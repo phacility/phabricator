@@ -95,14 +95,41 @@ Other mitigations are possible, but securing a network against the NSA and
 similar agents of other rogue nations is beyond the scope of this document.
 
 
-Monitoring Replication
-======================
+Monitoring Services
+===================
 
-You can review the current status of a repository on cluster devices in
-{nav Diffusion > (Repository) > Manage Repository > Cluster Configuration}.
+You can get an overview of repository cluster status from the
+{nav Config > Repository Servers} screen. This table shows a high-level
+overview of all active repository services.
+
+**Repos**: The number of repositories hosted on this service.
+
+**Sync**: Synchronization status of repositories on this service. This is an
+at-a-glance view of service health, and can show these values:
+
+  - **Synchronized**: All nodes are fully synchronized and have the latest
+    version of all repositories.
+  - **Partial**: All repositories either have at least two leaders, or have
+    a very recent write which is not expected to have propagated yet.
+  - **Unsynchronized**: At least one repository has changes which are
+    only available on one node and were not pushed very recently. Data may
+    be at risk.
+  - **No Repositories**: This service has no repositories.
+  - **Ambiguous Leader**: At least one repository has an ambiguous leader.
+
+If this screen identifies problems, you can drill down into repository details
+to get more information about them. See the next section for details.
+
+
+Monitoring Repositories
+=======================
+
+You can get a more detailed view the current status of a specific repository on
+cluster devices in {nav Diffusion > (Repository) > Manage Repository > Cluster
+Configuration}.
 
 This screen shows all the configured devices which are hosting the repository
-and the available version.
+and the available version on that device.
 
 **Version**: When a repository is mutated by a push, Phabricator increases
 an internal version number for the repository. This column shows which version
@@ -129,6 +156,8 @@ the user whose change is holding the lock.
 
 **Last Write At**: When the most recent write started. If the write lock is
 currently held, this shows when the lock was acquired.
+
+
 
 
 Cluster Failure Modes
