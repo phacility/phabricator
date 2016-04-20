@@ -3,7 +3,6 @@
 final class DiffusionPushLogListView extends AphrontView {
 
   private $logs;
-  private $handles;
 
   public function setLogs(array $logs) {
     assert_instances_of($logs, 'PhabricatorRepositoryPushLog');
@@ -11,15 +10,20 @@ final class DiffusionPushLogListView extends AphrontView {
     return $this;
   }
 
-  public function setHandles(array $handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
   public function render() {
     $logs = $this->logs;
-    $viewer = $this->getUser();
-    $handles = $this->handles;
+    $viewer = $this->getViewer();
+
+    $handle_phids = array();
+    foreach ($logs as $log) {
+      $handle_phids[] = $log->getPusherPHID();
+      $device_phid = $log->getDevicePHID();
+      if ($device_phid) {
+        $handle_phids[] = $device_phid;
+      }
+    }
+
+    $handles = $viewer->loadHandles($handle_phids);
 
     // Figure out which repositories are editable. We only let you see remote
     // IPs if you have edit capability on a repository.
@@ -62,7 +66,7 @@ final class DiffusionPushLogListView extends AphrontView {
 
       $device_phid = $log->getDevicePHID();
       if ($device_phid) {
-        $device = $handles[$device_phid]->renderLink();
+        $device = $viewer->renderHandle($device_phid);
         $any_host = true;
       } else {
         $device = null;
@@ -81,7 +85,7 @@ final class DiffusionPushLogListView extends AphrontView {
             'href' => $repository->getURI(),
           ),
           $repository->getDisplayName()),
-        $handles[$log->getPusherPHID()]->renderLink(),
+        $viewer->renderHandle($log->getPusherPHID()),
         $remote_address,
         $log->getPushEvent()->getRemoteProtocol(),
         $device,

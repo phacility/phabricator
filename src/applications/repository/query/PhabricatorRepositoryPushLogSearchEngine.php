@@ -92,25 +92,13 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $logs,
-    PhabricatorSavedQuery $query) {
-    $phids = array();
-    $phids[] = mpull($logs, 'getPusherPHID');
-    $phids[] = mpull($logs, 'getDevicePHID');
-    $phids = array_mergev($phids);
-    $phids = array_filter($phids);
-    return $phids;
-  }
-
   protected function renderResultList(
     array $logs,
     PhabricatorSavedQuery $query,
     array $handles) {
 
     $table = id(new DiffusionPushLogListView())
-      ->setUser($this->requireViewer())
-      ->setHandles($handles)
+      ->setViewer($this->requireViewer())
       ->setLogs($logs);
 
     return id(new PhabricatorApplicationSearchResultView())
