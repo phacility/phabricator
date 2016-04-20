@@ -1227,7 +1227,17 @@ abstract class PhabricatorApplicationTransaction
           // Make this weaker than TYPE_COMMENT.
           return 0.25;
         }
-        break;
+
+        if ($this->isApplicationAuthor()) {
+          // When applications (most often: Herald) change subscriptions it
+          // is very uninteresting.
+          return 0.000000001;
+        }
+
+        // In other cases, subscriptions are more interesting than comments
+        // (which are shown anyway) but less interesting than any other type of
+        // transaction.
+        return 0.75;
     }
 
     return 1.0;
@@ -1461,6 +1471,14 @@ abstract class PhabricatorApplicationTransaction
 
     return true;
   }
+
+  private function isApplicationAuthor() {
+    $author_phid = $this->getAuthorPHID();
+    $author_type = phid_get_type($author_phid);
+    $application_type = PhabricatorApplicationApplicationPHIDType::TYPECONST;
+    return ($author_type == $application_type);
+  }
+
 
   private function getInterestingMoves(array $moves) {
     // Remove moves which only shift the position of a task within a column.
