@@ -104,6 +104,7 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
 
     foreach ($metadata as $spec) {
       $link = $spec['link'];
+      $slug = PhabricatorSlug::normalize($link);
       $name = $spec['explicitName'];
       $class = 'phriction-link';
 
@@ -111,24 +112,24 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       // in text as: "Title" <link>. Otherwise, we'll just render: <link>.
       $is_interesting_name = (bool)strlen($name);
 
-      if (idx($existant_documents, $link) === null) {
+      if (idx($existant_documents, $slug) === null) {
         // The target document doesn't exist.
         if ($name === null) {
-          $name = explode('/', trim($link, '/'));
+          $name = explode('/', trim($slug, '/'));
           $name = end($name);
         }
         $class = 'phriction-link-missing';
-      } else if (idx($visible_documents, $link) === null) {
+      } else if (idx($visible_documents, $slug) === null) {
         // The document exists, but the user can't see it.
         if ($name === null) {
-          $name = explode('/', trim($link, '/'));
+          $name = explode('/', trim($slug, '/'));
           $name = end($name);
         }
         $class = 'phriction-link-lock';
       } else {
         if ($name === null) {
           // Use the title of the document if no name is set.
-          $name = $visible_documents[$link]
+          $name = $visible_documents[$slug]
             ->getContent()
             ->getTitle();
 
