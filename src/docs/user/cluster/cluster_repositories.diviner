@@ -1,5 +1,5 @@
 @title Cluster: Repositories
-@group intro
+@group cluster
 
 Configuring Phabricator to use multiple repository hosts.
 

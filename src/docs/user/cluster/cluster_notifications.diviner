@@ -1,5 +1,5 @@
 @title Cluster: Notifications
-@group intro
+@group cluster
 
 Configuring Phabricator to use multiple notification servers.
 

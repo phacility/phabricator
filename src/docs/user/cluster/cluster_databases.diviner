@@ -1,5 +1,5 @@
 @title Cluster: Databases
-@group intro
+@group cluster
 
 Configuring Phabricator to use multiple database hosts.
 

@@ -1,5 +1,5 @@
 @title Cluster: Daemons
-@group intro
+@group cluster
 
 Configuring Phabricator to use multiple daemon hosts.
 
