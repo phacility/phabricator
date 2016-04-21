@@ -85,6 +85,9 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
     }
 
     $slugs = ipull($metadata, 'link');
+    foreach ($slugs as $key => $slug) {
+      $slugs[$key] = PhabricatorSlug::normalize($slug);
+    }
 
     // We have to make two queries here to distinguish between
     // documents the user can't see, and documents that don't
@@ -115,14 +118,14 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       if (idx($existant_documents, $slug) === null) {
         // The target document doesn't exist.
         if ($name === null) {
-          $name = explode('/', trim($slug, '/'));
+          $name = explode('/', trim($link, '/'));
           $name = end($name);
         }
         $class = 'phriction-link-missing';
       } else if (idx($visible_documents, $slug) === null) {
         // The document exists, but the user can't see it.
         if ($name === null) {
-          $name = explode('/', trim($slug, '/'));
+          $name = explode('/', trim($link, '/'));
           $name = end($name);
         }
         $class = 'phriction-link-lock';
