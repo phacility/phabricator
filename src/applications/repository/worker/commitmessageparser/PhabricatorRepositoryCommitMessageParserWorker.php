@@ -23,6 +23,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         )),
       'diffusion.querycommits',
       array(
+        'repositoryPHID' => $repository->getPHID(),
         'phids' => array($commit->getPHID()),
         'bypassCache' => true,
         'needMessages' => true,
