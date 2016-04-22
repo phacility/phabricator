@@ -2528,8 +2528,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private function synchronizeWorkingCopyFromBinding($binding) {
     $fetch_uri = $this->getClusterRepositoryURIFromBinding($binding);
+    $local_path = $this->getLocalPath();
 
     if ($this->isGit()) {
+      if (!Filesystem::pathExists($local_path)) {
+        $device = AlmanacKeys::getLiveDevice();
+        throw new Exception(
+          pht(
+            'Repository "%s" does not have a working copy on this device '.
+            'yet, so it can not be synchronized. Wait for the daemons to '.
+            'construct one or run `bin/repository update %s` on this host '.
+            '("%s") to build it explicitly.',
+            $this->getDisplayName(),
+            $this->getMonogram(),
+            $device->getName()));
+      }
+
       $argv = array(
         'fetch --prune -- %s %s',
         $fetch_uri,
@@ -2546,7 +2560,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ->setProtocol($fetch_uri->getProtocol())
       ->newFuture();
 
-    $future->setCWD($this->getLocalPath());
+    $future->setCWD($local_path);
 
     $future->resolvex();
   }
