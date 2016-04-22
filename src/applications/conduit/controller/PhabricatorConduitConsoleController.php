@@ -23,24 +23,7 @@ final class PhabricatorConduitConsoleController
 
     $call_uri = '/api/'.$method->getAPIMethodName();
 
-    $status = $method->getMethodStatus();
-    $reason = $method->getMethodStatusDescription();
     $errors = array();
-
-    switch ($status) {
-      case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
-        $reason = nonempty($reason, pht('This method is deprecated.'));
-        $errors[] = pht('Deprecated Method: %s', $reason);
-        break;
-      case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
-        $reason = nonempty(
-          $reason,
-          pht(
-            'This method is new and unstable. Its interface is subject '.
-            'to change.'));
-        $errors[] = pht('Unstable Method: %s', $reason);
-        break;
-    }
 
     $form = id(new AphrontFormView())
       ->setAction($call_uri)
@@ -126,6 +109,41 @@ final class PhabricatorConduitConsoleController
     $viewer = $this->getViewer();
 
     $view = id(new PHUIPropertyListView());
+
+    $status = $method->getMethodStatus();
+    $reason = $method->getMethodStatusDescription();
+
+    switch ($status) {
+      case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
+        $stability_icon = 'fa-exclamation-triangle yellow';
+        $stability_label = pht('Unstable Method');
+        $stability_info = nonempty(
+          $reason,
+          pht(
+            'This method is new and unstable. Its interface is subject '.
+            'to change.'));
+        break;
+      case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
+        $stability_icon = 'fa-exclamation-triangle red';
+        $stability_label = pht('Deprecated Method');
+        $stability_info = nonempty($reason, pht('This method is deprecated.'));
+        break;
+      default:
+        $stability_label = null;
+        break;
+    }
+
+    if ($stability_label) {
+      $view->addProperty(
+        pht('Stability'),
+        array(
+          id(new PHUIIconView())->setIcon($stability_icon),
+          ' ',
+          phutil_tag('strong', array(), $stability_label.':'),
+          ' ',
+          $stability_info,
+        ));
+    }
 
     $view->addProperty(
       pht('Returns'),

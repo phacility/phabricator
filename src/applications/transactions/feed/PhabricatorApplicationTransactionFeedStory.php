@@ -99,8 +99,15 @@ class PhabricatorApplicationTransactionFeedStory
       }
     }
 
-    $view->setImage(
-      $this->getHandle($xaction->getAuthorPHID())->getImageURI());
+    $author_phid = $xaction->getAuthorPHID();
+    $author_handle = $this->getHandle($author_phid);
+    $author_image = $author_handle->getImageURI();
+
+    if ($author_image) {
+      $view->setImage($author_image);
+    } else {
+      $view->setAuthorIcon($author_handle->getIcon());
+    }
 
     return $view;
   }

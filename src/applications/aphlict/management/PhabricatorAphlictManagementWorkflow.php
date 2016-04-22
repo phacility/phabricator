@@ -301,7 +301,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     return $pid;
   }
 
-  final public function cleanup($signo = '?') {
+  final public function cleanup($signo = null) {
     global $g_future;
     if ($g_future) {
       $g_future->resolveKill();
@@ -309,6 +309,11 @@ abstract class PhabricatorAphlictManagementWorkflow
     }
 
     Filesystem::remove($this->getPIDPath());
+
+    if ($signo !== null) {
+      $signame = phutil_get_signal_name($signo);
+      error_log("Caught signal {$signame}, exiting.");
+    }
 
     exit(1);
   }
@@ -428,6 +433,15 @@ abstract class PhabricatorAphlictManagementWorkflow
     $console = PhutilConsole::getConsole();
     $this->willLaunch();
 
+    $log = $this->getOverseerLogPath();
+    if ($log !== null) {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Writing logs to: %s',
+          $log));
+    }
+
     $pid = pcntl_fork();
     if ($pid < 0) {
       throw new Exception(
@@ -437,6 +451,12 @@ abstract class PhabricatorAphlictManagementWorkflow
     } else if ($pid) {
       $console->writeErr("%s\n", pht('Aphlict Server started.'));
       exit(0);
+    }
+
+    // Redirect process errors to the error log. If we do not do this, any
+    // error the `aphlict` process itself encounters vanishes into thin air.
+    if ($log !== null) {
+      ini_set('error_log', $log);
     }
 
     // When we fork, the child process will inherit its parent's set of open
@@ -527,6 +547,17 @@ abstract class PhabricatorAphlictManagementWorkflow
       $this->getNodeArgv(),
       $this->getAphlictScriptPath(),
       $server_argv);
+  }
+
+  private function getOverseerLogPath() {
+    // For now, just return the first log. We could refine this eventually.
+    $logs = idx($this->configData, 'logs', array());
+
+    foreach ($logs as $log) {
+      return $log['path'];
+    }
+
+    return null;
   }
 
 }

@@ -85,6 +85,9 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
     }
 
     $slugs = ipull($metadata, 'link');
+    foreach ($slugs as $key => $slug) {
+      $slugs[$key] = PhabricatorSlug::normalize($slug);
+    }
 
     // We have to make two queries here to distinguish between
     // documents the user can't see, and documents that don't
@@ -104,17 +107,22 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
 
     foreach ($metadata as $spec) {
       $link = $spec['link'];
+      $slug = PhabricatorSlug::normalize($link);
       $name = $spec['explicitName'];
       $class = 'phriction-link';
 
-      if (idx($existant_documents, $link) === null) {
+      // If the name is something meaningful to humans, we'll render this
+      // in text as: "Title" <link>. Otherwise, we'll just render: <link>.
+      $is_interesting_name = (bool)strlen($name);
+
+      if (idx($existant_documents, $slug) === null) {
         // The target document doesn't exist.
         if ($name === null) {
           $name = explode('/', trim($link, '/'));
           $name = end($name);
         }
         $class = 'phriction-link-missing';
-      } else if (idx($visible_documents, $link) === null) {
+      } else if (idx($visible_documents, $slug) === null) {
         // The document exists, but the user can't see it.
         if ($name === null) {
           $name = explode('/', trim($link, '/'));
@@ -124,9 +132,11 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       } else {
         if ($name === null) {
           // Use the title of the document if no name is set.
-          $name = $visible_documents[$link]
+          $name = $visible_documents[$slug]
             ->getContent()
             ->getTitle();
+
+          $is_interesting_name = true;
         }
       }
 
@@ -143,7 +153,12 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
       if ($this->getEngine()->getState('toc')) {
         $text = $name;
       } else if ($text_mode || $mail_mode) {
-        return PhabricatorEnv::getProductionURI($href);
+        $href = PhabricatorEnv::getProductionURI($href);
+        if ($is_interesting_name) {
+          $text = pht('"%s" <%s>', $name, $href);
+        } else {
+          $text = pht('<%s>', $href);
+        }
       } else {
         if ($class === 'phriction-link-lock') {
           $name = array(
@@ -164,8 +179,9 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
             'class' => $class,
           ),
           $name);
-        $this->getEngine()->overwriteStoredText($spec['token'], $text);
       }
+
+      $this->getEngine()->overwriteStoredText($spec['token'], $text);
     }
   }
 

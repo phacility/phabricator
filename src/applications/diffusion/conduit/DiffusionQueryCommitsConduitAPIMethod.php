@@ -42,6 +42,9 @@ final class DiffusionQueryCommitsConduitAPIMethod
         ->executeOne();
       if ($repository) {
         $query->withRepository($repository);
+        if ($bypass_cache) {
+          $repository->synchronizeWorkingCopyBeforeRead();
+        }
       }
     }
 

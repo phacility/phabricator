@@ -165,7 +165,7 @@ final class PhabricatorPhurlURLEditController
       ->setError($error_alias);
 
     $projects = id(new AphrontFormTokenizerControl())
-      ->setLabel(pht('Projects'))
+      ->setLabel(pht('Tags'))
       ->setName('projects')
       ->setValue($projects)
       ->setUser($viewer)

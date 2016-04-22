@@ -62,15 +62,12 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   protected function getProxyCommand() {
     $uri = new PhutilURI($this->proxyURI);
 
-    $username = PhabricatorEnv::getEnvConfig('cluster.instance');
-    if (!strlen($username)) {
-      $username = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
-      if (!strlen($username)) {
-        throw new Exception(
-          pht(
-            'Unable to determine the username to connect with when trying '.
-            'to proxy an SSH request within the Phabricator cluster.'));
-      }
+    $username = AlmanacKeys::getClusterSSHUser();
+    if ($username === null) {
+      throw new Exception(
+        pht(
+          'Unable to determine the username to connect with when trying '.
+          'to proxy an SSH request within the Phabricator cluster.'));
     }
 
     $port = $uri->getPort();
@@ -204,6 +201,14 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     $repository = $this->getRepository();
     $viewer = $this->getUser();
 
+    if ($viewer->isOmnipotent()) {
+      throw new Exception(
+        pht(
+          'This request is authenticated as a cluster device, but is '.
+          'performing a write. Writes must be performed with a real '.
+          'user account.'));
+    }
+
     switch ($repository->getServeOverSSH()) {
       case PhabricatorRepository::SERVE_READONLY:
         if ($protocol_command !== null) {
@@ -238,5 +243,19 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     $this->hasWriteAccess = true;
     return $this->hasWriteAccess;
   }
+
+  protected function shouldSkipReadSynchronization() {
+    $viewer = $this->getUser();
+
+    // Currently, the only case where devices interact over SSH without
+    // assuming user credentials is when synchronizing before a read. These
+    // synchronizing reads do not themselves need to be synchronized.
+    if ($viewer->isOmnipotent()) {
+      return true;
+    }
+
+    return false;
+  }
+
 
 }

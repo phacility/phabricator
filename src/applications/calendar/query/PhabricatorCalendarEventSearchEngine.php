@@ -271,7 +271,10 @@ final class PhabricatorCalendarEventSearchEngine
       $attendees = array();
 
       foreach ($event->getInvitees() as $invitee) {
-        $attendees[] = $invitee->getInviteePHID();
+        $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+        if ($invitee->getStatus() === $status_attending) {
+          $attendees[] = $invitee->getInviteePHID();
+        }
       }
 
       if ($event->getIsGhostEvent()) {

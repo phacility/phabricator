@@ -234,6 +234,18 @@
   background: #ffaaaa;
 }
 
+.phabricator-remarkup .phriction-link {
+  font-weight: bold;
+}
+
+.phabricator-remarkup .phriction-link-missing {
+  color: {$red};
+}
+
+.phabricator-remarkup .phriction-link-lock {
+  color: {$greytext};
+}
+
 .phabricator-remarkup-mention-nopermission .phui-tag-core {
   background: {$lightgreybackground};
   color: {$lightgreytext};

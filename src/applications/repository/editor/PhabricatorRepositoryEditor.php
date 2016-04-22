@@ -683,6 +683,10 @@ final class PhabricatorRepositoryEditor
       $object->save();
     }
 
+    if ($this->getIsNewObject()) {
+      $object->synchronizeWorkingCopyAfterCreation();
+    }
+
     return $xactions;
   }
 

@@ -32,17 +32,3 @@
 .phriction-history-nav-table td.nav-next {
   text-align: right;
 }
-
-.phui-document-content .phriction-link {
-  font-weight: bold;
-}
-
-.phui-document-content .phriction-link-missing {
-  font-weight: bold;
-  color: {$red};
-}
-
-.phui-document-content .phriction-link-lock {
-  font-weight: bold;
-  color: {$greytext};
-}

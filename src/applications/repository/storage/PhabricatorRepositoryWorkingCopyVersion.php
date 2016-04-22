@@ -111,8 +111,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
       $conn_w,
       'UPDATE %T SET
           repositoryVersion = %d,
-          isWriting = 0,
-          writeProperties = null
+          isWriting = 0
         WHERE
           repositoryPHID = %s AND
           devicePHID = %s AND
@@ -133,6 +132,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
     $repository_phid,
     $device_phid,
     $new_version) {
+
     $version = new self();
     $conn_w = $version->establishConnection('w');
     $table = $version->getTableName();
@@ -152,5 +152,24 @@ final class PhabricatorRepositoryWorkingCopyVersion
       0);
   }
 
+
+  /**
+   * Explicitly demote a device.
+   */
+  public static function demoteDevice(
+    $repository_phid,
+    $device_phid) {
+
+    $version = new self();
+    $conn_w = $version->establishConnection('w');
+    $table = $version->getTableName();
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE repositoryPHID = %s AND devicePHID = %s',
+      $table,
+      $repository_phid,
+      $device_phid);
+  }
 
 }

@@ -1,36 +1,81 @@
 @title Cluster: Databases
-@group intro
+@group cluster
 
 Configuring Phabricator to use multiple database hosts.
 
 Overview
 ========
 
-WARNING: This feature is a very early prototype; the features this document
-describes are mostly speculative fantasy.
-
 You can deploy Phabricator with multiple database hosts, configured as a master
 and a set of replicas. The advantages of doing this are:
 
   - faster recovery from disasters by promoting a replica;
-  - graceful degradation if the master fails;
-  - reduced load on the master; and
+  - graceful degradation if the master fails; and
   - some tools to help monitor and manage replica health.
 
 This configuration is complex, and many installs do not need to pursue it.
-
-Phabricator can not currently be configured into a multi-master mode, nor can
-it be configured to automatically promote a replica to become the new master.
 
 If you lose the master, Phabricator can degrade automatically into read-only
 mode and remain available, but can not fully recover without operational
 intervention unless the master recovers on its own.
 
+Phabricator will not currently send read traffic to replicas unless the master
+has failed, so configuring a replica will not currently spread any load away
+from the master. Future versions of Phabricator are expected to be able to
+distribute some read traffic to replicas.
+
+Phabricator can not currently be configured into a multi-master mode, nor can
+it be configured to automatically promote a replica to become the new master.
+There are no current plans to support multi-master mode or autonomous failover,
+although this may change in the future.
+
 
 Setting up MySQL Replication
 ============================
 
-TODO: Write this section.
+To begin, set up a replica database server and configure MySQL replication.
+
+If you aren't sure how to do this, refer to the MySQL manual for instructions.
+The MySQL documentation is comprehensive and walks through the steps and
+options in good detail. You should understand MySQL replication before
+deploying it in production: Phabricator layers on top of it, and does not
+attempt to abstract it away.
+
+Some useful notes for configuring replication for Phabricator:
+
+**Binlog Format**: Phabricator issues some queries which MySQL will detect as
+unsafe if you use the `STATEMENT` binlog format (the default). Instead, use
+`MIXED` (recommended) or `ROW` as the `binlog_format`.
+
+**Grant `REPLICATION CLIENT` Privilege**: If you give the user that Phabricator
+will use to connect to the replica database server the `REPLICATION CLIENT`
+privilege, Phabricator's status console can give you more information about
+replica health and state.
+
+**Copying Data to Replicas**: Phabricator currently uses a mixture of MyISAM
+and InnoDB tables, so it can be difficult to guarantee that a dump is wholly
+consistent and suitable for loading into a replica because MySQL uses different
+consistency mechanisms for the different storage engines.
+
+An approach you may want to consider to limit downtime but still produce a
+consistent dump is to leave Phabricator running but configured in read-only
+mode while dumping:
+
+  - Stop all the daemons.
+  - Set `cluster.read-only` to `true` and deploy the new configuration. The
+    web UI should now show that Phabricator is in "Read Only" mode.
+  - Dump the database. You can do this with `bin/storage dump --for-replica`
+    to add the `--master-data` flag to the underlying command and include a
+    `CHANGE MASTER ...` statement in the dump.
+  - Once the dump finishes, turn `cluster.read-only` off again to restore
+    service. Continue loading the dump into the replica normally.
+
+**Log Expiration**: You can configure MySQL to automatically clean up old
+binary logs on startup with the `expire_logs_days` option. If you do not
+configure this and do not explicitly purge old logs with `PURGE BINARY LOGS`,
+the binary logs on disk will grow unboundedly and relatively quickly.
+
+Once you have a working replica, continue below to tell Phabricator about it.
 
 
 Configuring Replicas
@@ -207,7 +252,38 @@ the new master. See the next section, "Promoting a Replica", for details.
 Promoting a Replica
 ===================
 
-TODO: Write this section.
+If you lose access to the master database, Phabricator will degrade into
+read-only mode. This is described in greater detail below.
+
+The easiest way to get out of read-only mode is to restore the master database.
+If the database recovers on its own or operations staff can revive it,
+Phabricator will return to full working order after a few moments.
+
+If you can't restore the master or are unsure you will be able to restore the
+master quickly, you can promote a replica to become the new master instead.
+
+Before doing this, you should first assess how far behind the master the
+replica was when the link died. Any data which was not replicated will either
+be lost or become very difficult to recover after you promote a replica.
+
+For example, if some `T1234` had been created on the master but had not yet
+replicated and you promote the replica, a new `T1234` may be created on the
+replica after promotion. Even if you can recover the master later, merging
+the data will be difficult because each database may have conflicting changes
+which can not be merged easily.
+
+If there was a significant replication delay at the time of the failure, you
+may wait to try harder or spend more time attempting to recover the master
+before choosing to promote.
+
+If you have made a choice to promote, disable replication on the replica and
+mark it as the `master` in `cluster.databases`. Remove the original master and
+deploy the configuration change to all surviving hosts.
+
+Once write service is restored, you should provision, deploy, and configure a
+new replica by following the steps you took the first time around. You are
+critically vulnerable to a second disruption until you have restored the
+redundancy.
 
 
 Unreachable Masters

@@ -34,6 +34,7 @@ final class PhabricatorRepositoryPushLog
   protected $epoch;
   protected $pusherPHID;
   protected $pushEventPHID;
+  protected $devicePHID;
   protected $refType;
   protected $refNameHash;
   protected $refNameRaw;
@@ -81,6 +82,7 @@ final class PhabricatorRepositoryPushLog
         'refNew' => 'text40',
         'mergeBase' => 'text40?',
         'changeFlags' => 'uint32',
+        'devicePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_repository' => array(

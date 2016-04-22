@@ -82,7 +82,8 @@ final class PhabricatorCalendarEventCancelController
       } else if ($is_parent) {
         $title = pht('Reinstate Recurrence');
         $paragraph = pht(
-          'Reinstate the entire series of recurring events?');
+          'Reinstate all instances of this recurrence
+          that have not been individually cancelled?');
         $cancel = pht("Don't Reinstate Recurrence");
         $submit = pht('Reinstate Recurrence');
       } else {
