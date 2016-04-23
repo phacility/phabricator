@@ -19,7 +19,7 @@ final class UserWhoAmIConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   public function getRequiredScope() {
-    return PhabricatorOAuthServerScope::SCOPE_WHOAMI;
+    return self::SCOPE_ALWAYS;
   }
 
   protected function execute(ConduitAPIRequest $request) {

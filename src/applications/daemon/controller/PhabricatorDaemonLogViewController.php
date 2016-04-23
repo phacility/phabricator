@@ -16,15 +16,13 @@ final class PhabricatorDaemonLogViewController
       return new Aphront404Response();
     }
 
-    $events = id(new PhabricatorDaemonLogEvent())->loadAllWhere(
-      'logID = %d ORDER BY id DESC LIMIT 1000',
-      $log->getID());
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Daemon %s', $log->getID()));
+    $crumbs->setBorder(true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($log->getDaemon());
+      ->setHeader($log->getDaemon())
+      ->setHeaderIcon('fa-pied-piper-alt');
 
     $tag = id(new PHUITagView())
       ->setType(PHUITagView::TYPE_STATE);
@@ -32,56 +30,57 @@ final class PhabricatorDaemonLogViewController
     $status = $log->getStatus();
     switch ($status) {
       case PhabricatorDaemonLog::STATUS_UNKNOWN:
-        $tag->setBackgroundColor(PHUITagView::COLOR_ORANGE);
-        $tag->setName(pht('Unknown'));
+        $color = 'orange';
+        $name = pht('Unknown');
+        $icon = 'fa-warning';
         break;
       case PhabricatorDaemonLog::STATUS_RUNNING:
-        $tag->setBackgroundColor(PHUITagView::COLOR_GREEN);
-        $tag->setName(pht('Running'));
+        $color = 'green';
+        $name = pht('Running');
+        $icon = 'fa-rocket';
         break;
       case PhabricatorDaemonLog::STATUS_DEAD:
-        $tag->setBackgroundColor(PHUITagView::COLOR_RED);
-        $tag->setName(pht('Dead'));
+        $color = 'red';
+        $name = pht('Dead');
+        $icon = 'fa-times';
         break;
       case PhabricatorDaemonLog::STATUS_WAIT:
-        $tag->setBackgroundColor(PHUITagView::COLOR_BLUE);
-        $tag->setName(pht('Waiting'));
+        $color = 'blue';
+        $name = pht('Waiting');
+        $icon = 'fa-clock-o';
         break;
       case PhabricatorDaemonLog::STATUS_EXITING:
-        $tag->setBackgroundColor(PHUITagView::COLOR_YELLOW);
-        $tag->setName(pht('Exiting'));
+        $color = 'yellow';
+        $name = pht('Exiting');
+        $icon = 'fa-check';
         break;
       case PhabricatorDaemonLog::STATUS_EXITED:
-        $tag->setBackgroundColor(PHUITagView::COLOR_GREY);
-        $tag->setName(pht('Exited'));
+        $color = 'bluegrey';
+        $name = pht('Exited');
+        $icon = 'fa-check';
         break;
     }
 
-    $header->addTag($tag);
+    $header->setStatus($icon, $color, $name);
 
     $properties = $this->buildPropertyListView($log);
 
-    $event_view = id(new PhabricatorDaemonLogEventsView())
-      ->setUser($viewer)
-      ->setEvents($events);
-
-    $event_panel = new PHUIObjectBoxView();
-    $event_panel->setHeaderText(pht('Events'));
-    $event_panel->appendChild($event_view);
-
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Daemon Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $object_box,
-        $event_panel,
-      ),
-      array(
-        'title' => pht('Daemon Log'),
       ));
+
+    return $this->newPage()
+      ->setTitle(pht('Daemon Log'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function buildPropertyListView(PhabricatorDaemonLog $daemon) {

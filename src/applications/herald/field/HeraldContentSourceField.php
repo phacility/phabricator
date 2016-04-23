@@ -24,12 +24,13 @@ final class HeraldContentSourceField extends HeraldField {
   }
 
   public function getHeraldFieldValueType($condition) {
-    $map = PhabricatorContentSource::getSourceNameMap();
+    $map = PhabricatorContentSource::getAllContentSources();
+    $map = mpull($map, 'getSourceName');
     asort($map);
 
     return id(new HeraldSelectFieldValue())
       ->setKey(self::FIELDCONST)
-      ->setDefault(PhabricatorContentSource::SOURCE_WEB)
+      ->setDefault(PhabricatorWebContentSource::SOURCECONST)
       ->setOptions($map);
   }
 

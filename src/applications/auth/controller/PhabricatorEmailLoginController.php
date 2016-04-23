@@ -144,6 +144,7 @@ final class PhabricatorEmailLoginController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Reset Password'));
+    $crumbs->setBorder(true);
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($request->getUser());
@@ -152,14 +153,11 @@ final class PhabricatorEmailLoginController
     $dialog->addSubmitButton(pht('Send Email'));
     $dialog->setSubmitURI('/login/email/');
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $dialog,
-      ),
-      array(
-        'title' => pht('Forgot Password'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Forgot Password'))
+      ->setCrumbs($crumbs)
+      ->appendChild($dialog);
+
   }
 
 }

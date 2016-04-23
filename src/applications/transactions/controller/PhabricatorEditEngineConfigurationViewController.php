@@ -17,27 +17,35 @@ final class PhabricatorEditEngineConfigurationViewController
 
     $is_concrete = (bool)$config->getID();
 
-    $actions = $this->buildActionView($config);
-
-    $properties = $this->buildPropertyView($config)
-      ->setActionList($actions);
+    $curtain = $this->buildCurtainView($config);
+    $properties = $this->buildPropertyView($config);
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setPolicyObject($config)
-      ->setHeader(pht('Edit Form: %s', $config->getDisplayName()));
+      ->setHeader(pht('Edit Form: %s', $config->getDisplayName()))
+      ->setHeaderIcon('fa-pencil');
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    if ($config->getIsDisabled()) {
+      $name = pht('Disabled');
+      $icon = 'fa-ban';
+      $color = 'indigo';
+    } else {
+      $name = pht('Enabled');
+      $icon = 'fa-check';
+      $color = 'green';
+    }
+    $header->setStatus($icon, $color, $name);
 
     $field_list = $this->buildFieldList($config);
-
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     if ($is_concrete) {
-      $crumbs->addTextCrumb(pht('Form %d', $config->getID()));
+      $title = pht('Form %d', $config->getID());
+      $crumbs->addTextCrumb($title);
     } else {
+      $title = pht('Builtin');
       $crumbs->addTextCrumb(pht('Builtin'));
     }
 
@@ -51,17 +59,21 @@ final class PhabricatorEditEngineConfigurationViewController
       $timeline = null;
     }
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $field_list,
+        $timeline,
+      ));
+
     return $this->newPage()
+      ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $box,
-          $field_list,
-          $timeline,
-        ));
+      ->appendChild($view);
   }
 
-  private function buildActionView(
+  private function buildCurtainView(
     PhabricatorEditEngineConfiguration $config) {
     $viewer = $this->getViewer();
     $engine = $config->getEngine();
@@ -72,9 +84,7 @@ final class PhabricatorEditEngineConfigurationViewController
       $config,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
-
+    $curtain = $this->newCurtainView($config);
     $form_key = $config->getIdentifier();
 
     $base_uri = "/transactions/editengine/{$engine_key}";
@@ -83,7 +93,7 @@ final class PhabricatorEditEngineConfigurationViewController
     if (!$is_concrete) {
       $save_uri = "{$base_uri}/save/{$form_key}/";
 
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Make Editable'))
           ->setIcon('fa-pencil')
@@ -94,7 +104,7 @@ final class PhabricatorEditEngineConfigurationViewController
       $can_edit = false;
     } else {
       $edit_uri = "{$base_uri}/edit/{$form_key}/";
-      $view->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Form Configuration'))
           ->setIcon('fa-pencil')
@@ -105,7 +115,7 @@ final class PhabricatorEditEngineConfigurationViewController
 
     $use_uri = $engine->getEditURI(null, "form/{$form_key}/");
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Use Form'))
         ->setIcon('fa-th-list')
@@ -113,7 +123,7 @@ final class PhabricatorEditEngineConfigurationViewController
 
     $defaults_uri = "{$base_uri}/defaults/{$form_key}/";
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Change Default Values'))
         ->setIcon('fa-paint-brush')
@@ -123,7 +133,7 @@ final class PhabricatorEditEngineConfigurationViewController
 
     $reorder_uri = "{$base_uri}/reorder/{$form_key}/";
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Change Field Order'))
         ->setIcon('fa-sort-alpha-asc')
@@ -133,7 +143,7 @@ final class PhabricatorEditEngineConfigurationViewController
 
     $lock_uri = "{$base_uri}/lock/{$form_key}/";
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Lock / Hide Fields'))
         ->setIcon('fa-lock')
@@ -151,7 +161,7 @@ final class PhabricatorEditEngineConfigurationViewController
       $disable_icon = 'fa-ban';
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($disable_name)
         ->setIcon($disable_icon)
@@ -169,7 +179,7 @@ final class PhabricatorEditEngineConfigurationViewController
       $defaultcreate_icon = 'fa-plus';
     }
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($defaultcreate_name)
         ->setIcon($defaultcreate_icon)
@@ -187,7 +197,7 @@ final class PhabricatorEditEngineConfigurationViewController
 
     $isedit_uri = "{$base_uri}/defaultedit/{$form_key}/";
 
-    $view->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($isedit_name)
         ->setIcon($isedit_icon)
@@ -195,7 +205,7 @@ final class PhabricatorEditEngineConfigurationViewController
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
-    return $view;
+    return $curtain;
   }
 
   private function buildPropertyView(
@@ -203,8 +213,7 @@ final class PhabricatorEditEngineConfigurationViewController
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($config);
+      ->setUser($viewer);
 
     return $properties;
   }
@@ -226,7 +235,7 @@ final class PhabricatorEditEngineConfigurationViewController
     }
 
     $info = id(new PHUIInfoView())
-      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
       ->setErrors(
         array(
           pht('This is a preview of the current form configuration.'),
@@ -234,10 +243,10 @@ final class PhabricatorEditEngineConfigurationViewController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Form Preview'))
-      ->setInfoView($info)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $box;
+    return array($info, $box);
   }
 
 }

@@ -16,6 +16,7 @@ final class PHUIFeedStoryView extends AphrontView {
   private $actions = array();
   private $chronologicalKey;
   private $tags;
+  private $authorIcon;
 
   public function setTags($tags) {
     $this->tags = $tags;
@@ -80,6 +81,15 @@ final class PHUIFeedStoryView extends AphrontView {
   public function setHref($href) {
     $this->href = $href;
     return $this;
+  }
+
+  public function setAuthorIcon($author_icon) {
+    $this->authorIcon = $author_icon;
+    return $this;
+  }
+
+  public function getAuthorIcon() {
+    return $this->authorIcon;
   }
 
   public function setTokenBar(array $tokens) {
@@ -163,8 +173,18 @@ final class PHUIFeedStoryView extends AphrontView {
     $foot = null;
 
     $actor = new PHUIIconView();
-    $actor->setImage($this->image);
-    $actor->addClass('phui-feed-story-actor-image');
+    $actor->addClass('phui-feed-story-actor');
+
+    $author_icon = $this->getAuthorIcon();
+
+    if ($this->image) {
+      $actor->addClass('phui-feed-story-actor-image');
+      $actor->setImage($this->image);
+    } else if ($author_icon) {
+      $actor->addClass('phui-feed-story-actor-icon');
+      $actor->setIcon($author_icon);
+    }
+
     if ($this->imageHref) {
       $actor->setHref($this->imageHref);
     }

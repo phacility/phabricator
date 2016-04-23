@@ -1,11 +1,7 @@
 <?php
 
 final class PhabricatorDaemonBulkJobViewController
-  extends PhabricatorDaemonController {
-
-  public function shouldAllowPublic() {
-    return true;
-  }
+  extends PhabricatorDaemonBulkJobController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
@@ -21,15 +17,15 @@ final class PhabricatorDaemonBulkJobViewController
     $title = pht('Bulk Job %d', $job->getID());
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Bulk Jobs'), '/daemon/bulk/');
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $properties = $this->renderProperties($job);
-    $actions = $this->renderActions($job);
-    $properties->setActionList($actions);
+    $curtain = $this->buildCurtainView($job);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $timeline = $this->buildTransactionTimeline(
@@ -37,15 +33,22 @@ final class PhabricatorDaemonBulkJobViewController
       new PhabricatorWorkerBulkJobTransactionQuery());
     $timeline->setShouldTerminate(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-hourglass');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
         $box,
         $timeline,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function renderProperties(PhabricatorWorkerBulkJob $job) {
@@ -64,12 +67,9 @@ final class PhabricatorDaemonBulkJobViewController
     return $view;
   }
 
-  private function renderActions(PhabricatorWorkerBulkJob $job) {
+  private function buildCurtainView(PhabricatorWorkerBulkJob $job) {
     $viewer = $this->getViewer();
-
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($job);
+    $curtain = $this->newCurtainView($job);
 
     if ($job->isConfirming()) {
       $continue_uri = $job->getMonitorURI();
@@ -77,13 +77,13 @@ final class PhabricatorDaemonBulkJobViewController
       $continue_uri = $job->getDoneURI();
     }
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setHref($continue_uri)
         ->setIcon('fa-arrow-circle-o-right')
         ->setName(pht('Continue')));
 
-    return $actions;
+    return $curtain;
   }
 
 }

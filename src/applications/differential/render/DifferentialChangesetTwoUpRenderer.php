@@ -376,7 +376,7 @@ final class DifferentialChangesetTwoUpRenderer
     if (!$new) {
       $th_new = phutil_tag('th', array());
     } else {
-      $th_new = phutil_tag('th', array('id' => "C{$id}OL1"), 1);
+      $th_new = phutil_tag('th', array('id' => "C{$id}NL1"), 1);
     }
 
     $output = hsprintf(

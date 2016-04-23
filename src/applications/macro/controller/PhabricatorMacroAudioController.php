@@ -104,20 +104,19 @@ final class PhabricatorMacroAudioController extends PhabricatorMacroController {
         'Best for ambient sounds.'));
 
     $form->appendChild($options);
-
-    $form
-      ->appendChild(
+    $form->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Audio Behavior'))
           ->addCancelButton($view_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
 
-    $title = pht('Edit Audio Behavior');
+    $title = pht('Edit Audio: %s', $macro->getName());
     $crumb = pht('Edit Audio');
 
     $crumbs->addTextCrumb(pht('Macro "%s"', $macro->getName()), $view_uri);
     $crumbs->addTextCrumb($crumb, $request->getRequestURI());
+    $crumbs->setBorder(true);
 
     $upload_form = id(new AphrontFormView())
       ->setEncType('multipart/form-data')
@@ -132,22 +131,30 @@ final class PhabricatorMacroAudioController extends PhabricatorMacroController {
 
     $upload = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Upload New Audio'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($upload_form);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Behavior'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
         $upload,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

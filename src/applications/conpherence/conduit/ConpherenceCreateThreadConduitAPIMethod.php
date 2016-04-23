@@ -42,7 +42,7 @@ final class ConpherenceCreateThreadConduitAPIMethod
       $participant_phids,
       $title,
       $message,
-      PhabricatorContentSource::newFromConduitRequest($request));
+      $request->newContentSource());
 
     if ($errors) {
       foreach ($errors as $error_code) {

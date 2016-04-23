@@ -19,13 +19,6 @@ EOHELP
 );
 $args->parseStandardArguments();
 
-$conf = PhabricatorEnv::newObjectFromConfig(
-  'mysql.configuration-provider',
-  array($dao = null, 'w'));
-
-$default_user       = $conf->getUser();
-$default_host       = $conf->getHost();
-$default_port       = $conf->getPort();
 $default_namespace  = PhabricatorLiskDAO::getDefaultStorageNamespace();
 
 try {
@@ -38,13 +31,17 @@ try {
           'Do not prompt before performing dangerous operations.'),
       ),
       array(
+        'name' => 'host',
+        'param' => 'hostname',
+        'help' => pht(
+          'Connect to __host__ instead of the default host.'),
+      ),
+      array(
         'name'    => 'user',
         'short'   => 'u',
         'param'   => 'username',
-        'default' => $default_user,
         'help'    => pht(
-          "Connect with __username__ instead of the configured default ('%s').",
-          $default_user),
+          'Connect with __username__ instead of the configured default.'),
       ),
       array(
         'name'    => 'password',
@@ -84,11 +81,48 @@ try {
 // First, test that the Phabricator configuration is set up correctly. After
 // we know this works we'll test any administrative credentials specifically.
 
+$host = $args->getArg('host');
+if (strlen($host)) {
+  $ref = null;
+
+  $refs = PhabricatorDatabaseRef::getLiveRefs();
+
+  // Include the master in case the user is just specifying a redundant
+  // "--host" flag for no reason and does not actually have a database
+  // cluster configured.
+  $refs[] = PhabricatorDatabaseRef::getMasterDatabaseRef();
+
+  foreach ($refs as $possible_ref) {
+    if ($possible_ref->getHost() == $host) {
+      $ref = $possible_ref;
+      break;
+    }
+  }
+
+  if (!$ref) {
+    throw new PhutilArgumentUsageException(
+      pht(
+        'There is no configured database on host "%s". This command can '.
+        'only interact with configured databases.',
+        $host));
+  }
+} else {
+  $ref = PhabricatorDatabaseRef::getMasterDatabaseRef();
+  if (!$ref) {
+    throw new Exception(
+      pht('No database master is configured.'));
+  }
+}
+
+$default_user = $ref->getUser();
+$default_host = $ref->getHost();
+$default_port = $ref->getPort();
+
 $test_api = id(new PhabricatorStorageManagementAPI())
   ->setUser($default_user)
   ->setHost($default_host)
   ->setPort($default_port)
-  ->setPassword($conf->getPassword())
+  ->setPassword($ref->getPass())
   ->setNamespace($args->getArg('namespace'));
 
 try {
@@ -120,15 +154,20 @@ try {
 
 if ($args->getArg('password') === null) {
   // This is already a PhutilOpaqueEnvelope.
-  $password = $conf->getPassword();
+  $password = $ref->getPass();
 } else {
   // Put this in a PhutilOpaqueEnvelope.
   $password = new PhutilOpaqueEnvelope($args->getArg('password'));
   PhabricatorEnv::overrideConfig('mysql.pass', $args->getArg('password'));
 }
 
+$selected_user = $args->getArg('user');
+if ($selected_user === null) {
+  $selected_user = $default_user;
+}
+
 $api = id(new PhabricatorStorageManagementAPI())
-  ->setUser($args->getArg('user'))
+  ->setUser($selected_user)
   ->setHost($default_host)
   ->setPort($default_port)
   ->setPassword($password)

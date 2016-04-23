@@ -40,8 +40,8 @@ final class NuanceSourceViewController
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->addPropertySection(pht('DETAILS'), $properties)
-      ->addPropertySection(pht('ROUTING'), $routing_list)
+      ->addPropertySection(pht('Details'), $properties)
+      ->addPropertySection(pht('Routing'), $routing_list)
       ->setMainColumn($timeline);
 
     return $this->newPage()

@@ -19,8 +19,9 @@ final class PhabricatorFileEditController extends PhabricatorFileController {
       return new Aphront404Response();
     }
 
-    $title = pht('Edit %s', $file->getName());
+    $title = pht('Edit File: %s', $file->getName());
     $file_name = $file->getName();
+    $header_icon = 'fa-pencil';
     $view_uri = '/'.$file->getMonogram();
     $error_name = true;
     $validation_exception = null;
@@ -86,21 +87,28 @@ final class PhabricatorFileEditController extends PhabricatorFileController {
 
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb($file->getMonogram(), $view_uri)
-      ->addTextCrumb(pht('Edit'));
+      ->addTextCrumb(pht('Edit'))
+      ->setBorder(true);
 
-    $object_box = id(new PHUIObjectBoxView())
+    $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

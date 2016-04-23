@@ -190,10 +190,6 @@ a.button.phui-document-toc {
   margin: 0;
 }
 
-.phui-document-view-pro-box .phui-object-box .phui-form-view {
-  padding-bottom: 0;
-}
-
 .phui-document-view-pro-box .phui-object-box .remarkup-assist-textarea {
   height: 9em;
 }

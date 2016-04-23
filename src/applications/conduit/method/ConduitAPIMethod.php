@@ -15,6 +15,8 @@ abstract class ConduitAPIMethod
   const METHOD_STATUS_UNSTABLE    = 'unstable';
   const METHOD_STATUS_DEPRECATED  = 'deprecated';
 
+  const SCOPE_NEVER = 'scope.never';
+  const SCOPE_ALWAYS = 'scope.always';
 
   /**
    * Get a short, human-readable text summary of the method.
@@ -50,6 +52,9 @@ abstract class ConduitAPIMethod
 
   abstract protected function execute(ConduitAPIRequest $request);
 
+  public function isInternalAPI() {
+    return false;
+  }
 
   public function getParamTypes() {
     $types = $this->defineParamTypes();
@@ -108,8 +113,7 @@ abstract class ConduitAPIMethod
   }
 
   public function getRequiredScope() {
-    // by default, conduit methods are not accessible via OAuth
-    return PhabricatorOAuthServerScope::SCOPE_NOT_ACCESSIBLE;
+    return self::SCOPE_NEVER;
   }
 
   public function executeMethod(ConduitAPIRequest $request) {

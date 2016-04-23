@@ -15,28 +15,16 @@ final class PhabricatorBadgesSearchEngine
     return new PhabricatorBadgesQuery();
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'statuses',
-      $this->readListFromRequest($request, 'statuses'));
-
-    $saved->setParameter(
-      'qualities',
-      $this->readListFromRequest($request, 'qualities'));
-
-    return $saved;
-  }
-
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name')
+        ->setDescription(pht('Search for badges by name substring.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('qualities')
         ->setLabel(pht('Quality'))
-        ->setOptions(
-          id(new PhabricatorBadgesBadge())
-            ->getQualityNameMap()),
+        ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Status'))
@@ -55,6 +43,10 @@ final class PhabricatorBadgesSearchEngine
 
     if ($map['qualities']) {
       $query->withQualities($map['qualities']);
+    }
+
+    if ($map['name'] !== null) {
+      $query->withNameNgrams($map['name']);
     }
 
     return $query;
@@ -110,8 +102,9 @@ final class PhabricatorBadgesSearchEngine
 
     $list = id(new PHUIObjectItemListView());
     foreach ($badges as $badge) {
+      $quality_name = PhabricatorBadgesQuality::getQualityName(
+        $badge->getQuality());
 
-      $quality = idx($badge->getQualityNameMap(), $badge->getQuality());
       $mini_badge = id(new PHUIBadgeMiniView())
         ->setHeader($badge->getName())
         ->setIcon($badge->getIcon())
@@ -121,7 +114,7 @@ final class PhabricatorBadgesSearchEngine
         ->setHeader($badge->getName())
         ->setBadge($mini_badge)
         ->setHref('/badges/view/'.$badge->getID().'/')
-        ->addAttribute($quality)
+        ->addAttribute($quality_name)
         ->addAttribute($badge->getFlavor());
 
       if ($badge->isArchived()) {

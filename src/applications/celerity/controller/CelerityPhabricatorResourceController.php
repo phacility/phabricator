@@ -31,7 +31,11 @@ final class CelerityPhabricatorResourceController
       return new Aphront400Response();
     }
 
-    return $this->serveResource($this->path);
+    return $this->serveResource(
+      array(
+        'path' => $this->path,
+        'hash' => $this->hash,
+      ));
   }
 
   protected function buildResourceTransformer() {

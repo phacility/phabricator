@@ -4,8 +4,7 @@ $conn_w = id(new DifferentialRevision())->establishConnection('w');
 $rows = new LiskRawMigrationIterator($conn_w, 'differential_comment');
 
 $content_source = PhabricatorContentSource::newForSource(
-  PhabricatorContentSource::SOURCE_LEGACY,
-  array())->serialize();
+  PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
 echo pht('Migrating Differential comment text to modern storage...')."\n";
 foreach ($rows as $row) {

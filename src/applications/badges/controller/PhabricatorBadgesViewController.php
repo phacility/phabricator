@@ -50,7 +50,8 @@ final class PhabricatorBadgesViewController
       $badge,
       new PhabricatorBadgesTransactionQuery());
 
-    $recipient_phids = $badge->getRecipientPHIDs();
+    $awards = $badge->getAwards();
+    $recipient_phids = mpull($awards, 'getRecipientPHID');
     $recipient_phids = array_reverse($recipient_phids);
     $handles = $this->loadViewerHandles($recipient_phids);
 
@@ -59,7 +60,9 @@ final class PhabricatorBadgesViewController
       ->setHandles($handles)
       ->setUser($viewer);
 
-    $add_comment = $this->buildCommentForm($badge);
+    $comment_view = id(new PhabricatorBadgesEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($badge);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -67,9 +70,9 @@ final class PhabricatorBadgesViewController
       ->setMainColumn(array(
           $recipient_list,
           $timeline,
-          $add_comment,
+          $comment_view,
         ))
-      ->addPropertySection(pht('BADGE DETAILS'), $details);
+      ->addPropertySection(pht('Description'), $details);
 
     return $this->newPage()
       ->setTitle($title)
@@ -85,25 +88,8 @@ final class PhabricatorBadgesViewController
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    $quality = idx($badge->getQualityNameMap(), $badge->getQuality());
-
-    $view->addProperty(
-      pht('Quality'),
-      $quality);
-
-    $view->addProperty(
-      pht('Icon'),
-      id(new PhabricatorBadgesIconSet())
-        ->getIconLabel($badge->getIcon()));
-
-    $view->addProperty(
-      pht('Flavor'),
-      $badge->getFlavor());
-
     $description = $badge->getDescription();
     if (strlen($description)) {
-      $view->addSectionHeader(
-        pht('Description'), PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent(
         new PHUIRemarkupView($viewer, $description));
     }
@@ -168,26 +154,6 @@ final class PhabricatorBadgesViewController
         ->setHref($award_uri));
 
     return $curtain;
-  }
-
-  private function buildCommentForm(PhabricatorBadgesBadge $badge) {
-    $viewer = $this->getViewer();
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Render Honors');
-
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $badge->getPHID());
-
-    return id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($badge->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($this->getApplicationURI('/comment/'.$badge->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
   }
 
 }

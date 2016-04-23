@@ -310,7 +310,7 @@ final class DiffusionBrowseController extends DiffusionController {
         ));
 
     if ($properties) {
-      $view->addPropertySection(pht('DETAILS'), $properties);
+      $view->addPropertySection(pht('Details'), $properties);
     }
 
     $title = array($basename, $repository->getDisplayName());
@@ -413,7 +413,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ));
 
     if ($details) {
-      $view->addPropertySection(pht('DETAILS'), $details);
+      $view->addPropertySection(pht('Details'), $details);
     }
 
     return $this->newPage()
@@ -995,8 +995,8 @@ final class DiffusionBrowseController extends DiffusionController {
     array $lines,
     array $blame_list,
     array $blame_commits,
-    $show_color,
-    $show_blame) {
+    $show_blame,
+    $show_color) {
 
     $request = $this->getRequest();
     $viewer = $this->getViewer();
@@ -1187,6 +1187,19 @@ final class DiffusionBrowseController extends DiffusionController {
     $commit_links = $this->renderCommitLinks($blame_commits, $handles);
     $revision_links = $this->renderRevisionLinks($revisions, $handles);
 
+    if ($this->coverage) {
+      require_celerity_resource('differential-changeset-view-css');
+      Javelin::initBehavior(
+        'diffusion-browse-file',
+        array(
+          'labels' => array(
+            'cov-C' => pht('Covered'),
+            'cov-N' => pht('Not Covered'),
+            'cov-U' => pht('Not Executable'),
+          ),
+        ));
+    }
+
     $skip_text = pht('Skip Past This Commit');
     foreach ($display as $line_index => $line) {
       $row = array();
@@ -1233,26 +1246,28 @@ final class DiffusionBrowseController extends DiffusionController {
           "\xC2\xAB");
       }
 
-      $row[] = phutil_tag(
-        'th',
-        array(
-          'class' => 'diffusion-blame-link',
-        ),
-        $before_link);
+      if ($show_blame) {
+        $row[] = phutil_tag(
+          'th',
+          array(
+            'class' => 'diffusion-blame-link',
+          ),
+          $before_link);
 
-      $object_links = array();
-      $object_links[] = $commit_link;
-      if ($revision_link) {
-        $object_links[] = phutil_tag('span', array(), '/');
-        $object_links[] = $revision_link;
+        $object_links = array();
+        $object_links[] = $commit_link;
+        if ($revision_link) {
+          $object_links[] = phutil_tag('span', array(), '/');
+          $object_links[] = $revision_link;
+        }
+
+        $row[] = phutil_tag(
+          'th',
+          array(
+            'class' => 'diffusion-rev-link',
+          ),
+          $object_links);
       }
-
-      $row[] = phutil_tag(
-        'th',
-        array(
-          'class' => 'diffusion-rev-link',
-        ),
-        $object_links);
 
       $line_link = phutil_tag(
         'a',
@@ -1302,7 +1317,6 @@ final class DiffusionBrowseController extends DiffusionController {
         ));
 
       if ($this->coverage) {
-        require_celerity_resource('differential-changeset-view-css');
         $cov_index = $line_index;
 
         if (isset($this->coverage[$cov_index])) {
@@ -1407,7 +1421,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $file = $this->renderFileButton($file_uri);
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('DETAILS'))
+      ->setHeader(pht('Details'))
       ->addActionLink($file);
 
     $box = id(new PHUIObjectBoxView())
@@ -1424,7 +1438,7 @@ final class DiffusionBrowseController extends DiffusionController {
       ->appendChild($message);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('DETAILS'));
+      ->setHeader(pht('Details'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)

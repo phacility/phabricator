@@ -32,14 +32,12 @@ final class PhabricatorConfigIgnoreController
       throw new Exception(pht('Unrecognized verb: %s', $verb));
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($request->getUser())
+    return $this->newDialog()
       ->setTitle($title)
       ->appendChild($body)
       ->addSubmitButton($submit_title)
       ->addCancelButton($issue_uri);
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
   public function manageApplication($issue) {

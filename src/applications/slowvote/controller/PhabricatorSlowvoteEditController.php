@@ -136,21 +136,10 @@ final class PhabricatorSlowvoteEditController
       }
     }
 
-    $instructions =
-      phutil_tag(
-        'p',
-        array(
-          'class' => 'aphront-form-instructions',
-        ),
-        pht('Resolve issues and build consensus through '.
-          'protracted deliberation.'));
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->appendChild($instructions)
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
+        id(new AphrontFormTextControl())
           ->setLabel(pht('Question'))
           ->setName('question')
           ->setValue($v_question)
@@ -163,7 +152,7 @@ final class PhabricatorSlowvoteEditController
           ->setValue($v_description))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Projects'))
+          ->setLabel(pht('Tags'))
           ->setName('projects')
           ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()));
@@ -218,10 +207,12 @@ final class PhabricatorSlowvoteEditController
       $title = pht('Create Slowvote');
       $button = pht('Create');
       $cancel_uri = $this->getApplicationURI();
+      $header_icon = 'fa-plus-square';
     } else {
-      $title = pht('Edit %s', 'V'.$poll->getID());
+      $title = pht('Edit Poll: %s', $poll->getQuestion());
       $button = pht('Save Changes');
       $cancel_uri = '/V'.$poll->getID();
+      $header_icon = 'fa-pencil';
     }
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -259,18 +250,28 @@ final class PhabricatorSlowvoteEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Poll'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $form_box,
+          $view,
       ));
   }
 

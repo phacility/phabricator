@@ -59,15 +59,16 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Home'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $title = pht('Facts');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(array(
         $chart_form,
         $panel,
-      ),
-      array(
-        'title' => pht('Facts'),
       ));
+
   }
 
   private function buildChartForm() {

@@ -57,14 +57,13 @@ final class DiffusionCommitController extends DiffusionController {
             'Failed to load the commit because the commit has not been '.
             'parsed yet.'));
 
-      return $this->buildApplicationPage(
-        array(
-          $crumbs,
-          $error,
-        ),
-        array(
-          'title' => pht('Commit Still Parsing'),
-        ));
+      $title = pht('Commit Still Parsing');
+
+      return $this->newPage()
+        ->setTitle($title)
+        ->setCrumbs($crumbs)
+        ->appendChild($error);
+
     }
 
     $audit_requests = $commit->getAudits();
@@ -356,8 +355,8 @@ final class DiffusionCommitController extends DiffusionController {
         $change_list,
         $add_comment,
       ))
-      ->addPropertySection(pht('DESCRIPTION'), $detail_list)
-      ->addPropertySection(pht('DETAILS'), $details)
+      ->addPropertySection(pht('Description'), $detail_list)
+      ->addPropertySection(pht('Details'), $details)
       ->setCurtain($curtain);
 
     $page = $this->newPage()

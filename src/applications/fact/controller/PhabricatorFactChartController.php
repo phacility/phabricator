@@ -77,14 +77,13 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Chart'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => pht('Chart'),
-      ));
+    $title = pht('Chart');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
+
   }
 
 }

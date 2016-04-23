@@ -34,7 +34,7 @@ final class ManiphestEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit %s %s', $object->getMonogram(), $object->getTitle());
+    return pht('Edit Task: %s', $object->getTitle());
   }
 
   protected function getObjectEditShortText($object) {
@@ -43,6 +43,10 @@ final class ManiphestEditEngine
 
   protected function getObjectCreateShortText() {
     return pht('Create Task');
+  }
+
+  protected function getObjectName() {
+    return pht('Task');
   }
 
   protected function getEditorURI() {
@@ -77,6 +81,59 @@ final class ManiphestEditEngine
       $owner_value = array($this->getViewer()->getPHID());
     }
 
+    $column_documentation = pht(<<<EODOCS
+You can use this transaction type to create a task into a particular workboard
+column, or move an existing task between columns.
+
+The transaction value can be specified in several forms. Some are simpler but
+less powerful, while others are more complex and more powerful.
+
+The simplest valid value is a single column PHID:
+
+```lang=json
+"PHID-PCOL-1111"
+```
+
+This will move the task into that column, or create the task into that column
+if you are creating a new task. If the task is currently on the board, it will
+be moved out of any exclusive columns. If the task is not currently on the
+board, it will be added to the board.
+
+You can also perform multiple moves at the same time by passing a list of
+PHIDs:
+
+```lang=json
+["PHID-PCOL-2222", "PHID-PCOL-3333"]
+```
+
+This is equivalent to performing each move individually.
+
+The most complex and most powerful form uses a dictionary to provide additional
+information about the move, including an optional specific position within the
+column.
+
+The target column should be identified as `columnPHID`, and you may select a
+position by passing either `beforePHID` or `afterPHID`, specifying the PHID of
+a task currently in the column that you want to move this task before or after:
+
+```lang=json
+[
+  {
+    "columnPHID": "PHID-PCOL-4444",
+    "beforePHID": "PHID-TASK-5555"
+  }
+]
+```
+
+Note that this affects only the "natural" position of the task. The task
+position when the board is sorted by some other attribute (like priority)
+depends on that attribute value: change a task's priority to move it on
+priority-sorted boards.
+EODOCS
+      );
+
+    $column_map = $this->getColumnMap($object);
+
     $fields = array(
       id(new PhabricatorHandlesEditField())
         ->setKey('parent')
@@ -91,19 +148,23 @@ final class ManiphestEditEngine
         ->setIsReorderable(false)
         ->setIsDefaultable(false)
         ->setIsLockable(false),
-      id(new PhabricatorHandlesEditField())
+      id(new PhabricatorColumnsEditField())
         ->setKey('column')
         ->setLabel(pht('Column'))
-        ->setDescription(pht('Workboard column to create this task into.'))
-        ->setConduitDescription(pht('Create into a workboard column.'))
-        ->setConduitTypeDescription(pht('PHID of workboard column.'))
-        ->setAliases(array('columnPHID'))
-        ->setTransactionType(ManiphestTransaction::TYPE_COLUMN)
-        ->setSingleValue(null)
-        ->setIsInvisible(true)
+        ->setDescription(pht('Create a task in a workboard column.'))
+        ->setConduitDescription(
+          pht('Move a task to one or more workboard columns.'))
+        ->setConduitTypeDescription(
+          pht('List of columns to move the task to.'))
+        ->setConduitDocumentation($column_documentation)
+        ->setAliases(array('columnPHID', 'columns', 'columnPHIDs'))
+        ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
         ->setIsReorderable(false)
         ->setIsDefaultable(false)
-        ->setIsLockable(false),
+        ->setIsLockable(false)
+        ->setCommentActionLabel(pht('Move on Workboard'))
+        ->setCommentActionOrder(2000)
+        ->setColumnMap($column_map),
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
@@ -312,6 +373,88 @@ final class ManiphestEditEngine
       ->setObjectPHID($object_phid)
       ->setVisiblePHIDs($visible_phids)
       ->buildResponse();
+  }
+
+  private function getColumnMap(ManiphestTask $task) {
+    $phid = $task->getPHID();
+    if (!$phid) {
+      return array();
+    }
+
+    $board_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $phid,
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+    if (!$board_phids) {
+      return array();
+    }
+
+    $viewer = $this->getViewer();
+
+    $layout_engine = id(new PhabricatorBoardLayoutEngine())
+      ->setViewer($viewer)
+      ->setBoardPHIDs($board_phids)
+      ->setObjectPHIDs(array($task->getPHID()))
+      ->executeLayout();
+
+    $map = array();
+    foreach ($board_phids as $board_phid) {
+      $in_columns = $layout_engine->getObjectColumns($board_phid, $phid);
+      $in_columns = mpull($in_columns, null, 'getPHID');
+
+      $all_columns = $layout_engine->getColumns($board_phid);
+      if (!$all_columns) {
+        // This could be a project with no workboard, or a project the viewer
+        // does not have permission to see.
+        continue;
+      }
+
+      $board = head($all_columns)->getProject();
+
+      $options = array();
+      foreach ($all_columns as $column) {
+        $name = $column->getDisplayName();
+
+        $is_hidden = $column->isHidden();
+        $is_selected = isset($in_columns[$column->getPHID()]);
+
+        // Don't show hidden, subproject or milestone columns in this map
+        // unless the object is currently in the column.
+        $skip_column = ($is_hidden || $column->getProxyPHID());
+        if ($skip_column) {
+          if (!$is_selected) {
+            continue;
+          }
+        }
+
+        if ($is_hidden) {
+          $name = pht('(%s)', $name);
+        }
+
+        if ($is_selected) {
+          $name = pht("\xE2\x97\x8F %s", $name);
+        } else {
+          $name = pht("\xE2\x97\x8B %s", $name);
+        }
+
+        $option = array(
+          'key' => $column->getPHID(),
+          'label' => $name,
+          'selected' => (bool)$is_selected,
+        );
+
+        $options[] = $option;
+      }
+
+      $map[] = array(
+        'label' => $board->getDisplayName(),
+        'options' => $options,
+      );
+    }
+
+    $map = isort($map, 'label');
+    $map = array_values($map);
+
+    return $map;
   }
 
 

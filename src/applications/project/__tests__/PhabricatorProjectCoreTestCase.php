@@ -1072,22 +1072,17 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
       $options = array();
     }
 
+    $value = array(
+      'columnPHID' => $dst->getPHID(),
+    ) + $options;
+
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
-      ->setOldValue(
-        array(
-          'projectPHID' => $board->getPHID(),
-          'columnPHIDs' => array($src->getPHID()),
-        ))
-      ->setNewValue(
-        array(
-          'projectPHID' => $board->getPHID(),
-          'columnPHIDs' => array($dst->getPHID()),
-        ) + $options);
+      ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
+      ->setNewValue(array($value));
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($task, $xactions);
   }
@@ -1203,7 +1198,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($task, $xactions);
   }
@@ -1239,7 +1234,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($task, $xactions);
 
@@ -1464,7 +1459,7 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
 
     $editor = id(new PhabricatorProjectTransactionEditor())
       ->setActor($user)
-      ->setContentSource(PhabricatorContentSource::newConsoleSource())
+      ->setContentSource($this->newContentSource())
       ->setContinueOnNoEffect(true)
       ->applyTransactions($project, $xactions);
   }

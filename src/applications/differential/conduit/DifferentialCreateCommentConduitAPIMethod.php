@@ -77,7 +77,7 @@ final class DifferentialCreateCommentConduitAPIMethod
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)
       ->setDisableEmail($request->getValue('silent'))
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
 

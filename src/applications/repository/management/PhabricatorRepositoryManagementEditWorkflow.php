@@ -117,7 +117,7 @@ final class PhabricatorRepositoryManagementEditWorkflow
           pht('Specify one or more fields to edit!'));
       }
 
-      $content_source = PhabricatorContentSource::newConsoleSource();
+      $content_source = $this->newContentSource();
 
       $editor = id(new PhabricatorRepositoryEditor())
         ->setActor($actor)

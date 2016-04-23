@@ -1,5 +1,4 @@
 <?php
-
 final class PHUITimelineExample extends PhabricatorUIExample {
 
   public function getName() {
@@ -24,12 +23,12 @@ final class PHUITimelineExample extends PhabricatorUIExample {
     $designer = id(new PHUIBadgeMiniView())
       ->setIcon('fa-camera-retro')
       ->setHeader(pht('Designer'))
-      ->setQuality(PHUIBadgeView::EPIC);
+      ->setQuality(PhabricatorBadgesQuality::EPIC);
 
     $admin = id(new PHUIBadgeMiniView())
       ->setIcon('fa-user')
       ->setHeader(pht('Administrator'))
-      ->setQuality(PHUIBadgeView::RARE);
+      ->setQuality(PhabricatorBadgesQuality::RARE);
 
     $events = array();
 

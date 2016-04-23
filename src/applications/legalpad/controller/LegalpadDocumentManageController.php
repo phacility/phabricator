@@ -43,10 +43,12 @@ final class LegalpadDocumentManageController extends LegalpadController {
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
       ->setUser($viewer)
-      ->setPolicyObject($document);
+      ->setPolicyObject($document)
+      ->setHeaderIcon('fa-gavel');
 
-    $actions = $this->buildActionView($document);
-    $properties = $this->buildPropertyView($document, $engine, $actions);
+    $curtain = $this->buildCurtainView($document);
+    $properties = $this->buildPropertyView($document, $engine);
+    $document_view = $this->buildDocumentView($document, $engine);
 
     $comment_form_id = celerity_generate_unique_node_id();
 
@@ -57,48 +59,58 @@ final class LegalpadDocumentManageController extends LegalpadController {
       $document->getMonogram(),
       '/'.$document->getMonogram());
     $crumbs->addTextCrumb(pht('Manage'));
+    $crumbs->setBorder(true);
 
-    $object_box = id(new PHUIObjectBoxView())
+
+    $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->addPropertyList($properties)
-      ->addPropertyList($this->buildDocument($engine, $document_body));
-
-    $content = array(
-      $crumbs,
-      $object_box,
-      $timeline,
-      $add_comment,
-    );
-
-    return $this->buildApplicationPage(
-      $content,
-      array(
-        'title' => $title,
-        'pageObjects' => array($document->getPHID()),
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $properties,
+        $document_view,
+        $timeline,
+        $add_comment,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->setPageObjectPHIDs(array($document->getPHID()))
+      ->appendChild($view);
   }
 
-  private function buildDocument(
-    PhabricatorMarkupEngine
-    $engine, LegalpadDocumentBody $body) {
+  private function buildDocumentView(
+    LegalpadDocument $document,
+    PhabricatorMarkupEngine $engine) {
 
-    $view = new PHUIPropertyListView();
-    $view->addClass('legalpad');
-    $view->addSectionHeader(
-      pht('Document'), 'fa-file-text-o');
-    $view->addTextContent(
-      $engine->getOutput($body, LegalpadDocumentBody::MARKUP_FIELD_TEXT));
-
-    return $view;
-
-  }
-
-  private function buildActionView(LegalpadDocument $document) {
     $viewer = $this->getViewer();
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($viewer)
-      ->setObject($document);
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+    $document_body = $document->getDocumentBody();
+    $document_text = $engine->getOutput(
+      $document_body, LegalpadDocumentBody::MARKUP_FIELD_TEXT);
+
+    $preamble_box = null;
+    if (strlen($document->getPreamble())) {
+      $preamble_text = new PHUIRemarkupView($viewer, $document->getPreamble());
+      $view->addTextContent($preamble_text);
+      $view->addSectionHeader('');
+      $view->addTextContent($document_text);
+    } else {
+      $view->addTextContent($document_text);
+    }
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('DOCUMENT'))
+      ->addPropertyList($view)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
+  }
+
+  private function buildCurtainView(LegalpadDocument $document) {
+    $viewer = $this->getViewer();
+
+    $curtain = $this->newCurtainView($document);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -107,13 +119,13 @@ final class LegalpadDocumentManageController extends LegalpadController {
 
     $doc_id = $document->getID();
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
       ->setIcon('fa-pencil-square')
       ->setName(pht('View/Sign Document'))
       ->setHref('/'.$document->getMonogram()));
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setName(pht('Edit Document'))
@@ -121,26 +133,23 @@ final class LegalpadDocumentManageController extends LegalpadController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
       ->setIcon('fa-terminal')
       ->setName(pht('View Signatures'))
       ->setHref($this->getApplicationURI('/signatures/'.$doc_id.'/')));
 
-    return $actions;
+    return $curtain;
   }
 
   private function buildPropertyView(
     LegalpadDocument $document,
-    PhabricatorMarkupEngine $engine,
-    PhabricatorActionListView $actions) {
+    PhabricatorMarkupEngine $engine) {
 
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($document)
-      ->setActionList($actions);
+      ->setUser($viewer);
 
     $properties->addProperty(
       pht('Signature Type'),
@@ -166,9 +175,10 @@ final class LegalpadDocumentManageController extends LegalpadController {
           ->setAsInline(true));
     }
 
-    $properties->invokeWillRenderEvent();
-
-    return $properties;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Properties'))
+      ->addPropertyList($properties)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
   }
 
   private function buildAddCommentView(

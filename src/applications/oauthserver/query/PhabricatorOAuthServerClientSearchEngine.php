@@ -11,40 +11,30 @@ final class PhabricatorOAuthServerClientSearchEngine
     return 'PhabricatorOAuthServerApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'creatorPHIDs',
-      $this->readUsersFromRequest($request, 'creators'));
-
-    return $saved;
+  public function newQuery() {
+    return id(new PhabricatorOAuthServerClientQuery());
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorOAuthServerClientQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $creator_phids = $saved->getParameter('creatorPHIDs', array());
-    if ($creator_phids) {
-      $query->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()));
+    if ($map['creatorPHIDs']) {
+      $query->withCreatorPHIDs($map['creatorPHIDs']);
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $creator_phids = $saved_query->getParameter('creatorPHIDs', array());
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('creators')
-          ->setLabel(pht('Creators'))
-          ->setValue($creator_phids));
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setAliases(array('creators'))
+        ->setKey('creatorPHIDs')
+        ->setConduitKey('creators')
+        ->setLabel(pht('Creators'))
+        ->setDescription(
+          pht('Search for applications created by particular users.')),
+    );
   }
 
   protected function getURI($path) {
@@ -79,31 +69,26 @@ final class PhabricatorOAuthServerClientSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $clients,
-    PhabricatorSavedQuery $query) {
-    return mpull($clients, 'getCreatorPHID');
-  }
-
   protected function renderResultList(
     array $clients,
     PhabricatorSavedQuery $query,
     array $handles) {
-    assert_instances_of($clients, 'PhabricatorOauthServerClient');
+    assert_instances_of($clients, 'PhabricatorOAuthServerClient');
 
     $viewer = $this->requireViewer();
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($clients as $client) {
-      $creator = $handles[$client->getCreatorPHID()];
-
       $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Application %d', $client->getID()))
         ->setHeader($client->getName())
         ->setHref($client->getViewURI())
-        ->setObject($client)
-        ->addByline(pht('Creator: %s', $creator->renderLink()));
+        ->setObject($client);
+
+      if ($client->getIsDisabled()) {
+        $item->setDisabled(true);
+      }
 
       $list->addItem($item);
     }

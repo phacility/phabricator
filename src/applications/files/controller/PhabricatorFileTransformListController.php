@@ -113,26 +113,35 @@ final class PhabricatorFileTransformListController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($monogram, '/'.$monogram);
     $crumbs->addTextCrumb(pht('Transforms'));
+    $crumbs->setBorder(true);
 
     $dst_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('File Sources'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($dst_table);
 
     $src_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Available Transforms'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($src_table);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $title = pht('%s Transforms', $file->getName());
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-arrows-alt');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $dst_box,
         $src_box,
-      ),
-      array(
-        'title' => array(
-          pht('%s %s', $monogram, $file->getName()),
-          pht('Tranforms'),
-        ),
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 }

@@ -4,66 +4,293 @@ abstract class PhabricatorAphlictManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
   private $debug = false;
-  private $clientHost;
-  private $clientPort;
+  private $configData;
+  private $configPath;
 
-  protected function didConstruct() {
-    $this
-      ->setArguments(
-        array(
-          array(
-            'name'  => 'client-host',
-            'param' => 'hostname',
-            'help'  => pht('Hostname to bind to for the client server.'),
-          ),
-          array(
-            'name'  => 'client-port',
-            'param' => 'port',
-            'help'  => pht('Port to bind to for the client server.'),
-          ),
-        ));
+  final protected function setDebug($debug) {
+    $this->debug = $debug;
+    return $this;
   }
 
-  public function execute(PhutilArgumentParser $args) {
-    $this->clientHost = $args->getArg('client-host');
-    $this->clientPort = $args->getArg('client-port');
-    return 0;
+  protected function getLaunchArguments() {
+    return array(
+      array(
+        'name' => 'config',
+        'param' => 'file',
+        'help' => pht(
+          'Use a specific configuration file instead of the default '.
+          'configuration.'),
+      ),
+    );
+  }
+
+  protected function parseLaunchArguments(PhutilArgumentParser $args) {
+    $config_file = $args->getArg('config');
+    if ($config_file) {
+      $full_path = Filesystem::resolvePath($config_file);
+      $show_path = $full_path;
+    } else {
+      $root = dirname(dirname(phutil_get_library_root('phabricator')));
+
+      $try = array(
+        'phabricator/conf/aphlict/aphlict.custom.json',
+        'phabricator/conf/aphlict/aphlict.default.json',
+      );
+
+      foreach ($try as $config) {
+        $full_path = $root.'/'.$config;
+        $show_path = $config;
+        if (Filesystem::pathExists($full_path)) {
+          break;
+        }
+      }
+    }
+
+    echo tsprintf(
+      "%s\n",
+      pht(
+        'Reading configuration from: %s',
+        $show_path));
+
+    try {
+      $data = Filesystem::readFile($full_path);
+    } catch (Exception $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Failed to read configuration file. %s',
+          $ex->getMessage()));
+    }
+
+    try {
+      $data = phutil_json_decode($data);
+    } catch (Exception $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file is not properly formatted JSON. %s',
+          $ex->getMessage()));
+    }
+
+    try {
+      PhutilTypeSpec::checkMap(
+        $data,
+        array(
+          'servers' => 'list<wild>',
+          'logs' => 'optional list<wild>',
+          'cluster' => 'optional list<wild>',
+          'pidfile' => 'string',
+          'memory.hint' => 'optional int',
+        ));
+    } catch (Exception $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file has improper configuration keys at top '.
+          'level. %s',
+          $ex->getMessage()));
+    }
+
+    $servers = $data['servers'];
+    $has_client = false;
+    $has_admin = false;
+    $port_map = array();
+    foreach ($servers as $index => $server) {
+      PhutilTypeSpec::checkMap(
+        $server,
+        array(
+          'type' => 'string',
+          'port' => 'int',
+          'listen' => 'optional string|null',
+          'ssl.key' => 'optional string|null',
+          'ssl.cert' => 'optional string|null',
+          'ssl.chain' => 'optional string|null',
+        ));
+
+      $port = $server['port'];
+      if (!isset($port_map[$port])) {
+        $port_map[$port] = $index;
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Two servers (at indexes "%s" and "%s") both bind to the same '.
+            'port ("%s"). Each server must bind to a unique port.',
+            $port_map[$port],
+            $index,
+            $port));
+      }
+
+      $type = $server['type'];
+      switch ($type) {
+        case 'admin':
+          $has_admin = true;
+          break;
+        case 'client':
+          $has_client = true;
+          break;
+        default:
+          throw new PhutilArgumentUsageException(
+            pht(
+              'A specified server (at index "%s", on port "%s") has an '.
+              'invalid type ("%s"). Valid types are: admin, client.',
+              $index,
+              $port,
+              $type));
+      }
+
+      $ssl_key = idx($server, 'ssl.key');
+      $ssl_cert = idx($server, 'ssl.cert');
+      if (($ssl_key && !$ssl_cert) || ($ssl_cert && !$ssl_key)) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'A specified server (at index "%s", on port "%s") specifies '.
+            'only one of "%s" and "%s". Each server must specify neither '.
+            '(to disable SSL) or specify both (to enable it).',
+            $index,
+            $port,
+            'ssl.key',
+            'ssl.cert'));
+      }
+
+      $ssl_chain = idx($server, 'ssl.chain');
+      if ($ssl_chain && (!$ssl_key && !$ssl_cert)) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'A specified server (at index "%s", on port "%s") specifies '.
+            'a value for "%s", but no value for "%s" or "%s". Servers '.
+            'should only provide an SSL chain if they also provide an SSL '.
+            'key and SSL certificate.',
+            $index,
+            $port,
+            'ssl.chain',
+            'ssl.key',
+            'ssl.cert'));
+      }
+    }
+
+    if (!$servers) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file does not specify any servers. This service '.
+          'will not be able to interact with the outside world if it does '.
+          'not listen on any ports. You must specify at least one "%s" '.
+          'server and at least one "%s" server.',
+          'admin',
+          'client'));
+    }
+
+    if (!$has_client) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file does not specify any client servers. This '.
+          'service will be unable to transmit any notifications without a '.
+          'client server. You must specify at least one server with '.
+          'type "%s".',
+          'client'));
+    }
+
+    if (!$has_admin) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Configuration file does not specify any administrative '.
+          'servers. This service will be unable to receive messages. '.
+          'You must specify at least one server with type "%s".',
+          'admin'));
+    }
+
+    $logs = idx($data, 'logs', array());
+    foreach ($logs as $index => $log) {
+      PhutilTypeSpec::checkMap(
+        $log,
+        array(
+          'path' => 'string',
+        ));
+
+      $path = $log['path'];
+
+      try {
+        $dir = dirname($path);
+        if (!Filesystem::pathExists($dir)) {
+          Filesystem::createDirectory($dir, 0755, true);
+        }
+      } catch (FilesystemException $ex) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Failed to create directory "%s" for specified log file (with '.
+            'index "%s"). You should manually create this directory or '.
+            'choose a different logfile location. %s',
+            $dir,
+            $ex->getMessage()));
+      }
+    }
+
+    $peer_map = array();
+
+    $cluster = idx($data, 'cluster', array());
+    foreach ($cluster as $index => $peer) {
+      PhutilTypeSpec::checkMap(
+        $peer,
+        array(
+          'host' => 'string',
+          'port' => 'int',
+          'protocol' => 'string',
+        ));
+
+      $host = $peer['host'];
+      $port = $peer['port'];
+      $protocol = $peer['protocol'];
+
+      switch ($protocol) {
+        case 'http':
+        case 'https':
+          break;
+        default:
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Configuration file specifies cluster peer ("%s", at index '.
+              '"%s") with an invalid protocol, "%s". Valid protocols are '.
+              '"%s" or "%s".',
+              $host,
+              $index,
+              $protocol,
+              'http',
+              'https'));
+      }
+
+      $peer_key = "{$host}:{$port}";
+      if (!isset($peer_map[$peer_key])) {
+        $peer_map[$peer_key] = $index;
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Configuration file specifies cluster peer "%s" more than '.
+            'once (at indexes "%s" and "%s"). Each peer must have a '.
+            'unique host and port combination.',
+            $peer_key,
+            $peer_map[$peer_key],
+            $index));
+      }
+    }
+
+    $this->configData = $data;
+    $this->configPath = $full_path;
+
+    $pid_path = $this->getPIDPath();
+    try {
+      $dir = dirname($path);
+      if (!Filesystem::pathExists($dir)) {
+        Filesystem::createDirectory($dir, 0755, true);
+      }
+    } catch (FilesystemException $ex) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Failed to create directory "%s" for specified PID file. You '.
+          'should manually create this directory or choose a different '.
+          'PID file location. %s',
+          $dir,
+          $ex->getMessage()));
+    }
   }
 
   final public function getPIDPath() {
-    $path = PhabricatorEnv::getEnvConfig('notification.pidfile');
-
-    try {
-      $dir = dirname($path);
-      if (!Filesystem::pathExists($dir)) {
-        Filesystem::createDirectory($dir, 0755, true);
-      }
-    } catch (FilesystemException $ex) {
-      throw new Exception(
-        pht(
-          "Failed to create '%s'. You should manually create this directory.",
-          $dir));
-    }
-
-    return $path;
-  }
-
-  final public function getLogPath() {
-    $path = PhabricatorEnv::getEnvConfig('notification.log');
-
-    try {
-      $dir = dirname($path);
-      if (!Filesystem::pathExists($dir)) {
-        Filesystem::createDirectory($dir, 0755, true);
-      }
-    } catch (FilesystemException $ex) {
-      throw new Exception(
-        pht(
-          "Failed to create '%s'. You should manually create this directory.",
-          $dir));
-    }
-
-    return $path;
+    return $this->configData['pidfile'];
   }
 
   final public function getPID() {
@@ -74,7 +301,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     return $pid;
   }
 
-  final public function cleanup($signo = '?') {
+  final public function cleanup($signo = null) {
     global $g_future;
     if ($g_future) {
       $g_future->resolveKill();
@@ -83,12 +310,12 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     Filesystem::remove($this->getPIDPath());
 
-    exit(1);
-  }
+    if ($signo !== null) {
+      $signame = phutil_get_signal_name($signo);
+      error_log("Caught signal {$signame}, exiting.");
+    }
 
-  final protected function setDebug($debug) {
-    $this->debug = $debug;
-    return $this;
+    exit(1);
   }
 
   public static function requireExtensions() {
@@ -146,52 +373,14 @@ abstract class PhabricatorAphlictManagementWorkflow
     $test_argv = $this->getServerArgv();
     $test_argv[] = '--test=true';
 
-    execx(
-      '%s %s %Ls',
-      $this->getNodeBinary(),
-      $this->getAphlictScriptPath(),
-      $test_argv);
+
+    execx('%C', $this->getStartCommand($test_argv));
   }
 
   private function getServerArgv() {
-    $ssl_key = PhabricatorEnv::getEnvConfig('notification.ssl-key');
-    $ssl_cert = PhabricatorEnv::getEnvConfig('notification.ssl-cert');
-
-    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
-    $server_uri = new PhutilURI($server_uri);
-
-    $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
-    $client_uri = new PhutilURI($client_uri);
-
-    $log = $this->getLogPath();
-
     $server_argv = array();
-    $server_argv[] = '--client-port='.coalesce(
-      $this->clientPort,
-      $client_uri->getPort());
-    $server_argv[] = '--admin-port='.$server_uri->getPort();
-    $server_argv[] = '--admin-host='.$server_uri->getDomain();
-
-    if ($ssl_key) {
-      $server_argv[] = '--ssl-key='.$ssl_key;
-    }
-
-    if ($ssl_cert) {
-      $server_argv[] = '--ssl-cert='.$ssl_cert;
-    }
-
-    $server_argv[] = '--log='.$log;
-
-    if ($this->clientHost) {
-      $server_argv[] = '--client-host='.$this->clientHost;
-    }
-
+    $server_argv[] = '--config='.$this->configPath;
     return $server_argv;
-  }
-
-  private function getAphlictScriptPath() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    return $root.'/support/aphlict/server/aphlict_server.js';
   }
 
   final protected function launch() {
@@ -205,11 +394,7 @@ abstract class PhabricatorAphlictManagementWorkflow
       Filesystem::writeFile($this->getPIDPath(), getmypid());
     }
 
-    $command = csprintf(
-      '%s %s %Ls',
-      $this->getNodeBinary(),
-      $this->getAphlictScriptPath(),
-      $this->getServerArgv());
+    $command = $this->getStartCommand($this->getServerArgv());
 
     if (!$this->debug) {
       declare(ticks = 1);
@@ -248,6 +433,15 @@ abstract class PhabricatorAphlictManagementWorkflow
     $console = PhutilConsole::getConsole();
     $this->willLaunch();
 
+    $log = $this->getOverseerLogPath();
+    if ($log !== null) {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Writing logs to: %s',
+          $log));
+    }
+
     $pid = pcntl_fork();
     if ($pid < 0) {
       throw new Exception(
@@ -259,6 +453,12 @@ abstract class PhabricatorAphlictManagementWorkflow
       exit(0);
     }
 
+    // Redirect process errors to the error log. If we do not do this, any
+    // error the `aphlict` process itself encounters vanishes into thin air.
+    if ($log !== null) {
+      ini_set('error_log', $log);
+    }
+
     // When we fork, the child process will inherit its parent's set of open
     // file descriptors. If the parent process of bin/aphlict is waiting for
     // bin/aphlict's file descriptors to close, it will be stuck waiting on
@@ -266,7 +466,6 @@ abstract class PhabricatorAphlictManagementWorkflow
     // in another script using passthru().)
     fclose(STDOUT);
     fclose(STDERR);
-
 
     $this->launch();
     return 0;
@@ -323,6 +522,42 @@ abstract class PhabricatorAphlictManagementWorkflow
         'nodejs',
         'node',
         '$PATH'));
+  }
+
+  private function getAphlictScriptPath() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    return $root.'/support/aphlict/server/aphlict_server.js';
+  }
+
+  private function getNodeArgv() {
+    $argv = array();
+
+    $hint = idx($this->configData, 'memory.hint');
+    $hint = nonempty($hint, 256);
+
+    $argv[] = sprintf('--max-old-space-size=%d', $hint);
+
+    return $argv;
+  }
+
+  private function getStartCommand(array $server_argv) {
+    return csprintf(
+      '%R %Ls -- %s %Ls',
+      $this->getNodeBinary(),
+      $this->getNodeArgv(),
+      $this->getAphlictScriptPath(),
+      $server_argv);
+  }
+
+  private function getOverseerLogPath() {
+    // For now, just return the first log. We could refine this eventually.
+    $logs = idx($this->configData, 'logs', array());
+
+    foreach ($logs as $log) {
+      return $log['path'];
+    }
+
+    return null;
   }
 
 }

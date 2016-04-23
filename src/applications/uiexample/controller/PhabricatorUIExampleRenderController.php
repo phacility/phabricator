@@ -50,11 +50,9 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
         $result,
       ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title'   => $example->getName(),
-      ));
+    return $this->newPage()
+      ->setTitle($example->getName())
+      ->appendChild($nav);
   }
 
 }

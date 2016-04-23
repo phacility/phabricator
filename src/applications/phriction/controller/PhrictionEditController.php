@@ -177,8 +177,9 @@ final class PhrictionEditController
     }
 
     if ($document->getID()) {
-      $panel_header = pht('Edit Phriction Document');
+      $panel_header = pht('Edit Document: %s', $content->getTitle());
       $page_title = pht('Edit Document');
+      $header_icon = 'fa-pencil';
       if ($overwrite) {
         $submit_button = pht('Overwrite Changes');
       } else {
@@ -188,6 +189,7 @@ final class PhrictionEditController
       $panel_header = pht('Create New Phriction Document');
       $submit_button = pht('Create Document');
       $page_title = pht('Create Document');
+      $header_icon = 'fa-plus-square';
     }
 
     $uri = $document->getSlug();
@@ -263,13 +265,14 @@ final class PhrictionEditController
           ->setValue($submit_button));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($panel_header)
+      ->setHeaderText(pht('Document'))
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader($content->getTitle())
-      ->setPreviewURI('/phriction/preview/')
+      ->setPreviewURI('/phriction/preview/'.$document->getSlug())
       ->setControlID('document-textarea')
       ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
@@ -282,17 +285,25 @@ final class PhrictionEditController
     } else {
       $crumbs->addTextCrumb(pht('Create'));
     }
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($panel_header)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $draft_note,
         $form_box,
         $preview,
-      ),
-      array(
-        'title'   => $page_title,
       ));
+
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

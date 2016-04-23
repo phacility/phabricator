@@ -12,7 +12,7 @@ final class PhabricatorAuthRegisterController
     $account_key = $request->getURIData('akey');
 
     if ($request->getUser()->isLoggedIn()) {
-      return $this->renderError(pht('You are already logged in.'));
+      return id(new AphrontRedirectResponse())->setURI('/');
     }
 
     $is_setup = false;
@@ -497,6 +497,7 @@ final class PhabricatorAuthRegisterController
       $crumbs->addTextCrumb($provider->getProviderName());
         $title = pht('Phabricator Registration');
     }
+    $crumbs->setBorder(true);
 
     $welcome_view = null;
     if ($is_setup) {
@@ -511,7 +512,6 @@ final class PhabricatorAuthRegisterController
     }
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
       ->setForm($form)
       ->setFormErrors($errors);
 
@@ -520,16 +520,21 @@ final class PhabricatorAuthRegisterController
       $invite_header = $this->renderInviteHeader($invite);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $welcome_view,
-        $invite_header,
-        $object_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+      $welcome_view,
+      $invite_header,
+      $object_box,
+    ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function loadDefaultAccount() {

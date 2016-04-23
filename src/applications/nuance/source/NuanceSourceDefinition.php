@@ -149,7 +149,6 @@ abstract class NuanceSourceDefinition extends Phobject {
   }
 
   protected function newItemFromProperties(
-    NuanceRequestor $requestor,
     array $properties,
     PhabricatorContentSource $content_source) {
 
@@ -166,10 +165,6 @@ abstract class NuanceSourceDefinition extends Phobject {
       ->setTransactionType(NuanceItemTransaction::TYPE_SOURCE)
       ->setNewValue($source->getPHID());
 
-    $xactions[] = id(new NuanceItemTransaction())
-      ->setTransactionType(NuanceItemTransaction::TYPE_REQUESTOR)
-      ->setNewValue($requestor->getPHID());
-
     // TODO: Eventually, apply real routing rules. For now, just put everything
     // in the default queue for the source.
     $xactions[] = id(new NuanceItemTransaction())
@@ -185,7 +180,6 @@ abstract class NuanceSourceDefinition extends Phobject {
 
     $editor = id(new NuanceItemEditor())
       ->setActor($actor)
-      ->setActingAsPHID($requestor->getActingAsPHID())
       ->setContentSource($content_source);
 
     $editor->applyTransactions($item, $xactions);

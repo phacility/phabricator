@@ -38,7 +38,7 @@ final class PhortuneProductViewController extends PhortuneController {
         $product->getPriceAsCurrency()->formatForDisplay());
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 

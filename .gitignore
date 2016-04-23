@@ -16,6 +16,7 @@
 /conf/keys/device.pub
 /conf/keys/device.key
 /conf/keys/device.id
+/conf/aphlict/aphlict.custom.json
 
 # Impact Font
 /resources/font/impact.ttf

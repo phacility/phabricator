@@ -28,10 +28,13 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     $view_policy = $app->getPolicy(
       PhabricatorCountdownDefaultViewCapability::CAPABILITY);
 
+    $edit_policy = $app->getPolicy(
+      PhabricatorCountdownDefaultEditCapability::CAPABILITY);
+
     return id(new PhabricatorCountdown())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEpoch(PhabricatorTime::getNow())
+      ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
@@ -43,6 +46,14 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
         'description' => 'text',
         'mailKey' => 'bytes20',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_epoch' => array(
+          'columns' => array('epoch'),
+        ),
+        'key_author' => array(
+          'columns' => array('authorPHID', 'epoch'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -53,6 +64,10 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
 
   public function getMonogram() {
     return 'C'.$this->getID();
+  }
+
+  public function getURI() {
+    return '/'.$this->getMonogram();
   }
 
   public function save() {

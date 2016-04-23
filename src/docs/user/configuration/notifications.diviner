@@ -11,13 +11,13 @@ tasks or commenting on code reviews) through email and in-application
 notifications.
 
 Phabricator can also be configured to deliver notifications in real time, by
-popping up a message in any open browser windows if something has
-happened or an object has been updated.
+popping up a message in any open browser windows if something has happened or
+an object has been updated.
 
 To enable real-time notifications:
 
-  - Set `notification.enabled` in your configuration to true.
-  - Run the notification server, as described below.
+  - Configure and start the notification server, as described below.
+  - Adjust `notification.servers` to point at it.
 
 This document describes the process in detail.
 
@@ -59,40 +59,104 @@ After installing Node.js, you can control the notification server with the
 
   phabricator/ $ bin/aphlict start
 
-The server must be able to listen on port **22280** for Aphlict to work. In
-particular, if you're running in EC2, you need to unblock this port in the
-server's security group configuration. You can change this port in the
-`notification.client-uri` config.
+By default, the server must be able to listen on port `22280`. If you're using
+a host firewall (like a security group in EC2), make sure traffic can reach the
+server.
 
-You may need to adjust these settings:
+The server configuration is controlled by a configuration file, which is
+separate from Phabricator's configuration settings. The default file can
+be found at `phabricator/conf/aphlict/aphlict.default.json`.
 
-  - `notification.ssl-cert` Point this at an SSL certificate for secure
-    WebSockets.
-  - `notification.ssl-key` Point this at an SSL keyfile for secure WebSockets.
+To make adjustments to the default configuration, either copy this file to
+create `aphlict.custom.json` in the same directory (this file will be used if
+it exists) or specify a configuration file explicitly with the `--config` flag:
 
-In particular, if your server uses HTTPS, you **must** configure these options.
-Browsers will not allow you to use non-SSL websockets from an SSL web page.
+  phabricator/ $ bin/aphlict start --config path/to/config.json
 
-You may also want to adjust these settings:
+The configuration file has these settings:
 
-  - `notification.client-uri` Externally-facing host and port that browsers will
-    connect to in order to listen for notifications.
-  - `notification.server-uri` Internally-facing host and port that Phabricator
-    will connect to in order to publish notifications.
-  - `notification.log` Log file location for the server.
-  - `notification.pidfile` Pidfile location used to stop any running server when
-    aphlict is restarted.
+  - `servers`: //Required list.// A list of servers to start.
+  - `logs`: //Optional list.// A list of logs to write to.
+  - `cluster`: //Optional list.// A list of cluster peers. This is an advanced
+    feature.
+  - `pidfile`: //Required string.// Path to a PID file.
+  - `memory.hint`: //Optional int.// Suggestion to `node` about how much
+    memory to use, via `--max-old-stack-size`. In most cases, this can be
+    left unspecified.
+
+Each server in the `servers` list should be an object with these keys:
+
+  - `type`: //Required string.// The type of server to start. Options are
+    `admin` or `client`. Normally, you should run one of each.
+  - `port`: //Required int.// The port this server should listen on.
+  - `listen`: //Optional string.// Which interface to bind to. By default,
+    the `admin` server is bound to `127.0.0.1` (so only other services on the
+    local machine can connect to it), while the `client` server is bound
+    to `0.0.0.0` (so any client can connect).
+  - `ssl.key`: //Optional string.// If you want to use SSL on this port,
+    the path to an SSL key.
+  - `ssl.cert`: //Optional string.// If you want to use SSL on this port,
+    the path to an SSL certificate.
+  - `ssl.chain`: //Optional string.// If you have configured SSL on this
+    port, an optional path to a certificate chain file.
+
+Each log in the `logs` list should be an object with these keys:
+
+  - `path`: //Required string.// Path to the log file.
+
+Each peer in the `cluster` list should be an object with these keys:
+
+  - `host`: //Required string.// The peer host address.
+  - `port`: //Required int.// The peer port.
+  - `protocol`: //Required string.// The protocol to connect with, one of
+    `"http"` or `"https"`.
+
+Cluster configuration is an advanced topic and can be omitted for most
+installs. For more information on how to configure a cluster, see
+@{article:Clustering Introduction} and @{article:Cluster: Notifications}.
+
+The defaults are appropriate for simple cases, but you may need to adjust them
+if you are running a more complex configuration.
+
+Configuring Phabricator
+=======================
+
+After starting the server, configure Phabricator to connect to it by adjusting
+`notification.servers`. This configuration option should have a list of servers
+that Phabricator should interact with.
+
+Normally, you'll list one client server and one admin server, like this:
+
+```lang=json
+[
+  {
+    "type": "client",
+    "host": "phabricator.mycompany.com",
+    "port": 22280,
+    "protocol": "https"
+  },
+  {
+    "type": "admin",
+    "host": "127.0.0.1",
+    "port": 22281,
+    "protocol": "http"
+  }
+]
+```
+
+This definition defines which services the user's browser will attempt to
+connect to. Most of the time, it will be very similar to the services defined
+in the Aphlict configuration. However, if you are sending traffic through a
+load balancer or terminating SSL somewhere before traffic reaches Aphlict,
+the services the browser connects to may need to have different hosts, ports
+or protocols than the underlying server listens on.
 
 
 Verifying Server Status
 =======================
 
-Access `/notification/status/` to verify the server is operational. You should
-see a table showing stats like "uptime" and connection/message counts if the
-server is working. If it isn't working, you should see an error.
-
-You can also send a test notification by clicking the button in the upper right
-corner of this screen.
+After configuring `notification.servers`, navigate to
+{nav Config > Notification Servers} to verify that things are operational.
 
 
 Troubleshooting
@@ -106,31 +170,61 @@ Because the notification server uses WebSockets, your browser error console
 may also have information that is useful in figuring out what's wrong.
 
 The server also generates a log, by default in `/var/log/aphlict.log`. You can
-change this location by changing `notification.log` in your configuration. The
-log may contain information useful in resolving issues.
+change this location by adjusting configuration. The log may contain
+information that is useful in resolving issues.
 
 
-Advanced Usage
-==============
+SSL and HTTPS
+=============
 
-It is possible to route the WebSockets traffic for Aphlict through a reverse
-proxy such as `nginx` (see @{article:Configuration Guide} for instructions on
-configuring `nginx`). In order to do this with `nginx`, you will require at
-least version 1.3. You can read some more information about using `nginx` with
-WebSockets at http://nginx.com/blog/websocket-nginx/.
+If you serve Phabricator over HTTPS, you must also serve websockets over HTTPS.
+Browsers will refuse to connect to `ws://` websockets from HTTPS pages.
 
-There are a few benefits of this approach:
+If a client connects to Phabricator over HTTPS, Phabricator will automatically
+select an appropriate HTTPS service from `notification.servers` and instruct
+the browser to open a websocket connection with `wss://`.
 
-  - SSL is terminated at the `nginx` layer and consequently there is no need to
-    configure `notificaton.ssl-cert` and `notification.ssl-key` (in fact, with
-    this approach you should //not// configure these options because otherwise
-    the Aphlict server will not accept HTTP traffic).
-  - You don't have to open up a separate port on the server.
-  - Clients don't need to be able to connect to Aphlict over a non-standard
-    port which may be blocked by a firewall or anti-virus software.
+The simplest way to do this is configure Aphlict with an SSL key and
+certificate and let it terminate SSL directly.
 
-The following files show an example `nginx` configuration. Note that this is an
-example only and you may need to adjust this to suit your own setup.
+If you prefer not to do this, two other options are:
+
+  - run the websocket through a websocket-capable loadbalancer and terminate
+    SSL there; or
+  - run the websocket through `nginx` over the same socket as the rest of
+    your web traffic.
+
+See the next sections for more detail.
+
+
+Terminating SSL with a Load Balancer
+====================================
+
+If you want to terminate SSL in front of the notification server with a
+traditional load balancer or a similar device, do this:
+
+  - Point `notification.servers` at your load balancer or reverse proxy,
+    specifying that the protocol is `https`.
+  - On the load balancer or proxy, terminate SSL and forward traffic to the
+    Aphlict server.
+  - In the Aphlict configuration, listen on the target port with `http`.
+
+
+Terminating SSL with Nginx
+==========================
+
+If you use `nginx`, you can send websocket traffic to the same port as normal
+HTTP traffic and have `nginx` proxy it selectively based on the request path.
+
+This requires `nginx` 1.3 or greater. See the `nginx` documentation for
+details:
+
+> http://nginx.com/blog/websocket-nginx/
+
+This is very complex, but allows you to support notifications without opening
+additional ports.
+
+An example `nginx` configuration might look something like this:
 
 ```lang=nginx, name=/etc/nginx/conf.d/connection_upgrade.conf
 map $http_upgrade $connection_upgrade {
@@ -163,8 +257,23 @@ server {
 }
 ```
 
-With this approach, you should set `notification.client-uri` to
-`http://localhost/ws/`. Additionally, there is no need for the Aphlict server
-to bind to `0.0.0.0` anymore (which is the default behavior), so you could
-start the Aphlict server with `./bin/aphlict start --client-host=localhost`
-instead.
+With this approach, you should make these additional adjustments:
+
+**Phabricator Configuration**: The entry in `notification.servers` with type
+`"client"` should have these adjustments made:
+
+  - Set `host` to the Phabricator host.
+  - Set `port` to the standard HTTPS port (usually `443`).
+  - Set `protocol` to `"https"`.
+  - Set `path` to `/ws/`, so it matches the special `location` in your
+    `nginx` config.
+
+You do not need to adjust the `"admin"` server.
+
+**Aphlict**: Your Aphlict configuration should make these adjustments to
+the `"client"` server:
+
+  - The `protocol` should be `"http"`: `nginx` will send plain HTTP traffic
+    to Aphlict.
+  - Optionally, you can `listen` on `127.0.0.1` instead of `0.0.0.0`, because
+    the server will no longer receive external traffic.

@@ -22,7 +22,7 @@ final class TokenGiveConduitAPIMethod extends TokenConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $content_source = PhabricatorContentSource::newFromConduitRequest($request);
+    $content_source = $request->newContentSource();
 
     $editor = id(new PhabricatorTokenGivenEditor())
       ->setActor($request->getUser())

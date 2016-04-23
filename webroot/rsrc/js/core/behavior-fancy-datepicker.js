@@ -264,6 +264,7 @@ JX.behavior('fancy-datepicker', function(config, statics) {
 
   function getValidDate() {
     var written_date = new Date(value_y, value_m-1, value_d);
+
     if (isNaN(written_date.getTime())) {
       return new Date();
     } else {
@@ -272,6 +273,14 @@ JX.behavior('fancy-datepicker', function(config, statics) {
         value_y += 2000;
         written_date = new Date(value_y, value_m-1, value_d);
       }
+
+      // adjust for a date like February 31
+      var adjust = 1;
+      while (written_date.getMonth() !== value_m-1) {
+        written_date = new Date(value_y, value_m-1, value_d-adjust);
+        adjust++;
+      }
+
       return written_date;
     }
   }

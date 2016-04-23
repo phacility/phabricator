@@ -24,6 +24,7 @@ final class PhabricatorPhurlURLEditController
         $viewer);
       $submit_label = pht('Create');
       $page_title = pht('Shorten URL');
+      $header_icon = 'fa-plus-square';
       $subscribers = array();
       $cancel_uri = $this->getApplicationURI();
     } else {
@@ -42,7 +43,8 @@ final class PhabricatorPhurlURLEditController
       }
 
       $submit_label = pht('Update');
-      $page_title   = pht('Update URL');
+      $page_title   = pht('Edit URL: %s', $url->getName());
+      $header_icon = 'fa-pencil';
 
       $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $url->getPHID());
@@ -163,7 +165,7 @@ final class PhabricatorPhurlURLEditController
       ->setError($error_alias);
 
     $projects = id(new AphrontFormTokenizerControl())
-      ->setLabel(pht('Projects'))
+      ->setLabel(pht('Tags'))
       ->setName('projects')
       ->setValue($projects)
       ->setUser($viewer)
@@ -238,19 +240,27 @@ final class PhabricatorPhurlURLEditController
     }
 
     $crumbs->addTextCrumb($page_title);
+    $crumbs->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($page_title)
+      ->setHeaderText(pht('URL'))
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($page_title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $object_box,
-      ),
-      array(
-        'title' => $page_title,
       ));
+
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 }

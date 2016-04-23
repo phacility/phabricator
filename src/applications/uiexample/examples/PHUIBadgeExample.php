@@ -54,7 +54,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setIcon('fa-user')
       ->setHeader(pht('Phabricator User'))
       ->setSubhead(pht('Confirmed your account.'))
-      ->setQuality(PHUIBadgeView::POOR)
+      ->setQuality(PhabricatorBadgesQuality::POOR)
       ->setSource(pht('People (automatic)'))
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('212 Issued (100%)');
@@ -63,7 +63,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setIcon('fa-code')
       ->setHeader(pht('Code Contributor'))
       ->setSubhead(pht('Wrote code that was acceptable'))
-      ->setQuality(PHUIBadgeView::COMMON)
+      ->setQuality(PhabricatorBadgesQuality::COMMON)
       ->setSource('Diffusion (automatic)')
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('200 Awarded (98%)');
@@ -72,7 +72,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setIcon('fa-bug')
       ->setHeader(pht('Task Master'))
       ->setSubhead(pht('Closed over 100 tasks'))
-      ->setQuality(PHUIBadgeView::UNCOMMON)
+      ->setQuality(PhabricatorBadgesQuality::UNCOMMON)
       ->setSource('Maniphest (automatic)')
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('56 Awarded (43%)');
@@ -81,7 +81,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setIcon('fa-star')
       ->setHeader(pht('Code Weaver'))
       ->setSubhead(pht('Landed 1,000 Commits'))
-      ->setQuality(PHUIBadgeView::RARE)
+      ->setQuality(PhabricatorBadgesQuality::RARE)
       ->setSource('Diffusion (automatic)')
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('42 Awarded (20%)');
@@ -90,7 +90,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setIcon('fa-users')
       ->setHeader(pht('Security Team'))
       ->setSubhead(pht('<script>alert(1);</script>'))
-      ->setQuality(PHUIBadgeView::EPIC)
+      ->setQuality(PhabricatorBadgesQuality::EPIC)
       ->setSource('Projects (automatic)')
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('21 Awarded (10%)');
@@ -99,7 +99,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setIcon('fa-user')
       ->setHeader(pht('Adminstrator'))
       ->setSubhead(pht('Drew the short stick'))
-      ->setQuality(PHUIBadgeView::LEGENDARY)
+      ->setQuality(PhabricatorBadgesQuality::LEGENDARY)
       ->setSource(pht('People (automatic)'))
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('3 Awarded (1.4%)');
@@ -108,7 +108,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
       ->setIcon('fa-compass')
       ->setHeader(pht('Lead Developer'))
       ->setSubhead(pht('Lead Developer of Phabricator'))
-      ->setQuality(PHUIBadgeView::HEIRLOOM)
+      ->setQuality(PhabricatorBadgesQuality::HEIRLOOM)
       ->setSource(pht('Direct Award (epriestley)'))
       ->addByline(pht('Dec 31, 1969'))
       ->addByline('1 Awarded (0.4%)');
@@ -129,17 +129,17 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
     $badges3[] = id(new PHUIBadgeMiniView())
       ->setIcon('fa-heart')
       ->setHeader(pht('Funder'))
-      ->setQuality(PHUIBadgeView::UNCOMMON);
+      ->setQuality(PhabricatorBadgesQuality::UNCOMMON);
 
     $badges3[] = id(new PHUIBadgeMiniView())
       ->setIcon('fa-user')
       ->setHeader(pht('Administrator'))
-      ->setQuality(PHUIBadgeView::RARE);
+      ->setQuality(PhabricatorBadgesQuality::RARE);
 
     $badges3[] = id(new PHUIBadgeMiniView())
       ->setIcon('fa-camera-retro')
       ->setHeader(pht('Designer'))
-      ->setQuality(PHUIBadgeView::EPIC);
+      ->setQuality(PhabricatorBadgesQuality::EPIC);
 
     $flex1 = new PHUIBadgeBoxView();
     $flex1->addItems($badges1);

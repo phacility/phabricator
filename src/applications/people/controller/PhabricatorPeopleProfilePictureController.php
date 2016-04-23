@@ -228,6 +228,7 @@ final class PhabricatorPeopleProfilePictureController
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $upload_form = id(new AphrontFormView())
@@ -247,22 +248,31 @@ final class PhabricatorPeopleProfilePictureController
 
     $upload_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Upload New Picture'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($upload_form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit Profile Picture'));
+    $crumbs->setBorder(true);
 
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Profile Picture'))
+      ->setHeaderIcon('fa-camera');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+        $upload_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
-      ->appendChild(
-        array(
-          $form_box,
-          $upload_box,
-        ));
+      ->appendChild($view);
   }
 }

@@ -61,17 +61,18 @@ final class PhabricatorSettingsMainController
         '/p/'.$this->getUser()->getUsername().'/');
     }
     $crumbs->addTextCrumb($panel->getPanelName());
-    $nav->appendChild(
-      array(
-        $crumbs,
-        $response,
-      ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $panel->getPanelName(),
-      ));
+    $title = $panel->getPanelName();
+
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn($response);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function buildPanels() {

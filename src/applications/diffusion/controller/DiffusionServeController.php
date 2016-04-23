@@ -164,7 +164,14 @@ final class DiffusionServeController extends DiffusionController {
 
     // If authentication credentials have been provided, try to find a user
     // that actually matches those credentials.
-    if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
+
+    // We require both the username and password to be nonempty, because Git
+    // won't prompt users who provide a username but no password otherwise.
+    // See T10797 for discussion.
+
+    $have_user = strlen(idx($_SERVER, 'PHP_AUTH_USER'));
+    $have_pass = strlen(idx($_SERVER, 'PHP_AUTH_PW'));
+    if ($have_user && $have_pass) {
       $username = $_SERVER['PHP_AUTH_USER'];
       $password = new PhutilOpaqueEnvelope($_SERVER['PHP_AUTH_PW']);
 
@@ -531,10 +538,35 @@ final class DiffusionServeController extends DiffusionController {
     $command = csprintf('%s', $bin);
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
-    list($err, $stdout, $stderr) = id(new ExecFuture('%C', $command))
-      ->setEnv($env, true)
-      ->write($input)
-      ->resolve();
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+    $did_write_lock = false;
+    if ($this->isReadOnlyRequest($repository)) {
+      $repository->synchronizeWorkingCopyBeforeRead();
+    } else {
+      $did_write_lock = true;
+      $repository->synchronizeWorkingCopyBeforeWrite($viewer);
+    }
+
+    $caught = null;
+    try {
+      list($err, $stdout, $stderr) = id(new ExecFuture('%C', $command))
+        ->setEnv($env, true)
+        ->write($input)
+        ->resolve();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    if ($did_write_lock) {
+      $repository->synchronizeWorkingCopyAfterWrite();
+    }
+
+    unset($unguarded);
+
+    if ($caught) {
+      throw $caught;
+    }
 
     if ($err) {
       if ($this->isValidGitShallowCloneResponse($stdout, $stderr)) {
@@ -991,11 +1023,12 @@ final class DiffusionServeController extends DiffusionController {
           // <https://github.com/github/git-lfs/issues/1088>
           $no_authorization = 'Basic '.base64_encode('none');
 
-          $get_uri = $file->getCDNURIWithToken();
+          $get_uri = $file->getCDNURI();
           $actions['download'] = array(
             'href' => $get_uri,
             'header' => array(
               'Authorization' => $no_authorization,
+              'X-Phabricator-Request-Type' => 'git-lfs',
             ),
           );
         } else {

@@ -58,7 +58,7 @@ final class ConpherenceUpdateThreadConduitAPIMethod
       throw new ConduitException('ERR_USAGE_ROOM_NOT_FOUND');
     }
 
-    $source = PhabricatorContentSource::newFromConduitRequest($request);
+    $source = $request->newContentSource();
     $editor = id(new ConpherenceEditor())
       ->setContentSource($source)
       ->setActor($user);

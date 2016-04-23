@@ -102,15 +102,17 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
       $version = null;
       switch ($vcs['versionControlSystem']) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $minimum_version = null;
           $bad_versions = array();
           list($err, $stdout, $stderr) = exec_manual('git --version');
           $version = trim(substr($stdout, strlen('git version ')));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $minimum_version = '1.5';
           $bad_versions = array(
-            '1.7.1' => pht(
+            // We need 1.5 for "--depth", see T7228.
+            '< 1.5' => pht(
+              'The minimum supported version of Subversion is 1.5, which '.
+              'was released in 2008.'),
+            '= 1.7.1' => pht(
               'This version of Subversion has a bug where `%s` does not work '.
               'for files added in rN (Subversion issue #2873), fixed in 1.7.2.',
               'svn diff -c N'),
@@ -119,12 +121,15 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
           $version = trim($stdout);
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $minimum_version = '1.9';
           $bad_versions = array(
-            '2.1' => pht(
+            // We need 1.9 for HTTP cloning, see T3046.
+            '< 1.9' => pht(
+              'The minimum supported version of Mercurial is 1.9, which was '.
+              'released in 2011.'),
+            '= 2.1' => pht(
               'This version of Mercurial returns a bad exit code '.
               'after a successful pull.'),
-            '2.2' => pht(
+            '= 2.2' => pht(
               'This version of Mercurial has a significant memory leak, fixed '.
               'in 2.2.1. Pushing fails with this version as well; see %s.',
               'T3046#54922'),
@@ -136,20 +141,25 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
       if ($version === null) {
         $this->raiseUnknownVersionWarning($binary);
       } else {
-        if ($minimum_version &&
-          version_compare($version, $minimum_version, '<')) {
-          $this->raiseMinimumVersionWarning(
-            $binary,
-            $minimum_version,
-            $version);
+        $version_details = array();
+
+        foreach ($bad_versions as $spec => $details) {
+          list($operator, $bad_version) = explode(' ', $spec, 2);
+          $is_bad = version_compare($version, $bad_version, $operator);
+          if ($is_bad) {
+            $version_details[] = pht(
+              '(%s%s) %s',
+              $operator,
+              $bad_version,
+              $details);
+          }
         }
 
-        foreach ($bad_versions as $bad_version => $details) {
-          if ($bad_version === $version) {
-            $this->raiseBadVersionWarning(
-              $binary,
-              $bad_version);
-          }
+        if ($version_details) {
+          $this->raiseBadVersionWarning(
+            $binary,
+            $version,
+            $version_details);
         }
       }
     }
@@ -223,57 +233,34 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
         pht('Report this Issue to the Upstream'));
   }
 
-  private function raiseMinimumVersionWarning(
-    $binary,
-    $minimum_version,
-    $version) {
+  private function raiseBadVersionWarning($binary, $version, array $problems) {
+    $summary = pht(
+      'This server has a known bad version of "%s".',
+      $binary);
 
-    switch ($binary) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $summary = pht(
-          "The '%s' binary is version %s and Phabricator requires version ".
-          "%s or higher.",
-          $binary,
-          $version,
-          $minimum_version);
-        $message = pht(
-          "Please upgrade the '%s' binary to a more modern version.",
-          $binary);
-        $this->newIssue('bin.'.$binary)
-          ->setShortName(pht("Unsupported '%s' Version", $binary))
-          ->setName(pht("Unsupported '%s' Version", $binary))
-          ->setSummary($summary)
-          ->setMessage($summary.' '.$message);
-        break;
-      }
-  }
+    $message = array();
 
-  private function raiseBadVersionWarning($binary, $bad_version) {
-    switch ($binary) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $summary = pht(
-          "The '%s' binary is version %s which has bugs that break ".
-          "Phabricator.",
-          $binary,
-          $bad_version);
-        $message = pht(
-          "Please upgrade the '%s' binary to a more modern version.",
-          $binary);
-        $this->newIssue('bin.'.$binary)
-          ->setShortName(pht("Unsupported '%s' Version", $binary))
-          ->setName(pht("Unsupported '%s' Version", $binary))
-          ->setSummary($summary)
-          ->setMessage($summary.' '.$message);
-        break;
-      }
+    $message[] = pht(
+      'This server has a known bad version of "%s" installed ("%s"). This '.
+      'version is not supported, or contains important bugs or security '.
+      'vulnerabilities which are fixed in a newer version.',
+      $binary,
+      $version);
 
+    $message[] = pht('You should upgrade this software.');
 
+    $message[] = pht('The known issues with this old version are:');
+
+    foreach ($problems as $problem) {
+      $message[] = $problem;
+    }
+
+    $message = implode("\n\n", $message);
+
+    $this->newIssue("bin.{$binary}.bad-version")
+      ->setName(pht('Unsupported/Insecure "%s" Version', $binary))
+      ->setSummary($summary)
+      ->setMessage($message);
   }
 
 }

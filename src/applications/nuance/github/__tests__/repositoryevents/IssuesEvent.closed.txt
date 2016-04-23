@@ -69,5 +69,6 @@
   "issue.number": 1,
   "id": 3740905151,
   "uri": "https://github.com/epriestley/poems/issues/1#event-3740905151",
-  "title.full": "GitHub epriestley/poems Issue #1 (Closed)"
+  "title.full": "GitHub epriestley/poems Issue #1 (Closed)",
+  "actor.id": 102631
 }

@@ -39,6 +39,11 @@ abstract class AphrontProxyResponse
     return $this;
   }
 
+  public function setCanCDN($can_cdn) {
+    $this->getProxy()->setCanCDN($can_cdn);
+    return $this;
+  }
+
   public function setLastModified($epoch_timestamp) {
     $this->getProxy()->setLastModified($epoch_timestamp);
     return $this;

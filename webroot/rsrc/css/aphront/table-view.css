@@ -2,8 +2,7 @@
  * @provides aphront-table-view-css
  */
 
-.device-phone .aphront-table-wrap,
-.device-tablet .aphront-table-wrap {
+.aphront-table-wrap {
   overflow-x: auto;
 }
 

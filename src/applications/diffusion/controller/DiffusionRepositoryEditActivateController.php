@@ -16,12 +16,19 @@ final class DiffusionRepositoryEditActivateController
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
     if ($request->isFormPost()) {
+      if (!$repository->isTracked()) {
+        $new_status = PhabricatorRepository::STATUS_ACTIVE;
+      } else {
+        $new_status = PhabricatorRepository::STATUS_INACTIVE;
+      }
+
       $xaction = id(new PhabricatorRepositoryTransaction())
         ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_ACTIVATE)
-        ->setNewValue(!$repository->isTracked());
+        ->setNewValue($new_status);
 
       $editor = id(new PhabricatorRepositoryEditor())
         ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
         ->setContentSourceFromRequest($request)
         ->setActor($viewer)
         ->applyTransactions($repository, array($xaction));

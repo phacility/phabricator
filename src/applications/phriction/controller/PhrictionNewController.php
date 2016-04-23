@@ -16,8 +16,8 @@ final class PhrictionNewController extends PhrictionController {
         PhrictionDocumentStatus::STATUS_EXISTS;
 
       if ($document_exists && $prompt == 'no') {
-        $dialog = new AphrontDialogView();
-        $dialog->setSubmitURI('/phriction/new/')
+        return $this->newDialog()
+          ->setSubmitURI('/phriction/new/')
           ->setTitle(pht('Edit Existing Document?'))
           ->setUser($viewer)
           ->appendChild(pht(
@@ -27,8 +27,6 @@ final class PhrictionNewController extends PhrictionController {
           ->addHiddenInput('prompt', 'yes')
           ->addCancelButton('/w/')
           ->addSubmitButton(pht('Edit Document'));
-
-        return id(new AphrontDialogResponse())->setDialog($dialog);
       }
 
       $uri  = '/phriction/edit/?slug='.$slug;
@@ -46,8 +44,7 @@ final class PhrictionNewController extends PhrictionController {
                        ->setValue($slug)
                        ->setName('slug'));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('New Document'))
       ->setSubmitURI('/phriction/new/')
       ->appendChild(phutil_tag('p',
@@ -57,7 +54,6 @@ final class PhrictionNewController extends PhrictionController {
       ->addSubmitButton(pht('Create'))
       ->addCancelButton('/w/');
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

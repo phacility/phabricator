@@ -13,9 +13,8 @@ final class PhabricatorPholioMockTestDataGenerator
           ->loadOneWhere('phid = %s', $author_phid);
     $mock = PholioMock::initializeNewMock($author);
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_UNKNOWN,
-      array());
+    $content_source = $this->getLipsumContentSource();
+
     $template = id(new PholioTransaction())
       ->setContentSource($content_source);
 

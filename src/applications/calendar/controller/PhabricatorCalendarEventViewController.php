@@ -94,8 +94,8 @@ final class PhabricatorCalendarEventViewController
           $add_comment_form,
         ))
       ->setCurtain($curtain)
-      ->addPropertySection(pht('DETAILS'), $details)
-      ->addPropertySection(pht('DESCRIPTION'), $description);
+      ->addPropertySection(pht('Details'), $details)
+      ->addPropertySection(pht('Description'), $description);
 
     return $this->newPage()
       ->setTitle($page_title)
@@ -219,8 +219,8 @@ final class PhabricatorCalendarEventViewController
       $reinstate_label = pht('Reinstate This Instance');
       $cancel_disabled = (!$can_edit || $can_reinstate);
     } else if ($event->getIsRecurrenceParent()) {
-      $cancel_label = pht('Cancel Recurrence');
-      $reinstate_label = pht('Reinstate Recurrence');
+      $cancel_label = pht('Cancel All');
+      $reinstate_label = pht('Reinstate All');
       $cancel_disabled = !$can_edit;
     } else {
       $cancel_label = pht('Cancel Event');

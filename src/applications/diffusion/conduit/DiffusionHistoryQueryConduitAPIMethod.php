@@ -131,7 +131,8 @@ final class DiffusionHistoryQueryConduitAPIMethod
       hgsprintf('reverse(ancestors(%s))', $commit_hash),
       $path_arg);
 
-    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
+    $stdout = DiffusionMercurialCommandEngine::filterMercurialDebugOutput(
+      $stdout);
     $lines = explode("\n", trim($stdout));
     $lines = array_slice($lines, $offset);
 

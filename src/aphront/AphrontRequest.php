@@ -754,13 +754,26 @@ final class AphrontRequest extends Phobject {
     // NOTE: apache_request_headers() might provide a nicer way to do this,
     // but isn't available under FCGI until PHP 5.4.0.
     foreach ($_SERVER as $key => $value) {
-      if (preg_match('/^HTTP_/', $key)) {
-        // Unmangle the header as best we can.
-        $key = str_replace('_', ' ', $key);
-        $key = strtolower($key);
-        $key = ucwords($key);
-        $key = str_replace(' ', '-', $key);
+      if (!preg_match('/^HTTP_/', $key)) {
+        continue;
+      }
 
+      // Unmangle the header as best we can.
+      $key = substr($key, strlen('HTTP_'));
+      $key = str_replace('_', ' ', $key);
+      $key = strtolower($key);
+      $key = ucwords($key);
+      $key = str_replace(' ', '-', $key);
+
+      // By default, do not forward headers.
+      $should_forward = false;
+
+      // Forward "X-Hgarg-..." headers.
+      if (preg_match('/^X-Hgarg-/', $key)) {
+        $should_forward = true;
+      }
+
+      if ($should_forward) {
         $headers[] = array($key, $value);
         $seen[$key] = true;
       }

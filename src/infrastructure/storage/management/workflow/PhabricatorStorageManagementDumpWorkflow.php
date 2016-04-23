@@ -7,11 +7,20 @@ final class PhabricatorStorageManagementDumpWorkflow
     $this
       ->setName('dump')
       ->setExamples('**dump** [__options__]')
-      ->setSynopsis(pht('Dump all data in storage to stdout.'));
+      ->setSynopsis(pht('Dump all data in storage to stdout.'))
+      ->setArguments(
+        array(
+          array(
+            'name' => 'for-replica',
+            'help' => pht(
+              'Add __--master-data__ to the __mysqldump__ command, '.
+              'generating a CHANGE MASTER statement in the output.'),
+          ),
+        ));
   }
 
   public function didExecute(PhutilArgumentParser $args) {
-    $api     = $this->getAPI();
+    $api = $this->getAPI();
     $patches = $this->getPatches();
 
     $console = PhutilConsole::getConsole();
@@ -33,26 +42,46 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
-    $flag_password = '';
+    $has_password = false;
+
     $password = $api->getPassword();
     if ($password) {
       if (strlen($password->openEnvelope())) {
-        $flag_password = csprintf('-p%P', $password);
+        $has_password = true;
       }
     }
 
-    $flag_port = $port
-      ? csprintf('--port %d', $port)
-      : '';
+    $argv = array();
+    $argv[] = '--hex-blob';
+    $argv[] = '--single-transaction';
+    $argv[] = '--default-character-set=utf8';
 
-    return phutil_passthru(
-      'mysqldump --hex-blob --single-transaction --default-character-set=utf8 '.
-      '-u %s %C -h %s %C --databases %Ls',
-      $api->getUser(),
-      $flag_password,
-      $host,
-      $flag_port,
-      $databases);
+    if ($args->getArg('for-replica')) {
+      $argv[] = '--master-data';
+    }
+
+    $argv[] = '-u';
+    $argv[] = $api->getUser();
+    $argv[] = '-h';
+    $argv[] = $host;
+
+    if ($port) {
+      $argv[] = '--port';
+      $argv[] = $port;
+    }
+
+    $argv[] = '--databases';
+    foreach ($databases as $database) {
+      $argv[] = $database;
+    }
+
+    if ($has_password) {
+      $err = phutil_passthru('mysqldump -p%P %Ls', $password, $argv);
+    } else {
+      $err = phutil_passthru('mysqldump %Ls', $argv);
+    }
+
+    return $err;
   }
 
 }

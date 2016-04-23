@@ -153,17 +153,17 @@ final class PhabricatorConfigDatabaseIssueController
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('dbissue/');
-    $nav->appendChild(
-      array(
-        $crumbs,
-        $table_box,
-      ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $table_box,
+    ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

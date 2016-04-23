@@ -91,14 +91,16 @@ final class PhabricatorConfigDatabaseStatusController
       $crumbs->addTextCrumb(pht('Database Status'));
     }
 
-    $nav->setCrumbs($crumbs);
-    $nav->appendChild($body);
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $body,
+    ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 

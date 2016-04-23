@@ -288,7 +288,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $description = new PHUIRemarkupView($viewer, $description);
       $view->addTextContent($description);
       return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('DESCRIPTION'))
+        ->setHeaderText(pht('Description'))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->appendChild($view);
     }
@@ -354,7 +354,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($view);
 

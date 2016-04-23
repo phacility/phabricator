@@ -35,7 +35,7 @@ final class PhabricatorPasteEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit %s %s', $object->getMonogram(), $object->getTitle());
+    return pht('Edit Paste: %s', $object->getTitle());
   }
 
   protected function getObjectEditShortText($object) {
@@ -44,6 +44,10 @@ final class PhabricatorPasteEditEngine
 
   protected function getObjectCreateShortText() {
     return pht('Create Paste');
+  }
+
+  protected function getObjectName() {
+    return pht('Paste');
   }
 
   protected function getCommentViewHeaderText($object) {

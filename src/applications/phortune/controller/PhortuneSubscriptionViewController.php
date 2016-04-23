@@ -82,7 +82,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       $autopay_method);
 
     $details = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 

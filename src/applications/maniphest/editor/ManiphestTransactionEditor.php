@@ -3,6 +3,8 @@
 final class ManiphestTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $moreValidationErrors = array();
+
   public function getEditorApplicationClass() {
     return 'PhabricatorManiphestApplication';
   }
@@ -22,14 +24,13 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_DESCRIPTION;
     $types[] = ManiphestTransaction::TYPE_OWNER;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
-    $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
     $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
     $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
     $types[] = ManiphestTransaction::TYPE_PARENT;
-    $types[] = ManiphestTransaction::TYPE_COLUMN;
     $types[] = ManiphestTransaction::TYPE_COVER_IMAGE;
     $types[] = ManiphestTransaction::TYPE_POINTS;
+    $types[] = PhabricatorTransactions::TYPE_COLUMNS;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -63,9 +64,6 @@ final class ManiphestTransactionEditor
         return $object->getDescription();
       case ManiphestTransaction::TYPE_OWNER:
         return nonempty($object->getOwnerPHID(), null);
-      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
-        // These are pre-populated.
-        return $xaction->getOldValue();
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         return $object->getSubpriority();
       case ManiphestTransaction::TYPE_COVER_IMAGE:
@@ -80,7 +78,7 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_MERGED_FROM:
         return null;
       case ManiphestTransaction::TYPE_PARENT:
-      case ManiphestTransaction::TYPE_COLUMN:
+      case PhabricatorTransactions::TYPE_COLUMNS:
         return null;
     }
   }
@@ -98,14 +96,13 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_TITLE:
       case ManiphestTransaction::TYPE_DESCRIPTION:
       case ManiphestTransaction::TYPE_SUBPRIORITY:
-      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
       case ManiphestTransaction::TYPE_MERGED_INTO:
       case ManiphestTransaction::TYPE_MERGED_FROM:
       case ManiphestTransaction::TYPE_UNBLOCK:
       case ManiphestTransaction::TYPE_COVER_IMAGE:
         return $xaction->getNewValue();
       case ManiphestTransaction::TYPE_PARENT:
-      case ManiphestTransaction::TYPE_COLUMN:
+      case PhabricatorTransactions::TYPE_COLUMNS:
         return $xaction->getNewValue();
       case ManiphestTransaction::TYPE_POINTS:
         $value = $xaction->getNewValue();
@@ -127,12 +124,8 @@ final class ManiphestTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
-        $new_column_phids = $new['columnPHIDs'];
-        $old_column_phids = $old['columnPHIDs'];
-        sort($new_column_phids);
-        sort($old_column_phids);
-        return ($old !== $new);
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        return (bool)$new;
     }
 
     return parent::transactionHasEffect($object, $xaction);
@@ -175,9 +168,6 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         $object->setSubpriority($xaction->getNewValue());
         return;
-      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
-        // these do external (edge) updates
-        return;
       case ManiphestTransaction::TYPE_MERGED_INTO:
         $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
         return;
@@ -212,7 +202,7 @@ final class ManiphestTransactionEditor
         return;
       case ManiphestTransaction::TYPE_MERGED_FROM:
       case ManiphestTransaction::TYPE_PARENT:
-      case ManiphestTransaction::TYPE_COLUMN:
+      case PhabricatorTransactions::TYPE_COLUMNS:
         return;
     }
   }
@@ -231,125 +221,10 @@ final class ManiphestTransactionEditor
           ->addEdge($parent_phid, $parent_type, $task_phid)
           ->save();
         break;
-      case ManiphestTransaction::TYPE_PROJECT_COLUMN:
-        $board_phid = idx($xaction->getNewValue(), 'projectPHID');
-        if (!$board_phid) {
-          throw new Exception(
-            pht(
-              "Expected '%s' in column transaction.",
-              'projectPHID'));
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        foreach ($xaction->getNewValue() as $move) {
+          $this->applyBoardMove($object, $move);
         }
-
-        $old_phids = idx($xaction->getOldValue(), 'columnPHIDs', array());
-        $new_phids = idx($xaction->getNewValue(), 'columnPHIDs', array());
-        if (count($new_phids) !== 1) {
-          throw new Exception(
-            pht(
-              "Expected exactly one '%s' in column transaction.",
-              'columnPHIDs'));
-        }
-
-        $before_phid = idx($xaction->getNewValue(), 'beforePHID');
-        $after_phid = idx($xaction->getNewValue(), 'afterPHID');
-
-        if (!$before_phid && !$after_phid && ($old_phids == $new_phids)) {
-          // If we are not moving the object between columns and also not
-          // reordering the position, this is a move on some other order
-          // (like priority). We can leave the positions untouched and just
-          // bail, there's no work to be done.
-          return;
-        }
-
-        // Otherwise, we're either moving between columns or adjusting the
-        // object's position in the "natural" ordering, so we do need to update
-        // some rows.
-
-        $object_phid = $object->getPHID();
-
-        // We're doing layout with the ominpotent viewer to make sure we don't
-        // remove positions in columns that exist, but which the actual actor
-        // can't see.
-        $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
-
-        $select_phids = array($board_phid);
-
-        $descendants = id(new PhabricatorProjectQuery())
-          ->setViewer($omnipotent_viewer)
-          ->withAncestorProjectPHIDs($select_phids)
-          ->execute();
-        foreach ($descendants as $descendant) {
-          $select_phids[] = $descendant->getPHID();
-        }
-
-        $board_tasks = id(new ManiphestTaskQuery())
-          ->setViewer($omnipotent_viewer)
-          ->withEdgeLogicPHIDs(
-            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-            PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
-            array($select_phids))
-          ->execute();
-
-        $board_tasks = mpull($board_tasks, null, 'getPHID');
-        $board_tasks[$object_phid] = $object;
-
-        // Make sure tasks are sorted by ID, so we lay out new positions in
-        // a consistent way.
-        $board_tasks = msort($board_tasks, 'getID');
-
-        $object_phids = array_keys($board_tasks);
-
-        $engine = id(new PhabricatorBoardLayoutEngine())
-          ->setViewer($omnipotent_viewer)
-          ->setBoardPHIDs(array($board_phid))
-          ->setObjectPHIDs($object_phids)
-          ->executeLayout();
-
-        // TODO: This logic needs to be revised if we legitimately support
-        // multiple column positions.
-
-        // NOTE: When a task is newly created, it's implicitly added to the
-        // backlog but we don't currently record that in the "$old_phids". Just
-        // clean it up for now.
-        $columns = $engine->getObjectColumns($board_phid, $object_phid);
-        foreach ($columns as $column) {
-          $engine->queueRemovePosition(
-            $board_phid,
-            $column->getPHID(),
-            $object_phid);
-        }
-
-        // Remove all existing column positions on the board.
-        foreach ($old_phids as $column_phid) {
-          $engine->queueRemovePosition(
-            $board_phid,
-            $column_phid,
-            $object_phid);
-        }
-
-        // Add new positions.
-        foreach ($new_phids as $column_phid) {
-          if ($before_phid) {
-            $engine->queueAddPositionBefore(
-              $board_phid,
-              $column_phid,
-              $object_phid,
-              $before_phid);
-          } else if ($after_phid) {
-            $engine->queueAddPositionAfter(
-              $board_phid,
-              $column_phid,
-              $object_phid,
-              $after_phid);
-          } else {
-            $engine->queueAddPosition(
-              $board_phid,
-              $column_phid,
-              $object_phid);
-          }
-        }
-
-        $engine->applyPositionUpdates();
-
         break;
       default:
         break;
@@ -492,13 +367,12 @@ final class ManiphestTransactionEditor
 
 
     $board_phids = array();
-    $type_column = ManiphestTransaction::TYPE_PROJECT_COLUMN;
+    $type_columns = PhabricatorTransactions::TYPE_COLUMNS;
     foreach ($xactions as $xaction) {
-      if ($xaction->getTransactionType() == $type_column) {
-        $new = $xaction->getNewValue();
-        $project_phid = idx($new, 'projectPHID');
-        if ($project_phid) {
-          $board_phids[] = $project_phid;
+      if ($xaction->getTransactionType() == $type_columns) {
+        $moves = $xaction->getNewValue();
+        foreach ($moves as $move) {
+          $board_phids[] = $move['boardPHID'];
         }
       }
     }
@@ -815,38 +689,6 @@ final class ManiphestTransactionEditor
             last($with_effect));
         }
         break;
-      case ManiphestTransaction::TYPE_COLUMN:
-        $with_effect = array();
-        foreach ($xactions as $xaction) {
-          $column_phid = $xaction->getNewValue();
-          if (!$column_phid) {
-            continue;
-          }
-
-          $with_effect[] = $xaction;
-
-          $column = $this->loadProjectColumn($column_phid);
-          if (!$column) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht(
-                'Column PHID "%s" does not identify a visible column.',
-                $column_phid),
-              $xaction);
-          }
-        }
-
-        if ($with_effect && !$this->getIsNewObject()) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht(
-              'You can only put a task into an initial column during task '.
-              'creation.'),
-            last($with_effect));
-        }
-        break;
       case ManiphestTransaction::TYPE_OWNER:
         foreach ($xactions as $xaction) {
           $old = $xaction->getOldValue();
@@ -938,6 +780,19 @@ final class ManiphestTransactionEditor
     return $errors;
   }
 
+  protected function validateAllTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $errors = parent::validateAllTransactions($object, $xactions);
+
+    if ($this->moreValidationErrors) {
+      $errors = array_merge($errors, $this->moreValidationErrors);
+    }
+
+    return $errors;
+  }
+
   protected function expandTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -1009,28 +864,36 @@ final class ManiphestTransactionEditor
 
     $results = parent::expandTransaction($object, $xaction);
 
-    switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_COLUMN:
-        $column_phid = $xaction->getNewValue();
-        if (!$column_phid) {
-          break;
-        }
+    $type = $xaction->getTransactionType();
+    switch ($type) {
+      case PhabricatorTransactions::TYPE_COLUMNS:
+        try {
+          $this->buildMoveTransaction($object, $xaction);
 
-        // When a task is created into a column, we also generate a transaction
-        // to actually put it in that column.
-        $column = $this->loadProjectColumn($column_phid);
-        $results[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
-          ->setOldValue(
-            array(
-              'projectPHID' => $column->getProjectPHID(),
-              'columnPHIDs' => array(),
-            ))
-          ->setNewValue(
-            array(
-              'projectPHID' => $column->getProjectPHID(),
-              'columnPHIDs' => array($column->getPHID()),
-            ));
+          // Implicilty add the task to any boards that we're moving it
+          // on, since moves on a board the task isn't part of are not
+          // meaningful.
+          $board_phids = ipull($xaction->getNewValue(), 'boardPHID');
+          if ($board_phids) {
+            $results[] = id(new ManiphestTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+              ->setMetadataValue(
+                'edge:type',
+                PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+              ->setIgnoreOnNoEffect(true)
+              ->setNewValue(
+                array(
+                  '+' => array_fuse($board_phids),
+                ));
+          }
+        } catch (Exception $ex) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            $ex->getMessage(),
+            $xaction);
+          $this->moreValidationErrors[] = $error;
+        }
         break;
       case ManiphestTransaction::TYPE_OWNER:
         // If this is a no-op update, don't expand it.
@@ -1057,13 +920,6 @@ final class ManiphestTransactionEditor
     return $results;
   }
 
-  private function loadProjectColumn($column_phid) {
-    return id(new PhabricatorProjectColumnQuery())
-      ->setViewer($this->getActor())
-      ->withPHIDs(array($column_phid))
-      ->executeOne();
-  }
-
   protected function extractFilePHIDsFromCustomTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -1077,6 +933,265 @@ final class ManiphestTransactionEditor
 
     return $phids;
   }
+
+  private function buildMoveTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $new = $xaction->getNewValue();
+    if (!is_array($new)) {
+      $this->validateColumnPHID($new);
+      $new = array($new);
+    }
+
+    $nearby_phids = array();
+    foreach ($new as $key => $value) {
+      if (!is_array($value)) {
+        $this->validateColumnPHID($value);
+        $value = array(
+          'columnPHID' => $value,
+        );
+      }
+
+      PhutilTypeSpec::checkMap(
+        $value,
+        array(
+          'columnPHID' => 'string',
+          'beforePHID' => 'optional string',
+          'afterPHID' => 'optional string',
+        ));
+
+      $new[$key] = $value;
+
+      if (!empty($value['beforePHID'])) {
+        $nearby_phids[] = $value['beforePHID'];
+      }
+
+      if (!empty($value['afterPHID'])) {
+        $nearby_phids[] = $value['afterPHID'];
+      }
+    }
+
+    if ($nearby_phids) {
+      $nearby_objects = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($nearby_phids)
+        ->execute();
+      $nearby_objects = mpull($nearby_objects, null, 'getPHID');
+    } else {
+      $nearby_objects = array();
+    }
+
+    $column_phids = ipull($new, 'columnPHID');
+    if ($column_phids) {
+      $columns = id(new PhabricatorProjectColumnQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($column_phids)
+        ->execute();
+      $columns = mpull($columns, null, 'getPHID');
+    } else {
+      $columns = array();
+    }
+
+    $board_phids = mpull($columns, 'getProjectPHID');
+    $object_phid = $object->getPHID();
+
+    $object_phids = $nearby_phids;
+
+    // Note that we may not have an object PHID if we're creating a new
+    // object.
+    if ($object_phid) {
+      $object_phids[] = $object_phid;
+    }
+
+    if ($object_phids) {
+      $layout_engine = id(new PhabricatorBoardLayoutEngine())
+        ->setViewer($this->getActor())
+        ->setBoardPHIDs($board_phids)
+        ->setObjectPHIDs($object_phids)
+        ->setFetchAllBoards(true)
+        ->executeLayout();
+    }
+
+    foreach ($new as $key => $spec) {
+      $column_phid = $spec['columnPHID'];
+      $column = idx($columns, $column_phid);
+      if (!$column) {
+        throw new Exception(
+          pht(
+            'Column move transaction specifies column PHID "%s", but there '.
+            'is no corresponding column with this PHID.',
+            $column_phid));
+      }
+
+      $board_phid = $column->getProjectPHID();
+
+      $nearby = array();
+
+      if (!empty($spec['beforePHID'])) {
+        $nearby['beforePHID'] = $spec['beforePHID'];
+      }
+
+      if (!empty($spec['afterPHID'])) {
+        $nearby['afterPHID'] = $spec['afterPHID'];
+      }
+
+      if (count($nearby) > 1) {
+        throw new Exception(
+          pht(
+            'Column move transaction moves object to multiple positions. '.
+            'Specify only "beforePHID" or "afterPHID", not both.'));
+      }
+
+      foreach ($nearby as $where => $nearby_phid) {
+        if (empty($nearby_objects[$nearby_phid])) {
+          throw new Exception(
+            pht(
+              'Column move transaction specifies object "%s" as "%s", but '.
+              'there is no corresponding object with this PHID.',
+              $object_phid,
+              $where));
+        }
+
+        $nearby_columns = $layout_engine->getObjectColumns(
+          $board_phid,
+          $nearby_phid);
+        $nearby_columns = mpull($nearby_columns, null, 'getPHID');
+
+        if (empty($nearby_columns[$column_phid])) {
+          throw new Exception(
+            pht(
+              'Column move transaction specifies object "%s" as "%s" in '.
+              'column "%s", but this object is not in that column!',
+              $nearby_phid,
+              $where,
+              $column_phid));
+        }
+      }
+
+      if ($object_phid) {
+        $old_columns = $layout_engine->getObjectColumns(
+          $board_phid,
+          $object_phid);
+        $old_column_phids = mpull($old_columns, 'getPHID');
+      } else {
+        $old_column_phids = array();
+      }
+
+      $spec += array(
+        'boardPHID' => $board_phid,
+        'fromColumnPHIDs' => $old_column_phids,
+      );
+
+      // Check if the object is already in this column, and isn't being moved.
+      // We can just drop this column change if it has no effect.
+      $from_map = array_fuse($spec['fromColumnPHIDs']);
+      $already_here = isset($from_map[$column_phid]);
+      $is_reordering = (bool)$nearby;
+
+      if ($already_here && !$is_reordering) {
+        unset($new[$key]);
+      } else {
+        $new[$key] = $spec;
+      }
+    }
+
+    $new = array_values($new);
+    $xaction->setNewValue($new);
+  }
+
+  private function applyBoardMove($object, array $move) {
+    $board_phid = $move['boardPHID'];
+    $column_phid = $move['columnPHID'];
+    $before_phid = idx($move, 'beforePHID');
+    $after_phid = idx($move, 'afterPHID');
+
+    $object_phid = $object->getPHID();
+
+    // We're doing layout with the ominpotent viewer to make sure we don't
+    // remove positions in columns that exist, but which the actual actor
+    // can't see.
+    $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
+
+    $select_phids = array($board_phid);
+
+    $descendants = id(new PhabricatorProjectQuery())
+      ->setViewer($omnipotent_viewer)
+      ->withAncestorProjectPHIDs($select_phids)
+      ->execute();
+    foreach ($descendants as $descendant) {
+      $select_phids[] = $descendant->getPHID();
+    }
+
+    $board_tasks = id(new ManiphestTaskQuery())
+      ->setViewer($omnipotent_viewer)
+      ->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_ANCESTOR,
+        array($select_phids))
+      ->execute();
+
+    $board_tasks = mpull($board_tasks, null, 'getPHID');
+    $board_tasks[$object_phid] = $object;
+
+    // Make sure tasks are sorted by ID, so we lay out new positions in
+    // a consistent way.
+    $board_tasks = msort($board_tasks, 'getID');
+
+    $object_phids = array_keys($board_tasks);
+
+    $engine = id(new PhabricatorBoardLayoutEngine())
+      ->setViewer($omnipotent_viewer)
+      ->setBoardPHIDs(array($board_phid))
+      ->setObjectPHIDs($object_phids)
+      ->executeLayout();
+
+    // TODO: This logic needs to be revised when we legitimately support
+    // multiple column positions.
+    $columns = $engine->getObjectColumns($board_phid, $object_phid);
+    foreach ($columns as $column) {
+      $engine->queueRemovePosition(
+        $board_phid,
+        $column->getPHID(),
+        $object_phid);
+    }
+
+    if ($before_phid) {
+      $engine->queueAddPositionBefore(
+        $board_phid,
+        $column_phid,
+        $object_phid,
+        $before_phid);
+    } else if ($after_phid) {
+      $engine->queueAddPositionAfter(
+        $board_phid,
+        $column_phid,
+        $object_phid,
+        $after_phid);
+    } else {
+      $engine->queueAddPosition(
+        $board_phid,
+        $column_phid,
+        $object_phid);
+    }
+
+    $engine->applyPositionUpdates();
+  }
+
+
+  private function validateColumnPHID($value) {
+    if (phid_get_type($value) == PhabricatorProjectColumnPHIDType::TYPECONST) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'When moving objects between columns on a board, columns must '.
+        'be identified by PHIDs. This transaction uses "%s" to identify '.
+        'a column, but that is not a valid column PHID.',
+        $value));
+  }
+
 
 
 }

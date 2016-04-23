@@ -345,6 +345,18 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
     if ($site->shouldRequireHTTPS()) {
       if (!$request->isHTTPS()) {
+
+        // Don't redirect intracluster requests: doing so drops headers and
+        // parameters, imposes a performance penalty, and indicates a
+        // misconfiguration.
+        if ($request->isProxiedClusterRequest()) {
+          throw new AphrontMalformedRequestException(
+            pht('HTTPS Required'),
+            pht(
+              'This request reached a site which requires HTTPS, but the '.
+              'request is not marked as HTTPS.'));
+        }
+
         $https_uri = $request->getRequestURI();
         $https_uri->setDomain($request->getHost());
         $https_uri->setProtocol('https');

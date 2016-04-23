@@ -19,7 +19,6 @@ final class PonderQuestionCommentController extends PonderController {
     }
 
     $is_preview = $request->isPreviewRequest();
-//    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $qid = $question->getID();
     $view_uri = "/Q{$qid}";
@@ -44,10 +43,6 @@ final class PonderQuestionCommentController extends PonderController {
         ->setCancelURI($view_uri)
         ->setException($ex);
     }
-
-//    if ($draft) {
-//      $draft->replaceOrDelete();
-//    }
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())

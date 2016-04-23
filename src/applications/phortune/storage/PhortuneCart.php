@@ -431,8 +431,7 @@ final class PhortuneCart extends PhortuneDAO
       ->setNewValue(true);
 
     $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_PHORTUNE,
-      array());
+      PhabricatorPhortuneContentSource::SOURCECONST);
 
     $editor = id(new PhortuneCartEditor())
       ->setActor($omnipotent_user)

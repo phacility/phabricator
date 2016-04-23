@@ -10,16 +10,6 @@ final class PHUIBadgeView extends AphrontTagView {
   private $subhead;
   private $bylines = array();
 
-  // Yes, World of Warcraft Item Quality
-  const POOR = 'grey';
-  const COMMON = 'white';
-  const UNCOMMON = 'green';
-  const RARE = 'blue';
-  const EPIC = 'indigo';
-  const LEGENDARY = 'orange';
-  const HEIRLOOM = 'yellow';
-
-
   public function setIcon($icon) {
     $this->icon = $icon;
     return $this;
@@ -33,6 +23,14 @@ final class PHUIBadgeView extends AphrontTagView {
   public function setQuality($quality) {
     $this->quality = $quality;
     return $this;
+  }
+
+  private function getQualityColor() {
+    return PhabricatorBadgesQuality::getQualityColor($this->quality);
+  }
+
+  private function getQualityName() {
+    return PhabricatorBadgesQuality::getQualityName($this->quality);
   }
 
   public function setSource($source) {
@@ -55,26 +53,6 @@ final class PHUIBadgeView extends AphrontTagView {
     return $this;
   }
 
-  private function getQualityTitle() {
-
-    switch ($this->quality) {
-      case self::POOR:
-        return pht('Poor');
-      case self::COMMON:
-        return pht('Common');
-      case self::UNCOMMON:
-        return pht('Uncommon');
-      case self::RARE:
-        return pht('Rare');
-      case self::EPIC:
-        return pht('Epic');
-      case self::LEGENDARY:
-        return pht('Legendary');
-      case self::HEIRLOOM:
-        return pht('Heirloom');
-      }
-  }
-
   protected function getTagName() {
     return 'span';
   }
@@ -83,15 +61,18 @@ final class PHUIBadgeView extends AphrontTagView {
     require_celerity_resource('phui-badge-view-css');
     $id = celerity_generate_unique_node_id();
 
+    Javelin::initBehavior('badge-view', array());
+
     $classes = array();
     $classes[] = 'phui-badge-view';
     if ($this->quality) {
-      $classes[] = 'phui-badge-view-'.$this->quality;
+      $color = $this->getQualityColor();
+      $classes[] = 'phui-badge-view-'.$color;
     }
 
     return array(
         'class' => implode(' ', $classes),
-        'sigil' => 'jx-toggle-class',
+        'sigil' => 'jx-badge-view',
         'id'    => $id,
         'meta'  => array(
           'map' => array(
@@ -131,7 +112,7 @@ final class PHUIBadgeView extends AphrontTagView {
       ),
       array($header, $subhead));
 
-    $quality = phutil_tag_div('phui-badge-quality', $this->getQualityTitle());
+    $quality = phutil_tag_div('phui-badge-quality', $this->getQualityName());
     $source = phutil_tag_div('phui-badge-source', $this->source);
 
     $bylines = array();

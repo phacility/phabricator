@@ -87,11 +87,12 @@ final class PhabricatorXHProfSampleListController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('XHProf Samples'));
 
-    return $this->buildApplicationPage(
-      array($crumbs, $list),
-      array(
-        'title' => pht('XHProf Samples'),
-      ));
+    $title = pht('XHProf Samples');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($list);
 
   }
 }

@@ -6,11 +6,12 @@ final class PhabricatorAphlictManagementStatusWorkflow
   protected function didConstruct() {
     $this
       ->setName('status')
-      ->setSynopsis(pht('Show the status of the notifications server.'))
-      ->setArguments(array());
+      ->setSynopsis(pht('Show the status of the notification server.'))
+      ->setArguments($this->getLaunchArguments());
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $this->parseLaunchArguments($args);
     $console = PhutilConsole::getConsole();
     $pid = $this->getPID();
 

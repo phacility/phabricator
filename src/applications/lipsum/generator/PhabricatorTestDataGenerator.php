@@ -56,8 +56,7 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
 
   protected function getLipsumContentSource() {
     return PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LIPSUM,
-      array());
+      PhabricatorLipsumContentSource::SOURCECONST);
   }
 
   /**

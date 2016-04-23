@@ -69,7 +69,8 @@ final class PhabricatorCalendarEventEditController
       $recurrence_end_date_value->setOptional(true);
 
       $submit_label = pht('Create');
-      $page_title = pht('Create Event');
+      $title = pht('Create Event');
+      $header_icon = 'fa-plus-square';
       $redirect = 'created';
       $subscribers = array();
       $invitees = array($user_phid);
@@ -121,7 +122,8 @@ final class PhabricatorCalendarEventEditController
         ->setOptional(true);
 
       $submit_label = pht('Update');
-      $page_title   = pht('Update Event');
+      $title = pht('Edit Event: %s', $event->getName());
+      $header_icon = 'fa-pencil';
 
       $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $event->getPHID());
@@ -457,7 +459,7 @@ final class PhabricatorCalendarEventEditController
     }
 
     $projects = id(new AphrontFormTokenizerControl())
-      ->setLabel(pht('Projects'))
+      ->setLabel(pht('Tags'))
       ->setName('projects')
       ->setValue($projects)
       ->setUser($viewer)
@@ -540,7 +542,7 @@ final class PhabricatorCalendarEventEditController
 
     if ($request->isAjax()) {
       return $this->newDialog()
-        ->setTitle($page_title)
+        ->setTitle($title)
         ->setWidth(AphrontDialogView::WIDTH_FULL)
         ->appendForm($form)
         ->addCancelButton($cancel_uri)
@@ -554,30 +556,35 @@ final class PhabricatorCalendarEventEditController
     $form->appendChild($submit);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($page_title)
+      ->setHeaderText(pht('Event'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setValidationException($validation_exception)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
 
     if (!$this->isCreate()) {
       $crumbs->addTextCrumb('E'.$event->getId(), '/E'.$event->getId());
+      $crumb_title = pht('Edit Event');
+    } else {
+      $crumb_title = pht('Create Event');
     }
 
-    $crumbs->addTextCrumb($page_title);
+    $crumbs->addTextCrumb($crumb_title);
+    $crumbs->setBorder(true);
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($page_title)
-      ->setValidationException($validation_exception)
-      ->appendChild($form);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-      ),
-      array(
-        'title' => $page_title,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 

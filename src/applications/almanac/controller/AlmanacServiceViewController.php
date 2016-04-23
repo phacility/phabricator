@@ -81,7 +81,7 @@ final class AlmanacServiceViewController
       $service->getServiceImplementation()->getServiceTypeShortName());
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
   }
@@ -132,7 +132,7 @@ final class AlmanacServiceViewController
       ->setHideServiceColumn(true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('SERVICE BINDINGS'))
+      ->setHeader(pht('Service Bindings'))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')

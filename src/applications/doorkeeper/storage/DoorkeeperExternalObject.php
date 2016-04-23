@@ -47,7 +47,7 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_XOBJ);
+      DoorkeeperExternalObjectPHIDType::TYPECONST);
   }
 
   public function getProperty($key, $default = null) {
@@ -83,6 +83,27 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
     return parent::save();
   }
 
+  public function setDisplayName($display_name) {
+    return $this->setProperty('xobj.name.display', $display_name);
+  }
+
+  public function getDisplayName() {
+    return $this->getProperty('xobj.name.display', pht('External Object'));
+  }
+
+  public function setDisplayFullName($full_name) {
+    return $this->setProperty('xobj.name.display-full', $full_name);
+  }
+
+  public function getDisplayFullName() {
+    $full_name = $this->getProperty('xobj.name.display-full');
+
+    if ($full_name !== null) {
+      return $full_name;
+    }
+
+    return $this->getDisplayName();
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

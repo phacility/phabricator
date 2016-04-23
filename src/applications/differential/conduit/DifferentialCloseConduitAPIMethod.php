@@ -45,13 +45,11 @@ final class DifferentialCloseConduitAPIMethod
       ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
       ->setNewValue(DifferentialAction::ACTION_CLOSE);
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
-      array());
+    $content_source = $request->newContentSource();
 
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect(true);
 

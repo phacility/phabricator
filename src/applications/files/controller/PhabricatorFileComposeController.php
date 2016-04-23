@@ -155,8 +155,7 @@ final class PhabricatorFileComposeController
         'defaultIcon' => $value_icon,
       ));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setFormID($dialog_id)
       ->setClass('compose-dialog')
       ->setTitle(pht('Compose Image'))
@@ -188,8 +187,6 @@ final class PhabricatorFileComposeController
       ->appendChild($icon_input)
       ->addCancelButton('/')
       ->addSubmitButton(pht('Save Image'));
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
   private function getIconMap() {

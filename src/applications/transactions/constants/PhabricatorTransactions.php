@@ -14,6 +14,7 @@ final class PhabricatorTransactions extends Phobject {
   const TYPE_INLINESTATE  = 'core:inlinestate';
   const TYPE_SPACE = 'core:space';
   const TYPE_CREATE = 'core:create';
+  const TYPE_COLUMNS = 'core:columns';
 
   const COLOR_RED         = 'red';
   const COLOR_ORANGE      = 'orange';

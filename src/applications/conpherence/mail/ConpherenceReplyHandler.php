@@ -48,11 +48,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
       $conpherence->attachParticipants($participants);
     }
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_EMAIL,
-      array(
-        'id' => $mail->getID(),
-      ));
+    $content_source = $mail->newContentSource();
 
     $editor = id(new ConpherenceEditor())
       ->setActor($user)

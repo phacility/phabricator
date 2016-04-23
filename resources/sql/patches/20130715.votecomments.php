@@ -46,9 +46,8 @@ foreach ($comments as $comment) {
     PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
     PhabricatorSlowvotePollPHIDType::TYPECONST);
 
-  $source = PhabricatorContentSource::newForSource(
-    PhabricatorContentSource::SOURCE_LEGACY,
-    array())->serialize();
+  $content_source = PhabricatorContentSource::newForSource(
+    PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
   queryfx(
     $conn_w,

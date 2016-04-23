@@ -371,4 +371,12 @@ EOBODY
       ->saveAndSend();
   }
 
+  public function newContentSource() {
+    return PhabricatorContentSource::newForSource(
+      PhabricatorEmailContentSource::SOURCECONST,
+      array(
+        'id' => $this->getID(),
+      ));
+  }
+
 }

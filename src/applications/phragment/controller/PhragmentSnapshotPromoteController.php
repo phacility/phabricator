@@ -2,32 +2,26 @@
 
 final class PhragmentSnapshotPromoteController extends PhragmentController {
 
-  private $dblob;
-  private $id;
   private $targetSnapshot;
   private $targetFragment;
   private $snapshots;
   private $options;
 
-  public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, 'dblob', null);
-    $this->id = idx($data, 'id', null);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $dblob = $request->getURIData('dblob');
 
     // When the user is promoting a snapshot to the latest version, the
     // identifier is a fragment path.
-    if ($this->dblob !== null) {
+    if ($dblob !== null) {
       $this->targetFragment = id(new PhragmentFragmentQuery())
         ->setViewer($viewer)
         ->requireCapabilities(array(
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-        ->withPaths(array($this->dblob))
+        ->withPaths(array($dblob))
         ->executeOne();
       if ($this->targetFragment === null) {
         return new Aphront404Response();
@@ -41,14 +35,14 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
 
     // When the user is promoting a snapshot to another snapshot, the
     // identifier is another snapshot ID.
-    if ($this->id !== null) {
+    if ($id !== null) {
       $this->targetSnapshot = id(new PhragmentSnapshotQuery())
         ->setViewer($viewer)
         ->requireCapabilities(array(
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->executeOne();
       if ($this->targetSnapshot === null) {
         return new Aphront404Response();
@@ -72,8 +66,8 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
       $this->snapshots,
       'getName',
       'getID');
-    if ($this->id !== null) {
-      unset($this->options[$this->id]);
+    if ($id !== null) {
+      unset($this->options[$id]);
     }
 
     // If there's no options, show a dialog telling the
@@ -84,7 +78,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
           ->setTitle(pht('No snapshots to promote'))
           ->appendParagraph(pht(
             'There are no snapshots available to promote.'))
-          ->setUser($request->getUser())
+          ->setUser($this->getViewer())
           ->addCancelButton(pht('Cancel')));
     }
 
@@ -108,7 +102,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
           $child->delete();
         }
 
-        if ($this->id === null) {
+        if ($id === null) {
           // The user is promoting the snapshot to the latest version.
           $children = id(new PhragmentFragmentQuery())
             ->setViewer($viewer)
@@ -150,7 +144,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         }
       $snapshot->saveTransaction();
 
-      if ($this->id === null) {
+      if ($id === null) {
         return id(new AphrontRedirectResponse())
           ->setURI($this->targetFragment->getURI());
       } else {
@@ -159,20 +153,19 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
       }
     }
 
-    return $this->createDialog();
+    return $this->createDialog($id);
   }
 
-  public function createDialog() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function createDialog($id) {
+    $viewer = $this->getViewer();
 
     $dialog = id(new AphrontDialogView())
       ->setTitle(pht('Promote which snapshot?'))
-      ->setUser($request->getUser())
+      ->setUser($this->getViewer())
       ->addSubmitButton(pht('Promote'))
       ->addCancelButton(pht('Cancel'));
 
-    if ($this->id === null) {
+    if ($id === null) {
       // The user is promoting a snapshot to the latest version.
       $dialog->appendParagraph(pht(
         'Select the snapshot you want to promote to the latest version:'));

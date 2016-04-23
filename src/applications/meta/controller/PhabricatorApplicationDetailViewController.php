@@ -63,7 +63,7 @@ final class PhabricatorApplicationDetailViewController
           $policies,
           $panels,
         ))
-      ->addPropertySection(pht('DETAILS'), $details);
+      ->addPropertySection(pht('Details'), $details);
 
     return $this->newPage()
       ->setTitle($title)
@@ -123,8 +123,7 @@ final class PhabricatorApplicationDetailViewController
     PhabricatorApplication $application) {
 
     $viewer = $this->getViewer();
-    $properties = id(new PHUIPropertyListView())
-      ->setStacked(true);
+    $properties = id(new PHUIPropertyListView());
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('POLICIES'))

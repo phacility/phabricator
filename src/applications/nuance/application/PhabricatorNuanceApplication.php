@@ -56,11 +56,6 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
           $this->getEditRoutePattern('edit/') => 'NuanceQueueEditController',
           'view/(?P<id>[1-9]\d*)/' => 'NuanceQueueViewController',
         ),
-        'requestor/' => array(
-          'view/(?P<id>[1-9]\d*)/' => 'NuanceRequestorViewController',
-          'edit/(?P<id>[1-9]\d*)/' => 'NuanceRequestorEditController',
-          'new/'                   => 'NuanceRequestorEditController',
-        ),
       ),
       '/action/' => array(
         '(?P<id>[1-9]\d*)/(?P<path>.*)' => 'NuanceSourceActionController',

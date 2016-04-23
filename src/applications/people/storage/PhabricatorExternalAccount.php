@@ -54,14 +54,12 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
         'accountURI' => 'text255?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'account_details' => array(
           'columns' => array('accountType', 'accountDomain', 'accountID'),
           'unique' => true,
+        ),
+        'key_user' => array(
+          'columns' => array('userPHID'),
         ),
       ),
     ) + parent::getConfiguration();

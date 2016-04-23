@@ -15,8 +15,7 @@ final class PhabricatorDisabledUserController
       return new Aphront404Response();
     }
 
-    return id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('Account Disabled'))
       ->addCancelButton('/logout/', pht('Okay'))
       ->appendParagraph(pht('Your account has been disabled.'));

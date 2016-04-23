@@ -65,6 +65,13 @@ Continue to "Configuring Phabricator", below.
 Approach: CloudFlare
 ========
 
+WARNING: You should review all your CloudFlare settings, and be very
+sure to turn off all JavaScript, HTML, CSS minification and
+optimization features, including systems like "Rocket Loader". These
+features will break Phabricator in strange and mysterious ways that
+are unpredictable. Only allow CloudFlare to cache files, and never
+optimize them.
+
 [[ https://cloudflare.com | CloudFlare ]] is a general-purpose CDN service.
 
 To set up CloudFlare, you'll need to register a second domain and go through

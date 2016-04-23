@@ -28,14 +28,12 @@ final class ReleephProductHistoryController extends ReleephProductController {
     $crumbs->addTextCrumb(pht('History'));
     $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $timeline,
-      ),
-      array(
-        'title' => pht('Product History'),
-      ));
+    $title = pht('Product History');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($timeline);
   }
 
 }

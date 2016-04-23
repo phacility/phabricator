@@ -57,14 +57,11 @@ final class PhabricatorHelpKeyboardShortcutController
       array('class' => 'keyboard-shortcut-help'),
       $rows);
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('Keyboard Shortcuts'))
       ->appendChild($table)
       ->addCancelButton('#', pht('Close'));
 
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
 }

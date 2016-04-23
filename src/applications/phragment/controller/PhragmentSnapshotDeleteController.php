@@ -2,15 +2,9 @@
 
 final class PhragmentSnapshotDeleteController extends PhragmentController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $snapshot = id(new PhragmentSnapshotQuery())
       ->setViewer($viewer)
@@ -18,7 +12,7 @@ final class PhragmentSnapshotDeleteController extends PhragmentController {
         PhabricatorPolicyCapability::CAN_VIEW,
         PhabricatorPolicyCapability::CAN_EDIT,
       ))
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if ($snapshot === null) {
       return new Aphront404Response();
@@ -37,12 +31,11 @@ final class PhragmentSnapshotDeleteController extends PhragmentController {
   }
 
   public function createDialog() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $dialog = id(new AphrontDialogView())
       ->setTitle(pht('Really delete this snapshot?'))
-      ->setUser($request->getUser())
+      ->setUser($this->getViewer())
       ->addSubmitButton(pht('Delete'))
       ->addCancelButton(pht('Cancel'))
       ->appendParagraph(pht(

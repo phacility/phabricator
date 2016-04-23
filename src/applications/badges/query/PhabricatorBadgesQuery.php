@@ -36,6 +36,12 @@ final class PhabricatorBadgesQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new PhabricatorBadgesBadgeNameNgrams()),
+      $ngrams);
+  }
+
   public function needRecipients($need_recipients) {
     $this->needRecipients = $need_recipients;
     return $this;
@@ -45,27 +51,26 @@ final class PhabricatorBadgesQuery
     return $this->loadStandardPage($this->newResultObject());
   }
 
+  protected function getPrimaryTableAlias() {
+    return 'badges';
+  }
+
   public function newResultObject() {
     return new PhabricatorBadgesBadge();
   }
 
   protected function didFilterPage(array $badges) {
-
     if ($this->needRecipients) {
-      $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($badges, 'getPHID'))
-        ->withEdgeTypes(
-          array(
-            PhabricatorBadgeHasRecipientEdgeType::EDGECONST,
-          ));
-      $edge_query->execute();
+      $query = id(new PhabricatorBadgesAwardQuery())
+        ->setViewer($this->getViewer())
+        ->withBadgePHIDs(mpull($badges, 'getPHID'))
+        ->execute();
+
+      $awards = mgroup($query, 'getBadgePHID');
 
       foreach ($badges as $badge) {
-        $phids = $edge_query->getDestinationPHIDs(
-          array(
-            $badge->getPHID(),
-          ));
-        $badge->attachRecipientPHIDs($phids);
+        $badge_awards = idx($awards, $badge->getPHID(), array());
+        $badge->attachAwards($badge_awards);
       }
     }
 
@@ -78,28 +83,28 @@ final class PhabricatorBadgesQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'badges.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'badges.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->qualities !== null) {
       $where[] = qsprintf(
         $conn,
-        'quality IN (%Ls)',
+        'badges.quality IN (%Ls)',
         $this->qualities);
     }
 
     if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'badges.status IN (%Ls)',
         $this->statuses);
     }
 
@@ -108,6 +113,38 @@ final class PhabricatorBadgesQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorBadgesApplication';
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'quality' => array(
+        'vector' => array('quality', 'id'),
+        'name' => pht('Rarity (Rarest First)'),
+      ),
+      'shoddiness' => array(
+        'vector' => array('-quality', '-id'),
+        'name' => pht('Rarity (Most Common First)'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'quality' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'quality',
+        'reverse' => true,
+        'type' => 'int',
+      ),
+    ) + parent::getOrderableColumns();
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $badge = $this->loadCursorObject($cursor);
+    return array(
+      'quality' => $badge->getQuality(),
+      'id' => $badge->getID(),
+    );
   }
 
 }

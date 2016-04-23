@@ -83,8 +83,7 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
       phutil_tag(
         'a',
         array(
-          'href' => PhabricatorEnv::getDoclink(
-            'User Guide: Phabricator Clusters'),
+          'href' => PhabricatorEnv::getDoclink('Clustering Introduction'),
           'target' => '_blank',
         ),
         pht('Learn More')));

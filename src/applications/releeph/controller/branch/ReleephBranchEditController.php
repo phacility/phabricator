@@ -86,23 +86,29 @@ final class ReleephBranchEditController extends ReleephBranchController {
           ->setValue(pht('Save Branch')));
 
     $title = pht(
-      'Edit Branch %s',
+      'Edit Branch: %s',
       $branch->getDisplayNameWithDetail());
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Branch'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit'));
+    $crumbs->setBorder(true);
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->appendChild($form);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Branch'))
+      ->setHeaderIcon('fa-pencil');
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 }

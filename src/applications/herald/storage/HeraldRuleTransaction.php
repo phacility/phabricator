@@ -4,6 +4,7 @@ final class HeraldRuleTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_EDIT = 'herald:edit';
+  const TYPE_NAME = 'herald:name';
   const TYPE_DISABLE = 'herald:disable';
 
   public function getApplicationName() {
@@ -45,6 +46,8 @@ final class HeraldRuleTransaction
         } else {
           return pht('Enabled');
         }
+      case self::TYPE_NAME:
+        return pht('Renamed');
     }
 
     return parent::getActionName();
@@ -84,9 +87,49 @@ final class HeraldRuleTransaction
             '%s enabled this rule.',
             $this->renderHandleLink($author_phid));
         }
+      case self::TYPE_NAME:
+        if ($old == null) {
+          return pht(
+            '%s created this rule.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s renamed this rule from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
+      case self::TYPE_EDIT:
+        return pht(
+          '%s edited this rule.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
+  }
+
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_EDIT:
+        return true;
+    }
+    return parent::hasChangeDetails();
+  }
+
+  public function renderChangeDetails(PhabricatorUser $viewer) {
+    $json = new PhutilJSON();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_EDIT:
+        return $this->renderTextCorpusChangeDetails(
+          $viewer,
+          $json->encodeFormatted($this->getOldValue()),
+          $json->encodeFormatted($this->getNewValue()));
+    }
+
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $this->getOldValue(),
+      $this->getNewValue());
   }
 
 }

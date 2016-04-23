@@ -54,6 +54,10 @@ final class HarbormasterBuildPlanEditEngine
     return pht('Create Build Plan');
   }
 
+  protected function getObjectName() {
+    return pht('Build Plan');
+  }
+
   protected function getEditorURI() {
     return '/harbormaster/plan/edit/';
   }

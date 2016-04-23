@@ -24,6 +24,7 @@ abstract class PhabricatorEditField extends Phobject {
 
   private $commentActionLabel;
   private $commentActionValue;
+  private $commentActionOrder = 1000;
   private $hasCommentActionValue;
 
   private $isLocked;
@@ -241,6 +242,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getCommentActionLabel() {
     return $this->commentActionLabel;
+  }
+
+  public function setCommentActionOrder($order) {
+    $this->commentActionOrder = $order;
+    return $this;
+  }
+
+  public function getCommentActionOrder() {
+    return $this->commentActionOrder;
   }
 
   public function setCommentActionValue($comment_action_value) {
@@ -686,7 +696,8 @@ abstract class PhabricatorEditField extends Phobject {
     $action
       ->setKey($this->getKey())
       ->setLabel($label)
-      ->setValue($this->getValueForCommentAction($value));
+      ->setValue($this->getValueForCommentAction($value))
+      ->setOrder($this->getCommentActionOrder());
 
     return $action;
   }

@@ -56,6 +56,13 @@ final class PhabricatorEnv extends Phobject {
   private static $requestBaseURI;
   private static $cache;
   private static $localeCode;
+  private static $readOnly;
+  private static $readOnlyReason;
+
+  const READONLY_CONFIG = 'config';
+  const READONLY_UNREACHABLE = 'unreachable';
+  const READONLY_SEVERED = 'severed';
+  const READONLY_MASTERLESS = 'masterless';
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -84,6 +91,7 @@ final class PhabricatorEnv extends Phobject {
   private static function initializeCommonEnvironment() {
     PhutilErrorHandler::initialize();
 
+    self::resetUmask();
     self::buildConfigurationSourceStack();
 
     // Force a valid timezone. If both PHP and Phabricator configuration are
@@ -207,6 +215,16 @@ final class PhabricatorEnv extends Phobject {
 
     foreach ($site_sources as $site_source) {
       $stack->pushSource($site_source);
+    }
+
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
+    if (!$master) {
+      self::setReadOnly(true, self::READONLY_MASTERLESS);
+    } else if ($master->isSevered()) {
+      $master->checkHealth();
+      if ($master->isSevered()) {
+        self::setReadOnly(true, self::READONLY_SEVERED);
+      }
     }
 
     try {
@@ -439,6 +457,55 @@ final class PhabricatorEnv extends Phobject {
     self::$requestBaseURI = $uri;
   }
 
+  public static function isReadOnly() {
+    if (self::$readOnly !== null) {
+      return self::$readOnly;
+    }
+    return self::getEnvConfig('cluster.read-only');
+  }
+
+  public static function setReadOnly($read_only, $reason) {
+    self::$readOnly = $read_only;
+    self::$readOnlyReason = $reason;
+  }
+
+  public static function getReadOnlyMessage() {
+    $reason = self::getReadOnlyReason();
+    switch ($reason) {
+      case self::READONLY_MASTERLESS:
+        return pht(
+          'Phabricator is in read-only mode (no writable database '.
+          'is configured).');
+      case self::READONLY_UNREACHABLE:
+        return pht(
+          'Phabricator is in read-only mode (unreachable master).');
+      case self::READONLY_SEVERED:
+        return pht(
+          'Phabricator is in read-only mode (major interruption).');
+    }
+
+    return pht('Phabricator is in read-only mode.');
+  }
+
+  public static function getReadOnlyURI() {
+    return urisprintf(
+      '/readonly/%s/',
+      self::getReadOnlyReason());
+  }
+
+  public static function getReadOnlyReason() {
+    if (!self::isReadOnly()) {
+      return null;
+    }
+
+    if (self::$readOnlyReason !== null) {
+      return self::$readOnlyReason;
+    }
+
+    return self::READONLY_CONFIG;
+  }
+
+
 /* -(  Unit Test Support  )-------------------------------------------------- */
 
 
@@ -575,8 +642,8 @@ final class PhabricatorEnv extends Phobject {
    * @return void
    * @task uri
    */
-  public static function requireValidRemoteURIForLink($uri) {
-    $uri = new PhutilURI($uri);
+  public static function requireValidRemoteURIForLink($raw_uri) {
+    $uri = new PhutilURI($raw_uri);
 
     $proto = $uri->getProtocol();
     if (!strlen($proto)) {
@@ -584,7 +651,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid linkable resource. A valid linkable '.
           'resource URI must specify a protocol.',
-          $uri));
+          $raw_uri));
     }
 
     $protocols = self::getEnvConfig('uri.allowed-protocols');
@@ -593,7 +660,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid linkable resource. A valid linkable '.
           'resource URI must use one of these protocols: %s.',
-          $uri,
+          $raw_uri,
           implode(', ', array_keys($protocols))));
     }
 
@@ -603,7 +670,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid linkable resource. A valid linkable '.
           'resource URI must specify a domain.',
-          $uri));
+          $raw_uri));
     }
   }
 
@@ -716,6 +783,11 @@ final class PhabricatorEnv extends Phobject {
   }
 
   public static function isClusterRemoteAddress() {
+    $cluster_addresses = self::getEnvConfig('cluster.addresses');
+    if (!$cluster_addresses) {
+      return false;
+    }
+
     $address = idx($_SERVER, 'REMOTE_ADDR');
     if (!$address) {
       throw new Exception(
@@ -790,6 +862,19 @@ final class PhabricatorEnv extends Phobject {
 
   private static function dropConfigCache() {
     self::$cache = array();
+  }
+
+  private static function resetUmask() {
+    // Reset the umask to the common standard umask. The umask controls default
+    // permissions when files are created and propagates to subprocesses.
+
+    // "022" is the most common umask, but sometimes it is set to something
+    // unusual by the calling environment.
+
+    // Since various things rely on this umask to work properly and we are
+    // not aware of any legitimate reasons to adjust it, unconditionally
+    // normalize it until such reasons arise. See T7475 for discussion.
+    umask(022);
   }
 
 }

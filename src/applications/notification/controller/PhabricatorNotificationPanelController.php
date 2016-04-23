@@ -44,17 +44,8 @@ final class PhabricatorNotificationPanelController
       ),
       pht('Notifications'));
 
-    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
-      $connection_status = new PhabricatorNotificationStatusView();
-    } else {
-      $connection_status = phutil_tag(
-        'a',
-        array(
-          'href' => PhabricatorEnv::getDoclink(
-            'Notifications User Guide: Setup and Configuration'),
-        ),
-        pht('Notification Server not enabled.'));
-    }
+    $connection_status = new PhabricatorNotificationStatusView();
+
     $connection_ui = phutil_tag(
       'div',
       array(

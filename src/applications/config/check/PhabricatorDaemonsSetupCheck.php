@@ -46,49 +46,40 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
         ->addCommand('phabricator/ $ ./bin/phd start');
     }
 
-    $phd_user = PhabricatorEnv::getEnvConfig('phd.user');
-    $all_daemons = id(new PhabricatorDaemonLogQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
-      ->execute();
-    foreach ($all_daemons as $daemon) {
-
-      if ($phd_user) {
-        if ($daemon->getRunningAsUser() != $phd_user) {
-          $doc_href = PhabricatorEnv::getDocLink('Managing Daemons with phd');
-
-          $summary = pht(
-            'At least one daemon is currently running as a different '.
-            'user than configured in the Phabricator %s setting',
-            'phd.user');
-
-          $message = pht(
-            'A daemon is running as user %s while the Phabricator config '.
-            'specifies %s to be %s.'.
-            "\n\n".
-            'Either adjust %s to match %s or start '.
-            'the daemons as the correct user. '.
-            "\n\n".
-            '%s Daemons will try to use %s to start as the configured user. '.
-            'Make sure that the user who starts %s has the correct '.
-            'sudo permissions to start %s daemons as %s',
-            'phd.user',
-            'phd.user',
-            'phd',
-            'sudo',
-            'phd',
-            'phd',
-            phutil_tag('tt', array(), $daemon->getRunningAsUser()),
-            phutil_tag('tt', array(), $phd_user),
-            phutil_tag('tt', array(), $daemon->getRunningAsUser()),
-            phutil_tag('tt', array(), $phd_user));
-
-          $this->newIssue('daemons.run-as-different-user')
-            ->setName(pht('Daemons are running as the wrong user'))
-            ->setSummary($summary)
-            ->setMessage($message)
-            ->addCommand('phabricator/ $ ./bin/phd restart');
+    $expect_user = PhabricatorEnv::getEnvConfig('phd.user');
+    if (strlen($expect_user)) {
+      $all_daemons = id(new PhabricatorDaemonLogQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+        ->execute();
+      foreach ($all_daemons as $daemon) {
+        $actual_user = $daemon->getRunningAsUser();
+        if ($actual_user == $expect_user) {
+          continue;
         }
+
+        $summary = pht(
+          'At least one daemon is currently running as the wrong user.');
+
+        $message = pht(
+          'A daemon is running as user %s, but daemons should be '.
+          'running as %s.'.
+          "\n\n".
+          'Either adjust the configuration setting %s or restart the '.
+          'daemons. Daemons should attempt to run as the proper user when '.
+          'restarted.',
+          phutil_tag('tt', array(), $actual_user),
+          phutil_tag('tt', array(), $expect_user),
+          phutil_tag('tt', array(), 'phd.user'));
+
+        $this->newIssue('daemons.run-as-different-user')
+          ->setName(pht('Daemon Running as Wrong User'))
+          ->setSummary($summary)
+          ->setMessage($message)
+          ->addPhabricatorConfig('phd.user')
+          ->addCommand('phabricator/ $ ./bin/phd restart');
+
+        break;
       }
     }
   }

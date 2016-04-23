@@ -342,6 +342,8 @@ final class PHUITimelineEventView extends AphrontView {
     // Render "extra" information (timestamp, etc).
     $extra = $this->renderExtra($events);
 
+    $show_badges = false;
+
     $group_titles = array();
     $group_items = array();
     $group_children = array();
@@ -358,6 +360,7 @@ final class PHUITimelineEventView extends AphrontView {
 
       if ($event->hasChildren()) {
         $group_children[] = $event->renderChildren();
+        $show_badges = true;
       }
     }
 
@@ -382,7 +385,7 @@ final class PHUITimelineEventView extends AphrontView {
           'href' => $this->userHandle->getURI(),
         ),
         '');
-      if ($this->badges) {
+      if ($this->badges && $show_badges) {
         $flex = new PHUIBadgeBoxView();
         $flex->addItems($this->badges);
         $flex->setCollapsed(true);
@@ -622,9 +625,9 @@ final class PHUITimelineEventView extends AphrontView {
           ));
 
       $content_source = $this->getContentSource();
-      $source_email = PhabricatorContentSource::SOURCE_EMAIL;
+      $source_email = PhabricatorEmailContentSource::SOURCECONST;
       if ($content_source->getSource() == $source_email) {
-        $source_id = $content_source->getParam('id');
+        $source_id = $content_source->getContentSourceParameter('id');
         if ($source_id) {
           $items[] = id(new PhabricatorActionView())
             ->setIcon('fa-envelope-o')

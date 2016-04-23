@@ -201,4 +201,9 @@ final class PhabricatorPhabricatorAuthProvider
     return true;
   }
 
+  public function getPhabricatorURI() {
+    $config = $this->getProviderConfig();
+    return $config->getProperty(self::PROPERTY_PHABRICATOR_URI);
+  }
+
 }

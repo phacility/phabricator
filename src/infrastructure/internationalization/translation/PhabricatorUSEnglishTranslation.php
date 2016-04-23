@@ -1528,6 +1528,38 @@ final class PhabricatorUSEnglishTranslation
           '%s removed watchers for %3$s: %4$s.',
         ),
       ),
+
+      '%s awarded this badge to %s recipient(s): %s.' => array(
+        array(
+          '%s awarded this badge to recipient: %3$s.',
+          '%s awarded this badge to recipients: %3$s.',
+        ),
+      ),
+
+      '%s revoked this badge from %s recipient(s): %s.' => array(
+        array(
+          '%s revoked this badge from recipient: %3$s.',
+          '%s revoked this badge from recipients: %3$s.',
+        ),
+      ),
+
+      '%s awarded %s to %s recipient(s): %s.' => array(
+        array(
+          array(
+            '%s awarded %s to recipient: %4$s.',
+            '%s awarded %s to recipients: %4$s.',
+          ),
+        ),
+      ),
+
+      '%s revoked %s from %s recipient(s): %s.' => array(
+        array(
+          array(
+            '%s revoked %s from recipient: %4$s.',
+            '%s revoked %s from recipients: %4$s.',
+          ),
+        ),
+      ),
     );
   }
 

@@ -22,7 +22,8 @@ final class PholioMockEditController extends PholioController {
         return new Aphront404Response();
       }
 
-      $title = pht('Edit Mock');
+      $title = pht('Edit Mock: %s', $mock->getName());
+      $header_icon = 'fa-pencil';
 
       $is_new = false;
       $mock_images = $mock->getImages();
@@ -32,6 +33,7 @@ final class PholioMockEditController extends PholioController {
       $mock = PholioMock::initializeNewMock($viewer);
 
       $title = pht('Create Mock');
+      $header_icon = 'fa-plus-square';
 
       $is_new = true;
       $files = array();
@@ -314,7 +316,7 @@ final class PholioMockEditController extends PholioController {
         ->setUser($viewer))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Projects'))
+          ->setLabel(pht('Tags'))
           ->setName('projects')
           ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()))
@@ -350,8 +352,9 @@ final class PholioMockEditController extends PholioController {
       ->appendChild($submit);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Mock'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -359,21 +362,22 @@ final class PholioMockEditController extends PholioController {
       $crumbs->addTextCrumb($mock->getMonogram(), '/'.$mock->getMonogram());
     }
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
-    $content = array(
-      $crumbs,
-      $form_box,
-    );
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->addQuicksandConfig(
         array('mockEditConfig' => true))
-      ->appendChild(
-        array(
-          $form_box,
-      ));
+      ->appendChild($view);
   }
 
 }

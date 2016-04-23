@@ -4,26 +4,26 @@ final class PhabricatorOAuthServerClient
   extends PhabricatorOAuthServerDAO
   implements
     PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface,
     PhabricatorDestructibleInterface {
 
   protected $secret;
   protected $name;
   protected $redirectURI;
   protected $creatorPHID;
-  protected $isTrusted = 0;
+  protected $isTrusted;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $isDisabled;
 
   public function getEditURI() {
-    return '/oauthserver/client/edit/'.$this->getPHID().'/';
+    $id = $this->getID();
+    return "/oauthserver/edit/{$id}/";
   }
 
   public function getViewURI() {
-    return '/oauthserver/client/view/'.$this->getPHID().'/';
-  }
-
-  public function getDeleteURI() {
-    return '/oauthserver/client/delete/'.$this->getPHID().'/';
+    $id = $this->getID();
+    return "/oauthserver/client/view/{$id}/";
   }
 
   public static function initializeNewClient(PhabricatorUser $actor) {
@@ -31,7 +31,9 @@ final class PhabricatorOAuthServerClient
       ->setCreatorPHID($actor->getPHID())
       ->setSecret(Filesystem::readRandomCharacters(32))
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy($actor->getPHID());
+      ->setEditPolicy($actor->getPHID())
+      ->setIsDisabled(0)
+      ->setIsTrusted(0);
   }
 
   protected function getConfiguration() {
@@ -42,13 +44,9 @@ final class PhabricatorOAuthServerClient
         'secret' => 'text32',
         'redirectURI' => 'text255',
         'isTrusted' => 'bool',
+        'isDisabled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
-        ),
         'creatorPHID' => array(
           'columns' => array('creatorPHID'),
         ),
@@ -89,7 +87,31 @@ final class PhabricatorOAuthServerClient
     return null;
   }
 
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorOAuthServerEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorOAuthServerTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
+
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

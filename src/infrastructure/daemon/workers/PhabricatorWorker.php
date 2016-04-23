@@ -305,4 +305,9 @@ abstract class PhabricatorWorker extends Phobject {
       $epoch_ago);
   }
 
+  protected function newContentSource() {
+    return PhabricatorContentSource::newForSource(
+      PhabricatorDaemonContentSource::SOURCECONST);
+  }
+
 }

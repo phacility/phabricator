@@ -25,19 +25,15 @@ final class PhabricatorDashboardPanelViewController
       pht('Panels'),
       $this->getApplicationURI('panel/'));
     $crumbs->addTextCrumb($panel->getMonogram());
+    $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($panel);
-    $actions = $this->buildActionView($panel);
+    $curtain = $this->buildCurtainView($panel);
     $properties = $this->buildPropertyView($panel);
+
     $timeline = $this->buildTransactionTimeline(
       $panel,
       new PhabricatorDashboardPanelTransactionQuery());
-    $timeline->setShouldTerminate(true);
-
-    $properties->setActionList($actions);
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
 
     $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
@@ -45,31 +41,41 @@ final class PhabricatorDashboardPanelViewController
       ->setParentPanelPHIDs(array())
       ->renderPanel();
 
-    $view = id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE_LEFT)
-      ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
-      ->addMargin(PHUI::MARGIN_LARGE_TOP)
+    $preview = id(new PHUIBoxView())
+      ->addClass('dashboard-preview-box')
       ->appendChild($rendered_panel);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $view,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $properties,
         $timeline,
-      ),
-      array(
-        'title' => $title,
-      ));
+      ))
+      ->setFooter($rendered_panel);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildHeaderView(PhabricatorDashboardPanel $panel) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
+    $id = $panel->getID();
+
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View Panel'))
+      ->setIcon('fa-columns')
+      ->setHref($this->getApplicationURI("panel/render/{$id}/"));
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($panel->getName())
-      ->setPolicyObject($panel);
+      ->setPolicyObject($panel)
+      ->setHeaderIcon('fa-columns')
+      ->addActionLink($button);
 
     if (!$panel->getIsArchived()) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
@@ -79,20 +85,18 @@ final class PhabricatorDashboardPanelViewController
     return $header;
   }
 
-  private function buildActionView(PhabricatorDashboardPanel $panel) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildCurtainView(PhabricatorDashboardPanel $panel) {
+    $viewer = $this->getViewer();
     $id = $panel->getID();
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObject($panel)
-      ->setUser($viewer);
+    $curtain = $this->newCurtainView($panel);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $panel,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Panel'))
         ->setIcon('fa-pencil')
@@ -108,7 +112,7 @@ final class PhabricatorDashboardPanelViewController
       $archive_icon = 'fa-check';
     }
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName($archive_text)
         ->setIcon($archive_icon)
@@ -116,21 +120,14 @@ final class PhabricatorDashboardPanelViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View Standalone'))
-        ->setIcon('fa-eye')
-        ->setHref($this->getApplicationURI("panel/render/{$id}/")));
-
-    return $actions;
+    return $curtain;
   }
 
   private function buildPropertyView(PhabricatorDashboardPanel $panel) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($panel);
+      ->setUser($viewer);
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $viewer,
@@ -167,7 +164,10 @@ final class PhabricatorDashboardPanelViewController
         ? $viewer->renderHandleList($dashboard_phids)
         : phutil_tag('em', array(), $does_not_appear));
 
-    return $properties;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addPropertyList($properties);
   }
 
 }

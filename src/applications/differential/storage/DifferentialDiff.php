@@ -249,7 +249,6 @@ final class DifferentialDiff
       'unitStatus' => $this->getUnitStatus(),
       'lintStatus' => $this->getLintStatus(),
       'changes' => array(),
-      'properties' => array(),
     );
 
     $dict['changes'] = $this->buildChangesList();
@@ -258,7 +257,7 @@ final class DifferentialDiff
   }
 
   public function getDiffAuthorshipDict() {
-    $dict = array();
+    $dict = array('properties' => array());
 
     $properties = id(new DifferentialDiffProperty())->loadAllWhere(
       'diffID = %d',

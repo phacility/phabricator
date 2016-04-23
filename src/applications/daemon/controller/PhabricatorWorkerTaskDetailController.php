@@ -31,16 +31,17 @@ final class PhabricatorWorkerTaskDetailController
       $title = pht('Task %d', $task->getID());
 
       $header = id(new PHUIHeaderView())
-        ->setHeader(pht('Task %d (%s)',
+        ->setHeader(pht('Task %d: %s',
           $task->getID(),
-          $task->getTaskClass()));
+          $task->getTaskClass()))
+        ->setHeaderIcon('fa-sort');
 
       $properties = $this->buildPropertyListView($task);
 
       $object_box = id(new PHUIObjectBoxView())
-        ->setHeader($header)
+        ->setHeaderText($title)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->addPropertyList($properties);
-
 
       $retry_head = id(new PHUIHeaderView())
         ->setHeader(pht('Retries'));
@@ -49,6 +50,7 @@ final class PhabricatorWorkerTaskDetailController
 
       $retry_box = id(new PHUIObjectBoxView())
         ->setHeader($retry_head)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->addPropertyList($retry_info);
 
       $content = array(
@@ -59,15 +61,16 @@ final class PhabricatorWorkerTaskDetailController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($content);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildPropertyListView(

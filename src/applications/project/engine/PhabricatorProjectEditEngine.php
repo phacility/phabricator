@@ -56,7 +56,7 @@ final class PhabricatorProjectEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit %s', $object->getName());
+    return pht('Edit Project: %s', $object->getName());
   }
 
   protected function getObjectEditShortText($object) {
@@ -65,6 +65,10 @@ final class PhabricatorProjectEditEngine
 
   protected function getObjectCreateShortText() {
     return pht('Create Project');
+  }
+
+  protected function getObjectName() {
+    return pht('Project');
   }
 
   protected function getObjectViewURI($object) {

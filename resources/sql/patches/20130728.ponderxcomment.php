@@ -49,8 +49,7 @@ foreach ($rows as $row) {
     1,
     $row['content'],
     PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LEGACY,
-      array())->serialize(),
+      PhabricatorOldWorldContentSource::SOURCECONST)->serialize(),
     0,
     $row['dateCreated'],
     $row['dateModified']);
@@ -73,8 +72,7 @@ foreach ($rows as $row) {
     'null',
     'null',
     PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LEGACY,
-      array())->serialize(),
+      PhabricatorOldWorldContentSource::SOURCECONST)->serialize(),
     '[]',
     $row['dateCreated'],
     $row['dateModified']);

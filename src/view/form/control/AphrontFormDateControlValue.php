@@ -84,10 +84,27 @@ final class AphrontFormDateControlValue extends Phobject {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $request->getViewer();
 
-    list($value->valueDate, $value->valueTime) =
-      $value->getFormattedDateFromDate(
-        $request->getStr($key.'_d'),
-        $request->getStr($key.'_t'));
+    $date = $request->getStr($key.'_d');
+    $time = $request->getStr($key.'_t');
+
+    // If we have the individual parts, we read them preferentially. If we do
+    // not, try to read the key as a raw value. This makes it so that HTTP
+    // prefilling is overwritten by the control value if the user changes it.
+    if (!strlen($date) && !strlen($time)) {
+      $date = $request->getStr($key);
+      $time = null;
+    }
+
+    $value->valueDate = $date;
+    $value->valueTime = $time;
+
+    $formatted = $value->getFormattedDateFromDate(
+      $value->valueDate,
+      $value->valueTime);
+
+    if ($formatted) {
+      list($value->valueDate, $value->valueTime) = $formatted;
+    }
 
     $value->valueEnabled = $request->getStr($key.'_e');
     return $value;
@@ -96,6 +113,11 @@ final class AphrontFormDateControlValue extends Phobject {
   public static function newFromEpoch(PhabricatorUser $viewer, $epoch) {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $viewer;
+
+    if (!$epoch) {
+      return $value;
+    }
+
     $readable = $value->formatTime($epoch, 'Y!m!d!g:i A');
     $readable = explode('!', $readable, 4);
 
@@ -120,10 +142,16 @@ final class AphrontFormDateControlValue extends Phobject {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $viewer;
 
-    list($value->valueDate, $value->valueTime) =
-      $value->getFormattedDateFromDate(
-        idx($dictionary, 'd'),
-        idx($dictionary, 't'));
+    $value->valueDate = idx($dictionary, 'd');
+    $value->valueTime = idx($dictionary, 't');
+
+    $formatted = $value->getFormattedDateFromDate(
+      $value->valueDate,
+      $value->valueTime);
+
+    if ($formatted) {
+      list($value->valueDate, $value->valueTime) = $formatted;
+    }
 
     $value->valueEnabled = idx($dictionary, 'e');
 
@@ -170,37 +198,12 @@ final class AphrontFormDateControlValue extends Phobject {
       return null;
     }
 
-    $date = $this->valueDate;
-    $time = $this->valueTime;
-    $zone = $this->getTimezone();
-
-    if (!strlen($time)) {
+    $datetime = $this->newDateTime($this->valueDate, $this->valueTime);
+    if (!$datetime) {
       return null;
     }
 
-    $colloquial = array(
-      'elevenses' => '11:00 AM',
-      'morning tea' => '11:00 AM',
-      'noon' => '12:00 PM',
-      'high noon' => '12:00 PM',
-      'lunch' => '12:00 PM',
-      'tea time' => '3:00 PM',
-      'witching hour' => '12:00 AM',
-      'midnight' => '12:00 AM',
-    );
-
-    $normalized = phutil_utf8_strtolower($time);
-    if (isset($colloquial[$normalized])) {
-      $time = $colloquial[$normalized];
-    }
-
-    try {
-      $datetime = new DateTime("{$date} {$time}", $zone);
-      $value = $datetime->format('U');
-    } catch (Exception $ex) {
-      $value = null;
-    }
-    return $value;
+    return $datetime->format('U');
   }
 
   private function getTimeFormat() {
@@ -214,25 +217,37 @@ final class AphrontFormDateControlValue extends Phobject {
   }
 
   private function getFormattedDateFromDate($date, $time) {
-    $original_input = $date;
-    $zone = $this->getTimezone();
-    $separator = $this->getFormatSeparator();
-    $parts = preg_split('@[,./:-]@', $date);
-    $date = implode($separator, $parts);
-    $date = id(new DateTime($date, $zone));
-
-    if ($date) {
-      $date = $date->format($this->getDateFormat());
-    } else {
-      $date = $original_input;
+    $datetime = $this->newDateTime($date, $time);
+    if (!$datetime) {
+      return null;
     }
 
-    $date = id(new DateTime("{$date} {$time}", $zone));
-
     return array(
-      $date->format($this->getDateFormat()),
-      $date->format($this->getTimeFormat()),
+      $datetime->format($this->getDateFormat()),
+      $datetime->format($this->getTimeFormat()),
     );
+
+    return array($date, $time);
+  }
+
+  private function newDateTime($date, $time) {
+    $date = $this->getStandardDateFormat($date);
+    $time = $this->getStandardTimeFormat($time);
+
+    try {
+      // We need to provide the timezone in the constructor, and also set it
+      // explicitly. If the date is an epoch timestamp, the timezone in the
+      // constructor is ignored. If the date is not an epoch timestamp, it is
+      // used to parse the date.
+      $zone = $this->getTimezone();
+      $datetime = new DateTime("{$date} {$time}", $zone);
+      $datetime->setTimezone($zone);
+    } catch (Exception $ex) {
+      return null;
+    }
+
+
+    return $datetime;
   }
 
   private function getFormattedDateFromParts(
@@ -261,16 +276,7 @@ final class AphrontFormDateControlValue extends Phobject {
   }
 
   public function getDateTime() {
-    $epoch = $this->getEpoch();
-    $date = null;
-
-    if ($epoch) {
-      $zone = $this->getTimezone();
-      $date = new DateTime('@'.$epoch);
-      $date->setTimeZone($zone);
-    }
-
-    return $date;
+    return $this->newDateTime($this->valueDate, $this->valueTime);
   }
 
   private function getTimezone() {
@@ -283,5 +289,63 @@ final class AphrontFormDateControlValue extends Phobject {
     return $this->zone;
   }
 
+  private function getStandardDateFormat($date) {
+    $colloquial = array(
+      'newyear' => 'January 1',
+      'valentine' => 'February 14',
+      'pi' => 'March 14',
+      'christma' => 'December 25',
+    );
+
+    // Lowercase the input, then remove punctuation, a "day" suffix, and an
+    // "s" if one is present. This allows all of these to match. This allows
+    // variations like "New Year's Day" and "New Year" to both match.
+    $normalized = phutil_utf8_strtolower($date);
+    $normalized = preg_replace('/[^a-z]/', '', $normalized);
+    $normalized = preg_replace('/day\z/', '', $normalized);
+    $normalized = preg_replace('/s\z/', '', $normalized);
+
+    if (isset($colloquial[$normalized])) {
+      return $colloquial[$normalized];
+    }
+
+    // If this looks like an epoch timestamp, prefix it with "@" so that
+    // DateTime() reads it as one. Assume small numbers are a "Ymd" digit
+    // string instead of an epoch timestamp for a time in 1970.
+    if (ctype_digit($date) && ($date > 30000000)) {
+      $date = '@'.$date;
+    }
+
+    $separator = $this->getFormatSeparator();
+    $parts = preg_split('@[,./:-]@', $date);
+    return implode($separator, $parts);
+  }
+
+  private function getStandardTimeFormat($time) {
+    $colloquial = array(
+      'crack of dawn' => '5:00 AM',
+      'dawn' => '6:00 AM',
+      'early' => '7:00 AM',
+      'morning' => '8:00 AM',
+      'elevenses' => '11:00 AM',
+      'morning tea' => '11:00 AM',
+      'noon' => '12:00 PM',
+      'high noon' => '12:00 PM',
+      'lunch' => '12:00 PM',
+      'afternoon' => '2:00 PM',
+      'tea time' => '3:00 PM',
+      'evening' => '7:00 PM',
+      'late' => '11:00 PM',
+      'witching hour' => '12:00 AM',
+      'midnight' => '12:00 AM',
+    );
+
+    $normalized = phutil_utf8_strtolower($time);
+    if (isset($colloquial[$normalized])) {
+      $time = $colloquial[$normalized];
+    }
+
+    return $time;
+  }
 
 }

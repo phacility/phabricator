@@ -114,7 +114,7 @@ final class PhabricatorPhurlURLViewController
     $curtain
       ->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Edit'))
+          ->setName(pht('Edit Phurl'))
           ->setIcon('fa-pencil')
           ->setHref($this->getApplicationURI("url/edit/{$id}/"))
           ->setDisabled(!$can_edit)
@@ -145,7 +145,7 @@ final class PhabricatorPhurlURLViewController
     }
 
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DETAILS'))
+      ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($properties);
   }

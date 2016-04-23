@@ -137,14 +137,10 @@ final class PhabricatorApplicationEmailCommandsController
       ->appendChild($info_view)
       ->appendChild($content_box);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $document,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($document);
 
   }
 

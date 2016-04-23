@@ -28,11 +28,10 @@ final class PhabricatorAuthNeedsApprovalController
       ->appendChild($wait_for_approval)
       ->addCancelButton('/', pht('Wait Patiently'));
 
-    return $this->buildApplicationPage(
-      $dialog,
-      array(
-        'title' => pht('Wait For Approval'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Wait For Approval'))
+      ->appendChild($dialog);
+
   }
 
 }
