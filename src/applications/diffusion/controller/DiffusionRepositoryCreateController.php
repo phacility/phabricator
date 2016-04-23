@@ -162,9 +162,15 @@ final class DiffusionRepositoryCreateController
 
           $activate = $form->getPage('done')
             ->getControl('activate')->getValue();
+          if ($activate == 'start') {
+            $initial_status = PhabricatorRepository::STATUS_ACTIVE;
+          } else {
+            $initial_status = PhabricatorRepository::STATUS_INACTIVE;
+          }
+
           $xactions[] = id(clone $template)
             ->setTransactionType($type_activate)
-            ->setNewValue(($activate == 'start'));
+            ->setNewValue($initial_status);
 
           if ($service) {
             $xactions[] = id(clone $template)

@@ -145,6 +145,12 @@ abstract class DiffusionQueryConduitAPIMethod
 
       $this->setDiffusionRequest($drequest);
 
+      // TODO: Allow web UI queries opt out of this if they don't care about
+      // fetching the most up-to-date data? Synchronization can be slow, and a
+      // lot of web reads are probably fine if they're a few seconds out of
+      // date.
+      $repository->synchronizeWorkingCopyBeforeRead();
+
       return $this->getResult($request);
     }
   }

@@ -102,14 +102,7 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
       $version = null;
       switch ($vcs['versionControlSystem']) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $bad_versions = array(
-            '< 2.7.4' => pht(
-              'Prior to 2.7.4, Git contains two remote code execution '.
-              'vulnerabilities which allow an attacker to take control of a '.
-              'system by crafting a commit which affects very long paths, '.
-              'then pushing it or tricking a victim into fetching it. This '.
-              'is a severe security vulnerability.'),
-          );
+          $bad_versions = array();
           list($err, $stdout, $stderr) = exec_manual('git --version');
           $version = trim(substr($stdout, strlen('git version ')));
           break;

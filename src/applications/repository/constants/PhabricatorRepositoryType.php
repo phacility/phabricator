@@ -7,10 +7,10 @@ final class PhabricatorRepositoryType extends Phobject {
   const REPOSITORY_TYPE_MERCURIAL   = 'hg';
 
   public static function getAllRepositoryTypes() {
-    static $map = array(
-      self::REPOSITORY_TYPE_GIT       => 'Git',
-      self::REPOSITORY_TYPE_SVN       => 'Subversion',
-      self::REPOSITORY_TYPE_MERCURIAL => 'Mercurial',
+    $map = array(
+      self::REPOSITORY_TYPE_GIT       => pht('Git'),
+      self::REPOSITORY_TYPE_MERCURIAL => pht('Mercurial'),
+      self::REPOSITORY_TYPE_SVN       => pht('Subversion'),
     );
     return $map;
   }

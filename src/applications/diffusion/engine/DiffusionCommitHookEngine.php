@@ -1058,8 +1058,16 @@ final class DiffusionCommitHookEngine extends Phobject {
     // up.
     $phid = id(new PhabricatorRepositoryPushLog())->generatePHID();
 
+    $device = AlmanacKeys::getLiveDevice();
+    if ($device) {
+      $device_phid = $device->getPHID();
+    } else {
+      $device_phid = null;
+    }
+
     return PhabricatorRepositoryPushLog::initializeNewLog($this->getViewer())
       ->setPHID($phid)
+      ->setDevicePHID($device_phid)
       ->setRepositoryPHID($this->getRepository()->getPHID())
       ->attachRepository($this->getRepository())
       ->setEpoch(time());

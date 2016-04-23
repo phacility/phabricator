@@ -50,8 +50,7 @@ final class DiffusionPushEventViewController
 
     $updates_table = id(new DiffusionPushLogListView())
       ->setUser($viewer)
-      ->setLogs($logs)
-      ->setHandles($this->loadViewerHandles(mpull($logs, 'getPusherPHID')));
+      ->setLogs($logs);
 
     $update_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('All Pushed Updates'))

@@ -208,6 +208,11 @@ final class CelerityResourceMap extends Phobject {
   }
 
 
+  public function getHashForName($name) {
+    return idx($this->nameMap, $name);
+  }
+
+
   /**
    * Return the absolute URI for a resource, identified by hash.
    * This method is fairly low-level and ignores packaging.

@@ -132,7 +132,7 @@ final class AlmanacServiceViewController
       ->setHideServiceColumn(true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('SERVICE BINDINGS'))
+      ->setHeader(pht('Service Bindings'))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')

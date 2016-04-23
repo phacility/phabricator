@@ -7,6 +7,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
   protected $devicePHID;
   protected $repositoryVersion;
   protected $isWriting;
+  protected $writeProperties;
 
   protected function getConfiguration() {
     return array(
@@ -14,6 +15,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
       self::CONFIG_COLUMN_SCHEMA => array(
         'repositoryVersion' => 'uint32',
         'isWriting' => 'bool',
+        'writeProperties' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_workingcopy' => array(
@@ -66,7 +68,10 @@ final class PhabricatorRepositoryWorkingCopyVersion
    * lock is released by default. This is a durable lock which stays locked
    * by default.
    */
-  public static function willWrite($repository_phid, $device_phid) {
+  public static function willWrite(
+    $repository_phid,
+    $device_phid,
+    array $write_properties) {
     $version = new self();
     $conn_w = $version->establishConnection('w');
     $table = $version->getTableName();
@@ -74,16 +79,19 @@ final class PhabricatorRepositoryWorkingCopyVersion
     queryfx(
       $conn_w,
       'INSERT INTO %T
-        (repositoryPHID, devicePHID, repositoryVersion, isWriting)
+        (repositoryPHID, devicePHID, repositoryVersion, isWriting,
+          writeProperties)
         VALUES
-        (%s, %s, %d, %d)
+        (%s, %s, %d, %d, %s)
         ON DUPLICATE KEY UPDATE
-          isWriting = VALUES(isWriting)',
+          isWriting = VALUES(isWriting),
+          writeProperties = VALUES(writeProperties)',
       $table,
       $repository_phid,
       $device_phid,
+      0,
       1,
-      1);
+      phutil_json_encode($write_properties));
   }
 
 
@@ -101,7 +109,9 @@ final class PhabricatorRepositoryWorkingCopyVersion
 
     queryfx(
       $conn_w,
-      'UPDATE %T SET repositoryVersion = %d, isWriting = 0
+      'UPDATE %T SET
+          repositoryVersion = %d,
+          isWriting = 0
         WHERE
           repositoryPHID = %s AND
           devicePHID = %s AND
@@ -122,6 +132,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
     $repository_phid,
     $device_phid,
     $new_version) {
+
     $version = new self();
     $conn_w = $version->establishConnection('w');
     $table = $version->getTableName();
@@ -141,5 +152,24 @@ final class PhabricatorRepositoryWorkingCopyVersion
       0);
   }
 
+
+  /**
+   * Explicitly demote a device.
+   */
+  public static function demoteDevice(
+    $repository_phid,
+    $device_phid) {
+
+    $version = new self();
+    $conn_w = $version->establishConnection('w');
+    $table = $version->getTableName();
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE repositoryPHID = %s AND devicePHID = %s',
+      $table,
+      $repository_phid,
+      $device_phid);
+  }
 
 }

@@ -10,7 +10,7 @@ final class DiffusionRepositoryClusterManagementPanel
   }
 
   public function getManagementPanelOrder() {
-    return 12345;
+    return 600;
   }
 
   public function buildManagementPanelContent() {
@@ -104,6 +104,29 @@ final class DiffusionRepositoryClusterManagementPanel
             ->setIcon('fa-pencil grey');
         }
 
+        $write_properties = null;
+        if ($version) {
+          $write_properties = $version->getWriteProperties();
+          if ($write_properties) {
+            try {
+              $write_properties = phutil_json_decode($write_properties);
+            } catch (Exception $ex) {
+              $write_properties = null;
+            }
+          }
+        }
+
+        if ($write_properties) {
+          $writer_phid = idx($write_properties, 'userPHID');
+          $last_writer = $viewer->renderHandle($writer_phid);
+
+          $writer_epoch = idx($write_properties, 'epoch');
+          $writer_epoch = phabricator_datetime($writer_epoch, $viewer);
+        } else {
+          $last_writer = null;
+          $writer_epoch = null;
+        }
+
         $rows[] = array(
           $binding_icon,
           phutil_tag(
@@ -114,6 +137,8 @@ final class DiffusionRepositoryClusterManagementPanel
             $device->getName()),
           $version_number,
           $is_writing,
+          $last_writer,
+          $writer_epoch,
         );
       }
     }
@@ -126,6 +151,8 @@ final class DiffusionRepositoryClusterManagementPanel
           pht('Device'),
           pht('Version'),
           pht('Writing'),
+          pht('Last Writer'),
+          pht('Last Write At'),
         ))
       ->setColumnClasses(
         array(
@@ -133,6 +160,8 @@ final class DiffusionRepositoryClusterManagementPanel
           null,
           null,
           'right wide',
+          null,
+          'date',
         ));
 
     $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
@@ -160,6 +189,7 @@ final class DiffusionRepositoryClusterManagementPanel
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

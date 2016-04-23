@@ -58,7 +58,7 @@ final class ManiphestExcelDefaultFormat extends ManiphestExcelFormat {
       pht('Date Created'),
       pht('Date Updated'),
       pht('Title'),
-      pht('Projects'),
+      pht('Tags'),
       pht('URI'),
       pht('Description'),
     );

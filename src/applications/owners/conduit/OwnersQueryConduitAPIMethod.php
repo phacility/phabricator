@@ -6,12 +6,17 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
     return 'owners.query';
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Obsolete; use "owners.search" instead.');
+  }
+
+
   public function getMethodDescription() {
-    return pht(
-      'Query for packages by one of the following: repository/path, '.
-      'packages with a given user or project owner, or packages affiliated '.
-      'with a user (owned by either the user or a project they are a member '.
-      'of.) You should only provide at most one search query.');
+    return pht('Query for Owners packages. Obsoleted by "owners.search".');
   }
 
   protected function defineParamTypes() {

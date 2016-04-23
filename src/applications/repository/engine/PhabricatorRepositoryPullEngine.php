@@ -96,6 +96,8 @@ final class PhabricatorRepositoryPullEngine
       }
 
       if ($repository->isHosted()) {
+        $repository->synchronizeWorkingCopyBeforeRead();
+
         if ($is_git) {
           $this->installGitHook();
         } else if ($is_svn) {

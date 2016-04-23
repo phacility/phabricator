@@ -22,25 +22,21 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $req_domain = $request->getHost();
     $main_domain = id(new PhutilURI($base_uri))->getDomain();
 
-
     if (!strlen($alt) || $main_domain == $alt_domain) {
       // No alternate domain.
       $should_redirect = false;
-      $use_viewer = $viewer;
       $is_alternate_domain = false;
     } else if ($req_domain != $alt_domain) {
       // Alternate domain, but this request is on the main domain.
       $should_redirect = true;
-      $use_viewer = $viewer;
       $is_alternate_domain = false;
     } else {
       // Alternate domain, and on the alternate domain.
       $should_redirect = false;
-      $use_viewer = PhabricatorUser::getOmnipotentUser();
       $is_alternate_domain = true;
     }
 
-    $response = $this->loadFile($use_viewer);
+    $response = $this->loadFile();
     if ($response) {
       return $response;
     }
@@ -112,7 +108,21 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     return $response;
   }
 
-  private function loadFile(PhabricatorUser $viewer) {
+  private function loadFile() {
+    // Access to files is provided by knowledge of a per-file secret key in
+    // the URI. Knowledge of this secret is sufficient to retrieve the file.
+
+    // For some requests, we also have a valid viewer. However, for many
+    // requests (like alternate domain requests or Git LFS requests) we will
+    // not. Even if we do have a valid viewer, use the omnipotent viewer to
+    // make this logic simpler and more consistent.
+
+    // Beyond making the policy check itself more consistent, this also makes
+    // sure we're consitent about returning HTTP 404 on bad requests instead
+    // of serving HTTP 200 with a login page, which can mislead some clients.
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($this->phid))

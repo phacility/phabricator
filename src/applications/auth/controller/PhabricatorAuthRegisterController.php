@@ -12,7 +12,7 @@ final class PhabricatorAuthRegisterController
     $account_key = $request->getURIData('akey');
 
     if ($request->getUser()->isLoggedIn()) {
-      return $this->renderError(pht('You are already logged in.'));
+      return id(new AphrontRedirectResponse())->setURI('/');
     }
 
     $is_setup = false;

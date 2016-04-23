@@ -43,6 +43,7 @@ final class PhabricatorRepositoryManagementLookupUsersWorkflow
           )),
         'diffusion.querycommits',
         array(
+          'repositoryPHID' => $repo->getPHID(),
           'phids' => array($commit->getPHID()),
           'bypassCache' => true,
         ));

@@ -1,5 +1,5 @@
 @title Cluster: Web Servers
-@group intro
+@group cluster
 
 Configuring Phabricator to use multiple web servers.
 
