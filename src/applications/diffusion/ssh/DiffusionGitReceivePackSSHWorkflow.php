@@ -16,21 +16,37 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
   protected function executeRepositoryOperations() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
+    $device = AlmanacKeys::getLiveDevice();
 
     // This is a write, and must have write access.
     $this->requireWriteAccess();
 
     $cluster_engine = id(new DiffusionRepositoryClusterEngine())
       ->setViewer($viewer)
-      ->setRepository($repository);
+      ->setRepository($repository)
+      ->setLog($this);
 
     if ($this->shouldProxy()) {
       $command = $this->getProxyCommand();
       $did_synchronize = false;
+
+      if ($device) {
+        $this->writeClusterEngineLogMessage(
+          pht(
+            "# Push received by \"%s\", forwarding to cluster host.\n",
+            $device->getName()));
+      }
     } else {
       $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
       $did_synchronize = true;
       $cluster_engine->synchronizeWorkingCopyBeforeWrite();
+
+      if ($device) {
+        $this->writeClusterEngineLogMessage(
+          pht(
+            "# Ready to receive on cluster host \"%s\".\n",
+            $device->getName()));
+      }
     }
 
     $caught = null;
