@@ -274,7 +274,7 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     $pid_path = $this->getPIDPath();
     try {
-      $dir = dirname($path);
+      $dir = dirname($pid_path);
       if (!Filesystem::pathExists($dir)) {
         Filesystem::createDirectory($dir, 0755, true);
       }
