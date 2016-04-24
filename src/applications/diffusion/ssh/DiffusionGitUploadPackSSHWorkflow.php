@@ -15,6 +15,7 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
   protected function executeRepositoryOperations() {
     $repository = $this->getRepository();
+    $viewer = $this->getUser();
 
     $skip_sync = $this->shouldSkipReadSynchronization();
 
@@ -23,7 +24,10 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
     } else {
       $command = csprintf('git-upload-pack -- %s', $repository->getLocalPath());
       if (!$skip_sync) {
-        $repository->synchronizeWorkingCopyBeforeRead();
+        $cluster_engine = id(new DiffusionRepositoryClusterEngine())
+          ->setViewer($viewer)
+          ->setRepository($repository)
+          ->synchronizeWorkingCopyBeforeRead();
       }
     }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);

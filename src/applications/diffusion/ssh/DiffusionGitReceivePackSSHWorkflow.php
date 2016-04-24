@@ -15,19 +15,22 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
   protected function executeRepositoryOperations() {
     $repository = $this->getRepository();
+    $viewer = $this->getViewer();
 
     // This is a write, and must have write access.
     $this->requireWriteAccess();
+
+    $cluster_engine = id(new DiffusionRepositoryClusterEngine())
+      ->setViewer($viewer)
+      ->setRepository($repository);
 
     if ($this->shouldProxy()) {
       $command = $this->getProxyCommand();
       $did_synchronize = false;
     } else {
       $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
-
       $did_synchronize = true;
-      $viewer = $this->getUser();
-      $repository->synchronizeWorkingCopyBeforeWrite($viewer);
+      $cluster_engine->synchronizeWorkingCopyBeforeWrite();
     }
 
     $caught = null;
@@ -40,7 +43,7 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
     // We've committed the write (or rejected it), so we can release the lock
     // without waiting for the client to receive the acknowledgement.
     if ($did_synchronize) {
-      $repository->synchronizeWorkingCopyAfterWrite();
+      $cluster_engine->synchronizeWorkingCopyAfterWrite();
     }
 
     if ($caught) {

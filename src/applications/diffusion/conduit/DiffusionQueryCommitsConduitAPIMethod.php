@@ -29,21 +29,25 @@ final class DiffusionQueryCommitsConduitAPIMethod
   protected function execute(ConduitAPIRequest $request) {
     $need_messages = $request->getValue('needMessages');
     $bypass_cache = $request->getValue('bypassCache');
+    $viewer = $request->getUser();
 
     $query = id(new DiffusionCommitQuery())
-      ->setViewer($request->getUser())
+      ->setViewer($viewer)
       ->needCommitData(true);
 
     $repository_phid = $request->getValue('repositoryPHID');
     if ($repository_phid) {
       $repository = id(new PhabricatorRepositoryQuery())
-        ->setViewer($request->getUser())
+        ->setViewer($viewer)
         ->withPHIDs(array($repository_phid))
         ->executeOne();
       if ($repository) {
         $query->withRepository($repository);
         if ($bypass_cache) {
-          $repository->synchronizeWorkingCopyBeforeRead();
+          id(new DiffusionRepositoryClusterEngine())
+            ->setViewer($viewer)
+            ->setRepository($repository)
+            ->synchronizeWorkingCopyBeforeRead();
         }
       }
     }

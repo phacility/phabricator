@@ -684,7 +684,10 @@ final class PhabricatorRepositoryEditor
     }
 
     if ($this->getIsNewObject()) {
-      $object->synchronizeWorkingCopyAfterCreation();
+      id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($this->getActor())
+        ->setRepository($object)
+        ->synchronizeWorkingCopyAfterCreation();
     }
 
     return $xactions;
