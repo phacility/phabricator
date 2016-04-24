@@ -11,9 +11,11 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
   private $repository;
   private $viewer;
+  private $logger;
+
   private $clusterWriteLock;
   private $clusterWriteVersion;
-  private $logger;
+  private $clusterWriteOwner;
 
 
 /* -(  Configuring Synchronization  )---------------------------------------- */
@@ -247,8 +249,13 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     $device = AlmanacKeys::getLiveDevice();
     $device_phid = $device->getPHID();
 
+    $table = new PhabricatorRepositoryWorkingCopyVersion();
+    $locked_connection = $table->establishConnection('w');
+
     $write_lock = PhabricatorRepositoryWorkingCopyVersion::getWriteLock(
       $repository_phid);
+
+    $write_lock->useSpecificConnection($locked_connection);
 
     $lock_wait = phutil_units('2 minutes in seconds');
 
@@ -290,7 +297,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       throw new Exception(
         pht(
           'An previous write to this repository was interrupted; refusing '.
-          'new writes. This issue resolves operator intervention to resolve, '.
+          'new writes. This issue requires operator intervention to resolve, '.
           'see "Write Interruptions" in the "Cluster: Repositories" in the '.
           'documentation for instructions.'));
     }
@@ -302,14 +309,20 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       throw $ex;
     }
 
+    $pid = getmypid();
+    $hash = Filesystem::readRandomCharacters(12);
+    $this->clusterWriteOwner = "{$pid}.{$hash}";
+
     PhabricatorRepositoryWorkingCopyVersion::willWrite(
+      $locked_connection,
       $repository_phid,
       $device_phid,
       array(
         'userPHID' => $viewer->getPHID(),
         'epoch' => PhabricatorTime::getNow(),
         'devicePHID' => $device_phid,
-      ));
+      ),
+      $this->clusterWriteOwner);
 
     $this->clusterWriteVersion = $max_version;
     $this->clusterWriteLock = $write_lock;
@@ -337,31 +350,105 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     $device = AlmanacKeys::getLiveDevice();
     $device_phid = $device->getPHID();
 
-    // NOTE: This means we're still bumping the version when pushes fail. We
-    // could select only un-rejected events instead to bump a little less
-    // often.
+    // It is possible that we've lost the global lock while receiving the push.
+    // For example, the master database may have been restarted between the
+    // time we acquired the global lock and now, when the push has finished.
 
-    $new_log = id(new PhabricatorRepositoryPushEventQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withRepositoryPHIDs(array($repository_phid))
-      ->setLimit(1)
-      ->executeOne();
+    // We wrote a durable lock while we were holding the the global lock,
+    // essentially upgrading our lock. We can still safely release this upgraded
+    // lock even if we're no longer holding the global lock.
 
-    $old_version = $this->clusterWriteVersion;
-    if ($new_log) {
-      $new_version = $new_log->getID();
-    } else {
-      $new_version = $old_version;
+    // If we fail to release the lock, the repository will be frozen until
+    // an operator can figure out what happened, so we try pretty hard to
+    // reconnect to the database and release the lock.
+
+    $now = PhabricatorTime::getNow();
+    $duration = phutil_units('5 minutes in seconds');
+    $try_until = $now + $duration;
+
+    $did_release = false;
+    $already_failed = false;
+    while (PhabricatorTime::getNow() <= $try_until) {
+      try {
+        // NOTE: This means we're still bumping the version when pushes fail. We
+        // could select only un-rejected events instead to bump a little less
+        // often.
+
+        $new_log = id(new PhabricatorRepositoryPushEventQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withRepositoryPHIDs(array($repository_phid))
+          ->setLimit(1)
+          ->executeOne();
+
+        $old_version = $this->clusterWriteVersion;
+        if ($new_log) {
+          $new_version = $new_log->getID();
+        } else {
+          $new_version = $old_version;
+        }
+
+        PhabricatorRepositoryWorkingCopyVersion::didWrite(
+          $repository_phid,
+          $device_phid,
+          $this->clusterWriteVersion,
+          $new_log->getID(),
+          $this->clusterWriteOwner);
+        $did_release = true;
+        break;
+      } catch (AphrontConnectionQueryException $ex) {
+        $connection_exception = $ex;
+      } catch (AphrontConnectionLostQueryException $ex) {
+        $connection_exception = $ex;
+      }
+
+      if (!$already_failed) {
+        $already_failed = true;
+        $this->logLine(
+          pht('CRITICAL. Failed to release cluster write lock!'));
+
+        $this->logLine(
+          pht(
+            'The connection to the master database was lost while receiving '.
+            'the write.'));
+
+        $this->logLine(
+          pht(
+            'This process will spend %s more second(s) attempting to '.
+            'recover, then give up.',
+            new PhutilNumber($duration)));
+      }
+
+      sleep(1);
     }
 
-    PhabricatorRepositoryWorkingCopyVersion::didWrite(
-      $repository_phid,
-      $device_phid,
-      $this->clusterWriteVersion,
-      $new_log->getID());
+    if ($did_release) {
+      if ($already_failed) {
+        $this->logLine(
+          pht('RECOVERED. Link to master database was restored.'));
+      }
+      $this->logLine(pht('Released cluster write lock.'));
+    } else {
+      throw new Exception(
+        pht(
+          'Failed to reconnect to master database and release held write '.
+          'lock ("%s") on device "%s" for repository "%s" after trying '.
+          'for %s seconds(s). This repository will be frozen.',
+          $this->clusterWriteOwner,
+          $device->getName(),
+          $this->getDisplayName(),
+          new PhutilNumber($duration)));
+    }
 
-    $this->clusterWriteLock->unlock();
+    // We can continue even if we've lost this lock, everything is still
+    // consistent.
+    try {
+      $this->clusterWriteLock->unlock();
+    } catch (Exception $ex) {
+      // Ignore.
+    }
+
     $this->clusterWriteLock = null;
+    $this->clusterWriteOwner = null;
   }
 
 

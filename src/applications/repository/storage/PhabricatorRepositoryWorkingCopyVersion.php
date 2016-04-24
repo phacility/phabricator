@@ -7,6 +7,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
   protected $devicePHID;
   protected $repositoryVersion;
   protected $isWriting;
+  protected $lockOwner;
   protected $writeProperties;
 
   protected function getConfiguration() {
@@ -16,6 +17,7 @@ final class PhabricatorRepositoryWorkingCopyVersion
         'repositoryVersion' => 'uint32',
         'isWriting' => 'bool',
         'writeProperties' => 'text?',
+        'lockOwner' => 'text255?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_workingcopy' => array(
@@ -69,29 +71,33 @@ final class PhabricatorRepositoryWorkingCopyVersion
    * by default.
    */
   public static function willWrite(
+    AphrontDatabaseConnection $locked_connection,
     $repository_phid,
     $device_phid,
-    array $write_properties) {
+    array $write_properties,
+    $lock_owner) {
+
     $version = new self();
-    $conn_w = $version->establishConnection('w');
     $table = $version->getTableName();
 
     queryfx(
-      $conn_w,
+      $locked_connection,
       'INSERT INTO %T
         (repositoryPHID, devicePHID, repositoryVersion, isWriting,
-          writeProperties)
+          writeProperties, lockOwner)
         VALUES
-        (%s, %s, %d, %d, %s)
+        (%s, %s, %d, %d, %s, %s)
         ON DUPLICATE KEY UPDATE
           isWriting = VALUES(isWriting),
-          writeProperties = VALUES(writeProperties)',
+          writeProperties = VALUES(writeProperties),
+          lockOwner = VALUES(lockOwner)',
       $table,
       $repository_phid,
       $device_phid,
       0,
       1,
-      phutil_json_encode($write_properties));
+      phutil_json_encode($write_properties),
+      $lock_owner);
   }
 
 
@@ -102,7 +108,9 @@ final class PhabricatorRepositoryWorkingCopyVersion
     $repository_phid,
     $device_phid,
     $old_version,
-    $new_version) {
+    $new_version,
+    $lock_owner) {
+
     $version = new self();
     $conn_w = $version->establishConnection('w');
     $table = $version->getTableName();
@@ -111,17 +119,20 @@ final class PhabricatorRepositoryWorkingCopyVersion
       $conn_w,
       'UPDATE %T SET
           repositoryVersion = %d,
-          isWriting = 0
+          isWriting = 0,
+          lockOwner = NULL
         WHERE
           repositoryPHID = %s AND
           devicePHID = %s AND
           repositoryVersion = %d AND
-          isWriting = 1',
+          isWriting = 1 AND
+          lockOwner = %s',
       $table,
       $new_version,
       $repository_phid,
       $device_phid,
-      $old_version);
+      $old_version,
+      $lock_owner);
   }
 
 

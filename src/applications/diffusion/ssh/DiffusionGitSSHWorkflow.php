@@ -11,6 +11,7 @@ abstract class DiffusionGitSSHWorkflow
 
   public function writeClusterEngineLogMessage($message) {
     parent::writeError($message);
+    $this->getErrorChannel()->update();
   }
 
   protected function identifyRepository() {
