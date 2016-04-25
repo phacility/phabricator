@@ -200,10 +200,16 @@ There are three major steps:
 **Create `phabricator-ssh-hook.sh`**: Copy the template in
 `phabricator/resources/sshd/phabricator-ssh-hook.sh` to somewhere like
 `/usr/libexec/phabricator-ssh-hook.sh` and edit it to have the correct
-settings. Then make it owned by `root` and restrict editing:
+settings.
 
-  sudo chown root /path/to/phabricator-ssh-hook.sh
-  sudo chmod 755 /path/to/phabricator-ssh-hook.sh
+Both the script itself **and** the parent directory the script resides in must
+be owned by `root`, and the script must have `755` permissions:
+
+```
+$ sudo chown root /path/to/somewhere/
+$ sudo chown root /path/to/somewhere/phabricator-ssh-hook.sh
+$ sudo chmod 755 /path/to/somewhere/phabricator-ssh-hook.sh
+```
 
 If you don't do this, `sshd` will refuse to execute the hook.
 
