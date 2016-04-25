@@ -93,16 +93,16 @@ application, see @{article:Almanac User Guide}.
 
 Add **interfaces** to each device record so Phabricator can tell how to
 connect to these hosts. Normally, you'll add one HTTP interface (usually on
-port 80) and one SSH interface (often on port 22) to each device:
+port 80) and one SSH interface (by default, on port 2222) to each device:
 
 For example, if you are building a two-host repository cluster, you may end
 up with records that look like these:
 
   - Device: `repo001.mycompany.net`
-    - Interface: `123.0.0.1:22`
+    - Interface: `123.0.0.1:2222`
     - Interface: `123.0.0.1:80`
   - Device: `repo002.mycopmany.net`
-    - Interface: `123.0.0.2:22`
+    - Interface: `123.0.0.2:2222`
     - Interface: `123.0.0.2:80`
 
 Note that these hosts will normally run two `sshd` ports: the standard `sshd`
@@ -229,6 +229,11 @@ sure the process is completed correctly.
 
 Note that a copy of the active private key is stored in the `conf/keys/`
 directory permanently.
+
+When converting a host into a cluster host, you may need to revisit
+@{article:Diffusion User Guide: Repository Hosting} and double check the `sudo`
+permission for the host. In particular, cluster hosts need to be able to run
+`ssh` via `sudo` so they can read the device private key.
 
 
 Next Steps
