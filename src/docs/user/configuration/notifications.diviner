@@ -273,7 +273,7 @@ You do not need to adjust the `"admin"` server.
 **Aphlict**: Your Aphlict configuration should make these adjustments to
 the `"client"` server:
 
-  - The `protocol` should be `"http"`: `nginx` will send plain HTTP traffic
+  - Do not specify any `ssl.*` options: `nginx` will send plain HTTP traffic
     to Aphlict.
   - Optionally, you can `listen` on `127.0.0.1` instead of `0.0.0.0`, because
     the server will no longer receive external traffic.
