@@ -132,6 +132,16 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Change the default text encoding.'))
         ->setConduitTypeDescription(pht('New text encoding.'))
         ->setValue($object->getDetail('encoding')),
+      id(new PhabricatorBoolEditField())
+        ->setKey('allowDangerousChanges')
+        ->setLabel(pht('Allow Dangerous Changes'))
+        ->setIsCopyable(true)
+        ->setIsConduitOnly(true)
+        ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_DANGEROUS)
+        ->setDescription(pht('Permit dangerous changes to be made.'))
+        ->setConduitDescription(pht('Allow or prevent dangerous changes.'))
+        ->setConduitTypeDescription(pht('New protection setting.'))
+        ->setValue($object->shouldAllowDangerousChanges()),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))
