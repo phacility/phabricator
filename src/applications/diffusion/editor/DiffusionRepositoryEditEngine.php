@@ -162,6 +162,17 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Set the staging area URI.'))
         ->setConduitTypeDescription(pht('New staging area URI.'))
         ->setValue($object->getStagingURI()),
+      id(new PhabricatorDatasourceEditField())
+        ->setKey('automationBlueprintPHIDs')
+        ->setLabel(pht('Use Blueprints'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS)
+        ->setIsCopyable(true)
+        ->setDatasource(new DrydockBlueprintDatasource())
+        ->setDescription(pht('Automation blueprints.'))
+        ->setConduitDescription(pht('Change automation blueprints.'))
+        ->setConduitTypeDescription(pht('New blueprint PHIDs.'))
+        ->setValue($object->getAutomationBlueprintPHIDs()),
       id(new PhabricatorPolicyEditField())
         ->setKey('policy.push')
         ->setLabel(pht('Push Policy'))
