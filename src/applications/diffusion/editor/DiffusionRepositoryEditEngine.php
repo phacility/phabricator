@@ -152,6 +152,16 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Set the default branch name.'))
         ->setConduitTypeDescription(pht('New default branch name.'))
         ->setValue($object->getDetail('default-branch')),
+      id(new PhabricatorTextEditField())
+        ->setKey('stagingAreaURI')
+        ->setLabel(pht('Staging Area URI'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_STAGING_URI)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Staging area URI.'))
+        ->setConduitDescription(pht('Set the staging area URI.'))
+        ->setConduitTypeDescription(pht('New staging area URI.'))
+        ->setValue($object->getStagingURI()),
       id(new PhabricatorPolicyEditField())
         ->setKey('policy.push')
         ->setLabel(pht('Push Policy'))
