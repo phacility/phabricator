@@ -636,6 +636,43 @@ final class PhabricatorRepositoryEditor
           }
         }
         break;
+
+      case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
+        foreach ($xactions as $xaction) {
+          $old = $object->getSymbolSources();
+          $new = $xaction->getNewValue();
+
+          // If the viewer is adding new repositories, make sure they are
+          // valid and visible.
+          $add = array_diff($new, $old);
+          if (!$add) {
+            continue;
+          }
+
+          $repositories = id(new PhabricatorRepositoryQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs($add)
+            ->execute();
+          $repositories = mpull($repositories, null, 'getPHID');
+
+          foreach ($add as $phid) {
+            if (isset($repositories[$phid])) {
+              continue;
+            }
+
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Repository ("%s") does not exist, or you do not have '.
+                'permission to see it.',
+                $phid),
+              $xaction);
+            break;
+          }
+        }
+        break;
+
     }
 
     return $errors;

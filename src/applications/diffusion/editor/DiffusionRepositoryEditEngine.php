@@ -183,6 +183,30 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Change automation blueprints.'))
         ->setConduitTypeDescription(pht('New blueprint PHIDs.'))
         ->setValue($object->getAutomationBlueprintPHIDs()),
+      id(new PhabricatorStringListEditField())
+        ->setKey('symbolLanguages')
+        ->setLabel(pht('Languages'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE)
+        ->setIsCopyable(true)
+        ->setDescription(
+          pht('Languages which define symbols in this repository.'))
+        ->setConduitDescription(
+          pht('Change symbol languages for this repository.'))
+        ->setConduitTypeDescription(
+          pht('New symbol langauges.'))
+        ->setValue($object->getSymbolLanguages()),
+      id(new PhabricatorDatasourceEditField())
+        ->setKey('symbolRepositoryPHIDs')
+        ->setLabel(pht('Uses Symbols From'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES)
+        ->setIsCopyable(true)
+        ->setDatasource(new DiffusionRepositoryDatasource())
+        ->setDescription(pht('Repositories to link symbols from.'))
+        ->setConduitDescription(pht('Change symbol source repositories.'))
+        ->setConduitTypeDescription(pht('New symbol repositories.'))
+        ->setValue($object->getSymbolSources()),
       id(new PhabricatorPolicyEditField())
         ->setKey('policy.push')
         ->setLabel(pht('Push Policy'))
