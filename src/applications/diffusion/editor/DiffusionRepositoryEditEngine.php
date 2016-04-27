@@ -75,6 +75,12 @@ final class DiffusionRepositoryEditEngine
       ->setObject($object)
       ->execute();
 
+    $track_value = $object->getDetail('branch-filter', array());
+    $track_value = array_keys($track_value);
+
+    $autoclose_value = $object->getDetail('close-commits-filter', array());
+    $autoclose_value = array_keys($autoclose_value);
+
     return array(
       id(new PhabricatorSelectEditField())
         ->setKey('vcs')
@@ -162,6 +168,28 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Set the default branch name.'))
         ->setConduitTypeDescription(pht('New default branch name.'))
         ->setValue($object->getDetail('default-branch')),
+      id(new PhabricatorTextAreaEditField())
+        ->setIsStringList(true)
+        ->setKey('trackOnly')
+        ->setLabel(pht('Track Only'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Track only these branches.'))
+        ->setConduitDescription(pht('Set the tracked branches.'))
+        ->setConduitTypeDescription(pht('New tracked branchs.'))
+        ->setValue($track_value),
+      id(new PhabricatorTextAreaEditField())
+        ->setIsStringList(true)
+        ->setKey('autocloseOnly')
+        ->setLabel(pht('Autoclose Only'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Autoclose commits on only these branches.'))
+        ->setConduitDescription(pht('Set the autoclose branches.'))
+        ->setConduitTypeDescription(pht('New default tracked branchs.'))
+        ->setValue($autoclose_value),
       id(new PhabricatorTextEditField())
         ->setKey('stagingAreaURI')
         ->setLabel(pht('Staging Area URI'))
