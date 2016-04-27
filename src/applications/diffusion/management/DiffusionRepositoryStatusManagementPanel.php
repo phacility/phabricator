@@ -46,8 +46,12 @@ final class DiffusionRepositoryStatusManagementPanel
       pht('Update Frequency'),
       $this->buildRepositoryUpdateInterval($repository));
 
+    $messages = id(new PhabricatorRepositoryStatusMessage())
+      ->loadAllWhere('repositoryID = %d', $repository->getID());
+    $messages = mpull($messages, null, 'getStatusType');
 
-    list($status, $raw_error) = $this->buildRepositoryStatus($repository);
+    $status = $this->buildRepositoryStatus($repository, $messages);
+    $raw_error = $this->buildRepositoryRawError($repository, $messages);
 
     $view->addProperty(pht('Status'), $status);
     if ($raw_error) {
@@ -80,16 +84,13 @@ final class DiffusionRepositoryStatusManagementPanel
   }
 
   private function buildRepositoryStatus(
-    PhabricatorRepository $repository) {
+    PhabricatorRepository $repository,
+    array $messages) {
 
     $viewer = $this->getViewer();
     $is_cluster = $repository->getAlmanacServicePHID();
 
     $view = new PHUIStatusListView();
-
-    $messages = id(new PhabricatorRepositoryStatusMessage())
-      ->loadAllWhere('repositoryID = %d', $repository->getID());
-    $messages = mpull($messages, null, 'getStatusType');
 
     if ($repository->isTracked()) {
       $view->addItem(
@@ -361,8 +362,6 @@ final class DiffusionRepositoryStatusManagementPanel
       }
     }
 
-    $raw_error = null;
-
     $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_FETCH);
     if ($message) {
       switch ($message->getStatusCode()) {
@@ -376,8 +375,6 @@ final class DiffusionRepositoryStatusManagementPanel
               'keypair you have configured does not have permission to '.
               'access the repository.');
           }
-
-          $raw_error = $message;
 
           $view->addItem(
             id(new PHUIStatusItemView())
@@ -432,10 +429,29 @@ final class DiffusionRepositoryStatusManagementPanel
           ->setNote(pht('This repository will be updated soon!')));
     }
 
+    return $view;
+  }
+
+  private function buildRepositoryRawError(
+    PhabricatorRepository $repository,
+    array $messages) {
+    $viewer = $this->getViewer();
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $raw_error = null;
+
+    $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_FETCH);
+    if ($message) {
+      switch ($message->getStatusCode()) {
+        case PhabricatorRepositoryStatusMessage::CODE_ERROR:
+          $raw_error = $message->getParameter('message');
+          break;
+      }
+    }
 
     if ($raw_error !== null) {
       if (!$can_edit) {
@@ -450,7 +466,7 @@ final class DiffusionRepositoryStatusManagementPanel
       $raw_message = null;
     }
 
-    return array($view, $raw_message);
+    return $raw_message;
   }
 
 

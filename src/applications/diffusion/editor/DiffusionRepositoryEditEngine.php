@@ -5,6 +5,17 @@ final class DiffusionRepositoryEditEngine
 
   const ENGINECONST = 'diffusion.repository';
 
+  private $versionControlSystem;
+
+  public function setVersionControlSystem($version_control_system) {
+    $this->versionControlSystem = $version_control_system;
+    return $this;
+  }
+
+  public function getVersionControlSystem() {
+    return $this->versionControlSystem;
+  }
+
   public function isEngineConfigurable() {
     return false;
   }
@@ -27,7 +38,14 @@ final class DiffusionRepositoryEditEngine
 
   protected function newEditableObject() {
     $viewer = $this->getViewer();
-    return PhabricatorRepository::initializeNewRepository($viewer);
+    $repository = PhabricatorRepository::initializeNewRepository($viewer);
+
+    $vcs = $this->getVersionControlSystem();
+    if ($vcs) {
+      $repository->setVersionControlSystem($vcs);
+    }
+
+    return $repository;
   }
 
   protected function newObjectQuery() {

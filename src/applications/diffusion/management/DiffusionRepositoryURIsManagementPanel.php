@@ -106,7 +106,7 @@ final class DiffusionRepositoryURIsManagementPanel
         ));
 
     $doc_href = PhabricatorEnv::getDoclink(
-      'Diffusion User Guide: Repository URIs');
+      'Diffusion User Guide: URIs');
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Repository URIs'))
