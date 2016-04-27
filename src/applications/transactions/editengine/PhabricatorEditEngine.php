@@ -1808,8 +1808,9 @@ abstract class PhabricatorEditEngine
       } catch (Exception $ex) {
         throw new PhutilProxyException(
           pht(
-            'Exception when processing transaction of type "%s".',
-            $xaction['type']),
+            'Exception when processing transaction of type "%s": %s',
+            $xaction['type'],
+            $ex->getMessage()),
           $ex);
       }
 

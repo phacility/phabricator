@@ -342,7 +342,7 @@ final class PhabricatorRepositoryEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
       case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
         foreach ($xactions as $xaction) {
           foreach ($xaction->getNewValue() as $pattern) {

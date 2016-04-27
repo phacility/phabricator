@@ -143,6 +143,9 @@ final class DiffusionRepositoryEditEngine
         ->setLabel(pht('Allow Dangerous Changes'))
         ->setIsCopyable(true)
         ->setIsConduitOnly(true)
+        ->setOptions(
+          pht('Prevent Dangerous Changes'),
+          pht('Allow Dangerous Changes'))
         ->setTransactionType(PhabricatorRepositoryTransaction::TYPE_DANGEROUS)
         ->setDescription(pht('Permit dangerous changes to be made.'))
         ->setConduitDescription(pht('Allow or prevent dangerous changes.'))
@@ -235,6 +238,32 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Change symbol source repositories.'))
         ->setConduitTypeDescription(pht('New symbol repositories.'))
         ->setValue($object->getSymbolSources()),
+      id(new PhabricatorBoolEditField())
+        ->setKey('publish')
+        ->setLabel(pht('Publish/Notify'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_NOTIFY)
+        ->setIsCopyable(true)
+        ->setOptions(
+          pht('Disable Notifications, Feed, and Herald'),
+          pht('Enable Notifications, Feed, and Herald'))
+        ->setDescription(pht('Configure how changes are published.'))
+        ->setConduitDescription(pht('Change publishing options.'))
+        ->setConduitTypeDescription(pht('New notification setting.'))
+        ->setValue(!$object->getDetail('herald-disabled')),
+      id(new PhabricatorBoolEditField())
+        ->setKey('autoclose')
+        ->setLabel(pht('Autoclose'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE)
+        ->setIsCopyable(true)
+        ->setOptions(
+          pht('Disable Autoclose'),
+          pht('Enable Autoclose'))
+        ->setDescription(pht('Stop or resume autoclosing in this repository.'))
+        ->setConduitDescription(pht('Change autoclose setting.'))
+        ->setConduitTypeDescription(pht('New autoclose setting.'))
+        ->setValue(!$object->getDetail('disable-autoclose')),
       id(new PhabricatorPolicyEditField())
         ->setKey('policy.push')
         ->setLabel(pht('Push Policy'))
