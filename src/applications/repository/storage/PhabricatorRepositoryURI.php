@@ -105,7 +105,7 @@ final class PhabricatorRepositoryURI
   public function getEffectiveDisplayType() {
     $display = $this->getDisplayType();
 
-    if ($display != self::IO_DEFAULT) {
+    if ($display != self::DISPLAY_DEFAULT) {
       return $display;
     }
 
@@ -116,47 +116,40 @@ final class PhabricatorRepositoryURI
     switch ($this->getEffectiveIOType()) {
       case self::IO_MIRROR:
       case self::IO_OBSERVE:
-        return self::DISPLAY_NEVER;
       case self::IO_NONE:
-        if ($this->isBuiltin()) {
-          return self::DISPLAY_NEVER;
-        } else {
-          return self::DISPLAY_ALWAYS;
-        }
+        return self::DISPLAY_NEVER;
       case self::IO_READ:
       case self::IO_READWRITE:
         // By default, only show the "best" version of the builtin URI, not the
         // other redundant versions.
-        if ($this->isBuiltin()) {
-          $repository = $this->getRepository();
-          $other_uris = $repository->getURIs();
+        $repository = $this->getRepository();
+        $other_uris = $repository->getURIs();
 
-          $identifier_value = array(
-            self::BUILTIN_IDENTIFIER_CALLSIGN => 3,
-            self::BUILTIN_IDENTIFIER_SHORTNAME => 2,
-            self::BUILTIN_IDENTIFIER_ID => 1,
-          );
+        $identifier_value = array(
+          self::BUILTIN_IDENTIFIER_CALLSIGN => 3,
+          self::BUILTIN_IDENTIFIER_SHORTNAME => 2,
+          self::BUILTIN_IDENTIFIER_ID => 1,
+        );
 
-          $have_identifiers = array();
-          foreach ($other_uris as $other_uri) {
-            if ($other_uri->getIsDisabled()) {
-              continue;
-            }
-
-            $identifier = $other_uri->getBuiltinIdentifier();
-            if (!$identifier) {
-              continue;
-            }
-
-            $have_identifiers[$identifier] = $identifier_value[$identifier];
+        $have_identifiers = array();
+        foreach ($other_uris as $other_uri) {
+          if ($other_uri->getIsDisabled()) {
+            continue;
           }
 
-          $best_identifier = max($have_identifiers);
-          $this_identifier = $identifier_value[$this->getBuiltinIdentifier()];
-
-          if ($this_identifier < $best_identifier) {
-            return self::DISPLAY_NEVER;
+          $identifier = $other_uri->getBuiltinIdentifier();
+          if (!$identifier) {
+            continue;
           }
+
+          $have_identifiers[$identifier] = $identifier_value[$identifier];
+        }
+
+        $best_identifier = max($have_identifiers);
+        $this_identifier = $identifier_value[$this->getBuiltinIdentifier()];
+
+        if ($this_identifier < $best_identifier) {
+          return self::DISPLAY_NEVER;
         }
 
         return self::DISPLAY_ALWAYS;
