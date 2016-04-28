@@ -1,7 +1,11 @@
 <?php
 
 final class PhabricatorRepositoryURI
-  extends PhabricatorRepositoryDAO {
+  extends PhabricatorRepositoryDAO
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface {
 
   protected $repositoryPHID;
   protected $uri;
@@ -65,6 +69,11 @@ final class PhabricatorRepositoryURI
       ->setIoType(self::IO_DEFAULT)
       ->setDisplayType(self::DISPLAY_DEFAULT)
       ->setIsDisabled(0);
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorRepositoryURIPHIDType::TYPECONST);
   }
 
   public function attachRepository(PhabricatorRepository $repository) {
@@ -176,7 +185,7 @@ final class PhabricatorRepositoryURI
       }
     }
 
-    return self::IO_IGNORE;
+    return self::IO_NONE;
   }
 
 
@@ -296,6 +305,73 @@ final class PhabricatorRepositoryURI
       default:
         return null;
     }
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new DiffusionURIEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorRepositoryURITransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::getMostOpenPolicy();
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    $extended = array();
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        // To edit a repository URI, you must be able to edit the
+        // corresponding repository.
+        $extended[] = array($this->getRepository(), $capability);
+        break;
+    }
+
+    return $extended;
   }
 
 }

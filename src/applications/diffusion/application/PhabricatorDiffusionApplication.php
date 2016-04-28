@@ -91,6 +91,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             => 'DiffusionCommitEditController',
           'manage/(?:(?P<panel>[^/]+)/)?'
             => 'DiffusionRepositoryManageController',
+          $this->getEditRoutePattern('uri/edit/')
+            => 'DiffusionRepositoryURIEditController',
           'edit/' => array(
             '' => 'DiffusionRepositoryEditMainController',
             'basic/' => 'DiffusionRepositoryEditBasicController',

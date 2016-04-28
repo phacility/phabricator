@@ -16,8 +16,6 @@ final class DiffusionRepositoryURIsManagementPanel
   public function buildManagementPanelContent() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
-
-    $repository->attachURIs(array());
     $uris = $repository->getURIs();
 
     Javelin::initBehavior('phabricator-tooltips');
@@ -25,6 +23,12 @@ final class DiffusionRepositoryURIsManagementPanel
     foreach ($uris as $uri) {
 
       $uri_name = $uri->getDisplayURI();
+      $uri_name = phutil_tag(
+        'a',
+        array(
+          'href' => $repository->getPathURI('uri/edit/'.$uri->getID().'/'),
+        ),
+        $uri_name);
 
       if ($uri->getIsDisabled()) {
         $status_icon = 'fa-times grey';
