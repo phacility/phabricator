@@ -94,6 +94,7 @@ final class PhabricatorRepositoryURI
       $this->getBuiltinProtocol(),
       $this->getBuiltinIdentifier(),
     );
+
     return implode('.', $parts);
   }
 
@@ -108,6 +109,10 @@ final class PhabricatorRepositoryURI
       return $display;
     }
 
+    return $this->getDefaultDisplayType();
+  }
+
+  public function getDefaultDisplayType() {
     switch ($this->getEffectiveIOType()) {
       case self::IO_MIRROR:
       case self::IO_OBSERVE:
@@ -156,6 +161,8 @@ final class PhabricatorRepositoryURI
 
         return self::DISPLAY_ALWAYS;
     }
+
+    return self::DISPLAY_NEVER;
   }
 
 
@@ -166,6 +173,10 @@ final class PhabricatorRepositoryURI
       return $io;
     }
 
+    return $this->getDefaultIOType();
+  }
+
+  public function getDefaultIOType() {
     if ($this->isBuiltin()) {
       $repository = $this->getRepository();
       $other_uris = $repository->getURIs();
@@ -305,6 +316,142 @@ final class PhabricatorRepositoryURI
       default:
         return null;
     }
+  }
+
+  public function getViewURI() {
+    $id = $this->getID();
+    return $this->getRepository()->getPathURI("uri/view/{$id}/");
+  }
+
+  public function getEditURI() {
+    $id = $this->getID();
+    return $this->getRepository()->getPathURI("uri/edit/{$id}/");
+  }
+
+  public function getAvailableIOTypeOptions() {
+    $options = array(
+      self::IO_DEFAULT,
+      self::IO_NONE,
+    );
+
+    if ($this->isBuiltin()) {
+      $options[] = self::IO_READ;
+      $options[] = self::IO_WRITE;
+    } else {
+      $options[] = self::IO_OBSERVE;
+      $options[] = self::IO_MIRROR;
+    }
+
+    $map = array();
+    $io_map = self::getIOTypeMap();
+    foreach ($options as $option) {
+      $spec = idx($io_map, $option, array());
+
+      $label = idx($spec, 'label', $option);
+      $short = idx($spec, 'short');
+
+      $name = pht('%s: %s', $label, $short);
+      $map[$option] = $name;
+    }
+
+    return $map;
+  }
+
+  public function getAvailableDisplayTypeOptions() {
+    $options = array(
+      self::DISPLAY_DEFAULT,
+      self::DISPLAY_ALWAYS,
+      self::DISPLAY_NEVER,
+    );
+
+    $map = array();
+    $display_map = self::getDisplayTypeMap();
+    foreach ($options as $option) {
+      $spec = idx($display_map, $option, array());
+
+      $label = idx($spec, 'label', $option);
+      $short = idx($spec, 'short');
+
+      $name = pht('%s: %s', $label, $short);
+      $map[$option] = $name;
+    }
+
+    return $map;
+  }
+
+  public static function getIOTypeMap() {
+    return array(
+      self::IO_DEFAULT => array(
+        'label' => pht('Default'),
+        'short' => pht('Use default behavior.'),
+      ),
+      self::IO_OBSERVE => array(
+        'icon' => 'fa-download',
+        'color' => 'green',
+        'label' => pht('Observe'),
+        'note' => pht(
+          'Phabricator will observe changes to this URI and copy them.'),
+        'short' => pht('Copy from a remote.'),
+      ),
+      self::IO_MIRROR => array(
+        'icon' => 'fa-upload',
+        'color' => 'green',
+        'label' => pht('Mirror'),
+        'note' => pht(
+          'Phabricator will push a copy of any changes to this URI.'),
+        'short' => pht('Push a copy to a remote.'),
+      ),
+      self::IO_NONE => array(
+        'icon' => 'fa-times',
+        'color' => 'grey',
+        'label' => pht('No I/O'),
+        'note' => pht(
+          'Phabricator will not push or pull any changes to this URI.'),
+        'short' => pht('Do not perform any I/O.'),
+      ),
+      self::IO_READ => array(
+        'icon' => 'fa-folder',
+        'color' => 'blue',
+        'label' => pht('Read Only'),
+        'note' => pht(
+          'Phabricator will serve a read-only copy of the repository from '.
+          'this URI.'),
+        'short' => pht('Serve repository in read-only mode.'),
+      ),
+      self::IO_READWRITE => array(
+        'icon' => 'fa-folder-open',
+        'color' => 'blue',
+        'label' => pht('Read/Write'),
+        'note' => pht(
+          'Phabricator will serve a read/write copy of the repository from '.
+          'this URI.'),
+        'short' => pht('Serve repository in read/write mode.'),
+      ),
+    );
+  }
+
+  public static function getDisplayTypeMap() {
+    return array(
+      self::DISPLAY_DEFAULT => array(
+        'label' => pht('Default'),
+        'short' => pht('Use default behavior.'),
+      ),
+      self::DISPLAY_ALWAYS => array(
+        'icon' => 'fa-eye',
+        'color' => 'green',
+        'label' => pht('Visible'),
+        'note' => pht('This URI will be shown to users as a clone URI.'),
+        'short' => pht('Show as a clone URI.'),
+      ),
+      self::DISPLAY_NEVER => array(
+        'icon' => 'fa-eye-slash',
+        'color' => 'grey',
+        'label' => pht('Hidden'),
+        'note' => pht(
+          'This URI will be hidden from users.'),
+        'short' => pht('Do not show as a clone URI.'),
+      ),
+    );
   }
 
 

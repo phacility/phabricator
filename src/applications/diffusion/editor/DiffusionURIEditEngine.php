@@ -54,11 +54,11 @@ final class DiffusionURIEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit Repository URI: %s', $object->getDisplayURI());
+    return pht('Edit Repository URI %d', $object->getID());
   }
 
   protected function getObjectEditShortText($object) {
-    return $object->getDisplayURI();
+    return pht('URI %d', $object->getID());
   }
 
   protected function getObjectCreateShortText() {
@@ -70,8 +70,7 @@ final class DiffusionURIEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    $repository = $this->getRepository();
-    return $repository->getPathURI('manage/uris/');
+    return $object->getViewURI();
   }
 
   protected function buildCustomEditFields($object) {
@@ -87,6 +86,24 @@ final class DiffusionURIEditEngine
         ->setConduitDescription(pht('Change the repository URI.'))
         ->setConduitTypeDescription(pht('New repository URI.'))
         ->setValue($object->getURI()),
+      id(new PhabricatorSelectEditField())
+        ->setKey('io')
+        ->setLabel(pht('I/O Type'))
+        ->setTransactionType(PhabricatorRepositoryURITransaction::TYPE_IO)
+        ->setDescription(pht('URI I/O behavior.'))
+        ->setConduitDescription(pht('Adjust I/O behavior.'))
+        ->setConduitTypeDescription(pht('New I/O behavior.'))
+        ->setValue($object->getIOType())
+        ->setOptions($object->getAvailableIOTypeOptions()),
+      id(new PhabricatorSelectEditField())
+        ->setKey('display')
+        ->setLabel(pht('Display Type'))
+        ->setTransactionType(PhabricatorRepositoryURITransaction::TYPE_DISPLAY)
+        ->setDescription(pht('URI display behavior.'))
+        ->setConduitDescription(pht('Change display behavior.'))
+        ->setConduitTypeDescription(pht('New display behavior.'))
+        ->setValue($object->getDisplayType())
+        ->setOptions($object->getAvailableDisplayTypeOptions()),
     );
   }
 
