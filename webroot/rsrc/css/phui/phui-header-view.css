@@ -80,6 +80,10 @@ body .phui-header-shell.phui-bleed-header
   color: {$lightbluetext};
 }
 
+.phui-header-content {
+  display: inline-block;
+}
+
 .phui-object-box .phui-header-tall .phui-header-header,
 .phui-document-view .phui-header-tall .phui-header-header {
   font-size: 18px;
