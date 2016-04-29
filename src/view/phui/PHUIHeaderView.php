@@ -316,15 +316,6 @@ final class PHUIHeaderView extends AphrontTagView {
         $header_content);
     }
 
-    // This wrapper element allows titles to be triple-clicked to select them
-    // in Firefox. See T10905 for discussion.
-    $header_content = phutil_tag(
-      'span',
-      array(
-        'class' => 'phui-header-content',
-      ),
-      $header_content);
-
     $left[] = phutil_tag(
       'span',
       array(
