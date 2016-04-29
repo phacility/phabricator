@@ -62,10 +62,8 @@ final class PhabricatorRepositoryURI
     ) + parent::getConfiguration();
   }
 
-  public static function initializeNewURI(PhabricatorRepository $repository) {
+  public static function initializeNewURI() {
     return id(new self())
-      ->attachRepository($repository)
-      ->setRepositoryPHID($repository->getPHID())
       ->setIoType(self::IO_DEFAULT)
       ->setDisplayType(self::DISPLAY_DEFAULT)
       ->setIsDisabled(0);

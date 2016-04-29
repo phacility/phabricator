@@ -14,9 +14,12 @@ final class DiffusionURIEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorRepositoryURITransaction::TYPE_REPOSITORY;
     $types[] = PhabricatorRepositoryURITransaction::TYPE_URI;
     $types[] = PhabricatorRepositoryURITransaction::TYPE_IO;
     $types[] = PhabricatorRepositoryURITransaction::TYPE_DISPLAY;
+    $types[] = PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL;
+    $types[] = PhabricatorRepositoryURITransaction::TYPE_DISABLE;
 
     return $types;
   }
@@ -32,6 +35,12 @@ final class DiffusionURIEditor
         return $object->getIOType();
       case PhabricatorRepositoryURITransaction::TYPE_DISPLAY:
         return $object->getDisplayType();
+      case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
+        return $object->getRepositoryPHID();
+      case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
+        return $object->getCredentialPHID();
+      case PhabricatorRepositoryURITransaction::TYPE_DISABLE:
+        return (int)$object->getIsDisabled();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -45,7 +54,11 @@ final class DiffusionURIEditor
       case PhabricatorRepositoryURITransaction::TYPE_URI:
       case PhabricatorRepositoryURITransaction::TYPE_IO:
       case PhabricatorRepositoryURITransaction::TYPE_DISPLAY:
+      case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
+      case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
         return $xaction->getNewValue();
+      case PhabricatorRepositoryURITransaction::TYPE_DISABLE:
+        return (int)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -65,6 +78,15 @@ final class DiffusionURIEditor
       case PhabricatorRepositoryURITransaction::TYPE_DISPLAY:
         $object->setDisplayType($xaction->getNewValue());
         break;
+      case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
+        $object->setRepositoryPHID($xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
+        $object->setCredentialPHID($xaction->getNewValue());
+        break;
+      case PhabricatorRepositoryURITransaction::TYPE_DISABLE:
+        $object->setIsDisabled($xaction->getNewValue());
+        break;
     }
   }
 
@@ -76,6 +98,9 @@ final class DiffusionURIEditor
       case PhabricatorRepositoryURITransaction::TYPE_URI:
       case PhabricatorRepositoryURITransaction::TYPE_IO:
       case PhabricatorRepositoryURITransaction::TYPE_DISPLAY:
+      case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
+      case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
+      case PhabricatorRepositoryURITransaction::TYPE_DISABLE:
         return;
     }
 
@@ -90,6 +115,92 @@ final class DiffusionURIEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
+      case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getRepositoryPHID(),
+          $xactions);
+        if ($missing) {
+          // NOTE: This isn't being marked as a missing field error because
+          // it's a fundamental, required property of the URI.
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht(
+              'When creating a repository URI, you must specify which '.
+              'repository the URI will belong to.'),
+            nonempty(last($xactions), null));
+          break;
+        }
+
+        $viewer = $this->getActor();
+
+        foreach ($xactions as $xaction) {
+          $repository_phid = $xaction->getNewValue();
+
+          // If this isn't changing anything, let it through as-is.
+          if ($repository_phid == $object->getRepositoryPHID()) {
+            continue;
+          }
+
+          if (!$this->getIsNewObject()) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'The repository a URI is associated with is immutable, and '.
+                'can not be changed after the URI is created.'),
+              $xaction);
+            continue;
+          }
+
+          $repository = id(new PhabricatorRepositoryQuery())
+            ->setViewer($viewer)
+            ->withPHIDs(array($repository_phid))
+            ->requireCapabilities(
+              array(
+                PhabricatorPolicyCapability::CAN_VIEW,
+                PhabricatorPolicyCapability::CAN_EDIT,
+              ))
+            ->executeOne();
+          if (!$repository) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'To create a URI for a repository ("%s"), it must exist and '.
+                'you must have permission to edit it.',
+                $repository_phid),
+              $xaction);
+            continue;
+          }
+        }
+        break;
+      case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
+        $viewer = $this->getActor();
+        foreach ($xactions as $xaction) {
+          $credential_phid = $xaction->getNewValue();
+
+          if ($credential_phid == $object->getCredentialPHID()) {
+            continue;
+          }
+
+          $credential = id(new PassphraseCredentialQuery())
+            ->setViewer($viewer)
+            ->withPHIDs(array($credential_phid))
+            ->executeOne();
+          if (!$credential) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'You can only associate a credential ("%s") with a repository '.
+                'URI if it exists and you have permission to see it.',
+                $credential_phid),
+              $xaction);
+            continue;
+          }
+        }
+        break;
       case PhabricatorRepositoryURITransaction::TYPE_URI:
         $missing = $this->validateIsEmptyTextField(
           $object->getURI(),
@@ -99,7 +210,7 @@ final class DiffusionURIEditor
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),
-            pht('Repository URI is required.'),
+            pht('A repository URI must have a nonempty URI.'),
             nonempty(last($xactions), null));
 
           $error->setIsMissingFieldError(true);

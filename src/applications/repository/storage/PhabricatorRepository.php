@@ -2179,7 +2179,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $uris = array();
     foreach ($protocol_map as $protocol => $proto_supported) {
       foreach ($identifier_map as $identifier => $id_supported) {
-        $uris[] = PhabricatorRepositoryURI::initializeNewURI($this)
+        $uris[] = PhabricatorRepositoryURI::initializeNewURI()
+          ->setRepositoryPHID($this->getPHID())
+          ->attachRepository($this)
           ->setBuiltinProtocol($protocol)
           ->setBuiltinIdentifier($identifier)
           ->setIsDisabled(!$proto_supported || !$id_supported);

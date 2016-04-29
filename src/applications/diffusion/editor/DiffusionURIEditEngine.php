@@ -37,8 +37,15 @@ final class DiffusionURIEditEngine
   }
 
   protected function newEditableObject() {
+    $uri = PhabricatorRepositoryURI::initializeNewURI();
+
     $repository = $this->getRepository();
-    return PhabricatorRepositoryURI::initializeNewURI($repository);
+    if ($repository) {
+      $uri->setRepositoryPHID($repository->getPHID());
+      $uri->attachRepository($repository);
+    }
+
+    return $uri;
   }
 
   protected function newObjectQuery() {
@@ -77,6 +84,23 @@ final class DiffusionURIEditEngine
     $viewer = $this->getViewer();
 
     return array(
+      id(new PhabricatorHandlesEditField())
+        ->setKey('repository')
+        ->setAliases(array('repositoryPHID'))
+        ->setLabel(pht('Repository'))
+        ->setIsRequired(true)
+        ->setIsConduitOnly(true)
+        ->setTransactionType(
+          PhabricatorRepositoryURITransaction::TYPE_REPOSITORY)
+        ->setDescription(pht('The repository this URI is associated with.'))
+        ->setConduitDescription(
+          pht(
+            'Create a URI in a given repository. This transaction type '.
+            'must be present when creating a new URI and must not be '.
+            'present when editing an existing URI.'))
+        ->setConduitTypeDescription(
+          pht('Repository PHID to create a new URI for.'))
+        ->setSingleValue($object->getRepositoryPHID()),
       id(new PhabricatorTextEditField())
         ->setKey('uri')
         ->setLabel(pht('URI'))
@@ -104,6 +128,28 @@ final class DiffusionURIEditEngine
         ->setConduitTypeDescription(pht('New display behavior.'))
         ->setValue($object->getDisplayType())
         ->setOptions($object->getAvailableDisplayTypeOptions()),
+      id(new PhabricatorHandlesEditField())
+        ->setKey('credential')
+        ->setAliases(array('credentialPHID'))
+        ->setLabel(pht('Credential'))
+        ->setIsConduitOnly(true)
+        ->setTransactionType(
+          PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL)
+        ->setDescription(
+          pht('The credential to use when interacting with this URI.'))
+        ->setConduitDescription(pht('Change the credential for this URI.'))
+        ->setConduitTypeDescription(pht('New credential PHID, or null.'))
+        ->setSingleValue($object->getCredentialPHID()),
+      id(new PhabricatorBoolEditField())
+        ->setKey('disable')
+        ->setLabel(pht('Disabled'))
+        ->setIsConduitOnly(true)
+        ->setTransactionType(PhabricatorRepositoryURITransaction::TYPE_DISABLE)
+        ->setDescription(pht('Active status of the URI.'))
+        ->setConduitDescription(pht('Disable or activate the URI.'))
+        ->setConduitTypeDescription(pht('True to disable the URI.'))
+        ->setOptions(pht('Enable'), pht('Disable'))
+        ->setValue($object->getIsDisabled()),
     );
   }
 

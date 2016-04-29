@@ -3,9 +3,12 @@
 final class PhabricatorRepositoryURITransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_REPOSITORY = 'diffusion.uri.repository';
   const TYPE_URI = 'diffusion.uri.uri';
   const TYPE_IO = 'diffusion.uri.io';
   const TYPE_DISPLAY = 'diffusion.uri.display';
+  const TYPE_CREDENTIAL = 'diffusion.uri.credential';
+  const TYPE_DISABLE = 'diffusion.uri.disable';
 
   public function getApplicationName() {
     return 'repository';
