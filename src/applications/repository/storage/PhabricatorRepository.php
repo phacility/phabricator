@@ -2454,6 +2454,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ->setKey('shortName')
         ->setType('string')
         ->setDescription(pht('Unique short name, if the repository has one.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('status')
+        ->setType('string')
+        ->setDescription(pht('Active or inactive status.')),
     );
   }
 
@@ -2463,11 +2467,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'vcs' => $this->getVersionControlSystem(),
       'callsign' => $this->getCallsign(),
       'shortName' => $this->getRepositorySlug(),
+      'status' => $this->getStatus(),
     );
   }
 
   public function getConduitSearchAttachments() {
-    return array();
+    return array(
+      id(new DiffusionRepositoryURIsSearchEngineAttachment())
+        ->setAttachmentKey('uris'),
+    );
   }
 
 }

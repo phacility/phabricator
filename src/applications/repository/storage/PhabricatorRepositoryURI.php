@@ -5,7 +5,8 @@ final class PhabricatorRepositoryURI
   implements
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorExtendedPolicyInterface {
+    PhabricatorExtendedPolicyInterface,
+    PhabricatorConduitResultInterface {
 
   protected $repositoryPHID;
   protected $uri;
@@ -510,6 +511,89 @@ final class PhabricatorRepositoryURI
     }
 
     return $extended;
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('repositoryPHID')
+        ->setType('phid')
+        ->setDescription(pht('The associated repository PHID.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('uri')
+        ->setType('map<string, string>')
+        ->setDescription(pht('The raw and effective URI.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('io')
+        ->setType('map<string, const>')
+        ->setDescription(
+          pht('The raw, default, and effective I/O Type settings.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('display')
+        ->setType('map<string, const>')
+        ->setDescription(
+          pht('The raw, default, and effective Display Type settings.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('credentialPHID')
+        ->setType('phid?')
+        ->setDescription(
+          pht('The associated credential PHID, if one exists.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('disabled')
+        ->setType('bool')
+        ->setDescription(pht('True if the URI is disabled.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('builtin')
+        ->setType('map<string, string>')
+        ->setDescription(
+          pht('Information about builtin URIs.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dateCreated')
+        ->setType('int')
+        ->setDescription(
+          pht('Epoch timestamp when the object was created.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('dateModified')
+        ->setType('int')
+        ->setDescription(
+          pht('Epoch timestamp when the object was last updated.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'repositoryPHID' => $this->getRepositoryPHID(),
+      'uri' => array(
+        'raw' => $this->getURI(),
+        'effective' => (string)$this->getDisplayURI(),
+      ),
+      'io' => array(
+        'raw' => $this->getIOType(),
+        'default' => $this->getDefaultIOType(),
+        'effective' => $this->getEffectiveIOType(),
+      ),
+      'display' => array(
+        'raw' => $this->getDisplayType(),
+        'default' => $this->getDefaultDisplayType(),
+        'effective' => $this->getEffectiveDisplayType(),
+      ),
+      'credentialPHID' => $this->getCredentialPHID(),
+      'disabled' => (bool)$this->getIsDisabled(),
+      'builtin' => array(
+        'protocol' => $this->getBuiltinProtocol(),
+        'identifier' => $this->getBuiltinIdentifier(),
+      ),
+      'dateCreated' => $this->getDateCreated(),
+      'dateModified' => $this->getDateModified(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
