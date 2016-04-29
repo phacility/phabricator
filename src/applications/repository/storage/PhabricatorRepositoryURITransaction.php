@@ -51,6 +51,16 @@ final class PhabricatorRepositoryURITransaction
           $this->renderHandleLink($author_phid),
           $old_label,
           $new_label);
+      case self::TYPE_DISABLE:
+        if ($new) {
+          return pht(
+            '%s disabled this URI.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s enabled this URI.',
+            $this->renderHandleLink($author_phid));
+        }
 
     }
 

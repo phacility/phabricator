@@ -82,15 +82,17 @@ final class DiffusionRepositoryURIViewController
 
   private function buildCurtain(PhabricatorRepositoryURI $uri) {
     $viewer = $this->getViewer();
+    $id = $uri->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $uri,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $edit_uri = $uri->getEditURI();
 
     $curtain = $this->newCurtainView($uri);
+
+    $edit_uri = $uri->getEditURI();
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -98,6 +100,24 @@ final class DiffusionRepositoryURIViewController
         ->setName(pht('Edit URI'))
         ->setHref($edit_uri)
         ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
+
+    if ($uri->getIsDisabled()) {
+      $disable_name = pht('Enable URI');
+      $disable_icon = 'fa-check';
+    } else {
+      $disable_name = pht('Disable URI');
+      $disable_icon = 'fa-ban';
+    }
+
+    $disable_uri = $uri->getRepository()->getPathURI("uri/disable/{$id}/");
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon($disable_icon)
+        ->setName($disable_name)
+        ->setHref($disable_uri)
+        ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
     return $curtain;

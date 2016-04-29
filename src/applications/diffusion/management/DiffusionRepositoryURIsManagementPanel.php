@@ -91,11 +91,17 @@ final class DiffusionRepositoryURIsManagementPanel
           null,
         ));
 
-    $doc_href = PhabricatorEnv::getDoclink(
-      'Diffusion User Guide: URIs');
+    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: URIs');
+    $add_href = $repository->getPathURI('uri/edit/');
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Repository URIs'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setIcon('fa-plus')
+          ->setHref($add_href)
+          ->setTag('a')
+          ->setText(pht('Add New URI')))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setIcon('fa-book')

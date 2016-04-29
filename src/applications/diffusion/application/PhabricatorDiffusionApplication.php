@@ -93,6 +93,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             => 'DiffusionRepositoryManageController',
           'uri/' => array(
             'view/(?P<id>[0-9]\d*)/' => 'DiffusionRepositoryURIViewController',
+            'disable/(?P<id>[0-9]\d*)/'
+              => 'DiffusionRepositoryURIDisableController',
             $this->getEditRoutePattern('edit/')
               => 'DiffusionRepositoryURIEditController',
           ),

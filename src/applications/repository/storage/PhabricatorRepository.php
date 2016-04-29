@@ -1829,8 +1829,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
         throw new Exception(
           pht(
-            "The URI protocol is unrecognized. It should begin ".
-            "'%s', '%s', '%s', '%s', '%s', '%s', or be in the form '%s'.",
+            'The URI protocol is unrecognized. It should begin with '.
+            '"%s", "%s", "%s", "%s", "%s", "%s", or be in the form "%s".',
             'ssh://',
             'http://',
             'https://',

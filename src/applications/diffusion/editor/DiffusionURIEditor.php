@@ -217,6 +217,25 @@ final class DiffusionURIEditor
           $errors[] = $error;
           break;
         }
+
+        foreach ($xactions as $xaction) {
+          $new_uri = $xaction->getNewValue();
+          if ($new_uri == $object->getURI()) {
+            continue;
+          }
+
+          try {
+            PhabricatorRepository::assertValidRemoteURI($new_uri);
+          } catch (Exception $ex) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              $ex->getMessage(),
+              $xaction);
+            continue;
+          }
+        }
+
         break;
       case PhabricatorRepositoryURITransaction::TYPE_IO:
         $available = $object->getAvailableIOTypeOptions();
