@@ -10,7 +10,7 @@ AllowUsers vcs-user
 # You may need to tweak these options, but mostly they just turn off everything
 # dangerous.
 
-Port 22
+Port 2222
 Protocol 2
 PermitRootLogin no
 AllowAgentForwarding no

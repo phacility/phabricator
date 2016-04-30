@@ -50,8 +50,8 @@ abstract class CelerityResourceController extends PhabricatorController {
     // is not, refuse to cache this resource. This avoids poisoning caches
     // and CDNs if we're getting a request for a new resource to an old node
     // shortly after a push.
-    $is_cacheable = ($hash === $expect_hash) &&
-                    $this->isCacheableResourceType($type);
+    $is_cacheable = ($hash === $expect_hash);
+    $is_locally_cacheable = $this->isLocallyCacheableResourceType($type);
     if (AphrontRequest::getHTTPHeader('If-Modified-Since') && $is_cacheable) {
       // Return a "304 Not Modified". We don't care about the value of this
       // field since we never change what resource is served by a given URI.
@@ -60,7 +60,7 @@ abstract class CelerityResourceController extends PhabricatorController {
 
     $cache = null;
     $data = null;
-    if ($is_cacheable && !$dev_mode) {
+    if ($is_cacheable && $is_locally_cacheable && !$dev_mode) {
       $cache = PhabricatorCaches::getImmutableCache();
 
       $request_path = $this->getRequest()->getPath();
@@ -168,7 +168,7 @@ abstract class CelerityResourceController extends PhabricatorController {
    * @param string  Resource type.
    * @return bool   True to enable caching.
    */
-  private function isCacheableResourceType($type) {
+  private function isLocallyCacheableResourceType($type) {
     $types = array(
       'js' => true,
       'css' => true,

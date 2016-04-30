@@ -7,8 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '04a95108',
-    'core.pkg.js' => '37344f3c',
+    'core.pkg.css' => 'b729f9f5',
+    'core.pkg.js' => '6972d365',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '7ba78475',
     'differential.pkg.js' => 'd0cd0df6',
@@ -136,7 +136,7 @@ return array(
     'rsrc/css/phui/phui-form-view.css' => '6a51768e',
     'rsrc/css/phui/phui-form.css' => 'aac1d51d',
     'rsrc/css/phui/phui-head-thing.css' => 'fd311e5f',
-    'rsrc/css/phui/phui-header-view.css' => '230254d3',
+    'rsrc/css/phui/phui-header-view.css' => '4c7dd8f5',
     'rsrc/css/phui/phui-hovercard.css' => 'de1a2119',
     'rsrc/css/phui/phui-icon-set-selector.css' => '1ab67aad',
     'rsrc/css/phui/phui-icon.css' => '3f33ab57',
@@ -232,7 +232,7 @@ return array(
     'rsrc/externals/javelin/lib/DOM.js' => '805b806a',
     'rsrc/externals/javelin/lib/History.js' => 'd4505101',
     'rsrc/externals/javelin/lib/JSON.js' => '69adf288',
-    'rsrc/externals/javelin/lib/Leader.js' => 'b4ba945c',
+    'rsrc/externals/javelin/lib/Leader.js' => 'fea0eb47',
     'rsrc/externals/javelin/lib/Mask.js' => '8a41885b',
     'rsrc/externals/javelin/lib/Quicksand.js' => '6b8ef10b',
     'rsrc/externals/javelin/lib/Request.js' => '94b750d2',
@@ -704,7 +704,7 @@ return array(
     'javelin-history' => 'd4505101',
     'javelin-install' => '05270951',
     'javelin-json' => '69adf288',
-    'javelin-leader' => 'b4ba945c',
+    'javelin-leader' => 'fea0eb47',
     'javelin-magical-init' => '3010e992',
     'javelin-mask' => '8a41885b',
     'javelin-quicksand' => '6b8ef10b',
@@ -829,7 +829,7 @@ return array(
     'phui-form-css' => 'aac1d51d',
     'phui-form-view-css' => '6a51768e',
     'phui-head-thing-view-css' => 'fd311e5f',
-    'phui-header-view-css' => '230254d3',
+    'phui-header-view-css' => '4c7dd8f5',
     'phui-hovercard' => '1bd28176',
     'phui-hovercard-view-css' => 'de1a2119',
     'phui-icon-set-selector-css' => '1ab67aad',
@@ -1772,9 +1772,6 @@ return array(
       'javelin-typeahead-preloaded-source',
       'javelin-util',
     ),
-    'b4ba945c' => array(
-      'javelin-install',
-    ),
     'b59e1e96' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -2175,6 +2172,9 @@ return array(
       'javelin-dom',
       'javelin-view-visitor',
       'javelin-util',
+    ),
+    'fea0eb47' => array(
+      'javelin-install',
     ),
   ),
   'packages' => array(

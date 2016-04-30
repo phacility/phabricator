@@ -173,14 +173,15 @@ final class PholioMockViewController extends PholioController {
   }
 
   private function buildDescriptionView(PholioMock $mock) {
-
     $viewer = $this->getViewer();
+
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer);
     $description = $mock->getDescription();
 
     if (strlen($description)) {
-      $properties->addImageContent($description);
+      $properties->addTextContent(
+        new PHUIRemarkupView($viewer, $description));
       return id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Mock Description'))
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)

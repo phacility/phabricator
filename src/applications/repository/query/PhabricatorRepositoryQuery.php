@@ -34,6 +34,7 @@ final class PhabricatorRepositoryQuery
   private $needMostRecentCommits;
   private $needCommitCounts;
   private $needProjectPHIDs;
+  private $needURIs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -145,6 +146,11 @@ final class PhabricatorRepositoryQuery
 
   public function needProjectPHIDs($need_phids) {
     $this->needProjectPHIDs = $need_phids;
+    return $this;
+  }
+
+  public function needURIs($need_uris) {
+    $this->needURIs = $need_uris;
     return $this;
   }
 
@@ -345,6 +351,20 @@ final class PhabricatorRepositoryQuery
             $repository->getPHID(),
           ));
         $repository->attachProjectPHIDs($project_phids);
+      }
+    }
+
+    $viewer = $this->getViewer();
+
+    if ($this->needURIs) {
+      $uris = id(new PhabricatorRepositoryURIQuery())
+        ->setViewer($viewer)
+        ->withRepositories($repositories)
+        ->execute();
+      $uri_groups = mgroup($uris, 'getRepositoryPHID');
+      foreach ($repositories as $repository) {
+        $repository_uris = idx($uri_groups, $repository->getPHID(), array());
+        $repository->attachURIs($repository_uris);
       }
     }
 

@@ -10,7 +10,7 @@ final class DiffusionRepositoryHistoryManagementPanel
   }
 
   public function getManagementPanelOrder() {
-    return 900;
+    return 2000;
   }
 
   public function buildManagementPanelContent() {
