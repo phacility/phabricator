@@ -108,7 +108,7 @@ final class DiffusionMirrorEditController
           ->setName('remoteURI')
           ->setValue($v_remote)
           ->setError($e_remote))
-      ->appendChild(
+      ->appendControl(
         id(new PassphraseCredentialControl())
           ->setLabel(pht('Credentials'))
           ->setName('credential')

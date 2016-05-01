@@ -82,13 +82,13 @@ final class DiffusionRepositoryURIViewController
 
   private function buildCurtain(PhabricatorRepositoryURI $uri) {
     $viewer = $this->getViewer();
+    $repository = $uri->getRepository();
     $id = $uri->getID();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $uri,
       PhabricatorPolicyCapability::CAN_EDIT);
-
 
     $curtain = $this->newCurtainView($uri);
 
@@ -102,6 +102,43 @@ final class DiffusionRepositoryURIViewController
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 
+    $credential_uri = $repository->getPathURI("uri/credential/{$id}/edit/");
+    $remove_uri = $repository->getPathURI("uri/credential/{$id}/remove/");
+    $has_credential = (bool)$uri->getCredentialPHID();
+
+    if ($uri->isBuiltin()) {
+      $can_credential = false;
+    } else if (!$uri->newCommandEngine()->isCredentialSupported()) {
+      $can_credential = false;
+    } else {
+      $can_credential = true;
+    }
+
+    $can_update = ($can_edit && $can_credential);
+    $can_remove = ($can_edit && $has_credential);
+
+    if ($has_credential) {
+      $credential_name = pht('Update Credential');
+    } else {
+      $credential_name = pht('Set Credential');
+    }
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-key')
+        ->setName($credential_name)
+        ->setHref($credential_uri)
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-times')
+        ->setName(pht('Remove Credential'))
+        ->setHref($remove_uri)
+        ->setWorkflow(true)
+        ->setDisabled(!$can_remove));
+
     if ($uri->getIsDisabled()) {
       $disable_name = pht('Enable URI');
       $disable_icon = 'fa-check';
@@ -110,7 +147,7 @@ final class DiffusionRepositoryURIViewController
       $disable_icon = 'fa-ban';
     }
 
-    $disable_uri = $uri->getRepository()->getPathURI("uri/disable/{$id}/");
+    $disable_uri = $repository->getPathURI("uri/disable/{$id}/");
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -130,7 +167,84 @@ final class DiffusionRepositoryURIViewController
       ->setUser($viewer);
 
     $properties->addProperty(pht('URI'), $uri->getDisplayURI());
-    $properties->addProperty(pht('Credential'), 'TODO');
+
+    $credential_phid = $uri->getCredentialPHID();
+    $command_engine = $uri->newCommandEngine();
+    $is_optional = $command_engine->isCredentialOptional();
+    $is_supported = $command_engine->isCredentialSupported();
+    $is_builtin = $uri->isBuiltin();
+
+    if ($is_builtin) {
+      $credential_icon = 'fa-circle-o';
+      $credential_color = 'grey';
+      $credential_label = pht('Builtin');
+      $credential_note = pht('Builtin URIs do not use credentials.');
+    } else if (!$is_supported) {
+      $credential_icon = 'fa-circle-o';
+      $credential_color = 'grey';
+      $credential_label = pht('Not Supported');
+      $credential_note = pht('This protocol does not support authentication.');
+    } else if (!$credential_phid) {
+      if ($is_optional) {
+        $credential_icon = 'fa-circle-o';
+        $credential_color = 'green';
+        $credential_label = pht('No Credential');
+        $credential_note = pht('Configured for anonymous access.');
+      } else {
+        $credential_icon = 'fa-times';
+        $credential_color = 'red';
+        $credential_label = pht('Required');
+        $credential_note = pht('Credential required but not configured.');
+      }
+    } else {
+      // Don't raise a policy exception if we can't see the credential.
+      $credentials = id(new PassphraseCredentialQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($credential_phid))
+        ->execute();
+      $credential = head($credentials);
+
+      if (!$credential) {
+        $handles = $viewer->loadHandles(array($credential_phid));
+        $handle = $handles[$credential_phid];
+        if ($handle->getPolicyFiltered()) {
+          $credential_icon = 'fa-lock';
+          $credential_color = 'grey';
+          $credential_label = pht('Restricted');
+          $credential_note = pht(
+            'You do not have permission to view the configured '.
+            'credential.');
+        } else {
+          $credential_icon = 'fa-times';
+          $credential_color = 'red';
+          $credential_label = pht('Invalid');
+          $credential_note = pht('Configured credential is invalid.');
+        }
+      } else {
+        $provides = $credential->getProvidesType();
+        $needs = $command_engine->getPassphraseProvidesCredentialType();
+        if ($provides != $needs) {
+          $credential_icon = 'fa-times';
+          $credential_color = 'red';
+          $credential_label = pht('Wrong Type');
+        } else {
+          $credential_icon = 'fa-check';
+          $credential_color = 'green';
+          $credential_label = $command_engine->getPassphraseCredentialLabel();
+        }
+        $credential_note = $viewer->renderHandle($credential_phid);
+      }
+    }
+
+    $credential_item = id(new PHUIStatusItemView())
+      ->setIcon($credential_icon, $credential_color)
+      ->setTarget(phutil_tag('strong', array(), $credential_label))
+      ->setNote($credential_note);
+
+    $credential_view = id(new PHUIStatusListView())
+      ->addItem($credential_item);
+
+    $properties->addProperty(pht('Credential'), $credential_view);
 
 
     $io_type = $uri->getEffectiveIOType();

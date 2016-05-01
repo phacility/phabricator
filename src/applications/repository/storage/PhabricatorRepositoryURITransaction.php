@@ -18,6 +18,26 @@ final class PhabricatorRepositoryURITransaction
     return PhabricatorRepositoryURIPHIDType::TYPECONST;
   }
 
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_CREDENTIAL:
+        if ($old) {
+          $phids[] = $old;
+        }
+        if ($new) {
+          $phids[] = $new;
+        }
+        break;
+    }
+
+    return $phids;
+  }
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 
@@ -60,6 +80,24 @@ final class PhabricatorRepositoryURITransaction
           return pht(
             '%s enabled this URI.',
             $this->renderHandleLink($author_phid));
+        }
+      case self::TYPE_CREDENTIAL:
+        if ($old && $new) {
+          return pht(
+            '%s changed the credential for this URI from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
+        } else if ($old) {
+          return pht(
+            '%s removed %s as the credential for this URI.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old));
+        } else if ($new) {
+          return pht(
+            '%s set the credential for this URI to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($new));
         }
 
     }

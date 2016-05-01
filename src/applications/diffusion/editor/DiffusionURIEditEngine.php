@@ -83,6 +83,14 @@ final class DiffusionURIEditEngine
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 
+    if ($object->isBuiltin()) {
+      $is_builtin = true;
+      $uri_value = (string)$object->getDisplayURI();
+    } else {
+      $is_builtin = false;
+      $uri_value = $object->getURI();
+    }
+
     return array(
       id(new PhabricatorHandlesEditField())
         ->setKey('repository')
@@ -104,12 +112,13 @@ final class DiffusionURIEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('uri')
         ->setLabel(pht('URI'))
-        ->setIsRequired(true)
         ->setTransactionType(PhabricatorRepositoryURITransaction::TYPE_URI)
         ->setDescription(pht('The repository URI.'))
         ->setConduitDescription(pht('Change the repository URI.'))
         ->setConduitTypeDescription(pht('New repository URI.'))
-        ->setValue($object->getURI()),
+        ->setIsRequired(!$is_builtin)
+        ->setIsLocked($is_builtin)
+        ->setValue($uri_value),
       id(new PhabricatorSelectEditField())
         ->setKey('io')
         ->setLabel(pht('I/O Type'))

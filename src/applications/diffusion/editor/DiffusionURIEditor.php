@@ -70,7 +70,42 @@ final class DiffusionURIEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorRepositoryURITransaction::TYPE_URI:
+        if (!$this->getIsNewObject()) {
+          $old_uri = $object->getEffectiveURI();
+        } else {
+          $old_uri = null;
+        }
+
         $object->setURI($xaction->getNewValue());
+
+        // If we've changed the domain or protocol of the URI, remove the
+        // current credential. This improves behavior in several cases:
+
+        // If a user switches between protocols with different credential
+        // types, like HTTP and SSH, the old credential won't be valid anyway.
+        // It's cleaner to remove it than leave a bad credential in place.
+
+        // If a user switches hosts, the old credential is probably not
+        // correct (and potentially confusing/misleading). Removing it forces
+        // users to double check that they have the correct credentials.
+
+        // If an attacker can't see a symmetric credential like a username and
+        // password, they could still potentially capture it by changing the
+        // host for a URI that uses it to `evil.com`, a server they control,
+        // then observing the requests. Removing the credential prevents this
+        // kind of escalation.
+
+        // Since port and path changes are less likely to fall among these
+        // cases, they don't trigger a credential wipe.
+
+        $new_uri = $object->getEffectiveURI();
+        if ($old_uri) {
+          $new_proto = ($old_uri->getProtocol() != $new_uri->getProtocol());
+          $new_domain = ($old_uri->getDomain() != $new_uri->getDomain());
+          if ($new_proto || $new_domain) {
+            $object->setCredentialPHID(null);
+          }
+        }
         break;
       case PhabricatorRepositoryURITransaction::TYPE_IO:
         $object->setIOType($xaction->getNewValue());
@@ -181,6 +216,11 @@ final class DiffusionURIEditor
           $credential_phid = $xaction->getNewValue();
 
           if ($credential_phid == $object->getCredentialPHID()) {
+            continue;
+          }
+
+          // Anyone who can edit a URI can remove the credential.
+          if ($credential_phid === null) {
             continue;
           }
 
