@@ -58,15 +58,15 @@ final class DifferentialReviewersView extends AphrontView {
           } else {
             $item->setIcon(
               PHUIStatusItemView::ICON_ACCEPT,
-              'dark',
+              'bluegrey',
               pht('Accepted Prior Diff'));
           }
           break;
 
         case DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER:
           $item->setIcon(
-            PHUIStatusItemView::ICON_ACCEPT,
-            'dark',
+            'fa-check-circle-o',
+            'bluegrey',
             pht('Accepted Prior Diff'));
           break;
 
@@ -78,28 +78,29 @@ final class DifferentialReviewersView extends AphrontView {
               pht('Requested Changes'));
           } else {
             $item->setIcon(
-              PHUIStatusItemView::ICON_REJECT,
-              'dark',
+              'fa-times-circle-o',
+              'bluegrey',
               pht('Requested Changes to Prior Diff'));
           }
           break;
 
         case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
           $item->setIcon(
-            PHUIStatusItemView::ICON_REJECT,
-            'dark',
+            'fa-times-circle-o',
+            'bluegrey',
             pht('Rejected Prior Diff'));
           break;
 
         case DifferentialReviewerStatus::STATUS_COMMENTED:
           if ($is_current) {
             $item->setIcon(
-              PHUIStatusItemView::ICON_INFO,
+              'fa-question-circle',
               'blue',
               pht('Commented'));
           } else {
             $item->setIcon(
-              'info-dark',
+              'fa-question-circle-o',
+              'bluegrey',
               pht('Commented Previously'));
           }
           break;
