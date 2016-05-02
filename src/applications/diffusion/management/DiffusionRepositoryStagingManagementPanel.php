@@ -13,6 +13,12 @@ final class DiffusionRepositoryStagingManagementPanel
     return 700;
   }
 
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'stagingAreaURI',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,7 +28,7 @@ final class DiffusionRepositoryStagingManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $staging_uri = $repository->getPathURI('edit/staging/');
+    $staging_uri = $this->getEditPageURI();
 
     return array(
       id(new PhabricatorActionView())

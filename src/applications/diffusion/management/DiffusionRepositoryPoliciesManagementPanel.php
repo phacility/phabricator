@@ -13,6 +13,14 @@ final class DiffusionRepositoryPoliciesManagementPanel
     return 300;
   }
 
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'policy.view',
+      'policy.edit',
+      'policy.push',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,7 +30,7 @@ final class DiffusionRepositoryPoliciesManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $edit_uri = $repository->getPathURI('manage/');
+    $edit_uri = $this->getEditPageURI();
 
     return array(
       id(new PhabricatorActionView())

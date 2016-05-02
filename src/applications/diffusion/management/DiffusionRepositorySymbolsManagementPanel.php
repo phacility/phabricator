@@ -13,6 +13,13 @@ final class DiffusionRepositorySymbolsManagementPanel
     return 900;
   }
 
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'symbolLanguages',
+      'symbolRepositoryPHIDs',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,7 +29,7 @@ final class DiffusionRepositorySymbolsManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $symbols_uri = $repository->getPathURI('edit/symbols/');
+    $symbols_uri = $this->getEditPageURI();
 
     return array(
       id(new PhabricatorActionView())

@@ -13,6 +13,15 @@ final class DiffusionRepositoryBasicsManagementPanel
     return 100;
   }
 
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'name',
+      'callsign',
+      'shortName',
+      'description',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,10 +31,10 @@ final class DiffusionRepositoryBasicsManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $edit_uri = $repository->getPathURI('manage/');
+    $edit_uri = $this->getEditPageURI();
     $activate_uri = $repository->getPathURI('edit/activate/');
     $delete_uri = $repository->getPathURI('edit/delete/');
-    $encoding_uri = $repository->getPathURI('edit/encoding/');
+    $encoding_uri = $this->getEditPageURI('encoding');
     $dangerous_uri = $repository->getPathURI('edit/dangerous/');
 
     if ($repository->isTracked()) {

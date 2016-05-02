@@ -13,6 +13,12 @@ final class DiffusionRepositoryAutomationManagementPanel
     return 800;
   }
 
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'automationBlueprintPHIDs',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -24,7 +30,7 @@ final class DiffusionRepositoryAutomationManagementPanel
 
     $can_test = $can_edit && $repository->canPerformAutomation();
 
-    $automation_uri = $repository->getPathURI('edit/automation/');
+    $automation_uri = $this->getEditPageURI();
     $test_uri = $repository->getPathURI('edit/testautomation/');
 
     return array(

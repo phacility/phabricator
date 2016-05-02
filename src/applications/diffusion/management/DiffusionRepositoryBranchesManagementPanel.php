@@ -13,6 +13,14 @@ final class DiffusionRepositoryBranchesManagementPanel
     return 1000;
   }
 
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'defaultBranch',
+      'trackOnly',
+      'autocloseOnly',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,7 +30,7 @@ final class DiffusionRepositoryBranchesManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $branches_uri = $repository->getPathURI('edit/branches/');
+    $branches_uri = $this->getEditPageURI();
 
     return array(
       id(new PhabricatorActionView())

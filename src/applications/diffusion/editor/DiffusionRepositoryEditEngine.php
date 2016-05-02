@@ -85,6 +85,48 @@ final class DiffusionRepositoryEditEngine
       DiffusionCreateRepositoriesCapability::CAPABILITY);
   }
 
+  protected function newPages($object) {
+    $panels = DiffusionRepositoryManagementPanel::getAllPanels();
+
+    $pages = array();
+    $uris = array();
+    foreach ($panels as $panel_key => $panel) {
+      $panel->setRepository($object);
+
+      $uris[$panel_key] = $panel->getPanelURI();
+
+      $page = $panel->newEditEnginePage();
+      if (!$page) {
+        continue;
+      }
+      $pages[] = $page;
+    }
+
+    $basics_key = DiffusionRepositoryBasicsManagementPanel::PANELKEY;
+    $basics_uri = $uris[$basics_key];
+
+    $more_pages = array(
+      id(new PhabricatorEditPage())
+        ->setKey('encoding')
+        ->setLabel(pht('Text Encoding'))
+        ->setViewURI($basics_uri)
+        ->setFieldKeys(
+          array(
+            'encoding',
+          )),
+      id(new PhabricatorEditPage())
+        ->setKey('extensions')
+        ->setLabel(pht('Extensions'))
+        ->setIsDefault(true),
+    );
+
+    foreach ($more_pages as $page) {
+      $pages[] = $page;
+    }
+
+    return $pages;
+  }
+
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 
