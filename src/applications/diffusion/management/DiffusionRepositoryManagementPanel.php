@@ -38,6 +38,10 @@ abstract class DiffusionRepositoryManagementPanel
   abstract public function getManagementPanelOrder();
   abstract public function buildManagementPanelContent();
 
+  public function getManagementPanelIcon() {
+    return 'fa-pencil';
+  }
+
   protected function buildManagementPanelActions() {
     return array();
   }
@@ -97,5 +101,43 @@ abstract class DiffusionRepositoryManagementPanel
   final protected function newTimeline() {
     return $this->controller->newTimeline($this->getRepository());
   }
+
+  final public function getPanelURI() {
+    $repository = $this->getRepository();
+    $key = $this->getManagementPanelKey();
+    return $repository->getPathURI("manage/{$key}/");
+  }
+
+  final public function newEditEnginePage() {
+    $field_keys = $this->getEditEngineFieldKeys();
+    if (!$field_keys) {
+      return null;
+    }
+
+    $key = $this->getManagementPanelKey();
+    $label = $this->getManagementPanelLabel();
+    $panel_uri = $this->getPanelURI();
+
+    return id(new PhabricatorEditPage())
+      ->setKey($key)
+      ->setLabel($label)
+      ->setViewURI($panel_uri)
+      ->setFieldKeys($field_keys);
+  }
+
+  protected function getEditEngineFieldKeys() {
+    return array();
+  }
+
+  protected function getEditPageURI($page = null) {
+    if ($page === null) {
+      $page = $this->getManagementPanelKey();
+    }
+
+    $repository = $this->getRepository();
+    $id = $repository->getID();
+    return "/diffusion/editpro/{$id}/page/{$page}/";
+  }
+
 
 }

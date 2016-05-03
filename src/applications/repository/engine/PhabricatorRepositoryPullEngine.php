@@ -23,6 +23,7 @@ final class PhabricatorRepositoryPullEngine
 
   public function pullRepository() {
     $repository = $this->getRepository();
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $is_hg = false;
     $is_git = false;
@@ -96,7 +97,10 @@ final class PhabricatorRepositoryPullEngine
       }
 
       if ($repository->isHosted()) {
-        $repository->synchronizeWorkingCopyBeforeRead();
+        id(new DiffusionRepositoryClusterEngine())
+          ->setViewer($viewer)
+          ->setRepository($repository)
+          ->synchronizeWorkingCopyBeforeRead();
 
         if ($is_git) {
           $this->installGitHook();

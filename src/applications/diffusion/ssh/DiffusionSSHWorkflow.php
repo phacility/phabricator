@@ -55,6 +55,21 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $this;
   }
 
+  protected function getCurrentDeviceName() {
+    $device = AlmanacKeys::getLiveDevice();
+    if ($device) {
+      return $device->getName();
+    }
+
+    return php_uname('n');
+  }
+
+  protected function getTargetDeviceName() {
+    // TODO: This should use the correct device identity.
+    $uri = new PhutilURI($this->proxyURI);
+    return $uri->getDomain();
+  }
+
   protected function shouldProxy() {
     return (bool)$this->proxyURI;
   }

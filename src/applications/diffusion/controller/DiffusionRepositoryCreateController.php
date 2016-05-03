@@ -510,6 +510,7 @@ final class DiffusionRepositoryCreateController
       ->setAdjustFormPageCallback(array($this, 'adjustAuthPage'))
       ->addControl(
         id(new PassphraseCredentialControl())
+          ->setViewer($this->getViewer())
           ->setName('credential'));
   }
 

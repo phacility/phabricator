@@ -540,12 +540,16 @@ final class DiffusionServeController extends DiffusionController {
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
+    $cluster_engine = id(new DiffusionRepositoryClusterEngine())
+      ->setViewer($viewer)
+      ->setRepository($repository);
+
     $did_write_lock = false;
     if ($this->isReadOnlyRequest($repository)) {
-      $repository->synchronizeWorkingCopyBeforeRead();
+      $cluster_engine->synchronizeWorkingCopyBeforeRead();
     } else {
       $did_write_lock = true;
-      $repository->synchronizeWorkingCopyBeforeWrite($viewer);
+      $cluster_engine->synchronizeWorkingCopyBeforeWrite();
     }
 
     $caught = null;
@@ -559,7 +563,7 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     if ($did_write_lock) {
-      $repository->synchronizeWorkingCopyAfterWrite();
+      $cluster_engine->synchronizeWorkingCopyAfterWrite();
     }
 
     unset($unguarded);

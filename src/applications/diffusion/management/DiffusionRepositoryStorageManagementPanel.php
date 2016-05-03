@@ -1,19 +1,70 @@
 <?php
 
-final class DiffusionRepositoryClusterManagementPanel
+final class DiffusionRepositoryStorageManagementPanel
   extends DiffusionRepositoryManagementPanel {
 
-  const PANELKEY = 'cluster';
+  const PANELKEY = 'storage';
 
   public function getManagementPanelLabel() {
-    return pht('Cluster Configuration');
+    return pht('Storage');
   }
 
   public function getManagementPanelOrder() {
     return 600;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    if ($repository->getAlmanacServicePHID()) {
+      return 'fa-sitemap';
+    } else if ($repository->isHosted()) {
+      return 'fa-folder';
+    } else {
+      return 'fa-download';
+    }
+  }
+
   public function buildManagementPanelContent() {
+    return array(
+      $this->buildStorageStatusPanel(),
+      $this->buildClusterStatusPanel(),
+    );
+  }
+
+  private function buildStorageStatusPanel() {
+    $repository = $this->getRepository();
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setViewer($viewer);
+
+    if ($repository->usesLocalWorkingCopy()) {
+      $storage_path = $repository->getHumanReadableDetail('local-path');
+    } else {
+      $storage_path = phutil_tag('em', array(), pht('No Local Working Copy'));
+    }
+
+    $service_phid = $repository->getAlmanacServicePHID();
+    if ($service_phid) {
+      $storage_service = $viewer->renderHandle($service_phid);
+    } else {
+      $storage_service = phutil_tag('em', array(), pht('Local'));
+    }
+
+    $view->addProperty(pht('Storage Path'), $storage_path);
+    $view->addProperty(pht('Storage Cluster'), $storage_service);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Storage'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addPropertyList($view);
+  }
+
+  private function buildClusterStatusPanel() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
 
@@ -174,18 +225,6 @@ final class DiffusionRepositoryClusterManagementPanel
           ->setHref($doc_href)
           ->setTag('a')
           ->setText(pht('Documentation')));
-
-    if ($service) {
-      $header->setSubheader(
-        pht(
-          'This repository is hosted on %s.',
-          phutil_tag(
-            'a',
-            array(
-              'href' => $service->getURI(),
-            ),
-            $service->getName())));
-    }
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

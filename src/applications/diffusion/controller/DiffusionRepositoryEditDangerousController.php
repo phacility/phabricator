@@ -13,11 +13,29 @@ final class DiffusionRepositoryEditDangerousController
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    if (!$repository->canAllowDangerousChanges()) {
-      return new Aphront400Response();
-    }
-
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+
+    if (!$repository->canAllowDangerousChanges()) {
+      if ($repository->isSVN()) {
+        return $this->newDialog()
+          ->setTitle(pht('Not in Danger'))
+          ->appendParagraph(
+            pht(
+              'It is not possible for users to push any dangerous changes '.
+              'to a Subversion repository. Pushes to a Subversion repository '.
+              'can always be reverted and never destroy data.'))
+          ->addCancelButton($edit_uri);
+      } else {
+        return $this->newDialog()
+          ->setTitle(pht('Unprotectable Repository'))
+          ->appendParagraph(
+            pht(
+              'This repository can not be protected from dangerous changes '.
+              'because Phabricator does not control what users are allowed '.
+              'to push to it.'))
+          ->addCancelButton($edit_uri);
+      }
+    }
 
     if ($request->isFormPost()) {
       $xaction = id(new PhabricatorRepositoryTransaction())
