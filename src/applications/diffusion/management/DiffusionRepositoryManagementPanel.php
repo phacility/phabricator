@@ -136,7 +136,7 @@ abstract class DiffusionRepositoryManagementPanel
 
     $repository = $this->getRepository();
     $id = $repository->getID();
-    return "/diffusion/editpro/{$id}/page/{$page}/";
+    return "/diffusion/edit/{$id}/page/{$page}/";
   }
 
 

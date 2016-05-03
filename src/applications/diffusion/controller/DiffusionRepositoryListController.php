@@ -15,16 +15,9 @@ final class DiffusionRepositoryListController extends DiffusionController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $can_create = $this->hasApplicationCapability(
-      DiffusionCreateRepositoriesCapability::CAPABILITY);
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('New Repository'))
-        ->setHref($this->getApplicationURI('new/'))
-        ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create)
-        ->setIcon('fa-plus-square'));
+    id(new DiffusionRepositoryEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

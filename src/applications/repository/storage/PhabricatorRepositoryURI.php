@@ -246,6 +246,11 @@ final class PhabricatorRepositoryURI
     );
 
     $uri = new PhutilURI($raw_uri);
+
+    // Make sure to remove any password from the URI before we do anything
+    // with it; this should always be provided by the associated credential.
+    $uri->setPass(null);
+
     if (!$uri->getProtocol()) {
       $git_uri = new PhutilGitURI($raw_uri);
 
@@ -409,7 +414,7 @@ final class PhabricatorRepositoryURI
 
     if ($this->isBuiltin()) {
       $options[] = self::IO_READ;
-      $options[] = self::IO_WRITE;
+      $options[] = self::IO_READWRITE;
     } else {
       $options[] = self::IO_OBSERVE;
       $options[] = self::IO_MIRROR;
@@ -534,6 +539,25 @@ final class PhabricatorRepositoryURI
     return DiffusionCommandEngine::newCommandEngine($repository)
       ->setCredentialPHID($this->getCredentialPHID())
       ->setProtocol($protocol);
+  }
+
+  public function getURIScore() {
+    $score = 0;
+
+    $io_points = array(
+      self::IO_READWRITE => 20,
+      self::IO_READ => 10,
+    );
+    $score += idx($io_points, $this->getEffectiveIoType(), 0);
+
+    $protocol_points = array(
+      self::BUILTIN_PROTOCOL_SSH => 3,
+      self::BUILTIN_PROTOCOL_HTTPS => 2,
+      self::BUILTIN_PROTOCOL_HTTP => 1,
+    );
+    $score += idx($protocol_points, $this->getBuiltinProtocol(), 0);
+
+    return $score;
   }
 
 

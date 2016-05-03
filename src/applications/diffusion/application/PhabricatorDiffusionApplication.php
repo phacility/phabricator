@@ -57,7 +57,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
       '/diffusion/' => array(
         $this->getQueryRoutePattern()
           => 'DiffusionRepositoryListController',
-        $this->getEditRoutePattern('editpro/') =>
+        $this->getEditRoutePattern('edit/') =>
           'DiffusionRepositoryEditproController',
         'new/' => 'DiffusionRepositoryNewController',
         '(?P<edit>create)/' => 'DiffusionRepositoryCreateController',
@@ -101,24 +101,10 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
               => 'DiffusionRepositoryURICredentialController',
           ),
           'edit/' => array(
-            '' => 'DiffusionRepositoryEditMainController',
-            'basic/' => 'DiffusionRepositoryEditBasicController',
-            'encoding/' => 'DiffusionRepositoryEditEncodingController',
             'activate/' => 'DiffusionRepositoryEditActivateController',
             'dangerous/' => 'DiffusionRepositoryEditDangerousController',
-            'branches/' => 'DiffusionRepositoryEditBranchesController',
-            'subversion/' => 'DiffusionRepositoryEditSubversionController',
-            'actions/' => 'DiffusionRepositoryEditActionsController',
-            '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
-            '(?P<edit>policy)/' => 'DiffusionRepositoryCreateController',
-            'storage/' => 'DiffusionRepositoryEditStorageController',
             'delete/' => 'DiffusionRepositoryEditDeleteController',
-            'hosting/' => 'DiffusionRepositoryEditHostingController',
-            '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',
             'update/' => 'DiffusionRepositoryEditUpdateController',
-            'symbol/' => 'DiffusionRepositorySymbolsController',
-            'staging/' => 'DiffusionRepositoryEditStagingController',
-            'automation/' => 'DiffusionRepositoryEditAutomationController',
             'testautomation/' => 'DiffusionRepositoryTestAutomationController',
           ),
           'pathtree/(?P<dblob>.*)' => 'DiffusionPathTreeController',

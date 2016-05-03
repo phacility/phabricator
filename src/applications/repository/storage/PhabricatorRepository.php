@@ -35,10 +35,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_PARENTS = 'repository_parents';
   const TABLE_COVERAGE = 'repository_coverage';
 
-  const SERVE_OFF = 'off';
-  const SERVE_READONLY = 'readonly';
-  const SERVE_READWRITE = 'readwrite';
-
   const BECAUSE_REPOSITORY_IMPORTING = 'auto/importing';
   const BECAUSE_AUTOCLOSE_DISABLED = 'auto/disabled';
   const BECAUSE_NOT_ON_AUTOCLOSE_BRANCH = 'auto/nobranch';
@@ -1201,26 +1197,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @task uri
    */
   public function getPublicCloneURI() {
-    $uri = $this->getCloneURIObject();
-
-    // Make sure we don't leak anything if this repo is using HTTP Basic Auth
-    // with the credentials in the URI or something zany like that.
-
-    // If repository is not accessed over SSH we remove both username and
-    // password.
-    if (!$this->isHosted()) {
-      if (!$this->shouldUseSSH()) {
-        $uri->setUser(null);
-
-        // This might be a Git URI or a normal URI. If it's Git, there's no
-        // password support.
-        if ($uri instanceof PhutilURI) {
-          $uri->setPass(null);
-        }
-      }
-    }
-
-    return (string)$uri;
+    return (string)$this->getCloneURIObject();
   }
 
 
@@ -1303,91 +1280,19 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
     }
 
-    // Choose the best URI: pick a read/write URI over a URI which is not
-    // read/write, and SSH over HTTP.
+    // TODO: This should be cleaned up to deal with all the new URI handling.
+    $another_copy = id(new PhabricatorRepositoryQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($this->getPHID()))
+      ->needURIs(true)
+      ->executeOne();
 
-    $serve_ssh = $this->getServeOverSSH();
-    $serve_http = $this->getServeOverHTTP();
-
-    if ($serve_ssh === self::SERVE_READWRITE) {
-      return $this->getSSHCloneURIObject();
-    } else if ($serve_http === self::SERVE_READWRITE) {
-      return $this->getHTTPCloneURIObject();
-    } else if ($serve_ssh !== self::SERVE_OFF) {
-      return $this->getSSHCloneURIObject();
-    } else if ($serve_http !== self::SERVE_OFF) {
-      return $this->getHTTPCloneURIObject();
-    } else {
-      return null;
-    }
-  }
-
-
-  /**
-   * Get the repository's SSH clone/checkout URI, if one exists.
-   */
-  public function getSSHCloneURIObject() {
-    if (!$this->isHosted()) {
-      if ($this->shouldUseSSH()) {
-        return $this->getRemoteURIObject();
-      } else {
-        return null;
-      }
-    }
-
-    $serve_ssh = $this->getServeOverSSH();
-    if ($serve_ssh === self::SERVE_OFF) {
+    $clone_uris = $another_copy->getCloneURIs();
+    if (!$clone_uris) {
       return null;
     }
 
-    $uri = new PhutilURI(PhabricatorEnv::getProductionURI($this->getURI()));
-
-    if ($this->isSVN()) {
-      $uri->setProtocol('svn+ssh');
-    } else {
-      $uri->setProtocol('ssh');
-    }
-
-    if ($this->isGit()) {
-      $uri->setPath($uri->getPath().$this->getCloneName().'.git');
-    } else if ($this->isHg()) {
-      $uri->setPath($uri->getPath().$this->getCloneName().'/');
-    }
-
-    $ssh_user = AlmanacKeys::getClusterSSHUser();
-    if (strlen($ssh_user)) {
-      $uri->setUser($ssh_user);
-    }
-
-    $ssh_host = PhabricatorEnv::getEnvConfig('diffusion.ssh-host');
-    if (strlen($ssh_host)) {
-      $uri->setDomain($ssh_host);
-    }
-
-    $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
-
-    return $uri;
-  }
-
-
-  /**
-   * Get the repository's HTTP clone/checkout URI, if one exists.
-   */
-  public function getHTTPCloneURIObject() {
-    if (!$this->isHosted()) {
-      if ($this->shouldUseHTTP()) {
-        return $this->getRemoteURIObject();
-      } else {
-        return null;
-      }
-    }
-
-    $serve_http = $this->getServeOverHTTP();
-    if ($serve_http === self::SERVE_OFF) {
-      return null;
-    }
-
-    return $this->getRawHTTPCloneURIObject();
+    return head($clone_uris);
   }
 
   private function getRawHTTPCloneURIObject() {
@@ -1554,56 +1459,31 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->setDetail('hosting-enabled', $enabled);
   }
 
-  public function getServeOverHTTP() {
-    if ($this->isSVN()) {
-      return self::SERVE_OFF;
+  public function canServeProtocol($protocol, $write) {
+    if (!$this->isTracked()) {
+      return false;
     }
-    $serve = $this->getDetail('serve-over-http', self::SERVE_OFF);
-    return $this->normalizeServeConfigSetting($serve);
-  }
 
-  public function setServeOverHTTP($mode) {
-    return $this->setDetail('serve-over-http', $mode);
-  }
+    $clone_uris = $this->getCloneURIs();
+    foreach ($clone_uris as $uri) {
+      if ($uri->getBuiltinProtocol() !== $protocol) {
+        continue;
+      }
 
-  public function getServeOverSSH() {
-    $serve = $this->getDetail('serve-over-ssh', self::SERVE_OFF);
-    return $this->normalizeServeConfigSetting($serve);
-  }
+      $io_type = $uri->getEffectiveIoType();
+      if ($io_type == PhabricatorRepositoryURI::IO_READWRITE) {
+        return true;
+      }
 
-  public function setServeOverSSH($mode) {
-    return $this->setDetail('serve-over-ssh', $mode);
-  }
-
-  public static function getProtocolAvailabilityName($constant) {
-    switch ($constant) {
-      case self::SERVE_OFF:
-        return pht('Off');
-      case self::SERVE_READONLY:
-        return pht('Read Only');
-      case self::SERVE_READWRITE:
-        return pht('Read/Write');
-      default:
-        return pht('Unknown');
-    }
-  }
-
-  private function normalizeServeConfigSetting($value) {
-    switch ($value) {
-      case self::SERVE_OFF:
-      case self::SERVE_READONLY:
-        return $value;
-      case self::SERVE_READWRITE:
-        if ($this->isHosted()) {
-          return self::SERVE_READWRITE;
-        } else {
-          return self::SERVE_READONLY;
+      if (!$write) {
+        if ($io_type == PhabricatorRepositoryURI::IO_READ) {
+          return true;
         }
-      default:
-        return self::SERVE_OFF;
+      }
     }
-  }
 
+    return false;
+  }
 
   /**
    * Raise more useful errors when there are basic filesystem problems.
@@ -2133,10 +2013,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         continue;
       }
 
-      // If we don't have a persisted version of the URI, add the builtin
-      // version.
-      if (empty($custom_map[$builtin_key])) {
-        $uris[] = $builtin_uri;
+      // If the URI exists, make sure it's marked as not being disabled.
+      if (isset($custom_map[$builtin_key])) {
+        $uris[$custom_map[$builtin_key]]->setIsDisabled(false);
       }
     }
 
@@ -2156,9 +2035,41 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->assertAttached($this->uris);
   }
 
-  protected function newBuiltinURIs() {
+  public function getCloneURIs() {
+    $uris = $this->getURIs();
+
+    $clone = array();
+    foreach ($uris as $uri) {
+      if (!$uri->isBuiltin()) {
+        continue;
+      }
+
+      if ($uri->getIsDisabled()) {
+        continue;
+      }
+
+      $io_type = $uri->getEffectiveIoType();
+      $is_clone =
+        ($io_type == PhabricatorRepositoryURI::IO_READ) ||
+        ($io_type == PhabricatorRepositoryURI::IO_READWRITE);
+
+      if (!$is_clone) {
+        continue;
+      }
+
+      $clone[] = $uri;
+    }
+
+    return msort($clone, 'getURIScore');
+  }
+
+
+  public function newBuiltinURIs() {
     $has_callsign = ($this->getCallsign() !== null);
     $has_shortname = ($this->getRepositorySlug() !== null);
+
+    // TODO: For now, never enable these because they don't work yet.
+    $has_shortname = false;
 
     $identifier_map = array(
       PhabricatorRepositoryURI::BUILTIN_IDENTIFIER_CALLSIGN => $has_callsign,
@@ -2176,6 +2087,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $has_http = !PhabricatorEnv::getEnvConfig('security.require-https');
     $has_http = ($has_http && $allow_http);
 
+    // HTTP is not supported for Subversion.
+    if ($this->isSVN()) {
+      $has_http = false;
+    }
+
     // TODO: Maybe allow users to disable this by default somehow?
     $has_ssh = true;
 
@@ -2188,12 +2104,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $uris = array();
     foreach ($protocol_map as $protocol => $proto_supported) {
       foreach ($identifier_map as $identifier => $id_supported) {
+        // This is just a dummy value because it can't be empty; we'll force
+        // it to a proper value when using it in the UI.
+        $builtin_uri = "{$protocol}://{$identifier}";
         $uris[] = PhabricatorRepositoryURI::initializeNewURI()
           ->setRepositoryPHID($this->getPHID())
           ->attachRepository($this)
           ->setBuiltinProtocol($protocol)
           ->setBuiltinIdentifier($identifier)
-          ->setIsDisabled(!$proto_supported || !$id_supported);
+          ->setURI($builtin_uri)
+          ->setIsDisabled((int)(!$proto_supported || !$id_supported));
       }
     }
 

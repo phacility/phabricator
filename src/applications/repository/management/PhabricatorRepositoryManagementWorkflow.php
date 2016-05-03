@@ -12,6 +12,7 @@ abstract class PhabricatorRepositoryManagementWorkflow
 
     $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
+      ->needURIs(true)
       ->withIdentifiers($identifiers);
 
     $query->execute();

@@ -410,4 +410,44 @@ final class DiffusionURIEditor
     return $errors;
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // Synchronize the repository state based on the presence of an "Observe"
+    // URI.
+    $repository = $object->getRepository();
+
+    $uris = id(new PhabricatorRepositoryURIQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withRepositories(array($repository))
+      ->execute();
+
+    $observe_uri = null;
+    foreach ($uris as $uri) {
+      if ($uri->getIoType() != PhabricatorRepositoryURI::IO_OBSERVE) {
+        continue;
+      }
+
+      $observe_uri = $uri;
+      break;
+    }
+
+    if ($observe_uri) {
+      $repository
+        ->setHosted(false)
+        ->setDetail('remote-uri', (string)$observe_uri->getEffectiveURI())
+        ->setCredentialPHID($observe_uri->getCredentialPHID());
+    } else {
+      $repository
+        ->setHosted(true)
+        ->setDetail('remote-uri', null)
+        ->setCredentialPHID(null);
+    }
+
+    $repository->save();
+
+    return $xactions;
+  }
+
 }

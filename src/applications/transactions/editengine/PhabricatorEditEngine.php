@@ -2035,6 +2035,10 @@ abstract class PhabricatorEditEngine
       return $fields;
     }
 
+    if (!$this->getSelectedPage()) {
+      return $fields;
+    }
+
     $page_picks = array();
     $default_key = head($pages)->getKey();
     foreach ($pages as $page_key => $page) {
