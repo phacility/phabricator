@@ -128,14 +128,12 @@ final class PhabricatorRepositoryManagementMovePathsWorkflow
       }
 
       $repo = $row['repository'];
-      $details = $repo->getDetails();
-      $details['local-path'] = $row['dst'];
 
       queryfx(
         $repo->establishConnection('w'),
-        'UPDATE %T SET details = %s WHERE id = %d',
+        'UPDATE %T SET localPath = %s WHERE id = %d',
         $repo->getTableName(),
-        phutil_json_encode($details),
+        $row['dst'],
         $repo->getID());
     }
 

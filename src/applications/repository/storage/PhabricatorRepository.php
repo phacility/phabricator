@@ -62,6 +62,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $credentialPHID;
   protected $almanacServicePHID;
   protected $spacePHID;
+  protected $localPath;
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
@@ -107,6 +108,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'pushPolicy' => 'policy',
         'credentialPHID' => 'phid?',
         'almanacServicePHID' => 'phid?',
+        'localPath' => 'text128?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'callsign' => array(
@@ -121,6 +123,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ),
         'key_slug' => array(
           'columns' => array('repositorySlug'),
+          'unique' => true,
+        ),
+        'key_local' => array(
+          'columns' => array('localPath'),
           'unique' => true,
         ),
       ),
@@ -216,6 +222,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $monograms;
   }
 
+  public function setLocalPath($path) {
+    // Convert any extra slashes ("//") in the path to a single slash ("/").
+    $path = preg_replace('(//+)', '/', $path);
+
+    return parent::setLocalPath($path);
+  }
+
   public function getDetail($key, $default = null) {
     return idx($this->details, $key, $default);
   }
@@ -277,10 +290,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'action' => 'browse',
         'line'   => $line,
       ));
-  }
-
-  public function getLocalPath() {
-    return $this->getDetail('local-path');
   }
 
   public function getSubversionBaseURI($commit = null) {

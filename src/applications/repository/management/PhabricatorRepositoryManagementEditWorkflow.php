@@ -22,11 +22,6 @@ final class PhabricatorRepositoryManagementEditWorkflow
             'help' => pht('Edit as user.'),
           ),
           array(
-            'name' => 'local-path',
-            'param' => 'path',
-            'help' => pht('Edit the local path.'),
-          ),
-          array(
             'name' => 'serve-http',
             'param' => 'string',
             'help' => pht('Edit the http serving policy.'),
@@ -83,7 +78,6 @@ final class PhabricatorRepositoryManagementEditWorkflow
 
       $xactions = array();
 
-      $type_local_path = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
       $type_protocol_http =
         PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP;
       $type_protocol_ssh = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH;
@@ -93,11 +87,6 @@ final class PhabricatorRepositoryManagementEditWorkflow
         PhabricatorRepository::SERVE_READWRITE,
       );
 
-      if ($args->getArg('local-path')) {
-        $xactions[] = id(new PhabricatorRepositoryTransaction())
-          ->setTransactionType($type_local_path)
-          ->setNewValue($args->getArg('local-path'));
-      }
       $serve_http = $args->getArg('serve-http');
       if ($serve_http && in_array($serve_http, $allowed_serve_modes)) {
         $xactions[] = id(new PhabricatorRepositoryTransaction())

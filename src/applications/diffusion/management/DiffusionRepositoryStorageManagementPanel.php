@@ -40,7 +40,7 @@ final class DiffusionRepositoryStorageManagementPanel
       ->setViewer($viewer);
 
     if ($repository->usesLocalWorkingCopy()) {
-      $storage_path = $repository->getHumanReadableDetail('local-path');
+      $storage_path = $repository->getLocalPath();
     } else {
       $storage_path = phutil_tag('em', array(), pht('No Local Working Copy'));
     }

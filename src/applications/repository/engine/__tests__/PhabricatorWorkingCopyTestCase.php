@@ -65,7 +65,7 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
       ->setCallsign($callsign)
       ->setName(pht('Test Repo "%s"', $callsign))
       ->setVersionControlSystem($vcs_type)
-      ->setDetail('local-path', dirname($local).'/'.$callsign)
+      ->setLocalPath(dirname($local).'/'.$callsign)
       ->setDetail('remote-uri', 'file://'.$dir->getPath().'/');
 
     $this->didConstructRepository($repo);

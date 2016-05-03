@@ -86,7 +86,7 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
         return $object->getDetail('remote-uri');
       case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
-        return $object->getDetail('local-path');
+        return $object->getLocalPath();
       case PhabricatorRepositoryTransaction::TYPE_HOSTING:
         return $object->isHosted();
       case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
@@ -209,7 +209,7 @@ final class PhabricatorRepositoryEditor
         $object->setDetail('remote-uri', $xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
-        $object->setDetail('local-path', $xaction->getNewValue());
+        $object->setLocalPath($xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_HOSTING:
         return $object->setHosted($xaction->getNewValue());
@@ -706,7 +706,7 @@ final class PhabricatorRepositoryEditor
 
     // If the repository does not have a local path yet, assign it one based
     // on its ID. We can't do this earlier because we won't have an ID yet.
-    $local_path = $object->getDetail('local-path');
+    $local_path = $object->getLocalPath();
     if (!strlen($local_path)) {
       $local_key = 'repository.default-local-path';
 
@@ -716,7 +716,7 @@ final class PhabricatorRepositoryEditor
       $id = $object->getID();
       $local_path = "{$local_root}/{$id}/";
 
-      $object->setDetail('local-path', $local_path);
+      $object->setLocalPath($local_path);
       $object->save();
     }
 

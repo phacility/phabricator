@@ -110,7 +110,6 @@ final class RepositoryCreateConduitAPIMethod
       'description'       => $request->getValue('description'),
       'tracking-enabled'  => (bool)$request->getValue('tracking', true),
       'remote-uri'        => $remote_uri,
-      'local-path'        => $local_path,
       'branch-filter'     => array_fill_keys(
         $request->getValue('branchFilter', array()),
         true),
@@ -127,6 +126,8 @@ final class RepositoryCreateConduitAPIMethod
     foreach ($details as $key => $value) {
       $repository->setDetail($key, $value);
     }
+
+    $repository->setLocalPath($local_path);
 
     try {
       $repository->save();

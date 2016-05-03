@@ -15,7 +15,7 @@ final class DiffusionRepositoryEditStorageController
 
     $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
-    $v_local = $repository->getHumanReadableDetail('local-path');
+    $v_local = $repository->getLocalPath();
     $errors = array();
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -51,11 +51,7 @@ final class DiffusionRepositoryEditStorageController
       ->appendRemarkupInstructions(
         pht(
           "You can not adjust the local path for this repository from the ".
-          "web interface. To edit it, run this command:\n\n  %s",
-          sprintf(
-            'phabricator/ $ ./bin/repository edit %s --as %s --local-path ...',
-            $repository->getMonogram(),
-            $viewer->getUsername())))
+          'web interface.'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($edit_uri, pht('Done')));

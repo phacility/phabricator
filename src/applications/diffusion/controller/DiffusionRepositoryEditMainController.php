@@ -631,9 +631,7 @@ final class DiffusionRepositoryEditMainController
       pht('Storage Service'),
       $v_service);
 
-    $view->addProperty(
-      pht('Storage Path'),
-      $repository->getHumanReadableDetail('local-path'));
+    $view->addProperty(pht('Storage Path'), $repository->getLocalPath());
 
     return $view;
   }
