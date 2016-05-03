@@ -109,6 +109,14 @@ final class PhabricatorEmbedFileRemarkupRule
           );
           $image_class = 'phabricator-remarkup-embed-image-full';
           break;
+        // Displays "full" in normal Remarkup, "wide" in Documents
+        case 'wide':
+          $attrs += array(
+            'src' => $file->getBestURI(),
+            'width' => $file->getImageWidth(),
+          );
+          $image_class = 'phabricator-remarkup-embed-image-wide';
+          break;
         case 'thumb':
         default:
           $preview_key = PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW;
