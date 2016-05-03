@@ -96,32 +96,6 @@ final class PhabricatorProjectMoveController
       }
     }
 
-    $proxy = $column->getProxy();
-    if ($proxy) {
-      // We're moving the task into a subproject or milestone column, so add
-      // the subproject or milestone.
-      $add_projects = array($proxy->getPHID());
-    } else if ($project->getHasSubprojects() || $project->getHasMilestones()) {
-      // We're moving the task into the "Backlog" column on the parent project,
-      // so add the parent explicitly. This gets rid of any subproject or
-      // milestone tags.
-      $add_projects = array($project->getPHID());
-    } else {
-      $add_projects = array();
-    }
-
-    if ($add_projects) {
-      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $project_type)
-        ->setNewValue(
-          array(
-            '+' => array_fuse($add_projects),
-          ));
-    }
-
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
       ->setContinueOnMissingFields(true)
