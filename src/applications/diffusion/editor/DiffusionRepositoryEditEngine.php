@@ -45,6 +45,44 @@ final class DiffusionRepositoryEditEngine
       $repository->setVersionControlSystem($vcs);
     }
 
+    // Pick a random open service to allocate this repository on, if any exist.
+    // If there are no services, we aren't in cluster mode and will allocate
+    // locally. If there are services but none permit allocations, we fail.
+
+    // Eventually we can make this more flexible, but this rule is a reasonable
+    // starting point as we begin to deploy cluster services.
+
+    $services = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withServiceTypes(
+        array(
+          AlmanacClusterRepositoryServiceType::SERVICETYPE,
+        ))
+      ->needProperties(true)
+      ->execute();
+    if ($services) {
+      // Filter out services which do not permit new allocations.
+      foreach ($services as $key => $possible_service) {
+        if ($possible_service->getAlmanacPropertyValue('closed')) {
+          unset($services[$key]);
+        }
+      }
+
+      if (!$services) {
+        throw new Exception(
+          pht(
+            'This install is configured in cluster mode, but all available '.
+            'repository cluster services are closed to new allocations. '.
+            'At least one service must be open to allow new allocations to '.
+            'take place.'));
+      }
+
+      shuffle($services);
+      $service = head($services);
+
+      $repository->setAlmanacServicePHID($service->getPHID());
+    }
+
     return $repository;
   }
 
