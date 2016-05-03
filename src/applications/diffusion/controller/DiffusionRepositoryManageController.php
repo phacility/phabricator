@@ -106,9 +106,19 @@ final class DiffusionRepositoryManageController
       ->setBaseURI($base_uri);
 
     foreach ($panels as $panel) {
-      $nav->addFilter(
-        $panel->getManagementPanelKey(),
-        $panel->getManagementPanelLabel());
+      $key = $panel->getManagementPanelKey();
+      $label = $panel->getManagementPanelLabel();
+      $icon = $panel->getManagementPanelIcon();
+      $href = $repository->getPathURI("manage/{$key}/");
+
+      $item = id(new PHUIListItemView())
+        ->setKey($key)
+        ->setName($label)
+        ->setType(PHUIListItemView::TYPE_LINK)
+        ->setHref($href)
+        ->setIcon($icon);
+
+      $nav->addMenuItem($item);
     }
 
     $nav->selectFilter($selected);

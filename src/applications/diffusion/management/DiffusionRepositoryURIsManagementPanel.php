@@ -9,8 +9,12 @@ final class DiffusionRepositoryURIsManagementPanel
     return pht('Clone / Fetch / Mirror');
   }
 
+  public function getManagementPanelIcon() {
+    return 'fa-cogs';
+  }
+
   public function getManagementPanelOrder() {
-    return 300;
+    return 400;
   }
 
   public function buildManagementPanelContent() {

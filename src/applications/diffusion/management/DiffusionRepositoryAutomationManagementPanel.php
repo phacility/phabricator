@@ -19,6 +19,28 @@ final class DiffusionRepositoryAutomationManagementPanel
     );
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    if (!$repository->canPerformAutomation()) {
+      return 'fa-truck grey';
+    }
+
+    $blueprint_phids = $repository->getAutomationBlueprintPHIDs();
+    if (!$blueprint_phids) {
+      return 'fa-truck grey';
+    }
+
+    $is_authorized = DrydockAuthorizationQuery::isFullyAuthorized(
+      $repository->getPHID(),
+      $blueprint_phids);
+    if (!$is_authorized) {
+      return 'fa-exclamation-triangle yellow';
+    }
+
+    return 'fa-truck';
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();

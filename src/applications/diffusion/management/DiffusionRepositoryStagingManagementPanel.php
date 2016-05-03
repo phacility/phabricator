@@ -13,6 +13,18 @@ final class DiffusionRepositoryStagingManagementPanel
     return 700;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    $staging_uri = $repository->getStagingURI();
+
+    if ($staging_uri) {
+      return 'fa-upload';
+    } else {
+      return 'fa-upload grey';
+    }
+  }
+
   protected function getEditEngineFieldKeys() {
     return array(
       'stagingAreaURI',

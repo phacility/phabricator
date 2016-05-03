@@ -13,6 +13,23 @@ final class DiffusionRepositoryActionsManagementPanel
     return 1100;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    $has_any =
+      $repository->getDetail('herald-disabled') ||
+      $repository->getDetail('disable-autoclose');
+
+    // NOTE: Any value here really means something is disabled, so try to
+    // hint that a little bit with the icon.
+
+    if ($has_any) {
+      return 'fa-comment-o';
+    } else {
+      return 'fa-commenting grey';
+    }
+  }
+
   protected function getEditEngineFieldKeys() {
     return array(
       'publish',

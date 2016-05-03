@@ -13,6 +13,21 @@ final class DiffusionRepositoryBranchesManagementPanel
     return 1000;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    $has_any =
+      $repository->getDetail('default-branch') ||
+      $repository->getDetail('branch-filter') ||
+      $repository->getDetail('close-commits-filter');
+
+    if ($has_any) {
+      return 'fa-code-fork';
+    } else {
+      return 'fa-code-fork grey';
+    }
+  }
+
   protected function getEditEngineFieldKeys() {
     return array(
       'defaultBranch',

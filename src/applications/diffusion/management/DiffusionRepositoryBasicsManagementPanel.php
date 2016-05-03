@@ -13,6 +13,16 @@ final class DiffusionRepositoryBasicsManagementPanel
     return 100;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    if (!$repository->isTracked()) {
+      return 'fa-ban indigo';
+    } else {
+      return 'fa-code';
+    }
+  }
+
   protected function getEditEngineFieldKeys() {
     return array(
       'name',

@@ -13,6 +13,21 @@ final class DiffusionRepositoryStatusManagementPanel
     return 200;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    // TODO: We could try to show a warning icon in more cases, but just
+    // raise in the most serious cases for now.
+    $messages = $this->loadStatusMessages($repository);
+
+    $raw_error = $this->buildRepositoryRawError($repository, $messages);
+    if ($raw_error) {
+      return 'fa-exclamation-triangle red';
+    }
+
+    return 'fa-check grey';
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -46,9 +61,7 @@ final class DiffusionRepositoryStatusManagementPanel
       pht('Update Frequency'),
       $this->buildRepositoryUpdateInterval($repository));
 
-    $messages = id(new PhabricatorRepositoryStatusMessage())
-      ->loadAllWhere('repositoryID = %d', $repository->getID());
-    $messages = mpull($messages, null, 'getStatusType');
+    $messages = $this->loadStatusMessages($repository);
 
     $status = $this->buildRepositoryStatus($repository, $messages);
     $raw_error = $this->buildRepositoryRawError($repository, $messages);
@@ -467,6 +480,14 @@ final class DiffusionRepositoryStatusManagementPanel
     }
 
     return $raw_message;
+  }
+
+  private function loadStatusMessages(PhabricatorRepository $repository) {
+    $messages = id(new PhabricatorRepositoryStatusMessage())
+      ->loadAllWhere('repositoryID = %d', $repository->getID());
+    $messages = mpull($messages, null, 'getStatusType');
+
+    return $messages;
   }
 
 

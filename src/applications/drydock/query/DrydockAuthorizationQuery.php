@@ -9,6 +9,35 @@ final class DrydockAuthorizationQuery extends DrydockQuery {
   private $blueprintStates;
   private $objectStates;
 
+  public static function isFullyAuthorized(
+    $object_phid,
+    array $blueprint_phids) {
+
+    if (!$blueprint_phids) {
+      return true;
+    }
+
+    $authorizations = id(new self())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withObjectPHIDs(array($object_phid))
+      ->withBlueprintPHIDs($blueprint_phids)
+      ->execute();
+    $authorizations = mpull($authorizations, null, 'getBlueprintPHID');
+
+    foreach ($blueprint_phids as $phid) {
+      $authorization = idx($authorizations, $phid);
+      if (!$authorization) {
+        return false;
+      }
+
+      if (!$authorization->isAuthorized()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;

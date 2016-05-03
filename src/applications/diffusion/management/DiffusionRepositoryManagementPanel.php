@@ -38,6 +38,10 @@ abstract class DiffusionRepositoryManagementPanel
   abstract public function getManagementPanelOrder();
   abstract public function buildManagementPanelContent();
 
+  public function getManagementPanelIcon() {
+    return 'fa-pencil';
+  }
+
   protected function buildManagementPanelActions() {
     return array();
   }

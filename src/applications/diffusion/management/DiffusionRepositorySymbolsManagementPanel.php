@@ -13,6 +13,20 @@ final class DiffusionRepositorySymbolsManagementPanel
     return 900;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    $has_any =
+      $repository->getSymbolLanguages() ||
+      $repository->getSymbolSources();
+
+    if ($has_any) {
+      return 'fa-link';
+    } else {
+      return 'fa-link grey';
+    }
+  }
+
   protected function getEditEngineFieldKeys() {
     return array(
       'symbolLanguages',
