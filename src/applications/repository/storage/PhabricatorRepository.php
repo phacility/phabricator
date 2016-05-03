@@ -1493,10 +1493,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $commit->delete();
       }
 
-      $mirrors = id(new PhabricatorRepositoryMirror())
+      $uris = id(new PhabricatorRepositoryURI())
         ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
-      foreach ($mirrors as $mirror) {
-        $mirror->delete();
+      foreach ($uris as $uri) {
+        $uri->delete();
       }
 
       $ref_cursors = id(new PhabricatorRepositoryRefCursor())

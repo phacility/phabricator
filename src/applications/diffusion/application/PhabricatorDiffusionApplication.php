@@ -122,10 +122,6 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             'testautomation/' => 'DiffusionRepositoryTestAutomationController',
           ),
           'pathtree/(?P<dblob>.*)' => 'DiffusionPathTreeController',
-          'mirror/' => array(
-            'edit/(?:(?P<id>\d+)/)?' => 'DiffusionMirrorEditController',
-            'delete/(?P<id>\d+)/' => 'DiffusionMirrorDeleteController',
-          ),
         ),
 
         // NOTE: This must come after the rule above; it just gives us a

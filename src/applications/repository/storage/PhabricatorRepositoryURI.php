@@ -200,6 +200,29 @@ final class PhabricatorRepositoryURI
     return $this->getURIObject(true);
   }
 
+  public function getURIEnvelope() {
+    $uri = $this->getEffectiveURI();
+
+    $command_engine = $this->newCommandEngine();
+
+    $is_http = $command_engine->isAnyHTTPProtocol();
+    // For SVN, we use `--username` and `--password` flags separately in the
+    // CommandEngine, so we don't need to add any credentials here.
+    $is_svn = $this->getRepository()->isSVN();
+    $credential_phid = $this->getCredentialPHID();
+
+    if ($is_http && !$is_svn && $credential_phid) {
+      $key = PassphrasePasswordKey::loadFromPHID(
+        $credential_phid,
+        PhabricatorUser::getOmnipotentUser());
+
+      $uri->setUser($key->getUsernameEnvelope()->openEnvelope());
+      $uri->setPass($key->getPasswordEnvelope()->openEnvelope());
+    }
+
+    return new PhutilOpaqueEnvelope((string)$uri);
+  }
+
   private function getURIObject($normalize) {
     // Users can provide Git/SCP-style URIs in the form "user@host:path".
     // These are equivalent to "ssh://user@host/path". We use the more standard

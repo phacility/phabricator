@@ -7,6 +7,7 @@ final class PhabricatorRepositoryMirrorEngine
   extends PhabricatorRepositoryEngine {
 
   public function pushToMirrors() {
+    $viewer = $this->getViewer();
     $repository = $this->getRepository();
 
     if (!$repository->canMirror()) {
@@ -19,13 +20,24 @@ final class PhabricatorRepositoryMirrorEngine
       return;
     }
 
-    $mirrors = id(new PhabricatorRepositoryMirrorQuery())
-      ->setViewer($this->getViewer())
-      ->withRepositoryPHIDs(array($repository->getPHID()))
+    $uris = id(new PhabricatorRepositoryURIQuery())
+      ->setViewer($viewer)
+      ->withRepositories(array($repository))
       ->execute();
 
+    $io_mirror = PhabricatorRepositoryURI::IO_MIRROR;
+
     $exceptions = array();
-    foreach ($mirrors as $mirror) {
+    foreach ($uris as $mirror) {
+      if ($mirror->getIsDisabled()) {
+        continue;
+      }
+
+      $io_type = $mirror->getEffectiveIOType();
+      if ($io_type != $io_mirror) {
+        continue;
+      }
+
       try {
         $this->pushRepositoryToMirror($repository, $mirror);
       } catch (Exception $ex) {
@@ -44,54 +56,56 @@ final class PhabricatorRepositoryMirrorEngine
 
   private function pushRepositoryToMirror(
     PhabricatorRepository $repository,
-    PhabricatorRepositoryMirror $mirror) {
+    PhabricatorRepositoryURI $mirror_uri) {
 
-    // TODO: This is a little bit janky, but we don't have first-class
-    // infrastructure for running remote commands against an arbitrary remote
-    // right now. Just make an emphemeral copy of the repository and muck with
-    // it a little bit. In the medium term, we should pull this command stuff
-    // out and use it here and for "Land to ...".
+    $this->log(
+      pht(
+        'Pushing to remote "%s"...',
+        $mirror_uri->getEffectiveURI()));
 
-    $proxy = clone $repository;
-    $proxy->makeEphemeral();
-
-    $proxy->setDetail('hosting-enabled', false);
-    $proxy->setDetail('remote-uri', $mirror->getRemoteURI());
-    $proxy->setCredentialPHID($mirror->getCredentialPHID());
-
-    $this->log(pht('Pushing to remote "%s"...', $mirror->getRemoteURI()));
-
-    if ($proxy->isGit()) {
-      $this->pushToGitRepository($proxy);
-    } else if ($proxy->isHg()) {
-      $this->pushToHgRepository($proxy);
+    if ($repository->isGit()) {
+      $this->pushToGitRepository($repository, $mirror_uri);
+    } else if ($repository->isHg()) {
+      $this->pushToHgRepository($repository, $mirror_uri);
     } else {
       throw new Exception(pht('Unsupported VCS!'));
     }
   }
 
   private function pushToGitRepository(
-    PhabricatorRepository $proxy) {
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryURI $mirror_uri) {
 
-    $future = $proxy->getRemoteCommandFuture(
+    $argv = array(
       'push --verbose --mirror -- %P',
-      $proxy->getRemoteURIEnvelope());
+      $mirror_uri->getURIEnvelope(),
+    );
+
+    $future = $mirror_uri->newCommandEngine()
+      ->setArgv($argv)
+      ->newFuture();
 
     $future
-      ->setCWD($proxy->getLocalPath())
+      ->setCWD($repository->getLocalPath())
       ->resolvex();
   }
 
   private function pushToHgRepository(
-    PhabricatorRepository $proxy) {
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryURI $mirror_uri) {
 
-    $future = $proxy->getRemoteCommandFuture(
+    $argv = array(
       'push --verbose --rev tip -- %P',
-      $proxy->getRemoteURIEnvelope());
+      $mirror_uri->getURIEnvelope(),
+    );
+
+    $future = $mirror_uri->newCommandEngine()
+      ->setArgv($argv)
+      ->newFuture();
 
     try {
       $future
-        ->setCWD($proxy->getLocalPath())
+        ->setCWD($repository->getLocalPath())
         ->resolvex();
     } catch (CommandException $ex) {
       if (preg_match('/no changes found/', $ex->getStdOut())) {

@@ -1,18 +1,16 @@
 <?php
 
-final class PhabricatorRepositoryMirror extends PhabricatorRepositoryDAO
-  implements PhabricatorPolicyInterface {
+/**
+ * TODO: Remove this class and drop the underlying table after some time has
+ * passed. It currently exists only so that "bin/storage adjust" does not
+ * complain about the table.
+ */
+final class PhabricatorRepositoryMirror
+  extends PhabricatorRepositoryDAO {
 
   protected $repositoryPHID;
   protected $remoteURI;
   protected $credentialPHID;
-
-  private $repository = self::ATTACHABLE;
-
-  public static function initializeNewMirror(PhabricatorUser $actor) {
-    return id(new PhabricatorRepositoryMirror())
-      ->setRemoteURI('');
-  }
 
   protected function getConfiguration() {
     return array(
@@ -27,43 +25,6 @@ final class PhabricatorRepositoryMirror extends PhabricatorRepositoryDAO
         ),
       ),
     ) + parent::getConfiguration();
-  }
-
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryMirrorPHIDType::TYPECONST);
-  }
-
-  public function attachRepository(PhabricatorRepository $repository) {
-    $this->repository = $repository;
-    return $this;
-  }
-
-  public function getRepository() {
-    return $this->assertAttached($this->repository);
-  }
-
-
-/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
-
-
-  public function getCapabilities() {
-    return array(
-      PhabricatorPolicyCapability::CAN_VIEW,
-      PhabricatorPolicyCapability::CAN_EDIT,
-    );
-  }
-
-  public function getPolicy($capability) {
-    return $this->getRepository()->getPolicy($capability);
-  }
-
-  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
-  }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
   }
 
 }
