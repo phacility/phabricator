@@ -1292,7 +1292,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return null;
     }
 
-    return head($clone_uris);
+    return head($clone_uris)->getEffectiveURI();
   }
 
   private function getRawHTTPCloneURIObject() {
