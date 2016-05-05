@@ -1212,9 +1212,7 @@ final class DifferentialTransactionEditor
     }
 
     if ($inlines) {
-      $body->addTextSection(
-        pht('INLINE COMMENTS'),
-        $this->renderInlineCommentsForMail($object, $inlines));
+      $this->appendInlineCommentsForMail($object, $inlines, $body);
     }
 
     $changed_uri = $this->getChangedPriorToCommitURI();
@@ -1374,13 +1372,23 @@ final class DifferentialTransactionEditor
     return $result;
   }
 
-  private function renderInlineCommentsForMail(
+  private function appendInlineCommentsForMail(
     PhabricatorLiskDAO $object,
-    array $inlines) {
-    return id(new DifferentialInlineCommentMailView())
+    array $inlines,
+    PhabricatorMetaMTAMailBody $body) {
+
+    $section = id(new DifferentialInlineCommentMailView())
       ->setViewer($this->getActor())
       ->setInlines($inlines)
       ->buildMailSection();
+
+    $header = pht('INLINE COMMENTS');
+
+    $section_text = "\n".$section->getPlaintext();
+    $section_html = $section->getHTML();
+
+    $body->addPlaintextSection($header, $section_text, false);
+    $body->addHTMLSection($header, $section_html);
   }
 
   private function loadDiff($phid, $need_changesets = false) {

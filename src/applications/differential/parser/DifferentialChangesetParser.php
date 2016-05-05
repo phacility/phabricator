@@ -50,6 +50,7 @@ final class DifferentialChangesetParser extends Phobject {
   private $showEditAndReplyLinks = true;
   private $canMarkDone;
   private $objectOwnerPHID;
+  private $offsetMode;
 
   private $rangeStart;
   private $rangeEnd;
@@ -136,6 +137,15 @@ final class DifferentialChangesetParser extends Phobject {
 
   public function getObjectOwnerPHID() {
     return $this->objectOwnerPHID;
+  }
+
+  public function setOffsetMode($offset_mode) {
+    $this->offsetMode = $offset_mode;
+    return $this;
+  }
+
+  public function getOffsetMode() {
+    return $this->offsetMode;
   }
 
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
@@ -829,6 +839,22 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     $this->tryCacheStuff();
+
+    // If we're rendering in an offset mode, treat the range numbers as line
+    // numbers instead of rendering offsets.
+    $offset_mode = $this->getOffsetMode();
+    if ($offset_mode) {
+      if ($offset_mode == 'new') {
+        $offset_map = $this->new;
+      } else {
+        $offset_map = $this->old;
+      }
+
+      $range_end = $this->getOffset($offset_map, $range_start + $range_len);
+      $range_start = $this->getOffset($offset_map, $range_start);
+      $range_len = $range_end - $range_start;
+    }
+
     $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);
 
     $rows = max(
@@ -1632,5 +1658,21 @@ final class DifferentialChangesetParser extends Phobject {
     return $results;
   }
 
+  private function getOffset(array $map, $line) {
+    if (!$map) {
+      return null;
+    }
+
+    $line = (int)$line;
+    foreach ($map as $key => $spec) {
+      if ($spec && isset($spec['line'])) {
+        if ((int)$spec['line'] >= $line) {
+          return $key;
+        }
+      }
+    }
+
+    return $key;
+  }
 
 }

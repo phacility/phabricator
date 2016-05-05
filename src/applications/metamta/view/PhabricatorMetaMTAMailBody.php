@@ -111,8 +111,11 @@ final class PhabricatorMetaMTAMailBody extends Phobject {
     return $this;
   }
 
-  public function addPlaintextSection($header, $text) {
-    $this->sections[] = $header."\n".$this->indent($text);
+  public function addPlaintextSection($header, $text, $indent = true) {
+    if ($indent) {
+      $text = $this->indent($text);
+    }
+    $this->sections[] = $header."\n".$text;
     return $this;
   }
 

@@ -71,9 +71,11 @@ final class DifferentialInlineCommentMailView
             $context_html = $this->renderInline($parent, true, true);
           }
         } else {
-          $patch = $this->getPatch($hunk_parser, $comment);
-          $context_text = $this->renderPatch($comment, $patch, false);
-          $context_html = $this->renderPatch($comment, $patch, true);
+          $patch_text = $this->getPatch($hunk_parser, $comment, false);
+          $context_text = $this->renderPatch($comment, $patch_text, false);
+
+          $patch_html = $this->getPatch($hunk_parser, $comment, true);
+          $context_html = $this->renderPatch($comment, $patch_html, true);
         }
 
         $render_text = $this->renderInline($comment, false, false);
@@ -83,7 +85,6 @@ final class DifferentialInlineCommentMailView
         $section->addHTMLFragment($context_html);
 
         $section->addPlaintextFragment($spacer_text);
-        $section->addHTMLFragment($spacer_html);
 
         $section->addPlaintextFragment($render_text);
         $section->addHTMLFragment($render_html);
@@ -180,6 +181,18 @@ final class DifferentialInlineCommentMailView
     $content = $this->renderRemarkupContent($content, $is_html);
 
     if ($is_quote) {
+      if ($is_html) {
+        $style = array(
+          'padding: 4px 0;',
+        );
+
+        $content = phutil_tag(
+          'div',
+          array(
+            'style' => implode(' ', $style),
+          ),
+          $content);
+      }
       $header = $this->renderHeader($comment, $is_html, true);
     } else {
       $header = null;
@@ -254,6 +267,7 @@ final class DifferentialInlineCommentMailView
       'padding: 4px 8px;',
       'background: #F8F9FC;',
       'border-left: 3px solid #a7b5bf;',
+      'margin: 4px 0 0;',
     );
 
     $styles = implode(' ', $styles);
@@ -268,18 +282,43 @@ final class DifferentialInlineCommentMailView
 
   private function getPatch(
     DifferentialHunkParser $parser,
-    DifferentialTransactionComment $comment) {
+    DifferentialTransactionComment $comment,
+    $is_html) {
 
     $changeset = $this->getChangeset($comment->getChangesetID());
-    $hunks = $changeset->getHunks();
-
     $is_new = $comment->getIsNewFile();
     $start = $comment->getLineNumber();
     $length = $comment->getLineLength();
 
-    $diff = $parser->makeContextDiff($hunks, $is_new, $start, $length, 1);
+    if (!$is_html) {
+      $hunks = $changeset->getHunks();
+      $patch = $parser->makeContextDiff($hunks, $is_new, $start, $length, 1);
+      $patch = phutil_split_lines($patch);
 
-    return $diff;
+      // Remove the "@@ -x,y +u,v @@" line.
+      array_shift($patch);
+
+      return implode('', $patch);
+    }
+
+    $viewer = $this->getViewer();
+    $engine = new PhabricatorMarkupEngine();
+
+    if ($is_new) {
+      $offset_mode = 'new';
+    } else {
+      $offset_mode = 'old';
+    }
+
+    $parser = id(new DifferentialChangesetParser())
+      ->setUser($viewer)
+      ->setChangeset($changeset)
+      ->setOffsetMode($offset_mode)
+      ->setMarkupEngine($engine);
+
+    $parser->setRenderer(new DifferentialChangesetOneUpMailRenderer());
+
+    return $parser->render($start - 1, $length + 3, array());
   }
 
   private function renderPatch(
@@ -287,17 +326,10 @@ final class DifferentialInlineCommentMailView
     $patch,
     $is_html) {
 
-    $patch = phutil_split_lines($patch);
-
-    // Remove the "@@ -x,y +u,v @@" line.
-    array_shift($patch);
-
-    $patch = implode('', $patch);
-
     if ($is_html) {
       $style = array(
         'font: 11px/15px "Menlo", "Consolas", "Monaco", monospace;',
-        'padding: 0',
+        'padding: 4px 0;',
         'margin: 0;',
       );
 
@@ -346,7 +378,12 @@ final class DifferentialInlineCommentMailView
 
     $header = "{$path}:{$range}";
     if ($is_html) {
-      $header = phutil_tag('strong', array(), $header);
+      $header = phutil_tag(
+        'span',
+        array(
+          'style' => 'color: #000000',
+        ),
+        $header);
     }
 
     if ($with_author) {
@@ -359,7 +396,12 @@ final class DifferentialInlineCommentMailView
       $byline = '@'.$author->getName();
 
       if ($is_html) {
-        $byline = phutil_tag('strong', array(), $byline);
+        $byline = phutil_tag(
+          'span',
+          array(
+            'style' => 'color: #000000',
+          ),
+          $byline);
       }
 
       $header = pht('%s wrote in %s', $byline, $header);
@@ -371,7 +413,7 @@ final class DifferentialInlineCommentMailView
       $header = phutil_tag(
         'div',
         array(
-          'style' => 'font-style: italic',
+          'style' => 'font-style: italic; color: #74777d',
         ),
         $header);
     }
