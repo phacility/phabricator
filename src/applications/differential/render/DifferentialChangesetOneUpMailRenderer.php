@@ -73,7 +73,7 @@ final class DifferentialChangesetOneUpMailRenderer
             }
           }
 
-          $style = "padding: 0 2px; {$style}";
+          $style = "padding: 0 8px; margin: 0 4px; {$style}";
 
           $out[] = phutil_tag(
             'div',

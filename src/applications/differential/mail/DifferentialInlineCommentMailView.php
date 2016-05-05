@@ -82,12 +82,25 @@ final class DifferentialInlineCommentMailView
         $render_html = $this->renderInline($comment, true, false);
 
         $section->addPlaintextFragment($context_text);
-        $section->addHTMLFragment($context_html);
-
         $section->addPlaintextFragment($spacer_text);
-
         $section->addPlaintextFragment($render_text);
-        $section->addHTMLFragment($render_html);
+
+        $style = array(
+          'border: 1px solid #C7CCD9;',
+          'border-radius: 3px;',
+        );
+
+        $html_fragment = phutil_tag(
+          'div',
+          array(
+            'style' => implode(' ', $style),
+          ),
+          array(
+            $context_html,
+            $render_html,
+          ));
+
+        $section->addHTMLFragment($html_fragment);
 
         if (!$is_last_group || !$is_last_inline) {
           $section->addPlaintextFragment($spacer_text);
@@ -181,21 +194,26 @@ final class DifferentialInlineCommentMailView
     $content = $this->renderRemarkupContent($content, $is_html);
 
     if ($is_quote) {
-      if ($is_html) {
-        $style = array(
-          'padding: 4px 0;',
-        );
-
-        $content = phutil_tag(
-          'div',
-          array(
-            'style' => implode(' ', $style),
-          ),
-          $content);
-      }
       $header = $this->renderHeader($comment, $is_html, true);
     } else {
       $header = null;
+    }
+
+    if ($is_html) {
+      $style = array(
+        'padding: 8px 12px;',
+      );
+
+      if ($is_quote) {
+        $style[] = 'color: #74777D;';
+      }
+
+      $content = phutil_tag(
+        'div',
+        array(
+          'style' => implode(' ', $style),
+        ),
+        $content);
     }
 
     $parts = array(
@@ -230,9 +248,14 @@ final class DifferentialInlineCommentMailView
       $mode = PhutilRemarkupEngine::MODE_TEXT;
     }
 
+    $attributes = array(
+      'style' => 'padding: 0; margin: 0;',
+    );
+
     $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
       ->setConfig('viewer', $viewer)
       ->setConfig('uri.base', $production_uri)
+      ->setConfig('default.p.attributes', $attributes)
       ->setMode($mode);
 
     try {
@@ -264,10 +287,12 @@ final class DifferentialInlineCommentMailView
 
   private function quoteHTML($block) {
     $styles = array(
-      'padding: 4px 8px;',
-      'background: #F8F9FC;',
-      'border-left: 3px solid #a7b5bf;',
-      'margin: 4px 0 0;',
+      'padding: 0;',
+      'background: #F7F7F7;',
+      'border-color: #e3e4e8;',
+      'border-style: solid;',
+      'border-width: 0 0 1px 0;',
+      'margin: 0;',
     );
 
     $styles = implode(' ', $styles);
@@ -389,6 +414,9 @@ final class DifferentialInlineCommentMailView
     $changeset = $this->getChangeset($comment->getChangesetID());
     $path = $changeset->getFilename();
 
+    // Only show the filename.
+    $path = basename($path);
+
     $start = $comment->getLineNumber();
     $length = $comment->getLineLength();
     if ($length) {
@@ -402,7 +430,7 @@ final class DifferentialInlineCommentMailView
       $header = phutil_tag(
         'span',
         array(
-          'style' => 'color: #000000',
+          'style' => 'color: #4b4d51; font-weight: bold;',
         ),
         $header);
     }
@@ -414,32 +442,80 @@ final class DifferentialInlineCommentMailView
     }
 
     if ($author) {
-      $byline = '@'.$author->getName();
+      $byline = $author->getName();
 
       if ($is_html) {
         $byline = phutil_tag(
           'span',
           array(
-            'style' => 'color: #000000',
+            'style' => 'color: #4b4d51; font-weight: bold;',
           ),
           $byline);
       }
 
       $header = pht('%s wrote in %s', $byline, $header);
-    } else {
-      $header = pht('In %s', $header);
     }
 
     if ($is_html) {
+      $link_href = $this->getInlineURI($comment);
+      if ($link_href) {
+        $link_style = array(
+          'float: right;',
+        );
+
+        $link = phutil_tag(
+          'a',
+          array(
+            'style' => implode(' ', $link_style),
+            'href' => $link_href,
+          ),
+          pht('View Inline'));
+      } else {
+        $link = null;
+      }
+
+      $style = array(
+        'color: #74777d;',
+        'background: #eff2f4;',
+        'padding: 4px 8px;',
+        'overflow: hidden;',
+      );
+
       $header = phutil_tag(
         'div',
         array(
-          'style' => 'font-style: italic; color: #74777d',
+          'style' => implode(' ', $style),
         ),
-        $header);
+        array(
+          $link,
+          $header,
+        ));
     }
 
     return $header;
   }
+
+  private function getInlineURI(DifferentialTransactionComment $comment) {
+    $changeset = $this->getChangeset($comment->getChangesetID());
+    if (!$changeset) {
+      return null;
+    }
+
+    $diff = $changeset->getDiff();
+    if (!$diff) {
+      return null;
+    }
+
+    $revision = $diff->getRevision();
+    if (!$revision) {
+      return null;
+    }
+
+    $link_href = '/'.$revision->getMonogram().'#inline-'.$comment->getID();
+    $link_href = PhabricatorEnv::getProductionURI($link_href);
+
+    return $link_href;
+  }
+
 
 }
