@@ -27,4 +27,18 @@ abstract class PhabricatorSyntaxStyle extends Phobject {
       ->execute();
   }
 
+  final public function getRemarkupStyleMap() {
+    $map = array(
+      'rbw_r' => 'color: red',
+      'rbw_o' => 'color: orange',
+      'rbw_y' => 'color: yellow',
+      'rbw_g' => 'color: green',
+      'rbw_b' => 'color: blue',
+      'rbw_i' => 'color: indigo',
+      'rbw_v' => 'color: violet',
+    );
+
+    return $map + $this->getStyleMap();
+  }
+
 }
