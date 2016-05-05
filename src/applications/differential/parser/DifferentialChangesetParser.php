@@ -852,7 +852,7 @@ final class DifferentialChangesetParser extends Phobject {
 
       $range_end = $this->getOffset($offset_map, $range_start + $range_len);
       $range_start = $this->getOffset($offset_map, $range_start);
-      $range_len = $range_end - $range_start;
+      $range_len = ($range_end - $range_start);
     }
 
     $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);

@@ -290,9 +290,27 @@ final class DifferentialInlineCommentMailView
     $start = $comment->getLineNumber();
     $length = $comment->getLineLength();
 
+    // By default, show one line of context around the target inline.
+    $context = 1;
+
+    // If the inline is at least 3 lines long, don't show any extra context.
+    if ($length >= 2) {
+      $context = 0;
+    }
+
+    // If the inline is more than 7 lines long, only show the first 7 lines.
+    if ($length >= 6) {
+      $length = 6;
+    }
+
     if (!$is_html) {
       $hunks = $changeset->getHunks();
-      $patch = $parser->makeContextDiff($hunks, $is_new, $start, $length, 1);
+      $patch = $parser->makeContextDiff(
+        $hunks,
+        $is_new,
+        $start,
+        $length,
+        $context);
       $patch = phutil_split_lines($patch);
 
       // Remove the "@@ -x,y +u,v @@" line.
@@ -318,7 +336,10 @@ final class DifferentialInlineCommentMailView
 
     $parser->setRenderer(new DifferentialChangesetOneUpMailRenderer());
 
-    return $parser->render($start - 1, $length + 3, array());
+    return $parser->render(
+      $start - $context,
+      $length + 1 + (2 * $context),
+      array());
   }
 
   private function renderPatch(
