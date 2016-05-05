@@ -59,6 +59,7 @@ final class PhabricatorPeopleProfileViewController
 
     $projects = $this->buildProjectsView($user);
     $badges = $this->buildBadgesView($user);
+    $calendar = $this->buildCalendarDayView($user);
     require_celerity_resource('project-view-css');
 
     $home = id(new PHUITwoColumnView())
@@ -73,6 +74,7 @@ final class PhabricatorPeopleProfileViewController
         array(
           $projects,
           $badges,
+          $calendar,
         ));
 
     $nav = $this->getProfileMenu();
@@ -167,6 +169,69 @@ final class PhabricatorPeopleProfileViewController
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($list)
+      ->setBackground(PHUIObjectBoxView::GREY);
+
+    return $box;
+  }
+
+  private function buildCalendarDayView(PhabricatorUser $user) {
+    $viewer = $this->getViewer();
+    $class = 'PhabricatorCalendarApplication';
+
+    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      return null;
+    }
+
+    $midnight = PhabricatorTime::getTodayMidnightDateTime($viewer);
+    $week_end = clone $midnight;
+    $week_end = $week_end->modify('+3 days');
+
+    $range_start = $midnight->format('U');
+    $range_end = $week_end->format('U');
+
+    $query = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withDateRange($range_start, $range_end)
+      ->withInvitedPHIDs(array($viewer->getPHID()))
+      ->withIsCancelled(false);
+
+    $statuses = $query->execute();
+    $phids = mpull($statuses, 'getUserPHID');
+    $events = array();
+
+    foreach ($statuses as $status) {
+      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $status,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      $event = new AphrontCalendarEventView();
+      $event->setCanEdit($can_edit);
+      $event->setEventID($status->getID());
+      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+      $event->setIsAllDay($status->getIsAllDay());
+      $event->setIcon($status->getIcon());
+      $event->setViewerIsInvited($viewer_is_invited);
+
+      $event->setName($status->getName());
+      $event->setURI($status->getURI());
+      $events[] = $event;
+    }
+
+    $events = msort($events, 'getEpochStart');
+    $day_view = id(new PHUICalendarWeekView())
+      ->setViewer($viewer)
+      ->setEvents($events)
+      ->setWeekLength(3)
+      ->render();
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Calendar'));
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($day_view)
       ->setBackground(PHUIObjectBoxView::GREY);
 
     return $box;
