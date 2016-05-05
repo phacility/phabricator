@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '5242a859',
+    'core.pkg.css' => 'b7b8d101',
     'core.pkg.js' => '6972d365',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '7ba78475',
@@ -105,7 +105,7 @@ return array(
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => 'd0801452',
     'rsrc/css/core/remarkup.css' => '787105d6',
-    'rsrc/css/core/syntax.css' => '9fd11da8',
+    'rsrc/css/core/syntax.css' => '5101175d',
     'rsrc/css/core/z-index.css' => '5b6fcf3f',
     'rsrc/css/diviner/diviner-shared.css' => 'aa3656aa',
     'rsrc/css/font/font-aleo.css' => '8bdb2835',
@@ -164,6 +164,7 @@ return array(
     'rsrc/css/sprite-login.css' => '60e8560e',
     'rsrc/css/sprite-menu.css' => '9dd65b92',
     'rsrc/css/sprite-tokens.css' => '4f399012',
+    'rsrc/css/syntax/syntax-default.css' => '9923583c',
     'rsrc/externals/d3/d3.min.js' => 'a11a5ff2',
     'rsrc/externals/font/aleo/aleo-bold.eot' => 'd3d3bed7',
     'rsrc/externals/font/aleo/aleo-bold.svg' => '45899c8e',
@@ -877,7 +878,8 @@ return array(
     'sprite-login-css' => '60e8560e',
     'sprite-menu-css' => '9dd65b92',
     'sprite-tokens-css' => '4f399012',
-    'syntax-highlighting-css' => '9fd11da8',
+    'syntax-default-css' => '9923583c',
+    'syntax-highlighting-css' => '5101175d',
     'tokens-css' => '3d0f239e',
     'typeahead-browse-css' => 'd8581d2c',
     'unhandled-exception-css' => '4c96257a',
@@ -1238,6 +1240,9 @@ return array(
       'javelin-install',
       'javelin-typeahead-source',
       'javelin-util',
+    ),
+    '5101175d' => array(
+      'syntax-default-css',
     ),
     '519705ea' => array(
       'javelin-install',
@@ -2192,6 +2197,7 @@ return array(
       'aphront-list-filter-view-css',
       'phabricator-remarkup-css',
       'syntax-highlighting-css',
+      'syntax-default-css',
       'phui-pager-css',
       'aphront-tooltip-css',
       'phabricator-flag-css',
