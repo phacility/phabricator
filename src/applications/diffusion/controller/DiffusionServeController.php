@@ -267,20 +267,27 @@ final class DiffusionServeController extends DiffusionController {
       // token from SSH. If they're using HTTP username + password auth, they
       // have to obey the normal HTTP rules.
     } else {
-      if ($request->isHTTPS()) {
-        $protocol = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTPS;
-      } else {
-        $protocol = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTP;
-      }
+      // For now, we don't distinguish between HTTP and HTTPS-originated
+      // requests that are proxied within the cluster, so the user can connect
+      // with HTTPS but we may be on HTTP by the time we reach this part of
+      // the code. Allow things to move forward as long as either protocol
+      // can be served.
+      $proto_https = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTPS;
+      $proto_http = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTP;
 
-      if (!$repository->canServeProtocol($protocol, false)) {
+      $can_read =
+        $repository->canServeProtocol($proto_https, false) ||
+        $repository->canServeProtocol($proto_http, false);
+      if (!$can_read) {
         return new PhabricatorVCSResponse(
           403,
           pht('This repository is not available over HTTP.'));
       }
 
       if ($is_push) {
-        $can_write = $repository->canServeProtocol($protocol, true);
+        $can_write =
+          $repository->canServeProtocol($proto_https, true) ||
+          $repository->canServeProtocol($proto_http, true);
         if (!$can_write) {
           return new PhabricatorVCSResponse(
             403,
