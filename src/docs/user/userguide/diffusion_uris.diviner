@@ -23,9 +23,9 @@ is hosted elsewhere (like GitHub or Bitbucket) and track updates to the remote
 repository. This will create a read-only copy of the repository in Phabricator.
 
 **Mirror Repositories**: Phabricator can publish any repository to mirrors,
-updating the mirrors as changes are made to the repository. This works with
-both local hosted repositories and remote repositories that Phabricator is
-observing.
+overwiting them with an exact copy of the repository that stays up to date as
+the source changes. This works with both local repositories that Phabricator is
+hosting and remote repositories that Phabricator is observing.
 
 **Proxy Repositories**: If you are observing a repository, you can allow users
 to read Phabricator's copy of the repository. Phabricator supports granular
@@ -102,11 +102,18 @@ Mirror a Repository
 NOTE: Mirroring is not supported in Subversion.
 
 You can create a read-only mirror of an existing repository. Phabricator will
-push all changes made to the repository to the mirror.
+continuously publish the state of the source repository to the mirror, creating
+an exact copy.
 
 For example, if you have a repository hosted in Phabricator that you want to
 mirror to GitHub, you can configure Phabricator to automatically maintain the
 mirror. This is how the upstream repositories are set up.
+
+The mirror copy must be read-only for users because any writes made to the
+mirror will be undone when Phabricator updates it. The mirroring process copies
+the entire repository state exactly, so the remote state will be completely
+replaced with an exact copy of the source repository. This may remove or
+destroy information. Normally, you should only mirror to an empty repository.
 
 You can mirror any repository, even if Phabricator is only observing it and not
 hosting it directly.
