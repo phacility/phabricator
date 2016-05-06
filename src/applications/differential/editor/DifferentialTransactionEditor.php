@@ -1385,7 +1385,17 @@ final class DifferentialTransactionEditor
     $header = pht('INLINE COMMENTS');
 
     $section_text = "\n".$section->getPlaintext();
-    $section_html = $section->getHTML();
+
+    $style = array(
+      'margin: 12px 0;',
+    );
+
+    $section_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $style),
+      ),
+      $section->getHTML());
 
     $body->addPlaintextSection($header, $section_text, false);
     $body->addHTMLSection($header, $section_html);

@@ -201,7 +201,8 @@ final class DifferentialInlineCommentMailView
 
     if ($is_html) {
       $style = array(
-        'padding: 8px 12px;',
+        'margin: 8px 0;',
+        'padding: 0 12px;',
       );
 
       if ($is_quote) {
@@ -249,7 +250,7 @@ final class DifferentialInlineCommentMailView
     }
 
     $attributes = array(
-      'style' => 'padding: 0; margin: 0;',
+      'style' => 'padding: 0; margin: 8px;',
     );
 
     $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
@@ -461,6 +462,7 @@ final class DifferentialInlineCommentMailView
       if ($link_href) {
         $link_style = array(
           'float: right;',
+          'text-decoration: none;',
         );
 
         $link = phutil_tag(
@@ -477,7 +479,7 @@ final class DifferentialInlineCommentMailView
       $style = array(
         'color: #74777d;',
         'background: #eff2f4;',
-        'padding: 4px 8px;',
+        'padding: 6px 8px;',
         'overflow: hidden;',
       );
 
