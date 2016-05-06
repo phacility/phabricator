@@ -376,13 +376,15 @@ final class DifferentialInlineCommentMailView
     if ($is_html) {
       $style = array(
         'font: 11px/15px "Menlo", "Consolas", "Monaco", monospace;',
+        'white-space: pre-wrap;',
+        'clear: both;',
         'padding: 4px 0;',
         'margin: 0;',
       );
 
       $style = implode(' ', $style);
       $patch = phutil_tag(
-        'pre',
+        'div',
         array(
           'style' => $style,
         ),
