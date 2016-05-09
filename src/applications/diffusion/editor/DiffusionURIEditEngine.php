@@ -83,9 +83,25 @@ final class DiffusionURIEditEngine
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 
+    $uri_instructions = null;
     if ($object->isBuiltin()) {
       $is_builtin = true;
       $uri_value = (string)$object->getDisplayURI();
+
+      switch ($object->getBuiltinProtocol()) {
+        case PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH:
+          $uri_instructions = pht(
+            "  - Configure [[ %s | %s ]] to change the SSH username.\n".
+            "  - Configure [[ %s | %s ]] to change the SSH host.\n".
+            "  - Configure [[ %s | %s ]] to change the SSH port.",
+            '/config/edit/diffusion.ssh-user/',
+            'diffusion.ssh-user',
+            '/config/edit/diffusion.ssh-host/',
+            'diffusion.ssh-host',
+            '/config/edit/diffusion.ssh-port/',
+            'diffusion.ssh-port');
+          break;
+      }
     } else {
       $is_builtin = false;
       $uri_value = $object->getURI();
@@ -118,7 +134,8 @@ final class DiffusionURIEditEngine
         ->setConduitTypeDescription(pht('New repository URI.'))
         ->setIsRequired(!$is_builtin)
         ->setIsLocked($is_builtin)
-        ->setValue($uri_value),
+        ->setValue($uri_value)
+        ->setControlInstructions($uri_instructions),
       id(new PhabricatorSelectEditField())
         ->setKey('io')
         ->setLabel(pht('I/O Type'))

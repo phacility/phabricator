@@ -113,8 +113,28 @@ final class DiffusionRepositoryURIsManagementPanel
           ->setTag('a')
           ->setText(pht('Documentation')));
 
+    $messages = array();
+    if ($repository->isHosted()) {
+      $messages[] = array(
+        id(new PHUIIconView())->setIcon('fa-folder'),
+        ' ',
+        pht('Phabricator is hosting this repository.'),
+      );
+    } else {
+      $messages[] = array(
+        id(new PHUIIconView())->setIcon('fa-download'),
+        ' ',
+        pht('This repository is hosted remotely. Phabricator is observing it.'),
+      );
+    }
+
+    $info_view = id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->setErrors($messages);
+
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setInfoView($info_view)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }

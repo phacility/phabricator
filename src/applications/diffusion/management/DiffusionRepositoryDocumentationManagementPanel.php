@@ -14,7 +14,7 @@ final class DiffusionRepositoryDocumentationManagementPanel
   }
 
   public function getManagementPanelIcon() {
-    return 'fa-book bluegrey';
+    return 'fa-book';
   }
 
   public function buildManagementPanelContent() {
