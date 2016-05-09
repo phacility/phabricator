@@ -236,6 +236,49 @@ fetch from, serve from, and push to.
 These options are covered in detail in @{article:Diffusion User Guide: URIs}.
 
 
+Branches
+========
+
+The **Branches** panel allows you to configure how Phabricator interacts with
+branches.
+
+This panel is not available for Subversion repositories, because Subversion
+does not have formal branches.
+
+You can configure **Default Branch**. This controls which branch is shown by
+default in the UI. If no branch is provided, Phabricator will use `master` in
+Git and `default` in Mercurial.
+
+If you want Diffusion to ignore some branches in the repository, you can
+configure **Track Only**. Other branches will be ignored. If you do not specify
+any branches, all branches are tracked.
+
+When specifying branches, you should enter one branch name per line. You can
+use regular expressions to match branches by wrapping an expression in
+`regexp(...)`. For example:
+
+| Example | Effect |
+|---------|--------|
+| `master` | Track only `master`.
+| `regexp(/^release-/)` | Track all branches which start with `release-`.
+| `regexp(/^(?!temp-)/)` | Do not track branches which start with `temp-`.
+
+
+Actions
+======
+
+The **Actions** panel can configure notifications and publishing behavior.
+
+Normally, Phabricator publishes notifications when it discovers new commits.
+You can disable publishing for a repository by turning off **Publish/Noitfy**.
+This will disable notifications, feed, and Herald (including audits and build
+plans) for this repository.
+
+When Phabricator discovers a new commit, it can automatically close associated
+revisions and tasks. If you don't want Phabricator to close objects when it
+discovers new commits, disable **Autoclose** for the repository.
+
+
 Repository Identifiers and Names
 ================================
 

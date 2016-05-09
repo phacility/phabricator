@@ -500,5 +500,14 @@ final class DiffusionRepositoryStatusManagementPanel
     return $messages;
   }
 
+  private function getEnvConfigLink() {
+    $config_href = '/config/edit/environment.append-paths/';
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $config_href,
+      ),
+      'environment.append-paths');
+  }
 
 }

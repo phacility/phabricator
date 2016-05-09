@@ -208,6 +208,22 @@ final class DiffusionRepositoryEditEngine
     $autoclose_value = $object->getDetail('close-commits-filter', array());
     $autoclose_value = array_keys($autoclose_value);
 
+    $automation_instructions = pht(
+      "Configure **Repository Automation** to allow Phabricator to ".
+      "write to this repository.".
+      "\n\n".
+      "IMPORTANT: This feature is new, experimental, and not supported. ".
+      "Use it at your own risk.");
+
+    $staging_instructions = pht(
+      "To make it easier to run integration tests and builds on code ".
+      "under review, you can configure a **Staging Area**. When `arc` ".
+      "creates a diff, it will push a copy of the changes to the ".
+      "configured staging area with a corresponding tag.".
+      "\n\n".
+      "IMPORTANT: This feature is new, experimental, and not supported. ".
+      "Use it at your own risk.");
+
     return array(
       id(new PhabricatorSelectEditField())
         ->setKey('vcs')
@@ -329,7 +345,8 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Staging area URI.'))
         ->setConduitDescription(pht('Set the staging area URI.'))
         ->setConduitTypeDescription(pht('New staging area URI.'))
-        ->setValue($object->getStagingURI()),
+        ->setValue($object->getStagingURI())
+        ->setControlInstructions($staging_instructions),
       id(new PhabricatorDatasourceEditField())
         ->setKey('automationBlueprintPHIDs')
         ->setLabel(pht('Use Blueprints'))
@@ -340,7 +357,8 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Automation blueprints.'))
         ->setConduitDescription(pht('Change automation blueprints.'))
         ->setConduitTypeDescription(pht('New blueprint PHIDs.'))
-        ->setValue($object->getAutomationBlueprintPHIDs()),
+        ->setValue($object->getAutomationBlueprintPHIDs())
+        ->setControlInstructions($automation_instructions),
       id(new PhabricatorStringListEditField())
         ->setKey('symbolLanguages')
         ->setLabel(pht('Languages'))

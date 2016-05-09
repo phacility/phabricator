@@ -105,6 +105,43 @@ final class DiffusionURIEditEngine
     } else {
       $is_builtin = false;
       $uri_value = $object->getURI();
+
+      if ($object->getRepositoryPHID()) {
+        $repository = $object->getRepository();
+        if ($repository->isGit()) {
+          $uri_instructions = pht(
+            "Provide the URI of a Git repository. It should usually look ".
+            "like one of these examples:\n".
+            "\n".
+            "| Example Git URIs\n".
+            "| -----------------------\n".
+            "| `git@github.com:example/example.git`\n".
+            "| `ssh://user@host.com/git/example.git`\n".
+            "| `https://example.com/repository.git`");
+        } else if ($repository->isHg()) {
+          $uri_instructions = pht(
+            "Provide the URI of a Mercurial repository. It should usually ".
+            "look like one of these examples:\n".
+            "\n".
+            "| Example Mercurial URIs\n".
+            "|-----------------------\n".
+            "| `ssh://hg@bitbucket.org/example/repository`\n".
+            "| `https://bitbucket.org/example/repository`");
+        } else if ($repository->isSVN()) {
+          $uri_instructions = pht(
+            "Provide the **Repository Root** of a Subversion repository. ".
+            "You can identify this by running `svn info` in a working ".
+            "copy. It should usually look like one of these examples:\n".
+            "\n".
+            "| Example Subversion URIs\n".
+            "|-----------------------\n".
+            "| `http://svn.example.org/svnroot/`\n".
+            "| `svn+ssh://svn.example.com/svnroot/`\n".
+            "| `svn://svn.example.net/svnroot/`\n\n".
+            "You **MUST** specify the root of the repository, not a ".
+            "subdirectory.");
+        }
+      }
     }
 
     return array(

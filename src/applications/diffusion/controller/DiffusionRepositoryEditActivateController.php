@@ -40,7 +40,10 @@ final class DiffusionRepositoryEditActivateController
 
     if ($repository->isTracked()) {
       $title = pht('Deactivate Repository');
-      $body = pht('Deactivate this repository?');
+      $body = pht(
+        'If you deactivate this repository, it will no longer be updated. '.
+        'Observation and mirroring will cease, and pushing and pulling will '.
+        'be disabled. You can reactivate the repository later.');
       $submit = pht('Deactivate Repository');
     } else {
       $title = pht('Activate Repository');
