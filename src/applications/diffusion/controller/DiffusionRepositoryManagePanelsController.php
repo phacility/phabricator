@@ -27,11 +27,16 @@ final class DiffusionRepositoryManagePanelsController
 
     $panels = DiffusionRepositoryManagementPanel::getAllPanels();
 
-    foreach ($panels as $panel) {
+    foreach ($panels as $key => $panel) {
       $panel
         ->setViewer($viewer)
         ->setRepository($repository)
         ->setController($this);
+
+      if (!$panel->shouldEnableForRepository($repository)) {
+        unset($panels[$key]);
+        continue;
+      }
     }
 
     $selected = $request->getURIData('panel');

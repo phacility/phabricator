@@ -13,6 +13,12 @@ final class DiffusionRepositoryStagingManagementPanel
     return 700;
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository) {
+    return $repository->isGit();
+  }
+
+
   public function getManagementPanelIcon() {
     $repository = $this->getRepository();
 

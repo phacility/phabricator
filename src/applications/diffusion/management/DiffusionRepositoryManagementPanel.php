@@ -46,6 +46,11 @@ abstract class DiffusionRepositoryManagementPanel
     return array();
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository) {
+    return true;
+  }
+
   final protected function newActions() {
     $actions = $this->buildManagementPanelActions();
     if (!$actions) {

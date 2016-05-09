@@ -310,9 +310,15 @@ final class PhabricatorRepositoryURI
 
 
   private function getForcedProtocol() {
+    $repository = $this->getRepository();
+
     switch ($this->getBuiltinProtocol()) {
       case self::BUILTIN_PROTOCOL_SSH:
-        return 'ssh';
+        if ($repository->isSVN()) {
+          return 'svn+ssh';
+        } else {
+          return 'ssh';
+        }
       case self::BUILTIN_PROTOCOL_HTTP:
         return 'http';
       case self::BUILTIN_PROTOCOL_HTTPS:
@@ -382,6 +388,7 @@ final class PhabricatorRepositoryURI
       $suffix = '/';
     } else {
       $suffix = '';
+      $clone_name = '';
     }
 
     switch ($this->getBuiltinIdentifier()) {
