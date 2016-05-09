@@ -49,6 +49,7 @@ final class DiffusionRepositoryPoliciesManagementPanel
     return array(
       'policy.view',
       'policy.edit',
+      'spacePHID',
       'policy.push',
     );
   }

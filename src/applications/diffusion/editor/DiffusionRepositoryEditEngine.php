@@ -165,6 +165,35 @@ final class DiffusionRepositoryEditEngine
     return $pages;
   }
 
+  protected function willConfigureFields($object, array $fields) {
+    // Change the default field order so related fields are adjacent.
+    $after = array(
+      'policy.edit' => array('policy.push'),
+    );
+
+    $result = array();
+    foreach ($fields as $key => $value) {
+      $result[$key] = $value;
+
+      if (!isset($after[$key])) {
+        continue;
+      }
+
+      foreach ($after[$key] as $next_key) {
+        if (!isset($fields[$next_key])) {
+          continue;
+        }
+
+        unset($result[$next_key]);
+        $result[$next_key] = $fields[$next_key];
+        unset($fields[$next_key]);
+      }
+    }
+
+    return $result;
+  }
+
+
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 
