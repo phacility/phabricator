@@ -6,9 +6,6 @@ Guide to configuring repository URIs for fetching, cloning and mirroring.
 Overview
 ========
 
-WARNING: This document describes a feature which is still under development,
-and is not necessarily accurate or complete.
-
 Phabricator can create, host, observe, mirror, proxy, and import repositories.
 For example, you can:
 

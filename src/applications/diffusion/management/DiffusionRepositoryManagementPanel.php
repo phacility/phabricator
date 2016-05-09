@@ -139,5 +139,8 @@ abstract class DiffusionRepositoryManagementPanel
     return "/diffusion/edit/{$id}/page/{$page}/";
   }
 
+  public function getPanelNavigationURI() {
+    return $this->getPanelURI();
+  }
 
 }

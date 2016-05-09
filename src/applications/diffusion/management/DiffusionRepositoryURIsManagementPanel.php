@@ -6,7 +6,7 @@ final class DiffusionRepositoryURIsManagementPanel
   const PANELKEY = 'uris';
 
   public function getManagementPanelLabel() {
-    return pht('Clone / Fetch / Mirror');
+    return pht('URIs');
   }
 
   public function getManagementPanelIcon() {

@@ -109,7 +109,7 @@ final class DiffusionRepositoryManageController
       $key = $panel->getManagementPanelKey();
       $label = $panel->getManagementPanelLabel();
       $icon = $panel->getManagementPanelIcon();
-      $href = $repository->getPathURI("manage/{$key}/");
+      $href = $panel->getPanelNavigationURI();
 
       $item = id(new PHUIListItemView())
         ->setKey($key)
