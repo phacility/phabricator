@@ -58,7 +58,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         $this->getQueryRoutePattern()
           => 'DiffusionRepositoryListController',
         $this->getEditRoutePattern('edit/') =>
-          'DiffusionRepositoryEditproController',
+          'DiffusionRepositoryEditController',
         'pushlog/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'DiffusionPushLogListController',
           'view/(?P<id>\d+)/' => 'DiffusionPushEventViewController',
@@ -87,7 +87,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           'commit/(?P<commit>[a-z0-9]+)/edit/'
             => 'DiffusionCommitEditController',
           'manage/(?:(?P<panel>[^/]+)/)?'
-            => 'DiffusionRepositoryManageController',
+            => 'DiffusionRepositoryManagePanelsController',
           'uri/' => array(
             'view/(?P<id>[0-9]\d*)/' => 'DiffusionRepositoryURIViewController',
             'disable/(?P<id>[0-9]\d*)/'

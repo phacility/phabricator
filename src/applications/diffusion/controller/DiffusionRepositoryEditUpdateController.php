@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditUpdateController
-  extends DiffusionRepositoryEditController {
+  extends DiffusionRepositoryManageController {
 
   public function handleRequest(AphrontRequest $request) {
     $response = $this->loadDiffusionContextForEdit();
