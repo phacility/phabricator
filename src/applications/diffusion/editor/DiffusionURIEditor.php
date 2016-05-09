@@ -3,6 +3,9 @@
 final class DiffusionURIEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $repository;
+  private $repositoryPHID;
+
   public function getEditorApplicationClass() {
     return 'PhabricatorDiffusionApplication';
   }
@@ -115,6 +118,7 @@ final class DiffusionURIEditor
         break;
       case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
         $object->setRepositoryPHID($xaction->getNewValue());
+        $object->attachRepository($this->repository);
         break;
       case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
         $object->setCredentialPHID($xaction->getNewValue());
@@ -151,6 +155,9 @@ final class DiffusionURIEditor
 
     switch ($type) {
       case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
+        // Save this, since we need it to validate TYPE_IO transactions.
+        $this->repositoryPHID = $object->getRepositoryPHID();
+
         $missing = $this->validateIsEmptyTextField(
           $object->getRepositoryPHID(),
           $xactions);
@@ -208,6 +215,9 @@ final class DiffusionURIEditor
               $xaction);
             continue;
           }
+
+          $this->repository = $repository;
+          $this->repositoryPHID = $repository_phid;
         }
         break;
       case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
@@ -315,7 +325,7 @@ final class DiffusionURIEditor
           if ($no_observers || $no_readwrite) {
             $repository = id(new PhabricatorRepositoryQuery())
               ->setViewer(PhabricatorUser::getOmnipotentUser())
-              ->withPHIDs(array($object->getRepositoryPHID()))
+              ->withPHIDs(array($this->repositoryPHID))
               ->needURIs(true)
               ->executeOne();
             $uris = $repository->getURIs();

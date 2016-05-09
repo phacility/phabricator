@@ -53,6 +53,10 @@ Diffusion repositories have an array of configurable options and behaviors. For
 details on the available options and guidance on managing and administrating
 repositories, see @{article:Diffusion User Guilde: Managing Repositories}.
 
+Repositories can also be managed via the API. For an overview on using the
+API to create and edit repositories, see
+@{article:Diffusion User Guide: Repositories API}.
+
 
 Repository Clustering
 =====================
