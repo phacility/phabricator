@@ -13,7 +13,9 @@ final class DiffusionRepositoryEditDeleteController
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+    $panel_uri = id(new DiffusionRepositoryBasicsManagementPanel())
+      ->setRepository($repository)
+      ->getPanelURI();
 
     $dialog = new AphrontDialogView();
     $text_1 = pht(
@@ -40,7 +42,7 @@ final class DiffusionRepositoryEditDeleteController
     return $this->newDialog()
       ->setTitle(pht('Really want to delete the repository?'))
       ->appendChild($body)
-      ->addCancelButton($edit_uri, pht('Okay'));
+      ->addCancelButton($panel_uri, pht('Okay'));
   }
 
 }

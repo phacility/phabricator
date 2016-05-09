@@ -13,7 +13,9 @@ final class DiffusionRepositoryEditActivateController
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+    $panel_uri = id(new DiffusionRepositoryBasicsManagementPanel())
+      ->setRepository($repository)
+      ->getPanelURI();
 
     if ($request->isFormPost()) {
       if (!$repository->isTracked()) {
@@ -33,24 +35,24 @@ final class DiffusionRepositoryEditActivateController
         ->setActor($viewer)
         ->applyTransactions($repository, array($xaction));
 
-      return id(new AphrontReloadResponse())->setURI($edit_uri);
+      return id(new AphrontReloadResponse())->setURI($panel_uri);
     }
 
     if ($repository->isTracked()) {
-      return $this->newDialog()
-        ->setTitle(pht('Deactivate Repository?'))
-        ->appendChild(
-          pht('Deactivate this repository?'))
-        ->addSubmitButton(pht('Deactivate Repository'))
-        ->addCancelButton($edit_uri);
+      $title = pht('Deactivate Repository');
+      $body = pht('Deactivate this repository?');
+      $submit = pht('Deactivate Repository');
     } else {
-      return $this->newDialog()
-        ->setTitle(pht('Activate Repository?'))
-        ->appendChild(
-          pht('Activate this repository?'))
-        ->addSubmitButton(pht('Activate Repository'))
-        ->addCancelButton($edit_uri);
+      $title = pht('Activate Repository');
+      $body = pht('Activate this repository?');
+      $submit = pht('Activate Repository');
     }
+
+    return $this->newDialog()
+      ->setTitle($title)
+      ->appendChild($body)
+      ->addSubmitButton($submit)
+      ->addCancelButton($panel_uri);
   }
 
 }
