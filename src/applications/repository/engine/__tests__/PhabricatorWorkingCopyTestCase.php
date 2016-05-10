@@ -71,7 +71,6 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
     $this->didConstructRepository($repo);
 
     $repo->save();
-    $repo->makeEphemeral();
 
     // Keep the disk resources around until we exit.
     $this->dirs[] = $dir;

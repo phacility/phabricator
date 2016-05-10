@@ -26,6 +26,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    */
   const MINIMUM_QUALIFIED_HASH = 5;
 
+  /**
+   * Minimum number of commits to an empty repository to trigger "import" mode.
+   */
+  const IMPORT_THRESHOLD = 7;
+
   const TABLE_PATH = 'repository_path';
   const TABLE_PATHCHANGE = 'repository_pathchange';
   const TABLE_FILESYSTEM = 'repository_filesystem';
@@ -354,7 +359,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     if (!strlen($name)) {
       $name = $this->getName();
       $name = phutil_utf8_strtolower($name);
-      $name = preg_replace('@[/ -:]+@', '-', $name);
+      $name = preg_replace('@[/ -:<>]+@', '-', $name);
       $name = trim($name, '-');
       if (!strlen($name)) {
         $name = $this->getCallsign();
@@ -2153,6 +2158,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $service;
+  }
+
+  public function markImporting() {
+    $this->openTransaction();
+      $this->beginReadLocking();
+        $repository = $this->reload();
+        $repository->setDetail('importing', true);
+        $repository->save();
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    return $repository;
   }
 
 
