@@ -38,6 +38,11 @@ final class PhabricatorRepositorySearchEngine
         ->setLabel(pht('Types'))
         ->setKey('types')
         ->setOptions(PhabricatorRepositoryType::getAllRepositoryTypes()),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('URIs'))
+        ->setKey('uris')
+        ->setDescription(
+          pht('Search for repositories by clone/checkout URI.')),
     );
   }
 
@@ -68,6 +73,10 @@ final class PhabricatorRepositorySearchEngine
 
     if (strlen($map['name'])) {
       $query->withNameContains($map['name']);
+    }
+
+    if ($map['uris']) {
+      $query->withURIs($map['uris']);
     }
 
     return $query;

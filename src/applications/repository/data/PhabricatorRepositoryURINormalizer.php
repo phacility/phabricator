@@ -59,6 +59,14 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     $this->uri = $uri;
   }
 
+  public static function getAllURITypes() {
+    return array(
+      self::TYPE_GIT,
+      self::TYPE_SVN,
+      self::TYPE_MERCURIAL,
+    );
+  }
+
 
 /* -(  Normalizing URIs  )--------------------------------------------------- */
 
@@ -91,6 +99,10 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     }
   }
 
+  public function getNormalizedURI() {
+    return $this->getNormalizedDomain().'/'.$this->getNormalizedPath();
+  }
+
 
   /**
    * @task normal
@@ -113,11 +125,32 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     // example.
 
     $matches = null;
-    if (preg_match('@^(diffusion/[A-Z]+)@', $path, $matches)) {
+    if (preg_match('@^(diffusion/(?:[A-Z]+|\d+))@', $path, $matches)) {
       $path = $matches[1];
     }
 
     return $path;
   }
+
+  public function getNormalizedDomain() {
+    $domain = null;
+
+    $uri = new PhutilURI($this->uri);
+    if ($uri->getProtocol()) {
+      $domain = $uri->getDomain();
+    }
+
+    if (!strlen($domain)) {
+      $uri = new PhutilGitURI($this->uri);
+      $domain = $uri->getDomain();
+    }
+
+    if (!strlen($domain)) {
+      $domain = '<void>';
+    }
+
+    return phutil_utf8_strtolower($domain);
+  }
+
 
 }

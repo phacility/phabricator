@@ -196,6 +196,26 @@ final class PhabricatorRepositoryURI
     return $this->getURIObject(false);
   }
 
+  public function getNormalizedURI() {
+    $vcs = $this->getRepository()->getVersionControlSystem();
+
+    $map = array(
+      PhabricatorRepositoryType::REPOSITORY_TYPE_GIT =>
+        PhabricatorRepositoryURINormalizer::TYPE_GIT,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_SVN =>
+        PhabricatorRepositoryURINormalizer::TYPE_SVN,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL =>
+        PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
+    );
+
+    $type = $map[$vcs];
+    $display = (string)$this->getDisplayURI();
+
+    $normal_uri = new PhabricatorRepositoryURINormalizer($type, $display);
+
+    return $normal_uri->getNormalizedURI();
+  }
+
   public function getEffectiveURI() {
     return $this->getURIObject(true);
   }
@@ -693,6 +713,7 @@ final class PhabricatorRepositoryURI
         'raw' => $this->getURI(),
         'display' => (string)$this->getDisplayURI(),
         'effective' => (string)$this->getEffectiveURI(),
+        'normalized' => (string)$this->getNormalizedURI(),
       ),
       'io' => array(
         'raw' => $this->getIOType(),

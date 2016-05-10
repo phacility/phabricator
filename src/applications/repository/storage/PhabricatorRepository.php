@@ -803,39 +803,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function updateURIIndex() {
-    $uris = array(
-      (string)$this->getCloneURIObject(),
-    );
+    $indexes = array();
 
-    foreach ($uris as $key => $uri) {
-      $uris[$key] = $this->getNormalizedURI($uri)
-        ->getNormalizedPath();
+    $uris = $this->getURIs();
+    foreach ($uris as $uri) {
+      if ($uri->getIsDisabled()) {
+        continue;
+      }
+
+      $indexes[] = $uri->getNormalizedURI();
     }
 
     PhabricatorRepositoryURIIndex::updateRepositoryURIs(
       $this->getPHID(),
-      $uris);
+      $indexes);
 
     return $this;
-  }
-
-  private function getNormalizedURI($uri) {
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        return new PhabricatorRepositoryURINormalizer(
-          PhabricatorRepositoryURINormalizer::TYPE_GIT,
-          $uri);
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        return new PhabricatorRepositoryURINormalizer(
-          PhabricatorRepositoryURINormalizer::TYPE_SVN,
-          $uri);
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return new PhabricatorRepositoryURINormalizer(
-          PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
-          $uri);
-      default:
-        throw new Exception(pht('Unrecognized version control system.'));
-    }
   }
 
   public function isTracked() {
