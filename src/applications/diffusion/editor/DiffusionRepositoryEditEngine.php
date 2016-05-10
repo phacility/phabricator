@@ -40,6 +40,8 @@ final class DiffusionRepositoryEditEngine
     $viewer = $this->getViewer();
     $repository = PhabricatorRepository::initializeNewRepository($viewer);
 
+    $repository->setDetail('newly-initialized', true);
+
     $vcs = $this->getVersionControlSystem();
     if ($vcs) {
       $repository->setVersionControlSystem($vcs);

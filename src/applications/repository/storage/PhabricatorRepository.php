@@ -964,6 +964,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return (bool)$this->getDetail('importing', false);
   }
 
+  public function isNewlyInitialized() {
+    return (bool)$this->getDetail('newly-initialized', false);
+  }
+
   public function loadImportProgress() {
     $progress = queryfx_all(
       $this->establishConnection('r'),

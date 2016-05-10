@@ -138,7 +138,15 @@ final class PhabricatorRepositoryEditor
         $object->setVersionControlSystem($xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
-        $object->setDetail('tracking-enabled', $xaction->getNewValue());
+        $active = $xaction->getNewValue();
+
+        // The first time a repository is activated, clear the "new repository"
+        // flag so we stop showing setup hints.
+        if ($active) {
+          $object->setDetail('newly-initialized', false);
+        }
+
+        $object->setDetail('tracking-enabled', $active);
         break;
       case PhabricatorRepositoryTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());

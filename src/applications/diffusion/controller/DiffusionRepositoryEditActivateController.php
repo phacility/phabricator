@@ -47,7 +47,24 @@ final class DiffusionRepositoryEditActivateController
       $submit = pht('Deactivate Repository');
     } else {
       $title = pht('Activate Repository');
-      $body = pht('Activate this repository?');
+
+      $is_new = $repository->isNewlyInitialized();
+      if ($is_new) {
+        if ($repository->isHosted()) {
+          $body = pht(
+            'This repository will become a new hosted repository. '.
+            'It will begin serving read and write traffic.');
+        } else {
+          $body = pht(
+            'This repository will observe an existing remote repository. '.
+            'It will begin fetching changes from the remote.');
+        }
+      } else {
+        $body = pht(
+          'This repository will resume updates, observation, mirroring, '.
+          'and serving any configured read and write traffic.');
+      }
+
       $submit = pht('Activate Repository');
     }
 
