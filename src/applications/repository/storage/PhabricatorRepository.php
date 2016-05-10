@@ -1477,6 +1477,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return false;
   }
 
+  public function hasLocalWorkingCopy() {
+    try {
+      self::assertLocalExists();
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
   /**
    * Raise more useful errors when there are basic filesystem problems.
    */

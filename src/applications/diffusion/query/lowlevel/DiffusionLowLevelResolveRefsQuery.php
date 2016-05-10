@@ -31,6 +31,11 @@ final class DiffusionLowLevelResolveRefsQuery
       return array();
     }
 
+    $repository = $this->getRepository();
+    if (!$repository->hasLocalWorkingCopy()) {
+      return array();
+    }
+
     switch ($this->getRepository()->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $result = $this->resolveGitRefs();
