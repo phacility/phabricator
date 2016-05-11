@@ -236,6 +236,38 @@ fetch from, serve from, and push to.
 These options are covered in detail in @{article:Diffusion User Guide: URIs}.
 
 
+Staging Area
+============
+
+The **Staging Area** panel configures staging areas, used to make proposed
+changes available to build and continuous integration systems.
+
+For more details, see @{article:Harbormaster User Guide}.
+
+
+Automation
+==========
+
+The **Automation** panel configures support for allowing Phabricator to make
+writes directly to the repository, so that it can perform operations like
+automatically landing revisions from the web UI.
+
+For details on repository automation, see
+@{article:Drydock User Guide: Repository Automation}.
+
+
+Symbols
+======
+
+The **Symbols** panel allows you to customize how symbols (like class and
+function names) are linked when viewing code in the repository, and when
+viewing revisions which propose code changes to the repository.
+
+To take advantage of this feature, you need to do additional work to build
+symbol indexes. For details on configuring and populating symbol indexes, see
+@{article:User Guide: Symbol Indexes}.
+
+
 Branches
 ========
 
