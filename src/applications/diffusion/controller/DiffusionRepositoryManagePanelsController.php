@@ -62,6 +62,7 @@ final class DiffusionRepositoryManagePanelsController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($panel->getManagementPanelLabel());
+    $crumbs->setBorder(true);
 
     $header_text = pht(
       '%s: %s',
@@ -76,6 +77,13 @@ final class DiffusionRepositoryManagePanelsController
     } else {
       $header->setStatus('fa-ban', 'dark', pht('Inactive'));
     }
+
+    $header->addActionLink(
+      id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('View Repository'))
+        ->setHref($repository->getURI())
+        ->setIcon('fa-code'));
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
