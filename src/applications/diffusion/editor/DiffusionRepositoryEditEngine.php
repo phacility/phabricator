@@ -226,6 +226,11 @@ final class DiffusionRepositoryEditEngine
       "IMPORTANT: This feature is new, experimental, and not supported. ".
       "Use it at your own risk.");
 
+    $subpath_instructions = pht(
+      'If you want to import only part of a repository, like `trunk/`, '.
+      'you can set a path in **Import Only**. Phabricator will ignore '.
+      'commits which do not affect this path.');
+
     return array(
       id(new PhabricatorSelectEditField())
         ->setKey('vcs')
@@ -338,6 +343,17 @@ final class DiffusionRepositoryEditEngine
         ->setConduitDescription(pht('Set the autoclose branches.'))
         ->setConduitTypeDescription(pht('New default tracked branchs.'))
         ->setValue($autoclose_value),
+      id(new PhabricatorTextEditField())
+        ->setKey('importOnly')
+        ->setLabel(pht('Import Only'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Subpath to selectively import.'))
+        ->setConduitDescription(pht('Set the subpath to import.'))
+        ->setConduitTypeDescription(pht('New subpath to import.'))
+        ->setValue($object->getDetail('svn-subpath'))
+        ->setControlInstructions($subpath_instructions),
       id(new PhabricatorTextEditField())
         ->setKey('stagingAreaURI')
         ->setLabel(pht('Staging Area URI'))
