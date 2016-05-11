@@ -51,7 +51,11 @@ final class PhabricatorTextAreaEditField
 
   protected function getValueForControl() {
     $value = $this->getValue();
-    return implode("\n", $value);
+    if ($this->getIsStringList()) {
+      return implode("\n", $value);
+    } else {
+      return $value;
+    }
   }
 
   protected function newConduitParameterType() {
