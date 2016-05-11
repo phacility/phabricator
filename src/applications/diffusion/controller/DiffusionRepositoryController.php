@@ -671,7 +671,16 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     require_celerity_resource('diffusion-icons-css');
 
-    $display = (string)csprintf('%R', (string)$uri->getDisplayURI());
+    if ($repository->isSVN()) {
+      $display = csprintf(
+        'svn checkout %R %R',
+        (string)$uri->getDisplayURI(),
+        $repository->getCloneName());
+    } else {
+      $display = csprintf('%R', (string)$uri->getDisplayURI());
+    }
+
+    $display = (string)$display;
 
     $input = javelin_tag(
       'input',
