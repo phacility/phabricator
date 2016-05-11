@@ -164,6 +164,32 @@ Once you've put a working copy in the right place on disk, activate the
 repository.
 
 
+Builtin Clone URIs
+==================
+
+By default, Phabricator automatically exposes and activates HTTP, HTTPS and
+SSH clone URIs by examining configuration.
+
+**HTTP**: The `http://` clone URI will be available if these conditions are
+satisfied:
+
+  - `diffusion.allow-http-auth` must be enabled.
+  - The repository must be a Git or Mercurial repository.
+  - `security.require-https` must be disabled.
+
+**HTTPS**: The `https://` clone URI will be available if these conditions are
+satisfied:
+
+  - `diffusion.allow-http-auth` must be enabled.
+  - The repository must be a Git or Mercurial repository.
+  - The `phabricator.base-uri` protocol must be `https://`.
+
+**SSH**: The `ssh://` or `svn+ssh://` clone URI will be available if these
+conditions are satisfied:
+
+  - `phd.user` must be configured.
+
+
 Customizing Displayed Clone URIs
 ================================
 

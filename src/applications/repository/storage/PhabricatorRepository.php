@@ -2091,10 +2091,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     // HTTP is not supported for Subversion.
     if ($this->isSVN()) {
       $has_http = false;
+      $has_https = false;
     }
 
-    // TODO: Maybe allow users to disable this by default somehow?
-    $has_ssh = true;
+    $has_ssh = (bool)strlen(PhabricatorEnv::getEnvConfig('phd.user'));
 
     $protocol_map = array(
       PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH => $has_ssh,
