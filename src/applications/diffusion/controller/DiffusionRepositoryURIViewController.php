@@ -147,6 +147,8 @@ final class DiffusionRepositoryURIViewController
       $disable_icon = 'fa-ban';
     }
 
+    $can_disable = ($can_edit && !$uri->isBuiltin());
+
     $disable_uri = $repository->getPathURI("uri/disable/{$id}/");
 
     $curtain->addAction(
@@ -155,7 +157,7 @@ final class DiffusionRepositoryURIViewController
         ->setName($disable_name)
         ->setHref($disable_uri)
         ->setWorkflow(true)
-        ->setDisabled(!$can_edit));
+        ->setDisabled(!$can_disable));
 
     return $curtain;
   }

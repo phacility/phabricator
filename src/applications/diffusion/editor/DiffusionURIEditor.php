@@ -415,6 +415,26 @@ final class DiffusionURIEditor
           }
         }
         break;
+
+      case PhabricatorRepositoryURITransaction::TYPE_DISABLE:
+        $old = $object->getIsDisabled();
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+
+          if ($old == $new) {
+            continue;
+          }
+
+          if (!$object->isBuiltin()) {
+            continue;
+          }
+
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht('You can not manually disable builtin URIs.'));
+        }
+        break;
     }
 
     return $errors;

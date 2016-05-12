@@ -31,6 +31,16 @@ final class DiffusionRepositoryURIDisableController
     $is_disabled = $uri->getIsDisabled();
     $view_uri = $uri->getViewURI();
 
+    if ($uri->isBuiltin()) {
+      return $this->newDialog()
+        ->setTitle(pht('Builtin URI'))
+        ->appendParagraph(
+          pht(
+            'You can not manually disable builtin URIs. To hide a builtin '.
+            'URI, configure its "Display" behavior instead.'))
+        ->addCancelButton($view_uri);
+    }
+
     if ($request->isFormPost()) {
       $xactions = array();
 
