@@ -113,7 +113,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   public static function filterMonospacedCSSRule($monospaced) {
     // Prevent the user from doing dangerous things.
-    return preg_replace('/[^a-z0-9 ,".]+/i', '', $monospaced);
+    return preg_replace('([^a-z0-9 ,"./]+)i', '', $monospaced);
   }
 
 }
