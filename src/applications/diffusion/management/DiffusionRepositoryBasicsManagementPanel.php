@@ -29,6 +29,7 @@ final class DiffusionRepositoryBasicsManagementPanel
       'callsign',
       'shortName',
       'description',
+      'projectPHIDs',
     );
   }
 
