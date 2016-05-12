@@ -37,6 +37,33 @@ final class PhabricatorRepositoryDiscoveryEngine
   public function discoverCommits() {
     $repository = $this->getRepository();
 
+    $lock = $this->newRepositoryLock($repository, 'repo.look', false);
+
+    try {
+      $lock->lock();
+    } catch (PhutilLockException $ex) {
+      throw new DiffusionDaemonLockException(
+        pht(
+          'Another process is currently discovering repository "%s", '.
+          'skipping discovery.',
+          $repository->getDisplayName()));
+    }
+
+    try {
+      $result = $this->discoverCommitsWithLock();
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
+
+    $lock->unlock();
+
+    return $result;
+  }
+
+  private function discoverCommitsWithLock() {
+    $repository = $this->getRepository();
+
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
