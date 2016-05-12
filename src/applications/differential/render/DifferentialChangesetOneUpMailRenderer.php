@@ -51,6 +51,16 @@ final class DifferentialChangesetOneUpMailRenderer
   protected function renderPrimitives(array $primitives, $rows) {
     $out = array();
 
+    $context_style = array(
+      'background: #F7F7F7;',
+      'color: #74777D;',
+      'border-style: dashed;',
+      'border-color: #C7CCD9;',
+      'border-width: 1px 0;',
+    );
+
+    $context_style = implode(' ', $context_style);
+
     foreach ($primitives as $k => $p) {
       $type = $p['type'];
       switch ($type) {
@@ -78,6 +88,15 @@ final class DifferentialChangesetOneUpMailRenderer
             'style' => $style,
             'render' => $p['render'],
             'text' => (string)$p['render'],
+          );
+          break;
+        case 'context':
+          // NOTE: These are being included with no text so they get stripped
+          // in the header and footer.
+          $out[] = array(
+            'style' => $context_style,
+            'render' => '...',
+            'text' => '',
           );
           break;
         default:

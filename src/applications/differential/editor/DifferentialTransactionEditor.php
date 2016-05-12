@@ -1251,21 +1251,18 @@ final class DifferentialTransactionEditor
       $config_attach = PhabricatorEnv::getEnvConfig($config_key_attach);
 
       if ($config_inline || $config_attach) {
-        $patch_section = $this->renderPatchForMail($diff);
-        $lines = count(phutil_split_lines($patch_section->getPlaintext()));
+        $patch = $this->buildPatchForMail($diff);
+        $lines = substr_count($patch, "\n");
 
         if ($config_inline && ($lines <= $config_inline)) {
-          $body->addTextSection(
-            pht('CHANGE DETAILS'),
-            $patch_section);
+          $this->appendChangeDetailsForMail($object, $diff, $patch, $body);
         }
 
         if ($config_attach) {
           $name = pht('D%s.%s.patch', $object->getID(), $diff->getID());
           $mime_type = 'text/x-patch; charset=utf-8';
           $body->addAttachment(
-            new PhabricatorMetaMTAAttachment(
-              $patch_section->getPlaintext(), $name, $mime_type));
+            new PhabricatorMetaMTAAttachment($patch, $name, $mime_type));
         }
       }
     }
@@ -1387,7 +1384,38 @@ final class DifferentialTransactionEditor
     $section_text = "\n".$section->getPlaintext();
 
     $style = array(
-      'margin: 12px 0;',
+      'margin: 6px 0 12px 0;',
+    );
+
+    $section_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $style),
+      ),
+      $section->getHTML());
+
+    $body->addPlaintextSection($header, $section_text, false);
+    $body->addHTMLSection($header, $section_html);
+  }
+
+  private function appendChangeDetailsForMail(
+    PhabricatorLiskDAO $object,
+    DifferentialDiff $diff,
+    $patch,
+    PhabricatorMetaMTAMailBody $body) {
+
+    $section = id(new DifferentialChangeDetailMailView())
+      ->setViewer($this->getActor())
+      ->setDiff($diff)
+      ->setPatch($patch)
+      ->buildMailSection();
+
+    $header = pht('CHANGE DETAILS');
+
+    $section_text = "\n".$section->getPlaintext();
+
+    $style = array(
+      'margin: 6px 0 12px 0;',
     );
 
     $section_html = phutil_tag(
@@ -1659,20 +1687,14 @@ final class DifferentialTransactionEditor
       array('style' => 'font-family: monospace;'), $patch);
   }
 
-  private function renderPatchForMail(DifferentialDiff $diff) {
+  private function buildPatchForMail(DifferentialDiff $diff) {
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
 
-    $patch = id(new DifferentialRawDiffRenderer())
+    return id(new DifferentialRawDiffRenderer())
       ->setViewer($this->getActor())
       ->setFormat($format)
       ->setChangesets($diff->getChangesets())
       ->buildPatch();
-
-    $section = new PhabricatorMetaMTAMailSection();
-    $section->addHTMLFragment($this->renderPatchHTMLForMail($patch));
-    $section->addPlaintextFragment($patch);
-
-    return $section;
   }
 
   protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {

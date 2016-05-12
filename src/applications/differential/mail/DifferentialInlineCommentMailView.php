@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialInlineCommentMailView
-  extends Phobject {
+  extends DifferentialMailView {
 
   private $viewer;
   private $inlines;
@@ -85,16 +85,7 @@ final class DifferentialInlineCommentMailView
         $section->addPlaintextFragment($spacer_text);
         $section->addPlaintextFragment($render_text);
 
-        $style = array(
-          'border: 1px solid #C7CCD9;',
-          'border-radius: 3px;',
-        );
-
-        $html_fragment = phutil_tag(
-          'div',
-          array(
-            'style' => implode(' ', $style),
-          ),
+        $html_fragment = $this->renderContentBox(
           array(
             $context_html,
             $render_html,
@@ -374,21 +365,7 @@ final class DifferentialInlineCommentMailView
     $is_html) {
 
     if ($is_html) {
-      $style = array(
-        'font: 11px/15px "Menlo", "Consolas", "Monaco", monospace;',
-        'white-space: pre-wrap;',
-        'clear: both;',
-        'padding: 4px 0;',
-        'margin: 0;',
-      );
-
-      $style = implode(' ', $style);
-      $patch = phutil_tag(
-        'div',
-        array(
-          'style' => $style,
-        ),
-        $patch);
+      $patch = $this->renderCodeBlock($patch);
     }
 
     $header = $this->renderHeader($comment, $is_html, false);
@@ -430,12 +407,7 @@ final class DifferentialInlineCommentMailView
 
     $header = "{$path}:{$range}";
     if ($is_html) {
-      $header = phutil_tag(
-        'span',
-        array(
-          'style' => 'color: #4b4d51; font-weight: bold;',
-        ),
-        $header);
+      $header = $this->renderHeaderBold($header);
     }
 
     if ($with_author) {
@@ -448,12 +420,7 @@ final class DifferentialInlineCommentMailView
       $byline = $author->getName();
 
       if ($is_html) {
-        $byline = phutil_tag(
-          'span',
-          array(
-            'style' => 'color: #4b4d51; font-weight: bold;',
-          ),
-          $byline);
+        $byline = $this->renderHeaderBold($byline);
       }
 
       $header = pht('%s wrote in %s', $byline, $header);
@@ -478,22 +445,7 @@ final class DifferentialInlineCommentMailView
         $link = null;
       }
 
-      $style = array(
-        'color: #74777d;',
-        'background: #eff2f4;',
-        'padding: 6px 8px;',
-        'overflow: hidden;',
-      );
-
-      $header = phutil_tag(
-        'div',
-        array(
-          'style' => implode(' ', $style),
-        ),
-        array(
-          $link,
-          $header,
-        ));
+      $header = $this->renderHeaderBlock(array($link, $header));
     }
 
     return $header;
