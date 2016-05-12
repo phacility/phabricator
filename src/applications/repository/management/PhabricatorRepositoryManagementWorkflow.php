@@ -33,6 +33,32 @@ abstract class PhabricatorRepositoryManagementWorkflow
     return array_values($repositories);
   }
 
+  protected function loadLocalRepositories(
+    PhutilArgumentParser $args,
+    $param) {
+
+    $repositories = $this->loadRepositories($args, $param);
+    if (!$repositories) {
+      return $repositories;
+    }
+
+    $device = AlmanacKeys::getLiveDevice();
+    $viewer = $this->getViewer();
+
+    $filter = id(new DiffusionLocalRepositoryFilter())
+      ->setViewer($viewer)
+      ->setDevice($device)
+      ->setRepositories($repositories);
+
+    $repositories = $filter->execute();
+
+    foreach ($filter->getRejectionReasons() as $reason) {
+      throw new PhutilArgumentUsageException($reason);
+    }
+
+    return $repositories;
+  }
+
   protected function loadCommits(PhutilArgumentParser $args, $param) {
     $names = $args->getArg($param);
     if (!$names) {

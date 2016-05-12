@@ -27,7 +27,7 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $repos = $this->loadRepositories($args, 'repos');
+    $repos = $this->loadLocalRepositories($args, 'repos');
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(

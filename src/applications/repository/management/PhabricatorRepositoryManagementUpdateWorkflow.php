@@ -44,7 +44,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     $this->setVerbose($args->getArg('verbose'));
     $console = PhutilConsole::getConsole();
 
-    $repos = $this->loadRepositories($args, 'repos');
+    $repos = $this->loadLocalRepositories($args, 'repos');
     if (count($repos) !== 1) {
       throw new PhutilArgumentUsageException(
         pht('Specify exactly one repository to update.'));
