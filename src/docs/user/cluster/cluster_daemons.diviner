@@ -6,9 +6,6 @@ Configuring Phabricator to use multiple daemon hosts.
 Overview
 ========
 
-WARNING: This feature is a very early prototype; the features this document
-describes are mostly speculative fantasy.
-
 You can run daemons on multiple hosts. The advantages of doing this are:
 
   - you can completely survive the loss of multiple daemon hosts; and
@@ -18,7 +15,8 @@ This configuration is simple, but you must configure repositories first. For
 details, see @{article:Cluster: Repositories}.
 
 Since repository hosts must run daemons anyway, you usually do not need to do
-any additional work and can skip this entirely.
+any additional work and can skip this entirely if you have already configured
+multiple repository hosts.
 
 
 Adding Daemon Hosts

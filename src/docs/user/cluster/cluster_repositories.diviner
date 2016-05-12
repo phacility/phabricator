@@ -6,9 +6,6 @@ Configuring Phabricator to use multiple repository hosts.
 Overview
 ========
 
-WARNING: This feature is a very early prototype; the features this document
-describes are mostly speculative fantasy.
-
 If you use Git, you can deploy Phabricator with multiple repository hosts,
 configured so that each host is readable and writable. The advantages of doing
 this are:
@@ -294,8 +291,6 @@ the user whose change is holding the lock.
 
 **Last Write At**: When the most recent write started. If the write lock is
 currently held, this shows when the lock was acquired.
-
-
 
 
 Cluster Failure Modes
