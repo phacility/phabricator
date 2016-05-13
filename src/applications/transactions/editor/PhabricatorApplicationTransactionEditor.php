@@ -703,7 +703,13 @@ abstract class PhabricatorApplicationTransactionEditor
       $xaction->setEditPolicy($this->getActingAsPHID());
     }
 
-    $xaction->setAuthorPHID($this->getActingAsPHID());
+    // If the transaction already has an explicit author PHID, allow it to
+    // stand. This is used by applications like Owners that hook into the
+    // post-apply change pipeline.
+    if (!$xaction->getAuthorPHID()) {
+      $xaction->setAuthorPHID($this->getActingAsPHID());
+    }
+
     $xaction->setContentSource($this->getContentSource());
     $xaction->attachViewer($actor);
     $xaction->attachObject($object);
@@ -957,6 +963,12 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($herald_xactions) {
         $xscript_id = $this->getHeraldTranscript()->getID();
         foreach ($herald_xactions as $herald_xaction) {
+          // Don't set a transcript ID if this is a transaction from another
+          // application or source, like Owners.
+          if ($herald_xaction->getAuthorPHID()) {
+            continue;
+          }
+
           $herald_xaction->setMetadataValue('herald:transcriptID', $xscript_id);
         }
 
@@ -1217,6 +1229,7 @@ abstract class PhabricatorApplicationTransactionEditor
           $xaction,
           pht('You can not apply transactions which already have IDs/PHIDs!'));
       }
+
       if ($xaction->getObjectPHID()) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
@@ -1224,13 +1237,7 @@ abstract class PhabricatorApplicationTransactionEditor
             'You can not apply transactions which already have %s!',
             'objectPHIDs'));
       }
-      if ($xaction->getAuthorPHID()) {
-        throw new PhabricatorApplicationTransactionStructureException(
-          $xaction,
-          pht(
-            'You can not apply transactions which already have %s!',
-            'authorPHIDs'));
-      }
+
       if ($xaction->getCommentPHID()) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
@@ -1238,6 +1245,7 @@ abstract class PhabricatorApplicationTransactionEditor
             'You can not apply transactions which already have %s!',
             'commentPHIDs'));
       }
+
       if ($xaction->getCommentVersion() !== 0) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,

@@ -184,6 +184,12 @@ final class PhabricatorOwnersDetailController
     }
     $view->addProperty(pht('Owners'), $owner_list);
 
+    $auto = $package->getAutoReview();
+    $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
+    $spec = idx($autoreview_map, $auto, array());
+    $name = idx($spec, 'name', $auto);
+    $view->addProperty(pht('Auto Review'), $name);
+
     if ($package->getAuditingEnabled()) {
       $auditing = pht('Enabled');
     } else {

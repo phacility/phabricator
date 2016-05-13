@@ -7,6 +7,7 @@ final class DifferentialTransactionEditor
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
   private $didExpandInlineState = false;
+  private $affectedPaths;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -1481,6 +1482,75 @@ final class DifferentialTransactionEditor
     return parent::shouldApplyHeraldRules($object, $xactions);
   }
 
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $repository = $object->getRepository();
+    if (!$repository) {
+      return array();
+    }
+
+    if (!$this->affectedPaths) {
+      return array();
+    }
+
+    $packages = PhabricatorOwnersPackage::loadAffectedPackages(
+      $repository,
+      $this->affectedPaths);
+
+    foreach ($packages as $key => $package) {
+      if ($package->isArchived()) {
+        unset($packages[$key]);
+      }
+    }
+
+    if (!$packages) {
+      return array();
+    }
+
+    $auto_subscribe = array();
+    $auto_review = array();
+    $auto_block = array();
+
+    foreach ($packages as $package) {
+      switch ($package->getAutoReview()) {
+        case PhabricatorOwnersPackage::AUTOREVIEW_SUBSCRIBE:
+          $auto_subscribe[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_REVIEW:
+          $auto_review[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_BLOCK:
+          $auto_block[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_NONE:
+        default:
+          break;
+      }
+    }
+
+    $owners_phid = id(new PhabricatorOwnersApplication())
+      ->getPHID();
+
+    $xactions = array();
+    if ($auto_subscribe) {
+
+      $xactions[] = $object->getApplicationTransactionTemplate()
+        ->setAuthorPHID($owners_phid)
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(
+          array(
+            '+' => mpull($auto_subscribe, 'getPHID'),
+          ));
+    }
+
+    // TODO: Implement autoreview and autoblock, but these are more invovled.
+
+    return $xactions;
+  }
+
   protected function buildHeraldAdapter(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -1556,6 +1626,9 @@ final class DifferentialTransactionEditor
       }
     }
     $all_paths = array_keys($all_paths);
+
+    // Save the affected paths; we'll use them later to query Owners.
+    $this->affectedPaths = $all_paths;
 
     $path_ids =
       PhabricatorRepositoryCommitChangeParserWorker::lookupOrCreatePaths(

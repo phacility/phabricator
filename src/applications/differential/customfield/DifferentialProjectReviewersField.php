@@ -8,7 +8,7 @@ final class DifferentialProjectReviewersField
   }
 
   public function getFieldName() {
-    return pht('Coalition Reviewers');
+    return pht('Group Reviewers');
   }
 
   public function getFieldDescription() {
