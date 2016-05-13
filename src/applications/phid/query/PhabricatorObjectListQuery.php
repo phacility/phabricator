@@ -45,9 +45,49 @@ final class PhabricatorObjectListQuery extends Phobject {
 
   public function execute() {
     $names = $this->getObjectList();
-    $names = array_unique(array_filter(preg_split('/[\s,]+/', $names)));
 
-    $objects = $this->loadObjects($names);
+    // First, normalize any internal whitespace so we don't get weird results
+    // if linebreaks hit in weird spots.
+    $names = preg_replace('/\s+/', ' ', $names);
+
+    // Split the list on commas.
+    $names = explode(',', $names);
+
+    // Trim and remove empty tokens.
+    foreach ($names as $key => $name) {
+      $name = trim($name);
+
+      if (!strlen($name)) {
+        unset($names[$key]);
+        continue;
+      }
+
+      $names[$key] = $name;
+    }
+
+    // Remove duplicates.
+    $names = array_unique($names);
+
+    $name_map = array();
+    foreach ($names as $name) {
+      $parts = explode(' ', $name);
+
+      // If this looks like a monogram, ignore anything after the first token.
+      // This allows us to parse "O123 Package Name" as though it was "O123",
+      // which we can look up.
+      if (preg_match('/^[A-Z]\d+\z/', $parts[0])) {
+        $name_map[$parts[0]] = $name;
+      } else {
+        // For anything else, split it on spaces and use each token as a
+        // value. This means "alincoln htaft", separated with a space instead
+        // of with a comma, is two different users.
+        foreach ($parts as $part) {
+          $name_map[$part] = $part;
+        }
+      }
+    }
+
+    $objects = $this->loadObjects(array_keys($name_map));
 
     $types = array();
     foreach ($objects as $name => $object) {
@@ -66,8 +106,8 @@ final class PhabricatorObjectListQuery extends Phobject {
     $invalid = array_mergev($invalid);
 
     $missing = array();
-    foreach ($names as $name) {
-      if (empty($objects[$name])) {
+    foreach ($name_map as $key => $name) {
+      if (empty($objects[$key])) {
         $missing[] = $name;
       }
     }

@@ -146,6 +146,7 @@ final class DifferentialReviewersField
       array(
         PhabricatorPeopleUserPHIDType::TYPECONST,
         PhabricatorProjectProjectPHIDType::TYPECONST,
+        PhabricatorOwnersPackagePHIDType::TYPECONST,
       ));
   }
 

@@ -205,6 +205,21 @@ final class PhabricatorOwnersPackageTransactionEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
+
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+          if (preg_match('([,!])', $new)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Package names may not contain commas (",") or exclamation '.
+                'marks ("!"). These characters are ambiguous when package '.
+                'names are parsed from the command line.'),
+              $xaction);
+          }
+        }
+
         break;
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
         if (!$xactions) {
