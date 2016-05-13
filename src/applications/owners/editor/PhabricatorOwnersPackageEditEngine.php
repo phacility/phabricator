@@ -51,8 +51,7 @@ final class PhabricatorOwnersPackageEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    $id = $object->getID();
-    return "/owners/package/{$id}/";
+    return $object->getURI();
   }
 
   protected function buildCustomEditFields($object) {

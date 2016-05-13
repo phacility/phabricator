@@ -138,7 +138,7 @@ final class PhabricatorOwnersPackageSearchEngine
         ->setObject($package)
         ->setObjectName($package->getMonogram())
         ->setHeader($package->getName())
-        ->setHref('/owners/package/'.$id.'/');
+        ->setHref($package->getURI());
 
       if ($package->isArchived()) {
         $item->setDisabled(true);

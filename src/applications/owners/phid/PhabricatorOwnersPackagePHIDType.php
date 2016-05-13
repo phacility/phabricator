@@ -39,12 +39,13 @@ final class PhabricatorOwnersPackagePHIDType extends PhabricatorPHIDType {
       $monogram = $package->getMonogram();
       $name = $package->getName();
       $id = $package->getID();
+      $uri = $package->getURI();
 
       $handle
         ->setName($monogram)
         ->setFullName("{$monogram}: {$name}")
         ->setCommandLineObjectName("{$monogram} {$name}")
-        ->setURI("/owners/package/{$id}/");
+        ->setURI($uri);
 
       if ($package->isArchived()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);

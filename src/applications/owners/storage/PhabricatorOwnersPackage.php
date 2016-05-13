@@ -293,6 +293,10 @@ final class PhabricatorOwnersPackage
     return 'O'.$this->getID();
   }
 
+  public function getURI() {
+    // TODO: Move these to "/O123" for consistency.
+    return '/owners/package/'.$this->getID().'/';
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -346,8 +346,7 @@ final class PhabricatorOwnersPackageTransactionEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $detail_uri = PhabricatorEnv::getProductionURI(
-      '/owners/package/'.$object->getID().'/');
+    $detail_uri = PhabricatorEnv::getProductionURI($object->getURI());
 
     $body->addLinkSection(
       pht('PACKAGE DETAIL'),
