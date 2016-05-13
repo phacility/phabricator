@@ -289,6 +289,10 @@ final class PhabricatorOwnersPackage
     return isset($owner_phids[$phid]);
   }
 
+  public function getMonogram() {
+    return 'O'.$this->getID();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

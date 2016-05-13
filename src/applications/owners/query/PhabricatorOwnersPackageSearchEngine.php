@@ -136,7 +136,7 @@ final class PhabricatorOwnersPackageSearchEngine
 
       $item = id(new PHUIObjectItemView())
         ->setObject($package)
-        ->setObjectName(pht('Package %d', $id))
+        ->setObjectName($package->getMonogram())
         ->setHeader($package->getName())
         ->setHref('/owners/package/'.$id.'/');
 

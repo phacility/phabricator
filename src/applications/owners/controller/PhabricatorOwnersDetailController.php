@@ -144,7 +144,7 @@ final class PhabricatorOwnersDetailController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($package->getName());
+    $crumbs->addTextCrumb($package->getMonogram());
     $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
