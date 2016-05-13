@@ -9,7 +9,7 @@ final class PhabricatorOwnersPackagePHIDType extends PhabricatorPHIDType {
   }
 
   public function getTypeIcon() {
-    return 'fa-list-alt';
+    return 'fa-shopping-bag';
   }
 
   public function newObject() {
