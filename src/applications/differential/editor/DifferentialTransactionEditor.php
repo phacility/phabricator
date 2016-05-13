@@ -1510,6 +1510,27 @@ final class DifferentialTransactionEditor
       return array();
     }
 
+    // Remove packages that the revision author is an owner of. If you own
+    // code, you don't need another owner to review it.
+    $authority = id(new PhabricatorOwnersPackageQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(mpull($packages, 'getPHID'))
+      ->withAuthorityPHIDs(array($object->getAuthorPHID()))
+      ->execute();
+    $authority = mpull($authority, null, 'getPHID');
+
+    foreach ($packages as $key => $package) {
+      $package_phid = $package->getPHID();
+      if ($authority[$package_phid]) {
+        unset($packages[$key]);
+        continue;
+      }
+    }
+
+    if (!$packages) {
+      return array();
+    }
+
     $auto_subscribe = array();
     $auto_review = array();
     $auto_block = array();
