@@ -51,6 +51,11 @@ final class PhabricatorRepositoryCommitOwnersWorker
           continue;
         }
 
+        if ($package->isArchived()) {
+          // Don't trigger audits if the package is archived.
+          continue;
+        }
+
         if ($package->getAuditingEnabled()) {
           $reasons = $this->checkAuditReasons($commit, $package);
           if ($reasons) {

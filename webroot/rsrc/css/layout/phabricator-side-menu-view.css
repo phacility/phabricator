@@ -18,6 +18,12 @@
   border-bottom-right-radius: 3px;
 }
 
+.phabricator-basic-nav .phabricator-side-menu .phui-list-item-icon {
+  margin-left: -12px;
+  text-align: center;
+  width: 24px;
+}
+
 .phabricator-basic-nav .phabricator-side-menu .phui-list-item-selected {
   background-color: rgba({$alphablack},.05);
   border-left: 4px solid {$sky};

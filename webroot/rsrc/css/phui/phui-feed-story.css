@@ -27,11 +27,10 @@
   text-align: center;
   vertical-align: middle;
   font-size: 24px;
-  line-height: 35px;
-  color: {$lightgreytext};
-  background: {$greybackground};
+  line-height: 32px;
+  color: #fff;
+  background-color: #c4cde0;
 }
-
 
 .phui-feed-story-head {
   padding: 12px 4px;

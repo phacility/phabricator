@@ -1212,9 +1212,7 @@ final class DifferentialTransactionEditor
     }
 
     if ($inlines) {
-      $body->addTextSection(
-        pht('INLINE COMMENTS'),
-        $this->renderInlineCommentsForMail($object, $inlines));
+      $this->appendInlineCommentsForMail($object, $inlines, $body);
     }
 
     $changed_uri = $this->getChangedPriorToCommitURI();
@@ -1253,21 +1251,18 @@ final class DifferentialTransactionEditor
       $config_attach = PhabricatorEnv::getEnvConfig($config_key_attach);
 
       if ($config_inline || $config_attach) {
-        $patch_section = $this->renderPatchForMail($diff);
-        $lines = count(phutil_split_lines($patch_section->getPlaintext()));
+        $patch = $this->buildPatchForMail($diff);
+        $lines = substr_count($patch, "\n");
 
         if ($config_inline && ($lines <= $config_inline)) {
-          $body->addTextSection(
-            pht('CHANGE DETAILS'),
-            $patch_section);
+          $this->appendChangeDetailsForMail($object, $diff, $patch, $body);
         }
 
         if ($config_attach) {
           $name = pht('D%s.%s.patch', $object->getID(), $diff->getID());
           $mime_type = 'text/x-patch; charset=utf-8';
           $body->addAttachment(
-            new PhabricatorMetaMTAAttachment(
-              $patch_section->getPlaintext(), $name, $mime_type));
+            new PhabricatorMetaMTAAttachment($patch, $name, $mime_type));
         }
       }
     }
@@ -1374,138 +1369,64 @@ final class DifferentialTransactionEditor
     return $result;
   }
 
-  protected function indentForMail(array $lines) {
-    $indented = array();
-    foreach ($lines as $line) {
-      $indented[] = '> '.$line;
-    }
-    return $indented;
-  }
-
-  protected function nestCommentHistory(
-    DifferentialTransactionComment $comment, array $comments_by_line_number,
-    array $users_by_phid) {
-
-    $nested = array();
-    $previous_comments = $comments_by_line_number[$comment->getChangesetID()]
-                                                 [$comment->getLineNumber()];
-    foreach ($previous_comments as $previous_comment) {
-      if ($previous_comment->getID() >= $comment->getID()) {
-        break;
-      }
-      $nested = $this->indentForMail(
-        array_merge(
-          $nested,
-          explode("\n", $previous_comment->getContent())));
-      $user = idx($users_by_phid, $previous_comment->getAuthorPHID(), null);
-      if ($user) {
-        array_unshift($nested, pht('%s wrote:', $user->getUserName()));
-      }
-    }
-
-    $nested = array_merge($nested, explode("\n", $comment->getContent()));
-    return implode("\n", $nested);
-  }
-
-  private function renderInlineCommentsForMail(
+  private function appendInlineCommentsForMail(
     PhabricatorLiskDAO $object,
-    array $inlines) {
+    array $inlines,
+    PhabricatorMetaMTAMailBody $body) {
 
-    $context_key = 'metamta.differential.unified-comment-context';
-    $show_context = PhabricatorEnv::getEnvConfig($context_key);
-
-    $changeset_ids = array();
-    $line_numbers_by_changeset = array();
-    foreach ($inlines as $inline) {
-      $id = $inline->getComment()->getChangesetID();
-      $changeset_ids[$id] = $id;
-      $line_numbers_by_changeset[$id][] =
-        $inline->getComment()->getLineNumber();
-    }
-
-    $changesets = id(new DifferentialChangesetQuery())
+    $section = id(new DifferentialInlineCommentMailView())
       ->setViewer($this->getActor())
-      ->withIDs($changeset_ids)
-      ->needHunks(true)
-      ->execute();
+      ->setInlines($inlines)
+      ->buildMailSection();
 
-    $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(
-      $inlines,
-      $changesets);
+    $header = pht('INLINE COMMENTS');
 
-    if ($show_context) {
-      $hunk_parser = new DifferentialHunkParser();
-      $table = new DifferentialTransactionComment();
-      $conn_r = $table->establishConnection('r');
-      $queries = array();
-      foreach ($line_numbers_by_changeset as $id => $line_numbers) {
-        $queries[] = qsprintf(
-          $conn_r,
-          '(changesetID = %d AND lineNumber IN (%Ld))',
-          $id, $line_numbers);
-      }
-      $all_comments = id(new DifferentialTransactionComment())->loadAllWhere(
-        'transactionPHID IS NOT NULL AND (%Q)', implode(' OR ', $queries));
-      $comments_by_line_number = array();
-      foreach ($all_comments as $comment) {
-        $comments_by_line_number
-          [$comment->getChangesetID()]
-          [$comment->getLineNumber()]
-          [$comment->getID()] = $comment;
-      }
-      $author_phids = mpull($all_comments, 'getAuthorPHID');
-      $authors = id(new PhabricatorPeopleQuery())
-        ->setViewer($this->getActor())
-        ->withPHIDs($author_phids)
-        ->execute();
-      $authors_by_phid = mpull($authors, null, 'getPHID');
-    }
+    $section_text = "\n".$section->getPlaintext();
 
-    $section = new PhabricatorMetaMTAMailSection();
-    foreach ($inline_groups as $changeset_id => $group) {
-      $changeset = idx($changesets, $changeset_id);
-      if (!$changeset) {
-        continue;
-      }
+    $style = array(
+      'margin: 6px 0 12px 0;',
+    );
 
-      foreach ($group as $inline) {
-        $comment = $inline->getComment();
-        $file = $changeset->getFilename();
-        $start = $comment->getLineNumber();
-        $len = $comment->getLineLength();
-        if ($len) {
-          $range = $start.'-'.($start + $len);
-        } else {
-          $range = $start;
-        }
+    $section_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $style),
+      ),
+      $section->getHTML());
 
-        $inline_content = $comment->getContent();
+    $body->addPlaintextSection($header, $section_text, false);
+    $body->addHTMLSection($header, $section_html);
+  }
 
-        if (!$show_context) {
-          $section->addFragment("{$file}:{$range} {$inline_content}");
-        } else {
-          $patch = $hunk_parser->makeContextDiff(
-            $changeset->getHunks(),
-            $comment->getIsNewFile(),
-            $comment->getLineNumber(),
-            $comment->getLineLength(),
-            1);
-          $nested_comments = $this->nestCommentHistory(
-            $inline->getComment(), $comments_by_line_number, $authors_by_phid);
+  private function appendChangeDetailsForMail(
+    PhabricatorLiskDAO $object,
+    DifferentialDiff $diff,
+    $patch,
+    PhabricatorMetaMTAMailBody $body) {
 
-          $section
-            ->addFragment('================')
-            ->addFragment(pht('Comment at: %s:%s', $file, $range))
-            ->addPlaintextFragment($patch)
-            ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
-            ->addFragment('----------------')
-            ->addFragment($nested_comments)
-            ->addFragment(null);
-        }
-      }
-    }
+    $section = id(new DifferentialChangeDetailMailView())
+      ->setViewer($this->getActor())
+      ->setDiff($diff)
+      ->setPatch($patch)
+      ->buildMailSection();
 
-    return $section;
+    $header = pht('CHANGE DETAILS');
+
+    $section_text = "\n".$section->getPlaintext();
+
+    $style = array(
+      'margin: 6px 0 12px 0;',
+    );
+
+    $section_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $style),
+      ),
+      $section->getHTML());
+
+    $body->addPlaintextSection($header, $section_text, false);
+    $body->addHTMLSection($header, $section_html);
   }
 
   private function loadDiff($phid, $need_changesets = false) {
@@ -1766,20 +1687,14 @@ final class DifferentialTransactionEditor
       array('style' => 'font-family: monospace;'), $patch);
   }
 
-  private function renderPatchForMail(DifferentialDiff $diff) {
+  private function buildPatchForMail(DifferentialDiff $diff) {
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
 
-    $patch = id(new DifferentialRawDiffRenderer())
+    return id(new DifferentialRawDiffRenderer())
       ->setViewer($this->getActor())
       ->setFormat($format)
       ->setChangesets($diff->getChangesets())
       ->buildPatch();
-
-    $section = new PhabricatorMetaMTAMailSection();
-    $section->addHTMLFragment($this->renderPatchHTMLForMail($patch));
-    $section->addPlaintextFragment($patch);
-
-    return $section;
   }
 
   protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {

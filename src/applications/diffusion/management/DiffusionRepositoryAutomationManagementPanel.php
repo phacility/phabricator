@@ -13,6 +13,39 @@ final class DiffusionRepositoryAutomationManagementPanel
     return 800;
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository) {
+    return $repository->isGit();
+  }
+
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'automationBlueprintPHIDs',
+    );
+  }
+
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    if (!$repository->canPerformAutomation()) {
+      return 'fa-truck grey';
+    }
+
+    $blueprint_phids = $repository->getAutomationBlueprintPHIDs();
+    if (!$blueprint_phids) {
+      return 'fa-truck grey';
+    }
+
+    $is_authorized = DrydockAuthorizationQuery::isFullyAuthorized(
+      $repository->getPHID(),
+      $blueprint_phids);
+    if (!$is_authorized) {
+      return 'fa-exclamation-triangle yellow';
+    }
+
+    return 'fa-truck';
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -24,7 +57,7 @@ final class DiffusionRepositoryAutomationManagementPanel
 
     $can_test = $can_edit && $repository->canPerformAutomation();
 
-    $automation_uri = $repository->getPathURI('edit/automation/');
+    $automation_uri = $this->getEditPageURI();
     $test_uri = $repository->getPathURI('edit/testautomation/');
 
     return array(

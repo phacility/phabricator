@@ -13,6 +13,18 @@ final class DiffusionRepositoryStorageManagementPanel
     return 600;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    if ($repository->getAlmanacServicePHID()) {
+      return 'fa-sitemap';
+    } else if ($repository->isHosted()) {
+      return 'fa-folder';
+    } else {
+      return 'fa-download';
+    }
+  }
+
   public function buildManagementPanelContent() {
     return array(
       $this->buildStorageStatusPanel(),
@@ -28,7 +40,7 @@ final class DiffusionRepositoryStorageManagementPanel
       ->setViewer($viewer);
 
     if ($repository->usesLocalWorkingCopy()) {
-      $storage_path = $repository->getHumanReadableDetail('local-path');
+      $storage_path = $repository->getLocalPath();
     } else {
       $storage_path = phutil_tag('em', array(), pht('No Local Working Copy'));
     }

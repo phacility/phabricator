@@ -13,6 +13,27 @@ final class DiffusionRepositorySymbolsManagementPanel
     return 900;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    $has_any =
+      $repository->getSymbolLanguages() ||
+      $repository->getSymbolSources();
+
+    if ($has_any) {
+      return 'fa-link';
+    } else {
+      return 'fa-link grey';
+    }
+  }
+
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'symbolLanguages',
+      'symbolRepositoryPHIDs',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,7 +43,7 @@ final class DiffusionRepositorySymbolsManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $symbols_uri = $repository->getPathURI('edit/symbols/');
+    $symbols_uri = $this->getEditPageURI();
 
     return array(
       id(new PhabricatorActionView())

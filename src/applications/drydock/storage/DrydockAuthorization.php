@@ -93,6 +93,11 @@ final class DrydockAuthorization extends DrydockDAO
     return idx($map, $state, pht('<Unknown: %s>', $state));
   }
 
+  public function isAuthorized() {
+    $state = $this->getBlueprintAuthorizationState();
+    return ($state == self::BLUEPRINTAUTH_AUTHORIZED);
+  }
+
   /**
    * Apply external authorization effects after a user chagnes the value of a
    * blueprint selector control an object.

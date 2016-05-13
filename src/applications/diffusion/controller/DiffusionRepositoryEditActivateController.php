@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditActivateController
-  extends DiffusionRepositoryEditController {
+  extends DiffusionRepositoryManageController {
 
   public function handleRequest(AphrontRequest $request) {
     $response = $this->loadDiffusionContextForEdit();
@@ -13,7 +13,9 @@ final class DiffusionRepositoryEditActivateController
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+    $panel_uri = id(new DiffusionRepositoryBasicsManagementPanel())
+      ->setRepository($repository)
+      ->getPanelURI();
 
     if ($request->isFormPost()) {
       if (!$repository->isTracked()) {
@@ -33,24 +35,44 @@ final class DiffusionRepositoryEditActivateController
         ->setActor($viewer)
         ->applyTransactions($repository, array($xaction));
 
-      return id(new AphrontReloadResponse())->setURI($edit_uri);
+      return id(new AphrontReloadResponse())->setURI($panel_uri);
     }
 
     if ($repository->isTracked()) {
-      return $this->newDialog()
-        ->setTitle(pht('Deactivate Repository?'))
-        ->appendChild(
-          pht('Deactivate this repository?'))
-        ->addSubmitButton(pht('Deactivate Repository'))
-        ->addCancelButton($edit_uri);
+      $title = pht('Deactivate Repository');
+      $body = pht(
+        'If you deactivate this repository, it will no longer be updated. '.
+        'Observation and mirroring will cease, and pushing and pulling will '.
+        'be disabled. You can reactivate the repository later.');
+      $submit = pht('Deactivate Repository');
     } else {
-      return $this->newDialog()
-        ->setTitle(pht('Activate Repository?'))
-        ->appendChild(
-          pht('Activate this repository?'))
-        ->addSubmitButton(pht('Activate Repository'))
-        ->addCancelButton($edit_uri);
+      $title = pht('Activate Repository');
+
+      $is_new = $repository->isNewlyInitialized();
+      if ($is_new) {
+        if ($repository->isHosted()) {
+          $body = pht(
+            'This repository will become a new hosted repository. '.
+            'It will begin serving read and write traffic.');
+        } else {
+          $body = pht(
+            'This repository will observe an existing remote repository. '.
+            'It will begin fetching changes from the remote.');
+        }
+      } else {
+        $body = pht(
+          'This repository will resume updates, observation, mirroring, '.
+          'and serving any configured read and write traffic.');
+      }
+
+      $submit = pht('Activate Repository');
     }
+
+    return $this->newDialog()
+      ->setTitle($title)
+      ->appendChild($body)
+      ->addSubmitButton($submit)
+      ->addCancelButton($panel_uri);
   }
 
 }

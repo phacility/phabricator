@@ -172,14 +172,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     if ($this->isInitialImport($all_updates)) {
       $repository = $this->getRepository();
-
-      $repository->openTransaction();
-        $repository->beginReadLocking();
-          $repository = $repository->reload();
-          $repository->setDetail('importing', true);
-          $repository->save();
-        $repository->endReadLocking();
-      $repository->saveTransaction();
+      $repository->markImporting();
     }
 
     if ($this->emailPHIDs) {
@@ -1244,7 +1237,7 @@ final class DiffusionCommitHookEngine extends Phobject {
       $commit_count++;
     }
 
-    if ($commit_count <= 7) {
+    if ($commit_count <= PhabricatorRepository::IMPORT_THRESHOLD) {
       // If this pushes a very small number of commits, assume it's an
       // initial commit or stack of a few initial commits.
       return false;

@@ -37,6 +37,33 @@ final class PhabricatorRepositoryDiscoveryEngine
   public function discoverCommits() {
     $repository = $this->getRepository();
 
+    $lock = $this->newRepositoryLock($repository, 'repo.look', false);
+
+    try {
+      $lock->lock();
+    } catch (PhutilLockException $ex) {
+      throw new DiffusionDaemonLockException(
+        pht(
+          'Another process is currently discovering repository "%s", '.
+          'skipping discovery.',
+          $repository->getDisplayName()));
+    }
+
+    try {
+      $result = $this->discoverCommitsWithLock();
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
+
+    $lock->unlock();
+
+    return $result;
+  }
+
+  private function discoverCommitsWithLock() {
+    $repository = $this->getRepository();
+
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
@@ -50,6 +77,16 @@ final class PhabricatorRepositoryDiscoveryEngine
         break;
       default:
         throw new Exception(pht("Unknown VCS '%s'!", $vcs));
+    }
+
+    if ($this->isInitialImport($refs)) {
+      $this->log(
+        pht(
+          'Discovered more than %s commit(s) in an empty repository, '.
+          'marking repository as importing.',
+          new PhutilNumber(PhabricatorRepository::IMPORT_THRESHOLD)));
+
+      $repository->markImporting();
     }
 
     // Clear the working set cache.
@@ -577,6 +614,32 @@ final class PhabricatorRepositoryDiscoveryEngine
     $data['commitID'] = $commit->getID();
 
     PhabricatorWorker::scheduleTask($class, $data);
+  }
+
+  private function isInitialImport(array $refs) {
+    $commit_count = count($refs);
+
+    if ($commit_count <= PhabricatorRepository::IMPORT_THRESHOLD) {
+      // If we fetched a small number of commits, assume it's an initial
+      // commit or a stack of a few initial commits.
+      return false;
+    }
+
+    $viewer = $this->getViewer();
+    $repository = $this->getRepository();
+
+    $any_commits = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withRepository($repository)
+      ->setLimit(1)
+      ->execute();
+
+    if ($any_commits) {
+      // If the repository already has commits, this isn't an import.
+      return false;
+    }
+
+    return true;
   }
 
 }

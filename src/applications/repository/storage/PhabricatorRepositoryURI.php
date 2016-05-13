@@ -193,11 +193,121 @@ final class PhabricatorRepositoryURI
 
 
   public function getDisplayURI() {
-    $uri = new PhutilURI($this->getURI());
+    return $this->getURIObject(false);
+  }
 
-    $protocol = $this->getForcedProtocol();
-    if ($protocol) {
-      $uri->setProtocol($protocol);
+  public function getNormalizedURI() {
+    $vcs = $this->getRepository()->getVersionControlSystem();
+
+    $map = array(
+      PhabricatorRepositoryType::REPOSITORY_TYPE_GIT =>
+        PhabricatorRepositoryURINormalizer::TYPE_GIT,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_SVN =>
+        PhabricatorRepositoryURINormalizer::TYPE_SVN,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL =>
+        PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
+    );
+
+    $type = $map[$vcs];
+    $display = (string)$this->getDisplayURI();
+
+    $normal_uri = new PhabricatorRepositoryURINormalizer($type, $display);
+
+    return $normal_uri->getNormalizedURI();
+  }
+
+  public function getEffectiveURI() {
+    return $this->getURIObject(true);
+  }
+
+  public function getURIEnvelope() {
+    $uri = $this->getEffectiveURI();
+
+    $command_engine = $this->newCommandEngine();
+
+    $is_http = $command_engine->isAnyHTTPProtocol();
+    // For SVN, we use `--username` and `--password` flags separately in the
+    // CommandEngine, so we don't need to add any credentials here.
+    $is_svn = $this->getRepository()->isSVN();
+    $credential_phid = $this->getCredentialPHID();
+
+    if ($is_http && !$is_svn && $credential_phid) {
+      $key = PassphrasePasswordKey::loadFromPHID(
+        $credential_phid,
+        PhabricatorUser::getOmnipotentUser());
+
+      $uri->setUser($key->getUsernameEnvelope()->openEnvelope());
+      $uri->setPass($key->getPasswordEnvelope()->openEnvelope());
+    }
+
+    return new PhutilOpaqueEnvelope((string)$uri);
+  }
+
+  private function getURIObject($normalize) {
+    // Users can provide Git/SCP-style URIs in the form "user@host:path".
+    // These are equivalent to "ssh://user@host/path". We use the more standard
+    // form internally, and convert to it if we need to specify a port number,
+    // but try to preserve what the user typed when displaying the URI.
+
+    if ($this->isBuiltin()) {
+      $builtin_protocol = $this->getForcedProtocol();
+      $builtin_domain = $this->getForcedHost();
+      $raw_uri = "{$builtin_protocol}://{$builtin_domain}";
+    } else {
+      $raw_uri = $this->getURI();
+    }
+
+    $port = $this->getForcedPort();
+
+    $default_ports = array(
+      'ssh' => 22,
+      'http' => 80,
+      'https' => 443,
+    );
+
+    $uri = new PhutilURI($raw_uri);
+
+    // Make sure to remove any password from the URI before we do anything
+    // with it; this should always be provided by the associated credential.
+    $uri->setPass(null);
+
+    if (!$uri->getProtocol()) {
+      $git_uri = new PhutilGitURI($raw_uri);
+
+      // We must normalize this Git-style URI into a normal URI
+      $must_normalize = ($port && ($port != $default_ports['ssh']));
+      if ($must_normalize || $normalize) {
+        $domain = $git_uri->getDomain();
+
+
+        $uri = id(new PhutilURI("ssh://{$domain}"))
+          ->setUser($git_uri->getUser())
+          ->setPath($git_uri->getPath());
+      } else {
+        $uri = $git_uri;
+      }
+    }
+
+    $is_normal = ($uri instanceof PhutilURI);
+
+    if ($is_normal) {
+      $protocol = $this->getForcedProtocol();
+      if ($protocol) {
+        $uri->setProtocol($protocol);
+      }
+
+      if ($port) {
+        $uri->setPort($port);
+      }
+
+      // Remove any explicitly set default ports.
+      $uri_port = $uri->getPort();
+      $uri_protocol = $uri->getProtocol();
+
+      $uri_default = idx($default_ports, $uri_protocol);
+      if ($uri_default && ($uri_default == $uri_port)) {
+        $uri->setPort(null);
+      }
     }
 
     $user = $this->getForcedUser();
@@ -210,11 +320,6 @@ final class PhabricatorRepositoryURI
       $uri->setDomain($host);
     }
 
-    $port = $this->getForcedPort();
-    if ($port) {
-      $uri->setPort($port);
-    }
-
     $path = $this->getForcedPath();
     if ($path) {
       $uri->setPath($path);
@@ -223,10 +328,17 @@ final class PhabricatorRepositoryURI
     return $uri;
   }
 
+
   private function getForcedProtocol() {
+    $repository = $this->getRepository();
+
     switch ($this->getBuiltinProtocol()) {
       case self::BUILTIN_PROTOCOL_SSH:
-        return 'ssh';
+        if ($repository->isSVN()) {
+          return 'svn+ssh';
+        } else {
+          return 'ssh';
+        }
       case self::BUILTIN_PROTOCOL_HTTP:
         return 'http';
       case self::BUILTIN_PROTOCOL_HTTPS:
@@ -296,6 +408,7 @@ final class PhabricatorRepositoryURI
       $suffix = '/';
     } else {
       $suffix = '';
+      $clone_name = '';
     }
 
     switch ($this->getBuiltinIdentifier()) {
@@ -328,7 +441,7 @@ final class PhabricatorRepositoryURI
 
     if ($this->isBuiltin()) {
       $options[] = self::IO_READ;
-      $options[] = self::IO_WRITE;
+      $options[] = self::IO_READWRITE;
     } else {
       $options[] = self::IO_OBSERVE;
       $options[] = self::IO_MIRROR;
@@ -445,6 +558,35 @@ final class PhabricatorRepositoryURI
       ),
     );
   }
+
+  public function newCommandEngine() {
+    $repository = $this->getRepository();
+    $protocol = $this->getEffectiveURI()->getProtocol();
+
+    return DiffusionCommandEngine::newCommandEngine($repository)
+      ->setCredentialPHID($this->getCredentialPHID())
+      ->setProtocol($protocol);
+  }
+
+  public function getURIScore() {
+    $score = 0;
+
+    $io_points = array(
+      self::IO_READWRITE => 20,
+      self::IO_READ => 10,
+    );
+    $score += idx($io_points, $this->getEffectiveIoType(), 0);
+
+    $protocol_points = array(
+      self::BUILTIN_PROTOCOL_SSH => 3,
+      self::BUILTIN_PROTOCOL_HTTPS => 2,
+      self::BUILTIN_PROTOCOL_HTTP => 1,
+    );
+    $score += idx($protocol_points, $this->getBuiltinProtocol(), 0);
+
+    return $score;
+  }
+
 
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
@@ -569,7 +711,9 @@ final class PhabricatorRepositoryURI
       'repositoryPHID' => $this->getRepositoryPHID(),
       'uri' => array(
         'raw' => $this->getURI(),
-        'effective' => (string)$this->getDisplayURI(),
+        'display' => (string)$this->getDisplayURI(),
+        'effective' => (string)$this->getEffectiveURI(),
+        'normalized' => (string)$this->getNormalizedURI(),
       ),
       'io' => array(
         'raw' => $this->getIOType(),

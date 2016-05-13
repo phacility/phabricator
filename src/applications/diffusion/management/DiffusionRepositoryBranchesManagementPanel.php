@@ -13,6 +13,34 @@ final class DiffusionRepositoryBranchesManagementPanel
     return 1000;
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository) {
+    return ($repository->isGit() || $repository->isHg());
+  }
+
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    $has_any =
+      $repository->getDetail('default-branch') ||
+      $repository->getDetail('branch-filter') ||
+      $repository->getDetail('close-commits-filter');
+
+    if ($has_any) {
+      return 'fa-code-fork';
+    } else {
+      return 'fa-code-fork grey';
+    }
+  }
+
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'defaultBranch',
+      'trackOnly',
+      'autocloseOnly',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,7 +50,7 @@ final class DiffusionRepositoryBranchesManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $branches_uri = $repository->getPathURI('edit/branches/');
+    $branches_uri = $this->getEditPageURI();
 
     return array(
       id(new PhabricatorActionView())

@@ -480,6 +480,10 @@ final class PhabricatorMarkupEngine extends Phobject {
       'syntax-highlighter.engine',
       $options['syntax-highlighter.engine']);
 
+    $style_map = id(new PhabricatorDefaultSyntaxStyle())
+      ->getRemarkupStyleMap();
+    $engine->setConfig('phutil.codeblock.style-map', $style_map);
+
     $engine->setConfig('uri.full', $options['uri.full']);
 
     $rules = array();

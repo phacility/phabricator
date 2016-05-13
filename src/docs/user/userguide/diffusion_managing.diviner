@@ -1,0 +1,385 @@
+@title Diffusion User Guide: Managing Repositories
+@group userguide
+
+Guide to configuring and managing repositories in Diffusion.
+
+Overview
+========
+
+After you create a new repository in Diffusion or select **Manage Repository**
+from the main screen if an existing repository, you'll be taken to the
+repository management interface for that repository.
+
+On this interface, you'll find many options which allow you to configure the
+behavior of a repository. This document walks through the options.
+
+Basics
+======
+
+The **Basics** section of the management interface allows you to configure
+the repository name, description, and identifiers. You can also activate or
+deactivate the repository here, and configure a few other miscellaneous
+settings.
+
+Basics: Name
+============
+
+The repository name is a human-readable primary name for the repository. It
+does not need to be unique
+
+Because the name is not unique and does not have any meaningful restrictions,
+it's fairly ambiguous and isn't very useful as an identifier. The other basic
+information (primarily callsigns and short names) gives you control over
+repository identifiers.
+
+
+Basics: Callsigns
+=================
+
+Each repository can optionally be identified by a "callsign", which is a short
+uppercase string like "P" (for Phabricator) or "ARC" (for Arcanist).
+
+The primary goal of callsigns is to namespace commits to SVN repositories: if
+you use multiple SVN repositories, each repository has a revision 1, revision 2,
+etc., so referring to them by number alone is ambiguous.
+
+However, even for Git and Mercurial they impart additional information to human
+readers and allow parsers to detect that something is a commit name with high
+probability (and allow distinguishing between multiple copies of a repository).
+
+Configuring a callsign can make interacting with a commonly-used repository
+easier, but you may not want to bother assigning one to every repository if you
+have some similar, templated, or rarely-used repositories.
+
+If you choose to assign a callsign to a repository, it must be unique within an
+install but do not need to be globally unique, so you are free to use the
+single-letter callsigns for brevity. For example, Facebook uses "E" for the
+Engineering repository, "O" for the Ops repository, "Y" for a Yum package
+repository, and so on, while Phabricator uses "P", "ARC", "PHU" for libphutil,
+and "J" for Javelin. Keeping callsigns brief will make them easier to use, and
+the use of one-character callsigns is encouraged if they are reasonably
+evocative.
+
+If you configure a callsign like `XYZ`, Phabricator will activate callsign URIs
+and activate the callsign identifier (like `rXYZ`) for the repository. These
+more human-readable identifiers can make things a little easier to interact
+with.
+
+
+Basics: Short Name
+==================
+
+Each repository can optionally have a unique short name. Short names must be
+unique and have some minor restrictions to make sure they are unambiguous and
+appropriate for use as directory names and in URIs.
+
+
+Basics: Description
+===================
+
+You may optionally provide a brief (or, at your discretion, excruciatingly
+long) human-readable description of the repository. This description will be
+shown on the main repository page.
+
+You can also create a `README` file at the repository root (or in any
+subdirectory) to provide information about the repository. These formats are
+supported:
+
+| File Name         | Rendered As...
+|-------------------|---------------
+| `README`          | Plain Text
+| `README.txt`      | Plain Text
+| `README.remarkup` | Remarkup
+| `README.md`       | Remarkup
+| `README.rainbow`  | Rainbow
+
+
+Basics: Encoding
+================
+
+Before content from the repository can be shown in the web UI or embedded in
+other contexts like email, it must be converted to UTF-8.
+
+Most source code is written in UTF-8 or a subset of UTF-8 (like plain ASCII)
+already, so everything will work fine. The majority of repositories do not need
+to adjust this setting.
+
+If your repository is primarily written in some other encoding, specify it here
+so Phabricator can convert from it properly when reading content to embed in
+a webpage or email.
+
+
+Basics: Dangerous Changes
+=========================
+
+By default, repositories are protected against dangerous changes. Dangerous
+changes are operations which rewrite or destroy repository history (for
+example, by deleting or rewriting branches). Normally, these take the form
+of `git push --force` or similar.
+
+It is normally a good idea to leave this protection enabled because most
+scalable workflows rarely rewrite repository history and it's easy to make
+mistakes which are expensive to correct if this protection is disabled.
+
+If you do occasionally need to rewite published history, you can treat this
+option like a safety: disable it, perform required rewrites, then enable it
+again.
+
+If you fully disable this at the repository level, you can still use Herald to
+selectively protect certain branches or grant this power to a limited set of
+users.
+
+This option is only available in Git and Mercurial, because it is impossible
+to make dangerous changes in Subversion.
+
+This option has no effect if a repository is not hosted because Phabricator
+can not prevent dangerous changes in a remote repository it is merely
+observing.
+
+
+Basics: Deactivate Repository
+=============================
+
+Repositories can be deactivated. Deactivating a repository has these effects:
+
+  - the repository will no longer be updated;
+  - users will no longer be able to clone/fetch/checkout the repository;
+  - users will no longer be able to push to the repository; and
+  - the repository will be hidden from view in default queries.
+
+When repositories are created for the first time, they are deactivated. This
+gives you an opportuinty to customize settings, like adjusting policies or
+configuring a URI to observe. You must activate a repository before it will
+start working normally.
+
+
+Basics: Delete Repository
+=========================
+
+Repositories can not be deleted from the web UI, so this option is always
+disabled. Clicking it gives you information about how to delete a repository.
+
+Repositories can only be deleted from the command line, with `bin/remove`:
+
+```
+$ ./bin/remove destroy <repository>
+```
+
+WARNING: This command will issue you a dire warning about the severity of the
+action you are taking. Heed this warning. You are **strongly discouraged** from
+destroying repositories. Instead, deactivate them.
+
+
+Policies
+========
+
+The **Policies** section of the management interface allows you to review and
+manage repository access policies.
+
+You can configure granular access policies for each repository to control who
+can view, clone, administate, and push to the repository.
+
+
+Policies: View
+==============
+
+The view policy for a repository controls who can view the repository from
+the web UI and clone, fetch, or check it out from Phabricator.
+
+Users who can view a repository can also access the "Manage" interface to
+review information about the repository and examine the edit history, but can
+not make any changes.
+
+
+Policies: Edit
+==============
+
+The edit policy for a repository controls who can change repository settings
+using the "Manage" interface. In essence, this is permission to administrate
+the repository.
+
+You must be able to view a repository to edit it.
+
+You do not need this permission to push changes to a repository.
+
+
+Policies: Push
+==============
+
+The push policy for a repository controls who can push changes to the
+repository.
+
+This policy has no effect if Phabricator is not hosting the repository, because
+it can not control who is allowed to make changes to a remote repository it is
+merely observing.
+
+You must also be able to view a repository to push to it.
+
+You do not need to be able to edit a repository to push to it.
+
+Further restrictions on who can push (and what they can push) can be configured
+for hosted repositories with Herald, which allows you to write more
+sophisticated rules that evaluate when Phabricator receives a push. To get
+started with Herald, see @{article:Herald User Guide}.
+
+Additionally, Git and Mercurial repositories have a setting which allows
+you to **Prevent Dangerous Changes**. This setting is enabled by default and
+will prevent any users from pushing changes which rewrite or destroy history.
+
+
+URIs
+====
+
+The **URIs** panel allows you to add and manage URIs which Phabricator will
+fetch from, serve from, and push to.
+
+These options are covered in detail in @{article:Diffusion User Guide: URIs}.
+
+
+Staging Area
+============
+
+The **Staging Area** panel configures staging areas, used to make proposed
+changes available to build and continuous integration systems.
+
+For more details, see @{article:Harbormaster User Guide}.
+
+
+Automation
+==========
+
+The **Automation** panel configures support for allowing Phabricator to make
+writes directly to the repository, so that it can perform operations like
+automatically landing revisions from the web UI.
+
+For details on repository automation, see
+@{article:Drydock User Guide: Repository Automation}.
+
+
+Symbols
+======
+
+The **Symbols** panel allows you to customize how symbols (like class and
+function names) are linked when viewing code in the repository, and when
+viewing revisions which propose code changes to the repository.
+
+To take advantage of this feature, you need to do additional work to build
+symbol indexes. For details on configuring and populating symbol indexes, see
+@{article:User Guide: Symbol Indexes}.
+
+
+Branches
+========
+
+The **Branches** panel allows you to configure how Phabricator interacts with
+branches.
+
+This panel is not available for Subversion repositories, because Subversion
+does not have formal branches.
+
+You can configure **Default Branch**. This controls which branch is shown by
+default in the UI. If no branch is provided, Phabricator will use `master` in
+Git and `default` in Mercurial.
+
+If you want Diffusion to ignore some branches in the repository, you can
+configure **Track Only**. Other branches will be ignored. If you do not specify
+any branches, all branches are tracked.
+
+When specifying branches, you should enter one branch name per line. You can
+use regular expressions to match branches by wrapping an expression in
+`regexp(...)`. For example:
+
+| Example | Effect |
+|---------|--------|
+| `master` | Track only `master`.
+| `regexp(/^release-/)` | Track all branches which start with `release-`.
+| `regexp(/^(?!temp-)/)` | Do not track branches which start with `temp-`.
+
+
+Actions
+======
+
+The **Actions** panel can configure notifications and publishing behavior.
+
+Normally, Phabricator publishes notifications when it discovers new commits.
+You can disable publishing for a repository by turning off **Publish/Noitfy**.
+This will disable notifications, feed, and Herald (including audits and build
+plans) for this repository.
+
+When Phabricator discovers a new commit, it can automatically close associated
+revisions and tasks. If you don't want Phabricator to close objects when it
+discovers new commits, disable **Autoclose** for the repository.
+
+
+Repository Identifiers and Names
+================================
+
+Repositories have several short identifiers which you can use to refer to the
+repository. For example, if you use command-line administrative tools to
+interact with a repository, you'll provide one of these identifiers:
+
+```
+$ ./bin/repository update <identifier>
+```
+
+The identifiers available for a repository depend on which options are
+configured. Each repository may have several identifiers:
+
+  - An **ID** identifier, like `R123`. This is available for all repositories.
+  - A **callsign** identifier, like `rXY`. This is available for repositories
+    with a callsign.
+  - A **short name** identifier, like `xylophone`. This is available for
+    repositories with a short name.
+
+All three identifiers can be used to refer to the repository in cases where
+the intent is unambiguous, but only the first two forms work in ambiguous
+contexts.
+
+For example, if you type `R123` or `rXY` into a comment, Phabricator will
+recognize them as references to the repository. If you type `xylophone`, it
+assumes you mean the word "xylophone".
+
+Only the `R123` identifier is immutable: the others can be changed later by
+adjusting the callsign or short name for the repository.
+
+
+Commit Identifiers
+==================
+
+Diffusion uses repository identifiers and information about the commit itself
+to generate globally unique identifers for each commit, like `rE12345`.
+
+Each commit may have several identifiers:
+
+  - A repository **ID** identifier, like `R123:abcdef123...`.
+  - A repository **callsign** identifier, like `rXYZabcdef123...`. This only
+    works if a repository has a callsign.
+  - Any unique prefix of the commit hash.
+
+Git and Mercurial use commit hashes to identify commits, and Phabricator will
+recognize a commit if the hash prefix is unique and sufficiently long. Commit
+hashes qualified with a repository identifier must be at least 5 characters
+long; unqualified commit hashes must be at least 7 characters long.
+
+In Subversion, commit identifiers are sequential integers and prefixes can not
+be used to identify them.
+
+When rendering the name of a Git or Mercurial commit hash, Phabricator tends to
+shorten it to 12 characters. This "short length" is relatively long compared to
+Git itself (which often uses 7 characters). See this post on the LKML for a
+historical explanation of Git's occasional internal use of 7-character hashes:
+
+https://lkml.org/lkml/2010/10/28/287
+
+Because 7-character hashes are likely to collide for even moderately large
+repositories, Diffusion generally uses either a 12-character prefix (which makes
+collisions very unlikely) or the full 40-character hash (which makes collisions
+astronomically unlikely).
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Diffusion User Guide}.

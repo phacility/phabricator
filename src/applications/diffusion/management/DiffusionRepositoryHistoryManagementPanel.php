@@ -13,6 +13,10 @@ final class DiffusionRepositoryHistoryManagementPanel
     return 2000;
   }
 
+  public function getManagementPanelIcon() {
+    return 'fa-list-ul';
+  }
+
   public function buildManagementPanelContent() {
     return $this->newTimeline();
   }

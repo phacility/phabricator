@@ -248,21 +248,14 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildCurtain(PhabricatorRepository $repository) {
     $viewer = $this->getViewer();
 
-    $edit_uri = $repository->getPathURI('edit/');
+    $edit_uri = $repository->getPathURI('manage/');
     $curtain = $this->newCurtainView($repository);
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $repository,
-      PhabricatorPolicyCapability::CAN_EDIT);
 
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Edit Repository'))
-        ->setIcon('fa-pencil')
-        ->setHref($edit_uri)
-        ->setWorkflow(!$can_edit)
-        ->setDisabled(!$can_edit));
+        ->setName(pht('Manage Repository'))
+        ->setIcon('fa-cogs')
+        ->setHref($edit_uri));
 
     if ($repository->isHosted()) {
       $push_uri = $this->getApplicationURI(
@@ -301,56 +294,27 @@ final class DiffusionRepositoryController extends DiffusionController {
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    if ($repository->isHosted()) {
-      $ssh_uri = $repository->getSSHCloneURIObject();
-      if ($ssh_uri) {
-        $clone_uri = $this->renderCloneCommand(
-          $repository,
-          $ssh_uri,
-          $repository->getServeOverSSH(),
-          '/settings/panel/ssh/');
+    $display_never = PhabricatorRepositoryURI::DISPLAY_NEVER;
 
-        $view->addProperty(
-          $repository->isSVN()
-            ? pht('Checkout (SSH)')
-            : pht('Clone (SSH)'),
-          $clone_uri);
+    $uris = $repository->getURIs();
+    foreach ($uris as $uri) {
+      if ($uri->getIsDisabled()) {
+        continue;
       }
 
-      $http_uri = $repository->getHTTPCloneURIObject();
-      if ($http_uri) {
-        $clone_uri = $this->renderCloneCommand(
-          $repository,
-          $http_uri,
-          $repository->getServeOverHTTP(),
-          PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth')
-            ? '/settings/panel/vcspassword/'
-            : null);
+      if ($uri->getEffectiveDisplayType() == $display_never) {
+        continue;
+      }
 
-        $view->addProperty(
-          $repository->isSVN()
-            ? pht('Checkout (HTTP)')
-            : pht('Clone (HTTP)'),
-          $clone_uri);
+      if ($repository->isSVN()) {
+        $label = pht('Checkout');
+      } else {
+        $label = pht('Clone');
       }
-    } else {
-      switch ($repository->getVersionControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $view->addProperty(
-            pht('Clone'),
-            $this->renderCloneCommand(
-              $repository,
-              $repository->getPublicCloneURI()));
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $view->addProperty(
-            pht('Checkout'),
-            $this->renderCloneCommand(
-              $repository,
-              $repository->getPublicCloneURI()));
-          break;
-      }
+
+      $view->addProperty(
+        $label,
+        $this->renderCloneURI($repository, $uri));
     }
 
     $box = id(new PHUIObjectBoxView())
@@ -701,80 +665,27 @@ final class DiffusionRepositoryController extends DiffusionController {
     );
   }
 
-  private function renderCloneCommand(
+  private function renderCloneURI(
     PhabricatorRepository $repository,
-    $uri,
-    $serve_mode = null,
-    $manage_uri = null) {
+    PhabricatorRepositoryURI $uri) {
 
-    require_celerity_resource('diffusion-icons-css');
-
-    Javelin::initBehavior('select-on-click');
-
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $command = csprintf(
-          'git clone %R',
-          $uri);
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $command = csprintf(
-          'hg clone %R',
-          $uri);
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        if ($repository->isHosted()) {
-          $command = csprintf(
-            'svn checkout %R %R',
-            $uri,
-            $repository->getCloneName());
-        } else {
-          $command = csprintf(
-            'svn checkout %R',
-            $uri);
-        }
-        break;
+    if ($repository->isSVN()) {
+      $display = csprintf(
+        'svn checkout %R %R',
+        (string)$uri->getDisplayURI(),
+        $repository->getCloneName());
+    } else {
+      $display = csprintf('%R', (string)$uri->getDisplayURI());
     }
 
-    $input = javelin_tag(
-      'input',
-      array(
-        'type' => 'text',
-        'value' => (string)$command,
-        'class' => 'diffusion-clone-uri',
-        'sigil' => 'select-on-click',
-        'readonly' => 'true',
-      ));
+    $display = (string)$display;
+    $viewer = $this->getViewer();
 
-    $extras = array();
-    if ($serve_mode) {
-      if ($serve_mode === PhabricatorRepository::SERVE_READONLY) {
-        $extras[] = pht('(Read Only)');
-      }
-    }
-
-    if ($manage_uri) {
-      if ($this->getRequest()->getUser()->isLoggedIn()) {
-        $extras[] = phutil_tag(
-          'a',
-          array(
-            'href' => $manage_uri,
-          ),
-          pht('Manage Credentials'));
-      }
-    }
-
-    if ($extras) {
-      $extras = phutil_implode_html(' ', $extras);
-      $extras = phutil_tag(
-        'div',
-        array(
-          'class' => 'diffusion-clone-extras',
-        ),
-        $extras);
-    }
-
-    return array($input, $extras);
+    return id(new DiffusionCloneURIView())
+      ->setViewer($viewer)
+      ->setRepository($repository)
+      ->setRepositoryURI($uri)
+      ->setDisplayURI($display);
   }
 
 }

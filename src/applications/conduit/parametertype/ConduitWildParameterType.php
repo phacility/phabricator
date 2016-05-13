@@ -1,7 +1,7 @@
 <?php
 
 final class ConduitWildParameterType
-  extends ConduitListParameterType {
+  extends ConduitParameterType {
 
   protected function getParameterTypeName() {
     return 'wild';

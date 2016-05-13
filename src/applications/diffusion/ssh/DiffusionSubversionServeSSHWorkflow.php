@@ -148,14 +148,24 @@ final class DiffusionSubversionServeSSHWorkflow
     if ($this->shouldProxy()) {
       $command = $this->getProxyCommand();
       $this->isProxying = true;
+      $cwd = null;
     } else {
       $command = csprintf(
         'svnserve -t --tunnel-user=%s',
         $this->getUser()->getUsername());
+      $cwd = PhabricatorEnv::getEmptyCWD();
     }
 
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
     $future = new ExecFuture('%C', $command);
+
+    // If we're receiving a commit, svnserve will fail to execute the commit
+    // hook with an unhelpful error if the CWD isn't readable by the user we
+    // are sudoing to. Switch to a readable, empty CWD before running
+    // svnserve. See T10941.
+    if ($cwd !== null) {
+      $future->setCWD($cwd);
+    }
 
     $this->inProtocol = new DiffusionSubversionWireProtocol();
     $this->outProtocol = new DiffusionSubversionWireProtocol();

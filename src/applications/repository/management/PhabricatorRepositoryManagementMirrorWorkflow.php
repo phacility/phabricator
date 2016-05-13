@@ -12,18 +12,18 @@ final class PhabricatorRepositoryManagementMirrorWorkflow
       ->setArguments(
         array(
           array(
-            'name'        => 'verbose',
-            'help'        => pht('Show additional debugging information.'),
+            'name' => 'verbose',
+            'help' => pht('Show additional debugging information.'),
           ),
           array(
-            'name'        => 'repos',
-            'wildcard'    => true,
+            'name' => 'repos',
+            'wildcard' => true,
           ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $repos = $this->loadRepositories($args, 'repos');
+    $repos = $this->loadLocalRepositories($args, 'repos');
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
@@ -31,12 +31,11 @@ final class PhabricatorRepositoryManagementMirrorWorkflow
           'Specify one or more repositories to push to mirrors.'));
     }
 
-    $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
-      $console->writeOut(
+      echo tsprintf(
         "%s\n",
         pht(
-          "Pushing '%s' to mirrors...",
+          'Pushing "%s" to mirrors...',
           $repo->getDisplayName()));
 
       $engine = id(new PhabricatorRepositoryMirrorEngine())
@@ -45,7 +44,9 @@ final class PhabricatorRepositoryManagementMirrorWorkflow
         ->pushToMirrors();
     }
 
-    $console->writeOut("%s\n", pht('Done.'));
+    echo tsprintf(
+      "%s\n",
+      pht('Done.'));
 
     return 0;
   }

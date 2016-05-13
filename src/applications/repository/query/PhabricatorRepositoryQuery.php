@@ -650,7 +650,7 @@ final class PhabricatorRepositoryQuery
     }
 
     if ($this->uris !== null) {
-      $try_uris = $this->getNormalizedPaths();
+      $try_uris = $this->getNormalizedURIs();
       $try_uris = array_fuse($try_uris);
 
       $where[] = qsprintf(
@@ -666,7 +666,7 @@ final class PhabricatorRepositoryQuery
     return 'PhabricatorDiffusionApplication';
   }
 
-  private function getNormalizedPaths() {
+  private function getNormalizedURIs() {
     $normalized_uris = array();
 
     // Since we don't know which type of repository this URI is in the general
@@ -675,19 +675,15 @@ final class PhabricatorRepositoryQuery
     // or an `svn+ssh` URI, we could deduce how to normalize it. However, this
     // would be more complicated and it's not clear if it matters in practice.
 
+    $types = PhabricatorRepositoryURINormalizer::getAllURITypes();
     foreach ($this->uris as $uri) {
-      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
-        PhabricatorRepositoryURINormalizer::TYPE_GIT,
-        $uri);
-      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
-        PhabricatorRepositoryURINormalizer::TYPE_SVN,
-        $uri);
-      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
-        PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
-        $uri);
+      foreach ($types as $type) {
+        $normalized_uri = new PhabricatorRepositoryURINormalizer($type, $uri);
+        $normalized_uris[] = $normalized_uri->getNormalizedURI();
+      }
     }
 
-    return array_unique(mpull($normalized_uris, 'getNormalizedPath'));
+    return array_unique($normalized_uris);
   }
 
 }

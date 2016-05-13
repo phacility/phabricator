@@ -310,6 +310,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'notification.enabled' => $aphlict_reason,
       'notification.client-uri' => $aphlict_reason,
       'notification.server-uri' => $aphlict_reason,
+
+      'metamta.differential.unified-comment-context' => pht(
+        'Inline comments are now always rendered with a limited amount '.
+        'of context.'),
     );
 
     return $ancient_config;
