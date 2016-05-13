@@ -71,13 +71,12 @@ final class PhabricatorOwnersPackage
       self::AUTOREVIEW_SUBSCRIBE => array(
         'name' => pht('Subscribe to Changes'),
       ),
-      // TODO: Implement these.
-      // self::AUTOREVIEW_REVIEW => array(
-      //   'name' => pht('Review Changes'),
-      // ),
-      // self::AUTOREVIEW_BLOCK => array(
-      //   'name' => pht('Review Changes (Blocking)'),
-      // ),
+      self::AUTOREVIEW_REVIEW => array(
+        'name' => pht('Review Changes'),
+      ),
+      self::AUTOREVIEW_BLOCK => array(
+        'name' => pht('Review Changes (Blocking)'),
+      ),
     );
   }
 

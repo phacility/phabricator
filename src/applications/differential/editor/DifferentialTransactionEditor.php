@@ -1536,7 +1536,6 @@ final class DifferentialTransactionEditor
 
     $xactions = array();
     if ($auto_subscribe) {
-
       $xactions[] = $object->getApplicationTransactionTemplate()
         ->setAuthorPHID($owners_phid)
         ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
@@ -1546,9 +1545,95 @@ final class DifferentialTransactionEditor
           ));
     }
 
-    // TODO: Implement autoreview and autoblock, but these are more invovled.
+    $specs = array(
+      array($auto_review, false),
+      array($auto_block, true),
+    );
+
+    foreach ($specs as $spec) {
+      list($reviewers, $blocking) = $spec;
+      if (!$reviewers) {
+        continue;
+      }
+
+      $phids = mpull($reviewers, 'getPHID');
+      $xaction = $this->newAutoReviewTransaction($object, $phids, $blocking);
+      if ($xaction) {
+        $xactions[] = $xaction;
+      }
+    }
 
     return $xactions;
+  }
+
+  private function newAutoReviewTransaction(
+    PhabricatorLiskDAO $object,
+    array $phids,
+    $is_blocking) {
+
+    // TODO: This is substantially similar to DifferentialReviewersHeraldAction
+    // and both are needlessly complex. This logic should live in the normal
+    // transaction application pipeline. See T10967.
+
+    $reviewers = $object->getReviewerStatus();
+    $reviewers = mpull($reviewers, null, 'getReviewerPHID');
+
+    if ($is_blocking) {
+      $new_status = DifferentialReviewerStatus::STATUS_BLOCKING;
+    } else {
+      $new_status = DifferentialReviewerStatus::STATUS_ADDED;
+    }
+
+    $new_strength = DifferentialReviewerStatus::getStatusStrength(
+      $new_status);
+
+    $current = array();
+    foreach ($phids as $phid) {
+      if (!isset($reviewers[$phid])) {
+        continue;
+      }
+
+      // If we're applying a stronger status (usually, upgrading a reviewer
+      // into a blocking reviewer), skip this check so we apply the change.
+      $old_strength = DifferentialReviewerStatus::getStatusStrength(
+        $reviewers[$phid]->getStatus());
+      if ($old_strength <= $new_strength) {
+        continue;
+      }
+
+      $current[] = $phid;
+    }
+
+    $phids = array_diff($phids, $current);
+
+    if (!$phids) {
+      return null;
+    }
+
+    $phids = array_fuse($phids);
+
+    $value = array();
+    foreach ($phids as $phid) {
+      $value[$phid] = array(
+        'data' => array(
+          'status' => $new_status,
+        ),
+      );
+    }
+
+    $edgetype_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
+
+    $owners_phid = id(new PhabricatorOwnersApplication())
+      ->getPHID();
+
+    return $object->getApplicationTransactionTemplate()
+      ->setAuthorPHID($owners_phid)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $edgetype_reviewer)
+      ->setNewValue(
+        array(
+          '+' => $value,
+        ));
   }
 
   protected function buildHeraldAdapter(

@@ -1577,6 +1577,14 @@ abstract class PhabricatorApplicationTransactionEditor
       $type = $xaction->getTransactionType();
       if (isset($types[$type])) {
         foreach ($types[$type] as $other_key) {
+          $other_xaction = $result[$other_key];
+
+          // Don't merge transactions with different authors. For example,
+          // don't merge Herald transactions and owners transactions.
+          if ($other_xaction->getAuthorPHID() != $xaction->getAuthorPHID()) {
+            continue;
+          }
+
           $merged = $this->mergeTransactions($result[$other_key], $xaction);
           if ($merged) {
             $result[$other_key] = $merged;
