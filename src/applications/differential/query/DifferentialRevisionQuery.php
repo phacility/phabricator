@@ -92,18 +92,6 @@ final class DifferentialRevisionQuery
   }
 
   /**
-   * Filter results to revisions with comments authored by the given PHIDs.
-   *
-   * @param array List of PHIDs of authors
-   * @return this
-   * @task config
-   */
-  public function withDraftRepliesByAuthors(array $author_phids) {
-    $this->draftAuthors = $author_phids;
-    return $this;
-  }
-
-  /**
    * Filter results to revisions which CC one of the listed people. Calling this
    * function will clear anything set by previous calls to @{method:withCCs}.
    *
@@ -239,27 +227,6 @@ final class DifferentialRevisionQuery
   }
 
 
-  /**
-   * Set result ordering. Provide a class constant, such as
-   * `DifferentialRevisionQuery::ORDER_CREATED`.
-   *
-   * @task config
-   */
-  public function setOrder($order_constant) {
-    switch ($order_constant) {
-      case self::ORDER_CREATED:
-        $this->setOrderVector(array('id'));
-        break;
-      case self::ORDER_MODIFIED:
-        $this->setOrderVector(array('updated', 'id'));
-        break;
-      default:
-        throw new Exception(pht('Unknown order "%s".', $order_constant));
-    }
-
-    return $this;
-  }
-
 
   /**
    * Set whether or not the query will load and attach relationships.
@@ -371,6 +338,11 @@ final class DifferentialRevisionQuery
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
+  public function newResultObject() {
+    return new DifferentialRevision();
+  }
+
+
   /**
    * Execute the query as configured, returning matching
    * @{class:DifferentialRevision} objects.
@@ -379,11 +351,9 @@ final class DifferentialRevisionQuery
    * @task exec
    */
   protected function loadPage() {
-    $table = new DifferentialRevision();
-    $conn_r = $table->establishConnection('r');
-
     $data = $this->loadData();
 
+    $table = $this->newResultObject();
     return $table->loadAllFromArray($data);
   }
 
@@ -519,7 +489,7 @@ final class DifferentialRevisionQuery
   }
 
   private function loadData() {
-    $table = new DifferentialRevision();
+    $table = $this->newResultObject();
     $conn_r = $table->establishConnection('r');
 
     $selects = array();
@@ -605,7 +575,7 @@ final class DifferentialRevisionQuery
 
     $joins = $this->buildJoinsClause($conn_r);
     $where = $this->buildWhereClause($conn_r);
-    $group_by = $this->buildGroupByClause($conn_r);
+    $group_by = $this->buildGroupClause($conn_r);
     $having = $this->buildHavingClause($conn_r);
 
     $this->buildingGlobalOrder = false;
@@ -849,19 +819,37 @@ final class DifferentialRevisionQuery
   /**
    * @task internal
    */
-  private function buildGroupByClause($conn_r) {
+  protected function shouldGroupQueryResultRows() {
+
     $join_triggers = array_merge(
       $this->pathIDs,
       $this->ccs,
       $this->reviewers);
 
-    $needs_distinct = (count($join_triggers) > 1);
-
-    if ($needs_distinct) {
-      return 'GROUP BY r.id';
-    } else {
-      return '';
+    if (count($join_triggers) > 1) {
+      return true;
     }
+
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  public function getBuiltinOrders() {
+    $orders = parent::getBuiltinOrders() + array(
+      'updated' => array(
+        'vector' => array('updated', 'id'),
+        'name' => pht('Date Updated (Latest First)'),
+        'aliases' => array(self::ORDER_MODIFIED),
+      ),
+      'outdated' => array(
+        'vector' => array('-updated', '-id'),
+        'name' => pht('Date Updated (Oldest First)'),
+       ),
+    );
+
+    // Alias the "newest" builtin to the historical key for it.
+    $orders['newest']['aliases'][] = self::ORDER_CREATED;
+
+    return $orders;
   }
 
   protected function getDefaultOrderVector() {
