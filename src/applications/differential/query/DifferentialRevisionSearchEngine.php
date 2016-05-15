@@ -11,20 +11,16 @@ final class DifferentialRevisionSearchEngine
     return 'PhabricatorDifferentialApplication';
   }
 
+  protected function newResultBuckets() {
+    return DifferentialRevisionResultBucket::getAllResultBuckets();
+  }
+
   public function newQuery() {
     return id(new DifferentialRevisionQuery())
       ->needFlags(true)
       ->needDrafts(true)
       ->needRelationships(true);
   }
-
-  public function getPageSize(PhabricatorSavedQuery $saved) {
-    if ($saved->getQueryKey() == 'active') {
-      return 0xFFFF;
-    }
-    return parent::getPageSize($saved);
-  }
-
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
@@ -114,9 +110,12 @@ final class DifferentialRevisionSearchEngine
 
     switch ($query_key) {
       case 'active':
+        $bucket_key = DifferentialRevisionRequiredActionResultBucket::BUCKETKEY;
+
         return $query
           ->setParameter('responsiblePHIDs', array($viewer->getPHID()))
-          ->setParameter('status', DifferentialRevisionQuery::STATUS_OPEN);
+          ->setParameter('status', DifferentialRevisionQuery::STATUS_OPEN)
+          ->setParameter('bucket', $bucket_key);
       case 'authored':
         return $query
           ->setParameter('authorPHIDs', array($viewer->getPHID()));
@@ -139,13 +138,6 @@ final class DifferentialRevisionSearchEngine
     );
   }
 
-  private function getOrderOptions() {
-    return array(
-      DifferentialRevisionQuery::ORDER_CREATED    => pht('Created'),
-      DifferentialRevisionQuery::ORDER_MODIFIED   => pht('Updated'),
-    );
-  }
-
   protected function renderResultList(
     array $revisions,
     PhabricatorSavedQuery $query,
@@ -157,8 +149,10 @@ final class DifferentialRevisionSearchEngine
       ->setUser($viewer)
       ->setNoBox($this->isPanelContext());
 
+    $bucket = $this->getResultBucket($query);
+
     $views = array();
-    if ($query->getQueryKey() == 'active') {
+    if ($bucket) {
         $split = DifferentialRevisionQuery::splitResponsible(
           $revisions,
           $query->getParameter('responsiblePHIDs'));

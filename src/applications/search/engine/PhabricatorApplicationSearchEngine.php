@@ -28,6 +28,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
   const CONTEXT_LIST  = 'list';
   const CONTEXT_PANEL = 'panel';
 
+  const BUCKET_NONE = 'none';
+
   public function setController(PhabricatorController $controller) {
     $this->controller = $controller;
     return $this;
@@ -264,6 +266,18 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         ->setKey('order')
         ->setOrderAliases($query->getBuiltinOrderAliasMap())
         ->setOptions($orders);
+    }
+
+    $buckets = $this->newResultBuckets();
+    if ($query && $buckets) {
+      $bucket_options = array(
+        self::BUCKET_NONE => pht('No Bucketing'),
+      ) + mpull($buckets, 'getResultBucketName');
+
+      $fields[] = id(new PhabricatorSearchSelectField())
+        ->setLabel(pht('Bucket'))
+        ->setKey('bucket')
+        ->setOptions($bucket_options);
     }
 
     $field_map = array();
@@ -944,11 +958,35 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 /* -(  Paging and Executing Queries  )--------------------------------------- */
 
 
+  protected function newResultBuckets() {
+    return array();
+  }
+
+  protected function getResultBucket(PhabricatorSavedQuery $saved) {
+    $key = $saved->getParameter('bucket');
+    if ($key == self::BUCKET_NONE) {
+      return null;
+    }
+
+    $buckets = $this->newResultBuckets();
+    return idx($buckets, $key);
+  }
+
+
   public function getPageSize(PhabricatorSavedQuery $saved) {
+    $bucket = $this->getResultBucket($saved);
+
     $limit = (int)$saved->getParameter('limit');
 
     if ($limit > 0) {
+      if ($bucket) {
+        $bucket->setPageSize($limit);
+      }
       return $limit;
+    }
+
+    if ($bucket) {
+      return $bucket->getPageSize();
     }
 
     return 100;
