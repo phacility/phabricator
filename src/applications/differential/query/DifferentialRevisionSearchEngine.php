@@ -19,7 +19,8 @@ final class DifferentialRevisionSearchEngine
     return id(new DifferentialRevisionQuery())
       ->needFlags(true)
       ->needDrafts(true)
-      ->needRelationships(true);
+      ->needRelationships(true)
+      ->needReviewerStatus(true);
   }
 
   protected function buildQueryFromParameters(array $map) {
@@ -153,33 +154,20 @@ final class DifferentialRevisionSearchEngine
 
     $views = array();
     if ($bucket) {
-        $split = DifferentialRevisionQuery::splitResponsible(
-          $revisions,
-          $query->getParameter('responsiblePHIDs'));
-        list($blocking, $active, $waiting) = $split;
+      $bucket->setViewer($viewer);
 
-      $views[] = id(clone $template)
-        ->setHeader(pht('Blocking Others'))
-        ->setNoDataString(
-          pht('No revisions are blocked on your action.'))
-        ->setHighlightAge(true)
-        ->setRevisions($blocking)
-        ->setHandles(array());
+      try {
+        $groups = $bucket->newResultGroups($query, $revisions);
 
-      $views[] = id(clone $template)
-        ->setHeader(pht('Action Required'))
-        ->setNoDataString(
-          pht('No revisions require your action.'))
-        ->setHighlightAge(true)
-        ->setRevisions($active)
-        ->setHandles(array());
-
-      $views[] = id(clone $template)
-        ->setHeader(pht('Waiting on Others'))
-        ->setNoDataString(
-          pht('You have no revisions waiting on others.'))
-        ->setRevisions($waiting)
-        ->setHandles(array());
+        foreach ($groups as $group) {
+          $views[] = id(clone $template)
+            ->setHeader($group->getName())
+            ->setNoDataString($group->getNoDataString())
+            ->setRevisions($group->getObjects());
+        }
+      } catch (Exception $ex) {
+        $this->addError($ex->getMessage());
+      }
     } else {
       $views[] = id(clone $template)
         ->setRevisions($revisions)

@@ -213,6 +213,8 @@ final class PhabricatorApplicationSearchController
 
 
     if ($run_query) {
+      $exec_errors = array();
+
       $box->setAnchor(
         id(new PhabricatorAnchorView())
           ->setAnchorName('R'));
@@ -280,10 +282,18 @@ final class PhabricatorApplicationSearchController
           }
         }
       } catch (PhabricatorTypeaheadInvalidTokenException $ex) {
-        $errors[] = pht(
+        $exec_errors[] = pht(
           'This query specifies an invalid parameter. Review the '.
           'query parameters and correct errors.');
       }
+
+      // The engine may have encountered additional errors during rendering;
+      // merge them in and show everything.
+      foreach ($engine->getErrors() as $error) {
+        $exec_errors[] = $error;
+      }
+
+      $errors = $exec_errors;
     }
 
     if ($errors) {
