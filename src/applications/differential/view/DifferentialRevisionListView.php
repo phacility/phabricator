@@ -12,6 +12,16 @@ final class DifferentialRevisionListView extends AphrontView {
   private $noDataString;
   private $noBox;
   private $background = null;
+  private $unlandedDependencies = array();
+
+  public function setUnlandedDependencies(array $unlanded_dependencies) {
+    $this->unlandedDependencies = $unlanded_dependencies;
+    return $this;
+  }
+
+  public function getUnlandedDependencies() {
+    return $this->unlandedDependencies;
+  }
 
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
@@ -120,6 +130,16 @@ final class DifferentialRevisionListView extends AphrontView {
       // Author
       $author_handle = $this->handles[$revision->getAuthorPHID()];
       $item->addByline(pht('Author: %s', $author_handle->renderLink()));
+
+      $unlanded = idx($this->unlandedDependencies, $phid);
+      if ($unlanded) {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIcon('fa-chain-broken', 'red'),
+            ' ',
+            pht('Open Dependencies'),
+          ));
+      }
 
       $reviewers = array();
       // TODO: As above, this should be based on `getReviewerStatus()`.

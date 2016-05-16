@@ -153,6 +153,8 @@ final class DifferentialRevisionSearchEngine
 
     $bucket = $this->getResultBucket($query);
 
+    $unlanded = $this->loadUnlandedDependencies($revisions);
+
     $views = array();
     if ($bucket) {
       $bucket->setViewer($viewer);
@@ -187,6 +189,7 @@ final class DifferentialRevisionSearchEngine
 
     foreach ($views as $view) {
       $view->setHandles($handles);
+      $view->setUnlandedDependencies($unlanded);
     }
 
     if (count($views) == 1) {
@@ -221,6 +224,58 @@ final class DifferentialRevisionSearchEngine
       ->addAction($create_button);
 
       return $view;
+  }
+
+  private function loadUnlandedDependencies(array $revisions) {
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+
+    $phids = array();
+    foreach ($revisions as $revision) {
+      if ($revision->getStatus() != $status_accepted) {
+        continue;
+      }
+
+      $phids[] = $revision->getPHID();
+    }
+
+    if (!$phids) {
+      return array();
+    }
+
+    $query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($phids)
+      ->withEdgeTypes(
+        array(
+          DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST,
+        ));
+
+    $query->execute();
+
+    $revision_phids = $query->getDestinationPHIDs();
+    if (!$revision_phids) {
+      return array();
+    }
+
+    $viewer = $this->requireViewer();
+
+    $blocking_revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($revision_phids)
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->execute();
+    $blocking_revisions = mpull($blocking_revisions, null, 'getPHID');
+
+    $result = array();
+    foreach ($revisions as $revision) {
+      $revision_phid = $revision->getPHID();
+      $blocking_phids = $query->getDestinationPHIDs(array($revision_phid));
+      $blocking = array_select_keys($blocking_revisions, $blocking_phids);
+      if ($blocking) {
+        $result[$revision_phid] = $blocking;
+      }
+    }
+
+    return $result;
   }
 
 }
