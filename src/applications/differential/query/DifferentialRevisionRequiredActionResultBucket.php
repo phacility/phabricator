@@ -96,6 +96,7 @@ final class DifferentialRevisionRequiredActionResultBucket
   private function filterShouldReview(array $phids) {
     $reviewing = array(
       DifferentialReviewerStatus::STATUS_ADDED,
+      DifferentialReviewerStatus::STATUS_COMMENTED,
     );
     $reviewing = array_fuse($reviewing);
 
