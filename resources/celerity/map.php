@@ -7,10 +7,10 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'b7b8d101',
+    'core.pkg.css' => '204cabae',
     'core.pkg.js' => '6972d365',
     'darkconsole.pkg.js' => 'e7393ebb',
-    'differential.pkg.css' => '7ba78475',
+    'differential.pkg.css' => '33da0633',
     'differential.pkg.js' => 'd0cd0df6',
     'diffusion.pkg.css' => '91c5d3a6',
     'diffusion.pkg.js' => '3a9a8bfa',
@@ -57,7 +57,7 @@ return array(
     'rsrc/css/application/dashboard/dashboard.css' => 'bc6f2127',
     'rsrc/css/application/diff/inline-comment-summary.css' => '51efda3a',
     'rsrc/css/application/differential/add-comment.css' => 'c47f8c40',
-    'rsrc/css/application/differential/changeset-view.css' => '3e3b0b76',
+    'rsrc/css/application/differential/changeset-view.css' => '7bcbe615',
     'rsrc/css/application/differential/core.css' => '5b7b8ff4',
     'rsrc/css/application/differential/phui-inline-comment.css' => '5953c28e',
     'rsrc/css/application/differential/revision-comment.css' => '14b8565a',
@@ -105,7 +105,7 @@ return array(
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => 'd0801452',
     'rsrc/css/core/remarkup.css' => '787105d6',
-    'rsrc/css/core/syntax.css' => '5101175d',
+    'rsrc/css/core/syntax.css' => '9fc496d5',
     'rsrc/css/core/z-index.css' => '5b6fcf3f',
     'rsrc/css/diviner/diviner-shared.css' => 'aa3656aa',
     'rsrc/css/font/font-aleo.css' => '8bdb2835',
@@ -550,7 +550,7 @@ return array(
     'conpherence-update-css' => 'faf6be09',
     'conpherence-widget-pane-css' => '775eaaba',
     'd3' => 'a11a5ff2',
-    'differential-changeset-view-css' => '3e3b0b76',
+    'differential-changeset-view-css' => '7bcbe615',
     'differential-core-view-css' => '5b7b8ff4',
     'differential-inline-comment-editor' => '64a5550f',
     'differential-revision-add-comment-css' => 'c47f8c40',
@@ -881,7 +881,7 @@ return array(
     'sprite-menu-css' => '9dd65b92',
     'sprite-tokens-css' => '4f399012',
     'syntax-default-css' => '9923583c',
-    'syntax-highlighting-css' => '5101175d',
+    'syntax-highlighting-css' => '9fc496d5',
     'tokens-css' => '3d0f239e',
     'typeahead-browse-css' => 'd8581d2c',
     'unhandled-exception-css' => '4c96257a',
@@ -1148,9 +1148,6 @@ return array(
       'javelin-util',
       'javelin-uri',
     ),
-    '3e3b0b76' => array(
-      'phui-inline-comment-view-css',
-    ),
     '3f5d6dbf' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1242,9 +1239,6 @@ return array(
       'javelin-install',
       'javelin-typeahead-source',
       'javelin-util',
-    ),
-    '5101175d' => array(
-      'syntax-default-css',
     ),
     '519705ea' => array(
       'javelin-install',
@@ -1495,6 +1489,9 @@ return array(
       'javelin-stratcom',
       'javelin-util',
     ),
+    '7bcbe615' => array(
+      'phui-inline-comment-view-css',
+    ),
     '7cbe244b' => array(
       'javelin-install',
       'javelin-util',
@@ -1659,6 +1656,9 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'javelin-vector',
+    ),
+    '9fc496d5' => array(
+      'syntax-default-css',
     ),
     'a0b57eb8' => array(
       'javelin-behavior',
