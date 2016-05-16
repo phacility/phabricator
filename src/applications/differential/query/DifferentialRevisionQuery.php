@@ -501,39 +501,17 @@ final class DifferentialRevisionQuery
       $basic_authors = $this->authors;
       $basic_reviewers = $this->reviewers;
 
-      $authority_phids = $this->responsibles;
-
-      $authority_projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->getViewer())
-        ->withMemberPHIDs($this->responsibles)
-        ->execute();
-      foreach ($authority_projects as $project) {
-        $authority_phids[] = $project->getPHID();
-      }
-
-      // NOTE: We're querying by explicit owners to make this a little faster,
-      // since we've already expanded project membership so we don't need to
-      // have the PackageQuery do it again.
-      $authority_packages = id(new PhabricatorOwnersPackageQuery())
-        ->setViewer($this->getViewer())
-        ->withOwnerPHIDs($authority_phids)
-        ->execute();
-      foreach ($authority_packages as $package) {
-        $authority_phids[] = $package->getPHID();
-      }
-
       try {
         // Build the query where the responsible users are authors.
         $this->authors = array_merge($basic_authors, $this->responsibles);
+
         $this->reviewers = $basic_reviewers;
         $selects[] = $this->buildSelectStatement($conn_r);
 
         // Build the query where the responsible users are reviewers, or
         // projects they are members of are reviewers.
         $this->authors = $basic_authors;
-        $this->reviewers = array_merge(
-          $basic_reviewers,
-          $authority_phids);
+        $this->reviewers = array_merge($basic_reviewers, $this->responsibles);
         $selects[] = $this->buildSelectStatement($conn_r);
 
         // Put everything back like it was.

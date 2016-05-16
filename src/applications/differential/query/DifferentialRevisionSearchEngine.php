@@ -51,10 +51,11 @@ final class DifferentialRevisionSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorUsersSearchField())
+      id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Responsible Users'))
         ->setKey('responsiblePHIDs')
         ->setAliases(array('responsiblePHID', 'responsibles', 'responsible'))
+        ->setDatasource(new DifferentialResponsibleDatasource())
         ->setDescription(
           pht('Find revisions that a given user is responsible for.')),
       id(new PhabricatorUsersSearchField())
@@ -67,7 +68,7 @@ final class DifferentialRevisionSearchEngine
         ->setLabel(pht('Reviewers'))
         ->setKey('reviewerPHIDs')
         ->setAliases(array('reviewer', 'reviewers', 'reviewerPHID'))
-        ->setDatasource(new DiffusionAuditorDatasource())
+        ->setDatasource(new DiffusionAuditorFunctionDatasource())
         ->setDescription(
           pht('Find revisions with specific reviewers.')),
       id(new PhabricatorSearchDatasourceField())

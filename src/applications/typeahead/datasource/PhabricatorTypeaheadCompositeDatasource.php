@@ -142,6 +142,14 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     return parent::canEvaluateFunction($function);
   }
 
+  protected function evaluateValues(array $values) {
+    foreach ($this->getUsableDatasources() as $source) {
+      $values = $source->evaluateValues($values);
+    }
+
+    return parent::evaluateValues($values);
+  }
+
   protected function evaluateFunction($function, array $argv) {
     foreach ($this->getUsableDatasources() as $source) {
       if ($source->canEvaluateFunction($function)) {

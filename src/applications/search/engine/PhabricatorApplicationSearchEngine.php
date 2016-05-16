@@ -143,8 +143,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
    * @param PhabricatorSavedQuery The saved query to operate on.
    * @return The result of the query.
    */
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $saved = clone $saved;
+  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $original) {
+    $saved = clone $original;
     $this->willUseSavedQuery($saved);
 
     $fields = $this->buildSearchFields();
@@ -158,6 +158,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $map[$field->getKey()] = $value;
     }
 
+    $original->attachParameterMap($map);
     $query = $this->buildQueryFromParameters($map);
 
     $object = $this->newResultObject();

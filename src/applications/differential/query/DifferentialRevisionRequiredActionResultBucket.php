@@ -17,7 +17,7 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $this->objects = $objects;
 
-    $phids = $query->getParameter('responsiblePHIDs', array());
+    $phids = $query->getEvaluatedParameter('responsiblePHIDs', array());
     if (!$phids) {
       throw new Exception(
         pht(
