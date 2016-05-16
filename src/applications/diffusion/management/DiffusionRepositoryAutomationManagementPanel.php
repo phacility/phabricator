@@ -13,6 +13,11 @@ final class DiffusionRepositoryAutomationManagementPanel
     return 800;
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository) {
+    return $repository->isGit();
+  }
+
   protected function getEditEngineFieldKeys() {
     return array(
       'automationBlueprintPHIDs',

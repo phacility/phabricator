@@ -13,6 +13,11 @@ final class DiffusionRepositoryBranchesManagementPanel
     return 1000;
   }
 
+  public function shouldEnableForRepository(
+    PhabricatorRepository $repository) {
+    return ($repository->isGit() || $repository->isHg());
+  }
+
   public function getManagementPanelIcon() {
     $repository = $this->getRepository();
 

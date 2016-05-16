@@ -44,7 +44,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     $this->setVerbose($args->getArg('verbose'));
     $console = PhutilConsole::getConsole();
 
-    $repos = $this->loadRepositories($args, 'repos');
+    $repos = $this->loadLocalRepositories($args, 'repos');
     if (count($repos) !== 1) {
       throw new PhutilArgumentUsageException(
         pht('Specify exactly one repository to update.'));
@@ -53,60 +53,42 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     $repository = head($repos);
 
     try {
-      $lock_name = 'repository.update:'.$repository->getID();
-      $lock = PhabricatorGlobalLock::newLock($lock_name);
+      id(new PhabricatorRepositoryPullEngine())
+        ->setRepository($repository)
+        ->setVerbose($this->getVerbose())
+        ->pullRepository();
 
-      try {
-        $lock->lock();
-      } catch (PhutilLockException $ex) {
-        throw new PhutilProxyException(
-          pht(
-            'Another process is currently holding the update lock for '.
-            'repository "%s". Repositories may only be updated by one '.
-            'process at a time. This can happen if you are running multiple '.
-            'copies of the daemons. This can also happen if you manually '.
-            'update a repository while the daemons are also updating it '.
-            '(in this case, just try again in a few moments).',
-            $repository->getMonogram()),
-          $ex);
+      $no_discovery = $args->getArg('no-discovery');
+      if ($no_discovery) {
+        return 0;
       }
 
-      try {
-        $no_discovery = $args->getArg('no-discovery');
+      // TODO: It would be nice to discover only if we pulled something, but
+      // this isn't totally trivial. It's slightly more complicated with
+      // hosted repositories, too.
 
-        id(new PhabricatorRepositoryPullEngine())
-          ->setRepository($repository)
-          ->setVerbose($this->getVerbose())
-          ->pullRepository();
+      $repository->writeStatusMessage(
+        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+        null);
 
-        if ($no_discovery) {
-          $lock->unlock();
-          return;
-        }
+      $this->discoverRepository($repository);
 
-        // TODO: It would be nice to discover only if we pulled something, but
-        // this isn't totally trivial. It's slightly more complicated with
-        // hosted repositories, too.
+      $this->checkIfRepositoryIsFullyImported($repository);
 
-        $repository->writeStatusMessage(
-          PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-          null);
+      $this->updateRepositoryRefs($repository);
 
-        $this->discoverRepository($repository);
+      $this->mirrorRepository($repository);
 
-        $this->checkIfRepositoryIsFullyImported($repository);
-
-        $this->updateRepositoryRefs($repository);
-
-        $this->mirrorRepository($repository);
-
-        $repository->writeStatusMessage(
-          PhabricatorRepositoryStatusMessage::TYPE_FETCH,
-          PhabricatorRepositoryStatusMessage::CODE_OKAY);
-      } catch (Exception $ex) {
-        $lock->unlock();
-        throw $ex;
-      }
+      $repository->writeStatusMessage(
+        PhabricatorRepositoryStatusMessage::TYPE_FETCH,
+        PhabricatorRepositoryStatusMessage::CODE_OKAY);
+    } catch (DiffusionDaemonLockException $ex) {
+      // If we miss a pull or discover because some other process is already
+      // doing the work, just bail out.
+      echo tsprintf(
+        "%s\n",
+        $ex->getMessage());
+      return 0;
     } catch (Exception $ex) {
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_FETCH,
@@ -118,12 +100,11 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       throw $ex;
     }
 
-    $lock->unlock();
-
-    $console->writeOut(
+    echo tsprintf(
+      "%s\n",
       pht(
-        'Updated repository **%s**.',
-        $repository->getMonogram())."\n");
+        'Updated repository "%s".',
+        $repository->getDisplayName()));
 
     return 0;
   }

@@ -531,11 +531,26 @@ final class DifferentialRevisionQuery
       $basic_authors = $this->authors;
       $basic_reviewers = $this->reviewers;
 
+      $authority_phids = $this->responsibles;
+
       $authority_projects = id(new PhabricatorProjectQuery())
         ->setViewer($this->getViewer())
         ->withMemberPHIDs($this->responsibles)
         ->execute();
-      $authority_phids = mpull($authority_projects, 'getPHID');
+      foreach ($authority_projects as $project) {
+        $authority_phids[] = $project->getPHID();
+      }
+
+      // NOTE: We're querying by explicit owners to make this a little faster,
+      // since we've already expanded project membership so we don't need to
+      // have the PackageQuery do it again.
+      $authority_packages = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($this->getViewer())
+        ->withOwnerPHIDs($authority_phids)
+        ->execute();
+      foreach ($authority_packages as $package) {
+        $authority_phids[] = $package->getPHID();
+      }
 
       try {
         // Build the query where the responsible users are authors.
@@ -548,7 +563,6 @@ final class DifferentialRevisionQuery
         $this->authors = $basic_authors;
         $this->reviewers = array_merge(
           $basic_reviewers,
-          $this->responsibles,
           $authority_phids);
         $selects[] = $this->buildSelectStatement($conn_r);
 
@@ -1105,9 +1119,13 @@ final class DifferentialRevisionQuery
     $revision_map = mpull($revisions, null, 'getPHID');
     $viewer_phid = $this->getViewer()->getPHID();
 
-    // Find all the project reviewers which the user may have authority over.
+    // Find all the project/package reviewers which the user may have authority
+    // over.
     $project_phids = array();
+    $package_phids = array();
     $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
+    $package_type = PhabricatorOwnersPackagePHIDType::TYPECONST;
+
     $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
     foreach ($edges as $src => $types) {
       if (!$allow_self) {
@@ -1121,14 +1139,20 @@ final class DifferentialRevisionQuery
       }
       $edge_data = idx($types, $edge_type, array());
       foreach ($edge_data as $dst => $data) {
-        if (phid_get_type($dst) == $project_type) {
+        $phid_type = phid_get_type($dst);
+        if ($phid_type == $project_type) {
           $project_phids[] = $dst;
+        }
+        if ($phid_type == $package_type) {
+          $package_phids[] = $dst;
         }
       }
     }
 
-    // Now, figure out which of these projects the viewer is actually a
-    // member of.
+    // The viewer has authority over themselves.
+    $user_authority = array_fuse(array($viewer_phid));
+
+    // And over any projects they are a member of.
     $project_authority = array();
     if ($project_phids) {
       $project_authority = id(new PhabricatorProjectQuery())
@@ -1137,12 +1161,22 @@ final class DifferentialRevisionQuery
         ->withMemberPHIDs(array($viewer_phid))
         ->execute();
       $project_authority = mpull($project_authority, 'getPHID');
+      $project_authority = array_fuse($project_authority);
     }
 
-    // Finally, the viewer has authority over themselves.
-    return array(
-      $viewer_phid => true,
-    ) + array_fuse($project_authority);
+    // And over any packages they own.
+    $package_authority = array();
+    if ($package_phids) {
+      $package_authority = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($package_phids)
+        ->withAuthorityPHIDs(array($viewer_phid))
+        ->execute();
+      $package_authority = mpull($package_authority, 'getPHID');
+      $package_authority = array_fuse($package_authority);
+    }
+
+    return $user_authority + $project_authority + $package_authority;
   }
 
   public function getQueryApplicationClass() {

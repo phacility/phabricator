@@ -8,7 +8,7 @@ final class PhabricatorMetaMTAMailableDatasource
   }
 
   public function getPlaceholderText() {
-    return pht('Type a user, project, or mailing list name...');
+    return pht('Type a user, project, package, or mailing list name...');
   }
 
   public function getDatasourceApplicationClass() {
@@ -19,6 +19,7 @@ final class PhabricatorMetaMTAMailableDatasource
     return array(
       new PhabricatorPeopleDatasource(),
       new PhabricatorProjectDatasource(),
+      new PhabricatorOwnersPackageDatasource(),
     );
   }
 

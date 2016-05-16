@@ -101,7 +101,7 @@ up with records that look like these:
   - Device: `repo001.mycompany.net`
     - Interface: `123.0.0.1:2222`
     - Interface: `123.0.0.1:80`
-  - Device: `repo002.mycopmany.net`
+  - Device: `repo002.mycompany.net`
     - Interface: `123.0.0.2:2222`
     - Interface: `123.0.0.2:80`
 

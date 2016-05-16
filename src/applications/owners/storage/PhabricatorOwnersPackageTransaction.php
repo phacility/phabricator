@@ -10,6 +10,7 @@ final class PhabricatorOwnersPackageTransaction
   const TYPE_DESCRIPTION = 'owners.description';
   const TYPE_PATHS = 'owners.paths';
   const TYPE_STATUS = 'owners.status';
+  const TYPE_AUTOREVIEW = 'owners.autoreview';
 
   public function getApplicationName() {
     return 'owners';
@@ -143,6 +144,18 @@ final class PhabricatorOwnersPackageTransaction
             '%s archived this package.',
             $this->renderHandleLink($author_phid));
         }
+      case self::TYPE_AUTOREVIEW:
+        $map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
+        $map = ipull($map, 'name');
+
+        $old = idx($map, $old, $old);
+        $new = idx($map, $new, $new);
+
+        return pht(
+          '%s adjusted autoreview from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $old,
+          $new);
     }
 
     return parent::getTitle();

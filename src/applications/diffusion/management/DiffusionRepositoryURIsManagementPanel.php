@@ -6,7 +6,7 @@ final class DiffusionRepositoryURIsManagementPanel
   const PANELKEY = 'uris';
 
   public function getManagementPanelLabel() {
-    return pht('Clone / Fetch / Mirror');
+    return pht('URIs');
   }
 
   public function getManagementPanelIcon() {
@@ -113,8 +113,44 @@ final class DiffusionRepositoryURIsManagementPanel
           ->setTag('a')
           ->setText(pht('Documentation')));
 
+    $is_new = $repository->isNewlyInitialized();
+
+    $messages = array();
+    if ($repository->isHosted()) {
+      if ($is_new) {
+        $host_message = pht('Phabricator will host this repository.');
+      } else {
+        $host_message = pht('Phabricator is hosting this repository.');
+      }
+
+      $messages[] = array(
+        id(new PHUIIconView())->setIcon('fa-folder'),
+        ' ',
+        $host_message,
+      );
+    } else {
+      if ($is_new) {
+        $observe_message = pht(
+          'Phabricator will observe a remote repository.');
+      } else {
+        $observe_message = pht(
+          'This repository is hosted remotely. Phabricator is observing it.');
+      }
+
+      $messages[] = array(
+        id(new PHUIIconView())->setIcon('fa-download'),
+        ' ',
+        $observe_message,
+      );
+    }
+
+    $info_view = id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->setErrors($messages);
+
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setInfoView($info_view)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }

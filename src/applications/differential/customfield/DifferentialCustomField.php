@@ -54,7 +54,7 @@ abstract class DifferentialCustomField
       if ($handle->getPolicyFiltered()) {
         $out[] = $handle->getPHID();
       } else if ($handle->isComplete()) {
-        $out[] = $handle->getObjectName();
+        $out[] = $handle->getCommandLineObjectName();
       }
     }
 

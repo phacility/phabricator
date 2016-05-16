@@ -1,18 +1,20 @@
 @title Diffusion User Guide
 @group userguide
 
-Guide to Diffusion, the Phabricator repository browser.
+Guide to Diffusion, the Phabricator application for hosting and browsing
+repositories.
 
-= Overview =
+Overview
+========
 
-Diffusion is a repository browser which allows you to explore source code in a
-Subversion, Git, or Mercurial repository. It is somewhat similar to software
-like Trac and GitWeb.
+Diffusion allows you to create repositories so that you can browse them from
+the web and interact with them from other applications.
 
-Diffusion can either import a read-only copy of repositories hosted somewhere
-else (for example, from GitHub, Bitbucket or existing hosting) or host
-repositories within Phabricator. Hosted repositories support a variety of
-triggers and access controls.
+Diffusion can host repositories locally, or observe existing remote
+repositories which are hosted elsewhere (for example, on GitHub, Bitbucket, or
+other existing hosting). Both types of repositories can be browsed and
+interacted with, but hosted repositories support some additional triggers
+and access controls which are not available for observed repositories.
 
 Diffusion is integrated with the other tools in the Phabricator suite. For
 instance:
@@ -24,10 +26,15 @@ instance:
   - for hosted repositories, Herald can enforce granular access control rules;
   - in all the tools, commit names are automatically linked.
 
-= Adding Repositories =
+The remainder of this document walks through creating, configuring, and
+managing repositories.
+
+
+Adding Repositories
+===================
 
 Repository administration is accomplished through Diffusion. You can use the
-web interface in Diffusion to import an external repository, or create a new
+web interface in Diffusion to observe an external repository or create a new
 hosted repository.
 
   - For hosted repositories, make sure you go through the setup instructions
@@ -35,64 +42,35 @@ hosted repository.
   - For all repositories, you'll need to be running the daemons. If you have
     not set them up yet, see @{article:Managing Daemons with phd}.
 
-By default, you must be an administrator to create a new repository.
+By default, you must be an administrator to create a new repository. You can
+change this in the application settings.
 
-= Repository Callsigns and Commit Names =
 
-Each repository is identified by a "callsign", which is a short uppercase string
-like "P" (for Phabricator) or "ARC" (for Arcanist).
+Managing Repositories
+=====================
 
-Each repository must have a unique callsign. Callsigns must be unique within
-an install but do not need to be globally unique, so you are free to use the
-single-letter callsigns for brevity. For example, Facebook uses "E" for the
-Engineering repository, "O" for the Ops repository, "Y" for a Yum package
-repository, and so on, while Phabricator uses "P", "ARC", "PHU" for libphutil,
-and "J" for Javelin. Keeping callsigns brief will make them easier to use, and
-the use of one-character callsigns is recommended if they are reasonably
-evocative and you have no more than 26 tracked repositories.
+Diffusion repositories have an array of configurable options and behaviors. For
+details on the available options and guidance on managing and administrating
+repositories, see @{article:Diffusion User Guide: Managing Repositories}.
 
-The primary goal of callsigns is to namespace commits to SVN repositories: if
-you use multiple SVN repositories, each repository has a revision 1, revision 2,
-etc., so referring to them by number alone is ambiguous. However, even for Git
-they impart additional information to human readers and allow parsers to detect
-that something is a commit name with high probability (and allow distinguishing
-between multiple copies of a repository).
+Repositories can also be managed via the API. For an overview on using the
+API to create and edit repositories, see
+@{article:Diffusion User Guide: Repositories API}.
 
-Diffusion uses this callsign and information about the commit itself to generate
-a commit name, like "rE12345" or "rP28146171ce1278f2375e3646a1e1ea3fd56fc5a3".
-The "r" stands for "revision". It is followed by the repository callsign, and
-then a VCS-specific commit identifier (for SVN, the commit number; for Git and
-Mercurial, the commit hash). When writing the name of a Git commit you may
-abbreviate the hash, but note that hash collisions are probable for short prefix
-lengths. See this post on the LKML for a historical explanation of Git's
-occasional internal use of 7-character hashes:
 
-https://lkml.org/lkml/2010/10/28/287
+Repository Clustering
+=====================
 
-Because 7-character hashes are likely to collide for even moderately large
-repositories, Diffusion generally uses either a 16-character prefix (which makes
-collisions very unlikely) or the full 40-character hash (which makes collisions
-astronomically unlikely).
+Phabricator repository hosts can be set up in a cluster configuration so you
+can lose hosts with minimal downtime and data loss. This is an advanced feature
+which most installs do not need to pursue.
 
-= Running Diffusion Daemons =
+To get started with clustering, see @{article:Clustering Introduction}. For
+details on repository clustering, see @{article:Cluster: Repositories}.
 
-In most cases, it is sufficient to run:
 
-  phabricator/bin/ $ ./phd start
-
-...to start the daemons. For a more in-depth explanation of `phd` and daemons,
-see @{article:Managing Daemons with phd}.
-
-NOTE: If you have an unusually large install with multiple web frontends, see
-notes in @{article:Managing Daemons with phd}.
-
-You can use the repository detail screen and the Daemon Console to monitor the
-daemons and their progress importing the repository. Small repositories should
-import quickly, while larger repositories may take some time. Commits should
-begin appearing in Diffusion within a few minutes for all but the largest
-repositories.
-
-= Next Steps =
+Next Steps
+==========
 
 Continue by:
 

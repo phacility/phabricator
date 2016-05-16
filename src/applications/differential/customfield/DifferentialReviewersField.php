@@ -71,7 +71,7 @@ final class DifferentialReviewersField
     return id(new AphrontFormTokenizerControl())
       ->setUser($this->getViewer())
       ->setName($this->getFieldKey())
-      ->setDatasource(new PhabricatorProjectOrUserDatasource())
+      ->setDatasource(new DiffusionAuditorDatasource())
       ->setValue($phids)
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
@@ -146,6 +146,7 @@ final class DifferentialReviewersField
       array(
         PhabricatorPeopleUserPHIDType::TYPECONST,
         PhabricatorProjectProjectPHIDType::TYPECONST,
+        PhabricatorOwnersPackagePHIDType::TYPECONST,
       ));
   }
 

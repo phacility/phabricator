@@ -135,7 +135,12 @@ final class DiffusionRepositoryStatusManagementPanel
     }
 
     if ($repository->isHosted()) {
-      if ($repository->getServeOverHTTP() != PhabricatorRepository::SERVE_OFF) {
+      $proto_https = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTPS;
+      $proto_http = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTP;
+      $can_http = $repository->canServeProtocol($proto_http, false) ||
+                  $repository->canServeProtocol($proto_https, false);
+
+      if ($can_http) {
         switch ($repository->getVersionControlSystem()) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
             $binaries[] = 'git-http-backend';
@@ -151,7 +156,12 @@ final class DiffusionRepositoryStatusManagementPanel
             break;
         }
       }
-      if ($repository->getServeOverSSH() != PhabricatorRepository::SERVE_OFF) {
+
+
+      $proto_ssh = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH;
+      $can_ssh = $repository->canServeProtocol($proto_ssh, false);
+
+      if ($can_ssh) {
         switch ($repository->getVersionControlSystem()) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
             $binaries[] = 'git-receive-pack';
@@ -490,5 +500,14 @@ final class DiffusionRepositoryStatusManagementPanel
     return $messages;
   }
 
+  private function getEnvConfigLink() {
+    $config_href = '/config/edit/environment.append-paths/';
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $config_href,
+      ),
+      'environment.append-paths');
+  }
 
 }

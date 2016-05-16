@@ -89,7 +89,7 @@ There are several ways to do this:
   - If your repository is hosted on Phabricator, this will also be done for you
     automatically.
   - You can schedule an update from the web interface, in Diffusion >
-    (Choose a Repository) > Edit Repository > Update Now.
+    (Choose a Repository) > Manage Repository > Status > Update Now.
   - You can make a call to the Conduit API method `diffusion.looksoon`. This
     hints to Phabricator that it should poll a repository as soon as it can.
     All of the other mechanisms do this under the hood.
@@ -109,7 +109,7 @@ Troubleshooting Updates
 You can manually run a repository update from the command line to troubleshoot
 issues, using the `--trace` flag to get full details:
 
-  phabricator/ $ ./bin/repository update --trace <callsign>
+  phabricator/ $ ./bin/repository update --trace <repository>
 
 To catch potential issues with permissions, run this command as the same user
 that the daemons run as.

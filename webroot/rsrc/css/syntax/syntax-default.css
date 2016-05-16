@@ -1,0 +1,150 @@
+/**
+ * @provides syntax-default-css
+ * @generated
+ */
+
+.remarkup-code .bp,
+.remarkup-code .cp,
+.remarkup-code .kp,
+.remarkup-code .kr,
+.remarkup-code .nb {
+  color: #304a96
+}
+
+.remarkup-code .c,
+.remarkup-code .c1,
+.remarkup-code .cm,
+.remarkup-code .cs {
+  color: #74777d
+}
+
+.remarkup-code .gd {
+  color: #a00000
+}
+
+.remarkup-code .gh,
+.remarkup-code .gp {
+  color: #000080
+}
+
+.remarkup-code .gi {
+  color: #00a000
+}
+
+.remarkup-code .go {
+  color: #808080
+}
+
+.remarkup-code .gr {
+  color: #ff0000
+}
+
+.remarkup-code .gt {
+  color: #0040d0
+}
+
+.remarkup-code .gu {
+  color: #800080
+}
+
+.remarkup-code .hll {
+  color: #ffffcc
+}
+
+.remarkup-code .il,
+.remarkup-code .m,
+.remarkup-code .mf,
+.remarkup-code .mh,
+.remarkup-code .mi,
+.remarkup-code .mo {
+  color: #601200
+}
+
+.remarkup-code .k,
+.remarkup-code .kd,
+.remarkup-code .kn,
+.remarkup-code .kt {
+  color: #aa4000
+}
+
+.remarkup-code .kc,
+.remarkup-code .no {
+  color: #000a65
+}
+
+.remarkup-code .na {
+  color: #354bb3
+}
+
+.remarkup-code .nc,
+.remarkup-code .nt,
+.remarkup-code .vc {
+  color: #00702a
+}
+
+.remarkup-code .nd,
+.remarkup-code .ow {
+  color: #aa22ff
+}
+
+.remarkup-code .ne {
+  color: #d2413a
+}
+
+.remarkup-code .nf,
+.remarkup-code .nx {
+  color: #004012
+}
+
+.remarkup-code .ni {
+  color: #92969d
+}
+
+.remarkup-code .nl {
+  color: #a0a000
+}
+
+.remarkup-code .nn {
+  color: #0000ff
+}
+
+.remarkup-code .nv,
+.remarkup-code .vg,
+.remarkup-code .vi {
+  color: #001294
+}
+
+.remarkup-code .o,
+.remarkup-code .ss {
+  color: #aa2211
+}
+
+.remarkup-code .s,
+.remarkup-code .s1,
+.remarkup-code .s2,
+.remarkup-code .sb,
+.remarkup-code .sc,
+.remarkup-code .sx {
+  color: #766510
+}
+
+.remarkup-code .sd,
+.remarkup-code .sh {
+  color: #000000
+}
+
+.remarkup-code .se {
+  color: #bb6622
+}
+
+.remarkup-code .si {
+  color: #bb66bb
+}
+
+.remarkup-code .sr {
+  color: #bb6688
+}
+
+.remarkup-code .w {
+  color: #bbbbbb
+}

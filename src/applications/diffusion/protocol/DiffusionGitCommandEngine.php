@@ -24,8 +24,7 @@ final class DiffusionGitCommandEngine
     // really silly, but seems like the least damaging approach to
     // mitigating the issue.
 
-    $root = dirname(phutil_get_library_root('phabricator'));
-    $env['HOME'] = $root.'/support/empty/';
+    $env['HOME'] = PhabricatorEnv::getEmptyCWD();
 
     if ($this->isAnySSHProtocol()) {
       $env['GIT_SSH'] = $this->getSSHWrapper();

@@ -50,10 +50,12 @@ final class DifferentialChangesetParser extends Phobject {
   private $showEditAndReplyLinks = true;
   private $canMarkDone;
   private $objectOwnerPHID;
+  private $offsetMode;
 
   private $rangeStart;
   private $rangeEnd;
   private $mask;
+  private $linesOfContext = 8;
 
   private $highlightEngine;
 
@@ -138,6 +140,15 @@ final class DifferentialChangesetParser extends Phobject {
     return $this->objectOwnerPHID;
   }
 
+  public function setOffsetMode($offset_mode) {
+    $this->offsetMode = $offset_mode;
+    return $this;
+  }
+
+  public function getOffsetMode() {
+    return $this->offsetMode;
+  }
+
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
     $prefs = $viewer->loadPreferences();
     $pref_unified = PhabricatorUserPreferences::PREFERENCE_DIFF_UNIFIED;
@@ -185,8 +196,6 @@ final class DifferentialChangesetParser extends Phobject {
   const ATTR_WHITELINES = 'attr:white';
   const ATTR_MOVEAWAY   = 'attr:moveaway';
 
-  const LINES_CONTEXT = 8;
-
   const WHITESPACE_SHOW_ALL         = 'show-all';
   const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
   const WHITESPACE_IGNORE_MOST      = 'ignore-most';
@@ -216,6 +225,16 @@ final class DifferentialChangesetParser extends Phobject {
     $this->visible = $mask;
     return $this;
   }
+
+  public function setLinesOfContext($lines_of_context) {
+    $this->linesOfContext = $lines_of_context;
+    return $this;
+  }
+
+  public function getLinesOfContext() {
+    return $this->linesOfContext;
+  }
+
 
   /**
    * Configure which Changeset comments added to the right side of the visible
@@ -714,8 +733,10 @@ final class DifferentialChangesetParser extends Phobject {
       self::ATTR_MOVEAWAY   => $moveaway,
     ));
 
+    $lines_context = $this->getLinesOfContext();
+
     $hunk_parser->generateIntraLineDiffs();
-    $hunk_parser->generateVisibileLinesMask();
+    $hunk_parser->generateVisibileLinesMask($lines_context);
 
     $this->setOldLines($hunk_parser->getOldLines());
     $this->setNewLines($hunk_parser->getNewLines());
@@ -829,6 +850,22 @@ final class DifferentialChangesetParser extends Phobject {
     }
 
     $this->tryCacheStuff();
+
+    // If we're rendering in an offset mode, treat the range numbers as line
+    // numbers instead of rendering offsets.
+    $offset_mode = $this->getOffsetMode();
+    if ($offset_mode) {
+      if ($offset_mode == 'new') {
+        $offset_map = $this->new;
+      } else {
+        $offset_map = $this->old;
+      }
+
+      $range_end = $this->getOffset($offset_map, $range_start + $range_len);
+      $range_start = $this->getOffset($offset_map, $range_start);
+      $range_len = ($range_end - $range_start);
+    }
+
     $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);
 
     $rows = max(
@@ -933,6 +970,7 @@ final class DifferentialChangesetParser extends Phobject {
     $old_mask = array();
     $new_mask = array();
     $feedback_mask = array();
+    $lines_context = $this->getLinesOfContext();
 
     if ($this->comments) {
       // If there are any comments which appear in sections of the file which
@@ -975,10 +1013,10 @@ final class DifferentialChangesetParser extends Phobject {
 
         }
 
-        $start = max($comment->getLineNumber() - self::LINES_CONTEXT, 0);
+        $start = max($comment->getLineNumber() - $lines_context, 0);
         $end = $comment->getLineNumber() +
           $comment->getLineLength() +
-          self::LINES_CONTEXT;
+          $lines_context;
         for ($ii = $start; $ii <= $end; $ii++) {
           if ($new_side) {
             $new_mask[$ii] = true;
@@ -1163,6 +1201,8 @@ final class DifferentialChangesetParser extends Phobject {
     $range_start,
     $range_len) {
 
+    $lines_context = $this->getLinesOfContext();
+
     // Calculate gaps and mask first
     $gaps = array();
     $gap_start = 0;
@@ -1173,7 +1213,7 @@ final class DifferentialChangesetParser extends Phobject {
       if (isset($base_mask[$ii])) {
         if ($in_gap) {
           $gap_length = $ii - $gap_start;
-          if ($gap_length <= self::LINES_CONTEXT) {
+          if ($gap_length <= $lines_context) {
             for ($jj = $gap_start; $jj <= $gap_start + $gap_length; $jj++) {
               $base_mask[$jj] = true;
             }
@@ -1632,5 +1672,21 @@ final class DifferentialChangesetParser extends Phobject {
     return $results;
   }
 
+  private function getOffset(array $map, $line) {
+    if (!$map) {
+      return null;
+    }
+
+    $line = (int)$line;
+    foreach ($map as $key => $spec) {
+      if ($spec && isset($spec['line'])) {
+        if ((int)$spec['line'] >= $line) {
+          return $key;
+        }
+      }
+    }
+
+    return $key;
+  }
 
 }

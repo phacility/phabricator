@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryEditUpdateController
-  extends DiffusionRepositoryEditController {
+  extends DiffusionRepositoryManageController {
 
   public function handleRequest(AphrontRequest $request) {
     $response = $this->loadDiffusionContextForEdit();
@@ -13,7 +13,9 @@ final class DiffusionRepositoryEditUpdateController
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+    $panel_uri = id(new DiffusionRepositoryStatusManagementPanel())
+      ->setRepository($repository)
+      ->getPanelURI();
 
     if ($request->isFormPost()) {
       $params = array(
@@ -26,7 +28,7 @@ final class DiffusionRepositoryEditUpdateController
         ->setUser($viewer)
         ->execute();
 
-      return id(new AphrontRedirectResponse())->setURI($edit_uri);
+      return id(new AphrontRedirectResponse())->setURI($panel_uri);
     }
 
     $doc_name = 'Diffusion User Guide: Repository Updates';
@@ -58,7 +60,7 @@ final class DiffusionRepositoryEditUpdateController
           'To learn more about how Phabricator updates repositories, '.
           'read %s in the documentation.',
           $doc_link))
-      ->addCancelButton($edit_uri)
+      ->addCancelButton($panel_uri)
       ->addSubmitButton(pht('Schedule Update'));
   }
 

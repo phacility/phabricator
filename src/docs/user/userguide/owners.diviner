@@ -45,6 +45,32 @@ belonging to the package when you look at them in Diffusion, or look at changes
 which affect them in Diffusion or Differential.
 
 
+Auto Review
+===========
+
+You can configure **Auto Review** for packages. When a new code review is
+created in Differential which affects code in a package, the package can
+automatically be added as a subscriber or reviewer.
+
+The available settings are:
+
+  - **No Autoreview**: This package will not be added to new reviews.
+  - **Subscribe to Changes**: This package will be added to reviews as a
+    subscriber. Owners will be notified of changes, but not required to act.
+  - **Review Changes**: This package will be added to reviews as a reviewer.
+    Reviews will appear on the dashboards of package owners.
+  - **Review Changes (Blocking)** This package will be added to reviews
+    as a blocking reviewer. A package owner will be required to accept changes
+    before they may land.
+
+NOTE: These rules **do not trigger** if the change author is a package owner.
+They only apply to changes made by users who aren't already owners.
+
+The intent of this feature is to make it easy to configure simple, reasonable
+behaviors. If you want more tailored or specific triggers, you can write more
+powerful rules by using Herald.
+
+
 Files in Multiple Packages
 ==========================
 

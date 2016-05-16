@@ -196,8 +196,51 @@ final class PhabricatorRepositoryURI
     return $this->getURIObject(false);
   }
 
+  public function getNormalizedURI() {
+    $vcs = $this->getRepository()->getVersionControlSystem();
+
+    $map = array(
+      PhabricatorRepositoryType::REPOSITORY_TYPE_GIT =>
+        PhabricatorRepositoryURINormalizer::TYPE_GIT,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_SVN =>
+        PhabricatorRepositoryURINormalizer::TYPE_SVN,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL =>
+        PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
+    );
+
+    $type = $map[$vcs];
+    $display = (string)$this->getDisplayURI();
+
+    $normal_uri = new PhabricatorRepositoryURINormalizer($type, $display);
+
+    return $normal_uri->getNormalizedURI();
+  }
+
   public function getEffectiveURI() {
     return $this->getURIObject(true);
+  }
+
+  public function getURIEnvelope() {
+    $uri = $this->getEffectiveURI();
+
+    $command_engine = $this->newCommandEngine();
+
+    $is_http = $command_engine->isAnyHTTPProtocol();
+    // For SVN, we use `--username` and `--password` flags separately in the
+    // CommandEngine, so we don't need to add any credentials here.
+    $is_svn = $this->getRepository()->isSVN();
+    $credential_phid = $this->getCredentialPHID();
+
+    if ($is_http && !$is_svn && $credential_phid) {
+      $key = PassphrasePasswordKey::loadFromPHID(
+        $credential_phid,
+        PhabricatorUser::getOmnipotentUser());
+
+      $uri->setUser($key->getUsernameEnvelope()->openEnvelope());
+      $uri->setPass($key->getPasswordEnvelope()->openEnvelope());
+    }
+
+    return new PhutilOpaqueEnvelope((string)$uri);
   }
 
   private function getURIObject($normalize) {
@@ -223,6 +266,11 @@ final class PhabricatorRepositoryURI
     );
 
     $uri = new PhutilURI($raw_uri);
+
+    // Make sure to remove any password from the URI before we do anything
+    // with it; this should always be provided by the associated credential.
+    $uri->setPass(null);
+
     if (!$uri->getProtocol()) {
       $git_uri = new PhutilGitURI($raw_uri);
 
@@ -282,9 +330,15 @@ final class PhabricatorRepositoryURI
 
 
   private function getForcedProtocol() {
+    $repository = $this->getRepository();
+
     switch ($this->getBuiltinProtocol()) {
       case self::BUILTIN_PROTOCOL_SSH:
-        return 'ssh';
+        if ($repository->isSVN()) {
+          return 'svn+ssh';
+        } else {
+          return 'ssh';
+        }
       case self::BUILTIN_PROTOCOL_HTTP:
         return 'http';
       case self::BUILTIN_PROTOCOL_HTTPS:
@@ -354,6 +408,7 @@ final class PhabricatorRepositoryURI
       $suffix = '/';
     } else {
       $suffix = '';
+      $clone_name = '';
     }
 
     switch ($this->getBuiltinIdentifier()) {
@@ -386,7 +441,7 @@ final class PhabricatorRepositoryURI
 
     if ($this->isBuiltin()) {
       $options[] = self::IO_READ;
-      $options[] = self::IO_WRITE;
+      $options[] = self::IO_READWRITE;
     } else {
       $options[] = self::IO_OBSERVE;
       $options[] = self::IO_MIRROR;
@@ -511,6 +566,25 @@ final class PhabricatorRepositoryURI
     return DiffusionCommandEngine::newCommandEngine($repository)
       ->setCredentialPHID($this->getCredentialPHID())
       ->setProtocol($protocol);
+  }
+
+  public function getURIScore() {
+    $score = 0;
+
+    $io_points = array(
+      self::IO_READWRITE => 20,
+      self::IO_READ => 10,
+    );
+    $score += idx($io_points, $this->getEffectiveIoType(), 0);
+
+    $protocol_points = array(
+      self::BUILTIN_PROTOCOL_SSH => 3,
+      self::BUILTIN_PROTOCOL_HTTPS => 2,
+      self::BUILTIN_PROTOCOL_HTTP => 1,
+    );
+    $score += idx($protocol_points, $this->getBuiltinProtocol(), 0);
+
+    return $score;
   }
 
 
@@ -639,6 +713,7 @@ final class PhabricatorRepositoryURI
         'raw' => $this->getURI(),
         'display' => (string)$this->getDisplayURI(),
         'effective' => (string)$this->getEffectiveURI(),
+        'normalized' => (string)$this->getNormalizedURI(),
       ),
       'io' => array(
         'raw' => $this->getIOType(),

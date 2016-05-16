@@ -14,6 +14,7 @@ final class PhabricatorOwnersPackage
   protected $name;
   protected $originalName;
   protected $auditingEnabled;
+  protected $autoReview;
   protected $description;
   protected $primaryOwnerPHID;
   protected $mailKey;
@@ -28,6 +29,11 @@ final class PhabricatorOwnersPackage
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';
 
+  const AUTOREVIEW_NONE = 'none';
+  const AUTOREVIEW_SUBSCRIBE = 'subscribe';
+  const AUTOREVIEW_REVIEW = 'review';
+  const AUTOREVIEW_BLOCK = 'block';
+
   public static function initializeNewPackage(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
@@ -41,6 +47,7 @@ final class PhabricatorOwnersPackage
 
     return id(new PhabricatorOwnersPackage())
       ->setAuditingEnabled(0)
+      ->setAutoReview(self::AUTOREVIEW_NONE)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->attachPaths(array())
@@ -53,6 +60,23 @@ final class PhabricatorOwnersPackage
     return array(
       self::STATUS_ACTIVE => pht('Active'),
       self::STATUS_ARCHIVED => pht('Archived'),
+    );
+  }
+
+  public static function getAutoreviewOptionsMap() {
+    return array(
+      self::AUTOREVIEW_NONE => array(
+        'name' => pht('No Autoreview'),
+      ),
+      self::AUTOREVIEW_SUBSCRIBE => array(
+        'name' => pht('Subscribe to Changes'),
+      ),
+      self::AUTOREVIEW_REVIEW => array(
+        'name' => pht('Review Changes'),
+      ),
+      self::AUTOREVIEW_BLOCK => array(
+        'name' => pht('Review Changes (Blocking)'),
+      ),
     );
   }
 
@@ -69,6 +93,7 @@ final class PhabricatorOwnersPackage
         'auditingEnabled' => 'bool',
         'mailKey' => 'bytes20',
         'status' => 'text32',
+        'autoReview' => 'text32',
       ),
     ) + parent::getConfiguration();
   }
@@ -289,6 +314,14 @@ final class PhabricatorOwnersPackage
     return isset($owner_phids[$phid]);
   }
 
+  public function getMonogram() {
+    return 'O'.$this->getID();
+  }
+
+  public function getURI() {
+    // TODO: Move these to "/O123" for consistency.
+    return '/owners/package/'.$this->getID().'/';
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

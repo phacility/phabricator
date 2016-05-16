@@ -83,12 +83,65 @@ final class DiffusionURIEditEngine
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 
+    $uri_instructions = null;
     if ($object->isBuiltin()) {
       $is_builtin = true;
       $uri_value = (string)$object->getDisplayURI();
+
+      switch ($object->getBuiltinProtocol()) {
+        case PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH:
+          $uri_instructions = pht(
+            "  - Configure [[ %s | %s ]] to change the SSH username.\n".
+            "  - Configure [[ %s | %s ]] to change the SSH host.\n".
+            "  - Configure [[ %s | %s ]] to change the SSH port.",
+            '/config/edit/diffusion.ssh-user/',
+            'diffusion.ssh-user',
+            '/config/edit/diffusion.ssh-host/',
+            'diffusion.ssh-host',
+            '/config/edit/diffusion.ssh-port/',
+            'diffusion.ssh-port');
+          break;
+      }
     } else {
       $is_builtin = false;
       $uri_value = $object->getURI();
+
+      if ($object->getRepositoryPHID()) {
+        $repository = $object->getRepository();
+        if ($repository->isGit()) {
+          $uri_instructions = pht(
+            "Provide the URI of a Git repository. It should usually look ".
+            "like one of these examples:\n".
+            "\n".
+            "| Example Git URIs\n".
+            "| -----------------------\n".
+            "| `git@github.com:example/example.git`\n".
+            "| `ssh://user@host.com/git/example.git`\n".
+            "| `https://example.com/repository.git`");
+        } else if ($repository->isHg()) {
+          $uri_instructions = pht(
+            "Provide the URI of a Mercurial repository. It should usually ".
+            "look like one of these examples:\n".
+            "\n".
+            "| Example Mercurial URIs\n".
+            "|-----------------------\n".
+            "| `ssh://hg@bitbucket.org/example/repository`\n".
+            "| `https://bitbucket.org/example/repository`");
+        } else if ($repository->isSVN()) {
+          $uri_instructions = pht(
+            "Provide the **Repository Root** of a Subversion repository. ".
+            "You can identify this by running `svn info` in a working ".
+            "copy. It should usually look like one of these examples:\n".
+            "\n".
+            "| Example Subversion URIs\n".
+            "|-----------------------\n".
+            "| `http://svn.example.org/svnroot/`\n".
+            "| `svn+ssh://svn.example.com/svnroot/`\n".
+            "| `svn://svn.example.net/svnroot/`\n\n".
+            "You **MUST** specify the root of the repository, not a ".
+            "subdirectory.");
+        }
+      }
     }
 
     return array(
@@ -118,7 +171,8 @@ final class DiffusionURIEditEngine
         ->setConduitTypeDescription(pht('New repository URI.'))
         ->setIsRequired(!$is_builtin)
         ->setIsLocked($is_builtin)
-        ->setValue($uri_value),
+        ->setValue($uri_value)
+        ->setControlInstructions($uri_instructions),
       id(new PhabricatorSelectEditField())
         ->setKey('io')
         ->setLabel(pht('I/O Type'))

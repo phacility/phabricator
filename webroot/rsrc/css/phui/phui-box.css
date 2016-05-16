@@ -86,10 +86,11 @@
   padding: 6px 16px;
 }
 
-.device .phui-box.phui-box-blue-property .phui-header-shell,
-.device .phui-box-blue-property.phui-object-box.phui-object-box-collapsed
+body.device .phui-box.phui-box-blue-property .phui-header-shell,
+body.device .phui-box-blue-property.phui-object-box.phui-object-box-collapsed
   .phui-header-shell {
     padding: 6px 12px;
+    margin-top: 0;
 }
 
 .phui-box.phui-box-blue-property .phui-header-header {

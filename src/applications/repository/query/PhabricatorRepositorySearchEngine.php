@@ -38,6 +38,11 @@ final class PhabricatorRepositorySearchEngine
         ->setLabel(pht('Types'))
         ->setKey('types')
         ->setOptions(PhabricatorRepositoryType::getAllRepositoryTypes()),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('URIs'))
+        ->setKey('uris')
+        ->setDescription(
+          pht('Search for repositories by clone/checkout URI.')),
     );
   }
 
@@ -68,6 +73,10 @@ final class PhabricatorRepositorySearchEngine
 
     if (strlen($map['name'])) {
       $query->withNameContains($map['name']);
+    }
+
+    if ($map['uris']) {
+      $query->withURIs($map['uris']);
     }
 
     return $query;
@@ -242,16 +251,10 @@ final class PhabricatorRepositorySearchEngine
 
   protected function getNewUserBody() {
 
-    $import_button = id(new PHUIButtonView())
+    $new_button = id(new PHUIButtonView())
       ->setTag('a')
-      ->setText(pht('Import Repository'))
-      ->setHref('/diffusion/import/')
-      ->setColor(PHUIButtonView::GREEN);
-
-    $create_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Create Repository'))
-      ->setHref('/diffusion/create/')
+      ->setText(pht('New Repository'))
+      ->setHref('/diffusion/edit/')
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getIcon();
@@ -261,8 +264,7 @@ final class PhabricatorRepositorySearchEngine
       ->setTitle(pht('Welcome to %s', $app_name))
       ->setDescription(
         pht('Import, create, or just browse repositories in Diffusion.'))
-      ->addAction($import_button)
-      ->addAction($create_button);
+      ->addAction($new_button);
 
       return $view;
   }

@@ -3,6 +3,9 @@
 final class DiffusionURIEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $repository;
+  private $repositoryPHID;
+
   public function getEditorApplicationClass() {
     return 'PhabricatorDiffusionApplication';
   }
@@ -115,6 +118,7 @@ final class DiffusionURIEditor
         break;
       case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
         $object->setRepositoryPHID($xaction->getNewValue());
+        $object->attachRepository($this->repository);
         break;
       case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
         $object->setCredentialPHID($xaction->getNewValue());
@@ -151,6 +155,9 @@ final class DiffusionURIEditor
 
     switch ($type) {
       case PhabricatorRepositoryURITransaction::TYPE_REPOSITORY:
+        // Save this, since we need it to validate TYPE_IO transactions.
+        $this->repositoryPHID = $object->getRepositoryPHID();
+
         $missing = $this->validateIsEmptyTextField(
           $object->getRepositoryPHID(),
           $xactions);
@@ -208,6 +215,9 @@ final class DiffusionURIEditor
               $xaction);
             continue;
           }
+
+          $this->repository = $repository;
+          $this->repositoryPHID = $repository_phid;
         }
         break;
       case PhabricatorRepositoryURITransaction::TYPE_CREDENTIAL:
@@ -315,7 +325,7 @@ final class DiffusionURIEditor
           if ($no_observers || $no_readwrite) {
             $repository = id(new PhabricatorRepositoryQuery())
               ->setViewer(PhabricatorUser::getOmnipotentUser())
-              ->withPHIDs(array($object->getRepositoryPHID()))
+              ->withPHIDs(array($this->repositoryPHID))
               ->needURIs(true)
               ->executeOne();
             $uris = $repository->getURIs();
@@ -405,9 +415,69 @@ final class DiffusionURIEditor
           }
         }
         break;
+
+      case PhabricatorRepositoryURITransaction::TYPE_DISABLE:
+        $old = $object->getIsDisabled();
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+
+          if ($old == $new) {
+            continue;
+          }
+
+          if (!$object->isBuiltin()) {
+            continue;
+          }
+
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht('You can not manually disable builtin URIs.'));
+        }
+        break;
     }
 
     return $errors;
+  }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // Synchronize the repository state based on the presence of an "Observe"
+    // URI.
+    $repository = $object->getRepository();
+
+    $uris = id(new PhabricatorRepositoryURIQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withRepositories(array($repository))
+      ->execute();
+
+    $observe_uri = null;
+    foreach ($uris as $uri) {
+      if ($uri->getIoType() != PhabricatorRepositoryURI::IO_OBSERVE) {
+        continue;
+      }
+
+      $observe_uri = $uri;
+      break;
+    }
+
+    if ($observe_uri) {
+      $repository
+        ->setHosted(false)
+        ->setDetail('remote-uri', (string)$observe_uri->getEffectiveURI())
+        ->setCredentialPHID($observe_uri->getCredentialPHID());
+    } else {
+      $repository
+        ->setHosted(true)
+        ->setDetail('remote-uri', null)
+        ->setCredentialPHID(null);
+    }
+
+    $repository->save();
+
+    return $xactions;
   }
 
 }

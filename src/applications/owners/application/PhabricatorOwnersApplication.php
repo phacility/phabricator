@@ -39,6 +39,12 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorOwnersPackageRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/owners/' => array(

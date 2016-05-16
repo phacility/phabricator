@@ -497,6 +497,10 @@ abstract class PhabricatorEditEngine
   }
 
   public function getEffectiveObjectViewURI($object) {
+    if ($this->getIsCreate()) {
+      return $this->getObjectViewURI($object);
+    }
+
     $page = $this->getSelectedPage();
     if ($page) {
       $view_uri = $page->getViewURI();
@@ -839,6 +843,13 @@ abstract class PhabricatorEditEngine
     }
 
     $page_key = $request->getURIData('pageKey');
+    if (!strlen($page_key)) {
+      $pages = $this->getPages($object);
+      if ($pages) {
+        $page_key = head_key($pages);
+      }
+    }
+
     if (strlen($page_key)) {
       $page = $this->selectPage($object, $page_key);
       if (!$page) {
@@ -2032,6 +2043,10 @@ abstract class PhabricatorEditEngine
   private function applyPageToFields($object, array $fields) {
     $pages = $this->getPages($object);
     if (!$pages) {
+      return $fields;
+    }
+
+    if (!$this->getSelectedPage()) {
       return $fields;
     }
 

@@ -877,4 +877,21 @@ final class PhabricatorEnv extends Phobject {
     umask(022);
   }
 
+
+  /**
+   * Get the path to an empty directory which is readable by all of the system
+   * user accounts that Phabricator acts as.
+   *
+   * In some cases, a binary needs some valid HOME or CWD to continue, but not
+   * all user accounts have valid home directories and even if they do they
+   * may not be readable after a `sudo` operation.
+   *
+   * @return string Path to an empty directory suitable for use as a CWD.
+   */
+  public static function getEmptyCWD() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    return $root.'/support/empty/';
+  }
+
+
 }

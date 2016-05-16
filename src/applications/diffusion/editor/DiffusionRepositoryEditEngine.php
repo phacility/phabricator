@@ -40,6 +40,8 @@ final class DiffusionRepositoryEditEngine
     $viewer = $this->getViewer();
     $repository = PhabricatorRepository::initializeNewRepository($viewer);
 
+    $repository->setDetail('newly-initialized', true);
+
     $vcs = $this->getVersionControlSystem();
     if ($vcs) {
       $repository->setVersionControlSystem($vcs);
@@ -165,6 +167,35 @@ final class DiffusionRepositoryEditEngine
     return $pages;
   }
 
+  protected function willConfigureFields($object, array $fields) {
+    // Change the default field order so related fields are adjacent.
+    $after = array(
+      'policy.edit' => array('policy.push'),
+    );
+
+    $result = array();
+    foreach ($fields as $key => $value) {
+      $result[$key] = $value;
+
+      if (!isset($after[$key])) {
+        continue;
+      }
+
+      foreach ($after[$key] as $next_key) {
+        if (!isset($fields[$next_key])) {
+          continue;
+        }
+
+        unset($result[$next_key]);
+        $result[$next_key] = $fields[$next_key];
+        unset($fields[$next_key]);
+      }
+    }
+
+    return $result;
+  }
+
+
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 
@@ -178,6 +209,27 @@ final class DiffusionRepositoryEditEngine
 
     $autoclose_value = $object->getDetail('close-commits-filter', array());
     $autoclose_value = array_keys($autoclose_value);
+
+    $automation_instructions = pht(
+      "Configure **Repository Automation** to allow Phabricator to ".
+      "write to this repository.".
+      "\n\n".
+      "IMPORTANT: This feature is new, experimental, and not supported. ".
+      "Use it at your own risk.");
+
+    $staging_instructions = pht(
+      "To make it easier to run integration tests and builds on code ".
+      "under review, you can configure a **Staging Area**. When `arc` ".
+      "creates a diff, it will push a copy of the changes to the ".
+      "configured staging area with a corresponding tag.".
+      "\n\n".
+      "IMPORTANT: This feature is new, experimental, and not supported. ".
+      "Use it at your own risk.");
+
+    $subpath_instructions = pht(
+      'If you want to import only part of a repository, like `trunk/`, '.
+      'you can set a path in **Import Only**. Phabricator will ignore '.
+      'commits which do not affect this path.');
 
     return array(
       id(new PhabricatorSelectEditField())
@@ -292,6 +344,17 @@ final class DiffusionRepositoryEditEngine
         ->setConduitTypeDescription(pht('New default tracked branchs.'))
         ->setValue($autoclose_value),
       id(new PhabricatorTextEditField())
+        ->setKey('importOnly')
+        ->setLabel(pht('Import Only'))
+        ->setTransactionType(
+          PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH)
+        ->setIsCopyable(true)
+        ->setDescription(pht('Subpath to selectively import.'))
+        ->setConduitDescription(pht('Set the subpath to import.'))
+        ->setConduitTypeDescription(pht('New subpath to import.'))
+        ->setValue($object->getDetail('svn-subpath'))
+        ->setControlInstructions($subpath_instructions),
+      id(new PhabricatorTextEditField())
         ->setKey('stagingAreaURI')
         ->setLabel(pht('Staging Area URI'))
         ->setTransactionType(
@@ -300,7 +363,8 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Staging area URI.'))
         ->setConduitDescription(pht('Set the staging area URI.'))
         ->setConduitTypeDescription(pht('New staging area URI.'))
-        ->setValue($object->getStagingURI()),
+        ->setValue($object->getStagingURI())
+        ->setControlInstructions($staging_instructions),
       id(new PhabricatorDatasourceEditField())
         ->setKey('automationBlueprintPHIDs')
         ->setLabel(pht('Use Blueprints'))
@@ -311,7 +375,8 @@ final class DiffusionRepositoryEditEngine
         ->setDescription(pht('Automation blueprints.'))
         ->setConduitDescription(pht('Change automation blueprints.'))
         ->setConduitTypeDescription(pht('New blueprint PHIDs.'))
-        ->setValue($object->getAutomationBlueprintPHIDs()),
+        ->setValue($object->getAutomationBlueprintPHIDs())
+        ->setControlInstructions($automation_instructions),
       id(new PhabricatorStringListEditField())
         ->setKey('symbolLanguages')
         ->setLabel(pht('Languages'))

@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryTestAutomationController
-  extends DiffusionRepositoryEditController {
+  extends DiffusionRepositoryManageController {
 
   public function handleRequest(AphrontRequest $request) {
     $response = $this->loadDiffusionContextForEdit();
@@ -13,7 +13,9 @@ final class DiffusionRepositoryTestAutomationController
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+    $panel_uri = id(new DiffusionRepositoryAutomationManagementPanel())
+      ->setRepository($repository)
+      ->getPanelURI();
 
     if (!$repository->canPerformAutomation()) {
       return $this->newDialog()
@@ -23,7 +25,7 @@ final class DiffusionRepositoryTestAutomationController
             'You can not run a configuration test for this repository '.
             'because you have not configured repository automation yet. '.
             'Configure it first, then test the configuration.'))
-        ->addCancelButton($edit_uri);
+        ->addCancelButton($panel_uri);
     }
 
     if ($request->isFormPost()) {
@@ -63,7 +65,7 @@ final class DiffusionRepositoryTestAutomationController
           'If you run into write failures despite passing this test, '.
           'it suggests that your setup is nearly correct but authentication '.
           'is probably not fully configured.'))
-      ->addCancelButton($edit_uri)
+      ->addCancelButton($panel_uri)
       ->addSubmitButton(pht('Start Test'));
   }
 

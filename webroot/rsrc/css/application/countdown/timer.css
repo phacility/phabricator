@@ -7,8 +7,8 @@
 }
 
 .device .phabricator-timer {
-  margin-left: 8px;
-  margin-right: 8px;
+  margin-left: 12px;
+  margin-right: 12px;
 }
 
 .phabricator-remarkup .phabricator-timer-view {
@@ -16,9 +16,15 @@
   margin: 0 0 12px 0;
 }
 
-.phabricator-timer .countdown-description {
+body .phabricator-timer .countdown-description.phabricator-remarkup {
   border-bottom: 1px solid {$thinblueborder};
-  padding-bottom: 16px;
+  padding: 0 0 16px;
+  margin: 0;
+}
+
+.phabricator-timer .countdown-description.phabricator-remarkup
+  .phabricator-remarkup {
+    padding: 0;
 }
 
 .device-phone .phabricator-remarkup .phabricator-timer {
