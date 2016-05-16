@@ -17,7 +17,7 @@ abstract class DifferentialRevisionResultBucket
 
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
     foreach ($objects as $key => $object) {
-      if ($object->getStatus() !== $status_review) {
+      if ($object->getStatus() != $status_review) {
         continue;
       }
 
