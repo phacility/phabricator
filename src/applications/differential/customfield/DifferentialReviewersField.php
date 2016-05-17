@@ -36,43 +36,83 @@ final class DifferentialReviewersField
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
-    // Compute a new set of reviewer objects. For reviewers who haven't been
-    // added or removed, retain their existing status. Also, respect the new
-    // order.
+    // Compute a new set of reviewer objects. We're going to respect the new
+    // reviewer order, add or remove any missing or new reviewers, and respect
+    // any blocking or unblocking changes. For reviewers who were there before
+    // and are still there, we're going to keep the current value because it
+    // may be something like "Accept", "Reject", etc.
 
     $old_status = $this->getValue();
-    $old_status = mpull($old_status, null, 'getReviewerPHID');
+    $old_status = mpull($old_status, 'getStatus', 'getReviewerPHID');
+
+    $datasource = id(new DifferentialBlockingReviewerDatasource())
+      ->setViewer($request->getViewer());
 
     $new_phids = $request->getArr($this->getFieldKey());
-    $new_phids = array_fuse($new_phids);
+    $new_phids = $datasource->evaluateTokens($new_phids);
+
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+
+    $specs = array();
+    foreach ($new_phids as $spec) {
+      if (!is_array($spec)) {
+        $spec = array(
+          'type' => DifferentialReviewerStatus::STATUS_ADDED,
+          'phid' => $spec,
+        );
+      }
+      $specs[$spec['phid']] = $spec;
+    }
 
     $new_status = array();
-    foreach ($new_phids as $new_phid) {
-      if (empty($old_status[$new_phid])) {
-        $new_status[$new_phid] = new DifferentialReviewer(
-          $new_phid,
-          array(
-            'status' => DifferentialReviewerStatus::STATUS_ADDED,
-          ));
-      } else {
-        $new_status[$new_phid] = $old_status[$new_phid];
+    foreach ($specs as $phid => $spec) {
+      $new = $spec['type'];
+      $old = idx($old_status, $phid);
+
+      // If we have an old status and this didn't make the reviewer blocking
+      // or nonblocking, just retain the old status. This makes sure we don't
+      // throw away rejects, accepts, etc.
+      if ($old) {
+        $is_block = ($old !== $status_blocking && $new === $status_blocking);
+        $is_unblock = ($old === $status_blocking && $new !== $status_blocking);
+        if (!$is_block && !$is_unblock) {
+          $new_status[$phid] = $old;
+          continue;
+        }
       }
+
+      $new_status[$phid] = $new;
+    }
+
+    foreach ($new_status as $phid => $status) {
+      $new_status[$phid] = new DifferentialReviewer(
+        $phid,
+        array(
+          'status' => $status,
+        ));
     }
 
     $this->setValue($new_status);
   }
 
   public function renderEditControl(array $handles) {
-    $phids = array();
-    if ($this->getValue()) {
-      $phids = mpull($this->getValue(), 'getReviewerPHID');
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+
+    $value = array();
+    foreach ($this->getValue() as $reviewer) {
+      $phid = $reviewer->getReviewerPHID();
+      if ($reviewer->getStatus() == $status_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
     }
 
     return id(new AphrontFormTokenizerControl())
       ->setUser($this->getViewer())
       ->setName($this->getFieldKey())
-      ->setDatasource(new DiffusionAuditorDatasource())
-      ->setValue($phids)
+      ->setDatasource(new DifferentialReviewerDatasource())
+      ->setValue($value)
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
   }
