@@ -455,7 +455,12 @@ final class DiffusionCommitController extends DiffusionController {
     if ($audit_requests) {
       $user_requests = array();
       $other_requests = array();
+
       foreach ($audit_requests as $audit_request) {
+        if (!$audit_request->isInteresting()) {
+          continue;
+        }
+
         if ($audit_request->isUser()) {
           $user_requests[] = $audit_request;
         } else {
@@ -471,7 +476,7 @@ final class DiffusionCommitController extends DiffusionController {
 
       if ($other_requests) {
         $view->addProperty(
-          pht('Project/Package Auditors'),
+          pht('Group Auditors'),
           $this->renderAuditStatusView($other_requests));
       }
     }
