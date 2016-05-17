@@ -11,6 +11,7 @@ final class PhabricatorOwnersPackageTransaction
   const TYPE_PATHS = 'owners.paths';
   const TYPE_STATUS = 'owners.status';
   const TYPE_AUTOREVIEW = 'owners.autoreview';
+  const TYPE_DOMINION = 'owners.dominion';
 
   public function getApplicationName() {
     return 'owners';
@@ -153,6 +154,18 @@ final class PhabricatorOwnersPackageTransaction
 
         return pht(
           '%s adjusted autoreview from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $old,
+          $new);
+      case self::TYPE_DOMINION:
+        $map = PhabricatorOwnersPackage::getDominionOptionsMap();
+        $map = ipull($map, 'short');
+
+        $old = idx($map, $old, $old);
+        $new = idx($map, $new, $new);
+
+        return pht(
+          '%s adjusted package dominion rules from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $old,
           $new);

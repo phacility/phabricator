@@ -21,6 +21,7 @@ final class PhabricatorOwnersPackage
   protected $status;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $dominion;
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -51,6 +52,7 @@ final class PhabricatorOwnersPackage
     return id(new PhabricatorOwnersPackage())
       ->setAuditingEnabled(0)
       ->setAutoReview(self::AUTOREVIEW_NONE)
+      ->setDominion(self::DOMINION_STRONG)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->attachPaths(array())
@@ -83,6 +85,19 @@ final class PhabricatorOwnersPackage
     );
   }
 
+  public static function getDominionOptionsMap() {
+    return array(
+      self::DOMINION_STRONG => array(
+        'name' => pht('Strong (Control All Paths)'),
+        'short' => pht('Strong'),
+      ),
+      self::DOMINION_WEAK => array(
+        'name' => pht('Weak (Control Unowned Paths)'),
+        'short' => pht('Weak'),
+      ),
+    );
+  }
+
   protected function getConfiguration() {
     return array(
       // This information is better available from the history table.
@@ -97,6 +112,7 @@ final class PhabricatorOwnersPackage
         'mailKey' => 'bytes20',
         'status' => 'text32',
         'autoReview' => 'text32',
+        'dominion' => 'text32',
       ),
     ) + parent::getConfiguration();
   }
@@ -193,7 +209,7 @@ final class PhabricatorOwnersPackage
     foreach (array_chunk(array_keys($fragments), 128) as $chunk) {
       $rows[] = queryfx_all(
         $conn,
-        'SELECT pkg.id, "strong" dominion, p.excluded, p.path
+        'SELECT pkg.id, pkg.dominion, p.excluded, p.path
           FROM %T pkg JOIN %T p ON p.packageID = pkg.id
           WHERE p.path IN (%Ls) %Q',
         $package->getTableName(),

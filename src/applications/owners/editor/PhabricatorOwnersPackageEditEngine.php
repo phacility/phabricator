@@ -87,6 +87,9 @@ EOTEXT
     $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
     $autoreview_map = ipull($autoreview_map, 'name');
 
+    $dominion_map = PhabricatorOwnersPackage::getDominionOptionsMap();
+    $dominion_map = ipull($dominion_map, 'name');
+
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -103,6 +106,16 @@ EOTEXT
         ->setDatasource(new PhabricatorProjectOrUserDatasource())
         ->setIsCopyable(true)
         ->setValue($object->getOwnerPHIDs()),
+      id(new PhabricatorSelectEditField())
+        ->setKey('dominion')
+        ->setLabel(pht('Dominion'))
+        ->setDescription(
+          pht('Change package dominion rules.'))
+        ->setTransactionType(
+          PhabricatorOwnersPackageTransaction::TYPE_DOMINION)
+        ->setIsCopyable(true)
+        ->setValue($object->getDominion())
+        ->setOptions($dominion_map),
       id(new PhabricatorSelectEditField())
         ->setKey('autoReview')
         ->setLabel(pht('Auto Review'))

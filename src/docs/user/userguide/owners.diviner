@@ -45,6 +45,38 @@ belonging to the package when you look at them in Diffusion, or look at changes
 which affect them in Diffusion or Differential.
 
 
+Dominion
+========
+
+The **Dominion** option allows you to control how ownership cascades when
+multiple packages own a path. The dominion rules are:
+
+**Strong Dominion.** This is the default. In this mode, the package will always
+own all files matching its configured paths, even if another package also owns
+them.
+
+For example, if the package owns `a/`, it will always own `a/b/c.z` even if
+another package owns `a/b/`. In this case, both packages will own `a/b/c.z`.
+
+This mode prevents users from stealing files away from the package by defining
+more narrow ownership rules in new packages, but enforces hierarchical
+ownership rules.
+
+**Weak Dominion.** In this mode, the package will only own files which do not
+match a more specific path in another package.
+
+For example, if the package owns `a/` but another package owns `a/b/`, the
+package will no longer consider `a/b/c.z` to be a file it owns because another
+package matches the path with a more specific rule.
+
+This mode lets you to define rules without implicit hierarchical ownership,
+but allows users to steal files away from a package by defining a more
+specific package.
+
+For more details on files which match multiple packages, see
+"Files in Multiple Packages", below.
+
+
 Auto Review
 ===========
 
@@ -93,4 +125,6 @@ configuration, these files are part of three packages: "iOS Application",
 "Android Application", and "Design Assets".
 
 (You can use an "exclude" rule if you want to make a different package with a
-more specific claim the owner of a file or subdirectory.)
+more specific claim the owner of a file or subdirectory. You can also change
+the **Dominion** setting for a package to let it give up ownership of paths
+owned by another package.)

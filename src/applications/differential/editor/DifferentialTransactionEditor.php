@@ -1723,6 +1723,10 @@ final class DifferentialTransactionEditor
       $paths[] = $path_prefix.'/'.$changeset->getFilename();
     }
 
+    // Save the affected paths; we'll use them later to query Owners. This
+    // uses the un-expanded paths.
+    $this->affectedPaths = $paths;
+
     // Mark this as also touching all parent paths, so you can see all pending
     // changes to any file within a directory.
     $all_paths = array();
@@ -1732,9 +1736,6 @@ final class DifferentialTransactionEditor
       }
     }
     $all_paths = array_keys($all_paths);
-
-    // Save the affected paths; we'll use them later to query Owners.
-    $this->affectedPaths = $all_paths;
 
     $path_ids =
       PhabricatorRepositoryCommitChangeParserWorker::lookupOrCreatePaths(
