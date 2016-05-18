@@ -146,6 +146,7 @@ final class AlmanacDeviceViewController
     $keys = id(new PhabricatorAuthSSHKeyQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($device_phid))
+      ->withIsActive(true)
       ->execute();
 
     $table = id(new PhabricatorAuthSSHKeyTableView())

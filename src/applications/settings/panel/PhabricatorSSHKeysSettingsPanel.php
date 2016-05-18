@@ -33,6 +33,7 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     $keys = id(new PhabricatorAuthSSHKeyQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($user->getPHID()))
+      ->withIsActive(true)
       ->execute();
 
     $table = id(new PhabricatorAuthSSHKeyTableView())

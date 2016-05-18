@@ -35,6 +35,11 @@ final class AlmanacManagementTrustKeyWorkflow
         pht('No public key exists with ID "%s".', $id));
     }
 
+    if (!$key->getIsActive()) {
+      throw new PhutilArgumentUsageException(
+        pht('Public key "%s" is not an active key.', $id));
+    }
+
     if ($key->getIsTrusted()) {
       throw new PhutilArgumentUsageException(
         pht('Public key with ID %s is already trusted.', $id));

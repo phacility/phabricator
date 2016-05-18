@@ -11,6 +11,7 @@ final class PhabricatorAuthSSHKeyEditController
       $key = id(new PhabricatorAuthSSHKeyQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
+        ->withIsActive(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,

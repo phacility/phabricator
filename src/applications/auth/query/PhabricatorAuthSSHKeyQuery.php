@@ -7,6 +7,7 @@ final class PhabricatorAuthSSHKeyQuery
   private $phids;
   private $objectPHIDs;
   private $keys;
+  private $isActive;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -26,6 +27,11 @@ final class PhabricatorAuthSSHKeyQuery
   public function withKeys(array $keys) {
     assert_instances_of($keys, 'PhabricatorAuthSSHPublicKey');
     $this->keys = $keys;
+    return $this;
+  }
+
+  public function withIsActive($active) {
+    $this->isActive = $active;
     return $this;
   }
 
@@ -98,6 +104,19 @@ final class PhabricatorAuthSSHKeyQuery
           $key->getHash());
       }
       $where[] = implode(' OR ', $sql);
+    }
+
+    if ($this->isActive !== null) {
+      if ($this->isActive) {
+        $where[] = qsprintf(
+          $conn,
+          'isActive = %d',
+          1);
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'isActive IS NULL');
+      }
     }
 
     return $where;

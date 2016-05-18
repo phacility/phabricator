@@ -13,8 +13,27 @@ final class PhabricatorAuthSSHKey
   protected $keyBody;
   protected $keyComment = '';
   protected $isTrusted = 0;
+  protected $isActive;
 
   private $object = self::ATTACHABLE;
+
+  public static function initializeNewSSHKey(
+    PhabricatorUser $viewer,
+    PhabricatorSSHPublicKeyInterface $object) {
+
+    // You must be able to edit an object to create a new key on it.
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $object_phid = $object->getPHID();
+
+    return id(new self())
+      ->setIsActive(1)
+      ->setObjectPHID($object_phid)
+      ->attachObject($object);
+  }
 
   protected function getConfiguration() {
     return array(
@@ -26,13 +45,19 @@ final class PhabricatorAuthSSHKey
         'keyBody' => 'text',
         'keyComment' => 'text255',
         'isTrusted' => 'bool',
+        'isActive' => 'bool?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_object' => array(
           'columns' => array('objectPHID'),
         ),
-        'key_unique' => array(
-          'columns' => array('keyIndex'),
+        'key_active' => array(
+          'columns' => array('isActive', 'objectPHID'),
+        ),
+        // NOTE: This unique key includes a nullable column, effectively
+        // constraining uniqueness on active keys only.
+        'key_activeunique' => array(
+          'columns' => array('keyIndex', 'isActive'),
           'unique' => true,
         ),
       ),

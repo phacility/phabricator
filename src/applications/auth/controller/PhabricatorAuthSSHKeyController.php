@@ -25,9 +25,7 @@ abstract class PhabricatorAuthSSHKeyController
       return null;
     }
 
-    return id(new PhabricatorAuthSSHKey())
-      ->setObjectPHID($object_phid)
-      ->attachObject($object);
+    return PhabricatorAuthSSHKey::initializeNewSSHKey($viewer, $object);
   }
 
 }

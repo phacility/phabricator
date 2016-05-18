@@ -9,6 +9,7 @@ final class PhabricatorAuthSSHKeyDeleteController
     $key = id(new PhabricatorAuthSSHKeyQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
+      ->withIsActive(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -27,8 +28,11 @@ final class PhabricatorAuthSSHKeyDeleteController
       $cancel_uri);
 
     if ($request->isFormPost()) {
-      // TODO: It would be nice to write an edge transaction here or something.
-      $key->delete();
+
+      // TODO: Convert to transactions.
+      $key->setIsActive(null);
+      $key->save();
+
       return id(new AphrontRedirectResponse())->setURI($cancel_uri);
     }
 
