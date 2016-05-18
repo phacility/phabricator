@@ -180,7 +180,7 @@ final class DifferentialReviewersField
   }
 
   public function parseValueFromCommitMessage($value) {
-    return $this->parseObjectList(
+    $results = $this->parseObjectList(
       $value,
       array(
         PhabricatorPeopleUserPHIDType::TYPECONST,
@@ -189,6 +189,8 @@ final class DifferentialReviewersField
       ),
       false,
       array('!'));
+
+    return $this->flattenReviewers($results);
   }
 
   public function getRequiredHandlePHIDsForCommitMessage() {
@@ -196,6 +198,8 @@ final class DifferentialReviewersField
   }
 
   public function readValueFromCommitMessage($value) {
+    $value = $this->inflateReviewers($value);
+
     $reviewers = array();
     foreach ($value as $spec) {
       $phid = $spec['phid'];
@@ -285,6 +289,38 @@ final class DifferentialReviewersField
         'You can mark a reviewer as blocking by adding an exclamation '.
         'mark ("!") after their name.'),
     );
+  }
+
+  private function flattenReviewers(array $values) {
+    // NOTE: For now, `arc` relies on this field returning only scalars, so we
+    // need to reduce the results into scalars. See T10981.
+    $result = array();
+
+    foreach ($values as $value) {
+      $result[] = $value['phid'].implode('', array_keys($value['suffixes']));
+    }
+
+    return $result;
+  }
+
+  private function inflateReviewers(array $values) {
+    $result = array();
+
+    foreach ($values as $value) {
+      if (substr($value, -1) == '!') {
+        $value = substr($value, 0, -1);
+        $suffixes = array('!' => '!');
+      } else {
+        $suffixes = array();
+      }
+
+      $result[] = array(
+        'phid' => $value,
+        'suffixes' => $suffixes,
+      );
+    }
+
+    return $result;
   }
 
 }
