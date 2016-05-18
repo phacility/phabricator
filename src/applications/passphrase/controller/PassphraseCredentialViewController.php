@@ -119,6 +119,8 @@ final class PassphraseCredentialViewController extends PassphraseController {
       $credential,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $can_conduit = ($can_edit && !$is_locked);
+
     $curtain = $this->newCurtainView($credential);
 
     $curtain->addAction(
@@ -161,7 +163,7 @@ final class PassphraseCredentialViewController extends PassphraseController {
           ->setName($credential_conduit_text)
           ->setIcon($credential_conduit_icon)
           ->setHref($this->getApplicationURI("conduit/{$id}/"))
-          ->setDisabled(!$can_edit)
+          ->setDisabled(!$can_conduit)
           ->setWorkflow(true));
 
       $curtain->addAction(
