@@ -2697,7 +2697,9 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function addHeadersAndCommentsToMailBody(
     PhabricatorMetaMTAMailBody $body,
-    array $xactions) {
+    array $xactions,
+    $object_label = null,
+    $object_href = null) {
 
     $headers = array();
     $comments = array();
@@ -2717,7 +2719,62 @@ abstract class PhabricatorApplicationTransactionEditor
         $comments[] = $comment;
       }
     }
-    $body->addRawSection(implode("\n", $headers));
+
+    $headers_text = implode("\n", $headers);
+    $body->addRawPlaintextSection($headers_text);
+
+    $headers_html = phutil_implode_html(phutil_tag('br'), $headers);
+
+    $header_button = null;
+    if ($object_label !== null) {
+      $button_style = array(
+        'text-decoration: none;',
+        'padding: 4px 8px;',
+        'margin: 0 8px;',
+        'float: right;',
+        'color: #464C5C;',
+        'font-weight: bold;',
+        'border-radius: 3px;',
+        'background-color: #F7F7F9;',
+        'background-image: linear-gradient(to bottom,#fff,#f1f0f1);',
+        'border: 1px solid rgba(71,87,120,.2);',
+      );
+
+      $header_button = phutil_tag(
+        'a',
+        array(
+          'style' => implode(' ', $button_style),
+          'href' => $object_href,
+        ),
+        $object_label);
+    }
+
+    $xactions_style = array(
+      'padding: 0 0 8px 0;',
+    );
+
+    $headers_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $xactions_style),
+      ),
+      $headers_html);
+
+    $header_style = array(
+      'overflow: hidden;',
+    );
+
+    $headers_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $header_style),
+      ),
+      array(
+        $header_button,
+        $headers_html,
+      ));
+
+    $body->addRawHTMLSection($headers_html);
 
     foreach ($comments as $comment) {
       $body->addRemarkupSection(null, $comment);

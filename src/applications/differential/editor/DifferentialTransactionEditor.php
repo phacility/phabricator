@@ -1201,7 +1201,13 @@ final class DifferentialTransactionEditor
     $body = new PhabricatorMetaMTAMailBody();
     $body->setViewer($this->requireActor());
 
-    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $revision_uri = PhabricatorEnv::getProductionURI('/D'.$object->getID());
+
+    $this->addHeadersAndCommentsToMailBody(
+      $body,
+      $xactions,
+      pht('View Revision'),
+      $revision_uri);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
@@ -1227,7 +1233,7 @@ final class DifferentialTransactionEditor
 
     $body->addLinkSection(
       pht('REVISION DETAIL'),
-      PhabricatorEnv::getProductionURI('/D'.$object->getID()));
+      $revision_uri);
 
     $update_xaction = null;
     foreach ($xactions as $xaction) {
