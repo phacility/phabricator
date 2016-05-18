@@ -613,7 +613,14 @@ abstract class PhabricatorApplicationTransaction
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
             return true;
-            break;
+          case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
+            // When an object is first created, we hide any corresponding
+            // project transactions in the web UI because you can just look at
+            // the UI element elsewhere on screen to see which projects it
+            // is tagged with. However, in mail there's no other way to get
+            // this information, and it has some amount of value to users, so
+            // we keep the transaction. See T10493.
+            return false;
           default:
             break;
         }
