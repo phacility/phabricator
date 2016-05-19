@@ -69,8 +69,8 @@ and then deploy only Phabricator services into that VPC.
 
 If you have additional auxiliary hosts which run builds and tests via Drydock,
 you should //not// include them in the cluster address definition. For more
-detailed discussion of the Drydock security model, see @{Drydock User Guide:
-Security}.
+detailed discussion of the Drydock security model, see
+@{article:Drydock User Guide: Security}.
 
 Most other clustering features will not work until you define a cluster by
 configuring `cluster.addresses`.
