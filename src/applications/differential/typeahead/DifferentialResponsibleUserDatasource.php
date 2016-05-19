@@ -22,37 +22,9 @@ final class DifferentialResponsibleUserDatasource
   }
 
   protected function evaluateValues(array $values) {
-    $viewer = $this->getViewer();
-
-    $phids = array();
-    foreach ($values as $value) {
-      if (phid_get_type($value) == PhabricatorPeopleUserPHIDType::TYPECONST) {
-        $phids[] = $value;
-      }
-    }
-
-    if (!$phids) {
-      return $values;
-    }
-
-    $projects = id(new PhabricatorProjectQuery())
-       ->setViewer($viewer)
-       ->withMemberPHIDs($phids)
-       ->execute();
-    foreach ($projects as $project) {
-      $phids[] = $project->getPHID();
-      $values[] = $project->getPHID();
-    }
-
-    $packages = id(new PhabricatorOwnersPackageQuery())
-      ->setViewer($viewer)
-      ->withOwnerPHIDs($phids)
-      ->execute();
-    foreach ($packages as $package) {
-      $values[] = $package->getPHID();
-    }
-
-    return $values;
+    return DifferentialResponsibleDatasource::expandResponsibleUsers(
+      $this->getViewer(),
+      $values);
   }
 
 }
