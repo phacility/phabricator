@@ -1033,50 +1033,6 @@ final class DifferentialRevisionQuery
     }
   }
 
-
-  public static function splitResponsible(array $revisions, array $user_phids) {
-    $blocking = array();
-    $active = array();
-    $waiting = array();
-    $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-
-    // Bucket revisions into $blocking (revisions where you are blocking
-    // others), $active (revisions you need to do something about) and $waiting
-    // (revisions you're waiting on someone else to do something about).
-    foreach ($revisions as $revision) {
-      $needs_review = ($revision->getStatus() == $status_review);
-      $filter_is_author = in_array($revision->getAuthorPHID(), $user_phids);
-      if (!$revision->getReviewers()) {
-        $needs_review = false;
-        $author_is_reviewer = false;
-      } else {
-        $author_is_reviewer = in_array(
-          $revision->getAuthorPHID(),
-          $revision->getReviewers());
-      }
-
-      // If exactly one of "needs review" and "the user is the author" is
-      // true, the user needs to act on it. Otherwise, they're waiting on
-      // it.
-      if ($needs_review ^ $filter_is_author) {
-        if ($needs_review) {
-          array_unshift($blocking, $revision);
-        } else {
-          $active[] = $revision;
-        }
-      // User is author **and** reviewer. An exotic but configurable workflow.
-      // User needs to act on it double.
-      } else if ($needs_review && $author_is_reviewer) {
-        array_unshift($blocking, $revision);
-        $active[] = $revision;
-      } else {
-        $waiting[] = $revision;
-      }
-    }
-
-    return array($blocking, $active, $waiting);
-  }
-
   private function loadReviewerAuthority(
     array $revisions,
     array $edges,

@@ -4,6 +4,7 @@ final class PhabricatorSearchResultBucketGroup
   extends Phobject {
 
   private $name;
+  private $key;
   private $noDataString;
   private $objects;
 
@@ -23,6 +24,15 @@ final class PhabricatorSearchResultBucketGroup
 
   public function getName() {
     return $this->name;
+  }
+
+  public function setKey($key) {
+    $this->key = $key;
+    return $this;
+  }
+
+  public function getKey() {
+    return $this->key;
   }
 
   public function setObjects(array $objects) {

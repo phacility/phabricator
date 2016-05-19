@@ -5,6 +5,9 @@ final class DifferentialRevisionRequiredActionResultBucket
 
   const BUCKETKEY = 'action';
 
+  const KEY_MUSTREVIEW = 'must-review';
+  const KEY_SHOULDREVIEW = 'should-review';
+
   private $objects;
 
   public function getResultBucketName() {
@@ -30,11 +33,13 @@ final class DifferentialRevisionRequiredActionResultBucket
 
     $groups[] = $this->newGroup()
       ->setName(pht('Must Review'))
+      ->setKey(self::KEY_MUSTREVIEW)
       ->setNoDataString(pht('No revisions are blocked on your review.'))
       ->setObjects($this->filterMustReview($phids));
 
     $groups[] = $this->newGroup()
       ->setName(pht('Ready to Review'))
+      ->setKey(self::KEY_SHOULDREVIEW)
       ->setNoDataString(pht('No revisions are waiting on you to review them.'))
       ->setObjects($this->filterShouldReview($phids));
 

@@ -205,40 +205,29 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
   }
 
   private function buildRevisionPanel() {
-    $user = $this->getRequest()->getUser();
-    $user_phid = $user->getPHID();
+    $viewer = $this->getViewer();
 
-    $revision_query = id(new DifferentialRevisionQuery())
-      ->setViewer($user)
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
-      ->withResponsibleUsers(array($user_phid))
-      ->needRelationships(true)
-      ->needFlags(true)
-      ->needDrafts(true);
+    $revisions = PhabricatorDifferentialApplication::loadNeedAttentionRevisions(
+      $viewer);
 
-    $revisions = $revision_query->execute();
-
-    list($blocking, $active) = DifferentialRevisionQuery::splitResponsible(
-        $revisions,
-        array($user_phid));
-
-    if (!$blocking && !$active) {
+    if (!$revisions) {
       return $this->renderMiniPanel(
         pht('No Waiting Revisions'),
         pht('No revisions are waiting on you.'));
     }
 
     $title = pht('Revisions Waiting on You');
-    $href = '/differential';
+    $href = '/differential/';
     $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
 
     $revision_view = id(new DifferentialRevisionListView())
       ->setHighlightAge(true)
-      ->setRevisions(array_merge($blocking, $active))
-      ->setUser($user);
+      ->setRevisions($revisions)
+      ->setUser($viewer);
+
     $phids = array_merge(
-      array($user_phid),
+      array($viewer->getPHID()),
       $revision_view->getRequiredHandlePHIDs());
     $handles = $this->loadViewerHandles($phids);
 
