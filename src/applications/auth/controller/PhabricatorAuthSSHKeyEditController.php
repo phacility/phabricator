@@ -11,7 +11,6 @@ final class PhabricatorAuthSSHKeyEditController
       $key = id(new PhabricatorAuthSSHKeyQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
-        ->withIsActive(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -97,7 +96,7 @@ final class PhabricatorAuthSSHKeyEditController
       if (!$errors) {
         try {
           $key->save();
-          return id(new AphrontRedirectResponse())->setURI($cancel_uri);
+          return id(new AphrontRedirectResponse())->setURI($key->getURI());
         } catch (Exception $ex) {
           $e_key = pht('Duplicate');
           $errors[] = pht(

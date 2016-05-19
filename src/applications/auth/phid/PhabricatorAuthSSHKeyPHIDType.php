@@ -34,7 +34,7 @@ final class PhabricatorAuthSSHKeyPHIDType
       $handle->setName(pht('SSH Key %d', $key->getID()));
 
       if (!$key->getIsActive()) {
-        $handle->setClosed(pht('Inactive'));
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

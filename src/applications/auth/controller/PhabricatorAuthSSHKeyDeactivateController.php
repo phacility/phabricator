@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuthSSHKeyDeleteController
+final class PhabricatorAuthSSHKeyDeactivateController
   extends PhabricatorAuthSSHKeyController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -9,7 +9,6 @@ final class PhabricatorAuthSSHKeyDeleteController
     $key = id(new PhabricatorAuthSSHKeyQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
-      ->withIsActive(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -20,7 +19,7 @@ final class PhabricatorAuthSSHKeyDeleteController
       return new Aphront404Response();
     }
 
-    $cancel_uri = $key->getObject()->getSSHPublicKeyManagementURI($viewer);
+    $cancel_uri = $key->getURI();
 
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
@@ -39,13 +38,14 @@ final class PhabricatorAuthSSHKeyDeleteController
     $name = phutil_tag('strong', array(), $key->getName());
 
     return $this->newDialog()
-      ->setTitle(pht('Really delete SSH Public Key?'))
+      ->setTitle(pht('Deactivate SSH Public Key'))
       ->appendParagraph(
         pht(
-          'The key "%s" will be permanently deleted, and you will not longer '.
-          'be able to use the corresponding private key to authenticate.',
+          'The key "%s" will be permanently deactivated, and you will no '.
+          'longer be able to use the corresponding private key to '.
+          'authenticate.',
           $name))
-      ->addSubmitButton(pht('Delete Public Key'))
+      ->addSubmitButton(pht('Deactivate Public Key'))
       ->addCancelButton($cancel_uri);
   }
 

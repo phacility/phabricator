@@ -96,6 +96,11 @@ final class PhabricatorAuthSSHKey
       PhabricatorAuthSSHKeyPHIDType::TYPECONST);
   }
 
+  public function getURI() {
+    $id = $this->getID();
+    return "/auth/sshkey/view/{$id}/";
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -107,14 +112,29 @@ final class PhabricatorAuthSSHKey
   }
 
   public function getPolicy($capability) {
+    if (!$this->getIsActive()) {
+      if ($capability == PhabricatorPolicyCapability::CAN_EDIT) {
+        return PhabricatorPolicies::POLICY_NOONE;
+      }
+    }
+
     return $this->getObject()->getPolicy($capability);
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if (!$this->getIsActive()) {
+      return false;
+    }
+
     return $this->getObject()->hasAutomaticCapability($capability, $viewer);
   }
 
   public function describeAutomaticCapability($capability) {
+    if (!$this->getIsACtive()) {
+      return pht(
+        'Deactivated SSH keys can not be edited or reactivated.');
+    }
+
     return pht(
       'SSH keys inherit the policies of the user or object they authenticate.');
   }

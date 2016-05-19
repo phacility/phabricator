@@ -98,8 +98,6 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $this->navigationItems;
   }
 
-
-
   public function canUseInPanelContext() {
     return true;
   }
