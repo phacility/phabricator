@@ -26,6 +26,10 @@ final class PhabricatorAuthSSHKeyTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_CREATE:
+        return pht(
+          '%s created this key.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
         return pht(
           '%s renamed this key from "%s" to "%s".',

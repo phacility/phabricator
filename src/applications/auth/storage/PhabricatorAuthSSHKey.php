@@ -70,6 +70,12 @@ final class PhabricatorAuthSSHKey
     return parent::save();
   }
 
+  public function getMailKey() {
+    // NOTE: We don't actually receive mail for these objects. It's OK for
+    // the mail key to be predictable until we do.
+    return PhabricatorHash::digestForIndex($this->getPHID());
+  }
+
   public function toPublicKey() {
     return PhabricatorAuthSSHPublicKey::newFromStoredKey($this);
   }
@@ -164,7 +170,7 @@ final class PhabricatorAuthSSHKey
   }
 
   public function getApplicationTransactionTemplate() {
-    return new PhabricatorAuthProviderConfigTransaction();
+    return new PhabricatorAuthSSHKeyTransaction();
   }
 
   public function willRenderTimeline(

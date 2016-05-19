@@ -1342,6 +1342,12 @@ final class PhabricatorUser
     return 'id_rsa_phabricator';
   }
 
+  public function getSSHKeyNotifyPHIDs() {
+    return array(
+      $this->getPHID(),
+    );
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

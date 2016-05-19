@@ -36,13 +36,31 @@ final class PhabricatorAuthSSHKeyGenerateController
 
       $type = $public_key->getType();
       $body = $public_key->getBody();
+      $comment = pht('Generated');
 
-      $key
-        ->setName($default_name)
-        ->setKeyType($type)
-        ->setKeyBody($body)
-        ->setKeyComment(pht('Generated'))
-        ->save();
+      $entire_key = "{$type} {$body} {$comment}";
+
+      $type_create = PhabricatorTransactions::TYPE_CREATE;
+      $type_name = PhabricatorAuthSSHKeyTransaction::TYPE_NAME;
+      $type_key = PhabricatorAuthSSHKeyTransaction::TYPE_KEY;
+
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+
+      $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+        ->setTransactionType($type_name)
+        ->setNewValue($default_name);
+
+      $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+        ->setTransactionType($type_key)
+        ->setNewValue($entire_key);
+
+      $editor = id(new PhabricatorAuthSSHKeyEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->applyTransactions($key, $xactions);
 
       // NOTE: We're disabling workflow on submit so the download works. We're
       // disabling workflow on cancel so the page reloads, showing the new

@@ -177,4 +177,68 @@ final class PhabricatorAuthSSHKeyEditor
   }
 
 
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return pht('[SSH Key]');
+  }
+
+  protected function getMailThreadID(PhabricatorLiskDAO $object) {
+    return 'ssh-key-'.$object->getPHID();
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return $object->getObject()->getSSHKeyNotifyPHIDs();
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    return array();
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhabricatorAuthSSHKeyReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $name = $object->getName();
+    $phid = $object->getPHID();
+
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->setSubject(pht('SSH Key %d: %s', $id, $name))
+      ->addHeader('Thread-Topic', $phid);
+
+    // The primary value of this mail is alerting users to account compromises,
+    // so force delivery. In particular, this mail should still be delievered
+    // even if "self mail" is disabled.
+    $mail->setForceDelivery(true);
+
+    return $mail;
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addLinkSection(
+      pht('SECURITY WARNING'),
+      pht(
+        'If you do not recognize this change, it may indicate your account '.
+        'has been compromised.'));
+
+    $detail_uri = $object->getURI();
+    $detail_uri = PhabricatorEnv::getProductionURI($detail_uri);
+
+    $body->addLinkSection(pht('SSH KEY DETAIL'), $detail_uri);
+
+    return $body;
+  }
+
 }
