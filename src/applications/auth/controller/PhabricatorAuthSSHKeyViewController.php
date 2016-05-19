@@ -49,12 +49,10 @@ final class PhabricatorAuthSSHKeyViewController
     $crumbs->addTextCrumb($title);
     $crumbs->setBorder(true);
 
-    // TODO: This doesn't exist yet, build it.
-    // $timeline = $this->buildTransactionTimeline(
-    //   $ssh_key,
-    //   new PhabricatorAuthSSHKeyTransactionQuery());
-    // $timeline->setShouldTerminate(true);
-    $timeline = null;
+    $timeline = $this->buildTransactionTimeline(
+      $ssh_key,
+      new PhabricatorAuthSSHKeyTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -113,6 +111,9 @@ final class PhabricatorAuthSSHKeyViewController
       ->setUser($viewer);
 
     $properties->addProperty(pht('SSH Key Type'), $ssh_key->getKeyType());
+    $properties->addProperty(
+      pht('Created'),
+      phabricator_datetime($ssh_key->getDateCreated(), $viewer));
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Details'))

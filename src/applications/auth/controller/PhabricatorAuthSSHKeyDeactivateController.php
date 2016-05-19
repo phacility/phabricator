@@ -27,10 +27,18 @@ final class PhabricatorAuthSSHKeyDeactivateController
       $cancel_uri);
 
     if ($request->isFormPost()) {
+      $xactions = array();
 
-      // TODO: Convert to transactions.
-      $key->setIsActive(null);
-      $key->save();
+      $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+        ->setTransactionType(PhabricatorAuthSSHKeyTransaction::TYPE_DEACTIVATE)
+        ->setNewValue(true);
+
+      id(new PhabricatorAuthSSHKeyEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($key, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($cancel_uri);
     }
