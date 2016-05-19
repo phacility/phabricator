@@ -227,7 +227,7 @@ final class PhabricatorAuthSSHKeyEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $body->addLinkSection(
+    $body->addTextSection(
       pht('SECURITY WARNING'),
       pht(
         'If you do not recognize this change, it may indicate your account '.
