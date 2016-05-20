@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuthSSHKeyDeleteController
+final class PhabricatorAuthSSHKeyDeactivateController
   extends PhabricatorAuthSSHKeyController {
 
   public function handleRequest(AphrontRequest $request) {
@@ -19,7 +19,7 @@ final class PhabricatorAuthSSHKeyDeleteController
       return new Aphront404Response();
     }
 
-    $cancel_uri = $key->getObject()->getSSHPublicKeyManagementURI($viewer);
+    $cancel_uri = $key->getURI();
 
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
@@ -27,21 +27,33 @@ final class PhabricatorAuthSSHKeyDeleteController
       $cancel_uri);
 
     if ($request->isFormPost()) {
-      // TODO: It would be nice to write an edge transaction here or something.
-      $key->delete();
+      $xactions = array();
+
+      $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+        ->setTransactionType(PhabricatorAuthSSHKeyTransaction::TYPE_DEACTIVATE)
+        ->setNewValue(true);
+
+      id(new PhabricatorAuthSSHKeyEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($key, $xactions);
+
       return id(new AphrontRedirectResponse())->setURI($cancel_uri);
     }
 
     $name = phutil_tag('strong', array(), $key->getName());
 
     return $this->newDialog()
-      ->setTitle(pht('Really delete SSH Public Key?'))
+      ->setTitle(pht('Deactivate SSH Public Key'))
       ->appendParagraph(
         pht(
-          'The key "%s" will be permanently deleted, and you will not longer '.
-          'be able to use the corresponding private key to authenticate.',
+          'The key "%s" will be permanently deactivated, and you will no '.
+          'longer be able to use the corresponding private key to '.
+          'authenticate.',
           $name))
-      ->addSubmitButton(pht('Delete Public Key'))
+      ->addSubmitButton(pht('Deactivate Public Key'))
       ->addCancelButton($cancel_uri);
   }
 

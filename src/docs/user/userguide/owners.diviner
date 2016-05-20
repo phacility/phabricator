@@ -45,6 +45,88 @@ belonging to the package when you look at them in Diffusion, or look at changes
 which affect them in Diffusion or Differential.
 
 
+Dominion
+========
+
+The **Dominion** option allows you to control how ownership cascades when
+multiple packages own a path. The dominion rules are:
+
+**Strong Dominion.** This is the default. In this mode, the package will always
+own all files matching its configured paths, even if another package also owns
+them.
+
+For example, if the package owns `a/`, it will always own `a/b/c.z` even if
+another package owns `a/b/`. In this case, both packages will own `a/b/c.z`.
+
+This mode prevents users from stealing files away from the package by defining
+more narrow ownership rules in new packages, but enforces hierarchical
+ownership rules.
+
+**Weak Dominion.** In this mode, the package will only own files which do not
+match a more specific path in another package.
+
+For example, if the package owns `a/` but another package owns `a/b/`, the
+package will no longer consider `a/b/c.z` to be a file it owns because another
+package matches the path with a more specific rule.
+
+This mode lets you to define rules without implicit hierarchical ownership,
+but allows users to steal files away from a package by defining a more
+specific package.
+
+For more details on files which match multiple packages, see
+"Files in Multiple Packages", below.
+
+
+Auto Review
+===========
+
+You can configure **Auto Review** for packages. When a new code review is
+created in Differential which affects code in a package, the package can
+automatically be added as a subscriber or reviewer.
+
+The available settings are:
+
+  - **No Autoreview**: This package will not be added to new reviews.
+  - **Subscribe to Changes**: This package will be added to reviews as a
+    subscriber. Owners will be notified of changes, but not required to act.
+  - **Review Changes**: This package will be added to reviews as a reviewer.
+    Reviews will appear on the dashboards of package owners.
+  - **Review Changes (Blocking)** This package will be added to reviews
+    as a blocking reviewer. A package owner will be required to accept changes
+    before they may land.
+
+NOTE: These rules **do not trigger** if the change author is a package owner.
+They only apply to changes made by users who aren't already owners.
+
+These rules also do not trigger if the package has been archived.
+
+The intent of this feature is to make it easy to configure simple, reasonable
+behaviors. If you want more tailored or specific triggers, you can write more
+powerful rules by using Herald.
+
+
+Auditing
+========
+
+You can automatically trigger audits on unreviewed code by configuring
+**Auditing**. The available settings are:
+
+  - **Disabled**: Do not trigger audits.
+  - **Enabled**: Trigger audits.
+
+When enabled, audits are triggered for commits which:
+
+  - affect code owned by the package;
+  - were not authored by a package owner; and
+  - were not accepted by a package owner.
+
+Audits do not trigger if the package has been archived.
+
+The intent of this feature is to make it easy to configure simple auditing
+behavior. If you want more powerful auditing behavior, you can use Herald to
+write more sophisticated rules.
+
+
 Files in Multiple Packages
 ==========================
 
@@ -67,4 +149,6 @@ configuration, these files are part of three packages: "iOS Application",
 "Android Application", and "Design Assets".
 
 (You can use an "exclude" rule if you want to make a different package with a
-more specific claim the owner of a file or subdirectory.)
+more specific claim the owner of a file or subdirectory. You can also change
+the **Dominion** setting for a package to let it give up ownership of paths
+owned by another package.)

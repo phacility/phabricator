@@ -7,6 +7,7 @@ final class DifferentialTransactionEditor
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
   private $didExpandInlineState = false;
+  private $affectedPaths;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -1200,7 +1201,13 @@ final class DifferentialTransactionEditor
     $body = new PhabricatorMetaMTAMailBody();
     $body->setViewer($this->requireActor());
 
-    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $revision_uri = PhabricatorEnv::getProductionURI('/D'.$object->getID());
+
+    $this->addHeadersAndCommentsToMailBody(
+      $body,
+      $xactions,
+      pht('View Revision'),
+      $revision_uri);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
@@ -1226,7 +1233,7 @@ final class DifferentialTransactionEditor
 
     $body->addLinkSection(
       pht('REVISION DETAIL'),
-      PhabricatorEnv::getProductionURI('/D'.$object->getID()));
+      $revision_uri);
 
     $update_xaction = null;
     foreach ($xactions as $xaction) {
@@ -1481,6 +1488,181 @@ final class DifferentialTransactionEditor
     return parent::shouldApplyHeraldRules($object, $xactions);
   }
 
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $repository = $object->getRepository();
+    if (!$repository) {
+      return array();
+    }
+
+    if (!$this->affectedPaths) {
+      return array();
+    }
+
+    $packages = PhabricatorOwnersPackage::loadAffectedPackages(
+      $repository,
+      $this->affectedPaths);
+
+    foreach ($packages as $key => $package) {
+      if ($package->isArchived()) {
+        unset($packages[$key]);
+      }
+    }
+
+    if (!$packages) {
+      return array();
+    }
+
+    // Remove packages that the revision author is an owner of. If you own
+    // code, you don't need another owner to review it.
+    $authority = id(new PhabricatorOwnersPackageQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(mpull($packages, 'getPHID'))
+      ->withAuthorityPHIDs(array($object->getAuthorPHID()))
+      ->execute();
+    $authority = mpull($authority, null, 'getPHID');
+
+    foreach ($packages as $key => $package) {
+      $package_phid = $package->getPHID();
+      if ($authority[$package_phid]) {
+        unset($packages[$key]);
+        continue;
+      }
+    }
+
+    if (!$packages) {
+      return array();
+    }
+
+    $auto_subscribe = array();
+    $auto_review = array();
+    $auto_block = array();
+
+    foreach ($packages as $package) {
+      switch ($package->getAutoReview()) {
+        case PhabricatorOwnersPackage::AUTOREVIEW_SUBSCRIBE:
+          $auto_subscribe[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_REVIEW:
+          $auto_review[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_BLOCK:
+          $auto_block[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_NONE:
+        default:
+          break;
+      }
+    }
+
+    $owners_phid = id(new PhabricatorOwnersApplication())
+      ->getPHID();
+
+    $xactions = array();
+    if ($auto_subscribe) {
+      $xactions[] = $object->getApplicationTransactionTemplate()
+        ->setAuthorPHID($owners_phid)
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(
+          array(
+            '+' => mpull($auto_subscribe, 'getPHID'),
+          ));
+    }
+
+    $specs = array(
+      array($auto_review, false),
+      array($auto_block, true),
+    );
+
+    foreach ($specs as $spec) {
+      list($reviewers, $blocking) = $spec;
+      if (!$reviewers) {
+        continue;
+      }
+
+      $phids = mpull($reviewers, 'getPHID');
+      $xaction = $this->newAutoReviewTransaction($object, $phids, $blocking);
+      if ($xaction) {
+        $xactions[] = $xaction;
+      }
+    }
+
+    return $xactions;
+  }
+
+  private function newAutoReviewTransaction(
+    PhabricatorLiskDAO $object,
+    array $phids,
+    $is_blocking) {
+
+    // TODO: This is substantially similar to DifferentialReviewersHeraldAction
+    // and both are needlessly complex. This logic should live in the normal
+    // transaction application pipeline. See T10967.
+
+    $reviewers = $object->getReviewerStatus();
+    $reviewers = mpull($reviewers, null, 'getReviewerPHID');
+
+    if ($is_blocking) {
+      $new_status = DifferentialReviewerStatus::STATUS_BLOCKING;
+    } else {
+      $new_status = DifferentialReviewerStatus::STATUS_ADDED;
+    }
+
+    $new_strength = DifferentialReviewerStatus::getStatusStrength(
+      $new_status);
+
+    $current = array();
+    foreach ($phids as $phid) {
+      if (!isset($reviewers[$phid])) {
+        continue;
+      }
+
+      // If we're applying a stronger status (usually, upgrading a reviewer
+      // into a blocking reviewer), skip this check so we apply the change.
+      $old_strength = DifferentialReviewerStatus::getStatusStrength(
+        $reviewers[$phid]->getStatus());
+      if ($old_strength <= $new_strength) {
+        continue;
+      }
+
+      $current[] = $phid;
+    }
+
+    $phids = array_diff($phids, $current);
+
+    if (!$phids) {
+      return null;
+    }
+
+    $phids = array_fuse($phids);
+
+    $value = array();
+    foreach ($phids as $phid) {
+      $value[$phid] = array(
+        'data' => array(
+          'status' => $new_status,
+        ),
+      );
+    }
+
+    $edgetype_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
+
+    $owners_phid = id(new PhabricatorOwnersApplication())
+      ->getPHID();
+
+    return $object->getApplicationTransactionTemplate()
+      ->setAuthorPHID($owners_phid)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $edgetype_reviewer)
+      ->setNewValue(
+        array(
+          '+' => $value,
+        ));
+  }
+
   protected function buildHeraldAdapter(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -1546,6 +1728,10 @@ final class DifferentialTransactionEditor
     foreach ($changesets as $changeset) {
       $paths[] = $path_prefix.'/'.$changeset->getFilename();
     }
+
+    // Save the affected paths; we'll use them later to query Owners. This
+    // uses the un-expanded paths.
+    $this->affectedPaths = $paths;
 
     // Mark this as also touching all parent paths, so you can see all pending
     // changes to any file within a directory.

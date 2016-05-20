@@ -33,8 +33,22 @@ final class PassphraseCredentialConduitController
       throw new Exception(pht('Credential has invalid type "%s"!', $type));
     }
 
+    $is_locked = $credential->getIsLocked();
+
+    if ($is_locked) {
+      return $this->newDialog()
+        ->setUser($viewer)
+        ->setTitle(pht('Credential Locked'))
+        ->appendChild(
+          pht(
+            'This credential can not be made available via Conduit because '.
+            'it is locked.'))
+        ->addCancelButton($view_uri);
+    }
+
     if ($request->isFormPost()) {
       $xactions = array();
+
       $xactions[] = id(new PassphraseCredentialTransaction())
         ->setTransactionType(PassphraseCredentialTransaction::TYPE_CONDUIT)
         ->setNewValue(!$credential->getAllowConduit());

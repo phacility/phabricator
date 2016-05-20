@@ -18,8 +18,13 @@ abstract class DiffusionAuditorsHeraldAction
     $object = $adapter->getObject();
 
     $auditors = $object->getAudits();
-    $auditors = mpull($auditors, null, 'getAuditorPHID');
-    $current = array_keys($auditors);
+
+    $current = array();
+    foreach ($auditors as $auditor) {
+      if ($auditor->isInteresting()) {
+        $current[] = $auditor->getAuditorPHID();
+      }
+    }
 
     $allowed_types = array(
       PhabricatorPeopleUserPHIDType::TYPECONST,

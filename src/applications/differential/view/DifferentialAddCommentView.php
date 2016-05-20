@@ -69,7 +69,9 @@ final class DifferentialAddCommentView extends AphrontView {
     );
 
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $reviewer_source = new PhabricatorProjectOrUserDatasource();
+
+    // TODO: This should be a reviewers datasource, but it's a mess.
+    $reviewer_source = new PhabricatorMetaMTAMailableDatasource();
 
     $form = new AphrontFormView();
     $form

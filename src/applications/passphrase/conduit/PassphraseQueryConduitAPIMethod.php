@@ -63,9 +63,12 @@ final class PassphraseQueryConduitAPIMethod
 
       $material = array();
 
+      $is_locked = $credential->getIsLocked();
+      $allow_api = ($credential->getAllowConduit() && !$is_locked);
+
       $secret = null;
       if ($request->getValue('needSecrets')) {
-        if ($credential->getAllowConduit()) {
+        if ($allow_api) {
           $secret = $credential->getSecret();
           if ($secret) {
             $secret = $secret->openEnvelope();
@@ -102,7 +105,7 @@ final class PassphraseQueryConduitAPIMethod
           break;
       }
 
-      if (!$credential->getAllowConduit()) {
+      if (!$allow_api) {
         $material['noAPIAccess'] = pht(
           'This private material for this credential is not accessible via '.
           'API calls.');

@@ -102,68 +102,78 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     );
   }
 
+  public static function loadNeedAttentionRevisions(PhabricatorUser $viewer) {
+    if (!$viewer->isLoggedIn()) {
+      return array();
+    }
+
+    $viewer_phid = $viewer->getPHID();
+
+    $responsible_phids = id(new DifferentialResponsibleDatasource())
+      ->setViewer($viewer)
+      ->evaluateTokens(array($viewer_phid));
+
+    $revision_query = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withResponsibleUsers($responsible_phids)
+      ->needReviewerStatus(true)
+      ->needRelationships(true)
+      ->needFlags(true)
+      ->needDrafts(true)
+      ->setLimit(self::MAX_STATUS_ITEMS);
+
+    $revisions = $revision_query->execute();
+
+    $query = id(new PhabricatorSavedQuery())
+      ->attachParameterMap(
+        array(
+          'responsiblePHIDs' => $responsible_phids,
+        ));
+
+    $groups = id(new DifferentialRevisionRequiredActionResultBucket())
+      ->setViewer($viewer)
+      ->newResultGroups($query, $revisions);
+
+    $include = array();
+    foreach ($groups as $group) {
+      switch ($group->getKey()) {
+        case DifferentialRevisionRequiredActionResultBucket::KEY_MUSTREVIEW:
+        case DifferentialRevisionRequiredActionResultBucket::KEY_SHOULDREVIEW:
+          foreach ($group->getObjects() as $object) {
+            $include[] = $object;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
+    return $include;
+  }
+
   public function loadStatus(PhabricatorUser $user) {
+    $revisions = self::loadNeedAttentionRevisions($user);
     $limit = self::MAX_STATUS_ITEMS;
 
-    $revisions = id(new DifferentialRevisionQuery())
-      ->setViewer($user)
-      ->withResponsibleUsers(array($user->getPHID()))
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
-      ->needRelationships(true)
-      ->setLimit($limit)
-      ->execute();
+    if (count($revisions) >= $limit) {
+      $display_count = ($limit - 1);
+      $display_label = pht(
+        '%s+ Active Review(s)',
+        new PhutilNumber($display_count));
+    } else {
+      $display_count = count($revisions);
+      $display_label = pht(
+        '%s Review(s) Need Attention',
+        new PhutilNumber($display_count));
+    }
 
     $status = array();
-    if (count($revisions) >= $limit) {
-      $all_count = count($revisions);
-      $all_count_str = pht(
-        '%s+ Active Review(s)',
-        new PhutilNumber($limit - 1));
 
-      $type = PhabricatorApplicationStatusView::TYPE_WARNING;
-      $status[] = id(new PhabricatorApplicationStatusView())
-        ->setType($type)
-        ->setText($all_count_str)
-        ->setCount($all_count);
-    } else {
-      list($blocking, $active, $waiting) =
-        DifferentialRevisionQuery::splitResponsible(
-          $revisions,
-          array($user->getPHID()));
-
-      $blocking = count($blocking);
-      $blocking_str = pht(
-        '%s Review(s) Blocking Others',
-        new PhutilNumber($blocking));
-
-      $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-      $status[] = id(new PhabricatorApplicationStatusView())
-        ->setType($type)
-        ->setText($blocking_str)
-        ->setCount($blocking);
-
-      $active = count($active);
-      $active_str = pht(
-        '%s Review(s) Need Attention',
-        new PhutilNumber($active));
-
-      $type = PhabricatorApplicationStatusView::TYPE_WARNING;
-      $status[] = id(new PhabricatorApplicationStatusView())
-        ->setType($type)
-        ->setText($active_str)
-        ->setCount($active);
-
-      $waiting = count($waiting);
-      $waiting_str = pht(
-        '%s Review(s) Waiting on Others',
-        new PhutilNumber($waiting));
-
-      $type = PhabricatorApplicationStatusView::TYPE_INFO;
-      $status[] = id(new PhabricatorApplicationStatusView())
-        ->setType($type)
-        ->setText($waiting_str)
-        ->setCount($waiting);
-    }
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType(PhabricatorApplicationStatusView::TYPE_WARNING)
+      ->setText($display_label)
+      ->setCount($display_count);
 
     return $status;
   }

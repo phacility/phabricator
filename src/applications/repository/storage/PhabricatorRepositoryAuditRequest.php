@@ -49,6 +49,16 @@ final class PhabricatorRepositoryAuditRequest
     return $this->assertAttached($this->commit);
   }
 
+  public function isInteresting() {
+    switch ($this->getAuditStatus()) {
+      case PhabricatorAuditStatusConstants::NONE:
+      case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
+        return false;
+    }
+
+    return true;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

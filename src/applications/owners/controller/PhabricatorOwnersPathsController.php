@@ -64,7 +64,7 @@ final class PhabricatorOwnersPathsController
       $editor->applyTransactions($package, $xactions);
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/owners/package/'.$package->getID().'/');
+        ->setURI($package->getURI());
     } else {
       $paths = $package->getPaths();
       $path_refs = mpull($paths, 'getRef');
@@ -106,7 +106,7 @@ final class PhabricatorOwnersPathsController
 
     require_celerity_resource('owners-path-editor-css');
 
-    $cancel_uri = '/owners/package/'.$package->getID().'/';
+    $cancel_uri = $package->getURI();
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)

@@ -26,7 +26,7 @@ at any time.
 
 First, deploy the Phabricator software and configuration to a host, then
 register the host as a cluster device if it is not already registered (for
-help, see @{article:Cluster: Devices}.
+help, see @{article:Cluster: Devices}.)
 
 Once the host is registered, start the SSH server, and then add the host to the
 SSH load balancer pool.
@@ -36,7 +36,7 @@ production freely.
 
 You may also want to run web services on these hosts, since the service is very
 similar to SSH, also stateless, and it may be simpler to load balance the
-services together. For details, see @{cluster: Web Servers}.
+services together. For details, see @{article:Cluster: Web Servers}.
 
 
 Next Steps

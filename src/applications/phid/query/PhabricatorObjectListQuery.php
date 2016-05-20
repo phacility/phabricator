@@ -6,6 +6,7 @@ final class PhabricatorObjectListQuery extends Phobject {
   private $objectList;
   private $allowedTypes = array();
   private $allowPartialResults;
+  private $suffixes = array();
 
   public function setAllowPartialResults($allow_partial_results) {
     $this->allowPartialResults = $allow_partial_results;
@@ -14,6 +15,15 @@ final class PhabricatorObjectListQuery extends Phobject {
 
   public function getAllowPartialResults() {
     return $this->allowPartialResults;
+  }
+
+  public function setSuffixes(array $suffixes) {
+    $this->suffixes = $suffixes;
+    return $this;
+  }
+
+  public function getSuffixes() {
+    return $this->suffixes;
   }
 
   public function setAllowedTypes(array $allowed_types) {
@@ -45,9 +55,80 @@ final class PhabricatorObjectListQuery extends Phobject {
 
   public function execute() {
     $names = $this->getObjectList();
-    $names = array_unique(array_filter(preg_split('/[\s,]+/', $names)));
 
-    $objects = $this->loadObjects($names);
+    // First, normalize any internal whitespace so we don't get weird results
+    // if linebreaks hit in weird spots.
+    $names = preg_replace('/\s+/', ' ', $names);
+
+    // Split the list on commas.
+    $names = explode(',', $names);
+
+    // Trim and remove empty tokens.
+    foreach ($names as $key => $name) {
+      $name = trim($name);
+
+      if (!strlen($name)) {
+        unset($names[$key]);
+        continue;
+      }
+
+      $names[$key] = $name;
+    }
+
+    // Remove duplicates.
+    $names = array_unique($names);
+
+    $name_map = array();
+    foreach ($names as $name) {
+      $parts = explode(' ', $name);
+
+      // If this looks like a monogram, ignore anything after the first token.
+      // This allows us to parse "O123 Package Name" as though it was "O123",
+      // which we can look up.
+      if (preg_match('/^[A-Z]\d+\z/', $parts[0])) {
+        $name_map[$parts[0]] = $name;
+      } else {
+        // For anything else, split it on spaces and use each token as a
+        // value. This means "alincoln htaft", separated with a space instead
+        // of with a comma, is two different users.
+        foreach ($parts as $part) {
+          $name_map[$part] = $part;
+        }
+      }
+    }
+
+    // If we're parsing with suffixes, strip them off any tokens and keep
+    // track of them for later.
+    $suffixes = $this->getSuffixes();
+    if ($suffixes) {
+      $suffixes = array_fuse($suffixes);
+      $suffix_map = array();
+      $stripped_map = array();
+      foreach ($name_map as $key => $name) {
+        $found_suffixes = array();
+        do {
+          $has_any_suffix = false;
+          foreach ($suffixes as $suffix) {
+            if (!$this->hasSuffix($name, $suffix)) {
+              continue;
+            }
+
+            $key = $this->stripSuffix($key, $suffix);
+            $name = $this->stripSuffix($name, $suffix);
+
+            $found_suffixes[] = $suffix;
+            $has_any_suffix = true;
+            break;
+          }
+        } while ($has_any_suffix);
+
+        $stripped_map[$key] = $name;
+        $suffix_map[$key] = array_fuse($found_suffixes);
+      }
+      $name_map = $stripped_map;
+    }
+
+    $objects = $this->loadObjects(array_keys($name_map));
 
     $types = array();
     foreach ($objects as $name => $object) {
@@ -66,8 +147,8 @@ final class PhabricatorObjectListQuery extends Phobject {
     $invalid = array_mergev($invalid);
 
     $missing = array();
-    foreach ($names as $name) {
-      if (empty($objects[$name])) {
+    foreach ($name_map as $key => $name) {
+      if (empty($objects[$key])) {
         $missing[] = $name;
       }
     }
@@ -100,7 +181,18 @@ final class PhabricatorObjectListQuery extends Phobject {
       }
     }
 
-    return array_values(array_unique(mpull($objects, 'getPHID')));
+    $result = array_unique(mpull($objects, 'getPHID'));
+
+    if ($suffixes) {
+      foreach ($result as $key => $phid) {
+        $result[$key] = array(
+          'phid' => $phid,
+          'suffixes' => idx($suffix_map, $key, array()),
+        );
+      }
+    }
+
+    return array_values($result);
   }
 
   private function loadObjects($names) {
@@ -146,5 +238,16 @@ final class PhabricatorObjectListQuery extends Phobject {
     return $results;
   }
 
+  private function hasSuffix($key, $suffix) {
+    return (substr($key, -strlen($suffix)) === $suffix);
+  }
+
+  private function stripSuffix($key, $suffix) {
+    if ($this->hasSuffix($key, $suffix)) {
+      return substr($key, 0, -strlen($suffix));
+    }
+
+    return $key;
+  }
 
 }

@@ -229,25 +229,6 @@ final class PhabricatorDifferentialConfigOptions
             "\n\n".
             'This sort of workflow is very unusual. Very few installs should '.
             'need to change this option.')),
-      $this->newOption('differential.days-fresh', 'int', 1)
-        ->setSummary(
-          pht(
-            "For how many business days should a revision be considered ".
-            "'fresh'?"))
-        ->setDescription(
-          pht(
-            'Revisions newer than this number of days are marked as fresh in '.
-            'Action Required and Revisions Waiting on You views. Only work '.
-            'days (not weekends and holidays) are included. Set to 0 to '.
-            'disable this feature.')),
-      $this->newOption('differential.days-stale', 'int', 3)
-        ->setSummary(
-          pht("After this many days, a revision will be considered 'stale'."))
-        ->setDescription(
-          pht(
-            "Similar to `%s` but marks stale revisions. ".
-            "If the revision is even older than it is when marked as 'old'.",
-            'differential.days-fresh')),
       $this->newOption(
         'metamta.differential.subject-prefix',
         'string',

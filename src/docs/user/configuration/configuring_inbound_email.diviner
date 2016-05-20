@@ -128,6 +128,7 @@ like this:
   - Add a Mailgun route with a `catch_all()` rule which takes the action
     `forward("https://phabricator.example.com/mail/mailgun/")`. Replace the
     example domain with your actual domain.
+  - Set the `mailgun.api-key` config key to your Mailgun API key.
 
 = SendGrid Setup =
 

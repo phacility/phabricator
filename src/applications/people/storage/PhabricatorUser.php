@@ -1291,11 +1291,12 @@ final class PhabricatorUser
         $profile->delete();
       }
 
-      $keys = id(new PhabricatorAuthSSHKey())->loadAllWhere(
-        'objectPHID = %s',
-        $this->getPHID());
+      $keys = id(new PhabricatorAuthSSHKeyQuery())
+        ->setViewer($engine->getViewer())
+        ->withObjectPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($keys as $key) {
-        $key->delete();
+        $engine->destroyObject($key);
       }
 
       $emails = id(new PhabricatorUserEmail())->loadAllWhere(
@@ -1339,6 +1340,12 @@ final class PhabricatorUser
 
   public function getSSHKeyDefaultName() {
     return 'id_rsa_phabricator';
+  }
+
+  public function getSSHKeyNotifyPHIDs() {
+    return array(
+      $this->getPHID(),
+    );
   }
 
 

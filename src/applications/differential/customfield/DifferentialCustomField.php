@@ -35,27 +35,39 @@ abstract class DifferentialCustomField
   protected function parseObjectList(
     $value,
     array $types,
-    $allow_partial = false) {
+    $allow_partial = false,
+    array $suffixes = array()) {
     return id(new PhabricatorObjectListQuery())
       ->setViewer($this->getViewer())
       ->setAllowedTypes($types)
       ->setObjectList($value)
       ->setAllowPartialResults($allow_partial)
+      ->setSuffixes($suffixes)
       ->execute();
   }
 
-  protected function renderObjectList(array $handles) {
+  protected function renderObjectList(
+    array $handles,
+    array $suffixes = array()) {
+
     if (!$handles) {
       return null;
     }
 
     $out = array();
     foreach ($handles as $handle) {
+      $phid = $handle->getPHID();
+
       if ($handle->getPolicyFiltered()) {
-        $out[] = $handle->getPHID();
+        $token = $phid;
       } else if ($handle->isComplete()) {
-        $out[] = $handle->getObjectName();
+        $token = $handle->getCommandLineObjectName();
       }
+
+      $suffix = idx($suffixes, $phid);
+      $token = $token.$suffix;
+
+      $out[] = $token;
     }
 
     return implode(', ', $out);

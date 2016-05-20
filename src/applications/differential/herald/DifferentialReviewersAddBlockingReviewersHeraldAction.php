@@ -22,7 +22,7 @@ final class DifferentialReviewersAddBlockingReviewersHeraldAction
   }
 
   protected function getDatasource() {
-    return new PhabricatorMetaMTAMailableDatasource();
+    return new DiffusionAuditorDatasource();
   }
 
   public function renderActionDescription($value) {

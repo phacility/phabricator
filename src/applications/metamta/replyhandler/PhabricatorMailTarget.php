@@ -107,11 +107,15 @@ final class PhabricatorMailTarget extends Phobject {
     $cc_handles = iterator_to_array($cc_handles);
 
     $body = '';
+
     if ($to_handles) {
-      $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
+      $to_names = mpull($to_handles, 'getCommandLineObjectName');
+      $body .= "To: ".implode(', ', $to_names)."\n";
     }
+
     if ($cc_handles) {
-      $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
+      $cc_names = mpull($cc_handles, 'getCommandLineObjectName');
+      $body .= "Cc: ".implode(', ', $cc_names)."\n";
     }
 
     return $body;

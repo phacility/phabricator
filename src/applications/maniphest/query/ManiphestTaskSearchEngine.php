@@ -148,8 +148,7 @@ final class ManiphestTaskSearchEngine
   }
 
   protected function buildQueryFromParameters(array $map) {
-    $query = id(new ManiphestTaskQuery())
-      ->needProjectPHIDs(true);
+    $query = $this->newQuery();
 
     if ($map['assignedPHIDs']) {
       $query->withOwners($map['assignedPHIDs']);

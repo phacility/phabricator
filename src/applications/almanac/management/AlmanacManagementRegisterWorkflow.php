@@ -141,6 +141,7 @@ final class AlmanacManagementRegisterWorkflow
     $public_key = id(new PhabricatorAuthSSHKeyQuery())
       ->setViewer($this->getViewer())
       ->withKeys(array($key_object))
+      ->withIsActive(true)
       ->executeOne();
 
     if (!$public_key) {

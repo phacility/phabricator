@@ -60,12 +60,11 @@
   vertical-align: top;
   white-space: pre-wrap;
   word-wrap: break-word;
-  padding: 0 8px 1px;
-  line-height: 16px;
+  padding: 1px 8px;
 }
 
 .device .differential-diff td {
-  padding: 0 4px 1px;
+  padding: 1px 4px;
 }
 
 .device .differential-diff .inline td {
@@ -79,7 +78,7 @@
 
 .differential-diff th {
   text-align: right;
-  padding: 2px 6px 0px 0px;
+  padding: 1px 6px 1px 0;
   vertical-align: top;
   background: {$lightbluebackground};
   color: {$bluetext};
@@ -103,11 +102,11 @@
 }
 
 .differential-diff td.old {
-  background: #ffd0d0;
+  background: rgba(251, 175, 175, 0.3);
 }
 
 .differential-diff td.new {
-  background: #d0ffd0;
+  background: rgba(151, 234, 151, .3);
 }
 
 .differential-diff td.old-rebase {
@@ -120,12 +119,12 @@
 
 .differential-diff td.old-full,
 .differential-diff td.old span.bright {
-  background: #ffaaaa;
+  background: rgba(251, 175, 175, 0.8);
 }
 
 .differential-diff td.new-full,
 .differential-diff td.new span.bright {
-  background: #aaffaa;
+  background: rgba(151, 234, 151, .8);
 }
 
 .differential-diff td.copy {
