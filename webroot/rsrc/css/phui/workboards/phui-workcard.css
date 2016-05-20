@@ -114,6 +114,19 @@
   margin-bottom: 0;
 }
 
+.phui-workcard .phui-object-item-attribute-spacer {
+  display: none;
+}
+
+.phui-workcard .phui-workcard-points {
+  margin: 0 4px 2px 0;
+  display: inline-block;
+}
+
+.phui-workcard .phui-object-item-attribute {
+  display: inline;
+}
+
 
 /* - Draggable Colors --------------------------------------------------------*/
 
