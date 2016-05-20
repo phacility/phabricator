@@ -2730,13 +2730,14 @@ abstract class PhabricatorApplicationTransactionEditor
       $button_style = array(
         'text-decoration: none;',
         'padding: 4px 8px;',
-        'margin: 0 8px;',
+        'margin: 0 8px 8px;',
         'float: right;',
         'color: #464C5C;',
         'font-weight: bold;',
         'border-radius: 3px;',
         'background-color: #F7F7F9;',
         'background-image: linear-gradient(to bottom,#fff,#f1f0f1);',
+        'display: inline-block;',
         'border: 1px solid rgba(71,87,120,.2);',
       );
 
@@ -2750,29 +2751,24 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $xactions_style = array(
-      'padding: 0 0 8px 0;',
     );
 
-    $headers_html = phutil_tag(
-      'div',
+    $header_action = phutil_tag(
+      'td',
+      array(),
+      $header_button);
+
+    $header_action = phutil_tag(
+      'td',
       array(
         'style' => implode(' ', $xactions_style),
       ),
       $headers_html);
 
-    $header_style = array(
-      'overflow: hidden;',
-    );
-
     $headers_html = phutil_tag(
-      'div',
-      array(
-        'style' => implode(' ', $header_style),
-      ),
-      array(
-        $header_button,
-        $headers_html,
-      ));
+      'table',
+      array(),
+      phutil_tag('tr', array(), array($header_action, $header_button)));
 
     $body->addRawHTMLSection($headers_html);
 
