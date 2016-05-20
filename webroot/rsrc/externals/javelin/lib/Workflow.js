@@ -25,7 +25,7 @@ JX.install('Workflow', {
     this.setData(data || {});
   },
 
-  events : ['error', 'finally', 'submit'],
+  events : ['error', 'finally', 'submit', 'start'],
 
   statics : {
     _stack   : [],
@@ -54,6 +54,9 @@ JX.install('Workflow', {
       }
 
       var workflow = new JX.Workflow(form.getAttribute('action'), {});
+
+      workflow._form = form;
+
       workflow.setDataWithListOfPairs(pairs);
       workflow.setMethod(form.getAttribute('method'));
       workflow.listen('finally', function() {
@@ -137,9 +140,14 @@ JX.install('Workflow', {
       data.push([button.name, button.value || true]);
 
       var active = JX.Workflow._getActiveWorkflow();
+
+      active._form = form;
+
       var e = active.invoke('submit', {form: form, data: data});
       if (!e.getStopped()) {
-        active._destroy();
+        // NOTE: Don't remove the current dialog yet because additional
+        // handlers may still want to access the nodes.
+
         active
           .setURI(form.getAttribute('action') || active.getURI())
           .setDataWithListOfPairs(data)
@@ -156,7 +164,41 @@ JX.install('Workflow', {
     _root : null,
     _pushed : false,
     _data : null,
+
+    _form: null,
+    _paused: 0,
+    _nextCallback: null,
+
+    getSourceForm: function() {
+      return this._form;
+    },
+
+    pause: function() {
+      this._paused++;
+      return this;
+    },
+
+    resume: function() {
+      if (!this._paused) {
+        JX.$E('Resuming a workflow which is not paused!');
+      }
+
+      this._paused--;
+
+      if (!this._paused) {
+        var next = this._nextCallback;
+        this._nextCallback = null;
+        if (next) {
+          next();
+        }
+      }
+
+      return this;
+    },
+
     _onload : function(r) {
+      this._destroy();
+
       // It is permissible to send back a falsey redirect to force a page
       // reload, so we need to take this branch if the key is present.
       if (r && (typeof r.redirect != 'undefined')) {
@@ -247,7 +289,19 @@ JX.install('Workflow', {
         this._root = null;
       }
     },
+
     start : function() {
+      var next = JX.bind(this, this._send);
+
+      this.pause();
+      this._nextCallback = next;
+
+      this.invoke('start', this);
+
+      this.resume();
+    },
+
+    _send: function() {
       var uri = this.getURI();
       var method = this.getMethod();
       var r = new JX.Request(uri, JX.bind(this, this._onload));
@@ -288,6 +342,11 @@ JX.install('Workflow', {
       for (var k in dictionary) {
         this._data.push([k, dictionary[k]]);
       }
+      return this;
+    },
+
+    addData: function(key, value) {
+      this._data.push([key, value]);
       return this;
     },
 

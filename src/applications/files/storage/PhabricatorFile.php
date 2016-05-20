@@ -851,6 +851,14 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $supported;
   }
 
+  public function getDragAndDropDictionary() {
+    return array(
+      'id'   => $this->getID(),
+      'phid' => $this->getPHID(),
+      'uri'  => $this->getBestURI(),
+    );
+  }
+
   public function instantiateStorageEngine() {
     return self::buildEngine($this->getStorageEngine());
   }
