@@ -33,7 +33,7 @@ JX.behavior('durable-column', function(config, statics) {
 
   var columnWidth = (300 + margin);
   // This is the smallest window size where we'll enable the column.
-  var minimumViewportWidth = (768 - margin);
+  var minimumViewportWidth = (920 - margin);
 
   var quick = JX.$('phabricator-standard-page-body');
 

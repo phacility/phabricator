@@ -7,8 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '204cabae',
-    'core.pkg.js' => '9f2969e9',
+    'core.pkg.css' => '8aeacc63',
+    'core.pkg.js' => '437c65c2',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '33da0633',
     'differential.pkg.js' => '4b7d8f19',
@@ -126,7 +126,7 @@ return array(
     'rsrc/css/phui/phui-box.css' => '5c8387cf',
     'rsrc/css/phui/phui-button.css' => 'a64a8de6',
     'rsrc/css/phui/phui-chart.css' => '6bf6f78e',
-    'rsrc/css/phui/phui-crumbs-view.css' => '1a1265d4',
+    'rsrc/css/phui/phui-crumbs-view.css' => '6b813619',
     'rsrc/css/phui/phui-curtain-view.css' => '7148ae25',
     'rsrc/css/phui/phui-document-pro.css' => '8419560b',
     'rsrc/css/phui/phui-document-summary.css' => '9ca48bdf',
@@ -367,7 +367,7 @@ return array(
     'rsrc/js/application/config/behavior-reorder-fields.js' => 'b6993408',
     'rsrc/js/application/conpherence/ConpherenceThreadManager.js' => '01774ab2',
     'rsrc/js/application/conpherence/behavior-drag-and-drop-photo.js' => 'cf86d16a',
-    'rsrc/js/application/conpherence/behavior-durable-column.js' => 'c72aa091',
+    'rsrc/js/application/conpherence/behavior-durable-column.js' => 'd3506890',
     'rsrc/js/application/conpherence/behavior-menu.js' => '1d45c74d',
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '21ba5861',
     'rsrc/js/application/conpherence/behavior-quicksand-blacklist.js' => '7927a7d3',
@@ -477,7 +477,7 @@ return array(
     'rsrc/js/core/behavior-choose-control.js' => '327a00d1',
     'rsrc/js/core/behavior-crop.js' => 'fa0f4fc2',
     'rsrc/js/core/behavior-dark-console.js' => 'f411b6ae',
-    'rsrc/js/core/behavior-device.js' => 'b5b36110',
+    'rsrc/js/core/behavior-device.js' => 'bb1dd507',
     'rsrc/js/core/behavior-drag-and-drop-textarea.js' => '484a6e22',
     'rsrc/js/core/behavior-error-log.js' => '6882e80a',
     'rsrc/js/core/behavior-fancy-datepicker.js' => '568931f3',
@@ -601,7 +601,7 @@ return array(
     'javelin-behavior-dashboard-tab-panel' => 'd4eecc63',
     'javelin-behavior-day-view' => '5c46cff2',
     'javelin-behavior-desktop-notifications-control' => 'edd1ba66',
-    'javelin-behavior-device' => 'b5b36110',
+    'javelin-behavior-device' => 'bb1dd507',
     'javelin-behavior-differential-add-reviewers-and-ccs' => 'e10f8e18',
     'javelin-behavior-differential-comment-jump' => '4fdb476d',
     'javelin-behavior-differential-diff-radios' => 'e1ff79b1',
@@ -620,7 +620,7 @@ return array(
     'javelin-behavior-diffusion-pull-lastmodified' => 'f01586dc',
     'javelin-behavior-doorkeeper-tag' => 'e5822781',
     'javelin-behavior-drydock-live-operation-status' => '901935ef',
-    'javelin-behavior-durable-column' => 'c72aa091',
+    'javelin-behavior-durable-column' => 'd3506890',
     'javelin-behavior-editengine-reorder-configs' => 'd7a74243',
     'javelin-behavior-editengine-reorder-fields' => 'b59e1e96',
     'javelin-behavior-error-log' => '6882e80a',
@@ -823,7 +823,7 @@ return array(
     'phui-calendar-list-css' => 'c1c7f338',
     'phui-calendar-month-css' => '476be7e0',
     'phui-chart-css' => '6bf6f78e',
-    'phui-crumbs-view-css' => '1a1265d4',
+    'phui-crumbs-view-css' => '6b813619',
     'phui-curtain-view-css' => '7148ae25',
     'phui-document-summary-view-css' => '9ca48bdf',
     'phui-document-view-css' => '715aedfb',
@@ -1794,13 +1794,6 @@ return array(
       'javelin-dom',
       'phabricator-draggable-list',
     ),
-    'b5b36110' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-vector',
-      'javelin-install',
-    ),
     'b5c256b8' => array(
       'javelin-install',
       'javelin-dom',
@@ -1826,6 +1819,13 @@ return array(
     'bae58312' => array(
       'javelin-install',
       'javelin-workboard-card',
+    ),
+    'bb1dd507' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-vector',
+      'javelin-install',
     ),
     'bcaccd64' => array(
       'javelin-behavior',
@@ -1865,16 +1865,6 @@ return array(
     ),
     'c587b80f' => array(
       'javelin-install',
-    ),
-    'c72aa091' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-behavior-device',
-      'javelin-scrollbar',
-      'javelin-quicksand',
-      'phabricator-keyboard-shortcut',
-      'conpherence-thread-manager',
     ),
     'c7ccd872' => array(
       'phui-fontkit-css',
@@ -1940,6 +1930,16 @@ return array(
     ),
     'd254d646' => array(
       'javelin-util',
+    ),
+    'd3506890' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-behavior-device',
+      'javelin-scrollbar',
+      'javelin-quicksand',
+      'phabricator-keyboard-shortcut',
+      'conpherence-thread-manager',
     ),
     'd4505101' => array(
       'javelin-stratcom',
