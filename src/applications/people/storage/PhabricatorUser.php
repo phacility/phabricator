@@ -755,6 +755,17 @@ final class PhabricatorUser
     return new DateTimeZone($this->getTimezoneIdentifier());
   }
 
+  public function getTimeZoneOffset() {
+    $timezone = $this->getTimeZone();
+    $now = new DateTime('@'.PhabricatorTime::getNow());
+    $offset = $timezone->getOffset($now);
+
+    // Javascript offsets are in minutes and have the opposite sign.
+    $offset = -(int)($offset / 60);
+
+    return $offset;
+  }
+
   public function formatShortDateTime($when, $now = null) {
     if ($now === null) {
       $now = PhabricatorTime::getNow();

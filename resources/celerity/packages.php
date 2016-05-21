@@ -81,6 +81,7 @@ return array(
     'javelin-behavior-scrollbar',
     'javelin-behavior-durable-column',
     'conpherence-thread-manager',
+    'javelin-behavior-detect-timezone',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',

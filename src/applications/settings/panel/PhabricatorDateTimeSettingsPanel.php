@@ -21,6 +21,7 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
     $pref_time = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
     $pref_date = PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT;
     $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
+    $pref_ignore = PhabricatorUserPreferences::PREFERENCE_IGNORE_OFFSET;
     $preferences = $user->loadPreferences();
 
     $errors = array();
@@ -41,7 +42,8 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
           $request->getStr($pref_date))
         ->setPreference(
           $pref_week_start,
-          $request->getStr($pref_week_start));
+          $request->getStr($pref_week_start))
+        ->setPreference($pref_ignore, null);
 
       if (!$errors) {
         $preferences->save();
