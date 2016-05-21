@@ -45,4 +45,8 @@ final class PhabricatorSearchThreeStateField
     return null;
   }
 
+  protected function newConduitParameterType() {
+    return new ConduitBoolParameterType();
+  }
+
 }

@@ -501,6 +501,7 @@ EOTEXT
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('This call does not support any attachments.'))
       ->setHeaders(
         array(
           pht('Key'),

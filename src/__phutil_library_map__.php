@@ -4135,6 +4135,7 @@ phutil_register_library_map(array(
     'UserEnableConduitAPIMethod' => 'applications/people/conduit/UserEnableConduitAPIMethod.php',
     'UserFindConduitAPIMethod' => 'applications/people/conduit/UserFindConduitAPIMethod.php',
     'UserQueryConduitAPIMethod' => 'applications/people/conduit/UserQueryConduitAPIMethod.php',
+    'UserSearchConduitAPIMethod' => 'applications/people/conduit/UserSearchConduitAPIMethod.php',
     'UserWhoAmIConduitAPIMethod' => 'applications/people/conduit/UserWhoAmIConduitAPIMethod.php',
   ),
   'function' => array(
@@ -8313,6 +8314,7 @@ phutil_register_library_map(array(
       'PhabricatorFlaggableInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorFulltextInterface',
+      'PhabricatorConduitResultInterface',
     ),
     'PhabricatorUserBlurbField' => 'PhabricatorUserCustomField',
     'PhabricatorUserCardView' => 'AphrontTagView',
@@ -9028,6 +9030,7 @@ phutil_register_library_map(array(
     'UserEnableConduitAPIMethod' => 'UserConduitAPIMethod',
     'UserFindConduitAPIMethod' => 'UserConduitAPIMethod',
     'UserQueryConduitAPIMethod' => 'UserConduitAPIMethod',
+    'UserSearchConduitAPIMethod' => 'PhabricatorSearchEngineAPIMethod',
     'UserWhoAmIConduitAPIMethod' => 'UserConduitAPIMethod',
   ),
 ));
