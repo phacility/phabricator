@@ -598,6 +598,11 @@ EOTEXT
 
     $view = new PHUIRemarkupView($viewer, $remarkup);
 
+    $view->setRemarkupOptions(
+      array(
+        PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS => false,
+      ));
+
     return id(new PHUIBoxView())
       ->appendChild($view)
       ->addPadding(PHUI::PADDING_LARGE);

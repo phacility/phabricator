@@ -313,7 +313,14 @@ EOTEXT
 
   protected function renderInstructions($corpus) {
     $viewer = $this->getUser();
-    return new PHUIRemarkupView($viewer, $corpus);
+    $view = new PHUIRemarkupView($viewer, $corpus);
+
+    $view->setRemarkupOptions(
+      array(
+        PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS => false,
+      ));
+
+    return $view;
   }
 
 }
