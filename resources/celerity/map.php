@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '8aeacc63',
-    'core.pkg.js' => '7b44c14f',
+    'core.pkg.js' => '50e9228e',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '33da0633',
     'differential.pkg.js' => '4b7d8f19',
@@ -477,7 +477,7 @@ return array(
     'rsrc/js/core/behavior-choose-control.js' => '327a00d1',
     'rsrc/js/core/behavior-crop.js' => 'fa0f4fc2',
     'rsrc/js/core/behavior-dark-console.js' => 'f411b6ae',
-    'rsrc/js/core/behavior-detect-timezone.js' => 'ae9f2ec9',
+    'rsrc/js/core/behavior-detect-timezone.js' => '4c193c96',
     'rsrc/js/core/behavior-device.js' => 'bb1dd507',
     'rsrc/js/core/behavior-drag-and-drop-textarea.js' => '484a6e22',
     'rsrc/js/core/behavior-error-log.js' => '6882e80a',
@@ -602,7 +602,7 @@ return array(
     'javelin-behavior-dashboard-tab-panel' => 'd4eecc63',
     'javelin-behavior-day-view' => '5c46cff2',
     'javelin-behavior-desktop-notifications-control' => 'edd1ba66',
-    'javelin-behavior-detect-timezone' => 'ae9f2ec9',
+    'javelin-behavior-detect-timezone' => '4c193c96',
     'javelin-behavior-device' => 'bb1dd507',
     'javelin-behavior-differential-add-reviewers-and-ccs' => 'e10f8e18',
     'javelin-behavior-differential-comment-jump' => '4fdb476d',
@@ -1226,6 +1226,11 @@ return array(
       'javelin-util',
       'phabricator-shaped-request',
     ),
+    '4c193c96' => array(
+      'javelin-behavior',
+      'javelin-uri',
+      'phabricator-notification',
+    ),
     '4e3e79a6' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1743,11 +1748,6 @@ return array(
       'javelin-router',
       'javelin-util',
       'phabricator-busy',
-    ),
-    'ae9f2ec9' => array(
-      'javelin-behavior',
-      'javelin-uri',
-      'phabricator-notification',
     ),
     'b003d4fb' => array(
       'javelin-behavior',

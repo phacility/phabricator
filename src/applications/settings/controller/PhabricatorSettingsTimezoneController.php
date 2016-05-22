@@ -74,12 +74,20 @@ final class PhabricatorSettingsTimezoneController
         ->addCancelButton('/', pht('Done'));
     }
 
+    // If we have a guess at the timezone from the client, select it as the
+    // default.
+    $guess = $request->getStr('guess');
+    if (empty($options[$guess])) {
+      $guess = 'ignore';
+    }
+
     $form = id(new AphrontFormView())
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('timezone')
           ->setLabel(pht('Timezone'))
-          ->setOptions($options));
+          ->setOptions($options)
+          ->setValue($guess));
 
     return $this->newDialog()
       ->setTitle(pht('Adjust Timezone'))

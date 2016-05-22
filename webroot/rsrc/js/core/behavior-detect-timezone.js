@@ -45,6 +45,18 @@ JX.behavior('detect-timezone', function(config) {
 
     var uri = config.uri + offset + '/';
 
+    // Some browsers (notably, Chrome) expose an "Intl" API which gives us
+    // direct access to a timezone setting. If we are able to read this, use
+    // it to guess which timezone the user is in so we can prefill the
+    // dropdown.
+    try {
+      var guess = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      uri = JX.$U(uri).setQueryParam('guess', guess);
+    } catch (error) {
+      // Ignore any errors here, we'll just make the user pick from the big
+      // list.
+    }
+
     new JX.Workflow(uri)
       .start();
   });
