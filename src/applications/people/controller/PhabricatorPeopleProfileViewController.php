@@ -192,7 +192,7 @@ final class PhabricatorPeopleProfileViewController
     $query = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
       ->withDateRange($range_start, $range_end)
-      ->withInvitedPHIDs(array($viewer->getPHID()))
+      ->withInvitedPHIDs(array($user->getPHID()))
       ->withIsCancelled(false);
 
     $statuses = $query->execute();
@@ -200,23 +200,22 @@ final class PhabricatorPeopleProfileViewController
     $events = array();
 
     foreach ($statuses as $status) {
-      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+      $viewer_is_invited = $status->getIsUserInvited($user->getPHID());
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $status,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $event = new AphrontCalendarEventView();
-      $event->setCanEdit($can_edit);
-      $event->setEventID($status->getID());
-      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
-      $event->setIsAllDay($status->getIsAllDay());
-      $event->setIcon($status->getIcon());
-      $event->setViewerIsInvited($viewer_is_invited);
-
-      $event->setName($status->getName());
-      $event->setURI($status->getURI());
+      $event = id(new AphrontCalendarEventView())
+        ->setCanEdit($can_edit)
+        ->setEventID($status->getID())
+        ->setEpochRange($status->getDateFrom(), $status->getDateTo())
+        ->setIsAllDay($status->getIsAllDay())
+        ->setIcon($status->getIcon())
+        ->setViewerIsInvited($viewer_is_invited)
+        ->setName($status->getName())
+        ->setURI($status->getURI());
       $events[] = $event;
     }
 
@@ -229,7 +228,11 @@ final class PhabricatorPeopleProfileViewController
       ->render();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Calendar'));
+      ->setHeader(pht('Calendar'))
+      ->setHref(
+        urisprintf(
+          '/calendar/?invitedPHIDs=%s#R',
+          $user->getPHID()));
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($day_view)

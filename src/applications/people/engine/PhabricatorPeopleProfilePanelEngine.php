@@ -26,23 +26,6 @@ final class PhabricatorPeopleProfilePanelEngine
       ->setBuiltinKey(self::PANEL_PROFILE)
       ->setPanelKey(PhabricatorPeopleDetailsProfilePanel::PANELKEY);
 
-    // TODO: Convert this into a proper panel type.
-    $have_calendar = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorCalendarApplication',
-      $viewer);
-    if ($have_calendar) {
-      $uri = urisprintf(
-        '/p/%s/calendar/',
-        $object->getUsername());
-
-      $panels[] = $this->newPanel()
-        ->setBuiltinKey('calendar')
-        ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-        ->setPanelProperty('icon', 'calendar')
-        ->setPanelProperty('name', pht('Calendar'))
-        ->setPanelProperty('uri', $uri);
-    }
-
     $have_maniphest = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorManiphestApplication',
       $viewer);
