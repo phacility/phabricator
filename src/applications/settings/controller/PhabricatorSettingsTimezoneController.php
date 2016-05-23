@@ -81,16 +81,24 @@ final class PhabricatorSettingsTimezoneController
       $guess = 'ignore';
     }
 
+    $current_zone = $viewer->getTimezoneIdentifier();
+    $current_zone = phutil_tag('strong', array(), $current_zone);
+
     $form = id(new AphrontFormView())
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Current Setting'))
+          ->setValue($current_zone))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('timezone')
-          ->setLabel(pht('Timezone'))
+          ->setLabel(pht('New Setting'))
           ->setOptions($options)
           ->setValue($guess));
 
     return $this->newDialog()
       ->setTitle(pht('Adjust Timezone'))
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->appendParagraph(
         pht(
           'Your browser timezone (%s) differs from your profile timezone '.
@@ -100,7 +108,7 @@ final class PhabricatorSettingsTimezoneController
           $this->formatOffset($server_offset)))
       ->appendForm($form)
       ->addCancelButton(pht('Cancel'))
-      ->addSubmitButton(pht('Submit'));
+      ->addSubmitButton(pht('Change Timezone'));
   }
 
   private function formatOffset($offset) {

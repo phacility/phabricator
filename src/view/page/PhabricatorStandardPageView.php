@@ -241,7 +241,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
             'uri' => '/settings/timezone/',
             'message' => pht(
               'Your browser timezone setting differs from the timezone '.
-              'setting in your profile.'),
+              'setting in your profile, click to reconcile.'),
             'ignoreKey' => $ignore_key,
             'ignore' => $ignore,
           ));
