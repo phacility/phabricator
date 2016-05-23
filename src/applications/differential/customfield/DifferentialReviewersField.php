@@ -242,6 +242,7 @@ final class DifferentialReviewersField
     $config_self_accept_key = 'differential.allow-self-accept';
     $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
 
+    $value = $this->inflateReviewers($value);
     foreach ($value as $spec) {
       $phid = $spec['phid'];
 
