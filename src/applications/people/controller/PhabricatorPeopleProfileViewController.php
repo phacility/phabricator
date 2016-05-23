@@ -223,6 +223,7 @@ final class PhabricatorPeopleProfileViewController
     $events = msort($events, 'getEpochStart');
     $day_view = id(new PHUICalendarWeekView())
       ->setViewer($viewer)
+      ->setView('week')
       ->setEvents($events)
       ->setWeekLength(3)
       ->render();

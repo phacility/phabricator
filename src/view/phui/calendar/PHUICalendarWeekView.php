@@ -4,6 +4,7 @@ final class PHUICalendarWeekView extends AphrontView {
   private $events;
   private $dateTime;
   private $weekLength = 7;
+  private $view = 'day';
 
   public function setEvents($events) {
     $this->events = $events;
@@ -25,6 +26,15 @@ final class PHUICalendarWeekView extends AphrontView {
   public function setWeekLength($week_length) {
     $this->weekLength = $week_length;
     return $this;
+  }
+
+  public function setView($view) {
+    $this->view = $view;
+    return $this;
+  }
+
+  private function getView() {
+    return $this->view;
   }
 
   public function render() {
@@ -64,7 +74,7 @@ final class PHUICalendarWeekView extends AphrontView {
 
     $list = id(new PHUICalendarListView())
       ->setUser($this->getViewer())
-      ->setView('day');
+      ->setView($this->getView());
 
     if (count($events) == 0) {
       $list->showBlankState(true);

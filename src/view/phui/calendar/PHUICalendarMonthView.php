@@ -90,8 +90,9 @@ final class PHUICalendarMonthView extends AphrontView {
       $max_daily = 15;
       $counter = 0;
 
-      $list = new PHUICalendarListView();
-      $list->setViewer($viewer);
+      $list = id(new PHUICalendarListView())
+        ->setViewer($viewer)
+        ->setView('month');
       foreach ($all_day_events as $item) {
         if ($counter <= $max_daily) {
           $list->addEvent($item);
