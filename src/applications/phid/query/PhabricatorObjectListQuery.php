@@ -6,6 +6,7 @@ final class PhabricatorObjectListQuery extends Phobject {
   private $objectList;
   private $allowedTypes = array();
   private $allowPartialResults;
+  private $suffixes = array();
 
   public function setAllowPartialResults($allow_partial_results) {
     $this->allowPartialResults = $allow_partial_results;
@@ -14,6 +15,15 @@ final class PhabricatorObjectListQuery extends Phobject {
 
   public function getAllowPartialResults() {
     return $this->allowPartialResults;
+  }
+
+  public function setSuffixes(array $suffixes) {
+    $this->suffixes = $suffixes;
+    return $this;
+  }
+
+  public function getSuffixes() {
+    return $this->suffixes;
   }
 
   public function setAllowedTypes(array $allowed_types) {
@@ -87,6 +97,37 @@ final class PhabricatorObjectListQuery extends Phobject {
       }
     }
 
+    // If we're parsing with suffixes, strip them off any tokens and keep
+    // track of them for later.
+    $suffixes = $this->getSuffixes();
+    if ($suffixes) {
+      $suffixes = array_fuse($suffixes);
+      $suffix_map = array();
+      $stripped_map = array();
+      foreach ($name_map as $key => $name) {
+        $found_suffixes = array();
+        do {
+          $has_any_suffix = false;
+          foreach ($suffixes as $suffix) {
+            if (!$this->hasSuffix($name, $suffix)) {
+              continue;
+            }
+
+            $key = $this->stripSuffix($key, $suffix);
+            $name = $this->stripSuffix($name, $suffix);
+
+            $found_suffixes[] = $suffix;
+            $has_any_suffix = true;
+            break;
+          }
+        } while ($has_any_suffix);
+
+        $stripped_map[$key] = $name;
+        $suffix_map[$key] = array_fuse($found_suffixes);
+      }
+      $name_map = $stripped_map;
+    }
+
     $objects = $this->loadObjects(array_keys($name_map));
 
     $types = array();
@@ -140,7 +181,18 @@ final class PhabricatorObjectListQuery extends Phobject {
       }
     }
 
-    return array_values(array_unique(mpull($objects, 'getPHID')));
+    $result = array_unique(mpull($objects, 'getPHID'));
+
+    if ($suffixes) {
+      foreach ($result as $key => $phid) {
+        $result[$key] = array(
+          'phid' => $phid,
+          'suffixes' => idx($suffix_map, $key, array()),
+        );
+      }
+    }
+
+    return array_values($result);
   }
 
   private function loadObjects($names) {
@@ -186,5 +238,16 @@ final class PhabricatorObjectListQuery extends Phobject {
     return $results;
   }
 
+  private function hasSuffix($key, $suffix) {
+    return (substr($key, -strlen($suffix)) === $suffix);
+  }
+
+  private function stripSuffix($key, $suffix) {
+    if ($this->hasSuffix($key, $suffix)) {
+      return substr($key, 0, -strlen($suffix));
+    }
+
+    return $key;
+  }
 
 }

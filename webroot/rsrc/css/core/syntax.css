@@ -7,17 +7,12 @@
 }
 
 .remarkup-code .over-the-line {
-  color:   #aa0066;
+  color: #aa0066;
   margin-right: 1px;
 }
 
-.remarkup-code td > span,
-.remarkup-code td > span > span {
-  padding: 1px 0 3px;
-}
-
-.remarkup-code span.bright {
-  border-bottom: 1px solid transparent;
+.remarkup-code td span {
+  display: inline-block;
 }
 
 .remarkup-code .rbw_r { color: red; }

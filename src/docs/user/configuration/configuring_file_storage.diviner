@@ -164,6 +164,8 @@ To enable file storage in S3, set these keys:
 
   - `amazon-s3.access-key`: Your AWS access key.
   - `amazon-s3.secret-key`: Your AWS secret key.
+  - `amazon-s3.region`: Your AWS S3 region.
+  - `amazon-s3.endpoint`: Your AWS S3 endpoint.
   - `storage.s3.bucket`: S3 bucket name where files should be stored.
 
 Testing Storage Engines

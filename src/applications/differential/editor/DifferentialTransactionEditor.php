@@ -1201,7 +1201,13 @@ final class DifferentialTransactionEditor
     $body = new PhabricatorMetaMTAMailBody();
     $body->setViewer($this->requireActor());
 
-    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $revision_uri = PhabricatorEnv::getProductionURI('/D'.$object->getID());
+
+    $this->addHeadersAndCommentsToMailBody(
+      $body,
+      $xactions,
+      pht('View Revision'),
+      $revision_uri);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
@@ -1227,7 +1233,7 @@ final class DifferentialTransactionEditor
 
     $body->addLinkSection(
       pht('REVISION DETAIL'),
-      PhabricatorEnv::getProductionURI('/D'.$object->getID()));
+      $revision_uri);
 
     $update_xaction = null;
     foreach ($xactions as $xaction) {
@@ -1723,6 +1729,10 @@ final class DifferentialTransactionEditor
       $paths[] = $path_prefix.'/'.$changeset->getFilename();
     }
 
+    // Save the affected paths; we'll use them later to query Owners. This
+    // uses the un-expanded paths.
+    $this->affectedPaths = $paths;
+
     // Mark this as also touching all parent paths, so you can see all pending
     // changes to any file within a directory.
     $all_paths = array();
@@ -1732,9 +1742,6 @@ final class DifferentialTransactionEditor
       }
     }
     $all_paths = array_keys($all_paths);
-
-    // Save the affected paths; we'll use them later to query Owners.
-    $this->affectedPaths = $all_paths;
 
     $path_ids =
       PhabricatorRepositoryCommitChangeParserWorker::lookupOrCreatePaths(

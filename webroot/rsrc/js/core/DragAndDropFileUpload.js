@@ -155,7 +155,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
 
         var files = e.getRawEvent().dataTransfer.files;
         for (var ii = 0; ii < files.length; ii++) {
-          this._sendRequest(files[ii]);
+          this.sendRequest(files[ii]);
         }
 
         // Force depth to 0.
@@ -216,7 +216,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
               if (!spec.name) {
                 spec.name = 'pasted_file';
               }
-              this._sendRequest(spec);
+              this.sendRequest(spec);
             }
           }));
       }
@@ -224,7 +224,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
       this.setIsEnabled(true);
     },
 
-    _sendRequest : function(spec) {
+    sendRequest : function(spec) {
       var file = new JX.PhabricatorFileUpload()
         .setRawFileObject(spec)
         .setName(spec.name)

@@ -184,6 +184,13 @@ final class PhabricatorOwnersDetailController
     }
     $view->addProperty(pht('Owners'), $owner_list);
 
+
+    $dominion = $package->getDominion();
+    $dominion_map = PhabricatorOwnersPackage::getDominionOptionsMap();
+    $spec = idx($dominion_map, $dominion, array());
+    $name = idx($spec, 'short', $dominion);
+    $view->addProperty(pht('Dominion'), $name);
+
     $auto = $package->getAutoReview();
     $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
     $spec = idx($autoreview_map, $auto, array());

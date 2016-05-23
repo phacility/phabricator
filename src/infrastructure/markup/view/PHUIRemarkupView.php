@@ -12,19 +12,17 @@
 final class PHUIRemarkupView extends AphrontView {
 
   private $corpus;
-  private $markupType;
   private $contextObject;
+  private $options;
 
-  const DOCUMENT = 'document';
+  // TODO: In the long run, rules themselves should define available options.
+  // For now, just define constants here so we can more easily replace things
+  // later once this is cleaned up.
+  const OPTION_PRESERVE_LINEBREAKS = 'preserve-linebreaks';
 
   public function __construct(PhabricatorUser $viewer, $corpus) {
     $this->setUser($viewer);
     $this->corpus = $corpus;
-  }
-
-  private function setMarkupType($type) {
-    $this->markupType($type);
-    return $this;
   }
 
   public function setContextObject($context_object) {
@@ -36,29 +34,63 @@ final class PHUIRemarkupView extends AphrontView {
     return $this->contextObject;
   }
 
+  public function setRemarkupOption($key, $value) {
+    $this->options[$key] = $value;
+    return $this;
+  }
+
+  public function setRemarkupOptions(array $options) {
+    foreach ($options as $key => $value) {
+      $this->setRemarkupOption($key, $value);
+    }
+    return $this;
+  }
+
   public function render() {
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
     $corpus = $this->corpus;
     $context = $this->getContextObject();
 
+    $options = $this->options;
+
+    $oneoff = id(new PhabricatorMarkupOneOff())
+      ->setContent($corpus);
+
+    if ($options) {
+      $oneoff->setEngine($this->getEngine());
+    } else {
+      $oneoff->setPreserveLinebreaks(true);
+    }
+
     $content = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setPreserveLinebreaks(true)
-        ->setContent($corpus),
+      $oneoff,
       'default',
       $viewer,
       $context);
 
-    if ($this->markupType == self::DOCUMENT) {
-      return phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-remarkup phui-document-view',
-        ),
-        $content);
+    return $content;
+  }
+
+  private function getEngine() {
+    $options = $this->options;
+    $viewer = $this->getViewer();
+
+    $viewer_key = $viewer->getCacheFragment();
+
+    ksort($options);
+    $engine_key = serialize($options);
+    $engine_key = PhabricatorHash::digestForIndex($engine_key);
+
+    $cache = PhabricatorCaches::getRequestCache();
+    $cache_key = "remarkup.engine({$viewer}, {$engine_key})";
+
+    $engine = $cache->getKey($cache_key);
+    if (!$engine) {
+      $engine = PhabricatorMarkupEngine::newMarkupEngine($options);
+      $cache->setKey($cache_key, $engine);
     }
 
-    return $content;
+    return $engine;
   }
 
 }

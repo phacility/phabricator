@@ -17,8 +17,8 @@
 .pholio-thumb-box {
   margin: 2px 0;
   float: left;
-  background: #f7f7f7;
-  border: 1px solid #D5D9DF;
+  background: {$lightgreybackground};
+  border: 1px solid {$lightgreyborder};
   border-radius: 3px;
   width: 296px;
   overflow: hidden;
@@ -38,14 +38,14 @@
   margin: 0 auto;
 }
 
-.pholio-thumb-frame {
-  background-color: #ffffff;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 280px 210px;
-  width: 280px;
-  height: 210px;
+.pholio-thumb-img {
+  max-width: 280px;
+  max-height: 210px;
   padding: 8px;
+}
+
+.pholio-thumb-frame {
+  background: url('/rsrc/image/checker_lighter.png');
 }
 
 .device .pholio-thumb-frame {

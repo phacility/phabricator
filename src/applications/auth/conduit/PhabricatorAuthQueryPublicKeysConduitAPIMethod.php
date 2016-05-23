@@ -28,7 +28,8 @@ final class PhabricatorAuthQueryPublicKeysConduitAPIMethod
     $viewer = $request->getUser();
 
     $query = id(new PhabricatorAuthSSHKeyQuery())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->withIsActive(true);
 
     $ids = $request->getValue('ids');
     if ($ids !== null) {

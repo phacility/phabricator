@@ -194,7 +194,21 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           .start();
         break;
       case 'fa-cloud-upload':
-        new JX.Workflow('/file/uploaddialog/').start();
+        new JX.Workflow('/file/uploaddialog/')
+          .setHandler(function(response) {
+            var files = response.files;
+            for (var ii = 0; ii < files.length; ii++) {
+              var file = files[ii];
+
+              var upload = new JX.PhabricatorFileUpload()
+                .setID(file.id)
+                .setPHID(file.phid)
+                .setURI(file.uri);
+
+              JX.TextAreaUtils.insertFileReference(area, upload);
+            }
+          })
+          .start();
         break;
       case 'fa-arrows-alt':
         if (edit_mode == 'fa-arrows-alt') {

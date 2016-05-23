@@ -32,6 +32,10 @@ final class PhabricatorAuthSSHKeyPHIDType
     foreach ($handles as $phid => $handle) {
       $key = $objects[$phid];
       $handle->setName(pht('SSH Key %d', $key->getID()));
+
+      if (!$key->getIsActive()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
     }
   }
 

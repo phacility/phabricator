@@ -8,6 +8,58 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
   private $showTrusted;
   private $showID;
 
+  public static function newKeyActionsMenu(
+    PhabricatorUser $viewer,
+    PhabricatorSSHPublicKeyInterface $object) {
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    try {
+      PhabricatorSSHKeyGenerator::assertCanGenerateKeypair();
+      $can_generate = true;
+    } catch (Exception $ex) {
+      $can_generate = false;
+    }
+
+    $object_phid = $object->getPHID();
+
+    $generate_uri = "/auth/sshkey/generate/?objectPHID={$object_phid}";
+    $upload_uri = "/auth/sshkey/upload/?objectPHID={$object_phid}";
+    $view_uri = "/auth/sshkey/for/{$object_phid}/";
+
+    $action_view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setHref($upload_uri)
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit)
+          ->setName(pht('Upload Public Key'))
+          ->setIcon('fa-upload'))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setHref($generate_uri)
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit || !$can_generate)
+          ->setName(pht('Generate Keypair'))
+          ->setIcon('fa-lock'))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setHref($view_uri)
+          ->setName(pht('View History'))
+          ->setIcon('fa-list-ul'));
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('SSH Key Actions'))
+      ->setHref('#')
+      ->setIcon('fa-gear')
+      ->setDropdownMenu($action_view);
+  }
+
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
     return $this;
@@ -38,12 +90,6 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
     $keys = $this->keys;
     $viewer = $this->getUser();
 
-    if ($this->canEdit) {
-      $delete_class = 'small grey button';
-    } else {
-      $delete_class = 'small grey button disabled';
-    }
-
     $trusted_icon = id(new PHUIIconView())
       ->setIcon('fa-star blue');
     $untrusted_icon = id(new PHUIIconView())
@@ -56,22 +102,13 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
         javelin_tag(
           'a',
           array(
-            'href' => '/auth/sshkey/edit/'.$key->getID().'/',
-            'sigil' => 'workflow',
+            'href' => $key->getURI(),
           ),
           $key->getName()),
         $key->getIsTrusted() ? $trusted_icon : $untrusted_icon,
         $key->getKeyComment(),
         $key->getKeyType(),
         phabricator_datetime($key->getDateCreated(), $viewer),
-        javelin_tag(
-          'a',
-          array(
-            'href' => '/auth/sshkey/delete/'.$key->getID().'/',
-            'class' => $delete_class,
-            'sigil' => 'workflow',
-          ),
-          pht('Delete')),
       );
     }
 
@@ -85,7 +122,6 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
           pht('Comment'),
           pht('Type'),
           pht('Added'),
-          null,
         ))
       ->setColumnVisibility(
         array(
@@ -101,7 +137,6 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
           '',
           '',
           'right',
-          'action',
         ));
 
     return $table;

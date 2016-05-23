@@ -21,6 +21,7 @@ final class PhabricatorOwnersPackage
   protected $status;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $dominion;
 
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
@@ -33,6 +34,9 @@ final class PhabricatorOwnersPackage
   const AUTOREVIEW_SUBSCRIBE = 'subscribe';
   const AUTOREVIEW_REVIEW = 'review';
   const AUTOREVIEW_BLOCK = 'block';
+
+  const DOMINION_STRONG = 'strong';
+  const DOMINION_WEAK = 'weak';
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -48,6 +52,7 @@ final class PhabricatorOwnersPackage
     return id(new PhabricatorOwnersPackage())
       ->setAuditingEnabled(0)
       ->setAutoReview(self::AUTOREVIEW_NONE)
+      ->setDominion(self::DOMINION_STRONG)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->attachPaths(array())
@@ -80,6 +85,19 @@ final class PhabricatorOwnersPackage
     );
   }
 
+  public static function getDominionOptionsMap() {
+    return array(
+      self::DOMINION_STRONG => array(
+        'name' => pht('Strong (Control All Paths)'),
+        'short' => pht('Strong'),
+      ),
+      self::DOMINION_WEAK => array(
+        'name' => pht('Weak (Control Unowned Paths)'),
+        'short' => pht('Weak'),
+      ),
+    );
+  }
+
   protected function getConfiguration() {
     return array(
       // This information is better available from the history table.
@@ -94,6 +112,7 @@ final class PhabricatorOwnersPackage
         'mailKey' => 'bytes20',
         'status' => 'text32',
         'autoReview' => 'text32',
+        'dominion' => 'text32',
       ),
     ) + parent::getConfiguration();
   }
@@ -190,7 +209,7 @@ final class PhabricatorOwnersPackage
     foreach (array_chunk(array_keys($fragments), 128) as $chunk) {
       $rows[] = queryfx_all(
         $conn,
-        'SELECT pkg.id, p.excluded, p.path
+        'SELECT pkg.id, pkg.dominion, p.excluded, p.path
           FROM %T pkg JOIN %T p ON p.packageID = pkg.id
           WHERE p.path IN (%Ls) %Q',
         $package->getTableName(),
@@ -232,35 +251,100 @@ final class PhabricatorOwnersPackage
   }
 
   public static function findLongestPathsPerPackage(array $rows, array $paths) {
-    $ids = array();
 
-    foreach (igroup($rows, 'id') as $id => $package_paths) {
-      $relevant_paths = array_select_keys(
-        $paths,
-        ipull($package_paths, 'path'));
+    // Build a map from each path to all the package paths which match it.
+    $path_hits = array();
+    $weak = array();
+    foreach ($rows as $row) {
+      $id = $row['id'];
+      $path = $row['path'];
+      $length = strlen($path);
+      $excluded = $row['excluded'];
 
-      // For every package, remove all excluded paths.
-      $remove = array();
-      foreach ($package_paths as $package_path) {
-        if ($package_path['excluded']) {
-          $remove += idx($relevant_paths, $package_path['path'], array());
-          unset($relevant_paths[$package_path['path']]);
-        }
+      if ($row['dominion'] === self::DOMINION_WEAK) {
+        $weak[$id] = true;
       }
 
-      if ($remove) {
-        foreach ($relevant_paths as $fragment => $fragment_paths) {
-          $relevant_paths[$fragment] = array_diff_key($fragment_paths, $remove);
-        }
-      }
-
-      $relevant_paths = array_filter($relevant_paths);
-      if ($relevant_paths) {
-        $ids[$id] = max(array_map('strlen', array_keys($relevant_paths)));
+      $matches = $paths[$path];
+      foreach ($matches as $match => $ignored) {
+        $path_hits[$match][] = array(
+          'id' => $id,
+          'excluded' => $excluded,
+          'length' => $length,
+        );
       }
     }
 
-    return $ids;
+    // For each path, process the matching package paths to figure out which
+    // packages actually own it.
+    $path_packages = array();
+    foreach ($path_hits as $match => $hits) {
+      $hits = isort($hits, 'length');
+
+      $packages = array();
+      foreach ($hits as $hit) {
+        $package_id = $hit['id'];
+        if ($hit['excluded']) {
+          unset($packages[$package_id]);
+        } else {
+          $packages[$package_id] = $hit;
+        }
+      }
+
+      $path_packages[$match] = $packages;
+    }
+
+    // Remove packages with weak dominion rules that should cede control to
+    // a more specific package.
+    if ($weak) {
+      foreach ($path_packages as $match => $packages) {
+        $packages = isort($packages, 'length');
+        $packages = array_reverse($packages, true);
+
+        $first = null;
+        foreach ($packages as $package_id => $package) {
+          // If this is the first package we've encountered, note it and
+          // continue. We're iterating over the packages from longest to
+          // shortest match, so this package always has the strongest claim
+          // on the path.
+          if ($first === null) {
+            $first = $package_id;
+            continue;
+          }
+
+          // If this is the first package we saw, its claim stands even if it
+          // is a weak package.
+          if ($first === $package_id) {
+            continue;
+          }
+
+          // If this is a weak package and not the first package we saw,
+          // cede its claim to the stronger package.
+          if (isset($weak[$package_id])) {
+            unset($packages[$package_id]);
+          }
+        }
+
+        $path_packages[$match] = $packages;
+      }
+    }
+
+    // For each package that owns at least one path, identify the longest
+    // path it owns.
+    $package_lengths = array();
+    foreach ($path_packages as $match => $hits) {
+      foreach ($hits as $hit) {
+        $length = $hit['length'];
+        $id = $hit['id'];
+        if (empty($package_lengths[$id])) {
+          $package_lengths[$id] = $length;
+        } else {
+          $package_lengths[$id] = max($package_lengths[$id], $length);
+        }
+      }
+    }
+
+    return $package_lengths;
   }
 
   public static function splitPath($path) {

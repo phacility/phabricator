@@ -59,51 +59,45 @@ final class PhabricatorAuthSSHKeyEditController
     $v_key = $key->getEntireKey();
     $e_key = strlen($v_key) ? null : true;
 
-    $errors = array();
+    $validation_exception = null;
     if ($request->isFormPost()) {
+      $type_create = PhabricatorTransactions::TYPE_CREATE;
+      $type_name = PhabricatorAuthSSHKeyTransaction::TYPE_NAME;
+      $type_key = PhabricatorAuthSSHKeyTransaction::TYPE_KEY;
+
+      $e_name = null;
+      $e_key = null;
+
       $v_name = $request->getStr('name');
       $v_key = $request->getStr('key');
 
-      if (!strlen($v_name)) {
-        $errors[] = pht('You must provide a name for this public key.');
-        $e_name = pht('Required');
-      } else {
-        $key->setName($v_name);
+      $xactions = array();
+
+      if (!$key->getID()) {
+        $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
       }
 
-      if (!strlen($v_key)) {
-        $errors[] = pht('You must provide a public key.');
-        $e_key = pht('Required');
-      } else {
-        try {
-          $public_key = PhabricatorAuthSSHPublicKey::newFromRawKey($v_key);
+      $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+        ->setTransactionType($type_name)
+        ->setNewValue($v_name);
 
-          $type = $public_key->getType();
-          $body = $public_key->getBody();
-          $comment = $public_key->getComment();
+      $xactions[] = id(new PhabricatorAuthSSHKeyTransaction())
+        ->setTransactionType($type_key)
+        ->setNewValue($v_key);
 
-          $key->setKeyType($type);
-          $key->setKeyBody($body);
-          $key->setKeyComment($comment);
+      $editor = id(new PhabricatorAuthSSHKeyEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
 
-          $e_key = null;
-        } catch (Exception $ex) {
-          $e_key = pht('Invalid');
-          $errors[] = $ex->getMessage();
-        }
-      }
-
-      if (!$errors) {
-        try {
-          $key->save();
-          return id(new AphrontRedirectResponse())->setURI($cancel_uri);
-        } catch (Exception $ex) {
-          $e_key = pht('Duplicate');
-          $errors[] = pht(
-            'This public key is already associated with another user or '.
-            'device. Each key must unambiguously identify a single unique '.
-            'owner.');
-        }
+      try {
+        $editor->applyTransactions($key, $xactions);
+        return id(new AphrontRedirectResponse())->setURI($key->getURI());
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+        $e_name = $ex->getShortMessage($type_name);
+        $e_key = $ex->getShortMessage($type_key);
       }
     }
 
@@ -134,7 +128,7 @@ final class PhabricatorAuthSSHKeyEditController
     return $this->newDialog()
       ->setTitle($title)
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->setErrors($errors)
+      ->setValidationException($validation_exception)
       ->appendForm($form)
       ->addSubmitButton($save_button)
       ->addCancelButton($cancel_uri);

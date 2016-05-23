@@ -108,9 +108,9 @@ EOBANNER;
           'deleting complex or highly connected objects like repositories, '.
           'projects and users.'.
           "\n\n".
-          'These tattered edges are an expected consquence of destroying '.
+          'These tattered edges are an expected consequence of destroying '.
           'objects, and the Phabricator upstream will not help you fix '.
-          'them. We strongly recomend disabling or archiving objects '.
+          'them. We strongly recommend disabling or archiving objects '.
           'instead.')));
 
     $phids = mpull($named_objects, 'getPHID');

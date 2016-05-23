@@ -76,7 +76,7 @@ final class PhabricatorEmailFormatSettingsPanel
       ? pht('Vary')
       : pht('Do Not Vary');
 
-    $html_emails_default = pht('Plain Text');
+    $html_emails_default = pht('HTML');
 
     $re_prefix_value = $preferences->getPreference($pref_re_prefix);
     if ($re_prefix_value === null) {

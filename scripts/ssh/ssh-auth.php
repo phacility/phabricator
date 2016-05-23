@@ -6,6 +6,7 @@ require_once $root.'/scripts/__init_script__.php';
 
 $keys = id(new PhabricatorAuthSSHKeyQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
+  ->withIsActive(true)
   ->execute();
 
 if (!$keys) {
