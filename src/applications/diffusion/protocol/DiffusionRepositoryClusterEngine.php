@@ -391,7 +391,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
           $repository_phid,
           $device_phid,
           $this->clusterWriteVersion,
-          $new_log->getID(),
+          $new_version,
           $this->clusterWriteOwner);
         $did_release = true;
         break;
