@@ -24,6 +24,8 @@ abstract class PhabricatorEditEngine
   private $editEngineConfiguration;
   private $contextParameters = array();
   private $targetObject;
+  private $page;
+  private $pages;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -145,6 +147,8 @@ abstract class PhabricatorEditEngine
     $config = $this->getEditEngineConfiguration();
     $fields = $this->willConfigureFields($object, $fields);
     $fields = $config->applyConfigurationToFields($this, $object, $fields);
+
+    $fields = $this->applyPageToFields($object, $fields);
 
     return $fields;
   }
@@ -492,6 +496,34 @@ abstract class PhabricatorEditEngine
     return implode('', $parts);
   }
 
+  public function getEffectiveObjectViewURI($object) {
+    if ($this->getIsCreate()) {
+      return $this->getObjectViewURI($object);
+    }
+
+    $page = $this->getSelectedPage();
+    if ($page) {
+      $view_uri = $page->getViewURI();
+      if ($view_uri !== null) {
+        return $view_uri;
+      }
+    }
+
+    return $this->getObjectViewURI($object);
+  }
+
+  public function getEffectiveObjectEditCancelURI($object) {
+    $page = $this->getSelectedPage();
+    if ($page) {
+      $view_uri = $page->getViewURI();
+      if ($view_uri !== null) {
+        return $view_uri;
+      }
+    }
+
+    return $this->getObjectEditCancelURI($object);
+  }
+
 
 /* -(  Creating and Loading Objects  )--------------------------------------- */
 
@@ -810,6 +842,21 @@ abstract class PhabricatorEditEngine
       return $this->buildDisabledFormResponse($object, $config);
     }
 
+    $page_key = $request->getURIData('pageKey');
+    if (!strlen($page_key)) {
+      $pages = $this->getPages($object);
+      if ($pages) {
+        $page_key = head_key($pages);
+      }
+    }
+
+    if (strlen($page_key)) {
+      $page = $this->selectPage($object, $page_key);
+      if (!$page) {
+        return new Aphront404Response();
+      }
+    }
+
     switch ($action) {
       case 'parameters':
         return $this->buildParametersResponse($object);
@@ -841,7 +888,7 @@ abstract class PhabricatorEditEngine
     } else {
       $crumbs->addTextCrumb(
         $this->getObjectEditShortText($object),
-        $this->getObjectViewURI($object));
+        $this->getEffectiveObjectViewURI($object));
 
       $edit_text = pht('Edit');
       if ($final) {
@@ -1029,7 +1076,7 @@ abstract class PhabricatorEditEngine
         $cancel_uri = $this->getObjectCreateCancelURI($object);
         $submit_button = $this->getObjectCreateButtonText($object);
       } else {
-        $cancel_uri = $this->getObjectEditCancelURI($object);
+        $cancel_uri = $this->getEffectiveObjectEditCancelURI($object);
         $submit_button = $this->getObjectEditButtonText($object);
       }
 
@@ -1079,7 +1126,7 @@ abstract class PhabricatorEditEngine
     $object,
     array $xactions) {
     return id(new AphrontRedirectResponse())
-      ->setURI($this->getObjectViewURI($object));
+      ->setURI($this->getEffectiveObjectViewURI($object));
   }
 
   private function buildEditForm($object, array $fields) {
@@ -1103,7 +1150,7 @@ abstract class PhabricatorEditEngine
       $cancel_uri = $this->getObjectCreateCancelURI($object);
       $submit_button = $this->getObjectCreateButtonText($object);
     } else {
-      $cancel_uri = $this->getObjectEditCancelURI($object);
+      $cancel_uri = $this->getEffectiveObjectEditCancelURI($object);
       $submit_button = $this->getObjectEditButtonText($object);
     }
 
@@ -1547,7 +1594,7 @@ abstract class PhabricatorEditEngine
     $fields = $this->buildEditFields($object);
 
     $is_preview = $request->isPreviewRequest();
-    $view_uri = $this->getObjectViewURI($object);
+    $view_uri = $this->getEffectiveObjectViewURI($object);
 
     $template = $object->getApplicationTransactionTemplate();
     $comment_template = $template->getApplicationTransactionCommentObject();
@@ -1808,8 +1855,9 @@ abstract class PhabricatorEditEngine
       } catch (Exception $ex) {
         throw new PhutilProxyException(
           pht(
-            'Exception when processing transaction of type "%s".',
-            $xaction['type']),
+            'Exception when processing transaction of type "%s": %s',
+            $xaction['type'],
+            $ex->getMessage()),
           $ex);
       }
 
@@ -1952,6 +2000,87 @@ abstract class PhabricatorEditEngine
       $this->getViewer(),
       $this,
       PhabricatorPolicyCapability::CAN_EDIT);
+  }
+
+/* -(  Form Pages  )--------------------------------------------------------- */
+
+
+  public function getSelectedPage() {
+    return $this->page;
+  }
+
+
+  private function selectPage($object, $page_key) {
+    $pages = $this->getPages($object);
+
+    if (empty($pages[$page_key])) {
+      return null;
+    }
+
+    $this->page = $pages[$page_key];
+    return $this->page;
+  }
+
+
+  protected function newPages($object) {
+    return array();
+  }
+
+
+  protected function getPages($object) {
+    if ($this->pages === null) {
+      $pages = $this->newPages($object);
+
+      assert_instances_of($pages, 'PhabricatorEditPage');
+      $pages = mpull($pages, null, 'getKey');
+
+      $this->pages = $pages;
+    }
+
+    return $this->pages;
+  }
+
+  private function applyPageToFields($object, array $fields) {
+    $pages = $this->getPages($object);
+    if (!$pages) {
+      return $fields;
+    }
+
+    if (!$this->getSelectedPage()) {
+      return $fields;
+    }
+
+    $page_picks = array();
+    $default_key = head($pages)->getKey();
+    foreach ($pages as $page_key => $page) {
+      foreach ($page->getFieldKeys() as $field_key) {
+        $page_picks[$field_key] = $page_key;
+      }
+      if ($page->getIsDefault()) {
+        $default_key = $page_key;
+      }
+    }
+
+    $page_map = array_fill_keys(array_keys($pages), array());
+    foreach ($fields as $field_key => $field) {
+      if (isset($page_picks[$field_key])) {
+        $page_map[$page_picks[$field_key]][$field_key] = $field;
+        continue;
+      }
+
+      // TODO: Maybe let the field pick a page to associate itself with so
+      // extensions can force themselves onto a particular page?
+
+      $page_map[$default_key][$field_key] = $field;
+    }
+
+    $page = $this->getSelectedPage();
+    if (!$page) {
+      $page = head($pages);
+    }
+
+    $selected_key = $page->getKey();
+    return $page_map[$selected_key];
   }
 
 

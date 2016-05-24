@@ -351,6 +351,7 @@ final class PhabricatorOwnersPackageQuery
     }
 
     $packages = $this->controlResults;
+    $weak_dominion = PhabricatorOwnersPackage::DOMINION_WEAK;
 
     $matches = array();
     foreach ($packages as $package_id => $package) {
@@ -373,6 +374,7 @@ final class PhabricatorOwnersPackageQuery
       if ($best_match && $include) {
         $matches[$package_id] = array(
           'strength' => $best_match,
+          'weak' => ($package->getDominion() == $weak_dominion),
           'package' => $package,
         );
       }
@@ -380,6 +382,18 @@ final class PhabricatorOwnersPackageQuery
 
     $matches = isort($matches, 'strength');
     $matches = array_reverse($matches);
+
+    $first_id = null;
+    foreach ($matches as $package_id => $match) {
+      if ($first_id === null) {
+        $first_id = $package_id;
+        continue;
+      }
+
+      if ($match['weak']) {
+        unset($matches[$package_id]);
+      }
+    }
 
     return array_values(ipull($matches, 'package'));
   }

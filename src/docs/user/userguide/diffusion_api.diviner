@@ -1,0 +1,182 @@
+@title Diffusion User Guide: Repositories API
+@group userguide
+
+Managing repositories with the API.
+
+Overview
+========
+
+You can create and update Diffusion repositories using the Conduit API. This
+may be useful if you have a large number of existing repositories you want
+to import or apply bulk actions to.
+
+For an introduction to Conduit, see @{article:Conduit API Overview}.
+
+In general, you'll use these API methods:
+
+  - `diffusion.repository.edit`: Create and edit repositorie.
+  - `diffusion.uri.edit`: Create and edit repository URIs to configure
+    observation, mirroring, and cloning.
+
+To create a repository, you'll generally do this:
+
+  - Call `diffusion.repository.edit` to create a new object and configure
+    basic information.
+  - Optionally, call `diffusion.uri.edit` to add URIs to observe or mirror.
+  - Call `diffusion.repository.edit` to activate the repository.
+
+This workflow mirrors the workflow from the web UI. The remainder of this
+document walks through this workflow in greater detail.
+
+
+Create a Repository
+===================
+
+To create a repository, call `diffusion.repository.edit`, providing any
+properties you want to set. For simplicity these examples will use the
+builtin `arc call-conduit` client, but you can use whatever Conduit client
+you prefer.
+
+When creating a repository, you must provide a `vcs` transaction to choose
+a repository type, one of: `git`, `hg` or `svn`.
+
+You must also provide a `name`.
+
+Other properties are optional. Review the Conduit method documentation from the
+web UI for an exhaustive list.
+
+```
+$ echo '{
+  "transactions": [
+    {
+      "type": "vcs",
+      "value": "git"
+    },
+    {
+      "type": "name",
+      "value": "Poetry"
+    }
+  ]
+}' | arc call-conduit diffusion.repository.edit
+```
+
+If things work, you should get a result that looks something like this:
+
+```lang=json
+{
+  ...
+  "response": {
+    "object": {
+      "id": 1,
+      "phid": "PHID-REPO-7vm42oayez2rxcmpwhuv"
+    },
+    ...
+  }
+  ...
+}
+```
+
+If so, your new repository has been created. It hasn't been activated yet so
+it will not show up in the default repository list, but you can find it in the
+web UI by browsing to {nav Diffusion > All Repositories}.
+
+Continue to the next step to configure URIs.
+
+
+Configure URIs
+==============
+
+Now that the repository exists, you can add URIs to it. This is optional,
+and if you're creating a //hosted// repository you may be able to skip this
+step.
+
+However, if you want Phabricator to observe an existing remote, you'll
+configure it here by adding a URI in "Observe" mode. Use the PHID from the
+previous step to identify the repository you want to add a URI to, and call
+`diffusion.uri.edit` to create a new URI in Observe mode for the repository.
+
+You need to provide a `repository` to add the URI to, and the `uri` itself.
+
+To add the URI in Observe mode, provide an `io` transaction selecting
+`observe` mode.
+
+You may also want to provide a `credential`.
+
+```
+$ echo '{
+  "transactions": [
+    {
+      "type": "repository",
+      "value": "PHID-REPO-7vm42oayez2rxcmpwhuv"
+    },
+    {
+      "type": "uri",
+      "value": "https://github.com/epriestley/poems.git"
+    },
+    {
+      "type": "io",
+      "value": "observe"
+    }
+  ]
+}' | arc call-conduit diffusion.uri.edit
+```
+
+You should get a response that looks something like this:
+
+```lang=json
+{
+  ...
+  "response": {
+    "object": {
+      "id": 1,
+      "phid": "PHID-RURI-zwtho5o7h3m6rjzgsgrh"
+    },
+    ...
+  }
+  ...
+}
+```
+
+If so, your URI has been created. You can review it in the web UI, under
+{nav Manage Repository > URIs}.
+
+When satisfied, continue to the next step to activate the repository.
+
+
+Activate the Repository
+=======================
+
+Now that any URIs have been configured, activate the repository with another
+call to `diffusion.repository.edit`. This time, modify the existing repostitory
+instead of creating a new one:
+
+```
+$ echo '{
+  "objectIdentifier": "PHID-REPO-7vm42oayez2rxcmpwhuv",
+  "transactions": [
+    {
+      "type": "status",
+      "value": "active"
+    }
+  ]
+}' | arc call-conduit diffusion.repository.edit
+```
+
+If that goes through cleanly, you should be all set. You can review the
+repository from the web UI.
+
+
+Editing Repositories
+====================
+
+To edit an existing repository, apply changes normally with
+`diffusion.repository.edit`. For more details on using edit endpoints, see
+@{article:Conduit API: Using Edit Endpoints}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Diffusion User Guide}.

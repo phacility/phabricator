@@ -34,6 +34,7 @@ final class PhabricatorStandardCustomFieldCredential
       ->execute();
 
     return id(new PassphraseCredentialControl())
+      ->setViewer($this->getViewer())
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
       ->setCaption($this->getCaption())

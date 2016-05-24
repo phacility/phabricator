@@ -13,6 +13,47 @@ final class DiffusionRepositoryPoliciesManagementPanel
     return 300;
   }
 
+  public function getManagementPanelIcon() {
+    $viewer = $this->getViewer();
+    $repository = $this->getRepository();
+
+    $can_view = PhabricatorPolicyCapability::CAN_VIEW;
+    $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
+    $can_push = DiffusionPushCapability::CAPABILITY;
+
+    $actual_values = array(
+      'spacePHID' => $repository->getSpacePHID(),
+      'view' => $repository->getPolicy($can_view),
+      'edit' => $repository->getPolicy($can_edit),
+      'push' => $repository->getPolicy($can_push),
+    );
+
+    $default = PhabricatorRepository::initializeNewRepository(
+      $viewer);
+
+    $default_values = array(
+      'spacePHID' => $default->getSpacePHID(),
+      'view' => $default->getPolicy($can_view),
+      'edit' => $default->getPolicy($can_edit),
+      'push' => $default->getPolicy($can_push),
+    );
+
+    if ($actual_values === $default_values) {
+      return 'fa-lock grey';
+    } else {
+      return 'fa-lock';
+    }
+  }
+
+  protected function getEditEngineFieldKeys() {
+    return array(
+      'policy.view',
+      'policy.edit',
+      'spacePHID',
+      'policy.push',
+    );
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -22,7 +63,7 @@ final class DiffusionRepositoryPoliciesManagementPanel
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $edit_uri = $repository->getPathURI('manage/');
+    $edit_uri = $this->getEditPageURI();
 
     return array(
       id(new PhabricatorActionView())

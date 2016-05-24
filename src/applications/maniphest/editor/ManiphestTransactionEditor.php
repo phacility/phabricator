@@ -868,23 +868,9 @@ final class ManiphestTransactionEditor
     switch ($type) {
       case PhabricatorTransactions::TYPE_COLUMNS:
         try {
-          $this->buildMoveTransaction($object, $xaction);
-
-          // Implicilty add the task to any boards that we're moving it
-          // on, since moves on a board the task isn't part of are not
-          // meaningful.
-          $board_phids = ipull($xaction->getNewValue(), 'boardPHID');
-          if ($board_phids) {
-            $results[] = id(new ManiphestTransaction())
-              ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-              ->setMetadataValue(
-                'edge:type',
-                PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
-              ->setIgnoreOnNoEffect(true)
-              ->setNewValue(
-                array(
-                  '+' => array_fuse($board_phids),
-                ));
+          $more_xactions = $this->buildMoveTransaction($object, $xaction);
+          foreach ($more_xactions as $more_xaction) {
+            $results[] = $more_xaction;
           }
         } catch (Exception $ex) {
           $error = new PhabricatorApplicationTransactionValidationError(
@@ -1098,6 +1084,89 @@ final class ManiphestTransactionEditor
 
     $new = array_values($new);
     $xaction->setNewValue($new);
+
+
+    $more = array();
+
+    // If we're moving the object into a column and it does not already belong
+    // in the column, add the appropriate board. For normal columns, this
+    // is the board PHID. For proxy columns, it is the proxy PHID, unless the
+    // object is already a member of some descendant of the proxy PHID.
+
+    // The major case where this can happen is moves via the API, but it also
+    // happens when a user drags a task from the "Backlog" to a milestone
+    // column.
+
+    if ($object_phid) {
+      $current_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $object_phid,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $current_phids = array_fuse($current_phids);
+    } else {
+      $current_phids = array();
+    }
+
+    $add_boards = array();
+    foreach ($new as $move) {
+      $column_phid = $move['columnPHID'];
+      $board_phid = $move['boardPHID'];
+      $column = $columns[$column_phid];
+      $proxy_phid = $column->getProxyPHID();
+
+      // If this is a normal column, add the board if the object isn't already
+      // associated.
+      if (!$proxy_phid) {
+        if (!isset($current_phids[$board_phid])) {
+          $add_boards[] = $board_phid;
+        }
+        continue;
+      }
+
+      // If this is a proxy column but the object is already associated with
+      // the proxy board, we don't need to do anything.
+      if (isset($current_phids[$proxy_phid])) {
+        continue;
+      }
+
+      // If this a proxy column and the object is already associated with some
+      // descendant of the proxy board, we also don't need to do anything.
+      $descendants = id(new PhabricatorProjectQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withAncestorProjectPHIDs(array($proxy_phid))
+        ->execute();
+
+      $found_descendant = false;
+      foreach ($descendants as $descendant) {
+        if (isset($current_phids[$descendant->getPHID()])) {
+          $found_descendant = true;
+          break;
+        }
+      }
+
+      if ($found_descendant) {
+        continue;
+      }
+
+      // Otherwise, we're moving the object to a proxy column which it is not
+      // a member of yet, so add an association to the column's proxy board.
+
+      $add_boards[] = $proxy_phid;
+    }
+
+    if ($add_boards) {
+      $more[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue(
+          'edge:type',
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+        ->setIgnoreOnNoEffect(true)
+        ->setNewValue(
+          array(
+            '+' => array_fuse($add_boards),
+          ));
+    }
+
+    return $more;
   }
 
   private function applyBoardMove($object, array $move) {

@@ -66,7 +66,7 @@ final class PhabricatorRepositoryManagementMovePathsWorkflow
       } else {
         $dst = $to.substr($src, strlen($from));
 
-        $row['action'] = phutil_console_format('**%s**', pht('Move'));
+        $row['action'] = tsprintf('**%s**', pht('Move'));
         $row['dst'] = $dst;
         $row['move'] = true;
         $any_changes = true;
@@ -94,7 +94,7 @@ final class PhabricatorRepositoryManagementMovePathsWorkflow
       ->addColumn(
         'dst',
         array(
-          'title' => pht('dst'),
+          'title' => pht('Dst'),
         ))
       ->setBorders(true);
 
@@ -128,14 +128,12 @@ final class PhabricatorRepositoryManagementMovePathsWorkflow
       }
 
       $repo = $row['repository'];
-      $details = $repo->getDetails();
-      $details['local-path'] = $row['dst'];
 
       queryfx(
         $repo->establishConnection('w'),
-        'UPDATE %T SET details = %s WHERE id = %d',
+        'UPDATE %T SET localPath = %s WHERE id = %d',
         $repo->getTableName(),
-        phutil_json_encode($details),
+        $row['dst'],
         $repo->getID());
     }
 

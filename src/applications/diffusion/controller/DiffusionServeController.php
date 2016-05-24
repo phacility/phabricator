@@ -219,6 +219,7 @@ final class DiffusionServeController extends DiffusionController {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer($viewer)
         ->withIdentifiers(array($identifier))
+        ->needURIs(true)
         ->executeOne();
       if (!$repository) {
         return new PhabricatorVCSResponse(
@@ -266,22 +267,32 @@ final class DiffusionServeController extends DiffusionController {
       // token from SSH. If they're using HTTP username + password auth, they
       // have to obey the normal HTTP rules.
     } else {
-      switch ($repository->getServeOverHTTP()) {
-        case PhabricatorRepository::SERVE_READONLY:
-          if ($is_push) {
-            return new PhabricatorVCSResponse(
-              403,
-              pht('This repository is read-only over HTTP.'));
-          }
-          break;
-        case PhabricatorRepository::SERVE_READWRITE:
-          // We'll check for push capability below.
-          break;
-        case PhabricatorRepository::SERVE_OFF:
-        default:
+      // For now, we don't distinguish between HTTP and HTTPS-originated
+      // requests that are proxied within the cluster, so the user can connect
+      // with HTTPS but we may be on HTTP by the time we reach this part of
+      // the code. Allow things to move forward as long as either protocol
+      // can be served.
+      $proto_https = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTPS;
+      $proto_http = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTP;
+
+      $can_read =
+        $repository->canServeProtocol($proto_https, false) ||
+        $repository->canServeProtocol($proto_http, false);
+      if (!$can_read) {
+        return new PhabricatorVCSResponse(
+          403,
+          pht('This repository is not available over HTTP.'));
+      }
+
+      if ($is_push) {
+        $can_write =
+          $repository->canServeProtocol($proto_https, true) ||
+          $repository->canServeProtocol($proto_http, true);
+        if (!$can_write) {
           return new PhabricatorVCSResponse(
             403,
-            pht('This repository is not available over HTTP.'));
+            pht('This repository is read-only over HTTP.'));
+        }
       }
     }
 
@@ -540,12 +551,16 @@ final class DiffusionServeController extends DiffusionController {
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
+    $cluster_engine = id(new DiffusionRepositoryClusterEngine())
+      ->setViewer($viewer)
+      ->setRepository($repository);
+
     $did_write_lock = false;
     if ($this->isReadOnlyRequest($repository)) {
-      $repository->synchronizeWorkingCopyBeforeRead();
+      $cluster_engine->synchronizeWorkingCopyBeforeRead();
     } else {
       $did_write_lock = true;
-      $repository->synchronizeWorkingCopyBeforeWrite($viewer);
+      $cluster_engine->synchronizeWorkingCopyBeforeWrite();
     }
 
     $caught = null;
@@ -559,7 +574,7 @@ final class DiffusionServeController extends DiffusionController {
     }
 
     if ($did_write_lock) {
-      $repository->synchronizeWorkingCopyAfterWrite();
+      $cluster_engine->synchronizeWorkingCopyAfterWrite();
     }
 
     unset($unguarded);

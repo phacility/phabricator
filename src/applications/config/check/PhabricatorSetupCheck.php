@@ -50,9 +50,35 @@ abstract class PhabricatorSetupCheck extends Phobject {
     return $cache->getKey('phabricator.setup.issue-keys');
   }
 
-  final public static function setOpenSetupIssueKeys(array $keys) {
+  final public static function setOpenSetupIssueKeys(
+    array $keys,
+    $update_database) {
     $cache = PhabricatorCaches::getSetupCache();
     $cache->setKey('phabricator.setup.issue-keys', $keys);
+
+    if ($update_database) {
+      $db_cache = new PhabricatorKeyValueDatabaseCache();
+      try {
+        $json = phutil_json_encode($keys);
+        $db_cache->setKey('phabricator.setup.issue-keys', $json);
+      } catch (Exception $ex) {
+        // Ignore any write failures, since they likely just indicate that we
+        // have a database-related setup issue that needs to be resolved.
+      }
+    }
+  }
+
+  final public static function getOpenSetupIssueKeysFromDatabase() {
+    $db_cache = new PhabricatorKeyValueDatabaseCache();
+    try {
+      $value = $db_cache->getKey('phabricator.setup.issue-keys');
+      if (!strlen($value)) {
+        return null;
+      }
+      return phutil_json_decode($value);
+    } catch (Exception $ex) {
+      return null;
+    }
   }
 
   final public static function getUnignoredIssueKeys(array $all_issues) {
@@ -97,7 +123,21 @@ abstract class PhabricatorSetupCheck extends Phobject {
             ->setView($view);
         }
       }
-      self::setOpenSetupIssueKeys(self::getUnignoredIssueKeys($issues));
+      $issue_keys = self::getUnignoredIssueKeys($issues);
+      self::setOpenSetupIssueKeys($issue_keys, $update_database = true);
+    } else if ($issue_keys) {
+      // If Phabricator is configured in a cluster with multiple web devices,
+      // we can end up with setup issues cached on every device. This can cause
+      // a warning banner to show on every device so that each one needs to
+      // be dismissed individually, which is pretty annoying. See T10876.
+
+      // To avoid this, check if the issues we found have already been cleared
+      // in the database. If they have, we'll just wipe out our own cache and
+      // move on.
+      $issue_keys = self::getOpenSetupIssueKeysFromDatabase();
+      if ($issue_keys !== null) {
+        self::setOpenSetupIssueKeys($issue_keys, $update_database = false);
+      }
     }
 
     // Try to repair configuration unless we have a clean bill of health on it.

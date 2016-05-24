@@ -13,6 +13,21 @@ final class DiffusionRepositoryStatusManagementPanel
     return 200;
   }
 
+  public function getManagementPanelIcon() {
+    $repository = $this->getRepository();
+
+    // TODO: We could try to show a warning icon in more cases, but just
+    // raise in the most serious cases for now.
+    $messages = $this->loadStatusMessages($repository);
+
+    $raw_error = $this->buildRepositoryRawError($repository, $messages);
+    if ($raw_error) {
+      return 'fa-exclamation-triangle red';
+    }
+
+    return 'fa-check grey';
+  }
+
   protected function buildManagementPanelActions() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
@@ -46,8 +61,10 @@ final class DiffusionRepositoryStatusManagementPanel
       pht('Update Frequency'),
       $this->buildRepositoryUpdateInterval($repository));
 
+    $messages = $this->loadStatusMessages($repository);
 
-    list($status, $raw_error) = $this->buildRepositoryStatus($repository);
+    $status = $this->buildRepositoryStatus($repository, $messages);
+    $raw_error = $this->buildRepositoryRawError($repository, $messages);
 
     $view->addProperty(pht('Status'), $status);
     if ($raw_error) {
@@ -80,16 +97,13 @@ final class DiffusionRepositoryStatusManagementPanel
   }
 
   private function buildRepositoryStatus(
-    PhabricatorRepository $repository) {
+    PhabricatorRepository $repository,
+    array $messages) {
 
     $viewer = $this->getViewer();
     $is_cluster = $repository->getAlmanacServicePHID();
 
     $view = new PHUIStatusListView();
-
-    $messages = id(new PhabricatorRepositoryStatusMessage())
-      ->loadAllWhere('repositoryID = %d', $repository->getID());
-    $messages = mpull($messages, null, 'getStatusType');
 
     if ($repository->isTracked()) {
       $view->addItem(
@@ -121,7 +135,12 @@ final class DiffusionRepositoryStatusManagementPanel
     }
 
     if ($repository->isHosted()) {
-      if ($repository->getServeOverHTTP() != PhabricatorRepository::SERVE_OFF) {
+      $proto_https = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTPS;
+      $proto_http = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_HTTP;
+      $can_http = $repository->canServeProtocol($proto_http, false) ||
+                  $repository->canServeProtocol($proto_https, false);
+
+      if ($can_http) {
         switch ($repository->getVersionControlSystem()) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
             $binaries[] = 'git-http-backend';
@@ -137,7 +156,12 @@ final class DiffusionRepositoryStatusManagementPanel
             break;
         }
       }
-      if ($repository->getServeOverSSH() != PhabricatorRepository::SERVE_OFF) {
+
+
+      $proto_ssh = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH;
+      $can_ssh = $repository->canServeProtocol($proto_ssh, false);
+
+      if ($can_ssh) {
         switch ($repository->getVersionControlSystem()) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
             $binaries[] = 'git-receive-pack';
@@ -361,8 +385,6 @@ final class DiffusionRepositoryStatusManagementPanel
       }
     }
 
-    $raw_error = null;
-
     $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_FETCH);
     if ($message) {
       switch ($message->getStatusCode()) {
@@ -376,8 +398,6 @@ final class DiffusionRepositoryStatusManagementPanel
               'keypair you have configured does not have permission to '.
               'access the repository.');
           }
-
-          $raw_error = $message;
 
           $view->addItem(
             id(new PHUIStatusItemView())
@@ -432,10 +452,29 @@ final class DiffusionRepositoryStatusManagementPanel
           ->setNote(pht('This repository will be updated soon!')));
     }
 
+    return $view;
+  }
+
+  private function buildRepositoryRawError(
+    PhabricatorRepository $repository,
+    array $messages) {
+    $viewer = $this->getViewer();
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    $raw_error = null;
+
+    $message = idx($messages, PhabricatorRepositoryStatusMessage::TYPE_FETCH);
+    if ($message) {
+      switch ($message->getStatusCode()) {
+        case PhabricatorRepositoryStatusMessage::CODE_ERROR:
+          $raw_error = $message->getParameter('message');
+          break;
+      }
+    }
 
     if ($raw_error !== null) {
       if (!$can_edit) {
@@ -450,8 +489,25 @@ final class DiffusionRepositoryStatusManagementPanel
       $raw_message = null;
     }
 
-    return array($view, $raw_message);
+    return $raw_message;
   }
 
+  private function loadStatusMessages(PhabricatorRepository $repository) {
+    $messages = id(new PhabricatorRepositoryStatusMessage())
+      ->loadAllWhere('repositoryID = %d', $repository->getID());
+    $messages = mpull($messages, null, 'getStatusType');
+
+    return $messages;
+  }
+
+  private function getEnvConfigLink() {
+    $config_href = '/config/edit/environment.append-paths/';
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $config_href,
+      ),
+      'environment.append-paths');
+  }
 
 }

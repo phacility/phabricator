@@ -144,7 +144,7 @@ final class PhabricatorOwnersDetailController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($package->getName());
+    $crumbs->addTextCrumb($package->getMonogram());
     $crumbs->setBorder(true);
 
     $timeline = $this->buildTransactionTimeline(
@@ -183,6 +183,19 @@ final class PhabricatorOwnersDetailController
       $owner_list = phutil_tag('em', array(), pht('None'));
     }
     $view->addProperty(pht('Owners'), $owner_list);
+
+
+    $dominion = $package->getDominion();
+    $dominion_map = PhabricatorOwnersPackage::getDominionOptionsMap();
+    $spec = idx($dominion_map, $dominion, array());
+    $name = idx($spec, 'short', $dominion);
+    $view->addProperty(pht('Dominion'), $name);
+
+    $auto = $package->getAutoReview();
+    $autoreview_map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
+    $spec = idx($autoreview_map, $auto, array());
+    $name = idx($spec, 'name', $auto);
+    $view->addProperty(pht('Auto Review'), $name);
 
     if ($package->getAuditingEnabled()) {
       $auditing = pht('Enabled');

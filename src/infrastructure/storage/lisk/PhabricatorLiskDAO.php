@@ -75,6 +75,12 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $connection->setReadOnly(true);
     }
 
+    // Unless this is a script running from the CLI, prevent any query from
+    // running for more than 30 seconds. See T10849 for discussion.
+    if (php_sapi_name() != 'cli') {
+      $connection->setQueryTimeout(30);
+    }
+
     return $connection;
   }
 

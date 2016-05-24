@@ -17,4 +17,6 @@ interface PhabricatorSSHPublicKeyInterface {
    */
   public function getSSHKeyDefaultName();
 
+  public function getSSHKeyNotifyPHIDs();
+
 }

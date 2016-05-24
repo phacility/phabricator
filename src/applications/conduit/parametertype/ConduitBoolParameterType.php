@@ -1,7 +1,7 @@
 <?php
 
 final class ConduitBoolParameterType
-  extends ConduitListParameterType {
+  extends ConduitParameterType {
 
   protected function getParameterValue(array $request, $key) {
     $value = parent::getParameterValue($request, $key);

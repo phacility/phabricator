@@ -55,6 +55,21 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $this;
   }
 
+  protected function getCurrentDeviceName() {
+    $device = AlmanacKeys::getLiveDevice();
+    if ($device) {
+      return $device->getName();
+    }
+
+    return php_uname('n');
+  }
+
+  protected function getTargetDeviceName() {
+    // TODO: This should use the correct device identity.
+    $uri = new PhutilURI($this->proxyURI);
+    return $uri->getDomain();
+  }
+
   protected function shouldProxy() {
     return (bool)$this->proxyURI;
   }
@@ -170,24 +185,19 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     $repository = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
       ->withIdentifiers(array($identifier))
+      ->needURIs(true)
       ->executeOne();
     if (!$repository) {
       throw new Exception(
         pht('No repository "%s" exists!', $identifier));
     }
 
-    switch ($repository->getServeOverSSH()) {
-      case PhabricatorRepository::SERVE_READONLY:
-      case PhabricatorRepository::SERVE_READWRITE:
-        // If we have read or read/write access, proceed for now. We will
-        // check write access when the user actually issues a write command.
-        break;
-      case PhabricatorRepository::SERVE_OFF:
-      default:
-        throw new Exception(
-          pht(
-            'This repository ("%s") is not available over SSH.',
-            $repository->getDisplayName()));
+    $protocol = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH;
+    if (!$repository->canServeProtocol($protocol, false)) {
+      throw new Exception(
+        pht(
+          'This repository ("%s") is not available over SSH.',
+          $repository->getDisplayName()));
     }
 
     return $repository;
@@ -209,35 +219,27 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
           'user account.'));
     }
 
-    switch ($repository->getServeOverSSH()) {
-      case PhabricatorRepository::SERVE_READONLY:
-        if ($protocol_command !== null) {
-          throw new Exception(
-            pht(
-              'This repository is read-only over SSH (tried to execute '.
-              'protocol command "%s").',
-              $protocol_command));
-        } else {
-          throw new Exception(
-            pht('This repository is read-only over SSH.'));
-        }
-        break;
-      case PhabricatorRepository::SERVE_READWRITE:
-        $can_push = PhabricatorPolicyFilter::hasCapability(
-          $viewer,
-          $repository,
-          DiffusionPushCapability::CAPABILITY);
-        if (!$can_push) {
-          throw new Exception(
-            pht('You do not have permission to push to this repository.'));
-        }
-        break;
-      case PhabricatorRepository::SERVE_OFF:
-      default:
-        // This shouldn't be reachable because we don't get this far if the
-        // repository isn't enabled, but kick them out anyway.
+    $protocol = PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH;
+    if ($repository->canServeProtocol($protocol, true)) {
+      $can_push = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $repository,
+        DiffusionPushCapability::CAPABILITY);
+      if (!$can_push) {
         throw new Exception(
-          pht('This repository is not available over SSH.'));
+          pht('You do not have permission to push to this repository.'));
+      }
+    } else {
+      if ($protocol_command !== null) {
+        throw new Exception(
+          pht(
+            'This repository is read-only over SSH (tried to execute '.
+            'protocol command "%s").',
+            $protocol_command));
+      } else {
+        throw new Exception(
+          pht('This repository is read-only over SSH.'));
+      }
     }
 
     $this->hasWriteAccess = true;

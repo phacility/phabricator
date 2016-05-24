@@ -351,15 +351,15 @@ final class PhabricatorRepositoryTransaction
           '%s changed the availability of this repository over HTTP from '.
           '"%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          PhabricatorRepository::getProtocolAvailabilityName($old),
-          PhabricatorRepository::getProtocolAvailabilityName($new));
+          $old,
+          $new);
       case self::TYPE_PROTOCOL_SSH:
         return pht(
           '%s changed the availability of this repository over SSH from '.
           '"%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          PhabricatorRepository::getProtocolAvailabilityName($old),
-          PhabricatorRepository::getProtocolAvailabilityName($new));
+          $old,
+          $new);
       case self::TYPE_PUSH_POLICY:
         return pht(
           '%s changed the push policy of this repository from "%s" to "%s".',

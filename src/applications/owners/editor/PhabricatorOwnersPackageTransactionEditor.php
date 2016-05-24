@@ -20,6 +20,8 @@ final class PhabricatorOwnersPackageTransactionEditor
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_PATHS;
     $types[] = PhabricatorOwnersPackageTransaction::TYPE_STATUS;
+    $types[] = PhabricatorOwnersPackageTransaction::TYPE_AUTOREVIEW;
+    $types[] = PhabricatorOwnersPackageTransaction::TYPE_DOMINION;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -47,6 +49,10 @@ final class PhabricatorOwnersPackageTransactionEditor
         return mpull($paths, 'getRef');
       case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
         return $object->getStatus();
+      case PhabricatorOwnersPackageTransaction::TYPE_AUTOREVIEW:
+        return $object->getAutoReview();
+      case PhabricatorOwnersPackageTransaction::TYPE_DOMINION:
+        return $object->getDominion();
     }
   }
 
@@ -58,6 +64,8 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_NAME:
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
       case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
+      case PhabricatorOwnersPackageTransaction::TYPE_AUTOREVIEW:
+      case PhabricatorOwnersPackageTransaction::TYPE_DOMINION:
         return $xaction->getNewValue();
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
         $new = $xaction->getNewValue();
@@ -113,6 +121,12 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         return;
+      case PhabricatorOwnersPackageTransaction::TYPE_AUTOREVIEW:
+        $object->setAutoReview($xaction->getNewValue());
+        return;
+      case PhabricatorOwnersPackageTransaction::TYPE_DOMINION:
+        $object->setDominion($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -127,6 +141,8 @@ final class PhabricatorOwnersPackageTransactionEditor
       case PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION:
       case PhabricatorOwnersPackageTransaction::TYPE_AUDITING:
       case PhabricatorOwnersPackageTransaction::TYPE_STATUS:
+      case PhabricatorOwnersPackageTransaction::TYPE_AUTOREVIEW:
+      case PhabricatorOwnersPackageTransaction::TYPE_DOMINION:
         return;
       case PhabricatorOwnersPackageTransaction::TYPE_OWNERS:
         $old = $xaction->getOldValue();
@@ -204,6 +220,61 @@ final class PhabricatorOwnersPackageTransactionEditor
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+          if (preg_match('([,!])', $new)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Package names may not contain commas (",") or exclamation '.
+                'marks ("!"). These characters are ambiguous when package '.
+                'names are parsed from the command line.'),
+              $xaction);
+          }
+        }
+
+        break;
+      case PhabricatorOwnersPackageTransaction::TYPE_AUTOREVIEW:
+        $map = PhabricatorOwnersPackage::getAutoreviewOptionsMap();
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+
+          if (empty($map[$new])) {
+            $valid = array_keys($map);
+
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Autoreview setting "%s" is not valid. '.
+                'Valid settings are: %s.',
+                $new,
+                implode(', ', $valid)),
+              $xaction);
+          }
+        }
+        break;
+      case PhabricatorOwnersPackageTransaction::TYPE_DOMINION:
+        $map = PhabricatorOwnersPackage::getDominionOptionsMap();
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+
+          if (empty($map[$new])) {
+            $valid = array_keys($map);
+
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Dominion setting "%s" is not valid. '.
+                'Valid settings are: %s.',
+                $new,
+                implode(', ', $valid)),
+              $xaction);
+          }
         }
         break;
       case PhabricatorOwnersPackageTransaction::TYPE_PATHS:
@@ -331,8 +402,7 @@ final class PhabricatorOwnersPackageTransactionEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $detail_uri = PhabricatorEnv::getProductionURI(
-      '/owners/package/'.$object->getID().'/');
+    $detail_uri = PhabricatorEnv::getProductionURI($object->getURI());
 
     $body->addLinkSection(
       pht('PACKAGE DETAIL'),

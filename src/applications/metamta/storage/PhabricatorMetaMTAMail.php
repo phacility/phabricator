@@ -634,7 +634,7 @@ final class PhabricatorMetaMTAMail
       }
       $mailer->setBody($body);
 
-      $html_emails = false;
+      $html_emails = true;
       if ($use_prefs && $prefs) {
         $html_emails = $prefs->getPreference(
           PhabricatorUserPreferences::PREFERENCE_HTML_EMAILS,

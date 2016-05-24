@@ -12,6 +12,16 @@ final class DifferentialRevisionListView extends AphrontView {
   private $noDataString;
   private $noBox;
   private $background = null;
+  private $unlandedDependencies = array();
+
+  public function setUnlandedDependencies(array $unlanded_dependencies) {
+    $this->unlandedDependencies = $unlanded_dependencies;
+    return $this;
+  }
+
+  public function getUnlandedDependencies() {
+    return $this->unlandedDependencies;
+  }
 
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
@@ -65,20 +75,6 @@ final class DifferentialRevisionListView extends AphrontView {
   public function render() {
     $viewer = $this->getViewer();
 
-    $fresh = PhabricatorEnv::getEnvConfig('differential.days-fresh');
-    if ($fresh) {
-      $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
-        time(),
-        -$fresh);
-    }
-
-    $stale = PhabricatorEnv::getEnvConfig('differential.days-stale');
-    if ($stale) {
-      $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
-        time(),
-        -$stale);
-    }
-
     $this->initBehavior('phabricator-tooltips', array());
     $this->requireResource('aphront-tooltip-css');
 
@@ -109,18 +105,6 @@ final class DifferentialRevisionListView extends AphrontView {
       $modified = $revision->getDateModified();
 
       $status = $revision->getStatus();
-      $show_age = ($fresh || $stale) &&
-                  $this->highlightAge &&
-                  !$revision->isClosed();
-
-      if ($stale && $modified < $stale) {
-        $object_age = PHUIObjectItemView::AGE_OLD;
-      } else if ($fresh && $modified < $fresh) {
-        $object_age = PHUIObjectItemView::AGE_STALE;
-      } else {
-        $object_age = PHUIObjectItemView::AGE_FRESH;
-      }
-
       $status_name =
         ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
@@ -143,14 +127,19 @@ final class DifferentialRevisionListView extends AphrontView {
         $item->addAttribute($draft);
       }
 
-      /* Most things 'Need Review', so accept it's the default */
-      if ($status != ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
-        $item->addAttribute($status_name);
-      }
-
       // Author
       $author_handle = $this->handles[$revision->getAuthorPHID()];
       $item->addByline(pht('Author: %s', $author_handle->renderLink()));
+
+      $unlanded = idx($this->unlandedDependencies, $phid);
+      if ($unlanded) {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIcon('fa-chain-broken', 'red'),
+            ' ',
+            pht('Open Dependencies'),
+          ));
+      }
 
       $reviewers = array();
       // TODO: As above, this should be based on `getReviewerStatus()`.
@@ -164,7 +153,7 @@ final class DifferentialRevisionListView extends AphrontView {
       }
 
       $item->addAttribute(pht('Reviewers: %s', $reviewers));
-      $item->setEpoch($revision->getDateModified(), $object_age);
+      $item->setEpoch($revision->getDateModified());
 
       switch ($status) {
         case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:

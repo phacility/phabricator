@@ -11,7 +11,8 @@ final class PhabricatorConfigIssueListController
 
     $issues = PhabricatorSetupCheck::runAllChecks();
     PhabricatorSetupCheck::setOpenSetupIssueKeys(
-      PhabricatorSetupCheck::getUnignoredIssueKeys($issues));
+      PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
+      $update_database = true);
 
     $important = $this->buildIssueList(
       $issues, PhabricatorSetupCheck::GROUP_IMPORTANT);

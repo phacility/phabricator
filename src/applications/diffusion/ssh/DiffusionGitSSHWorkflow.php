@@ -1,10 +1,17 @@
 <?php
 
-abstract class DiffusionGitSSHWorkflow extends DiffusionSSHWorkflow {
+abstract class DiffusionGitSSHWorkflow
+  extends DiffusionSSHWorkflow
+  implements DiffusionRepositoryClusterEngineLogInterface {
 
   protected function writeError($message) {
     // Git assumes we'll add our own newlines.
     return parent::writeError($message."\n");
+  }
+
+  public function writeClusterEngineLogMessage($message) {
+    parent::writeError($message);
+    $this->getErrorChannel()->update();
   }
 
   protected function identifyRepository() {

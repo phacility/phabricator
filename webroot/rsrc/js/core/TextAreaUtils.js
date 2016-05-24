@@ -62,6 +62,26 @@ JX.install('TextAreaUtils', {
       JX.TextAreaUtils.setSelectionRange(area, start, end);
     },
 
+
+    /**
+     * Insert a reference to a given uploaded file into a textarea.
+     */
+    insertFileReference: function(area, file) {
+      var ref = '{F' + file.getID() + '}';
+
+      // If we're inserting immediately after a "}" (usually, another file
+      // reference), put some newlines before our token so that multiple file
+      // uploads get laid out more nicely.
+      var range = JX.TextAreaUtils.getSelectionRange(area);
+      var before = area.value.substring(0, range.start);
+      if (before.match(/\}$/)) {
+        ref = '\n\n' + ref;
+      }
+
+      JX.TextAreaUtils.setSelectionText(area, ref, false);
+    },
+
+
     /**
      * Get the document pixel positions of the beginning and end of a character
      * range in a textarea.

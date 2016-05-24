@@ -204,6 +204,7 @@ final class PhabricatorConduitAPIController
       $stored_key = id(new PhabricatorAuthSSHKeyQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withKeys(array($public_key))
+        ->withIsActive(true)
         ->executeOne();
       if (!$stored_key) {
         return array(

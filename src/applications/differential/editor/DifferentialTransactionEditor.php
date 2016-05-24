@@ -7,6 +7,7 @@ final class DifferentialTransactionEditor
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
   private $didExpandInlineState = false;
+  private $affectedPaths;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -1200,7 +1201,13 @@ final class DifferentialTransactionEditor
     $body = new PhabricatorMetaMTAMailBody();
     $body->setViewer($this->requireActor());
 
-    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $revision_uri = PhabricatorEnv::getProductionURI('/D'.$object->getID());
+
+    $this->addHeadersAndCommentsToMailBody(
+      $body,
+      $xactions,
+      pht('View Revision'),
+      $revision_uri);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
@@ -1212,9 +1219,7 @@ final class DifferentialTransactionEditor
     }
 
     if ($inlines) {
-      $body->addTextSection(
-        pht('INLINE COMMENTS'),
-        $this->renderInlineCommentsForMail($object, $inlines));
+      $this->appendInlineCommentsForMail($object, $inlines, $body);
     }
 
     $changed_uri = $this->getChangedPriorToCommitURI();
@@ -1228,7 +1233,7 @@ final class DifferentialTransactionEditor
 
     $body->addLinkSection(
       pht('REVISION DETAIL'),
-      PhabricatorEnv::getProductionURI('/D'.$object->getID()));
+      $revision_uri);
 
     $update_xaction = null;
     foreach ($xactions as $xaction) {
@@ -1253,21 +1258,18 @@ final class DifferentialTransactionEditor
       $config_attach = PhabricatorEnv::getEnvConfig($config_key_attach);
 
       if ($config_inline || $config_attach) {
-        $patch_section = $this->renderPatchForMail($diff);
-        $lines = count(phutil_split_lines($patch_section->getPlaintext()));
+        $patch = $this->buildPatchForMail($diff);
+        $lines = substr_count($patch, "\n");
 
         if ($config_inline && ($lines <= $config_inline)) {
-          $body->addTextSection(
-            pht('CHANGE DETAILS'),
-            $patch_section);
+          $this->appendChangeDetailsForMail($object, $diff, $patch, $body);
         }
 
         if ($config_attach) {
           $name = pht('D%s.%s.patch', $object->getID(), $diff->getID());
           $mime_type = 'text/x-patch; charset=utf-8';
           $body->addAttachment(
-            new PhabricatorMetaMTAAttachment(
-              $patch_section->getPlaintext(), $name, $mime_type));
+            new PhabricatorMetaMTAAttachment($patch, $name, $mime_type));
         }
       }
     }
@@ -1374,138 +1376,64 @@ final class DifferentialTransactionEditor
     return $result;
   }
 
-  protected function indentForMail(array $lines) {
-    $indented = array();
-    foreach ($lines as $line) {
-      $indented[] = '> '.$line;
-    }
-    return $indented;
-  }
-
-  protected function nestCommentHistory(
-    DifferentialTransactionComment $comment, array $comments_by_line_number,
-    array $users_by_phid) {
-
-    $nested = array();
-    $previous_comments = $comments_by_line_number[$comment->getChangesetID()]
-                                                 [$comment->getLineNumber()];
-    foreach ($previous_comments as $previous_comment) {
-      if ($previous_comment->getID() >= $comment->getID()) {
-        break;
-      }
-      $nested = $this->indentForMail(
-        array_merge(
-          $nested,
-          explode("\n", $previous_comment->getContent())));
-      $user = idx($users_by_phid, $previous_comment->getAuthorPHID(), null);
-      if ($user) {
-        array_unshift($nested, pht('%s wrote:', $user->getUserName()));
-      }
-    }
-
-    $nested = array_merge($nested, explode("\n", $comment->getContent()));
-    return implode("\n", $nested);
-  }
-
-  private function renderInlineCommentsForMail(
+  private function appendInlineCommentsForMail(
     PhabricatorLiskDAO $object,
-    array $inlines) {
+    array $inlines,
+    PhabricatorMetaMTAMailBody $body) {
 
-    $context_key = 'metamta.differential.unified-comment-context';
-    $show_context = PhabricatorEnv::getEnvConfig($context_key);
-
-    $changeset_ids = array();
-    $line_numbers_by_changeset = array();
-    foreach ($inlines as $inline) {
-      $id = $inline->getComment()->getChangesetID();
-      $changeset_ids[$id] = $id;
-      $line_numbers_by_changeset[$id][] =
-        $inline->getComment()->getLineNumber();
-    }
-
-    $changesets = id(new DifferentialChangesetQuery())
+    $section = id(new DifferentialInlineCommentMailView())
       ->setViewer($this->getActor())
-      ->withIDs($changeset_ids)
-      ->needHunks(true)
-      ->execute();
+      ->setInlines($inlines)
+      ->buildMailSection();
 
-    $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(
-      $inlines,
-      $changesets);
+    $header = pht('INLINE COMMENTS');
 
-    if ($show_context) {
-      $hunk_parser = new DifferentialHunkParser();
-      $table = new DifferentialTransactionComment();
-      $conn_r = $table->establishConnection('r');
-      $queries = array();
-      foreach ($line_numbers_by_changeset as $id => $line_numbers) {
-        $queries[] = qsprintf(
-          $conn_r,
-          '(changesetID = %d AND lineNumber IN (%Ld))',
-          $id, $line_numbers);
-      }
-      $all_comments = id(new DifferentialTransactionComment())->loadAllWhere(
-        'transactionPHID IS NOT NULL AND (%Q)', implode(' OR ', $queries));
-      $comments_by_line_number = array();
-      foreach ($all_comments as $comment) {
-        $comments_by_line_number
-          [$comment->getChangesetID()]
-          [$comment->getLineNumber()]
-          [$comment->getID()] = $comment;
-      }
-      $author_phids = mpull($all_comments, 'getAuthorPHID');
-      $authors = id(new PhabricatorPeopleQuery())
-        ->setViewer($this->getActor())
-        ->withPHIDs($author_phids)
-        ->execute();
-      $authors_by_phid = mpull($authors, null, 'getPHID');
-    }
+    $section_text = "\n".$section->getPlaintext();
 
-    $section = new PhabricatorMetaMTAMailSection();
-    foreach ($inline_groups as $changeset_id => $group) {
-      $changeset = idx($changesets, $changeset_id);
-      if (!$changeset) {
-        continue;
-      }
+    $style = array(
+      'margin: 6px 0 12px 0;',
+    );
 
-      foreach ($group as $inline) {
-        $comment = $inline->getComment();
-        $file = $changeset->getFilename();
-        $start = $comment->getLineNumber();
-        $len = $comment->getLineLength();
-        if ($len) {
-          $range = $start.'-'.($start + $len);
-        } else {
-          $range = $start;
-        }
+    $section_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $style),
+      ),
+      $section->getHTML());
 
-        $inline_content = $comment->getContent();
+    $body->addPlaintextSection($header, $section_text, false);
+    $body->addHTMLSection($header, $section_html);
+  }
 
-        if (!$show_context) {
-          $section->addFragment("{$file}:{$range} {$inline_content}");
-        } else {
-          $patch = $hunk_parser->makeContextDiff(
-            $changeset->getHunks(),
-            $comment->getIsNewFile(),
-            $comment->getLineNumber(),
-            $comment->getLineLength(),
-            1);
-          $nested_comments = $this->nestCommentHistory(
-            $inline->getComment(), $comments_by_line_number, $authors_by_phid);
+  private function appendChangeDetailsForMail(
+    PhabricatorLiskDAO $object,
+    DifferentialDiff $diff,
+    $patch,
+    PhabricatorMetaMTAMailBody $body) {
 
-          $section
-            ->addFragment('================')
-            ->addFragment(pht('Comment at: %s:%s', $file, $range))
-            ->addPlaintextFragment($patch)
-            ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
-            ->addFragment('----------------')
-            ->addFragment($nested_comments)
-            ->addFragment(null);
-        }
-      }
-    }
+    $section = id(new DifferentialChangeDetailMailView())
+      ->setViewer($this->getActor())
+      ->setDiff($diff)
+      ->setPatch($patch)
+      ->buildMailSection();
 
-    return $section;
+    $header = pht('CHANGE DETAILS');
+
+    $section_text = "\n".$section->getPlaintext();
+
+    $style = array(
+      'margin: 6px 0 12px 0;',
+    );
+
+    $section_html = phutil_tag(
+      'div',
+      array(
+        'style' => implode(' ', $style),
+      ),
+      $section->getHTML());
+
+    $body->addPlaintextSection($header, $section_text, false);
+    $body->addHTMLSection($header, $section_html);
   }
 
   private function loadDiff($phid, $need_changesets = false) {
@@ -1558,6 +1486,181 @@ final class DifferentialTransactionEditor
     }
 
     return parent::shouldApplyHeraldRules($object, $xactions);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $repository = $object->getRepository();
+    if (!$repository) {
+      return array();
+    }
+
+    if (!$this->affectedPaths) {
+      return array();
+    }
+
+    $packages = PhabricatorOwnersPackage::loadAffectedPackages(
+      $repository,
+      $this->affectedPaths);
+
+    foreach ($packages as $key => $package) {
+      if ($package->isArchived()) {
+        unset($packages[$key]);
+      }
+    }
+
+    if (!$packages) {
+      return array();
+    }
+
+    // Remove packages that the revision author is an owner of. If you own
+    // code, you don't need another owner to review it.
+    $authority = id(new PhabricatorOwnersPackageQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(mpull($packages, 'getPHID'))
+      ->withAuthorityPHIDs(array($object->getAuthorPHID()))
+      ->execute();
+    $authority = mpull($authority, null, 'getPHID');
+
+    foreach ($packages as $key => $package) {
+      $package_phid = $package->getPHID();
+      if ($authority[$package_phid]) {
+        unset($packages[$key]);
+        continue;
+      }
+    }
+
+    if (!$packages) {
+      return array();
+    }
+
+    $auto_subscribe = array();
+    $auto_review = array();
+    $auto_block = array();
+
+    foreach ($packages as $package) {
+      switch ($package->getAutoReview()) {
+        case PhabricatorOwnersPackage::AUTOREVIEW_SUBSCRIBE:
+          $auto_subscribe[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_REVIEW:
+          $auto_review[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_BLOCK:
+          $auto_block[] = $package;
+          break;
+        case PhabricatorOwnersPackage::AUTOREVIEW_NONE:
+        default:
+          break;
+      }
+    }
+
+    $owners_phid = id(new PhabricatorOwnersApplication())
+      ->getPHID();
+
+    $xactions = array();
+    if ($auto_subscribe) {
+      $xactions[] = $object->getApplicationTransactionTemplate()
+        ->setAuthorPHID($owners_phid)
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(
+          array(
+            '+' => mpull($auto_subscribe, 'getPHID'),
+          ));
+    }
+
+    $specs = array(
+      array($auto_review, false),
+      array($auto_block, true),
+    );
+
+    foreach ($specs as $spec) {
+      list($reviewers, $blocking) = $spec;
+      if (!$reviewers) {
+        continue;
+      }
+
+      $phids = mpull($reviewers, 'getPHID');
+      $xaction = $this->newAutoReviewTransaction($object, $phids, $blocking);
+      if ($xaction) {
+        $xactions[] = $xaction;
+      }
+    }
+
+    return $xactions;
+  }
+
+  private function newAutoReviewTransaction(
+    PhabricatorLiskDAO $object,
+    array $phids,
+    $is_blocking) {
+
+    // TODO: This is substantially similar to DifferentialReviewersHeraldAction
+    // and both are needlessly complex. This logic should live in the normal
+    // transaction application pipeline. See T10967.
+
+    $reviewers = $object->getReviewerStatus();
+    $reviewers = mpull($reviewers, null, 'getReviewerPHID');
+
+    if ($is_blocking) {
+      $new_status = DifferentialReviewerStatus::STATUS_BLOCKING;
+    } else {
+      $new_status = DifferentialReviewerStatus::STATUS_ADDED;
+    }
+
+    $new_strength = DifferentialReviewerStatus::getStatusStrength(
+      $new_status);
+
+    $current = array();
+    foreach ($phids as $phid) {
+      if (!isset($reviewers[$phid])) {
+        continue;
+      }
+
+      // If we're applying a stronger status (usually, upgrading a reviewer
+      // into a blocking reviewer), skip this check so we apply the change.
+      $old_strength = DifferentialReviewerStatus::getStatusStrength(
+        $reviewers[$phid]->getStatus());
+      if ($old_strength <= $new_strength) {
+        continue;
+      }
+
+      $current[] = $phid;
+    }
+
+    $phids = array_diff($phids, $current);
+
+    if (!$phids) {
+      return null;
+    }
+
+    $phids = array_fuse($phids);
+
+    $value = array();
+    foreach ($phids as $phid) {
+      $value[$phid] = array(
+        'data' => array(
+          'status' => $new_status,
+        ),
+      );
+    }
+
+    $edgetype_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
+
+    $owners_phid = id(new PhabricatorOwnersApplication())
+      ->getPHID();
+
+    return $object->getApplicationTransactionTemplate()
+      ->setAuthorPHID($owners_phid)
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $edgetype_reviewer)
+      ->setNewValue(
+        array(
+          '+' => $value,
+        ));
   }
 
   protected function buildHeraldAdapter(
@@ -1625,6 +1728,10 @@ final class DifferentialTransactionEditor
     foreach ($changesets as $changeset) {
       $paths[] = $path_prefix.'/'.$changeset->getFilename();
     }
+
+    // Save the affected paths; we'll use them later to query Owners. This
+    // uses the un-expanded paths.
+    $this->affectedPaths = $paths;
 
     // Mark this as also touching all parent paths, so you can see all pending
     // changes to any file within a directory.
@@ -1766,20 +1873,14 @@ final class DifferentialTransactionEditor
       array('style' => 'font-family: monospace;'), $patch);
   }
 
-  private function renderPatchForMail(DifferentialDiff $diff) {
+  private function buildPatchForMail(DifferentialDiff $diff) {
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
 
-    $patch = id(new DifferentialRawDiffRenderer())
+    return id(new DifferentialRawDiffRenderer())
       ->setViewer($this->getActor())
       ->setFormat($format)
       ->setChangesets($diff->getChangesets())
       ->buildPatch();
-
-    $section = new PhabricatorMetaMTAMailSection();
-    $section->addHTMLFragment($this->renderPatchHTMLForMail($patch));
-    $section->addPlaintextFragment($patch);
-
-    return $section;
   }
 
   protected function willPublish(PhabricatorLiskDAO $object, array $xactions) {

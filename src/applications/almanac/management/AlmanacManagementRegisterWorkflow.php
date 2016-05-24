@@ -20,13 +20,6 @@ final class AlmanacManagementRegisterWorkflow
             'help' => pht('Path to a private key for the host.'),
           ),
           array(
-            'name' => 'allow-key-reuse',
-            'help' => pht(
-              'Register even if another host is already registered with this '.
-              'keypair. This is an advanced featuer which allows a pool of '.
-              'devices to share credentials.'),
-          ),
-          array(
             'name' => 'identify-as',
             'param' => 'name',
             'help' => pht(
@@ -36,13 +29,13 @@ final class AlmanacManagementRegisterWorkflow
           array(
             'name' => 'force',
             'help' => pht(
-              'Register this host even if keys already exist.'),
+              'Register this host even if keys already exist on disk.'),
           ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
+    $viewer = $this->getViewer();
 
     $device_name = $args->getArg('device');
     if (!strlen($device_name)) {
@@ -51,12 +44,29 @@ final class AlmanacManagementRegisterWorkflow
     }
 
     $device = id(new AlmanacDeviceQuery())
-      ->setViewer($this->getViewer())
+      ->setViewer($viewer)
       ->withNames(array($device_name))
       ->executeOne();
     if (!$device) {
       throw new PhutilArgumentUsageException(
         pht('No such device "%s" exists!', $device_name));
+    }
+
+    $identify_as = $args->getArg('identify-as');
+
+    $raw_device = $device_name;
+    if (strlen($identify_as)) {
+      $raw_device = $identify_as;
+    }
+
+    $identity_device = id(new AlmanacDeviceQuery())
+      ->setViewer($viewer)
+      ->withNames(array($raw_device))
+      ->executeOne();
+    if (!$identity_device) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'No such device "%s" exists!', $raw_device));
     }
 
     $private_key_path = $args->getArg('private-key');
@@ -67,7 +77,7 @@ final class AlmanacManagementRegisterWorkflow
 
     if (!Filesystem::pathExists($private_key_path)) {
       throw new PhutilArgumentUsageException(
-        pht('Private key "%s" does not exist!', $private_key_path));
+        pht('No private key exists at path "%s"!', $private_key_path));
     }
 
     $raw_private_key = Filesystem::readFile($private_key_path);
@@ -85,8 +95,8 @@ final class AlmanacManagementRegisterWorkflow
     if ($err) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Unable to change ownership of a file to daemon user "%s". Run '.
-          'this command as %s or root.',
+          'Unable to change ownership of an identity file to daemon user '.
+          '"%s". Run this command as %s or root.',
           $phd_user,
           $phd_user));
     }
@@ -131,45 +141,42 @@ final class AlmanacManagementRegisterWorkflow
     $public_key = id(new PhabricatorAuthSSHKeyQuery())
       ->setViewer($this->getViewer())
       ->withKeys(array($key_object))
+      ->withIsActive(true)
       ->executeOne();
 
-    if ($public_key) {
-      if ($public_key->getObjectPHID() !== $device->getPHID()) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'The public key corresponding to the given private key is '.
-            'already associated with an object other than the specified '.
-            'device. You can not use a single private key to identify '.
-            'multiple devices or users.'));
-      } else if (!$public_key->getIsTrusted()) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'The public key corresponding to the given private key is '.
-            'already associated with the device, but is not trusted. '.
-            'Registering this key would trust the other entities which '.
-            'hold it. Use a unique key, or explicitly enable trust for the '.
-            'current key.'));
-      } else if (!$args->getArg('allow-key-reuse')) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'The public key corresponding to the given private key is '.
-            'already associated with the device. If you do not want to '.
-            'use a unique key, use --allow-key-reuse to permit '.
-            'reassociation.'));
-      }
-    } else {
-      $public_key = id(new PhabricatorAuthSSHKey())
-        ->setObjectPHID($device->getPHID())
-        ->attachObject($device)
-        ->setName($device->getSSHKeyDefaultName())
-        ->setKeyType($key_object->getType())
-        ->setKeyBody($key_object->getBody())
-        ->setKeyComment(pht('Registered'))
-        ->setIsTrusted(1);
+    if (!$public_key) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'The public key corresponding to the given private key is not '.
+          'yet known to Phabricator. Associate the public key with an '.
+          'Almanac device in the web interface before registering hosts '.
+          'with it.'));
     }
 
+    if ($public_key->getObjectPHID() !== $device->getPHID()) {
+      $public_phid = $public_key->getObjectPHID();
+      $public_handles = $viewer->loadHandles(array($public_phid));
+      $public_handle = $public_handles[$public_phid];
 
-    $console->writeOut(
+      throw new PhutilArgumentUsageException(
+        pht(
+          'The public key corresponding to the given private key is already '.
+          'associated with an object ("%s") other than the specified '.
+          'device ("%s"). You can not use a single private key to identify '.
+          'multiple devices or users.',
+          $public_handle->getFullName(),
+          $device->getName()));
+    }
+
+    if (!$public_key->getIsTrusted()) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'The public key corresponding to the given private key is '.
+          'properly associated with the device, but is not yet trusted. '.
+          'Trust this key before registering devices with it.'));
+    }
+
+    echo tsprintf(
       "%s\n",
       pht('Installing public key...'));
 
@@ -179,18 +186,12 @@ final class AlmanacManagementRegisterWorkflow
     Filesystem::writeFile($tmp_public, $raw_public_key);
     execx('mv -f %s %s', $tmp_public, $stored_public_path);
 
-    $console->writeOut(
+    echo tsprintf(
       "%s\n",
       pht('Installing private key...'));
     execx('mv -f %s %s', $tmp_private, $stored_private_path);
 
-    $raw_device = $device_name;
-    $identify_as = $args->getArg('identify-as');
-    if (strlen($identify_as)) {
-      $raw_device = $identify_as;
-    }
-
-    $console->writeOut(
+    echo tsprintf(
       "%s\n",
       pht('Installing device %s...', $raw_device));
 
@@ -202,14 +203,7 @@ final class AlmanacManagementRegisterWorkflow
     Filesystem::writeFile($tmp_device, $raw_device);
     execx('mv -f %s %s', $tmp_device, $stored_device_path);
 
-    if (!$public_key->getID()) {
-      $console->writeOut(
-        "%s\n",
-        pht('Registering device key...'));
-      $public_key->save();
-    }
-
-    $console->writeOut(
+    echo tsprintf(
       "**<bg:green> %s </bg>** %s\n",
       pht('HOST REGISTERED'),
       pht(

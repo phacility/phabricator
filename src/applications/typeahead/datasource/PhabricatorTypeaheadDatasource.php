@@ -334,6 +334,14 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   /**
    * @task functions
    */
+  protected function evaluateValues(array $values) {
+    return $values;
+  }
+
+
+  /**
+   * @task functions
+   */
   public function evaluateTokens(array $tokens) {
     $results = array();
     $evaluate = array();
@@ -344,6 +352,8 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
         $evaluate[] = $token;
       }
     }
+
+    $results = $this->evaluateValues($results);
 
     foreach ($evaluate as $function) {
       $function = self::parseFunction($function);

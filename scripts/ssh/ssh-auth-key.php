@@ -14,6 +14,7 @@ try {
 $key = id(new PhabricatorAuthSSHKeyQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
   ->withKeys(array($public_key))
+  ->withIsActive(true)
   ->executeOne();
 if (!$key) {
   exit(1);

@@ -70,12 +70,12 @@ final class PhabricatorRepositoryTestCase
 
     $repo->setDetail('hosting-enabled', true);
 
-    $repo->setDetail('local-path', '/var/repo/SVN');
+    $repo->setLocalPath('/var/repo/SVN');
     $this->assertEqual(
       'file:///var/repo/SVN',
       $repo->getSubversionPathURI());
 
-    $repo->setDetail('local-path', '/var/repo/SVN/');
+    $repo->setLocalPath('/var/repo/SVN/');
     $this->assertEqual(
       'file:///var/repo/SVN',
       $repo->getSubversionPathURI());

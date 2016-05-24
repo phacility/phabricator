@@ -3,18 +3,34 @@
 abstract class PhabricatorAuthSSHKeyController
   extends PhabricatorAuthController {
 
-  protected function newKeyForObjectPHID($object_phid) {
+  private $keyObject;
+
+  public function setSSHKeyObject(PhabricatorSSHPublicKeyInterface $object) {
+    $this->keyObject = $object;
+    return $this;
+  }
+
+  public function getSSHKeyObject() {
+    return $this->keyObject;
+  }
+
+  protected function loadSSHKeyObject($object_phid, $need_edit) {
     $viewer = $this->getViewer();
 
-    $object = id(new PhabricatorObjectQuery())
+    $query = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array($object_phid))
-      ->requireCapabilities(
+      ->withPHIDs(array($object_phid));
+
+    if ($need_edit) {
+      $query->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
+        ));
+    }
+
+    $object = $query->executeOne();
+
     if (!$object) {
       return null;
     }
@@ -25,9 +41,38 @@ abstract class PhabricatorAuthSSHKeyController
       return null;
     }
 
-    return id(new PhabricatorAuthSSHKey())
-      ->setObjectPHID($object_phid)
-      ->attachObject($object);
+    $this->keyObject = $object;
+
+    return $object;
+  }
+
+  protected function newKeyForObjectPHID($object_phid) {
+    $viewer = $this->getViewer();
+
+    $object = $this->loadSSHKeyObject($object_phid, true);
+    if (!$object) {
+      return null;
+    }
+
+    return PhabricatorAuthSSHKey::initializeNewSSHKey($viewer, $object);
+  }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $viewer = $this->getViewer();
+
+    $key_object = $this->getSSHKeyObject();
+    if ($key_object) {
+      $object_phid = $key_object->getPHID();
+      $handles = $viewer->loadHandles(array($object_phid));
+      $handle = $handles[$object_phid];
+
+      $uri = $key_object->getSSHPublicKeyManagementURI($viewer);
+
+      $crumbs->addTextCrumb($handle->getObjectName(), $uri);
+    }
+
+    return $crumbs;
   }
 
 }

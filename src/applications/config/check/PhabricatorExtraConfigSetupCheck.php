@@ -186,6 +186,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'Configuration of the notification server has changed substantially. '.
       'For discussion, see T10794.');
 
+    $stale_reason = pht(
+      'The Differential revision list view age UI elements have been removed '.
+      'to simplify the interface.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -310,6 +314,13 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'notification.enabled' => $aphlict_reason,
       'notification.client-uri' => $aphlict_reason,
       'notification.server-uri' => $aphlict_reason,
+
+      'metamta.differential.unified-comment-context' => pht(
+        'Inline comments are now always rendered with a limited amount '.
+        'of context.'),
+
+      'differential.days-fresh' => $stale_reason,
+      'differential.days-stale' => $stale_reason,
     );
 
     return $ancient_config;

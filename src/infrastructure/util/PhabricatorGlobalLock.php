@@ -29,6 +29,7 @@
 final class PhabricatorGlobalLock extends PhutilLock {
 
   private $conn;
+  private $isExternalConnection = false;
 
   private static $pool = array();
 
@@ -74,6 +75,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
    */
   public function useSpecificConnection(AphrontDatabaseConnection $conn) {
     $this->conn = $conn;
+    $this->isExternalConnection = true;
     return $this;
   }
 
@@ -109,29 +111,54 @@ final class PhabricatorGlobalLock extends PhutilLock {
     $max_allowed_timeout = 2147483;
     queryfx($conn, 'SET wait_timeout = %d', $max_allowed_timeout);
 
+    $lock_name = $this->getName();
+
     $result = queryfx_one(
       $conn,
       'SELECT GET_LOCK(%s, %f)',
-      $this->getName(),
+      $lock_name,
       $wait);
 
     $ok = head($result);
     if (!$ok) {
-      throw new PhutilLockException($this->getName());
+      throw new PhutilLockException($lock_name);
     }
+
+    $conn->rememberLock($lock_name);
 
     $this->conn = $conn;
   }
 
   protected function doUnlock() {
-    queryfx(
-      $this->conn,
-      'SELECT RELEASE_LOCK(%s)',
-      $this->getName());
+    $lock_name = $this->getName();
 
-    $this->conn->close();
-    self::$pool[] = $this->conn;
+    $conn = $this->conn;
+
+    try {
+      $result = queryfx_one(
+        $conn,
+        'SELECT RELEASE_LOCK(%s)',
+        $lock_name);
+      $conn->forgetLock($lock_name);
+    } catch (Exception $ex) {
+      $result = array(null);
+    }
+
+    $ok = head($result);
+    if (!$ok) {
+      // TODO: We could throw here, but then this lock doesn't get marked
+      // unlocked and we throw again later when exiting. It also doesn't
+      // particularly matter for any current applications. For now, just
+      // swallow the error.
+    }
+
     $this->conn = null;
+    $this->isExternalConnection = false;
+
+    if (!$this->isExternalConnection) {
+      $conn->close();
+      self::$pool[] = $conn;
+    }
   }
 
 }

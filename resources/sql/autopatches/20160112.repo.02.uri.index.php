@@ -1,7 +1,4 @@
 <?php
 
-$table = new PhabricatorRepository();
-
-foreach (new LiskMigrationIterator($table) as $repo) {
-  $repo->updateURIIndex();
-}
+// A later patch ("20160510.repo.01.uriindex.php") performs an identical
+// regeneration of the index, so we no longer need to do it here.

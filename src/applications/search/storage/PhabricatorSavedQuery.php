@@ -7,6 +7,8 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
   protected $queryKey;
   protected $engineClassName;
 
+  private $parameterMap = self::ATTACHABLE;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
@@ -50,6 +52,15 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
 
   public function newEngine() {
     return newv($this->getEngineClassName(), array());
+  }
+
+  public function attachParameterMap(array $map) {
+    $this->parameterMap = $map;
+    return $this;
+  }
+
+  public function getEvaluatedParameter($key, $default = null) {
+    return $this->assertAttachedKey($this->parameterMap, $key, $default);
   }
 
 

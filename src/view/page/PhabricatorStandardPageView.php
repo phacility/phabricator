@@ -223,6 +223,30 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     }
 
     if ($user) {
+      if ($user->isLoggedIn()) {
+        $offset = $user->getTimeZoneOffset();
+
+        $preferences = $user->loadPreferences();
+        $ignore_key = PhabricatorUserPreferences::PREFERENCE_IGNORE_OFFSET;
+
+        $ignore = $preferences->getPreference($ignore_key);
+        if (!strlen($ignore)) {
+          $ignore = null;
+        }
+
+        Javelin::initBehavior(
+          'detect-timezone',
+          array(
+            'offset' => $offset,
+            'uri' => '/settings/timezone/',
+            'message' => pht(
+              'Your browser timezone setting differs from the timezone '.
+              'setting in your profile, click to reconcile.'),
+            'ignoreKey' => $ignore_key,
+            'ignore' => $ignore,
+          ));
+      }
+
       $default_img_uri =
         celerity_get_resource_uri(
           'rsrc/image/icon/fatcow/document_black.png');

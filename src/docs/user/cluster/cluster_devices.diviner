@@ -1,0 +1,247 @@
+@title Cluster: Devices
+@group cluster
+
+Guide to configuring hosts to act as cluster devices.
+
+Cluster Context
+===============
+
+This document describes a step in configuring Phabricator to run on
+multiple hosts in a cluster configuration. This is an advanced feature. For
+more information on clustering, see @{article:Clustering Introduction}.
+
+In this context, device configuration is mostly relevant to configuring
+repository services in a cluster. You can find more details about this in
+@{article:Cluster: Repositories}.
+
+
+Overview
+========
+
+Some cluster services need to be able to authenticate themselves and interact
+with other services. For example, two repository hosts holding copies of the
+same repository must be able to fetch changes from one another, even if the
+repository is private.
+
+Within a cluster, devices authenticate using SSH keys. Some operations happen
+over SSH (using keys in a normal way, as you would when running `ssh` from the
+command line), while others happen over HTTP (using SSH keys to sign requests).
+
+Before hosts can authenticate to one another, you need to configure the
+credentials so other devices know the keys can be trusted. Beyond establishing
+trust, this configuration will establish //device identity//, so each host
+knows which device it is explicitly.
+
+Today, this is primarily necessary when configuring repository clusters.
+
+
+Using Almanac
+=============
+
+The tool Phabricator uses to manage cluster devices is the **Almanac**
+application, and most configuration will occur through the application's web
+UI. If you are not familiar with it, see @{article:Almanac User Guide} first.
+This document assumes you are familiar with Almanac concepts.
+
+
+What Lies Ahead
+===============
+
+Here's a brief overview of the steps required to register cluster devices. The
+remainder of this document walks through these points in more detail.
+
+  - Create an Almanac device record for each device.
+  - Generate, add, and trust SSH keys if necessary.
+  - Install Phabricator on the host.
+  - Use `bin/almanac register` from the host to register it as a device.
+
+See below for guidance on each of these steps.
+
+
+Individual vs Shared Keys
+=========================
+
+Before getting started, you should choose how you plan to manage device SSH
+keys. Trust and device identity are handled separately, and there are two ways
+to set up SSH keys so that devices can authenticate with one another:
+
+  - you can generate a unique SSH key for each device; or
+  - you can generate one SSH key and share it across multiple devices.
+
+Using **unique keys** allows the tools to do some more sanity/safety checks and
+makes it a bit more difficult to misconfigure things, but you'll have to do
+more work managing the actual keys. This may be a better choice if you are
+setting up a small cluster (2-3 devices) for the first time.
+
+Using **shared keys** makes key management easier but safety checks won't be
+able to catch a few kinds of mistakes. This may be a better choice if you are
+setting up a larger cluster, plan to expand the cluster later, or have
+experience with Phabricator clustering.
+
+Because all cluster keys are all-powerful, there is no material difference
+between these methods from a security or trust viewpoint. Unique keys are just
+potentially easier to administrate at small scales, while shared keys are
+easier at larger scales.
+
+
+Create Almanac Device Records
+=============================
+
+For each host you plan to make part of a Phabricator cluster, go to the
+{nav Almanac} application and create a **device** record. For guidance on this
+application, see @{article:Almanac User Guide}.
+
+Add **interfaces** to each device record so Phabricator can tell how to
+connect to these hosts. Normally, you'll add one HTTP interface (usually on
+port 80) and one SSH interface (by default, on port 2222) to each device:
+
+For example, if you are building a two-host repository cluster, you may end
+up with records that look like these:
+
+  - Device: `repo001.mycompany.net`
+    - Interface: `123.0.0.1:2222`
+    - Interface: `123.0.0.1:80`
+  - Device: `repo002.mycompany.net`
+    - Interface: `123.0.0.2:2222`
+    - Interface: `123.0.0.2:80`
+
+Note that these hosts will normally run two `sshd` ports: the standard `sshd`
+which you connect to to operate and administrate the host, and the special
+Phabricator `sshd` that you connect to to clone and push repositories.
+
+You should specify the Phabricator `sshd` port, **not** the standard `sshd`
+port.
+
+If you're using **unique** SSH keys for each device, continue to the next step.
+
+If you're using **shared** SSH keys, create a third device with no interfaces,
+like `keywarden.mycompany.net`. This device will just be used as a container to
+hold the trusted SSH key and is not a real device.
+
+NOTE: Do **not** create a **service** record yet. Today, service records become
+active immediately once they are created, and you haven't set things up yet.
+
+
+Generate and Trust SSH Keys
+===========================
+
+Next, you need to generate or upload SSH keys and mark them as trusted. Marking
+a key as trusted gives it tremendous power.
+
+If you're using **unique** SSH keys, upload or generate a key for each
+individual device from the device detail screen in the Almanac web UI. Save the
+private keys for the next step.
+
+If you're using a **shared** SSH key, upload or generate a single key for
+the keywarden device from the device detail screen in the Almanac web UI.
+Save the private key for the next step.
+
+Regardless of how many keys you generated, take the key IDs from the tables
+in the web UI and run this command from the command line for each key, to mark
+each key as trusted:
+
+```
+phabricator/ $ ./bin/almanac trust-key --id <key-id-1>
+phabricator/ $ ./bin/almanac trust-key --id <key-id-2>
+...
+```
+
+The warnings this command emits are serious. The private keys are now trusted,
+and allow any user or device possessing them to sign requests that bypass
+policy checks without requiring additional credentials. Guard them carefully!
+
+If you need to revoke trust for a key later, use `untrust-key`:
+
+```
+phabricator/ $ ./bin/almanac untrust-key --id <key-id>
+```
+
+Once the keys are trusted, continue to the next step.
+
+
+Install Phabricator
+===================
+
+If you haven't already, install Phabricator on each device you plan to enroll
+in the cluster. Cluster repository devices must provide services over both HTTP
+and SSH, so you need to install and configure both a webserver and a
+Phabricator `sshd` on these hosts.
+
+Generally, you will follow whatever process you otherwise use when installing
+Phabricator.
+
+NOTE: Do not start the daemons on the new devices yet. They won't work properly
+until you've finished configuring things.
+
+Once Phabricator is installed, you can enroll the devices in the cluster by
+registering them.
+
+
+Register Devices
+================
+
+To register a host as an Almanac device, use `bin/almanac register`.
+
+If you are using **unique** keys, run it like this:
+
+```
+$ ./bin/almanac register \
+  --device <device> \
+  --private-key <key>
+```
+
+For example, you might run this command on `repo001` when using unique keys:
+
+```
+$ ./bin/almanac register \
+  --device repo001.mycompany.net \
+  --private-key /path/to/private.key
+```
+
+If you are using a **shared** key, this will be a little more complicated
+because you need to override some checks that are intended to prevent mistakes.
+Use the `--identify-as` flag to choose a device identity:
+
+```
+$ ./bin/almanac register \
+  --device <keywarden-device> \
+  --private-key <key> \
+  --identify-as <actual-device>
+```
+
+For example, you might run this command on `repo001` when using a shared key:
+
+```
+$ ./bin/almanac register
+  --device keywarden.mycompany.net \
+  --private-key /path/to/private-key \
+  --identify-as repo001.mycompany.net
+```
+
+In particular, note that `--device` is always the **trusted** device associated
+with the trusted key. The `--identify-as` flag allows several different hosts
+to share the same key but still identify as different devices.
+
+The overall effect of the `bin/almanac` command is to copy identity and key
+files into `phabricator/conf/keys/`. You can inspect the results by examining
+that directory. The helper script just catches potential mistakes and makes
+sure the process is completed correctly.
+
+Note that a copy of the active private key is stored in the `conf/keys/`
+directory permanently.
+
+When converting a host into a cluster host, you may need to revisit
+@{article:Diffusion User Guide: Repository Hosting} and double check the `sudo`
+permission for the host. In particular, cluster hosts need to be able to run
+`ssh` via `sudo` so they can read the device private key.
+
+
+Next Steps
+==========
+
+Now that devices are registered, you can build cluster services from them.
+Return to the relevant cluster service documentation to continue:
+
+  - build repository clusters with @{article:Cluster: Repositories};
+  - return to @{article:Clustering Introduction}; or
+  - review the Almanac application with @{article:Almanac User Guide}.

@@ -13,7 +13,6 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
     $name = $user->getUsername();
     $phid = $user->getPHID();
 
-
     $result = $this->parseObjectList("@{$name}");
     $this->assertEqual(array($phid), $result);
 
@@ -28,6 +27,47 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
 
     $result = $this->parseObjectList('');
     $this->assertEqual(array(), $result);
+
+    $result = $this->parseObjectList("{$name}!", array(), false, array('!'));
+    $this->assertEqual(
+      array(
+        array(
+          'phid' => $phid,
+          'suffixes' => array('!' => '!'),
+        ),
+      ),
+      $result);
+
+    $package = PhabricatorOwnersPackage::initializeNewPackage($user)
+      ->setName(pht('Query Test Package'))
+      ->save();
+
+    $package_phid = $package->getPHID();
+    $package_mono = $package->getMonogram();
+
+    $result = $this->parseObjectList("{$package_mono} Any Ignored Text");
+    $this->assertEqual(array($package_phid), $result);
+
+    $result = $this->parseObjectList("{$package_mono} Any Text, {$name}");
+    $this->assertEqual(array($package_phid, $phid), $result);
+
+    $result = $this->parseObjectList(
+      "{$package_mono} Any Text!, {$name}",
+      array(),
+      false,
+      array('!'));
+    $this->assertEqual(
+      array(
+        array(
+          'phid' => $package_phid,
+          'suffixes' => array('!' => '!'),
+        ),
+        array(
+          'phid' => $phid,
+          'suffixes' => array(),
+        ),
+      ),
+      $result);
 
     // Expect failure when loading a user if objects must be of type "DUCK".
     $caught = null;
@@ -67,7 +107,8 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
   private function parseObjectList(
     $list,
     array $types = array(),
-    $allow_partial = false) {
+    $allow_partial = false,
+    $suffixes = array()) {
 
     $query = id(new PhabricatorObjectListQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -79,6 +120,10 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
 
     if ($allow_partial) {
       $query->setAllowPartialResults(true);
+    }
+
+    if ($suffixes) {
+      $query->setSuffixes($suffixes);
     }
 
     return $query->execute();

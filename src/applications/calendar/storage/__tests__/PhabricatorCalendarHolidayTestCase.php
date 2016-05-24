@@ -16,24 +16,4 @@ final class PhabricatorCalendarHolidayTestCase extends PhabricatorTestCase {
       ->save();
   }
 
-  public function testNthBusinessDay() {
-    $map = array(
-      array('2011-12-30', 1, '2012-01-03'),
-      array('2012-01-01', 1, '2012-01-03'),
-      array('2012-01-01', 0, '2012-01-01'),
-      array('2012-01-01', -1, '2011-12-30'),
-      array('2012-01-04', -1, '2012-01-03'),
-    );
-    foreach ($map as $val) {
-      list($date, $n, $expect) = $val;
-      $actual = PhabricatorCalendarHoliday::getNthBusinessDay(
-        strtotime($date),
-        $n);
-      $this->assertEqual(
-        $expect,
-        date('Y-m-d', $actual),
-        pht("%d business days since '%s'", $n, $date));
-    }
-  }
-
 }

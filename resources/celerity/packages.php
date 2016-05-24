@@ -81,6 +81,7 @@ return array(
     'javelin-behavior-scrollbar',
     'javelin-behavior-durable-column',
     'conpherence-thread-manager',
+    'javelin-behavior-detect-timezone',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -97,6 +98,7 @@ return array(
 
     'phabricator-remarkup-css',
     'syntax-highlighting-css',
+    'syntax-default-css',
     'phui-pager-css',
     'aphront-tooltip-css',
     'phabricator-flag-css',

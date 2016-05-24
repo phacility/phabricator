@@ -6,18 +6,20 @@ final class DiffusionRepositoryURIsManagementPanel
   const PANELKEY = 'uris';
 
   public function getManagementPanelLabel() {
-    return pht('Clone / Fetch / Mirror');
+    return pht('URIs');
+  }
+
+  public function getManagementPanelIcon() {
+    return 'fa-cogs';
   }
 
   public function getManagementPanelOrder() {
-    return 300;
+    return 400;
   }
 
   public function buildManagementPanelContent() {
     $repository = $this->getRepository();
     $viewer = $this->getViewer();
-
-    $repository->attachURIs(array());
     $uris = $repository->getURIs();
 
     Javelin::initBehavior('phabricator-tooltips');
@@ -25,6 +27,12 @@ final class DiffusionRepositoryURIsManagementPanel
     foreach ($uris as $uri) {
 
       $uri_name = $uri->getDisplayURI();
+      $uri_name = phutil_tag(
+        'a',
+        array(
+          'href' => $uri->getViewURI(),
+        ),
+        $uri_name);
 
       if ($uri->getIsDisabled()) {
         $status_icon = 'fa-times grey';
@@ -34,48 +42,30 @@ final class DiffusionRepositoryURIsManagementPanel
 
       $uri_status = id(new PHUIIconView())->setIcon($status_icon);
 
-      switch ($uri->getEffectiveIOType()) {
-        case PhabricatorRepositoryURI::IO_OBSERVE:
-          $io_icon = 'fa-download green';
-          $io_label = pht('Observe');
-          break;
-        case PhabricatorRepositoryURI::IO_MIRROR:
-          $io_icon = 'fa-upload green';
-          $io_label = pht('Mirror');
-          break;
-        case PhabricatorRepositoryURI::IO_NONE:
-          $io_icon = 'fa-times grey';
-          $io_label = pht('No I/O');
-          break;
-        case PhabricatorRepositoryURI::IO_READ:
-          $io_icon = 'fa-folder blue';
-          $io_label = pht('Read Only');
-          break;
-        case PhabricatorRepositoryURI::IO_READWRITE:
-          $io_icon = 'fa-folder-open blue';
-          $io_label = pht('Read/Write');
-          break;
-      }
+      $io_type = $uri->getEffectiveIOType();
+      $io_map = PhabricatorRepositoryURI::getIOTypeMap();
+      $io_spec = idx($io_map, $io_type, array());
+
+      $io_icon = idx($io_spec, 'icon');
+      $io_color = idx($io_spec, 'color');
+      $io_label = idx($io_spec, 'label', $io_type);
 
       $uri_io = array(
-        id(new PHUIIconView())->setIcon($io_icon),
+        id(new PHUIIconView())->setIcon("{$io_icon} {$io_color}"),
         ' ',
         $io_label,
       );
 
-      switch ($uri->getEffectiveDisplayType()) {
-        case PhabricatorRepositoryURI::DISPLAY_NEVER:
-          $display_icon = 'fa-eye-slash grey';
-          $display_label = pht('Hidden');
-          break;
-        case PhabricatorRepositoryURI::DISPLAY_ALWAYS:
-          $display_icon = 'fa-eye green';
-          $display_label = pht('Visible');
-          break;
-      }
+      $display_type = $uri->getEffectiveDisplayType();
+      $display_map = PhabricatorRepositoryURI::getDisplayTypeMap();
+      $display_spec = idx($display_map, $display_type, array());
+
+      $display_icon = idx($display_spec, 'icon');
+      $display_color = idx($display_spec, 'color');
+      $display_label = idx($display_spec, 'label', $display_type);
 
       $uri_display = array(
-        id(new PHUIIconView())->setIcon($display_icon),
+        id(new PHUIIconView())->setIcon("{$display_icon} {$display_color}"),
         ' ',
         $display_label,
       );
@@ -105,11 +95,17 @@ final class DiffusionRepositoryURIsManagementPanel
           null,
         ));
 
-    $doc_href = PhabricatorEnv::getDoclink(
-      'Diffusion User Guide: Repository URIs');
+    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: URIs');
+    $add_href = $repository->getPathURI('uri/edit/');
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Repository URIs'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setIcon('fa-plus')
+          ->setHref($add_href)
+          ->setTag('a')
+          ->setText(pht('Add New URI')))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setIcon('fa-book')
@@ -117,8 +113,44 @@ final class DiffusionRepositoryURIsManagementPanel
           ->setTag('a')
           ->setText(pht('Documentation')));
 
+    $is_new = $repository->isNewlyInitialized();
+
+    $messages = array();
+    if ($repository->isHosted()) {
+      if ($is_new) {
+        $host_message = pht('Phabricator will host this repository.');
+      } else {
+        $host_message = pht('Phabricator is hosting this repository.');
+      }
+
+      $messages[] = array(
+        id(new PHUIIconView())->setIcon('fa-folder'),
+        ' ',
+        $host_message,
+      );
+    } else {
+      if ($is_new) {
+        $observe_message = pht(
+          'Phabricator will observe a remote repository.');
+      } else {
+        $observe_message = pht(
+          'This repository is hosted remotely. Phabricator is observing it.');
+      }
+
+      $messages[] = array(
+        id(new PHUIIconView())->setIcon('fa-download'),
+        ' ',
+        $observe_message,
+      );
+    }
+
+    $info_view = id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->setErrors($messages);
+
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setInfoView($info_view)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }

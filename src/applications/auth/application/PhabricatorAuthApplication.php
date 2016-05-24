@@ -75,10 +75,14 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         'multifactor/'
           => 'PhabricatorAuthNeedsMultiFactorController',
         'sshkey/' => array(
+          $this->getQueryRoutePattern('for/(?P<forPHID>[^/]+)/')
+            => 'PhabricatorAuthSSHKeyListController',
           'generate/' => 'PhabricatorAuthSSHKeyGenerateController',
           'upload/' => 'PhabricatorAuthSSHKeyEditController',
           'edit/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyEditController',
-          'delete/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyDeleteController',
+          'deactivate/(?P<id>\d+)/'
+            => 'PhabricatorAuthSSHKeyDeactivateController',
+          'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
         ),
       ),
 

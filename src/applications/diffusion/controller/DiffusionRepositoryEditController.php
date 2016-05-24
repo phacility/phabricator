@@ -1,28 +1,69 @@
 <?php
 
-abstract class DiffusionRepositoryEditController
-  extends DiffusionController {
+final class DiffusionRepositoryEditController
+  extends DiffusionRepositoryManageController {
 
-  protected function buildApplicationCrumbs($is_main = false) {
-    $crumbs = parent::buildApplicationCrumbs();
+  public function handleRequest(AphrontRequest $request) {
+    $engine = id(new DiffusionRepositoryEditEngine())
+      ->setController($this);
 
-    if ($this->hasDiffusionRequest()) {
-      $drequest = $this->getDiffusionRequest();
-      $repository = $drequest->getRepository();
-      $repo_uri = $repository->getURI();
-      $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+    $id = $request->getURIData('id');
+    if (!$id) {
+      $this->requireApplicationCapability(
+        DiffusionCreateRepositoriesCapability::CAPABILITY);
 
-      $crumbs->addTextCrumb($repository->getDisplayname(), $repo_uri);
-
-      if ($is_main) {
-        $crumbs->addTextCrumb(pht('Edit Repository'));
-      } else {
-        $crumbs->addTextCrumb(pht('Edit'), $edit_uri);
+      $vcs = $request->getStr('vcs');
+      $vcs_types = PhabricatorRepositoryType::getRepositoryTypeMap();
+      if (empty($vcs_types[$vcs])) {
+        return $this->buildVCSTypeResponse();
       }
+
+      $engine
+        ->addContextParameter('vcs', $vcs)
+        ->setVersionControlSystem($vcs);
     }
+
+    return $engine->buildResponse();
+  }
+
+  private function buildVCSTypeResponse() {
+    $vcs_types = PhabricatorRepositoryType::getRepositoryTypeMap();
+
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Create Repository'));
     $crumbs->setBorder(true);
 
-    return $crumbs;
+    $title = pht('Choose Repository Type');
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Create Repository'))
+      ->setHeaderIcon('fa-plus-square');
+
+    $layout = id(new AphrontMultiColumnView())
+      ->setFluidLayout(true);
+
+    $create_uri = $request->getRequestURI();
+
+    foreach ($vcs_types as $vcs_key => $vcs_type) {
+      $action = id(new PHUIActionPanelView())
+        ->setIcon(idx($vcs_type, 'icon'))
+        ->setHeader(idx($vcs_type, 'create.header'))
+        ->setHref($create_uri->alter('vcs', $vcs_key))
+        ->setSubheader(idx($vcs_type, 'create.subheader'));
+
+      $layout->addColumn($action);
+    }
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($layout);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

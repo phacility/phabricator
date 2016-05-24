@@ -141,8 +141,27 @@ a.button.phui-document-toc {
   margin: 16px 0 0 0;
 }
 
+.phui-document-view-pro .phabricator-remarkup-embed-image-wide {
+  margin-left: -200px;
+  margin-right: -200px;
+  width: auto;
+}
 
+.phui-document-view-pro .phabricator-remarkup-embed-image-wide img {
+  max-width: 1200px;
+}
 
+@media (max-width: 1200px) {
+  .phui-document-view-pro .phabricator-remarkup-embed-image-wide {
+    margin-left: 0;
+    margin-right: 0;
+    width: auto;
+  }
+
+  .phui-document-view-pro .phabricator-remarkup-embed-image-wide img {
+    max-width: inherit;
+  }
+}
 
 .phui-document-view-pro-box .phui-timeline-view {
   padding: 16px 0 0 0;

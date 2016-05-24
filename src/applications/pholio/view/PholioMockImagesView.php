@@ -92,6 +92,16 @@ final class PholioMockImagesView extends AphrontView {
         $current_set++;
       }
 
+      $description = $engine->getOutput($image, 'default');
+      if (strlen($description)) {
+        $description = phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-remarkup',
+          ),
+          $description);
+      }
+
       $history_uri = '/pholio/image/history/'.$image->getID().'/';
       $images[] = array(
         'id' => $image->getID(),
@@ -105,7 +115,7 @@ final class PholioMockImagesView extends AphrontView {
         'width' => $x,
         'height' => $y,
         'title' => $image->getName(),
-        'descriptionMarkup' => $engine->getOutput($image, 'default'),
+        'descriptionMarkup' => $description,
         'isObsolete' => (bool)$image->getIsObsolete(),
         'isImage' => $file->isViewableImage(),
         'isViewable' => $file->isViewableInBrowser(),

@@ -354,117 +354,17 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
     }
 
-    $service_phids = array();
-    foreach ($repositories as $key => $repository) {
-      $service_phid = $repository->getAlmanacServicePHID();
+    $viewer = $this->getViewer();
 
-      // If the repository is bound to a service but this host is not a
-      // recognized device, or vice versa, don't pull the repository.
-      $is_cluster_repo = (bool)$service_phid;
-      $is_cluster_device = (bool)$device;
-      if ($is_cluster_repo != $is_cluster_device) {
-        if ($is_cluster_device) {
-          $this->log(
-            pht(
-              'Repository "%s" is not a cluster repository, but the current '.
-              'host is a cluster device ("%s"), so the repository will not '.
-              'be updated on this host.',
-              $repository->getDisplayName(),
-              $device->getName()));
-        } else {
-          $this->log(
-            pht(
-              'Repository "%s" is a cluster repository, but the current '.
-              'host is not a cluster device (it has no device ID), so the '.
-              'repository will not be updated on this host.',
-              $repository->getDisplayName()));
-        }
-        unset($repositories[$key]);
-        continue;
-      }
+    $filter = id(new DiffusionLocalRepositoryFilter())
+      ->setViewer($viewer)
+      ->setDevice($device)
+      ->setRepositories($repositories);
 
-      if ($service_phid) {
-        $service_phids[] = $service_phid;
-      }
-    }
+    $repositories = $filter->execute();
 
-    if ($device) {
-      $device_phid = $device->getPHID();
-
-      if ($service_phids) {
-        // We could include `withDevicePHIDs()` here to pull a smaller result
-        // set, but we can provide more helpful diagnostic messages below if
-        // we fetch a little more data.
-        $services = id(new AlmanacServiceQuery())
-          ->setViewer($this->getViewer())
-          ->withPHIDs($service_phids)
-          ->withServiceTypes(
-            array(
-              AlmanacClusterRepositoryServiceType::SERVICETYPE,
-            ))
-          ->needBindings(true)
-          ->execute();
-        $services = mpull($services, null, 'getPHID');
-      } else {
-        $services = array();
-      }
-
-      foreach ($repositories as $key => $repository) {
-        $service_phid = $repository->getAlmanacServicePHID();
-
-        $service = idx($services, $service_phid);
-        if (!$service) {
-          $this->log(
-            pht(
-              'Repository "%s" is on cluster service "%s", but that service '.
-              'could not be loaded, so the repository will not be updated '.
-              'on this host.',
-              $repository->getDisplayName(),
-              $service_phid));
-          unset($repositories[$key]);
-          continue;
-        }
-
-        $bindings = $service->getBindings();
-        $bindings = mgroup($bindings, 'getDevicePHID');
-        $bindings = idx($bindings, $device_phid);
-        if (!$bindings) {
-          $this->log(
-            pht(
-              'Repository "%s" is on cluster service "%s", but that service '.
-              'is not bound to this device ("%s"), so the repository will '.
-              'not be updated on this host.',
-              $repository->getDisplayName(),
-              $service->getName(),
-              $device->getName()));
-          unset($repositories[$key]);
-          continue;
-        }
-
-        $all_disabled = true;
-        foreach ($bindings as $binding) {
-          if (!$binding->getIsDisabled()) {
-            $all_disabled = false;
-            break;
-          }
-        }
-
-        if ($all_disabled) {
-          $this->log(
-            pht(
-              'Repository "%s" is on cluster service "%s", but the binding '.
-              'between that service and this device ("%s") is disabled, so '.
-              'the not be updated on this host.',
-              $repository->getDisplayName(),
-              $service->getName(),
-              $device->getName()));
-          unset($repositories[$key]);
-          continue;
-        }
-
-        // We have a valid service that is actively bound to the current host
-        // device, so we're good to go.
-      }
+    foreach ($filter->getRejectionReasons() as $reason) {
+      $this->log($reason);
     }
 
     // Shuffle the repositories, then re-key the array since shuffle()

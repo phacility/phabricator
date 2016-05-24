@@ -20,7 +20,9 @@
   text-decoration: none;
 }
 
-.device-phone .phui-crumbs-view {
+.device-tablet .phui-crumbs-view,
+.device-phone .phui-crumbs-view,
+.project-board-nav .phui-crumbs-view {
   padding-left: 8px;
   padding-right: 0;
 }

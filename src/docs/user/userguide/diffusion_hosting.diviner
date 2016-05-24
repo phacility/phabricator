@@ -3,13 +3,15 @@
 
 Guide to configuring Phabricator repository hosting.
 
-= Overview =
+Overview
+========
 
 Phabricator can host repositories and provide authenticated read and write
 access to them over HTTP and SSH. This document describes how to configure
 repository hosting.
 
-= Understanding Supported Protocols =
+Understanding Supported Protocols
+=================================
 
 Phabricator supports hosting over these protocols:
 
@@ -35,99 +37,165 @@ performant, but HTTP is easier to set up and supports anonymous access.
 | Performance | Better | Okay |
 | Setup | Hard | Easy |
 
-Each repository can be configured individually, and you can use either protocol,
-or both, or a mixture across different repositories.
+Each repository can be configured individually, and you can use either
+protocol, or both, or a mixture across different repositories.
 
 SSH is recommended unless you need anonymous access, or are not able to
 configure it for technical reasons.
 
-= Configuring System User Accounts =
 
-Phabricator uses as many as three user accounts. This section will guide you
-through creating and configuring them. These are system user accounts on the
-machine Phabricator runs on, not Phabricator user accounts.
+Creating System User Accounts
+=============================
 
-The system accounts are:
+Phabricator uses two system user accounts, plus a third account if you
+configure SSH access. This section will guide you through creating and
+configuring them. These are system user accounts on the machine Phabricator
+runs on, not Phabricator user accounts.
 
-  - The user the daemons run as. We'll call this `daemon-user`. For more
-    information on the daemons, see @{article:Managing Daemons with phd}. This
+The system accounts Phabricator uses are:
+
+  - The user the webserver runs as. We'll call this `www-user`.
+  - The user the daemons run as. We'll call this `daemon-user`. This
     user is the only user which will interact with the repositories directly.
-    Other accounts will `sudo` to this account in order to perform VCS
+    Other accounts will `sudo` to this account in order to perform repository
     operations.
-  - The user the webserver runs as. We'll call this `www-user`. If you do not
-    plan to make repositories available over HTTP, you do not need to perform
-    any special configuration for this user.
-  - The user that users will connect over SSH as. We'll call this `vcs-user`.
+  - The user that humans will connect over SSH as. We'll call this `vcs-user`.
     If you do not plan to make repositories available over SSH, you do not need
-    to perform any special configuration for this user.
+    to create or configure this user.
 
-To configure these users:
+To create these users:
 
+  - Create a `www-user` if one does not already exist. In most cases, this
+    user will already exist and you just need to identify which user it is. Run
+    your webserver as this user.
   - Create a `daemon-user` if one does not already exist (you can call this user
-    whatever you want, or use an existing account). When you start the daemons,
-    start them using this user.
-  - Create a `www-user` if one does not already exist. Run your webserver as
-    this user. In most cases, this user will already exist.
-  - Create a `vcs-user` if one does not already exist. Common names for this
-    user are `git` or `hg`. When users clone repositories, they will use a URI
-    like `vcs-user@phabricator.yourcompany.com`.
+    whatever you want, or use an existing account). Below, you'll configure
+    the daemons to start as this user.
+  - Create a `vcs-user` if one does not already exist and you plan to set up
+    SSH. When users clone repositories, they will use a URI like
+    `vcs-user@phabricator.yourcompany.com`, so common names for this user are
+    `git` or `hg`.
 
-Now, allow the `vcs-user` and `www-user` to `sudo` as the `daemon-user`. Add
-this to `/etc/sudoers`, using `visudo` or `sudoedit`.
+Continue below to configure these accounts.
 
-If you plan to use SSH:
 
-  vcs-user ALL=(daemon-user) SETENV: NOPASSWD: /path/to/bin/git-upload-pack, /path/to/bin/git-receive-pack, /path/to/bin/hg, /path/to/bin/svnserve
+Configuring Phabricator
+=======================
 
-If you plan to use HTTP:
+Now that you have created or identified these accounts, update the Phabricator
+configuration to specify them.
 
-  www-user ALL=(daemon-user) SETENV: NOPASSWD: /usr/bin/git-http-backend, /usr/bin/hg
+First, set `phd.user` to the `daemon-user`:
 
-Replace `vcs-user`, `www-user` and `daemon-user` with the right usernames for
-your configuration. Make sure all the paths point to the real locations of the
-binaries on your system. You can omit any binaries associated with VCSes you do
-not use.
+```
+phabricator/ $ ./bin/config set phd.user daemon-user
+```
 
-Adding these commands to `sudoers` will allow the daemon and webserver users to
-write to repositories as the daemon user.
+Restart the daemons to make sure this configuration works properly. They should
+start as the correct user automatically.
 
-Before saving and closing `/etc/sudoers`, look for this line:
+If you're using a `vcs-user` for SSH, you should also configure that:
+
+```
+phabricator/ $ ./bin/config set diffusion.ssh-user vcs-user
+```
+
+Next, you'll set up `sudo` permissions so these users can interact with one
+another.
+
+
+Configuring Sudo
+================
+
+The `www-user` and `vcs-user` need to be able to `sudo` as the `daemon-user`
+so they can interact with repositories.
+
+To grant them access, edit the `sudo` system configuration. On many systems,
+you will do this by modifying the `/etc/sudoers` file using `visudo` or
+`sudoedit`. In some cases, you may add a new file to `/etc/sudoers.d` instead.
+
+To give a user account `sudo` access to run a list of binaries, add a line like
+this to the configuration file (this example would grant `vcs-user` permission
+to run `ls` as `daemon-user`):
+
+```
+vcs-user ALL=(daemon-user) SETENV: NOPASSWD: /path/to/bin/ls
+```
+
+The `www-user` needs to be able to run these binaries as the `daemon-user`:
+
+  - `git` (if using Git)
+  - `git-http-backend` (if using Git)
+  - `hg` (if using Mercurial)
+  - `ssh` (if configuring clusters)
+
+If you plan to use SSH, the `vcs-user` needs to be able to run these binaries
+as the `daemon-user`:
+
+  - `git` (if using Git)
+  - `git-upload-pack` (if using Git)
+  - `git-receive-pack` (if using Git)
+  - `hg` (if using Mercurial)
+  - `svnserve` (if using Subversion)
+  - `ssh` (if configuring clusters)
+
+Identify the full paths to all of these binaries on your system and add the
+appropriate permissions to the `sudo` configuration.
+
+Normally, you'll add two lines that look something like this:
+
+```
+www-user ALL=(daemon-user) SETENV: NOPASSWD: /path/to/x, /path/to/y, ...
+vcs-user ALL=(daemon-user) SETENV: NOPASSWD: /path/to/x, /path/to/y, ...
+```
+
+This is just a template. In the real configuration file, you need to:
+
+  - Replace `www-user`, `dameon-user` and `vcs-user` with the correct
+    usernames for your system.
+  - List every binary that these users need access to, as described above.
+  - Make sure each binary path is the full path to the correct binary location
+    on your system.
+
+Before continuing, look for this line in your `sudo` configuration:
 
   Defaults    requiretty
 
 If it's present, comment it out by putting a `#` at the beginning of the line.
 With this option enabled, VCS SSH sessions won't be able to use `sudo`.
 
+
+Additional SSH User Configuration
+=================================
+
 If you're planning to use SSH, you should also edit `/etc/passwd` and
 `/etc/shadow` to make sure the `vcs-user` account is set up correctly.
 
-  - Open `/etc/shadow` and find the line for the `vcs-user` account.
-    - The second field (which is the password field) must not be set to
-      `!!`. This value will prevent login. If it is set to `!!`, edit it
-      and set it to `NP` ("no password") instead.
-  - Open `/etc/passwd` and find the line for the `vcs-user` account.
-    - The last field (which is the login shell) must be set to a real shell.
-      If it is set to something like `/bin/false`, then `sshd` will not be able
-      to execute commands. Instead, you should set it to a real shell, like
-      `/bin/sh`.
+**`/etc/shadow`**: Open `/etc/shadow` and find the line for the `vcs-user`
+account.
 
-Finally, once you've configured `/etc/sudoers`, `/etc/shadow` and `/etc/passwd`,
-set `phd.user` to the `daemon-user`:
+The second field (which is the password field) must not be set to `!!`. This
+value will prevent login. If it is set to `!!`, edit it and set it to `NP` ("no
+password") instead.
 
-  phabricator/ $ ./bin/config set phd.user daemon-user
+**`/etc/passwd`**: Open `/etc/passwd` and find the line for the `vcs-user`
+account.
 
-If you're using a `vcs-user`, you should also configure that here:
+The last field (which is the login shell) must be set to a real shell. If it is
+set to something like `/bin/false`, then `sshd` will not be able to execute
+commands. Instead, you should set it to a real shell, like `/bin/sh`.
 
-  phabricator/ $ ./bin/config set diffusion.ssh-user vcs-user
 
-= Configuring HTTP =
+Configuring HTTP
+================
 
-If you plan to use authenticated HTTP, you need to set
-`diffusion.allow-http-auth` in Config. If you don't plan to use HTTP, or plan to
-use only anonymous HTTP, you can leave this setting disabled.
+If you plan to serve repositories over authenticated HTTP, you need to set
+`diffusion.allow-http-auth` in Config. If you don't plan to serve repositories
+over HTTP (or plan to use only anonymous HTTP) you can leave this setting
+disabled.
 
-If you plan to use authenticated HTTP, you'll also need to configure a VCS
-password in {nav Settings > VCS Password}.
+If you plan to use authenticated HTTP, you (and all other users) also need to
+configure a VCS password for your account in {nav Settings > VCS Password}.
 
 Your VCS password must be a different password than your main Phabricator
 password because VCS passwords are very easy to accidentally disclose. They are
@@ -136,60 +204,58 @@ and present in command output and logs. We strongly encourage you to use SSH
 instead of HTTP to authenticate access to repositories.
 
 Otherwise, if you've configured system accounts above, you're all set. No
-additional server configuration is required to make HTTP work.
+additional server configuration is required to make HTTP work. You should now
+be able to fetch and push repositories over HTTP. See "Cloning a Repository"
+below for more details.
 
-= Configuring SSH =
+If you're having trouble, see "Troubleshooting HTTP" below.
 
-SSH access requires some additional setup. Here's an overview of how setup
-works:
 
-  - You'll move the normal `sshd` daemon to another port, like `222`. When
-    connecting to the machine to administrate it, you'll use this alternate
-    port to get a normal login shell.
-  - You'll run a highly restricted `sshd` on port 22, with a special locked-down
-    configuration that uses Phabricator to authorize users and execute commands.
-  - The `sshd` on port 22 **MUST** be 6.2 or newer, because Phabricator relies
-    on the `AuthorizedKeysCommand` option.
+Configuring SSH
+===============
 
-Here's a walkthrough of how to perform this configuration in detail:
+SSH access requires some additional setup. You will configure and run a second,
+restricted copy of `sshd` on the machine, on a different port from the standard
+`sshd`. This special copy of `sshd` will serve repository requests and provide
+other Phabricator SSH services.
 
-**Move Normal SSHD**: Be careful when editing the configuration for `sshd`. If
-you get it wrong, you may lock yourself out of the machine. Restarting `sshd`
-generally will not interrupt existing connections, but you should exercise
-caution. Two strategies you can use to mitigate this risk are: smoke-test
-configuration by starting a second `sshd`; and use a `screen` session which
-automatically repairs configuration unless stopped.
+NOTE: The Phabricator `sshd` service **MUST** be 6.2 or newer, because
+Phabricator relies on the `AuthorizedKeysCommand` option.
 
-To smoke-test a configuration, just start another `sshd` using the `-f` flag:
+**Choose a Port**: These instructions will configure the alternate `sshd` on
+port `2222`. This is easy to configure, but if you run the service on this port
+users will clone and push to URIs like `ssh://git@host.com:2222/`, which is
+a little ugly.
 
-  sudo /path/to/sshd -f /path/to/config_file.edited
+The easiest way to fix this is to put a load balancer in front of the host and
+have it forward TCP traffic on port `22` to port `2222`. Then users can clone
+from `ssh://git@host.com/` without an explicit port number and you don't need
+to do anything else.
 
-You can then connect and make sure the edited config file is valid before
-replacing your primary configuration file.
+Alternatively, you can move the administrative `sshd` to a new port, then run
+Phabricator `sshd` on port 22. This is complicated and risky. See "Moving the
+sshd Port" below for help.
 
-To automatically repair configuration, start a `screen` session with a command
-like this in it:
+Finally, you can just run on port `2222` and accept the explicit port in the
+URIs. This is the simplest approach, and you can start here and clean things
+up later.
 
-  sleep 60 ; mv sshd_config.good sshd_config ; /etc/init.d/sshd restart
+If you plan to connect to a port other than `22`, you should set this port
+as `diffusion.ssh-port` in your Phabricator config:
 
-The specific command may vary for your system, but the general idea is to have
-the machine automatically restore configuration after some period of time if
-you don't stop it. If you lock yourself out, this will fix things automatically.
+```
+$ ./bin/config set diffusion.ssh-port 2222
+```
 
-Now that you're ready to edit your configuration, open up your `sshd` config
-(often `/etc/ssh/sshd_config`) and change the `Port` setting to some other port,
-like `222` (you can choose any port other than 22).
+This port is not special, and you are free to choose a different port, provided
+you make the appropriate configuration adjustment below.
 
-  Port 222
+**Configure and Start Phabricator SSHD**: Now, you'll configure and start a
+copy of `sshd` which will serve Phabricator services, including repositories,
+over SSH.
 
-Very carefully, restart `sshd`. Verify that you can connect on the new port:
-
-  ssh -p 222 ...
-
-**Configure and Start Phabricator SSHD**: Now, configure and start a second
-`sshd` instance which will run on port `22`. This instance will use a special
-locked-down configuration that uses Phabricator to handle authentication and
-command execution.
+This instance will use a special locked-down configuration that uses
+Phabricator to handle authentication and command execution.
 
 There are three major steps:
 
@@ -200,10 +266,16 @@ There are three major steps:
 **Create `phabricator-ssh-hook.sh`**: Copy the template in
 `phabricator/resources/sshd/phabricator-ssh-hook.sh` to somewhere like
 `/usr/libexec/phabricator-ssh-hook.sh` and edit it to have the correct
-settings. Then make it owned by `root` and restrict editing:
+settings.
 
-  sudo chown root /path/to/phabricator-ssh-hook.sh
-  sudo chmod 755 /path/to/phabricator-ssh-hook.sh
+Both the script itself **and** the parent directory the script resides in must
+be owned by `root`, and the script must have `755` permissions:
+
+```
+$ sudo chown root /path/to/somewhere/
+$ sudo chown root /path/to/somewhere/phabricator-ssh-hook.sh
+$ sudo chmod 755 /path/to/somewhere/phabricator-ssh-hook.sh
+```
 
 If you don't do this, `sshd` will refuse to execute the hook.
 
@@ -215,34 +287,38 @@ Open the file and edit the `AuthorizedKeysCommand`,
 `AuthorizedKeysCommandUser`, and `AllowUsers` settings to be correct for your
 system.
 
+This configuration file also specifies the `Port` the service should run on.
+If you intend to run on a non-default port, adjust it now.
+
 **Start SSHD**: Now, start the Phabricator `sshd`:
 
   sudo /path/to/sshd -f /path/to/sshd_config.phabricator
 
-If you did everything correctly, you should be able to run this:
+If you did everything correctly, you should be able to run this command:
 
-  echo {} | ssh vcs-user@phabricator.yourcompany.com conduit conduit.ping
+```
+$ echo {} | ssh vcs-user@phabricator.yourcompany.com conduit conduit.ping
+```
 
 ...and get a response like this:
 
-  {"result":"orbital","error_code":null,"error_info":null}
+```lang=json
+{"result":"phabricator.yourcompany.com","error_code":null,"error_info":null}
+```
 
-(If you get an authentication error, make sure you added your public key in
-**Settings > SSH Public Keys**.) If you're having trouble, check the
+If you get an authentication error, make sure you added your public key in
+{nav Settings > SSH Public Keys}. If you're having trouble, check the
 troubleshooting section below.
 
-= Authentication Over HTTP =
+Authentication Over SSH
+=======================
 
-To authenticate over HTTP, users should configure a **VCS Password** in the
-**Settings** screen. This panel is available only if `diffusion.allow-http-auth`
-is enabled.
+To authenticate over SSH, users should add their public keys under
+{nav Settings > SSH Public Keys}.
 
-= Authentication Over SSH =
 
-To authenticate over SSH, users should add **SSH Public Keys** in the
-**Settings** screen.
-
-= Cloning a Repository =
+Cloning a Repository
+====================
 
 If you've already set up a hosted repository, you can try cloning it now. To
 do this, browse to the repository's main screen in Diffusion. You should see
@@ -253,13 +329,15 @@ To clone the repository, just run the appropriate command.
 If you don't see the commands or running them doesn't work, see below for tips
 on troubleshooting.
 
-= Troubleshooting HTTP =
+
+Troubleshooting HTTP
+====================
 
 Some general tips for troubleshooting problems with HTTP:
 
   - Make sure `diffusion.allow-http-auth` is enabled in your Phabricator config.
-  - Make sure HTTP serving is enabled for the repository you're trying to clone.
-    You can find this in {nav Edit Repository > Hosting}.
+  - Make sure HTTP serving is enabled for the repository you're trying to
+    clone. You can find this in {nav Edit Repository > Hosting}.
   - Make sure you've configured a VCS password. This is separate from your main
     account password. You can configure this in {nav Settings > VCS Password}.
   - Make sure the main repository screen in Diffusion shows a clone/checkout
@@ -281,7 +359,8 @@ with the HTTP response is likely to be useful:
 
 In many cases, this can give you more information about what's wrong.
 
-= Troubleshooting SSH =
+Troubleshooting SSH
+===================
 
 Some general tips for troubleshooting problems with SSH:
 
@@ -305,11 +384,11 @@ Some general tips for troubleshooting problems with SSH:
   - Check your `phabricator-ssh-hook.sh` file for proper settings.
   - Check your `sshd_config.phabricator` file for proper settings.
 
-To troubleshoot SSH setup: connect to the server with `ssh`, without running
-a command. You may need to use the `-T` flag. You should see a message like
-this one:
+To troubleshoot SSH setup: connect to the server with `ssh`, without running a
+command. You may need to use the `-T` flag, and will need to use `-p` if you
+are running on a nonstandard port. You should see a message like this one:
 
-  $ ssh -T dweller@secure.phabricator.com
+  $ ssh -T -p 2222 vcs-user@phabricator.yourcompany.com
   phabricator-ssh-exec: Welcome to Phabricator.
 
   You are logged in as alincoln.
@@ -332,8 +411,8 @@ settings:
   - You're connecting as the `vcs-user`.
   - The `vcs-user` has `NP` in `/etc/shadow`.
   - The `vcs-user` has `/bin/sh` or some other valid shell in `/etc/passwd`.
-  - Your SSH key is correct, and you've added it to Phabricator in the Settings
-    panel.
+  - Your SSH private key is correct, and you've added the corresponding
+    public key to Phabricator in the Settings panel.
 
 If you can get this far, but can't execute VCS commands like `git clone`, there
 is probably an issue with your `sudoers` configuration. Check:
@@ -351,7 +430,7 @@ It may also be helpful to run `sshd` in debug mode:
   $ /path/to/sshd -d -d -d -f /path/to/sshd_config.phabricator
 
 This will run it in the foreground and emit a large amount of debugging
-information.
+information when you connect to it.
 
 Finally, you can usually test that `sudoers` is configured correctly by
 doing something like this:
@@ -363,13 +442,63 @@ That will try to run the binary via `sudo` in a manner similar to the way that
 Phabricator will run it. This can give you better error messages about issues
 with `sudoers` configuration.
 
-= Miscellaneous Troubleshooting =
+
+Miscellaneous Troubleshooting
+=============================
 
   - If you're getting an error about `svnlook` not being found, add the path
     where `svnlook` is located to the Phabricator configuration
     `environment.append-paths` (even if it already appears in PATH). This issue
     is caused by SVN wiping the environment (including PATH) when invoking
     commit hooks.
+
+
+Moving the sshd Port
+====================
+
+If you want to move the standard (administrative) `sshd` to a different port to
+make Phabricator repository URIs cleaner, this section has some tips.
+
+This is optional, and it is normally easier to do this by putting a load
+balancer in front of Phabricator and having it accept TCP traffic on port 22
+and forward it to some other port.
+
+When moving `sshd`, be careful when editing the configuration. If you get it
+wrong, you may lock yourself out of the machine. Restarting `sshd` generally
+will not interrupt existing connections, but you should exercise caution. Two
+strategies you can use to mitigate this risk are: smoke-test configuration by
+starting a second `sshd`; and use a `screen` session which automatically
+repairs configuration unless stopped.
+
+To smoke-test a configuration, just start another `sshd` using the `-f` flag:
+
+  sudo /path/to/sshd -f /path/to/config_file.edited
+
+You can then connect and make sure the edited config file is valid before
+replacing your primary configuration file.
+
+To automatically repair configuration, start a `screen` session with a command
+like this in it:
+
+  sleep 60 ; mv sshd_config.good sshd_config ; /etc/init.d/sshd restart
+
+The specific command may vary for your system, but the general idea is to have
+the machine automatically restore configuration after some period of time if
+you don't stop it. If you lock yourself out, this can fix things automatically.
+
+Now that you're ready to edit your configuration, open up your `sshd` config
+(often `/etc/ssh/sshd_config`) and change the `Port` setting to some other port,
+like `222` (you can choose any port other than 22).
+
+  Port 222
+
+Very carefully, restart `sshd`. Verify that you can connect on the new port:
+
+  ssh -p 222 ...
+
+Now you can move the Phabricator `sshd` to port 22, then adjust the value
+for `diffusion.ssh-port` in your Phabricator configuration.
+
 
 No Direct Pushes
 ================
@@ -406,7 +535,8 @@ document provides instructions for configuring. Its absence indicates that the
 request did not pass through Phabricator.
 
 
-= Next Steps =
+Next Steps
+==========
 
 Once hosted repositories are set up:
 

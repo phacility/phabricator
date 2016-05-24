@@ -56,7 +56,7 @@ final class PhabricatorFileDropUploadController
       $file_phid = $result['filePHID'];
       if ($file_phid) {
         $file = $this->loadFile($file_phid);
-        $result += $this->getFileDictionary($file);
+        $result += $file->getDragAndDropDictionary();
       }
 
       return id(new AphrontAjaxResponse())->setContent($result);
@@ -84,7 +84,7 @@ final class PhabricatorFileDropUploadController
       } else {
         $result = array(
           'complete' => true,
-        ) + $this->getFileDictionary($file);
+        ) + $file->getDragAndDropDictionary();
       }
 
       return id(new AphrontAjaxResponse())->setContent($result);
@@ -99,16 +99,8 @@ final class PhabricatorFileDropUploadController
         'isExplicitUpload' => true,
       ));
 
-    $result = $this->getFileDictionary($file);
+    $result = $file->getDragAndDropDictionary();
     return id(new AphrontAjaxResponse())->setContent($result);
-  }
-
-  private function getFileDictionary(PhabricatorFile $file) {
-    return array(
-      'id'   => $file->getID(),
-      'phid' => $file->getPHID(),
-      'uri'  => $file->getBestURI(),
-    );
   }
 
   private function loadFile($file_phid) {

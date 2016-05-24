@@ -470,6 +470,7 @@ final class PhabricatorMarkupEngine extends Phobject {
     $engine = new PhutilRemarkupEngine();
 
     $engine->setConfig('preserve-linebreaks', $options['preserve-linebreaks']);
+
     $engine->setConfig('pygments.enabled', $options['pygments']);
     $engine->setConfig(
       'uri.allowed-protocols',
@@ -479,6 +480,10 @@ final class PhabricatorMarkupEngine extends Phobject {
     $engine->setConfig(
       'syntax-highlighter.engine',
       $options['syntax-highlighter.engine']);
+
+    $style_map = id(new PhabricatorDefaultSyntaxStyle())
+      ->getRemarkupStyleMap();
+    $engine->setConfig('phutil.codeblock.style-map', $style_map);
 
     $engine->setConfig('uri.full', $options['uri.full']);
 

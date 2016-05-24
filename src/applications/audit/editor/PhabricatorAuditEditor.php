@@ -159,7 +159,17 @@ final class PhabricatorAuditEditor
         $requests = mpull($requests, null, 'getAuditorPHID');
         foreach ($add as $phid) {
           if (isset($requests[$phid])) {
-            continue;
+            $request = $requests[$phid];
+
+            // Only update an existing request if the current status is not
+            // an interesting status.
+            if ($request->isInteresting()) {
+              continue;
+            }
+          } else {
+            $request = id(new PhabricatorRepositoryAuditRequest())
+              ->setCommitPHID($object->getPHID())
+              ->setAuditorPHID($phid);
           }
 
           if ($this->getIsHeraldEditor()) {
@@ -170,12 +180,13 @@ final class PhabricatorAuditEditor
             $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
             $audit_reason = $this->getAuditReasons($phid);
           }
-          $requests[] = id(new PhabricatorRepositoryAuditRequest())
-            ->setCommitPHID($object->getPHID())
-            ->setAuditorPHID($phid)
+
+          $request
             ->setAuditStatus($audit_requested)
             ->setAuditReasons($audit_reason)
             ->save();
+
+          $requests[$phid] = $request;
         }
 
         $object->attachAudits($requests);
@@ -631,6 +642,12 @@ final class PhabricatorAuditEditor
 
     $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
     foreach ($object->getAudits() as $audit) {
+      if (!$audit->isInteresting()) {
+        // Don't send mail to uninteresting auditors, like packages which
+        // own this code but which audits have not triggered for.
+        continue;
+      }
+
       if ($audit->getAuditStatus() != $status_resigned) {
         $phids[] = $audit->getAuditorPHID();
       }

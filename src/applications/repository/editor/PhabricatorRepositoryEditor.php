@@ -26,18 +26,7 @@ final class PhabricatorRepositoryEditor
     $types[] = PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH;
     $types[] = PhabricatorRepositoryTransaction::TYPE_NOTIFY;
     $types[] = PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_REMOTE_URI;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_KEY;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_HTTP_PASS;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_HOSTING;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH;
     $types[] = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
-    $types[] = PhabricatorRepositoryTransaction::TYPE_CREDENTIAL;
     $types[] = PhabricatorRepositoryTransaction::TYPE_DANGEROUS;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SLUG;
     $types[] = PhabricatorRepositoryTransaction::TYPE_SERVICE;
@@ -83,20 +72,8 @@ final class PhabricatorRepositoryEditor
         return (int)!$object->getDetail('herald-disabled');
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
         return (int)!$object->getDetail('disable-autoclose');
-      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
-        return $object->getDetail('remote-uri');
-      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
-        return $object->getDetail('local-path');
-      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
-        return $object->isHosted();
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
-        return $object->getServeOverHTTP();
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
-        return $object->getServeOverSSH();
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
         return $object->getPushPolicy();
-      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
-        return $object->getCredentialPHID();
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         return $object->shouldAllowDangerousChanges();
       case PhabricatorRepositoryTransaction::TYPE_SLUG:
@@ -130,19 +107,8 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
       case PhabricatorRepositoryTransaction::TYPE_UUID:
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
-      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
-      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
-      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
-      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
-      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
-      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
-      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
       case PhabricatorRepositoryTransaction::TYPE_VCS:
-      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
-      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
       case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_LANGUAGE:
@@ -172,7 +138,15 @@ final class PhabricatorRepositoryEditor
         $object->setVersionControlSystem($xaction->getNewValue());
         break;
       case PhabricatorRepositoryTransaction::TYPE_ACTIVATE:
-        $object->setDetail('tracking-enabled', $xaction->getNewValue());
+        $active = $xaction->getNewValue();
+
+        // The first time a repository is activated, clear the "new repository"
+        // flag so we stop showing setup hints.
+        if ($active) {
+          $object->setDetail('newly-initialized', false);
+        }
+
+        $object->setDetail('tracking-enabled', $active);
         break;
       case PhabricatorRepositoryTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
@@ -205,22 +179,8 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
         $object->setDetail('disable-autoclose', (int)!$xaction->getNewValue());
         break;
-      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
-        $object->setDetail('remote-uri', $xaction->getNewValue());
-        break;
-      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
-        $object->setDetail('local-path', $xaction->getNewValue());
-        break;
-      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
-        return $object->setHosted($xaction->getNewValue());
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
-        return $object->setServeOverHTTP($xaction->getNewValue());
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
-        return $object->setServeOverSSH($xaction->getNewValue());
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
         return $object->setPushPolicy($xaction->getNewValue());
-      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
-        return $object->setCredentialPHID($xaction->getNewValue());
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
         $object->setDetail('allow-dangerous-changes', $xaction->getNewValue());
         return;
@@ -258,27 +218,6 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
-        // Adjust the object <-> credential edge for this repository.
-
-        $old_phid = $xaction->getOldValue();
-        $new_phid = $xaction->getNewValue();
-
-        $editor = new PhabricatorEdgeEditor();
-
-        $edge_type = PhabricatorObjectUsesCredentialsEdgeType::EDGECONST;
-        $src_phid = $object->getPHID();
-
-        if ($old_phid) {
-          $editor->removeEdge($src_phid, $edge_type, $old_phid);
-        }
-
-        if ($new_phid) {
-          $editor->addEdge($src_phid, $edge_type, $new_phid);
-        }
-
-        $editor->save();
-        break;
       case PhabricatorRepositoryTransaction::TYPE_AUTOMATION_BLUEPRINTS:
         DrydockAuthorization::applyAuthorizationChanges(
           $this->getActor(),
@@ -304,21 +243,10 @@ final class PhabricatorRepositoryEditor
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
       case PhabricatorRepositoryTransaction::TYPE_UUID:
       case PhabricatorRepositoryTransaction::TYPE_SVN_SUBPATH:
-      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
-      case PhabricatorRepositoryTransaction::TYPE_SSH_LOGIN:
-      case PhabricatorRepositoryTransaction::TYPE_SSH_KEY:
-      case PhabricatorRepositoryTransaction::TYPE_SSH_KEYFILE:
-      case PhabricatorRepositoryTransaction::TYPE_HTTP_LOGIN:
-      case PhabricatorRepositoryTransaction::TYPE_HTTP_PASS:
-      case PhabricatorRepositoryTransaction::TYPE_LOCAL_PATH:
       case PhabricatorRepositoryTransaction::TYPE_VCS:
       case PhabricatorRepositoryTransaction::TYPE_NOTIFY:
       case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
-      case PhabricatorRepositoryTransaction::TYPE_HOSTING:
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_HTTP:
-      case PhabricatorRepositoryTransaction::TYPE_PROTOCOL_SSH:
       case PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY:
-      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
       case PhabricatorRepositoryTransaction::TYPE_DANGEROUS:
       case PhabricatorRepositoryTransaction::TYPE_SLUG:
       case PhabricatorRepositoryTransaction::TYPE_SERVICE:
@@ -342,7 +270,7 @@ final class PhabricatorRepositoryEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE_ONLY:
       case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
         foreach ($xactions as $xaction) {
           foreach ($xaction->getNewValue() as $pattern) {
@@ -384,38 +312,6 @@ final class PhabricatorRepositoryEditor
                   break;
               }
             }
-          }
-        }
-        break;
-
-      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
-        foreach ($xactions as $xaction) {
-          $new_uri = $xaction->getNewValue();
-          try {
-            PhabricatorRepository::assertValidRemoteURI($new_uri);
-          } catch (Exception $ex) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              $ex->getMessage(),
-              $xaction);
-          }
-        }
-        break;
-
-      case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
-        $ok = PassphraseCredentialControl::validateTransactions(
-          $this->getActor(),
-          $xactions);
-        if (!$ok) {
-          foreach ($xactions as $xaction) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht(
-                'The selected credential does not exist, or you do not have '.
-                'permission to use it.'),
-              $xaction);
           }
         }
         break;
@@ -636,6 +532,43 @@ final class PhabricatorRepositoryEditor
           }
         }
         break;
+
+      case PhabricatorRepositoryTransaction::TYPE_SYMBOLS_SOURCES:
+        foreach ($xactions as $xaction) {
+          $old = $object->getSymbolSources();
+          $new = $xaction->getNewValue();
+
+          // If the viewer is adding new repositories, make sure they are
+          // valid and visible.
+          $add = array_diff($new, $old);
+          if (!$add) {
+            continue;
+          }
+
+          $repositories = id(new PhabricatorRepositoryQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs($add)
+            ->execute();
+          $repositories = mpull($repositories, null, 'getPHID');
+
+          foreach ($add as $phid) {
+            if (isset($repositories[$phid])) {
+              continue;
+            }
+
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Repository ("%s") does not exist, or you do not have '.
+                'permission to see it.',
+                $phid),
+              $xaction);
+            break;
+          }
+        }
+        break;
+
     }
 
     return $errors;
@@ -669,7 +602,7 @@ final class PhabricatorRepositoryEditor
 
     // If the repository does not have a local path yet, assign it one based
     // on its ID. We can't do this earlier because we won't have an ID yet.
-    $local_path = $object->getDetail('local-path');
+    $local_path = $object->getLocalPath();
     if (!strlen($local_path)) {
       $local_key = 'repository.default-local-path';
 
@@ -679,12 +612,26 @@ final class PhabricatorRepositoryEditor
       $id = $object->getID();
       $local_path = "{$local_root}/{$id}/";
 
-      $object->setDetail('local-path', $local_path);
+      $object->setLocalPath($local_path);
       $object->save();
     }
 
     if ($this->getIsNewObject()) {
-      $object->synchronizeWorkingCopyAfterCreation();
+      // The default state of repositories is to be hosted, if they are
+      // enabled without configuring any "Observe" URIs.
+      $object->setHosted(true);
+      $object->save();
+
+      // Create this repository's builtin URIs.
+      $builtin_uris = $object->newBuiltinURIs();
+      foreach ($builtin_uris as $uri) {
+        $uri->save();
+      }
+
+      id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($this->getActor())
+        ->setRepository($object)
+        ->synchronizeWorkingCopyAfterCreation();
     }
 
     return $xactions;

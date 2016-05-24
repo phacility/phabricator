@@ -6,12 +6,9 @@ Configuring Phabricator to use multiple repository hosts.
 Overview
 ========
 
-WARNING: This feature is a very early prototype; the features this document
-describes are mostly speculative fantasy.
-
-If you use Git or Mercurial, you can deploy Phabricator with multiple
-repository hosts, configured so that each host is readable and writable. The
-advantages of doing this are:
+If you use Git, you can deploy Phabricator with multiple repository hosts,
+configured so that each host is readable and writable. The advantages of doing
+this are:
 
   - you can completely survive the loss of repository hosts;
   - reads and writes can scale across multiple machines; and
@@ -20,24 +17,6 @@ advantages of doing this are:
 This configuration is complex, and many installs do not need to pursue it.
 
 This configuration is not currently supported with Subversion or Mercurial.
-
-
-Repository Hosts
-================
-
-Repository hosts must run a complete, fully configured copy of Phabricator,
-including a webserver. They must also run a properly configured `sshd`.
-
-Generally, these hosts will run the same set of services and configuration that
-web hosts run. If you prefer, you can overlay these services and put web and
-repository services on the same hosts. See @{article:Clustering Introduction}
-for some guidance on overlaying services.
-
-When a user requests information about a repository that can only be satisfied
-by examining a repository working copy, the webserver receiving the request
-will make an HTTP service call to a repository server which hosts the
-repository to retrieve the data it needs. It will use the result of this query
-to respond to the user.
 
 
 How Reads and Writes Work
@@ -93,6 +72,162 @@ configuration mistakes, as it doesn't cover intracluster traffic.
 
 Other mitigations are possible, but securing a network against the NSA and
 similar agents of other rogue nations is beyond the scope of this document.
+
+
+Repository Hosts
+================
+
+Repository hosts must run a complete, fully configured copy of Phabricator,
+including a webserver. They must also run a properly configured `sshd`.
+
+If you are converting existing hosts into cluster hosts, you may need to
+revisit @{article:Diffusion User Guide: Repository Hosting} and make sure
+the system user accounts have all the necessary `sudo` permissions. In
+particular, cluster devices need `sudo` access to `ssh` so they can read
+device keys.
+
+Generally, these hosts will run the same set of services and configuration that
+web hosts run. If you prefer, you can overlay these services and put web and
+repository services on the same hosts. See @{article:Clustering Introduction}
+for some guidance on overlaying services.
+
+When a user requests information about a repository that can only be satisfied
+by examining a repository working copy, the webserver receiving the request
+will make an HTTP service call to a repository server which hosts the
+repository to retrieve the data it needs. It will use the result of this query
+to respond to the user.
+
+
+Setting up a Cluster Services
+=============================
+
+To set up clustering, first register the devices that you want to use as part
+of the cluster with Almanac. For details, see @{article:Cluster: Devices}.
+
+NOTE: Once you create a service, new repositories will immediately allocate
+on it. You may want to disable repository creation during initial setup.
+
+Once the hosts are registered as devices, you can create a new service in
+Almanac:
+
+  - First, register at least one device according to the device clustering
+    instructions.
+  - Create a new service of type **Phabricator Cluster: Repository** in
+    Almanac.
+  - Bind this service to all the interfaces on the device or devices.
+  - For each binding, add a `protocol` key with one of these values:
+    `ssh`, `http`, `https`.
+
+For example, a service might look like this:
+
+  - Service: `repos001.mycompany.net`
+    - Binding: `repo001.mycompany.net:80`, `protocol=http`
+    - Binding: `repo001.mycompany.net:2222`, `protocol=ssh`
+
+The service itself has a `closed` property. You can set this to `true` to
+disable new repository allocations on this service (for example, if it is
+reaching capacity).
+
+
+Migrating to Clustered Services
+===============================
+
+To convert existing repositories on an install into cluster repositories, you
+will generally perform these steps:
+
+  - Register the existing host as a cluster device.
+  - Configure a single host repository service using //only// that host.
+
+This puts you in a transitional state where repositories on the host can work
+as either on-host repositories or cluster repositories. You can move forward
+from here slowly and make sure services still work, with a quick path back to
+safety if you run into trouble.
+
+To move forward, migrate one repository to the service and make sure things
+work correctly. If you run into issues, you can back out by migrating the
+repository off the service.
+
+To migrate a repository onto a cluster service, use this command:
+
+```
+$ ./bin/repository clusterize <repository> --service <service>
+```
+
+To migrate a repository back off a service, use this command:
+
+```
+$ ./bin/repoistory clusterize <repository> --remove-service
+```
+
+This command only changes how Phabricator connects to the repository; it does
+not move any data or make any complex structural changes.
+
+When Phabricator needs information about a non-clustered repository, it just
+runs a command like `git log` directly on disk. When Phabricator needs
+information about a clustered repository, it instead makes a service call to
+another server, asking that server to run `git log` instead.
+
+In a single-host cluster the server will make this service call to itself, so
+nothing will really change. But this //is// an effective test for most
+possible configuration mistakes.
+
+If your canary repository works well, you can migrate the rest of your
+repositories when ready (you can use `bin/repository list` to quickly get a
+list of all repository monograms).
+
+Once all repositories are migrated, you've reached a stable state and can
+remain here as long as you want. This state is sufficient to convert daemons,
+SSH, and web services into clustered versions and spread them across multiple
+machines if those goals are more interesting.
+
+Obviously, your single-device "cluster" will not be able to survive the loss of
+the single repository host, but you can take as long as you want to expand the
+cluster and add redundancy.
+
+After creating a service, you do not need to `clusterize` new repositories:
+they will automatically allocate onto an open service.
+
+When you're ready to expand the cluster, continue below.
+
+
+Expanding a Cluster
+===================
+
+To expand an existing cluster, follow these general steps:
+
+  - Register new devices in Almanac.
+  - Add bindings to the new devices to the repository service, also in Almanac.
+  - Start the daemons on the new devices.
+
+For instructions on configuring and registering devices, see
+@{article:Cluster: Devices}.
+
+As soon as you add active bindings to a service, Phabricator will begin
+synchronizing repositories and sending traffic to the new device. You do not
+need to copy any repository data to the device: Phabricator will automatically
+synchronize it.
+
+If you have a large amount of repository data, you may want to help this
+process along by copying the repository directory from an existing cluster
+device before bringing the new host online. This is optional, but can reduce
+the amount of time required to fully synchronize the cluster.
+
+You do not need to synchronize the most up-to-date data or stop writes during
+this process. For example, loading the most recent backup snapshot onto the new
+device will substantially reduce the amount of data that needs to be
+synchronized.
+
+
+Contracting a Cluster
+=====================
+
+To reduce the size of an existing cluster, follow these general steps:
+
+  - Disable the bindings from the service to the dead device in Almanac.
+
+If you are removing a device because it failed abruptly (or removing several
+devices at once) it is possible that some repositories will have lost all their
+leaders. See "Loss of Leaders" below to understand and resolve this.
 
 
 Monitoring Services
@@ -156,8 +291,6 @@ the user whose change is holding the lock.
 
 **Last Write At**: When the most recent write started. If the write lock is
 currently held, this shows when the lock was acquired.
-
-
 
 
 Cluster Failure Modes

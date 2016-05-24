@@ -10,6 +10,14 @@ final class AlmanacKeys extends Phobject {
   }
 
   public static function getDeviceID() {
+    // While running unit tests, ignore any configured device identity.
+    try {
+      PhabricatorTestCase::assertExecutingUnitTests();
+      return null;
+    } catch (Exception $ex) {
+      // Continue normally.
+    }
+
     $device_id_path = self::getKeyPath('device.id');
 
     if (Filesystem::pathExists($device_id_path)) {

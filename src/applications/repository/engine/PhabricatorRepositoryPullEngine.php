@@ -24,6 +24,34 @@ final class PhabricatorRepositoryPullEngine
   public function pullRepository() {
     $repository = $this->getRepository();
 
+    $lock = $this->newRepositoryLock($repository, 'repo.pull', true);
+
+    try {
+      $lock->lock();
+    } catch (PhutilLockException $ex) {
+      throw new DiffusionDaemonLockException(
+        pht(
+          'Another process is currently updating repository "%s", '.
+          'skipping pull.',
+          $repository->getDisplayName()));
+    }
+
+    try {
+      $result = $this->pullRepositoryWithLock();
+    } catch (Exception $ex) {
+      $lock->unlock();
+      throw $ex;
+    }
+
+    $lock->unlock();
+
+    return $result;
+  }
+
+  private function pullRepositoryWithLock() {
+    $repository = $this->getRepository();
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
     $is_hg = false;
     $is_git = false;
     $is_svn = false;
@@ -96,7 +124,10 @@ final class PhabricatorRepositoryPullEngine
       }
 
       if ($repository->isHosted()) {
-        $repository->synchronizeWorkingCopyBeforeRead();
+        id(new DiffusionRepositoryClusterEngine())
+          ->setViewer($viewer)
+          ->setRepository($repository)
+          ->synchronizeWorkingCopyBeforeRead();
 
         if ($is_git) {
           $this->installGitHook();

@@ -5,6 +5,7 @@ final class PhabricatorTextAreaEditField
 
   private $monospaced;
   private $height;
+  private $isStringList;
 
   public function setMonospaced($monospaced) {
     $this->monospaced = $monospaced;
@@ -24,6 +25,15 @@ final class PhabricatorTextAreaEditField
     return $this->height;
   }
 
+  public function setIsStringList($is_string_list) {
+    $this->isStringList = $is_string_list;
+    return $this;
+  }
+
+  public function getIsStringList() {
+    return $this->isStringList;
+  }
+
   protected function newControl() {
     $control = new AphrontFormTextAreaControl();
 
@@ -39,8 +49,29 @@ final class PhabricatorTextAreaEditField
     return $control;
   }
 
+  protected function getValueForControl() {
+    $value = $this->getValue();
+    if ($this->getIsStringList()) {
+      return implode("\n", $value);
+    } else {
+      return $value;
+    }
+  }
+
   protected function newConduitParameterType() {
-    return new ConduitStringParameterType();
+    if ($this->getIsStringList()) {
+      return new ConduitStringListParameterType();
+    } else {
+      return new ConduitStringParameterType();
+    }
+  }
+
+  protected function newHTTPParameterType() {
+    if ($this->getIsStringList()) {
+      return new AphrontStringListHTTPParameterType();
+    } else {
+      return new AphrontStringHTTPParameterType();
+    }
   }
 
 }

@@ -4,11 +4,13 @@
 Guide to configuring Phabricator across multiple hosts for availability and
 performance.
 
+
 Overview
 ========
 
-WARNING: This feature is a very early prototype; the features this document
-describes are mostly speculative fantasy.
+WARNING: This feature is a prototype. Installs should expect a challening
+adventure when deploying clusters. In the best of times, configuring a
+cluster is complex and requires significant operations experience.
 
 Phabricator can be configured to run on multiple hosts with redundant services
 to improve its availability and scalability, and make disaster recovery much
@@ -19,15 +21,34 @@ single host, but greatly reduces the cost of recovering from hardware and
 network failures.
 
 Each Phabricator service has an array of clustering options that can be
-configured independently. Configuring a cluster is inherently complex, and this
-is an advanced feature aimed at installs with large userbases and experienced
-operations personnel who need this high degree of flexibility.
+configured somewhat independently. Configuring a cluster is inherently complex,
+and this is an advanced feature aimed at installs with large userbases and
+experienced operations personnel who need this high degree of flexibility.
 
 The remainder of this document summarizes how to add redundancy to each
 service and where your efforts are likely to have the greatest impact.
 
 For additional guidance on setting up a cluster, see "Overlaying Services"
 and "Cluster Recipes" at the bottom of this document.
+
+
+Clusterable Services
+====================
+
+This table provides an overview of clusterable services, their setup
+complexity, and the rough impact that converting them to run on multiple hosts
+will have on availability, resistance to data loss, and scalability.
+
+| Service | Setup | Availability | Loss Resistance | Scalability
+|---------|-------|--------------|-----------|------------
+| **Databases** | Moderate | **High** | **High** | Low
+| **Repositories** | Complex | Moderate | **High** | Moderate
+| **Daemons** | Minimal | Low | No Risk | Low
+| **SSH Servers** | Minimal | Low | No Risk | Low
+| **Web Servers** | Minimal | **High** | No Risk | Moderate
+| **Notifications** | Minimal | Low | No Risk | Low
+
+See below for a walkthrough of these services in greater detail.
 
 
 Preparing for Clustering
@@ -48,8 +69,8 @@ and then deploy only Phabricator services into that VPC.
 
 If you have additional auxiliary hosts which run builds and tests via Drydock,
 you should //not// include them in the cluster address definition. For more
-detailed discussion of the Drydock security model, see @{Drydock User Guide:
-Security}.
+detailed discussion of the Drydock security model, see
+@{article:Drydock User Guide: Security}.
 
 Most other clustering features will not work until you define a cluster by
 configuring `cluster.addresses`.
@@ -146,7 +167,7 @@ Cluster: Daemons
 Configuring multiple daemon hosts is straightforward, but you must configure
 repositories first.
 
-With daemons running on multiple hosts, you can transparently survive the loss
+With daemons running on multiple hosts you can transparently survive the loss
 of any subset of hosts without an interruption to daemon services, as long as
 at least one host remains alive. Daemons are stateless, so spreading daemons
 across multiple hosts provides no resistance to data loss.
@@ -161,14 +182,30 @@ in capacity.
 For details, see @{article:Cluster: Daemons}.
 
 
+Cluster: SSH Servers
+====================
+
+Configuring multiple SSH hosts is straightforward, but you must configure
+repositories first.
+
+With multiple SSH hosts you can transparently survive the loss of any subset
+of hosts without interruption to repository services, as long as at last one
+host remains alive. SSH services are stateless, so putting multiple hosts in
+service provides no resistance to data loss because no data is at risk.
+
+SSH hosts are very rarely a scalability bottleneck.
+
+For details, see @{article:Cluster: SSH Servers}.
+
+
 Cluster: Web Servers
 ====================
 
 Configuring multiple web hosts is straightforward, but you must configure
 repositories first.
 
-With multiple web hosts, you can transparently survive the loss of any subset
-of hosts as long as at least one host remains alive. Web hosts are stateless,
+With multiple web hosts you can transparently survive the loss of any subset
+of hosts as long as at least one host remains alive. Web services are stateless,
 so putting multiple hosts in service provides no resistance to data loss
 because no data is at risk.
 

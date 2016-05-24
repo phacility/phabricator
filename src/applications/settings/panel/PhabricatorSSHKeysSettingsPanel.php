@@ -33,6 +33,7 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     $keys = id(new PhabricatorAuthSSHKeyQuery())
       ->setViewer($viewer)
       ->withObjectPHIDs(array($user->getPHID()))
+      ->withIsActive(true)
       ->execute();
 
     $table = id(new PhabricatorAuthSSHKeyTableView())
@@ -44,31 +45,12 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     $panel = new PHUIObjectBoxView();
     $header = new PHUIHeaderView();
 
-    $upload_button = id(new PHUIButtonView())
-      ->setText(pht('Upload Public Key'))
-      ->setHref('/auth/sshkey/upload/?objectPHID='.$user->getPHID())
-      ->setWorkflow(true)
-      ->setTag('a')
-      ->setIcon('fa-upload');
-
-    try {
-      PhabricatorSSHKeyGenerator::assertCanGenerateKeypair();
-      $can_generate = true;
-    } catch (Exception $ex) {
-      $can_generate = false;
-    }
-
-    $generate_button = id(new PHUIButtonView())
-      ->setText(pht('Generate Keypair'))
-      ->setHref('/auth/sshkey/generate/?objectPHID='.$user->getPHID())
-      ->setTag('a')
-      ->setWorkflow(true)
-      ->setDisabled(!$can_generate)
-      ->setIcon('fa-lock');
+    $ssh_actions = PhabricatorAuthSSHKeyTableView::newKeyActionsMenu(
+      $viewer,
+      $user);
 
     $header->setHeader(pht('SSH Public Keys'));
-    $header->addActionLink($generate_button);
-    $header->addActionLink($upload_button);
+    $header->addActionLink($ssh_actions);
 
     $panel->setHeader($header);
     $panel->setTable($table);

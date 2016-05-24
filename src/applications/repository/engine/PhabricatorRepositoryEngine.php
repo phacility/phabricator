@@ -51,6 +51,27 @@ abstract class PhabricatorRepositoryEngine extends Phobject {
     return PhabricatorUser::getOmnipotentUser();
   }
 
+  protected function newRepositoryLock(
+    PhabricatorRepository $repository,
+    $lock_key,
+    $lock_device_only) {
+
+    $lock_parts = array();
+    $lock_parts[] = $lock_key;
+    $lock_parts[] = $repository->getID();
+
+    if ($lock_device_only) {
+      $device = AlmanacKeys::getLiveDevice();
+      if ($device) {
+        $lock_parts[] = $device->getID();
+      }
+    }
+
+    $lock_name = implode(':', $lock_parts);
+    return PhabricatorGlobalLock::newLock($lock_name);
+  }
+
+
   /**
    * Verify that the "origin" remote exists, and points at the correct URI.
    *

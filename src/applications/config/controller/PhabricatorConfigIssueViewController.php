@@ -9,7 +9,8 @@ final class PhabricatorConfigIssueViewController
 
     $issues = PhabricatorSetupCheck::runAllChecks();
     PhabricatorSetupCheck::setOpenSetupIssueKeys(
-      PhabricatorSetupCheck::getUnignoredIssueKeys($issues));
+      PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
+      $update_database = true);
 
     if (empty($issues[$issue_key])) {
       $content = id(new PHUIInfoView())

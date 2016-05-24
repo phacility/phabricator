@@ -124,10 +124,11 @@ abstract class DiffusionQueryConduitAPIMethod
     // to prevent infinite recursion.
 
     $is_cluster_request = $request->getIsClusterRequest();
+    $viewer = $request->getUser();
 
     $repository = $drequest->getRepository();
     $client = $repository->newConduitClient(
-      $request->getUser(),
+      $viewer,
       $is_cluster_request);
     if ($client) {
       // We're proxying, so just make an intracluster call.
@@ -149,7 +150,10 @@ abstract class DiffusionQueryConduitAPIMethod
       // fetching the most up-to-date data? Synchronization can be slow, and a
       // lot of web reads are probably fine if they're a few seconds out of
       // date.
-      $repository->synchronizeWorkingCopyBeforeRead();
+      id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($viewer)
+        ->setRepository($repository)
+        ->synchronizeWorkingCopyBeforeRead();
 
       return $this->getResult($request);
     }

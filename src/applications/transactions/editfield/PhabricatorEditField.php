@@ -16,6 +16,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $isRequired;
   private $previewPanel;
   private $controlID;
+  private $controlInstructions;
 
   private $description;
   private $conduitDescription;
@@ -272,6 +273,15 @@ abstract class PhabricatorEditField extends Phobject {
     return $this->previewPanel;
   }
 
+  public function setControlInstructions($control_instructions) {
+    $this->controlInstructions = $control_instructions;
+    return $this;
+  }
+
+  public function getControlInstructions() {
+    return $this->controlInstructions;
+  }
+
   protected function newControl() {
     throw new PhutilMethodNotImplementedException();
   }
@@ -356,6 +366,11 @@ abstract class PhabricatorEditField extends Phobject {
           $control
             ->setError(pht('Locked'));
         }
+      }
+
+      $instructions = $this->getControlInstructions();
+      if (strlen($instructions)) {
+        $form->appendRemarkupInstructions($instructions);
       }
 
       $form->appendControl($control);

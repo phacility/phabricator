@@ -29,6 +29,7 @@ final class PhabricatorObjectHandle
   private $policyFiltered;
   private $subtitle;
   private $tokenIcon;
+  private $commandLineObjectName;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -194,6 +195,19 @@ final class PhabricatorObjectHandle
       return $this->fullName;
     }
     return $this->getName();
+  }
+
+  public function setCommandLineObjectName($command_line_object_name) {
+    $this->commandLineObjectName = $command_line_object_name;
+    return $this;
+  }
+
+  public function getCommandLineObjectName() {
+    if ($this->commandLineObjectName !== null) {
+      return $this->commandLineObjectName;
+    }
+
+    return $this->getObjectName();
   }
 
   public function setTitle($title) {

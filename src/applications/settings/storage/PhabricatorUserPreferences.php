@@ -43,6 +43,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_PROFILE_MENU_COLLAPSED = 'profile-menu.collapsed';
   const PREFERENCE_FAVORITE_POLICIES = 'policy.favorites';
+  const PREFERENCE_IGNORE_OFFSET = 'time.offset.ignore';
 
   // These are in an unusual order for historic reasons.
   const MAILTAG_PREFERENCE_NOTIFY       = 0;
@@ -113,7 +114,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   public static function filterMonospacedCSSRule($monospaced) {
     // Prevent the user from doing dangerous things.
-    return preg_replace('/[^a-z0-9 ,".]+/i', '', $monospaced);
+    return preg_replace('([^a-z0-9 ,"./]+)i', '', $monospaced);
   }
 
 }
