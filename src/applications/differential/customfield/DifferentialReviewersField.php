@@ -237,6 +237,10 @@ final class DifferentialReviewersField
   }
 
   public function validateCommitMessageValue($value) {
+    if (!$value) {
+      return;
+    }
+
     $author_phid = $this->getObject()->getAuthorPHID();
 
     $config_self_accept_key = 'differential.allow-self-accept';
