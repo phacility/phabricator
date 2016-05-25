@@ -2078,7 +2078,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       PhabricatorRepositoryURI::BUILTIN_IDENTIFIER_ID => true,
     );
 
-    $allow_http = PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
+    // If the view policy of the repository is public, support anonymous HTTP
+    // even if authenticated HTTP is not supported.
+    if ($this->getViewPolicy() === PhabricatorPolicies::POLICY_PUBLIC) {
+      $allow_http = true;
+    } else {
+      $allow_http = PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
+    }
 
     $base_uri = PhabricatorEnv::getURI('/');
     $base_uri = new PhutilURI($base_uri);
