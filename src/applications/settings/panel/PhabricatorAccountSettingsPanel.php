@@ -102,7 +102,13 @@ final class PhabricatorAccountSettingsPanel extends PhabricatorSettingsPanel {
     $translations = array();
     foreach ($locales as $locale) {
       $code = $locale->getLocaleCode();
+
+      // Get the locale's localized name if it's available. For example,
+      // "Deutsch" instead of "German". This helps users who do not speak the
+      // current language to find the correct setting.
+      $raw_scope = PhabricatorEnv::beginScopedLocale($code);
       $name = $locale->getLocaleName();
+      unset($raw_scope);
 
       if ($locale->isSillyLocale()) {
         if ($is_serious) {
