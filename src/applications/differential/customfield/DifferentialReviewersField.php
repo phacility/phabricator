@@ -237,11 +237,16 @@ final class DifferentialReviewersField
   }
 
   public function validateCommitMessageValue($value) {
+    if (!$value) {
+      return;
+    }
+
     $author_phid = $this->getObject()->getAuthorPHID();
 
     $config_self_accept_key = 'differential.allow-self-accept';
     $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
 
+    $value = $this->inflateReviewers($value);
     foreach ($value as $spec) {
       $phid = $spec['phid'];
 

@@ -13,14 +13,11 @@ final class PhabricatorSearchController
     $viewer = $this->getViewer();
 
     if ($request->getStr('jump') != 'no') {
-      $pref_jump = PhabricatorUserPreferences::PREFERENCE_SEARCHBAR_JUMP;
-      if ($viewer->loadPreferences($pref_jump, 1)) {
-        $response = PhabricatorJumpNavHandler::getJumpResponse(
-          $viewer,
-          $request->getStr('query'));
-        if ($response) {
-          return $response;
-        }
+      $response = PhabricatorJumpNavHandler::getJumpResponse(
+        $viewer,
+        $request->getStr('query'));
+      if ($response) {
+        return $response;
       }
     }
 
