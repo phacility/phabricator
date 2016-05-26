@@ -30,14 +30,4 @@ JX.behavior('phabricator-keyboard-shortcuts', function(config) {
     })
     .register();
 
-  if (config.searchID) {
-    desc = 'Give keyboard focus to the search box.';
-    new JX.KeyboardShortcut('/', desc)
-      .setHandler(function() {
-        var search = JX.$(config.searchID);
-        search.focus();
-        search.select();
-      })
-      .register();
-  }
 });

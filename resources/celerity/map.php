@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '8aeacc63',
-    'core.pkg.js' => '50e9228e',
+    'core.pkg.js' => '3f15fa62',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '33da0633',
     'differential.pkg.js' => '4b7d8f19',
@@ -490,7 +490,7 @@ return array(
     'rsrc/js/core/behavior-history-install.js' => '7ee2b591',
     'rsrc/js/core/behavior-hovercard.js' => 'bcaccd64',
     'rsrc/js/core/behavior-keyboard-pager.js' => 'a8da01f0',
-    'rsrc/js/core/behavior-keyboard-shortcuts.js' => 'd75709e6',
+    'rsrc/js/core/behavior-keyboard-shortcuts.js' => '7835f8c9',
     'rsrc/js/core/behavior-lightbox-attachments.js' => 'f8ba29d7',
     'rsrc/js/core/behavior-line-linker.js' => '1499a8cb',
     'rsrc/js/core/behavior-more.js' => 'a80d0378',
@@ -651,7 +651,7 @@ return array(
     'javelin-behavior-phabricator-gesture' => '3ab51e2c',
     'javelin-behavior-phabricator-gesture-example' => '558829c2',
     'javelin-behavior-phabricator-keyboard-pager' => 'a8da01f0',
-    'javelin-behavior-phabricator-keyboard-shortcuts' => 'd75709e6',
+    'javelin-behavior-phabricator-keyboard-shortcuts' => '7835f8c9',
     'javelin-behavior-phabricator-line-linker' => '1499a8cb',
     'javelin-behavior-phabricator-nav' => '56a1ca03',
     'javelin-behavior-phabricator-notification-example' => '8ce821c5',
@@ -1492,6 +1492,13 @@ return array(
       'multirow-row-manager',
       'javelin-json',
     ),
+    '7835f8c9' => array(
+      'javelin-behavior',
+      'javelin-workflow',
+      'javelin-json',
+      'javelin-dom',
+      'phabricator-keyboard-shortcut',
+    ),
     '7927a7d3' => array(
       'javelin-behavior',
       'javelin-quicksand',
@@ -1972,13 +1979,6 @@ return array(
       'javelin-stratcom',
       'javelin-json',
       'phabricator-prefab',
-    ),
-    'd75709e6' => array(
-      'javelin-behavior',
-      'javelin-workflow',
-      'javelin-json',
-      'javelin-dom',
-      'phabricator-keyboard-shortcut',
     ),
     'd7a74243' => array(
       'javelin-behavior',
