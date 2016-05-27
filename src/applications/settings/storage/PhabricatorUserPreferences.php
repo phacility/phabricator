@@ -92,6 +92,21 @@ final class PhabricatorUserPreferences
     return $this;
   }
 
+  public function getDefaultValue($key) {
+    $setting = self::getSettingObject($key);
+
+    if (!$setting) {
+      return null;
+    }
+
+    return $setting->getSettingDefaultValue();
+  }
+
+  private static function getSettingObject($key) {
+    $settings = PhabricatorSetting::getAllSettings();
+    return idx($settings, $key);
+  }
+
   public function getPinnedApplications(array $apps, PhabricatorUser $viewer) {
     $pref_pinned = self::PREFERENCE_APP_PINNED;
     $pinned = $this->getPreference($pref_pinned);
@@ -212,8 +227,7 @@ final class PhabricatorUserPreferences
 
 
   public function getApplicationTransactionEditor() {
-    // TODO: Implement.
-    throw new PhutilMethodNotImplementedException();
+    return new PhabricatorUserPreferencesEditor();
   }
 
   public function getApplicationTransactionObject() {

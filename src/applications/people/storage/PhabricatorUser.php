@@ -503,6 +503,7 @@ final class PhabricatorUser
     if (!$preferences) {
       $preferences = new PhabricatorUserPreferences();
       $preferences->setUserPHID($this->getPHID());
+      $preferences->attachUser($this);
 
       $default_dict = array(
         PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',

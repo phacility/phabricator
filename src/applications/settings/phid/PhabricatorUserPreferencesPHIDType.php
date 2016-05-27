@@ -32,7 +32,6 @@ final class PhabricatorUserPreferencesPHIDType extends PhabricatorPHIDType {
     $viewer = $query->getViewer();
     foreach ($handles as $phid => $handle) {
       $preferences = $objects[$phid];
-
       $handle->setName(pht('Settings %d', $preferences->getID()));
     }
   }
