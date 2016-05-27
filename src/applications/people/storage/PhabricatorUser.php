@@ -494,9 +494,10 @@ final class PhabricatorUser
 
     $preferences = null;
     if ($this->getPHID()) {
-      $preferences = id(new PhabricatorUserPreferences())->loadOneWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $preferences = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer($this)
+        ->withUsers(array($this))
+        ->executeOne();
     }
 
     if (!$preferences) {
@@ -1293,11 +1294,12 @@ final class PhabricatorUser
         $external->delete();
       }
 
-      $prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $prefs = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer($engine->getViewer())
+        ->withUsers(array($this))
+        ->execute();
       foreach ($prefs as $pref) {
-        $pref->delete();
+        $engine->destroyObject($pref);
       }
 
       $profiles = id(new PhabricatorUserProfile())->loadAllWhere(

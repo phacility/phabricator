@@ -533,13 +533,20 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $to_phids = array();
+
     $participants = $object->getParticipants();
-    if (empty($participants)) {
+    if (!$participants) {
       return $to_phids;
     }
-    $preferences = id(new PhabricatorUserPreferences())
-      ->loadAllWhere('userPHID in (%Ls)', array_keys($participants));
+
+    $participant_phids = mpull($participants, 'getParticipantPHID');
+
+    $preferences = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUserPHIDs($participant_phids)
+      ->execute();
     $preferences = mpull($preferences, null, 'getUserPHID');
+
     foreach ($participants as $phid => $participant) {
       $default = ConpherenceSettings::EMAIL_ALWAYS;
       $preference = idx($preferences, $phid);
@@ -557,6 +564,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         $to_phids[] = $phid;
       }
     }
+
     return $to_phids;
   }
 

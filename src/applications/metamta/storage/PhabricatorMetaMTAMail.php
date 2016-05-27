@@ -940,9 +940,10 @@ final class PhabricatorMetaMTAMail
       }
     }
 
-    $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-      'userPHID in (%Ls)',
-      $actor_phids);
+    $all_prefs = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUserPHIDs($actor_phids)
+      ->execute();
     $all_prefs = mpull($all_prefs, null, 'getUserPHID');
 
     $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
