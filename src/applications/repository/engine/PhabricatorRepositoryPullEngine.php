@@ -108,27 +108,27 @@ final class PhabricatorRepositoryPullEngine
         } else {
           $this->executeSubversionCreate();
         }
-      } else {
-        if (!$repository->isHosted()) {
-          $this->logPull(
-            pht(
-              'Updating the working copy for repository "%s".',
-              $repository->getDisplayName()));
-          if ($is_git) {
-            $this->verifyGitOrigin($repository);
-            $this->executeGitUpdate();
-          } else if ($is_hg) {
-            $this->executeMercurialUpdate();
-          }
+      }
+
+      id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($viewer)
+        ->setRepository($repository)
+        ->synchronizeWorkingCopyBeforeRead();
+
+      if (!$repository->isHosted()) {
+        $this->logPull(
+          pht(
+            'Updating the working copy for repository "%s".',
+            $repository->getDisplayName()));
+        if ($is_git) {
+          $this->verifyGitOrigin($repository);
+          $this->executeGitUpdate();
+        } else if ($is_hg) {
+          $this->executeMercurialUpdate();
         }
       }
 
       if ($repository->isHosted()) {
-        id(new DiffusionRepositoryClusterEngine())
-          ->setViewer($viewer)
-          ->setRepository($repository)
-          ->synchronizeWorkingCopyBeforeRead();
-
         if ($is_git) {
           $this->installGitHook();
         } else if ($is_svn) {

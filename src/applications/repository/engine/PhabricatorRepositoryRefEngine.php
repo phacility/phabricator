@@ -452,7 +452,10 @@ final class PhabricatorRepositoryRefEngine
   private function loadGitBranchPositions(PhabricatorRepository $repository) {
     return id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withIsOriginBranch(true)
+      ->withRefTypes(
+        array(
+          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+        ))
       ->execute();
   }
 
@@ -463,7 +466,10 @@ final class PhabricatorRepositoryRefEngine
   private function loadGitTagPositions(PhabricatorRepository $repository) {
     return id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withIsTag(true)
+      ->withRefTypes(
+        array(
+          PhabricatorRepositoryRefCursor::TYPE_TAG,
+        ))
       ->execute();
   }
 

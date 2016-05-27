@@ -63,6 +63,7 @@ final class PhabricatorRepositoryDiscoveryEngine
 
   private function discoverCommitsWithLock() {
     $repository = $this->getRepository();
+    $viewer = $this->getViewer();
 
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
@@ -104,6 +105,14 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->commitCache[$ref->getIdentifier()] = true;
     }
 
+    $version = $this->getObservedVersion($repository);
+    if ($version !== null) {
+      id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($viewer)
+        ->setRepository($repository)
+        ->synchronizeWorkingCopyAfterDiscovery($version);
+    }
+
     return $refs;
   }
 
@@ -121,9 +130,15 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->verifyGitOrigin($repository);
     }
 
+    // TODO: This should also import tags, but some of the logic is still
+    // branch-specific today.
+
     $branches = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withIsOriginBranch(true)
+      ->withRefTypes(
+        array(
+          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+        ))
       ->execute();
 
     if (!$branches) {
@@ -640,6 +655,51 @@ final class PhabricatorRepositoryDiscoveryEngine
     }
 
     return true;
+  }
+
+
+  private function getObservedVersion(PhabricatorRepository $repository) {
+    if ($repository->isHosted()) {
+      return null;
+    }
+
+    if ($repository->isGit()) {
+      return $this->getGitObservedVersion($repository);
+    }
+
+    return null;
+  }
+
+  private function getGitObservedVersion(PhabricatorRepository $repository) {
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+     ->setRepository($repository)
+     ->execute();
+    if (!$refs) {
+      return null;
+    }
+
+    // In Git, the observed version is the most recently discovered commit
+    // at any repository HEAD. It's possible for this to regress temporarily
+    // if a branch is pushed and then deleted. This is acceptable because it
+    // doesn't do anything meaningfully bad and will fix itself on the next
+    // push.
+
+    $ref_identifiers = mpull($refs, 'getCommitIdentifier');
+    $ref_identifiers = array_fuse($ref_identifiers);
+
+    $version = queryfx_one(
+      $repository->establishConnection('w'),
+      'SELECT MAX(id) version FROM %T WHERE repositoryID = %d
+        AND commitIdentifier IN (%Ls)',
+      id(new PhabricatorRepositoryCommit())->getTableName(),
+      $repository->getID(),
+      $ref_identifiers);
+
+    if (!$version) {
+      return null;
+    }
+
+    return (int)$version['version'];
   }
 
 }
