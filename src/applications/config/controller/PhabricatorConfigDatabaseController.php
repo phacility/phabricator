@@ -4,16 +4,14 @@ abstract class PhabricatorConfigDatabaseController
   extends PhabricatorConfigController {
 
   protected function buildSchemaQuery() {
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array($dao = null, 'w'));
+    $ref = PhabricatorDatabaseRef::getMasterDatabaseRef();
 
     $api = id(new PhabricatorStorageManagementAPI())
-      ->setUser($conf->getUser())
-      ->setHost($conf->getHost())
-      ->setPort($conf->getPort())
+      ->setUser($ref->getUser())
+      ->setHost($ref->getHost())
+      ->setPort($ref->getPort())
       ->setNamespace(PhabricatorLiskDAO::getDefaultStorageNamespace())
-      ->setPassword($conf->getPassword());
+      ->setPassword($ref->getPass());
 
     $query = id(new PhabricatorConfigSchemaQuery())
       ->setAPI($api);
