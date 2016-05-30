@@ -968,6 +968,10 @@ final class PhabricatorUser
    * @task availability
    */
   public function writeAvailabilityCache(array $availability, $ttl) {
+    if (PhabricatorEnv::isReadOnly()) {
+      return $this;
+    }
+
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     queryfx(
       $this->establishConnection('w'),

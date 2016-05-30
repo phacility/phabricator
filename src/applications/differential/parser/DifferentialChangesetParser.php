@@ -458,6 +458,10 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   public function saveCache() {
+    if (PhabricatorEnv::isReadOnly()) {
+      return false;
+    }
+
     if ($this->highlightErrors) {
       return false;
     }
