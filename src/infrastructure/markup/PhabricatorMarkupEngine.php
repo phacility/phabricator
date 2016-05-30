@@ -470,6 +470,7 @@ final class PhabricatorMarkupEngine extends Phobject {
     $engine = new PhutilRemarkupEngine();
 
     $engine->setConfig('preserve-linebreaks', $options['preserve-linebreaks']);
+
     $engine->setConfig('pygments.enabled', $options['pygments']);
     $engine->setConfig(
       'uri.allowed-protocols',

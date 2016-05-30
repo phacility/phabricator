@@ -16,7 +16,8 @@ final class PhabricatorUser
     PhabricatorSSHPublicKeyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -755,6 +756,17 @@ final class PhabricatorUser
     return new DateTimeZone($this->getTimezoneIdentifier());
   }
 
+  public function getTimeZoneOffset() {
+    $timezone = $this->getTimeZone();
+    $now = new DateTime('@'.PhabricatorTime::getNow());
+    $offset = $timezone->getOffset($now);
+
+    // Javascript offsets are in minutes and have the opposite sign.
+    $offset = -(int)($offset / 60);
+
+    return $offset;
+  }
+
   public function formatShortDateTime($when, $now = null) {
     if ($now === null) {
       $now = PhabricatorTime::getNow();
@@ -1377,5 +1389,69 @@ final class PhabricatorUser
   public function newFulltextEngine() {
     return new PhabricatorUserFulltextEngine();
   }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('username')
+        ->setType('string')
+        ->setDescription(pht("The user's username.")),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('realName')
+        ->setType('string')
+        ->setDescription(pht("The user's real name.")),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('roles')
+        ->setType('list<string>')
+        ->setDescription(pht('List of acccount roles.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $roles = array();
+
+    if ($this->getIsDisabled()) {
+      $roles[] = 'disabled';
+    }
+
+    if ($this->getIsSystemAgent()) {
+      $roles[] = 'bot';
+    }
+
+    if ($this->getIsMailingList()) {
+      $roles[] = 'list';
+    }
+
+    if ($this->getIsAdmin()) {
+      $roles[] = 'admin';
+    }
+
+    if ($this->getIsEmailVerified()) {
+      $roles[] = 'verified';
+    }
+
+    if ($this->getIsApproved()) {
+      $roles[] = 'approved';
+    }
+
+    if ($this->isUserActivated()) {
+      $roles[] = 'activated';
+    }
+
+    return array(
+      'username' => $this->getUsername(),
+      'realName' => $this->getRealName(),
+      'roles' => $roles,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
 
 }

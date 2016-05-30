@@ -22,51 +22,79 @@ final class PhabricatorPeopleSearchEngine
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Usernames'))
         ->setKey('usernames')
-        ->setAliases(array('username')),
+        ->setAliases(array('username'))
+        ->setDescription(pht('Find users by exact username.')),
       id(new PhabricatorSearchTextField())
         ->setLabel(pht('Name Contains'))
-        ->setKey('nameLike'),
+        ->setKey('nameLike')
+        ->setDescription(
+          pht('Find users whose usernames contain a substring.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Administrators'))
         ->setKey('isAdmin')
         ->setOptions(
           pht('(Show All)'),
           pht('Show Only Administrators'),
-          pht('Hide Administrators')),
+          pht('Hide Administrators'))
+        ->setDescription(
+          pht(
+            'Pass true to find only administrators, or false to omit '.
+            'administrators.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Disabled'))
         ->setKey('isDisabled')
         ->setOptions(
           pht('(Show All)'),
           pht('Show Only Disabled Users'),
-          pht('Hide Disabled Users')),
+          pht('Hide Disabled Users'))
+        ->setDescription(
+          pht(
+            'Pass true to find only disabled users, or false to omit '.
+            'disabled users.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Bots'))
-        ->setKey('isSystemAgent')
+        ->setKey('isBot')
+        ->setAliases(array('isSystemAgent'))
         ->setOptions(
           pht('(Show All)'),
           pht('Show Only Bots'),
-          pht('Hide Bots')),
+          pht('Hide Bots'))
+        ->setDescription(
+          pht(
+            'Pass true to find only bots, or false to omit bots.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Mailing Lists'))
         ->setKey('isMailingList')
         ->setOptions(
           pht('(Show All)'),
           pht('Show Only Mailing Lists'),
-          pht('Hide Mailing Lists')),
+          pht('Hide Mailing Lists'))
+        ->setDescription(
+          pht(
+            'Pass true to find only mailing lists, or false to omit '.
+            'mailing lists.')),
       id(new PhabricatorSearchThreeStateField())
         ->setLabel(pht('Needs Approval'))
         ->setKey('needsApproval')
         ->setOptions(
           pht('(Show All)'),
           pht('Show Only Unapproved Users'),
-          pht('Hide Unappproved Users')),
+          pht('Hide Unappproved Users'))
+        ->setDescription(
+          pht(
+            'Pass true to find only users awaiting administrative approval, '.
+            'or false to omit these users.')),
       id(new PhabricatorSearchDateField())
         ->setKey('createdStart')
-        ->setLabel(pht('Joined After')),
+        ->setLabel(pht('Joined After'))
+        ->setDescription(
+          pht('Find user accounts created after a given time.')),
       id(new PhabricatorSearchDateField())
         ->setKey('createdEnd')
-        ->setLabel(pht('Joined Before')),
+        ->setLabel(pht('Joined Before'))
+        ->setDescription(
+          pht('Find user accounts created before a given time.')),
+
     );
   }
 
@@ -115,8 +143,8 @@ final class PhabricatorPeopleSearchEngine
       $query->withIsMailingList($map['isMailingList']);
     }
 
-    if ($map['isSystemAgent'] !== null) {
-      $query->withIsSystemAgent($map['isSystemAgent']);
+    if ($map['isBot'] !== null) {
+      $query->withIsSystemAgent($map['isBot']);
     }
 
     if ($map['needsApproval'] !== null) {

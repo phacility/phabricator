@@ -85,7 +85,13 @@ final class PHUICalendarListView extends AphrontTagView {
       }
 
       $tip = $this->getEventTooltip($event);
-      $tip_align = ($this->getView() == 'day') ? 'E' : 'N';
+      if ($this->getView() == 'day') {
+        $tip_align = 'E';
+      } else if ($this->getView() == 'month') {
+        $tip_align = 'N';
+      } else {
+        $tip_align = 'W';
+      }
       $content = javelin_tag(
         'a',
         array(

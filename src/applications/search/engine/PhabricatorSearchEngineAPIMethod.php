@@ -501,6 +501,7 @@ EOTEXT
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('This call does not support any attachments.'))
       ->setHeaders(
         array(
           pht('Key'),
@@ -596,6 +597,11 @@ EOTEXT
     $viewer = $this->getViewer();
 
     $view = new PHUIRemarkupView($viewer, $remarkup);
+
+    $view->setRemarkupOptions(
+      array(
+        PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS => false,
+      ));
 
     return id(new PHUIBoxView())
       ->appendChild($view)

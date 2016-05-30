@@ -173,14 +173,16 @@ SSH clone URIs by examining configuration.
 **HTTP**: The `http://` clone URI will be available if these conditions are
 satisfied:
 
-  - `diffusion.allow-http-auth` must be enabled.
+  - `diffusion.allow-http-auth` must be enabled or the repository view policy
+    must be "Public".
   - The repository must be a Git or Mercurial repository.
   - `security.require-https` must be disabled.
 
 **HTTPS**: The `https://` clone URI will be available if these conditions are
 satisfied:
 
-  - `diffusion.allow-http-auth` must be enabled.
+  - `diffusion.allow-http-auth` must be enabled or the repository view policy
+    must be "Public".
   - The repository must be a Git or Mercurial repository.
   - The `phabricator.base-uri` protocol must be `https://`.
 

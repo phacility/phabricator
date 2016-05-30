@@ -84,9 +84,20 @@ final class AphrontFormView extends AphrontView {
   }
 
   public function appendRemarkupInstructions($remarkup) {
-    return $this->appendInstructions(
-      new PHUIRemarkupView($this->getViewer(), $remarkup));
+    $view = $this->newInstructionsRemarkupView($remarkup);
+    return $this->appendInstructions($view);
+  }
 
+  public function newInstructionsRemarkupView($remarkup) {
+    $viewer = $this->getViewer();
+    $view = new PHUIRemarkupView($viewer, $remarkup);
+
+    $view->setRemarkupOptions(
+      array(
+        PHUIRemarkupView::OPTION_PRESERVE_LINEBREAKS => false,
+      ));
+
+    return $view;
   }
 
   public function buildLayoutView() {

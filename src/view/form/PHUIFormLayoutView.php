@@ -31,14 +31,11 @@ final class PHUIFormLayoutView extends AphrontView {
   }
 
   public function appendRemarkupInstructions($remarkup) {
-    if ($this->getUser() === null) {
-      throw new PhutilInvalidStateException('setUser');
-    }
+    $view = id(new AphrontFormView())
+      ->setViewer($this->getViewer())
+      ->newInstructionsRemarkupView($remarkup);
 
-    $viewer = $this->getUser();
-    $instructions = new PHUIRemarkupView($viewer, $remarkup);
-
-    return $this->appendInstructions($instructions);
+    return $this->appendInstructions($view);
   }
 
   public function render() {

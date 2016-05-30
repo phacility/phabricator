@@ -2,10 +2,6 @@
  * @provides phui-calendar-list-css
  */
 
-.phui-calendar-list-container {
-  width: 300px;
-}
-
 .device-phone .phui-calendar-list-container {
   width: auto;
 }

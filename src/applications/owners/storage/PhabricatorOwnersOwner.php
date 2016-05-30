@@ -45,25 +45,37 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
       'packageID IN (%Ls)',
       $package_ids);
 
-    $all_phids = phid_group_by_type(mpull($owners, 'getUserPHID'));
+    $type_user = PhabricatorPeopleUserPHIDType::TYPECONST;
+    $type_project = PhabricatorProjectProjectPHIDType::TYPECONST;
 
-    $user_phids = idx($all_phids,
-      PhabricatorPeopleUserPHIDType::TYPECONST,
-      array());
-
-    if ($user_phids) {
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withMemberPHIDs($user_phids)
-        ->withIsMilestone(false)
-        ->execute();
-      $project_phids = mpull($projects, 'getPHID');
-    } else {
-      $project_phids = array();
+    $user_phids = array();
+    $project_phids = array();
+    foreach ($owners as $owner) {
+      $owner_phid = $owner->getUserPHID();
+      switch (phid_get_type($owner_phid)) {
+        case PhabricatorPeopleUserPHIDType::TYPECONST:
+          $user_phids[] = $owner_phid;
+          break;
+        case PhabricatorProjectProjectPHIDType::TYPECONST:
+          $project_phids[] = $owner_phid;
+          break;
+      }
     }
 
-    $all_phids = array_fuse($user_phids) + array_fuse($project_phids);
+    if ($project_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($project_phids)
+        ->needMembers(true)
+        ->execute();
+      foreach ($projects as $project) {
+        foreach ($project->getMemberPHIDs() as $member_phid) {
+          $user_phids[] = $member_phid;
+        }
+      }
+    }
 
-    return array_values($all_phids);
+    $user_phids = array_fuse($user_phids);
+    return array_values($user_phids);
   }
 }

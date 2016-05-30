@@ -145,7 +145,11 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     $header = $this->renderDayViewHeader();
-    $sidebar = $this->renderSidebar();
+    $sidebar = id(new PHUICalendarWeekView())
+      ->setViewer($this->getViewer())
+      ->setEvents($this->events)
+      ->setDateTime($this->getDateTime())
+      ->render();
     $warnings = $this->getQueryRangeWarning();
 
     $table_id = celerity_generate_unique_node_id();
@@ -240,91 +244,6 @@ final class PHUICalendarDayView extends AphrontView {
       $errors[] = pht('Day is out of query range');
     }
     return $errors;
-  }
-
-  private function renderSidebar() {
-    $this->events = msort($this->events, 'getEpochStart');
-    $week_of_boxes = $this->getWeekOfBoxes();
-    $filled_boxes = array();
-
-    foreach ($week_of_boxes as $day_box) {
-      $box_start = $day_box['start'];
-      $box_end = id(clone $box_start)->modify('+1 day');
-
-      $box_start = $box_start->format('U');
-      $box_end = $box_end->format('U');
-
-      $box_events = array();
-
-      foreach ($this->events as $event) {
-        $event_start = $event->getEpochStart();
-        $event_end = $event->getEpochEnd();
-
-        if ($event_start < $box_end && $event_end > $box_start) {
-          $box_events[] = $event;
-        }
-      }
-
-      $filled_boxes[] = $this->renderSidebarBox(
-        $box_events,
-        $day_box['title']);
-    }
-
-    return $filled_boxes;
-  }
-
-  private function renderSidebarBox($events, $title) {
-    $widget = id(new PHUICalendarWidgetView())
-      ->addClass('calendar-day-view-sidebar');
-
-    $list = id(new PHUICalendarListView())
-      ->setUser($this->getViewer())
-      ->setView('day');
-
-    if (count($events) == 0) {
-      $list->showBlankState(true);
-    } else {
-      $sorted_events = msort($events, 'getEpochStart');
-      foreach ($sorted_events as $event) {
-        $list->addEvent($event);
-      }
-    }
-
-    $widget
-      ->setCalendarList($list)
-      ->setHeader($title);
-    return $widget;
-  }
-
-  private function getWeekOfBoxes() {
-    $sidebar_day_boxes = array();
-
-    $display_start_day = $this->getDateTime();
-    $display_end_day = id(clone $display_start_day)->modify('+6 day');
-
-    $box_start_time = clone $display_start_day;
-
-    $today_time = PhabricatorTime::getTodayMidnightDateTime($this->getViewer());
-    $tomorrow_time = clone $today_time;
-    $tomorrow_time->modify('+1 day');
-
-    while ($box_start_time <= $display_end_day) {
-      if ($box_start_time == $today_time) {
-        $title = pht('Today');
-      } else if ($box_start_time == $tomorrow_time) {
-        $title = pht('Tomorrow');
-      } else {
-        $title = $box_start_time->format('l');
-      }
-
-      $sidebar_day_boxes[] = array(
-        'title' => $title,
-        'start' => clone $box_start_time,
-        );
-
-      $box_start_time->modify('+1 day');
-    }
-    return $sidebar_day_boxes;
   }
 
   private function renderDayViewHeader() {

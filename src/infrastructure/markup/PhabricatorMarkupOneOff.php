@@ -10,6 +10,7 @@ final class PhabricatorMarkupOneOff
   private $content;
   private $preserveLinebreaks;
   private $engineRuleset;
+  private $engine;
   private $disableCache;
 
   public function setEngineRuleset($engine_ruleset) {
@@ -35,6 +36,15 @@ final class PhabricatorMarkupOneOff
     return $this->content;
   }
 
+  public function setEngine(PhutilMarkupEngine $engine) {
+    $this->engine = $engine;
+    return $this;
+  }
+
+  public function getEngine() {
+    return $this->engine;
+  }
+
   public function setDisableCache($disable_cache) {
     $this->disableCache = $disable_cache;
     return $this;
@@ -49,6 +59,10 @@ final class PhabricatorMarkupOneOff
   }
 
   public function newMarkupEngine($field) {
+    if ($this->engine) {
+      return $this->engine;
+    }
+
     if ($this->engineRuleset) {
       return PhabricatorMarkupEngine::getEngine($this->engineRuleset);
     } else if ($this->preserveLinebreaks) {

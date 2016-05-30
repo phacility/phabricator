@@ -10,7 +10,7 @@
 JX.install('Device', {
   statics : {
     _device : null,
-    _tabletBreakpoint: 768,
+    _tabletBreakpoint: 920,
 
     setTabletBreakpoint: function(width) {
       var self = JX.Device;

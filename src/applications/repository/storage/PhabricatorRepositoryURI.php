@@ -379,14 +379,40 @@ final class PhabricatorRepositoryURI
   }
 
   private function getForcedPort() {
-    switch ($this->getBuiltinProtocol()) {
-      case self::BUILTIN_PROTOCOL_SSH:
-        return PhabricatorEnv::getEnvConfig('diffusion.ssh-port');
-      case self::BUILTIN_PROTOCOL_HTTP:
-      case self::BUILTIN_PROTOCOL_HTTPS:
-      default:
-        return null;
+    $protocol = $this->getBuiltinProtocol();
+
+    if ($protocol == self::BUILTIN_PROTOCOL_SSH) {
+      return PhabricatorEnv::getEnvConfig('diffusion.ssh-port');
     }
+
+    // If Phabricator is running on a nonstandard port, use that as the defualt
+    // port for URIs with the same protocol.
+
+    $is_http = ($protocol == self::BUILTIN_PROTOCOL_HTTP);
+    $is_https = ($protocol == self::BUILTIN_PROTOCOL_HTTPS);
+
+    if ($is_http || $is_https) {
+      $uri = PhabricatorEnv::getURI('/');
+      $uri = new PhutilURI($uri);
+
+      $port = $uri->getPort();
+      if (!$port) {
+        return null;
+      }
+
+      $uri_protocol = $uri->getProtocol();
+      $use_port =
+        ($is_http && ($uri_protocol == 'http')) ||
+        ($is_https && ($uri_protocol == 'https'));
+
+      if (!$use_port) {
+        return null;
+      }
+
+      return $port;
+    }
+
+    return null;
   }
 
   private function getForcedPath() {

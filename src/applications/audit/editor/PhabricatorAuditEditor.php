@@ -642,6 +642,12 @@ final class PhabricatorAuditEditor
 
     $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
     foreach ($object->getAudits() as $audit) {
+      if (!$audit->isInteresting()) {
+        // Don't send mail to uninteresting auditors, like packages which
+        // own this code but which audits have not triggered for.
+        continue;
+      }
+
       if ($audit->getAuditStatus() != $status_resigned) {
         $phids[] = $audit->getAuditorPHID();
       }
