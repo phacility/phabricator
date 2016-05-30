@@ -30,6 +30,10 @@ final class PhabricatorStorageManagementRenamespaceWorkflow
         ));
   }
 
+  protected function isReadOnlyWorkflow() {
+    return true;
+  }
+
   public function didExecute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
