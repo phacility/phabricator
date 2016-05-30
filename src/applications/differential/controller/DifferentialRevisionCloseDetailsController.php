@@ -93,7 +93,7 @@ final class DifferentialRevisionCloseDetailsController
           'href' => $obj_handle->getURI(),
         ),
         $obj_handle->getName());
-      $body_why = pht(
+      $body_why[] = pht(
         'This commit and the active diff of %s had the same %s hash '.
         '(%s) so we linked this commit to %s.',
         $diff_link,
