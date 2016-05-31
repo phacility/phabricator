@@ -276,6 +276,7 @@ final class AphrontDialogView
     $attributes = array(
       'class'   => implode(' ', $classes),
       'sigil'   => 'jx-dialog',
+      'role'    => 'dialog',
     );
 
     $form_attributes = array(
