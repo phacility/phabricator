@@ -68,7 +68,7 @@ abstract class PhabricatorSearchEngineAPIMethod
       'This is a standard **ApplicationSearch** method which will let you '.
       'list, query, or search for objects. For documentation on these '.
       'endpoints, see **[[ %s | Conduit API: Using Search Endpoints ]]**.',
-      PhabricatorEnv::getDoclink('Conduit API: Using Edit Endpoints'));
+      PhabricatorEnv::getDoclink('Conduit API: Using Search Endpoints'));
   }
 
   final public function getMethodDocumentation() {
