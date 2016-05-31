@@ -374,7 +374,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       // We can't print this normally because escaping quotation marks will
       // break the CSS. Instead, filter it strictly and then mark it as safe.
       $monospaced = new PhutilSafeHTML(
-        PhabricatorUserPreferences::filterMonospacedCSSRule(
+        PhabricatorMonospacedFontSetting::filterMonospacedCSSRule(
           $monospaced));
 
       $font_css = hsprintf(
