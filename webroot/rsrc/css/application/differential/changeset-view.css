@@ -102,7 +102,7 @@
 }
 
 .differential-diff td.old {
-  background: rgba(251, 175, 175, 0.3);
+  background: rgba(251, 175, 175, .3);
 }
 
 .differential-diff td.new {
@@ -119,12 +119,12 @@
 
 .differential-diff td.old-full,
 .differential-diff td.old span.bright {
-  background: rgba(251, 175, 175, 0.8);
+  background: rgba(251, 175, 175, .7);
 }
 
 .differential-diff td.new-full,
 .differential-diff td.new span.bright {
-  background: rgba(151, 234, 151, .8);
+  background: rgba(151, 234, 151, .6);
 }
 
 .differential-diff td.copy {
