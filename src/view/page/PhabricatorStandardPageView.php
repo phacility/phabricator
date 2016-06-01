@@ -133,7 +133,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
   public function getDurableColumnVisible() {
     $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
-    return (bool)$this->getUserPreference($column_key, 0);
+    return (bool)$this->getUserPreference($column_key, false);
   }
 
   public function addQuicksandConfig(array $config) {
@@ -164,12 +164,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
   }
 
   public function getTitle() {
-    $glyph_key = PhabricatorUserPreferences::PREFERENCE_TITLES;
-    if ($this->getUserPreference($glyph_key) == 'text') {
-      $use_glyph = false;
-    } else {
-      $use_glyph = true;
-    }
+    $glyph_key = PhabricatorTitleGlyphsSetting::SETTINGKEY;
+    $glyph_on = PhabricatorTitleGlyphsSetting::VALUE_TITLE_GLYPHS;
+    $glyph_setting = $this->getUserPreference($glyph_key, $glyph_on);
+
+    $use_glyph = ($glyph_setting == $glyph_on);
 
     $title = parent::getTitle();
 
@@ -362,8 +361,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     if ($request) {
       $user = $request->getUser();
       if ($user) {
-        $monospaced = $user->loadPreferences()->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
+        $monospaced = $user->getUserSetting(
+          PhabricatorMonospacedFontSetting::SETTINGKEY);
       }
     }
 
@@ -834,7 +833,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       return $default;
     }
 
-    return $user->loadPreferences()->getPreference($key, $default);
+    return $user->getUserSetting($key);
   }
 
   public function produceAphrontResponse() {

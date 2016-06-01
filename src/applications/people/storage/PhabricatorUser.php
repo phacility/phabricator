@@ -506,6 +506,11 @@ final class PhabricatorUser
     return null;
   }
 
+  public function compareUserSetting($key, $value) {
+    $actual = $this->getUserSetting($key);
+    return ($actual == $value);
+  }
+
   public function loadPreferences() {
     if ($this->preferences) {
       return $this->preferences;
