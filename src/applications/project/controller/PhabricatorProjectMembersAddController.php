@@ -21,12 +21,17 @@ final class PhabricatorProjectMembersAddController
     }
 
     $this->setProject($project);
+    $done_uri = "/project/members/{$id}/";
 
     if (!$project->supportsEditMembers()) {
-      return new Aphront404Response();
-    }
+      $copy = pht('Parent projects and milestones do not support adding '.
+        'members. You can add members directly to any non-parent subproject.');
 
-    $done_uri = "/project/members/{$id}/";
+      return $this->newDialog()
+        ->setTitle(pht('Unsupported Project'))
+        ->appendParagraph($copy)
+        ->addCancelButton($done_uri);
+    }
 
     if ($request->isFormPost()) {
       $member_phids = $request->getArr('memberPHIDs');
