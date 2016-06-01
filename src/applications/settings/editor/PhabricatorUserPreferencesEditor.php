@@ -1,7 +1,11 @@
 <?php
 
 final class PhabricatorUserPreferencesEditor
-  extends AlmanacEditor {
+  extends PhabricatorApplicationTransactionEditor {
+
+  public function getEditorApplicationClass() {
+    return 'PhabricatorSettingsApplication';
+  }
 
   public function getEditorObjectsDescription() {
     return pht('Settings');
@@ -127,6 +131,24 @@ final class PhabricatorUserPreferencesEditor
     }
 
     return $errors;
+  }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $user_phid = $object->getUserPHID();
+    if ($user_phid) {
+      PhabricatorUserCache::clearCache(
+        PhabricatorUserPreferencesCacheType::KEY_PREFERENCES,
+        $user_phid);
+    } else {
+      PhabricatorUserCache::clearCacheForAllUsers(
+        PhabricatorUserPreferencesCacheType::KEY_PREFERENCES);
+    }
+
+
+    return $xactions;
   }
 
 }

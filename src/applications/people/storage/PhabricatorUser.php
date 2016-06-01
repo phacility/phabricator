@@ -5,6 +5,7 @@
  * @task image-cache Profile Image Cache
  * @task factors Multi-Factor Authentication
  * @task handles Managing Handles
+ * @task cache User Cache
  */
 final class PhabricatorUser
   extends PhabricatorUserDAO
@@ -61,6 +62,8 @@ final class PhabricatorUser
 
   private $alternateCSRFString = self::ATTACHABLE;
   private $session = self::ATTACHABLE;
+  private $rawCacheData = array();
+  private $usableCacheData = array();
 
   private $authorities = array();
   private $handlePool;
@@ -485,6 +488,22 @@ final class PhabricatorUser
       'userPHID',
       'getPHID',
       '(isPrimary = 1)');
+  }
+
+  public function getUserSetting($key) {
+    $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
+    $settings = $this->requireCacheData($settings_key);
+
+    if (array_key_exists($key, $settings)) {
+      return $settings[$key];
+    }
+
+    $defaults = PhabricatorSetting::getAllEnabledSettings($this);
+    if (isset($defaults[$key])) {
+      return $defaults[$key]->getSettingDefaultValue();
+    }
+
+    return null;
   }
 
   public function loadPreferences() {
@@ -1460,5 +1479,59 @@ final class PhabricatorUser
     return array();
   }
 
+
+/* -(  User Cache  )--------------------------------------------------------- */
+
+
+  /**
+   * @task cache
+   */
+  public function attachRawCacheData(array $data) {
+    $this->rawCacheData = $data + $this->rawCacheData;
+    return $this;
+  }
+
+
+  /**
+   * @task cache
+   */
+  protected function requireCacheData($key) {
+    if (isset($this->usableCacheData[$key])) {
+      return $this->usableCacheData[$key];
+    }
+
+    $type = PhabricatorUserCacheType::requireCacheTypeForKey($key);
+
+    if (isset($this->rawCacheData[$key])) {
+      $raw_value = $this->rawCacheData[$key];
+
+      $usable_value = $type->getValueFromStorage($raw_value);
+      $this->usableCacheData[$key] = $usable_value;
+
+      return $usable_value;
+    }
+
+    $usable_value = $type->getDefaultValue();
+
+    $user_phid = $this->getPHID();
+    if ($user_phid) {
+      $map = $type->newValueForUsers($key, array($this));
+      if (array_key_exists($user_phid, $map)) {
+        $usable_value = $map[$user_phid];
+        $raw_value = $type->getValueForStorage($usable_value);
+
+        $this->rawCacheData[$key] = $raw_value;
+        PhabricatorUserCache::writeCache(
+          $type,
+          $key,
+          $user_phid,
+          $raw_value);
+      }
+    }
+
+    $this->usableCacheData[$key] = $usable_value;
+
+    return $usable_value;
+  }
 
 }
