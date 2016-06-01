@@ -31,6 +31,7 @@ final class PhabricatorSettingsTimezoneController
       $timezone = $request->getStr('timezone');
 
       $pref_ignore = PhabricatorUserPreferences::PREFERENCE_IGNORE_OFFSET;
+      $pref_timezone = PhabricatorTimezoneSetting::SETTINGKEY;
 
       $preferences = $viewer->loadPreferences();
 
@@ -52,11 +53,11 @@ final class PhabricatorSettingsTimezoneController
       if (isset($options[$timezone])) {
         $preferences
           ->setPreference($pref_ignore, null)
+          ->setPreference($pref_timezone, $timezone)
           ->save();
 
-        $viewer
-          ->setTimezoneIdentifier($timezone)
-          ->save();
+        $viewer->clearCacheData(
+          PhabricatorUserPreferencesCacheType::KEY_PREFERENCES);
       }
     }
 
@@ -115,9 +116,9 @@ final class PhabricatorSettingsTimezoneController
     $offset = $offset / 60;
 
     if ($offset >= 0) {
-      return pht('GMT-%d', $offset);
+      return pht('UTC-%d', $offset);
     } else {
-      return pht('GMT+%d', -$offset);
+      return pht('UTC+%d', -$offset);
     }
   }
 

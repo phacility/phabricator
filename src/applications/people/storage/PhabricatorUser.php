@@ -5,6 +5,7 @@
  * @task image-cache Profile Image Cache
  * @task factors Multi-Factor Authentication
  * @task handles Managing Handles
+ * @task settings Settings
  * @task cache User Cache
  */
 final class PhabricatorUser
@@ -26,15 +27,12 @@ final class PhabricatorUser
 
   protected $userName;
   protected $realName;
-  protected $sex;
-  protected $translation;
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
   protected $profileImageCache;
   protected $availabilityCache;
   protected $availabilityCacheTTL;
-  protected $timezoneIdentifier = '';
 
   protected $consoleEnabled = 0;
   protected $consoleVisible = 0;
@@ -68,14 +66,10 @@ final class PhabricatorUser
   private $authorities = array();
   private $handlePool;
   private $csrfSalt;
+  private $timezoneOverride;
 
   protected function readField($field) {
     switch ($field) {
-      case 'timezoneIdentifier':
-        // If the user hasn't set one, guess the server's time.
-        return nonempty(
-          $this->timezoneIdentifier,
-          date_default_timezone_get());
       // Make sure these return booleans.
       case 'isAdmin':
         return (bool)$this->isAdmin;
@@ -191,8 +185,6 @@ final class PhabricatorUser
       self::CONFIG_COLUMN_SCHEMA => array(
         'userName' => 'sort64',
         'realName' => 'text128',
-        'sex' => 'text4?',
-        'translation' => 'text64?',
         'passwordSalt' => 'text32?',
         'passwordHash' => 'text128?',
         'profileImagePHID' => 'phid?',
@@ -204,7 +196,6 @@ final class PhabricatorUser
         'isMailingList' => 'bool',
         'isDisabled' => 'bool',
         'isAdmin' => 'bool',
-        'timezoneIdentifier' => 'text255',
         'isEmailVerified' => 'uint32',
         'isApproved' => 'uint32',
         'accountSecret' => 'bytes64',
@@ -259,11 +250,6 @@ final class PhabricatorUser
       $this->setPasswordHash($hash->openEnvelope());
     }
     return $this;
-  }
-
-  // To satisfy PhutilPerson.
-  public function getSex() {
-    return $this->sex;
   }
 
   public function getMonogram() {
@@ -490,6 +476,10 @@ final class PhabricatorUser
       '(isPrimary = 1)');
   }
 
+
+/* -(  Settings  )----------------------------------------------------------- */
+
+
   public function getUserSetting($key) {
     $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
     $settings = $this->requireCacheData($settings_key);
@@ -506,9 +496,49 @@ final class PhabricatorUser
     return null;
   }
 
+
+  /**
+   * Test if a given setting is set to a particular value.
+   *
+   * @param const Setting key.
+   * @param wild Value to compare.
+   * @return bool True if the setting has the specified value.
+   * @task settings
+   */
   public function compareUserSetting($key, $value) {
     $actual = $this->getUserSetting($key);
     return ($actual == $value);
+  }
+
+  public function getTranslation() {
+    return $this->getUserSetting(PhabricatorTranslationSetting::SETTINGKEY);
+  }
+
+  public function getTimezoneIdentifier() {
+    if ($this->timezoneOverride) {
+      return $this->timezoneOverride;
+    }
+
+    return $this->getUserSetting(PhabricatorTimezoneSetting::SETTINGKEY);
+  }
+
+
+  /**
+   * Override the user's timezone identifier.
+   *
+   * This is primarily useful for unit tests.
+   *
+   * @param string New timezone identifier.
+   * @return this
+   * @task settings
+   */
+  public function overrideTimezoneIdentifier($identifier) {
+    $this->timezoneOverride = $identifier;
+    return $this;
+  }
+
+  public function getSex() {
+    return $this->getUserSetting(PhabricatorPronounSetting::SETTINGKEY);
   }
 
   public function loadPreferences() {
@@ -1537,6 +1567,16 @@ final class PhabricatorUser
     $this->usableCacheData[$key] = $usable_value;
 
     return $usable_value;
+  }
+
+
+  /**
+   * @task cache
+   */
+  public function clearCacheData($key) {
+    unset($this->rawCacheData[$key]);
+    unset($this->usableCacheData[$key]);
+    return $this;
   }
 
 }

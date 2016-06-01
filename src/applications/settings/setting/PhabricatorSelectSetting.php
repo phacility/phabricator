@@ -17,9 +17,11 @@ abstract class PhabricatorSelectSetting
       $default_label = pht('Default (Unknown, "%s")', $default_value);
     }
 
-    $options = array(
-      '' => $default_label,
-    ) + $options;
+    if (empty($options[''])) {
+      $options = array(
+        '' => $default_label,
+      ) + $options;
+    }
 
     return $this->newEditField($object, new PhabricatorSelectEditField())
       ->setOptions($options);

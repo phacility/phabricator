@@ -78,6 +78,12 @@ final class PhabricatorSettingsEditEngine
     $viewer = $this->getViewer();
     $settings = PhabricatorSetting::getAllEnabledSettings($viewer);
 
+    foreach ($settings as $key => $setting) {
+      $setting = clone $setting;
+      $setting->setViewer($viewer);
+      $settings[$key] = $setting;
+    }
+
     $fields = array();
     foreach ($settings as $setting) {
       foreach ($setting->newCustomEditFields($object) as $field) {
