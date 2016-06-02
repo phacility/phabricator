@@ -108,12 +108,6 @@ final class PhameBlogViewController extends PhameLiveController {
           $about,
       ));
 
-    if ($is_live) {
-      $page
-        ->setShowChrome(false)
-        ->setShowFooter(false);
-    }
-
     return $page;
   }
 
