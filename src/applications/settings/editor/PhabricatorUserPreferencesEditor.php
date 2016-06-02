@@ -99,6 +99,12 @@ final class PhabricatorUserPreferencesEditor
     $actor = $this->getActor();
     $settings = PhabricatorSetting::getAllEnabledSettings($actor);
 
+    foreach ($settings as $key => $setting) {
+      $setting = clone $setting;
+      $setting->setViewer($actor);
+      $settings[$key] = $setting;
+    }
+
     switch ($type) {
       case PhabricatorUserPreferencesTransaction::TYPE_SETTING:
         foreach ($xactions as $xaction) {
