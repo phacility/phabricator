@@ -6689,7 +6689,7 @@ phutil_register_library_map(array(
     'PhabricatorConfigWelcomeController' => 'PhabricatorConfigController',
     'PhabricatorConpherenceApplication' => 'PhabricatorApplication',
     'PhabricatorConpherenceNotificationsSetting' => 'PhabricatorSelectSetting',
-    'PhabricatorConpherencePreferencesSettingsPanel' => 'PhabricatorSettingsPanel',
+    'PhabricatorConpherencePreferencesSettingsPanel' => 'PhabricatorEditEngineSettingsPanel',
     'PhabricatorConpherenceThreadPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorConsoleApplication' => 'PhabricatorApplication',
     'PhabricatorConsoleContentSource' => 'PhabricatorContentSource',

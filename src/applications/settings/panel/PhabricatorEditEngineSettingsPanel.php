@@ -38,6 +38,12 @@ abstract class PhabricatorEditEngineSettingsPanel
     return $engine->buildResponse();
   }
 
+  final public function isEnabled() {
+    // Only enable the panel if it has any fields.
+    $field_keys = $this->getPanelSettingsKeys();
+    return (bool)$field_keys;
+  }
+
   final public function newEditEnginePage() {
     $field_keys = $this->getPanelSettingsKeys();
     if (!$field_keys) {

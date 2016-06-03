@@ -80,11 +80,14 @@ final class PhabricatorSettingsMainController
   }
 
   private function buildPanels() {
+    $viewer = $this->getViewer();
     $panels = PhabricatorSettingsPanel::getAllDisplayPanels();
 
     $result = array();
     foreach ($panels as $key => $panel) {
-      $panel->setUser($this->user);
+      $panel
+        ->setViewer($viewer)
+        ->setUser($this->user);
 
       if (!$panel->isEnabled()) {
         continue;

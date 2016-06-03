@@ -12,9 +12,19 @@ final class PhabricatorConpherenceNotificationsSetting
     return pht('Conpherence Notifications');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorConpherencePreferencesSettingsPanel::PANELKEY;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'Choose the default notification behavior for Conpherence rooms.');
+  }
+
+  protected function isEnabledForViewer(PhabricatorUser $viewer) {
+    return PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorConpherenceApplication',
+      $viewer);
   }
 
   public function getSettingDefaultValue() {
