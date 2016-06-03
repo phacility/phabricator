@@ -73,47 +73,26 @@ final class PhabricatorUserPreferences
       return null;
     }
 
+    $setting = id(clone $setting)
+      ->setViewer($this->getUser());
+
     return $setting->getSettingDefaultValue();
+  }
+
+  public function getSettingValue($key) {
+    if (array_key_exists($key, $this->preferences)) {
+      return $this->preferences[$key];
+    }
+
+    // TODO: If this setting set inherits from another preference set,
+    // we would look it up here.
+
+    return $this->getDefaultValue($key);
   }
 
   private static function getSettingObject($key) {
     $settings = PhabricatorSetting::getAllSettings();
     return idx($settings, $key);
-  }
-
-  public function getPinnedApplications(array $apps, PhabricatorUser $viewer) {
-    $pref_pinned = self::PREFERENCE_APP_PINNED;
-    $pinned = $this->getPreference($pref_pinned);
-
-    if ($pinned) {
-      return $pinned;
-    }
-
-    $pref_tiles = self::PREFERENCE_APP_TILES;
-    $tiles = $this->getPreference($pref_tiles, array());
-    $full_tile = 'full';
-
-    $large = array();
-    foreach ($apps as $app) {
-      $show = $app->isPinnedByDefault($viewer);
-
-      // TODO: This is legacy stuff, clean it up eventually. This approximately
-      // retains the old "tiles" preference.
-      if (isset($tiles[get_class($app)])) {
-        $show = ($tiles[get_class($app)] == $full_tile);
-      }
-
-      if ($show) {
-        $large[] = get_class($app);
-      }
-    }
-
-    return $large;
-  }
-
-  public static function filterMonospacedCSSRule($monospaced) {
-    // Prevent the user from doing dangerous things.
-    return preg_replace('([^a-z0-9 ,"./]+)i', '', $monospaced);
   }
 
   public function attachUser(PhabricatorUser $user = null) {

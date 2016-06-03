@@ -217,4 +217,22 @@ abstract class PhabricatorSettingsPanel extends Phobject {
       ->addString($this->getPanelName());
   }
 
+  protected function loadTargetPreferences() {
+    $viewer = $this->getViewer();
+    $user = $this->getUser();
+
+    $preferences = PhabricatorUserPreferences::loadUserPreferences($user);
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $preferences,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    return $preferences;
+  }
+
+  protected function newDialog() {
+    return $this->getController()->newDialog();
+  }
+
 }

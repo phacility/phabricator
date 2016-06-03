@@ -26,12 +26,7 @@ abstract class PhabricatorEditEngineSettingsPanel
       ->setIsSelfEdit($is_self)
       ->setProfileURI($profile_uri);
 
-    $preferences = $user->loadPreferences();
-
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $preferences,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    $preferences = $this->loadTargetPreferences();
 
     $engine->setTargetObject($preferences);
 
