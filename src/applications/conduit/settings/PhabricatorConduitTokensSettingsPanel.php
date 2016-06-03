@@ -15,8 +15,8 @@ final class PhabricatorConduitTokensSettingsPanel
     return pht('Conduit API Tokens');
   }
 
-  public function getPanelGroup() {
-    return pht('Sessions and Logs');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {

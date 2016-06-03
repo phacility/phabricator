@@ -14,8 +14,8 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
     return pht('VCS Password');
   }
 
-  public function getPanelGroup() {
-    return pht('Authentication');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {

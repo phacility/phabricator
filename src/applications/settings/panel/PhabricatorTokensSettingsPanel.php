@@ -10,12 +10,8 @@ final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
     return pht('Temporary Tokens');
   }
 
-  public function getPanelGroup() {
-    return pht('Sessions and Logs');
-  }
-
-  public function isEnabled() {
-    return true;
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {

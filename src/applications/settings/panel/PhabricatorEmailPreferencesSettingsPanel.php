@@ -11,8 +11,8 @@ final class PhabricatorEmailPreferencesSettingsPanel
     return pht('Email Preferences');
   }
 
-  public function getPanelGroup() {
-    return pht('Email');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }
 
   public function isEditableByAdministrators() {

@@ -11,8 +11,8 @@ final class PhabricatorDeveloperPreferencesSettingsPanel
     return pht('Developer Settings');
   }
 
-  public function getPanelGroup() {
-    return pht('Developer');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsDeveloperPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {

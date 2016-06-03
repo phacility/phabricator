@@ -80,7 +80,7 @@ final class PhabricatorSettingsMainController
   }
 
   private function buildPanels() {
-    $panels = PhabricatorSettingsPanel::getAllPanels();
+    $panels = PhabricatorSettingsPanel::getAllDisplayPanels();
 
     $result = array();
     foreach ($panels as $key => $panel) {
@@ -125,11 +125,12 @@ final class PhabricatorSettingsMainController
 
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI($base_uri)));
 
-    $group = null;
+    $group_key = null;
     foreach ($panels as $panel) {
-      if ($panel->getPanelGroup() != $group) {
+      if ($panel->getPanelGroupKey() != $group_key) {
+        $group_key = $panel->getPanelGroupKey();
         $group = $panel->getPanelGroup();
-        $nav->addLabel($group);
+        $nav->addLabel($group->getPanelGroupName());
       }
 
       $nav->addFilter($panel->getPanelKey(), $panel->getPanelName());

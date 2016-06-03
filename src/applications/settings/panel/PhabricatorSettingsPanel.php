@@ -7,8 +7,6 @@
  * submits the form. By extending this class, you can add new settings
  * panels.
  *
- * NOTE: This stuff is new and might not be completely stable.
- *
  * @task config   Panel Configuration
  * @task panel    Panel Implementation
  * @task internal Internals
@@ -63,11 +61,38 @@ abstract class PhabricatorSettingsPanel extends Phobject {
   }
 
   final public static function getAllPanels() {
-    return id(new PhutilClassMapQuery())
+    $panels = id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getPanelKey')
-      ->setSortMethod('getPanelSortKey')
       ->execute();
+    return msortv($panels, 'getPanelOrderVector');
+  }
+
+  final public static function getAllDisplayPanels() {
+    $panels = array();
+    $groups = PhabricatorSettingsPanelGroup::getAllPanelGroupsWithPanels();
+    foreach ($groups as $group) {
+      foreach ($group->getPanels() as $key => $panel) {
+        $panels[$key] = $panel;
+      }
+    }
+
+    return $panels;
+  }
+
+  final public function getPanelGroup() {
+    $group_key = $this->getPanelGroupKey();
+
+    $groups = PhabricatorSettingsPanelGroup::getAllPanelGroupsWithPanels();
+    $group = idx($groups, $group_key);
+    if (!$group) {
+      throw new Exception(
+        pht(
+          'No settings panel group with key "%s" exists!',
+          $group_key));
+    }
+
+    return $group;
   }
 
 
@@ -97,17 +122,12 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
 
   /**
-   * Return a human-readable group name for this panel. For instance, if you
-   * had several related panels like "Volume Settings" and
-   * "Microphone Settings", you might put them in a group called "Audio".
+   * Return a panel group key constant for this panel.
    *
-   * When displayed, panels are grouped with other panels that have the same
-   * group name.
-   *
-   * @return string Human-readable panel group name.
+   * @return const Panel group key.
    * @task config
    */
-  abstract public function getPanelGroup();
+  abstract public function getPanelGroupKey();
 
 
   /**
@@ -192,11 +212,9 @@ abstract class PhabricatorSettingsPanel extends Phobject {
    * @return string Sortable key.
    * @task internal
    */
-  final public function getPanelSortKey() {
-    return sprintf(
-      '%s'.chr(255).'%s',
-      $this->getPanelGroup(),
-      $this->getPanelName());
+  final public function getPanelOrderVector() {
+    return id(new PhutilSortVector())
+      ->addString($this->getPanelName());
   }
 
 }

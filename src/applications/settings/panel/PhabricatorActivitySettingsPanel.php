@@ -14,12 +14,8 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
     return pht('Activity Logs');
   }
 
-  public function getPanelGroup() {
-    return pht('Sessions and Logs');
-  }
-
-  public function isEnabled() {
-    return true;
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {

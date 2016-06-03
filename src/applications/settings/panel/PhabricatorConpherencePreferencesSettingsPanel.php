@@ -16,8 +16,8 @@ final class PhabricatorConpherencePreferencesSettingsPanel
     return pht('Conpherence Preferences');
   }
 
-  public function getPanelGroup() {
-    return pht('Application Settings');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {

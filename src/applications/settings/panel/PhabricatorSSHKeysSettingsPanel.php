@@ -14,8 +14,8 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     return pht('SSH Public Keys');
   }
 
-  public function getPanelGroup() {
-    return pht('Authentication');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {

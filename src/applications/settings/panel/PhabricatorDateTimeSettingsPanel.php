@@ -9,8 +9,8 @@ final class PhabricatorDateTimeSettingsPanel
     return pht('Date and Time');
   }
 
-  public function getPanelGroup() {
-    return pht('Account Information');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAccountPanelGroup::PANELGROUPKEY;
   }
 
   public function isEditableByAdministrators() {

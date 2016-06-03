@@ -9,8 +9,8 @@ final class PhabricatorAccountSettingsPanel
     return pht('Account');
   }
 
-  public function getPanelGroup() {
-    return pht('Account Information');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAccountPanelGroup::PANELGROUPKEY;
   }
 
   public function isEditableByAdministrators() {

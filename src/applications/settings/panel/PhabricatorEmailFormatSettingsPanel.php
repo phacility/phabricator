@@ -11,8 +11,8 @@ final class PhabricatorEmailFormatSettingsPanel
     return pht('Email Format');
   }
 
-  public function getPanelGroup() {
-    return pht('Email');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }
 
   public function isEditableByAdministrators() {
