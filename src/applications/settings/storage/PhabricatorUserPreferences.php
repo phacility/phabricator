@@ -24,9 +24,6 @@ final class PhabricatorUserPreferences
   const PREFERENCE_VARY_SUBJECT         = 'vary-subject';
   const PREFERENCE_HTML_EMAILS          = 'html-emails';
 
-  const PREFERENCE_DIFFUSION_BLAME      = 'diffusion-blame';
-  const PREFERENCE_DIFFUSION_COLOR      = 'diffusion-color';
-
   const PREFERENCE_NAV_COLLAPSED        = 'nav-collapsed';
   const PREFERENCE_NAV_WIDTH            = 'nav-width';
   const PREFERENCE_APP_TILES            = 'app-tiles';
@@ -172,6 +169,34 @@ final class PhabricatorUserPreferences
     return parent::save();
   }
 
+  /**
+   * Load or create a preferences object for the given user.
+   *
+   * @param PhabricatorUser User to load or create preferences for.
+   */
+  public static function loadUserPreferences(PhabricatorUser $user) {
+    $preferences = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer($user)
+      ->withUsers(array($user))
+      ->executeOne();
+    if ($preferences) {
+      return $preferences;
+    }
+
+    return id(new self())
+      ->setUserPHID($user->getPHID())
+      ->attachUser($user);
+  }
+
+  public function newTransaction($key, $value) {
+    $setting_property = PhabricatorUserPreferencesTransaction::PROPERTY_SETTING;
+    $xaction_type = PhabricatorUserPreferencesTransaction::TYPE_SETTING;
+
+    return id(clone $this->getApplicationTransactionTemplate())
+      ->setTransactionType($xaction_type)
+      ->setMetadataValue($setting_property, $key)
+      ->setNewValue($value);
+  }
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
