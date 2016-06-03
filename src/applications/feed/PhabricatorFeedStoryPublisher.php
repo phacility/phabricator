@@ -207,9 +207,10 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
 
     $tags = $this->getMailTags();
     if ($tags) {
-      $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID in (%Ls)',
-        $phids);
+      $all_prefs = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withUserPHIDs($phids)
+        ->execute();
       $all_prefs = mpull($all_prefs, null, 'getUserPHID');
     }
 

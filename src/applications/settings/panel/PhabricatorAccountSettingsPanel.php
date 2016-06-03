@@ -23,21 +23,29 @@ final class PhabricatorAccountSettingsPanel extends PhabricatorSettingsPanel {
     $user = $this->getUser();
     $username = $user->getUsername();
 
+    $preferences = $user->loadPreferences();
+
     $errors = array();
     if ($request->isFormPost()) {
       $sex = $request->getStr('sex');
       $sexes = array(PhutilPerson::SEX_MALE, PhutilPerson::SEX_FEMALE);
       if (in_array($sex, $sexes)) {
-        $user->setSex($sex);
+        $new_value = $sex;
       } else {
-        $user->setSex(null);
+        $new_value = null;
       }
 
-      // Checked in runtime.
-      $user->setTranslation($request->getStr('translation'));
+      $preferences->setPreference(
+        PhabricatorPronounSetting::SETTINGKEY,
+        $new_value);
+
+      $preferences->setPreference(
+        PhabricatorTranslationSetting::SETTINGKEY,
+        $request->getStr('translation'));
 
       if (!$errors) {
-        $user->save();
+        $preferences->save();
+
         return id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?saved=true'));
       }

@@ -23,13 +23,34 @@ final class DifferentialInlineCommentEditController
   }
 
   protected function createComment() {
-    // Verify revision and changeset correspond to actual objects.
+    // Verify revision and changeset correspond to actual objects, and are
+    // connected to one another.
     $changeset_id = $this->getChangesetID();
+    $viewer = $this->getViewer();
 
     $revision = $this->loadRevision();
 
-    if (!id(new DifferentialChangeset())->load($changeset_id)) {
-      throw new Exception(pht('Invalid changeset ID!'));
+    $changeset = id(new DifferentialChangesetQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($changeset_id))
+      ->executeOne();
+    if (!$changeset) {
+      throw new Exception(
+        pht(
+          'Invalid changeset ID "%s"!',
+          $changeset_id));
+    }
+
+    $diff = $changeset->getDiff();
+    if ($diff->getRevisionID() != $revision->getID()) {
+      throw new Exception(
+        pht(
+          'Changeset ID "%s" is part of diff ID "%s", but that diff '.
+          'is attached to reivsion "%s", not revision "%s".',
+          $changeset_id,
+          $diff->getID(),
+          $diff->getRevisionID(),
+          $revision->getID()));
     }
 
     return id(new DifferentialInlineComment())

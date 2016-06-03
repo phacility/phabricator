@@ -1,6 +1,11 @@
 <?php
 
-final class PhabricatorUserPreferences extends PhabricatorUserDAO {
+final class PhabricatorUserPreferences
+  extends PhabricatorUserDAO
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const PREFERENCE_MONOSPACED           = 'monospaced';
   const PREFERENCE_DARK_CONSOLE         = 'dark_console';
@@ -51,12 +56,14 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   protected $userPHID;
   protected $preferences = array();
 
+  private $user = self::ATTACHABLE;
+
   protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'preferences' => self::SERIALIZATION_JSON,
       ),
-      self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID' => array(
           'columns' => array('userPHID'),
@@ -64,6 +71,11 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorUserPreferencesPHIDType::TYPECONST);
   }
 
   public function getPreference($key, $default = null) {
@@ -78,6 +90,21 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   public function unsetPreference($key) {
     unset($this->preferences[$key]);
     return $this;
+  }
+
+  public function getDefaultValue($key) {
+    $setting = self::getSettingObject($key);
+
+    if (!$setting) {
+      return null;
+    }
+
+    return $setting->getSettingDefaultValue();
+  }
+
+  private static function getSettingObject($key) {
+    $settings = PhabricatorSetting::getAllSettings();
+    return idx($settings, $key);
   }
 
   public function getPinnedApplications(array $apps, PhabricatorUser $viewer) {
@@ -113,6 +140,119 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   public static function filterMonospacedCSSRule($monospaced) {
     // Prevent the user from doing dangerous things.
     return preg_replace('([^a-z0-9 ,"./]+)i', '', $monospaced);
+  }
+
+  public function attachUser(PhabricatorUser $user = null) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->assertAttached($this->user);
+  }
+
+  public function hasManagedUser() {
+    $user_phid = $this->getUserPHID();
+    if (!$user_phid) {
+      return false;
+    }
+
+    $user = $this->getUser();
+    if ($user->getIsSystemAgent() || $user->getIsMailingList()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // TODO: Remove this once all edits go through the Editor. For now, some
+  // old edits just do direct saves so make sure we nuke the cache.
+  public function save() {
+    PhabricatorUserCache::clearCache(
+      PhabricatorUserPreferencesCacheType::KEY_PREFERENCES,
+      $this->getUserPHID());
+
+    return parent::save();
+  }
+
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $user_phid = $this->getUserPHID();
+        if ($user_phid) {
+          return $user_phid;
+        }
+
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        if ($this->hasManagedUser()) {
+          return PhabricatorPolicies::POLICY_ADMIN;
+        }
+
+        $user_phid = $this->getUserPHID();
+        if ($user_phid) {
+          return $user_phid;
+        }
+
+        return PhabricatorPolicies::POLICY_ADMIN;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($this->hasManagedUser()) {
+      if ($viewer->getIsAdmin()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+    $this->delete();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorUserPreferencesEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorUserPreferencesTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

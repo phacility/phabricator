@@ -6,30 +6,33 @@
  */
 final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
 
-  private $isTag;
-  private $isOriginBranch;
+  private $refTypes;
 
-  public function withIsTag($is_tag) {
-    $this->isTag = $is_tag;
-    return $this;
-  }
-
-  public function withIsOriginBranch($is_origin_branch) {
-    $this->isOriginBranch = $is_origin_branch;
+  public function withRefTypes(array $ref_types) {
+    $this->refTypes = $ref_types;
     return $this;
   }
 
   protected function executeQuery() {
+    $ref_types = $this->refTypes;
+    if ($ref_types) {
+      $type_branch = PhabricatorRepositoryRefCursor::TYPE_BRANCH;
+      $type_tag = PhabricatorRepositoryRefCursor::TYPE_TAG;
+
+      $ref_types = array_fuse($ref_types);
+
+      $with_branches = isset($ref_types[$type_branch]);
+      $with_tags = isset($ref_types[$type_tag]);
+    } else {
+      $with_branches = true;
+      $with_tags = true;
+    }
+
     $repository = $this->getRepository();
 
     $prefixes = array();
 
-    $any = ($this->isTag || $this->isOriginBranch);
-    if (!$any) {
-      throw new Exception(pht('Specify types of refs to query.'));
-    }
-
-    if ($this->isOriginBranch) {
+    if ($with_branches) {
       if ($repository->isWorkingCopyBare()) {
         $prefix = 'refs/heads/';
       } else {
@@ -39,7 +42,7 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
       $prefixes[] = $prefix;
     }
 
-    if ($this->isTag) {
+    if ($with_tags) {
       $prefixes[] = 'refs/tags/';
     }
 

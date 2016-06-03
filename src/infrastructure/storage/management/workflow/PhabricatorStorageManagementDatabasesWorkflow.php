@@ -10,6 +10,10 @@ final class PhabricatorStorageManagementDatabasesWorkflow
       ->setSynopsis(pht('List Phabricator databases.'));
   }
 
+  protected function isReadOnlyWorkflow() {
+    return true;
+  }
+
   public function didExecute(PhutilArgumentParser $args) {
     $api     = $this->getAPI();
     $patches = $this->getPatches();

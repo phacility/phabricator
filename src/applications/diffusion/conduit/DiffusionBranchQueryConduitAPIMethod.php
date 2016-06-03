@@ -56,7 +56,10 @@ final class DiffusionBranchQueryConduitAPIMethod
     } else {
       $refs = id(new DiffusionLowLevelGitRefQuery())
         ->setRepository($repository)
-        ->withIsOriginBranch(true)
+        ->withRefTypes(
+          array(
+            PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+          ))
         ->execute();
     }
 

@@ -6,21 +6,20 @@
   width: auto;
 }
 
-.phui-calendar-list-container .phui-object-box {
+.phui-calendar-list-container.calendar-day-view-sidebar .phui-object-box {
   border-bottom: none;
   margin: 0;
+  padding: 0 12px 12px;
 }
 
-.phui-calendar-list-container:last-child .phui-object-box {
-  border-bottom: 1px solid {$blueborder};
-}
-
-.phui-calendar-list-container .phui-object-box .phui-header-shell h1 {
-  padding: 6px 0;
+.project-view-home .phui-box-grey .phui-calendar-list-container
+  .phui-header-shell {
+  padding: 8px 0;
+  background: #fff;
 }
 
 .phui-calendar-list {
-  padding: 16px 12px;
+  padding: 16px 4px;
 }
 
 .phui-calendar-list-item {

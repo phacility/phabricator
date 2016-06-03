@@ -136,6 +136,10 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
             ),
             '@'.$user->getUserName());
         } else {
+          if ($engine->getConfig('uri.full')) {
+            $user_href = PhabricatorEnv::getURI($user_href);
+          }
+
           $tag = id(new PHUITagView())
             ->setType(PHUITagView::TYPE_PERSON)
             ->setPHID($user->getPHID())

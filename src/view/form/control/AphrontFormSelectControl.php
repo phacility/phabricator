@@ -56,6 +56,7 @@ final class AphrontFormSelectControl extends AphrontFormControl {
     $disabled = array_fuse($disabled);
 
     $tags = array();
+    $already_selected = false;
     foreach ($options as $value => $thing) {
       if (is_array($thing)) {
         $tags[] = phutil_tag(
@@ -65,10 +66,22 @@ final class AphrontFormSelectControl extends AphrontFormControl {
           ),
           self::renderOptions($selected, $thing));
       } else {
+        // When there are a list of options including similar values like
+        // "0" and "" (the empty string), only select the first matching
+        // value. Ideally this should be more precise about matching, but we
+        // have 2,000 of these controls at this point so hold that for a
+        // broader rewrite.
+        if (!$already_selected && ($value == $selected)) {
+          $is_selected = 'selected';
+          $already_selected = true;
+        } else {
+          $is_selected = null;
+        }
+
         $tags[] = phutil_tag(
           'option',
           array(
-            'selected' => ($value == $selected) ? 'selected' : null,
+            'selected' => $is_selected,
             'value'    => $value,
             'disabled' => isset($disabled[$value]) ? 'disabled' : null,
           ),

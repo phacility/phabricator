@@ -164,33 +164,6 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('herald-force-recipients', array());
   }
 
-  public function getTranslation(array $objects) {
-    $default_translation = PhabricatorEnv::getEnvConfig('translation.provider');
-    $return = null;
-    $recipients = array_merge(
-      idx($this->parameters, 'to', array()),
-      idx($this->parameters, 'cc', array()));
-    foreach (array_select_keys($objects, $recipients) as $object) {
-      $translation = null;
-      if ($object instanceof PhabricatorUser) {
-        $translation = $object->getTranslation();
-      }
-      if (!$translation) {
-        $translation = $default_translation;
-      }
-      if ($return && $translation != $return) {
-        return $default_translation;
-      }
-      $return = $translation;
-    }
-
-    if (!$return) {
-      $return = $default_translation;
-    }
-
-    return $return;
-  }
-
   public function addPHIDHeaders($name, array $phids) {
     $phids = array_unique($phids);
     foreach ($phids as $phid) {
@@ -940,9 +913,10 @@ final class PhabricatorMetaMTAMail
       }
     }
 
-    $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-      'userPHID in (%Ls)',
-      $actor_phids);
+    $all_prefs = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUserPHIDs($actor_phids)
+      ->execute();
     $all_prefs = mpull($all_prefs, null, 'getUserPHID');
 
     $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;

@@ -1,0 +1,11 @@
+CREATE TABLE {$NAMESPACE}_user.user_cache (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  userPHID VARBINARY(64) NOT NULL,
+  cacheIndex BINARY(12) NOT NULL,
+  cacheKey VARCHAR(255) NOT NULL COLLATE {$COLLATE_TEXT},
+  cacheData LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT},
+  cacheType VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT},
+  UNIQUE KEY `key_usercache` (userPHID, cacheIndex),
+  KEY `key_cachekey` (cacheIndex),
+  KEY `key_cachetype` (cacheType)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

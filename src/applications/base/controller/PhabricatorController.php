@@ -106,10 +106,9 @@ abstract class PhabricatorController extends AphrontController {
 
     PhabricatorEnv::setLocaleCode($user->getTranslation());
 
-    $preferences = $user->loadPreferences();
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
-      $dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
-      if ($preferences->getPreference($dark_console) ||
+      $dark_console = PhabricatorDarkConsoleSetting::SETTINGKEY;
+      if ($user->getUserSetting($dark_console) ||
          PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
         $console = new DarkConsoleCore();
         $request->getApplicationConfiguration()->setConsole($console);

@@ -10,7 +10,7 @@ final class CelerityDefaultPostprocessor
   }
 
   public function getPostprocessorName() {
-    return pht('Use Default Colors');
+    return pht('Use Standard Colors');
   }
 
   public function buildDefaultPostprocessor() {

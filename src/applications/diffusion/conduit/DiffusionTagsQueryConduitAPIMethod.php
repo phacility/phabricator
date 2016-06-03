@@ -72,7 +72,10 @@ final class DiffusionTagsQueryConduitAPIMethod
 
     $refs = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withIsTag(true)
+      ->withRefTypes(
+        array(
+          PhabricatorRepositoryRefCursor::TYPE_TAG,
+        ))
       ->execute();
 
     $tags = array();

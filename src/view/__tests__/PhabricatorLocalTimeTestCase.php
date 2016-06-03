@@ -4,10 +4,10 @@ final class PhabricatorLocalTimeTestCase extends PhabricatorTestCase {
 
   public function testLocalTimeFormatting() {
     $user = new PhabricatorUser();
-    $user->setTimezoneIdentifier('America/Los_Angeles');
+    $user->overrideTimezoneIdentifier('America/Los_Angeles');
 
     $utc = new PhabricatorUser();
-    $utc->setTimezoneIdentifier('UTC');
+    $utc->overrideTimezoneIdentifier('UTC');
 
     $this->assertEqual(
       'Jan 1 2000, 12:00 AM',

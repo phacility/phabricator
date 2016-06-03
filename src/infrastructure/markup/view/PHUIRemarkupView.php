@@ -82,7 +82,7 @@ final class PHUIRemarkupView extends AphrontView {
     $engine_key = PhabricatorHash::digestForIndex($engine_key);
 
     $cache = PhabricatorCaches::getRequestCache();
-    $cache_key = "remarkup.engine({$viewer}, {$engine_key})";
+    $cache_key = "remarkup.engine({$viewer_key}, {$engine_key})";
 
     $engine = $cache->getKey($cache_key);
     if (!$engine) {

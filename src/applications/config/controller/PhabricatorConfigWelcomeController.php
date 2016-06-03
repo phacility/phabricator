@@ -141,8 +141,14 @@ final class PhabricatorConfigWelcomeController
       $content);
 
     $settings_href = PhabricatorEnv::getURI('/settings/');
-    $prefs = $viewer->loadPreferences()->getPreferences();
-    $have_settings = !empty($prefs);
+
+    $preferences = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer($viewer)
+      ->withUsers(array($viewer))
+      ->executeOne();
+
+    $have_settings = ($preferences && $preferences->getPreferences());
+
     if ($have_settings) {
       $content = pht(
         "=== Adjust Account Settings ===\n\n".
