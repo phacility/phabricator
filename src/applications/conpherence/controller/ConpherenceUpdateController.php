@@ -127,9 +127,14 @@ final class ConpherenceUpdateController
           }
           $participant->setSettings(array('notifications' => $notifications));
           $participant->save();
+
+          $label = PhabricatorConpherenceNotificationsSetting::getSettingLabel(
+            $notifications);
+
           $result = pht(
             'Updated notification settings to "%s".',
-            ConpherenceSettings::getHumanString($notifications));
+            $label);
+
           return id(new AphrontAjaxResponse())
             ->setContent($result);
           break;

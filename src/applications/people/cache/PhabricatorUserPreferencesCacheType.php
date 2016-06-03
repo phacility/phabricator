@@ -20,12 +20,16 @@ final class PhabricatorUserPreferencesCacheType
   public function newValueForUsers($key, array $users) {
     $viewer = $this->getViewer();
 
+    $user_phids = mpull($users, 'getPHID');
+
     $preferences = id(new PhabricatorUserPreferencesQuery())
       ->setViewer($viewer)
-      ->withUserPHIDs(mpull($users, 'getPHID'))
+      ->withUserPHIDs($user_phids)
       ->execute();
 
-    return mpull($preferences, 'getPreferences', 'getUserPHID');
+    $empty = array_fill_keys($user_phids, array());
+
+    return mpull($preferences, 'getPreferences', 'getUserPHID') + $empty;
   }
 
 }

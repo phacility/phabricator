@@ -23,6 +23,7 @@ final class PhabricatorPeopleQuery
   private $needProfileImage;
   private $needAvailability;
   private $needBadges;
+  private $cacheKeys = array();
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -116,6 +117,18 @@ final class PhabricatorPeopleQuery
 
   public function needBadges($need) {
     $this->needBadges = $need;
+    return $this;
+  }
+
+  public function needUserSettings($need) {
+    $cache_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
+
+    if ($need) {
+      $this->cacheKeys[$cache_key] = true;
+    } else {
+      unset($this->cacheKeys[$cache_key]);
+    }
+
     return $this;
   }
 
@@ -237,6 +250,8 @@ final class PhabricatorPeopleQuery
         $this->rebuildAvailabilityCache($rebuild);
       }
     }
+
+    $this->fillUserCaches($users);
 
     return $users;
   }
@@ -481,4 +496,91 @@ final class PhabricatorPeopleQuery
     }
   }
 
+  private function fillUserCaches(array $users) {
+    if (!$this->cacheKeys) {
+      return;
+    }
+
+    $user_map = mpull($users, null, 'getPHID');
+    $keys = array_keys($this->cacheKeys);
+
+    $hashes = array();
+    foreach ($keys as $key) {
+      $hashes[] = PhabricatorHash::digestForIndex($key);
+    }
+
+    // First, pull any available caches. If we wanted to be particularly clever
+    // we could do this with JOINs in the main query.
+
+    $cache_table = new PhabricatorUserCache();
+    $cache_conn = $cache_table->establishConnection('r');
+
+    $cache_data = queryfx_all(
+      $cache_conn,
+      'SELECT cacheKey, userPHID, cacheData FROM %T
+        WHERE cacheIndex IN (%Ls) AND userPHID IN (%Ls)',
+      $cache_table->getTableName(),
+      $hashes,
+      array_keys($user_map));
+
+    $need = array();
+
+    $cache_data = igroup($cache_data, 'userPHID');
+    foreach ($user_map as $user_phid => $user) {
+      $raw_rows = idx($cache_data, $user_phid, array());
+      if (!$raw_rows) {
+        continue;
+      }
+      $raw_data = ipull($raw_rows, 'cacheData', 'cacheKey');
+
+      foreach ($keys as $key) {
+        if (isset($raw_data[$key]) || array_key_exists($key, $raw_data)) {
+          continue;
+        }
+        $need[$key][$user_phid] = $user;
+      }
+
+      $user->attachRawCacheData($raw_data);
+    }
+
+    // If we missed any cache values, bulk-construct them now. This is
+    // usually much cheaper than generating them on-demand for each user
+    // record.
+
+    if (!$need) {
+      return;
+    }
+
+    $writes = array();
+    foreach ($need as $cache_key => $need_users) {
+      $type = PhabricatorUserCacheType::getCacheTypeForKey($cache_key);
+      if (!$type) {
+        continue;
+      }
+
+      $data = $type->newValueForUsers($cache_key, $need_users);
+
+      foreach ($data as $user_phid => $value) {
+        $raw_value = $type->getValueForStorage($value);
+        $data[$user_phid] = $raw_value;
+        $writes[] = array(
+          'userPHID' => $user_phid,
+          'key' => $cache_key,
+          'type' => $type,
+          'value' => $raw_value,
+        );
+      }
+
+      foreach ($need_users as $user_phid => $user) {
+        if (isset($data[$user_phid]) || array_key_exists($user_phid, $data)) {
+          $user->attachRawCacheData(
+            array(
+              $cache_key => $data[$user_phid],
+            ));
+        }
+      }
+    }
+
+    PhabricatorUserCache::writeCaches($writes);
+  }
 }

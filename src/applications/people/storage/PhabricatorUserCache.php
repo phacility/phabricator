@@ -42,27 +42,54 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
     $key,
     $user_phid,
     $raw_value) {
+    self::writeCaches(
+      array(
+        array(
+          'type' => $type,
+          'key' => $key,
+          'userPHID' => $user_phid,
+          'value' => $raw_value,
+        ),
+      ));
+  }
 
+  public static function writeCaches(array $values) {
     if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
+    if (!$values) {
       return;
     }
 
     $table = new self();
     $conn_w = $table->establishConnection('w');
 
+    $sql = array();
+    foreach ($values as $value) {
+      $key = $value['key'];
+
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%s, %s, %s, %s, %s)',
+        $value['userPHID'],
+        PhabricatorHash::digestForIndex($key),
+        $key,
+        $value['value'],
+        $value['type']->getUserCacheType());
+    }
+
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-    queryfx(
-      $conn_w,
-      'INSERT INTO %T (userPHID, cacheIndex, cacheKey, cacheData, cacheType)
-        VALUES (%s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE cacheData = VALUES(cacheData)',
-      $table->getTableName(),
-      $user_phid,
-      PhabricatorHash::digestForIndex($key),
-      $key,
-      $raw_value,
-      $type->getUserCacheType());
+    foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (userPHID, cacheIndex, cacheKey, cacheData, cacheType)
+          VALUES %Q
+          ON DUPLICATE KEY UPDATE cacheData = VALUES(cacheData)',
+        $table->getTableName(),
+        $chunk);
+    }
 
     unset($unguarded);
   }

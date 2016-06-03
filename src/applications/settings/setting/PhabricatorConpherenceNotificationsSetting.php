@@ -32,6 +32,15 @@ final class PhabricatorConpherenceNotificationsSetting
   }
 
   protected function getSelectOptions() {
+    return self::getOptionsMap();
+  }
+
+  public static function getSettingLabel($key) {
+    $labels = self::getOptionsMap();
+    return idx($labels, $key, pht('Unknown ("%s")', $key));
+  }
+
+  private static function getOptionsMap() {
     return array(
       self::VALUE_CONPHERENCE_EMAIL => pht('Send Email'),
       self::VALUE_CONPHERENCE_NOTIFY => pht('Send Notifications'),
