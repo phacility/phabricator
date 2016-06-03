@@ -132,7 +132,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
   }
 
   public function getDurableColumnVisible() {
-    $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
+    $column_key = PhabricatorConpherenceColumnVisibleSetting::SETTINGKEY;
     return (bool)$this->getUserPreference($column_key, false);
   }
 

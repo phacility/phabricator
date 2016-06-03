@@ -108,7 +108,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   protected function getTagContent() {
-    $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
+    $column_key = PhabricatorConpherenceColumnVisibleSetting::SETTINGKEY;
 
     Javelin::initBehavior(
       'durable-column',

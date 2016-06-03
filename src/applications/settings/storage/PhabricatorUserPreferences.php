@@ -14,13 +14,7 @@ final class PhabricatorUserPreferences
   const PREFERENCE_VARY_SUBJECT         = 'vary-subject';
   const PREFERENCE_HTML_EMAILS          = 'html-emails';
 
-  const PREFERENCE_NAV_COLLAPSED        = 'nav-collapsed';
-  const PREFERENCE_APP_TILES            = 'app-tiles';
-  const PREFERENCE_APP_PINNED           = 'app-pinned';
-
-  const PREFERENCE_CONPHERENCE_COLUMN  = 'conpherence-column';
   const PREFERENCE_DESKTOP_NOTIFICATIONS = 'desktop-notifications';
-  const PREFERENCE_PROFILE_MENU_COLLAPSED = 'profile-menu.collapsed';
 
   // These are in an unusual order for historic reasons.
   const MAILTAG_PREFERENCE_NOTIFY       = 0;
