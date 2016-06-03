@@ -505,13 +505,13 @@ final class PhabricatorUser
             ->setViewer($this)
             ->assertValidValue($value);
 
-          $this->settingCacheKeys[$key] = true;
-          $this->settingCache[$key] = $value;
-
-          return $value;
+          return $this->writeUserSettingCache($key, $value);
         } catch (Exception $ex) {
           // Fall through below and return the default value.
         }
+      } else {
+        // This is an ad-hoc setting with no controlling object.
+        return $this->writeUserSettingCache($key, $value);
       }
     }
 
@@ -523,10 +523,7 @@ final class PhabricatorUser
       $value = null;
     }
 
-    $this->settingCacheKeys[$key] = true;
-    $this->settingCache[$key] = $value;
-
-    return $value;
+    return $this->writeUserSettingCache($key, $value);
   }
 
 
@@ -555,6 +552,12 @@ final class PhabricatorUser
     $this->clearCacheData($settings_key);
 
     return $this;
+  }
+
+  private function writeUserSettingCache($key, $value) {
+    $this->settingCacheKeys[$key] = true;
+    $this->settingCache[$key] = $value;
+    return $value;
   }
 
   public function getTranslation() {
