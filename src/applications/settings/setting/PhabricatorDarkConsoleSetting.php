@@ -42,5 +42,17 @@ final class PhabricatorDarkConsoleSetting
     );
   }
 
+  public function expandSettingTransaction($object, $xaction) {
+    // If the user has hidden the DarkConsole UI, forget their setting when
+    // they enable or disable it.
+    return array(
+      $xaction,
+      $this->newSettingTransaction(
+        $object,
+        PhabricatorDarkConsoleVisibleSetting::SETTINGKEY,
+        1),
+    );
+  }
+
 
 }
