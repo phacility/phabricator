@@ -37,8 +37,6 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
         'adjust/' => 'PhabricatorSettingsAdjustController',
         'timezone/(?P<offset>[^/]+)/'
           => 'PhabricatorSettingsTimezoneController',
-        '(?P<type>user)/(?P<username>[^/]+)/(?:panel/(?P<key>[^/]+)/)?'
-          => 'PhabricatorSettingsEditController',
       ),
     );
   }
