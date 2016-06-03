@@ -2240,6 +2240,8 @@ phutil_register_library_map(array(
     'PhabricatorDaemonsSetupCheck' => 'applications/config/check/PhabricatorDaemonsSetupCheck.php',
     'PhabricatorDailyRoutineTriggerClock' => 'infrastructure/daemon/workers/clock/PhabricatorDailyRoutineTriggerClock.php',
     'PhabricatorDarkConsoleSetting' => 'applications/settings/setting/PhabricatorDarkConsoleSetting.php',
+    'PhabricatorDarkConsoleTabSetting' => 'applications/settings/setting/PhabricatorDarkConsoleTabSetting.php',
+    'PhabricatorDarkConsoleVisibleSetting' => 'applications/settings/setting/PhabricatorDarkConsoleVisibleSetting.php',
     'PhabricatorDashboard' => 'applications/dashboard/storage/PhabricatorDashboard.php',
     'PhabricatorDashboardAddPanelController' => 'applications/dashboard/controller/PhabricatorDashboardAddPanelController.php',
     'PhabricatorDashboardApplication' => 'applications/dashboard/application/PhabricatorDashboardApplication.php',
@@ -6797,6 +6799,8 @@ phutil_register_library_map(array(
     'PhabricatorDaemonsSetupCheck' => 'PhabricatorSetupCheck',
     'PhabricatorDailyRoutineTriggerClock' => 'PhabricatorTriggerClock',
     'PhabricatorDarkConsoleSetting' => 'PhabricatorSelectSetting',
+    'PhabricatorDarkConsoleTabSetting' => 'PhabricatorInternalSetting',
+    'PhabricatorDarkConsoleVisibleSetting' => 'PhabricatorInternalSetting',
     'PhabricatorDashboard' => array(
       'PhabricatorDashboardDAO',
       'PhabricatorApplicationTransactionInterface',

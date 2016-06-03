@@ -34,10 +34,6 @@ final class PhabricatorUser
   protected $availabilityCache;
   protected $availabilityCacheTTL;
 
-  protected $consoleEnabled = 0;
-  protected $consoleVisible = 0;
-  protected $consoleTab = '';
-
   protected $conduitCertificate;
 
   protected $isSystemAgent = 0;
@@ -190,9 +186,6 @@ final class PhabricatorUser
         'passwordSalt' => 'text32?',
         'passwordHash' => 'text128?',
         'profileImagePHID' => 'phid?',
-        'consoleEnabled' => 'bool',
-        'consoleVisible' => 'bool',
-        'consoleTab' => 'text64',
         'conduitCertificate' => 'text255',
         'isSystemAgent' => 'bool',
         'isMailingList' => 'bool',

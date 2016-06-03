@@ -639,13 +639,23 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       $headers[DarkConsoleServicesPlugin::getQueryAnalyzerHeader()] = true;
     }
 
+    if ($user) {
+      $setting_tab = PhabricatorDarkConsoleTabSetting::SETTINGKEY;
+      $setting_visible = PhabricatorDarkConsoleVisibleSetting::SETTINGKEY;
+      $tab = $user->getUserSetting($setting_tab);
+      $visible = $user->getUserSetting($setting_visible);
+    } else {
+      $tab = null;
+      $visible = true;
+    }
+
     return array(
       // NOTE: We use a generic label here to prevent input reflection
       // and mitigate compression attacks like BREACH. See discussion in
       // T3684.
       'uri' => pht('Main Request'),
-      'selected' => $user ? $user->getConsoleTab() : null,
-      'visible'  => $user ? (int)$user->getConsoleVisible() : true,
+      'selected' => $tab,
+      'visible'  => $visible,
       'headers' => $headers,
     );
   }
