@@ -13,6 +13,31 @@ final class PhabricatorTimezoneSetting
     return date_default_timezone_get();
   }
 
+  public function assertValidValue($value) {
+    // NOTE: This isn't doing anything fancy, it's just a much faster
+    // validator than doing all the timezone calculations to build the full
+    // list of options.
+
+    if (!$value) {
+      return;
+    }
+
+    static $identifiers;
+    if ($identifiers === null) {
+      $identifiers = DateTimeZone::listIdentifiers();
+      $identifiers = array_fuse($identifiers);
+    }
+
+    if (isset($identifiers[$value])) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Timezone "%s" is not a valid timezone identiifer.',
+        $value));
+  }
+
   protected function getSelectOptionGroups() {
     $timezones = DateTimeZone::listIdentifiers();
     $now = new DateTime('@'.PhabricatorTime::getNow());

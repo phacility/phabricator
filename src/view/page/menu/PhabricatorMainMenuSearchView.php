@@ -50,7 +50,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       '');
 
     $search_datasource = new PhabricatorSearchDatasource();
-    $scope_key = PhabricatorUserPreferences::PREFERENCE_SEARCH_SCOPE;
+    $scope_key = PhabricatorSearchScopeSetting::SETTINGKEY;
 
     Javelin::initBehavior(
       'phabricator-search-typeahead',
@@ -177,10 +177,8 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       'href' => PhabricatorEnv::getDoclink('Search User Guide'),
     );
 
-    $scope_key = PhabricatorUserPreferences::PREFERENCE_SEARCH_SCOPE;
-    $current_value = $viewer->loadPreferences()->getPreference(
-      $scope_key,
-      'all');
+    $scope_key = PhabricatorSearchScopeSetting::SETTINGKEY;
+    $current_value = $viewer->getUserSetting($scope_key);
 
     $current_icon = 'fa-globe';
     foreach ($items as $item) {

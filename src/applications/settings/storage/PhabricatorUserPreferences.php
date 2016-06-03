@@ -24,8 +24,6 @@ final class PhabricatorUserPreferences
   const PREFERENCE_VARY_SUBJECT         = 'vary-subject';
   const PREFERENCE_HTML_EMAILS          = 'html-emails';
 
-  const PREFERENCE_SEARCH_SCOPE         = 'search-scope';
-
   const PREFERENCE_DIFFUSION_BLAME      = 'diffusion-blame';
   const PREFERENCE_DIFFUSION_COLOR      = 'diffusion-color';
 
@@ -46,7 +44,6 @@ final class PhabricatorUserPreferences
 
   const PREFERENCE_PROFILE_MENU_COLLAPSED = 'profile-menu.collapsed';
   const PREFERENCE_FAVORITE_POLICIES = 'policy.favorites';
-  const PREFERENCE_IGNORE_OFFSET = 'time.offset.ignore';
 
   // These are in an unusual order for historic reasons.
   const MAILTAG_PREFERENCE_NOTIFY       = 0;

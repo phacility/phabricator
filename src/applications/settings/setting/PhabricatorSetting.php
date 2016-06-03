@@ -89,6 +89,10 @@ abstract class PhabricatorSetting extends Phobject {
     return;
   }
 
+  public function assertValidValue($value) {
+    $this->validateTransactionValue($value);
+  }
+
   public function getTransactionNewValue($value) {
     return $value;
   }

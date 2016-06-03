@@ -30,7 +30,7 @@ final class PhabricatorSettingsTimezoneController
     if ($request->isFormPost()) {
       $timezone = $request->getStr('timezone');
 
-      $pref_ignore = PhabricatorUserPreferences::PREFERENCE_IGNORE_OFFSET;
+      $pref_ignore = PhabricatorTimezoneIgnoreOffsetSetting::SETTINGKEY;
       $pref_timezone = PhabricatorTimezoneSetting::SETTINGKEY;
 
       $preferences = $viewer->loadPreferences();
@@ -56,8 +56,7 @@ final class PhabricatorSettingsTimezoneController
           ->setPreference($pref_timezone, $timezone)
           ->save();
 
-        $viewer->clearCacheData(
-          PhabricatorUserPreferencesCacheType::KEY_PREFERENCES);
+        $viewer->clearUserSettingCache();
       }
     }
 

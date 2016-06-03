@@ -66,7 +66,9 @@ final class PhabricatorUser
   private $authorities = array();
   private $handlePool;
   private $csrfSalt;
-  private $timezoneOverride;
+
+  private $settingCacheKeys = array();
+  private $settingCache = array();
 
   protected function readField($field) {
     switch ($field) {
@@ -481,19 +483,50 @@ final class PhabricatorUser
 
 
   public function getUserSetting($key) {
+    // NOTE: We store available keys and cached values separately to make it
+    // faster to check for `null` in the cache, which is common.
+    if (isset($this->settingCacheKeys[$key])) {
+      return $this->settingCache[$key];
+    }
+
     $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
     $settings = $this->requireCacheData($settings_key);
 
-    if (array_key_exists($key, $settings)) {
-      return $settings[$key];
-    }
-
     $defaults = PhabricatorSetting::getAllEnabledSettings($this);
-    if (isset($defaults[$key])) {
-      return $defaults[$key]->getSettingDefaultValue();
+
+    if (array_key_exists($key, $settings)) {
+      $value = $settings[$key];
+
+      // Make sure the value is valid before we return it. This makes things
+      // more robust when options are changed or removed.
+      if (isset($defaults[$key])) {
+        try {
+          id(clone $defaults[$key])
+            ->setViewer($this)
+            ->assertValidValue($value);
+
+          $this->settingCacheKeys[$key] = true;
+          $this->settingCache[$key] = $value;
+
+          return $value;
+        } catch (Exception $ex) {
+          // Fall through below and return the default value.
+        }
+      }
     }
 
-    return null;
+    if (isset($defaults[$key])) {
+      $value = id(clone $defaults[$key])
+        ->setViewer($this)
+        ->getSettingDefaultValue();
+    } else {
+      $value = null;
+    }
+
+    $this->settingCacheKeys[$key] = true;
+    $this->settingCache[$key] = $value;
+
+    return $value;
   }
 
 
@@ -510,15 +543,25 @@ final class PhabricatorUser
     return ($actual == $value);
   }
 
+
+  /**
+   * @task settings
+   */
+  public function clearUserSettingCache() {
+    $this->settingCacheKeys = array();
+    $this->settingCache = array();
+
+    $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
+    $this->clearCacheData($settings_key);
+
+    return $this;
+  }
+
   public function getTranslation() {
     return $this->getUserSetting(PhabricatorTranslationSetting::SETTINGKEY);
   }
 
   public function getTimezoneIdentifier() {
-    if ($this->timezoneOverride) {
-      return $this->timezoneOverride;
-    }
-
     return $this->getUserSetting(PhabricatorTimezoneSetting::SETTINGKEY);
   }
 
@@ -533,7 +576,9 @@ final class PhabricatorUser
    * @task settings
    */
   public function overrideTimezoneIdentifier($identifier) {
-    $this->timezoneOverride = $identifier;
+    $timezone_key = PhabricatorTimezoneSetting::SETTINGKEY;
+    $this->settingCacheKeys[$timezone_key] = true;
+    $this->settingCache[$timezone_key] = $identifier;
     return $this;
   }
 
@@ -578,17 +623,17 @@ final class PhabricatorUser
     $line,
     PhabricatorRepository $repository = null) {
 
-    $editor = $this->loadPreferences()->getPreference(
-      PhabricatorUserPreferences::PREFERENCE_EDITOR);
+    $editor = $this->getUserSetting(PhabricatorEditorSetting::SETTINGKEY);
 
     if (is_array($path)) {
-      $multiedit = $this->loadPreferences()->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_MULTIEDIT);
+      $multi_key = PhabricatorEditorMultipleSetting::SETTINGKEY;
+      $multiedit = $this->getUserSetting($multi_key);
       switch ($multiedit) {
-        case '':
+        case PhabricatorEditorMultipleSetting::VALUE_SPACES:
           $path = implode(' ', $path);
           break;
-        case 'disable':
+        case PhabricatorEditorMultipleSetting::VALUE_SINGLE:
+        default:
           return null;
       }
     }
@@ -848,46 +893,11 @@ final class PhabricatorUser
       $format = 'M j';
     } else {
       // Same year, month and day so show a time of day.
-      $pref_time = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
-      $format = $this->getPreference($pref_time);
+      $pref_time = PhabricatorTimeFormatSetting::SETTINGKEY;
+      $format = $this->getUserSetting($pref_time);
     }
 
     return $when->format($format);
-  }
-
-  public function getPreference($key) {
-    $preferences = $this->loadPreferences();
-
-    // TODO: After T4103 and T7707 this should eventually be pushed down the
-    // stack into modular preference definitions and role profiles. This is
-    // just fixing T8601 and mildly anticipating those changes.
-    $value = $preferences->getPreference($key);
-
-    $allowed_values = null;
-    switch ($key) {
-      case PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT:
-        $allowed_values = array(
-          'g:i A',
-          'H:i',
-        );
-        break;
-      case PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT:
-        $allowed_values = array(
-          'Y-m-d',
-          'n/j/Y',
-          'd-m-Y',
-        );
-        break;
-    }
-
-    if ($allowed_values !== null) {
-      $allowed_values = array_fuse($allowed_values);
-      if (empty($allowed_values[$value])) {
-        $value = head($allowed_values);
-      }
-    }
-
-    return $value;
   }
 
   public function __toString() {

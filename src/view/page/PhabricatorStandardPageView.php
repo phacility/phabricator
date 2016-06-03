@@ -225,13 +225,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       if ($user->isLoggedIn()) {
         $offset = $user->getTimeZoneOffset();
 
-        $preferences = $user->loadPreferences();
-        $ignore_key = PhabricatorUserPreferences::PREFERENCE_IGNORE_OFFSET;
-
-        $ignore = $preferences->getPreference($ignore_key);
-        if (!strlen($ignore)) {
-          $ignore = null;
-        }
+        $ignore_key = PhabricatorTimezoneIgnoreOffsetSetting::SETTINGKEY;
+        $ignore = $user->getUserSetting($ignore_key);
 
         Javelin::initBehavior(
           'detect-timezone',

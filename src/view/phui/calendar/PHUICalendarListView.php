@@ -147,16 +147,18 @@ final class PHUICalendarListView extends AphrontTagView {
   }
 
   private function getEventTooltip(AphrontCalendarEventView $event) {
-    $time_pref = $this->getUser()
-      ->getPreference(PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
+    $viewer = $this->getViewer();
+    $time_key = PhabricatorTimeFormatSetting::SETTINGKEY;
+    $time_pref = $viewer->getUserSetting($time_key);
 
     Javelin::initBehavior('phabricator-tooltips');
 
     $start = id(AphrontFormDateControlValue::newFromEpoch(
-      $this->getUser(),
+      $viewer,
       $event->getEpochStart()));
+
     $end = id(AphrontFormDateControlValue::newFromEpoch(
-      $this->getUser(),
+      $viewer,
       $event->getEpochEnd()));
 
     $start_date = $start->getDateTime()->format('m d Y');
