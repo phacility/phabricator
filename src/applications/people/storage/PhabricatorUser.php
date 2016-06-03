@@ -606,15 +606,6 @@ final class PhabricatorUser
       $preferences = new PhabricatorUserPreferences();
       $preferences->setUserPHID($this->getPHID());
       $preferences->attachUser($this);
-
-      $default_dict = array(
-        PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
-        PhabricatorUserPreferences::PREFERENCE_EDITOR => '',
-        PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '',
-        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0,
-      );
-
-      $preferences->setPreferences($default_dict);
     }
 
     $this->preferences = $preferences;

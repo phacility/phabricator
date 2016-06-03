@@ -195,7 +195,7 @@ final class PhabricatorPolicyQuery
     $viewer = $this->getViewer();
 
     if ($viewer->getPHID()) {
-      $pref_key = PhabricatorUserPreferences::PREFERENCE_FAVORITE_POLICIES;
+      $pref_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
 
       $favorite_limit = 10;
       $default_limit = 5;
