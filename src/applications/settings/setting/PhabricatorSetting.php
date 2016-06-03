@@ -111,4 +111,18 @@ abstract class PhabricatorSetting extends Phobject {
     return $value;
   }
 
+  public function expandSettingTransaction($object, $xaction) {
+    return array($xaction);
+  }
+
+  protected function newSettingTransaction($object, $key, $value) {
+    $setting_property = PhabricatorUserPreferencesTransaction::PROPERTY_SETTING;
+    $xaction_type = PhabricatorUserPreferencesTransaction::TYPE_SETTING;
+
+    return id(clone $object->getApplicationTransactionTemplate())
+      ->setTransactionType($xaction_type)
+      ->setMetadataValue($setting_property, $key)
+      ->setNewValue($value);
+  }
+
 }

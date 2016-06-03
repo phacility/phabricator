@@ -87,4 +87,16 @@ final class PhabricatorTimezoneSetting
     return $option_groups;
   }
 
+  public function expandSettingTransaction($object, $xaction) {
+    // When the user changes their timezone, we also clear any ignored
+    // timezone offset.
+    return array(
+      $xaction,
+      $this->newSettingTransaction(
+        $object,
+        PhabricatorTimezoneIgnoreOffsetSetting::SETTINGKEY,
+        null),
+    );
+  }
+
 }
