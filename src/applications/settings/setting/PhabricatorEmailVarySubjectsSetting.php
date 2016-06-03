@@ -12,6 +12,18 @@ final class PhabricatorEmailVarySubjectsSetting
     return pht('Vary Subjects');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorEmailFormatSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 300;
+  }
+
+  protected function isEnabledForViewer(PhabricatorUser $viewer) {
+    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
+  }
+
   protected function getControlInstructions() {
     return pht(
       'With **Vary Subjects** enabled, most mail subject lines will include '.

@@ -12,6 +12,18 @@ final class PhabricatorDarkConsoleSetting
     return pht('DarkConsole');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDeveloperPreferencesSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 100;
+  }
+
+  protected function isEnabledForViewer(PhabricatorUser $viewer) {
+    return PhabricatorEnv::getEnvConfig('darkconsole.enabled');
+  }
+
   protected function getControlInstructions() {
     return pht(
       'DarkConsole is a debugging console for developing and troubleshooting '.

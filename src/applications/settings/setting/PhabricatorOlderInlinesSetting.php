@@ -12,6 +12,14 @@ final class PhabricatorOlderInlinesSetting
     return pht('Show Older Inlines');
   }
 
+  protected function getSettingOrder() {
+    return 200;
+  }
+
+  public function getSettingPanelKey() {
+    return PhabricatorDiffPreferencesSettingsPanel::PANELKEY;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'When a revision is updated, Phabricator attempts to bring inline '.

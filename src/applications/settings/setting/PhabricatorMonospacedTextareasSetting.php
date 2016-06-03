@@ -12,6 +12,14 @@ final class PhabricatorMonospacedTextareasSetting
     return pht('Monospaced Textareas');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDisplayPreferencesSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 600;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'You can choose to use either a monospaced or variable-width font '.

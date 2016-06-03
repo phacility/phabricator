@@ -12,6 +12,14 @@ final class PhabricatorEditorMultipleSetting
     return pht('Edit Mulitple Files');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDisplayPreferencesSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 400;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'Some editors support opening multiple files with a single URI. You '.

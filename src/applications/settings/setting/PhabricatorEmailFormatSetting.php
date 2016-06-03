@@ -12,6 +12,18 @@ final class PhabricatorEmailFormatSetting
     return pht('HTML Email');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorEmailFormatSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 100;
+  }
+
+  protected function isEnabledForViewer(PhabricatorUser $viewer) {
+    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
+  }
+
   protected function getControlInstructions() {
     return pht(
       'You can opt to receive plain text email from Phabricator instead '.

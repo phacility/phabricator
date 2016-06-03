@@ -12,6 +12,18 @@ final class PhabricatorEmailRePrefixSetting
     return pht('Add "Re:" Prefix');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorEmailFormatSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 200;
+  }
+
+  protected function isEnabledForViewer(PhabricatorUser $viewer) {
+    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
+  }
+
   protected function getControlInstructions() {
     return pht(
       'The **Add "Re:" Prefix** setting adds "Re:" in front of all messages, '.

@@ -12,6 +12,14 @@ final class PhabricatorTitleGlyphsSetting
     return pht('Page Titles');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDisplayPreferencesSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 200;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'Phabricator uses unicode glyphs in page titles to provide a compact '.
