@@ -9,6 +9,18 @@ final class PhabricatorTimezoneSetting
     return pht('Timezone');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDateTimeSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 100;
+  }
+
+  protected function getControlInstructions() {
+    return pht('Select your local timezone.');
+  }
+
   public function getSettingDefaultValue() {
     return date_default_timezone_get();
   }

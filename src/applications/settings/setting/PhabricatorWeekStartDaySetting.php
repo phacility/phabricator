@@ -9,6 +9,14 @@ final class PhabricatorWeekStartDaySetting
     return pht('Week Starts On');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDateTimeSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 400;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'Choose which day a calendar week should begin on.');

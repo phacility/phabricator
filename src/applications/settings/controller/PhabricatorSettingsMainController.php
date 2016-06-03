@@ -10,8 +10,14 @@ final class PhabricatorSettingsMainController
   }
 
   private function isSelf() {
+    $user = $this->getUser();
+    if (!$user) {
+      return false;
+    }
+
+    $user_phid = $user->getPHID();
+
     $viewer_phid = $this->getViewer()->getPHID();
-    $user_phid = $this->getUser()->getPHID();
     return ($viewer_phid == $user_phid);
   }
 
@@ -45,21 +51,19 @@ final class PhabricatorSettingsMainController
 
     $key = $nav->selectFilter($key, head($panels)->getPanelKey());
 
-    $panel = $panels[$key];
-    $panel->setUser($this->getUser());
-    $panel->setViewer($viewer);
+    $panel = $panels[$key]
+      ->setUser($this->getUser())
+      ->setViewer($viewer)
+      ->setController($this)
+      ->setNavigation($nav);
 
     $response = $panel->processRequest($request);
-    if ($response instanceof AphrontResponse) {
+    if (($response instanceof AphrontResponse) ||
+        ($response instanceof AphrontResponseProducerInterface)) {
       return $response;
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    if (!$this->isSelf()) {
-      $crumbs->addTextCrumb(
-        $this->getUser()->getUsername(),
-        '/p/'.$this->getUser()->getUsername().'/');
-    }
     $crumbs->addTextCrumb($panel->getPanelName());
 
     $title = $panel->getPanelName();
@@ -76,11 +80,7 @@ final class PhabricatorSettingsMainController
   }
 
   private function buildPanels() {
-    $panels = id(new PhutilClassMapQuery())
-      ->setAncestorClass('PhabricatorSettingsPanel')
-      ->setExpandMethod('buildPanels')
-      ->setUniqueMethod('getPanelKey')
-      ->execute();
+    $panels = PhabricatorSettingsPanel::getAllPanels();
 
     $result = array();
     foreach ($panels as $key => $panel) {
@@ -106,8 +106,6 @@ final class PhabricatorSettingsMainController
 
       $result[$key] = $panel;
     }
-
-    $result = msort($result, 'getPanelSortKey');
 
     if (!$result) {
       throw new Exception(pht('No settings panels are available.'));
@@ -143,6 +141,18 @@ final class PhabricatorSettingsMainController
   public function buildApplicationMenu() {
     $panels = $this->buildPanels();
     return $this->renderSideNav($panels)->getMenu();
+  }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $user = $this->getUser();
+    if (!$this->isSelf() && $user) {
+      $username = $user->getUsername();
+      $crumbs->addTextCrumb($username, "/p/{$username}/");
+    }
+
+    return $crumbs;
   }
 
 }

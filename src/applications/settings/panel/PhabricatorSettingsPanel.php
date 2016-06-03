@@ -17,8 +17,9 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
   private $user;
   private $viewer;
+  private $controller;
+  private $navigation;
   private $overrideURI;
-
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -43,6 +44,32 @@ abstract class PhabricatorSettingsPanel extends Phobject {
     return $this;
   }
 
+  final public function setController(PhabricatorController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  final public function getController() {
+    return $this->controller;
+  }
+
+  final public function setNavigation(AphrontSideNavFilterView $navigation) {
+    $this->navigation = $navigation;
+    return $this;
+  }
+
+  final public function getNavigation() {
+    return $this->navigation;
+  }
+
+  final public static function getAllPanels() {
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getPanelKey')
+      ->setSortMethod('getPanelSortKey')
+      ->execute();
+  }
+
 
 /* -(  Panel Configuration  )------------------------------------------------ */
 
@@ -54,7 +81,9 @@ abstract class PhabricatorSettingsPanel extends Phobject {
    * @return string Unique panel identifier (used in URIs).
    * @task config
    */
-  abstract public function getPanelKey();
+  public function getPanelKey() {
+    return $this->getPhobjectClassConstant('PANELKEY');
+  }
 
 
   /**
@@ -92,23 +121,6 @@ abstract class PhabricatorSettingsPanel extends Phobject {
    */
   public function isEnabled() {
     return true;
-  }
-
-
-  /**
-   * You can use this callback to generate multiple similar panels which all
-   * share the same implementation. For example, OAuth providers each have a
-   * separate panel, but the implementation for each panel is the same.
-   *
-   * To generate multiple panels, build them here and return a list. By default,
-   * the current panel (`$this`) is returned alone. For most panels, this
-   * is the right implementation.
-   *
-   * @return list<PhabricatorSettingsPanel> Zero or more panels.
-   * @task config
-   */
-  public function buildPanels() {
-    return array($this);
   }
 
 

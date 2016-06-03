@@ -26,6 +26,8 @@ abstract class PhabricatorEditEngine
   private $targetObject;
   private $page;
   private $pages;
+  private $navigation;
+  private $hideHeader;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -78,6 +80,24 @@ abstract class PhabricatorEditEngine
 
   public function getTargetObject() {
     return $this->targetObject;
+  }
+
+  public function setNavigation(AphrontSideNavFilterView $navigation) {
+    $this->navigation = $navigation;
+    return $this;
+  }
+
+  public function getNavigation() {
+    return $this->navigation;
+  }
+
+  public function setHideHeader($hide_header) {
+    $this->hideHeader = $hide_header;
+    return $this;
+  }
+
+  public function getHideHeader() {
+    return $this->hideHeader;
   }
 
 
@@ -1090,16 +1110,21 @@ abstract class PhabricatorEditEngine
         ->addSubmitButton($submit_button);
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($header_text)
-      ->setHeaderIcon($header_icon);
+    $crumbs = $this->buildCrumbs($object, $final = true);
+
+    if ($this->getHideHeader()) {
+      $header = null;
+      $crumbs->setBorder(false);
+    } else {
+      $header = id(new PHUIHeaderView())
+        ->setHeader($header_text)
+        ->setHeaderIcon($header_icon);
+      $crumbs->setBorder(true);
+    }
 
     if ($action_button) {
       $header->addActionLink($action_button);
     }
-
-    $crumbs = $this->buildCrumbs($object, $final = true);
-    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
@@ -1108,12 +1133,30 @@ abstract class PhabricatorEditEngine
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter(array(
-        $box,
-        $previews,
-      ));
+    // This is fairly questionable, but in use by Settings.
+    if ($request->getURIData('formSaved')) {
+      $box->setFormSaved(true);
+    }
+
+    $content = array(
+      $box,
+      $previews,
+    );
+
+    $view = new PHUITwoColumnView();
+
+    if ($header) {
+      $view->setHeader($header);
+    }
+
+    $navigation = $this->getNavigation();
+    if ($navigation) {
+      $view
+        ->setNavigation($navigation)
+        ->setMainColumn($content);
+    } else {
+      $view->setFooter($content);
+    }
 
     return $controller->newPage()
       ->setTitle($header_text)
@@ -1155,10 +1198,14 @@ abstract class PhabricatorEditEngine
     }
 
     if (!$request->isAjax()) {
-      $form->appendControl(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($cancel_uri)
-          ->setValue($submit_button));
+      $buttons = id(new AphrontFormSubmitControl())
+        ->setValue($submit_button);
+
+      if ($cancel_uri) {
+        $buttons->addCancelButton($cancel_uri);
+      }
+
+      $form->appendControl($buttons);
     }
 
     return $form;

@@ -9,6 +9,14 @@ final class PhabricatorPronounSetting
     return pht('Pronoun');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorAccountSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 200;
+  }
+
   protected function getControlInstructions() {
     return pht('Choose the pronoun you prefer.');
   }
@@ -18,6 +26,9 @@ final class PhabricatorPronounSetting
   }
 
   protected function getSelectOptions() {
+    // TODO: When editing another user's settings as an administrator, this
+    // is not the best username: the user's username would be better.
+
     $viewer = $this->getViewer();
     $username = $viewer->getUsername();
 

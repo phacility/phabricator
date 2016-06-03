@@ -9,8 +9,21 @@ final class PhabricatorTranslationSetting
     return pht('Translation');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorAccountSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 100;
+  }
+
   public function getSettingDefaultValue() {
     return 'en_US';
+  }
+
+  protected function getControlInstructions() {
+    return pht(
+      'Choose which language you would like the Phabricator UI to use.');
   }
 
   protected function getSelectOptionGroups() {

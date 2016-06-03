@@ -15,6 +15,20 @@ abstract class PhabricatorSetting extends Phobject {
 
   abstract public function getSettingName();
 
+  public function getSettingPanelKey() {
+    return null;
+  }
+
+  protected function getSettingOrder() {
+    return 1000;
+  }
+
+  public function getSettingOrderVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->getSettingOrder())
+      ->addString($this->getSettingName());
+  }
+
   protected function getControlInstructions() {
     return null;
   }

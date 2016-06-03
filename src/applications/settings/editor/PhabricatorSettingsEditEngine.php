@@ -5,6 +5,27 @@ final class PhabricatorSettingsEditEngine
 
   const ENGINECONST = 'settings.settings';
 
+  private $isSelfEdit;
+  private $profileURI;
+
+  public function setIsSelfEdit($is_self_edit) {
+    $this->isSelfEdit = $is_self_edit;
+    return $this;
+  }
+
+  public function getIsSelfEdit() {
+    return $this->isSelfEdit;
+  }
+
+  public function setProfileURI($profile_uri) {
+    $this->profileURI = $profile_uri;
+    return $this;
+  }
+
+  public function getProfileURI() {
+    return $this->profileURI;
+  }
+
   public function isEngineConfigurable() {
     return false;
   }
@@ -54,6 +75,12 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectName() {
+    $page = $this->getSelectedPage();
+
+    if ($page) {
+      return $page->getLabel();
+    }
+
     return pht('Settings');
   }
 
@@ -74,6 +101,62 @@ final class PhabricatorSettingsEditEngine
     return PhabricatorPolicies::POLICY_ADMIN;
   }
 
+  public function getEffectiveObjectEditCancelURI($object) {
+    if ($this->getIsSelfEdit()) {
+      return null;
+    }
+
+    if ($this->getProfileURI()) {
+      return $this->getProfileURI();
+    }
+
+    return parent::getEffectiveObjectEditCancelURI($object);
+  }
+
+  protected function newPages($object) {
+    $viewer = $this->getViewer();
+    $user = $object->getUser();
+
+    $panels = PhabricatorSettingsPanel::getAllPanels();
+
+    foreach ($panels as $key => $panel) {
+      if (!($panel instanceof PhabricatorEditEngineSettingsPanel)) {
+        unset($panels[$key]);
+        continue;
+      }
+
+      $panel->setViewer($viewer);
+      if ($user) {
+        $panel->setUser($user);
+      }
+    }
+
+    $pages = array();
+    $uris = array();
+    foreach ($panels as $key => $panel) {
+      $uris[$key] = $panel->getPanelURI();
+
+      $page = $panel->newEditEnginePage();
+      if (!$page) {
+        continue;
+      }
+      $pages[] = $page;
+    }
+
+    $more_pages = array(
+      id(new PhabricatorEditPage())
+        ->setKey('extra')
+        ->setLabel(pht('Extra Settings'))
+        ->setIsDefault(true),
+    );
+
+    foreach ($more_pages as $page) {
+      $pages[] = $page;
+    }
+
+    return $pages;
+  }
+
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
     $settings = PhabricatorSetting::getAllEnabledSettings($viewer);
@@ -83,6 +166,8 @@ final class PhabricatorSettingsEditEngine
       $setting->setViewer($viewer);
       $settings[$key] = $setting;
     }
+
+    $settings = msortv($settings, 'getSettingOrderVector');
 
     $fields = array();
     foreach ($settings as $setting) {

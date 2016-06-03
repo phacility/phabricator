@@ -13,6 +13,14 @@ final class PhabricatorDateFormatSetting
     return pht('Date Format');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDateTimeSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 200;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'Select the format you prefer for editing dates.');

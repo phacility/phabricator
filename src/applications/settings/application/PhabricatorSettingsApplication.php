@@ -29,7 +29,10 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/settings/' => array(
-        '(?:(?P<id>\d+)/)?(?:panel/(?P<key>[^/]+)/)?'
+        '(?:(?P<id>\d+)/)?'.
+          '(?:panel/(?P<pageKey>(?P<key>[^/]+))/'.
+            '(?:(?P<formSaved>saved)/)?'.
+          ')?'
           => 'PhabricatorSettingsMainController',
         'adjust/' => 'PhabricatorSettingsAdjustController',
         'timezone/(?P<offset>[^/]+)/'
