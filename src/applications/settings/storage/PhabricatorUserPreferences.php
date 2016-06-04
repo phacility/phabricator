@@ -98,16 +98,6 @@ final class PhabricatorUserPreferences
     return false;
   }
 
-  // TODO: Remove this once all edits go through the Editor. For now, some
-  // old edits just do direct saves so make sure we nuke the cache.
-  public function save() {
-    PhabricatorUserCache::clearCache(
-      PhabricatorUserPreferencesCacheType::KEY_PREFERENCES,
-      $this->getUserPHID());
-
-    return parent::save();
-  }
-
   /**
    * Load or create a preferences object for the given user.
    *

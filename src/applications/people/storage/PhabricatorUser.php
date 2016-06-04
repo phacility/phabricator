@@ -568,29 +568,6 @@ final class PhabricatorUser
     return $this->getUserSetting(PhabricatorPronounSetting::SETTINGKEY);
   }
 
-  public function loadPreferences() {
-    if ($this->preferences) {
-      return $this->preferences;
-    }
-
-    $preferences = null;
-    if ($this->getPHID()) {
-      $preferences = id(new PhabricatorUserPreferencesQuery())
-        ->setViewer($this)
-        ->withUsers(array($this))
-        ->executeOne();
-    }
-
-    if (!$preferences) {
-      $preferences = new PhabricatorUserPreferences();
-      $preferences->setUserPHID($this->getPHID());
-      $preferences->attachUser($this);
-    }
-
-    $this->preferences = $preferences;
-    return $preferences;
-  }
-
   public function loadEditorLink(
     $path,
     $line,
