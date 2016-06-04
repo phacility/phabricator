@@ -5,8 +5,8 @@ final class PhabricatorEmailRePrefixSetting
 
   const SETTINGKEY = 're-prefix';
 
-  const VALUE_RE_PREFIX = 'true';
-  const VALUE_NO_PREFIX = 'false';
+  const VALUE_RE_PREFIX = 're';
+  const VALUE_NO_PREFIX = 'none';
 
   public function getSettingName() {
     return pht('Add "Re:" Prefix');

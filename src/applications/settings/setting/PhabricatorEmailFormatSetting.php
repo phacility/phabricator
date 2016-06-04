@@ -5,8 +5,8 @@ final class PhabricatorEmailFormatSetting
 
   const SETTINGKEY = 'html-emails';
 
-  const VALUE_HTML_EMAIL = 'true';
-  const VALUE_TEXT_EMAIL = 'false';
+  const VALUE_HTML_EMAIL = 'html';
+  const VALUE_TEXT_EMAIL = 'text';
 
   public function getSettingName() {
     return pht('HTML Email');

@@ -214,8 +214,8 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
       $all_prefs = mpull($all_prefs, null, 'getUserPHID');
     }
 
-    $pref_default = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
-    $pref_ignore = PhabricatorUserPreferences::MAILTAG_PREFERENCE_IGNORE;
+    $pref_default = PhabricatorEmailTagsSetting::VALUE_EMAIL;
+    $pref_ignore = PhabricatorEmailTagsSetting::VALUE_IGNORE;
 
     $keep = array();
     foreach ($phids as $phid) {
@@ -224,9 +224,8 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
       }
 
       if ($tags && isset($all_prefs[$phid])) {
-        $mailtags = $all_prefs[$phid]->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
-          array());
+        $mailtags = $all_prefs[$phid]->getSettingValue(
+          PhabricatorEmailTagsSetting::SETTINGKEY);
 
         $notify = false;
         foreach ($tags as $tag) {

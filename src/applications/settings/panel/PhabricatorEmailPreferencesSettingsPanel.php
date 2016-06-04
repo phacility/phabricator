@@ -27,23 +27,12 @@ final class PhabricatorEmailPreferencesSettingsPanel
     $viewer = $this->getViewer();
     $user = $this->getUser();
 
-    $preferences = $user->loadPreferences();
+    $preferences = $this->loadTargetPreferences();
 
-    $pref_no_mail = PhabricatorUserPreferences::PREFERENCE_NO_MAIL;
-    $pref_no_self_mail = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
-
-    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
+    $value_email = PhabricatorEmailTagsSetting::VALUE_EMAIL;
 
     $errors = array();
     if ($request->isFormPost()) {
-      $preferences->setPreference(
-        $pref_no_mail,
-        $request->getStr($pref_no_mail));
-
-      $preferences->setPreference(
-        $pref_no_self_mail,
-        $request->getStr($pref_no_self_mail));
-
       $new_tags = $request->getArr('mailtags');
       $mailtags = $preferences->getPreference('mailtags', array());
       $all_tags = $this->getAllTags($user);
@@ -51,59 +40,21 @@ final class PhabricatorEmailPreferencesSettingsPanel
       foreach ($all_tags as $key => $label) {
         $mailtags[$key] = (int)idx($new_tags, $key, $value_email);
       }
-      $preferences->setPreference('mailtags', $mailtags);
 
-      $preferences->save();
+      $this->writeSetting(
+        $preferences,
+        PhabricatorEmailTagsSetting::SETTINGKEY,
+        $mailtags);
 
       return id(new AphrontRedirectResponse())
         ->setURI($this->getPanelURI('?saved=true'));
     }
 
-    $form = new AphrontFormView();
-    $form
-      ->setUser($viewer)
-      ->appendRemarkupInstructions(
-        pht(
-          'These settings let you control how Phabricator notifies you about '.
-          'events. You can configure Phabricator to send you an email, '.
-          'just send a web notification, or not notify you at all.'))
-      ->appendRemarkupInstructions(
-        pht(
-          'If you disable **Email Notifications**, Phabricator will never '.
-          'send email to notify you about events. This preference overrides '.
-          'all your other settings.'.
-          "\n\n".
-          "//You may still receive some administrative email, like password ".
-          "reset email.//"))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Email Notifications'))
-          ->setName($pref_no_mail)
-          ->setOptions(
-            array(
-              '0' => pht('Send me email notifications'),
-              '1' => pht('Never send email notifications'),
-            ))
-          ->setValue($preferences->getPreference($pref_no_mail, 0)))
-      ->appendRemarkupInstructions(
-        pht(
-          'If you disable **Self Actions**, Phabricator will not notify '.
-          'you about actions you take.'))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Self Actions'))
-          ->setName($pref_no_self_mail)
-          ->setOptions(
-            array(
-              '0' => pht('Send me an email when I take an action'),
-              '1' => pht('Do not send me an email when I take an action'),
-            ))
-          ->setValue($preferences->getPreference($pref_no_self_mail, 0)));
+    $mailtags = $preferences->getSettingValue(
+      PhabricatorEmailTagsSetting::SETTINGKEY);
 
-    $mailtags = $preferences->getPreference('mailtags', array());
-
-    $form->appendChild(
-      id(new PHUIFormDividerControl()));
+    $form = id(new AphrontFormView())
+      ->setUser($viewer);
 
     $form->appendRemarkupInstructions(
       pht(
@@ -183,11 +134,7 @@ final class PhabricatorEmailPreferencesSettingsPanel
       ->setFormErrors($errors)
       ->setForm($form);
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $form_box,
-        ));
+    return $form_box;
   }
 
   private function getAllEditorsWithTags(PhabricatorUser $user) {
@@ -222,9 +169,9 @@ final class PhabricatorEmailPreferencesSettingsPanel
     array $tags,
     array $prefs) {
 
-    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
-    $value_notify = PhabricatorUserPreferences::MAILTAG_PREFERENCE_NOTIFY;
-    $value_ignore = PhabricatorUserPreferences::MAILTAG_PREFERENCE_IGNORE;
+    $value_email = PhabricatorEmailTagsSetting::VALUE_EMAIL;
+    $value_notify = PhabricatorEmailTagsSetting::VALUE_NOTIFY;
+    $value_ignore = PhabricatorEmailTagsSetting::VALUE_IGNORE;
 
     $content = array();
     foreach ($tags as $key => $label) {
