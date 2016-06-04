@@ -27,18 +27,18 @@ final class PhabricatorSettingsTimezoneController
     $settings_help = pht(
       'You can change your date and time preferences in Settings.');
 
+    $did_calibrate = false;
     if ($request->isFormPost()) {
       $timezone = $request->getStr('timezone');
 
       $pref_ignore = PhabricatorTimezoneIgnoreOffsetSetting::SETTINGKEY;
       $pref_timezone = PhabricatorTimezoneSetting::SETTINGKEY;
 
-      $preferences = $viewer->loadPreferences();
-
       if ($timezone == 'ignore') {
-        $preferences
-          ->setPreference($pref_ignore, $client_offset)
-          ->save();
+        $this->writeSettings(
+          array(
+            $pref_ignore => $client_offset,
+          ));
 
         return $this->newDialog()
           ->setTitle(pht('Conflict Ignored'))
@@ -51,18 +51,19 @@ final class PhabricatorSettingsTimezoneController
       }
 
       if (isset($options[$timezone])) {
-        $preferences
-          ->setPreference($pref_ignore, null)
-          ->setPreference($pref_timezone, $timezone)
-          ->save();
+        $this->writeSettings(
+          array(
+            $pref_ignore => null,
+            $pref_timezone => $timezone,
+          ));
 
-        $viewer->clearUserSettingCache();
+        $did_calibrate = true;
       }
     }
 
     $server_offset = $viewer->getTimeZoneOffset();
 
-    if ($client_offset == $server_offset) {
+    if ($client_offset == $server_offset || $did_calibrate) {
       return $this->newDialog()
         ->setTitle(pht('Timezone Calibrated'))
         ->appendParagraph(
@@ -119,6 +120,26 @@ final class PhabricatorSettingsTimezoneController
     } else {
       return pht('UTC+%d', -$offset);
     }
+  }
+
+  private function writeSettings(array $map) {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
+
+    $editor = id(new PhabricatorUserPreferencesEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+    foreach ($map as $key => $value) {
+      $xactions[] = $preferences->newTransaction($key, $value);
+    }
+
+    $editor->applyTransactions($preferences, $xactions);
   }
 
 }

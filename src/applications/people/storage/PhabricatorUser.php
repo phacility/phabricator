@@ -533,20 +533,6 @@ final class PhabricatorUser
     return ($actual == $value);
   }
 
-
-  /**
-   * @task settings
-   */
-  public function clearUserSettingCache() {
-    $this->settingCacheKeys = array();
-    $this->settingCache = array();
-
-    $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
-    $this->clearCacheData($settings_key);
-
-    return $this;
-  }
-
   private function writeUserSettingCache($key, $value) {
     $this->settingCacheKeys[$key] = true;
     $this->settingCache[$key] = $value;
