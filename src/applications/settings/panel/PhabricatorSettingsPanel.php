@@ -235,4 +235,22 @@ abstract class PhabricatorSettingsPanel extends Phobject {
     return $this->getController()->newDialog();
   }
 
+  protected function writeSetting(
+    PhabricatorUserPreferences $preferences,
+    $key,
+    $value) {
+    $viewer = $this->getViewer();
+    $request = $this->getController()->getRequest();
+
+    $editor = id(new PhabricatorUserPreferencesEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+    $xactions[] = $preferences->newTransaction($key, $value);
+    $editor->applyTransactions($preferences, $xactions);
+  }
+
 }

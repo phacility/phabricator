@@ -208,19 +208,8 @@ final class PhabricatorHomePreferencesSettingsPanel
     PhabricatorUserPreferences $preferences,
     $pinned) {
 
-    $viewer = $this->getViewer();
-    $request = $this->getController()->getRequest();
     $pinned_key = PhabricatorPinnedApplicationsSetting::SETTINGKEY;
-
-    $editor = id(new PhabricatorUserPreferencesEditor())
-      ->setActor($viewer)
-      ->setContentSourceFromRequest($request)
-      ->setContinueOnNoEffect(true)
-      ->setContinueOnMissingFields(true);
-
-    $xactions = array();
-    $xactions[] = $preferences->newTransaction($pinned_key, $pinned);
-    $editor->applyTransactions($preferences, $xactions);
+    $this->writeSetting($preferences, $pinned_key, $pinned);
   }
 
 }
