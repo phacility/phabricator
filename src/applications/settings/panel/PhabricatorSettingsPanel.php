@@ -18,6 +18,7 @@ abstract class PhabricatorSettingsPanel extends Phobject {
   private $controller;
   private $navigation;
   private $overrideURI;
+  private $preferences;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -58,6 +59,15 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
   final public function getNavigation() {
     return $this->navigation;
+  }
+
+  public function setPreferences(PhabricatorUserPreferences $preferences) {
+    $this->preferences = $preferences;
+    return $this;
+  }
+
+  public function getPreferences() {
+    return $this->preferences;
   }
 
   final public static function getAllPanels() {
@@ -145,13 +155,24 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
 
   /**
-   * Return true if this panel is available to administrators while editing
-   * system agent accounts.
+   * Return true if this panel is available to administrators while managing
+   * bot and mailing list accounts.
    *
-   * @return bool True to enable edit by administrators.
+   * @return bool True to enable management on behalf of accounts.
    * @task config
    */
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
+    return false;
+  }
+
+
+  /**
+   * Return true if this panel is available while editing settings templates.
+   *
+   * @return bool True to allow editing in templates.
+   * @task config
+   */
+  public function isTemplatePanel() {
     return false;
   }
 
@@ -194,11 +215,13 @@ abstract class PhabricatorSettingsPanel extends Phobject {
     $key = $this->getPanelKey();
     $key = phutil_escape_uri($key);
 
-    if ($this->getUser()->getPHID() != $this->getViewer()->getPHID()) {
-      $user_id = $this->getUser()->getID();
-      return "/settings/{$user_id}/panel/{$key}/{$path}";
+    $user = $this->getUser();
+    if ($user) {
+      $username = $user->getUsername();
+      return "/settings/user/{$username}/page/{$key}/{$path}";
     } else {
-      return "/settings/panel/{$key}/{$path}";
+      $builtin = $this->getPreferences()->getBuiltinKey();
+      return "/settings/builtin/{$builtin}/page/{$key}/{$path}";
     }
   }
 
@@ -215,20 +238,6 @@ abstract class PhabricatorSettingsPanel extends Phobject {
   final public function getPanelOrderVector() {
     return id(new PhutilSortVector())
       ->addString($this->getPanelName());
-  }
-
-  protected function loadTargetPreferences() {
-    $viewer = $this->getViewer();
-    $user = $this->getUser();
-
-    $preferences = PhabricatorUserPreferences::loadUserPreferences($user);
-
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $preferences,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    return $preferences;
   }
 
   protected function newDialog() {

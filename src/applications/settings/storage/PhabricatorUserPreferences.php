@@ -7,10 +7,14 @@ final class PhabricatorUserPreferences
     PhabricatorDestructibleInterface,
     PhabricatorApplicationTransactionInterface {
 
+  const BUILTIN_GLOBAL_DEFAULT = 'global';
+
   protected $userPHID;
   protected $preferences = array();
+  protected $builtinKey;
 
   private $user = self::ATTACHABLE;
+  private $defaultSettings;
 
   protected function getConfiguration() {
     return array(
@@ -18,9 +22,17 @@ final class PhabricatorUserPreferences
       self::CONFIG_SERIALIZATION => array(
         'preferences' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'userPHID' => 'phid?',
+        'builtinKey' => 'text32?',
+      ),
       self::CONFIG_KEY_SCHEMA => array(
-        'userPHID' => array(
+        'key_user' => array(
           'columns' => array('userPHID'),
+          'unique' => true,
+        ),
+        'key_builtin' => array(
+          'columns' => array('builtinKey'),
           'unique' => true,
         ),
       ),
@@ -47,6 +59,10 @@ final class PhabricatorUserPreferences
   }
 
   public function getDefaultValue($key) {
+    if ($this->defaultSettings) {
+      return $this->defaultSettings->getSettingValue($key);
+    }
+
     $setting = self::getSettingObject($key);
 
     if (!$setting) {
@@ -64,15 +80,17 @@ final class PhabricatorUserPreferences
       return $this->preferences[$key];
     }
 
-    // TODO: If this setting set inherits from another preference set,
-    // we would look it up here.
-
     return $this->getDefaultValue($key);
   }
 
   private static function getSettingObject($key) {
     $settings = PhabricatorSetting::getAllSettings();
     return idx($settings, $key);
+  }
+
+  public function attachDefaultSettings(PhabricatorUserPreferences $settings) {
+    $this->defaultSettings = $settings;
+    return $this;
   }
 
   public function attachUser(PhabricatorUser $user = null) {
@@ -127,6 +145,21 @@ final class PhabricatorUserPreferences
       ->setNewValue($value);
   }
 
+  public function getEditURI() {
+    if ($this->getUser()) {
+      return '/settings/user/'.$this->getUser()->getUsername().'/';
+    } else {
+      return '/settings/builtin/'.$this->getBuiltinKey().'/';
+    }
+  }
+
+  public function getDisplayName() {
+    if ($this->getBuiltinKey()) {
+      return pht('Global Default Settings');
+    }
+
+    return pht('Personal Settings');
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

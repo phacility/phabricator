@@ -67,7 +67,15 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectEditShortText($object) {
-    return pht('Edit Settings');
+    if (!$object->getUser()) {
+      return pht('Global Defaults');
+    } else {
+      if ($this->getIsSelfEdit()) {
+        return pht('Personal Settings');
+      } else {
+        return pht('Account Settings');
+      }
+    }
   }
 
   protected function getObjectCreateShortText() {
@@ -85,7 +93,7 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getEditorURI() {
-    return '/settings/edit/';
+    throw new PhutilMethodNotImplementedException();
   }
 
   protected function getObjectCreateCancelURI($object) {
@@ -93,15 +101,22 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    // TODO: This isn't correct...
-    return '/settings/user/'.$this->getViewer()->getUsername().'/';
+    return $object->getEditURI();
   }
 
   protected function getCreateNewObjectPolicy() {
     return PhabricatorPolicies::POLICY_ADMIN;
   }
 
+  public function getEffectiveObjectEditDoneURI($object) {
+    return parent::getEffectiveObjectViewURI($object).'saved/';
+  }
+
   public function getEffectiveObjectEditCancelURI($object) {
+    if (!$object->getUser()) {
+      return '/settings/';
+    }
+
     if ($this->getIsSelfEdit()) {
       return null;
     }

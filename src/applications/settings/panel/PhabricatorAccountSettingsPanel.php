@@ -13,7 +13,11 @@ final class PhabricatorAccountSettingsPanel
     return PhabricatorSettingsAccountPanelGroup::PANELGROUPKEY;
   }
 
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
+    return true;
+  }
+
+  public function isTemplatePanel() {
     return true;
   }
 

@@ -532,6 +532,10 @@ abstract class PhabricatorEditEngine
     return $this->getObjectViewURI($object);
   }
 
+  public function getEffectiveObjectEditDoneURI($object) {
+    return $this->getEffectiveObjectViewURI($object);
+  }
+
   public function getEffectiveObjectEditCancelURI($object) {
     $page = $this->getSelectedPage();
     if ($page) {
@@ -1169,7 +1173,7 @@ abstract class PhabricatorEditEngine
     $object,
     array $xactions) {
     return id(new AphrontRedirectResponse())
-      ->setURI($this->getEffectiveObjectViewURI($object));
+      ->setURI($this->getEffectiveObjectEditDoneURI($object));
   }
 
   private function buildEditForm($object, array $fields) {

@@ -3,7 +3,11 @@
 final class PhabricatorConduitTokensSettingsPanel
   extends PhabricatorSettingsPanel {
 
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -20,10 +24,6 @@ final class PhabricatorConduitTokensSettingsPanel
   }
 
   public function isEnabled() {
-    if ($this->getUser()->getIsMailingList()) {
-      return false;
-    }
-
     return true;
   }
 

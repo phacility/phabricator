@@ -15,7 +15,7 @@ final class PhabricatorEmailPreferencesSettingsPanel
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }
 
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
     if ($this->getUser()->getIsMailingList()) {
       return true;
     }
@@ -23,11 +23,15 @@ final class PhabricatorEmailPreferencesSettingsPanel
     return false;
   }
 
+  public function isTemplatePanel() {
+    return true;
+  }
+
   public function processRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
     $user = $this->getUser();
 
-    $preferences = $this->loadTargetPreferences();
+    $preferences = $this->getPreferences();
 
     $value_email = PhabricatorEmailTagsSetting::VALUE_EMAIL;
 
@@ -137,7 +141,7 @@ final class PhabricatorEmailPreferencesSettingsPanel
     return $form_box;
   }
 
-  private function getAllEditorsWithTags(PhabricatorUser $user) {
+  private function getAllEditorsWithTags(PhabricatorUser $user = null) {
     $editors = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorApplicationTransactionEditor')
       ->setFilterMethod('getMailTagsMap')
@@ -146,7 +150,7 @@ final class PhabricatorEmailPreferencesSettingsPanel
     foreach ($editors as $key => $editor) {
       // Remove editors for applications which are not installed.
       $app = $editor->getEditorApplicationClass();
-      if ($app !== null) {
+      if ($app !== null && $user !== null) {
         if (!PhabricatorApplication::isClassInstalledForViewer($app, $user)) {
           unset($editors[$key]);
         }

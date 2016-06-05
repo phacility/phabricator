@@ -13,4 +13,8 @@ final class PhabricatorDisplayPreferencesSettingsPanel
     return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
   }
 
+  public function isTemplatePanel() {
+    return true;
+  }
+
 }

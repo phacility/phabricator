@@ -27,7 +27,7 @@ final class PhabricatorDesktopNotificationsSettingsPanel
 
   public function processRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $preferences = $this->loadTargetPreferences();
+    $preferences = $this->getPreferences();
 
     $notifications_key = PhabricatorDesktopNotificationsSetting::SETTINGKEY;
     $notifications_value = $preferences->getSettingValue($notifications_key);

@@ -27,12 +27,14 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
   }
 
   public function getRoutes() {
+    $panel_pattern = '(?:page/(?P<pageKey>[^/]+)/(?:(?P<formSaved>saved)/)?)?';
+
     return array(
       '/settings/' => array(
-        '(?:(?P<id>\d+)/)?'.
-          '(?:panel/(?P<pageKey>(?P<key>[^/]+))/'.
-            '(?:(?P<formSaved>saved)/)?'.
-          ')?'
+        $this->getQueryRoutePattern() => 'PhabricatorSettingsListController',
+        'user/(?P<username>[^/]+)/'.$panel_pattern
+          => 'PhabricatorSettingsMainController',
+        'builtin/(?P<builtin>global)/'.$panel_pattern
           => 'PhabricatorSettingsMainController',
         'adjust/' => 'PhabricatorSettingsAdjustController',
         'timezone/(?P<offset>[^/]+)/'

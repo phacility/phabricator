@@ -15,9 +15,13 @@ final class PhabricatorHomePreferencesSettingsPanel
     return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
   }
 
+  public function isTemplatePanel() {
+    return true;
+  }
+
   public function processRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $preferences = $this->loadTargetPreferences();
+    $preferences = $this->getPreferences();
 
     $pinned_key = PhabricatorPinnedApplicationsSetting::SETTINGKEY;
     $pinned = $preferences->getSettingValue($pinned_key);

@@ -4,6 +4,8 @@ final class PhabricatorSettingsMainController
   extends PhabricatorController {
 
   private $user;
+  private $builtinKey;
+  private $preferences;
 
   private function getUser() {
     return $this->user;
@@ -21,15 +23,39 @@ final class PhabricatorSettingsMainController
     return ($viewer_phid == $user_phid);
   }
 
+  private function isTemplate() {
+    return ($this->builtinKey !== null);
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $id = $request->getURIData('id');
-    $key = $request->getURIData('key');
 
-    if ($id) {
+    $username = $request->getURIData('username');
+    $builtin = $request->getURIData('builtin');
+
+    $key = $request->getURIData('pageKey');
+
+    if ($builtin) {
+      $this->builtinKey = $builtin;
+
+      $preferences = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer($viewer)
+        ->withBuiltinKeys(array($builtin))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$preferences) {
+        $preferences = id(new PhabricatorUserPreferences())
+          ->attachUser(null)
+          ->setBuiltinKey($builtin);
+      }
+    } else {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
-        ->withIDs(array($id))
+        ->withUsernames(array($username))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -41,19 +67,27 @@ final class PhabricatorSettingsMainController
         return new Aphront404Response();
       }
 
+      $preferences = PhabricatorUserPreferences::loadUserPreferences($user);
       $this->user = $user;
-    } else {
-      $this->user = $viewer;
     }
 
-    $panels = $this->buildPanels();
+    if (!$preferences) {
+      return new Aphront404Response();
+    }
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $preferences,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $this->preferences = $preferences;
+
+    $panels = $this->buildPanels($preferences);
     $nav = $this->renderSideNav($panels);
 
     $key = $nav->selectFilter($key, head($panels)->getPanelKey());
 
     $panel = $panels[$key]
-      ->setUser($this->getUser())
-      ->setViewer($viewer)
       ->setController($this)
       ->setNavigation($nav);
 
@@ -79,22 +113,30 @@ final class PhabricatorSettingsMainController
 
   }
 
-  private function buildPanels() {
+  private function buildPanels(PhabricatorUserPreferences $preferences) {
     $viewer = $this->getViewer();
     $panels = PhabricatorSettingsPanel::getAllDisplayPanels();
 
     $result = array();
     foreach ($panels as $key => $panel) {
       $panel
-        ->setViewer($viewer)
-        ->setUser($this->user);
+        ->setPreferences($preferences)
+        ->setViewer($viewer);
+
+      if ($this->user) {
+        $panel->setUser($this->user);
+      }
 
       if (!$panel->isEnabled()) {
         continue;
       }
 
-      if (!$this->isSelf()) {
-        if (!$panel->isEditableByAdministrators()) {
+      if ($this->isTemplate()) {
+        if (!$panel->isTemplatePanel()) {
+          continue;
+        }
+      } else {
+        if (!$this->isSelf() && !$panel->isManagementPanel()) {
           continue;
         }
       }
@@ -120,10 +162,11 @@ final class PhabricatorSettingsMainController
   private function renderSideNav(array $panels) {
     $nav = new AphrontSideNavFilterView();
 
-    if ($this->isSelf()) {
-      $base_uri = 'panel/';
+    if ($this->isTemplate()) {
+      $base_uri = 'builtin/'.$this->builtinKey.'/page/';
     } else {
-      $base_uri = $this->getUser()->getID().'/panel/';
+      $user = $this->getUser();
+      $base_uri = 'user/'.$user->getUsername().'/page/';
     }
 
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI($base_uri)));
@@ -143,8 +186,11 @@ final class PhabricatorSettingsMainController
   }
 
   public function buildApplicationMenu() {
-    $panels = $this->buildPanels();
-    return $this->renderSideNav($panels)->getMenu();
+    if ($this->preferences) {
+      $panels = $this->buildPanels($this->preferences);
+      return $this->renderSideNav($panels)->getMenu();
+    }
+    return parent::buildApplicationMenu();
   }
 
   protected function buildApplicationCrumbs() {

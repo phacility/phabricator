@@ -7,13 +7,13 @@ abstract class PhabricatorEditEngineSettingsPanel
     $viewer = $this->getViewer();
     $user = $this->getUser();
 
-    if ($user->getPHID() === $viewer->getPHID()) {
+    if ($user && ($user->getPHID() === $viewer->getPHID())) {
       $is_self = true;
     } else {
       $is_self = false;
     }
 
-    if ($user->getPHID()) {
+    if ($user && $user->getPHID()) {
       $profile_uri = '/people/manage/'.$user->getID().'/';
     } else {
       $profile_uri = null;
@@ -26,7 +26,7 @@ abstract class PhabricatorEditEngineSettingsPanel
       ->setIsSelfEdit($is_self)
       ->setProfileURI($profile_uri);
 
-    $preferences = $this->loadTargetPreferences();
+    $preferences = $this->getPreferences();
 
     $engine->setTargetObject($preferences);
 
@@ -47,7 +47,7 @@ abstract class PhabricatorEditEngineSettingsPanel
 
     $key = $this->getPanelKey();
     $label = $this->getPanelName();
-    $panel_uri = $this->getPanelURI().'saved/';
+    $panel_uri = $this->getPanelURI();
 
     return id(new PhabricatorEditPage())
       ->setKey($key)

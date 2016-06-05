@@ -13,12 +13,16 @@ final class PhabricatorEmailDeliverySettingsPanel
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }
 
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
     if ($this->getUser()->getIsMailingList()) {
       return true;
     }
 
     return false;
+  }
+
+  public function isTemplatePanel() {
+    return true;
   }
 
 }

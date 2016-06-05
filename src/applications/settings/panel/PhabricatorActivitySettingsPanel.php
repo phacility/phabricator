@@ -2,10 +2,6 @@
 
 final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
 
-  public function isEditableByAdministrators() {
-    return true;
-  }
-
   public function getPanelKey() {
     return 'activity';
   }
@@ -59,6 +55,10 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
       ->appendChild($pager);
 
     return array($panel, $pager_box);
+  }
+
+  public function isManagementPanel() {
+    return true;
   }
 
 }
