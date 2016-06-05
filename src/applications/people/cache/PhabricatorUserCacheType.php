@@ -27,11 +27,7 @@ abstract class PhabricatorUserCacheType extends Phobject {
   }
 
   public function getValueFromStorage($value) {
-    return phutil_json_decode($value);
-  }
-
-  public function getValueForStorage($value) {
-    return phutil_json_encode($value);
+    return $value;
   }
 
   public function newValueForUsers($key, array $users) {

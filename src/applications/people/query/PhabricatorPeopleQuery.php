@@ -544,8 +544,7 @@ final class PhabricatorPeopleQuery
 
       $data = $type->newValueForUsers($cache_key, $need_users);
 
-      foreach ($data as $user_phid => $value) {
-        $raw_value = $type->getValueForStorage($value);
+      foreach ($data as $user_phid => $raw_value) {
         $data[$user_phid] = $raw_value;
         $writes[] = array(
           'userPHID' => $user_phid,

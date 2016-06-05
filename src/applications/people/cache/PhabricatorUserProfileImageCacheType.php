@@ -17,6 +17,10 @@ final class PhabricatorUserProfileImageCacheType
     return ($key === self::KEY_URI);
   }
 
+  public function getDefaultValue() {
+    return PhabricatorUser::getDefaultProfileImageURI();
+  }
+
   public function newValueForUsers($key, array $users) {
     $viewer = $this->getViewer();
 
@@ -53,10 +57,6 @@ final class PhabricatorUserProfileImageCacheType
   public function getValueFromStorage($value) {
     $parts = explode(',', $value, 2);
     return end($parts);
-  }
-
-  public function getValueForStorage($value) {
-    return $value;
   }
 
   public function shouldValidateRawCacheData() {

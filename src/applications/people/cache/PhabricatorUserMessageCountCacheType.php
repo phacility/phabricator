@@ -21,10 +21,6 @@ final class PhabricatorUserMessageCountCacheType
     return (int)$value;
   }
 
-  public function getValueForStorage($value) {
-    return $value;
-  }
-
   public function newValueForUsers($key, array $users) {
     if (!$users) {
       return array();

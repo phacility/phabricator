@@ -1463,8 +1463,7 @@ final class PhabricatorUser
     if ($user_phid) {
       $map = $type->newValueForUsers($key, array($this));
       if (array_key_exists($user_phid, $map)) {
-        $usable_value = $map[$user_phid];
-        $raw_value = $type->getValueForStorage($usable_value);
+        $raw_value = $map[$user_phid];
         $usable_value = $type->getValueFromStorage($raw_value);
 
         $this->rawCacheData[$key] = $raw_value;

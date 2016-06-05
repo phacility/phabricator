@@ -17,6 +17,10 @@ final class PhabricatorUserPreferencesCacheType
     return ($key === self::KEY_PREFERENCES);
   }
 
+  public function getValueFromStorage($value) {
+    return phutil_json_decode($value);
+  }
+
   public function newValueForUsers($key, array $users) {
     $viewer = $this->getViewer();
 
@@ -27,9 +31,15 @@ final class PhabricatorUserPreferencesCacheType
       ->withUserPHIDs($user_phids)
       ->execute();
 
-    $empty = array_fill_keys($user_phids, array());
+    $settings = mpull($preferences, 'getPreferences', 'getUserPHID');
 
-    return mpull($preferences, 'getPreferences', 'getUserPHID') + $empty;
+    $results = array();
+    foreach ($user_phids as $user_phid) {
+      $value = idx($settings, $user_phid, array());
+      $results[$user_phid] = phutil_json_encode($value);
+    }
+
+    return $results;
   }
 
 }
