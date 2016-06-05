@@ -86,7 +86,9 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
         $conn_w,
         'INSERT INTO %T (userPHID, cacheIndex, cacheKey, cacheData, cacheType)
           VALUES %Q
-          ON DUPLICATE KEY UPDATE cacheData = VALUES(cacheData)',
+          ON DUPLICATE KEY UPDATE
+            cacheData = VALUES(cacheData),
+            cacheType = VALUES(cacheType)',
         $table->getTableName(),
         $chunk);
     }

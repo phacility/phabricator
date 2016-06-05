@@ -113,7 +113,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $session_key = PhabricatorHash::digest($session_token);
 
     $cache_parts = $this->getUserCacheQueryParts($conn_r);
-    list($cache_selects, $cache_joins, $cache_map) = $cache_parts;
+    list($cache_selects, $cache_joins, $cache_map, $types_map) = $cache_parts;
 
     $info = queryfx_one(
       $conn_r,
@@ -162,6 +162,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $user = $user_table->loadFromArray($info);
 
+    $cache_raw = $this->filterRawCacheData($user, $types_map, $cache_raw);
     $user->attachRawCacheData($cache_raw);
     $user->setAllowInlineCacheGeneration(true);
 
@@ -761,11 +762,13 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $cache_map = array();
 
     $keys = array();
+    $types_map = array();
 
     $cache_types = PhabricatorUserCacheType::getAllCacheTypes();
     foreach ($cache_types as $cache_type) {
       foreach ($cache_type->getAutoloadKeys() as $autoload_key) {
         $keys[] = $autoload_key;
+        $types_map[$autoload_key] = $cache_type;
       }
     }
 
@@ -809,7 +812,24 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $cache_joins = '';
     }
 
-    return array($cache_selects, $cache_joins, $cache_map);
+    return array($cache_selects, $cache_joins, $cache_map, $types_map);
+  }
+
+  private function filterRawCacheData(
+    PhabricatorUser $user,
+    array $types_map,
+    array $cache_raw) {
+
+    foreach ($cache_raw as $cache_key => $cache_data) {
+      $type = $types_map[$cache_key];
+      if ($type->shouldValidateRawCacheData()) {
+        if (!$type->isRawCacheDataValid($user, $cache_key, $cache_data)) {
+          unset($cache_raw[$cache_key]);
+        }
+      }
+    }
+
+    return $cache_raw;
   }
 
 }

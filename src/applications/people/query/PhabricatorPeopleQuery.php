@@ -106,7 +106,14 @@ final class PhabricatorPeopleQuery
   }
 
   public function needProfileImage($need) {
-    $this->needProfileImage = $need;
+    $cache_key = PhabricatorUserProfileImageCacheType::KEY_URI;
+
+    if ($need) {
+      $this->cacheKeys[$cache_key] = true;
+    } else {
+      unset($this->cacheKeys[$cache_key]);
+    }
+
     return $this;
   }
 
@@ -179,59 +186,6 @@ final class PhabricatorPeopleQuery
         $user_awards = idx($awards, $user->getPHID(), array());
         $badge_phids = mpull($user_awards, 'getBadgePHID');
         $user->attachBadgePHIDs($badge_phids);
-      }
-    }
-
-    if ($this->needProfileImage) {
-      $rebuild = array();
-      foreach ($users as $user) {
-        $image_uri = $user->getProfileImageCache();
-        if ($image_uri) {
-          // This user has a valid cache, so we don't need to fetch any
-          // data or rebuild anything.
-
-          $user->attachProfileImageURI($image_uri);
-          continue;
-        }
-
-        // This user's cache is invalid or missing, so we're going to rebuild
-        // it.
-        $rebuild[] = $user;
-      }
-
-      if ($rebuild) {
-        $file_phids = mpull($rebuild, 'getProfileImagePHID');
-        $file_phids = array_filter($file_phids);
-
-        if ($file_phids) {
-          // NOTE: We're using the omnipotent user here because older profile
-          // images do not have the 'profile' flag, so they may not be visible
-          // to the executing viewer. At some point, we could migrate to add
-          // this flag and then use the real viewer, or just use the real
-          // viewer after enough time has passed to limit the impact of old
-          // data. The consequence of missing here is that we cache a default
-          // image when a real image exists.
-          $files = id(new PhabricatorFileQuery())
-            ->setParentQuery($this)
-            ->setViewer(PhabricatorUser::getOmnipotentUser())
-            ->withPHIDs($file_phids)
-            ->execute();
-          $files = mpull($files, null, 'getPHID');
-        } else {
-          $files = array();
-        }
-
-        foreach ($rebuild as $user) {
-          $image_phid = $user->getProfileImagePHID();
-          if (isset($files[$image_phid])) {
-            $image_uri = $files[$image_phid]->getBestURI();
-          } else {
-            $image_uri = PhabricatorUser::getDefaultProfileImageURI();
-          }
-
-          $user->writeProfileImageCache($image_uri);
-          $user->attachProfileImageURI($image_uri);
-        }
       }
     }
 
@@ -509,6 +463,8 @@ final class PhabricatorPeopleQuery
       $hashes[] = PhabricatorHash::digestForIndex($key);
     }
 
+    $types = PhabricatorUserCacheType::getAllCacheTypes();
+
     // First, pull any available caches. If we wanted to be particularly clever
     // we could do this with JOINs in the main query.
 
@@ -517,11 +473,42 @@ final class PhabricatorPeopleQuery
 
     $cache_data = queryfx_all(
       $cache_conn,
-      'SELECT cacheKey, userPHID, cacheData FROM %T
+      'SELECT cacheKey, userPHID, cacheData, cacheType FROM %T
         WHERE cacheIndex IN (%Ls) AND userPHID IN (%Ls)',
       $cache_table->getTableName(),
       $hashes,
       array_keys($user_map));
+
+    $skip_validation = array();
+
+    // After we read caches from the database, discard any which have data that
+    // invalid or out of date. This allows cache types to implement TTLs or
+    // versions instead of or in addition to explicit cache clears.
+    foreach ($cache_data as $row_key => $row) {
+      $cache_type = $row['cacheType'];
+
+      if (isset($skip_validation[$cache_type])) {
+        continue;
+      }
+
+      if (empty($types[$cache_type])) {
+        unset($cache_data[$row_key]);
+        continue;
+      }
+
+      $type = $types[$cache_type];
+      if (!$type->shouldValidateRawCacheData()) {
+        $skip_validation[$cache_type] = true;
+        continue;
+      }
+
+      $user = $user_map[$row['userPHID']];
+      $raw_data = $row['cacheData'];
+      if (!$type->isRawCacheDataValid($user, $row['cacheKey'], $raw_data)) {
+        unset($cache_data[$row_key]);
+        continue;
+      }
+    }
 
     $need = array();
 

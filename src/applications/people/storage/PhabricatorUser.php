@@ -30,7 +30,6 @@ final class PhabricatorUser
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
-  protected $profileImageCache;
   protected $availabilityCache;
   protected $availabilityCacheTTL;
 
@@ -46,7 +45,6 @@ final class PhabricatorUser
 
   protected $accountSecret;
 
-  private $profileImage = self::ATTACHABLE;
   private $profile = null;
   private $availability = self::ATTACHABLE;
   private $preferences = null;
@@ -196,7 +194,6 @@ final class PhabricatorUser
         'isApproved' => 'uint32',
         'accountSecret' => 'bytes64',
         'isEnrolledInMultiFactor' => 'bool',
-        'profileImageCache' => 'text255?',
         'availabilityCache' => 'text255?',
         'availabilityCacheTTL' => 'uint32?',
       ),
@@ -218,7 +215,6 @@ final class PhabricatorUser
         ),
       ),
       self::CONFIG_NO_MUTATE => array(
-        'profileImageCache' => true,
         'availabilityCache' => true,
         'availabilityCacheTTL' => true,
       ),
@@ -791,13 +787,9 @@ final class PhabricatorUser
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
   }
 
-  public function attachProfileImageURI($uri) {
-    $this->profileImage = $uri;
-    return $this;
-  }
-
   public function getProfileImageURI() {
-    return $this->assertAttached($this->profileImage);
+    $uri_key = PhabricatorUserProfileImageCacheType::KEY_URI;
+    return $this->requireCacheData($uri_key);
   }
 
   public function getFullName() {
@@ -1005,72 +997,6 @@ final class PhabricatorUser
     unset($unguarded);
 
     return $this;
-  }
-
-
-/* -(  Profile Image Cache  )------------------------------------------------ */
-
-
-  /**
-   * Get this user's cached profile image URI.
-   *
-   * @return string|null Cached URI, if a URI is cached.
-   * @task image-cache
-   */
-  public function getProfileImageCache() {
-    $version = $this->getProfileImageVersion();
-
-    $parts = explode(',', $this->profileImageCache, 2);
-    if (count($parts) !== 2) {
-      return null;
-    }
-
-    if ($parts[0] !== $version) {
-      return null;
-    }
-
-    return $parts[1];
-  }
-
-
-  /**
-   * Generate a new cache value for this user's profile image.
-   *
-   * @return string New cache value.
-   * @task image-cache
-   */
-  public function writeProfileImageCache($uri) {
-    $version = $this->getProfileImageVersion();
-    $cache = "{$version},{$uri}";
-
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-    queryfx(
-      $this->establishConnection('w'),
-      'UPDATE %T SET profileImageCache = %s WHERE id = %d',
-      $this->getTableName(),
-      $cache,
-      $this->getID());
-    unset($unguarded);
-  }
-
-
-  /**
-   * Get a version identifier for a user's profile image.
-   *
-   * This version will change if the image changes, or if any of the
-   * environment configuration which goes into generating a URI changes.
-   *
-   * @return string Cache version.
-   * @task image-cache
-   */
-  private function getProfileImageVersion() {
-    $parts = array(
-      PhabricatorEnv::getCDNURI('/'),
-      PhabricatorEnv::getEnvConfig('cluster.instance'),
-      $this->getProfileImagePHID(),
-    );
-    $parts = serialize($parts);
-    return PhabricatorHash::digestForIndex($parts);
   }
 
 
@@ -1529,6 +1455,7 @@ final class PhabricatorUser
       if (array_key_exists($user_phid, $map)) {
         $usable_value = $map[$user_phid];
         $raw_value = $type->getValueForStorage($usable_value);
+        $usable_value = $type->getValueFromStorage($raw_value);
 
         $this->rawCacheData[$key] = $raw_value;
         PhabricatorUserCache::writeCache(

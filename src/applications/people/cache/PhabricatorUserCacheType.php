@@ -18,6 +18,14 @@ abstract class PhabricatorUserCacheType extends Phobject {
     return array();
   }
 
+  public function shouldValidateRawCacheData() {
+    return false;
+  }
+
+  public function isRawCacheDataValid(PhabricatorUser $user, $key, $data) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
   public function getValueFromStorage($value) {
     return phutil_json_decode($value);
   }

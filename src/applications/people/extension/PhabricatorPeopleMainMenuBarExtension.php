@@ -7,15 +7,7 @@ final class PhabricatorPeopleMainMenuBarExtension
 
   public function buildMainMenus() {
     $viewer = $this->getViewer();
-
-    // TODO: This should get cached.
-
-    $profile = id(new PhabricatorPeopleQuery())
-      ->setViewer($viewer)
-      ->needProfileImage(true)
-      ->withPHIDs(array($viewer->getPHID()))
-      ->executeOne();
-    $image = $profile->getProfileImageURI();
+    $image = $viewer->getProfileImageURI();
 
     $bar_item = id(new PHUIListItemView())
       ->setName($viewer->getUsername())
