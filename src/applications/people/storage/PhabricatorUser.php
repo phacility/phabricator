@@ -65,6 +65,7 @@ final class PhabricatorUser
 
   private $settingCacheKeys = array();
   private $settingCache = array();
+  private $allowInlineCacheGeneration;
 
   protected function readField($field) {
     switch ($field) {
@@ -483,7 +484,11 @@ final class PhabricatorUser
     }
 
     $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
-    $settings = $this->requireCacheData($settings_key);
+    if ($this->getPHID()) {
+      $settings = $this->requireCacheData($settings_key);
+    } else {
+      $settings = array();
+    }
 
     $defaults = PhabricatorSetting::getAllEnabledSettings($this);
 
@@ -1486,6 +1491,10 @@ final class PhabricatorUser
     return $this;
   }
 
+  public function setAllowInlineCacheGeneration($allow_cache_generation) {
+    $this->allowInlineCacheGeneration = $allow_cache_generation;
+    return $this;
+  }
 
   /**
    * @task cache
@@ -1504,6 +1513,12 @@ final class PhabricatorUser
       $this->usableCacheData[$key] = $usable_value;
 
       return $usable_value;
+    }
+
+    // By default, we throw if a cache isn't available. This is consistent
+    // with the standard `needX()` + `attachX()` + `getX()` interaction.
+    if (!$this->allowInlineCacheGeneration) {
+      throw new PhabricatorDataNotAttachedException($this);
     }
 
     $usable_value = $type->getDefaultValue();

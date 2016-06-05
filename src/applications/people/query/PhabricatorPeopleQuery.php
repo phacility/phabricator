@@ -528,9 +528,6 @@ final class PhabricatorPeopleQuery
     $cache_data = igroup($cache_data, 'userPHID');
     foreach ($user_map as $user_phid => $user) {
       $raw_rows = idx($cache_data, $user_phid, array());
-      if (!$raw_rows) {
-        continue;
-      }
       $raw_data = ipull($raw_rows, 'cacheData', 'cacheKey');
 
       foreach ($keys as $key) {

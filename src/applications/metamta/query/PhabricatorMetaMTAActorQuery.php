@@ -59,6 +59,7 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
     $users = id(new PhabricatorPeopleQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs($phids)
+      ->needUserSettings(true)
       ->execute();
     $users = mpull($users, null, 'getPHID');
 

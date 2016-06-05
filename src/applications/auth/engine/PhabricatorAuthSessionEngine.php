@@ -163,6 +163,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $user = $user_table->loadFromArray($info);
 
     $user->attachRawCacheData($cache_raw);
+    $user->setAllowInlineCacheGeneration(true);
 
     switch ($session_type) {
       case PhabricatorAuthSession::TYPE_WEB:
