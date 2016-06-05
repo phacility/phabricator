@@ -76,12 +76,6 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    return id(new PhabricatorPasteEditEngine())
-      ->setViewer($viewer)
-      ->loadQuickCreateItems();
-  }
-
   public function getMailCommandObjects() {
     return array(
       'paste' => array(

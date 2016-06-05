@@ -42,51 +42,29 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     PhabricatorUser $user,
     PhabricatorController $controller = null) {
 
-    $quick_create_items = $this->loadAllQuickCreateItems($user);
     $items = array();
+    $create_id = celerity_generate_unique_node_id();
 
-    if ($user->isLoggedIn() &&
-        $user->isUserActivated() &&
-        $quick_create_items) {
-      $create_id = celerity_generate_unique_node_id();
-      Javelin::initBehavior(
-        'aphlict-dropdown',
-        array(
-          'bubbleID' => $create_id,
-          'dropdownID' => 'phabricator-quick-create-menu',
-          'local' => true,
-          'desktop' => true,
-          'right' => true,
-        ));
+    Javelin::initBehavior(
+      'aphlict-dropdown',
+      array(
+        'bubbleID' => $create_id,
+        'dropdownID' => 'phabricator-quick-create-menu',
+        'local' => true,
+        'desktop' => true,
+        'right' => true,
+      ));
 
-      $item = id(new PHUIListItemView())
-        ->setName(pht('Create New...'))
-        ->setIcon('fa-plus')
-        ->addClass('core-menu-item')
-        ->setHref('/home/create/')
-        ->addSigil('quick-create-menu')
-        ->setID($create_id)
-        ->setAural(pht('Quick Create'))
-        ->setOrder(300);
-      $items[] = $item;
-    }
-
-    return $items;
-  }
-
-  public function loadAllQuickCreateItems(PhabricatorUser $viewer) {
-    $applications = id(new PhabricatorApplicationQuery())
-      ->setViewer($viewer)
-      ->withInstalled(true)
-      ->execute();
-
-    $items = array();
-    foreach ($applications as $application) {
-      $app_items = $application->getQuickCreateItems($viewer);
-      foreach ($app_items as $app_item) {
-        $items[] = $app_item;
-      }
-    }
+    $item = id(new PHUIListItemView())
+      ->setName(pht('Quick Actions'))
+      ->setIcon('fa-plus')
+      ->addClass('core-menu-item')
+      ->setHref('/home/create/')
+      ->addSigil('quick-create-menu')
+      ->setID($create_id)
+      ->setAural(pht('Quick Actions'))
+      ->setOrder(300);
+    $items[] = $item;
 
     return $items;
   }
@@ -95,7 +73,7 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     PhabricatorUser $viewer,
     PhabricatorController $controller = null) {
 
-    $items = $this->loadAllQuickCreateItems($viewer);
+    $items = PhabricatorQuickActions::loadMenuItemsForUser($viewer);
 
     $view = null;
     if ($items) {

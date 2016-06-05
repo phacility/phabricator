@@ -1972,20 +1972,34 @@ abstract class PhabricatorEditEngine
     return $application->getIcon();
   }
 
-  public function loadQuickCreateItems() {
-    $items = array();
-
-    if (!$this->hasCreateCapability()) {
-      return $items;
+  public function hasQuickCreateActions() {
+    if (!$this->isEngineConfigurable()) {
+      return false;
     }
 
-    $configs = $this->loadUsableConfigurationsForCreate();
+    return true;
+  }
+
+  public function newQuickCreateActions(array $configs) {
+    $items = array();
 
     if (!$configs) {
-      // No items to add.
-    } else if (count($configs) == 1) {
+      return array();
+    }
+
+    // If the viewer is logged in and can't create objects, don't show the
+    // menu item. If they're logged out, we assume they could create objects
+    // if they logged in, so we show the item as a hint about how to
+    // accomplish the action.
+    if ($this->getViewer()->isLoggedIn()) {
+      if (!$this->hasCreateCapability()) {
+        return array();
+      }
+    }
+
+    if (count($configs) == 1) {
       $config = head($configs);
-      $items[] = $this->newQuickCreateItem($config);
+      $items[] = $this->newQuickCreateAction($config);
     } else {
       $group_name = $this->getQuickCreateMenuHeaderText();
 
@@ -1994,7 +2008,7 @@ abstract class PhabricatorEditEngine
         ->setName($group_name);
 
       foreach ($configs as $config) {
-        $items[] = $this->newQuickCreateItem($config)
+        $items[] = $this->newQuickCreateAction($config)
           ->setIndented(true);
       }
     }
@@ -2017,7 +2031,7 @@ abstract class PhabricatorEditEngine
     return $configs;
   }
 
-  private function newQuickCreateItem(
+  private function newQuickCreateAction(
     PhabricatorEditEngineConfiguration $config) {
 
     $item_name = $config->getName();

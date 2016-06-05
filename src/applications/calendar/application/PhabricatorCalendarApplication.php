@@ -73,18 +73,6 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Calendar Event'))
-      ->setIcon('fa-calendar')
-      ->setHref($this->getBaseURI().'event/create/');
-    $items[] = $item;
-
-    return $items;
-  }
-
   public function getMailCommandObjects() {
     return array(
       'event' => array(
