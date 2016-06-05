@@ -30,6 +30,19 @@ final class PhabricatorSettingsMainController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
+    // Redirect "/panel/XYZ/" to the viewer's personal settings panel. This
+    // was the primary URI before global settings were introduced and allows
+    // generation of viewer-agnostic URIs for email.
+    $panel = $request->getURIData('panel');
+    if ($panel) {
+      $panel = phutil_escape_uri($panel);
+      $username = $viewer->getUsername();
+
+      $panel_uri = "/user/{$username}/page/{$panel}/";
+      $panel_uri = $this->getApplicationURI($panel_uri);
+      return id(new AphrontRedirectResponse())->setURI($panel_uri);
+    }
+
     $username = $request->getURIData('username');
     $builtin = $request->getURIData('builtin');
 

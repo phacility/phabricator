@@ -36,6 +36,8 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
           => 'PhabricatorSettingsMainController',
         'builtin/(?P<builtin>global)/'.$panel_pattern
           => 'PhabricatorSettingsMainController',
+        'panel/(?P<panel>[^/]+)/'
+          => 'PhabricatorSettingsMainController',
         'adjust/' => 'PhabricatorSettingsAdjustController',
         'timezone/(?P<offset>[^/]+)/'
           => 'PhabricatorSettingsTimezoneController',
