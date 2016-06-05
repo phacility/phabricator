@@ -160,7 +160,7 @@ final class PhabricatorEmailPreferencesSettingsPanel
     return $editors;
   }
 
-  private function getAllTags(PhabricatorUser $user) {
+  private function getAllTags(PhabricatorUser $user = null) {
     $tags = array();
     foreach ($this->getAllEditorsWithTags($user) as $editor) {
       $tags += $editor->getMailTagsMap();
