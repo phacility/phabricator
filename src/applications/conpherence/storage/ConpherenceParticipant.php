@@ -47,11 +47,16 @@ final class ConpherenceParticipant extends ConpherenceDAO {
       $this->setBehindTransactionPHID($xaction->getPHID());
       $this->setSeenMessageCount($conpherence->getMessageCount());
       $this->save();
+
+      PhabricatorUserCache::clearCache(
+        PhabricatorUserMessageCountCacheType::KEY_COUNT,
+        $this->getParticipantPHID());
     }
+
     return $this;
   }
 
-  private function isUpToDate(ConpherenceThread $conpherence) {
+  public function isUpToDate(ConpherenceThread $conpherence) {
     return
       ($this->getSeenMessageCount() == $conpherence->getMessageCount())
         &&

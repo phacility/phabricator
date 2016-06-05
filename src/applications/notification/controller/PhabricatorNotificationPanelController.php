@@ -71,8 +71,7 @@ final class PhabricatorNotificationPanelController
       $content,
       $connection_ui);
 
-    $unread_count = id(new PhabricatorFeedStoryNotification())
-      ->countUnread($viewer);
+    $unread_count = $viewer->getUnreadNotificationCount();
 
     $json = array(
       'content' => $content,

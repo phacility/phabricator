@@ -134,6 +134,9 @@ final class PhabricatorFileQuery
       return $files;
     }
 
+    $viewer = $this->getViewer();
+    $is_omnipotent = $viewer->isOmnipotent();
+
     // We need to load attached objects to perform policy checks for files.
     // First, load the edges.
 
@@ -153,6 +156,13 @@ final class PhabricatorFileQuery
         // If this is a profile image, don't bother loading related files.
         // It will always be visible, and we can get into trouble if we try
         // to load objects and end up stuck in a cycle. See T8478.
+        continue;
+      }
+
+      if ($is_omnipotent) {
+        // If the viewer is omnipotent, we don't need to load the associated
+        // objects either since they can certainly see the object. Skipping
+        // this can improve performance and prevent cycles.
         continue;
       }
 

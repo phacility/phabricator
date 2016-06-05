@@ -162,7 +162,6 @@ final class PhabricatorUserPreferencesEditor
         PhabricatorUserPreferencesCacheType::KEY_PREFERENCES);
     }
 
-
     return $xactions;
   }
 

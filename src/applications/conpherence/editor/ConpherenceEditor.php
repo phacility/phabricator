@@ -422,6 +422,10 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       $participant->save();
     }
 
+    PhabricatorUserCache::clearCaches(
+      PhabricatorUserMessageCountCacheType::KEY_COUNT,
+      array_keys($participants));
+
     if ($xactions) {
       $data = array(
         'type'        => 'message',

@@ -792,6 +792,16 @@ final class PhabricatorUser
     return $this->requireCacheData($uri_key);
   }
 
+  public function getUnreadNotificationCount() {
+    $notification_key = PhabricatorUserNotificationCountCacheType::KEY_COUNT;
+    return $this->requireCacheData($notification_key);
+  }
+
+  public function getUnreadMessageCount() {
+    $message_key = PhabricatorUserMessageCountCacheType::KEY_COUNT;
+    return $this->requireCacheData($message_key);
+  }
+
   public function getFullName() {
     if (strlen($this->getRealName())) {
       return $this->getUsername().' ('.$this->getRealName().')';

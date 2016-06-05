@@ -159,7 +159,8 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
 
     $will_receive_mail = array_fill_keys($this->mailRecipientPHIDs, true);
 
-    foreach (array_unique($subscribed_phids) as $user_phid) {
+    $user_phids = array_unique($subscribed_phids);
+    foreach ($user_phids as $user_phid) {
       if (isset($will_receive_mail[$user_phid])) {
         $mark_read = 1;
       } else {
@@ -184,6 +185,10 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
         $notif->getTableName(),
         implode(', ', $sql));
     }
+
+    PhabricatorUserCache::clearCaches(
+      PhabricatorUserNotificationCountCacheType::KEY_COUNT,
+      $user_phids);
   }
 
   private function sendNotification($chrono_key, array $subscribed_phids) {

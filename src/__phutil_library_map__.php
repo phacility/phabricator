@@ -3640,6 +3640,8 @@ phutil_register_library_map(array(
     'PhabricatorUserIconField' => 'applications/people/customfield/PhabricatorUserIconField.php',
     'PhabricatorUserLog' => 'applications/people/storage/PhabricatorUserLog.php',
     'PhabricatorUserLogView' => 'applications/people/view/PhabricatorUserLogView.php',
+    'PhabricatorUserMessageCountCacheType' => 'applications/people/cache/PhabricatorUserMessageCountCacheType.php',
+    'PhabricatorUserNotificationCountCacheType' => 'applications/people/cache/PhabricatorUserNotificationCountCacheType.php',
     'PhabricatorUserPHIDResolver' => 'applications/phid/resolver/PhabricatorUserPHIDResolver.php',
     'PhabricatorUserPreferences' => 'applications/settings/storage/PhabricatorUserPreferences.php',
     'PhabricatorUserPreferencesCacheType' => 'applications/people/cache/PhabricatorUserPreferencesCacheType.php',
@@ -8451,6 +8453,8 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
     ),
     'PhabricatorUserLogView' => 'AphrontView',
+    'PhabricatorUserMessageCountCacheType' => 'PhabricatorUserCacheType',
+    'PhabricatorUserNotificationCountCacheType' => 'PhabricatorUserCacheType',
     'PhabricatorUserPHIDResolver' => 'PhabricatorPHIDResolver',
     'PhabricatorUserPreferences' => array(
       'PhabricatorUserDAO',

@@ -97,7 +97,15 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
   }
 
   public static function clearCache($key, $user_phid) {
+    return self::clearCaches($key, array($user_phid));
+  }
+
+  public static function clearCaches($key, array $user_phids) {
     if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
+    if (!$user_phids) {
       return;
     }
 
@@ -108,14 +116,13 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
 
     queryfx(
       $conn_w,
-      'DELETE FROM %T WHERE cacheIndex = %s AND userPHID = %s',
+      'DELETE FROM %T WHERE cacheIndex = %s AND userPHID IN (%Ls)',
       $table->getTableName(),
       PhabricatorHash::digestForIndex($key),
-      $user_phid);
+      $user_phids);
 
     unset($unguarded);
   }
-
 
   public static function clearCacheForAllUsers($key) {
     if (PhabricatorEnv::isReadOnly()) {
