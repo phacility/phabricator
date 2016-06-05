@@ -194,4 +194,43 @@ final class PhabricatorSettingsEditEngine
     return $fields;
   }
 
+  protected function getValidationExceptionShortMessage(
+    PhabricatorApplicationTransactionValidationException $ex,
+    PhabricatorEditField $field) {
+
+    // Settings fields all have the same transaction type so we need to make
+    // sure the transaction is changing the same setting before matching an
+    // error to a given field.
+    $xaction_type = $field->getTransactionType();
+    if ($xaction_type == PhabricatorUserPreferencesTransaction::TYPE_SETTING) {
+      $property = PhabricatorUserPreferencesTransaction::PROPERTY_SETTING;
+
+      $field_setting = idx($field->getMetadata(), $property);
+      foreach ($ex->getErrors() as $error) {
+        if ($error->getType() !== $xaction_type) {
+          continue;
+        }
+
+        $xaction = $error->getTransaction();
+        if (!$xaction) {
+          continue;
+        }
+
+        $xaction_setting = $xaction->getMetadataValue($property);
+        if ($xaction_setting != $field_setting) {
+          continue;
+        }
+
+        $short_message = $error->getShortMessage();
+        if ($short_message !== null) {
+          return $short_message;
+        }
+      }
+
+      return null;
+    }
+
+    return parent::getValidationExceptionShortMessage($ex, $field);
+  }
+
 }

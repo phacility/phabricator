@@ -39,6 +39,10 @@ final class PhabricatorEditorSetting
   }
 
   public function validateTransactionValue($value) {
+    if (!strlen($value)) {
+      return;
+    }
+
     $ok = PhabricatorHelpEditorProtocolController::hasAllowedProtocol($value);
     if ($ok) {
       return;

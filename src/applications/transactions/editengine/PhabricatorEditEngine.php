@@ -1004,12 +1004,7 @@ abstract class PhabricatorEditEngine
         $validation_exception = $ex;
 
         foreach ($fields as $field) {
-          $xaction_type = $field->getTransactionType();
-          if ($xaction_type === null) {
-            continue;
-          }
-
-          $message = $ex->getShortMessage($xaction_type);
+          $message = $this->getValidationExceptionShortMessage($ex, $field);
           if ($message === null) {
             continue;
           }
@@ -2047,6 +2042,18 @@ abstract class PhabricatorEditEngine
       ->setName($item_name)
       ->setIcon($item_icon)
       ->setHref($item_uri);
+  }
+
+  protected function getValidationExceptionShortMessage(
+    PhabricatorApplicationTransactionValidationException $ex,
+    PhabricatorEditField $field) {
+
+    $xaction_type = $field->getTransactionType();
+    if ($xaction_type === null) {
+      return null;
+    }
+
+    return $ex->getShortMessage($xaction_type);
   }
 
   protected function getCreateNewObjectPolicy() {
