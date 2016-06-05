@@ -1044,6 +1044,21 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->moveToColumn($user, $board, $task_a, $column, $column, $a_options);
     $new_projects = $this->getTaskProjects($task_a);
     $this->assertEqual($old_projects, $new_projects);
+
+
+    // Add the parent project to the task. This should move it out of the
+    // milestone column and into the parent's backlog.
+    $this->addProjectTags($user, $task, array($board->getPHID()));
+    $expect_columns = array(
+      $backlog->getPHID(),
+    );
+    $this->assertColumns($expect_columns, $user, $board, $task);
+
+    $new_projects = $this->getTaskProjects($task);
+    $expect_projects = array(
+      $board->getPHID(),
+    );
+    $this->assertEqual($expect_projects, $new_projects);
   }
 
   public function testColumnExtendedPolicies() {

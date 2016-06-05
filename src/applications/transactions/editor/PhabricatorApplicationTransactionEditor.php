@@ -677,6 +677,8 @@ abstract class PhabricatorApplicationTransactionEditor
         }
 
         $editor->save();
+
+        $this->updateWorkboardColumns($object, $const, $old, $new);
         break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_SPACE:
@@ -3602,5 +3604,49 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return true;
   }
+
+  private function updateWorkboardColumns($object, $const, $old, $new) {
+    // If an object is removed from a project, remove it from any proxy
+    // columns for that project. This allows a task which is moved up from a
+    // milestone to the parent to move back into the "Backlog" column on the
+    // parent workboard.
+
+    if ($const != PhabricatorProjectObjectHasProjectEdgeType::EDGECONST) {
+      return;
+    }
+
+    // TODO: This should likely be some future WorkboardInterface.
+    $appears_on_workboards = ($object instanceof ManiphestTask);
+    if (!$appears_on_workboards) {
+      return;
+    }
+
+    $removed_phids = array_keys(array_diff_key($old, $new));
+    if (!$removed_phids) {
+      return;
+    }
+
+    // Find any proxy columns for the removed projects.
+    $proxy_columns = id(new PhabricatorProjectColumnQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withProxyPHIDs($removed_phids)
+      ->execute();
+    if (!$proxy_columns) {
+      return array();
+    }
+
+    $proxy_phids = mpull($proxy_columns, 'getPHID');
+
+    $position_table = new PhabricatorProjectColumnPosition();
+    $conn_w = $position_table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE objectPHID = %s AND columnPHID IN (%Ls)',
+      $position_table->getTableName(),
+      $object->getPHID(),
+      $proxy_phids);
+  }
+
 
 }
