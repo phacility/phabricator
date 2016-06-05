@@ -486,7 +486,10 @@ final class PhabricatorUser
       $settings = array();
     }
 
-    $defaults = PhabricatorSetting::getAllEnabledSettings($this);
+    // NOTE: To slightly improve performance, we're using all settings here,
+    // not just settings that are enabled for the current viewer. It's fine to
+    // get the value of a setting that we wouldn't let the user edit in the UI.
+    $defaults = PhabricatorSetting::getAllSettings();
 
     if (array_key_exists($key, $settings)) {
       $value = $settings[$key];

@@ -26,6 +26,11 @@ final class PhabricatorTranslationSetting
       'Choose which language you would like the Phabricator UI to use.');
   }
 
+  public function assertValidValue($value) {
+    $locales = PhutilLocale::loadAllLocales();
+    return isset($locales[$value]);
+  }
+
   protected function getSelectOptionGroups() {
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $locales = PhutilLocale::loadAllLocales();

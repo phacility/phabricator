@@ -2,6 +2,7 @@
 
 final class PhabricatorHomeApplication extends PhabricatorApplication {
 
+  private $quickItems;
   const DASHBOARD_DEFAULT = 'dashboard:default';
 
   public function getBaseURI() {
@@ -42,6 +43,11 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     PhabricatorUser $user,
     PhabricatorController $controller = null) {
 
+    $quick_items = $this->getQuickActionItems($user);
+    if (!$quick_items) {
+      return array();
+    }
+
     $items = array();
     $create_id = celerity_generate_unique_node_id();
 
@@ -73,7 +79,7 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     PhabricatorUser $viewer,
     PhabricatorController $controller = null) {
 
-    $items = PhabricatorQuickActions::loadMenuItemsForUser($viewer);
+    $items = $this->getQuickActionItems($viewer);
 
     $view = null;
     if ($items) {
@@ -92,6 +98,14 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
         $view);
     }
     return $view;
+  }
+
+  private function getQuickActionItems(PhabricatorUser $viewer) {
+    if ($this->quickItems === null) {
+      $items = PhabricatorQuickActions::loadMenuItemsForUser($viewer);
+      $this->quickItems = $items;
+    }
+    return $this->quickItems;
   }
 
 }
