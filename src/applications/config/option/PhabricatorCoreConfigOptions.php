@@ -282,10 +282,9 @@ final class PhabricatorCoreConfigOptions
             "Config option '%s' is invalid. The URI must contain a dot ".
             "('%s'), like '%s', not just a bare name like '%s'. Some web ".
             "browsers will not set cookies on domains with no TLD.",
-            '.',
+            $key,
             'http://example.com/',
-            'http://example/',
-            $key));
+            'http://example/'));
       }
 
       $path = $uri->getPath();
