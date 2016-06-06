@@ -17,41 +17,48 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
   }
 
   public function render() {
-    $old = $this->oldText;
-    $new = $this->newText;
+    $diff = $this->buildDiff();
 
-    // TODO: On mobile, or perhaps by default, we should switch to 1-up once
-    // that is built.
+    require_celerity_resource('differential-changeset-view-css');
 
-    if (strlen($old)) {
-      $old = phutil_utf8_hard_wrap($old, 80);
-      $old = implode("\n", $old)."\n";
+    $result = array();
+    foreach ($diff->getParts() as $part) {
+      $type = $part['type'];
+      $text = $part['text'];
+      switch ($type) {
+        case '-':
+          $result[] = phutil_tag(
+            'span',
+            array(
+              'class' => 'old',
+            ),
+            $text);
+          break;
+        case '+':
+          $result[] = phutil_tag(
+            'span',
+            array(
+              'class' => 'new',
+            ),
+            $text);
+          break;
+        case '=':
+          $result[] = $text;
+          break;
+      }
     }
 
-    if (strlen($new)) {
-      $new = phutil_utf8_hard_wrap($new, 80);
-      $new = implode("\n", $new)."\n";
-    }
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'prose-diff',
+      ),
+      $result);
+  }
 
-    try {
-      $engine = new PhabricatorDifferenceEngine();
-      $changeset = $engine->generateChangesetFromFileContent($old, $new);
-
-      $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
-
-      $markup_engine = new PhabricatorMarkupEngine();
-      $markup_engine->setViewer($this->getUser());
-
-      $parser = new DifferentialChangesetParser();
-      $parser->setUser($this->getUser());
-      $parser->setChangeset($changeset);
-      $parser->setMarkupEngine($markup_engine);
-      $parser->setWhitespaceMode($whitespace_mode);
-
-      return $parser->render(0, PHP_INT_MAX, array());
-    } catch (Exception $ex) {
-      return $ex->getMessage();
-    }
+  private function buildDiff() {
+    $engine = new PhutilProseDifferenceEngine();
+    return $engine->getDiff($this->oldText, $this->newText);
   }
 
 }

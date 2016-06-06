@@ -93,6 +93,19 @@
   user-select: none;
 }
 
+.prose-diff span.old,
+.prose-diff span.new {
+  padding: 0 2px;
+}
+
+.prose-diff span.old {
+  color: {$redtext};
+}
+
+.prose-diff span.new {
+  color: {$greentext};
+}
+
 .differential-diff th.selected {
   background-color: {$sh-yellowbackground};
 }
@@ -118,12 +131,14 @@
 }
 
 .differential-diff td.old-full,
-.differential-diff td.old span.bright {
+.differential-diff td.old span.bright,
+.prose-diff span.old {
   background: rgba(251, 175, 175, .7);
 }
 
 .differential-diff td.new-full,
-.differential-diff td.new span.bright {
+.differential-diff td.new span.bright,
+.prose-diff span.new {
   background: rgba(151, 234, 151, .6);
 }
 

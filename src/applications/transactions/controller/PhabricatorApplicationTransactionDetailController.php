@@ -24,8 +24,7 @@ final class PhabricatorApplicationTransactionDetailController
 
     return $this->newDialog()
       ->setTitle(pht('Change Details'))
-      ->setWidth(AphrontDialogView::WIDTH_FULL)
-      ->setFlush(true)
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->appendChild($details)
       ->addCancelButton($cancel_uri);
   }
