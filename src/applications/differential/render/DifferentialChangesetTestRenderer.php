@@ -32,6 +32,13 @@ abstract class DifferentialChangesetTestRenderer
     $changeset = $this->getChangeset();
     list($old, $new) = $this->getChangesetProperties($changeset);
 
+    foreach (array_keys($old) as $key) {
+      if ($old[$key] === idx($new, $key)) {
+        unset($old[$key]);
+        unset($new[$key]);
+      }
+    }
+
     if (!$old && !$new) {
       return null;
     }
