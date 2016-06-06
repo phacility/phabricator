@@ -93,6 +93,14 @@
   user-select: none;
 }
 
+.prose-diff {
+  white-space: pre-wrap;
+}
+
+.prose-diff-frame {
+  padding: 12px;
+}
+
 .prose-diff span.old,
 .prose-diff span.new {
   padding: 0 2px;
