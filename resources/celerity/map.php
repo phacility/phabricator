@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => 'b9927580',
-    'core.pkg.js' => '3f15fa62',
+    'core.pkg.js' => '3f2c120d',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'f3fb8324',
     'differential.pkg.js' => '4b7d8f19',
@@ -507,6 +507,7 @@ return array(
     'rsrc/js/core/behavior-search-typeahead.js' => '06c32383',
     'rsrc/js/core/behavior-select-content.js' => 'bf5374ef',
     'rsrc/js/core/behavior-select-on-click.js' => '4e3e79a6',
+    'rsrc/js/core/behavior-setup-check-https.js' => '491416b3',
     'rsrc/js/core/behavior-time-typeahead.js' => '522431f7',
     'rsrc/js/core/behavior-toggle-class.js' => '92b9ec77',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
@@ -692,6 +693,7 @@ return array(
     'javelin-behavior-search-reorder-queries' => 'e9581f08',
     'javelin-behavior-select-content' => 'bf5374ef',
     'javelin-behavior-select-on-click' => '4e3e79a6',
+    'javelin-behavior-setup-check-https' => '491416b3',
     'javelin-behavior-slowvote-embed' => '887ad43f',
     'javelin-behavior-stripe-payment-form' => '3f5d6dbf',
     'javelin-behavior-test-payment-form' => 'fc91ab6c',
@@ -1213,6 +1215,11 @@ return array(
       'javelin-dom',
       'phabricator-drag-and-drop-file-upload',
       'phabricator-textareautils',
+    ),
+    '491416b3' => array(
+      'javelin-behavior',
+      'javelin-uri',
+      'phabricator-notification',
     ),
     '49b73b36' => array(
       'javelin-behavior',
@@ -2340,6 +2347,7 @@ return array(
       'javelin-behavior-durable-column',
       'conpherence-thread-manager',
       'javelin-behavior-detect-timezone',
+      'javelin-behavior-setup-check-https',
     ),
     'darkconsole.pkg.js' => array(
       'javelin-behavior-dark-console',
