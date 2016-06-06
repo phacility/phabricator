@@ -2704,7 +2704,9 @@ abstract class PhabricatorApplicationTransactionEditor
     $object_href = null) {
 
     $headers = array();
+    $headers_html = array();
     $comments = array();
+    $details = array();
 
     foreach ($xactions as $xaction) {
       if ($xaction->shouldHideForMail($xactions)) {
@@ -2716,16 +2718,25 @@ abstract class PhabricatorApplicationTransactionEditor
         $headers[] = $header;
       }
 
+      $header_html = $xaction->getTitleForHTMLMail();
+      if ($header_html !== null) {
+        $headers_html[] = $header_html;
+      }
+
       $comment = $xaction->getBodyForMail();
       if ($comment !== null) {
         $comments[] = $comment;
+      }
+
+      if ($xaction->hasChangeDetailsForMail()) {
+        $details[] = $xaction;
       }
     }
 
     $headers_text = implode("\n", $headers);
     $body->addRawPlaintextSection($headers_text);
 
-    $headers_html = phutil_implode_html(phutil_tag('br'), $headers);
+    $headers_html = phutil_implode_html(phutil_tag('br'), $headers_html);
 
     $header_button = null;
     if ($object_label !== null) {
@@ -2765,7 +2776,13 @@ abstract class PhabricatorApplicationTransactionEditor
       array(
         'style' => implode(' ', $xactions_style),
       ),
-      $headers_html);
+      array(
+        $headers_html,
+        // Add an extra newline to prevent the "View Object" button from
+        // running into the transaction text in Mail.app text snippet
+        // previews.
+        "\n",
+      ));
 
     $headers_html = phutil_tag(
       'table',
@@ -2777,6 +2794,14 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($comments as $comment) {
       $body->addRemarkupSection(null, $comment);
     }
+
+    foreach ($details as $xaction) {
+      $details = $xaction->renderChangeDetailsForMail($body->getViewer());
+      if ($details !== null) {
+        $body->addHTMLSection(pht('EDIT DETAILS'), $details);
+      }
+    }
+
   }
 
   /**
