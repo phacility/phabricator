@@ -269,10 +269,10 @@ final class PhabricatorCoreConfigOptions
         throw new PhabricatorConfigValidationException(
           pht(
             "Config option '%s' is invalid. The URI must start with ".
-            "%s' or '%s'.",
+            "'%s' or '%s'.",
+            $key,
             'http://',
-            'https://',
-            $key));
+            'https://'));
       }
 
       $domain = $uri->getDomain();
