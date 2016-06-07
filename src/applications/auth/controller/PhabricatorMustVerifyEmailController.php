@@ -3,10 +3,6 @@
 final class PhabricatorMustVerifyEmailController
   extends PhabricatorAuthController {
 
-  public function shouldRequireLogin() {
-    return false;
-  }
-
   public function shouldRequireEmailVerification() {
     // NOTE: We don't technically need this since PhabricatorController forces
     // us here in either case, but it's more consistent with intent.
