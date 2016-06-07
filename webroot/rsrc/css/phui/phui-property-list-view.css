@@ -160,6 +160,13 @@
   min-width: 240px;
 }
 
+.phui-property-list-video {
+  display: block;
+  margin: 0 auto;
+  width: 90%;
+  min-width: 240px;
+}
+
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
 .phui-property-list-view .phui-tag-view {
