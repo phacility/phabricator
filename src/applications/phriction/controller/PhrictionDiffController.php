@@ -45,61 +45,20 @@ final class PhrictionDiffController extends PhrictionController {
     $text_l = $content_l->getContent();
     $text_r = $content_r->getContent();
 
-    $text_l = phutil_utf8_hard_wrap($text_l, 80);
-    $text_l = implode("\n", $text_l);
-    $text_r = phutil_utf8_hard_wrap($text_r, 80);
-    $text_r = implode("\n", $text_r);
+    $diff_view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setOldText($text_l)
+      ->setNewText($text_r);
 
-    $engine = new PhabricatorDifferenceEngine();
-    $changeset = $engine->generateChangesetFromFileContent($text_l, $text_r);
-
-    $changeset->setFilename($content_r->getTitle());
-
-    $changeset->setOldProperties(
-      array(
-        'Title'   => $content_l->getTitle(),
-      ));
-    $changeset->setNewProperties(
-      array(
-        'Title'   => $content_r->getTitle(),
-      ));
-
-    $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
-
-    $parser = id(new DifferentialChangesetParser())
-      ->setUser($viewer)
-      ->setChangeset($changeset)
-      ->setRenderingReference("{$l},{$r}");
-
-    $parser->readParametersFromRequest($request);
-    $parser->setWhitespaceMode($whitespace_mode);
-
-    $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($viewer);
-    $engine->process();
-    $parser->setMarkupEngine($engine);
-
-    $spec = $request->getStr('range');
-    list($range_s, $range_e, $mask) =
-      DifferentialChangesetParser::parseRangeSpecification($spec);
-
-    $parser->setRange($range_s, $range_e);
-    $parser->setMask($mask);
-
-    if ($request->isAjax()) {
-      return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($parser->renderChangeset());
-    }
-
-    $changes = id(new DifferentialChangesetListView())
-      ->setUser($this->getViewer())
-      ->setChangesets(array($changeset))
-      ->setVisibleChangesets(array($changeset))
-      ->setRenderingReferences(array("{$l},{$r}"))
-      ->setRenderURI('/phriction/diff/'.$document->getID().'/')
-      ->setTitle(pht('Changes'))
+    $changes = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Content Changes'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setParser($parser);
+      ->appendChild(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'prose-diff-frame',
+          ),
+          $diff_view));
 
     require_celerity_resource('phriction-document-css');
 

@@ -151,10 +151,9 @@ final class PhabricatorCalendarEventSearchEngine
       $display_start = $start_day->format('U');
       $display_end = $next->format('U');
 
-      $preferences = $viewer->loadPreferences();
-      $pref_week_day = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
+      $start_of_week = $viewer->getUserSetting(
+        PhabricatorWeekStartDaySetting::SETTINGKEY);
 
-      $start_of_week = $preferences->getPreference($pref_week_day, 0);
       $end_of_week = ($start_of_week + 6) % 7;
 
       $first_of_month = $start_day->format('w');

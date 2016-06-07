@@ -3,7 +3,11 @@
 final class PhabricatorConduitTokensSettingsPanel
   extends PhabricatorSettingsPanel {
 
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -15,15 +19,11 @@ final class PhabricatorConduitTokensSettingsPanel
     return pht('Conduit API Tokens');
   }
 
-  public function getPanelGroup() {
-    return pht('Sessions and Logs');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {
-    if ($this->getUser()->getIsMailingList()) {
-      return false;
-    }
-
     return true;
   }
 

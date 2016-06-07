@@ -103,6 +103,9 @@ try {
           'Invalid username ("%s"). There is no user with this username.',
           $user_name));
     }
+
+    id(new PhabricatorAuthSessionEngine())
+      ->willServeRequestForUser($user);
   } else if (strlen($device_name)) {
     if (!$remote_address) {
       throw new Exception(

@@ -495,4 +495,12 @@ abstract class PhabricatorAuthProvider extends Phobject {
     }
   }
 
+  public function supportsAutoLogin() {
+    return false;
+  }
+
+  public function getAutoLoginURI(AphrontRequest $request) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
 }

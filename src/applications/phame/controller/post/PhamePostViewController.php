@@ -78,10 +78,14 @@ final class PhamePostViewController
       ->executeOne();
     $blogger_profile = $blogger->loadUserProfile();
 
+
+    $author_uri = '/p/'.$blogger->getUsername().'/';
+    $author_uri = PhabricatorEnv::getURI($author_uri);
+
     $author = phutil_tag(
       'a',
       array(
-        'href' => '/p/'.$blogger->getUsername().'/',
+        'href' => $author_uri,
       ),
       $blogger->getUsername());
 
@@ -105,7 +109,7 @@ final class PhamePostViewController
           $blogger_profile->getTitle(),
         ))
       ->setImage($blogger->getProfileImageURI())
-      ->setImageHref('/p/'.$blogger->getUsername());
+      ->setImageHref($author_uri);
 
     $timeline = $this->buildTransactionTimeline(
       $post,
@@ -128,10 +132,10 @@ final class PhamePostViewController
 
     $next_view = new PhameNextPostView();
     if ($next) {
-      $next_view->setNext($next->getTitle(), $next->getViewURI());
+      $next_view->setNext($next->getTitle(), $next->getLiveURI());
     }
     if ($prev) {
-      $next_view->setPrevious($prev->getTitle(), $prev->getViewURI());
+      $next_view->setPrevious($prev->getTitle(), $prev->getLiveURI());
     }
 
     $document->setFoot($next_view);

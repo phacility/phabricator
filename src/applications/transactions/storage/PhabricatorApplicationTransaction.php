@@ -693,6 +693,33 @@ abstract class PhabricatorApplicationTransaction
     return id(clone $this)->setRenderingTarget('text')->getTitle();
   }
 
+  public function getTitleForHTMLMail() {
+    $title = $this->getTitleForMail();
+    if ($title === null) {
+      return null;
+    }
+
+    if ($this->hasChangeDetails()) {
+      $details_uri = $this->getChangeDetailsURI();
+      $details_uri = PhabricatorEnv::getProductionURI($details_uri);
+
+      $show_details = phutil_tag(
+        'a',
+        array(
+          'href' => $details_uri,
+        ),
+        pht('(Show Details)'));
+
+      $title = array($title, ' ', $show_details);
+    }
+
+    return $title;
+  }
+
+  public function getChangeDetailsURI() {
+    return '/transactions/detail/'.$this->getPHID().'/';
+  }
+
   public function getBodyForMail() {
     if ($this->isInlineCommentTransaction()) {
       // We don't return inline comment content as mail body content, because
@@ -1307,6 +1334,18 @@ abstract class PhabricatorApplicationTransaction
     return false;
   }
 
+  public function hasChangeDetailsForMail() {
+    return $this->hasChangeDetails();
+  }
+
+  public function renderChangeDetailsForMail(PhabricatorUser $viewer) {
+    $view = $this->renderChangeDetails($viewer);
+    if ($view instanceof PhabricatorApplicationTransactionTextDiffDetailView) {
+      return $view->renderForMail();
+    }
+    return null;
+  }
+
   public function renderChangeDetails(PhabricatorUser $viewer) {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
@@ -1327,15 +1366,10 @@ abstract class PhabricatorApplicationTransaction
     PhabricatorUser $viewer,
     $old,
     $new) {
-
-    require_celerity_resource('differential-changeset-view-css');
-
-    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+    return id(new PhabricatorApplicationTransactionTextDiffDetailView())
       ->setUser($viewer)
       ->setOldText($old)
       ->setNewText($new);
-
-    return $view->render();
   }
 
   public function attachTransactionGroup(array $group) {

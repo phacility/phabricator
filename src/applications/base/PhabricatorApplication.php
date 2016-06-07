@@ -335,17 +335,6 @@ abstract class PhabricatorApplication
   }
 
 
-  /**
-   * Build items for the "quick create" menu.
-   *
-   * @param   PhabricatorUser         The viewing user.
-   * @return  list<PHUIListItemView>  List of menu items.
-   */
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    return array();
-  }
-
-
 /* -(  Application Management  )--------------------------------------------- */
 
 

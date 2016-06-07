@@ -2,7 +2,11 @@
 
 final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
 
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -14,16 +18,8 @@ final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
     return pht('SSH Public Keys');
   }
 
-  public function getPanelGroup() {
-    return pht('Authentication');
-  }
-
-  public function isEnabled() {
-    if ($this->getUser()->getIsMailingList()) {
-      return false;
-    }
-
-    return true;
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {

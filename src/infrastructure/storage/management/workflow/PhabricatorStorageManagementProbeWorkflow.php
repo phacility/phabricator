@@ -10,6 +10,10 @@ final class PhabricatorStorageManagementProbeWorkflow
       ->setSynopsis(pht('Show approximate table sizes.'));
   }
 
+  protected function isReadOnlyWorkflow() {
+    return true;
+  }
+
   public function didExecute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
     $console->writeErr(

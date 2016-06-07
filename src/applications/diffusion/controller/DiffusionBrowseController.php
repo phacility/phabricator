@@ -105,28 +105,31 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $path = $drequest->getPath();
 
-    $preferences = $viewer->loadPreferences();
+    $blame_key = PhabricatorDiffusionBlameSetting::SETTINGKEY;
+    $color_key = PhabricatorDiffusionColorSetting::SETTINGKEY;
 
     $show_blame = $request->getBool(
       'blame',
-      $preferences->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_BLAME,
-        false));
+      $viewer->getUserSetting($blame_key));
+
     $show_color = $request->getBool(
       'color',
-      $preferences->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_COLOR,
-        true));
+      $viewer->getUserSetting($color_key));
 
     $view = $request->getStr('view');
     if ($request->isFormPost() && $view != 'raw' && $viewer->isLoggedIn()) {
-      $preferences->setPreference(
-        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_BLAME,
-        $show_blame);
-      $preferences->setPreference(
-        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_COLOR,
-        $show_color);
-      $preferences->save();
+      $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
+
+      $editor = id(new PhabricatorUserPreferencesEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true);
+
+      $xactions = array();
+      $xactions[] = $preferences->newTransaction($blame_key, $show_blame);
+      $xactions[] = $preferences->newTransaction($color_key, $show_color);
+      $editor->applyTransactions($preferences, $xactions);
 
       $uri = $request->getRequestURI()
         ->alter('blame', null)

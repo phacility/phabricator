@@ -164,33 +164,6 @@ final class PhabricatorMetaMTAMail
     return $this->getParam('herald-force-recipients', array());
   }
 
-  public function getTranslation(array $objects) {
-    $default_translation = PhabricatorEnv::getEnvConfig('translation.provider');
-    $return = null;
-    $recipients = array_merge(
-      idx($this->parameters, 'to', array()),
-      idx($this->parameters, 'cc', array()));
-    foreach (array_select_keys($objects, $recipients) as $object) {
-      $translation = null;
-      if ($object instanceof PhabricatorUser) {
-        $translation = $object->getTranslation();
-      }
-      if (!$translation) {
-        $translation = $default_translation;
-      }
-      if ($return && $translation != $return) {
-        return $default_translation;
-      }
-      $return = $translation;
-    }
-
-    if (!$return) {
-      $return = $default_translation;
-    }
-
-    return $return;
-  }
-
   public function addPHIDHeaders($name, array $phids) {
     $phids = array_unique($phids);
     foreach ($phids as $phid) {
@@ -462,31 +435,16 @@ final class PhabricatorMetaMTAMail
       $add_cc = array();
       $add_to = array();
 
-      // Only try to use preferences if everything is multiplexed, so we
-      // get consistent behavior.
-      $use_prefs = self::shouldMultiplexAllMail();
-
-      $prefs = null;
-      if ($use_prefs) {
-
-        // If multiplexing is enabled, some recipients will be in "Cc"
-        // rather than "To". We'll move them to "To" later (or supply a
-        // dummy "To") but need to look for the recipient in either the
-        // "To" or "Cc" fields here.
-        $target_phid = head(idx($params, 'to', array()));
-        if (!$target_phid) {
-          $target_phid = head(idx($params, 'cc', array()));
-        }
-
-        if ($target_phid) {
-          $user = id(new PhabricatorUser())->loadOneWhere(
-            'phid = %s',
-            $target_phid);
-          if ($user) {
-            $prefs = $user->loadPreferences();
-          }
-        }
+      // If multiplexing is enabled, some recipients will be in "Cc"
+      // rather than "To". We'll move them to "To" later (or supply a
+      // dummy "To") but need to look for the recipient in either the
+      // "To" or "Cc" fields here.
+      $target_phid = head(idx($params, 'to', array()));
+      if (!$target_phid) {
+        $target_phid = head(idx($params, 'cc', array()));
       }
+
+      $preferences = $this->loadPreferences($target_phid);
 
       foreach ($params as $key => $value) {
         switch ($key) {
@@ -553,15 +511,7 @@ final class PhabricatorMetaMTAMail
             $subject = array();
 
             if ($is_threaded) {
-              $add_re = PhabricatorEnv::getEnvConfig('metamta.re-prefix');
-
-              if ($prefs) {
-                $add_re = $prefs->getPreference(
-                  PhabricatorUserPreferences::PREFERENCE_RE_PREFIX,
-                  $add_re);
-              }
-
-              if ($add_re) {
+              if ($this->shouldAddRePrefix($preferences)) {
                 $subject[] = 'Re:';
               }
             }
@@ -570,16 +520,7 @@ final class PhabricatorMetaMTAMail
 
             $vary_prefix = idx($params, 'vary-subject-prefix');
             if ($vary_prefix != '') {
-              $use_subject = PhabricatorEnv::getEnvConfig(
-                'metamta.vary-subjects');
-
-              if ($prefs) {
-                $use_subject = $prefs->getPreference(
-                  PhabricatorUserPreferences::PREFERENCE_VARY_SUBJECT,
-                  $use_subject);
-              }
-
-              if ($use_subject) {
+              if ($this->shouldVarySubject($preferences)) {
                 $subject[] = $vary_prefix;
               }
             }
@@ -634,13 +575,7 @@ final class PhabricatorMetaMTAMail
       }
       $mailer->setBody($body);
 
-      $html_emails = true;
-      if ($use_prefs && $prefs) {
-        $html_emails = $prefs->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_HTML_EMAILS,
-          $html_emails);
-      }
-
+      $html_emails = $this->shouldSendHTML($preferences);
       if ($html_emails && isset($params['html-body'])) {
         $mailer->setHTMLBody($params['html-body']);
       }
@@ -927,25 +862,25 @@ final class PhabricatorMetaMTAMail
       $from_user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($from_phid))
+        ->needUserSettings(true)
         ->execute();
       $from_user = head($from_user);
       if ($from_user) {
-        $pref_key = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
-        $exclude_self = $from_user
-          ->loadPreferences()
-          ->getPreference($pref_key);
+        $pref_key = PhabricatorEmailSelfActionsSetting::SETTINGKEY;
+        $exclude_self = $from_user->getUserSetting($pref_key);
         if ($exclude_self) {
           $from_actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_SELF);
         }
       }
     }
 
-    $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-      'userPHID in (%Ls)',
-      $actor_phids);
+    $all_prefs = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUserPHIDs($actor_phids)
+      ->execute();
     $all_prefs = mpull($all_prefs, null, 'getUserPHID');
 
-    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
+    $value_email = PhabricatorEmailTagsSetting::VALUE_EMAIL;
 
     // Exclude all recipients who have set preferences to not receive this type
     // of email (for example, a user who says they don't want emails about task
@@ -953,9 +888,8 @@ final class PhabricatorMetaMTAMail
     $tags = $this->getParam('mailtags');
     if ($tags) {
       foreach ($all_prefs as $phid => $prefs) {
-        $user_mailtags = $prefs->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
-          array());
+        $user_mailtags = $prefs->getSettingValue(
+          PhabricatorEmailTagsSetting::SETTINGKEY);
 
         // The user must have elected to receive mail for at least one
         // of the mailtags.
@@ -1008,9 +942,8 @@ final class PhabricatorMetaMTAMail
     // Exclude recipients who don't want any mail. This rule is very strong
     // and runs last.
     foreach ($all_prefs as $phid => $prefs) {
-      $exclude = $prefs->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_NO_MAIL,
-        false);
+      $exclude = $prefs->getSettingValue(
+        PhabricatorEmailNotificationsSetting::SETTINGKEY);
       if ($exclude) {
         $actors[$phid]->setUndeliverable(
           PhabricatorMetaMTAActor::REASON_MAIL_DISABLED);
@@ -1166,6 +1099,67 @@ final class PhabricatorMetaMTAMail
     }
 
     return $this->routingMap;
+  }
+
+/* -(  Preferences  )-------------------------------------------------------- */
+
+
+  private function loadPreferences($target_phid) {
+    if (!self::shouldMultiplexAllMail()) {
+      $target_phid = null;
+    }
+
+    if ($target_phid) {
+      $preferences = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withUserPHIDs(array($target_phid))
+        ->executeOne();
+    } else {
+      $preferences = null;
+    }
+
+    // TODO: Here, we would load global preferences once they exist.
+
+    if (!$preferences) {
+      // If we haven't found suitable preferences yet, return an empty object
+      // which implicitly has all the default values.
+      $preferences = id(new PhabricatorUserPreferences())
+        ->attachUser(new PhabricatorUser());
+    }
+
+    return $preferences;
+  }
+
+  private function shouldAddRePrefix(PhabricatorUserPreferences $preferences) {
+    $default_value = PhabricatorEnv::getEnvConfig('metamta.re-prefix');
+
+    $value = $preferences->getPreference(
+      PhabricatorEmailRePrefixSetting::SETTINGKEY);
+    if ($value === null) {
+      return $default_value;
+    }
+
+    return ($value == PhabricatorEmailRePrefixSetting::VALUE_RE_PREFIX);
+  }
+
+  private function shouldVarySubject(PhabricatorUserPreferences $preferences) {
+    $default_value = PhabricatorEnv::getEnvConfig('metamta.vary-subjects');
+
+    $value = $preferences->getPreference(
+      PhabricatorEmailVarySubjectsSetting::SETTINGKEY);
+
+    if ($value === null) {
+      return $default_value;
+    }
+
+    return ($value == PhabricatorEmailVarySubjectsSetting::VALUE_VARY_SUBJECTS);
+  }
+
+  private function shouldSendHTML(PhabricatorUserPreferences $preferences) {
+    $value = $preferences->getSettingValue(
+      PhabricatorEmailFormatSetting::SETTINGKEY);
+
+    return ($value == PhabricatorEmailFormatSetting::VALUE_HTML_EMAIL);
   }
 
 

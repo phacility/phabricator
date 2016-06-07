@@ -11,12 +11,8 @@ final class PhabricatorExternalAccountsSettingsPanel
     return pht('External Accounts');
   }
 
-  public function getPanelGroup() {
-    return pht('Authentication');
-  }
-
-  public function isEnabled() {
-    return true;
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {

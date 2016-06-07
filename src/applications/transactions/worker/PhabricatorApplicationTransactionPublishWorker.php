@@ -84,8 +84,10 @@ final class PhabricatorApplicationTransactionPublishWorker
 
     $xaction_phids = idx($data, 'xactionPHIDs');
     if (!$xaction_phids) {
-      throw new PhabricatorWorkerPermanentFailureException(
-        pht('Task has no transaction PHIDs!'));
+      // It's okay if we don't have any transactions. This can happen when
+      // creating objects or performing no-op updates. We will still apply
+      // meaningful side effects like updating search engine indexes.
+      return array();
     }
 
     $viewer = PhabricatorUser::getOmnipotentUser();

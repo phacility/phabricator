@@ -259,7 +259,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return javelin_tag(
       'a',
       array(
-        'href' => '/transactions/detail/'.$xaction->getPHID().'/',
+        'href' => $xaction->getChangeDetailsURI(),
         'sigil' => 'workflow',
       ),
       pht('(Show Details)'));

@@ -137,12 +137,28 @@ final class DiffusionRepositoryStorageManagementPanel
         $version = idx($versions, $device->getPHID());
         if ($version) {
           $version_number = $version->getRepositoryVersion();
-          $version_number = phutil_tag(
-            'a',
-            array(
-              'href' => "/diffusion/pushlog/view/{$version_number}/",
-            ),
-            $version_number);
+
+          $href = null;
+          if ($repository->isHosted()) {
+            $href = "/diffusion/pushlog/view/{$version_number}/";
+          } else {
+            $commit = id(new DiffusionCommitQuery())
+              ->setViewer($viewer)
+              ->withIDs(array($version_number))
+              ->executeOne();
+            if ($commit) {
+              $href = $commit->getURI();
+            }
+          }
+
+          if ($href) {
+            $version_number = phutil_tag(
+              'a',
+              array(
+                'href' => $href,
+              ),
+              $version_number);
+          }
         } else {
           $version_number = '-';
         }

@@ -6,7 +6,7 @@ final class PhabricatorHomeQuickCreateController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $items = $this->getCurrentApplication()->loadAllQuickCreateItems($viewer);
+    $items = PhabricatorQuickActions::loadMenuItemsForUser($viewer);
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);

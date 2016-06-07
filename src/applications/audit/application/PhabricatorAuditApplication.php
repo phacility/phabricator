@@ -60,7 +60,7 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
 
     $count = count($commits);
     if ($count >= $limit) {
-      $count_str = pht('%s+ Problem Commit(s)', new PhutilNumber($limit - 1));
+      $count_str = pht('%s+ Problem Commits', new PhutilNumber($limit - 1));
     } else {
       $count_str = pht('%s Problem Commit(s)', new PhutilNumber($count));
     }
@@ -80,9 +80,13 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
 
     $count = count($commits);
     if ($count >= $limit) {
-      $count_str = pht('%s+ Problem Commit(s)', new PhutilNumber($limit - 1));
+      $count_str = pht(
+        '%s+ Commits Awaiting Audit',
+        new PhutilNumber($limit - 1));
     } else {
-      $count_str = pht('%s Problem Commit(s)', new PhutilNumber($count));
+      $count_str = pht(
+        '%s Commit(s) Awaiting Audit',
+        new PhutilNumber($count));
     }
 
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;

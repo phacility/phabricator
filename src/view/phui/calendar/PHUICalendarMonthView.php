@@ -574,10 +574,10 @@ final class PHUICalendarMonthView extends AphrontView {
   }
 
   private function getWeekStartAndEnd() {
-    $preferences = $this->getViewer()->loadPreferences();
-    $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
+    $viewer = $this->getViewer();
+    $week_key = PhabricatorWeekStartDaySetting::SETTINGKEY;
 
-    $week_start = $preferences->getPreference($pref_week_start, 0);
+    $week_start = $viewer->getUserSetting($week_key);
     $week_end = ($week_start + 6) % 7;
 
     return array($week_start, $week_end);

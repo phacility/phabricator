@@ -10,9 +10,11 @@ final class PhabricatorStorageManagementShellWorkflow
       ->setSynopsis(pht('Launch an interactive shell.'));
   }
 
+  protected function isReadOnlyWorkflow() {
+    return true;
+  }
+
   public function execute(PhutilArgumentParser $args) {
-
-
     $api = $this->getAPI();
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 

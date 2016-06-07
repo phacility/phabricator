@@ -90,12 +90,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return $status;
   }
 
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    return id(new ManiphestEditEngine())
-      ->setViewer($viewer)
-      ->loadQuickCreateItems();
-  }
-
   public function supportsEmailIntegration() {
     return true;
   }

@@ -10,8 +10,8 @@ final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
     return pht('Password');
   }
 
-  public function getPanelGroup() {
-    return pht('Authentication');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {

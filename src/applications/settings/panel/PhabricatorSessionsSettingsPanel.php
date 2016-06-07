@@ -10,8 +10,8 @@ final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
     return pht('Sessions');
   }
 
-  public function getPanelGroup() {
-    return pht('Sessions and Logs');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {

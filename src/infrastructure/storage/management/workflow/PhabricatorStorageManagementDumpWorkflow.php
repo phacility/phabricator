@@ -19,6 +19,10 @@ final class PhabricatorStorageManagementDumpWorkflow
         ));
   }
 
+  protected function isReadOnlyWorkflow() {
+    return true;
+  }
+
   public function didExecute(PhutilArgumentParser $args) {
     $api = $this->getAPI();
     $patches = $this->getPatches();

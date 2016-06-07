@@ -93,7 +93,9 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
       '/' => array(
         '' => 'PhameBlogViewController',
         'post/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
+        '.*' => 'PhameBlog404Controller',
       ),
+
     );
   }
 

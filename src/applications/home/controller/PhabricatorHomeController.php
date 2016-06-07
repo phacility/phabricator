@@ -15,9 +15,8 @@ abstract class PhabricatorHomeController extends PhabricatorController {
       ->withLaunchable(true)
       ->execute();
 
-    $pinned = $user->loadPreferences()->getPinnedApplications(
-      $applications,
-      $user);
+    $pinned = $user->getUserSetting(
+      PhabricatorPinnedApplicationsSetting::SETTINGKEY);
 
     // Force "Applications" to appear at the bottom.
     $meta_app = 'PhabricatorApplicationsApplication';

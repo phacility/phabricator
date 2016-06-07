@@ -281,10 +281,8 @@ final class PhabricatorPolicyEditController
         // Save this project as one of the user's most recently used projects,
         // so we'll show it by default in future menus.
 
-        $pref_key = PhabricatorUserPreferences::PREFERENCE_FAVORITE_POLICIES;
-
-        $preferences = $viewer->loadPreferences();
-        $favorites = $preferences->getPreference($pref_key);
+        $favorites_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+        $favorites = $viewer->getUserSetting($favorites_key);
         if (!is_array($favorites)) {
           $favorites = array();
         }
@@ -293,8 +291,17 @@ final class PhabricatorPolicyEditController
         unset($favorites[$project_phid]);
         $favorites[$project_phid] = true;
 
-        $preferences->setPreference($pref_key, $favorites);
-        $preferences->save();
+        $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
+
+        $editor = id(new PhabricatorUserPreferencesEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true);
+
+        $xactions = array();
+        $xactions[] = $preferences->newTransaction($favorites_key, $favorites);
+        $editor->applyTransactions($preferences, $xactions);
 
         $data = array(
           'phid' => $project->getPHID(),

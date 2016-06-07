@@ -46,17 +46,15 @@ final class AphlictDropdownDataQuery extends Phobject {
     $is_c_installed = PhabricatorApplication::isClassInstalledForViewer(
       $conpherence_app,
       $viewer);
-    $raw_message_count_number = null;
-    $message_count_number = null;
     if ($is_c_installed) {
-      $unread_status = ConpherenceParticipationStatus::BEHIND;
-      $unread = id(new ConpherenceParticipantCountQuery())
-        ->withParticipantPHIDs(array($viewer->getPHID()))
-        ->withParticipationStatus($unread_status)
-        ->execute();
-      $raw_message_count_number = idx($unread, $viewer->getPHID(), 0);
+      $raw_message_count_number = $viewer->getUnreadMessageCount();
       $message_count_number = $this->formatNumber($raw_message_count_number);
+    } else {
+      $raw_message_count_number = null;
+      $message_count_number = null;
     }
+
+
     $conpherence_data = array(
       'isInstalled' => $is_c_installed,
       'countType' => 'messages',
@@ -69,15 +67,15 @@ final class AphlictDropdownDataQuery extends Phobject {
     $is_n_installed = PhabricatorApplication::isClassInstalledForViewer(
       $notification_app,
       $viewer);
-    $notification_count_number = null;
-    $raw_notification_count_number = null;
     if ($is_n_installed) {
-      $raw_notification_count_number =
-        id(new PhabricatorFeedStoryNotification())
-        ->countUnread($viewer);
+      $raw_notification_count_number = $viewer->getUnreadNotificationCount();
       $notification_count_number = $this->formatNumber(
         $raw_notification_count_number);
+    } else {
+      $notification_count_number = null;
+      $raw_notification_count_number = null;
     }
+
     $notification_data = array(
       'isInstalled' => $is_n_installed,
       'countType' => 'notifications',

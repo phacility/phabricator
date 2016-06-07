@@ -2,17 +2,6 @@
 
 final class ConpherenceWidgetController extends ConpherenceController {
 
-  private $userPreferences;
-
-  public function setUserPreferences(PhabricatorUserPreferences $pref) {
-    $this->userPreferences = $pref;
-    return $this;
-  }
-
-  public function getUserPreferences() {
-    return $this->userPreferences;
-  }
-
   public function shouldAllowPublic() {
     return true;
   }
@@ -34,8 +23,6 @@ final class ConpherenceWidgetController extends ConpherenceController {
       return new Aphront404Response();
     }
     $this->setConpherence($conpherence);
-
-    $this->setUserPreferences($user->loadPreferences());
 
     switch ($request->getStr('widget')) {
       case 'widgets-people':
@@ -143,28 +130,24 @@ final class ConpherenceWidgetController extends ConpherenceController {
         ),
         $text);
     }
-    $default = ConpherenceSettings::EMAIL_ALWAYS;
-    $preference = $this->getUserPreferences();
-    if ($preference) {
-      $default = $preference->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_CONPH_NOTIFICATIONS,
-        ConpherenceSettings::EMAIL_ALWAYS);
-    }
+    $notification_key = PhabricatorConpherenceNotificationsSetting::SETTINGKEY;
+    $notification_default = $viewer->getUserSetting($notification_key);
+
     $settings = $participant->getSettings();
     $notifications = idx(
       $settings,
       'notifications',
-      $default);
+      $notification_default);
     $options = id(new AphrontFormRadioButtonControl())
       ->addButton(
-        ConpherenceSettings::EMAIL_ALWAYS,
-        ConpherenceSettings::getHumanString(
-          ConpherenceSettings::EMAIL_ALWAYS),
+        PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL,
+        PhabricatorConpherenceNotificationsSetting::getSettingLabel(
+          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL),
         '')
       ->addButton(
-        ConpherenceSettings::NOTIFICATIONS_ONLY,
-        ConpherenceSettings::getHumanString(
-          ConpherenceSettings::NOTIFICATIONS_ONLY),
+        PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY,
+        PhabricatorConpherenceNotificationsSetting::getSettingLabel(
+          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY),
         '')
       ->setName('notifications')
       ->setValue($notifications);

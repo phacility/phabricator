@@ -48,19 +48,6 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Conpherence Room'))
-      ->setIcon('fa-comments')
-      ->setWorkflow(true)
-      ->setHref($this->getBaseURI().'new/');
-    $items[] = $item;
-
-    return $items;
-  }
-
   public function getQuicksandURIPatternBlacklist() {
     return array(
       '/conpherence/.*',

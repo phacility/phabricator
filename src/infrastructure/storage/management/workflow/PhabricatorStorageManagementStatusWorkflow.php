@@ -10,6 +10,10 @@ final class PhabricatorStorageManagementStatusWorkflow
       ->setSynopsis(pht('Show patch application status.'));
   }
 
+  protected function isReadOnlyWorkflow() {
+    return true;
+  }
+
   public function didExecute(PhutilArgumentParser $args) {
     $api     = $this->getAPI();
     $patches = $this->getPatches();

@@ -273,4 +273,17 @@ abstract class PhabricatorOAuth2AuthProvider
     parent::willRenderLinkedAccount($viewer, $item, $account);
   }
 
+  public function supportsAutoLogin() {
+    return true;
+  }
+
+  public function getAutoLoginURI(AphrontRequest $request) {
+    $csrf_code = $this->getAuthCSRFCode($request);
+
+    $adapter = $this->getAdapter();
+    $adapter->setState($csrf_code);
+
+    return $adapter->getAuthenticateURI();
+  }
+
 }

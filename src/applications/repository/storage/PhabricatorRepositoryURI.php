@@ -598,17 +598,24 @@ final class PhabricatorRepositoryURI
     $score = 0;
 
     $io_points = array(
-      self::IO_READWRITE => 20,
-      self::IO_READ => 10,
+      self::IO_READWRITE => 200,
+      self::IO_READ => 100,
     );
     $score += idx($io_points, $this->getEffectiveIoType(), 0);
 
     $protocol_points = array(
-      self::BUILTIN_PROTOCOL_SSH => 3,
-      self::BUILTIN_PROTOCOL_HTTPS => 2,
-      self::BUILTIN_PROTOCOL_HTTP => 1,
+      self::BUILTIN_PROTOCOL_SSH => 30,
+      self::BUILTIN_PROTOCOL_HTTPS => 20,
+      self::BUILTIN_PROTOCOL_HTTP => 10,
     );
     $score += idx($protocol_points, $this->getBuiltinProtocol(), 0);
+
+    $identifier_points = array(
+      self::BUILTIN_IDENTIFIER_SHORTNAME => 3,
+      self::BUILTIN_IDENTIFIER_CALLSIGN => 2,
+      self::BUILTIN_IDENTIFIER_ID => 1,
+    );
+    $score += idx($identifier_points, $this->getBuiltinIdentifier(), 0);
 
     return $score;
   }

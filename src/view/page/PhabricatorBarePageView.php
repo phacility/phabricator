@@ -130,8 +130,8 @@ class PhabricatorBarePageView extends AphrontPageView {
     if ($this->getRequest()) {
       $viewer = $this->getRequest()->getViewer();
       if ($viewer) {
-        $postprocessor_key = $viewer->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_RESOURCE_POSTPROCESSOR);
+        $postprocessor_key = $viewer->getUserSetting(
+          PhabricatorAccessibilitySetting::SETTINGKEY);
         if (strlen($postprocessor_key)) {
           $response->setPostProcessorKey($postprocessor_key);
         }

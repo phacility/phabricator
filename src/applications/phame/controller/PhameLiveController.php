@@ -70,6 +70,8 @@ abstract class PhameLiveController extends PhameController {
 
       $blog = $blog_query->executeOne();
       if (!$blog) {
+        $this->isExternal = $is_external;
+        $this->isLive = $is_live;
         return new Aphront404Response();
       }
 
@@ -80,6 +82,9 @@ abstract class PhameLiveController extends PhameController {
       $is_live = false;
       $blog = null;
     }
+
+    $this->isExternal = $is_external;
+    $this->isLive = $is_live;
 
     if ($post_id) {
       $post_query = id(new PhamePostQuery())
@@ -109,8 +114,6 @@ abstract class PhameLiveController extends PhameController {
       $post = null;
     }
 
-    $this->isExternal = $is_external;
-    $this->isLive = $is_live;
     $this->blog = $blog;
     $this->post = $post;
 
@@ -186,6 +189,32 @@ abstract class PhameLiveController extends PhameController {
     }
 
     return $crumbs;
+  }
+
+  public function willSendResponse(AphrontResponse $response) {
+    if ($this->getIsExternal()) {
+      if ($response instanceof Aphront404Response) {
+        $page = $this->newPage()
+          ->setCrumbs($this->buildApplicationCrumbs());
+
+        $response = id(new Phame404Response())
+          ->setPage($page);
+      }
+    }
+
+    return parent::willSendResponse($response);
+  }
+
+  public function newPage() {
+    $page = parent::newPage();
+
+    if ($this->getIsLive()) {
+      $page
+        ->setShowChrome(false)
+        ->setShowFooter(false);
+    }
+
+    return $page;
   }
 
 }

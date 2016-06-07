@@ -325,14 +325,15 @@ final class DiffusionCommitController extends DiffusionController {
 
     $add_comment = $this->renderAddCommentPanel($commit, $audit_requests);
 
-    $prefs = $viewer->loadPreferences();
-    $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
-    $pref_collapse = PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED;
-    $show_filetree = $prefs->getPreference($pref_filetree);
-    $collapsed = $prefs->getPreference($pref_collapse);
+    $filetree_on = $viewer->compareUserSetting(
+      PhabricatorShowFiletreeSetting::SETTINGKEY,
+      PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
+
+    $pref_collapse = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
+    $collapsed = $viewer->getUserSetting($pref_collapse);
 
     $nav = null;
-    if ($show_changesets && $show_filetree) {
+    if ($show_changesets && $filetree_on) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
         ->setTitle($commit->getDisplayName())
         ->setBaseURI(new PhutilURI($commit->getURI()))
