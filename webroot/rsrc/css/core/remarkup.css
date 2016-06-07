@@ -225,8 +225,7 @@ video.phabricator-media {
 .phabricator-remarkup video {
   display: block;
   margin: 0 auto;
-  min-width: 240px;
-  width: 90%;
+  max-width: 95%;
 }
 
 .phabricator-remarkup-mention-exists {

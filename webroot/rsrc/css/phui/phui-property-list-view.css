@@ -163,8 +163,7 @@
 .phui-property-list-video {
   display: block;
   margin: 0 auto;
-  width: 90%;
-  min-width: 240px;
+  max-width: 95%;
 }
 
 /* When tags appear in property lists, give them a little more vertical
