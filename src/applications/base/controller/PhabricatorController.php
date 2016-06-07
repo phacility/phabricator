@@ -104,7 +104,8 @@ abstract class PhabricatorController extends AphrontController {
       $request->setUser($user);
     }
 
-    PhabricatorEnv::setLocaleCode($user->getTranslation());
+    id(new PhabricatorAuthSessionEngine())
+      ->willServeRequestForUser($user);
 
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
       $dark_console = PhabricatorDarkConsoleSetting::SETTINGKEY;

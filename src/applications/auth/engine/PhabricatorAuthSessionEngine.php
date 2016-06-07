@@ -164,7 +164,6 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     $cache_raw = $this->filterRawCacheData($user, $types_map, $cache_raw);
     $user->attachRawCacheData($cache_raw);
-    $user->setAllowInlineCacheGeneration(true);
 
     switch ($session_type) {
       case PhabricatorAuthSession::TYPE_WEB:
@@ -830,6 +829,14 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     return $cache_raw;
+  }
+
+  public function willServeRequestForUser(PhabricatorUser $user) {
+    // We allow the login user to generate any missing cache data inline.
+    $user->setAllowInlineCacheGeneration(true);
+
+    // Switch to the user's translation.
+    PhabricatorEnv::setLocaleCode($user->getTranslation());
   }
 
 }
