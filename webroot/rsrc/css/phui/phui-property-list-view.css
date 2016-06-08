@@ -79,6 +79,7 @@
   margin-left: 1%;
   float: left;
   margin-bottom: 4px;
+  word-wrap: break-word;
 }
 
 .device-desktop .phui-property-list-has-actions .phui-property-list-value {
