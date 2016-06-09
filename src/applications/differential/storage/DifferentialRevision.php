@@ -14,7 +14,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorMentionableInterface,
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -634,5 +635,32 @@ final class DifferentialRevision extends DifferentialDAO
     return new DifferentialRevisionFulltextEngine();
   }
 
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('title')
+        ->setType('string')
+        ->setDescription(pht('The revision title.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('authorPHID')
+        ->setType('phid')
+        ->setDescription(pht('Revision author PHID.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'title' => $this->getTitle(),
+      'authorPHID' => $this->getAuthorPHID(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
 
 }
