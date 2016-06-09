@@ -184,10 +184,19 @@ JX.install('Prefab', {
       var priority_hits = {};
       var self_hits = {};
 
+      // We'll put matches where the user's input is a prefix of the name
+      // above mathches where that isn't true.
+      var prefix_hits = {};
+
       var tokens = this.tokenize(value);
+      var normal = this.normalize(value);
 
       for (var ii = 0; ii < list.length; ii++) {
         var item = list[ii];
+
+        if (this.normalize(item.name).indexOf(normal) === 0) {
+          prefix_hits[item.id] = true;
+        }
 
         for (var jj = 0; jj < tokens.length; jj++) {
           if (item.name.indexOf(tokens[jj]) === 0) {
@@ -237,6 +246,10 @@ JX.install('Prefab', {
           return priority_hits[v.id] ? 1 : -1;
         }
 
+        if (prefix_hits[u.id] != prefix_hits[v.id]) {
+          return prefix_hits[v.id] ? 1 : -1;
+        }
+
         // Sort users ahead of other result types.
         if (u.priorityType != v.priorityType) {
           if (u.priorityType == 'user') {
@@ -245,6 +258,13 @@ JX.install('Prefab', {
           if (v.priorityType == 'user') {
             return 1;
           }
+        }
+
+        // Sort functions after other result types.
+        var uf = (u.tokenType == 'function');
+        var vf = (v.tokenType == 'function');
+        if (uf != vf) {
+          return uf ? 1 : -1;
         }
 
         return cmp(u, v);
