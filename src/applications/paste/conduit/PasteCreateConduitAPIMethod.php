@@ -47,15 +47,15 @@ final class PasteCreateConduitAPIMethod extends PasteConduitAPIMethod {
     $xactions = array();
 
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
+      ->setTransactionType(PhabricatorPasteContentTransaction::TRANSACTIONTYPE)
       ->setNewValue($content);
 
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
+      ->setTransactionType(PhabricatorPasteTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue($title);
 
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
+      ->setTransactionType(PhabricatorPasteLanguageTransaction::TRANSACTIONTYPE)
       ->setNewValue($language);
 
     $editor = id(new PhabricatorPasteEditor())

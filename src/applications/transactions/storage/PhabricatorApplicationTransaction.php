@@ -280,6 +280,7 @@ abstract class PhabricatorApplicationTransaction
     $new = $this->getNewValue();
 
     $phids[] = array($this->getAuthorPHID());
+    $phids[] = array($this->getObjectPHID());
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getTransactionCustomField();

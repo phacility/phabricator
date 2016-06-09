@@ -68,6 +68,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mailCCPHIDs = array();
   private $feedNotifyPHIDs = array();
   private $feedRelatedPHIDs = array();
+  private $modularTypes;
 
   const STORAGE_ENCODING_BINARY = 'binary';
 
@@ -285,6 +286,14 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_SPACE;
     }
 
+    $template = $this->object->getApplicationTransactionTemplate();
+    if ($template instanceof PhabricatorModularTransaction) {
+      $xtypes = $template->newModularTransactionTypes();
+      foreach ($xtypes as $xtype) {
+        $types[] = $xtype->getTransactionTypeConstant();
+      }
+    }
+
     return $types;
   }
 
@@ -304,7 +313,15 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
+
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->generateOldValue($object);
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_CREATE:
         return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
@@ -374,7 +391,15 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getTransactionNewValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
+
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->generateNewValue($object, $xaction->getNewValue());
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_CREATE:
         return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
@@ -496,7 +521,14 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->applyInternalEffects($object, $xaction->getNewValue());
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
@@ -520,7 +552,15 @@ abstract class PhabricatorApplicationTransactionEditor
   private function applyExternalEffects(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
+
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->applyExternalEffects($object, $xaction->getNewValue());
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())
           ->setObject($object)
@@ -801,6 +841,8 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($errors) {
         throw new PhabricatorApplicationTransactionValidationException($errors);
       }
+
+      $this->willApplyTransactions($object, $xactions);
 
       if ($object->getID()) {
         foreach ($xactions as $xaction) {
@@ -2006,6 +2048,12 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions) {
 
     $errors = array();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $errors[] = $xtype->validateTransactions($object, $xactions);
+    }
+
     switch ($type) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $errors[] = $this->validatePolicyTransaction(
@@ -3129,9 +3177,16 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     foreach ($xactions as $xaction) {
-      $phids[] = $this->extractFilePHIDsFromCustomTransaction(
-        $object,
-        $xaction);
+      $type = $xaction->getTransactionType();
+
+      $xtype = $this->getModularTransactionType($type);
+      if ($xtype) {
+        $phids[] = $xtype->extractFilePHIDs($object, $xaction->getNewValue());
+      } else {
+        $phids[] = $this->extractFilePHIDsFromCustomTransaction(
+          $object,
+          $xaction);
+      }
     }
 
     $phids = array_unique(array_filter(array_mergev($phids)));
@@ -3692,5 +3747,50 @@ abstract class PhabricatorApplicationTransactionEditor
       $proxy_phids);
   }
 
+  private function getModularTransactionTypes() {
+    if ($this->modularTypes === null) {
+      $template = $this->object->getApplicationTransactionTemplate();
+      if ($template instanceof PhabricatorModularTransaction) {
+        $xtypes = $template->newModularTransactionTypes();
+        foreach ($xtypes as $key => $xtype) {
+          $xtype = clone $xtype;
+          $xtype->setEditor($this);
+          $xtypes[$key] = $xtype;
+        }
+      } else {
+        $xtypes = array();
+      }
+
+      $this->modularTypes = $xtypes;
+    }
+
+    return $this->modularTypes;
+  }
+
+  private function getModularTransactionType($type) {
+    $types = $this->getModularTransactionTypes();
+    return idx($types, $type);
+  }
+
+  private function willApplyTransactions($object, array $xactions) {
+    foreach ($xactions as $xaction) {
+      $type = $xaction->getTransactionType();
+
+      $xtype = $this->getModularTransactionType($type);
+      if (!$xtype) {
+        continue;
+      }
+
+      $xtype->willApplyTransactions($object, $xactions);
+    }
+  }
+
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this object.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created an object: %s.', $author, $object);
+  }
 
 }
