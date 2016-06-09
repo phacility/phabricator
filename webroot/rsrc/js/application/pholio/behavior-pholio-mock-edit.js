@@ -106,20 +106,47 @@ JX.behavior('pholio-mock-edit', function(config, statics) {
         }
       }
 
-      JX.DOM.setContent(node, pht('uploaded'));
-
-      new JX.Workflow(config.renderURI, {filePHID: file.getPHID()})
-        .setHandler(function(response) {
-          var new_node = JX.$H(response.markup).getFragment().firstChild;
-          build_update_control(new_node);
-
-          JX.DOM.replace(node, new_node);
-          synchronize_order();
-        })
-        .start();
+      render_upload(node, file);
     });
 
     drop.start();
+
+    JX.DOM.listen(add_node, 'click', null, function(e) {
+      e.kill();
+
+      new JX.Workflow('/file/uploaddialog/')
+        .setHandler(function(response) {
+          var files = response.files;
+          for (var ii = 0; ii < files.length; ii++) {
+            var file = files[ii];
+
+            var upload = new JX.PhabricatorFileUpload()
+              .setID(file.id)
+              .setPHID(file.phid)
+              .setURI(file.uri);
+
+            var node = render_uploading();
+            statics.nodes.list.appendChild(node);
+
+            render_upload(node, upload);
+          }
+        })
+        .start();
+    });
+  };
+
+  var render_upload = function(node, file) {
+    JX.DOM.setContent(node, pht('uploaded'));
+
+    new JX.Workflow(config.renderURI, {filePHID: file.getPHID()})
+      .setHandler(function(response) {
+        var new_node = JX.$H(response.markup).getFragment().firstChild;
+        build_update_control(new_node);
+
+        JX.DOM.replace(node, new_node);
+        synchronize_order();
+      })
+      .start();
   };
 
   var build_list_controls = function(list_node) {
@@ -130,13 +157,7 @@ JX.behavior('pholio-mock-edit', function(config, statics) {
   };
 
   var build_update_control = function(node) {
-    var drop = build_drop_upload(node);
-
-    drop.listen('willUpload', function() {
-      JX.DOM.alterClass(node, 'pholio-replacing', true);
-    });
-
-    drop.listen('didUpload', function(file) {
+    var did_upload = function(node, file) {
       var node_data = JX.Stratcom.getData(node);
 
       var data = {
@@ -156,9 +177,39 @@ JX.behavior('pholio-mock-edit', function(config, statics) {
           synchronize_order();
         })
         .start();
+    };
+
+    var drop = build_drop_upload(node);
+
+    drop.listen('willUpload', function() {
+      JX.DOM.alterClass(node, 'pholio-replacing', true);
+    });
+
+    drop.listen('didUpload', function(file) {
+      did_upload(node, file);
     });
 
     drop.start();
+
+    JX.DOM.listen(node, 'click', 'pholio-uploaded-thumb', function(e) {
+      e.kill();
+
+      new JX.Workflow('/file/uploaddialog/single/')
+        .setHandler(function(response) {
+          var files = response.files;
+          for (var ii = 0; ii < files.length; ii++) {
+            var file = files[ii];
+
+            var upload = new JX.PhabricatorFileUpload()
+              .setID(file.id)
+              .setPHID(file.phid)
+              .setURI(file.uri);
+
+            did_upload(node, upload);
+          }
+        })
+        .start();
+    });
   };
 
 

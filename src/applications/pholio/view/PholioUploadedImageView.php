@@ -42,11 +42,12 @@ final class PholioUploadedImageView extends AphrontView {
       PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
     $thumbnail_uri = $file->getURIForTransform($xform);
 
-    $thumb_img = phutil_tag(
+    $thumb_img = javelin_tag(
       'img',
       array(
         'class' => 'pholio-thumb-img',
         'src' => $thumbnail_uri,
+        'sigil' => 'pholio-uploaded-thumb',
       ));
 
     $thumb_frame = phutil_tag(
