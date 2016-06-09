@@ -64,6 +64,9 @@ final class PhabricatorApplicationTransactionCommentEditor
         $comment->setTransactionPHID($xaction->getPHID());
         $comment->save();
 
+        $old_comment = $xaction->getComment();
+        $comment->attachOldComment($old_comment);
+
         $xaction->setCommentVersion($new_version);
         $xaction->setCommentPHID($comment->getPHID());
         $xaction->setViewPolicy($comment->getViewPolicy());

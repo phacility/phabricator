@@ -542,7 +542,7 @@ final class PhabricatorAuditEditor
   protected function expandCustomRemarkupBlockTransactions(
     PhabricatorLiskDAO $object,
     array $xactions,
-    $blocks,
+    array $changes,
     PhutilMarkupEngine $engine) {
 
     // we are only really trying to find unmentionable phids here...
@@ -563,7 +563,7 @@ final class PhabricatorAuditEditor
       return $result;
     }
 
-    $flat_blocks = array_mergev($blocks);
+    $flat_blocks = mpull($changes, 'getNewValue');
     $huge_block = implode("\n\n", $flat_blocks);
     $phid_map = array();
     $phid_map[] = $this->getUnmentionablePHIDMap();
