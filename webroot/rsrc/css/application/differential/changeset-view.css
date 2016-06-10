@@ -95,6 +95,7 @@
 
 .prose-diff {
   white-space: pre-wrap;
+  color: {$greytext};
 }
 
 .prose-diff-frame {
