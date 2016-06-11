@@ -113,17 +113,9 @@ final class PhabricatorAuthStartController
       PhabricatorCookies::setClientIDCookie($request);
     }
 
-    if (!$request->getURIData('loggedout') && count($providers) == 1) {
-      $auto_login_provider = head($providers);
-      $auto_login_config = $auto_login_provider->getProviderConfig();
-      if ($auto_login_provider instanceof PhabricatorPhabricatorAuthProvider &&
-          $auto_login_config->getShouldAutoLogin()) {
-        $auto_login_adapter = $provider->getAdapter();
-        $auto_login_adapter->setState($provider->getAuthCSRFCode($request));
-        return id(new AphrontRedirectResponse())
-          ->setIsExternal(true)
-          ->setURI($provider->getAdapter()->getAuthenticateURI());
-      }
+    $auto_response = $this->tryAutoLogin($providers);
+    if ($auto_response) {
+      return $auto_response;
     }
 
     $invite = $this->loadInvite();
@@ -280,6 +272,37 @@ final class PhabricatorAuthStartController
     return $this->renderErrorPage(
       pht('Authentication Failure'),
       array($message));
+  }
+
+  private function tryAutoLogin(array $providers) {
+    $request = $this->getRequest();
+
+    // If the user just logged out, don't immediately log them in again.
+    if ($request->getURIData('loggedout')) {
+      return null;
+    }
+
+    // If we have more than one provider, we can't autologin because we
+    // don't know which one the user wants.
+    if (count($providers) != 1) {
+      return null;
+    }
+
+    $provider = head($providers);
+    if (!$provider->supportsAutoLogin()) {
+      return null;
+    }
+
+    $config = $provider->getProviderConfig();
+    if (!$config->getShouldAutoLogin()) {
+      return null;
+    }
+
+    $auto_uri = $provider->getAutoLoginURI($request);
+
+    return id(new AphrontRedirectResponse())
+      ->setIsExternal(true)
+      ->setURI($auto_uri);
   }
 
 }

@@ -93,7 +93,8 @@ final class DarkConsoleCore extends Phobject {
 
   public function render(AphrontRequest $request) {
     $user = $request->getUser();
-    $visible = $user ? $user->getConsoleVisible() : true;
+    $visible = $user->getUserSetting(
+      PhabricatorDarkConsoleVisibleSetting::SETTINGKEY);
 
     return javelin_tag(
       'div',

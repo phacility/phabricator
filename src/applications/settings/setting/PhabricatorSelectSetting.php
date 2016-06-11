@@ -27,6 +27,25 @@ abstract class PhabricatorSelectSetting
       ->setOptions($options);
   }
 
+  public function assertValidValue($value) {
+    // This is a slightly stricter check than the transaction check. It's
+    // OK for empty string to go through transactions because it gets converted
+    // to null later, but we shouldn't be reading the empty string from
+    // storage.
+    if ($value === null) {
+      return;
+    }
+
+    if (!strlen($value)) {
+      throw new Exception(
+        pht(
+          'Empty string is not a valid setting for "%s".',
+          $this->getSettingName()));
+    }
+
+    $this->validateTransactionValue($value);
+  }
+
   final public function validateTransactionValue($value) {
     if (!strlen($value)) {
       return;

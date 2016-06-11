@@ -12,6 +12,14 @@ final class PhabricatorEmailNotificationsSetting
     return pht('Email Notifications');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorEmailDeliverySettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 100;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'If you disable **Email Notifications**, Phabricator will never '.

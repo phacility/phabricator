@@ -30,13 +30,8 @@ final class PhabricatorUser
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
-  protected $profileImageCache;
   protected $availabilityCache;
   protected $availabilityCacheTTL;
-
-  protected $consoleEnabled = 0;
-  protected $consoleVisible = 0;
-  protected $consoleTab = '';
 
   protected $conduitCertificate;
 
@@ -50,7 +45,6 @@ final class PhabricatorUser
 
   protected $accountSecret;
 
-  private $profileImage = self::ATTACHABLE;
   private $profile = null;
   private $availability = self::ATTACHABLE;
   private $preferences = null;
@@ -66,7 +60,10 @@ final class PhabricatorUser
   private $authorities = array();
   private $handlePool;
   private $csrfSalt;
-  private $timezoneOverride;
+
+  private $settingCacheKeys = array();
+  private $settingCache = array();
+  private $allowInlineCacheGeneration;
 
   protected function readField($field) {
     switch ($field) {
@@ -188,9 +185,6 @@ final class PhabricatorUser
         'passwordSalt' => 'text32?',
         'passwordHash' => 'text128?',
         'profileImagePHID' => 'phid?',
-        'consoleEnabled' => 'bool',
-        'consoleVisible' => 'bool',
-        'consoleTab' => 'text64',
         'conduitCertificate' => 'text255',
         'isSystemAgent' => 'bool',
         'isMailingList' => 'bool',
@@ -200,7 +194,6 @@ final class PhabricatorUser
         'isApproved' => 'uint32',
         'accountSecret' => 'bytes64',
         'isEnrolledInMultiFactor' => 'bool',
-        'profileImageCache' => 'text255?',
         'availabilityCache' => 'text255?',
         'availabilityCacheTTL' => 'uint32?',
       ),
@@ -222,7 +215,6 @@ final class PhabricatorUser
         ),
       ),
       self::CONFIG_NO_MUTATE => array(
-        'profileImageCache' => true,
         'availabilityCache' => true,
         'availabilityCacheTTL' => true,
       ),
@@ -481,19 +473,54 @@ final class PhabricatorUser
 
 
   public function getUserSetting($key) {
+    // NOTE: We store available keys and cached values separately to make it
+    // faster to check for `null` in the cache, which is common.
+    if (isset($this->settingCacheKeys[$key])) {
+      return $this->settingCache[$key];
+    }
+
     $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
-    $settings = $this->requireCacheData($settings_key);
+    if ($this->getPHID()) {
+      $settings = $this->requireCacheData($settings_key);
+    } else {
+      $settings = array();
+    }
+
+    // NOTE: To slightly improve performance, we're using all settings here,
+    // not just settings that are enabled for the current viewer. It's fine to
+    // get the value of a setting that we wouldn't let the user edit in the UI.
+    $defaults = PhabricatorSetting::getAllSettings();
 
     if (array_key_exists($key, $settings)) {
-      return $settings[$key];
+      $value = $settings[$key];
+
+      // Make sure the value is valid before we return it. This makes things
+      // more robust when options are changed or removed.
+      if (isset($defaults[$key])) {
+        try {
+          id(clone $defaults[$key])
+            ->setViewer($this)
+            ->assertValidValue($value);
+
+          return $this->writeUserSettingCache($key, $value);
+        } catch (Exception $ex) {
+          // Fall through below and return the default value.
+        }
+      } else {
+        // This is an ad-hoc setting with no controlling object.
+        return $this->writeUserSettingCache($key, $value);
+      }
     }
 
-    $defaults = PhabricatorSetting::getAllEnabledSettings($this);
     if (isset($defaults[$key])) {
-      return $defaults[$key]->getSettingDefaultValue();
+      $value = id(clone $defaults[$key])
+        ->setViewer($this)
+        ->getSettingDefaultValue();
+    } else {
+      $value = null;
     }
 
-    return null;
+    return $this->writeUserSettingCache($key, $value);
   }
 
 
@@ -510,15 +537,17 @@ final class PhabricatorUser
     return ($actual == $value);
   }
 
+  private function writeUserSettingCache($key, $value) {
+    $this->settingCacheKeys[$key] = true;
+    $this->settingCache[$key] = $value;
+    return $value;
+  }
+
   public function getTranslation() {
     return $this->getUserSetting(PhabricatorTranslationSetting::SETTINGKEY);
   }
 
   public function getTimezoneIdentifier() {
-    if ($this->timezoneOverride) {
-      return $this->timezoneOverride;
-    }
-
     return $this->getUserSetting(PhabricatorTimezoneSetting::SETTINGKEY);
   }
 
@@ -533,7 +562,9 @@ final class PhabricatorUser
    * @task settings
    */
   public function overrideTimezoneIdentifier($identifier) {
-    $this->timezoneOverride = $identifier;
+    $timezone_key = PhabricatorTimezoneSetting::SETTINGKEY;
+    $this->settingCacheKeys[$timezone_key] = true;
+    $this->settingCache[$timezone_key] = $identifier;
     return $this;
   }
 
@@ -541,54 +572,22 @@ final class PhabricatorUser
     return $this->getUserSetting(PhabricatorPronounSetting::SETTINGKEY);
   }
 
-  public function loadPreferences() {
-    if ($this->preferences) {
-      return $this->preferences;
-    }
-
-    $preferences = null;
-    if ($this->getPHID()) {
-      $preferences = id(new PhabricatorUserPreferencesQuery())
-        ->setViewer($this)
-        ->withUsers(array($this))
-        ->executeOne();
-    }
-
-    if (!$preferences) {
-      $preferences = new PhabricatorUserPreferences();
-      $preferences->setUserPHID($this->getPHID());
-      $preferences->attachUser($this);
-
-      $default_dict = array(
-        PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
-        PhabricatorUserPreferences::PREFERENCE_EDITOR => '',
-        PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '',
-        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0,
-      );
-
-      $preferences->setPreferences($default_dict);
-    }
-
-    $this->preferences = $preferences;
-    return $preferences;
-  }
-
   public function loadEditorLink(
     $path,
     $line,
     PhabricatorRepository $repository = null) {
 
-    $editor = $this->loadPreferences()->getPreference(
-      PhabricatorUserPreferences::PREFERENCE_EDITOR);
+    $editor = $this->getUserSetting(PhabricatorEditorSetting::SETTINGKEY);
 
     if (is_array($path)) {
-      $multiedit = $this->loadPreferences()->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_MULTIEDIT);
+      $multi_key = PhabricatorEditorMultipleSetting::SETTINGKEY;
+      $multiedit = $this->getUserSetting($multi_key);
       switch ($multiedit) {
-        case '':
+        case PhabricatorEditorMultipleSetting::VALUE_SPACES:
           $path = implode(' ', $path);
           break;
-        case 'disable':
+        case PhabricatorEditorMultipleSetting::VALUE_SINGLE:
+        default:
           return null;
       }
     }
@@ -791,13 +790,19 @@ final class PhabricatorUser
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
   }
 
-  public function attachProfileImageURI($uri) {
-    $this->profileImage = $uri;
-    return $this;
+  public function getProfileImageURI() {
+    $uri_key = PhabricatorUserProfileImageCacheType::KEY_URI;
+    return $this->requireCacheData($uri_key);
   }
 
-  public function getProfileImageURI() {
-    return $this->assertAttached($this->profileImage);
+  public function getUnreadNotificationCount() {
+    $notification_key = PhabricatorUserNotificationCountCacheType::KEY_COUNT;
+    return $this->requireCacheData($notification_key);
+  }
+
+  public function getUnreadMessageCount() {
+    $message_key = PhabricatorUserMessageCountCacheType::KEY_COUNT;
+    return $this->requireCacheData($message_key);
   }
 
   public function getFullName() {
@@ -848,46 +853,11 @@ final class PhabricatorUser
       $format = 'M j';
     } else {
       // Same year, month and day so show a time of day.
-      $pref_time = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
-      $format = $this->getPreference($pref_time);
+      $pref_time = PhabricatorTimeFormatSetting::SETTINGKEY;
+      $format = $this->getUserSetting($pref_time);
     }
 
     return $when->format($format);
-  }
-
-  public function getPreference($key) {
-    $preferences = $this->loadPreferences();
-
-    // TODO: After T4103 and T7707 this should eventually be pushed down the
-    // stack into modular preference definitions and role profiles. This is
-    // just fixing T8601 and mildly anticipating those changes.
-    $value = $preferences->getPreference($key);
-
-    $allowed_values = null;
-    switch ($key) {
-      case PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT:
-        $allowed_values = array(
-          'g:i A',
-          'H:i',
-        );
-        break;
-      case PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT:
-        $allowed_values = array(
-          'Y-m-d',
-          'n/j/Y',
-          'd-m-Y',
-        );
-        break;
-    }
-
-    if ($allowed_values !== null) {
-      $allowed_values = array_fuse($allowed_values);
-      if (empty($allowed_values[$value])) {
-        $value = head($allowed_values);
-      }
-    }
-
-    return $value;
   }
 
   public function __toString() {
@@ -1040,72 +1010,6 @@ final class PhabricatorUser
     unset($unguarded);
 
     return $this;
-  }
-
-
-/* -(  Profile Image Cache  )------------------------------------------------ */
-
-
-  /**
-   * Get this user's cached profile image URI.
-   *
-   * @return string|null Cached URI, if a URI is cached.
-   * @task image-cache
-   */
-  public function getProfileImageCache() {
-    $version = $this->getProfileImageVersion();
-
-    $parts = explode(',', $this->profileImageCache, 2);
-    if (count($parts) !== 2) {
-      return null;
-    }
-
-    if ($parts[0] !== $version) {
-      return null;
-    }
-
-    return $parts[1];
-  }
-
-
-  /**
-   * Generate a new cache value for this user's profile image.
-   *
-   * @return string New cache value.
-   * @task image-cache
-   */
-  public function writeProfileImageCache($uri) {
-    $version = $this->getProfileImageVersion();
-    $cache = "{$version},{$uri}";
-
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-    queryfx(
-      $this->establishConnection('w'),
-      'UPDATE %T SET profileImageCache = %s WHERE id = %d',
-      $this->getTableName(),
-      $cache,
-      $this->getID());
-    unset($unguarded);
-  }
-
-
-  /**
-   * Get a version identifier for a user's profile image.
-   *
-   * This version will change if the image changes, or if any of the
-   * environment configuration which goes into generating a URI changes.
-   *
-   * @return string Cache version.
-   * @task image-cache
-   */
-  private function getProfileImageVersion() {
-    $parts = array(
-      PhabricatorEnv::getCDNURI('/'),
-      PhabricatorEnv::getEnvConfig('cluster.instance'),
-      $this->getProfileImagePHID(),
-    );
-    $parts = serialize($parts);
-    return PhabricatorHash::digestForIndex($parts);
   }
 
 
@@ -1526,6 +1430,10 @@ final class PhabricatorUser
     return $this;
   }
 
+  public function setAllowInlineCacheGeneration($allow_cache_generation) {
+    $this->allowInlineCacheGeneration = $allow_cache_generation;
+    return $this;
+  }
 
   /**
    * @task cache
@@ -1546,14 +1454,20 @@ final class PhabricatorUser
       return $usable_value;
     }
 
+    // By default, we throw if a cache isn't available. This is consistent
+    // with the standard `needX()` + `attachX()` + `getX()` interaction.
+    if (!$this->allowInlineCacheGeneration) {
+      throw new PhabricatorDataNotAttachedException($this);
+    }
+
     $usable_value = $type->getDefaultValue();
 
     $user_phid = $this->getPHID();
     if ($user_phid) {
       $map = $type->newValueForUsers($key, array($this));
       if (array_key_exists($user_phid, $map)) {
-        $usable_value = $map[$user_phid];
-        $raw_value = $type->getValueForStorage($usable_value);
+        $raw_value = $map[$user_phid];
+        $usable_value = $type->getValueFromStorage($raw_value);
 
         $this->rawCacheData[$key] = $raw_value;
         PhabricatorUserCache::writeCache(

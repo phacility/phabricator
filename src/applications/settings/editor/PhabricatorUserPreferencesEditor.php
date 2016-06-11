@@ -19,6 +19,23 @@ final class PhabricatorUserPreferencesEditor
     return $types;
   }
 
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $setting_key = $xaction->getMetadataValue(
+      PhabricatorUserPreferencesTransaction::PROPERTY_SETTING);
+
+    $settings = $this->getSettings();
+    $setting = idx($settings, $setting_key);
+    if ($setting) {
+      return $setting->expandSettingTransaction($object, $xaction);
+    }
+
+    return parent::expandTransaction($object, $xaction);
+  }
+
+
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -95,9 +112,7 @@ final class PhabricatorUserPreferencesEditor
     array $xactions) {
 
     $errors = parent::validateTransaction($object, $type, $xactions);
-
-    $actor = $this->getActor();
-    $settings = PhabricatorSetting::getAllEnabledSettings($actor);
+    $settings = $this->getSettings();
 
     switch ($type) {
       case PhabricatorUserPreferencesTransaction::TYPE_SETTING:
@@ -147,8 +162,20 @@ final class PhabricatorUserPreferencesEditor
         PhabricatorUserPreferencesCacheType::KEY_PREFERENCES);
     }
 
-
     return $xactions;
+  }
+
+  private function getSettings() {
+    $actor = $this->getActor();
+    $settings = PhabricatorSetting::getAllEnabledSettings($actor);
+
+    foreach ($settings as $key => $setting) {
+      $setting = clone $setting;
+      $setting->setViewer($actor);
+      $settings[$key] = $setting;
+    }
+
+    return $settings;
   }
 
 }

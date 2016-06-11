@@ -59,18 +59,6 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Pholio Mock'))
-      ->setIcon('fa-picture-o')
-      ->setHref($this->getBaseURI().'create/');
-    $items[] = $item;
-
-    return $items;
-  }
-
   protected function getCustomCapabilities() {
     return array(
       PholioDefaultViewCapability::CAPABILITY => array(

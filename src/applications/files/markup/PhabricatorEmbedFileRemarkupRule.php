@@ -43,12 +43,27 @@ final class PhabricatorEmbedFileRemarkupRule
 
     $is_viewable_image = $object->isViewableImage();
     $is_audio = $object->isAudio();
+    $is_video = $object->isVideo();
     $force_link = ($options['layout'] == 'link');
 
-    $options['viewable'] = ($is_viewable_image || $is_audio);
+    // If a file is both audio and video, as with "application/ogg" by default,
+    // render it as video but allow the user to specify `media=audio` if they
+    // want to force it to render as audio.
+    if ($is_audio && $is_video) {
+      $media = $options['media'];
+      if ($media == 'audio') {
+        $is_video = false;
+      } else {
+        $is_audio = false;
+      }
+    }
+
+    $options['viewable'] = ($is_viewable_image || $is_audio || $is_video);
 
     if ($is_viewable_image && !$force_link) {
       return $this->renderImageFile($object, $handle, $options);
+    } else if ($is_video && !$force_link) {
+      return $this->renderVideoFile($object, $handle, $options);
     } else if ($is_audio && !$force_link) {
       return $this->renderAudioFile($object, $handle, $options);
     } else {
@@ -58,12 +73,15 @@ final class PhabricatorEmbedFileRemarkupRule
 
   private function getFileOptions($option_string) {
     $options = array(
-      'size'    => null,
-      'layout'  => 'left',
-      'float'   => false,
-      'width'   => null,
-      'height'  => null,
+      'size' => null,
+      'layout' => 'left',
+      'float' => false,
+      'width' => null,
+      'height' => null,
       'alt' => null,
+      'media' => null,
+      'autoplay' => null,
+      'loop' => null,
     );
 
     if ($option_string) {
@@ -201,22 +219,47 @@ final class PhabricatorEmbedFileRemarkupRule
     PhabricatorFile $file,
     PhabricatorObjectHandle $handle,
     array $options) {
+    return $this->renderMediaFile('audio', $file, $handle, $options);
+  }
+
+  private function renderVideoFile(
+    PhabricatorFile $file,
+    PhabricatorObjectHandle $handle,
+    array $options) {
+    return $this->renderMediaFile('video', $file, $handle, $options);
+  }
+
+  private function renderMediaFile(
+    $tag,
+    PhabricatorFile $file,
+    PhabricatorObjectHandle $handle,
+    array $options) {
+
+    $is_video = ($tag == 'video');
 
     if (idx($options, 'autoplay')) {
       $preload = 'auto';
       $autoplay = 'autoplay';
     } else {
-      $preload = 'none';
+      // If we don't preload video, the user can't see the first frame and
+      // has no clue what they're looking at, so always preload.
+      if ($is_video) {
+        $preload = 'auto';
+      } else {
+        $preload = 'none';
+      }
       $autoplay = null;
     }
 
     return $this->newTag(
-      'audio',
+      $tag,
       array(
         'controls' => 'controls',
         'preload' => $preload,
         'autoplay' => $autoplay,
         'loop' => idx($options, 'loop') ? 'loop' : null,
+        'alt' => $options['alt'],
+        'class' => 'phabricator-media',
       ),
       $this->newTag(
         'source',

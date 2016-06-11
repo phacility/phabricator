@@ -42,33 +42,70 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
     $key,
     $user_phid,
     $raw_value) {
+    self::writeCaches(
+      array(
+        array(
+          'type' => $type,
+          'key' => $key,
+          'userPHID' => $user_phid,
+          'value' => $raw_value,
+        ),
+      ));
+  }
 
+  public static function writeCaches(array $values) {
     if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
+    if (!$values) {
       return;
     }
 
     $table = new self();
     $conn_w = $table->establishConnection('w');
 
+    $sql = array();
+    foreach ($values as $value) {
+      $key = $value['key'];
+
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%s, %s, %s, %s, %s)',
+        $value['userPHID'],
+        PhabricatorHash::digestForIndex($key),
+        $key,
+        $value['value'],
+        $value['type']->getUserCacheType());
+    }
+
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-    queryfx(
-      $conn_w,
-      'INSERT INTO %T (userPHID, cacheIndex, cacheKey, cacheData, cacheType)
-        VALUES (%s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE cacheData = VALUES(cacheData)',
-      $table->getTableName(),
-      $user_phid,
-      PhabricatorHash::digestForIndex($key),
-      $key,
-      $raw_value,
-      $type->getUserCacheType());
+    foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (userPHID, cacheIndex, cacheKey, cacheData, cacheType)
+          VALUES %Q
+          ON DUPLICATE KEY UPDATE
+            cacheData = VALUES(cacheData),
+            cacheType = VALUES(cacheType)',
+        $table->getTableName(),
+        $chunk);
+    }
 
     unset($unguarded);
   }
 
   public static function clearCache($key, $user_phid) {
+    return self::clearCaches($key, array($user_phid));
+  }
+
+  public static function clearCaches($key, array $user_phids) {
     if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
+    if (!$user_phids) {
       return;
     }
 
@@ -79,14 +116,13 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
 
     queryfx(
       $conn_w,
-      'DELETE FROM %T WHERE cacheIndex = %s AND userPHID = %s',
+      'DELETE FROM %T WHERE cacheIndex = %s AND userPHID IN (%Ls)',
       $table->getTableName(),
       PhabricatorHash::digestForIndex($key),
-      $user_phid);
+      $user_phids);
 
     unset($unguarded);
   }
-
 
   public static function clearCacheForAllUsers($key) {
     if (PhabricatorEnv::isReadOnly()) {

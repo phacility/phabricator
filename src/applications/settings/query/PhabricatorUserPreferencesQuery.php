@@ -6,6 +6,8 @@ final class PhabricatorUserPreferencesQuery
   private $ids;
   private $phids;
   private $userPHIDs;
+  private $builtinKeys;
+  private $hasUserPHID;
   private $users = array();
 
   public function withIDs(array $ids) {
@@ -18,6 +20,11 @@ final class PhabricatorUserPreferencesQuery
     return $this;
   }
 
+  public function withHasUserPHID($is_user) {
+    $this->hasUserPHID = $is_user;
+    return $this;
+  }
+
   public function withUserPHIDs(array $phids) {
     $this->userPHIDs = $phids;
     return $this;
@@ -27,6 +34,11 @@ final class PhabricatorUserPreferencesQuery
     assert_instances_of($users, 'PhabricatorUser');
     $this->users = mpull($users, null, 'getPHID');
     $this->withUserPHIDs(array_keys($this->users));
+    return $this;
+  }
+
+  public function withBuiltinKeys(array $keys) {
+    $this->builtinKeys = $keys;
     return $this;
   }
 
@@ -64,12 +76,15 @@ final class PhabricatorUserPreferencesQuery
       $users = array();
     }
 
+    $need_global = array();
     foreach ($prefs as $key => $pref) {
       $user_phid = $pref->getUserPHID();
       if (!$user_phid) {
         $pref->attachUser(null);
         continue;
       }
+
+      $need_global[] = $pref;
 
       $user = idx($users, $user_phid);
       if (!$user) {
@@ -79,6 +94,23 @@ final class PhabricatorUserPreferencesQuery
       }
 
       $pref->attachUser($user);
+    }
+
+    // If we loaded any user preferences, load the global defaults and attach
+    // them if they exist.
+    if ($need_global) {
+      $global = id(new self())
+        ->setViewer($this->getViewer())
+        ->withBuiltinKeys(
+          array(
+            PhabricatorUserPreferences::BUILTIN_GLOBAL_DEFAULT,
+          ))
+        ->executeOne();
+      if ($global) {
+        foreach ($need_global as $pref) {
+          $pref->attachDefaultSettings($global);
+        }
+      }
     }
 
     return $prefs;
@@ -106,6 +138,25 @@ final class PhabricatorUserPreferencesQuery
         $conn,
         'userPHID IN (%Ls)',
         $this->userPHIDs);
+    }
+
+    if ($this->builtinKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'builtinKey IN (%Ls)',
+        $this->builtinKeys);
+    }
+
+    if ($this->hasUserPHID !== null) {
+      if ($this->hasUserPHID) {
+        $where[] = qsprintf(
+          $conn,
+          'userPHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'userPHID IS NULL');
+      }
     }
 
     return $where;

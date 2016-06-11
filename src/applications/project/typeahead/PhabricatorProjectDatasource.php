@@ -84,6 +84,11 @@ final class PhabricatorProjectDatasource
 
       $all_strings = array();
       $all_strings[] = $proj->getDisplayName();
+
+      // Add an extra space after the name so that the original project
+      // sorts ahead of milestones. This is kind of a hack but ehh?
+      $all_strings[] = null;
+
       foreach ($proj->getSlugs() as $project_slug) {
         $all_strings[] = $project_slug->getSlug();
       }

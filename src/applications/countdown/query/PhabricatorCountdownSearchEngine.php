@@ -147,7 +147,7 @@ final class PhabricatorCountdownSearchEngine
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Create a Countdown'))
-      ->setHref('/countdown/create/')
+      ->setHref('/countdown/edit/')
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getIcon();

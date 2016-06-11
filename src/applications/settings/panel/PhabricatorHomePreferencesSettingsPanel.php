@@ -11,22 +11,27 @@ final class PhabricatorHomePreferencesSettingsPanel
     return pht('Home Page');
   }
 
-  public function getPanelGroup() {
-    return pht('Application Settings');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsApplicationsPanelGroup::PANELGROUPKEY;
+  }
+
+  public function isTemplatePanel() {
+    return true;
   }
 
   public function processRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-    $preferences = $user->loadPreferences();
+    $viewer = $this->getViewer();
+    $preferences = $this->getPreferences();
+
+    $pinned_key = PhabricatorPinnedApplicationsSetting::SETTINGKEY;
+    $pinned = $preferences->getSettingValue($pinned_key);
 
     $apps = id(new PhabricatorApplicationQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withInstalled(true)
       ->withUnlisted(false)
       ->withLaunchable(true)
       ->execute();
-
-    $pinned = $preferences->getPinnedApplications($apps, $user);
 
     $app_list = array();
     foreach ($pinned as $app) {
@@ -34,6 +39,23 @@ final class PhabricatorHomePreferencesSettingsPanel
         $app_list[$app] = $apps[$app];
       }
     }
+
+    if ($request->getBool('reset')) {
+        if ($request->isFormPost()) {
+          $this->writePinnedApplications($preferences, null);
+          return id(new AphrontRedirectResponse())
+            ->setURI($this->getPanelURI());
+        }
+
+        return $this->newDialog()
+          ->setTitle(pht('Reset Applications'))
+          ->addHiddenInput('reset', 'true')
+          ->appendParagraph(
+            pht('Reset pinned applications to their defaults?'))
+          ->addSubmitButton(pht('Reset Applications'))
+          ->addCancelButton($this->getPanelURI());
+      }
+
 
     if ($request->getBool('add')) {
       $options = array();
@@ -48,10 +70,8 @@ final class PhabricatorHomePreferencesSettingsPanel
         $pin = $request->getStr('pin');
         if (isset($options[$pin]) && !in_array($pin, $pinned)) {
           $pinned[] = $pin;
-          $preferences->setPreference(
-            PhabricatorUserPreferences::PREFERENCE_APP_PINNED,
-            $pinned);
-          $preferences->save();
+
+          $this->writePinnedApplications($preferences, $pinned);
 
           return id(new AphrontRedirectResponse())
             ->setURI($this->getPanelURI());
@@ -65,21 +85,18 @@ final class PhabricatorHomePreferencesSettingsPanel
         ->setDisabledOptions(array_keys($app_list));
 
       $form = id(new AphrontFormView())
-        ->setUser($user)
+        ->setViewer($viewer)
         ->addHiddenInput('add', 'true')
         ->appendRemarkupInstructions(
           pht('Choose an application to pin to your home page.'))
         ->appendChild($options_control);
 
-      $dialog = id(new AphrontDialogView())
-        ->setUser($user)
+      return $this->newDialog()
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setTitle(pht('Pin Application'))
         ->appendChild($form->buildLayoutView())
         ->addSubmitButton(pht('Pin Application'))
         ->addCancelButton($this->getPanelURI());
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     $unpin = $request->getStr('unpin');
@@ -88,35 +105,28 @@ final class PhabricatorHomePreferencesSettingsPanel
       if ($app) {
         if ($request->isFormPost()) {
           $pinned = array_diff($pinned, array($unpin));
-          $preferences->setPreference(
-            PhabricatorUserPreferences::PREFERENCE_APP_PINNED,
-            $pinned);
-          $preferences->save();
+
+          $this->writePinnedApplications($preferences, $pinned);
 
           return id(new AphrontRedirectResponse())
             ->setURI($this->getPanelURI());
         }
 
-        $dialog = id(new AphrontDialogView())
-          ->setUser($user)
+        return $this->newDialog()
           ->setTitle(pht('Unpin Application'))
+          ->addHiddenInput('unpin', $unpin)
           ->appendParagraph(
             pht(
               'Unpin the %s application from your home page?',
               phutil_tag('strong', array(), $app->getName())))
           ->addSubmitButton(pht('Unpin Application'))
-          ->addCanceLButton($this->getPanelURI());
-
-        return id(new AphrontDialogResponse())->setDialog($dialog);
+          ->addCancelButton($this->getPanelURI());
       }
     }
 
     $order = $request->getStrList('order');
     if ($order && $request->validateCSRF()) {
-      $preferences->setPreference(
-        PhabricatorUserPreferences::PREFERENCE_APP_PINNED,
-        $order);
-      $preferences->save();
+      $this->writePinnedApplications($preferences, $order);
 
       return id(new AphrontRedirectResponse())
         ->setURI($this->getPanelURI());
@@ -125,7 +135,7 @@ final class PhabricatorHomePreferencesSettingsPanel
     $list_id = celerity_generate_unique_node_id();
 
     $list = id(new PHUIObjectItemListView())
-      ->setUser($user)
+      ->setViewer($viewer)
       ->setID($list_id);
 
     Javelin::initBehavior(
@@ -182,13 +192,28 @@ final class PhabricatorHomePreferencesSettingsPanel
           ->setText(pht('Pin Application'))
           ->setHref($this->getPanelURI().'?add=true')
           ->setWorkflow(true)
-          ->setIcon('fa-thumb-tack'));
+          ->setIcon('fa-thumb-tack'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText(pht('Reset to Defaults'))
+          ->setHref($this->getPanelURI().'?reset=true')
+          ->setWorkflow(true)
+          ->setIcon('fa-recycle'));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setObjectList($list);
 
     return $box;
+  }
+
+  private function writePinnedApplications(
+    PhabricatorUserPreferences $preferences,
+    $pinned) {
+
+    $pinned_key = PhabricatorPinnedApplicationsSetting::SETTINGKEY;
+    $this->writeSetting($preferences, $pinned_key, $pinned);
   }
 
 }

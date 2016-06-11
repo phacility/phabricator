@@ -3,13 +3,25 @@
 final class PhabricatorEmailVarySubjectsSetting
   extends PhabricatorSelectSetting {
 
-  const SETTINGKEY = 'vary-subjects';
+  const SETTINGKEY = 'vary-subject';
 
-  const VALUE_VARY_SUBJECTS = 'true';
-  const VALUE_STATIC_SUBJECTS = 'false';
+  const VALUE_VARY_SUBJECTS = 'vary';
+  const VALUE_STATIC_SUBJECTS = 'static';
 
   public function getSettingName() {
     return pht('Vary Subjects');
+  }
+
+  public function getSettingPanelKey() {
+    return PhabricatorEmailFormatSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 300;
+  }
+
+  protected function isEnabledForViewer(PhabricatorUser $viewer) {
+    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
   }
 
   protected function getControlInstructions() {

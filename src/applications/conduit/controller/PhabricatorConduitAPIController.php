@@ -487,6 +487,10 @@ final class PhabricatorConduitAPIController
     }
 
     $request->setUser($user);
+
+    id(new PhabricatorAuthSessionEngine())
+      ->willServeRequestForUser($user);
+
     return null;
   }
 

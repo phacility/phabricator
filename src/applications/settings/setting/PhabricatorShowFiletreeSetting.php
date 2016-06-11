@@ -12,6 +12,14 @@ final class PhabricatorShowFiletreeSetting
     return pht('Show Filetree');
   }
 
+  protected function getSettingOrder() {
+    return 300;
+  }
+
+  public function getSettingPanelKey() {
+    return PhabricatorDiffPreferencesSettingsPanel::PANELKEY;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'When viewing a revision or commit, you can enable a sidebar showing '.

@@ -422,6 +422,10 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       $participant->save();
     }
 
+    PhabricatorUserCache::clearCaches(
+      PhabricatorUserMessageCountCacheType::KEY_COUNT,
+      array_keys($participants));
+
     if ($xactions) {
       $data = array(
         'type'        => 'message',
@@ -541,26 +545,29 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $participant_phids = mpull($participants, 'getParticipantPHID');
 
-    $preferences = id(new PhabricatorUserPreferencesQuery())
+    $users = id(new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withUserPHIDs($participant_phids)
+      ->withPHIDs($participant_phids)
+      ->needUserSettings(true)
       ->execute();
-    $preferences = mpull($preferences, null, 'getUserPHID');
+    $users = mpull($users, null, 'getPHID');
+
+    $notification_key = PhabricatorConpherenceNotificationsSetting::SETTINGKEY;
+    $notification_email =
+      PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL;
 
     foreach ($participants as $phid => $participant) {
-      $default = ConpherenceSettings::EMAIL_ALWAYS;
-      $preference = idx($preferences, $phid);
-      if ($preference) {
-        $default = $preference->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_CONPH_NOTIFICATIONS,
-          ConpherenceSettings::EMAIL_ALWAYS);
+      $user = idx($users, $phid);
+      if ($user) {
+        $default = $user->getUserSetting($notification_key);
+      } else {
+        $default = $notification_email;
       }
+
       $settings = $participant->getSettings();
-      $notifications = idx(
-        $settings,
-        'notifications',
-        $default);
-      if ($notifications == ConpherenceSettings::EMAIL_ALWAYS) {
+      $notifications = idx($settings, 'notifications', $default);
+
+      if ($notifications == $notification_email) {
         $to_phids[] = $phid;
       }
     }

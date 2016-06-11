@@ -18,6 +18,10 @@ final class PhabricatorNotificationClearController
         $viewer->getPHID(),
         $chrono_key);
 
+      PhabricatorUserCache::clearCache(
+        PhabricatorUserNotificationCountCacheType::KEY_COUNT,
+        $viewer->getPHID());
+
       return id(new AphrontReloadResponse())
         ->setURI('/notification/');
     }

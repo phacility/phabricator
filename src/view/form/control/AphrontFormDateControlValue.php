@@ -207,13 +207,15 @@ final class AphrontFormDateControlValue extends Phobject {
   }
 
   private function getTimeFormat() {
-    return $this->getViewer()
-      ->getPreference(PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
+    $viewer = $this->getViewer();
+    $time_key = PhabricatorTimeFormatSetting::SETTINGKEY;
+    return $viewer->getUserSetting($time_key);
   }
 
   private function getDateFormat() {
-    return $this->getViewer()
-      ->getPreference(PhabricatorUserPreferences::PREFERENCE_DATE_FORMAT);
+    $viewer = $this->getViewer();
+    $date_key = PhabricatorDateFormatSetting::SETTINGKEY;
+    return $viewer->getUserSetting($date_key);
   }
 
   private function getFormattedDateFromDate($date, $time) {

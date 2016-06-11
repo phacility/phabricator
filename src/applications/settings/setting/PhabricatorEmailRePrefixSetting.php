@@ -5,11 +5,23 @@ final class PhabricatorEmailRePrefixSetting
 
   const SETTINGKEY = 're-prefix';
 
-  const VALUE_RE_PREFIX = 'true';
-  const VALUE_NO_PREFIX = 'false';
+  const VALUE_RE_PREFIX = 're';
+  const VALUE_NO_PREFIX = 'none';
 
   public function getSettingName() {
     return pht('Add "Re:" Prefix');
+  }
+
+  public function getSettingPanelKey() {
+    return PhabricatorEmailFormatSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 200;
+  }
+
+  protected function isEnabledForViewer(PhabricatorUser $viewer) {
+    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
   }
 
   protected function getControlInstructions() {

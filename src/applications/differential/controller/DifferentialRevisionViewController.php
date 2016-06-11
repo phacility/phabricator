@@ -381,7 +381,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $nav = null;
     if ($filetree_on) {
-      $collapsed_key = PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED;
+      $collapsed_key = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
       $collapsed_value = $viewer->getUserSetting($collapsed_key);
 
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())

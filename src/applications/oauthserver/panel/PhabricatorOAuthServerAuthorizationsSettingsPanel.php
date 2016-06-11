@@ -11,8 +11,8 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
     return pht('OAuth Authorizations');
   }
 
-  public function getPanelGroup() {
-    return pht('Sessions and Logs');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {

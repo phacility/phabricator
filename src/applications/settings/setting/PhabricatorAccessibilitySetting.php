@@ -9,9 +9,17 @@ final class PhabricatorAccessibilitySetting
     return pht('Accessibility');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDisplayPreferencesSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 100;
+  }
+
   protected function getControlInstructions() {
     return pht(
-      'If you have difficulty reading the Phabricator UI, these settings '.
+      'If you have difficulty reading the Phabricator UI, this setting '.
       'may make Phabricator more accessible.');
   }
 

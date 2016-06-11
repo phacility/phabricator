@@ -329,7 +329,7 @@ final class DiffusionCommitController extends DiffusionController {
       PhabricatorShowFiletreeSetting::SETTINGKEY,
       PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
 
-    $pref_collapse = PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED;
+    $pref_collapse = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
     $collapsed = $viewer->getUserSetting($pref_collapse);
 
     $nav = null;

@@ -382,8 +382,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
     $collapse_id = celerity_generate_unique_node_id();
     $viewer = $this->getViewer();
-    $collapse_key =
-      PhabricatorUserPreferences::PREFERENCE_PROFILE_MENU_COLLAPSED;
+    $collapse_key = PhabricatorProfileMenuCollapsedSetting::SETTINGKEY;
 
     $is_collapsed = $viewer->getUserSetting($collapse_key);
 

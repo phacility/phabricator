@@ -12,6 +12,14 @@ final class PhabricatorUnifiedDiffsSetting
     return pht('Show Unified Diffs');
   }
 
+  protected function getSettingOrder() {
+    return 100;
+  }
+
+  public function getSettingPanelKey() {
+    return PhabricatorDiffPreferencesSettingsPanel::PANELKEY;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'Phabricator normally shows diffs in a side-by-side layout on large '.

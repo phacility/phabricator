@@ -26,6 +26,10 @@ final class PhabricatorCacheManagementPurgeWorkflow
             'name'    => 'purge-general',
             'help'    => pht('Purge the general cache.'),
           ),
+          array(
+            'name' => 'purge-user',
+            'help' => pht('Purge the user cache.'),
+          ),
         ));
   }
 
@@ -38,6 +42,7 @@ final class PhabricatorCacheManagementPurgeWorkflow
       'remarkup'  => $purge_all || $args->getArg('purge-remarkup'),
       'changeset' => $purge_all || $args->getArg('purge-changeset'),
       'general'   => $purge_all || $args->getArg('purge-general'),
+      'user' => $purge_all || $args->getArg('purge-user'),
     );
 
     if (!array_filter($purge)) {
@@ -72,6 +77,12 @@ final class PhabricatorCacheManagementPurgeWorkflow
       $this->purgeGeneralCache();
       $console->writeOut("%s\n", pht('Done.'));
     }
+
+    if ($purge['user']) {
+      $console->writeOut(pht('Purging user cache...'));
+      $this->purgeUserCache();
+      $console->writeOut("%s\n", pht('Done.'));
+    }
   }
 
   private function purgeRemarkupCache() {
@@ -98,6 +109,16 @@ final class PhabricatorCacheManagementPurgeWorkflow
       $conn_w,
       'TRUNCATE TABLE %T',
       'cache_general');
+  }
+
+  private function purgeUserCache() {
+    $table = new PhabricatorUserCache();
+    $conn_w = $table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'TRUNCATE TABLE %T',
+      $table->getTableName());
   }
 
 }

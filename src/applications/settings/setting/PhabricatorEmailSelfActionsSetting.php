@@ -12,6 +12,14 @@ final class PhabricatorEmailSelfActionsSetting
     return pht('Self Actions');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorEmailDeliverySettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 200;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'If you disable **Self Actions**, Phabricator will not notify '.

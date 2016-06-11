@@ -2,7 +2,11 @@
 
 final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
+    if ($this->getUser()->getIsMailingList()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -14,15 +18,11 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
     return pht('VCS Password');
   }
 
-  public function getPanelGroup() {
-    return pht('Authentication');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
   public function isEnabled() {
-    if ($this->getUser()->getIsMailingList()) {
-      return false;
-    }
-
     return PhabricatorEnv::getEnvConfig('diffusion.allow-http-auth');
   }
 

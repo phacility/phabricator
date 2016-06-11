@@ -677,6 +677,8 @@ abstract class PhabricatorApplicationTransactionEditor
         }
 
         $editor->save();
+
+        $this->updateWorkboardColumns($object, $const, $old, $new);
         break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_SPACE:
@@ -2702,7 +2704,9 @@ abstract class PhabricatorApplicationTransactionEditor
     $object_href = null) {
 
     $headers = array();
+    $headers_html = array();
     $comments = array();
+    $details = array();
 
     foreach ($xactions as $xaction) {
       if ($xaction->shouldHideForMail($xactions)) {
@@ -2714,16 +2718,25 @@ abstract class PhabricatorApplicationTransactionEditor
         $headers[] = $header;
       }
 
+      $header_html = $xaction->getTitleForHTMLMail();
+      if ($header_html !== null) {
+        $headers_html[] = $header_html;
+      }
+
       $comment = $xaction->getBodyForMail();
       if ($comment !== null) {
         $comments[] = $comment;
+      }
+
+      if ($xaction->hasChangeDetailsForMail()) {
+        $details[] = $xaction;
       }
     }
 
     $headers_text = implode("\n", $headers);
     $body->addRawPlaintextSection($headers_text);
 
-    $headers_html = phutil_implode_html(phutil_tag('br'), $headers);
+    $headers_html = phutil_implode_html(phutil_tag('br'), $headers_html);
 
     $header_button = null;
     if ($object_label !== null) {
@@ -2763,7 +2776,13 @@ abstract class PhabricatorApplicationTransactionEditor
       array(
         'style' => implode(' ', $xactions_style),
       ),
-      $headers_html);
+      array(
+        $headers_html,
+        // Add an extra newline to prevent the "View Object" button from
+        // running into the transaction text in Mail.app text snippet
+        // previews.
+        "\n",
+      ));
 
     $headers_html = phutil_tag(
       'table',
@@ -2775,6 +2794,14 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($comments as $comment) {
       $body->addRemarkupSection(null, $comment);
     }
+
+    foreach ($details as $xaction) {
+      $details = $xaction->renderChangeDetailsForMail($body->getViewer());
+      if ($details !== null) {
+        $body->addHTMLSection(pht('EDIT DETAILS'), $details);
+      }
+    }
+
   }
 
   /**
@@ -3602,5 +3629,49 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return true;
   }
+
+  private function updateWorkboardColumns($object, $const, $old, $new) {
+    // If an object is removed from a project, remove it from any proxy
+    // columns for that project. This allows a task which is moved up from a
+    // milestone to the parent to move back into the "Backlog" column on the
+    // parent workboard.
+
+    if ($const != PhabricatorProjectObjectHasProjectEdgeType::EDGECONST) {
+      return;
+    }
+
+    // TODO: This should likely be some future WorkboardInterface.
+    $appears_on_workboards = ($object instanceof ManiphestTask);
+    if (!$appears_on_workboards) {
+      return;
+    }
+
+    $removed_phids = array_keys(array_diff_key($old, $new));
+    if (!$removed_phids) {
+      return;
+    }
+
+    // Find any proxy columns for the removed projects.
+    $proxy_columns = id(new PhabricatorProjectColumnQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withProxyPHIDs($removed_phids)
+      ->execute();
+    if (!$proxy_columns) {
+      return array();
+    }
+
+    $proxy_phids = mpull($proxy_columns, 'getPHID');
+
+    $position_table = new PhabricatorProjectColumnPosition();
+    $conn_w = $position_table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE objectPHID = %s AND columnPHID IN (%Ls)',
+      $position_table->getTableName(),
+      $object->getPHID(),
+      $proxy_phids);
+  }
+
 
 }

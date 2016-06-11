@@ -11,8 +11,8 @@ final class PhabricatorMultiFactorSettingsPanel
     return pht('Multi-Factor Auth');
   }
 
-  public function getPanelGroup() {
-    return pht('Authentication');
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsAuthenticationPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {

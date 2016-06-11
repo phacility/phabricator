@@ -5,6 +5,27 @@ final class PhabricatorSettingsEditEngine
 
   const ENGINECONST = 'settings.settings';
 
+  private $isSelfEdit;
+  private $profileURI;
+
+  public function setIsSelfEdit($is_self_edit) {
+    $this->isSelfEdit = $is_self_edit;
+    return $this;
+  }
+
+  public function getIsSelfEdit() {
+    return $this->isSelfEdit;
+  }
+
+  public function setProfileURI($profile_uri) {
+    $this->profileURI = $profile_uri;
+    return $this;
+  }
+
+  public function getProfileURI() {
+    return $this->profileURI;
+  }
+
   public function isEngineConfigurable() {
     return false;
   }
@@ -46,7 +67,15 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectEditShortText($object) {
-    return pht('Edit Settings');
+    if (!$object->getUser()) {
+      return pht('Global Defaults');
+    } else {
+      if ($this->getIsSelfEdit()) {
+        return pht('Personal Settings');
+      } else {
+        return pht('Account Settings');
+      }
+    }
   }
 
   protected function getObjectCreateShortText() {
@@ -54,11 +83,17 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectName() {
+    $page = $this->getSelectedPage();
+
+    if ($page) {
+      return $page->getLabel();
+    }
+
     return pht('Settings');
   }
 
   protected function getEditorURI() {
-    return '/settings/edit/';
+    throw new PhutilMethodNotImplementedException();
   }
 
   protected function getObjectCreateCancelURI($object) {
@@ -66,12 +101,75 @@ final class PhabricatorSettingsEditEngine
   }
 
   protected function getObjectViewURI($object) {
-    // TODO: This isn't correct...
-    return '/settings/user/'.$this->getViewer()->getUsername().'/';
+    return $object->getEditURI();
   }
 
   protected function getCreateNewObjectPolicy() {
     return PhabricatorPolicies::POLICY_ADMIN;
+  }
+
+  public function getEffectiveObjectEditDoneURI($object) {
+    return parent::getEffectiveObjectViewURI($object).'saved/';
+  }
+
+  public function getEffectiveObjectEditCancelURI($object) {
+    if (!$object->getUser()) {
+      return '/settings/';
+    }
+
+    if ($this->getIsSelfEdit()) {
+      return null;
+    }
+
+    if ($this->getProfileURI()) {
+      return $this->getProfileURI();
+    }
+
+    return parent::getEffectiveObjectEditCancelURI($object);
+  }
+
+  protected function newPages($object) {
+    $viewer = $this->getViewer();
+    $user = $object->getUser();
+
+    $panels = PhabricatorSettingsPanel::getAllPanels();
+
+    foreach ($panels as $key => $panel) {
+      if (!($panel instanceof PhabricatorEditEngineSettingsPanel)) {
+        unset($panels[$key]);
+        continue;
+      }
+
+      $panel->setViewer($viewer);
+      if ($user) {
+        $panel->setUser($user);
+      }
+    }
+
+    $pages = array();
+    $uris = array();
+    foreach ($panels as $key => $panel) {
+      $uris[$key] = $panel->getPanelURI();
+
+      $page = $panel->newEditEnginePage();
+      if (!$page) {
+        continue;
+      }
+      $pages[] = $page;
+    }
+
+    $more_pages = array(
+      id(new PhabricatorEditPage())
+        ->setKey('extra')
+        ->setLabel(pht('Extra Settings'))
+        ->setIsDefault(true),
+    );
+
+    foreach ($more_pages as $page) {
+      $pages[] = $page;
+    }
+
+    return $pages;
   }
 
   protected function buildCustomEditFields($object) {
@@ -84,6 +182,8 @@ final class PhabricatorSettingsEditEngine
       $settings[$key] = $setting;
     }
 
+    $settings = msortv($settings, 'getSettingOrderVector');
+
     $fields = array();
     foreach ($settings as $setting) {
       foreach ($setting->newCustomEditFields($object) as $field) {
@@ -92,6 +192,45 @@ final class PhabricatorSettingsEditEngine
     }
 
     return $fields;
+  }
+
+  protected function getValidationExceptionShortMessage(
+    PhabricatorApplicationTransactionValidationException $ex,
+    PhabricatorEditField $field) {
+
+    // Settings fields all have the same transaction type so we need to make
+    // sure the transaction is changing the same setting before matching an
+    // error to a given field.
+    $xaction_type = $field->getTransactionType();
+    if ($xaction_type == PhabricatorUserPreferencesTransaction::TYPE_SETTING) {
+      $property = PhabricatorUserPreferencesTransaction::PROPERTY_SETTING;
+
+      $field_setting = idx($field->getMetadata(), $property);
+      foreach ($ex->getErrors() as $error) {
+        if ($error->getType() !== $xaction_type) {
+          continue;
+        }
+
+        $xaction = $error->getTransaction();
+        if (!$xaction) {
+          continue;
+        }
+
+        $xaction_setting = $xaction->getMetadataValue($property);
+        if ($xaction_setting != $field_setting) {
+          continue;
+        }
+
+        $short_message = $error->getShortMessage();
+        if ($short_message !== null) {
+          return $short_message;
+        }
+      }
+
+      return null;
+    }
+
+    return parent::getValidationExceptionShortMessage($ex, $field);
   }
 
 }

@@ -555,14 +555,25 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   height: 28px;
 }
 
-.phabricator-main-menu-dropdown {
+.phabricator-main-menu-dropdown.phui-list-sidenav {
   position: absolute;
   background: #fff;
   top: 42px;
-  padding: 2px;
+  padding: 6px 0;
+  margin: 0 20px 0 0;
   box-shadow: {$dropshadow};
-  border: 1px solid {$blueborder};
+  border: 1px solid {$lightblueborder};
   border-radius: 3px;
+}
+
+.phabricator-main-menu-dropdown.phui-list-sidenav .phui-list-item-has-icon
+  .phui-list-item-href {
+    padding: 4px 40px 4px 12px;
+}
+
+.phabricator-main-menu-dropdown.phui-list-sidenav .phui-list-item-type-label
+  .phui-list-item-name {
+    padding-left: 12px;
 }
 
 

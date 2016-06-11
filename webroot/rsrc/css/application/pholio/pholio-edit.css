@@ -44,6 +44,10 @@
   padding: 8px;
 }
 
+.pholio-uploaded-image .pholio-thumb-img {
+  cursor: pointer;
+}
+
 .pholio-thumb-frame {
   background: url('/rsrc/image/checker_lighter.png');
 }
@@ -102,17 +106,13 @@
 }
 
 .pholio-edit-drop {
+  display: block;
   border-width: 1px;
   border-style: dashed;
   border-color: {$lightgreytext};
   text-align: center;
   padding: 16px;
   color: {$greytext};
-}
-
-.device .pholio-edit-drop {
-  /* For now, no uploading from devices. */
-  display: none;
 }
 
 .pholio-uploaded-image.pholio-drop-active,

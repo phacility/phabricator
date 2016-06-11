@@ -508,7 +508,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return DiffusionCommandEngine::newCommandEngine($this)
       ->setArgv($argv)
       ->setCredentialPHID($this->getCredentialPHID())
-      ->setProtocol($this->getRemoteProtocol());
+      ->setURI($this->getRemoteURIObject());
   }
 
 /* -(  Local Command Execution  )-------------------------------------------- */

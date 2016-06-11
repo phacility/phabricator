@@ -37,12 +37,18 @@ final class PhabricatorFileUploadDialogController
       }
     }
 
+    if ($request->getURIData('single')) {
+      $allow_multiple = false;
+    } else {
+      $allow_multiple = true;
+    }
+
     $form = id(new AphrontFormView())
       ->appendChild(
         id(new PHUIFormFileControl())
           ->setName('filePHIDs')
           ->setLabel(pht('Upload File'))
-          ->setAllowMultiple(true)
+          ->setAllowMultiple($allow_multiple)
           ->setError($e_file));
 
     return $this->newDialog()

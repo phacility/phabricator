@@ -9,8 +9,45 @@ final class PhabricatorTimezoneSetting
     return pht('Timezone');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDateTimeSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 100;
+  }
+
+  protected function getControlInstructions() {
+    return pht('Select your local timezone.');
+  }
+
   public function getSettingDefaultValue() {
     return date_default_timezone_get();
+  }
+
+  public function assertValidValue($value) {
+    // NOTE: This isn't doing anything fancy, it's just a much faster
+    // validator than doing all the timezone calculations to build the full
+    // list of options.
+
+    if (!$value) {
+      return;
+    }
+
+    static $identifiers;
+    if ($identifiers === null) {
+      $identifiers = DateTimeZone::listIdentifiers();
+      $identifiers = array_fuse($identifiers);
+    }
+
+    if (isset($identifiers[$value])) {
+      return;
+    }
+
+    throw new Exception(
+      pht(
+        'Timezone "%s" is not a valid timezone identiifer.',
+        $value));
   }
 
   protected function getSelectOptionGroups() {
@@ -48,6 +85,18 @@ final class PhabricatorTimezoneSetting
     }
 
     return $option_groups;
+  }
+
+  public function expandSettingTransaction($object, $xaction) {
+    // When the user changes their timezone, we also clear any ignored
+    // timezone offset.
+    return array(
+      $xaction,
+      $this->newSettingTransaction(
+        $object,
+        PhabricatorTimezoneIgnoreOffsetSetting::SETTINGKEY,
+        null),
+    );
   }
 
 }

@@ -108,12 +108,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
     );
   }
 
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    return id(new PhabricatorProjectEditEngine())
-      ->setViewer($viewer)
-      ->loadQuickCreateItems();
-  }
-
   protected function getCustomCapabilities() {
     return array(
       ProjectCreateProjectsCapability::CAPABILITY => array(),

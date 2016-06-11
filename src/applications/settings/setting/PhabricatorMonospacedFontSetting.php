@@ -9,6 +9,14 @@ final class PhabricatorMonospacedFontSetting
     return pht('Monospaced Font');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDisplayPreferencesSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 500;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'You can customize the font used when showing monospaced text, '.

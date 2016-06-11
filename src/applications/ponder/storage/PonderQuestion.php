@@ -48,6 +48,7 @@ final class PonderQuestion extends PonderDAO
       ->setViewPolicy($view_policy)
       ->setStatus(PonderQuestionStatus::STATUS_OPEN)
       ->setAnswerCount(0)
+      ->setAnswerWiki('')
       ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 

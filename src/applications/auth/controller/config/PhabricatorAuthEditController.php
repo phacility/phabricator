@@ -130,7 +130,7 @@ final class PhabricatorAuthEditController
             PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS)
           ->setNewValue($request->getInt('trustEmails', 0));
 
-        if ($provider instanceof PhabricatorPhabricatorAuthProvider) {
+        if ($provider->supportsAutoLogin()) {
           $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
             ->setTransactionType(
               PhabricatorAuthProviderConfigTransaction::TYPE_AUTO_LOGIN)
@@ -314,7 +314,7 @@ final class PhabricatorAuthEditController
             $v_trust_email));
     }
 
-    if ($provider instanceof PhabricatorPhabricatorAuthProvider) {
+    if ($provider->supportsAutoLogin()) {
       $form->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(

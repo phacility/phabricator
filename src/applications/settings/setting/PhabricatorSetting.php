@@ -2,18 +2,35 @@
 
 abstract class PhabricatorSetting extends Phobject {
 
-  private $viewer;
+  private $viewer = false;
 
-  public function setViewer(PhabricatorUser $viewer) {
+  public function setViewer(PhabricatorUser $viewer = null) {
     $this->viewer = $viewer;
     return $this;
   }
 
   public function getViewer() {
+    if ($this->viewer === false) {
+      throw new PhutilInvalidStateException('setViewer');
+    }
     return $this->viewer;
   }
 
   abstract public function getSettingName();
+
+  public function getSettingPanelKey() {
+    return null;
+  }
+
+  protected function getSettingOrder() {
+    return 1000;
+  }
+
+  public function getSettingOrderVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->getSettingOrder())
+      ->addString($this->getSettingName());
+  }
 
   protected function getControlInstructions() {
     return null;
@@ -89,8 +106,26 @@ abstract class PhabricatorSetting extends Phobject {
     return;
   }
 
+  public function assertValidValue($value) {
+    $this->validateTransactionValue($value);
+  }
+
   public function getTransactionNewValue($value) {
     return $value;
+  }
+
+  public function expandSettingTransaction($object, $xaction) {
+    return array($xaction);
+  }
+
+  protected function newSettingTransaction($object, $key, $value) {
+    $setting_property = PhabricatorUserPreferencesTransaction::PROPERTY_SETTING;
+    $xaction_type = PhabricatorUserPreferencesTransaction::TYPE_SETTING;
+
+    return id(clone $object->getApplicationTransactionTemplate())
+      ->setTransactionType($xaction_type)
+      ->setMetadataValue($setting_property, $key)
+      ->setNewValue($value);
   }
 
 }

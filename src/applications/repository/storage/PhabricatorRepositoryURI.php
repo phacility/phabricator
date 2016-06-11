@@ -587,11 +587,10 @@ final class PhabricatorRepositoryURI
 
   public function newCommandEngine() {
     $repository = $this->getRepository();
-    $protocol = $this->getEffectiveURI()->getProtocol();
 
     return DiffusionCommandEngine::newCommandEngine($repository)
       ->setCredentialPHID($this->getCredentialPHID())
-      ->setProtocol($protocol);
+      ->setURI($this->getEffectiveURI());
   }
 
   public function getURIScore() {

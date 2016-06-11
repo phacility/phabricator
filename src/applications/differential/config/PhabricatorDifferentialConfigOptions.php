@@ -261,13 +261,14 @@ final class PhabricatorDifferentialConfigOptions
             "that many lines. For instance, a value of 100 means 'inline ".
             "patches if they are no longer than 100 lines'. By default, ".
             "patches are not inlined.")),
-      // TODO: Implement 'enum'? Options are 'unified' or 'git'.
       $this->newOption(
         'metamta.differential.patch-format',
-        'string',
+        'enum',
         'unified')
         ->setDescription(
-          pht("Format for inlined or attached patches: 'git' or 'unified'.")),
+          pht('Format for inlined or attached patches.'))
+        ->setEnumOptions(
+          array('unified' => 'unified', 'git' => 'git')),
     );
   }
 

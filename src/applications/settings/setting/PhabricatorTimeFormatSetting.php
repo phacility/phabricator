@@ -12,6 +12,14 @@ final class PhabricatorTimeFormatSetting
     return pht('Time Format');
   }
 
+  public function getSettingPanelKey() {
+    return PhabricatorDateTimeSettingsPanel::PANELKEY;
+  }
+
+  protected function getSettingOrder() {
+    return 300;
+  }
+
   protected function getControlInstructions() {
     return pht(
       'Select the format you prefer for editing and displaying time.');

@@ -218,6 +218,16 @@
   width: 50%;
 }
 
+video.phabricator-media {
+  background: {$greybackground};
+}
+
+.phabricator-remarkup video {
+  display: block;
+  margin: 0 auto;
+  max-width: 95%;
+}
+
 .phabricator-remarkup-mention-exists {
   font-weight: bold;
   background: #e6f3ff;

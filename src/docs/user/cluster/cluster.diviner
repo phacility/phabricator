@@ -8,7 +8,7 @@ performance.
 Overview
 ========
 
-WARNING: This feature is a prototype. Installs should expect a challening
+WARNING: This feature is a prototype. Installs should expect a challenging
 adventure when deploying clusters. In the best of times, configuring a
 cluster is complex and requires significant operations experience.
 
