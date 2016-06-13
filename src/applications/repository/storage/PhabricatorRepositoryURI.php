@@ -191,11 +191,6 @@ final class PhabricatorRepositoryURI
     return self::IO_NONE;
   }
 
-
-  public function getDisplayURI() {
-    return $this->getURIObject(false);
-  }
-
   public function getNormalizedURI() {
     $vcs = $this->getRepository()->getVersionControlSystem();
 
@@ -216,8 +211,12 @@ final class PhabricatorRepositoryURI
     return $normal_uri->getNormalizedURI();
   }
 
+  public function getDisplayURI() {
+    return $this->getURIObject();
+  }
+
   public function getEffectiveURI() {
-    return $this->getURIObject(true);
+    return $this->getURIObject();
   }
 
   public function getURIEnvelope() {
@@ -243,11 +242,10 @@ final class PhabricatorRepositoryURI
     return new PhutilOpaqueEnvelope((string)$uri);
   }
 
-  private function getURIObject($normalize) {
+  private function getURIObject() {
     // Users can provide Git/SCP-style URIs in the form "user@host:path".
-    // These are equivalent to "ssh://user@host/path". We use the more standard
-    // form internally, and convert to it if we need to specify a port number,
-    // but try to preserve what the user typed when displaying the URI.
+    // In the general case, these are not equivalent to any "ssh://..." form
+    // because the path is relative.
 
     if ($this->isBuiltin()) {
       $builtin_protocol = $this->getForcedProtocol();
@@ -271,43 +269,22 @@ final class PhabricatorRepositoryURI
     // with it; this should always be provided by the associated credential.
     $uri->setPass(null);
 
-    if (!$uri->getProtocol()) {
-      $git_uri = new PhutilGitURI($raw_uri);
-
-      // We must normalize this Git-style URI into a normal URI
-      $must_normalize = ($port && ($port != $default_ports['ssh']));
-      if ($must_normalize || $normalize) {
-        $domain = $git_uri->getDomain();
-
-
-        $uri = id(new PhutilURI("ssh://{$domain}"))
-          ->setUser($git_uri->getUser())
-          ->setPath($git_uri->getPath());
-      } else {
-        $uri = $git_uri;
-      }
+    $protocol = $this->getForcedProtocol();
+    if ($protocol) {
+      $uri->setProtocol($protocol);
     }
 
-    $is_normal = ($uri instanceof PhutilURI);
+    if ($port) {
+      $uri->setPort($port);
+    }
 
-    if ($is_normal) {
-      $protocol = $this->getForcedProtocol();
-      if ($protocol) {
-        $uri->setProtocol($protocol);
-      }
+    // Remove any explicitly set default ports.
+    $uri_port = $uri->getPort();
+    $uri_protocol = $uri->getProtocol();
 
-      if ($port) {
-        $uri->setPort($port);
-      }
-
-      // Remove any explicitly set default ports.
-      $uri_port = $uri->getPort();
-      $uri_protocol = $uri->getProtocol();
-
-      $uri_default = idx($default_ports, $uri_protocol);
-      if ($uri_default && ($uri_default == $uri_port)) {
-        $uri->setPort(null);
-      }
+    $uri_default = idx($default_ports, $uri_protocol);
+    if ($uri_default && ($uri_default == $uri_port)) {
+      $uri->setPort(null);
     }
 
     $user = $this->getForcedUser();
