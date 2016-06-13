@@ -31,19 +31,39 @@ final class PhabricatorUserPreferencesCacheType
       ->setViewer($viewer)
       ->withUserPHIDs($user_phids)
       ->execute();
+    $preferences = mpull($preferences, null, 'getUserPHID');
+
+    // If some users don't have settings of their own yet, we need to load
+    // the global default settings to generate caches for them.
+    if (count($preferences) < count($user_phids)) {
+      $global = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer($viewer)
+        ->withBuiltinKeys(
+          array(
+            PhabricatorUserPreferences::BUILTIN_GLOBAL_DEFAULT,
+          ))
+        ->executeOne();
+    } else {
+      $global = null;
+    }
 
     $all_settings = PhabricatorSetting::getAllSettings();
 
     $settings = array();
-    foreach ($preferences as $preference) {
-      $user_phid = $preference->getUserPHID();
+    foreach ($users as $user_phid => $user) {
+      $preference = idx($preferences, $user_phid, $global);
+
+      if (!$preference) {
+        continue;
+      }
+
       foreach ($all_settings as $key => $setting) {
         $value = $preference->getSettingValue($key);
 
         // As an optimization, we omit the value from the cache if it is
         // exactly the same as the hardcoded default.
         $default_value = id(clone $setting)
-          ->setViewer($users[$user_phid])
+          ->setViewer($user)
           ->getSettingDefaultValue();
         if ($value === $default_value) {
           continue;

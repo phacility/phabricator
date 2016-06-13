@@ -130,9 +130,23 @@ final class PhabricatorUserPreferences
       return $preferences;
     }
 
-    return id(new self())
+    $preferences = id(new self())
       ->setUserPHID($user->getPHID())
       ->attachUser($user);
+
+    $global = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer($user)
+      ->withBuiltinKeys(
+        array(
+          self::BUILTIN_GLOBAL_DEFAULT,
+        ))
+      ->executeOne();
+
+    if ($global) {
+      $preferences->attachDefaultSettings($global);
+    }
+
+    return $preferences;
   }
 
   public function newTransaction($key, $value) {
