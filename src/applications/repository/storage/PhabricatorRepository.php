@@ -508,7 +508,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return DiffusionCommandEngine::newCommandEngine($this)
       ->setArgv($argv)
       ->setCredentialPHID($this->getCredentialPHID())
-      ->setProtocol($this->getRemoteProtocol());
+      ->setURI($this->getRemoteURIObject());
   }
 
 /* -(  Local Command Execution  )-------------------------------------------- */
@@ -1201,27 +1201,19 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    */
   public function getRemoteProtocol() {
     $uri = $this->getRemoteURIObject();
-
-    if ($uri instanceof PhutilGitURI) {
-      return 'ssh';
-    } else {
-      return $uri->getProtocol();
-    }
+    return $uri->getProtocol();
   }
 
 
   /**
-   * Get a parsed object representation of the repository's remote URI. This
-   * may be a normal URI (returned as a @{class@libphutil:PhutilURI}) or a git
-   * URI (returned as a @{class@libphutil:PhutilGitURI}).
+   * Get a parsed object representation of the repository's remote URI..
    *
-   * @return wild A @{class@libphutil:PhutilURI} or
-   *              @{class@libphutil:PhutilGitURI}.
+   * @return wild A @{class@libphutil:PhutilURI}.
    * @task uri
    */
   public function getRemoteURIObject() {
     $raw_uri = $this->getDetail('remote-uri');
-    if (!$raw_uri) {
+    if (!strlen($raw_uri)) {
       return new PhutilURI('');
     }
 
@@ -1229,17 +1221,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return new PhutilURI('file://'.$raw_uri);
     }
 
-    $uri = new PhutilURI($raw_uri);
-    if ($uri->getProtocol()) {
-      return $uri;
-    }
-
-    $uri = new PhutilGitURI($raw_uri);
-    if ($uri->getDomain()) {
-      return $uri;
-    }
-
-    throw new Exception(pht("Remote URI '%s' could not be parsed!", $raw_uri));
+    return new PhutilURI($raw_uri);
   }
 
 
@@ -1666,27 +1648,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this;
   }
 
-  public static function getRemoteURIProtocol($raw_uri) {
-    $uri = new PhutilURI($raw_uri);
-    if ($uri->getProtocol()) {
-      return strtolower($uri->getProtocol());
-    }
-
-    $git_uri = new PhutilGitURI($raw_uri);
-    if (strlen($git_uri->getDomain()) && strlen($git_uri->getPath())) {
-      return 'ssh';
-    }
-
-    return null;
-  }
-
   public static function assertValidRemoteURI($uri) {
     if (trim($uri) != $uri) {
       throw new Exception(
         pht('The remote URI has leading or trailing whitespace.'));
     }
 
-    $protocol = self::getRemoteURIProtocol($uri);
+    $uri_object = new PhutilURI($uri);
+    $protocol = $uri_object->getProtocol();
 
     // Catch confusion between Git/SCP-style URIs and normal URIs. See T3619
     // for discussion. This is usually a user adding "ssh://" to an implicit

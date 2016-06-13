@@ -137,9 +137,12 @@ final class PholioImageQuery
     $all_files = mpull($all_files, null, 'getPHID');
 
     if ($this->needInlineComments) {
-      $all_inline_comments = id(new PholioTransactionComment())
-        ->loadAllWhere('imageid IN (%Ld)',
-          mpull($images, 'getID'));
+      // Only load inline comments the viewer has permission to see.
+      $all_inline_comments = id(new PholioTransactionComment())->loadAllWhere(
+        'imageID IN (%Ld)
+          AND (transactionPHID IS NOT NULL OR authorPHID = %s)',
+        mpull($images, 'getID'),
+        $this->getViewer()->getPHID());
       $all_inline_comments = mgroup($all_inline_comments, 'getImageID');
     }
 

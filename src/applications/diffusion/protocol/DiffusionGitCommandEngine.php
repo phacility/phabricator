@@ -30,6 +30,21 @@ final class DiffusionGitCommandEngine
       $env['GIT_SSH'] = $this->getSSHWrapper();
     }
 
+    if ($this->isAnyHTTPProtocol()) {
+      $uri = $this->getURI();
+      if ($uri) {
+        $proxy = PhutilHTTPEngineExtension::buildHTTPProxyURI($uri);
+        if ($proxy) {
+          if ($this->isHTTPSProtocol()) {
+            $env_key = 'https_proxy';
+          } else {
+            $env_key = 'http_proxy';
+          }
+          $env[$env_key] = (string)$proxy;
+        }
+      }
+    }
+
     return $env;
   }
 

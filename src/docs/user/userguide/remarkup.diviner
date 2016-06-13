@@ -410,18 +410,29 @@ You can set file display options like this:
 
   {F123, layout=left, float, size=full, alt="a duckling"}
 
-Valid options are:
+Valid options for all files are:
 
   - **layout** left (default), center, right, inline, link (render a link
     instead of a thumbnail for images)
+  - **name** with `layout=link` or for non-images, use this name for the link
+    text
+  - **alt** Provide alternate text for assistive technologies.
+
+Image files support these options:
+
   - **float** If layout is set to left or right, the image will be floated so
     text wraps around it.
   - **size** thumb (default), full
-  - **name** with `layout=link` or for non-images, use this name for the link
-    text
   - **width** Scale image to a specific width.
   - **height** Scale image to a specific height.
-  - **alt** Provide alternate text for assistive technologies.
+
+Audio and video files support these options:
+
+  - **media**: Specify the media type as `audio` or `video`. This allows you
+    to disambiguate how file format which may contain either audio or video
+    should be rendered.
+  - **loop**: Loop this media.
+  - **autoplay**: Automatically begin playing this media.
 
 == Embedding Countdowns
 

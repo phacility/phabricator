@@ -55,7 +55,7 @@ final class PhabricatorPHPMailerConfigOptions
       $this->newOption('phpmailer.smtp-password', 'string', null)
         ->setHidden(true)
         ->setDescription(pht('Password for SMTP.')),
-      $this->newOption('phpmailer.smtp-encoding', 'string', '8bit')
+      $this->newOption('phpmailer.smtp-encoding', 'string', 'base64')
         ->setSummary(pht('Configure how mail is encoded.'))
         ->setDescription(
           pht(
@@ -64,14 +64,8 @@ final class PhabricatorPHPMailerConfigOptions
             "encoding. If you're having trouble with mail being mangled or ".
             "arriving with too many or too few newlines, you may try ".
             "adjusting this setting.\n\n".
-            "Supported values are `8bit` (default), `quoted-printable`, ".
-            "`7bit`, `binary` and `base64`.\n\n".
-            "The settings in the table below may work well.\n\n".
-            "| MTA | Setting | Notes\n".
-            "|-----|---------|------\n".
-            "| SendGrid via SMTP | `quoted-printable` | Double newlines under ".
-            "`8bit`.\n".
-            "| All Other MTAs | `8bit` | Default setting.")),
+            "Supported values are `8bit`, `quoted-printable`, ".
+            "`7bit`, `binary` and `base64`.")),
     );
   }
 

@@ -239,6 +239,28 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
             'ignoreKey' => $ignore_key,
             'ignore' => $ignore,
           ));
+
+        if ($user->getIsAdmin()) {
+          $server_https = $request->isHTTPS();
+          $server_protocol = $server_https ? 'HTTPS' : 'HTTP';
+          $client_protocol = $server_https ? 'HTTP' : 'HTTPS';
+
+          $doc_name = 'Configuring a Preamble Script';
+          $doc_href = PhabricatorEnv::getDoclink($doc_name);
+
+          Javelin::initBehavior(
+            'setup-check-https',
+            array(
+              'server_https' => $server_https,
+              'doc_name' => pht('See Documentation'),
+              'doc_href' => $doc_href,
+              'message' => pht(
+                'Phabricator thinks you are using %s, but your '.
+                'client is conviced that it is using %s. This is a serious '.
+                'misconfiguration with subtle, but significant, consequences.',
+                $server_protocol, $client_protocol),
+            ));
+        }
       }
 
       $default_img_uri =

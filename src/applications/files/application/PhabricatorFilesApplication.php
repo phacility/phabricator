@@ -81,7 +81,8 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'proxy/' => 'PhabricatorFileProxyController',
         'transforms/(?P<id>[1-9]\d*)/' =>
           'PhabricatorFileTransformListController',
-        'uploaddialog/' => 'PhabricatorFileUploadDialogController',
+        'uploaddialog/(?P<single>single/)?'
+          => 'PhabricatorFileUploadDialogController',
         'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
         'iconset/(?P<key>[^/]+)/' => array(
           'select/' => 'PhabricatorFileIconSetSelectController',

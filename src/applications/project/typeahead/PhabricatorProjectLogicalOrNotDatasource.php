@@ -92,14 +92,14 @@ final class PhabricatorProjectLogicalOrNotDatasource
         $return[] = id(clone $result)
           ->setPHID('any('.$result->getPHID().')')
           ->setDisplayName(pht('In Any: %s', $result->getDisplayName()))
-          ->setName($result->getName().' any');
+          ->setName('any '.$result->getName());
       }
 
       if ($return_not) {
         $return[] = id(clone $result)
           ->setPHID('not('.$result->getPHID().')')
           ->setDisplayName(pht('Not In: %s', $result->getDisplayName()))
-          ->setName($result->getName().' not');
+          ->setName('not '.$result->getName());
       }
     }
 

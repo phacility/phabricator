@@ -9,6 +9,7 @@ abstract class DiffusionCommandEngine extends Phobject {
   private $passthru;
   private $connectAsDevice;
   private $sudoAsDaemon;
+  private $uri;
 
   public static function newCommandEngine(PhabricatorRepository $repository) {
     $engines = self::newCommandEngines();
@@ -46,6 +47,16 @@ abstract class DiffusionCommandEngine extends Phobject {
 
   public function getRepository() {
     return $this->repository;
+  }
+
+  public function setURI(PhutilURI $uri) {
+    $this->uri = $uri;
+    $this->setProtocol($uri->getProtocol());
+    return $this;
+  }
+
+  public function getURI() {
+    return $this->uri;
   }
 
   public function setProtocol($protocol) {

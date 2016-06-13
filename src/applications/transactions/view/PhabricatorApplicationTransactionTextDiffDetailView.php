@@ -33,11 +33,24 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
     );
     $new_styles = implode(' ', $new_styles);
 
+    $omit_styles = array(
+      'padding: 8px 0;',
+    );
+    $omit_styles = implode(' ', $omit_styles);
+
     $result = array();
-    foreach ($diff->getParts() as $part) {
+    foreach ($diff->getSummaryParts() as $part) {
       $type = $part['type'];
       $text = $part['text'];
       switch ($type) {
+        case '.':
+          $result[] = phutil_tag(
+            'div',
+            array(
+              'style' => $omit_styles,
+            ),
+            pht('...'));
+          break;
         case '-':
           $result[] = phutil_tag(
             'span',
@@ -62,7 +75,12 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
 
     $styles = array(
       'white-space: pre-wrap;',
+      'color: #74777D;',
     );
+
+    // Beyond applying "pre-wrap", convert newlines to "<br />" explicitly
+    // to improve behavior in clients like Airmail.
+    $result = phutil_escape_html_newlines($result);
 
     return phutil_tag(
       'div',

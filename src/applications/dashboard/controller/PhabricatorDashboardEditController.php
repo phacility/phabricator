@@ -268,10 +268,10 @@ final class PhabricatorDashboardEditController
           $request,
           $viewer,
           'query',
-          pht('Recent Tasks'),
+          pht('Open Tasks'),
           array(
             'class' => 'ManiphestTaskSearchEngine',
-            'key' => 'all',
+            'key' => 'open',
           ));
         $panel_phids[] = $task_panel->getPHID();
 
