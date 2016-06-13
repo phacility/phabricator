@@ -19,10 +19,14 @@ final class PhameBlogViewController extends PhameLiveController {
 
     $post_query = id(new PhamePostQuery())
       ->setViewer($viewer)
-      ->withBlogPHIDs(array($blog->getPHID()));
+      ->withBlogPHIDs(array($blog->getPHID()))
+      ->withVisibility(array(
+        PhameConstants::VISIBILITY_PUBLISHED,
+        PhameConstants::VISIBILITY_DRAFT,
+      ));
 
     if ($is_live) {
-      $post_query->withVisibility(PhameConstants::VISIBILITY_PUBLISHED);
+      $post_query->withVisibility(array(PhameConstants::VISIBILITY_PUBLISHED));
     }
 
     $posts = $post_query->executeWithCursorPager($pager);

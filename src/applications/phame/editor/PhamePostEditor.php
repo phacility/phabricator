@@ -66,6 +66,9 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_VISIBILITY:
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
           $object->setDatePublished(0);
+        } else if ($xaction->getNewValue() ==
+          PhameConstants::VISIBILITY_ARCHIVED) {
+            $object->setDatePublished(0);
         } else {
           $object->setDatePublished(PhabricatorTime::getNow());
         }
