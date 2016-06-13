@@ -104,15 +104,19 @@ final class PhamePostSearchEngine
       if ($post->isDraft()) {
         $item->setStatusIcon('fa-star-o grey');
         $item->setDisabled(true);
-        $item->addIcon('none', pht('Draft Post'));
+        $item->addIcon('fa-star-o', pht('Draft Post'));
       } else if ($post->isArchived()) {
         $item->setStatusIcon('fa-ban grey');
         $item->setDisabled(true);
-        $item->addIcon('none', pht('Archived Post'));
+        $item->addIcon('fa-ban', pht('Archived Post'));
       } else {
         $date = $post->getDatePublished();
         $item->setEpoch($date);
       }
+      $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('fa-pencil')
+            ->setHref($post->getEditURI()));
       $list->addItem($item);
     }
 
