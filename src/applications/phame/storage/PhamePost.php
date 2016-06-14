@@ -10,7 +10,8 @@ final class PhamePost extends PhameDAO
     PhabricatorSubscribableInterface,
     PhabricatorDestructibleInterface,
     PhabricatorTokenReceiverInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorFulltextInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
   const MARKUP_FIELD_SUMMARY = 'markup:summary';
@@ -342,6 +343,13 @@ final class PhamePost extends PhameDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+  public function newFulltextEngine() {
+    return new PhamePostFulltextEngine();
   }
 
 }
