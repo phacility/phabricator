@@ -39,7 +39,7 @@ final class PhabricatorEmailRePrefixSetting
   }
 
   public function getSettingDefaultValue() {
-    return self::VALUE_RE_PREFIX;
+    return self::VALUE_NO_PREFIX;
   }
 
   protected function getSelectOptions() {

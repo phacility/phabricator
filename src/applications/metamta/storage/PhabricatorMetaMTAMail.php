@@ -1131,26 +1131,15 @@ final class PhabricatorMetaMTAMail
   }
 
   private function shouldAddRePrefix(PhabricatorUserPreferences $preferences) {
-    $default_value = PhabricatorEnv::getEnvConfig('metamta.re-prefix');
-
-    $value = $preferences->getPreference(
+    $value = $preferences->getSettingValue(
       PhabricatorEmailRePrefixSetting::SETTINGKEY);
-    if ($value === null) {
-      return $default_value;
-    }
 
     return ($value == PhabricatorEmailRePrefixSetting::VALUE_RE_PREFIX);
   }
 
   private function shouldVarySubject(PhabricatorUserPreferences $preferences) {
-    $default_value = PhabricatorEnv::getEnvConfig('metamta.vary-subjects');
-
-    $value = $preferences->getPreference(
+    $value = $preferences->getSettingValue(
       PhabricatorEmailVarySubjectsSetting::SETTINGKEY);
-
-    if ($value === null) {
-      return $default_value;
-    }
 
     return ($value == PhabricatorEmailVarySubjectsSetting::VALUE_VARY_SUBJECTS);
   }

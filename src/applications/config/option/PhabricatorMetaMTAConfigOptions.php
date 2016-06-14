@@ -276,22 +276,6 @@ EODOC
           ))
         ->setSummary(pht('Show email preferences link in email.'))
         ->setDescription($email_preferences_description),
-      $this->newOption('metamta.re-prefix', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Force "Re:" Subject Prefix'),
-            pht('No "Re:" Subject Prefix'),
-          ))
-        ->setSummary(pht('Control "Re:" subject prefix, for Mail.app.'))
-        ->setDescription($re_prefix_description),
-      $this->newOption('metamta.vary-subjects', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht('Allow Varied Subjects'),
-            pht('Always Use the Same Thread Subject'),
-          ))
-        ->setSummary(pht('Control subject variance, for some mail clients.'))
-        ->setDescription($vary_subjects_description),
       $this->newOption('metamta.insecure-auth-with-reply-to', 'bool', false)
         ->setBoolOptions(
           array(
