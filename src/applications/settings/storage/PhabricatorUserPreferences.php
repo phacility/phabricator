@@ -122,31 +122,35 @@ final class PhabricatorUserPreferences
    * @param PhabricatorUser User to load or create preferences for.
    */
   public static function loadUserPreferences(PhabricatorUser $user) {
-    $preferences = id(new PhabricatorUserPreferencesQuery())
+    return id(new PhabricatorUserPreferencesQuery())
       ->setViewer($user)
       ->withUsers(array($user))
+      ->needSyntheticPreferences(true)
       ->executeOne();
-    if ($preferences) {
-      return $preferences;
-    }
+  }
 
-    $preferences = id(new self())
-      ->setUserPHID($user->getPHID())
-      ->attachUser($user);
-
+  /**
+   * Load or create a global preferences object.
+   *
+   * If no global preferences exist, an empty preferences object is returned.
+   *
+   * @param PhabricatorUser Viewing user.
+   */
+  public static function loadGlobalPreferences(PhabricatorUser $viewer) {
     $global = id(new PhabricatorUserPreferencesQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withBuiltinKeys(
         array(
           self::BUILTIN_GLOBAL_DEFAULT,
         ))
       ->executeOne();
 
-    if ($global) {
-      $preferences->attachDefaultSettings($global);
+    if (!$global) {
+      $global = id(new self())
+        ->attachUser(new PhabricatorUser());
     }
 
-    return $preferences;
+    return $global;
   }
 
   public function newTransaction($key, $value) {

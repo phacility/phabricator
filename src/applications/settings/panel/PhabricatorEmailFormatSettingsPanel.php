@@ -13,7 +13,15 @@ final class PhabricatorEmailFormatSettingsPanel
     return PhabricatorSettingsEmailPanelGroup::PANELGROUPKEY;
   }
 
+  public function isUserPanel() {
+    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
+  }
+
   public function isManagementPanel() {
+    if (!$this->isUserPanel()) {
+      return false;
+    }
+
     if ($this->getUser()->getIsMailingList()) {
       return true;
     }

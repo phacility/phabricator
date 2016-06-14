@@ -20,10 +20,6 @@ final class PhabricatorEmailVarySubjectsSetting
     return 300;
   }
 
-  protected function isEnabledForViewer(PhabricatorUser $viewer) {
-    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
-  }
-
   protected function getControlInstructions() {
     return pht(
       'With **Vary Subjects** enabled, most mail subject lines will include '.

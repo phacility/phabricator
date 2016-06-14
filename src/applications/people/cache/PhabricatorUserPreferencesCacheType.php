@@ -29,29 +29,16 @@ final class PhabricatorUserPreferencesCacheType
 
     $preferences = id(new PhabricatorUserPreferencesQuery())
       ->setViewer($viewer)
-      ->withUserPHIDs($user_phids)
+      ->withUsers($users)
+      ->needSyntheticPreferences(true)
       ->execute();
     $preferences = mpull($preferences, null, 'getUserPHID');
-
-    // If some users don't have settings of their own yet, we need to load
-    // the global default settings to generate caches for them.
-    if (count($preferences) < count($user_phids)) {
-      $global = id(new PhabricatorUserPreferencesQuery())
-        ->setViewer($viewer)
-        ->withBuiltinKeys(
-          array(
-            PhabricatorUserPreferences::BUILTIN_GLOBAL_DEFAULT,
-          ))
-        ->executeOne();
-    } else {
-      $global = null;
-    }
 
     $all_settings = PhabricatorSetting::getAllSettings();
 
     $settings = array();
     foreach ($users as $user_phid => $user) {
-      $preference = idx($preferences, $user_phid, $global);
+      $preference = idx($preferences, $user_phid);
 
       if (!$preference) {
         continue;
