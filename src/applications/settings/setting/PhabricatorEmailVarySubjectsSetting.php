@@ -48,8 +48,8 @@ final class PhabricatorEmailVarySubjectsSetting
 
   protected function getSelectOptions() {
     return array(
-      self::VALUE_VARY_SUBJECTS => pht('Enable "Re:" Prefix'),
-      self::VALUE_STATIC_SUBJECTS => pht('Disable "Re:" Prefix'),
+      self::VALUE_VARY_SUBJECTS => pht('Enable Vary Subjects'),
+      self::VALUE_STATIC_SUBJECTS => pht('Disable Vary Subjects'),
     );
   }
 
