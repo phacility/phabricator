@@ -90,7 +90,9 @@ if (strlen($host)) {
   // Include the master in case the user is just specifying a redundant
   // "--host" flag for no reason and does not actually have a database
   // cluster configured.
-  $refs[] = PhabricatorDatabaseRef::getMasterDatabaseRef();
+  foreach (PhabricatorDatabaseRef::getMasterDatabaseRefs() as $master_ref) {
+    $refs[] = $master_ref;
+  }
 
   foreach ($refs as $possible_ref) {
     if ($possible_ref->getHost() == $host) {

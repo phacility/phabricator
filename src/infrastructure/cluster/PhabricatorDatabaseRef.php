@@ -446,24 +446,39 @@ final class PhabricatorDatabaseRef
     return $this->healthRecord;
   }
 
-  public static function getMasterDatabaseRef() {
+  public static function getMasterDatabaseRefs() {
     $refs = self::getLiveRefs();
 
     if (!$refs) {
-      return self::getLiveIndividualRef();
+      return array(self::getLiveIndividualRef());
     }
 
-    $master = null;
+    $masters = array();
     foreach ($refs as $ref) {
       if ($ref->getDisabled()) {
         continue;
       }
       if ($ref->getIsMaster()) {
-        return $ref;
+        $masters[] = $ref;
       }
     }
 
-    return null;
+    return $masters;
+  }
+
+  public static function getMasterDatabaseRef() {
+    // TODO: Remove this method; it no longer makes sense with application
+    // partitioning.
+
+    return head(self::getMasterDatabaseRefs());
+  }
+
+  public static function getMasterDatabaseRefForDatabase($database) {
+    $masters = self::getMasterDatabaseRefs();
+
+    // TODO: Actually implement this.
+
+    return head($masters);
   }
 
   public static function newIndividualRef() {
@@ -480,18 +495,14 @@ final class PhabricatorDatabaseRef
       ->setIsMaster(true);
   }
 
-  public static function getReplicaDatabaseRef() {
+  public static function getReplicaDatabaseRefs() {
     $refs = self::getLiveRefs();
 
     if (!$refs) {
-      return null;
+      return array();
     }
 
-    // TODO: We may have multiple replicas to choose from, and could make
-    // more of an effort to pick the "best" one here instead of always
-    // picking the first one. Once we've picked one, we should try to use
-    // the same replica for the rest of the request, though.
-
+    $replicas = array();
     foreach ($refs as $ref) {
       if ($ref->getDisabled()) {
         continue;
@@ -499,10 +510,24 @@ final class PhabricatorDatabaseRef
       if ($ref->getIsMaster()) {
         continue;
       }
-      return $ref;
+
+      $replicas[] = $ref;
     }
 
-    return null;
+    return $replicas;
+  }
+
+  public static function getReplicaDatabaseRefForDatabase($database) {
+    $replicas = self::getReplicaDatabaseRefs();
+
+    // TODO: Actually implement this.
+
+    // TODO: We may have multiple replicas to choose from, and could make
+    // more of an effort to pick the "best" one here instead of always
+    // picking the first one. Once we've picked one, we should try to use
+    // the same replica for the rest of the request, though.
+
+    return head($replicas);
   }
 
   private function newConnection(array $options) {
