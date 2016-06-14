@@ -104,7 +104,7 @@ abstract class PhabricatorModularTransaction
       return $title;
     }
 
-    return $this->getTitle();
+    return parent::getTitleForFeed();
   }
 
   final public function getColor() {
