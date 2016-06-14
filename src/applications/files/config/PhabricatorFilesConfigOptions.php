@@ -44,6 +44,7 @@ final class PhabricatorFilesConfigOptions
       'video/mp4' => 'video/mp4',
       'video/ogg' => 'video/ogg',
       'video/webm' => 'video/webm',
+      'video/quicktime' => 'video/quicktime',
     );
 
     $image_default = array(
@@ -71,6 +72,7 @@ final class PhabricatorFilesConfigOptions
       // to set the mood for your task without distracting viewers.)
       'video/mp4' => true,
       'video/ogg' => true,
+      'video/quicktime' => true,
       'application/ogg' => true,
     );
 
@@ -78,6 +80,7 @@ final class PhabricatorFilesConfigOptions
       'video/mp4' => true,
       'video/ogg' => true,
       'video/webm' => true,
+      'video/quicktime' => true,
       'application/ogg' => true,
     );
 
