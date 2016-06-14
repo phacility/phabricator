@@ -264,7 +264,7 @@ final class PhamePostEditor
   }
 
   protected function supportsSearch() {
-    return false;
+    return true;
   }
 
   protected function shouldApplyHeraldRules(
