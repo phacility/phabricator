@@ -20,6 +20,7 @@ final class PhameBlogViewController extends PhameLiveController {
     $post_query = id(new PhamePostQuery())
       ->setViewer($viewer)
       ->withBlogPHIDs(array($blog->getPHID()))
+      ->setOrder('datePublished')
       ->withVisibility(array(
         PhameConstants::VISIBILITY_PUBLISHED,
         PhameConstants::VISIBILITY_DRAFT,

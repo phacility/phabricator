@@ -36,6 +36,7 @@ final class PhameHomeController extends PhamePostController {
         ->setViewer($viewer)
         ->withBlogPHIDs($blog_phids)
         ->withVisibility(array(PhameConstants::VISIBILITY_PUBLISHED))
+        ->setOrder('datePublished')
         ->executeWithCursorPager($pager);
 
       if ($posts) {
