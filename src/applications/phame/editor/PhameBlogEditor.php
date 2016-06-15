@@ -227,7 +227,7 @@ final class PhameBlogEditor
 
 
   protected function supportsSearch() {
-    return false;
+    return true;
   }
 
   protected function shouldApplyHeraldRules(

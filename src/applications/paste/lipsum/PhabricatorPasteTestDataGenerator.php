@@ -17,15 +17,15 @@ final class PhabricatorPasteTestDataGenerator
     $xactions = array();
 
     $xactions[] = $this->newTransaction(
-      PhabricatorPasteTransaction::TYPE_TITLE,
+      PhabricatorPasteTitleTransaction::TRANSACTIONTYPE,
       $name);
 
     $xactions[] = $this->newTransaction(
-      PhabricatorPasteTransaction::TYPE_LANGUAGE,
+      PhabricatorPasteLanguageTransaction::TRANSACTIONTYPE,
       $language);
 
     $xactions[] = $this->newTransaction(
-      PhabricatorPasteTransaction::TYPE_CONTENT,
+      PhabricatorPasteContentTransaction::TRANSACTIONTYPE,
       $content);
 
     $editor = id(new PhabricatorPasteEditor())

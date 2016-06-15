@@ -73,6 +73,8 @@ final class PhamePostTransaction
       case self::TYPE_VISIBILITY:
         if ($new == PhameConstants::VISIBILITY_PUBLISHED) {
           return 'fa-globe';
+        } else if ($new == PhameConstants::VISIBILITY_ARCHIVED) {
+          return 'fa-ban';
         } else {
           return 'fa-eye-slash';
         }
@@ -144,6 +146,10 @@ final class PhamePostTransaction
           return pht(
             '%s marked this post as a draft.',
             $this->renderHandleLink($author_phid));
+        } else if ($new == PhameConstants::VISIBILITY_ARCHIVED) {
+          return pht(
+            '%s archived this post.',
+            $this->renderHandleLink($author_phid));
         } else {
           return pht(
           '%s published this post.',
@@ -199,6 +205,11 @@ final class PhamePostTransaction
         if ($new == PhameConstants::VISIBILITY_DRAFT) {
           return pht(
             '%s marked %s as a draft.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else if ($new == PhameConstants::VISIBILITY_ARCHIVED) {
+          return pht(
+            '%s marked %s as archived.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         } else {

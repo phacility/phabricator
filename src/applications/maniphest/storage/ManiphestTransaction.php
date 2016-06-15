@@ -54,16 +54,18 @@ final class ManiphestTransaction
     return parent::shouldGenerateOldValue();
   }
 
-  public function getRemarkupBlocks() {
-    $blocks = parent::getRemarkupBlocks();
+  protected function newRemarkupChanges() {
+    $changes = array();
 
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
-        $blocks[] = $this->getNewValue();
+        $changes[] = $this->newRemarkupChange()
+          ->setOldValue($this->getOldValue())
+          ->setNewValue($this->getNewValue());
         break;
     }
 
-    return $blocks;
+    return $changes;
   }
 
   public function getRequiredHandlePHIDs() {

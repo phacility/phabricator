@@ -20,10 +20,6 @@ final class PhabricatorEmailRePrefixSetting
     return 200;
   }
 
-  protected function isEnabledForViewer(PhabricatorUser $viewer) {
-    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
-  }
-
   protected function getControlInstructions() {
     return pht(
       'The **Add "Re:" Prefix** setting adds "Re:" in front of all messages, '.
@@ -39,7 +35,7 @@ final class PhabricatorEmailRePrefixSetting
   }
 
   public function getSettingDefaultValue() {
-    return self::VALUE_RE_PREFIX;
+    return self::VALUE_NO_PREFIX;
   }
 
   protected function getSelectOptions() {

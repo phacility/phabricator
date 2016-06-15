@@ -9,6 +9,7 @@ final class PhabricatorUserPreferencesQuery
   private $builtinKeys;
   private $hasUserPHID;
   private $users = array();
+  private $synthetic;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -42,12 +43,38 @@ final class PhabricatorUserPreferencesQuery
     return $this;
   }
 
+  /**
+   * Always return preferences for every queried user.
+   *
+   * If no settings exist for a user, a new empty settings object with
+   * appropriate defaults is returned.
+   *
+   * @param bool True to generat synthetic preferences for missing users.
+   */
+  public function needSyntheticPreferences($synthetic) {
+    $this->synthetic = $synthetic;
+    return $this;
+  }
+
   public function newResultObject() {
     return new PhabricatorUserPreferences();
   }
 
   protected function loadPage() {
-    return $this->loadStandardPage($this->newResultObject());
+    $preferences = $this->loadStandardPage($this->newResultObject());
+
+    if ($this->synthetic) {
+      $user_map = mpull($preferences, null, 'getUserPHID');
+      foreach ($this->userPHIDs as $user_phid) {
+        if (isset($user_map[$user_phid])) {
+          continue;
+        }
+        $preferences[] = $this->newResultObject()
+          ->setUserPHID($user_phid);
+      }
+    }
+
+    return $preferences;
   }
 
   protected function willFilterPage(array $prefs) {

@@ -84,7 +84,6 @@
 .phame-blog-list-item {
   display: block;
   color: {$darkgreytext};
-  height: 24px;
   position: relative;
   margin-bottom: 8px;
   padding-right: 20px;
@@ -108,14 +107,12 @@
 
 .phame-blog-list-title {
   margin-left: 30px;
-  margin-top: 4px;
+  margin-top: 2px;
   display: inline-block;
   font-weight: bold;
   color: {$bluetext};
   width: 190px;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .phame-blog-list-new-post {

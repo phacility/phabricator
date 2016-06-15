@@ -18,6 +18,8 @@ abstract class PhabricatorApplicationTransactionComment
   protected $contentSource;
   protected $isDeleted = 0;
 
+  private $oldComment = self::ATTACHABLE;
+
   abstract public function getApplicationTransactionObject();
 
   public function generatePHID() {
@@ -83,6 +85,20 @@ abstract class PhabricatorApplicationTransactionComment
       $this->setIsDeleted(0);
     }
     return $this;
+  }
+
+  public function attachOldComment(
+    PhabricatorApplicationTransactionComment $old_comment) {
+    $this->oldComment = $old_comment;
+    return $this;
+  }
+
+  public function getOldComment() {
+    return $this->assertAttached($this->oldComment);
+  }
+
+  public function hasOldComment() {
+    return ($this->oldComment !== self::ATTACHABLE);
   }
 
 

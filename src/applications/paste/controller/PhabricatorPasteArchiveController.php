@@ -20,7 +20,7 @@ final class PhabricatorPasteArchiveController
       return new Aphront404Response();
     }
 
-    $view_uri = '/P'.$paste->getID();
+    $view_uri = $paste->getURI();
 
     if ($request->isFormPost()) {
       if ($paste->isArchived()) {
@@ -32,7 +32,7 @@ final class PhabricatorPasteArchiveController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorPasteTransaction())
-        ->setTransactionType(PhabricatorPasteTransaction::TYPE_STATUS)
+        ->setTransactionType(PhabricatorPasteStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PhabricatorPasteEditor())

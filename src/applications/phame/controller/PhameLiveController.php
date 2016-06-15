@@ -97,7 +97,8 @@ abstract class PhameLiveController extends PhameController {
 
       // Only show published posts on external domains.
       if ($is_external) {
-        $post_query->withVisibility(PhameConstants::VISIBILITY_PUBLISHED);
+        $post_query->withVisibility(
+          array(PhameConstants::VISIBILITY_PUBLISHED));
       }
 
       $post = $post_query->executeOne();

@@ -29,7 +29,7 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function withVisibility($visibility) {
+  public function withVisibility(array $visibility) {
     $this->visibility = $visibility;
     return $this;
   }
@@ -98,10 +98,10 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->bloggerPHIDs);
     }
 
-    if ($this->visibility !== null) {
+    if ($this->visibility) {
       $where[] = qsprintf(
         $conn,
-        'visibility = %d',
+        'visibility IN (%Ld)',
         $this->visibility);
     }
 

@@ -29,21 +29,28 @@ final class PhabricatorUserPreferencesCacheType
 
     $preferences = id(new PhabricatorUserPreferencesQuery())
       ->setViewer($viewer)
-      ->withUserPHIDs($user_phids)
+      ->withUsers($users)
+      ->needSyntheticPreferences(true)
       ->execute();
+    $preferences = mpull($preferences, null, 'getUserPHID');
 
     $all_settings = PhabricatorSetting::getAllSettings();
 
     $settings = array();
-    foreach ($preferences as $preference) {
-      $user_phid = $preference->getUserPHID();
+    foreach ($users as $user_phid => $user) {
+      $preference = idx($preferences, $user_phid);
+
+      if (!$preference) {
+        continue;
+      }
+
       foreach ($all_settings as $key => $setting) {
         $value = $preference->getSettingValue($key);
 
         // As an optimization, we omit the value from the cache if it is
         // exactly the same as the hardcoded default.
         $default_value = id(clone $setting)
-          ->setViewer($users[$user_phid])
+          ->setViewer($user)
           ->getSettingDefaultValue();
         if ($value === $default_value) {
           continue;

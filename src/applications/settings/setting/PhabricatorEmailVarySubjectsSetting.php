@@ -20,10 +20,6 @@ final class PhabricatorEmailVarySubjectsSetting
     return 300;
   }
 
-  protected function isEnabledForViewer(PhabricatorUser $viewer) {
-    return PhabricatorMetaMTAMail::shouldMultiplexAllMail();
-  }
-
   protected function getControlInstructions() {
     return pht(
       'With **Vary Subjects** enabled, most mail subject lines will include '.
@@ -48,8 +44,8 @@ final class PhabricatorEmailVarySubjectsSetting
 
   protected function getSelectOptions() {
     return array(
-      self::VALUE_VARY_SUBJECTS => pht('Enable "Re:" Prefix'),
-      self::VALUE_STATIC_SUBJECTS => pht('Disable "Re:" Prefix'),
+      self::VALUE_VARY_SUBJECTS => pht('Enable Vary Subjects'),
+      self::VALUE_STATIC_SUBJECTS => pht('Disable Vary Subjects'),
     );
   }
 
