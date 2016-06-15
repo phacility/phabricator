@@ -38,8 +38,8 @@ final class PhameBlogManageController extends PhameBlogController {
       ->setImage($picture)
       ->setStatus($header_icon, $header_color, $header_name);
 
-    $actions = $this->renderActions($blog, $viewer);
-    $properties = $this->renderProperties($blog, $viewer, $actions);
+    $curtain = $this->buildCurtain($blog);
+    $properties = $this->buildPropertyView($blog);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
@@ -47,6 +47,7 @@ final class PhameBlogManageController extends PhameBlogController {
       $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb(
       $blog->getName());
+    $crumbs->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -57,28 +58,33 @@ final class PhameBlogManageController extends PhameBlogController {
       new PhameBlogTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->addPropertySection(pht('Details'), $properties)
+      ->setMainColumn(
+        array(
+          $timeline,
+        ));
+
     return $this->newPage()
       ->setTitle($blog->getName())
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $object_box,
-          $timeline,
+          $view,
       ));
   }
 
-  private function renderProperties(
-    PhameBlog $blog,
-    PhabricatorUser $viewer,
-    PhabricatorActionListView $actions) {
+  private function buildPropertyView(PhameBlog $blog) {
+    $viewer = $this->getViewer();
 
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips');
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
-      ->setObject($blog)
-      ->setActionList($actions);
+      ->setObject($blog);
 
     $domain = $blog->getDomain();
     if (!$domain) {
@@ -129,7 +135,11 @@ final class PhameBlogManageController extends PhameBlogController {
     return $properties;
   }
 
-  private function renderActions(PhameBlog $blog, PhabricatorUser $viewer) {
+  private function buildCurtain(PhameBlog $blog) {
+    $viewer = $this->getViewer();
+
+    $curtain = $this->newCurtainView($viewer);
+
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
       ->setUser($viewer);
@@ -139,7 +149,7 @@ final class PhameBlogManageController extends PhameBlogController {
       $blog,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
@@ -147,7 +157,7 @@ final class PhameBlogManageController extends PhameBlogController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-picture-o')
         ->setHref($this->getApplicationURI('blog/picture/'.$blog->getID().'/'))
@@ -156,7 +166,7 @@ final class PhameBlogManageController extends PhameBlogController {
         ->setWorkflow(!$can_edit));
 
     if ($blog->isArchived()) {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Activate Blog'))
           ->setIcon('fa-check')
@@ -165,7 +175,7 @@ final class PhameBlogManageController extends PhameBlogController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     } else {
-      $actions->addAction(
+      $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Archive Blog'))
           ->setIcon('fa-ban')
@@ -175,7 +185,7 @@ final class PhameBlogManageController extends PhameBlogController {
           ->setWorkflow(true));
     }
 
-    return $actions;
+    return $curtain;
   }
 
 }
