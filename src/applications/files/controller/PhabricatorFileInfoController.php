@@ -256,8 +256,10 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $types[] = pht('Profile');
     }
 
-    $types = implode(', ', $types);
-    $finfo->addProperty(pht('Attributes'), $types);
+    if ($types) {
+      $types = implode(', ', $types);
+      $finfo->addProperty(pht('Attributes'), $types);
+    }
 
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));
@@ -266,9 +268,14 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       pht('Engine'),
       $file->getStorageEngine());
 
-    $storage_properties->addProperty(
-      pht('Format'),
-      $file->getStorageFormat());
+    $format_key = $file->getStorageFormat();
+    $format = PhabricatorFileStorageFormat::getFormat($format_key);
+    if ($format) {
+      $format_name = $format->getStorageFormatName();
+    } else {
+      $format_name = pht('Unknown ("%s")', $format_key);
+    }
+    $storage_properties->addProperty(pht('Format'), $format_name);
 
     $storage_properties->addProperty(
       pht('Handle'),
