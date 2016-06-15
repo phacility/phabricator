@@ -327,10 +327,17 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file = self::initializeNewFile();
 
     $default_key = PhabricatorFileRawStorageFormat::FORMATKEY;
-    $format_key = idx($params, 'format', $default_key);
+    $key = idx($params, 'format', $default_key);
 
-    $format = id(clone PhabricatorFileStorageFormat::requireFormat($format_key))
-      ->setFile($file);
+    // Callers can pass in an object explicitly instead of a key. This is
+    // primarily useful for unit tests.
+    if ($key instanceof PhabricatorFileStorageFormat) {
+      $format = clone $key;
+    } else {
+      $format = clone PhabricatorFileStorageFormat::requireFormat($key);
+    }
+
+    $format->setFile($file);
 
     $properties = $format->newStorageProperties();
     $file->setStorageFormat($format->getStorageFormatKey());

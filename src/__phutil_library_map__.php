@@ -2468,6 +2468,7 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryPublisher' => 'applications/feed/PhabricatorFeedStoryPublisher.php',
     'PhabricatorFeedStoryReference' => 'applications/feed/storage/PhabricatorFeedStoryReference.php',
     'PhabricatorFile' => 'applications/files/storage/PhabricatorFile.php',
+    'PhabricatorFileAES256StorageFormat' => 'applications/files/format/PhabricatorFileAES256StorageFormat.php',
     'PhabricatorFileBundleLoader' => 'applications/files/query/PhabricatorFileBundleLoader.php',
     'PhabricatorFileChunk' => 'applications/files/storage/PhabricatorFileChunk.php',
     'PhabricatorFileChunkIterator' => 'applications/files/engine/PhabricatorFileChunkIterator.php',
@@ -7102,6 +7103,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
+    'PhabricatorFileAES256StorageFormat' => 'PhabricatorFileStorageFormat',
     'PhabricatorFileBundleLoader' => 'Phobject',
     'PhabricatorFileChunk' => array(
       'PhabricatorFileDAO',

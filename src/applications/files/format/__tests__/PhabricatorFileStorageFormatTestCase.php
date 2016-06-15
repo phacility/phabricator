@@ -35,4 +35,38 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
     $this->assertEqual($expect, $raw_data);
   }
 
+  public function testAES256Storage() {
+    $engine = new PhabricatorTestStorageEngine();
+
+    $key_name = 'test.abcd';
+    $key_text = new PhutilOpaqueEnvelope('abcdefghijklmnopABCDEFGHIJKLMNOP');
+
+    PhabricatorFileAES256StorageFormat::addKeyToKeyRing($key_name, $key_text);
+
+    $format = id(new PhabricatorFileAES256StorageFormat())
+      ->selectKey($key_name);
+
+    $data = 'The cow jumped over the full moon.';
+
+    $params = array(
+      'name' => 'test.dat',
+      'storageEngines' => array(
+        $engine,
+      ),
+      'format' => $format,
+    );
+
+    $file = PhabricatorFile::newFromFileData($data, $params);
+
+    // We should have a file stored as AES256.
+    $format_key = $format->getStorageFormatKey();
+    $this->assertEqual($format_key, $file->getStorageFormat());
+    $this->assertEqual($data, $file->loadFileData());
+
+    // The actual raw data in the storage engine should be encrypted. We
+    // can't really test this, but we can make sure it's not the same as the
+    // input data.
+    $raw_data = $engine->readFile($file->getStorageHandle());
+    $this->assertTrue($data !== $raw_data);
+  }
 }
