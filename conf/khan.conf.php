@@ -66,8 +66,6 @@ return array(
   'metamta.domain'          => 'phabricator.khanacademy.org',
   'metamta.can-send-as-user'    => true,
   'metamta.user-address-format' => 'short',
-  // gmail threading will break if the subject changes.
-  'metamta.vary-subjects' => false,
 
   // Connection information for MySQL.
   'mysql.host' => 'localhost',
