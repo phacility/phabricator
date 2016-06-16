@@ -51,6 +51,11 @@ final class DiffusionRepositoryRef extends Phobject {
     return ($this->getRefType() === $type_branch);
   }
 
+  public function isTag() {
+    $type_tag = PhabricatorRepositoryRefCursor::TYPE_TAG;
+    return ($this->getRefType() === $type_tag);
+  }
+
 
 /* -(  Serialization  )------------------------------------------------------ */
 

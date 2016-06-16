@@ -911,6 +911,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function shouldTrackRef(DiffusionRepositoryRef $ref) {
+    // At least for now, don't track the staging area tags.
+    if ($ref->isTag()) {
+      if (preg_match('(^phabricator/)', $ref->getShortName())) {
+        return false;
+      }
+    }
+
     if (!$ref->isBranch()) {
       return true;
     }
