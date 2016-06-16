@@ -326,7 +326,13 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $file = self::initializeNewFile();
 
-    $default_key = PhabricatorFileRawStorageFormat::FORMATKEY;
+    $aes_type = PhabricatorFileAES256StorageFormat::FORMATKEY;
+    $has_aes = PhabricatorKeyring::getDefaultKeyName($aes_type);
+    if ($has_aes !== null) {
+      $default_key = PhabricatorFileAES256StorageFormat::FORMATKEY;
+    } else {
+      $default_key = PhabricatorFileRawStorageFormat::FORMATKEY;
+    }
     $key = idx($params, 'format', $default_key);
 
     // Callers can pass in an object explicitly instead of a key. This is
@@ -440,6 +446,53 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $old_engine,
       $old_identifier,
       $old_handle);
+
+    return $this;
+  }
+
+  public function migrateToStorageFormat(PhabricatorFileStorageFormat $format) {
+    if (!$this->getID() || !$this->getStorageHandle()) {
+      throw new Exception(
+        pht("You can not migrate a file which hasn't yet been saved."));
+    }
+
+    $data = $this->loadFileData();
+    $params = array(
+      'name' => $this->getName(),
+    );
+
+    $engine = $this->instantiateStorageEngine();
+    $old_handle = $this->getStorageHandle();
+
+    $properties = $format->newStorageProperties();
+    $this->setStorageFormat($format->getStorageFormatKey());
+    $this->setStorageProperties($properties);
+
+    list($identifier, $new_handle) = $this->writeToEngine(
+      $engine,
+      $data,
+      $params);
+
+    $this->setStorageHandle($new_handle);
+    $this->save();
+
+    $this->deleteFileDataIfUnused(
+      $engine,
+      $identifier,
+      $old_handle);
+
+    return $this;
+  }
+
+  public function cycleMasterStorageKey(PhabricatorFileStorageFormat $format) {
+    if (!$this->getID() || !$this->getStorageHandle()) {
+      throw new Exception(
+        pht("You can not cycle keys for a file which hasn't yet been saved."));
+    }
+
+    $properties = $format->cycleStorageProperties();
+    $this->setStorageProperties($properties);
+    $this->save();
 
     return $this;
   }

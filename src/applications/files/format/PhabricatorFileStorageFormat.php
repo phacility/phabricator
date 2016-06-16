@@ -26,6 +26,29 @@ abstract class PhabricatorFileStorageFormat
     return array();
   }
 
+  public function canGenerateNewKeyMaterial() {
+    return false;
+  }
+
+  public function generateNewKeyMaterial() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function canCycleMasterKey() {
+    return false;
+  }
+
+  public function cycleStorageProperties() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function selectMasterKey($key_name) {
+    throw new Exception(
+      pht(
+        'This storage format ("%s") does not support key selection.',
+        $this->getStorageFormatName()));
+  }
+
   final public function getStorageFormatKey() {
     return $this->getPhobjectClassConstant('FORMATKEY');
   }

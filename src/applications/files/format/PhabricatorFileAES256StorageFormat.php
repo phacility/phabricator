@@ -9,10 +9,29 @@ final class PhabricatorFileAES256StorageFormat
   const FORMATKEY = 'aes-256-cbc';
 
   private $keyName;
-  private static $keyRing = array();
 
   public function getStorageFormatName() {
     return pht('Encrypted (AES-256-CBC)');
+  }
+
+  public function canGenerateNewKeyMaterial() {
+    return true;
+  }
+
+  public function generateNewKeyMaterial() {
+    $envelope = self::newAES256Key();
+    $material = $envelope->openEnvelope();
+    return base64_encode($material);
+  }
+
+  public function canCycleMasterKey() {
+    return true;
+  }
+
+  public function cycleStorageProperties() {
+    $file = $this->getFile();
+    list($key, $iv) = $this->extractKeyAndIV($file);
+    return $this->formatStorageProperties($key, $iv);
   }
 
   public function newReadIterator($raw_iterator) {
@@ -42,6 +61,13 @@ final class PhabricatorFileAES256StorageFormat
     $key_envelope = self::newAES256Key();
     $iv_envelope = self::newAES256IV();
 
+    return $this->formatStorageProperties($key_envelope, $iv_envelope);
+  }
+
+  private function formatStorageProperties(
+    PhutilOpaqueEnvelope $key_envelope,
+    PhutilOpaqueEnvelope $iv_envelope) {
+
     // Encode the raw binary data with base64 so we can wrap it in JSON.
     $data = array(
       'iv.base64' => base64_encode($iv_envelope->openEnvelope()),
@@ -54,7 +80,7 @@ final class PhabricatorFileAES256StorageFormat
     // Encrypt the block key with the master key, using a unique IV.
     $data_iv = self::newAES256IV();
     $key_name = $this->getMasterKeyName();
-    $master_key = self::getMasterKeyFromKeyRing($key_name);
+    $master_key = $this->getMasterKeyMaterial($key_name);
     $data_cipher = $this->encryptData($data_clear, $master_key, $data_iv);
 
     return array(
@@ -73,7 +99,7 @@ final class PhabricatorFileAES256StorageFormat
     $outer_payload = base64_decode($outer_payload);
 
     $outer_key_name = $file->getStorageProperty('key.name');
-    $outer_key = self::getMasterKeyFromKeyRing($outer_key_name);
+    $outer_key = $this->getMasterKeyMaterial($outer_key_name);
 
     $payload = $this->decryptData($outer_payload, $outer_key, $outer_iv);
     $payload = phutil_json_decode($payload);
@@ -142,35 +168,32 @@ final class PhabricatorFileAES256StorageFormat
     return new PhutilOpaqueEnvelope($iv);
   }
 
-  public function selectKey($key_name) {
+  public function selectMasterKey($key_name) {
     // Require that the key exist on the key ring.
-    self::getMasterKeyFromKeyRing($key_name);
+    $this->getMasterKeyMaterial($key_name);
 
     $this->keyName = $key_name;
     return $this;
   }
 
-  public static function addKeyToKeyRing($name, PhutilOpaqueEnvelope $key) {
-    self::$keyRing[$name] = $key;
-  }
-
   private function getMasterKeyName() {
-    if ($this->keyName === null) {
-      throw new Exception(pht('No master key selected for AES256 storage.'));
+    if ($this->keyName !== null) {
+      return $this->keyName;
     }
 
-    return $this->keyName;
+    $default = PhabricatorKeyring::getDefaultKeyName(self::FORMATKEY);
+    if ($default !== null) {
+      return $default;
+    }
+
+    throw new Exception(
+      pht(
+        'No AES256 key is specified in the keyring as a default encryption '.
+        'key, and no encryption key has been explicitly selected.'));
   }
 
-  private static function getMasterKeyFromKeyRing($key_name) {
-    if (!isset(self::$keyRing[$key_name])) {
-      throw new Exception(
-        pht(
-          'No master key "%s" exists in key ring for AES256 storage.',
-          $key_name));
-    }
-
-    return self::$keyRing[$key_name];
+  private function getMasterKeyMaterial($key_name) {
+    return PhabricatorKeyring::getKey($key_name, self::FORMATKEY);
   }
 
 }

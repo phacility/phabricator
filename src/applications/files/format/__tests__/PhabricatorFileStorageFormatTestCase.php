@@ -39,12 +39,17 @@ final class PhabricatorFileStorageFormatTestCase extends PhabricatorTestCase {
     $engine = new PhabricatorTestStorageEngine();
 
     $key_name = 'test.abcd';
-    $key_text = new PhutilOpaqueEnvelope('abcdefghijklmnopABCDEFGHIJKLMNOP');
+    $key_text = 'abcdefghijklmnopABCDEFGHIJKLMNOP';
 
-    PhabricatorFileAES256StorageFormat::addKeyToKeyRing($key_name, $key_text);
+    PhabricatorKeyring::addKey(
+      array(
+        'name' => $key_name,
+        'type' => 'aes-256-cbc',
+        'material.base64' => base64_encode($key_text),
+      ));
 
     $format = id(new PhabricatorFileAES256StorageFormat())
-      ->selectKey($key_name);
+      ->selectMasterKey($key_name);
 
     $data = 'The cow jumped over the full moon.';
 
