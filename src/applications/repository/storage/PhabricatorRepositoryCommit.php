@@ -64,13 +64,38 @@ final class PhabricatorRepositoryCommit
   }
 
   public function writeImportStatusFlag($flag) {
-    queryfx(
-      $this->establishConnection('w'),
-      'UPDATE %T SET importStatus = (importStatus | %d) WHERE id = %d',
-      $this->getTableName(),
-      $flag,
-      $this->getID());
-    $this->setImportStatus($this->getImportStatus() | $flag);
+    return $this->adjustImportStatusFlag($flag, true);
+  }
+
+  public function clearImportStatusFlag($flag) {
+    return $this->adjustImportStatusFlag($flag, false);
+  }
+
+  private function adjustImportStatusFlag($flag, $set) {
+    $conn_w = $this->establishConnection('w');
+    $table_name = $this->getTableName();
+    $id = $this->getID();
+
+    if ($set) {
+      queryfx(
+        $conn_w,
+        'UPDATE %T SET importStatus = (importStatus | %d) WHERE id = %d',
+        $table_name,
+        $flag,
+        $id);
+
+      $this->setImportStatus($this->getImportStatus() | $flag);
+    } else {
+      queryfx(
+        $conn_w,
+        'UPDATE %T SET importStatus = (importStatus & ~%d) WHERE id = %d',
+        $table_name,
+        $flag,
+        $id);
+
+      $this->setImportStatus($this->getImportStatus() & ~$flag);
+    }
+
     return $this;
   }
 
