@@ -514,9 +514,15 @@ final class PhabricatorRepositoryDiscoveryEngine
       $repository->getID(),
       $commit_identifier);
     if ($conn_w->getAffectedRows()) {
+      $commit = $commit->loadOneWhere(
+        'repositoryID = %d AND commitIdentifier = %s',
+        $repository->getID(),
+        $commit_identifier);
+
+      // After reviving a commit, schedule new daemons for it.
+      $this->didDiscoverCommit($repository, $commit, $epoch);
       return;
     }
-
 
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
@@ -575,21 +581,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         }
       $commit->saveTransaction();
 
-      $this->insertTask($repository, $commit);
-
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
-          VALUES (%d, 1, %d, %d)
-          ON DUPLICATE KEY UPDATE
-            size = size + 1,
-            lastCommitID =
-              IF(VALUES(epoch) > epoch, VALUES(lastCommitID), lastCommitID),
-            epoch = IF(VALUES(epoch) > epoch, VALUES(epoch), epoch)',
-        PhabricatorRepository::TABLE_SUMMARY,
-        $repository->getID(),
-        $commit->getID(),
-        $epoch);
+      $this->didDiscoverCommit($repository, $commit, $epoch);
 
       if ($this->repairMode) {
         // Normally, the query should throw a duplicate key exception. If we
@@ -612,6 +604,29 @@ final class PhabricatorRepositoryDiscoveryEngine
       // data inconsistency or cosmic radiation; in any case, we're still
       // in a good state if we ignore the failure.
     }
+  }
+
+  private function didDiscoverCommit(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit,
+    $epoch) {
+
+    $this->insertTask($repository, $commit);
+
+    // Update the repository summary table.
+    queryfx(
+      $commit->establishConnection('w'),
+      'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
+        VALUES (%d, 1, %d, %d)
+        ON DUPLICATE KEY UPDATE
+          size = size + 1,
+          lastCommitID =
+            IF(VALUES(epoch) > epoch, VALUES(lastCommitID), lastCommitID),
+          epoch = IF(VALUES(epoch) > epoch, VALUES(epoch), epoch)',
+      PhabricatorRepository::TABLE_SUMMARY,
+      $repository->getID(),
+      $commit->getID(),
+      $epoch);
   }
 
   private function didDiscoverRefs(array $refs) {

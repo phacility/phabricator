@@ -26,6 +26,14 @@ abstract class PhabricatorRepositoryCommitParserWorker
         pht('Commit "%s" does not exist.', $commit_id));
     }
 
+    if ($commit->isUnreachable()) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        pht(
+          'Commit "%s" has been deleted: it is no longer reachable from '.
+          'any ref.',
+          $commit_id));
+    }
+
     $this->commit = $commit;
 
     return $commit;
@@ -42,6 +50,42 @@ abstract class PhabricatorRepositoryCommitParserWorker
 
   final protected function shouldQueueFollowupTasks() {
     return !idx($this->getTaskData(), 'only');
+  }
+
+  protected function getImportStepFlag() {
+    return null;
+  }
+
+  final protected function shouldSkipImportStep() {
+    // If this step has already been performed and this is a "natural" task
+    // which was queued by the normal daemons, decline to do the work again.
+    // This mitigates races if commits are rapidly deleted and revived.
+    $flag = $this->getImportStepFlag();
+    if (!$flag) {
+      // This step doesn't have an associated flag.
+      return false;
+    }
+
+    $commit = $this->commit;
+    if (!$commit->isPartiallyImported($flag)) {
+      // This commit doesn't have the flag set yet.
+      return false;
+    }
+
+
+    if (!$this->shouldQueueFollowupTasks()) {
+      // This task was queued by administrative tools, so do the work even
+      // if it duplicates existing work.
+      return false;
+    }
+
+    $this->log(
+      "%s\n",
+      pht(
+        'Skipping import step; this step was previously completed for '.
+        'this commit.'));
+
+    return true;
   }
 
   abstract protected function parseCommit(
