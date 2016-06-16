@@ -910,6 +910,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return null;
   }
 
+  public function shouldTrackRef(DiffusionRepositoryRef $ref) {
+    if (!$ref->isBranch()) {
+      return true;
+    }
+
+    return $this->shouldTrackBranch($ref->getShortName());
+  }
+
   public function shouldTrackBranch($branch) {
     return $this->isBranchInFilter($branch, 'branch-filter');
   }
@@ -1019,6 +1027,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 /* -(  Autoclose  )---------------------------------------------------------- */
 
+
+  public function shouldAutocloseRef(DiffusionRepositoryRef $ref) {
+    if (!$ref->isBranch()) {
+      return false;
+    }
+
+    return $this->shouldAutocloseBranch($ref->getShortName());
+  }
 
   /**
    * Determine if autoclose is active for a branch.

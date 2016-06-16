@@ -130,39 +130,35 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->verifyGitOrigin($repository);
     }
 
-    // TODO: This should also import tags, but some of the logic is still
-    // branch-specific today.
-
-    $branches = id(new DiffusionLowLevelGitRefQuery())
+    $heads = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withRefTypes(
-        array(
-          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
-        ))
       ->execute();
 
-    if (!$branches) {
-      // This repository has no branches at all, so we don't need to do
+    if (!$heads) {
+      // This repository has no heads at all, so we don't need to do
       // anything. Generally, this means the repository is empty.
       return array();
     }
 
-    $branches = $this->sortBranches($branches);
-    $branches = mpull($branches, 'getCommitIdentifier', 'getShortName');
+    $heads = $this->sortRefs($heads);
+    $head_commits = mpull($heads, 'getCommitIdentifier');
 
     $this->log(
       pht(
         'Discovering commits in repository "%s".',
         $repository->getDisplayName()));
 
-    $this->fillCommitCache(array_values($branches));
+    $this->fillCommitCache($head_commits);
 
     $refs = array();
-    foreach ($branches as $name => $commit) {
-      $this->log(pht('Examining branch "%s", at "%s".', $name, $commit));
+    foreach ($heads as $ref) {
+      $name = $ref->getShortName();
+      $commit = $ref->getCommitIdentifier();
 
-      if (!$repository->shouldTrackBranch($name)) {
-        $this->log(pht('Skipping, branch is untracked.'));
+      $this->log(pht('Examining ref "%s", at "%s".', $name, $commit));
+
+      if (!$repository->shouldTrackRef($ref)) {
+        $this->log(pht('Skipping, ref is untracked.'));
         continue;
       }
 
@@ -173,14 +169,14 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       $this->log(pht('Looking for new commits.'));
 
-      $branch_refs = $this->discoverStreamAncestry(
+      $head_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
         $commit,
-        $repository->shouldAutocloseBranch($name));
+        $repository->shouldAutocloseRef($ref));
 
-      $this->didDiscoverRefs($branch_refs);
+      $this->didDiscoverRefs($head_refs);
 
-      $refs[] = $branch_refs;
+      $refs[] = $head_refs;
     }
 
     return array_mergev($refs);
@@ -469,25 +465,23 @@ final class PhabricatorRepositoryDiscoveryEngine
    *
    * @task internal
    *
-   * @param   list<DiffusionRepositoryRef> List of branch heads.
-   * @return  list<DiffusionRepositoryRef> Sorted list of branch heads.
+   * @param   list<DiffusionRepositoryRef> List of refs.
+   * @return  list<DiffusionRepositoryRef> Sorted list of refs.
    */
-  private function sortBranches(array $branches) {
+  private function sortRefs(array $refs) {
     $repository = $this->getRepository();
 
-    $head_branches = array();
-    $tail_branches = array();
-    foreach ($branches as $branch) {
-      $name = $branch->getShortName();
-
-      if ($repository->shouldAutocloseBranch($name)) {
-        $head_branches[] = $branch;
+    $head_refs = array();
+    $tail_refs = array();
+    foreach ($refs as $ref) {
+      if ($repository->shouldAutocloseRef($ref)) {
+        $head_refs[] = $ref;
       } else {
-        $tail_branches[] = $branch;
+        $tail_refs[] = $ref;
       }
     }
 
-    return array_merge($head_branches, $tail_branches);
+    return array_merge($head_refs, $tail_refs);
   }
 
 
