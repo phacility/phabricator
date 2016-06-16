@@ -70,6 +70,9 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
       return array();
     }
 
+    $remote_prefix = 'refs/remotes/';
+    $remote_len = strlen($remote_prefix);
+
     // NOTE: Although git supports --count, we can't apply any offset or
     // limit logic until the very end because we may encounter a HEAD which
     // we want to discard.
@@ -86,6 +89,12 @@ final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
       } else if (!strncmp($refname, $tag_prefix, $tag_len)) {
         $short = substr($refname, $tag_len);
         $type = $type_tag;
+      } else if (!strncmp($refname, $remote_prefix, $remote_len)) {
+        // If we've found a remote ref that we didn't recognize as naming a
+        // branch, just ignore it. This can happen if we're observing a remote,
+        // and that remote has its own remotes. We don't care about their
+        // state and they may be out of date, so ignore them.
+        continue;
       } else {
         $short = $refname;
         $type = $type_ref;
