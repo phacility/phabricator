@@ -85,6 +85,13 @@ final class PhabricatorRepositoryRefEngine
           $ref->save();
         }
         foreach ($this->deadRefs as $ref) {
+          // Shove this ref into the old refs table so the discovery engine
+          // can check if any commits have been rendered unreachable.
+          id(new PhabricatorRepositoryOldRef())
+            ->setRepositoryPHID($repository->getPHID())
+            ->setCommitIdentifier($ref->getCommitIdentifier())
+            ->save();
+
           $ref->delete();
         }
       $repository->saveTransaction();

@@ -3277,6 +3277,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryMercurialCommitMessageParserWorker' => 'applications/repository/worker/commitmessageparser/PhabricatorRepositoryMercurialCommitMessageParserWorker.php',
     'PhabricatorRepositoryMirror' => 'applications/repository/storage/PhabricatorRepositoryMirror.php',
     'PhabricatorRepositoryMirrorEngine' => 'applications/repository/engine/PhabricatorRepositoryMirrorEngine.php',
+    'PhabricatorRepositoryOldRef' => 'applications/repository/storage/PhabricatorRepositoryOldRef.php',
     'PhabricatorRepositoryParsedChange' => 'applications/repository/data/PhabricatorRepositoryParsedChange.php',
     'PhabricatorRepositoryPullEngine' => 'applications/repository/engine/PhabricatorRepositoryPullEngine.php',
     'PhabricatorRepositoryPullEvent' => 'applications/repository/storage/PhabricatorRepositoryPullEvent.php',
@@ -8067,6 +8068,10 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryMercurialCommitMessageParserWorker' => 'PhabricatorRepositoryCommitMessageParserWorker',
     'PhabricatorRepositoryMirror' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositoryMirrorEngine' => 'PhabricatorRepositoryEngine',
+    'PhabricatorRepositoryOldRef' => array(
+      'PhabricatorRepositoryDAO',
+      'PhabricatorPolicyInterface',
+    ),
     'PhabricatorRepositoryParsedChange' => 'Phobject',
     'PhabricatorRepositoryPullEngine' => 'PhabricatorRepositoryEngine',
     'PhabricatorRepositoryPullEvent' => array(

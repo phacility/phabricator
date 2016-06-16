@@ -105,6 +105,8 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->commitCache[$ref->getIdentifier()] = true;
     }
 
+    $this->markUnreachableCommits($repository);
+
     $version = $this->getObservedVersion($repository);
     if ($version !== null) {
       id(new DiffusionRepositoryClusterEngine())
@@ -729,6 +731,138 @@ final class PhabricatorRepositoryDiscoveryEngine
     }
 
     return (int)$version['version'];
+  }
+
+  private function markUnreachableCommits(PhabricatorRepository $repository) {
+    // For now, this is only supported for Git.
+    if (!$repository->isGit()) {
+      return;
+    }
+
+    // Find older versions of refs which we haven't processed yet. We're going
+    // to make sure their commits are still reachable.
+    $old_refs = id(new PhabricatorRepositoryOldRef())->loadAllWhere(
+      'repositoryPHID = %s',
+      $repository->getPHID());
+
+    // We can share a single graph stream across all the checks we need to do.
+    $stream = new PhabricatorGitGraphStream($repository);
+
+    foreach ($old_refs as $old_ref) {
+      $identifier = $old_ref->getCommitIdentifier();
+      $this->markUnreachableFrom($repository, $stream, $identifier);
+
+      // If nothing threw an exception, we're all done with this ref.
+      $old_ref->delete();
+    }
+  }
+
+  private function markUnreachableFrom(
+    PhabricatorRepository $repository,
+    PhabricatorGitGraphStream $stream,
+    $identifier) {
+
+    $unreachable = array();
+
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryID = %s AND commitIdentifier = %s',
+      $repository->getID(),
+      $identifier);
+    if (!$commit) {
+      return;
+    }
+
+    $look = array($commit);
+    $seen = array();
+    while ($look) {
+      $target = array_pop($look);
+
+      // If we've already checked this commit (for example, because history
+      // branches and then merges) we don't need to check it again.
+      $target_identifier = $target->getCommitIdentifier();
+      if (isset($seen[$target_identifier])) {
+        continue;
+      }
+
+      $seen[$target_identifier] = true;
+
+      try {
+        $stream->getCommitDate($target_identifier);
+        $reachable = true;
+      } catch (Exception $ex) {
+        $reachable = false;
+      }
+
+      if ($reachable) {
+        // This commit is reachable, so we don't need to go any further
+        // down this road.
+        continue;
+      }
+
+      $unreachable[] = $target;
+
+      // Find the commit's parents and check them for reachability, too. We
+      // have to look in the database since we no may longer have the commit
+      // in the repository.
+      $rows = queryfx_all(
+        $commit->establishConnection('w'),
+        'SELECT commit.* FROM %T commit
+          JOIN %T parents ON commit.id = parents.parentCommitID
+          WHERE parents.childCommitID = %d',
+        $commit->getTableName(),
+        PhabricatorRepository::TABLE_PARENTS,
+        $target->getID());
+      if (!$rows) {
+        continue;
+      }
+
+      $parents = id(new PhabricatorRepositoryCommit())
+        ->loadAllFromArray($rows);
+      foreach ($parents as $parent) {
+        $look[] = $parent;
+      }
+    }
+
+    $unreachable = array_reverse($unreachable);
+
+    $flag = PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE;
+    foreach ($unreachable as $unreachable_commit) {
+      $unreachable_commit->writeImportStatusFlag($flag);
+    }
+
+    // If anything was unreachable, just rebuild the whole summary table.
+    // We can't really update it incrementally when a commit becomes
+    // unreachable.
+    if ($unreachable) {
+      $this->rebuildSummaryTable($repository);
+    }
+  }
+
+  private function rebuildSummaryTable(PhabricatorRepository $repository) {
+    $conn_w = $repository->establishConnection('w');
+
+    $data = queryfx_one(
+      $conn_w,
+      'SELECT COUNT(*) N, MAX(id) id, MAX(epoch) epoch
+        FROM %T WHERE repositoryID = %d AND (importStatus & %d) != %d',
+      id(new PhabricatorRepositoryCommit())->getTableName(),
+      $repository->getID(),
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
+
+    queryfx(
+      $conn_w,
+      'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
+        VALUES (%d, %d, %d, %d)
+        ON DUPLICATE KEY UPDATE
+          size = VALUES(size),
+          lastCommitID = VALUES(lastCommitID),
+          epoch = VALUES(epoch)',
+      PhabricatorRepository::TABLE_SUMMARY,
+      $repository->getID(),
+      $data['N'],
+      $data['id'],
+      $data['epoch']);
   }
 
 }
