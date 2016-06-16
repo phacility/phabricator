@@ -444,10 +444,17 @@ final class PhabricatorRepositoryDiscoveryEngine
       return;
     }
 
+    // When filling the cache we ignore commits which have been marked as
+    // unreachable, treating them as though they do not exist. When recording
+    // commits later we'll revive commits that exist but are unreachable.
+
     $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
-      'repositoryID = %d AND commitIdentifier IN (%Ls)',
+      'repositoryID = %d AND commitIdentifier IN (%Ls)
+        AND (importStatus & %d) != %d',
       $this->getRepository()->getID(),
-      $identifiers);
+      $identifiers,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
 
     foreach ($commits as $commit) {
       $this->commitCache[$commit->getCommitIdentifier()] = true;
@@ -493,6 +500,24 @@ final class PhabricatorRepositoryDiscoveryEngine
     array $parents) {
 
     $commit = new PhabricatorRepositoryCommit();
+    $conn_w = $repository->establishConnection('w');
+
+    // First, try to revive an existing unreachable commit (if one exists) by
+    // removing the "unreachable" flag. If we succeed, we don't need to do
+    // anything else: we already discovered this commit some time ago.
+    queryfx(
+      $conn_w,
+      'UPDATE %T SET importStatus = (importStatus & ~%d)
+        WHERE repositoryID = %d AND commitIdentifier = %s',
+      $commit->getTableName(),
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+      $repository->getID(),
+      $commit_identifier);
+    if ($conn_w->getAffectedRows()) {
+      return;
+    }
+
+
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
@@ -502,10 +527,7 @@ final class PhabricatorRepositoryDiscoveryEngine
 
     $data = new PhabricatorRepositoryCommitData();
 
-    $conn_w = $repository->establishConnection('w');
-
     try {
-
       // If this commit has parents, look up their IDs. The parent commits
       // should always exist already.
 
@@ -582,8 +604,6 @@ final class PhabricatorRepositoryDiscoveryEngine
             'repository'  => $repository,
             'commit'      => $commit,
           )));
-
-
 
     } catch (AphrontDuplicateKeyQueryException $ex) {
       $commit->killTransaction();

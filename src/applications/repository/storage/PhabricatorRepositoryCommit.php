@@ -32,6 +32,7 @@ final class PhabricatorRepositoryCommit
   const IMPORTED_ALL = 15;
 
   const IMPORTED_CLOSEABLE = 1024;
+  const IMPORTED_UNREACHABLE = 2048;
 
   private $commitData = self::ATTACHABLE;
   private $audits = self::ATTACHABLE;
@@ -56,6 +57,10 @@ final class PhabricatorRepositoryCommit
 
   public function isImported() {
     return $this->isPartiallyImported(self::IMPORTED_ALL);
+  }
+
+  public function isUnreachable() {
+    return $this->isPartiallyImported(self::IMPORTED_UNREACHABLE);
   }
 
   public function writeImportStatusFlag($flag) {
