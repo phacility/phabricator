@@ -8,6 +8,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   protected $artifactIndex;
   protected $artifactKey;
   protected $artifactData = array();
+  protected $isReleased = 0;
 
   private $buildTarget = self::ATTACHABLE;
   private $artifactImplementation;
@@ -29,6 +30,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
         'artifactType' => 'text32',
         'artifactIndex' => 'bytes12',
         'artifactKey' => 'text255',
+        'isReleased' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_artifact' => array(
@@ -83,13 +85,18 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   }
 
   public function releaseArtifact() {
-    $impl = $this->getArtifactImplementation();
+    if ($this->getIsReleased()) {
+      return $this;
+    }
 
+    $impl = $this->getArtifactImplementation();
     if ($impl) {
       $impl->releaseArtifact(PhabricatorUser::getOmnipotentUser());
     }
 
-    return null;
+    return $this
+      ->setIsReleased(1)
+      ->save();
   }
 
   public function getArtifactImplementation() {
