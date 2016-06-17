@@ -32,12 +32,19 @@ final class PhameBlogManageController extends PhameBlogController {
 
     $picture = $blog->getProfileImageURI();
 
+    $view = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View Live'))
+      ->setIcon('fa-external-link')
+      ->setHref($blog->getLiveURI());
+
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
       ->setUser($viewer)
       ->setPolicyObject($blog)
       ->setImage($picture)
-      ->setStatus($header_icon, $header_color, $header_name);
+      ->setStatus($header_icon, $header_color, $header_name)
+      ->addActionLink($view);
 
     $curtain = $this->buildCurtain($blog);
     $properties = $this->buildPropertyView($blog);
@@ -48,7 +55,9 @@ final class PhameBlogManageController extends PhameBlogController {
       pht('Blogs'),
       $this->getApplicationURI('blog/'));
     $crumbs->addTextCrumb(
-      $blog->getName());
+      $blog->getName(),
+      $this->getApplicationURI('blog/view/'.$id));
+    $crumbs->addTextCrumb(pht('Manage Blog'));
     $crumbs->setBorder(true);
 
     $object_box = id(new PHUIObjectBoxView())
