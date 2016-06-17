@@ -250,3 +250,13 @@
   color: {$darkgreytext};
   background: {$greybackground};
 }
+
+/* Hero Image */
+.phame-header-hero {
+  background-color: #fff;
+}
+
+.phame-header-image {
+  max-height: 240px;
+  margin: 0 auto;
+}

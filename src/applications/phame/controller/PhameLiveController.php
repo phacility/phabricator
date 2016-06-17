@@ -58,6 +58,7 @@ abstract class PhameLiveController extends PhameController {
       $blog_query = id(new PhameBlogQuery())
         ->setViewer($viewer)
         ->needProfileImage(true)
+        ->needHeaderImage(true)
         ->withIDs(array($blog_id));
 
       // If this is a live view, only show active blogs.
