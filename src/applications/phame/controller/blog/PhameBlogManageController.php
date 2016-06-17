@@ -14,6 +14,7 @@ final class PhameBlogManageController extends PhameBlogController {
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->needProfileImage(true)
+      ->needHeaderImage(true)
       ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
@@ -40,6 +41,7 @@ final class PhameBlogManageController extends PhameBlogController {
 
     $curtain = $this->buildCurtain($blog);
     $properties = $this->buildPropertyView($blog);
+    $file = $this->buildFileView($blog);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
@@ -62,6 +64,7 @@ final class PhameBlogManageController extends PhameBlogController {
       ->setHeader($header)
       ->setCurtain($curtain)
       ->addPropertySection(pht('Details'), $properties)
+      ->addPropertySection(pht('Header'), $file)
       ->setMainColumn(
         array(
           $timeline,
@@ -159,6 +162,14 @@ final class PhameBlogManageController extends PhameBlogController {
 
     $curtain->addAction(
       id(new PhabricatorActionView())
+        ->setIcon('fa-camera')
+        ->setHref($this->getApplicationURI('blog/header/'.$blog->getID().'/'))
+        ->setName(pht('Edit Blog Header'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
         ->setIcon('fa-picture-o')
         ->setHref($this->getApplicationURI('blog/picture/'.$blog->getID().'/'))
         ->setName(pht('Edit Blog Picture'))
@@ -186,6 +197,26 @@ final class PhameBlogManageController extends PhameBlogController {
     }
 
     return $curtain;
+  }
+
+  private function buildFileView(
+    PhameBlog $blog) {
+    $viewer = $this->getViewer();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    if ($blog->getHeaderImagePHID()) {
+      $view->addImageContent(
+        phutil_tag(
+          'img',
+          array(
+            'src'     => $blog->getHeaderImageURI(),
+            'class'   => 'phabricator-image-macro-hero',
+          )));
+      return $view;
+    }
+    return null;
   }
 
 }

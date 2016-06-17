@@ -24,8 +24,10 @@ final class PhameBlog extends PhameDAO
   protected $status;
   protected $mailKey;
   protected $profileImagePHID;
+  protected $headerImagePHID;
 
   private $profileImageFile = self::ATTACHABLE;
+  private $headerImageFile = self::ATTACHABLE;
 
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';
@@ -43,6 +45,7 @@ final class PhameBlog extends PhameDAO
         'status' => 'text32',
         'mailKey' => 'bytes20',
         'profileImagePHID' => 'phid?',
+        'headerImagePHID' => 'phid?',
 
         // T6203/NULLABILITY
         // These policies should always be non-null.
@@ -210,6 +213,19 @@ final class PhameBlog extends PhameDAO
 
   public function getProfileImageFile() {
     return $this->assertAttached($this->profileImageFile);
+  }
+
+  public function getHeaderImageURI() {
+    return $this->getHeaderImageFile()->getBestURI();
+  }
+
+  public function attachHeaderImageFile(PhabricatorFile $file) {
+    $this->headerImageFile = $file;
+    return $this;
+  }
+
+  public function getHeaderImageFile() {
+    return $this->assertAttached($this->headerImageFile);
   }
 
 

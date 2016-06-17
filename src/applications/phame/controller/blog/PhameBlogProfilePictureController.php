@@ -3,10 +3,6 @@
 final class PhameBlogProfilePictureController
   extends PhameBlogController {
 
-  public function shouldRequireAdmin() {
-    return false;
-  }
-
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
