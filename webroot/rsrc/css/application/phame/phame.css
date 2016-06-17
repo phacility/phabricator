@@ -258,5 +258,6 @@
 
 .phame-header-image {
   max-height: 320px;
+  max-width: 100%;
   margin: 0 auto;
 }
