@@ -1099,6 +1099,18 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $column = $this->refreshColumn($user, $column);
     $this->assertTrue((bool)$column);
 
+    // This test has been failing randomly in a way that doesn't reproduce
+    // on any host, so add some extra assertions to try to nail it down.
+    $board = $this->refreshProject($board, $user, true);
+    $this->assertTrue((bool)$board);
+    $this->assertTrue($board->isUserMember($user->getPHID()));
+
+    $can_view = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $column,
+      PhabricatorPolicyCapability::CAN_VIEW);
+    $this->assertTrue($can_view);
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,
       $column,

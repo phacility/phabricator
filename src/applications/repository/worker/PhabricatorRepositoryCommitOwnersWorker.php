@@ -3,14 +3,18 @@
 final class PhabricatorRepositoryCommitOwnersWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  protected function getImportStepFlag() {
+    return PhabricatorRepositoryCommit::IMPORTED_OWNERS;
+  }
+
   protected function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $this->triggerOwnerAudits($repository, $commit);
-
-    $commit->writeImportStatusFlag(
-      PhabricatorRepositoryCommit::IMPORTED_OWNERS);
+    if (!$this->shouldSkipImportStep()) {
+      $this->triggerOwnerAudits($repository, $commit);
+      $commit->writeImportStatusFlag($this->getImportStepFlag());
+    }
 
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(

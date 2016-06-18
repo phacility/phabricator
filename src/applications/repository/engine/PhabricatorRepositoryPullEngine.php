@@ -347,7 +347,7 @@ final class PhabricatorRepositoryPullEngine
         // For bare working copies, we need this magic incantation.
         $future = $repository->getRemoteCommandFuture(
           'fetch origin %s --prune',
-          '+refs/heads/*:refs/heads/*');
+          '+refs/*:refs/*');
       } else {
         $future = $repository->getRemoteCommandFuture(
           'fetch --all --prune');

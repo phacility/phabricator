@@ -12,6 +12,7 @@ final class PhabricatorRepositoryRefCursor
   const TYPE_BRANCH = 'branch';
   const TYPE_TAG = 'tag';
   const TYPE_BOOKMARK = 'bookmark';
+  const TYPE_REF = 'ref';
 
   protected $repositoryPHID;
   protected $refType;

@@ -4,6 +4,7 @@ final class PhameBlogTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME        = 'phame.blog.name';
+  const TYPE_SUBTITLE    = 'phame.blog.subtitle';
   const TYPE_DESCRIPTION = 'phame.blog.description';
   const TYPE_DOMAIN      = 'phame.blog.domain';
   const TYPE_STATUS      = 'phame.blog.status';
@@ -80,6 +81,7 @@ final class PhameBlogTransaction
         $tags[] = self::MAILTAG_SUBSCRIBERS;
         break;
       case self::TYPE_NAME:
+      case self::TYPE_SUBTITLE:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_DOMAIN:
         $tags[] = self::MAILTAG_DETAILS;
@@ -112,6 +114,19 @@ final class PhameBlogTransaction
         } else {
           return pht(
             '%s updated the blog\'s name to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        }
+        break;
+      case self::TYPE_SUBTITLE:
+        if ($old === null) {
+          return pht(
+            '%s set this blog\'s subtitle to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else {
+          return pht(
+            '%s updated the blog\'s subtitle to "%s".',
             $this->renderHandleLink($author_phid),
             $new);
         }
@@ -162,6 +177,19 @@ final class PhameBlogTransaction
         } else {
           return pht(
             '%s updated the name for %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+        break;
+      case self::TYPE_SUBTITLE:
+        if ($old === null) {
+          return pht(
+            '%s set the subtitle for %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s updated the subtitle for %s.',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         }

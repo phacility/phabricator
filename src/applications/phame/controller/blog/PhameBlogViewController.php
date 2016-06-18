@@ -20,6 +20,7 @@ final class PhameBlogViewController extends PhameLiveController {
     $post_query = id(new PhamePostQuery())
       ->setViewer($viewer)
       ->withBlogPHIDs(array($blog->getPHID()))
+      ->setOrder('datePublished')
       ->withVisibility(array(
         PhameConstants::VISIBILITY_PUBLISHED,
         PhameConstants::VISIBILITY_DRAFT,
@@ -31,8 +32,10 @@ final class PhameBlogViewController extends PhameLiveController {
 
     $posts = $post_query->executeWithCursorPager($pager);
 
+    $hero = $this->buildPhameHeader($blog);
+
     $header = id(new PHUIHeaderView())
-      ->setHeader($blog->getName())
+      ->addClass('phame-header-bar')
       ->setUser($viewer);
 
     if (!$is_external) {
@@ -108,6 +111,7 @@ final class PhameBlogViewController extends PhameLiveController {
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
+          $hero,
           $page,
           $about,
       ));
@@ -149,6 +153,35 @@ final class PhameBlogViewController extends PhameLiveController {
         ->setName(pht('Manage Blog')));
 
     return $actions;
+  }
+
+  private function buildPhameHeader(
+    PhameBlog $blog) {
+
+    $image = null;
+    if ($blog->getHeaderImagePHID()) {
+      $image = phutil_tag(
+        'div',
+        array(
+          'class' => 'phame-header-hero',
+        ),
+        phutil_tag(
+          'img',
+          array(
+            'src'     => $blog->getHeaderImageURI(),
+            'class'   => 'phame-header-image',
+          )));
+    }
+
+    $title = phutil_tag_div('phame-header-title', $blog->getName());
+    $subtitle = null;
+    if ($blog->getSubtitle()) {
+      $subtitle = phutil_tag_div('phame-header-subtitle', $blog->getSubtitle());
+    }
+
+    return phutil_tag_div(
+      'phame-mega-header', array($image, $title, $subtitle));
+
   }
 
 }

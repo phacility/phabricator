@@ -3,10 +3,6 @@
 final class PhameBlogProfilePictureController
   extends PhameBlogController {
 
-  public function shouldRequireAdmin() {
-    return false;
-  }
-
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
@@ -175,6 +171,7 @@ final class PhameBlogProfilePictureController
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $upload_form = id(new AphrontFormView())
@@ -194,6 +191,7 @@ final class PhameBlogProfilePictureController
 
     $upload_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Upload New Picture'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($upload_form);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -204,14 +202,25 @@ final class PhameBlogProfilePictureController
       $blog->getName(),
       $this->getApplicationURI('blog/view/'.$id));
     $crumbs->addTextCrumb(pht('Blog Picture'));
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Blog Picture'))
+      ->setHeaderIcon('fa-camera');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $form_box,
+        $upload_box,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
-          $form_box,
-          $upload_box,
+          $view,
       ));
 
   }

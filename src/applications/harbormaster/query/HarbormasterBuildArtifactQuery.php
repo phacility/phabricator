@@ -9,6 +9,7 @@ final class HarbormasterBuildArtifactQuery
   private $artifactIndexes;
   private $keyBuildPHID;
   private $keyBuildGeneration;
+  private $isReleased;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -27,6 +28,11 @@ final class HarbormasterBuildArtifactQuery
 
   public function withArtifactIndexes(array $artifact_indexes) {
     $this->artifactIndexes = $artifact_indexes;
+    return $this;
+  }
+
+  public function withIsReleased($released) {
+    $this->isReleased = $released;
     return $this;
   }
 
@@ -92,6 +98,13 @@ final class HarbormasterBuildArtifactQuery
         $conn,
         'artifactIndex IN (%Ls)',
         $this->artifactIndexes);
+    }
+
+    if ($this->isReleased !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isReleased = %d',
+        (int)$this->isReleased);
     }
 
     return $where;

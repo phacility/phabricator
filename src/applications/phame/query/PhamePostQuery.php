@@ -122,6 +122,36 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $where;
   }
 
+  public function getBuiltinOrders() {
+    return array(
+      'datePublished' => array(
+        'vector' => array('datePublished', 'id'),
+        'name' => pht('Publish Date'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'datePublished' => array(
+        'column' => 'datePublished',
+        'type' => 'int',
+        'reverse' => false,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $post = $this->loadCursorObject($cursor);
+
+    $map = array(
+      'datePublished' => $post->getDatePublished(),
+      'id' => $post->getID(),
+    );
+
+    return $map;
+  }
+
   public function getQueryApplicationClass() {
     // TODO: Does setting this break public blogs?
     return null;

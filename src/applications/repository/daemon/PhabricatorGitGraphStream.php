@@ -11,14 +11,20 @@ final class PhabricatorGitGraphStream
 
   public function __construct(
     PhabricatorRepository $repository,
-    $start_commit) {
+    $start_commit = null) {
 
     $this->repository = $repository;
 
-    $future = $repository->getLocalCommandFuture(
-      'log --format=%s %s --',
-      '%H%x01%P%x01%ct',
-      $start_commit);
+    if ($start_commit !== null) {
+      $future = $repository->getLocalCommandFuture(
+        'log --format=%s %s --',
+        '%H%x01%P%x01%ct',
+        $start_commit);
+    } else {
+      $future = $repository->getLocalCommandFuture(
+        'log --format=%s --all --',
+        '%H%x01%P%x01%ct');
+    }
 
     $this->iterator = new LinesOfALargeExecFuture($future);
     $this->iterator->setDelimiter("\n");

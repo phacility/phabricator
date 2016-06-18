@@ -30,9 +30,11 @@ final class PhabricatorAuthAuthProviderPHIDType extends PhabricatorPHIDType {
     array $objects) {
 
     foreach ($handles as $phid => $handle) {
-      $provider = $objects[$phid];
+      $provider = $objects[$phid]->getProvider();
 
-      $handle->setName($provider->getProviderName());
+      if ($provider) {
+        $handle->setName($provider->getProviderName());
+      }
     }
   }
 

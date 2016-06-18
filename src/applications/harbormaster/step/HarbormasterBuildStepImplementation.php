@@ -103,11 +103,6 @@ abstract class HarbormasterBuildStepImplementation extends Phobject {
   /**
    * Return the name of artifacts produced by this command.
    *
-   * Something like:
-   *
-   *   return array(
-   *     'some_name_input_by_user' => 'host');
-   *
    * Future steps will calculate all available artifact mappings
    * before them and filter on the type.
    *
