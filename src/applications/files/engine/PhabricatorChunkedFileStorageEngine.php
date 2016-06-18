@@ -174,7 +174,7 @@ final class PhabricatorChunkedFileStorageEngine
     return (4 * 1024 * 1024);
   }
 
-  public function getFileDataIterator(PhabricatorFile $file, $begin, $end) {
+  public function getRawFileDataIterator(PhabricatorFile $file, $begin, $end) {
     $chunks = id(new PhabricatorFileChunkQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withChunkHandles(array($file->getStorageHandle()))

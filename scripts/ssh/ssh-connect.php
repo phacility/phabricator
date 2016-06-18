@@ -4,6 +4,11 @@
 // This is a wrapper script for Git, Mercurial, and Subversion. It primarily
 // serves to inject "-o StrictHostKeyChecking=no" into the SSH arguments.
 
+// In some cases, Subversion sends us SIGTERM. If we don't catch the signal and
+// react to it, we won't run object destructors by default and thus won't clean
+// up temporary files. Declare ticks so we can install a signal handler.
+declare(ticks=1);
+
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
@@ -20,6 +25,16 @@ $args->parsePartial(
     ),
   ));
 $unconsumed_argv = $args->getUnconsumedArgumentVector();
+
+if (function_exists('pcntl_signal')) {
+  pcntl_signal(SIGTERM, 'ssh_connect_signal');
+}
+
+function ssh_connect_signal($signo) {
+  // This is just letting destructors fire. In particular, we want to clean
+  // up any temporary files we wrote. See T10547.
+  exit(128 + $signo);
+}
 
 $pattern = array();
 $arguments = array();

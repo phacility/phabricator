@@ -75,7 +75,7 @@ final class DifferentialRevisionSearchEngine
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
         ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
-        ->setDatasource(new DiffusionRepositoryDatasource())
+        ->setDatasource(new DifferentialRepositoryDatasource())
         ->setDescription(
           pht('Find revisions from specific repositories.')),
       id(new PhabricatorSearchSelectField())

@@ -155,6 +155,18 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
 
   /**
+   * Return true if this panel is available to users while editing their own
+   * settings.
+   *
+   * @return bool True to enable management on behalf of a user.
+   * @task config
+   */
+  public function isUserPanel() {
+    return true;
+  }
+
+
+  /**
    * Return true if this panel is available to administrators while managing
    * bot and mailing list accounts.
    *

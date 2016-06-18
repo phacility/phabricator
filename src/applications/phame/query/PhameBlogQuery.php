@@ -9,6 +9,7 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $needBloggers;
   private $needProfileImage;
+  private $needHeaderImage;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -32,6 +33,11 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function needProfileImage($need) {
     $this->needProfileImage = $need;
+    return $this;
+  }
+
+  public function needHeaderImage($need) {
+    $this->needHeaderImage = $need;
     return $this;
   }
 
@@ -105,6 +111,28 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           $file = $default;
         }
         $blog->attachProfileImageFile($file);
+      }
+    }
+
+    if ($this->needHeaderImage) {
+      $file_phids = mpull($blogs, 'getHeaderImagePHID');
+      $file_phids = array_filter($file_phids);
+      if ($file_phids) {
+        $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+      } else {
+        $files = array();
+      }
+
+      foreach ($blogs as $blog) {
+        $file = idx($files, $blog->getHeaderImagePHID());
+        if ($file) {
+          $blog->attachHeaderImageFile($file);
+        }
       }
     }
     return $blogs;

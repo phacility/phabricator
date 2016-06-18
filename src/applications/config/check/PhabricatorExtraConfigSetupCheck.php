@@ -190,6 +190,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'The Differential revision list view age UI elements have been removed '.
       'to simplify the interface.');
 
+    $global_settings_reason = pht(
+      'The "Re: Prefix" and "Vary Subjects" settings are now configured '.
+      'in global settings.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -321,6 +325,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'differential.days-fresh' => $stale_reason,
       'differential.days-stale' => $stale_reason,
+
+      'metamta.re-prefix' => $global_settings_reason,
+      'metamta.vary-subjects' => $global_settings_reason,
     );
 
     return $ancient_config;

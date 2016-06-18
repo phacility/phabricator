@@ -29,7 +29,7 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function withVisibility($visibility) {
+  public function withVisibility(array $visibility) {
     $this->visibility = $visibility;
     return $this;
   }
@@ -98,10 +98,10 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->bloggerPHIDs);
     }
 
-    if ($this->visibility !== null) {
+    if ($this->visibility) {
       $where[] = qsprintf(
         $conn,
-        'visibility = %d',
+        'visibility IN (%Ld)',
         $this->visibility);
     }
 
@@ -120,6 +120,36 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     return $where;
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'datePublished' => array(
+        'vector' => array('datePublished', 'id'),
+        'name' => pht('Publish Date'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'datePublished' => array(
+        'column' => 'datePublished',
+        'type' => 'int',
+        'reverse' => false,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $post = $this->loadCursorObject($cursor);
+
+    $map = array(
+      'datePublished' => $post->getDatePublished(),
+      'id' => $post->getID(),
+    );
+
+    return $map;
   }
 
   public function getQueryApplicationClass() {

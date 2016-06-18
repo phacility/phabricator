@@ -25,29 +25,31 @@ final class PhabricatorRepositoryRefEngine
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // No meaningful refs of any type in Subversion.
-        $branches = array();
-        $bookmarks = array();
-        $tags = array();
+        $maps = array();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $branches = $this->loadMercurialBranchPositions($repository);
         $bookmarks = $this->loadMercurialBookmarkPositions($repository);
-        $tags = array();
+        $maps = array(
+          PhabricatorRepositoryRefCursor::TYPE_BRANCH => $branches,
+          PhabricatorRepositoryRefCursor::TYPE_BOOKMARK => $bookmarks,
+        );
+
         $branches_may_close = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $branches = $this->loadGitBranchPositions($repository);
-        $bookmarks = array();
-        $tags = $this->loadGitTagPositions($repository);
+        $maps = $this->loadGitRefPositions($repository);
         break;
       default:
         throw new Exception(pht('Unknown VCS "%s"!', $vcs));
     }
 
-    $maps = array(
-      PhabricatorRepositoryRefCursor::TYPE_BRANCH => $branches,
-      PhabricatorRepositoryRefCursor::TYPE_TAG => $tags,
-      PhabricatorRepositoryRefCursor::TYPE_BOOKMARK => $bookmarks,
+    // Fill in any missing types with empty lists.
+    $maps = $maps + array(
+      PhabricatorRepositoryRefCursor::TYPE_BRANCH => array(),
+      PhabricatorRepositoryRefCursor::TYPE_TAG => array(),
+      PhabricatorRepositoryRefCursor::TYPE_BOOKMARK => array(),
+      PhabricatorRepositoryRefCursor::TYPE_REF => array(),
     );
 
     $all_cursors = id(new PhabricatorRepositoryRefCursorQuery())
@@ -83,6 +85,13 @@ final class PhabricatorRepositoryRefEngine
           $ref->save();
         }
         foreach ($this->deadRefs as $ref) {
+          // Shove this ref into the old refs table so the discovery engine
+          // can check if any commits have been rendered unreachable.
+          id(new PhabricatorRepositoryOldRef())
+            ->setRepositoryPHID($repository->getPHID())
+            ->setCommitIdentifier($ref->getCommitIdentifier())
+            ->save();
+
           $ref->delete();
         }
       $repository->saveTransaction();
@@ -91,6 +100,7 @@ final class PhabricatorRepositoryRefEngine
       $this->deadRefs = array();
     }
 
+    $branches = $maps[PhabricatorRepositoryRefCursor::TYPE_BRANCH];
     if ($branches && $branches_may_close) {
       $this->updateBranchStates($repository, $branches);
     }
@@ -449,28 +459,12 @@ final class PhabricatorRepositoryRefEngine
   /**
    * @task git
    */
-  private function loadGitBranchPositions(PhabricatorRepository $repository) {
-    return id(new DiffusionLowLevelGitRefQuery())
+  private function loadGitRefPositions(PhabricatorRepository $repository) {
+    $refs = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withRefTypes(
-        array(
-          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
-        ))
       ->execute();
-  }
 
-
-  /**
-   * @task git
-   */
-  private function loadGitTagPositions(PhabricatorRepository $repository) {
-    return id(new DiffusionLowLevelGitRefQuery())
-      ->setRepository($repository)
-      ->withRefTypes(
-        array(
-          PhabricatorRepositoryRefCursor::TYPE_TAG,
-        ))
-      ->execute();
+    return mgroup($refs, 'getRefType');
   }
 
 

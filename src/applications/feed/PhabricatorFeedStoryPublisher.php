@@ -215,6 +215,7 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
       $all_prefs = id(new PhabricatorUserPreferencesQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withUserPHIDs($phids)
+        ->needSyntheticPreferences(true)
         ->execute();
       $all_prefs = mpull($all_prefs, null, 'getUserPHID');
     }

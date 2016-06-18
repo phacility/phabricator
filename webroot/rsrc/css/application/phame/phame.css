@@ -84,7 +84,6 @@
 .phame-blog-list-item {
   display: block;
   color: {$darkgreytext};
-  height: 24px;
   position: relative;
   margin-bottom: 8px;
   padding-right: 20px;
@@ -108,14 +107,12 @@
 
 .phame-blog-list-title {
   margin-left: 30px;
-  margin-top: 4px;
+  margin-top: 2px;
   display: inline-block;
   font-weight: bold;
   color: {$bluetext};
   width: 190px;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .phame-blog-list-new-post {
@@ -252,4 +249,62 @@
   width: 50%;
   color: {$darkgreytext};
   background: {$greybackground};
+}
+
+/* Blog Chrome */
+.phame-live-view .phui-crumbs-view {
+  background: #fff;
+  border: none;
+  padding-left: 8px;
+}
+
+/* Hero Image */
+.phame-header-hero {
+  background-color: #fff;
+}
+
+.phame-header-image {
+  max-height: 320px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.phui-document-view.phui-document-view-pro .phui-header-shell.phame-header-bar {
+  border-top: 1px solid {$thinblueborder};
+  border-bottom: none;
+  padding: 4px 0;
+}
+
+.phame-header-bar .phui-header-subheader {
+  margin: 0;
+}
+
+.phame-mega-header {
+  margin: 0 auto;
+  text-align: center;
+  background: #fff;
+  padding: 16px 0 24px;
+}
+
+.device-phone .phame-mega-header {
+  padding: 24px 0;
+}
+
+.phame-mega-header .phame-header-title {
+  color: #000;
+  font-size: 28px;
+  font-weight: bold;
+  font-family: 'Aleo', {$fontfamily};
+  padding-top: 24px;
+}
+
+.device-phone .phame-mega-header .phame-header-title {
+  padding-top: 0;
+}
+
+.phame-mega-header .phame-header-subtitle {
+  color: {$greytext};
+  font-size: 20px;
+  font-family: 'Aleo', {$fontfamily};
+  padding-top: 8px;
 }

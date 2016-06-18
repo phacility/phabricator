@@ -152,6 +152,10 @@ final class PhabricatorSettingsMainController
         if (!$this->isSelf() && !$panel->isManagementPanel()) {
           continue;
         }
+
+        if ($this->isSelf() && !$panel->isUserPanel()) {
+          continue;
+        }
       }
 
       if (!empty($result[$key])) {

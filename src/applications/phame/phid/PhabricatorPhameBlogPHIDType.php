@@ -34,6 +34,11 @@ final class PhabricatorPhameBlogPHIDType extends PhabricatorPHIDType {
       $handle->setName($blog->getName());
       $handle->setFullName($blog->getName());
       $handle->setURI('/phame/blog/view/'.$blog->getID().'/');
+
+      if ($blog->isArchived()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
+
     }
   }
 

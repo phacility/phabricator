@@ -43,6 +43,14 @@ final class PhabricatorSecurityConfigOptions
       '255.255.255.255/32',
     );
 
+    $keyring_type = 'custom:PhabricatorKeyringConfigOptionType';
+    $keyring_description = $this->deformat(pht(<<<EOTEXT
+The keyring stores master encryption keys. For help with configuring a keyring
+and encryption, see **[[ %s | Configuring Encryption ]]**.
+EOTEXT
+      ,
+      PhabricatorEnv::getDoclink('Configuring Encryption')));
+
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
         ->setLocked(true)
@@ -276,6 +284,10 @@ final class PhabricatorSecurityConfigOptions
               'unsecured content over plain HTTP. It is very difficult to '.
               'undo this change once users\' browsers have accepted the '.
               'setting.')),
+        $this->newOption('keyring', $keyring_type, array())
+          ->setHidden(true)
+          ->setSummary(pht('Configure master encryption keys.'))
+          ->setDescription($keyring_description),
     );
   }
 

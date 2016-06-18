@@ -877,6 +877,7 @@ final class PhabricatorMetaMTAMail
     $all_prefs = id(new PhabricatorUserPreferencesQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withUserPHIDs($actor_phids)
+      ->needSyntheticPreferences(true)
       ->execute();
     $all_prefs = mpull($all_prefs, null, 'getUserPHID');
 
@@ -1105,52 +1106,32 @@ final class PhabricatorMetaMTAMail
 
 
   private function loadPreferences($target_phid) {
-    if (!self::shouldMultiplexAllMail()) {
-      $target_phid = null;
-    }
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
-    if ($target_phid) {
+    if (self::shouldMultiplexAllMail()) {
       $preferences = id(new PhabricatorUserPreferencesQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($viewer)
         ->withUserPHIDs(array($target_phid))
+        ->needSyntheticPreferences(true)
         ->executeOne();
-    } else {
-      $preferences = null;
+      if ($preferences) {
+        return $preferences;
+      }
     }
 
-    // TODO: Here, we would load global preferences once they exist.
-
-    if (!$preferences) {
-      // If we haven't found suitable preferences yet, return an empty object
-      // which implicitly has all the default values.
-      $preferences = id(new PhabricatorUserPreferences())
-        ->attachUser(new PhabricatorUser());
-    }
-
-    return $preferences;
+    return PhabricatorUserPreferences::loadGlobalPreferences($viewer);
   }
 
   private function shouldAddRePrefix(PhabricatorUserPreferences $preferences) {
-    $default_value = PhabricatorEnv::getEnvConfig('metamta.re-prefix');
-
-    $value = $preferences->getPreference(
+    $value = $preferences->getSettingValue(
       PhabricatorEmailRePrefixSetting::SETTINGKEY);
-    if ($value === null) {
-      return $default_value;
-    }
 
     return ($value == PhabricatorEmailRePrefixSetting::VALUE_RE_PREFIX);
   }
 
   private function shouldVarySubject(PhabricatorUserPreferences $preferences) {
-    $default_value = PhabricatorEnv::getEnvConfig('metamta.vary-subjects');
-
-    $value = $preferences->getPreference(
+    $value = $preferences->getSettingValue(
       PhabricatorEmailVarySubjectsSetting::SETTINGKEY);
-
-    if ($value === null) {
-      return $default_value;
-    }
 
     return ($value == PhabricatorEmailVarySubjectsSetting::VALUE_VARY_SUBJECTS);
   }

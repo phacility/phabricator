@@ -1303,10 +1303,10 @@ final class DifferentialTransactionEditor
   protected function expandCustomRemarkupBlockTransactions(
     PhabricatorLiskDAO $object,
     array $xactions,
-    $blocks,
+    array $changes,
     PhutilMarkupEngine $engine) {
 
-    $flat_blocks = array_mergev($blocks);
+    $flat_blocks = mpull($changes, 'getNewValue');
     $huge_block = implode("\n\n", $flat_blocks);
 
     $task_map = array();

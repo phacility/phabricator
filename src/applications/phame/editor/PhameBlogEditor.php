@@ -15,6 +15,7 @@ final class PhameBlogEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhameBlogTransaction::TYPE_NAME;
+    $types[] = PhameBlogTransaction::TYPE_SUBTITLE;
     $types[] = PhameBlogTransaction::TYPE_DESCRIPTION;
     $types[] = PhameBlogTransaction::TYPE_DOMAIN;
     $types[] = PhameBlogTransaction::TYPE_STATUS;
@@ -31,6 +32,8 @@ final class PhameBlogEditor
     switch ($xaction->getTransactionType()) {
       case PhameBlogTransaction::TYPE_NAME:
         return $object->getName();
+      case PhameBlogTransaction::TYPE_SUBTITLE:
+        return $object->getSubtitle();
       case PhameBlogTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
       case PhameBlogTransaction::TYPE_DOMAIN:
@@ -46,6 +49,7 @@ final class PhameBlogEditor
 
     switch ($xaction->getTransactionType()) {
       case PhameBlogTransaction::TYPE_NAME:
+      case PhameBlogTransaction::TYPE_SUBTITLE:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
@@ -65,6 +69,8 @@ final class PhameBlogEditor
     switch ($xaction->getTransactionType()) {
       case PhameBlogTransaction::TYPE_NAME:
         return $object->setName($xaction->getNewValue());
+      case PhameBlogTransaction::TYPE_SUBTITLE:
+        return $object->setSubtitle($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_DESCRIPTION:
         return $object->setDescription($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_DOMAIN:
@@ -82,6 +88,7 @@ final class PhameBlogEditor
 
     switch ($xaction->getTransactionType()) {
       case PhameBlogTransaction::TYPE_NAME:
+      case PhameBlogTransaction::TYPE_SUBTITLE:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_DOMAIN:
       case PhameBlogTransaction::TYPE_STATUS:
@@ -227,7 +234,7 @@ final class PhameBlogEditor
 
 
   protected function supportsSearch() {
-    return false;
+    return true;
   }
 
   protected function shouldApplyHeraldRules(

@@ -35,7 +35,8 @@ final class PhameHomeController extends PhamePostController {
       $posts = id(new PhamePostQuery())
         ->setViewer($viewer)
         ->withBlogPHIDs($blog_phids)
-        ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
+        ->withVisibility(array(PhameConstants::VISIBILITY_PUBLISHED))
+        ->setOrder('datePublished')
         ->executeWithCursorPager($pager);
 
       if ($posts) {
@@ -97,7 +98,7 @@ final class PhameHomeController extends PhamePostController {
         ->setViewer($viewer)
         ->withBloggerPHIDs(array($viewer->getPHID()))
         ->withBlogPHIDs(mpull($blogs, 'getPHID'))
-        ->withVisibility(PhameConstants::VISIBILITY_DRAFT)
+        ->withVisibility(array(PhameConstants::VISIBILITY_DRAFT))
         ->setLimit(5)
         ->execute();
 

@@ -34,7 +34,13 @@ final class PhabricatorPhamePostPHIDType extends PhabricatorPHIDType {
       $handle->setName($post->getTitle());
       $handle->setFullName($post->getTitle());
       $handle->setURI('/phame/post/view/'.$post->getID().'/');
+
+      if ($post->isArchived()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
+
     }
+
   }
 
 }

@@ -19,7 +19,7 @@ final class PhamePostSearchEngine
     $query = $this->newQuery();
 
     if (strlen($map['visibility'])) {
-      $query->withVisibility($map['visibility']);
+      $query->withVisibility(array($map['visibility']));
     }
 
     return $query;
@@ -35,6 +35,7 @@ final class PhamePostSearchEngine
             '' => pht('All'),
             PhameConstants::VISIBILITY_PUBLISHED => pht('Published'),
             PhameConstants::VISIBILITY_DRAFT => pht('Draft'),
+            PhameConstants::VISIBILITY_ARCHIVED => pht('Archived'),
           )),
     );
   }
@@ -48,6 +49,7 @@ final class PhamePostSearchEngine
       'all' => pht('All Posts'),
       'live' => pht('Published Posts'),
       'draft' => pht('Draft Posts'),
+      'archived' => pht('Archived Posts'),
     );
     return $names;
   }
@@ -65,6 +67,9 @@ final class PhamePostSearchEngine
       case 'draft':
         return $query->setParameter(
           'visibility', PhameConstants::VISIBILITY_DRAFT);
+      case 'archived':
+        return $query->setParameter(
+          'visibility', PhameConstants::VISIBILITY_ARCHIVED);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -99,11 +104,19 @@ final class PhamePostSearchEngine
       if ($post->isDraft()) {
         $item->setStatusIcon('fa-star-o grey');
         $item->setDisabled(true);
-        $item->addIcon('none', pht('Draft Post'));
+        $item->addIcon('fa-star-o', pht('Draft Post'));
+      } else if ($post->isArchived()) {
+        $item->setStatusIcon('fa-ban grey');
+        $item->setDisabled(true);
+        $item->addIcon('fa-ban', pht('Archived Post'));
       } else {
         $date = $post->getDatePublished();
         $item->setEpoch($date);
       }
+      $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('fa-pencil')
+            ->setHref($post->getEditURI()));
       $list->addItem($item);
     }
 

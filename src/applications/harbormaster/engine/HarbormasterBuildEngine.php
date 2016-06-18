@@ -9,6 +9,7 @@ final class HarbormasterBuildEngine extends Phobject {
   private $build;
   private $viewer;
   private $newBuildTargets = array();
+  private $artifactReleaseQueue = array();
   private $forceBuildableUpdate;
 
   public function setForceBuildableUpdate($force_buildable_update) {
@@ -94,6 +95,8 @@ final class HarbormasterBuildEngine extends Phobject {
       $this->updateBuildable($build->getBuildable());
     }
 
+    $this->releaseQueuedArtifacts();
+
     // If we are no longer building for any reason, release all artifacts.
     if (!$build->isBuilding()) {
       $this->releaseAllArtifacts($build);
@@ -149,20 +152,21 @@ final class HarbormasterBuildEngine extends Phobject {
   }
 
   private function updateBuildSteps(HarbormasterBuild $build) {
-    $targets = id(new HarbormasterBuildTargetQuery())
+    $all_targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($this->getViewer())
       ->withBuildPHIDs(array($build->getPHID()))
       ->withBuildGenerations(array($build->getBuildGeneration()))
       ->execute();
 
-    $this->updateWaitingTargets($targets);
+    $this->updateWaitingTargets($all_targets);
 
-    $targets = mgroup($targets, 'getBuildStepPHID');
+    $targets = mgroup($all_targets, 'getBuildStepPHID');
 
     $steps = id(new HarbormasterBuildStepQuery())
       ->setViewer($this->getViewer())
       ->withBuildPlanPHIDs(array($build->getBuildPlan()->getPHID()))
       ->execute();
+    $steps = mpull($steps, null, 'getPHID');
 
     // Identify steps which are in various states.
 
@@ -252,6 +256,12 @@ final class HarbormasterBuildEngine extends Phobject {
       return;
     }
 
+    // Release any artifacts which are not inputs to any remaining build
+    // step. We're done with these, so something else is free to use them.
+    $ongoing_phids = array_keys($queued + $waiting + $underway);
+    $ongoing_steps = array_select_keys($steps, $ongoing_phids);
+    $this->releaseUnusedArtifacts($all_targets, $ongoing_steps);
+
     // Identify all the steps which are ready to run (because all their
     // dependencies are complete).
 
@@ -290,6 +300,59 @@ final class HarbormasterBuildEngine extends Phobject {
       $target->save();
 
       $this->queueNewBuildTarget($target);
+    }
+  }
+
+
+  /**
+   * Release any artifacts which aren't used by any running or waiting steps.
+   *
+   * This releases artifacts as soon as they're no longer used. This can be
+   * particularly relevant when a build uses multiple hosts since it returns
+   * hosts to the pool more quickly.
+   *
+   * @param list<HarbormasterBuildTarget> Targets in the build.
+   * @param list<HarbormasterBuildStep> List of running and waiting steps.
+   * @return void
+   */
+  private function releaseUnusedArtifacts(array $targets, array $steps) {
+    assert_instances_of($targets, 'HarbormasterBuildTarget');
+    assert_instances_of($steps, 'HarbormasterBuildStep');
+
+    if (!$targets || !$steps) {
+      return;
+    }
+
+    $target_phids = mpull($targets, 'getPHID');
+
+    $artifacts = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer($this->getViewer())
+      ->withBuildTargetPHIDs($target_phids)
+      ->withIsReleased(false)
+      ->execute();
+    if (!$artifacts) {
+      return;
+    }
+
+    // Collect all the artifacts that remaining build steps accept as inputs.
+    $must_keep = array();
+    foreach ($steps as $step) {
+      $inputs = $step->getStepImplementation()->getArtifactInputs();
+      foreach ($inputs as $input) {
+        $artifact_key = $input['key'];
+        $must_keep[$artifact_key] = true;
+      }
+    }
+
+    // Queue unreleased artifacts which no remaining step uses for immediate
+    // release.
+    foreach ($artifacts as $artifact) {
+      $key = $artifact->getArtifactKey();
+      if (isset($must_keep[$key])) {
+        continue;
+      }
+
+      $this->artifactReleaseQueue[] = $artifact;
     }
   }
 
@@ -488,12 +551,18 @@ final class HarbormasterBuildEngine extends Phobject {
     $artifacts = id(new HarbormasterBuildArtifactQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBuildTargetPHIDs($target_phids)
+      ->withIsReleased(false)
       ->execute();
-
     foreach ($artifacts as $artifact) {
       $artifact->releaseArtifact();
     }
+  }
 
+  private function releaseQueuedArtifacts() {
+    foreach ($this->artifactReleaseQueue as $key => $artifact) {
+      $artifact->releaseArtifact();
+      unset($this->artifactReleaseQueue[$key]);
+    }
   }
 
 }

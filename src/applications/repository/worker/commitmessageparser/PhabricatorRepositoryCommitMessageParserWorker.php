@@ -3,42 +3,52 @@
 abstract class PhabricatorRepositoryCommitMessageParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
-  abstract protected function parseCommitWithRef(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit,
-    DiffusionCommitRef $ref);
+  protected function getImportStepFlag() {
+    return PhabricatorRepositoryCommit::IMPORTED_MESSAGE;
+  }
+
+  abstract protected function getFollowupTaskClass();
 
   final protected function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $viewer = PhabricatorUser::getOmnipotentUser();
+    if (!$this->shouldSkipImportStep()) {
+      $viewer = PhabricatorUser::getOmnipotentUser();
 
-    $refs_raw = DiffusionQuery::callConduitWithDiffusionRequest(
-      $viewer,
-      DiffusionRequest::newFromDictionary(
+      $refs_raw = DiffusionQuery::callConduitWithDiffusionRequest(
+        $viewer,
+        DiffusionRequest::newFromDictionary(
+          array(
+            'repository' => $repository,
+            'user' => $viewer,
+          )),
+        'diffusion.querycommits',
         array(
-          'repository' => $repository,
-          'user' => $viewer,
-        )),
-      'diffusion.querycommits',
-      array(
-        'repositoryPHID' => $repository->getPHID(),
-        'phids' => array($commit->getPHID()),
-        'bypassCache' => true,
-        'needMessages' => true,
-      ));
+          'repositoryPHID' => $repository->getPHID(),
+          'phids' => array($commit->getPHID()),
+          'bypassCache' => true,
+          'needMessages' => true,
+        ));
 
-    if (empty($refs_raw['data'])) {
-      throw new Exception(
-        pht(
-          'Unable to retrieve details for commit "%s"!',
-          $commit->getPHID()));
+      if (empty($refs_raw['data'])) {
+        throw new Exception(
+          pht(
+            'Unable to retrieve details for commit "%s"!',
+            $commit->getPHID()));
+      }
+
+      $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
+      $this->updateCommitData($ref);
     }
 
-    $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
-
-    $this->parseCommitWithRef($repository, $commit, $ref);
+    if ($this->shouldQueueFollowupTasks()) {
+      $this->queueTask(
+        $this->getFollowupTaskClass(),
+        array(
+          'commitID' => $commit->getID(),
+        ));
+    }
   }
 
   final protected function updateCommitData(DiffusionCommitRef $ref) {

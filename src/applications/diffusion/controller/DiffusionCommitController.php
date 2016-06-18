@@ -129,6 +129,12 @@ final class DiffusionCommitController extends DiffusionController {
           ),
           $message));
 
+      if ($commit->isUnreachable()) {
+        $this->commitErrors[] = pht(
+          'This commit has been deleted in the repository: it is no longer '.
+          'reachable from any branch, tag, or ref.');
+      }
+
       if ($this->getCommitErrors()) {
         $error_panel = id(new PHUIInfoView())
           ->appendChild($this->getCommitErrors())

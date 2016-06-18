@@ -58,6 +58,7 @@ abstract class PhameLiveController extends PhameController {
       $blog_query = id(new PhameBlogQuery())
         ->setViewer($viewer)
         ->needProfileImage(true)
+        ->needHeaderImage(true)
         ->withIDs(array($blog_id));
 
       // If this is a live view, only show active blogs.
@@ -97,7 +98,8 @@ abstract class PhameLiveController extends PhameController {
 
       // Only show published posts on external domains.
       if ($is_external) {
-        $post_query->withVisibility(PhameConstants::VISIBILITY_PUBLISHED);
+        $post_query->withVisibility(
+          array(PhameConstants::VISIBILITY_PUBLISHED));
       }
 
       $post = $post_query->executeOne();
@@ -210,6 +212,7 @@ abstract class PhameLiveController extends PhameController {
 
     if ($this->getIsLive()) {
       $page
+        ->addClass('phame-live-view')
         ->setShowChrome(false)
         ->setShowFooter(false);
     }
