@@ -15,6 +15,7 @@ final class PhameBlog extends PhameDAO
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
   protected $name;
+  protected $subtitle;
   protected $description;
   protected $domain;
   protected $configData;
@@ -40,6 +41,7 @@ final class PhameBlog extends PhameDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text64',
+        'subtitle' => 'text64',
         'description' => 'text',
         'domain' => 'text128?',
         'status' => 'text32',

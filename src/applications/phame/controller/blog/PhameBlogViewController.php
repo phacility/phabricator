@@ -32,10 +32,10 @@ final class PhameBlogViewController extends PhameLiveController {
 
     $posts = $post_query->executeWithCursorPager($pager);
 
-    $hero = $this->buildHeaderImage($blog);
+    $hero = $this->buildPhameHeader($blog);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($blog->getName())
+      ->addClass('phame-header-bar')
       ->setUser($viewer);
 
     if (!$is_external) {
@@ -155,11 +155,12 @@ final class PhameBlogViewController extends PhameLiveController {
     return $actions;
   }
 
-  private function buildHeaderImage(
+  private function buildPhameHeader(
     PhameBlog $blog) {
 
+    $image = null;
     if ($blog->getHeaderImagePHID()) {
-      $view = phutil_tag(
+      $image = phutil_tag(
         'div',
         array(
           'class' => 'phame-header-hero',
@@ -170,9 +171,17 @@ final class PhameBlogViewController extends PhameLiveController {
             'src'     => $blog->getHeaderImageURI(),
             'class'   => 'phame-header-image',
           )));
-      return $view;
     }
-    return null;
+
+    $title = phutil_tag_div('phame-header-title', $blog->getName());
+    $subtitle = null;
+    if ($blog->getSubtitle()) {
+      $subtitle = phutil_tag_div('phame-header-subtitle', $blog->getSubtitle());
+    }
+
+    return phutil_tag_div(
+      'phame-mega-header', array($image, $title, $subtitle));
+
   }
 
 }
