@@ -212,6 +212,7 @@ abstract class PhameLiveController extends PhameController {
 
     if ($this->getIsLive()) {
       $page
+        ->addClass('phame-live-view')
         ->setShowChrome(false)
         ->setShowFooter(false);
     }
