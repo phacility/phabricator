@@ -5,6 +5,7 @@ final class PhabricatorGitGraphStream
 
   private $repository;
   private $iterator;
+  private $startCommit;
 
   private $parents        = array();
   private $dates          = array();
@@ -14,6 +15,7 @@ final class PhabricatorGitGraphStream
     $start_commit = null) {
 
     $this->repository = $repository;
+    $this->startCommit = $start_commit;
 
     if ($start_commit !== null) {
       $future = $repository->getLocalCommandFuture(
@@ -82,10 +84,18 @@ final class PhabricatorGitGraphStream
       }
     }
 
-    throw new Exception(
-      pht(
-        "No such commit '%s' in repository!",
-        $commit));
+    if ($this->startCommit !== null) {
+      throw new Exception(
+        pht(
+          'Commit "%s" is not a reachable ancestor of "%s".',
+          $commit,
+          $this->startCommit));
+    } else {
+      throw new Exception(
+        pht(
+          'Commit "%s" is not a reachable ancestor of any ref.',
+          $commit));
+    }
   }
 
   private function isParsed($commit) {
