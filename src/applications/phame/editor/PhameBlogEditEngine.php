@@ -101,6 +101,22 @@ final class PhameBlogEditEngine
         ->setConduitTypeDescription(pht('New blog domain.'))
         ->setValue($object->getDomain())
         ->setTransactionType(PhameBlogTransaction::TYPE_DOMAIN),
+      id(new PhabricatorTextEditField())
+        ->setKey('parentSite')
+        ->setLabel(pht('Parent Site'))
+        ->setDescription(pht('Blog parent site name.'))
+        ->setConduitDescription(pht('Change the blog parent site name.'))
+        ->setConduitTypeDescription(pht('New blog parent site name.'))
+        ->setValue($object->getParentSite())
+        ->setTransactionType(PhameBlogTransaction::TYPE_PARENTSITE),
+      id(new PhabricatorTextEditField())
+        ->setKey('parentDomain')
+        ->setLabel(pht('Parent Domain'))
+        ->setDescription(pht('Blog parent domain name.'))
+        ->setConduitDescription(pht('Change the blog parent domain.'))
+        ->setConduitTypeDescription(pht('New blog parent domain.'))
+        ->setValue($object->getParentDomain())
+        ->setTransactionType(PhameBlogTransaction::TYPE_PARENTDOMAIN),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))

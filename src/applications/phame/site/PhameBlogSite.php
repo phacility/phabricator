@@ -39,6 +39,7 @@ final class PhameBlogSite extends PhameSite {
         ->setViewer(new PhabricatorUser())
         ->withDomain($host)
         ->needProfileImage(true)
+        ->needHeaderImage(true)
         ->withStatuses(
           array(
             PhameBlog::STATUS_ACTIVE,

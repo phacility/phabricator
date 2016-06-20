@@ -157,7 +157,12 @@ final class PhabricatorRepositoryDiscoveryEngine
       $name = $ref->getShortName();
       $commit = $ref->getCommitIdentifier();
 
-      $this->log(pht('Examining ref "%s", at "%s".', $name, $commit));
+      $this->log(
+        pht(
+          'Examining "%s" (%s) at "%s".',
+          $name,
+          $ref->getRefType(),
+          $commit));
 
       if (!$repository->shouldTrackRef($ref)) {
         $this->log(pht('Skipping, ref is untracked.'));
@@ -166,6 +171,15 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       if ($this->isKnownCommit($commit)) {
         $this->log(pht('Skipping, HEAD is known.'));
+        continue;
+      }
+
+      // In Git, it's possible to tag a tag. We just skip these, we'll discover
+      // them when we process the target tag. See T11180.
+      $fields = $ref->getRawFields();
+      $tag_type = idx($fields, '*objecttype');
+      if ($tag_type == 'tag') {
+        $this->log(pht('Skipping, this is a tag of a tag.'));
         continue;
       }
 

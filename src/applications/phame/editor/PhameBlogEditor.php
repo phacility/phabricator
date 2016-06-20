@@ -18,6 +18,8 @@ final class PhameBlogEditor
     $types[] = PhameBlogTransaction::TYPE_SUBTITLE;
     $types[] = PhameBlogTransaction::TYPE_DESCRIPTION;
     $types[] = PhameBlogTransaction::TYPE_DOMAIN;
+    $types[] = PhameBlogTransaction::TYPE_PARENTSITE;
+    $types[] = PhameBlogTransaction::TYPE_PARENTDOMAIN;
     $types[] = PhameBlogTransaction::TYPE_STATUS;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -38,6 +40,10 @@ final class PhameBlogEditor
         return $object->getDescription();
       case PhameBlogTransaction::TYPE_DOMAIN:
         return $object->getDomain();
+      case PhameBlogTransaction::TYPE_PARENTSITE:
+        return $object->getParentSite();
+      case PhameBlogTransaction::TYPE_PARENTDOMAIN:
+        return $object->getParentDomain();
       case PhameBlogTransaction::TYPE_STATUS:
         return $object->getStatus();
     }
@@ -52,6 +58,8 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_SUBTITLE:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_STATUS:
+      case PhameBlogTransaction::TYPE_PARENTSITE:
+      case PhameBlogTransaction::TYPE_PARENTDOMAIN:
         return $xaction->getNewValue();
       case PhameBlogTransaction::TYPE_DOMAIN:
         $domain = $xaction->getNewValue();
@@ -77,6 +85,10 @@ final class PhameBlogEditor
         return $object->setDomain($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_STATUS:
         return $object->setStatus($xaction->getNewValue());
+      case PhameBlogTransaction::TYPE_PARENTSITE:
+        return $object->setParentSite($xaction->getNewValue());
+      case PhameBlogTransaction::TYPE_PARENTDOMAIN:
+        return $object->setParentDomain($xaction->getNewValue());
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -91,6 +103,8 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_SUBTITLE:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_DOMAIN:
+      case PhameBlogTransaction::TYPE_PARENTSITE:
+      case PhameBlogTransaction::TYPE_PARENTDOMAIN:
       case PhameBlogTransaction::TYPE_STATUS:
         return;
     }
@@ -120,6 +134,25 @@ final class PhameBlogEditor
             nonempty(last($xactions), null));
 
           $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
+      case PhameBlogTransaction::TYPE_PARENTDOMAIN:
+        if (!$xactions) {
+          continue;
+        }
+        $parent_domain = last($xactions)->getNewValue();
+        if (empty($parent_domain)) {
+          continue;
+        }
+        try {
+          PhabricatorEnv::requireValidRemoteURIForLink($parent_domain);
+        } catch (Exception $ex) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid URI'),
+            pht('Parent Domain must be set to a valid Remote URI.'),
+            nonempty(last($xactions), null));
           $errors[] = $error;
         }
         break;

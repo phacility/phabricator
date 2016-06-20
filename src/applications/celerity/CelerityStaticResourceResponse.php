@@ -13,6 +13,7 @@ final class CelerityStaticResourceResponse extends Phobject {
   private $packaged;
   private $metadata = array();
   private $metadataBlock = 0;
+  private $metadataLocked;
   private $behaviors = array();
   private $hasRendered = array();
   private $postprocessorKey;
@@ -24,6 +25,13 @@ final class CelerityStaticResourceResponse extends Phobject {
   }
 
   public function addMetadata($metadata) {
+    if ($this->metadataLocked) {
+      throw new Exception(
+        pht(
+          'Attempting to add more metadata after metadata has been '.
+          'locked.'));
+    }
+
     $id = count($this->metadata);
     $this->metadata[$id] = $metadata;
     return $this->metadataBlock.'_'.$id;
@@ -189,6 +197,8 @@ final class CelerityStaticResourceResponse extends Phobject {
   }
 
   public function renderHTMLFooter() {
+    $this->metadataLocked = true;
+
     $data = array();
     if ($this->metadata) {
       $json_metadata = AphrontResponse::encodeJSONForHTTPResponse(

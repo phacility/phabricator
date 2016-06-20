@@ -105,10 +105,7 @@ final class PHUIButtonView extends AphrontTagView {
     Javelin::initBehavior('phui-dropdown-menu');
 
     $this->addSigil('phui-dropdown-menu');
-    $this->setMetadata(
-      array(
-        'items' => $actions,
-      ));
+    $this->setMetadata($actions->getDropdownMenuMetadata());
 
     return $this;
   }
