@@ -28,7 +28,7 @@ return array(
     'rsrc/css/aphront/table-view.css' => '9258e19f',
     'rsrc/css/aphront/tokenizer.css' => '056da01b',
     'rsrc/css/aphront/tooltip.css' => '1a07aea8',
-    'rsrc/css/aphront/typeahead-browse.css' => 'd8581d2c',
+    'rsrc/css/aphront/typeahead-browse.css' => '8904346a',
     'rsrc/css/aphront/typeahead.css' => 'd4f16145',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '0877ed6e',
@@ -889,7 +889,7 @@ return array(
     'syntax-default-css' => '9923583c',
     'syntax-highlighting-css' => '9fc496d5',
     'tokens-css' => '3d0f239e',
-    'typeahead-browse-css' => 'd8581d2c',
+    'typeahead-browse-css' => '8904346a',
     'unhandled-exception-css' => '4c96257a',
   ),
   'requires' => array(

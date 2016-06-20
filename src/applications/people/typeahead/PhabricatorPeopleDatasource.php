@@ -3,18 +3,6 @@
 final class PhabricatorPeopleDatasource
   extends PhabricatorTypeaheadDatasource {
 
-  private $enrichResults;
-
-  /**
-   * Controls enriched rendering, for global search. This is a bit hacky and
-   * should probably be handled in a more general way, but is fairly reasonable
-   * for now.
-   */
-  public function setEnrichResults($enrich) {
-    $this->enrichResults = $enrich;
-    return $this;
-  }
-
   public function getBrowseTitle() {
     return pht('Browse Users');
   }
@@ -40,7 +28,9 @@ final class PhabricatorPeopleDatasource
 
     $users = $this->executeQuery($query);
 
-    if ($this->enrichResults && $users) {
+    $is_browse = $this->getIsBrowse();
+
+    if ($is_browse && $users) {
       $phids = mpull($users, 'getPHID');
       $handles = id(new PhabricatorHandleQuery())
         ->setViewer($viewer)
@@ -50,6 +40,8 @@ final class PhabricatorPeopleDatasource
 
     $results = array();
     foreach ($users as $user) {
+      $phid = $user->getPHID();
+
       $closed = null;
       if ($user->getIsDisabled()) {
         $closed = pht('Disabled');
@@ -64,7 +56,7 @@ final class PhabricatorPeopleDatasource
       $result = id(new PhabricatorTypeaheadResult())
         ->setName($user->getFullName())
         ->setURI('/p/'.$username.'/')
-        ->setPHID($user->getPHID())
+        ->setPHID($phid)
         ->setPriorityString($username)
         ->setPriorityType('user')
         ->setAutocomplete('@'.$username)
@@ -74,13 +66,29 @@ final class PhabricatorPeopleDatasource
         $result->setIcon('fa-envelope-o');
       }
 
-      if ($this->enrichResults) {
-        $display_type = pht('User');
+      if ($is_browse) {
+        $handle = $handles[$phid];
+
+        $result
+          ->setIcon($handle->getIcon())
+          ->setImageURI($handle->getImageURI())
+          ->addAttribute($handle->getSubtitle());
+
+        if ($user->getIsAdmin()) {
+          $result->addAttribute(
+            array(
+              id(new PHUIIconView())->setIcon('fa-star'),
+              ' ',
+              pht('Administrator'),
+            ));
+        }
+
         if ($user->getIsAdmin()) {
           $display_type = pht('Administrator');
+        } else {
+          $display_type = pht('User');
         }
         $result->setDisplayType($display_type);
-        $result->setImageURI($handles[$user->getPHID()]->getImageURI());
       }
 
       $results[] = $result;

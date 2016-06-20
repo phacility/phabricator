@@ -69,7 +69,8 @@ final class PhabricatorPeopleNoOwnerDatasource
       ->setDisplayName($name)
       ->setIcon('fa-ban')
       ->setPHID('none()')
-      ->setUnique(true);
+      ->setUnique(true)
+      ->addAttribute(pht('Select results with no owner.'));
   }
 
 }

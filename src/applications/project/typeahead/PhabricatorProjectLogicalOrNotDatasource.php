@@ -86,20 +86,24 @@ final class PhabricatorProjectLogicalOrNotDatasource
       $result
         ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
         ->setIcon('fa-asterisk')
-        ->setColor(null);
+        ->setColor(null)
+        ->resetAttributes()
+        ->addAttribute(pht('Function'));
 
       if ($return_any) {
         $return[] = id(clone $result)
           ->setPHID('any('.$result->getPHID().')')
           ->setDisplayName(pht('In Any: %s', $result->getDisplayName()))
-          ->setName('any '.$result->getName());
+          ->setName('any '.$result->getName())
+          ->addAttribute(pht('Include results tagged with this project.'));
       }
 
       if ($return_not) {
         $return[] = id(clone $result)
           ->setPHID('not('.$result->getPHID().')')
           ->setDisplayName(pht('Not In: %s', $result->getDisplayName()))
-          ->setName('not '.$result->getName());
+          ->setName('not '.$result->getName())
+          ->addAttribute(pht('Exclude results tagged with this project.'));
       }
     }
 

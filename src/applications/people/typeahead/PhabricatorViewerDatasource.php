@@ -74,7 +74,8 @@ final class PhabricatorViewerDatasource
       ->setName(pht('Current Viewer'))
       ->setPHID('viewer()')
       ->setIcon('fa-user')
-      ->setUnique(true);
+      ->setUnique(true)
+      ->addAttribute(pht('Select current viewer.'));
   }
 
 }

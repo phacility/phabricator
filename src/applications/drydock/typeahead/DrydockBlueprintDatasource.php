@@ -7,6 +7,10 @@ final class DrydockBlueprintDatasource
     return pht('Type a blueprint name...');
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Blueprints');
+  }
+
   public function getDatasourceApplicationClass() {
     return 'PhabricatorDrydockApplication';
   }
@@ -36,6 +40,9 @@ final class DrydockBlueprintDatasource
       if ($blueprint->getIsDisabled()) {
         $result->setClosed(pht('Disabled'));
       }
+
+      $result->addAttribute(
+        $blueprint->getImplementation()->getBlueprintName());
 
       $results[] = $result;
     }
