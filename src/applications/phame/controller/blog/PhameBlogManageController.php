@@ -95,8 +95,7 @@ final class PhameBlogManageController extends PhameBlogController {
     Javelin::initBehavior('phabricator-tooltips');
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($blog);
+      ->setUser($viewer);
 
     $domain = $blog->getDomain();
     if (!$domain) {
@@ -104,6 +103,20 @@ final class PhameBlogManageController extends PhameBlogController {
     }
 
     $properties->addProperty(pht('Domain'), $domain);
+
+    $parent_site = $blog->getParentSite();
+    if (!$parent_site) {
+      $parent_site = phutil_tag('em', array(), pht('No parent site'));
+    }
+
+    $properties->addProperty(pht('Parent Site'), $parent_site);
+
+    $parent_domain = $blog->getParentDomain();
+    if (!$parent_domain) {
+      $parent_domain = phutil_tag('em', array(), pht('No parent domain'));
+    }
+
+    $properties->addProperty(pht('Parent Domain'), $parent_domain);
 
     $feed_uri = PhabricatorEnv::getProductionURI(
       $this->getApplicationURI('blog/feed/'.$blog->getID().'/'));
@@ -133,8 +146,6 @@ final class PhameBlogManageController extends PhameBlogController {
       ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
       ->process();
 
-    $properties->invokeWillRenderEvent();
-
     $description = $blog->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
@@ -150,7 +161,7 @@ final class PhameBlogManageController extends PhameBlogController {
   private function buildCurtain(PhameBlog $blog) {
     $viewer = $this->getViewer();
 
-    $curtain = $this->newCurtainView($viewer);
+    $curtain = $this->newCurtainView($blog);
 
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)

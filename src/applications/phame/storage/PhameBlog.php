@@ -18,6 +18,8 @@ final class PhameBlog extends PhameDAO
   protected $subtitle;
   protected $description;
   protected $domain;
+  protected $parentSite;
+  protected $parentDomain;
   protected $configData;
   protected $creatorPHID;
   protected $viewPolicy;
@@ -44,6 +46,8 @@ final class PhameBlog extends PhameDAO
         'subtitle' => 'text64',
         'description' => 'text',
         'domain' => 'text128?',
+        'parentSite' => 'text128',
+        'parentDomain' => 'text128',
         'status' => 'text32',
         'mailKey' => 'bytes20',
         'profileImagePHID' => 'phid?',
@@ -187,8 +191,13 @@ final class PhameBlog extends PhameDAO
   }
 
   public function getExternalLiveURI() {
-    $domain = $this->getDomain();
     $uri = new PhutilURI('http://'.$this->getDomain().'/');
+    return (string)$uri;
+  }
+
+  public function getExternalParentURI() {
+    $uri = $this->getParentDomain();
+    PhabricatorEnv::requireValidRemoteURIForLink($uri);
     return (string)$uri;
   }
 
