@@ -53,5 +53,11 @@ final class PhabricatorActionListView extends AphrontView {
       $actions);
   }
 
+  public function getDropdownMenuMetadata() {
+    return array(
+      'items' => (string)hsprintf('%s', $this),
+    );
+  }
+
 
 }
