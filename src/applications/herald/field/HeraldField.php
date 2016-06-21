@@ -80,6 +80,8 @@ abstract class HeraldField extends Phobject {
           HeraldAdapter::CONDITION_NOT_CONTAINS,
           HeraldAdapter::CONDITION_REGEXP,
           HeraldAdapter::CONDITION_NOT_REGEXP,
+          HeraldAdapter::CONDITION_EXISTS,
+          HeraldAdapter::CONDITION_NOT_EXISTS,
         );
       case self::STANDARD_TEXT_MAP:
         return array(
@@ -107,7 +109,13 @@ abstract class HeraldField extends Phobject {
       case self::STANDARD_TEXT:
       case self::STANDARD_TEXT_LIST:
       case self::STANDARD_TEXT_MAP:
-        return new HeraldTextFieldValue();
+        switch ($condition) {
+          case HeraldAdapter::CONDITION_EXISTS:
+          case HeraldAdapter::CONDITION_NOT_EXISTS:
+            return new HeraldEmptyFieldValue();
+          default:
+            return new HeraldTextFieldValue();
+        }
       case self::STANDARD_PHID:
       case self::STANDARD_PHID_NULLABLE:
       case self::STANDARD_PHID_LIST:
