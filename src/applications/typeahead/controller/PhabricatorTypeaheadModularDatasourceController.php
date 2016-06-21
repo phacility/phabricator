@@ -143,8 +143,6 @@ final class PhabricatorTypeaheadModularDatasourceController
 
         $items = array();
         foreach ($results as $result) {
-          $information = $this->renderBrowseResult($result);
-
           // Disable already-selected tokens.
           $disabled = isset($exclude[$result->getPHID()]);
 
@@ -161,15 +159,14 @@ final class PhabricatorTypeaheadModularDatasourceController
             ),
             pht('Select'));
 
+          $information = $this->renderBrowseResult($result, $button);
+
           $items[] = phutil_tag(
             'div',
             array(
               'class' => 'typeahead-browse-item grouped',
             ),
-            array(
-              $button,
-              $information,
-            ));
+            $information);
         }
 
         $markup = array(
@@ -352,7 +349,10 @@ final class PhabricatorTypeaheadModularDatasourceController
       ->appendChild($view);
   }
 
-  private function renderBrowseResult(PhabricatorTypeaheadResult $result) {
+  private function renderBrowseResult(
+    PhabricatorTypeaheadResult $result,
+    $button) {
+
     $class = array();
     $style = array();
     $separator = " \xC2\xB7 ";
@@ -399,6 +399,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         'style' => implode(' ', $style),
       ),
       array(
+        $button,
         $name,
         $attributes,
       ));
