@@ -268,7 +268,7 @@ a.policy-control .caret {
   float: right;
   margin-top: 4px;
   margin-right: 6px;
-  border-left-color: {$lightgreytext};
+  border-left-color: {$alphablue};
 }
 
 .phabricator-action-view-submenu .caret {
@@ -278,27 +278,17 @@ a.policy-control .caret {
   border-top: 7px solid {$lightgreytext};
 }
 
-.phabricator-action-view-submenu.phui-submenu-open {
-  background: {$greybackground};
+.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
+  .phabricator-action-view-item {
+  background-color: rgba({$alphablue}, 0.07);
+  color: {$sky};
+  border-radius: 3px;
 }
 
-.phui-submenu-animate {
-  animation: phui-submenu-summon 0.25s;
+.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
+  .phabricator-action-view-item .phui-icon-view {
+    color: {$sky};
 }
-
-@keyframes phui-submenu-summon {
-  0% {
-    color: {$lightgreytext};
-    margin-left: 0;
-    transform: rotate(12deg);
-  }
-  60% {
-    margin-left: 24px;
-    transform: rotate(-5deg);
-    margin-top: 18px;
-  }
-}
-
 
 /* Icons */
 .button.has-icon {
