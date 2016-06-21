@@ -250,6 +250,8 @@ final class PhabricatorTypeaheadModularDatasourceController
           ->setRenderDialogAsDiv(true)
           ->setTitle($source->getBrowseTitle())
           ->appendChild($browser)
+          ->setResizeX(true)
+          ->setResizeY($frame_id)
           ->addFooter($function_help)
           ->addCancelButton('/', pht('Close'));
       }

@@ -48,11 +48,29 @@
 
 .aphront-dialog-tail {
   border: none;
+  position: relative;
   background: {$lightgreybackground};
   padding: 8px 16px;
   border-top: 1px solid {$thinblueborder};
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
+}
+
+.device .aphront-dialog-resize {
+  /* No resizing on devices. */
+  display: none;
+}
+
+.aphront-dialog-resize {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 18px;
+  height: 18px;
+  background-image: url(/rsrc/image/resize.png);
+  background-size: 100%;
+  cursor: nwse-resize;
+  pointer-events: all;
 }
 
 .aphront-dialog-foot {
