@@ -264,6 +264,42 @@ a.policy-control .caret {
   border-top-color: #000;
 }
 
+.phabricator-action-view-submenu .caret-right {
+  float: right;
+  margin-top: 4px;
+  margin-right: 6px;
+  border-left-color: {$lightgreytext};
+}
+
+.phabricator-action-view-submenu .caret {
+  float: right;
+  margin-top: 5px;
+  margin-right: 4px;
+  border-top: 7px solid {$lightgreytext};
+}
+
+.phabricator-action-view-submenu.phui-submenu-open {
+  background: {$greybackground};
+}
+
+.phui-submenu-animate {
+  animation: phui-submenu-summon 0.25s;
+}
+
+@keyframes phui-submenu-summon {
+  0% {
+    color: {$lightgreytext};
+    margin-left: 0;
+    transform: rotate(12deg);
+  }
+  60% {
+    margin-left: 24px;
+    transform: rotate(-5deg);
+    margin-top: 18px;
+  }
+}
+
+
 /* Icons */
 .button.has-icon {
   position: relative;

@@ -166,15 +166,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Merge Duplicates In'))
-        ->setHref("/search/attach/{$phid}/TASK/merge/")
-        ->setWorkflow(true)
-        ->setIcon('fa-compress')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
     $edit_config = $edit_engine->loadDefaultEditConfiguration();
     $can_create = (bool)$edit_config;
 
@@ -195,23 +186,36 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $edit_uri = $this->getApplicationURI($edit_uri);
     }
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Create Subtask'))
-        ->setHref($edit_uri)
-        ->setIcon('fa-level-down')
-        ->setDisabled(!$can_create)
-        ->setWorkflow(!$can_create));
+    $task_submenu = array();
+
+    $task_submenu[] = id(new PhabricatorActionView())
+      ->setName(pht('Create Subtask'))
+      ->setHref($edit_uri)
+      ->setIcon('fa-level-down')
+      ->setDisabled(!$can_create)
+      ->setWorkflow(!$can_create);
+
+    $task_submenu[] = id(new PhabricatorActionView())
+      ->setName(pht('Edit Blocking Tasks'))
+      ->setHref("/search/attach/{$phid}/TASK/blocks/")
+      ->setWorkflow(true)
+      ->setIcon('fa-link')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
+
+    $task_submenu[] = id(new PhabricatorActionView())
+      ->setName(pht('Merge Duplicates In'))
+      ->setHref("/search/attach/{$phid}/TASK/merge/")
+      ->setWorkflow(true)
+      ->setIcon('fa-compress')
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(true);
 
     $curtain->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Edit Blocking Tasks'))
-        ->setHref("/search/attach/{$phid}/TASK/blocks/")
-        ->setWorkflow(true)
-        ->setIcon('fa-link')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
+        ->setName(pht('Edit Related Tasks...'))
+        ->setIcon('fa-anchor')
+        ->setSubmenu($task_submenu));
 
     $owner_phid = $task->getOwnerPHID();
     $author_phid = $task->getAuthorPHID();
