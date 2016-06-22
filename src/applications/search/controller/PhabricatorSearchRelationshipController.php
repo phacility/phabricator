@@ -140,6 +140,8 @@ final class PhabricatorSearchRelationshipController
       ManiphestTaskHasCommitEdgeType::EDGECONST => 'CMIT',
       ManiphestTaskHasMockEdgeType::EDGECONST => 'MOCK',
       ManiphestTaskHasRevisionEdgeType::EDGECONST => 'DREV',
+      ManiphestTaskDependsOnTaskEdgeType::EDGECONST => 'TASK',
+      ManiphestTaskDependedOnByTaskEdgeType::EDGECONST => 'TASK',
     );
 
     $edge_type = $relationship->getEdgeConstant();
@@ -180,12 +182,14 @@ final class PhabricatorSearchRelationshipController
 
     $message = pht(
       'You can not create that relationship because it would create a '.
-      'circular dependency: %s.',
-      implode(" \xE2\x86\x92 ", $names));
+      'circular dependency:');
+
+    $list = implode(" \xE2\x86\x92 ", $names);
 
     return $this->newDialog()
       ->setTitle(pht('Circular Dependency'))
       ->appendParagraph($message)
+      ->appendParagraph($list)
       ->addCancelButton($done_uri);
   }
 

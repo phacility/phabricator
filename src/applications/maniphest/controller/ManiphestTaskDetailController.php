@@ -195,12 +195,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setDisabled(!$can_create)
       ->setWorkflow(!$can_create);
 
-    $task_submenu[] = id(new PhabricatorActionView())
-      ->setName(pht('Edit Blocking Tasks'))
-      ->setHref("/search/attach/{$phid}/TASK/blocks/")
-      ->setIcon('fa-link')
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(true);
+    $relationship_list = PhabricatorObjectRelationshipList::newForObject(
+      $viewer,
+      $task);
+
+    $parent_key = ManiphestTaskHasParentRelationship::RELATIONSHIPKEY;
+    $subtask_key = ManiphestTaskHasSubtaskRelationship::RELATIONSHIPKEY;
+
+    $task_submenu[] = $relationship_list->getRelationship($parent_key)
+      ->newAction($task);
+
+    $task_submenu[] = $relationship_list->getRelationship($subtask_key)
+      ->newAction($task);
 
     $task_submenu[] = id(new PhabricatorActionView())
       ->setName(pht('Merge Duplicates In'))
@@ -214,10 +220,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setName(pht('Edit Related Tasks...'))
         ->setIcon('fa-anchor')
         ->setSubmenu($task_submenu));
-
-    $relationship_list = PhabricatorObjectRelationshipList::newForObject(
-      $viewer,
-      $task);
 
     $relationship_submenu = $relationship_list->newActionMenu();
     if ($relationship_submenu) {
@@ -288,9 +290,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $edge_types = array(
       ManiphestTaskDependedOnByTaskEdgeType::EDGECONST
-        => pht('Blocks'),
+        => pht('Parent Tasks'),
       ManiphestTaskDependsOnTaskEdgeType::EDGECONST
-        => pht('Blocked By'),
+        => pht('Subtasks'),
       ManiphestTaskHasRevisionEdgeType::EDGECONST
         => pht('Differential Revisions'),
       ManiphestTaskHasMockEdgeType::EDGECONST

@@ -225,10 +225,10 @@ final class PhabricatorAuthStartController
     }
 
     // Often, users end up here by clicking a disabled action link in the UI
-    // (for example, they might click "Edit Blocking Tasks" on a Maniphest
-    // task page). After they log in we want to send them back to that main
-    // object page if we can, since it's confusing to end up on a standalone
-    // page with only a dialog (particularly if that dialog is another error,
+    // (for example, they might click "Edit Subtasks" on a Maniphest task
+    // page). After they log in we want to send them back to that main object
+    // page if we can, since it's confusing to end up on a standalone page with
+    // only a dialog (particularly if that dialog is another error,
     // like a policy exception).
 
     $via_header = AphrontRequest::getViaHeaderName();
