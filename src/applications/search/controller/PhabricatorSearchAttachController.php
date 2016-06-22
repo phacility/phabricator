@@ -18,6 +18,11 @@ final class PhabricatorSearchAttachController
 
     $object = id(new PhabricatorObjectQuery())
       ->setViewer($user)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->withPHIDs(array($phid))
       ->executeOne();
 

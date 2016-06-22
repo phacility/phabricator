@@ -198,7 +198,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $task_submenu[] = id(new PhabricatorActionView())
       ->setName(pht('Edit Blocking Tasks'))
       ->setHref("/search/attach/{$phid}/TASK/blocks/")
-      ->setWorkflow(true)
       ->setIcon('fa-link')
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
@@ -206,7 +205,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $task_submenu[] = id(new PhabricatorActionView())
       ->setName(pht('Merge Duplicates In'))
       ->setHref("/search/attach/{$phid}/TASK/merge/")
-      ->setWorkflow(true)
       ->setIcon('fa-compress')
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
