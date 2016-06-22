@@ -17,4 +17,20 @@ final class ManiphestTaskHasRevisionRelationship
     return 'fa-cog';
   }
 
+  public function canRelateObjects($src, $dst) {
+    return ($dst instanceof DifferentialRevision);
+  }
+
+  public function getDialogTitleText() {
+    return pht('Edit Related Revisions');
+  }
+
+  public function getDialogHeaderText() {
+    return pht('Current Revisions');
+  }
+
+  public function getDialogButtonText() {
+    return pht('Save Related Revisions');
+  }
+
 }

@@ -71,6 +71,10 @@ final class PhabricatorObjectRelationshipList extends Phobject {
       ->setSubmenu($actions);
   }
 
+  public function getRelationship($key) {
+    return idx($this->relationships, $key);
+  }
+
   public static function newForObject(PhabricatorUser $viewer, $object) {
     $relationships = PhabricatorObjectRelationship::getAllRelationships();
 

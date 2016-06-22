@@ -24,4 +24,20 @@ final class ManiphestTaskHasCommitRelationship
     return false;
   }
 
+  public function canRelateObjects($src, $dst) {
+    return ($dst instanceof PhabricatorRepositoryCommit);
+  }
+
+  public function getDialogTitleText() {
+    return pht('Edit Related Commits');
+  }
+
+  public function getDialogHeaderText() {
+    return pht('Current Commits');
+  }
+
+  public function getDialogButtonText() {
+    return pht('Save Related Commits');
+  }
+
 }

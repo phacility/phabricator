@@ -17,4 +17,20 @@ final class ManiphestTaskHasMockRelationship
     return 'fa-camera-retro';
   }
 
+  public function canRelateObjects($src, $dst) {
+    return ($dst instanceof PholioMock);
+  }
+
+  public function getDialogTitleText() {
+    return pht('Edit Related Mocks');
+  }
+
+  public function getDialogHeaderText() {
+    return pht('Current Mocks');
+  }
+
+  public function getDialogButtonText() {
+    return pht('Save Related Mocks');
+  }
+
 }

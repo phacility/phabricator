@@ -24,6 +24,16 @@ abstract class PhabricatorObjectRelationship extends Phobject {
   abstract protected function getActionName();
   abstract protected function getActionIcon();
 
+  abstract public function canRelateObjects($src, $dst);
+
+  abstract public function getDialogTitleText();
+  abstract public function getDialogHeaderText();
+  abstract public function getDialogButtonText();
+
+  public function getDialogInstructionsText() {
+    return null;
+  }
+
   public function shouldAppearInActionMenu() {
     return true;
   }
@@ -58,24 +68,8 @@ abstract class PhabricatorObjectRelationship extends Phobject {
 
   private function getActionURI($object) {
     $phid = $object->getPHID();
-
-    // TODO: Remove this, this is just legacy support for the current
-    // controller until a new one gets built.
-    $legacy_kinds = array(
-      ManiphestTaskHasCommitEdgeType::EDGECONST => 'CMIT',
-      ManiphestTaskHasMockEdgeType::EDGECONST => 'MOCK',
-      ManiphestTaskHasRevisionEdgeType::EDGECONST => 'DREV',
-    );
-
-    $edge_type = $this->getEdgeConstant();
-    $legacy_kind = idx($legacy_kinds, $edge_type);
-    if (!$legacy_kind) {
-      throw new Exception(
-        pht(
-          'Only specific legacy relationships are supported!'));
-    }
-
-    return "/search/attach/{$phid}/{$legacy_kind}/";
+    $type = $this->getRelationshipConstant();
+    return "/search/rel/{$type}/{$phid}/";
   }
 
 }
