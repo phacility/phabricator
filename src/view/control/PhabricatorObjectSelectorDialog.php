@@ -10,6 +10,7 @@ final class PhabricatorObjectSelectorDialog extends Phobject {
   private $searchURI;
   private $selectedFilter;
   private $excluded;
+  private $initialPHIDs;
 
   private $title;
   private $header;
@@ -75,6 +76,15 @@ final class PhabricatorObjectSelectorDialog extends Phobject {
   public function setInstructions($instructions) {
     $this->instructions = $instructions;
     return $this;
+  }
+
+  public function setInitialPHIDs(array $initial_phids) {
+    $this->initialPHIDs = $initial_phids;
+    return $this;
+  }
+
+  public function getInitialPHIDs() {
+    return $this->initialPHIDs;
   }
 
   public function buildDialog() {
@@ -171,8 +181,14 @@ final class PhabricatorObjectSelectorDialog extends Phobject {
       $view = new PhabricatorHandleObjectSelectorDataView($handle);
       $handle_views[$phid] = $view->renderData();
     }
+
     $dialog->addHiddenInput('phids', implode(';', array_keys($this->handles)));
 
+    $initial_phids = $this->getInitialPHIDs();
+    if ($initial_phids) {
+      $initial_phids = implode(', ', $initial_phids);
+      $dialog->addHiddenInput('initialPHIDs', $initial_phids);
+    }
 
     Javelin::initBehavior(
       'phabricator-object-selector',

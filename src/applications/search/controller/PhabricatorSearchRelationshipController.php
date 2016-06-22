@@ -44,18 +44,20 @@ final class PhabricatorSearchRelationshipController
     $src_handle = $handles[$src_phid];
 
     $done_uri = $src_handle->getURI();
+    $initial_phids = $dst_phids;
 
     if ($request->isFormPost()) {
       $phids = explode(';', $request->getStr('phids'));
       $phids = array_filter($phids);
       $phids = array_values($phids);
 
-      // TODO: Embed these in the form instead, to gracefully resolve
-      // concurrent edits like we do for subscribers and projects.
-      $old_phids = $dst_phids;
+      $initial_phids = $request->getStrList('initialPHIDs');
 
-      $add_phids = $phids;
-      $rem_phids = array_diff($old_phids, $add_phids);
+      // Apply the changes as adds and removes relative to the original state
+      // of the object when the dialog was rendered so that two users adding
+      // relationships at the same time don't race and overwrite one another.
+      $add_phids = array_diff($phids, $initial_phids);
+      $rem_phids = array_diff($initial_phids, $phids);
 
       if ($add_phids) {
         $dst_objects = id(new PhabricatorObjectQuery())
@@ -149,6 +151,7 @@ final class PhabricatorSearchRelationshipController
 
     return id(new PhabricatorObjectSelectorDialog())
       ->setUser($viewer)
+      ->setInitialPHIDs($initial_phids)
       ->setHandles($handles)
       ->setFilters($filters)
       ->setSelectedFilter('created')
