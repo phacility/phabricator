@@ -204,7 +204,10 @@ final class PhabricatorObjectSelectorDialog extends Phobject {
         'handles' => $handle_views,
       ));
 
-   return $dialog;
+    $dialog->setResizeX(true);
+    $dialog->setResizeY($results_id);
+
+    return $dialog;
   }
 
 }
