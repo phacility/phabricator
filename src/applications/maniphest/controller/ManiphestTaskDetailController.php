@@ -215,6 +215,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setIcon('fa-anchor')
         ->setSubmenu($task_submenu));
 
+    $relationship_list = PhabricatorObjectRelationshipList::newForObject(
+      $viewer,
+      $task);
+
+    $relationship_submenu = $relationship_list->newActionMenu();
+    if ($relationship_submenu) {
+      $curtain->addAction($relationship_submenu);
+    }
+
     $owner_phid = $task->getOwnerPHID();
     $author_phid = $task->getAuthorPHID();
     $handles = $viewer->loadHandles(array($owner_phid, $author_phid));

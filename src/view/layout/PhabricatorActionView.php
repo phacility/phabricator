@@ -70,6 +70,10 @@ final class PhabricatorActionView extends AphrontView {
     return $this;
   }
 
+  public function getName() {
+    return $this->name;
+  }
+
   public function setLabel($label) {
     $this->label = $label;
     return $this;
