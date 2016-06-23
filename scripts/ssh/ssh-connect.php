@@ -88,7 +88,22 @@ if ($as_device) {
   $arguments[] = AlmanacKeys::getKeyPath('device.key');
 }
 
+// Subversion passes us a host in the form "domain.com:port", which is not
+// valid for normal SSH but which we can parse into a valid "-p" flag.
+
+$passthru_args = $unconsumed_argv;
+$host = array_shift($passthru_args);
+$parts = explode(':', $host, 2);
+$host = $parts[0];
+
 $port = $args->getArg('port');
+
+if (!$port) {
+  if (count($parts) == 2) {
+    $port = $parts[1];
+  }
+}
+
 if ($port) {
   $pattern[] = '-p %d';
   $arguments[] = $port;
@@ -96,7 +111,9 @@ if ($port) {
 
 $pattern[] = '--';
 
-$passthru_args = $unconsumed_argv;
+$pattern[] = '%s';
+$arguments[] = $host;
+
 foreach ($passthru_args as $passthru_arg) {
   $pattern[] = '%s';
   $arguments[] = $passthru_arg;
