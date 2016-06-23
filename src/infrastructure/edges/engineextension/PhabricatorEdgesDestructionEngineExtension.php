@@ -28,10 +28,20 @@ final class PhabricatorEdgesDestructionEngineExtension
     foreach ($edges as $type => $type_edges) {
       foreach ($type_edges as $src => $src_edges) {
         foreach ($src_edges as $dst => $edge) {
-          $editor->removeEdge($edge['src'], $edge['type'], $edge['dst']);
+          try {
+            $editor->removeEdge($edge['src'], $edge['type'], $edge['dst']);
+          } catch (Exception $ex) {
+            // We can run into an exception while removing the edge if the
+            // edge type no longer exists. This prevents us from figuring out
+            // if there's an inverse type. Just ignore any errors here and
+            // continue, since the best we can do is clean up all the edges
+            // we still have information about. See T11201.
+            phlog($ex);
+          }
         }
       }
     }
+
     $editor->save();
   }
 
