@@ -21,7 +21,8 @@ final class DiffusionPreCommitContentRevisionAcceptedHeraldField
     }
 
     $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-    if ($revision->getStatus() != $status_accepted) {
+    $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
+    if (($revision->getStatus() != $status_accepted) && ($revision->getStatus() != $status_closed)) {
       return null;
     }
 
