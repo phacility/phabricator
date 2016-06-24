@@ -94,13 +94,13 @@ final class PhameBlogEditEngine
         ->setTransactionType(PhameBlogTransaction::TYPE_DESCRIPTION)
         ->setValue($object->getDescription()),
       id(new PhabricatorTextEditField())
-        ->setKey('domain')
-        ->setLabel(pht('Custom Domain'))
-        ->setDescription(pht('Blog domain name.'))
-        ->setConduitDescription(pht('Change the blog domain.'))
-        ->setConduitTypeDescription(pht('New blog domain.'))
-        ->setValue($object->getDomain())
-        ->setTransactionType(PhameBlogTransaction::TYPE_DOMAIN),
+        ->setKey('domainFullURI')
+        ->setLabel(pht('Full Domain URI'))
+        ->setDescription(pht('Blog full domain URI.'))
+        ->setConduitDescription(pht('Change the blog full domain URI.'))
+        ->setConduitTypeDescription(pht('New blog full domain URI.'))
+        ->setValue($object->getDomainFullURI())
+        ->setTransactionType(PhameBlogTransaction::TYPE_FULLDOMAIN),
       id(new PhabricatorTextEditField())
         ->setKey('parentSite')
         ->setLabel(pht('Parent Site'))

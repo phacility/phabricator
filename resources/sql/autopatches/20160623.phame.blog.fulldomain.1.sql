@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_phame.phame_blog
+  ADD domainFullURI VARCHAR(128) COLLATE {$COLLATE_TEXT};
