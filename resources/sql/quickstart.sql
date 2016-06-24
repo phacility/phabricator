@@ -269,6 +269,8 @@ CREATE TABLE `countdown` (
   `mailKey` binary(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_epoch` (`epoch`),
+  KEY `key_author` (`authorPHID`,`epoch`),
   KEY `key_space` (`spacePHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
@@ -713,6 +715,15 @@ CREATE TABLE `drydock_blueprint` (
   UNIQUE KEY `key_phid` (`phid`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `drydock_blueprintname_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `drydock_blueprinttransaction` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
@@ -823,6 +834,24 @@ CREATE TABLE `drydock_slotlock` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_lock` (`lockIndex`),
   KEY `key_owner` (`ownerPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `edge` (
+  `src` varbinary(64) NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varbinary(64) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  UNIQUE KEY `key_dst` (`dst`,`type`,`src`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_feed` /*!40100 DEFAULT CHARACTER SET {$CHARSET} COLLATE {$COLLATE_TEXT} */;
@@ -1149,10 +1178,12 @@ CREATE TABLE `harbormaster_buildartifact` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   `buildTargetPHID` varbinary(64) NOT NULL,
+  `isReleased` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_artifact` (`artifactType`,`artifactIndex`),
   UNIQUE KEY `key_phid` (`phid`),
-  KEY `key_garbagecollect` (`artifactType`,`dateCreated`)
+  KEY `key_garbagecollect` (`artifactType`,`dateCreated`),
+  KEY `key_target` (`buildTargetPHID`,`artifactType`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `harbormaster_buildcommand` (
@@ -1234,6 +1265,15 @@ CREATE TABLE `harbormaster_buildplan` (
   UNIQUE KEY `key_planautokey` (`planAutoKey`),
   KEY `key_status` (`planStatus`),
   KEY `key_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `harbormaster_buildplanname_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `harbormaster_buildplantransaction` (
@@ -1577,7 +1617,6 @@ CREATE TABLE `maniphest_task` (
   `phid` varbinary(64) NOT NULL,
   `authorPHID` varbinary(64) NOT NULL,
   `ownerPHID` varbinary(64) DEFAULT NULL,
-  `attached` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   `status` varchar(12) COLLATE {$COLLATE_TEXT} NOT NULL,
   `priority` int(10) unsigned NOT NULL,
   `title` longtext CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} NOT NULL,
@@ -1585,7 +1624,6 @@ CREATE TABLE `maniphest_task` (
   `description` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
-  `projectPHIDs` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   `mailKey` binary(20) NOT NULL,
   `ownerOrdering` varchar(64) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `originalEmailSource` varchar(255) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
@@ -1593,8 +1631,12 @@ CREATE TABLE `maniphest_task` (
   `viewPolicy` varbinary(64) NOT NULL,
   `editPolicy` varbinary(64) NOT NULL,
   `spacePHID` varbinary(64) DEFAULT NULL,
+  `properties` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `points` double DEFAULT NULL,
+  `bridgedObjectPHID` varbinary(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `key_bridgedobject` (`bridgedObjectPHID`),
   KEY `priority` (`priority`,`status`),
   KEY `status` (`status`),
   KEY `ownerPHID` (`ownerPHID`,`status`),
@@ -1657,7 +1699,7 @@ CREATE TABLE `patch_status` (
   PRIMARY KEY (`patch`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
-INSERT INTO `patch_status` VALUES ('phabricator:000.project.sql',1453226118,NULL),('phabricator:0000.legacy.sql',1453226118,NULL),('phabricator:001.maniphest_projects.sql',1453226118,NULL),('phabricator:002.oauth.sql',1453226118,NULL),('phabricator:003.more_oauth.sql',1453226118,NULL),('phabricator:004.daemonrepos.sql',1453226118,NULL),('phabricator:005.workers.sql',1453226118,NULL),('phabricator:006.repository.sql',1453226118,NULL),('phabricator:007.daemonlog.sql',1453226118,NULL),('phabricator:008.repoopt.sql',1453226118,NULL),('phabricator:009.repo_summary.sql',1453226118,NULL),('phabricator:010.herald.sql',1453226118,NULL),('phabricator:011.badcommit.sql',1453226118,NULL),('phabricator:012.dropphidtype.sql',1453226118,NULL),('phabricator:013.commitdetail.sql',1453226118,NULL),('phabricator:014.shortcuts.sql',1453226118,NULL),('phabricator:015.preferences.sql',1453226118,NULL),('phabricator:016.userrealnameindex.sql',1453226118,NULL),('phabricator:017.sessionkeys.sql',1453226118,NULL),('phabricator:018.owners.sql',1453226118,NULL),('phabricator:019.arcprojects.sql',1453226118,NULL),('phabricator:020.pathcapital.sql',1453226118,NULL),('phabricator:021.xhpastview.sql',1453226118,NULL),('phabricator:022.differentialcommit.sql',1453226118,NULL),('phabricator:023.dxkeys.sql',1453226118,NULL),('phabricator:024.mlistkeys.sql',1453226118,NULL),('phabricator:025.commentopt.sql',1453226118,NULL),('phabricator:026.diffpropkey.sql',1453226118,NULL),('phabricator:027.metamtakeys.sql',1453226118,NULL),('phabricator:028.systemagent.sql',1453226118,NULL),('phabricator:029.cursors.sql',1453226118,NULL),('phabricator:030.imagemacro.sql',1453226118,NULL),('phabricator:031.workerrace.sql',1453226118,NULL),('phabricator:032.viewtime.sql',1453226118,NULL),('phabricator:033.privtest.sql',1453226118,NULL),('phabricator:034.savedheader.sql',1453226118,NULL),('phabricator:035.proxyimage.sql',1453226118,NULL),('phabricator:036.mailkey.sql',1453226119,NULL),('phabricator:037.setuptest.sql',1453226119,NULL),('phabricator:038.admin.sql',1453226119,NULL),('phabricator:039.userlog.sql',1453226119,NULL),('phabricator:040.transform.sql',1453226119,NULL),('phabricator:041.heraldrepetition.sql',1453226119,NULL),('phabricator:042.commentmetadata.sql',1453226119,NULL),('phabricator:043.pastebin.sql',1453226119,NULL),('phabricator:044.countdown.sql',1453226119,NULL),('phabricator:045.timezone.sql',1453226119,NULL),('phabricator:046.conduittoken.sql',1453226119,NULL),('phabricator:047.projectstatus.sql',1453226119,NULL),('phabricator:048.relationshipkeys.sql',1453226119,NULL),('phabricator:049.projectowner.sql',1453226119,NULL),('phabricator:050.taskdenormal.sql',1453226119,NULL),('phabricator:051.projectfilter.sql',1453226119,NULL),('phabricator:052.pastelanguage.sql',1453226119,NULL),('phabricator:053.feed.sql',1453226119,NULL),('phabricator:054.subscribers.sql',1453226119,NULL),('phabricator:055.add_author_to_files.sql',1453226119,NULL),('phabricator:056.slowvote.sql',1453226119,NULL),('phabricator:057.parsecache.sql',1453226119,NULL),('phabricator:058.missingkeys.sql',1453226119,NULL),('phabricator:059.engines.php',1453226120,NULL),('phabricator:060.phriction.sql',1453226120,NULL),('phabricator:061.phrictioncontent.sql',1453226120,NULL),('phabricator:062.phrictionmenu.sql',1453226120,NULL),('phabricator:063.pasteforks.sql',1453226120,NULL),('phabricator:064.subprojects.sql',1453226120,NULL),('phabricator:065.sshkeys.sql',1453226120,NULL),('phabricator:066.phrictioncontent.sql',1453226120,NULL),('phabricator:067.preferences.sql',1453226120,NULL),('phabricator:068.maniphestauxiliarystorage.sql',1453226120,NULL),('phabricator:069.heraldxscript.sql',1453226120,NULL),('phabricator:070.differentialaux.sql',1453226120,NULL),('phabricator:071.contentsource.sql',1453226120,NULL),('phabricator:072.blamerevert.sql',1453226120,NULL),('phabricator:073.reposymbols.sql',1453226120,NULL),('phabricator:074.affectedpath.sql',1453226120,NULL),('phabricator:075.revisionhash.sql',1453226120,NULL),('phabricator:076.indexedlanguages.sql',1453226120,NULL),('phabricator:077.originalemail.sql',1453226120,NULL),('phabricator:078.nametoken.sql',1453226120,NULL),('phabricator:079.nametokenindex.php',1453226120,NULL),('phabricator:080.filekeys.sql',1453226120,NULL),('phabricator:081.filekeys.php',1453226120,NULL),('phabricator:082.xactionkey.sql',1453226120,NULL),('phabricator:083.dxviewtime.sql',1453226120,NULL),('phabricator:084.pasteauthorkey.sql',1453226120,NULL),('phabricator:085.packagecommitrelationship.sql',1453226120,NULL),('phabricator:086.formeraffil.sql',1453226120,NULL),('phabricator:087.phrictiondelete.sql',1453226120,NULL),('phabricator:088.audit.sql',1453226120,NULL),('phabricator:089.projectwiki.sql',1453226120,NULL),('phabricator:090.forceuniqueprojectnames.php',1453226120,NULL),('phabricator:091.uniqueslugkey.sql',1453226120,NULL),('phabricator:092.dropgithubnotification.sql',1453226120,NULL),('phabricator:093.gitremotes.php',1453226120,NULL),('phabricator:094.phrictioncolumn.sql',1453226120,NULL),('phabricator:095.directory.sql',1453226120,NULL),('phabricator:096.filename.sql',1453226120,NULL),('phabricator:097.heraldruletypes.sql',1453226120,NULL),('phabricator:098.heraldruletypemigration.php',1453226120,NULL),('phabricator:099.drydock.sql',1453226120,NULL),('phabricator:100.projectxaction.sql',1453226120,NULL),('phabricator:101.heraldruleapplied.sql',1453226120,NULL),('phabricator:102.heraldcleanup.php',1453226120,NULL),('phabricator:103.heraldedithistory.sql',1453226120,NULL),('phabricator:104.searchkey.sql',1453226120,NULL),('phabricator:105.mimetype.sql',1453226120,NULL),('phabricator:106.chatlog.sql',1453226120,NULL),('phabricator:107.oauthserver.sql',1453226120,NULL),('phabricator:108.oauthscope.sql',1453226120,NULL),('phabricator:109.oauthclientphidkey.sql',1453226120,NULL),('phabricator:110.commitaudit.sql',1453226121,NULL),('phabricator:111.commitauditmigration.php',1453226121,NULL),('phabricator:112.oauthaccesscoderedirecturi.sql',1453226121,NULL),('phabricator:113.lastreviewer.sql',1453226121,NULL),('phabricator:114.auditrequest.sql',1453226121,NULL),('phabricator:115.prepareutf8.sql',1453226121,NULL),('phabricator:116.utf8-backup-first-expect-wait.sql',1453226122,NULL),('phabricator:117.repositorydescription.php',1453226122,NULL),('phabricator:118.auditinline.sql',1453226122,NULL),('phabricator:119.filehash.sql',1453226123,NULL),('phabricator:120.noop.sql',1453226123,NULL),('phabricator:121.drydocklog.sql',1453226123,NULL),('phabricator:122.flag.sql',1453226123,NULL),('phabricator:123.heraldrulelog.sql',1453226123,NULL),('phabricator:124.subpriority.sql',1453226123,NULL),('phabricator:125.ipv6.sql',1453226123,NULL),('phabricator:126.edges.sql',1453226123,NULL),('phabricator:127.userkeybody.sql',1453226123,NULL),('phabricator:128.phabricatorcom.sql',1453226123,NULL),('phabricator:129.savedquery.sql',1453226123,NULL),('phabricator:130.denormalrevisionquery.sql',1453226123,NULL),('phabricator:131.migraterevisionquery.php',1453226123,NULL),('phabricator:132.phame.sql',1453226123,NULL),('phabricator:133.imagemacro.sql',1453226123,NULL),('phabricator:134.emptysearch.sql',1453226123,NULL),('phabricator:135.datecommitted.sql',1453226123,NULL),('phabricator:136.sex.sql',1453226123,NULL),('phabricator:137.auditmetadata.sql',1453226123,NULL),('phabricator:138.notification.sql',1453226123,NULL),('phabricator:20121209.pholioxactions.sql',1453226124,NULL),('phabricator:20121209.xmacroadd.sql',1453226124,NULL),('phabricator:20121209.xmacromigrate.php',1453226124,NULL),('phabricator:20121209.xmacromigratekey.sql',1453226124,NULL),('phabricator:20121220.generalcache.sql',1453226124,NULL),('phabricator:20121226.config.sql',1453226124,NULL),('phabricator:20130101.confxaction.sql',1453226124,NULL),('phabricator:20130102.metamtareceivedmailmessageidhash.sql',1453226124,NULL),('phabricator:20130103.filemetadata.sql',1453226124,NULL),('phabricator:20130111.conpherence.sql',1453226124,NULL),('phabricator:20130127.altheraldtranscript.sql',1453226124,NULL),('phabricator:20130131.conpherencepics.sql',1453226124,NULL),('phabricator:20130201.revisionunsubscribed.php',1453226124,NULL),('phabricator:20130201.revisionunsubscribed.sql',1453226124,NULL),('phabricator:20130214.chatlogchannel.sql',1453226124,NULL),('phabricator:20130214.chatlogchannelid.sql',1453226124,NULL),('phabricator:20130214.token.sql',1453226124,NULL),('phabricator:20130215.phabricatorfileaddttl.sql',1453226124,NULL),('phabricator:20130217.cachettl.sql',1453226124,NULL),('phabricator:20130218.longdaemon.sql',1453226124,NULL),('phabricator:20130218.updatechannelid.php',1453226124,NULL),('phabricator:20130219.commitsummary.sql',1453226124,NULL),('phabricator:20130219.commitsummarymig.php',1453226124,NULL),('phabricator:20130222.dropchannel.sql',1453226124,NULL),('phabricator:20130226.commitkey.sql',1453226124,NULL),('phabricator:20130304.lintauthor.sql',1453226124,NULL),('phabricator:20130310.xactionmeta.sql',1453226124,NULL),('phabricator:20130317.phrictionedge.sql',1453226124,NULL),('phabricator:20130319.conpherence.sql',1453226124,NULL),('phabricator:20130319.phabricatorfileexplicitupload.sql',1453226124,NULL),('phabricator:20130320.phlux.sql',1453226124,NULL),('phabricator:20130321.token.sql',1453226124,NULL),('phabricator:20130322.phortune.sql',1453226124,NULL),('phabricator:20130323.phortunepayment.sql',1453226124,NULL),('phabricator:20130324.phortuneproduct.sql',1453226124,NULL),('phabricator:20130330.phrequent.sql',1453226124,NULL),('phabricator:20130403.conpherencecache.sql',1453226124,NULL),('phabricator:20130403.conpherencecachemig.php',1453226124,NULL),('phabricator:20130409.commitdrev.php',1453226124,NULL),('phabricator:20130417.externalaccount.sql',1453226124,NULL),('phabricator:20130423.conpherenceindices.sql',1453226125,NULL),('phabricator:20130423.phortunepaymentrevised.sql',1453226125,NULL),('phabricator:20130423.updateexternalaccount.sql',1453226124,NULL),('phabricator:20130426.search_savedquery.sql',1453226125,NULL),('phabricator:20130502.countdownrevamp1.sql',1453226125,NULL),('phabricator:20130502.countdownrevamp2.php',1453226125,NULL),('phabricator:20130502.countdownrevamp3.sql',1453226125,NULL),('phabricator:20130507.releephrqmailkey.sql',1453226125,NULL),('phabricator:20130507.releephrqmailkeypop.php',1453226125,NULL),('phabricator:20130507.releephrqsimplifycols.sql',1453226125,NULL),('phabricator:20130508.releephtransactions.sql',1453226125,NULL),('phabricator:20130508.releephtransactionsmig.php',1453226125,NULL),('phabricator:20130508.search_namedquery.sql',1453226125,NULL),('phabricator:20130513.receviedmailstatus.sql',1453226125,NULL),('phabricator:20130519.diviner.sql',1453226125,NULL),('phabricator:20130521.dropconphimages.sql',1453226125,NULL),('phabricator:20130523.maniphest_owners.sql',1453226125,NULL),('phabricator:20130524.repoxactions.sql',1453226125,NULL),('phabricator:20130529.macroauthor.sql',1453226125,NULL),('phabricator:20130529.macroauthormig.php',1453226125,NULL),('phabricator:20130530.macrodatekey.sql',1453226125,NULL),('phabricator:20130530.pastekeys.sql',1453226125,NULL),('phabricator:20130530.sessionhash.php',1453226125,NULL),('phabricator:20130531.filekeys.sql',1453226125,NULL),('phabricator:20130602.morediviner.sql',1453226125,NULL),('phabricator:20130602.namedqueries.sql',1453226125,NULL),('phabricator:20130606.userxactions.sql',1453226125,NULL),('phabricator:20130607.xaccount.sql',1453226125,NULL),('phabricator:20130611.migrateoauth.php',1453226125,NULL),('phabricator:20130611.nukeldap.php',1453226125,NULL),('phabricator:20130613.authdb.sql',1453226125,NULL),('phabricator:20130619.authconf.php',1453226125,NULL),('phabricator:20130620.diffxactions.sql',1453226125,NULL),('phabricator:20130621.diffcommentphid.sql',1453226125,NULL),('phabricator:20130621.diffcommentphidmig.php',1453226125,NULL),('phabricator:20130621.diffcommentunphid.sql',1453226125,NULL),('phabricator:20130622.doorkeeper.sql',1453226125,NULL),('phabricator:20130628.legalpadv0.sql',1453226125,NULL),('phabricator:20130701.conduitlog.sql',1453226125,NULL),('phabricator:20130703.legalpaddocdenorm.php',1453226125,NULL),('phabricator:20130703.legalpaddocdenorm.sql',1453226125,NULL),('phabricator:20130709.droptimeline.sql',1453226125,NULL),('phabricator:20130709.legalpadsignature.sql',1453226125,NULL),('phabricator:20130711.pholioimageobsolete.php',1453226126,NULL),('phabricator:20130711.pholioimageobsolete.sql',1453226126,NULL),('phabricator:20130711.pholioimageobsolete2.sql',1453226126,NULL),('phabricator:20130711.trimrealnames.php',1453226125,NULL),('phabricator:20130714.votexactions.sql',1453226125,NULL),('phabricator:20130715.votecomments.php',1453226125,NULL),('phabricator:20130715.voteedges.sql',1453226125,NULL),('phabricator:20130716.archivememberlessprojects.php',1453226126,NULL),('phabricator:20130722.pholioreplace.sql',1453226126,NULL),('phabricator:20130723.taskstarttime.sql',1453226126,NULL),('phabricator:20130726.ponderxactions.sql',1453226126,NULL),('phabricator:20130727.ponderquestionstatus.sql',1453226126,NULL),('phabricator:20130728.ponderunique.php',1453226126,NULL),('phabricator:20130728.ponderuniquekey.sql',1453226126,NULL),('phabricator:20130728.ponderxcomment.php',1453226126,NULL),('phabricator:20130731.releephcutpointidentifier.sql',1453226126,NULL),('phabricator:20130731.releephproject.sql',1453226126,NULL),('phabricator:20130731.releephrepoid.sql',1453226126,NULL),('phabricator:20130801.pastexactions.php',1453226126,NULL),('phabricator:20130801.pastexactions.sql',1453226126,NULL),('phabricator:20130802.heraldphid.sql',1453226126,NULL),('phabricator:20130802.heraldphids.php',1453226126,NULL),('phabricator:20130802.heraldphidukey.sql',1453226126,NULL),('phabricator:20130802.heraldxactions.sql',1453226126,NULL),('phabricator:20130805.pasteedges.sql',1453226126,NULL),('phabricator:20130805.pastemailkey.sql',1453226126,NULL),('phabricator:20130805.pastemailkeypop.php',1453226126,NULL),('phabricator:20130814.usercustom.sql',1453226126,NULL),('phabricator:20130820.file-mailkey-populate.php',1453226126,NULL),('phabricator:20130820.filemailkey.sql',1453226126,NULL),('phabricator:20130820.filexactions.sql',1453226126,NULL),('phabricator:20130820.releephxactions.sql',1453226126,NULL),('phabricator:20130826.divinernode.sql',1453226126,NULL),('phabricator:20130912.maniphest.1.touch.sql',1453226126,NULL),('phabricator:20130912.maniphest.2.created.sql',1453226126,NULL),('phabricator:20130912.maniphest.3.nameindex.sql',1453226126,NULL),('phabricator:20130912.maniphest.4.fillindex.php',1453226126,NULL),('phabricator:20130913.maniphest.1.migratesearch.php',1453226126,NULL),('phabricator:20130914.usercustom.sql',1453226126,NULL),('phabricator:20130915.maniphestcustom.sql',1453226126,NULL),('phabricator:20130915.maniphestmigrate.php',1453226126,NULL),('phabricator:20130915.maniphestqdrop.sql',1453226126,NULL),('phabricator:20130919.mfieldconf.php',1453226126,NULL),('phabricator:20130920.repokeyspolicy.sql',1453226126,NULL),('phabricator:20130921.mtransactions.sql',1453226126,NULL),('phabricator:20130921.xmigratemaniphest.php',1453226126,NULL),('phabricator:20130923.mrename.sql',1453226126,NULL),('phabricator:20130924.mdraftkey.sql',1453226126,NULL),('phabricator:20130925.mpolicy.sql',1453226126,NULL),('phabricator:20130925.xpolicy.sql',1453226126,NULL),('phabricator:20130926.dcustom.sql',1453226126,NULL),('phabricator:20130926.dinkeys.sql',1453226126,NULL),('phabricator:20130926.dinline.php',1453226126,NULL),('phabricator:20130927.audiomacro.sql',1453226126,NULL),('phabricator:20130929.filepolicy.sql',1453226126,NULL),('phabricator:20131004.dxedgekey.sql',1453226126,NULL),('phabricator:20131004.dxreviewers.php',1453226126,NULL),('phabricator:20131006.hdisable.sql',1453226126,NULL),('phabricator:20131010.pstorage.sql',1453226126,NULL),('phabricator:20131015.cpolicy.sql',1453226126,NULL),('phabricator:20131020.col1.sql',1453226126,NULL),('phabricator:20131020.harbormaster.sql',1453226126,NULL),('phabricator:20131020.pcustom.sql',1453226126,NULL),('phabricator:20131020.pxaction.sql',1453226126,NULL),('phabricator:20131020.pxactionmig.php',1453226126,NULL),('phabricator:20131025.repopush.sql',1453226127,NULL),('phabricator:20131026.commitstatus.sql',1453226127,NULL),('phabricator:20131030.repostatusmessage.sql',1453226127,NULL),('phabricator:20131031.vcspassword.sql',1453226127,NULL),('phabricator:20131105.buildstep.sql',1453226127,NULL),('phabricator:20131106.diffphid.1.col.sql',1453226127,NULL),('phabricator:20131106.diffphid.2.mig.php',1453226127,NULL),('phabricator:20131106.diffphid.3.key.sql',1453226127,NULL),('phabricator:20131106.nuance-v0.sql',1453226127,NULL),('phabricator:20131107.buildlog.sql',1453226127,NULL),('phabricator:20131112.userverified.1.col.sql',1453226127,NULL),('phabricator:20131112.userverified.2.mig.php',1453226127,NULL),('phabricator:20131118.ownerorder.php',1453226127,NULL),('phabricator:20131119.passphrase.sql',1453226127,NULL),('phabricator:20131120.nuancesourcetype.sql',1453226127,NULL),('phabricator:20131121.passphraseedge.sql',1453226127,NULL),('phabricator:20131121.repocredentials.1.col.sql',1453226127,NULL),('phabricator:20131121.repocredentials.2.mig.php',1453226127,NULL),('phabricator:20131122.repomirror.sql',1453226127,NULL),('phabricator:20131123.drydockblueprintpolicy.sql',1453226127,NULL),('phabricator:20131129.drydockresourceblueprint.sql',1453226127,NULL),('phabricator:20131204.pushlog.sql',1453226127,NULL),('phabricator:20131205.buildsteporder.sql',1453226127,NULL),('phabricator:20131205.buildstepordermig.php',1453226127,NULL),('phabricator:20131205.buildtargets.sql',1453226127,NULL),('phabricator:20131206.phragment.sql',1453226127,NULL),('phabricator:20131206.phragmentnull.sql',1453226127,NULL),('phabricator:20131208.phragmentsnapshot.sql',1453226127,NULL),('phabricator:20131211.phragmentedges.sql',1453226127,NULL),('phabricator:20131217.pushlogphid.1.col.sql',1453226127,NULL),('phabricator:20131217.pushlogphid.2.mig.php',1453226127,NULL),('phabricator:20131217.pushlogphid.3.key.sql',1453226127,NULL),('phabricator:20131219.pxdrop.sql',1453226127,NULL),('phabricator:20131224.harbormanual.sql',1453226127,NULL),('phabricator:20131227.heraldobject.sql',1453226127,NULL),('phabricator:20131231.dropshortcut.sql',1453226127,NULL),('phabricator:20131302.maniphestvalue.sql',1453226124,NULL),('phabricator:20140104.harbormastercmd.sql',1453226127,NULL),('phabricator:20140106.macromailkey.1.sql',1453226127,NULL),('phabricator:20140106.macromailkey.2.php',1453226127,NULL),('phabricator:20140108.ddbpname.1.sql',1453226127,NULL),('phabricator:20140108.ddbpname.2.php',1453226127,NULL),('phabricator:20140109.ddxactions.sql',1453226127,NULL),('phabricator:20140109.projectcolumnsdates.sql',1453226127,NULL),('phabricator:20140113.legalpadsig.1.sql',1453226127,NULL),('phabricator:20140113.legalpadsig.2.php',1453226127,NULL),('phabricator:20140115.auth.1.id.sql',1453226128,NULL),('phabricator:20140115.auth.2.expires.sql',1453226128,NULL),('phabricator:20140115.auth.3.unlimit.php',1453226128,NULL),('phabricator:20140115.legalpadsigkey.sql',1453226128,NULL),('phabricator:20140116.reporefcursor.sql',1453226128,NULL),('phabricator:20140126.diff.1.parentrevisionid.sql',1453226128,NULL),('phabricator:20140126.diff.2.repositoryphid.sql',1453226128,NULL),('phabricator:20140130.dash.1.board.sql',1453226128,NULL),('phabricator:20140130.dash.2.panel.sql',1453226128,NULL),('phabricator:20140130.dash.3.boardxaction.sql',1453226128,NULL),('phabricator:20140130.dash.4.panelxaction.sql',1453226128,NULL),('phabricator:20140130.mail.1.retry.sql',1453226128,NULL),('phabricator:20140130.mail.2.next.sql',1453226128,NULL),('phabricator:20140201.gc.1.mailsent.sql',1453226128,NULL),('phabricator:20140201.gc.2.mailreceived.sql',1453226128,NULL),('phabricator:20140205.cal.1.rename.sql',1453226128,NULL),('phabricator:20140205.cal.2.phid-col.sql',1453226128,NULL),('phabricator:20140205.cal.3.phid-mig.php',1453226128,NULL),('phabricator:20140205.cal.4.phid-key.sql',1453226128,NULL),('phabricator:20140210.herald.rule-condition-mig.php',1453226128,NULL),('phabricator:20140210.projcfield.1.blurb.php',1453226128,NULL),('phabricator:20140210.projcfield.2.piccol.sql',1453226128,NULL),('phabricator:20140210.projcfield.3.picmig.sql',1453226128,NULL),('phabricator:20140210.projcfield.4.memmig.sql',1453226128,NULL),('phabricator:20140210.projcfield.5.dropprofile.sql',1453226128,NULL),('phabricator:20140211.dx.1.nullablechangesetid.sql',1453226128,NULL),('phabricator:20140211.dx.2.migcommenttext.php',1453226128,NULL),('phabricator:20140211.dx.3.migsubscriptions.sql',1453226128,NULL),('phabricator:20140211.dx.999.drop.relationships.sql',1453226128,NULL),('phabricator:20140212.dx.1.armageddon.php',1453226128,NULL),('phabricator:20140214.clean.1.legacycommentid.sql',1453226128,NULL),('phabricator:20140214.clean.2.dropcomment.sql',1453226128,NULL),('phabricator:20140214.clean.3.dropinline.sql',1453226128,NULL),('phabricator:20140218.differentialdraft.sql',1453226128,NULL),('phabricator:20140218.passwords.1.extend.sql',1453226128,NULL),('phabricator:20140218.passwords.2.prefix.sql',1453226128,NULL),('phabricator:20140218.passwords.3.vcsextend.sql',1453226128,NULL),('phabricator:20140218.passwords.4.vcs.php',1453226128,NULL),('phabricator:20140223.bigutf8scratch.sql',1453226128,NULL),('phabricator:20140224.dxclean.1.datecommitted.sql',1453226128,NULL),('phabricator:20140226.dxcustom.1.fielddata.php',1453226128,NULL),('phabricator:20140226.dxcustom.99.drop.sql',1453226128,NULL),('phabricator:20140228.dxcomment.1.sql',1453226128,NULL),('phabricator:20140305.diviner.1.slugcol.sql',1453226128,NULL),('phabricator:20140305.diviner.2.slugkey.sql',1453226128,NULL),('phabricator:20140311.mdroplegacy.sql',1453226128,NULL),('phabricator:20140314.projectcolumn.1.statuscol.sql',1453226128,NULL),('phabricator:20140314.projectcolumn.2.statuskey.sql',1453226128,NULL),('phabricator:20140317.mupdatedkey.sql',1453226128,NULL),('phabricator:20140321.harbor.1.bxaction.sql',1453226128,NULL),('phabricator:20140321.mstatus.1.col.sql',1453226128,NULL),('phabricator:20140321.mstatus.2.mig.php',1453226128,NULL),('phabricator:20140323.harbor.1.renames.php',1453226128,NULL),('phabricator:20140323.harbor.2.message.sql',1453226128,NULL),('phabricator:20140325.push.1.event.sql',1453226128,NULL),('phabricator:20140325.push.2.eventphid.sql',1453226128,NULL),('phabricator:20140325.push.3.groups.php',1453226128,NULL),('phabricator:20140325.push.4.prune.sql',1453226128,NULL),('phabricator:20140326.project.1.colxaction.sql',1453226128,NULL),('phabricator:20140328.releeph.1.productxaction.sql',1453226128,NULL),('phabricator:20140330.flagtext.sql',1453226128,NULL),('phabricator:20140402.actionlog.sql',1453226128,NULL),('phabricator:20140410.accountsecret.1.sql',1453226128,NULL),('phabricator:20140410.accountsecret.2.php',1453226128,NULL),('phabricator:20140416.harbor.1.sql',1453226128,NULL),('phabricator:20140420.rel.1.objectphid.sql',1453226128,NULL),('phabricator:20140420.rel.2.objectmig.php',1453226128,NULL),('phabricator:20140421.slowvotecolumnsisclosed.sql',1453226128,NULL),('phabricator:20140423.session.1.hisec.sql',1453226128,NULL),('phabricator:20140427.mfactor.1.sql',1453226128,NULL),('phabricator:20140430.auth.1.partial.sql',1453226128,NULL),('phabricator:20140430.dash.1.paneltype.sql',1453226128,NULL),('phabricator:20140430.dash.2.edge.sql',1453226128,NULL),('phabricator:20140501.passphraselockcredential.sql',1453226128,NULL),('phabricator:20140501.remove.1.dlog.sql',1453226128,NULL),('phabricator:20140507.smstable.sql',1453226128,NULL),('phabricator:20140509.coverage.1.sql',1453226128,NULL),('phabricator:20140509.dashboardlayoutconfig.sql',1453226128,NULL),('phabricator:20140512.dparents.1.sql',1453226128,NULL),('phabricator:20140514.harbormasterbuildabletransaction.sql',1453226128,NULL),('phabricator:20140514.pholiomockclose.sql',1453226129,NULL),('phabricator:20140515.trust-emails.sql',1453226129,NULL),('phabricator:20140517.dxbinarycache.sql',1453226129,NULL),('phabricator:20140518.dxmorebinarycache.sql',1453226129,NULL),('phabricator:20140519.dashboardinstall.sql',1453226129,NULL),('phabricator:20140520.authtemptoken.sql',1453226129,NULL),('phabricator:20140521.projectslug.1.create.sql',1453226129,NULL),('phabricator:20140521.projectslug.2.mig.php',1453226129,NULL),('phabricator:20140522.projecticon.sql',1453226129,NULL),('phabricator:20140524.auth.mfa.cache.sql',1453226129,NULL),('phabricator:20140525.hunkmodern.sql',1453226129,NULL),('phabricator:20140615.pholioedit.1.sql',1453226129,NULL),('phabricator:20140615.pholioedit.2.sql',1453226129,NULL),('phabricator:20140617.daemon.explicit-argv.sql',1453226129,NULL),('phabricator:20140617.daemonlog.sql',1453226129,NULL),('phabricator:20140624.projcolor.1.sql',1453226129,NULL),('phabricator:20140624.projcolor.2.sql',1453226129,NULL),('phabricator:20140629.dasharchive.1.sql',1453226129,NULL),('phabricator:20140629.legalsig.1.sql',1453226129,NULL),('phabricator:20140629.legalsig.2.php',1453226129,NULL),('phabricator:20140701.legalexemption.1.sql',1453226129,NULL),('phabricator:20140701.legalexemption.2.sql',1453226129,NULL),('phabricator:20140703.legalcorp.1.sql',1453226129,NULL),('phabricator:20140703.legalcorp.2.sql',1453226129,NULL),('phabricator:20140703.legalcorp.3.sql',1453226129,NULL),('phabricator:20140703.legalcorp.4.sql',1453226129,NULL),('phabricator:20140703.legalcorp.5.sql',1453226129,NULL),('phabricator:20140704.harbormasterstep.1.sql',1453226129,NULL),('phabricator:20140704.harbormasterstep.2.sql',1453226129,NULL),('phabricator:20140704.legalpreamble.1.sql',1453226129,NULL),('phabricator:20140706.harbormasterdepend.1.php',1453226129,NULL),('phabricator:20140706.pedge.1.sql',1453226129,NULL),('phabricator:20140711.pnames.1.sql',1453226129,NULL),('phabricator:20140711.pnames.2.php',1453226129,NULL),('phabricator:20140711.workerpriority.sql',1453226129,NULL),('phabricator:20140712.projcoluniq.sql',1453226129,NULL),('phabricator:20140721.phortune.1.cart.sql',1453226129,NULL),('phabricator:20140721.phortune.2.purchase.sql',1453226129,NULL),('phabricator:20140721.phortune.3.charge.sql',1453226129,NULL),('phabricator:20140721.phortune.4.cartstatus.sql',1453226129,NULL),('phabricator:20140721.phortune.5.cstatusdefault.sql',1453226129,NULL),('phabricator:20140721.phortune.6.onetimecharge.sql',1453226129,NULL),('phabricator:20140721.phortune.7.nullmethod.sql',1453226129,NULL),('phabricator:20140722.appname.php',1453226129,NULL),('phabricator:20140722.audit.1.xactions.sql',1453226129,NULL),('phabricator:20140722.audit.2.comments.sql',1453226129,NULL),('phabricator:20140722.audit.3.miginlines.php',1453226129,NULL),('phabricator:20140722.audit.4.migtext.php',1453226129,NULL),('phabricator:20140722.renameauth.php',1453226129,NULL),('phabricator:20140723.apprenamexaction.sql',1453226129,NULL),('phabricator:20140725.audit.1.migxactions.php',1453226129,NULL),('phabricator:20140731.audit.1.subscribers.php',1453226129,NULL),('phabricator:20140731.cancdn.php',1453226129,NULL),('phabricator:20140731.harbormasterstepdesc.sql',1453226129,NULL),('phabricator:20140805.boardcol.1.sql',1453226129,NULL),('phabricator:20140805.boardcol.2.php',1453226129,NULL),('phabricator:20140807.harbormastertargettime.sql',1453226129,NULL),('phabricator:20140808.boardprop.1.sql',1453226129,NULL),('phabricator:20140808.boardprop.2.sql',1453226129,NULL),('phabricator:20140808.boardprop.3.php',1453226129,NULL),('phabricator:20140811.blob.1.sql',1453226129,NULL),('phabricator:20140811.blob.2.sql',1453226129,NULL),('phabricator:20140812.projkey.1.sql',1453226129,NULL),('phabricator:20140812.projkey.2.sql',1453226129,NULL),('phabricator:20140814.passphrasecredentialconduit.sql',1453226129,NULL),('phabricator:20140815.cancdncase.php',1453226129,NULL),('phabricator:20140818.harbormasterindex.1.sql',1453226129,NULL),('phabricator:20140821.harbormasterbuildgen.1.sql',1453226129,NULL),('phabricator:20140822.daemonenvhash.sql',1453226129,NULL),('phabricator:20140902.almanacdevice.1.sql',1453226129,NULL),('phabricator:20140904.macroattach.php',1453226129,NULL),('phabricator:20140911.fund.1.initiative.sql',1453226129,NULL),('phabricator:20140911.fund.2.xaction.sql',1453226129,NULL),('phabricator:20140911.fund.3.edge.sql',1453226129,NULL),('phabricator:20140911.fund.4.backer.sql',1453226129,NULL),('phabricator:20140911.fund.5.backxaction.sql',1453226129,NULL),('phabricator:20140914.betaproto.php',1453226129,NULL),('phabricator:20140917.project.canlock.sql',1453226129,NULL),('phabricator:20140918.schema.1.dropaudit.sql',1453226129,NULL),('phabricator:20140918.schema.2.dropauditinline.sql',1453226129,NULL),('phabricator:20140918.schema.3.wipecache.sql',1453226129,NULL),('phabricator:20140918.schema.4.cachetype.sql',1453226129,NULL),('phabricator:20140918.schema.5.slowvote.sql',1453226129,NULL),('phabricator:20140919.schema.01.calstatus.sql',1453226129,NULL),('phabricator:20140919.schema.02.calname.sql',1453226129,NULL),('phabricator:20140919.schema.03.dropaux.sql',1453226129,NULL),('phabricator:20140919.schema.04.droptaskproj.sql',1453226129,NULL),('phabricator:20140926.schema.01.droprelev.sql',1453226129,NULL),('phabricator:20140926.schema.02.droprelreqev.sql',1453226129,NULL),('phabricator:20140926.schema.03.dropldapinfo.sql',1453226129,NULL),('phabricator:20140926.schema.04.dropoauthinfo.sql',1453226129,NULL),('phabricator:20140926.schema.05.dropprojaffil.sql',1453226129,NULL),('phabricator:20140926.schema.06.dropsubproject.sql',1453226129,NULL),('phabricator:20140926.schema.07.droppondcom.sql',1453226129,NULL),('phabricator:20140927.schema.01.dropsearchq.sql',1453226129,NULL),('phabricator:20140927.schema.02.pholio1.sql',1453226129,NULL),('phabricator:20140927.schema.03.pholio2.sql',1453226129,NULL),('phabricator:20140927.schema.04.pholio3.sql',1453226129,NULL),('phabricator:20140927.schema.05.phragment1.sql',1453226130,NULL),('phabricator:20140927.schema.06.releeph1.sql',1453226130,NULL),('phabricator:20141001.schema.01.version.sql',1453226130,NULL),('phabricator:20141001.schema.02.taskmail.sql',1453226130,NULL),('phabricator:20141002.schema.01.liskcounter.sql',1453226130,NULL),('phabricator:20141002.schema.02.draftnull.sql',1453226130,NULL),('phabricator:20141004.currency.01.sql',1453226130,NULL),('phabricator:20141004.currency.02.sql',1453226130,NULL),('phabricator:20141004.currency.03.sql',1453226130,NULL),('phabricator:20141004.currency.04.sql',1453226130,NULL),('phabricator:20141004.currency.05.sql',1453226130,NULL),('phabricator:20141004.currency.06.sql',1453226130,NULL),('phabricator:20141004.harborliskcounter.sql',1453226130,NULL),('phabricator:20141005.phortuneproduct.sql',1453226130,NULL),('phabricator:20141006.phortunecart.sql',1453226130,NULL),('phabricator:20141006.phortunemerchant.sql',1453226130,NULL),('phabricator:20141006.phortunemerchantx.sql',1453226130,NULL),('phabricator:20141007.fundmerchant.sql',1453226130,NULL),('phabricator:20141007.fundrisks.sql',1453226130,NULL),('phabricator:20141007.fundtotal.sql',1453226130,NULL),('phabricator:20141007.phortunecartmerchant.sql',1453226130,NULL),('phabricator:20141007.phortunecharge.sql',1453226130,NULL),('phabricator:20141007.phortunepayment.sql',1453226130,NULL),('phabricator:20141007.phortuneprovider.sql',1453226130,NULL),('phabricator:20141007.phortuneproviderx.sql',1453226130,NULL),('phabricator:20141008.phortunemerchdesc.sql',1453226130,NULL),('phabricator:20141008.phortuneprovdis.sql',1453226130,NULL),('phabricator:20141008.phortunerefund.sql',1453226130,NULL),('phabricator:20141010.fundmailkey.sql',1453226130,NULL),('phabricator:20141011.phortunemerchedit.sql',1453226130,NULL),('phabricator:20141012.phortunecartxaction.sql',1453226130,NULL),('phabricator:20141013.phortunecartkey.sql',1453226130,NULL),('phabricator:20141016.almanac.device.sql',1453226130,NULL),('phabricator:20141016.almanac.dxaction.sql',1453226130,NULL),('phabricator:20141016.almanac.interface.sql',1453226130,NULL),('phabricator:20141016.almanac.network.sql',1453226130,NULL),('phabricator:20141016.almanac.nxaction.sql',1453226130,NULL),('phabricator:20141016.almanac.service.sql',1453226130,NULL),('phabricator:20141016.almanac.sxaction.sql',1453226130,NULL),('phabricator:20141017.almanac.binding.sql',1453226130,NULL),('phabricator:20141017.almanac.bxaction.sql',1453226130,NULL),('phabricator:20141025.phriction.1.xaction.sql',1453226130,NULL),('phabricator:20141025.phriction.2.xaction.sql',1453226130,NULL),('phabricator:20141025.phriction.mailkey.sql',1453226130,NULL),('phabricator:20141103.almanac.1.delprop.sql',1453226130,NULL),('phabricator:20141103.almanac.2.addprop.sql',1453226131,NULL),('phabricator:20141104.almanac.3.edge.sql',1453226131,NULL),('phabricator:20141105.ssh.1.rename.sql',1453226131,NULL),('phabricator:20141106.dropold.sql',1453226131,NULL),('phabricator:20141106.uniqdrafts.php',1453226131,NULL),('phabricator:20141107.phriction.policy.1.sql',1453226131,NULL),('phabricator:20141107.phriction.policy.2.php',1453226131,NULL),('phabricator:20141107.phriction.popkeys.php',1453226131,NULL),('phabricator:20141107.ssh.1.colname.sql',1453226131,NULL),('phabricator:20141107.ssh.2.keyhash.sql',1453226131,NULL),('phabricator:20141107.ssh.3.keyindex.sql',1453226131,NULL),('phabricator:20141107.ssh.4.keymig.php',1453226131,NULL),('phabricator:20141107.ssh.5.indexnull.sql',1453226131,NULL),('phabricator:20141107.ssh.6.indexkey.sql',1453226131,NULL),('phabricator:20141107.ssh.7.colnull.sql',1453226131,NULL),('phabricator:20141113.auditdupes.php',1453226131,NULL),('phabricator:20141118.diffxaction.sql',1453226131,NULL),('phabricator:20141119.commitpedge.sql',1453226131,NULL),('phabricator:20141119.differential.diff.policy.sql',1453226131,NULL),('phabricator:20141119.sshtrust.sql',1453226131,NULL),('phabricator:20141123.taskpriority.1.sql',1453226131,NULL),('phabricator:20141123.taskpriority.2.sql',1453226131,NULL),('phabricator:20141210.maniphestsubscribersmig.1.sql',1453226131,NULL),('phabricator:20141210.maniphestsubscribersmig.2.sql',1453226131,NULL),('phabricator:20141210.reposervice.sql',1453226131,NULL),('phabricator:20141212.conduittoken.sql',1453226131,NULL),('phabricator:20141215.almanacservicetype.sql',1453226131,NULL),('phabricator:20141217.almanacdevicelock.sql',1453226131,NULL),('phabricator:20141217.almanaclock.sql',1453226131,NULL),('phabricator:20141218.maniphestcctxn.php',1453226131,NULL),('phabricator:20141222.maniphestprojtxn.php',1453226131,NULL),('phabricator:20141223.daemonloguser.sql',1453226131,NULL),('phabricator:20141223.daemonobjectphid.sql',1453226131,NULL),('phabricator:20141230.pasteeditpolicycolumn.sql',1453226131,NULL),('phabricator:20141230.pasteeditpolicyexisting.sql',1453226131,NULL),('phabricator:20150102.policyname.php',1453226131,NULL),('phabricator:20150102.tasksubscriber.sql',1453226131,NULL),('phabricator:20150105.conpsearch.sql',1453226131,NULL),('phabricator:20150114.oauthserver.client.policy.sql',1453226131,NULL),('phabricator:20150115.applicationemails.sql',1453226131,NULL),('phabricator:20150115.trigger.1.sql',1453226131,NULL),('phabricator:20150115.trigger.2.sql',1453226131,NULL),('phabricator:20150116.maniphestapplicationemails.php',1453226131,NULL),('phabricator:20150120.maniphestdefaultauthor.php',1453226131,NULL),('phabricator:20150124.subs.1.sql',1453226131,NULL),('phabricator:20150129.pastefileapplicationemails.php',1453226131,NULL),('phabricator:20150130.phortune.1.subphid.sql',1453226131,NULL),('phabricator:20150130.phortune.2.subkey.sql',1453226131,NULL),('phabricator:20150131.phortune.1.defaultpayment.sql',1453226131,NULL),('phabricator:20150205.authprovider.autologin.sql',1453226131,NULL),('phabricator:20150205.daemonenv.sql',1453226131,NULL),('phabricator:20150209.invite.sql',1453226131,NULL),('phabricator:20150209.oauthclient.trust.sql',1453226131,NULL),('phabricator:20150210.invitephid.sql',1453226131,NULL),('phabricator:20150212.legalpad.session.1.sql',1453226131,NULL),('phabricator:20150212.legalpad.session.2.sql',1453226131,NULL),('phabricator:20150219.scratch.nonmutable.sql',1453226131,NULL),('phabricator:20150223.daemon.1.id.sql',1453226131,NULL),('phabricator:20150223.daemon.2.idlegacy.sql',1453226131,NULL),('phabricator:20150223.daemon.3.idkey.sql',1453226131,NULL),('phabricator:20150312.filechunk.1.sql',1453226131,NULL),('phabricator:20150312.filechunk.2.sql',1453226131,NULL),('phabricator:20150312.filechunk.3.sql',1453226131,NULL),('phabricator:20150317.conpherence.isroom.1.sql',1453226131,NULL),('phabricator:20150317.conpherence.isroom.2.sql',1453226131,NULL),('phabricator:20150317.conpherence.policy.sql',1453226131,NULL),('phabricator:20150410.nukeruleedit.sql',1453226131,NULL),('phabricator:20150420.invoice.1.sql',1453226131,NULL),('phabricator:20150420.invoice.2.sql',1453226131,NULL),('phabricator:20150425.isclosed.sql',1453226131,NULL),('phabricator:20150427.calendar.1.edge.sql',1453226131,NULL),('phabricator:20150427.calendar.1.xaction.sql',1453226131,NULL),('phabricator:20150427.calendar.2.xaction.sql',1453226131,NULL),('phabricator:20150428.calendar.1.iscancelled.sql',1453226131,NULL),('phabricator:20150428.calendar.1.name.sql',1453226131,NULL),('phabricator:20150429.calendar.1.invitee.sql',1453226131,NULL),('phabricator:20150430.calendar.1.policies.sql',1453226132,NULL),('phabricator:20150430.multimeter.1.sql',1453226132,NULL),('phabricator:20150430.multimeter.2.host.sql',1453226132,NULL),('phabricator:20150430.multimeter.3.viewer.sql',1453226132,NULL),('phabricator:20150430.multimeter.4.context.sql',1453226132,NULL),('phabricator:20150430.multimeter.5.label.sql',1453226132,NULL),('phabricator:20150501.calendar.1.reply.sql',1453226132,NULL),('phabricator:20150501.calendar.2.reply.php',1453226132,NULL),('phabricator:20150501.conpherencepics.sql',1453226132,NULL),('phabricator:20150503.repositorysymbols.1.sql',1453226132,NULL),('phabricator:20150503.repositorysymbols.2.php',1453226132,NULL),('phabricator:20150503.repositorysymbols.3.sql',1453226132,NULL),('phabricator:20150504.symbolsproject.1.php',1453226132,NULL),('phabricator:20150504.symbolsproject.2.sql',1453226132,NULL),('phabricator:20150506.calendarunnamedevents.1.php',1453226132,NULL),('phabricator:20150507.calendar.1.isallday.sql',1453226132,NULL),('phabricator:20150513.user.cache.1.sql',1453226132,NULL),('phabricator:20150514.calendar.status.sql',1453226132,NULL),('phabricator:20150514.phame.blog.xaction.sql',1453226132,NULL),('phabricator:20150514.user.cache.2.sql',1453226132,NULL),('phabricator:20150515.phame.post.xaction.sql',1453226132,NULL),('phabricator:20150515.project.mailkey.1.sql',1453226132,NULL),('phabricator:20150515.project.mailkey.2.php',1453226132,NULL),('phabricator:20150519.calendar.calendaricon.sql',1453226132,NULL),('phabricator:20150521.releephrepository.sql',1453226132,NULL),('phabricator:20150525.diff.hidden.1.sql',1453226132,NULL),('phabricator:20150526.owners.mailkey.1.sql',1453226132,NULL),('phabricator:20150526.owners.mailkey.2.php',1453226132,NULL),('phabricator:20150526.owners.xaction.sql',1453226132,NULL),('phabricator:20150527.calendar.recurringevents.sql',1453226132,NULL),('phabricator:20150601.spaces.1.namespace.sql',1453226132,NULL),('phabricator:20150601.spaces.2.xaction.sql',1453226132,NULL),('phabricator:20150602.mlist.1.sql',1453226132,NULL),('phabricator:20150602.mlist.2.php',1453226132,NULL),('phabricator:20150604.spaces.1.sql',1453226132,NULL),('phabricator:20150605.diviner.edges.sql',1453226132,NULL),('phabricator:20150605.diviner.editPolicy.sql',1453226132,NULL),('phabricator:20150605.diviner.xaction.sql',1453226132,NULL),('phabricator:20150606.mlist.1.php',1453226132,NULL),('phabricator:20150609.inline.sql',1453226132,NULL),('phabricator:20150609.spaces.1.pholio.sql',1453226132,NULL),('phabricator:20150609.spaces.2.maniphest.sql',1453226132,NULL),('phabricator:20150610.spaces.1.desc.sql',1453226132,NULL),('phabricator:20150610.spaces.2.edge.sql',1453226132,NULL),('phabricator:20150610.spaces.3.archive.sql',1453226132,NULL),('phabricator:20150611.spaces.1.mailxaction.sql',1453226132,NULL),('phabricator:20150611.spaces.2.appmail.sql',1453226132,NULL),('phabricator:20150616.divinerrepository.sql',1453226132,NULL),('phabricator:20150617.harbor.1.lint.sql',1453226132,NULL),('phabricator:20150617.harbor.2.unit.sql',1453226132,NULL),('phabricator:20150618.harbor.1.planauto.sql',1453226132,NULL),('phabricator:20150618.harbor.2.stepauto.sql',1453226132,NULL),('phabricator:20150618.harbor.3.buildauto.sql',1453226132,NULL),('phabricator:20150619.conpherencerooms.1.sql',1453226132,NULL),('phabricator:20150619.conpherencerooms.2.sql',1453226132,NULL),('phabricator:20150619.conpherencerooms.3.sql',1453226132,NULL),('phabricator:20150621.phrase.1.sql',1453226132,NULL),('phabricator:20150621.phrase.2.sql',1453226132,NULL),('phabricator:20150622.bulk.1.job.sql',1453226132,NULL),('phabricator:20150622.bulk.2.task.sql',1453226132,NULL),('phabricator:20150622.bulk.3.xaction.sql',1453226132,NULL),('phabricator:20150622.bulk.4.edge.sql',1453226132,NULL),('phabricator:20150622.metamta.1.phid-col.sql',1453226132,NULL),('phabricator:20150622.metamta.2.phid-mig.php',1453226132,NULL),('phabricator:20150622.metamta.3.phid-key.sql',1453226132,NULL),('phabricator:20150622.metamta.4.actor-phid-col.sql',1453226132,NULL),('phabricator:20150622.metamta.5.actor-phid-mig.php',1453226132,NULL),('phabricator:20150622.metamta.6.actor-phid-key.sql',1453226132,NULL),('phabricator:20150624.spaces.1.repo.sql',1453226132,NULL),('phabricator:20150626.spaces.1.calendar.sql',1453226132,NULL),('phabricator:20150630.herald.1.sql',1453226132,NULL),('phabricator:20150630.herald.2.sql',1453226132,NULL),('phabricator:20150701.herald.1.sql',1453226132,NULL),('phabricator:20150701.herald.2.sql',1453226132,NULL),('phabricator:20150702.spaces.1.slowvote.sql',1453226133,NULL),('phabricator:20150706.herald.1.sql',1453226133,NULL),('phabricator:20150707.herald.1.sql',1453226133,NULL),('phabricator:20150708.arcanistproject.sql',1453226133,NULL),('phabricator:20150708.herald.1.sql',1453226133,NULL),('phabricator:20150708.herald.2.sql',1453226133,NULL),('phabricator:20150708.herald.3.sql',1453226133,NULL),('phabricator:20150712.badges.1.sql',1453226133,NULL),('phabricator:20150714.spaces.countdown.1.sql',1453226133,NULL),('phabricator:20150717.herald.1.sql',1453226133,NULL),('phabricator:20150719.countdown.1.sql',1453226133,NULL),('phabricator:20150719.countdown.2.sql',1453226133,NULL),('phabricator:20150719.countdown.3.sql',1453226133,NULL),('phabricator:20150721.phurl.1.url.sql',1453226133,NULL),('phabricator:20150721.phurl.2.xaction.sql',1453226133,NULL),('phabricator:20150721.phurl.3.xactioncomment.sql',1453226133,NULL),('phabricator:20150721.phurl.4.url.sql',1453226133,NULL),('phabricator:20150721.phurl.5.edge.sql',1453226133,NULL),('phabricator:20150721.phurl.6.alias.sql',1453226133,NULL),('phabricator:20150721.phurl.7.authorphid.sql',1453226133,NULL),('phabricator:20150722.dashboard.1.sql',1453226133,NULL),('phabricator:20150722.dashboard.2.sql',1453226133,NULL),('phabricator:20150723.countdown.1.sql',1453226133,NULL),('phabricator:20150724.badges.comments.1.sql',1453226133,NULL),('phabricator:20150724.countdown.comments.1.sql',1453226133,NULL),('phabricator:20150725.badges.mailkey.1.sql',1453226133,NULL),('phabricator:20150725.badges.mailkey.2.php',1453226133,NULL),('phabricator:20150725.badges.viewpolicy.3.sql',1453226133,NULL),('phabricator:20150725.countdown.mailkey.1.sql',1453226133,NULL),('phabricator:20150725.countdown.mailkey.2.php',1453226133,NULL),('phabricator:20150725.slowvote.mailkey.1.sql',1453226133,NULL),('phabricator:20150725.slowvote.mailkey.2.php',1453226133,NULL),('phabricator:20150727.heraldaction.1.sql',1453226133,NULL),('phabricator:20150730.herald.1.sql',1453226133,NULL),('phabricator:20150730.herald.2.sql',1453226133,NULL),('phabricator:20150730.herald.3.sql',1453226133,NULL),('phabricator:20150730.herald.4.sql',1453226133,NULL),('phabricator:20150730.herald.5.sql',1453226133,NULL),('phabricator:20150730.herald.6.sql',1453226133,NULL),('phabricator:20150730.herald.7.sql',1453226133,NULL),('phabricator:20150803.herald.1.sql',1453226133,NULL),('phabricator:20150803.herald.2.sql',1453226133,NULL),('phabricator:20150804.ponder.answer.mailkey.1.sql',1453226133,NULL),('phabricator:20150804.ponder.answer.mailkey.2.php',1453226133,NULL),('phabricator:20150804.ponder.question.1.sql',1453226133,NULL),('phabricator:20150804.ponder.question.2.sql',1453226133,NULL),('phabricator:20150804.ponder.question.3.sql',1453226133,NULL),('phabricator:20150804.ponder.spaces.4.sql',1453226133,NULL),('phabricator:20150805.paste.status.1.sql',1453226133,NULL),('phabricator:20150805.paste.status.2.sql',1453226133,NULL),('phabricator:20150806.ponder.answer.1.sql',1453226133,NULL),('phabricator:20150806.ponder.editpolicy.2.sql',1453226133,NULL),('phabricator:20150806.ponder.status.1.sql',1453226133,NULL),('phabricator:20150806.ponder.status.2.sql',1453226133,NULL),('phabricator:20150806.ponder.status.3.sql',1453226133,NULL),('phabricator:20150808.ponder.vote.1.sql',1453226133,NULL),('phabricator:20150808.ponder.vote.2.sql',1453226133,NULL),('phabricator:20150812.ponder.answer.1.sql',1453226133,NULL),('phabricator:20150812.ponder.answer.2.sql',1453226133,NULL),('phabricator:20150814.harbormater.artifact.phid.sql',1453226133,NULL),('phabricator:20150815.owners.status.1.sql',1453226133,NULL),('phabricator:20150815.owners.status.2.sql',1453226133,NULL),('phabricator:20150823.nuance.queue.1.sql',1453226133,NULL),('phabricator:20150823.nuance.queue.2.sql',1453226133,NULL),('phabricator:20150823.nuance.queue.3.sql',1453226133,NULL),('phabricator:20150823.nuance.queue.4.sql',1453226133,NULL),('phabricator:20150828.ponder.wiki.1.sql',1453226133,NULL),('phabricator:20150829.ponder.dupe.1.sql',1453226133,NULL),('phabricator:20150904.herald.1.sql',1453226133,NULL),('phabricator:20150906.mailinglist.sql',1453226133,NULL),('phabricator:20150910.owners.custom.1.sql',1453226133,NULL),('phabricator:20150916.drydock.slotlocks.1.sql',1453226133,NULL),('phabricator:20150922.drydock.commands.1.sql',1453226133,NULL),('phabricator:20150923.drydock.resourceid.1.sql',1453226133,NULL),('phabricator:20150923.drydock.resourceid.2.sql',1453226133,NULL),('phabricator:20150923.drydock.resourceid.3.sql',1453226133,NULL),('phabricator:20150923.drydock.taskid.1.sql',1453226133,NULL),('phabricator:20150924.drydock.disable.1.sql',1453226133,NULL),('phabricator:20150924.drydock.status.1.sql',1453226133,NULL),('phabricator:20150928.drydock.rexpire.1.sql',1453226133,NULL),('phabricator:20150930.drydock.log.1.sql',1453226134,NULL),('phabricator:20151001.drydock.rname.1.sql',1453226134,NULL),('phabricator:20151002.dashboard.status.1.sql',1453226134,NULL),('phabricator:20151002.harbormaster.bparam.1.sql',1453226134,NULL),('phabricator:20151009.drydock.auth.1.sql',1453226134,NULL),('phabricator:20151010.drydock.auth.2.sql',1453226134,NULL),('phabricator:20151013.drydock.op.1.sql',1453226134,NULL),('phabricator:20151023.harborpolicy.1.sql',1453226134,NULL),('phabricator:20151023.harborpolicy.2.php',1453226134,NULL),('phabricator:20151023.patchduration.sql',1453226134,14142),('phabricator:20151030.harbormaster.initiator.sql',1453226134,35726),('phabricator:20151106.editengine.1.table.sql',1453226134,8030),('phabricator:20151106.editengine.2.xactions.sql',1453226134,7392),('phabricator:20151106.phame.post.mailkey.1.sql',1453226134,18595),('phabricator:20151106.phame.post.mailkey.2.php',1453226134,1616),('phabricator:20151107.phame.blog.mailkey.1.sql',1453226134,19832),('phabricator:20151107.phame.blog.mailkey.2.php',1453226134,1389),('phabricator:20151108.phame.blog.joinpolicy.sql',1453226134,16415),('phabricator:20151108.xhpast.stderr.sql',1453226134,24424),('phabricator:20151109.phame.post.comments.1.sql',1453226134,8007),('phabricator:20151109.repository.coverage.1.sql',1453226134,1405),('phabricator:20151109.xhpast.db.1.sql',1453226134,1559),('phabricator:20151109.xhpast.db.2.sql',1453226134,599),('phabricator:20151110.daemonenvhash.sql',1453226134,39904),('phabricator:20151111.phame.blog.archive.1.sql',1453226134,15720),('phabricator:20151111.phame.blog.archive.2.sql',1453226134,534),('phabricator:20151112.herald.edge.sql',1453226134,13618),('phabricator:20151116.owners.edge.sql',1453226134,13570),('phabricator:20151128.phame.blog.picture.1.sql',1453226134,15964),('phabricator:20151130.phurl.mailkey.1.sql',1453226134,10402),('phabricator:20151130.phurl.mailkey.2.php',1453226134,1457),('phabricator:20151202.versioneddraft.1.sql',1453226134,8923),('phabricator:20151207.editengine.1.sql',1453226134,76111),('phabricator:20151210.land.1.refphid.sql',1453226134,19463),('phabricator:20151210.land.2.refphid.php',1453226134,833),('phabricator:20151215.phame.1.autotitle.sql',1453226134,21510),('phabricator:20151218.key.1.keyphid.sql',1453226134,14834),('phabricator:20151218.key.2.keyphid.php',1453226134,429),('phabricator:20151219.proj.01.prislug.sql',1453226134,21059),('phabricator:20151219.proj.02.prislugkey.sql',1453226134,16233),('phabricator:20151219.proj.03.copyslug.sql',1453226134,474),('phabricator:20151219.proj.04.dropslugkey.sql',1453226134,7782),('phabricator:20151219.proj.05.dropslug.sql',1453226134,20865),('phabricator:20151219.proj.06.defaultpolicy.php',1453226134,1358),('phabricator:20151219.proj.07.viewnull.sql',1453226134,16753),('phabricator:20151219.proj.08.editnull.sql',1453226134,13683),('phabricator:20151219.proj.09.joinnull.sql',1453226134,10924),('phabricator:20151219.proj.10.subcolumns.sql',1453226134,129879),('phabricator:20151219.proj.11.subprojectphids.sql',1453226135,26586),('phabricator:20151221.search.1.version.sql',1453226135,14029),('phabricator:20151221.search.2.ownersngrams.sql',1453226135,7390),('phabricator:20151221.search.3.reindex.php',1453226135,436),('phabricator:20151223.proj.01.paths.sql',1453226135,22387),('phabricator:20151223.proj.02.depths.sql',1453226135,28069),('phabricator:20151223.proj.03.pathkey.sql',1453226135,12562),('phabricator:20151223.proj.04.keycol.sql',1453226135,24719),('phabricator:20151223.proj.05.updatekeys.php',1453226135,463),('phabricator:20151223.proj.06.uniq.sql',1453226135,12857),('phabricator:20151226.reop.1.sql',1453226135,19351),('phabricator:20151227.proj.01.materialize.sql',1453226135,697),('phabricator:20151231.proj.01.icon.php',1453226135,3273),('phabricator:20160110.repo.01.slug.sql',1453226135,31556),('phabricator:20160110.repo.02.slug.php',1453226135,461),('phabricator:20160111.repo.01.slugx.sql',1453226135,745),('phabricator:20160112.repo.01.uri.sql',1453226135,7698),('phabricator:20160112.repo.02.uri.index.php',1453226135,437),('phabricator:20160113.propanel.1.storage.sql',1453226135,6273),('phabricator:20160113.propanel.2.xaction.sql',1453226135,7608),('phabricator:daemonstatus.sql',1453226123,NULL),('phabricator:daemonstatuskey.sql',1453226123,NULL),('phabricator:daemontaskarchive.sql',1453226124,NULL),('phabricator:db.almanac',1453226117,NULL),('phabricator:db.audit',1453226117,NULL),('phabricator:db.auth',1453226117,NULL),('phabricator:db.badges',1453226117,NULL),('phabricator:db.cache',1453226117,NULL),('phabricator:db.calendar',1453226117,NULL),('phabricator:db.chatlog',1453226117,NULL),('phabricator:db.conduit',1453226117,NULL),('phabricator:db.config',1453226117,NULL),('phabricator:db.conpherence',1453226117,NULL),('phabricator:db.countdown',1453226117,NULL),('phabricator:db.daemon',1453226117,NULL),('phabricator:db.dashboard',1453226117,NULL),('phabricator:db.differential',1453226117,NULL),('phabricator:db.diviner',1453226117,NULL),('phabricator:db.doorkeeper',1453226117,NULL),('phabricator:db.draft',1453226117,NULL),('phabricator:db.drydock',1453226117,NULL),('phabricator:db.fact',1453226117,NULL),('phabricator:db.feed',1453226117,NULL),('phabricator:db.file',1453226117,NULL),('phabricator:db.flag',1453226117,NULL),('phabricator:db.fund',1453226117,NULL),('phabricator:db.harbormaster',1453226117,NULL),('phabricator:db.herald',1453226117,NULL),('phabricator:db.legalpad',1453226117,NULL),('phabricator:db.maniphest',1453226117,NULL),('phabricator:db.meta_data',1453226117,NULL),('phabricator:db.metamta',1453226117,NULL),('phabricator:db.multimeter',1453226117,NULL),('phabricator:db.nuance',1453226117,NULL),('phabricator:db.oauth_server',1453226117,NULL),('phabricator:db.owners',1453226117,NULL),('phabricator:db.passphrase',1453226117,NULL),('phabricator:db.pastebin',1453226117,NULL),('phabricator:db.phame',1453226117,NULL),('phabricator:db.phlux',1453226117,NULL),('phabricator:db.pholio',1453226117,NULL),('phabricator:db.phortune',1453226117,NULL),('phabricator:db.phragment',1453226117,NULL),('phabricator:db.phrequent',1453226117,NULL),('phabricator:db.phriction',1453226117,NULL),('phabricator:db.phurl',1453226117,NULL),('phabricator:db.policy',1453226117,NULL),('phabricator:db.ponder',1453226117,NULL),('phabricator:db.project',1453226117,NULL),('phabricator:db.releeph',1453226117,NULL),('phabricator:db.repository',1453226117,NULL),('phabricator:db.search',1453226117,NULL),('phabricator:db.slowvote',1453226117,NULL),('phabricator:db.spaces',1453226117,NULL),('phabricator:db.system',1453226117,NULL),('phabricator:db.timeline',1453226117,NULL),('phabricator:db.token',1453226117,NULL),('phabricator:db.user',1453226117,NULL),('phabricator:db.worker',1453226117,NULL),('phabricator:db.xhpast',1453226117,NULL),('phabricator:db.xhpastview',1453226117,NULL),('phabricator:db.xhprof',1453226117,NULL),('phabricator:differentialbookmarks.sql',1453226123,NULL),('phabricator:draft-metadata.sql',1453226123,NULL),('phabricator:dropfileproxyimage.sql',1453226124,NULL),('phabricator:drydockresoucetype.sql',1453226124,NULL),('phabricator:drydocktaskid.sql',1453226124,NULL),('phabricator:edgetype.sql',1453226123,NULL),('phabricator:emailtable.sql',1453226123,NULL),('phabricator:emailtableport.sql',1453226123,NULL),('phabricator:emailtableremove.sql',1453226123,NULL),('phabricator:fact-raw.sql',1453226123,NULL),('phabricator:harbormasterobject.sql',1453226123,NULL),('phabricator:holidays.sql',1453226123,NULL),('phabricator:ldapinfo.sql',1453226123,NULL),('phabricator:legalpad-mailkey-populate.php',1453226125,NULL),('phabricator:legalpad-mailkey.sql',1453226125,NULL),('phabricator:liskcounters-task.sql',1453226124,NULL),('phabricator:liskcounters.php',1453226124,NULL),('phabricator:liskcounters.sql',1453226124,NULL),('phabricator:maniphestxcache.sql',1453226123,NULL),('phabricator:markupcache.sql',1453226123,NULL),('phabricator:migrate-differential-dependencies.php',1453226123,NULL),('phabricator:migrate-maniphest-dependencies.php',1453226123,NULL),('phabricator:migrate-maniphest-revisions.php',1453226123,NULL),('phabricator:migrate-project-edges.php',1453226123,NULL),('phabricator:owners-exclude.sql',1453226124,NULL),('phabricator:pastepolicy.sql',1453226123,NULL),('phabricator:phameblog.sql',1453226123,NULL),('phabricator:phamedomain.sql',1453226123,NULL),('phabricator:phameoneblog.sql',1453226123,NULL),('phabricator:phamepolicy.sql',1453226123,NULL),('phabricator:phiddrop.sql',1453226123,NULL),('phabricator:pholio.sql',1453226124,NULL),('phabricator:policy-project.sql',1453226123,NULL),('phabricator:ponder-comments.sql',1453226123,NULL),('phabricator:ponder-mailkey-populate.php',1453226123,NULL),('phabricator:ponder-mailkey.sql',1453226123,NULL),('phabricator:ponder.sql',1453226123,NULL),('phabricator:releeph.sql',1453226124,NULL),('phabricator:repository-lint.sql',1453226124,NULL),('phabricator:statustxt.sql',1453226124,NULL),('phabricator:symbolcontexts.sql',1453226123,NULL),('phabricator:testdatabase.sql',1453226123,NULL),('phabricator:threadtopic.sql',1453226123,NULL),('phabricator:userstatus.sql',1453226123,NULL),('phabricator:usertranslation.sql',1453226123,NULL),('phabricator:xhprof.sql',1453226123,NULL);
+INSERT INTO `patch_status` VALUES ('phabricator:000.project.sql',1466802850,NULL),('phabricator:0000.legacy.sql',1466802850,NULL),('phabricator:001.maniphest_projects.sql',1466802850,NULL),('phabricator:002.oauth.sql',1466802850,NULL),('phabricator:003.more_oauth.sql',1466802851,NULL),('phabricator:004.daemonrepos.sql',1466802851,NULL),('phabricator:005.workers.sql',1466802851,NULL),('phabricator:006.repository.sql',1466802851,NULL),('phabricator:007.daemonlog.sql',1466802851,NULL),('phabricator:008.repoopt.sql',1466802851,NULL),('phabricator:009.repo_summary.sql',1466802851,NULL),('phabricator:010.herald.sql',1466802851,NULL),('phabricator:011.badcommit.sql',1466802851,NULL),('phabricator:012.dropphidtype.sql',1466802851,NULL),('phabricator:013.commitdetail.sql',1466802851,NULL),('phabricator:014.shortcuts.sql',1466802851,NULL),('phabricator:015.preferences.sql',1466802851,NULL),('phabricator:016.userrealnameindex.sql',1466802851,NULL),('phabricator:017.sessionkeys.sql',1466802851,NULL),('phabricator:018.owners.sql',1466802851,NULL),('phabricator:019.arcprojects.sql',1466802851,NULL),('phabricator:020.pathcapital.sql',1466802851,NULL),('phabricator:021.xhpastview.sql',1466802851,NULL),('phabricator:022.differentialcommit.sql',1466802851,NULL),('phabricator:023.dxkeys.sql',1466802851,NULL),('phabricator:024.mlistkeys.sql',1466802851,NULL),('phabricator:025.commentopt.sql',1466802851,NULL),('phabricator:026.diffpropkey.sql',1466802851,NULL),('phabricator:027.metamtakeys.sql',1466802851,NULL),('phabricator:028.systemagent.sql',1466802851,NULL),('phabricator:029.cursors.sql',1466802851,NULL),('phabricator:030.imagemacro.sql',1466802851,NULL),('phabricator:031.workerrace.sql',1466802851,NULL),('phabricator:032.viewtime.sql',1466802851,NULL),('phabricator:033.privtest.sql',1466802851,NULL),('phabricator:034.savedheader.sql',1466802851,NULL),('phabricator:035.proxyimage.sql',1466802851,NULL),('phabricator:036.mailkey.sql',1466802851,NULL),('phabricator:037.setuptest.sql',1466802851,NULL),('phabricator:038.admin.sql',1466802851,NULL),('phabricator:039.userlog.sql',1466802851,NULL),('phabricator:040.transform.sql',1466802851,NULL),('phabricator:041.heraldrepetition.sql',1466802851,NULL),('phabricator:042.commentmetadata.sql',1466802852,NULL),('phabricator:043.pastebin.sql',1466802852,NULL),('phabricator:044.countdown.sql',1466802852,NULL),('phabricator:045.timezone.sql',1466802852,NULL),('phabricator:046.conduittoken.sql',1466802852,NULL),('phabricator:047.projectstatus.sql',1466802852,NULL),('phabricator:048.relationshipkeys.sql',1466802852,NULL),('phabricator:049.projectowner.sql',1466802852,NULL),('phabricator:050.taskdenormal.sql',1466802852,NULL),('phabricator:051.projectfilter.sql',1466802852,NULL),('phabricator:052.pastelanguage.sql',1466802852,NULL),('phabricator:053.feed.sql',1466802852,NULL),('phabricator:054.subscribers.sql',1466802852,NULL),('phabricator:055.add_author_to_files.sql',1466802852,NULL),('phabricator:056.slowvote.sql',1466802852,NULL),('phabricator:057.parsecache.sql',1466802852,NULL),('phabricator:058.missingkeys.sql',1466802852,NULL),('phabricator:059.engines.php',1466802852,NULL),('phabricator:060.phriction.sql',1466802852,NULL),('phabricator:061.phrictioncontent.sql',1466802852,NULL),('phabricator:062.phrictionmenu.sql',1466802852,NULL),('phabricator:063.pasteforks.sql',1466802852,NULL),('phabricator:064.subprojects.sql',1466802852,NULL),('phabricator:065.sshkeys.sql',1466802852,NULL),('phabricator:066.phrictioncontent.sql',1466802852,NULL),('phabricator:067.preferences.sql',1466802852,NULL),('phabricator:068.maniphestauxiliarystorage.sql',1466802852,NULL),('phabricator:069.heraldxscript.sql',1466802852,NULL),('phabricator:070.differentialaux.sql',1466802852,NULL),('phabricator:071.contentsource.sql',1466802852,NULL),('phabricator:072.blamerevert.sql',1466802852,NULL),('phabricator:073.reposymbols.sql',1466802852,NULL),('phabricator:074.affectedpath.sql',1466802852,NULL),('phabricator:075.revisionhash.sql',1466802852,NULL),('phabricator:076.indexedlanguages.sql',1466802852,NULL),('phabricator:077.originalemail.sql',1466802852,NULL),('phabricator:078.nametoken.sql',1466802852,NULL),('phabricator:079.nametokenindex.php',1466802852,NULL),('phabricator:080.filekeys.sql',1466802852,NULL),('phabricator:081.filekeys.php',1466802852,NULL),('phabricator:082.xactionkey.sql',1466802852,NULL),('phabricator:083.dxviewtime.sql',1466802852,NULL),('phabricator:084.pasteauthorkey.sql',1466802852,NULL),('phabricator:085.packagecommitrelationship.sql',1466802852,NULL),('phabricator:086.formeraffil.sql',1466802852,NULL),('phabricator:087.phrictiondelete.sql',1466802853,NULL),('phabricator:088.audit.sql',1466802853,NULL),('phabricator:089.projectwiki.sql',1466802853,NULL),('phabricator:090.forceuniqueprojectnames.php',1466802853,NULL),('phabricator:091.uniqueslugkey.sql',1466802853,NULL),('phabricator:092.dropgithubnotification.sql',1466802853,NULL),('phabricator:093.gitremotes.php',1466802853,NULL),('phabricator:094.phrictioncolumn.sql',1466802853,NULL),('phabricator:095.directory.sql',1466802853,NULL),('phabricator:096.filename.sql',1466802853,NULL),('phabricator:097.heraldruletypes.sql',1466802853,NULL),('phabricator:098.heraldruletypemigration.php',1466802853,NULL),('phabricator:099.drydock.sql',1466802853,NULL),('phabricator:100.projectxaction.sql',1466802853,NULL),('phabricator:101.heraldruleapplied.sql',1466802853,NULL),('phabricator:102.heraldcleanup.php',1466802853,NULL),('phabricator:103.heraldedithistory.sql',1466802853,NULL),('phabricator:104.searchkey.sql',1466802853,NULL),('phabricator:105.mimetype.sql',1466802853,NULL),('phabricator:106.chatlog.sql',1466802853,NULL),('phabricator:107.oauthserver.sql',1466802853,NULL),('phabricator:108.oauthscope.sql',1466802853,NULL),('phabricator:109.oauthclientphidkey.sql',1466802853,NULL),('phabricator:110.commitaudit.sql',1466802853,NULL),('phabricator:111.commitauditmigration.php',1466802853,NULL),('phabricator:112.oauthaccesscoderedirecturi.sql',1466802853,NULL),('phabricator:113.lastreviewer.sql',1466802853,NULL),('phabricator:114.auditrequest.sql',1466802853,NULL),('phabricator:115.prepareutf8.sql',1466802853,NULL),('phabricator:116.utf8-backup-first-expect-wait.sql',1466802855,NULL),('phabricator:117.repositorydescription.php',1466802855,NULL),('phabricator:118.auditinline.sql',1466802855,NULL),('phabricator:119.filehash.sql',1466802855,NULL),('phabricator:120.noop.sql',1466802855,NULL),('phabricator:121.drydocklog.sql',1466802855,NULL),('phabricator:122.flag.sql',1466802855,NULL),('phabricator:123.heraldrulelog.sql',1466802855,NULL),('phabricator:124.subpriority.sql',1466802855,NULL),('phabricator:125.ipv6.sql',1466802855,NULL),('phabricator:126.edges.sql',1466802855,NULL),('phabricator:127.userkeybody.sql',1466802855,NULL),('phabricator:128.phabricatorcom.sql',1466802855,NULL),('phabricator:129.savedquery.sql',1466802855,NULL),('phabricator:130.denormalrevisionquery.sql',1466802855,NULL),('phabricator:131.migraterevisionquery.php',1466802855,NULL),('phabricator:132.phame.sql',1466802855,NULL),('phabricator:133.imagemacro.sql',1466802855,NULL),('phabricator:134.emptysearch.sql',1466802855,NULL),('phabricator:135.datecommitted.sql',1466802855,NULL),('phabricator:136.sex.sql',1466802855,NULL),('phabricator:137.auditmetadata.sql',1466802855,NULL),('phabricator:138.notification.sql',1466802855,NULL),('phabricator:20121209.pholioxactions.sql',1466802856,NULL),('phabricator:20121209.xmacroadd.sql',1466802856,NULL),('phabricator:20121209.xmacromigrate.php',1466802856,NULL),('phabricator:20121209.xmacromigratekey.sql',1466802856,NULL),('phabricator:20121220.generalcache.sql',1466802856,NULL),('phabricator:20121226.config.sql',1466802856,NULL),('phabricator:20130101.confxaction.sql',1466802856,NULL),('phabricator:20130102.metamtareceivedmailmessageidhash.sql',1466802856,NULL),('phabricator:20130103.filemetadata.sql',1466802856,NULL),('phabricator:20130111.conpherence.sql',1466802856,NULL),('phabricator:20130127.altheraldtranscript.sql',1466802856,NULL),('phabricator:20130131.conpherencepics.sql',1466802857,NULL),('phabricator:20130201.revisionunsubscribed.php',1466802856,NULL),('phabricator:20130201.revisionunsubscribed.sql',1466802857,NULL),('phabricator:20130214.chatlogchannel.sql',1466802857,NULL),('phabricator:20130214.chatlogchannelid.sql',1466802857,NULL),('phabricator:20130214.token.sql',1466802857,NULL),('phabricator:20130215.phabricatorfileaddttl.sql',1466802857,NULL),('phabricator:20130217.cachettl.sql',1466802857,NULL),('phabricator:20130218.longdaemon.sql',1466802857,NULL),('phabricator:20130218.updatechannelid.php',1466802857,NULL),('phabricator:20130219.commitsummary.sql',1466802857,NULL),('phabricator:20130219.commitsummarymig.php',1466802857,NULL),('phabricator:20130222.dropchannel.sql',1466802857,NULL),('phabricator:20130226.commitkey.sql',1466802857,NULL),('phabricator:20130304.lintauthor.sql',1466802857,NULL),('phabricator:20130310.xactionmeta.sql',1466802857,NULL),('phabricator:20130317.phrictionedge.sql',1466802857,NULL),('phabricator:20130319.conpherence.sql',1466802857,NULL),('phabricator:20130319.phabricatorfileexplicitupload.sql',1466802857,NULL),('phabricator:20130320.phlux.sql',1466802857,NULL),('phabricator:20130321.token.sql',1466802857,NULL),('phabricator:20130322.phortune.sql',1466802857,NULL),('phabricator:20130323.phortunepayment.sql',1466802857,NULL),('phabricator:20130324.phortuneproduct.sql',1466802857,NULL),('phabricator:20130330.phrequent.sql',1466802857,NULL),('phabricator:20130403.conpherencecache.sql',1466802857,NULL),('phabricator:20130403.conpherencecachemig.php',1466802857,NULL),('phabricator:20130409.commitdrev.php',1466802857,NULL),('phabricator:20130417.externalaccount.sql',1466802857,NULL),('phabricator:20130423.conpherenceindices.sql',1466802857,NULL),('phabricator:20130423.phortunepaymentrevised.sql',1466802857,NULL),('phabricator:20130423.updateexternalaccount.sql',1466802857,NULL),('phabricator:20130426.search_savedquery.sql',1466802857,NULL),('phabricator:20130502.countdownrevamp1.sql',1466802857,NULL),('phabricator:20130502.countdownrevamp2.php',1466802857,NULL),('phabricator:20130502.countdownrevamp3.sql',1466802857,NULL),('phabricator:20130507.releephrqmailkey.sql',1466802857,NULL),('phabricator:20130507.releephrqmailkeypop.php',1466802857,NULL),('phabricator:20130507.releephrqsimplifycols.sql',1466802857,NULL),('phabricator:20130508.releephtransactions.sql',1466802857,NULL),('phabricator:20130508.releephtransactionsmig.php',1466802857,NULL),('phabricator:20130508.search_namedquery.sql',1466802857,NULL),('phabricator:20130513.receviedmailstatus.sql',1466802857,NULL),('phabricator:20130519.diviner.sql',1466802857,NULL),('phabricator:20130521.dropconphimages.sql',1466802857,NULL),('phabricator:20130523.maniphest_owners.sql',1466802857,NULL),('phabricator:20130524.repoxactions.sql',1466802857,NULL),('phabricator:20130529.macroauthor.sql',1466802857,NULL),('phabricator:20130529.macroauthormig.php',1466802857,NULL),('phabricator:20130530.macrodatekey.sql',1466802857,NULL),('phabricator:20130530.pastekeys.sql',1466802857,NULL),('phabricator:20130530.sessionhash.php',1466802857,NULL),('phabricator:20130531.filekeys.sql',1466802857,NULL),('phabricator:20130602.morediviner.sql',1466802858,NULL),('phabricator:20130602.namedqueries.sql',1466802858,NULL),('phabricator:20130606.userxactions.sql',1466802858,NULL),('phabricator:20130607.xaccount.sql',1466802858,NULL),('phabricator:20130611.migrateoauth.php',1466802858,NULL),('phabricator:20130611.nukeldap.php',1466802858,NULL),('phabricator:20130613.authdb.sql',1466802858,NULL),('phabricator:20130619.authconf.php',1466802858,NULL),('phabricator:20130620.diffxactions.sql',1466802858,NULL),('phabricator:20130621.diffcommentphid.sql',1466802858,NULL),('phabricator:20130621.diffcommentphidmig.php',1466802858,NULL),('phabricator:20130621.diffcommentunphid.sql',1466802858,NULL),('phabricator:20130622.doorkeeper.sql',1466802858,NULL),('phabricator:20130628.legalpadv0.sql',1466802858,NULL),('phabricator:20130701.conduitlog.sql',1466802858,NULL),('phabricator:20130703.legalpaddocdenorm.php',1466802858,NULL),('phabricator:20130703.legalpaddocdenorm.sql',1466802858,NULL),('phabricator:20130709.droptimeline.sql',1466802858,NULL),('phabricator:20130709.legalpadsignature.sql',1466802858,NULL),('phabricator:20130711.pholioimageobsolete.php',1466802858,NULL),('phabricator:20130711.pholioimageobsolete.sql',1466802858,NULL),('phabricator:20130711.pholioimageobsolete2.sql',1466802858,NULL),('phabricator:20130711.trimrealnames.php',1466802858,NULL),('phabricator:20130714.votexactions.sql',1466802858,NULL),('phabricator:20130715.votecomments.php',1466802858,NULL),('phabricator:20130715.voteedges.sql',1466802858,NULL),('phabricator:20130716.archivememberlessprojects.php',1466802858,NULL),('phabricator:20130722.pholioreplace.sql',1466802858,NULL),('phabricator:20130723.taskstarttime.sql',1466802858,NULL),('phabricator:20130726.ponderxactions.sql',1466802858,NULL),('phabricator:20130727.ponderquestionstatus.sql',1466802858,NULL),('phabricator:20130728.ponderunique.php',1466802858,NULL),('phabricator:20130728.ponderuniquekey.sql',1466802858,NULL),('phabricator:20130728.ponderxcomment.php',1466802858,NULL),('phabricator:20130731.releephcutpointidentifier.sql',1466802858,NULL),('phabricator:20130731.releephproject.sql',1466802858,NULL),('phabricator:20130731.releephrepoid.sql',1466802858,NULL),('phabricator:20130801.pastexactions.php',1466802858,NULL),('phabricator:20130801.pastexactions.sql',1466802858,NULL),('phabricator:20130802.heraldphid.sql',1466802858,NULL),('phabricator:20130802.heraldphids.php',1466802858,NULL),('phabricator:20130802.heraldphidukey.sql',1466802858,NULL),('phabricator:20130802.heraldxactions.sql',1466802858,NULL),('phabricator:20130805.pasteedges.sql',1466802858,NULL),('phabricator:20130805.pastemailkey.sql',1466802858,NULL),('phabricator:20130805.pastemailkeypop.php',1466802858,NULL),('phabricator:20130814.usercustom.sql',1466802858,NULL),('phabricator:20130820.file-mailkey-populate.php',1466802859,NULL),('phabricator:20130820.filemailkey.sql',1466802859,NULL),('phabricator:20130820.filexactions.sql',1466802859,NULL),('phabricator:20130820.releephxactions.sql',1466802858,NULL),('phabricator:20130826.divinernode.sql',1466802859,NULL),('phabricator:20130912.maniphest.1.touch.sql',1466802859,NULL),('phabricator:20130912.maniphest.2.created.sql',1466802859,NULL),('phabricator:20130912.maniphest.3.nameindex.sql',1466802859,NULL),('phabricator:20130912.maniphest.4.fillindex.php',1466802859,NULL),('phabricator:20130913.maniphest.1.migratesearch.php',1466802859,NULL),('phabricator:20130914.usercustom.sql',1466802859,NULL),('phabricator:20130915.maniphestcustom.sql',1466802859,NULL),('phabricator:20130915.maniphestmigrate.php',1466802859,NULL),('phabricator:20130915.maniphestqdrop.sql',1466802859,NULL),('phabricator:20130919.mfieldconf.php',1466802859,NULL),('phabricator:20130920.repokeyspolicy.sql',1466802859,NULL),('phabricator:20130921.mtransactions.sql',1466802859,NULL),('phabricator:20130921.xmigratemaniphest.php',1466802859,NULL),('phabricator:20130923.mrename.sql',1466802859,NULL),('phabricator:20130924.mdraftkey.sql',1466802859,NULL),('phabricator:20130925.mpolicy.sql',1466802859,NULL),('phabricator:20130925.xpolicy.sql',1466802859,NULL),('phabricator:20130926.dcustom.sql',1466802859,NULL),('phabricator:20130926.dinkeys.sql',1466802859,NULL),('phabricator:20130926.dinline.php',1466802859,NULL),('phabricator:20130927.audiomacro.sql',1466802859,NULL),('phabricator:20130929.filepolicy.sql',1466802859,NULL),('phabricator:20131004.dxedgekey.sql',1466802859,NULL),('phabricator:20131004.dxreviewers.php',1466802859,NULL),('phabricator:20131006.hdisable.sql',1466802859,NULL),('phabricator:20131010.pstorage.sql',1466802859,NULL),('phabricator:20131015.cpolicy.sql',1466802859,NULL),('phabricator:20131020.col1.sql',1466802859,NULL),('phabricator:20131020.harbormaster.sql',1466802859,NULL),('phabricator:20131020.pcustom.sql',1466802859,NULL),('phabricator:20131020.pxaction.sql',1466802859,NULL),('phabricator:20131020.pxactionmig.php',1466802859,NULL),('phabricator:20131025.repopush.sql',1466802859,NULL),('phabricator:20131026.commitstatus.sql',1466802859,NULL),('phabricator:20131030.repostatusmessage.sql',1466802859,NULL),('phabricator:20131031.vcspassword.sql',1466802859,NULL),('phabricator:20131105.buildstep.sql',1466802859,NULL),('phabricator:20131106.diffphid.1.col.sql',1466802859,NULL),('phabricator:20131106.diffphid.2.mig.php',1466802859,NULL),('phabricator:20131106.diffphid.3.key.sql',1466802859,NULL),('phabricator:20131106.nuance-v0.sql',1466802859,NULL),('phabricator:20131107.buildlog.sql',1466802859,NULL),('phabricator:20131112.userverified.1.col.sql',1466802859,NULL),('phabricator:20131112.userverified.2.mig.php',1466802859,NULL),('phabricator:20131118.ownerorder.php',1466802859,NULL),('phabricator:20131119.passphrase.sql',1466802859,NULL),('phabricator:20131120.nuancesourcetype.sql',1466802860,NULL),('phabricator:20131121.passphraseedge.sql',1466802860,NULL),('phabricator:20131121.repocredentials.1.col.sql',1466802860,NULL),('phabricator:20131121.repocredentials.2.mig.php',1466802860,NULL),('phabricator:20131122.repomirror.sql',1466802860,NULL),('phabricator:20131123.drydockblueprintpolicy.sql',1466802860,NULL),('phabricator:20131129.drydockresourceblueprint.sql',1466802860,NULL),('phabricator:20131204.pushlog.sql',1466802860,NULL),('phabricator:20131205.buildsteporder.sql',1466802860,NULL),('phabricator:20131205.buildstepordermig.php',1466802860,NULL),('phabricator:20131205.buildtargets.sql',1466802860,NULL),('phabricator:20131206.phragment.sql',1466802860,NULL),('phabricator:20131206.phragmentnull.sql',1466802860,NULL),('phabricator:20131208.phragmentsnapshot.sql',1466802860,NULL),('phabricator:20131211.phragmentedges.sql',1466802860,NULL),('phabricator:20131217.pushlogphid.1.col.sql',1466802860,NULL),('phabricator:20131217.pushlogphid.2.mig.php',1466802860,NULL),('phabricator:20131217.pushlogphid.3.key.sql',1466802860,NULL),('phabricator:20131219.pxdrop.sql',1466802860,NULL),('phabricator:20131224.harbormanual.sql',1466802860,NULL),('phabricator:20131227.heraldobject.sql',1466802860,NULL),('phabricator:20131231.dropshortcut.sql',1466802860,NULL),('phabricator:20131302.maniphestvalue.sql',1466802857,NULL),('phabricator:20140104.harbormastercmd.sql',1466802860,NULL),('phabricator:20140106.macromailkey.1.sql',1466802860,NULL),('phabricator:20140106.macromailkey.2.php',1466802860,NULL),('phabricator:20140108.ddbpname.1.sql',1466802860,NULL),('phabricator:20140108.ddbpname.2.php',1466802860,NULL),('phabricator:20140109.ddxactions.sql',1466802860,NULL),('phabricator:20140109.projectcolumnsdates.sql',1466802860,NULL),('phabricator:20140113.legalpadsig.1.sql',1466802860,NULL),('phabricator:20140113.legalpadsig.2.php',1466802860,NULL),('phabricator:20140115.auth.1.id.sql',1466802860,NULL),('phabricator:20140115.auth.2.expires.sql',1466802860,NULL),('phabricator:20140115.auth.3.unlimit.php',1466802860,NULL),('phabricator:20140115.legalpadsigkey.sql',1466802860,NULL),('phabricator:20140116.reporefcursor.sql',1466802860,NULL),('phabricator:20140126.diff.1.parentrevisionid.sql',1466802860,NULL),('phabricator:20140126.diff.2.repositoryphid.sql',1466802860,NULL),('phabricator:20140130.dash.1.board.sql',1466802860,NULL),('phabricator:20140130.dash.2.panel.sql',1466802860,NULL),('phabricator:20140130.dash.3.boardxaction.sql',1466802860,NULL),('phabricator:20140130.dash.4.panelxaction.sql',1466802860,NULL),('phabricator:20140130.mail.1.retry.sql',1466802860,NULL),('phabricator:20140130.mail.2.next.sql',1466802860,NULL),('phabricator:20140201.gc.1.mailsent.sql',1466802860,NULL),('phabricator:20140201.gc.2.mailreceived.sql',1466802860,NULL),('phabricator:20140205.cal.1.rename.sql',1466802860,NULL),('phabricator:20140205.cal.2.phid-col.sql',1466802860,NULL),('phabricator:20140205.cal.3.phid-mig.php',1466802860,NULL),('phabricator:20140205.cal.4.phid-key.sql',1466802860,NULL),('phabricator:20140210.herald.rule-condition-mig.php',1466802860,NULL),('phabricator:20140210.projcfield.1.blurb.php',1466802860,NULL),('phabricator:20140210.projcfield.2.piccol.sql',1466802860,NULL),('phabricator:20140210.projcfield.3.picmig.sql',1466802860,NULL),('phabricator:20140210.projcfield.4.memmig.sql',1466802860,NULL),('phabricator:20140210.projcfield.5.dropprofile.sql',1466802860,NULL),('phabricator:20140211.dx.1.nullablechangesetid.sql',1466802860,NULL),('phabricator:20140211.dx.2.migcommenttext.php',1466802860,NULL),('phabricator:20140211.dx.3.migsubscriptions.sql',1466802860,NULL),('phabricator:20140211.dx.999.drop.relationships.sql',1466802860,NULL),('phabricator:20140212.dx.1.armageddon.php',1466802860,NULL),('phabricator:20140214.clean.1.legacycommentid.sql',1466802860,NULL),('phabricator:20140214.clean.2.dropcomment.sql',1466802860,NULL),('phabricator:20140214.clean.3.dropinline.sql',1466802860,NULL),('phabricator:20140218.differentialdraft.sql',1466802860,NULL),('phabricator:20140218.passwords.1.extend.sql',1466802860,NULL),('phabricator:20140218.passwords.2.prefix.sql',1466802860,NULL),('phabricator:20140218.passwords.3.vcsextend.sql',1466802860,NULL),('phabricator:20140218.passwords.4.vcs.php',1466802860,NULL),('phabricator:20140223.bigutf8scratch.sql',1466802860,NULL),('phabricator:20140224.dxclean.1.datecommitted.sql',1466802860,NULL),('phabricator:20140226.dxcustom.1.fielddata.php',1466802860,NULL),('phabricator:20140226.dxcustom.99.drop.sql',1466802860,NULL),('phabricator:20140228.dxcomment.1.sql',1466802860,NULL),('phabricator:20140305.diviner.1.slugcol.sql',1466802861,NULL),('phabricator:20140305.diviner.2.slugkey.sql',1466802861,NULL),('phabricator:20140311.mdroplegacy.sql',1466802861,NULL),('phabricator:20140314.projectcolumn.1.statuscol.sql',1466802861,NULL),('phabricator:20140314.projectcolumn.2.statuskey.sql',1466802861,NULL),('phabricator:20140317.mupdatedkey.sql',1466802861,NULL),('phabricator:20140321.harbor.1.bxaction.sql',1466802861,NULL),('phabricator:20140321.mstatus.1.col.sql',1466802861,NULL),('phabricator:20140321.mstatus.2.mig.php',1466802861,NULL),('phabricator:20140323.harbor.1.renames.php',1466802861,NULL),('phabricator:20140323.harbor.2.message.sql',1466802861,NULL),('phabricator:20140325.push.1.event.sql',1466802861,NULL),('phabricator:20140325.push.2.eventphid.sql',1466802861,NULL),('phabricator:20140325.push.3.groups.php',1466802861,NULL),('phabricator:20140325.push.4.prune.sql',1466802861,NULL),('phabricator:20140326.project.1.colxaction.sql',1466802861,NULL),('phabricator:20140328.releeph.1.productxaction.sql',1466802861,NULL),('phabricator:20140330.flagtext.sql',1466802861,NULL),('phabricator:20140402.actionlog.sql',1466802861,NULL),('phabricator:20140410.accountsecret.1.sql',1466802861,NULL),('phabricator:20140410.accountsecret.2.php',1466802861,NULL),('phabricator:20140416.harbor.1.sql',1466802861,NULL),('phabricator:20140420.rel.1.objectphid.sql',1466802861,NULL),('phabricator:20140420.rel.2.objectmig.php',1466802861,NULL),('phabricator:20140421.slowvotecolumnsisclosed.sql',1466802861,NULL),('phabricator:20140423.session.1.hisec.sql',1466802861,NULL),('phabricator:20140427.mfactor.1.sql',1466802861,NULL),('phabricator:20140430.auth.1.partial.sql',1466802861,NULL),('phabricator:20140430.dash.1.paneltype.sql',1466802861,NULL),('phabricator:20140430.dash.2.edge.sql',1466802861,NULL),('phabricator:20140501.passphraselockcredential.sql',1466802861,NULL),('phabricator:20140501.remove.1.dlog.sql',1466802861,NULL),('phabricator:20140507.smstable.sql',1466802861,NULL),('phabricator:20140509.coverage.1.sql',1466802861,NULL),('phabricator:20140509.dashboardlayoutconfig.sql',1466802861,NULL),('phabricator:20140512.dparents.1.sql',1466802861,NULL),('phabricator:20140514.harbormasterbuildabletransaction.sql',1466802861,NULL),('phabricator:20140514.pholiomockclose.sql',1466802861,NULL),('phabricator:20140515.trust-emails.sql',1466802861,NULL),('phabricator:20140517.dxbinarycache.sql',1466802861,NULL),('phabricator:20140518.dxmorebinarycache.sql',1466802861,NULL),('phabricator:20140519.dashboardinstall.sql',1466802861,NULL),('phabricator:20140520.authtemptoken.sql',1466802861,NULL),('phabricator:20140521.projectslug.1.create.sql',1466802861,NULL),('phabricator:20140521.projectslug.2.mig.php',1466802861,NULL),('phabricator:20140522.projecticon.sql',1466802861,NULL),('phabricator:20140524.auth.mfa.cache.sql',1466802861,NULL),('phabricator:20140525.hunkmodern.sql',1466802861,NULL),('phabricator:20140615.pholioedit.1.sql',1466802861,NULL),('phabricator:20140615.pholioedit.2.sql',1466802861,NULL),('phabricator:20140617.daemon.explicit-argv.sql',1466802861,NULL),('phabricator:20140617.daemonlog.sql',1466802861,NULL),('phabricator:20140624.projcolor.1.sql',1466802861,NULL),('phabricator:20140624.projcolor.2.sql',1466802861,NULL),('phabricator:20140629.dasharchive.1.sql',1466802861,NULL),('phabricator:20140629.legalsig.1.sql',1466802861,NULL),('phabricator:20140629.legalsig.2.php',1466802861,NULL),('phabricator:20140701.legalexemption.1.sql',1466802861,NULL),('phabricator:20140701.legalexemption.2.sql',1466802861,NULL),('phabricator:20140703.legalcorp.1.sql',1466802861,NULL),('phabricator:20140703.legalcorp.2.sql',1466802861,NULL),('phabricator:20140703.legalcorp.3.sql',1466802861,NULL),('phabricator:20140703.legalcorp.4.sql',1466802861,NULL),('phabricator:20140703.legalcorp.5.sql',1466802861,NULL),('phabricator:20140704.harbormasterstep.1.sql',1466802861,NULL),('phabricator:20140704.harbormasterstep.2.sql',1466802861,NULL),('phabricator:20140704.legalpreamble.1.sql',1466802861,NULL),('phabricator:20140706.harbormasterdepend.1.php',1466802861,NULL),('phabricator:20140706.pedge.1.sql',1466802861,NULL),('phabricator:20140711.pnames.1.sql',1466802861,NULL),('phabricator:20140711.pnames.2.php',1466802861,NULL),('phabricator:20140711.workerpriority.sql',1466802862,NULL),('phabricator:20140712.projcoluniq.sql',1466802862,NULL),('phabricator:20140721.phortune.1.cart.sql',1466802862,NULL),('phabricator:20140721.phortune.2.purchase.sql',1466802862,NULL),('phabricator:20140721.phortune.3.charge.sql',1466802862,NULL),('phabricator:20140721.phortune.4.cartstatus.sql',1466802862,NULL),('phabricator:20140721.phortune.5.cstatusdefault.sql',1466802862,NULL),('phabricator:20140721.phortune.6.onetimecharge.sql',1466802862,NULL),('phabricator:20140721.phortune.7.nullmethod.sql',1466802862,NULL),('phabricator:20140722.appname.php',1466802862,NULL),('phabricator:20140722.audit.1.xactions.sql',1466802862,NULL),('phabricator:20140722.audit.2.comments.sql',1466802862,NULL),('phabricator:20140722.audit.3.miginlines.php',1466802862,NULL),('phabricator:20140722.audit.4.migtext.php',1466802862,NULL),('phabricator:20140722.renameauth.php',1466802862,NULL),('phabricator:20140723.apprenamexaction.sql',1466802862,NULL),('phabricator:20140725.audit.1.migxactions.php',1466802862,NULL),('phabricator:20140731.audit.1.subscribers.php',1466802862,NULL),('phabricator:20140731.cancdn.php',1466802862,NULL),('phabricator:20140731.harbormasterstepdesc.sql',1466802862,NULL),('phabricator:20140805.boardcol.1.sql',1466802862,NULL),('phabricator:20140805.boardcol.2.php',1466802862,NULL),('phabricator:20140807.harbormastertargettime.sql',1466802862,NULL),('phabricator:20140808.boardprop.1.sql',1466802862,NULL),('phabricator:20140808.boardprop.2.sql',1466802862,NULL),('phabricator:20140808.boardprop.3.php',1466802862,NULL),('phabricator:20140811.blob.1.sql',1466802862,NULL),('phabricator:20140811.blob.2.sql',1466802862,NULL),('phabricator:20140812.projkey.1.sql',1466802862,NULL),('phabricator:20140812.projkey.2.sql',1466802862,NULL),('phabricator:20140814.passphrasecredentialconduit.sql',1466802862,NULL),('phabricator:20140815.cancdncase.php',1466802862,NULL),('phabricator:20140818.harbormasterindex.1.sql',1466802862,NULL),('phabricator:20140821.harbormasterbuildgen.1.sql',1466802862,NULL),('phabricator:20140822.daemonenvhash.sql',1466802862,NULL),('phabricator:20140902.almanacdevice.1.sql',1466802862,NULL),('phabricator:20140904.macroattach.php',1466802862,NULL),('phabricator:20140911.fund.1.initiative.sql',1466802862,NULL),('phabricator:20140911.fund.2.xaction.sql',1466802862,NULL),('phabricator:20140911.fund.3.edge.sql',1466802862,NULL),('phabricator:20140911.fund.4.backer.sql',1466802862,NULL),('phabricator:20140911.fund.5.backxaction.sql',1466802862,NULL),('phabricator:20140914.betaproto.php',1466802862,NULL),('phabricator:20140917.project.canlock.sql',1466802862,NULL),('phabricator:20140918.schema.1.dropaudit.sql',1466802862,NULL),('phabricator:20140918.schema.2.dropauditinline.sql',1466802862,NULL),('phabricator:20140918.schema.3.wipecache.sql',1466802862,NULL),('phabricator:20140918.schema.4.cachetype.sql',1466802862,NULL),('phabricator:20140918.schema.5.slowvote.sql',1466802862,NULL),('phabricator:20140919.schema.01.calstatus.sql',1466802862,NULL),('phabricator:20140919.schema.02.calname.sql',1466802862,NULL),('phabricator:20140919.schema.03.dropaux.sql',1466802862,NULL),('phabricator:20140919.schema.04.droptaskproj.sql',1466802862,NULL),('phabricator:20140926.schema.01.droprelev.sql',1466802862,NULL),('phabricator:20140926.schema.02.droprelreqev.sql',1466802862,NULL),('phabricator:20140926.schema.03.dropldapinfo.sql',1466802862,NULL),('phabricator:20140926.schema.04.dropoauthinfo.sql',1466802862,NULL),('phabricator:20140926.schema.05.dropprojaffil.sql',1466802862,NULL),('phabricator:20140926.schema.06.dropsubproject.sql',1466802862,NULL),('phabricator:20140926.schema.07.droppondcom.sql',1466802862,NULL),('phabricator:20140927.schema.01.dropsearchq.sql',1466802862,NULL),('phabricator:20140927.schema.02.pholio1.sql',1466802862,NULL),('phabricator:20140927.schema.03.pholio2.sql',1466802862,NULL),('phabricator:20140927.schema.04.pholio3.sql',1466802862,NULL),('phabricator:20140927.schema.05.phragment1.sql',1466802862,NULL),('phabricator:20140927.schema.06.releeph1.sql',1466802862,NULL),('phabricator:20141001.schema.01.version.sql',1466802862,NULL),('phabricator:20141001.schema.02.taskmail.sql',1466802862,NULL),('phabricator:20141002.schema.01.liskcounter.sql',1466802862,NULL),('phabricator:20141002.schema.02.draftnull.sql',1466802862,NULL),('phabricator:20141004.currency.01.sql',1466802862,NULL),('phabricator:20141004.currency.02.sql',1466802862,NULL),('phabricator:20141004.currency.03.sql',1466802862,NULL),('phabricator:20141004.currency.04.sql',1466802862,NULL),('phabricator:20141004.currency.05.sql',1466802862,NULL),('phabricator:20141004.currency.06.sql',1466802862,NULL),('phabricator:20141004.harborliskcounter.sql',1466802862,NULL),('phabricator:20141005.phortuneproduct.sql',1466802862,NULL),('phabricator:20141006.phortunecart.sql',1466802862,NULL),('phabricator:20141006.phortunemerchant.sql',1466802863,NULL),('phabricator:20141006.phortunemerchantx.sql',1466802863,NULL),('phabricator:20141007.fundmerchant.sql',1466802863,NULL),('phabricator:20141007.fundrisks.sql',1466802863,NULL),('phabricator:20141007.fundtotal.sql',1466802863,NULL),('phabricator:20141007.phortunecartmerchant.sql',1466802863,NULL),('phabricator:20141007.phortunecharge.sql',1466802863,NULL),('phabricator:20141007.phortunepayment.sql',1466802863,NULL),('phabricator:20141007.phortuneprovider.sql',1466802863,NULL),('phabricator:20141007.phortuneproviderx.sql',1466802863,NULL),('phabricator:20141008.phortunemerchdesc.sql',1466802863,NULL),('phabricator:20141008.phortuneprovdis.sql',1466802863,NULL),('phabricator:20141008.phortunerefund.sql',1466802863,NULL),('phabricator:20141010.fundmailkey.sql',1466802863,NULL),('phabricator:20141011.phortunemerchedit.sql',1466802863,NULL),('phabricator:20141012.phortunecartxaction.sql',1466802863,NULL),('phabricator:20141013.phortunecartkey.sql',1466802863,NULL),('phabricator:20141016.almanac.device.sql',1466802863,NULL),('phabricator:20141016.almanac.dxaction.sql',1466802863,NULL),('phabricator:20141016.almanac.interface.sql',1466802863,NULL),('phabricator:20141016.almanac.network.sql',1466802863,NULL),('phabricator:20141016.almanac.nxaction.sql',1466802863,NULL),('phabricator:20141016.almanac.service.sql',1466802863,NULL),('phabricator:20141016.almanac.sxaction.sql',1466802863,NULL),('phabricator:20141017.almanac.binding.sql',1466802863,NULL),('phabricator:20141017.almanac.bxaction.sql',1466802863,NULL),('phabricator:20141025.phriction.1.xaction.sql',1466802863,NULL),('phabricator:20141025.phriction.2.xaction.sql',1466802863,NULL),('phabricator:20141025.phriction.mailkey.sql',1466802863,NULL),('phabricator:20141103.almanac.1.delprop.sql',1466802863,NULL),('phabricator:20141103.almanac.2.addprop.sql',1466802863,NULL),('phabricator:20141104.almanac.3.edge.sql',1466802863,NULL),('phabricator:20141105.ssh.1.rename.sql',1466802863,NULL),('phabricator:20141106.dropold.sql',1466802863,NULL),('phabricator:20141106.uniqdrafts.php',1466802863,NULL),('phabricator:20141107.phriction.policy.1.sql',1466802863,NULL),('phabricator:20141107.phriction.policy.2.php',1466802863,NULL),('phabricator:20141107.phriction.popkeys.php',1466802863,NULL),('phabricator:20141107.ssh.1.colname.sql',1466802863,NULL),('phabricator:20141107.ssh.2.keyhash.sql',1466802863,NULL),('phabricator:20141107.ssh.3.keyindex.sql',1466802863,NULL),('phabricator:20141107.ssh.4.keymig.php',1466802863,NULL),('phabricator:20141107.ssh.5.indexnull.sql',1466802863,NULL),('phabricator:20141107.ssh.6.indexkey.sql',1466802863,NULL),('phabricator:20141107.ssh.7.colnull.sql',1466802863,NULL),('phabricator:20141113.auditdupes.php',1466802863,NULL),('phabricator:20141118.diffxaction.sql',1466802863,NULL),('phabricator:20141119.commitpedge.sql',1466802863,NULL),('phabricator:20141119.differential.diff.policy.sql',1466802863,NULL),('phabricator:20141119.sshtrust.sql',1466802863,NULL),('phabricator:20141123.taskpriority.1.sql',1466802863,NULL),('phabricator:20141123.taskpriority.2.sql',1466802863,NULL),('phabricator:20141210.maniphestsubscribersmig.1.sql',1466802863,NULL),('phabricator:20141210.maniphestsubscribersmig.2.sql',1466802863,NULL),('phabricator:20141210.reposervice.sql',1466802863,NULL),('phabricator:20141212.conduittoken.sql',1466802863,NULL),('phabricator:20141215.almanacservicetype.sql',1466802863,NULL),('phabricator:20141217.almanacdevicelock.sql',1466802864,NULL),('phabricator:20141217.almanaclock.sql',1466802864,NULL),('phabricator:20141218.maniphestcctxn.php',1466802864,NULL),('phabricator:20141222.maniphestprojtxn.php',1466802864,NULL),('phabricator:20141223.daemonloguser.sql',1466802864,NULL),('phabricator:20141223.daemonobjectphid.sql',1466802864,NULL),('phabricator:20141230.pasteeditpolicycolumn.sql',1466802864,NULL),('phabricator:20141230.pasteeditpolicyexisting.sql',1466802864,NULL),('phabricator:20150102.policyname.php',1466802864,NULL),('phabricator:20150102.tasksubscriber.sql',1466802864,NULL),('phabricator:20150105.conpsearch.sql',1466802864,NULL),('phabricator:20150114.oauthserver.client.policy.sql',1466802864,NULL),('phabricator:20150115.applicationemails.sql',1466802864,NULL),('phabricator:20150115.trigger.1.sql',1466802864,NULL),('phabricator:20150115.trigger.2.sql',1466802864,NULL),('phabricator:20150116.maniphestapplicationemails.php',1466802864,NULL),('phabricator:20150120.maniphestdefaultauthor.php',1466802864,NULL),('phabricator:20150124.subs.1.sql',1466802864,NULL),('phabricator:20150129.pastefileapplicationemails.php',1466802864,NULL),('phabricator:20150130.phortune.1.subphid.sql',1466802864,NULL),('phabricator:20150130.phortune.2.subkey.sql',1466802864,NULL),('phabricator:20150131.phortune.1.defaultpayment.sql',1466802864,NULL),('phabricator:20150205.authprovider.autologin.sql',1466802864,NULL),('phabricator:20150205.daemonenv.sql',1466802864,NULL),('phabricator:20150209.invite.sql',1466802864,NULL),('phabricator:20150209.oauthclient.trust.sql',1466802864,NULL),('phabricator:20150210.invitephid.sql',1466802864,NULL),('phabricator:20150212.legalpad.session.1.sql',1466802864,NULL),('phabricator:20150212.legalpad.session.2.sql',1466802864,NULL),('phabricator:20150219.scratch.nonmutable.sql',1466802864,NULL),('phabricator:20150223.daemon.1.id.sql',1466802864,NULL),('phabricator:20150223.daemon.2.idlegacy.sql',1466802864,NULL),('phabricator:20150223.daemon.3.idkey.sql',1466802864,NULL),('phabricator:20150312.filechunk.1.sql',1466802864,NULL),('phabricator:20150312.filechunk.2.sql',1466802864,NULL),('phabricator:20150312.filechunk.3.sql',1466802864,NULL),('phabricator:20150317.conpherence.isroom.1.sql',1466802864,NULL),('phabricator:20150317.conpherence.isroom.2.sql',1466802864,NULL),('phabricator:20150317.conpherence.policy.sql',1466802864,NULL),('phabricator:20150410.nukeruleedit.sql',1466802864,NULL),('phabricator:20150420.invoice.1.sql',1466802864,NULL),('phabricator:20150420.invoice.2.sql',1466802864,NULL),('phabricator:20150425.isclosed.sql',1466802864,NULL),('phabricator:20150427.calendar.1.edge.sql',1466802864,NULL),('phabricator:20150427.calendar.1.xaction.sql',1466802864,NULL),('phabricator:20150427.calendar.2.xaction.sql',1466802864,NULL),('phabricator:20150428.calendar.1.iscancelled.sql',1466802864,NULL),('phabricator:20150428.calendar.1.name.sql',1466802864,NULL),('phabricator:20150429.calendar.1.invitee.sql',1466802864,NULL),('phabricator:20150430.calendar.1.policies.sql',1466802864,NULL),('phabricator:20150430.multimeter.1.sql',1466802864,NULL),('phabricator:20150430.multimeter.2.host.sql',1466802864,NULL),('phabricator:20150430.multimeter.3.viewer.sql',1466802864,NULL),('phabricator:20150430.multimeter.4.context.sql',1466802864,NULL),('phabricator:20150430.multimeter.5.label.sql',1466802864,NULL),('phabricator:20150501.calendar.1.reply.sql',1466802864,NULL),('phabricator:20150501.calendar.2.reply.php',1466802864,NULL),('phabricator:20150501.conpherencepics.sql',1466802865,NULL),('phabricator:20150503.repositorysymbols.1.sql',1466802865,NULL),('phabricator:20150503.repositorysymbols.2.php',1466802865,NULL),('phabricator:20150503.repositorysymbols.3.sql',1466802865,NULL),('phabricator:20150504.symbolsproject.1.php',1466802865,NULL),('phabricator:20150504.symbolsproject.2.sql',1466802865,NULL),('phabricator:20150506.calendarunnamedevents.1.php',1466802865,NULL),('phabricator:20150507.calendar.1.isallday.sql',1466802865,NULL),('phabricator:20150513.user.cache.1.sql',1466802865,NULL),('phabricator:20150514.calendar.status.sql',1466802865,NULL),('phabricator:20150514.phame.blog.xaction.sql',1466802865,NULL),('phabricator:20150514.user.cache.2.sql',1466802865,NULL),('phabricator:20150515.phame.post.xaction.sql',1466802865,NULL),('phabricator:20150515.project.mailkey.1.sql',1466802865,NULL),('phabricator:20150515.project.mailkey.2.php',1466802865,NULL),('phabricator:20150519.calendar.calendaricon.sql',1466802865,NULL),('phabricator:20150521.releephrepository.sql',1466802865,NULL),('phabricator:20150525.diff.hidden.1.sql',1466802865,NULL),('phabricator:20150526.owners.mailkey.1.sql',1466802865,NULL),('phabricator:20150526.owners.mailkey.2.php',1466802865,NULL),('phabricator:20150526.owners.xaction.sql',1466802865,NULL),('phabricator:20150527.calendar.recurringevents.sql',1466802865,NULL),('phabricator:20150601.spaces.1.namespace.sql',1466802865,NULL),('phabricator:20150601.spaces.2.xaction.sql',1466802865,NULL),('phabricator:20150602.mlist.1.sql',1466802865,NULL),('phabricator:20150602.mlist.2.php',1466802865,NULL),('phabricator:20150604.spaces.1.sql',1466802865,NULL),('phabricator:20150605.diviner.edges.sql',1466802865,NULL),('phabricator:20150605.diviner.editPolicy.sql',1466802865,NULL),('phabricator:20150605.diviner.xaction.sql',1466802865,NULL),('phabricator:20150606.mlist.1.php',1466802865,NULL),('phabricator:20150609.inline.sql',1466802865,NULL),('phabricator:20150609.spaces.1.pholio.sql',1466802865,NULL),('phabricator:20150609.spaces.2.maniphest.sql',1466802865,NULL),('phabricator:20150610.spaces.1.desc.sql',1466802865,NULL),('phabricator:20150610.spaces.2.edge.sql',1466802865,NULL),('phabricator:20150610.spaces.3.archive.sql',1466802865,NULL),('phabricator:20150611.spaces.1.mailxaction.sql',1466802865,NULL),('phabricator:20150611.spaces.2.appmail.sql',1466802865,NULL),('phabricator:20150616.divinerrepository.sql',1466802865,NULL),('phabricator:20150617.harbor.1.lint.sql',1466802865,NULL),('phabricator:20150617.harbor.2.unit.sql',1466802865,NULL),('phabricator:20150618.harbor.1.planauto.sql',1466802866,NULL),('phabricator:20150618.harbor.2.stepauto.sql',1466802866,NULL),('phabricator:20150618.harbor.3.buildauto.sql',1466802866,NULL),('phabricator:20150619.conpherencerooms.1.sql',1466802866,NULL),('phabricator:20150619.conpherencerooms.2.sql',1466802866,NULL),('phabricator:20150619.conpherencerooms.3.sql',1466802866,NULL),('phabricator:20150621.phrase.1.sql',1466802866,NULL),('phabricator:20150621.phrase.2.sql',1466802866,NULL),('phabricator:20150622.bulk.1.job.sql',1466802866,NULL),('phabricator:20150622.bulk.2.task.sql',1466802866,NULL),('phabricator:20150622.bulk.3.xaction.sql',1466802866,NULL),('phabricator:20150622.bulk.4.edge.sql',1466802866,NULL),('phabricator:20150622.metamta.1.phid-col.sql',1466802866,NULL),('phabricator:20150622.metamta.2.phid-mig.php',1466802866,NULL),('phabricator:20150622.metamta.3.phid-key.sql',1466802866,NULL),('phabricator:20150622.metamta.4.actor-phid-col.sql',1466802866,NULL),('phabricator:20150622.metamta.5.actor-phid-mig.php',1466802866,NULL),('phabricator:20150622.metamta.6.actor-phid-key.sql',1466802866,NULL),('phabricator:20150624.spaces.1.repo.sql',1466802866,NULL),('phabricator:20150626.spaces.1.calendar.sql',1466802866,NULL),('phabricator:20150630.herald.1.sql',1466802866,NULL),('phabricator:20150630.herald.2.sql',1466802866,NULL),('phabricator:20150701.herald.1.sql',1466802866,NULL),('phabricator:20150701.herald.2.sql',1466802866,NULL),('phabricator:20150702.spaces.1.slowvote.sql',1466802866,NULL),('phabricator:20150706.herald.1.sql',1466802866,NULL),('phabricator:20150707.herald.1.sql',1466802866,NULL),('phabricator:20150708.arcanistproject.sql',1466802866,NULL),('phabricator:20150708.herald.1.sql',1466802866,NULL),('phabricator:20150708.herald.2.sql',1466802866,NULL),('phabricator:20150708.herald.3.sql',1466802866,NULL),('phabricator:20150712.badges.1.sql',1466802866,NULL),('phabricator:20150714.spaces.countdown.1.sql',1466802866,NULL),('phabricator:20150717.herald.1.sql',1466802866,NULL),('phabricator:20150719.countdown.1.sql',1466802866,NULL),('phabricator:20150719.countdown.2.sql',1466802866,NULL),('phabricator:20150719.countdown.3.sql',1466802866,NULL),('phabricator:20150721.phurl.1.url.sql',1466802866,NULL),('phabricator:20150721.phurl.2.xaction.sql',1466802866,NULL),('phabricator:20150721.phurl.3.xactioncomment.sql',1466802866,NULL),('phabricator:20150721.phurl.4.url.sql',1466802866,NULL),('phabricator:20150721.phurl.5.edge.sql',1466802866,NULL),('phabricator:20150721.phurl.6.alias.sql',1466802866,NULL),('phabricator:20150721.phurl.7.authorphid.sql',1466802866,NULL),('phabricator:20150722.dashboard.1.sql',1466802866,NULL),('phabricator:20150722.dashboard.2.sql',1466802866,NULL),('phabricator:20150723.countdown.1.sql',1466802866,NULL),('phabricator:20150724.badges.comments.1.sql',1466802866,NULL),('phabricator:20150724.countdown.comments.1.sql',1466802866,NULL),('phabricator:20150725.badges.mailkey.1.sql',1466802866,NULL),('phabricator:20150725.badges.mailkey.2.php',1466802866,NULL),('phabricator:20150725.badges.viewpolicy.3.sql',1466802866,NULL),('phabricator:20150725.countdown.mailkey.1.sql',1466802866,NULL),('phabricator:20150725.countdown.mailkey.2.php',1466802866,NULL),('phabricator:20150725.slowvote.mailkey.1.sql',1466802866,NULL),('phabricator:20150725.slowvote.mailkey.2.php',1466802866,NULL),('phabricator:20150727.heraldaction.1.sql',1466802866,NULL),('phabricator:20150730.herald.1.sql',1466802866,NULL),('phabricator:20150730.herald.2.sql',1466802866,NULL),('phabricator:20150730.herald.3.sql',1466802866,NULL),('phabricator:20150730.herald.4.sql',1466802866,NULL),('phabricator:20150730.herald.5.sql',1466802866,NULL),('phabricator:20150730.herald.6.sql',1466802866,NULL),('phabricator:20150730.herald.7.sql',1466802866,NULL),('phabricator:20150803.herald.1.sql',1466802866,NULL),('phabricator:20150803.herald.2.sql',1466802866,NULL),('phabricator:20150804.ponder.answer.mailkey.1.sql',1466802866,NULL),('phabricator:20150804.ponder.answer.mailkey.2.php',1466802866,NULL),('phabricator:20150804.ponder.question.1.sql',1466802867,NULL),('phabricator:20150804.ponder.question.2.sql',1466802867,NULL),('phabricator:20150804.ponder.question.3.sql',1466802867,NULL),('phabricator:20150804.ponder.spaces.4.sql',1466802867,NULL),('phabricator:20150805.paste.status.1.sql',1466802867,NULL),('phabricator:20150805.paste.status.2.sql',1466802867,NULL),('phabricator:20150806.ponder.answer.1.sql',1466802867,NULL),('phabricator:20150806.ponder.editpolicy.2.sql',1466802867,NULL),('phabricator:20150806.ponder.status.1.sql',1466802867,NULL),('phabricator:20150806.ponder.status.2.sql',1466802867,NULL),('phabricator:20150806.ponder.status.3.sql',1466802867,NULL),('phabricator:20150808.ponder.vote.1.sql',1466802867,NULL),('phabricator:20150808.ponder.vote.2.sql',1466802867,NULL),('phabricator:20150812.ponder.answer.1.sql',1466802867,NULL),('phabricator:20150812.ponder.answer.2.sql',1466802867,NULL),('phabricator:20150814.harbormater.artifact.phid.sql',1466802867,NULL),('phabricator:20150815.owners.status.1.sql',1466802867,NULL),('phabricator:20150815.owners.status.2.sql',1466802867,NULL),('phabricator:20150823.nuance.queue.1.sql',1466802867,NULL),('phabricator:20150823.nuance.queue.2.sql',1466802867,NULL),('phabricator:20150823.nuance.queue.3.sql',1466802867,NULL),('phabricator:20150823.nuance.queue.4.sql',1466802867,NULL),('phabricator:20150828.ponder.wiki.1.sql',1466802867,NULL),('phabricator:20150829.ponder.dupe.1.sql',1466802867,NULL),('phabricator:20150904.herald.1.sql',1466802867,NULL),('phabricator:20150906.mailinglist.sql',1466802867,NULL),('phabricator:20150910.owners.custom.1.sql',1466802867,NULL),('phabricator:20150916.drydock.slotlocks.1.sql',1466802867,NULL),('phabricator:20150922.drydock.commands.1.sql',1466802867,NULL),('phabricator:20150923.drydock.resourceid.1.sql',1466802867,NULL),('phabricator:20150923.drydock.resourceid.2.sql',1466802867,NULL),('phabricator:20150923.drydock.resourceid.3.sql',1466802867,NULL),('phabricator:20150923.drydock.taskid.1.sql',1466802867,NULL),('phabricator:20150924.drydock.disable.1.sql',1466802867,NULL),('phabricator:20150924.drydock.status.1.sql',1466802867,NULL),('phabricator:20150928.drydock.rexpire.1.sql',1466802867,NULL),('phabricator:20150930.drydock.log.1.sql',1466802867,NULL),('phabricator:20151001.drydock.rname.1.sql',1466802867,NULL),('phabricator:20151002.dashboard.status.1.sql',1466802867,NULL),('phabricator:20151002.harbormaster.bparam.1.sql',1466802867,NULL),('phabricator:20151009.drydock.auth.1.sql',1466802867,NULL),('phabricator:20151010.drydock.auth.2.sql',1466802867,NULL),('phabricator:20151013.drydock.op.1.sql',1466802867,NULL),('phabricator:20151023.harborpolicy.1.sql',1466802867,NULL),('phabricator:20151023.harborpolicy.2.php',1466802867,NULL),('phabricator:20151023.patchduration.sql',1466802867,16373),('phabricator:20151030.harbormaster.initiator.sql',1466802867,21600),('phabricator:20151106.editengine.1.table.sql',1466802867,9430),('phabricator:20151106.editengine.2.xactions.sql',1466802867,7174),('phabricator:20151106.phame.post.mailkey.1.sql',1466802867,19922),('phabricator:20151106.phame.post.mailkey.2.php',1466802867,1343),('phabricator:20151107.phame.blog.mailkey.1.sql',1466802867,17107),('phabricator:20151107.phame.blog.mailkey.2.php',1466802867,1049),('phabricator:20151108.phame.blog.joinpolicy.sql',1466802867,16781),('phabricator:20151108.xhpast.stderr.sql',1466802867,23962),('phabricator:20151109.phame.post.comments.1.sql',1466802867,8796),('phabricator:20151109.repository.coverage.1.sql',1466802867,1058),('phabricator:20151109.xhpast.db.1.sql',1466802867,1587),('phabricator:20151109.xhpast.db.2.sql',1466802867,561),('phabricator:20151110.daemonenvhash.sql',1466802867,36237),('phabricator:20151111.phame.blog.archive.1.sql',1466802867,16500),('phabricator:20151111.phame.blog.archive.2.sql',1466802867,479),('phabricator:20151112.herald.edge.sql',1466802867,14091),('phabricator:20151116.owners.edge.sql',1466802867,11769),('phabricator:20151128.phame.blog.picture.1.sql',1466802867,15526),('phabricator:20151130.phurl.mailkey.1.sql',1466802868,10082),('phabricator:20151130.phurl.mailkey.2.php',1466802868,1190),('phabricator:20151202.versioneddraft.1.sql',1466802868,8290),('phabricator:20151207.editengine.1.sql',1466802868,76502),('phabricator:20151210.land.1.refphid.sql',1466802868,15998),('phabricator:20151210.land.2.refphid.php',1466802868,751),('phabricator:20151215.phame.1.autotitle.sql',1466802868,20074),('phabricator:20151218.key.1.keyphid.sql',1466802868,15772),('phabricator:20151218.key.2.keyphid.php',1466802868,454),('phabricator:20151219.proj.01.prislug.sql',1466802868,22082),('phabricator:20151219.proj.02.prislugkey.sql',1466802868,15591),('phabricator:20151219.proj.03.copyslug.sql',1466802868,581),('phabricator:20151219.proj.04.dropslugkey.sql',1466802868,8692),('phabricator:20151219.proj.05.dropslug.sql',1466802868,21494),('phabricator:20151219.proj.06.defaultpolicy.php',1466802868,1250),('phabricator:20151219.proj.07.viewnull.sql',1466802868,14942),('phabricator:20151219.proj.08.editnull.sql',1466802868,11831),('phabricator:20151219.proj.09.joinnull.sql',1466802868,10583),('phabricator:20151219.proj.10.subcolumns.sql',1466802868,201986),('phabricator:20151219.proj.11.subprojectphids.sql',1466802868,23604),('phabricator:20151221.search.1.version.sql',1466802868,9540),('phabricator:20151221.search.2.ownersngrams.sql',1466802868,7522),('phabricator:20151221.search.3.reindex.php',1466802868,415),('phabricator:20151223.proj.01.paths.sql',1466802868,22569),('phabricator:20151223.proj.02.depths.sql',1466802868,25408),('phabricator:20151223.proj.03.pathkey.sql',1466802868,13193),('phabricator:20151223.proj.04.keycol.sql',1466802868,27276),('phabricator:20151223.proj.05.updatekeys.php',1466802868,451),('phabricator:20151223.proj.06.uniq.sql',1466802868,11754),('phabricator:20151226.reop.1.sql',1466802868,19139),('phabricator:20151227.proj.01.materialize.sql',1466802868,535),('phabricator:20151231.proj.01.icon.php',1466802868,1991),('phabricator:20160102.badges.award.sql',1466802868,10113),('phabricator:20160110.repo.01.slug.sql',1466802868,32438),('phabricator:20160110.repo.02.slug.php',1466802868,459),('phabricator:20160111.repo.01.slugx.sql',1466802868,627),('phabricator:20160112.repo.01.uri.sql',1466802868,8500),('phabricator:20160112.repo.02.uri.index.php',1466802868,64),('phabricator:20160113.propanel.1.storage.sql',1466802868,6858),('phabricator:20160113.propanel.2.xaction.sql',1466802868,7710),('phabricator:20160119.project.1.silence.sql',1466802868,579),('phabricator:20160122.project.1.boarddefault.php',1466802868,904),('phabricator:20160124.people.1.icon.sql',1466802868,12728),('phabricator:20160124.people.2.icondefault.sql',1466802868,477),('phabricator:20160128.repo.1.pull.sql',1466802868,9886),('phabricator:20160202.board.1.proxy.sql',1466802868,17041),('phabricator:20160202.ipv6.1.sql',1466802868,22960),('phabricator:20160202.ipv6.2.php',1466802868,1991),('phabricator:20160206.cover.1.sql',1466802868,29137),('phabricator:20160208.task.1.sql',1466802868,32546),('phabricator:20160208.task.2.sql',1466802868,33818),('phabricator:20160208.task.3.sql',1466802868,34881),('phabricator:20160212.proj.1.sql',1466802868,28365),('phabricator:20160212.proj.2.sql',1466802868,504),('phabricator:20160215.owners.policy.1.sql',1466802868,18780),('phabricator:20160215.owners.policy.2.sql',1466802868,17029),('phabricator:20160215.owners.policy.3.sql',1466802868,432),('phabricator:20160215.owners.policy.4.sql',1466802868,361),('phabricator:20160218.callsigns.1.sql',1466802869,12331),('phabricator:20160221.almanac.1.devicen.sql',1466802869,9432),('phabricator:20160221.almanac.2.devicei.php',1466802869,1470),('phabricator:20160221.almanac.3.servicen.sql',1466802869,7845),('phabricator:20160221.almanac.4.servicei.php',1466802869,916),('phabricator:20160221.almanac.5.networkn.sql',1466802869,8044),('phabricator:20160221.almanac.6.networki.php',1466802869,903),('phabricator:20160221.almanac.7.namespacen.sql',1466802869,7463),('phabricator:20160221.almanac.8.namespace.sql',1466802869,7462),('phabricator:20160221.almanac.9.namespacex.sql',1466802869,7400),('phabricator:20160222.almanac.1.properties.php',1466802869,1750),('phabricator:20160223.almanac.1.bound.sql',1466802869,16093),('phabricator:20160223.almanac.2.lockbind.sql',1466802869,447),('phabricator:20160223.almanac.3.devicelock.sql',1466802869,19320),('phabricator:20160223.almanac.4.servicelock.sql',1466802869,23933),('phabricator:20160223.paste.fileedges.php',1466802869,654),('phabricator:20160225.almanac.1.disablebinding.sql',1466802869,24011),('phabricator:20160225.almanac.2.stype.sql',1466802869,7243),('phabricator:20160225.almanac.3.stype.php',1466802869,464),('phabricator:20160227.harbormaster.1.plann.sql',1466802869,7447),('phabricator:20160227.harbormaster.2.plani.php',1466802869,367),('phabricator:20160303.drydock.1.bluen.sql',1466802869,6561),('phabricator:20160303.drydock.2.bluei.php',1466802869,323),('phabricator:20160303.drydock.3.edge.sql',1466802869,12513),('phabricator:20160308.nuance.01.disabled.sql',1466802869,14286),('phabricator:20160308.nuance.02.cursordata.sql',1466802869,14221),('phabricator:20160308.nuance.03.sourcen.sql',1466802869,7121),('phabricator:20160308.nuance.04.sourcei.php',1466802869,1214),('phabricator:20160308.nuance.05.sourcename.sql',1466802869,10244),('phabricator:20160308.nuance.06.label.sql',1466802869,18965),('phabricator:20160308.nuance.07.itemtype.sql',1466802869,25794),('phabricator:20160308.nuance.08.itemkey.sql',1466802869,21958),('phabricator:20160308.nuance.09.itemcontainer.sql',1466802869,22612),('phabricator:20160308.nuance.10.itemkeyu.sql',1466802869,552),('phabricator:20160308.nuance.11.requestor.sql',1466802869,14556),('phabricator:20160308.nuance.12.queue.sql',1466802869,19884),('phabricator:20160316.lfs.01.token.resource.sql',1466802869,13284),('phabricator:20160316.lfs.02.token.user.sql',1466802869,15555),('phabricator:20160316.lfs.03.token.properties.sql',1466802869,16563),('phabricator:20160316.lfs.04.token.default.sql',1466802869,581),('phabricator:20160317.lfs.01.ref.sql',1466802869,8120),('phabricator:20160321.nuance.01.taskbridge.sql',1466802869,28702),('phabricator:20160322.nuance.01.itemcommand.sql',1466802869,11727),('phabricator:20160323.badgemigrate.sql',1466802869,873),('phabricator:20160329.nuance.01.requestor.sql',1466802869,1313),('phabricator:20160329.nuance.02.requestorsource.sql',1466802869,1704),('phabricator:20160329.nuance.03.requestorxaction.sql',1466802869,1686),('phabricator:20160329.nuance.04.requestorcomment.sql',1466802869,1374),('phabricator:20160330.badges.migratequality.sql',1466802869,9959),('phabricator:20160330.badges.qualityxaction.mig.sql',1466802869,2022),('phabricator:20160331.fund.comments.1.sql',1466802869,6337),('phabricator:20160404.oauth.1.xaction.sql',1466802869,6577),('phabricator:20160405.oauth.2.disable.sql',1466802869,15800),('phabricator:20160406.badges.ngrams.php',1466802869,678),('phabricator:20160406.badges.ngrams.sql',1466802869,8117),('phabricator:20160406.columns.1.php',1466802869,543),('phabricator:20160411.repo.1.version.sql',1466802869,7060),('phabricator:20160418.repouri.1.sql',1466802869,6372),('phabricator:20160418.repouri.2.sql',1466802869,13856),('phabricator:20160418.repoversion.1.sql',1466802869,15751),('phabricator:20160419.pushlog.1.sql',1466802869,25118),('phabricator:20160424.locks.1.sql',1466802869,15525),('phabricator:20160426.searchedge.sql',1466802869,15875),('phabricator:20160428.repo.1.urixaction.sql',1466802869,7234),('phabricator:20160503.repo.01.lpath.sql',1466802869,23546),('phabricator:20160503.repo.02.lpathkey.sql',1466802869,12838),('phabricator:20160503.repo.03.lpathmigrate.php',1466802869,473),('phabricator:20160503.repo.04.mirrormigrate.php',1466802869,540),('phabricator:20160503.repo.05.urimigrate.php',1466802869,355),('phabricator:20160510.repo.01.uriindex.php',1466802869,4261),('phabricator:20160513.owners.01.autoreview.sql',1466802869,17537),('phabricator:20160513.owners.02.autoreviewnone.sql',1466802869,514),('phabricator:20160516.owners.01.dominion.sql',1466802869,16006),('phabricator:20160516.owners.02.dominionstrong.sql',1466802869,563),('phabricator:20160517.oauth.01.edge.sql',1466802869,13998),('phabricator:20160518.ssh.01.activecol.sql',1466802869,15647),('phabricator:20160518.ssh.02.activeval.sql',1466802869,485),('phabricator:20160518.ssh.03.activekey.sql',1466802869,10420),('phabricator:20160519.ssh.01.xaction.sql',1466802869,9024),('phabricator:20160531.pref.01.xaction.sql',1466802869,7837),('phabricator:20160531.pref.02.datecreatecol.sql',1466802869,11848),('phabricator:20160531.pref.03.datemodcol.sql',1466802869,13814),('phabricator:20160531.pref.04.datecreateval.sql',1466802869,429),('phabricator:20160531.pref.05.datemodval.sql',1466802869,305),('phabricator:20160531.pref.06.phidcol.sql',1466802869,12896),('phabricator:20160531.pref.07.phidval.php',1466802869,679),('phabricator:20160601.user.01.cache.sql',1466802869,9294),('phabricator:20160601.user.02.copyprefs.php',1466802869,1552),('phabricator:20160601.user.03.removetime.sql',1466802869,18764),('phabricator:20160601.user.04.removetranslation.sql',1466802869,20404),('phabricator:20160601.user.05.removesex.sql',1466802869,23968),('phabricator:20160603.user.01.removedcenabled.sql',1466802869,25907),('phabricator:20160603.user.02.removedctab.sql',1466802869,20792),('phabricator:20160603.user.03.removedcvisible.sql',1466802869,22140),('phabricator:20160604.user.01.stringmailprefs.php',1466802869,683),('phabricator:20160604.user.02.removeimagecache.sql',1466802870,22776),('phabricator:20160605.user.01.prefnulluser.sql',1466802870,12931),('phabricator:20160605.user.02.prefbuiltin.sql',1466802870,13598),('phabricator:20160605.user.03.builtinunique.sql',1466802870,12068),('phabricator:20160616.phame.blog.header.1.sql',1466802870,21493),('phabricator:20160616.repo.01.oldref.sql',1466802870,9001),('phabricator:20160617.harbormaster.01.arelease.sql',1466802870,16927),('phabricator:20160618.phame.blog.subtitle.sql',1466802870,28832),('phabricator:20160620.phame.blog.parentdomain.2.sql',1466802870,32443),('phabricator:20160620.phame.blog.parentsite.1.sql',1466802870,35279),('phabricator:20160623.phame.blog.fulldomain.1.sql',1466802870,37279),('phabricator:20160623.phame.blog.fulldomain.2.sql',1466802870,500),('phabricator:20160623.phame.blog.fulldomain.3.sql',1466802870,589),('phabricator:daemonstatus.sql',1466802856,NULL),('phabricator:daemonstatuskey.sql',1466802856,NULL),('phabricator:daemontaskarchive.sql',1466802856,NULL),('phabricator:db.almanac',1466802850,NULL),('phabricator:db.audit',1466802850,NULL),('phabricator:db.auth',1466802850,NULL),('phabricator:db.badges',1466802850,NULL),('phabricator:db.cache',1466802850,NULL),('phabricator:db.calendar',1466802850,NULL),('phabricator:db.chatlog',1466802850,NULL),('phabricator:db.conduit',1466802850,NULL),('phabricator:db.config',1466802850,NULL),('phabricator:db.conpherence',1466802850,NULL),('phabricator:db.countdown',1466802850,NULL),('phabricator:db.daemon',1466802850,NULL),('phabricator:db.dashboard',1466802850,NULL),('phabricator:db.differential',1466802850,NULL),('phabricator:db.diviner',1466802850,NULL),('phabricator:db.doorkeeper',1466802850,NULL),('phabricator:db.draft',1466802850,NULL),('phabricator:db.drydock',1466802850,NULL),('phabricator:db.fact',1466802850,NULL),('phabricator:db.feed',1466802850,NULL),('phabricator:db.file',1466802850,NULL),('phabricator:db.flag',1466802850,NULL),('phabricator:db.fund',1466802850,NULL),('phabricator:db.harbormaster',1466802850,NULL),('phabricator:db.herald',1466802850,NULL),('phabricator:db.legalpad',1466802850,NULL),('phabricator:db.maniphest',1466802850,NULL),('phabricator:db.meta_data',1466802850,NULL),('phabricator:db.metamta',1466802850,NULL),('phabricator:db.multimeter',1466802850,NULL),('phabricator:db.nuance',1466802850,NULL),('phabricator:db.oauth_server',1466802850,NULL),('phabricator:db.owners',1466802850,NULL),('phabricator:db.passphrase',1466802850,NULL),('phabricator:db.pastebin',1466802850,NULL),('phabricator:db.phame',1466802850,NULL),('phabricator:db.phlux',1466802850,NULL),('phabricator:db.pholio',1466802850,NULL),('phabricator:db.phortune',1466802850,NULL),('phabricator:db.phragment',1466802850,NULL),('phabricator:db.phrequent',1466802850,NULL),('phabricator:db.phriction',1466802850,NULL),('phabricator:db.phurl',1466802850,NULL),('phabricator:db.policy',1466802850,NULL),('phabricator:db.ponder',1466802850,NULL),('phabricator:db.project',1466802850,NULL),('phabricator:db.releeph',1466802850,NULL),('phabricator:db.repository',1466802850,NULL),('phabricator:db.search',1466802850,NULL),('phabricator:db.slowvote',1466802850,NULL),('phabricator:db.spaces',1466802850,NULL),('phabricator:db.system',1466802850,NULL),('phabricator:db.timeline',1466802850,NULL),('phabricator:db.token',1466802850,NULL),('phabricator:db.user',1466802850,NULL),('phabricator:db.worker',1466802850,NULL),('phabricator:db.xhpast',1466802850,NULL),('phabricator:db.xhpastview',1466802850,NULL),('phabricator:db.xhprof',1466802850,NULL),('phabricator:differentialbookmarks.sql',1466802856,NULL),('phabricator:draft-metadata.sql',1466802856,NULL),('phabricator:dropfileproxyimage.sql',1466802856,NULL),('phabricator:drydockresoucetype.sql',1466802856,NULL),('phabricator:drydocktaskid.sql',1466802856,NULL),('phabricator:edgetype.sql',1466802856,NULL),('phabricator:emailtable.sql',1466802855,NULL),('phabricator:emailtableport.sql',1466802855,NULL),('phabricator:emailtableremove.sql',1466802855,NULL),('phabricator:fact-raw.sql',1466802856,NULL),('phabricator:harbormasterobject.sql',1466802856,NULL),('phabricator:holidays.sql',1466802855,NULL),('phabricator:ldapinfo.sql',1466802855,NULL),('phabricator:legalpad-mailkey-populate.php',1466802858,NULL),('phabricator:legalpad-mailkey.sql',1466802858,NULL),('phabricator:liskcounters-task.sql',1466802856,NULL),('phabricator:liskcounters.php',1466802856,NULL),('phabricator:liskcounters.sql',1466802856,NULL),('phabricator:maniphestxcache.sql',1466802856,NULL),('phabricator:markupcache.sql',1466802856,NULL),('phabricator:migrate-differential-dependencies.php',1466802856,NULL),('phabricator:migrate-maniphest-dependencies.php',1466802856,NULL),('phabricator:migrate-maniphest-revisions.php',1466802856,NULL),('phabricator:migrate-project-edges.php',1466802856,NULL),('phabricator:owners-exclude.sql',1466802856,NULL),('phabricator:pastepolicy.sql',1466802856,NULL),('phabricator:phameblog.sql',1466802856,NULL),('phabricator:phamedomain.sql',1466802856,NULL),('phabricator:phameoneblog.sql',1466802856,NULL),('phabricator:phamepolicy.sql',1466802856,NULL),('phabricator:phiddrop.sql',1466802855,NULL),('phabricator:pholio.sql',1466802856,NULL),('phabricator:policy-project.sql',1466802856,NULL),('phabricator:ponder-comments.sql',1466802856,NULL),('phabricator:ponder-mailkey-populate.php',1466802856,NULL),('phabricator:ponder-mailkey.sql',1466802856,NULL),('phabricator:ponder.sql',1466802856,NULL),('phabricator:releeph.sql',1466802857,NULL),('phabricator:repository-lint.sql',1466802856,NULL),('phabricator:statustxt.sql',1466802856,NULL),('phabricator:symbolcontexts.sql',1466802856,NULL),('phabricator:testdatabase.sql',1466802855,NULL),('phabricator:threadtopic.sql',1466802855,NULL),('phabricator:userstatus.sql',1466802855,NULL),('phabricator:usertranslation.sql',1466802855,NULL),('phabricator:xhprof.sql',1466802856,NULL);
 
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_metamta` /*!40100 DEFAULT CHARACTER SET {$CHARSET} COLLATE {$COLLATE_TEXT} */;
 
@@ -1773,6 +1815,24 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_oauth_server` /*!40100 DE
 
 USE `{$NAMESPACE}_oauth_server`;
 
+CREATE TABLE `edge` (
+  `src` varbinary(64) NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varbinary(64) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  UNIQUE KEY `key_dst` (`dst`,`type`,`src`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `oauth_server_oauthclientauthorization` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
@@ -1822,9 +1882,31 @@ CREATE TABLE `oauth_server_oauthserverclient` (
   `editPolicy` varbinary(64) NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
+  `isDisabled` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `key_phid` (`phid`),
   KEY `creatorPHID` (`creatorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `oauth_server_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `objectPHID` varbinary(64) NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `commentPHID` varbinary(64) DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `oldValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `newValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `metadata` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_owners` /*!40100 DEFAULT CHARACTER SET {$CHARSET} COLLATE {$COLLATE_TEXT} */;
@@ -1906,6 +1988,10 @@ CREATE TABLE `owners_package` (
   `auditingEnabled` tinyint(1) NOT NULL DEFAULT '0',
   `mailKey` binary(20) NOT NULL,
   `status` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `autoReview` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dominion` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
@@ -2065,6 +2151,11 @@ CREATE TABLE `phame_blog` (
   `mailKey` binary(20) NOT NULL,
   `status` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
   `profileImagePHID` varbinary(64) DEFAULT NULL,
+  `headerImagePHID` varbinary(64) DEFAULT NULL,
+  `subtitle` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `parentDomain` varchar(128) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `parentSite` varchar(128) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `domainFullURI` varchar(128) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `phid` (`phid`),
   UNIQUE KEY `domain` (`domain`)
@@ -2292,6 +2383,7 @@ CREATE TABLE `project` (
   `projectPath` varbinary(64) NOT NULL,
   `projectDepth` int(10) unsigned NOT NULL,
   `projectPathKey` binary(4) NOT NULL,
+  `properties` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_pathkey` (`projectPathKey`),
   UNIQUE KEY `key_phid` (`phid`),
@@ -2312,8 +2404,10 @@ CREATE TABLE `project_column` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   `properties` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `proxyPHID` varbinary(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_proxy` (`projectPHID`,`proxyPHID`),
   KEY `key_status` (`projectPHID`,`status`,`sequence`),
   KEY `key_sequence` (`projectPHID`,`sequence`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
@@ -2447,7 +2541,7 @@ CREATE TABLE `repository` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
   `name` varchar(255) CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} NOT NULL,
-  `callsign` varchar(32) CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} NOT NULL,
+  `callsign` varchar(32) CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} DEFAULT NULL,
   `versionControlSystem` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
   `details` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
@@ -2460,10 +2554,12 @@ CREATE TABLE `repository` (
   `almanacServicePHID` varbinary(64) DEFAULT NULL,
   `spacePHID` varbinary(64) DEFAULT NULL,
   `repositorySlug` varchar(64) CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} DEFAULT NULL,
+  `localPath` varchar(128) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `callsign` (`callsign`),
   UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `callsign` (`callsign`),
   UNIQUE KEY `key_slug` (`repositorySlug`),
+  UNIQUE KEY `key_local` (`localPath`),
   KEY `key_vcs` (`versionControlSystem`),
   KEY `key_name` (`name`(128)),
   KEY `key_space` (`spacePHID`)
@@ -2550,6 +2646,19 @@ CREATE TABLE `repository_filesystem` (
   KEY `repositoryID` (`repositoryID`,`svnCommit`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `repository_gitlfsref` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `repositoryPHID` varbinary(64) NOT NULL,
+  `objectHash` binary(64) NOT NULL,
+  `byteSize` bigint(20) unsigned NOT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `filePHID` varbinary(64) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_hash` (`repositoryPHID`,`objectHash`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `repository_lintmessage` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `branchID` int(10) unsigned NOT NULL,
@@ -2576,6 +2685,14 @@ CREATE TABLE `repository_mirror` (
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_repository` (`repositoryPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `repository_oldref` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `repositoryPHID` varbinary(64) NOT NULL,
+  `commitIdentifier` varchar(40) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
   KEY `key_repository` (`repositoryPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
@@ -2610,13 +2727,30 @@ CREATE TABLE `repository_pathchange` (
   KEY `repositoryID` (`repositoryID`,`pathID`,`commitSequence`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `repository_pullevent` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `repositoryPHID` varbinary(64) DEFAULT NULL,
+  `epoch` int(10) unsigned NOT NULL,
+  `pullerPHID` varbinary(64) DEFAULT NULL,
+  `remoteAddress` varbinary(64) DEFAULT NULL,
+  `remoteProtocol` varchar(32) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
+  `resultType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `resultCode` int(10) unsigned NOT NULL,
+  `properties` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_repository` (`repositoryPHID`),
+  KEY `key_epoch` (`epoch`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `repository_pushevent` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
   `repositoryPHID` varbinary(64) NOT NULL,
   `epoch` int(10) unsigned NOT NULL,
   `pusherPHID` varbinary(64) NOT NULL,
-  `remoteAddress` int(10) unsigned DEFAULT NULL,
+  `remoteAddress` varbinary(64) DEFAULT NULL,
   `remoteProtocol` varchar(32) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `rejectCode` int(10) unsigned NOT NULL,
   `rejectDetails` varchar(64) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
@@ -2640,6 +2774,7 @@ CREATE TABLE `repository_pushlog` (
   `refNew` varchar(40) COLLATE {$COLLATE_TEXT} NOT NULL,
   `mergeBase` varchar(40) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `changeFlags` int(10) unsigned NOT NULL,
+  `devicePHID` varbinary(64) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
   KEY `key_repository` (`repositoryPHID`),
@@ -2716,6 +2851,24 @@ CREATE TABLE `repository_transaction` (
   KEY `key_object` (`objectPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `repository_uri` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `repositoryPHID` varbinary(64) NOT NULL,
+  `uri` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `builtinProtocol` varchar(32) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
+  `builtinIdentifier` varchar(32) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
+  `ioType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `displayType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `isDisabled` tinyint(1) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `credentialPHID` varbinary(64) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_builtin` (`repositoryPHID`,`builtinProtocol`,`builtinIdentifier`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `repository_uriindex` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `repositoryPHID` varbinary(64) NOT NULL,
@@ -2723,6 +2876,27 @@ CREATE TABLE `repository_uriindex` (
   PRIMARY KEY (`id`),
   KEY `key_repository` (`repositoryPHID`),
   KEY `key_uri` (`repositoryURI`(128))
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `repository_uritransaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `objectPHID` varbinary(64) NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `commentPHID` varbinary(64) DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `oldValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `newValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `metadata` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `repository_vcspassword` (
@@ -2735,9 +2909,39 @@ CREATE TABLE `repository_vcspassword` (
   UNIQUE KEY `key_phid` (`userPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `repository_workingcopyversion` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `repositoryPHID` varbinary(64) NOT NULL,
+  `devicePHID` varbinary(64) NOT NULL,
+  `repositoryVersion` int(10) unsigned NOT NULL,
+  `isWriting` tinyint(1) NOT NULL,
+  `writeProperties` longtext COLLATE {$COLLATE_TEXT},
+  `lockOwner` varchar(255) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_workingcopy` (`repositoryPHID`,`devicePHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_search` /*!40100 DEFAULT CHARACTER SET {$CHARSET} COLLATE {$COLLATE_TEXT} */;
 
 USE `{$NAMESPACE}_search`;
+
+CREATE TABLE `edge` (
+  `src` varbinary(64) NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varbinary(64) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  UNIQUE KEY `key_dst` (`dst`,`type`,`src`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `search_document` (
   `phid` varbinary(64) NOT NULL,
@@ -3031,26 +3235,19 @@ CREATE TABLE `user` (
   `phid` varbinary(64) NOT NULL,
   `userName` varchar(64) CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} NOT NULL,
   `realName` varchar(128) COLLATE {$COLLATE_TEXT} NOT NULL,
-  `sex` varchar(4) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
-  `translation` varchar(64) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `passwordSalt` varchar(32) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `passwordHash` varchar(128) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   `profileImagePHID` varbinary(64) DEFAULT NULL,
-  `consoleEnabled` tinyint(1) NOT NULL,
-  `consoleVisible` tinyint(1) NOT NULL,
-  `consoleTab` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
   `conduitCertificate` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
   `isSystemAgent` tinyint(1) NOT NULL DEFAULT '0',
   `isDisabled` tinyint(1) NOT NULL,
   `isAdmin` tinyint(1) NOT NULL,
-  `timezoneIdentifier` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
   `isEmailVerified` int(10) unsigned NOT NULL,
   `isApproved` int(10) unsigned NOT NULL,
   `accountSecret` binary(64) NOT NULL,
   `isEnrolledInMultiFactor` tinyint(1) NOT NULL DEFAULT '0',
-  `profileImageCache` varchar(255) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `availabilityCache` varchar(255) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   `availabilityCacheTTL` int(10) unsigned DEFAULT NULL,
   `isMailingList` tinyint(1) NOT NULL,
@@ -3074,6 +3271,19 @@ CREATE TABLE `user_authinvite` (
   UNIQUE KEY `key_address` (`emailAddress`),
   UNIQUE KEY `key_code` (`verificationHash`),
   UNIQUE KEY `key_phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `user_cache` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varbinary(64) NOT NULL,
+  `cacheIndex` binary(12) NOT NULL,
+  `cacheKey` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `cacheData` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `cacheType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_usercache` (`userPHID`,`cacheIndex`),
+  KEY `key_cachekey` (`cacheIndex`),
+  KEY `key_cachetype` (`cacheType`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `user_configuredcustomfieldstorage` (
@@ -3138,8 +3348,9 @@ CREATE TABLE `user_externalaccount` (
   `profileImagePHID` varbinary(64) DEFAULT NULL,
   `properties` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `phid` (`phid`),
-  UNIQUE KEY `account_details` (`accountType`,`accountDomain`,`accountID`)
+  UNIQUE KEY `account_details` (`accountType`,`accountDomain`,`accountID`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_user` (`userPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `user_log` (
@@ -3172,10 +3383,37 @@ CREATE TABLE `user_nametoken` (
 
 CREATE TABLE `user_preferences` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `userPHID` varbinary(64) NOT NULL,
+  `userPHID` varbinary(64) DEFAULT NULL,
   `preferences` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `phid` varbinary(64) NOT NULL,
+  `builtinKey` varchar(32) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `userPHID` (`userPHID`)
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_builtin` (`builtinKey`),
+  UNIQUE KEY `key_user` (`userPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `user_preferencestransaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `objectPHID` varbinary(64) NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `commentPHID` varbinary(64) DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `oldValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `newValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `metadata` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `user_profile` (
@@ -3186,6 +3424,7 @@ CREATE TABLE `user_profile` (
   `profileImagePHID` varbinary(64) DEFAULT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
+  `icon` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `userPHID` (`userPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
@@ -4512,21 +4751,47 @@ CREATE TABLE `auth_sshkey` (
   `dateModified` int(10) unsigned NOT NULL,
   `keyIndex` binary(12) NOT NULL,
   `isTrusted` tinyint(1) NOT NULL,
+  `isActive` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `key_unique` (`keyIndex`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_activeunique` (`keyIndex`,`isActive`),
+  KEY `key_object` (`objectPHID`),
+  KEY `key_active` (`isActive`,`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `auth_sshkeytransaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `objectPHID` varbinary(64) NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `commentPHID` varbinary(64) DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `oldValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `newValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `metadata` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
   KEY `key_object` (`objectPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `auth_temporarytoken` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `objectPHID` varbinary(64) NOT NULL,
+  `tokenResource` varbinary(64) NOT NULL,
   `tokenType` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
   `tokenExpires` int(10) unsigned NOT NULL,
   `tokenCode` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `userPHID` varbinary(64) DEFAULT NULL,
+  `properties` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `key_token` (`objectPHID`,`tokenType`,`tokenCode`),
-  KEY `key_expires` (`tokenExpires`)
+  UNIQUE KEY `key_token` (`tokenResource`,`tokenType`,`tokenCode`),
+  KEY `key_expires` (`tokenExpires`),
+  KEY `key_user` (`userPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_doorkeeper` /*!40100 DEFAULT CHARACTER SET {$CHARSET} COLLATE {$COLLATE_TEXT} */;
@@ -4735,25 +5000,53 @@ CREATE TABLE `edgedata` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `nuance_importcursordata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `sourcePHID` varbinary(64) NOT NULL,
+  `cursorKey` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `cursorType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `properties` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_source` (`sourcePHID`,`cursorKey`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `nuance_item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
   `ownerPHID` varbinary(64) DEFAULT NULL,
-  `requestorPHID` varbinary(64) NOT NULL,
+  `requestorPHID` varbinary(64) DEFAULT NULL,
   `sourcePHID` varbinary(64) NOT NULL,
-  `sourceLabel` varchar(255) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
-  `status` int(10) unsigned NOT NULL,
+  `status` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
   `data` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   `mailKey` binary(20) NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
-  `queuePHID` varbinary(64) NOT NULL,
+  `queuePHID` varbinary(64) DEFAULT NULL,
+  `itemType` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `itemKey` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `itemContainerKey` varchar(64) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_item` (`sourcePHID`,`itemKey`),
   KEY `key_source` (`sourcePHID`,`status`),
   KEY `key_owner` (`ownerPHID`,`status`),
   KEY `key_requestor` (`requestorPHID`,`status`),
-  KEY `key_queue` (`queuePHID`,`status`)
+  KEY `key_queue` (`queuePHID`,`status`),
+  KEY `key_container` (`sourcePHID`,`itemContainerKey`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `nuance_itemcommand` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `itemPHID` varbinary(64) NOT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `command` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `parameters` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_item` (`itemPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `nuance_itemtransaction` (
@@ -4847,73 +5140,10 @@ CREATE TABLE `nuance_queuetransaction_comment` (
   UNIQUE KEY `key_version` (`transactionPHID`,`commentVersion`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
-CREATE TABLE `nuance_requestor` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `phid` varbinary(64) NOT NULL,
-  `data` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `dateCreated` int(10) unsigned NOT NULL,
-  `dateModified` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `key_phid` (`phid`)
-) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
-
-CREATE TABLE `nuance_requestorsource` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `requestorPHID` varbinary(64) NOT NULL,
-  `sourcePHID` varbinary(64) NOT NULL,
-  `sourceKey` varchar(128) COLLATE {$COLLATE_TEXT} NOT NULL,
-  `data` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `dateCreated` int(10) unsigned NOT NULL,
-  `dateModified` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `key_source_key` (`sourcePHID`,`sourceKey`),
-  KEY `key_requestor` (`requestorPHID`,`id`),
-  KEY `key_source` (`sourcePHID`,`id`)
-) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
-
-CREATE TABLE `nuance_requestortransaction` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `phid` varbinary(64) NOT NULL,
-  `authorPHID` varbinary(64) NOT NULL,
-  `objectPHID` varbinary(64) NOT NULL,
-  `viewPolicy` varbinary(64) NOT NULL,
-  `editPolicy` varbinary(64) NOT NULL,
-  `commentPHID` varbinary(64) DEFAULT NULL,
-  `commentVersion` int(10) unsigned NOT NULL,
-  `transactionType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
-  `oldValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `newValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `metadata` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `dateCreated` int(10) unsigned NOT NULL,
-  `dateModified` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `key_phid` (`phid`),
-  KEY `key_object` (`objectPHID`)
-) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
-
-CREATE TABLE `nuance_requestortransaction_comment` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `phid` varbinary(64) NOT NULL,
-  `transactionPHID` varbinary(64) DEFAULT NULL,
-  `authorPHID` varbinary(64) NOT NULL,
-  `viewPolicy` varbinary(64) NOT NULL,
-  `editPolicy` varbinary(64) NOT NULL,
-  `commentVersion` int(10) unsigned NOT NULL,
-  `content` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
-  `isDeleted` tinyint(1) NOT NULL,
-  `dateCreated` int(10) unsigned NOT NULL,
-  `dateModified` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `key_phid` (`phid`),
-  UNIQUE KEY `key_version` (`transactionPHID`,`commentVersion`)
-) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
-
 CREATE TABLE `nuance_source` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
-  `name` varchar(255) COLLATE {$COLLATE_TEXT} DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} NOT NULL,
   `type` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
   `data` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   `mailKey` binary(20) NOT NULL,
@@ -4922,9 +5152,19 @@ CREATE TABLE `nuance_source` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   `defaultQueuePHID` varbinary(64) NOT NULL,
+  `isDisabled` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
   KEY `key_type` (`type`,`dateModified`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `nuance_sourcename_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `nuance_sourcetransaction` (
@@ -5347,6 +5587,24 @@ CREATE TABLE `fund_initiativetransaction` (
   KEY `key_object` (`objectPHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `fund_initiativetransaction_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `transactionPHID` varbinary(64) DEFAULT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `content` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `isDeleted` tinyint(1) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_version` (`transactionPHID`,`commentVersion`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_almanac` /*!40100 DEFAULT CHARACTER SET {$CHARSET} COLLATE {$COLLATE_TEXT} */;
 
 USE `{$NAMESPACE}_almanac`;
@@ -5360,6 +5618,7 @@ CREATE TABLE `almanac_binding` (
   `mailKey` binary(20) NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
+  `isDisabled` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
   UNIQUE KEY `key_service` (`servicePHID`,`interfacePHID`),
@@ -5398,11 +5657,20 @@ CREATE TABLE `almanac_device` (
   `mailKey` binary(20) NOT NULL,
   `viewPolicy` varbinary(64) NOT NULL,
   `editPolicy` varbinary(64) NOT NULL,
-  `isLocked` tinyint(1) NOT NULL,
+  `isBoundToClusterService` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
   UNIQUE KEY `key_name` (`nameIndex`),
   KEY `key_nametext` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `almanac_devicename_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `almanac_devicetransaction` (
@@ -5441,6 +5709,52 @@ CREATE TABLE `almanac_interface` (
   KEY `key_device` (`devicePHID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
+CREATE TABLE `almanac_namespace` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `name` varchar(128) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `nameIndex` binary(12) NOT NULL,
+  `mailKey` binary(20) NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_nameindex` (`nameIndex`),
+  KEY `key_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `almanac_namespacename_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `almanac_namespacetransaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varbinary(64) NOT NULL,
+  `authorPHID` varbinary(64) NOT NULL,
+  `objectPHID` varbinary(64) NOT NULL,
+  `viewPolicy` varbinary(64) NOT NULL,
+  `editPolicy` varbinary(64) NOT NULL,
+  `commentPHID` varbinary(64) DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `oldValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `newValue` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `contentSource` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `metadata` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `almanac_network` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
@@ -5452,6 +5766,15 @@ CREATE TABLE `almanac_network` (
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `almanac_networkname_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `almanac_networktransaction` (
@@ -5495,13 +5818,21 @@ CREATE TABLE `almanac_service` (
   `editPolicy` varbinary(64) NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
-  `serviceClass` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
-  `isLocked` tinyint(1) NOT NULL,
+  `serviceType` varchar(64) COLLATE {$COLLATE_TEXT} NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
   UNIQUE KEY `key_name` (`nameIndex`),
   KEY `key_nametext` (`name`),
-  KEY `key_class` (`serviceClass`)
+  KEY `key_servicetype` (`serviceType`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `almanac_servicename_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `almanac_servicetransaction` (
@@ -5740,14 +6071,26 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `{$NAMESPACE}_badges` /*!40100 DEFAULT 
 
 USE `{$NAMESPACE}_badges`;
 
+CREATE TABLE `badges_award` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `badgePHID` varbinary(64) NOT NULL,
+  `recipientPHID` varbinary(64) NOT NULL,
+  `awarderPHID` varbinary(64) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_badge` (`badgePHID`,`recipientPHID`),
+  KEY `key_recipient` (`recipientPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
 CREATE TABLE `badges_badge` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varbinary(64) NOT NULL,
-  `name` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `name` varchar(255) CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT} NOT NULL,
   `flavor` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
   `description` longtext COLLATE {$COLLATE_TEXT} NOT NULL,
   `icon` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
-  `quality` varchar(255) COLLATE {$COLLATE_TEXT} NOT NULL,
+  `quality` int(10) unsigned NOT NULL,
   `status` varchar(32) COLLATE {$COLLATE_TEXT} NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
@@ -5757,6 +6100,15 @@ CREATE TABLE `badges_badge` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `key_phid` (`phid`),
   KEY `key_creator` (`creatorPHID`,`dateModified`)
+) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
+
+CREATE TABLE `badges_badgename_ngrams` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectID` int(10) unsigned NOT NULL,
+  `ngram` char(3) COLLATE {$COLLATE_TEXT} NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_object` (`objectID`),
+  KEY `key_ngram` (`ngram`,`objectID`)
 ) ENGINE=InnoDB DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};
 
 CREATE TABLE `badges_transaction` (
