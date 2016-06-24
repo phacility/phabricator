@@ -105,14 +105,14 @@ final class PhabricatorBadgesTransaction
         }
         break;
       case self::TYPE_QUALITY:
+        $qual_new = PhabricatorBadgesQuality::getQualityName($new);
+        $qual_old = PhabricatorBadgesQuality::getQualityName($old);
         if ($old === null) {
           return pht(
             '%s set the quality for this badge as "%s".',
             $this->renderHandleLink($author_phid),
-            $new);
+            $qual_new);
         } else {
-          $qual_new = PhabricatorBadgesQuality::getQualityName($new);
-          $qual_old = PhabricatorBadgesQuality::getQualityName($old);
           return pht(
             '%s updated the quality for this badge from "%s" to "%s".',
             $this->renderHandleLink($author_phid),

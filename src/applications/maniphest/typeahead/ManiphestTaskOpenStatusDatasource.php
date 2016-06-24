@@ -67,7 +67,8 @@ final class ManiphestTaskOpenStatusDatasource
       ->setName($name.' open')
       ->setDisplayName($name)
       ->setPHID(self::FUNCTION_TOKEN)
-      ->setUnique(true);
+      ->setUnique(true)
+      ->addAttribute(pht('Select any open status.'));
   }
 
 }

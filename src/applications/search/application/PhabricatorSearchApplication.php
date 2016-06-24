@@ -41,6 +41,8 @@ final class PhabricatorSearchApplication extends PhabricatorApplication {
         'delete/(?P<queryKey>[^/]+)/(?P<engine>[^/]+)/'
           => 'PhabricatorSearchDeleteController',
         'order/(?P<engine>[^/]+)/' => 'PhabricatorSearchOrderController',
+        'rel/(?P<relationshipKey>[^/]+)/(?P<sourcePHID>[^/]+)/'
+          => 'PhabricatorSearchRelationshipController',
       ),
     );
   }

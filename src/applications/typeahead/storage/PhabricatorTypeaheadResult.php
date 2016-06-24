@@ -17,6 +17,7 @@ final class PhabricatorTypeaheadResult extends Phobject {
   private $tokenType;
   private $unique;
   private $autocomplete;
+  private $attributes = array();
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -186,6 +187,28 @@ final class PhabricatorTypeaheadResult extends Phobject {
     }
 
     return null;
+  }
+
+  public function getImageURI() {
+    return $this->imageURI;
+  }
+
+  public function getClosed() {
+    return $this->closed;
+  }
+
+  public function resetAttributes() {
+    $this->attributes = array();
+    return $this;
+  }
+
+  public function getAttributes() {
+    return $this->attributes;
+  }
+
+  public function addAttribute($attribute) {
+    $this->attributes[] = $attribute;
+    return $this;
   }
 
 }

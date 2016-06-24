@@ -26,12 +26,6 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return pht('Things before they were cool.');
   }
 
-  public function getEventListeners() {
-    return array(
-      new PholioActionMenuEventListener(),
-    );
-  }
-
   public function getRemarkupRules() {
     return array(
       new PholioRemarkupRule(),

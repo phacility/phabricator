@@ -57,10 +57,26 @@ input.typeahead-browse-input {
 
 .typeahead-browse-item button {
   float: right;
-  margin: 2px 6px;
+  margin: 8px 6px 0;
 }
 
 .typeahead-browse-item a.jx-tokenizer-token {
   margin-top: 1px;
   margin-left: 6px;
+}
+
+.typeahead-browse-item .phabricator-main-search-typeahead-result {
+  margin: 2px 0;
+  padding: 0 8px;
+}
+
+.typeahead-browse-item .phabricator-main-search-typeahead-result.has-image {
+  padding-left: 48px;
+}
+
+.typeahead-browse-item
+  .phabricator-main-search-typeahead-result.result-closed
+  .result-name {
+  text-decoration: line-through;
+  color: {$lightgreytext};
 }

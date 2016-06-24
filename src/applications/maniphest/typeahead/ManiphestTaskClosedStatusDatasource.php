@@ -67,7 +67,8 @@ final class ManiphestTaskClosedStatusDatasource
       ->setName($name.' closed')
       ->setDisplayName($name)
       ->setPHID(self::FUNCTION_TOKEN)
-      ->setUnique(true);
+      ->setUnique(true)
+      ->addAttribute(pht('Select any closed status.'));
   }
 
 }

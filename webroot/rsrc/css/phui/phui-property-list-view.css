@@ -169,8 +169,9 @@
 
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
-.phui-property-list-view .phui-tag-view {
+.phui-property-list-value .phui-tag-view {
   margin: 2px 0;
+  white-space: pre-wrap;
 }
 
 .phui-property-list-has-actions .phui-property-list-properties-wrap {

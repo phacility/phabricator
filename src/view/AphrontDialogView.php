@@ -24,6 +24,8 @@ final class AphrontDialogView
   private $flush;
   private $validationException;
   private $objectList;
+  private $resizeX;
+  private $resizeY;
 
 
   const WIDTH_DEFAULT = 'default';
@@ -70,6 +72,24 @@ final class AphrontDialogView
 
   public function getShortTitle() {
     return $this->shortTitle;
+  }
+
+  public function setResizeY($resize_y) {
+    $this->resizeY = $resize_y;
+    return $this;
+  }
+
+  public function getResizeY() {
+    return $this->resizeY;
+  }
+
+  public function setResizeX($resize_x) {
+    $this->resizeX = $resize_x;
+    return $this;
+  }
+
+  public function getResizeX() {
+    return $this->resizeX;
   }
 
   public function addSubmitButton($text = null) {
@@ -347,6 +367,20 @@ final class AphrontDialogView
         $this->footers);
     }
 
+    $resize = null;
+    if ($this->resizeX || $this->resizeY) {
+      $resize = javelin_tag(
+        'div',
+        array(
+          'class' => 'aphront-dialog-resize',
+          'sigil' => 'jx-dialog-resize',
+          'meta' => array(
+            'resizeX' => $this->resizeX,
+            'resizeY' => $this->resizeY,
+          ),
+        ));
+    }
+
     $tail = null;
     if ($buttons || $footer) {
       $tail = phutil_tag(
@@ -357,6 +391,7 @@ final class AphrontDialogView
         array(
           $buttons,
           $footer,
+          $resize,
         ));
     }
 

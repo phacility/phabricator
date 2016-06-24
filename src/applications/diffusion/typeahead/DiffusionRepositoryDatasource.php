@@ -31,24 +31,50 @@ final class DiffusionRepositoryDatasource
       "phabricator-search-icon phui-font-fa phui-icon-view {$type_icon}";
 
     $results = array();
-    foreach ($repos as $repo) {
-      $display_name = $repo->getMonogram().' '.$repo->getName();
+    foreach ($repos as $repository) {
+      $monogram = $repository->getMonogram();
+      $name = $repository->getName();
 
-      $name = $display_name;
-      $slug = $repo->getRepositorySlug();
+      $display_name = "{$monogram} {$name}";
+
+      $parts = array();
+      $parts[] = $name;
+
+      $slug = $repository->getRepositorySlug();
       if (strlen($slug)) {
-        $name = "{$name} {$slug}";
+        $parts[] = $slug;
       }
 
-      $results[] = id(new PhabricatorTypeaheadResult())
+      $callsign = $repository->getCallsign();
+      if ($callsign) {
+        $parts[] = $callsign;
+      }
+
+      foreach ($repository->getAllMonograms() as $monogram) {
+        $parts[] = $monogram;
+      }
+
+      $name = implode(' ', $parts);
+
+      $vcs = $repository->getVersionControlSystem();
+      $vcs_type = PhabricatorRepositoryType::getNameForRepositoryType($vcs);
+
+      $result = id(new PhabricatorTypeaheadResult())
         ->setName($name)
         ->setDisplayName($display_name)
-        ->setURI($repo->getURI())
-        ->setPHID($repo->getPHID())
-        ->setPriorityString($repo->getMonogram())
+        ->setURI($repository->getURI())
+        ->setPHID($repository->getPHID())
+        ->setPriorityString($repository->getMonogram())
         ->setPriorityType('repo')
         ->setImageSprite($image_sprite)
-        ->setDisplayType(pht('Repository'));
+        ->setDisplayType(pht('Repository'))
+        ->addAttribute($vcs_type);
+
+      if (!$repository->isTracked()) {
+        $result->setClosed(pht('Inactive'));
+      }
+
+      $results[] = $result;
     }
 
     return $results;

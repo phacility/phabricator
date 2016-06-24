@@ -159,6 +159,12 @@ abstract class PhameLiveController extends PhameController {
     // "Blogs" crumb into the crumbs list.
     if ($is_external) {
       $crumbs = new PHUICrumbsView();
+      // Link back to parent site
+      if ($blog->getParentSite() && $blog->getParentDomain()) {
+        $crumbs->addTextCrumb(
+          $blog->getParentSite(),
+          $blog->getExternalParentURI());
+      }
     } else {
       $crumbs = parent::buildApplicationCrumbs();
       $crumbs->addTextCrumb(

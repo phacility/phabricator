@@ -18,6 +18,9 @@ final class PhameBlog extends PhameDAO
   protected $subtitle;
   protected $description;
   protected $domain;
+  protected $domainFullURI;
+  protected $parentSite;
+  protected $parentDomain;
   protected $configData;
   protected $creatorPHID;
   protected $viewPolicy;
@@ -44,6 +47,9 @@ final class PhameBlog extends PhameDAO
         'subtitle' => 'text64',
         'description' => 'text',
         'domain' => 'text128?',
+        'domainFullURI' => 'text128?',
+        'parentSite' => 'text128',
+        'parentDomain' => 'text128',
         'status' => 'text32',
         'mailKey' => 'bytes20',
         'profileImagePHID' => 'phid?',
@@ -108,34 +114,29 @@ final class PhameBlog extends PhameDAO
    *
    * @return string
    */
-  public function validateCustomDomain($custom_domain) {
-    $example_domain = 'blog.example.com';
+  public function validateCustomDomain($domain_full_uri) {
+    $example_domain = 'http://blog.example.com/';
     $label = pht('Invalid');
 
     // note this "uri" should be pretty busted given the desired input
     // so just use it to test if there's a protocol specified
-    $uri = new PhutilURI($custom_domain);
-    if ($uri->getProtocol()) {
+    $uri = new PhutilURI($domain_full_uri);
+    $domain = $uri->getDomain();
+    $protocol = $uri->getProtocol();
+    $path = $uri->getPath();
+    $supported_protocols = array('http', 'https');
+
+    if (!in_array($protocol, $supported_protocols)) {
       return array(
         $label,
         pht(
-          'The custom domain should not include a protocol. Just provide '.
-          'the bare domain name (for example, "%s").',
+          'The custom domain should include a valid protocol in the URI '.
+          '(for example, "%s"). Valid protocols are "http" or "https".',
           $example_domain),
-      );
+        );
     }
 
-    if ($uri->getPort()) {
-      return array(
-        $label,
-        pht(
-          'The custom domain should not include a port number. Just provide '.
-          'the bare domain name (for example, "%s").',
-          $example_domain),
-      );
-    }
-
-    if (strpos($custom_domain, '/') !== false) {
+    if (strlen($path) && $path != '/') {
       return array(
         $label,
         pht(
@@ -146,7 +147,7 @@ final class PhameBlog extends PhameDAO
         );
     }
 
-    if (strpos($custom_domain, '.') === false) {
+    if (strpos($domain, '.') === false) {
       return array(
         $label,
         pht(
@@ -187,8 +188,14 @@ final class PhameBlog extends PhameDAO
   }
 
   public function getExternalLiveURI() {
-    $domain = $this->getDomain();
-    $uri = new PhutilURI('http://'.$this->getDomain().'/');
+    $uri = new PhutilURI($this->getDomainFullURI());
+    PhabricatorEnv::requireValidRemoteURIForLink($uri);
+    return (string)$uri;
+  }
+
+  public function getExternalParentURI() {
+    $uri = $this->getParentDomain();
+    PhabricatorEnv::requireValidRemoteURIForLink($uri);
     return (string)$uri;
   }
 

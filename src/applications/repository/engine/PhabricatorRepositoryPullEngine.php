@@ -191,7 +191,7 @@ final class PhabricatorRepositoryPullEngine
       ));
   }
 
-  private function installHook($path) {
+  private function installHook($path, array $hook_argv = array()) {
     $this->log('%s', pht('Installing commit hook to "%s"...', $path));
 
     $repository = $this->getRepository();
@@ -202,10 +202,11 @@ final class PhabricatorRepositoryPullEngine
 
     $full_php_path = Filesystem::resolveBinary('php');
     $cmd = csprintf(
-      'exec %s -f %s -- %s "$@"',
+      'exec %s -f %s -- %s %Ls "$@"',
       $full_php_path,
       $bin,
-      $identifier);
+      $identifier,
+      $hook_argv);
 
     $hook = "#!/bin/sh\nexport TERM=dumb\n{$cmd}\n";
 
@@ -585,8 +586,16 @@ final class PhabricatorRepositoryPullEngine
     $root = $repository->getLocalPath();
 
     $path = '/hooks/pre-commit';
-
     $this->installHook($root.$path);
+
+    $revprop_path = '/hooks/pre-revprop-change';
+
+    $revprop_argv = array(
+      '--hook-mode',
+      'svn-revprop',
+    );
+
+    $this->installHook($root.$revprop_path, $revprop_argv);
   }
 
 

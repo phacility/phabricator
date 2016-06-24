@@ -22,7 +22,7 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s blocking task(s): %s.',
+      '%s added %s subtask(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -34,7 +34,7 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s blocking task(s): %s.',
+      '%s removed %s subtask(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -49,7 +49,7 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited blocking task(s), added %s: %s; removed %s: %s.',
+      '%s edited subtask(s), added %s: %s; removed %s: %s.',
       $actor,
       $add_count,
       $add_edges,
@@ -64,7 +64,7 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s blocking task(s) for %s: %s.',
+      '%s added %s subtask(s) for %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -78,7 +78,7 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s blocking task(s) for %s: %s.',
+      '%s removed %s subtask(s) for %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -95,7 +95,7 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited blocking task(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited subtask(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $object,
       $add_count,

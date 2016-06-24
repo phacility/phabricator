@@ -68,7 +68,8 @@ final class PhabricatorProjectNoProjectsDatasource
       ->setPHID('null()')
       ->setIcon('fa-ban')
       ->setName('null '.$name)
-      ->setDisplayName($name);
+      ->setDisplayName($name)
+      ->addAttribute(pht('Select results with no tags.'));
   }
 
 }

@@ -65,7 +65,8 @@ final class PhabricatorTypeaheadModularDatasourceController
         }
 
         $composite
-          ->setOffset($offset);
+          ->setOffset($offset)
+          ->setIsBrowse(true);
       }
 
       $results = $composite->loadResults();
@@ -142,9 +143,6 @@ final class PhabricatorTypeaheadModularDatasourceController
 
         $items = array();
         foreach ($results as $result) {
-          $token = PhabricatorTypeaheadTokenView::newFromTypeaheadResult(
-            $result);
-
           // Disable already-selected tokens.
           $disabled = isset($exclude[$result->getPHID()]);
 
@@ -161,15 +159,14 @@ final class PhabricatorTypeaheadModularDatasourceController
             ),
             pht('Select'));
 
+          $information = $this->renderBrowseResult($result, $button);
+
           $items[] = phutil_tag(
             'div',
             array(
               'class' => 'typeahead-browse-item grouped',
             ),
-            array(
-              $token,
-              $button,
-            ));
+            $information);
         }
 
         $markup = array(
@@ -250,6 +247,8 @@ final class PhabricatorTypeaheadModularDatasourceController
           ->setRenderDialogAsDiv(true)
           ->setTitle($source->getBrowseTitle())
           ->appendChild($browser)
+          ->setResizeX(true)
+          ->setResizeY($frame_id)
           ->addFooter($function_help)
           ->addCancelButton('/', pht('Close'));
       }
@@ -348,6 +347,62 @@ final class PhabricatorTypeaheadModularDatasourceController
     return $this->newPage()
       ->setTitle($title)
       ->appendChild($view);
+  }
+
+  private function renderBrowseResult(
+    PhabricatorTypeaheadResult $result,
+    $button) {
+
+    $class = array();
+    $style = array();
+    $separator = " \xC2\xB7 ";
+
+    $class[] = 'phabricator-main-search-typeahead-result';
+
+    $name = phutil_tag(
+      'div',
+      array(
+        'class' => 'result-name',
+      ),
+      $result->getDisplayName());
+
+    $icon = $result->getIcon();
+    $icon = id(new PHUIIconView())->setIcon($icon);
+
+    $attributes = $result->getAttributes();
+    $attributes = phutil_implode_html($separator, $attributes);
+    $attributes = array($icon, ' ', $attributes);
+
+    $closed = $result->getClosed();
+    if ($closed) {
+      $class[] = 'result-closed';
+      $attributes = array($closed, $separator, $attributes);
+    }
+
+    $attributes = phutil_tag(
+      'div',
+      array(
+        'class' => 'result-type',
+      ),
+      $attributes);
+
+    $image = $result->getImageURI();
+    if ($image) {
+      $style[] = 'background-image: url('.$image.');';
+      $class[] = 'has-image';
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => implode(' ', $class),
+        'style' => implode(' ', $style),
+      ),
+      array(
+        $button,
+        $name,
+        $attributes,
+      ));
   }
 
 }

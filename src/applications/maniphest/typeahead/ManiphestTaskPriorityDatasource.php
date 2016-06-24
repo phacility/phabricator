@@ -32,7 +32,8 @@ final class ManiphestTaskPriorityDatasource
       $result = id(new PhabricatorTypeaheadResult())
         ->setIcon(ManiphestTaskPriority::getTaskPriorityIcon($value))
         ->setPHID($value)
-        ->setName($name);
+        ->setName($name)
+        ->addAttribute(pht('Priority'));
 
       if (ManiphestTaskPriority::isDisabledPriority($value)) {
         $result->setClosed(pht('Disabled'));

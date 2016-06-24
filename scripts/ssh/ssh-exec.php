@@ -190,12 +190,14 @@ try {
       'P' => $user->getPHID(),
     ));
 
-  if (!$user->canEstablishSSHSessions()) {
-    throw new Exception(
-      pht(
-        'Your account ("%s") does not have permission to establish SSH '.
-        'sessions. Visit the web interface for more information.',
-        $user_name));
+  if (!$device) {
+    if (!$user->canEstablishSSHSessions()) {
+      throw new Exception(
+        pht(
+          'Your account ("%s") does not have permission to establish SSH '.
+          'sessions. Visit the web interface for more information.',
+          $user_name));
+    }
   }
 
   $workflows = id(new PhutilClassMapQuery())
