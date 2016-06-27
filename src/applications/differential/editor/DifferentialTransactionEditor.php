@@ -182,6 +182,7 @@ final class DifferentialTransactionEditor
     $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
     $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
     $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
 
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
@@ -233,7 +234,12 @@ final class DifferentialTransactionEditor
             $object->setStatus($status_review);
             return;
           case DifferentialAction::ACTION_CLOSE:
+            $old_status = $object->getStatus();
             $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
+            $was_accepted = ($old_status == $status_accepted);
+            $object->setProperty(
+              DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED,
+              $was_accepted);
             return;
           case DifferentialAction::ACTION_CLAIM:
             $object->setAuthorPHID($this->getActingAsPHID());
