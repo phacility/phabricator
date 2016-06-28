@@ -307,6 +307,28 @@ the rendered result. For example, this callout uses `(NOTE)`:
 (NOTE) Dr. Egon Spengler is the best resource for additional proton pack
  questions.
 
+
+Dividers
+========
+
+You can divide sections by putting three or more dashes on a line by
+themselves. This creates a divider or horizontal rule similar to an `<hr />`
+tag, like this one:
+
+---
+
+The dashes need to appear on their own line and be separated from other
+content. For example, like this:
+
+```
+This section will be visually separated.
+
+---
+
+On an entirely different topic, ...
+```
+
+
 = Linking URIs =
 
 URIs are automatically linked: http://phabricator.org/
