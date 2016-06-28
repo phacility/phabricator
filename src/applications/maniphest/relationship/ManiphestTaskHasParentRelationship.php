@@ -37,4 +37,8 @@ final class ManiphestTaskHasParentRelationship
     return pht('Save Parent Tasks');
   }
 
+  protected function newRelationshipSource() {
+    return new ManiphestTaskRelationshipSource();
+  }
+
 }

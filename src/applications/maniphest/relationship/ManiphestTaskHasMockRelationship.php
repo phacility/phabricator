@@ -33,4 +33,8 @@ final class ManiphestTaskHasMockRelationship
     return pht('Save Related Mocks');
   }
 
+  protected function newRelationshipSource() {
+    return new PholioMockRelationshipSource();
+  }
+
 }

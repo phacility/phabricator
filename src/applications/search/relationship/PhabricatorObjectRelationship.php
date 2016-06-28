@@ -47,6 +47,25 @@ abstract class PhabricatorObjectRelationship extends Phobject {
       PhabricatorPolicyCapability::CAN_EDIT);
   }
 
+  public function getRequiredRelationshipCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  final public function newSource() {
+    return $this->newRelationshipSource();
+  }
+
+  abstract protected function newRelationshipSource();
+
+  final public function getSourceURI($object) {
+    $relationship_key = $this->getRelationshipConstant();
+    $object_phid = $object->getPHID();
+
+    return "/search/source/{$relationship_key}/{$object_phid}/";
+  }
+
   final public function newAction($object) {
     $is_enabled = $this->isActionEnabled($object);
     $action_uri = $this->getActionURI($object);

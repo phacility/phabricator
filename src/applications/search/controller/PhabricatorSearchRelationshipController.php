@@ -6,26 +6,12 @@ final class PhabricatorSearchRelationshipController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $phid = $request->getURIData('sourcePHID');
-    $object = id(new PhabricatorObjectQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($phid))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
+    $object = $this->loadRelationshipObject();
     if (!$object) {
       return new Aphront404Response();
     }
 
-    $list = PhabricatorObjectRelationshipList::newForObject(
-      $viewer,
-      $object);
-
-    $relationship_key = $request->getURIData('relationshipKey');
-    $relationship = $list->getRelationship($relationship_key);
+    $relationship = $this->loadRelationship($object);
     if (!$relationship) {
       return new Aphront404Response();
     }
@@ -135,21 +121,7 @@ final class PhabricatorSearchRelationshipController
     $dialog_button = $relationship->getDialogButtonText();
     $dialog_instructions = $relationship->getDialogInstructionsText();
 
-    // TODO: Remove this, this is just legacy support.
-    $legacy_kinds = array(
-      ManiphestTaskHasCommitEdgeType::EDGECONST => 'CMIT',
-      ManiphestTaskHasMockEdgeType::EDGECONST => 'MOCK',
-      ManiphestTaskHasRevisionEdgeType::EDGECONST => 'DREV',
-      ManiphestTaskDependsOnTaskEdgeType::EDGECONST => 'TASK',
-      ManiphestTaskDependedOnByTaskEdgeType::EDGECONST => 'TASK',
-    );
-
-    $edge_type = $relationship->getEdgeConstant();
-    $legacy_kind = idx($legacy_kinds, $edge_type);
-    if (!$legacy_kind) {
-      throw new Exception(
-        pht('Only specific legacy relationships are supported!'));
-    }
+    $source_uri = $relationship->getSourceURI($object);
 
     return id(new PhabricatorObjectSelectorDialog())
       ->setUser($viewer)
@@ -157,9 +129,9 @@ final class PhabricatorSearchRelationshipController
       ->setHandles($handles)
       ->setFilters($filters)
       ->setSelectedFilter('created')
-      ->setExcluded($phid)
+      ->setExcluded($src_phid)
       ->setCancelURI($done_uri)
-      ->setSearchURI("/search/select/{$legacy_kind}/edge/")
+      ->setSearchURI($source_uri)
       ->setTitle($dialog_title)
       ->setHeader($dialog_header)
       ->setButtonText($dialog_button)

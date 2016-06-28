@@ -37,4 +37,8 @@ final class ManiphestTaskHasSubtaskRelationship
     return pht('Save Subtasks');
   }
 
+  protected function newRelationshipSource() {
+    return new ManiphestTaskRelationshipSource();
+  }
+
 }
