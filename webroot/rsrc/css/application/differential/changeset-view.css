@@ -67,7 +67,7 @@
   padding: 1px 4px;
 }
 
-.device .differential-diff .inline td {
+.device .differential-diff .inline > td {
   padding: 4px;
 }
 
@@ -308,7 +308,7 @@ td.cov-I {
   box-sizing: border-box;
 }
 
-.differential-diff .inline td {
+.differential-diff .inline > td {
   padding: 8px 12px;
 }
 
