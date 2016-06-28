@@ -322,10 +322,12 @@ final class PhameBlog extends PhameDAO
 
     $this->openTransaction();
 
-      $posts = id(new PhamePost())
-        ->loadAllWhere('blogPHID = %s', $this->getPHID());
+      $posts = id(new PhamePostQuery())
+        ->setViewer($engine->getViewer())
+        ->withBlogPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($posts as $post) {
-        $post->delete();
+        $engine->destroyObject($post);
       }
       $this->delete();
 

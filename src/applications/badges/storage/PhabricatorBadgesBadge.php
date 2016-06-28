@@ -186,7 +186,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
       ->execute();
 
     foreach ($awards as $award) {
-      $engine->destroyObjectPermanently($award);
+      $engine->destroyObject($award);
     }
 
     $this->openTransaction();
