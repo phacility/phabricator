@@ -49,11 +49,10 @@ final class PhabricatorConduitTokenEditController
       $submit_button = pht('Generate Token');
     }
 
-    if ($viewer->getPHID() == $object->getPHID()) {
-      $panel_uri = '/settings/panel/apitokens/';
-    } else {
-      $panel_uri = '/settings/'.$object->getID().'/panel/apitokens/';
-    }
+    $panel_uri = id(new PhabricatorConduitTokensSettingsPanel())
+      ->setViewer($viewer)
+      ->setUser($object)
+      ->getPanelURI();
 
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
