@@ -54,7 +54,10 @@ abstract class PhabricatorObjectRelationship extends Phobject {
   }
 
   final public function newSource() {
-    return $this->newRelationshipSource();
+    $viewer = $this->getViewer();
+
+    return $this->newRelationshipSource()
+      ->setViewer($viewer);
   }
 
   abstract protected function newRelationshipSource();

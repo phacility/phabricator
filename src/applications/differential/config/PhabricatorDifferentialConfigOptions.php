@@ -40,8 +40,8 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialViewPolicyField(),
       new DifferentialEditPolicyField(),
 
-      new DifferentialDependsOnField(),
-      new DifferentialDependenciesField(),
+      new DifferentialParentRevisionsField(),
+      new DifferentialChildRevisionsField(),
       new DifferentialManiphestTasksField(),
       new DifferentialCommitsField(),
 

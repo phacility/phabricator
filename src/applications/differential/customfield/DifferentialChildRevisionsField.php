@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialDependenciesField
+final class DifferentialChildRevisionsField
   extends DifferentialCustomField {
 
   public function getFieldKey() {
@@ -8,7 +8,7 @@ final class DifferentialDependenciesField
   }
 
   public function getFieldName() {
-    return pht('Dependencies');
+    return pht('Child Revisions');
   }
 
   public function canDisableField() {

@@ -87,6 +87,11 @@ final class PhabricatorObjectRelationshipList extends Phobject {
         continue;
       }
 
+      $source = $relationship->newSource();
+      if (!$source->isEnabledForObject($object)) {
+        continue;
+      }
+
       $results[$key] = $relationship;
     }
 

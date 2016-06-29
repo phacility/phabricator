@@ -516,34 +516,38 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $this->requireResource('phabricator-object-selector-css');
-    $this->requireResource('javelin-behavior-phabricator-object-selector');
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-link')
-        ->setName(pht('Edit Dependencies'))
-        ->setHref("/search/attach/{$revision_phid}/DREV/dependencies/")
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit));
-
-    $maniphest = 'PhabricatorManiphestApplication';
-    if (PhabricatorApplication::isClassInstalled($maniphest)) {
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-anchor')
-          ->setName(pht('Edit Maniphest Tasks'))
-          ->setHref("/search/attach/{$revision_phid}/TASK/")
-          ->setWorkflow(true)
-          ->setDisabled(!$can_edit));
-    }
-
     $request_uri = $this->getRequest()->getRequestURI();
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-download')
         ->setName(pht('Download Raw Diff'))
         ->setHref($request_uri->alter('download', 'true')));
+
+    $relationship_list = PhabricatorObjectRelationshipList::newForObject(
+      $viewer,
+      $revision);
+
+    $parent_key = DifferentialRevisionHasParentRelationship::RELATIONSHIPKEY;
+    $child_key = DifferentialRevisionHasChildRelationship::RELATIONSHIPKEY;
+
+    $revision_submenu = array();
+
+    $revision_submenu[] = $relationship_list->getRelationship($parent_key)
+      ->newAction($revision);
+
+    $revision_submenu[] = $relationship_list->getRelationship($child_key)
+      ->newAction($revision);
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Related Revisions...'))
+        ->setIcon('fa-cog')
+        ->setSubmenu($revision_submenu));
+
+    $relationship_submenu = $relationship_list->newActionMenu();
+    if ($relationship_submenu) {
+      $curtain->addAction($relationship_submenu);
+    }
 
     return $curtain;
   }
