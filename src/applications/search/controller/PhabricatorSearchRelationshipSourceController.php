@@ -58,7 +58,7 @@ final class PhabricatorSearchRelationshipSourceController
       ->execute();
 
     $phids = array_fill_keys(mpull($results, 'getPHID'), true);
-    $phids += $this->queryObjectNames($query_str, $capabilities);
+    $phids = $this->queryObjectNames($query, $capabilities) + $phids;
 
     $phids = array_keys($phids);
     $handles = $viewer->loadHandles($phids);
@@ -72,15 +72,21 @@ final class PhabricatorSearchRelationshipSourceController
     return id(new AphrontAjaxResponse())->setContent($data);
   }
 
-  private function queryObjectNames($query, $capabilities) {
+  private function queryObjectNames(
+    PhabricatorSavedQuery $query,
+    array $capabilities) {
+
     $request = $this->getRequest();
     $viewer = $request->getUser();
+
+    $types = $query->getParameter('types');
+    $match = $query->getParameter('query');
 
     $objects = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
       ->requireCapabilities($capabilities)
-      ->withTypes(array($request->getURIData('type')))
-      ->withNames(array($query))
+      ->withTypes($query->getParameter('types'))
+      ->withNames(array($match))
       ->execute();
 
     return mpull($objects, 'getPHID');

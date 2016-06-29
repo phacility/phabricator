@@ -609,6 +609,8 @@ abstract class PhabricatorApplicationTransaction
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
           case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
+          case ManiphestTaskHasDuplicateTaskEdgeType::EDGECONST:
+          case ManiphestTaskIsDuplicateOfTaskEdgeType::EDGECONST:
             return true;
             break;
           case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:

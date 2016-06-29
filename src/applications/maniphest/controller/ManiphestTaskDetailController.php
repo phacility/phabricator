@@ -201,6 +201,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $parent_key = ManiphestTaskHasParentRelationship::RELATIONSHIPKEY;
     $subtask_key = ManiphestTaskHasSubtaskRelationship::RELATIONSHIPKEY;
+    $merge_key = ManiphestTaskMergeInRelationship::RELATIONSHIPKEY;
+    $close_key = ManiphestTaskCloseAsDuplicateRelationship::RELATIONSHIPKEY;
 
     $task_submenu[] = $relationship_list->getRelationship($parent_key)
       ->newAction($task);
@@ -208,12 +210,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $task_submenu[] = $relationship_list->getRelationship($subtask_key)
       ->newAction($task);
 
-    $task_submenu[] = id(new PhabricatorActionView())
-      ->setName(pht('Merge Duplicates In'))
-      ->setHref("/search/attach/{$phid}/TASK/merge/")
-      ->setIcon('fa-compress')
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(true);
+    $task_submenu[] = $relationship_list->getRelationship($merge_key)
+      ->newAction($task);
+
+    $task_submenu[] = $relationship_list->getRelationship($close_key)
+      ->newAction($task);
 
     $curtain->addAction(
       id(new PhabricatorActionView())
