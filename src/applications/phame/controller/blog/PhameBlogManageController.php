@@ -97,12 +97,11 @@ final class PhameBlogManageController extends PhameBlogController {
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    $domain = $blog->getDomain();
-    if (!$domain) {
-      $domain = phutil_tag('em', array(), pht('No external domain'));
+    $full_domain = $blog->getDomainFullURI();
+    if (!$full_domain) {
+      $full_domain = phutil_tag('em', array(), pht('No external domain'));
     }
-
-    $properties->addProperty(pht('Domain'), $domain);
+    $properties->addProperty(pht('Full Domain'), $full_domain);
 
     $parent_site = $blog->getParentSite();
     if (!$parent_site) {

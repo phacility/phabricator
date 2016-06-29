@@ -6,7 +6,7 @@ final class PhameBlogTransaction
   const TYPE_NAME        = 'phame.blog.name';
   const TYPE_SUBTITLE    = 'phame.blog.subtitle';
   const TYPE_DESCRIPTION = 'phame.blog.description';
-  const TYPE_DOMAIN      = 'phame.blog.domain';
+  const TYPE_FULLDOMAIN  = 'phame.blog.full.domain';
   const TYPE_STATUS      = 'phame.blog.status';
   const TYPE_PARENTSITE  = 'phame.blog.parent.site';
   const TYPE_PARENTDOMAIN = 'phame.blog.parent.domain';
@@ -46,7 +46,7 @@ final class PhameBlogTransaction
         }
         break;
       case self::TYPE_DESCRIPTION:
-      case self::TYPE_DOMAIN:
+      case self::TYPE_FULLDOMAIN:
         return 'fa-pencil';
       case self::TYPE_STATUS:
         if ($new == PhameBlog::STATUS_ARCHIVED) {
@@ -85,7 +85,7 @@ final class PhameBlogTransaction
       case self::TYPE_NAME:
       case self::TYPE_SUBTITLE:
       case self::TYPE_DESCRIPTION:
-      case self::TYPE_DOMAIN:
+      case self::TYPE_FULLDOMAIN:
       case self::TYPE_PARENTSITE:
       case self::TYPE_PARENTDOMAIN:
         $tags[] = self::MAILTAG_DETAILS;
@@ -140,9 +140,9 @@ final class PhameBlogTransaction
           '%s updated the blog\'s description.',
           $this->renderHandleLink($author_phid));
         break;
-      case self::TYPE_DOMAIN:
+      case self::TYPE_FULLDOMAIN:
         return pht(
-          '%s updated the blog\'s domain to "%s".',
+          '%s updated the blog\'s full domain to "%s".',
           $this->renderHandleLink($author_phid),
           $new);
         break;
@@ -230,9 +230,9 @@ final class PhameBlogTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case self::TYPE_DOMAIN:
+      case self::TYPE_FULLDOMAIN:
         return pht(
-          '%s updated the domain for %s.',
+          '%s updated the full domain for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;

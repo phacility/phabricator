@@ -222,7 +222,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     }
 
     if ($user) {
-      if ($user->isLoggedIn()) {
+      if ($user->isUserActivated()) {
         $offset = $user->getTimeZoneOffset();
 
         $ignore_key = PhabricatorTimezoneIgnoreOffsetSetting::SETTINGKEY;

@@ -474,8 +474,11 @@ abstract class PhabricatorController extends AphrontController {
   public function newCurtainView($object) {
     $viewer = $this->getViewer();
 
+    $action_id = celerity_generate_unique_node_id();
+
     $action_list = id(new PhabricatorActionListView())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->setID($action_id);
 
     // NOTE: Applications (objects of class PhabricatorApplication) can't
     // currently be set here, although they don't need any of the extensions

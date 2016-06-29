@@ -206,73 +206,73 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%s added %s blocking task(s): %s.' => array(
+      '%s added %s subtask(s): %s.' => array(
         array(
-          '%s added a blocking task: %3$s.',
-          '%s added blocking tasks: %3$s.',
+          '%s added a subtask: %3$s.',
+          '%s added subtasks: %3$s.',
         ),
       ),
 
-      '%s added %s blocked task(s): %s.' => array(
+      '%s added %s parent task(s): %s.' => array(
         array(
-          '%s added a blocked task: %3$s.',
-          '%s added blocked tasks: %3$s.',
+          '%s added a parent task: %3$s.',
+          '%s added parent tasks: %3$s.',
         ),
       ),
 
-      '%s removed %s blocking task(s): %s.' => array(
+      '%s removed %s subtask(s): %s.' => array(
         array(
-          '%s removed a blocking task: %3$s.',
-          '%s removed blocking tasks: %3$s.',
+          '%s removed a subtask: %3$s.',
+          '%s removed subtasks: %3$s.',
         ),
       ),
 
-      '%s removed %s blocked task(s): %s.' => array(
+      '%s removed %s parent task(s): %s.' => array(
         array(
-          '%s removed a blocked task: %3$s.',
-          '%s removed blocked tasks: %3$s.',
+          '%s removed a parent task: %3$s.',
+          '%s removed parent tasks: %3$s.',
         ),
       ),
 
-      '%s added %s blocking task(s) for %s: %s.' => array(
+      '%s added %s subtask(s) for %s: %s.' => array(
         array(
-          '%s added a blocking task for %3$s: %4$s.',
-          '%s added blocking tasks for %3$s: %4$s.',
+          '%s added a subtask for %3$s: %4$s.',
+          '%s added subtasks for %3$s: %4$s.',
         ),
       ),
 
-      '%s added %s blocked task(s) for %s: %s.' => array(
+      '%s added %s parent task(s) for %s: %s.' => array(
         array(
-          '%s added a blocked task for %3$s: %4$s.',
-          '%s added blocked tasks for %3$s: %4$s.',
+          '%s added a parent task for %3$s: %4$s.',
+          '%s added parent tasks for %3$s: %4$s.',
         ),
       ),
 
-      '%s removed %s blocking task(s) for %s: %s.' => array(
+      '%s removed %s subtask(s) for %s: %s.' => array(
         array(
-          '%s removed a blocking task for %3$s: %4$s.',
-          '%s removed blocking tasks for %3$s: %4$s.',
+          '%s removed a subtask for %3$s: %4$s.',
+          '%s removed subtasks for %3$s: %4$s.',
         ),
       ),
 
-      '%s removed %s blocked task(s) for %s: %s.' => array(
+      '%s removed %s parent task(s) for %s: %s.' => array(
         array(
-          '%s removed a blocked task for %3$s: %4$s.',
-          '%s removed blocked tasks for %3$s: %4$s.',
+          '%s removed a parent task for %3$s: %4$s.',
+          '%s removed parent tasks for %3$s: %4$s.',
         ),
       ),
 
-      '%s edited blocking task(s), added %s: %s; removed %s: %s.' =>
-        '%s edited blocking tasks, added: %3$s; removed: %5$s.',
+      '%s edited subtask(s), added %s: %s; removed %s: %s.' =>
+        '%s edited subtasks, added: %3$s; removed: %5$s.',
 
-      '%s edited blocking task(s) for %s, added %s: %s; removed %s: %s.' =>
-        '%s edited blocking tasks for %s, added: %4$s; removed: %6$s.',
+      '%s edited subtask(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited subtasks for %s, added: %4$s; removed: %6$s.',
 
-      '%s edited blocked task(s), added %s: %s; removed %s: %s.' =>
-        '%s edited blocked tasks, added: %3$s; removed: %5$s.',
+      '%s edited parent task(s), added %s: %s; removed %s: %s.' =>
+        '%s edited parent tasks, added: %3$s; removed: %5$s.',
 
-      '%s edited blocked task(s) for %s, added %s: %s; removed %s: %s.' =>
-        '%s edited blocked tasks for %s, added: %4$s; removed: %6$s.',
+      '%s edited parent task(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited parent tasks for %s, added: %4$s; removed: %6$s.',
 
       '%s edited answer(s), added %s: %s; removed %d: %s.' =>
         '%s edited answers, added: %3$s; removed: %5$s.',

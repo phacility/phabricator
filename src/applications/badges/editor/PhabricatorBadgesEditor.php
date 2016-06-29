@@ -47,7 +47,7 @@ final class PhabricatorBadgesEditor
       case PhabricatorBadgesTransaction::TYPE_ICON:
         return $object->getIcon();
       case PhabricatorBadgesTransaction::TYPE_QUALITY:
-        return $object->getQuality();
+        return (int)$object->getQuality();
       case PhabricatorBadgesTransaction::TYPE_STATUS:
         return $object->getStatus();
       case PhabricatorBadgesTransaction::TYPE_AWARD:

@@ -44,7 +44,10 @@ final class PhabricatorProjectMembersDatasource
         ->setColor(null)
         ->setPHID('members('.$result->getPHID().')')
         ->setDisplayName(pht('Members: %s', $result->getDisplayName()))
-        ->setName($result->getName().' members');
+        ->setName($result->getName().' members')
+        ->resetAttributes()
+        ->addAttribute(pht('Function'))
+        ->addAttribute(pht('Select project members.'));
     }
 
     return $results;

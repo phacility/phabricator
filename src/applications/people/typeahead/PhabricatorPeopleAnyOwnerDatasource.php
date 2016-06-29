@@ -62,7 +62,8 @@ final class PhabricatorPeopleAnyOwnerDatasource
       ->setDisplayName($name)
       ->setIcon('fa-certificate')
       ->setPHID(self::FUNCTION_TOKEN)
-      ->setUnique(true);
+      ->setUnique(true)
+      ->addAttribute(pht('Select results with any owner.'));
   }
 
 }

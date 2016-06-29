@@ -43,7 +43,10 @@ final class DiffusionTaggedRepositoriesFunctionDatasource
         ->setColor(null)
         ->setPHID('tagged('.$result->getPHID().')')
         ->setDisplayName(pht('Tagged: %s', $result->getDisplayName()))
-        ->setName('tagged '.$result->getName());
+        ->setName('tagged '.$result->getName())
+        ->resetAttributes()
+        ->addAttribute(pht('Function'))
+        ->addAttribute(pht('Select repositories tagged with this project.'));
     }
 
     return $results;

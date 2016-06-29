@@ -94,6 +94,10 @@ final class PhabricatorUser
    * @return bool True if this is a standard, usable account.
    */
   public function isUserActivated() {
+    if (!$this->isLoggedIn()) {
+      return false;
+    }
+
     if ($this->isOmnipotent()) {
       return true;
     }

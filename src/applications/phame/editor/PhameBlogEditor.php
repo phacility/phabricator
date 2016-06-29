@@ -17,7 +17,7 @@ final class PhameBlogEditor
     $types[] = PhameBlogTransaction::TYPE_NAME;
     $types[] = PhameBlogTransaction::TYPE_SUBTITLE;
     $types[] = PhameBlogTransaction::TYPE_DESCRIPTION;
-    $types[] = PhameBlogTransaction::TYPE_DOMAIN;
+    $types[] = PhameBlogTransaction::TYPE_FULLDOMAIN;
     $types[] = PhameBlogTransaction::TYPE_PARENTSITE;
     $types[] = PhameBlogTransaction::TYPE_PARENTDOMAIN;
     $types[] = PhameBlogTransaction::TYPE_STATUS;
@@ -38,8 +38,8 @@ final class PhameBlogEditor
         return $object->getSubtitle();
       case PhameBlogTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
-      case PhameBlogTransaction::TYPE_DOMAIN:
-        return $object->getDomain();
+      case PhameBlogTransaction::TYPE_FULLDOMAIN:
+        return $object->getDomainFullURI();
       case PhameBlogTransaction::TYPE_PARENTSITE:
         return $object->getParentSite();
       case PhameBlogTransaction::TYPE_PARENTDOMAIN:
@@ -61,7 +61,7 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_PARENTSITE:
       case PhameBlogTransaction::TYPE_PARENTDOMAIN:
         return $xaction->getNewValue();
-      case PhameBlogTransaction::TYPE_DOMAIN:
+      case PhameBlogTransaction::TYPE_FULLDOMAIN:
         $domain = $xaction->getNewValue();
         if (!strlen($xaction->getNewValue())) {
           return null;
@@ -81,8 +81,17 @@ final class PhameBlogEditor
         return $object->setSubtitle($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_DESCRIPTION:
         return $object->setDescription($xaction->getNewValue());
-      case PhameBlogTransaction::TYPE_DOMAIN:
-        return $object->setDomain($xaction->getNewValue());
+      case PhameBlogTransaction::TYPE_FULLDOMAIN:
+        $new_value = $xaction->getNewValue();
+        if (strlen($new_value)) {
+          $uri = new PhutilURI($new_value);
+          $domain = $uri->getDomain();
+          $object->setDomain($domain);
+        } else {
+          $object->setDomain(null);
+        }
+        $object->setDomainFullURI($new_value);
+        return;
       case PhameBlogTransaction::TYPE_STATUS:
         return $object->setStatus($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_PARENTSITE:
@@ -102,7 +111,7 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_NAME:
       case PhameBlogTransaction::TYPE_SUBTITLE:
       case PhameBlogTransaction::TYPE_DESCRIPTION:
-      case PhameBlogTransaction::TYPE_DOMAIN:
+      case PhameBlogTransaction::TYPE_FULLDOMAIN:
       case PhameBlogTransaction::TYPE_PARENTSITE:
       case PhameBlogTransaction::TYPE_PARENTDOMAIN:
       case PhameBlogTransaction::TYPE_STATUS:
@@ -156,7 +165,7 @@ final class PhameBlogEditor
           $errors[] = $error;
         }
         break;
-      case PhameBlogTransaction::TYPE_DOMAIN:
+      case PhameBlogTransaction::TYPE_FULLDOMAIN:
         if (!$xactions) {
           continue;
         }
@@ -185,9 +194,11 @@ final class PhameBlogEditor
             nonempty(last($xactions), null));
           $errors[] = $error;
         }
+        $domain = new PhutilURI($custom_domain);
+        $domain = $domain->getDomain();
         $duplicate_blog = id(new PhameBlogQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withDomain($custom_domain)
+          ->withDomain($domain)
           ->executeOne();
         if ($duplicate_blog && $duplicate_blog->getID() != $object->getID()) {
           $error = new PhabricatorApplicationTransactionValidationError(

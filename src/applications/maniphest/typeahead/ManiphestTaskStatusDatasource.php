@@ -35,6 +35,12 @@ final class ManiphestTaskStatusDatasource
         ->setPHID($value)
         ->setName($name);
 
+      if (ManiphestTaskStatus::isOpenStatus($value)) {
+        $result->addAttribute(pht('Open Status'));
+      } else {
+        $result->addAttribute(pht('Closed Status'));
+      }
+
       if (ManiphestTaskStatus::isDisabledStatus($value)) {
         $result->setClosed(pht('Disabled'));
       }

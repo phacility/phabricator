@@ -43,7 +43,6 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
 
   public function getEventListeners() {
     return array(
-      new DifferentialActionMenuEventListener(),
       new DifferentialLandingActionMenuEventListener(),
     );
   }

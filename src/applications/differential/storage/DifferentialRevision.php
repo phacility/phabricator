@@ -35,6 +35,7 @@ final class DifferentialRevision extends DifferentialDAO
   protected $repositoryPHID;
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
   protected $editPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $properties = array();
 
   private $relationships = self::ATTACHABLE;
   private $commits = self::ATTACHABLE;
@@ -52,6 +53,8 @@ final class DifferentialRevision extends DifferentialDAO
 
   const RELATION_REVIEWER     = 'revw';
   const RELATION_SUBSCRIBED   = 'subd';
+
+  const PROPERTY_CLOSED_FROM_ACCEPTED = 'wasAcceptedBeforeClose';
 
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -76,6 +79,7 @@ final class DifferentialRevision extends DifferentialDAO
       self::CONFIG_SERIALIZATION => array(
         'attached'      => self::SERIALIZATION_JSON,
         'unsubscribed'  => self::SERIALIZATION_JSON,
+        'properties' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
@@ -112,6 +116,19 @@ final class DifferentialRevision extends DifferentialDAO
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function hasRevisionProperty($key) {
+    return array_key_exists($key, $this->properties);
   }
 
   public function getMonogram() {

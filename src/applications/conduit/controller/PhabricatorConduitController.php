@@ -25,6 +25,8 @@ abstract class PhabricatorConduitController extends PhabricatorController {
   }
 
   protected function renderExampleBox(ConduitAPIMethod $method, $params) {
+    $viewer = $this->getViewer();
+
     $arc_example = id(new PHUIPropertyListView())
       ->addRawContent($this->renderExample($method, 'arc', $params));
 
@@ -34,10 +36,15 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     $php_example = id(new PHUIPropertyListView())
       ->addRawContent($this->renderExample($method, 'php', $params));
 
+    $panel_uri = id(new PhabricatorConduitTokensSettingsPanel())
+      ->setViewer($viewer)
+      ->setUser($viewer)
+      ->getPanelURI();
+
     $panel_link = phutil_tag(
       'a',
       array(
-        'href' => '/settings/panel/apitokens/',
+        'href' => $panel_uri,
       ),
       pht('Conduit API Tokens'));
 

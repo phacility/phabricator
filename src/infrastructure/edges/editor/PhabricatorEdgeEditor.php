@@ -134,7 +134,6 @@ final class PhabricatorEdgeEditor extends Phobject {
       $caught = $ex;
     }
 
-
     if ($caught) {
       $this->killTransactions();
     }

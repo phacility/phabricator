@@ -258,15 +258,15 @@ final class PhamePost extends PhameDAO
     return $timeline;
   }
 
+
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
 
     $this->openTransaction();
-
       $this->delete();
-
     $this->saveTransaction();
   }
 

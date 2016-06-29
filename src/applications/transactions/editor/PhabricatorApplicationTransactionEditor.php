@@ -931,6 +931,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $object->openTransaction();
     }
 
+    try {
       foreach ($xactions as $xaction) {
         $this->applyInternalEffects($object, $xaction);
       }
@@ -940,8 +941,6 @@ abstract class PhabricatorApplicationTransactionEditor
       try {
         $object->save();
       } catch (AphrontDuplicateKeyQueryException $ex) {
-        $object->killTransaction();
-
         // This callback has an opportunity to throw a better exception,
         // so execution may end here.
         $this->didCatchDuplicateKeyException($object, $xactions, $ex);
@@ -973,7 +972,11 @@ abstract class PhabricatorApplicationTransactionEditor
         $read_locking = false;
       }
 
-    $object->saveTransaction();
+      $object->saveTransaction();
+    } catch (Exception $ex) {
+      $object->killTransaction();
+      throw $ex;
+    }
 
     // Now that we've completely applied the core transaction set, try to apply
     // Herald rules. Herald rules are allowed to either take direct actions on

@@ -343,6 +343,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       array(
         'id'    => $this->getPreviewPanelID(),
         'style' => 'display: none',
+        'class' => 'phui-comment-preview-view',
       ),
       $preview);
   }

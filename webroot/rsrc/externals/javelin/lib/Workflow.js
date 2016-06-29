@@ -157,6 +157,80 @@ JX.install('Workflow', {
     _getActiveWorkflow : function() {
       var stack = JX.Workflow._stack;
       return stack[stack.length - 1];
+    },
+
+    _onresizestart: function(e) {
+      var self = JX.Workflow;
+      if (self._resizing) {
+        return;
+      }
+
+      var workflow = self._getActiveWorkflow();
+      if (!workflow) {
+        return;
+      }
+
+      e.kill();
+
+      var form = JX.DOM.find(workflow._root, 'div', 'jx-dialog');
+      var resize = e.getNodeData('jx-dialog-resize');
+      var node_y = JX.$(resize.resizeY);
+
+      var dim = JX.Vector.getDim(form);
+      dim.y = JX.Vector.getDim(node_y).y;
+
+      if (!form._minimumSize) {
+        form._minimumSize = dim;
+      }
+
+      self._resizing = {
+        min: form._minimumSize,
+        form: form,
+        startPos: JX.$V(e),
+        startDim: dim,
+        resizeY: node_y,
+        resizeX: resize.resizeX
+      };
+    },
+
+    _onmousemove: function(e) {
+      var self = JX.Workflow;
+      if (!self._resizing) {
+        return;
+      }
+
+      var spec = self._resizing;
+      var form = spec.form;
+      var min = spec.min;
+
+      var delta = JX.$V(e).add(-spec.startPos.x, -spec.startPos.y);
+      var src_dim = spec.startDim;
+      var dst_dim = JX.$V(src_dim.x + delta.x, src_dim.y + delta.y);
+
+      if (dst_dim.x < min.x) {
+        dst_dim.x = min.x;
+      }
+
+      if (dst_dim.y < min.y) {
+        dst_dim.y = min.y;
+      }
+
+      if (spec.resizeX) {
+        JX.$V(dst_dim.x, null).setDim(form);
+      }
+
+      if (spec.resizeY) {
+        JX.$V(null, dst_dim.y).setDim(spec.resizeY);
+      }
+    },
+
+    _onmouseup: function() {
+      var self = JX.Workflow;
+      if (!self._resizing) {
+        return;
+      }
+
+      self._resizing = false;
     }
   },
 
@@ -219,6 +293,12 @@ JX.install('Workflow', {
           'didSyntheticSubmit',
           [],
           JX.Workflow._onsyntheticsubmit);
+
+        JX.DOM.listen(
+          this._root,
+          'mousedown',
+          'jx-dialog-resize',
+          JX.Workflow._onresizestart);
 
         // Note that even in the presence of a content frame, we're doing
         // everything here at top level: dialogs are fully modal and cover
@@ -413,6 +493,9 @@ JX.install('Workflow', {
     }
 
     JX.Stratcom.listen('keydown', null, close_dialog_when_user_presses_escape);
+
+    JX.Stratcom.listen('mousemove', null, JX.Workflow._onmousemove);
+    JX.Stratcom.listen('mouseup', null, JX.Workflow._onmouseup);
   }
 
 });

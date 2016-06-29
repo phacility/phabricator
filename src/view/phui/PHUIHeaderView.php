@@ -24,6 +24,7 @@ final class PHUIHeaderView extends AphrontTagView {
   private $badges = array();
   private $href;
   private $actionList;
+  private $actionListID;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -87,6 +88,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setActionList(PhabricatorActionListView $list) {
     $this->actionList = $list;
+    return $this;
+  }
+
+  public function setActionListID($action_list_id) {
+    $this->actionListID = $action_list_id;
     return $this;
   }
 
@@ -189,14 +195,20 @@ final class PHUIHeaderView extends AphrontTagView {
 
   protected function getTagContent() {
 
-    if ($this->actionList) {
+    if ($this->actionList || $this->actionListID) {
       $action_button = id(new PHUIButtonView())
         ->setTag('a')
         ->setText(pht('Actions'))
         ->setHref('#')
         ->setIcon('fa-bars')
-        ->addClass('phui-mobile-menu')
-        ->setDropdownMenu($this->actionList);
+        ->addClass('phui-mobile-menu');
+
+      if ($this->actionList) {
+        $action_button->setDropdownMenu($this->actionList);
+      } else if ($this->actionListID) {
+        $action_button->setDropdownMenuID($this->actionListID);
+      }
+
       $this->addActionLink($action_button);
     }
 

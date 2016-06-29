@@ -18,10 +18,21 @@ JX.behavior('phabricator-object-selector', function(config) {
   var query_timer = null;
   var query_delay = 50;
 
-  var phid_input = JX.DOM.find(
+  // TODO: This is fairly grotesque, but the dialog has two different forms
+  // inside it and there's no way to sigil the inputs in the "real" form right
+  // now. Clean this up when the dialog as a whole gets cleaned up.
+
+  var inputs = JX.DOM.scry(
     JX.$(config.form),
     'input',
     'aphront-dialog-application-input');
+  var phid_input;
+  for (var ii = 0; ii < inputs.length; ii++) {
+    if (inputs[ii].name == 'phids') {
+      phid_input = inputs[ii];
+      break;
+    }
+  }
 
   var last_value = JX.$(config.query).value;
 
