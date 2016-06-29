@@ -16,14 +16,22 @@ final class PhabricatorSearchDatasource
   }
 
   public function getComponentDatasources() {
-    return array(
-      id(new PhabricatorPeopleDatasource())->setEnrichResults(true),
+    $sources = array(
+      new PhabricatorPeopleDatasource(),
       new PhabricatorProjectDatasource(),
       new PhabricatorApplicationDatasource(),
       new PhabricatorTypeaheadMonogramDatasource(),
       new DiffusionRepositoryDatasource(),
       new DiffusionSymbolDatasource(),
     );
+
+    // These results are always rendered in the full browse display mode, so
+    // set the browse flag on all component sources.
+    foreach ($sources as $source) {
+      $source->setIsBrowse(true);
+    }
+
+    return $sources;
   }
 
 }

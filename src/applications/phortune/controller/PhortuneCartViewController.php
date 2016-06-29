@@ -8,6 +8,7 @@ final class PhortuneCartViewController
     $id = $request->getURIData('id');
 
     $authority = $this->loadMerchantAuthority();
+    require_celerity_resource('phortune-css');
 
     $query = id(new PhortuneCartQuery())
       ->setViewer($viewer)
@@ -208,6 +209,7 @@ final class PhortuneCartViewController
     return $this->newPage()
       ->setTitle(pht('Cart %d', $cart->getID()))
       ->setCrumbs($crumbs)
+      ->addClass('phortune-cart-page')
       ->appendChild($view);
 
   }

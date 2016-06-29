@@ -12,6 +12,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   private $limit;
   private $parameters = array();
   private $functionStack = array();
+  private $isBrowse;
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -69,6 +70,15 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
 
   public function getParameter($name, $default = null) {
     return idx($this->parameters, $name, $default);
+  }
+
+  public function setIsBrowse($is_browse) {
+    $this->isBrowse = $is_browse;
+    return $this;
+  }
+
+  public function getIsBrowse() {
+    return $this->isBrowse;
   }
 
   public function getDatasourceURI() {
@@ -199,7 +209,8 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   protected function newFunctionResult() {
     return id(new PhabricatorTypeaheadResult())
       ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
-      ->setIcon('fa-asterisk');
+      ->setIcon('fa-asterisk')
+      ->addAttribute(pht('Function'));
   }
 
   public function newInvalidToken($name) {

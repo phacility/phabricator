@@ -37,6 +37,7 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     }
 
     $stack = $this->getFunctionStack();
+    $is_browse = $this->getIsBrowse();
 
     $results = array();
     foreach ($this->getUsableDatasources() as $source) {
@@ -68,6 +69,10 @@ abstract class PhabricatorTypeaheadCompositeDatasource
 
       if ($limit) {
         $source->setLimit($offset + $limit);
+      }
+
+      if ($is_browse) {
+        $source->setIsBrowse(true);
       }
 
       $source_results = $source->loadResults();

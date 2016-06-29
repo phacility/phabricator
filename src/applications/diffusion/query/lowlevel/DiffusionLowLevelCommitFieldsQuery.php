@@ -67,19 +67,23 @@ final class DiffusionLowLevelCommitFieldsQuery
         ->withCommitHashes($hash_list)
         ->execute();
 
-      if (!empty($revisions)) {
+      if ($revisions) {
         $revision = $this->pickBestRevision($revisions);
+
         $fields['revisionID'] = $revision->getID();
         $revision_hashes = $revision->getHashes();
+
         $revision_hashes = DiffusionCommitHash::convertArrayToObjects(
           $revision_hashes);
-        $revision_hashes = mpull($revision_hashes, 'getHashType');
+        $revision_hashes = mpull($revision_hashes, null, 'getHashType');
+
         // sort the hashes in the order the mighty
         // @{class:ArcanstDifferentialRevisionHash} does; probably unnecessary
         // but should future proof things nicely.
         $revision_hashes = array_select_keys(
           $revision_hashes,
           ArcanistDifferentialRevisionHash::getTypes());
+
         foreach ($hashes as $hash) {
           $revision_hash = idx($revision_hashes, $hash->getHashType());
           if (!$revision_hash) {

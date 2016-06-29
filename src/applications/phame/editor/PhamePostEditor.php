@@ -66,6 +66,9 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_VISIBILITY:
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
           $object->setDatePublished(0);
+        } else if ($xaction->getNewValue() ==
+          PhameConstants::VISIBILITY_ARCHIVED) {
+            $object->setDatePublished(0);
         } else {
           $object->setDatePublished(PhabricatorTime::getNow());
         }
@@ -168,7 +171,7 @@ final class PhamePostEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    if ($object->isDraft()) {
+    if ($object->isDraft() || ($object->isArchived())) {
       return false;
     }
     return true;
@@ -177,7 +180,7 @@ final class PhamePostEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    if ($object->isDraft()) {
+    if ($object->isDraft() || $object->isArchived()) {
       return false;
     }
     return true;
@@ -228,7 +231,7 @@ final class PhamePostEditor
       foreach ($xactions as $xaction) {
         switch ($xaction->getTransactionType()) {
           case PhamePostTransaction::TYPE_VISIBILITY:
-            if (!$object->isDraft()) {
+            if (!$object->isDraft() && !$object->isArchived()) {
               $body->addRemarkupSection(null, $object->getBody());
             }
           break;
@@ -261,7 +264,7 @@ final class PhamePostEditor
   }
 
   protected function supportsSearch() {
-    return false;
+    return true;
   }
 
   protected function shouldApplyHeraldRules(

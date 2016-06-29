@@ -48,6 +48,16 @@ final class PhamePostViewController
                 'Use "Publish" to publish this post.')));
     }
 
+    if ($post->isArchived()) {
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
+          ->setTitle(pht('Archived Post'))
+          ->appendChild(
+            pht('Only you can see this archived post until you publish it. '.
+                'Use "Publish" to publish this post.')));
+    }
+
     if (!$post->getBlog()) {
       $document->appendChild(
         id(new PHUIInfoView())
@@ -78,16 +88,22 @@ final class PhamePostViewController
       ->executeOne();
     $blogger_profile = $blogger->loadUserProfile();
 
+
+    $author_uri = '/p/'.$blogger->getUsername().'/';
+    $author_uri = PhabricatorEnv::getURI($author_uri);
+
     $author = phutil_tag(
       'a',
       array(
-        'href' => '/p/'.$blogger->getUsername().'/',
+        'href' => $author_uri,
       ),
       $blogger->getUsername());
 
     $date = phabricator_datetime($post->getDatePublished(), $viewer);
     if ($post->isDraft()) {
       $subtitle = pht('Unpublished draft by %s.', $author);
+    } else if ($post->isArchived()) {
+      $subtitle = pht('Archived post by %s.', $author);
     } else {
       $subtitle = pht('Written by %s on %s.', $author, $date);
     }
@@ -105,7 +121,7 @@ final class PhamePostViewController
           $blogger_profile->getTitle(),
         ))
       ->setImage($blogger->getProfileImageURI())
-      ->setImageHref('/p/'.$blogger->getUsername());
+      ->setImageHref($author_uri);
 
     $timeline = $this->buildTransactionTimeline(
       $post,
@@ -128,10 +144,10 @@ final class PhamePostViewController
 
     $next_view = new PhameNextPostView();
     if ($next) {
-      $next_view->setNext($next->getTitle(), $next->getViewURI());
+      $next_view->setNext($next->getTitle(), $next->getLiveURI());
     }
     if ($prev) {
-      $next_view->setPrevious($prev->getTitle(), $prev->getViewURI());
+      $next_view->setPrevious($prev->getTitle(), $prev->getLiveURI());
     }
 
     $document->setFoot($next_view);
@@ -203,12 +219,34 @@ final class PhamePostViewController
           ->setName(pht('Publish'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI('post/archive/'.$id.'/'))
+          ->setName(pht('Archive'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else if ($post->isArchived()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-eye')
+          ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
+          ->setName(pht('Publish'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('fa-eye-slash')
           ->setHref($this->getApplicationURI('post/unpublish/'.$id.'/'))
           ->setName(pht('Unpublish'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI('post/archive/'.$id.'/'))
+          ->setName(pht('Archive'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     }
@@ -219,12 +257,14 @@ final class PhamePostViewController
       $live_name = pht('View Live');
     }
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setUser($viewer)
-        ->setIcon('fa-globe')
-        ->setHref($post->getLiveURI())
-        ->setName($live_name));
+    if (!$post->isArchived()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setUser($viewer)
+          ->setIcon('fa-globe')
+          ->setHref($post->getLiveURI())
+          ->setName($live_name));
+    }
 
     return $actions;
   }
@@ -251,7 +291,7 @@ final class PhamePostViewController
 
     $query = id(new PhamePostQuery())
       ->setViewer($viewer)
-      ->withVisibility(PhameConstants::VISIBILITY_PUBLISHED)
+      ->withVisibility(array(PhameConstants::VISIBILITY_PUBLISHED))
       ->withBlogPHIDs(array($post->getBlog()->getPHID()))
       ->setLimit(1);
 

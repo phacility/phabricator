@@ -63,6 +63,7 @@ final class PhabricatorRepositoryDiscoveryEngine
 
   private function discoverCommitsWithLock() {
     $repository = $this->getRepository();
+    $viewer = $this->getViewer();
 
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
@@ -104,6 +105,16 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->commitCache[$ref->getIdentifier()] = true;
     }
 
+    $this->markUnreachableCommits($repository);
+
+    $version = $this->getObservedVersion($repository);
+    if ($version !== null) {
+      id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($viewer)
+        ->setRepository($repository)
+        ->synchronizeWorkingCopyAfterDiscovery($version);
+    }
+
     return $refs;
   }
 
@@ -121,33 +132,40 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->verifyGitOrigin($repository);
     }
 
-    $branches = id(new DiffusionLowLevelGitRefQuery())
+    $heads = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withIsOriginBranch(true)
       ->execute();
 
-    if (!$branches) {
-      // This repository has no branches at all, so we don't need to do
+    if (!$heads) {
+      // This repository has no heads at all, so we don't need to do
       // anything. Generally, this means the repository is empty.
       return array();
     }
 
-    $branches = $this->sortBranches($branches);
-    $branches = mpull($branches, 'getCommitIdentifier', 'getShortName');
+    $heads = $this->sortRefs($heads);
+    $head_commits = mpull($heads, 'getCommitIdentifier');
 
     $this->log(
       pht(
         'Discovering commits in repository "%s".',
         $repository->getDisplayName()));
 
-    $this->fillCommitCache(array_values($branches));
+    $this->fillCommitCache($head_commits);
 
     $refs = array();
-    foreach ($branches as $name => $commit) {
-      $this->log(pht('Examining branch "%s", at "%s".', $name, $commit));
+    foreach ($heads as $ref) {
+      $name = $ref->getShortName();
+      $commit = $ref->getCommitIdentifier();
 
-      if (!$repository->shouldTrackBranch($name)) {
-        $this->log(pht('Skipping, branch is untracked.'));
+      $this->log(
+        pht(
+          'Examining "%s" (%s) at "%s".',
+          $name,
+          $ref->getRefType(),
+          $commit));
+
+      if (!$repository->shouldTrackRef($ref)) {
+        $this->log(pht('Skipping, ref is untracked.'));
         continue;
       }
 
@@ -156,16 +174,25 @@ final class PhabricatorRepositoryDiscoveryEngine
         continue;
       }
 
+      // In Git, it's possible to tag a tag. We just skip these, we'll discover
+      // them when we process the target tag. See T11180.
+      $fields = $ref->getRawFields();
+      $tag_type = idx($fields, '*objecttype');
+      if ($tag_type == 'tag') {
+        $this->log(pht('Skipping, this is a tag of a tag.'));
+        continue;
+      }
+
       $this->log(pht('Looking for new commits.'));
 
-      $branch_refs = $this->discoverStreamAncestry(
+      $head_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
         $commit,
-        $repository->shouldAutocloseBranch($name));
+        $repository->shouldAutocloseRef($ref));
 
-      $this->didDiscoverRefs($branch_refs);
+      $this->didDiscoverRefs($head_refs);
 
-      $refs[] = $branch_refs;
+      $refs[] = $head_refs;
     }
 
     return array_mergev($refs);
@@ -433,10 +460,17 @@ final class PhabricatorRepositoryDiscoveryEngine
       return;
     }
 
+    // When filling the cache we ignore commits which have been marked as
+    // unreachable, treating them as though they do not exist. When recording
+    // commits later we'll revive commits that exist but are unreachable.
+
     $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
-      'repositoryID = %d AND commitIdentifier IN (%Ls)',
+      'repositoryID = %d AND commitIdentifier IN (%Ls)
+        AND (importStatus & %d) != %d',
       $this->getRepository()->getID(),
-      $identifiers);
+      $identifiers,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
 
     foreach ($commits as $commit) {
       $this->commitCache[$commit->getCommitIdentifier()] = true;
@@ -454,25 +488,23 @@ final class PhabricatorRepositoryDiscoveryEngine
    *
    * @task internal
    *
-   * @param   list<DiffusionRepositoryRef> List of branch heads.
-   * @return  list<DiffusionRepositoryRef> Sorted list of branch heads.
+   * @param   list<DiffusionRepositoryRef> List of refs.
+   * @return  list<DiffusionRepositoryRef> Sorted list of refs.
    */
-  private function sortBranches(array $branches) {
+  private function sortRefs(array $refs) {
     $repository = $this->getRepository();
 
-    $head_branches = array();
-    $tail_branches = array();
-    foreach ($branches as $branch) {
-      $name = $branch->getShortName();
-
-      if ($repository->shouldAutocloseBranch($name)) {
-        $head_branches[] = $branch;
+    $head_refs = array();
+    $tail_refs = array();
+    foreach ($refs as $ref) {
+      if ($repository->shouldAutocloseRef($ref)) {
+        $head_refs[] = $ref;
       } else {
-        $tail_branches[] = $branch;
+        $tail_refs[] = $ref;
       }
     }
 
-    return array_merge($head_branches, $tail_branches);
+    return array_merge($head_refs, $tail_refs);
   }
 
 
@@ -484,6 +516,30 @@ final class PhabricatorRepositoryDiscoveryEngine
     array $parents) {
 
     $commit = new PhabricatorRepositoryCommit();
+    $conn_w = $repository->establishConnection('w');
+
+    // First, try to revive an existing unreachable commit (if one exists) by
+    // removing the "unreachable" flag. If we succeed, we don't need to do
+    // anything else: we already discovered this commit some time ago.
+    queryfx(
+      $conn_w,
+      'UPDATE %T SET importStatus = (importStatus & ~%d)
+        WHERE repositoryID = %d AND commitIdentifier = %s',
+      $commit->getTableName(),
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+      $repository->getID(),
+      $commit_identifier);
+    if ($conn_w->getAffectedRows()) {
+      $commit = $commit->loadOneWhere(
+        'repositoryID = %d AND commitIdentifier = %s',
+        $repository->getID(),
+        $commit_identifier);
+
+      // After reviving a commit, schedule new daemons for it.
+      $this->didDiscoverCommit($repository, $commit, $epoch);
+      return;
+    }
+
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
@@ -493,10 +549,7 @@ final class PhabricatorRepositoryDiscoveryEngine
 
     $data = new PhabricatorRepositoryCommitData();
 
-    $conn_w = $repository->establishConnection('w');
-
     try {
-
       // If this commit has parents, look up their IDs. The parent commits
       // should always exist already.
 
@@ -544,21 +597,7 @@ final class PhabricatorRepositoryDiscoveryEngine
         }
       $commit->saveTransaction();
 
-      $this->insertTask($repository, $commit);
-
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
-          VALUES (%d, 1, %d, %d)
-          ON DUPLICATE KEY UPDATE
-            size = size + 1,
-            lastCommitID =
-              IF(VALUES(epoch) > epoch, VALUES(lastCommitID), lastCommitID),
-            epoch = IF(VALUES(epoch) > epoch, VALUES(epoch), epoch)',
-        PhabricatorRepository::TABLE_SUMMARY,
-        $repository->getID(),
-        $commit->getID(),
-        $epoch);
+      $this->didDiscoverCommit($repository, $commit, $epoch);
 
       if ($this->repairMode) {
         // Normally, the query should throw a duplicate key exception. If we
@@ -574,8 +613,6 @@ final class PhabricatorRepositoryDiscoveryEngine
             'commit'      => $commit,
           )));
 
-
-
     } catch (AphrontDuplicateKeyQueryException $ex) {
       $commit->killTransaction();
       // Ignore. This can happen because we discover the same new commit
@@ -583,6 +620,29 @@ final class PhabricatorRepositoryDiscoveryEngine
       // data inconsistency or cosmic radiation; in any case, we're still
       // in a good state if we ignore the failure.
     }
+  }
+
+  private function didDiscoverCommit(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit,
+    $epoch) {
+
+    $this->insertTask($repository, $commit);
+
+    // Update the repository summary table.
+    queryfx(
+      $commit->establishConnection('w'),
+      'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
+        VALUES (%d, 1, %d, %d)
+        ON DUPLICATE KEY UPDATE
+          size = size + 1,
+          lastCommitID =
+            IF(VALUES(epoch) > epoch, VALUES(lastCommitID), lastCommitID),
+          epoch = IF(VALUES(epoch) > epoch, VALUES(epoch), epoch)',
+      PhabricatorRepository::TABLE_SUMMARY,
+      $repository->getID(),
+      $commit->getID(),
+      $epoch);
   }
 
   private function didDiscoverRefs(array $refs) {
@@ -640,6 +700,183 @@ final class PhabricatorRepositoryDiscoveryEngine
     }
 
     return true;
+  }
+
+
+  private function getObservedVersion(PhabricatorRepository $repository) {
+    if ($repository->isHosted()) {
+      return null;
+    }
+
+    if ($repository->isGit()) {
+      return $this->getGitObservedVersion($repository);
+    }
+
+    return null;
+  }
+
+  private function getGitObservedVersion(PhabricatorRepository $repository) {
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+     ->setRepository($repository)
+     ->execute();
+    if (!$refs) {
+      return null;
+    }
+
+    // In Git, the observed version is the most recently discovered commit
+    // at any repository HEAD. It's possible for this to regress temporarily
+    // if a branch is pushed and then deleted. This is acceptable because it
+    // doesn't do anything meaningfully bad and will fix itself on the next
+    // push.
+
+    $ref_identifiers = mpull($refs, 'getCommitIdentifier');
+    $ref_identifiers = array_fuse($ref_identifiers);
+
+    $version = queryfx_one(
+      $repository->establishConnection('w'),
+      'SELECT MAX(id) version FROM %T WHERE repositoryID = %d
+        AND commitIdentifier IN (%Ls)',
+      id(new PhabricatorRepositoryCommit())->getTableName(),
+      $repository->getID(),
+      $ref_identifiers);
+
+    if (!$version) {
+      return null;
+    }
+
+    return (int)$version['version'];
+  }
+
+  private function markUnreachableCommits(PhabricatorRepository $repository) {
+    // For now, this is only supported for Git.
+    if (!$repository->isGit()) {
+      return;
+    }
+
+    // Find older versions of refs which we haven't processed yet. We're going
+    // to make sure their commits are still reachable.
+    $old_refs = id(new PhabricatorRepositoryOldRef())->loadAllWhere(
+      'repositoryPHID = %s',
+      $repository->getPHID());
+
+    // We can share a single graph stream across all the checks we need to do.
+    $stream = new PhabricatorGitGraphStream($repository);
+
+    foreach ($old_refs as $old_ref) {
+      $identifier = $old_ref->getCommitIdentifier();
+      $this->markUnreachableFrom($repository, $stream, $identifier);
+
+      // If nothing threw an exception, we're all done with this ref.
+      $old_ref->delete();
+    }
+  }
+
+  private function markUnreachableFrom(
+    PhabricatorRepository $repository,
+    PhabricatorGitGraphStream $stream,
+    $identifier) {
+
+    $unreachable = array();
+
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryID = %s AND commitIdentifier = %s',
+      $repository->getID(),
+      $identifier);
+    if (!$commit) {
+      return;
+    }
+
+    $look = array($commit);
+    $seen = array();
+    while ($look) {
+      $target = array_pop($look);
+
+      // If we've already checked this commit (for example, because history
+      // branches and then merges) we don't need to check it again.
+      $target_identifier = $target->getCommitIdentifier();
+      if (isset($seen[$target_identifier])) {
+        continue;
+      }
+
+      $seen[$target_identifier] = true;
+
+      try {
+        $stream->getCommitDate($target_identifier);
+        $reachable = true;
+      } catch (Exception $ex) {
+        $reachable = false;
+      }
+
+      if ($reachable) {
+        // This commit is reachable, so we don't need to go any further
+        // down this road.
+        continue;
+      }
+
+      $unreachable[] = $target;
+
+      // Find the commit's parents and check them for reachability, too. We
+      // have to look in the database since we no may longer have the commit
+      // in the repository.
+      $rows = queryfx_all(
+        $commit->establishConnection('w'),
+        'SELECT commit.* FROM %T commit
+          JOIN %T parents ON commit.id = parents.parentCommitID
+          WHERE parents.childCommitID = %d',
+        $commit->getTableName(),
+        PhabricatorRepository::TABLE_PARENTS,
+        $target->getID());
+      if (!$rows) {
+        continue;
+      }
+
+      $parents = id(new PhabricatorRepositoryCommit())
+        ->loadAllFromArray($rows);
+      foreach ($parents as $parent) {
+        $look[] = $parent;
+      }
+    }
+
+    $unreachable = array_reverse($unreachable);
+
+    $flag = PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE;
+    foreach ($unreachable as $unreachable_commit) {
+      $unreachable_commit->writeImportStatusFlag($flag);
+    }
+
+    // If anything was unreachable, just rebuild the whole summary table.
+    // We can't really update it incrementally when a commit becomes
+    // unreachable.
+    if ($unreachable) {
+      $this->rebuildSummaryTable($repository);
+    }
+  }
+
+  private function rebuildSummaryTable(PhabricatorRepository $repository) {
+    $conn_w = $repository->establishConnection('w');
+
+    $data = queryfx_one(
+      $conn_w,
+      'SELECT COUNT(*) N, MAX(id) id, MAX(epoch) epoch
+        FROM %T WHERE repositoryID = %d AND (importStatus & %d) != %d',
+      id(new PhabricatorRepositoryCommit())->getTableName(),
+      $repository->getID(),
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
+
+    queryfx(
+      $conn_w,
+      'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
+        VALUES (%d, %d, %d, %d)
+        ON DUPLICATE KEY UPDATE
+          size = VALUES(size),
+          lastCommitID = VALUES(lastCommitID),
+          epoch = VALUES(epoch)',
+      PhabricatorRepository::TABLE_SUMMARY,
+      $repository->getID(),
+      $data['N'],
+      $data['id'],
+      $data['epoch']);
   }
 
 }

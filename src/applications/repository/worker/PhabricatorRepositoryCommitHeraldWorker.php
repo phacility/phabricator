@@ -3,6 +3,10 @@
 final class PhabricatorRepositoryCommitHeraldWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  protected function getImportStepFlag() {
+    return PhabricatorRepositoryCommit::IMPORTED_HERALD;
+  }
+
   public function getRequiredLeaseTime() {
     // Herald rules may take a long time to process.
     return phutil_units('4 hours in seconds');
@@ -11,6 +15,12 @@ final class PhabricatorRepositoryCommitHeraldWorker
   protected function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
+
+    if ($this->shouldSkipImportStep()) {
+      // This worker has no followup tasks, so we can just bail out
+      // right away without queueing anything.
+      return;
+    }
 
     // Reload the commit to pull commit data and audit requests.
     $commit = id(new DiffusionCommitQuery())

@@ -46,6 +46,10 @@ final class PhabricatorRepositoryCommitPHIDType extends PhabricatorPHIDType {
       $handle->setFullName($full_name);
       $handle->setURI($commit->getURI());
       $handle->setTimestamp($commit->getEpoch());
+
+      if ($commit->isUnreachable()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
     }
   }
 

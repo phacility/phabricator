@@ -357,7 +357,7 @@ JX.install('TypeaheadSource', {
       if (!str.length) {
         return [];
       }
-      return str.split(/\s/g);
+      return str.split(/\s+/g);
     },
     _defaultTransformer : function(object) {
       return {

@@ -42,7 +42,7 @@ final class PhabricatorMarkupEngine extends Phobject {
   private $objects = array();
   private $viewer;
   private $contextObject;
-  private $version = 15;
+  private $version = 16;
   private $engineCaches = array();
   private $auxiliaryConfig = array();
 
@@ -351,10 +351,13 @@ final class PhabricatorMarkupEngine extends Phobject {
    * @task engine
    */
   public static function newPhameMarkupEngine() {
-    return self::newMarkupEngine(array(
-      'macros' => false,
-      'uri.full' => true,
-    ));
+    return self::newMarkupEngine(
+      array(
+        'macros' => false,
+        'uri.full' => true,
+        'uri.same-window' => true,
+        'uri.base' => PhabricatorEnv::getURI('/'),
+      ));
   }
 
 
@@ -486,6 +489,14 @@ final class PhabricatorMarkupEngine extends Phobject {
     $engine->setConfig('phutil.codeblock.style-map', $style_map);
 
     $engine->setConfig('uri.full', $options['uri.full']);
+
+    if (isset($options['uri.base'])) {
+      $engine->setConfig('uri.base', $options['uri.base']);
+    }
+
+    if (isset($options['uri.same-window'])) {
+      $engine->setConfig('uri.same-window', $options['uri.same-window']);
+    }
 
     $rules = array();
     $rules[] = new PhutilRemarkupEscapeRemarkupRule();

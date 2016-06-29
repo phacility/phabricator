@@ -21,6 +21,10 @@ final class PhabricatorActionListView extends AphrontView {
     return $this;
   }
 
+  public function getID() {
+    return $this->id;
+  }
+
   public function render() {
     $viewer = $this->getViewer();
 
@@ -44,13 +48,26 @@ final class PhabricatorActionListView extends AphrontView {
 
     require_celerity_resource('phabricator-action-list-view-css');
 
+    $items = array();
+    foreach ($actions as $action) {
+      foreach ($action->getItems() as $item) {
+        $items[] = $item;
+      }
+    }
+
     return phutil_tag(
       'ul',
       array(
         'class' => 'phabricator-action-list-view',
         'id' => $this->id,
       ),
-      $actions);
+      $items);
+  }
+
+  public function getDropdownMenuMetadata() {
+    return array(
+      'items' => (string)hsprintf('%s', $this),
+    );
   }
 
 

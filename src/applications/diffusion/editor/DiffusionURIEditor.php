@@ -463,6 +463,8 @@ final class DiffusionURIEditor
       break;
     }
 
+    $was_hosted = $repository->isHosted();
+
     if ($observe_uri) {
       $repository
         ->setHosted(false)
@@ -476,6 +478,17 @@ final class DiffusionURIEditor
     }
 
     $repository->save();
+
+    $is_hosted = $repository->isHosted();
+
+    // If we've swapped the repository from hosted to observed or vice versa,
+    // reset all the cluster version clocks.
+    if ($was_hosted != $is_hosted) {
+      $cluster_engine = id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($this->getActor())
+        ->setRepository($repository)
+        ->synchronizeWorkingCopyAfterHostingChange();
+    }
 
     return $xactions;
   }

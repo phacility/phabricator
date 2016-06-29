@@ -31,7 +31,6 @@ final class PhabricatorConduitTokenTerminateController
         'Really terminate this token? Any system using this token '.
         'will no longer be able to make API requests.');
       $submit_button = pht('Terminate Token');
-      $panel_uri = '/settings/panel/apitokens/';
     } else {
       $tokens = id(new PhabricatorConduitTokenQuery())
         ->setViewer($viewer)
@@ -51,7 +50,6 @@ final class PhabricatorConduitTokenTerminateController
       $submit_button = pht('Terminate Tokens');
     }
 
-    $panel_uri = '/settings/panel/apitokens/';
     if ($object_phid != $viewer->getPHID()) {
       $object = id(new PhabricatorObjectQuery())
         ->setViewer($viewer)
@@ -60,8 +58,14 @@ final class PhabricatorConduitTokenTerminateController
       if (!$object) {
         return new Aphront404Response();
       }
-      $panel_uri = '/settings/'.$object->getID().'/panel/apitokens/';
+    } else {
+      $object = $viewer;
     }
+
+    $panel_uri = id(new PhabricatorConduitTokensSettingsPanel())
+      ->setViewer($viewer)
+      ->setUser($object)
+      ->getPanelURI();
 
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,

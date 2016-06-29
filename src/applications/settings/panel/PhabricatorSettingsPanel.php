@@ -7,8 +7,6 @@
  * submits the form. By extending this class, you can add new settings
  * panels.
  *
- * NOTE: This stuff is new and might not be completely stable.
- *
  * @task config   Panel Configuration
  * @task panel    Panel Implementation
  * @task internal Internals
@@ -17,8 +15,10 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
   private $user;
   private $viewer;
+  private $controller;
+  private $navigation;
   private $overrideURI;
-
+  private $preferences;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -43,6 +43,68 @@ abstract class PhabricatorSettingsPanel extends Phobject {
     return $this;
   }
 
+  final public function setController(PhabricatorController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  final public function getController() {
+    return $this->controller;
+  }
+
+  final public function setNavigation(AphrontSideNavFilterView $navigation) {
+    $this->navigation = $navigation;
+    return $this;
+  }
+
+  final public function getNavigation() {
+    return $this->navigation;
+  }
+
+  public function setPreferences(PhabricatorUserPreferences $preferences) {
+    $this->preferences = $preferences;
+    return $this;
+  }
+
+  public function getPreferences() {
+    return $this->preferences;
+  }
+
+  final public static function getAllPanels() {
+    $panels = id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getPanelKey')
+      ->execute();
+    return msortv($panels, 'getPanelOrderVector');
+  }
+
+  final public static function getAllDisplayPanels() {
+    $panels = array();
+    $groups = PhabricatorSettingsPanelGroup::getAllPanelGroupsWithPanels();
+    foreach ($groups as $group) {
+      foreach ($group->getPanels() as $key => $panel) {
+        $panels[$key] = $panel;
+      }
+    }
+
+    return $panels;
+  }
+
+  final public function getPanelGroup() {
+    $group_key = $this->getPanelGroupKey();
+
+    $groups = PhabricatorSettingsPanelGroup::getAllPanelGroupsWithPanels();
+    $group = idx($groups, $group_key);
+    if (!$group) {
+      throw new Exception(
+        pht(
+          'No settings panel group with key "%s" exists!',
+          $group_key));
+    }
+
+    return $group;
+  }
+
 
 /* -(  Panel Configuration  )------------------------------------------------ */
 
@@ -54,7 +116,9 @@ abstract class PhabricatorSettingsPanel extends Phobject {
    * @return string Unique panel identifier (used in URIs).
    * @task config
    */
-  abstract public function getPanelKey();
+  public function getPanelKey() {
+    return $this->getPhobjectClassConstant('PANELKEY');
+  }
 
 
   /**
@@ -68,17 +132,12 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
 
   /**
-   * Return a human-readable group name for this panel. For instance, if you
-   * had several related panels like "Volume Settings" and
-   * "Microphone Settings", you might put them in a group called "Audio".
+   * Return a panel group key constant for this panel.
    *
-   * When displayed, panels are grouped with other panels that have the same
-   * group name.
-   *
-   * @return string Human-readable panel group name.
+   * @return const Panel group key.
    * @task config
    */
-  abstract public function getPanelGroup();
+  abstract public function getPanelGroupKey();
 
 
   /**
@@ -96,30 +155,36 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
 
   /**
-   * You can use this callback to generate multiple similar panels which all
-   * share the same implementation. For example, OAuth providers each have a
-   * separate panel, but the implementation for each panel is the same.
+   * Return true if this panel is available to users while editing their own
+   * settings.
    *
-   * To generate multiple panels, build them here and return a list. By default,
-   * the current panel (`$this`) is returned alone. For most panels, this
-   * is the right implementation.
-   *
-   * @return list<PhabricatorSettingsPanel> Zero or more panels.
+   * @return bool True to enable management on behalf of a user.
    * @task config
    */
-  public function buildPanels() {
-    return array($this);
+  public function isUserPanel() {
+    return true;
   }
 
 
   /**
-   * Return true if this panel is available to administrators while editing
-   * system agent accounts.
+   * Return true if this panel is available to administrators while managing
+   * bot and mailing list accounts.
    *
-   * @return bool True to enable edit by administrators.
+   * @return bool True to enable management on behalf of accounts.
    * @task config
    */
-  public function isEditableByAdministrators() {
+  public function isManagementPanel() {
+    return false;
+  }
+
+
+  /**
+   * Return true if this panel is available while editing settings templates.
+   *
+   * @return bool True to allow editing in templates.
+   * @task config
+   */
+  public function isTemplatePanel() {
     return false;
   }
 
@@ -162,11 +227,13 @@ abstract class PhabricatorSettingsPanel extends Phobject {
     $key = $this->getPanelKey();
     $key = phutil_escape_uri($key);
 
-    if ($this->getUser()->getPHID() != $this->getViewer()->getPHID()) {
-      $user_id = $this->getUser()->getID();
-      return "/settings/{$user_id}/panel/{$key}/{$path}";
+    $user = $this->getUser();
+    if ($user) {
+      $username = $user->getUsername();
+      return "/settings/user/{$username}/page/{$key}/{$path}";
     } else {
-      return "/settings/panel/{$key}/{$path}";
+      $builtin = $this->getPreferences()->getBuiltinKey();
+      return "/settings/builtin/{$builtin}/page/{$key}/{$path}";
     }
   }
 
@@ -180,11 +247,31 @@ abstract class PhabricatorSettingsPanel extends Phobject {
    * @return string Sortable key.
    * @task internal
    */
-  final public function getPanelSortKey() {
-    return sprintf(
-      '%s'.chr(255).'%s',
-      $this->getPanelGroup(),
-      $this->getPanelName());
+  final public function getPanelOrderVector() {
+    return id(new PhutilSortVector())
+      ->addString($this->getPanelName());
+  }
+
+  protected function newDialog() {
+    return $this->getController()->newDialog();
+  }
+
+  protected function writeSetting(
+    PhabricatorUserPreferences $preferences,
+    $key,
+    $value) {
+    $viewer = $this->getViewer();
+    $request = $this->getController()->getRequest();
+
+    $editor = id(new PhabricatorUserPreferencesEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+    $xactions[] = $preferences->newTransaction($key, $value);
+    $editor->applyTransactions($preferences, $xactions);
   }
 
 }

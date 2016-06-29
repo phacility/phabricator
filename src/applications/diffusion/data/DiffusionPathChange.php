@@ -113,9 +113,7 @@ final class DiffusionPathChange extends Phobject {
     if (!$this->getCommitData()) {
       return null;
     }
-    $message = $this->getCommitData()->getCommitMessage();
-    $first = idx(explode("\n", $message), 0);
-    return substr($first, 0, 80);
+    return $this->getCommitData()->getSummary();
   }
 
   public static function convertToArcanistChanges(array $changes) {

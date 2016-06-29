@@ -203,10 +203,11 @@
   padding: 16px;
 }
 
-.phui-two-column-view .phui-two-column-row .phui-object-box
+.phui-two-column-view .phui-side-column .phui-object-item-empty
   .phui-info-view {
-    margin: 0;
+   margin-bottom: 0;
 }
+
 
 .phui-two-column-view .phui-box-blue-property
   .phui-header-shell + .phui-info-view {

@@ -121,8 +121,8 @@ a.button.phui-document-toc {
 }
 
 .device-phone .phui-document-view.phui-document-view-pro .phui-header-shell {
-  margin: 8px 0 0 0;
-  padding: 8px 0 20px;
+  margin: 0;
+  padding: 16px 0 20px;
 }
 
 .phui-document-view.phui-document-view-pro .phui-header-tall

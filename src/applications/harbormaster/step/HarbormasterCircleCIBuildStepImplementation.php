@@ -69,11 +69,6 @@ EOTEXT
     $uri_object = new PhutilURI($uri);
     $domain = $uri_object->getDomain();
 
-    if (!strlen($domain)) {
-      $uri_object = new PhutilGitURI($uri);
-      $domain = $uri_object->getDomain();
-    }
-
     $domain = phutil_utf8_strtolower($domain);
     switch ($domain) {
       case 'github.com':

@@ -72,14 +72,6 @@ final class ConpherenceThreadListView extends AphrontView {
     $epoch = $data['epoch'];
     $image = $data['image'];
     $dom_id = $thread->getPHID().'-nav-item';
-    $glyph_pref = PhabricatorUserPreferences::PREFERENCE_TITLES;
-    $preferences = $user->loadPreferences();
-    if ($preferences->getPreference($glyph_pref) == 'glyph') {
-      $glyph = id(new PhabricatorConpherenceApplication())
-        ->getTitleGlyph().' ';
-    } else {
-      $glyph = null;
-    }
 
     return id(new ConpherenceMenuItemView())
       ->setUser($user)
@@ -93,7 +85,7 @@ final class ConpherenceThreadListView extends AphrontView {
       ->addSigil('conpherence-menu-click')
       ->setMetadata(
         array(
-          'title' => $glyph.$data['title'],
+          'title' => $data['title'],
           'id' => $dom_id,
           'threadID' => $thread->getID(),
           ));

@@ -58,6 +58,7 @@ abstract class PhameLiveController extends PhameController {
       $blog_query = id(new PhameBlogQuery())
         ->setViewer($viewer)
         ->needProfileImage(true)
+        ->needHeaderImage(true)
         ->withIDs(array($blog_id));
 
       // If this is a live view, only show active blogs.
@@ -70,6 +71,8 @@ abstract class PhameLiveController extends PhameController {
 
       $blog = $blog_query->executeOne();
       if (!$blog) {
+        $this->isExternal = $is_external;
+        $this->isLive = $is_live;
         return new Aphront404Response();
       }
 
@@ -80,6 +83,9 @@ abstract class PhameLiveController extends PhameController {
       $is_live = false;
       $blog = null;
     }
+
+    $this->isExternal = $is_external;
+    $this->isLive = $is_live;
 
     if ($post_id) {
       $post_query = id(new PhamePostQuery())
@@ -92,7 +98,8 @@ abstract class PhameLiveController extends PhameController {
 
       // Only show published posts on external domains.
       if ($is_external) {
-        $post_query->withVisibility(PhameConstants::VISIBILITY_PUBLISHED);
+        $post_query->withVisibility(
+          array(PhameConstants::VISIBILITY_PUBLISHED));
       }
 
       $post = $post_query->executeOne();
@@ -109,8 +116,6 @@ abstract class PhameLiveController extends PhameController {
       $post = null;
     }
 
-    $this->isExternal = $is_external;
-    $this->isLive = $is_live;
     $this->blog = $blog;
     $this->post = $post;
 
@@ -154,6 +159,12 @@ abstract class PhameLiveController extends PhameController {
     // "Blogs" crumb into the crumbs list.
     if ($is_external) {
       $crumbs = new PHUICrumbsView();
+      // Link back to parent site
+      if ($blog->getParentSite() && $blog->getParentDomain()) {
+        $crumbs->addTextCrumb(
+          $blog->getParentSite(),
+          $blog->getExternalParentURI());
+      }
     } else {
       $crumbs = parent::buildApplicationCrumbs();
       $crumbs->addTextCrumb(
@@ -186,6 +197,33 @@ abstract class PhameLiveController extends PhameController {
     }
 
     return $crumbs;
+  }
+
+  public function willSendResponse(AphrontResponse $response) {
+    if ($this->getIsExternal()) {
+      if ($response instanceof Aphront404Response) {
+        $page = $this->newPage()
+          ->setCrumbs($this->buildApplicationCrumbs());
+
+        $response = id(new Phame404Response())
+          ->setPage($page);
+      }
+    }
+
+    return parent::willSendResponse($response);
+  }
+
+  public function newPage() {
+    $page = parent::newPage();
+
+    if ($this->getIsLive()) {
+      $page
+        ->addClass('phame-live-view')
+        ->setShowChrome(false)
+        ->setShowFooter(false);
+    }
+
+    return $page;
   }
 
 }

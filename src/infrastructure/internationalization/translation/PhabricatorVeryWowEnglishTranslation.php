@@ -33,6 +33,7 @@ final class PhabricatorVeryWowEnglishTranslation
       'Prototype' => 'Chew Toy',
       'Continue' => 'Bark And Run',
       'Countdown to Events' => 'To the Moon!',
+      'English (Very Wow)' => 'Such English',
     );
   }
 }

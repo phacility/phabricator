@@ -34,9 +34,17 @@ final class PhabricatorFilesConfigOptions
       'image/x-icon'              => 'image/x-icon',
       'image/vnd.microsoft.icon'  => 'image/x-icon',
 
-      'audio/x-wav'     => 'audio/x-wav',
+      // This is a generic type for both OGG video and OGG audio.
       'application/ogg' => 'application/ogg',
-      'audio/mpeg'      => 'audio/mpeg',
+
+      'audio/x-wav' => 'audio/x-wav',
+      'audio/mpeg' => 'audio/mpeg',
+      'audio/ogg' => 'audio/ogg',
+
+      'video/mp4' => 'video/mp4',
+      'video/ogg' => 'video/ogg',
+      'video/webm' => 'video/webm',
+      'video/quicktime' => 'video/quicktime',
     );
 
     $image_default = array(
@@ -49,10 +57,31 @@ final class PhabricatorFilesConfigOptions
       'image/vnd.microsoft.icon'  => true,
     );
 
+
+    // The "application/ogg" type is listed as both an audio and video type,
+    // because it may contain either type of content.
+
     $audio_default = array(
-      'audio/x-wav'     => true,
+      'audio/x-wav' => true,
+      'audio/mpeg' => true,
+      'audio/ogg' => true,
+
+      // These are video or ambiguous types, but can be forced to render as
+      // audio with `media=audio`, which seems to work properly in browsers.
+      // (For example, you can embed a music video as audio if you just want
+      // to set the mood for your task without distracting viewers.)
+      'video/mp4' => true,
+      'video/ogg' => true,
+      'video/quicktime' => true,
       'application/ogg' => true,
-      'audio/mpeg'      => true,
+    );
+
+    $video_default = array(
+      'video/mp4' => true,
+      'video/ogg' => true,
+      'video/webm' => true,
+      'video/quicktime' => true,
+      'application/ogg' => true,
     );
 
     // largely lifted from http://en.wikipedia.org/wiki/Internet_media_type
@@ -70,6 +99,7 @@ final class PhabricatorFilesConfigOptions
       // movie file icon
       'video/mpeg' => 'fa-file-movie-o',
       'video/mp4' => 'fa-file-movie-o',
+      'application/ogg' => 'fa-file-movie-o',
       'video/ogg' => 'fa-file-movie-o',
       'video/quicktime' => 'fa-file-movie-o',
       'video/webm' => 'fa-file-movie-o',
@@ -122,8 +152,14 @@ final class PhabricatorFilesConfigOptions
         ->setSummary(pht('Configure which MIME types are audio.'))
         ->setDescription(
           pht(
-            'List of MIME types which can be used to render an `%s` tag.',
+            'List of MIME types which can be rendered with an `%s` tag.',
             '<audio />')),
+      $this->newOption('files.video-mime-types', 'set', $video_default)
+        ->setSummary(pht('Configure which MIME types are video.'))
+        ->setDescription(
+          pht(
+            'List of MIME types which can be rendered with a `%s` tag.',
+            '<video />')),
       $this->newOption('files.icon-mime-types', 'wild', $icon_default)
         ->setLocked(true)
         ->setSummary(pht('Configure which MIME types map to which icons.'))

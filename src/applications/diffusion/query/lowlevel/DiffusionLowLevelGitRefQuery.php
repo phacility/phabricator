@@ -6,101 +6,129 @@
  */
 final class DiffusionLowLevelGitRefQuery extends DiffusionLowLevelQuery {
 
-  private $isTag;
-  private $isOriginBranch;
+  private $refTypes;
 
-  public function withIsTag($is_tag) {
-    $this->isTag = $is_tag;
-    return $this;
-  }
-
-  public function withIsOriginBranch($is_origin_branch) {
-    $this->isOriginBranch = $is_origin_branch;
+  public function withRefTypes(array $ref_types) {
+    $this->refTypes = $ref_types;
     return $this;
   }
 
   protected function executeQuery() {
+    $type_branch = PhabricatorRepositoryRefCursor::TYPE_BRANCH;
+    $type_tag = PhabricatorRepositoryRefCursor::TYPE_TAG;
+    $type_ref = PhabricatorRepositoryRefCursor::TYPE_REF;
+
+    $ref_types = $this->refTypes;
+    if (!$ref_types) {
+      $ref_types = array($type_branch, $type_tag, $type_ref);
+    }
+
+    $ref_types = array_fuse($ref_types);
+
+    $with_branches = isset($ref_types[$type_branch]);
+    $with_tags = isset($ref_types[$type_tag]);
+    $with_refs = isset($refs_types[$type_ref]);
+
     $repository = $this->getRepository();
 
     $prefixes = array();
 
-    $any = ($this->isTag || $this->isOriginBranch);
-    if (!$any) {
-      throw new Exception(pht('Specify types of refs to query.'));
+    if ($repository->isWorkingCopyBare()) {
+      $branch_prefix = 'refs/heads/';
+    } else {
+      $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
+      $branch_prefix = 'refs/remotes/'.$remote.'/';
     }
 
-    if ($this->isOriginBranch) {
-      if ($repository->isWorkingCopyBare()) {
-        $prefix = 'refs/heads/';
-      } else {
-        $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
-        $prefix = 'refs/remotes/'.$remote.'/';
+    $tag_prefix = 'refs/tags/';
+
+
+    if ($with_refs || count($ref_types) > 1) {
+      // If we're loading refs or more than one type of ref, just query
+      // everything.
+      $prefix = 'refs/';
+    } else {
+      if ($with_branches) {
+        $prefix = $branch_prefix;
       }
-      $prefixes[] = $prefix;
+      if ($with_tags) {
+        $prefix = $tag_prefix;
+      }
     }
 
-    if ($this->isTag) {
-      $prefixes[] = 'refs/tags/';
+    $branch_len = strlen($branch_prefix);
+    $tag_len = strlen($tag_prefix);
+
+    list($stdout) = $repository->execxLocalCommand(
+      'for-each-ref --sort=%s --format=%s -- %s',
+      '-creatordate',
+      $this->getFormatString(),
+      $prefix);
+
+    $stdout = rtrim($stdout);
+    if (!strlen($stdout)) {
+      return array();
     }
 
-    $order = '-creatordate';
+    $remote_prefix = 'refs/remotes/';
+    $remote_len = strlen($remote_prefix);
 
-    $futures = array();
-    foreach ($prefixes as $prefix) {
-      $futures[$prefix] = $repository->getLocalCommandFuture(
-        'for-each-ref --sort=%s --format=%s %s',
-        $order,
-        $this->getFormatString(),
-        $prefix);
-    }
+    // NOTE: Although git supports --count, we can't apply any offset or
+    // limit logic until the very end because we may encounter a HEAD which
+    // we want to discard.
 
-    // Resolve all the futures first. We want to iterate over them in prefix
-    // order, not resolution order.
-    foreach (new FutureIterator($futures) as $prefix => $future) {
-      $future->resolvex();
-    }
-
+    $lines = explode("\n", $stdout);
     $results = array();
-    foreach ($futures as $prefix => $future) {
-      list($stdout) = $future->resolvex();
+    foreach ($lines as $line) {
+      $fields = $this->extractFields($line);
 
-      $stdout = rtrim($stdout);
-      if (!strlen($stdout)) {
+      $refname = $fields['refname'];
+      if (!strncmp($refname, $branch_prefix, $branch_len)) {
+        $short = substr($refname, $branch_len);
+        $type = $type_branch;
+      } else if (!strncmp($refname, $tag_prefix, $tag_len)) {
+        $short = substr($refname, $tag_len);
+        $type = $type_tag;
+      } else if (!strncmp($refname, $remote_prefix, $remote_len)) {
+        // If we've found a remote ref that we didn't recognize as naming a
+        // branch, just ignore it. This can happen if we're observing a remote,
+        // and that remote has its own remotes. We don't care about their
+        // state and they may be out of date, so ignore them.
+        continue;
+      } else {
+        $short = $refname;
+        $type = $type_ref;
+      }
+
+      // If this isn't a type of ref we care about, skip it.
+      if (empty($ref_types[$type])) {
         continue;
       }
 
-      // NOTE: Although git supports --count, we can't apply any offset or
-      // limit logic until the very end because we may encounter a HEAD which
-      // we want to discard.
-
-      $lines = explode("\n", $stdout);
-      foreach ($lines as $line) {
-        $fields = $this->extractFields($line);
-
-        $creator = $fields['creator'];
-        $matches = null;
-        if (preg_match('/^(.*) ([0-9]+) ([0-9+-]+)$/', $creator, $matches)) {
-          $fields['author'] = $matches[1];
-          $fields['epoch'] = (int)$matches[2];
-        } else {
-          $fields['author'] = null;
-          $fields['epoch'] = null;
-        }
-
-        $commit = nonempty($fields['*objectname'], $fields['objectname']);
-
-        $short = substr($fields['refname'], strlen($prefix));
-        if ($short == 'HEAD') {
-          continue;
-        }
-
-        $ref = id(new DiffusionRepositoryRef())
-          ->setShortName($short)
-          ->setCommitIdentifier($commit)
-          ->setRawFields($fields);
-
-        $results[] = $ref;
+      // If this is the local HEAD, skip it.
+      if ($short == 'HEAD') {
+        continue;
       }
+
+      $creator = $fields['creator'];
+      $matches = null;
+      if (preg_match('/^(.*) ([0-9]+) ([0-9+-]+)$/', $creator, $matches)) {
+        $fields['author'] = $matches[1];
+        $fields['epoch'] = (int)$matches[2];
+      } else {
+        $fields['author'] = null;
+        $fields['epoch'] = null;
+      }
+
+      $commit = nonempty($fields['*objectname'], $fields['objectname']);
+
+      $ref = id(new DiffusionRepositoryRef())
+        ->setRefType($type)
+        ->setShortName($short)
+        ->setCommitIdentifier($commit)
+        ->setRawFields($fields);
+
+      $results[] = $ref;
     }
 
     return $results;

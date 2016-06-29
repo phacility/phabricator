@@ -124,7 +124,7 @@ final class PhabricatorPeopleProfileManageController
         ->setName(pht('Edit Settings'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
-        ->setHref('/settings/'.$user->getID().'/'));
+        ->setHref('/settings/user/'.$user->getUsername().'/'));
 
     if ($user->getIsAdmin()) {
       $empower_icon = 'fa-arrow-circle-o-down';

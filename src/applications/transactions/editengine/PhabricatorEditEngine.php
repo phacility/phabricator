@@ -26,6 +26,8 @@ abstract class PhabricatorEditEngine
   private $targetObject;
   private $page;
   private $pages;
+  private $navigation;
+  private $hideHeader;
 
   final public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -78,6 +80,24 @@ abstract class PhabricatorEditEngine
 
   public function getTargetObject() {
     return $this->targetObject;
+  }
+
+  public function setNavigation(AphrontSideNavFilterView $navigation) {
+    $this->navigation = $navigation;
+    return $this;
+  }
+
+  public function getNavigation() {
+    return $this->navigation;
+  }
+
+  public function setHideHeader($hide_header) {
+    $this->hideHeader = $hide_header;
+    return $this;
+  }
+
+  public function getHideHeader() {
+    return $this->hideHeader;
   }
 
 
@@ -510,6 +530,10 @@ abstract class PhabricatorEditEngine
     }
 
     return $this->getObjectViewURI($object);
+  }
+
+  public function getEffectiveObjectEditDoneURI($object) {
+    return $this->getEffectiveObjectViewURI($object);
   }
 
   public function getEffectiveObjectEditCancelURI($object) {
@@ -980,12 +1004,7 @@ abstract class PhabricatorEditEngine
         $validation_exception = $ex;
 
         foreach ($fields as $field) {
-          $xaction_type = $field->getTransactionType();
-          if ($xaction_type === null) {
-            continue;
-          }
-
-          $message = $ex->getShortMessage($xaction_type);
+          $message = $this->getValidationExceptionShortMessage($ex, $field);
           if ($message === null) {
             continue;
           }
@@ -1090,16 +1109,21 @@ abstract class PhabricatorEditEngine
         ->addSubmitButton($submit_button);
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($header_text)
-      ->setHeaderIcon($header_icon);
+    $crumbs = $this->buildCrumbs($object, $final = true);
+
+    if ($this->getHideHeader()) {
+      $header = null;
+      $crumbs->setBorder(false);
+    } else {
+      $header = id(new PHUIHeaderView())
+        ->setHeader($header_text)
+        ->setHeaderIcon($header_icon);
+      $crumbs->setBorder(true);
+    }
 
     if ($action_button) {
       $header->addActionLink($action_button);
     }
-
-    $crumbs = $this->buildCrumbs($object, $final = true);
-    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
       ->setUser($viewer)
@@ -1108,12 +1132,30 @@ abstract class PhabricatorEditEngine
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter(array(
-        $box,
-        $previews,
-      ));
+    // This is fairly questionable, but in use by Settings.
+    if ($request->getURIData('formSaved')) {
+      $box->setFormSaved(true);
+    }
+
+    $content = array(
+      $box,
+      $previews,
+    );
+
+    $view = new PHUITwoColumnView();
+
+    if ($header) {
+      $view->setHeader($header);
+    }
+
+    $navigation = $this->getNavigation();
+    if ($navigation) {
+      $view
+        ->setNavigation($navigation)
+        ->setMainColumn($content);
+    } else {
+      $view->setFooter($content);
+    }
 
     return $controller->newPage()
       ->setTitle($header_text)
@@ -1126,7 +1168,7 @@ abstract class PhabricatorEditEngine
     $object,
     array $xactions) {
     return id(new AphrontRedirectResponse())
-      ->setURI($this->getEffectiveObjectViewURI($object));
+      ->setURI($this->getEffectiveObjectEditDoneURI($object));
   }
 
   private function buildEditForm($object, array $fields) {
@@ -1155,10 +1197,14 @@ abstract class PhabricatorEditEngine
     }
 
     if (!$request->isAjax()) {
-      $form->appendControl(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($cancel_uri)
-          ->setValue($submit_button));
+      $buttons = id(new AphrontFormSubmitControl())
+        ->setValue($submit_button);
+
+      if ($cancel_uri) {
+        $buttons->addCancelButton($cancel_uri);
+      }
+
+      $form->appendControl($buttons);
     }
 
     return $form;
@@ -1925,20 +1971,34 @@ abstract class PhabricatorEditEngine
     return $application->getIcon();
   }
 
-  public function loadQuickCreateItems() {
-    $items = array();
-
-    if (!$this->hasCreateCapability()) {
-      return $items;
+  public function hasQuickCreateActions() {
+    if (!$this->isEngineConfigurable()) {
+      return false;
     }
 
-    $configs = $this->loadUsableConfigurationsForCreate();
+    return true;
+  }
+
+  public function newQuickCreateActions(array $configs) {
+    $items = array();
 
     if (!$configs) {
-      // No items to add.
-    } else if (count($configs) == 1) {
+      return array();
+    }
+
+    // If the viewer is logged in and can't create objects, don't show the
+    // menu item. If they're logged out, we assume they could create objects
+    // if they logged in, so we show the item as a hint about how to
+    // accomplish the action.
+    if ($this->getViewer()->isLoggedIn()) {
+      if (!$this->hasCreateCapability()) {
+        return array();
+      }
+    }
+
+    if (count($configs) == 1) {
       $config = head($configs);
-      $items[] = $this->newQuickCreateItem($config);
+      $items[] = $this->newQuickCreateAction($config);
     } else {
       $group_name = $this->getQuickCreateMenuHeaderText();
 
@@ -1947,7 +2007,7 @@ abstract class PhabricatorEditEngine
         ->setName($group_name);
 
       foreach ($configs as $config) {
-        $items[] = $this->newQuickCreateItem($config)
+        $items[] = $this->newQuickCreateAction($config)
           ->setIndented(true);
       }
     }
@@ -1970,7 +2030,7 @@ abstract class PhabricatorEditEngine
     return $configs;
   }
 
-  private function newQuickCreateItem(
+  private function newQuickCreateAction(
     PhabricatorEditEngineConfiguration $config) {
 
     $item_name = $config->getName();
@@ -1982,6 +2042,18 @@ abstract class PhabricatorEditEngine
       ->setName($item_name)
       ->setIcon($item_icon)
       ->setHref($item_uri);
+  }
+
+  protected function getValidationExceptionShortMessage(
+    PhabricatorApplicationTransactionValidationException $ex,
+    PhabricatorEditField $field) {
+
+    $xaction_type = $field->getTransactionType();
+    if ($xaction_type === null) {
+      return null;
+    }
+
+    return $ex->getShortMessage($xaction_type);
   }
 
   protected function getCreateNewObjectPolicy() {

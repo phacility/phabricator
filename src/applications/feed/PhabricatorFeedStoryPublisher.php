@@ -159,7 +159,8 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
 
     $will_receive_mail = array_fill_keys($this->mailRecipientPHIDs, true);
 
-    foreach (array_unique($subscribed_phids) as $user_phid) {
+    $user_phids = array_unique($subscribed_phids);
+    foreach ($user_phids as $user_phid) {
       if (isset($will_receive_mail[$user_phid])) {
         $mark_read = 1;
       } else {
@@ -184,6 +185,10 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
         $notif->getTableName(),
         implode(', ', $sql));
     }
+
+    PhabricatorUserCache::clearCaches(
+      PhabricatorUserNotificationCountCacheType::KEY_COUNT,
+      $user_phids);
   }
 
   private function sendNotification($chrono_key, array $subscribed_phids) {
@@ -207,14 +212,16 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
 
     $tags = $this->getMailTags();
     if ($tags) {
-      $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID in (%Ls)',
-        $phids);
+      $all_prefs = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withUserPHIDs($phids)
+        ->needSyntheticPreferences(true)
+        ->execute();
       $all_prefs = mpull($all_prefs, null, 'getUserPHID');
     }
 
-    $pref_default = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
-    $pref_ignore = PhabricatorUserPreferences::MAILTAG_PREFERENCE_IGNORE;
+    $pref_default = PhabricatorEmailTagsSetting::VALUE_EMAIL;
+    $pref_ignore = PhabricatorEmailTagsSetting::VALUE_IGNORE;
 
     $keep = array();
     foreach ($phids as $phid) {
@@ -223,9 +230,8 @@ final class PhabricatorFeedStoryPublisher extends Phobject {
       }
 
       if ($tags && isset($all_prefs[$phid])) {
-        $mailtags = $all_prefs[$phid]->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
-          array());
+        $mailtags = $all_prefs[$phid]->getSettingValue(
+          PhabricatorEmailTagsSetting::SETTINGKEY);
 
         $notify = false;
         foreach ($tags as $tag) {

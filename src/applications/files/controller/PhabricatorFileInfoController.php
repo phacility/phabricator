@@ -230,23 +230,36 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $cache_string = pht('Not Applicable');
     }
 
-    $finfo->addProperty(pht('Viewable Image'), $image_string);
-    $finfo->addProperty(pht('Cacheable'), $cache_string);
-
-    $builtin = $file->getBuiltinName();
-    if ($builtin === null) {
-      $builtin_string = pht('No');
-    } else {
-      $builtin_string = $builtin;
+    $types = array();
+    if ($file->isViewableImage()) {
+      $types[] = pht('Image');
     }
 
-    $finfo->addProperty(pht('Builtin'), $builtin_string);
+    if ($file->isVideo()) {
+      $types[] = pht('Video');
+    }
 
-    $is_profile = $file->getIsProfileImage()
-      ? pht('Yes')
-      : pht('No');
+    if ($file->isAudio()) {
+      $types[] = pht('Audio');
+    }
 
-    $finfo->addProperty(pht('Profile'), $is_profile);
+    if ($file->getCanCDN()) {
+      $types[] = pht('Can CDN');
+    }
+
+    $builtin = $file->getBuiltinName();
+    if ($builtin !== null) {
+      $types[] = pht('Builtin ("%s")', $builtin);
+    }
+
+    if ($file->getIsProfileImage()) {
+      $types[] = pht('Profile');
+    }
+
+    if ($types) {
+      $types = implode(', ', $types);
+      $finfo->addProperty(pht('Attributes'), $types);
+    }
 
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));
@@ -255,9 +268,14 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       pht('Engine'),
       $file->getStorageEngine());
 
-    $storage_properties->addProperty(
-      pht('Format'),
-      $file->getStorageFormat());
+    $format_key = $file->getStorageFormat();
+    $format = PhabricatorFileStorageFormat::getFormat($format_key);
+    if ($format) {
+      $format_name = $format->getStorageFormatName();
+    } else {
+      $format_name = pht('Unknown ("%s")', $format_key);
+    }
+    $storage_properties->addProperty(pht('Format'), $format_name);
 
     $storage_properties->addProperty(
       pht('Handle'),
@@ -291,6 +309,23 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
       $media = id(new PHUIPropertyListView())
         ->addImageContent($linked_image);
+
+      $box->addPropertyList($media);
+    } else if ($file->isVideo()) {
+      $video = phutil_tag(
+        'video',
+        array(
+          'controls' => 'controls',
+          'class' => 'phui-property-list-video',
+        ),
+        phutil_tag(
+          'source',
+          array(
+            'src' => $file->getViewURI(),
+            'type' => $file->getMimeType(),
+          )));
+      $media = id(new PHUIPropertyListView())
+        ->addImageContent($video);
 
       $box->addPropertyList($media);
     } else if ($file->isAudio()) {

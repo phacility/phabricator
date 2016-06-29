@@ -26,7 +26,7 @@ final class PhabricatorApplicationTransactionValidationError
   }
 
   public function getTransaction() {
-    return $this->tranaction;
+    return $this->transaction;
   }
 
   public function getShortMessage() {

@@ -35,7 +35,7 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
       }
     }
 
-    $console->writeOut(
+    $console->writeErr(
       "%s\n",
       pht('Found %s file(s)...', phutil_count($futures)));
 
@@ -44,14 +44,24 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($futures));
 
+    $messages = array();
+
     $futures = id(new FutureIterator($futures))
       ->limit(8);
     foreach ($futures as $full_path => $future) {
       $bar->update(1);
 
-      $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
-        Filesystem::readFile($full_path),
-        $future->resolve());
+      try {
+        $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
+          Filesystem::readFile($full_path),
+          $future->resolve());
+      } catch (Exception $ex) {
+        $messages[] = pht(
+          'WARNING: Failed to extract strings from file "%s": %s',
+          $full_path,
+          $ex->getMessage());
+        continue;
+      }
 
       $root = $tree->getRootNode();
       $calls = $root->selectDescendantsOfType('n_FUNCTION_CALL');
@@ -69,7 +79,11 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
               'line' => $string_line,
             );
           } catch (Exception $ex) {
-            // TODO: Deal with this junks.
+            $messages[] = pht(
+              'WARNING: Failed to evaluate pht() call on line %d in "%s": %s',
+              $call->getLineNumber(),
+              $full_path,
+              $ex->getMessage());
           }
         }
       }
@@ -77,6 +91,10 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
       $tree->dispose();
     }
     $bar->done();
+
+    foreach ($messages as $message) {
+      $console->writeErr("%s\n", $message);
+    }
 
     ksort($results);
 

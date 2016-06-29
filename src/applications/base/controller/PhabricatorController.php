@@ -104,12 +104,12 @@ abstract class PhabricatorController extends AphrontController {
       $request->setUser($user);
     }
 
-    PhabricatorEnv::setLocaleCode($user->getTranslation());
+    id(new PhabricatorAuthSessionEngine())
+      ->willServeRequestForUser($user);
 
-    $preferences = $user->loadPreferences();
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
-      $dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
-      if ($preferences->getPreference($dark_console) ||
+      $dark_console = PhabricatorDarkConsoleSetting::SETTINGKEY;
+      if ($user->getUserSetting($dark_console) ||
          PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
         $console = new DarkConsoleCore();
         $request->getApplicationConfiguration()->setConsole($console);
@@ -474,8 +474,11 @@ abstract class PhabricatorController extends AphrontController {
   public function newCurtainView($object) {
     $viewer = $this->getViewer();
 
+    $action_id = celerity_generate_unique_node_id();
+
     $action_list = id(new PhabricatorActionListView())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->setID($action_id);
 
     // NOTE: Applications (objects of class PhabricatorApplication) can't
     // currently be set here, although they don't need any of the extensions

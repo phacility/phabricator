@@ -26,12 +26,6 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return pht('Things before they were cool.');
   }
 
-  public function getEventListeners() {
-    return array(
-      new PholioActionMenuEventListener(),
-    );
-  }
-
   public function getRemarkupRules() {
     return array(
       new PholioRemarkupRule(),
@@ -57,18 +51,6 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
         ),
       ),
     );
-  }
-
-  public function getQuickCreateItems(PhabricatorUser $viewer) {
-    $items = array();
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Pholio Mock'))
-      ->setIcon('fa-picture-o')
-      ->setHref($this->getBaseURI().'create/');
-    $items[] = $item;
-
-    return $items;
   }
 
   protected function getCustomCapabilities() {

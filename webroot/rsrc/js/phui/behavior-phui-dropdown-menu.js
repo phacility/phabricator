@@ -16,17 +16,42 @@ JX.behavior('phui-dropdown-menu', function() {
 
     e.kill();
 
-    var list = JX.$H(data.items).getFragment().firstChild;
+    var list;
+    var placeholder;
+    if (data.items) {
+      list = JX.$H(data.items).getFragment().firstChild;
+    } else {
+      list = JX.$(data.menuID);
+      placeholder = JX.$N('span');
+    }
 
     var icon = e.getNode('phui-dropdown-menu');
     data.menu = new JX.PHUIXDropdownMenu(icon);
-    data.menu.setContent(list);
+
+    data.menu.listen('open', function() {
+      if (placeholder) {
+        JX.DOM.replace(list, placeholder);
+      }
+      data.menu.setContent(list);
+    });
+
+    data.menu.listen('close', function() {
+      if (placeholder) {
+        JX.DOM.replace(placeholder, list);
+      }
+    });
+
     data.menu.open();
 
     JX.DOM.listen(list, 'click', 'tag:a', function(e) {
       if (!e.isNormalClick()) {
         return;
       }
+
+      if (JX.Stratcom.pass()) {
+        return;
+      }
+
       data.menu.close();
     });
   });

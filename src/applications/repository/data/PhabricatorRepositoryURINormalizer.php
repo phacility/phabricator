@@ -78,16 +78,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     switch ($this->type) {
       case self::TYPE_GIT:
         $uri = new PhutilURI($this->uri);
-        if ($uri->getProtocol()) {
-          return $uri->getPath();
-        }
-
-        $uri = new PhutilGitURI($this->uri);
-        if ($uri->getDomain()) {
-          return $uri->getPath();
-        }
-
-        return $this->uri;
+        return $uri->getPath();
       case self::TYPE_SVN:
       case self::TYPE_MERCURIAL:
         $uri = new PhutilURI($this->uri);
@@ -136,14 +127,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     $domain = null;
 
     $uri = new PhutilURI($this->uri);
-    if ($uri->getProtocol()) {
-      $domain = $uri->getDomain();
-    }
-
-    if (!strlen($domain)) {
-      $uri = new PhutilGitURI($this->uri);
-      $domain = $uri->getDomain();
-    }
+    $domain = $uri->getDomain();
 
     if (!strlen($domain)) {
       $domain = '<void>';

@@ -34,6 +34,21 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     );
   }
 
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send email to these addresses to create questions. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),
+        ),
+        pht('Learn More')));
+  }
+
   public function getRoutes() {
     return array(
       '/Q(?P<id>[1-9]\d*)'

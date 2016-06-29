@@ -267,12 +267,12 @@ final class PholioMockEditController extends PholioController {
       $image_elements);
 
     $drop_control = phutil_tag(
-      'div',
+      'a',
       array(
         'id' => $drop_id,
         'class' => 'pholio-edit-drop',
       ),
-      pht('Drag and drop images here to add them to the mock.'));
+      pht('Click here, or drag and drop images to add them to the mock.'));
 
     $order_control = phutil_tag(
       'input',

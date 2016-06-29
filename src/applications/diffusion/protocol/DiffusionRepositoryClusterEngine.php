@@ -85,6 +85,53 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
   /**
    * @task sync
    */
+  public function synchronizeWorkingCopyAfterHostingChange() {
+    if (!$this->shouldEnableSynchronization()) {
+      return;
+    }
+
+    $repository = $this->getRepository();
+    $repository_phid = $repository->getPHID();
+
+    $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
+      $repository_phid);
+    $versions = mpull($versions, null, 'getDevicePHID');
+
+    // After converting a hosted repository to observed, or vice versa, we
+    // need to reset version numbers because the clocks for observed and hosted
+    // repositories run on different units.
+
+    // We identify all the cluster leaders and reset their version to 0.
+    // We identify all the cluster followers and demote them.
+
+    // This allows the cluter to start over again at version 0 but keep the
+    // same leaders.
+
+    if ($versions) {
+      $max_version = (int)max(mpull($versions, 'getRepositoryVersion'));
+      foreach ($versions as $version) {
+        $device_phid = $version->getDevicePHID();
+
+        if ($version->getRepositoryVersion() == $max_version) {
+          PhabricatorRepositoryWorkingCopyVersion::updateVersion(
+            $repository_phid,
+            $device_phid,
+            0);
+        } else {
+          PhabricatorRepositoryWorkingCopyVersion::demoteDevice(
+            $repository_phid,
+            $device_phid);
+        }
+      }
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * @task sync
+   */
   public function synchronizeWorkingCopyBeforeRead() {
     if (!$this->shouldEnableSynchronization()) {
       return;
@@ -149,14 +196,18 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
 
       $max_version = (int)max(mpull($versions, 'getRepositoryVersion'));
       if ($max_version > $this_version) {
-        $fetchable = array();
-        foreach ($versions as $version) {
-          if ($version->getRepositoryVersion() == $max_version) {
-            $fetchable[] = $version->getDevicePHID();
+        if ($repository->isHosted()) {
+          $fetchable = array();
+          foreach ($versions as $version) {
+            if ($version->getRepositoryVersion() == $max_version) {
+              $fetchable[] = $version->getDevicePHID();
+            }
           }
-        }
 
-        $this->synchronizeWorkingCopyFromDevices($fetchable);
+          $this->synchronizeWorkingCopyFromDevices($fetchable);
+        } else {
+          $this->synchornizeWorkingCopyFromRemote();
+        }
 
         PhabricatorRepositoryWorkingCopyVersion::updateVersion(
           $repository_phid,
@@ -329,6 +380,47 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
   }
 
 
+  public function synchronizeWorkingCopyAfterDiscovery($new_version) {
+    if (!$this->shouldEnableSynchronization()) {
+      return;
+    }
+
+    $repository = $this->getRepository();
+    $repository_phid = $repository->getPHID();
+    if ($repository->isHosted()) {
+      return;
+    }
+
+    $viewer = $this->getViewer();
+
+    $device = AlmanacKeys::getLiveDevice();
+    $device_phid = $device->getPHID();
+
+    // NOTE: We are not holding a lock here because this method is only called
+    // from PhabricatorRepositoryDiscoveryEngine, which already holds a device
+    // lock. Even if we do race here and record an older version, the
+    // consequences are mild: we only do extra work to correct it later.
+
+    $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
+      $repository_phid);
+    $versions = mpull($versions, null, 'getDevicePHID');
+
+    $this_version = idx($versions, $device_phid);
+    if ($this_version) {
+      $this_version = (int)$this_version->getRepositoryVersion();
+    } else {
+      $this_version = -1;
+    }
+
+    if ($new_version > $this_version) {
+      PhabricatorRepositoryWorkingCopyVersion::updateVersion(
+        $repository_phid,
+        $device_phid,
+        $new_version);
+    }
+  }
+
+
   /**
    * @task sync
    */
@@ -471,19 +563,56 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       return false;
     }
 
-    // TODO: It may eventually make sense to try to version and synchronize
-    // observed repositories (so that daemons don't do reads against out-of
-    // date hosts), but don't bother for now.
-    if (!$repository->isHosted()) {
-      return false;
-    }
-
     $device = AlmanacKeys::getLiveDevice();
     if (!$device) {
       return false;
     }
 
     return true;
+  }
+
+
+  /**
+   * @task internal
+   */
+  private function synchornizeWorkingCopyFromRemote() {
+    $repository = $this->getRepository();
+    $device = AlmanacKeys::getLiveDevice();
+
+    $local_path = $repository->getLocalPath();
+    $fetch_uri = $repository->getRemoteURIEnvelope();
+
+    if ($repository->isGit()) {
+      $this->requireWorkingCopy();
+
+      $argv = array(
+        'fetch --prune -- %P %s',
+        $fetch_uri,
+        '+refs/*:refs/*',
+      );
+    } else {
+      throw new Exception(pht('Remote sync only supported for git!'));
+    }
+
+    $future = DiffusionCommandEngine::newCommandEngine($repository)
+      ->setArgv($argv)
+      ->setSudoAsDaemon(true)
+      ->setCredentialPHID($repository->getCredentialPHID())
+      ->setURI($repository->getRemoteURI())
+      ->newFuture();
+
+    $future->setCWD($local_path);
+
+    try {
+      $future->resolvex();
+    } catch (Exception $ex) {
+      $this->logLine(
+        pht(
+          'Synchronization of "%s" from remote failed: %s',
+          $device->getName(),
+          $ex->getMessage()));
+      throw $ex;
+    }
   }
 
 
@@ -560,17 +689,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     $local_path = $repository->getLocalPath();
 
     if ($repository->isGit()) {
-      if (!Filesystem::pathExists($local_path)) {
-        throw new Exception(
-          pht(
-            'Repository "%s" does not have a working copy on this device '.
-            'yet, so it can not be synchronized. Wait for the daemons to '.
-            'construct one or run `bin/repository update %s` on this host '.
-            '("%s") to build it explicitly.',
-            $repository->getDisplayName(),
-            $repository->getMonogram(),
-            $device->getName()));
-      }
+      $this->requireWorkingCopy();
 
       $argv = array(
         'fetch --prune -- %s %s',
@@ -585,7 +704,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       ->setArgv($argv)
       ->setConnectAsDevice(true)
       ->setSudoAsDaemon(true)
-      ->setProtocol($fetch_uri->getProtocol())
+      ->setURI($fetch_uri)
       ->newFuture();
 
     $future->setCWD($local_path);
@@ -622,4 +741,24 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
     }
     return $this;
   }
+
+  private function requireWorkingCopy() {
+    $repository = $this->getRepository();
+    $local_path = $repository->getLocalPath();
+
+    if (!Filesystem::pathExists($local_path)) {
+      $device = AlmanacKeys::getLiveDevice();
+
+      throw new Exception(
+        pht(
+          'Repository "%s" does not have a working copy on this device '.
+          'yet, so it can not be synchronized. Wait for the daemons to '.
+          'construct one or run `bin/repository update %s` on this host '.
+          '("%s") to build it explicitly.',
+          $repository->getDisplayName(),
+          $repository->getMonogram(),
+          $device->getName()));
+    }
+  }
+
 }

@@ -68,6 +68,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mailCCPHIDs = array();
   private $feedNotifyPHIDs = array();
   private $feedRelatedPHIDs = array();
+  private $modularTypes;
 
   const STORAGE_ENCODING_BINARY = 'binary';
 
@@ -285,6 +286,14 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_SPACE;
     }
 
+    $template = $this->object->getApplicationTransactionTemplate();
+    if ($template instanceof PhabricatorModularTransaction) {
+      $xtypes = $template->newModularTransactionTypes();
+      foreach ($xtypes as $xtype) {
+        $types[] = $xtype->getTransactionTypeConstant();
+      }
+    }
+
     return $types;
   }
 
@@ -304,7 +313,15 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
+
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->generateOldValue($object);
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_CREATE:
         return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
@@ -374,7 +391,15 @@ abstract class PhabricatorApplicationTransactionEditor
   private function getTransactionNewValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
+
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->generateNewValue($object, $xaction->getNewValue());
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_CREATE:
         return null;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
@@ -496,7 +521,14 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->applyInternalEffects($object, $xaction->getNewValue());
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
@@ -520,7 +552,15 @@ abstract class PhabricatorApplicationTransactionEditor
   private function applyExternalEffects(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
+
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->applyExternalEffects($object, $xaction->getNewValue());
+    }
+
+    switch ($type) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())
           ->setObject($object)
@@ -677,6 +717,8 @@ abstract class PhabricatorApplicationTransactionEditor
         }
 
         $editor->save();
+
+        $this->updateWorkboardColumns($object, $const, $old, $new);
         break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_SPACE:
@@ -800,6 +842,8 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new PhabricatorApplicationTransactionValidationException($errors);
       }
 
+      $this->willApplyTransactions($object, $xactions);
+
       if ($object->getID()) {
         foreach ($xactions as $xaction) {
 
@@ -887,6 +931,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $object->openTransaction();
     }
 
+    try {
       foreach ($xactions as $xaction) {
         $this->applyInternalEffects($object, $xaction);
       }
@@ -896,8 +941,6 @@ abstract class PhabricatorApplicationTransactionEditor
       try {
         $object->save();
       } catch (AphrontDuplicateKeyQueryException $ex) {
-        $object->killTransaction();
-
         // This callback has an opportunity to throw a better exception,
         // so execution may end here.
         $this->didCatchDuplicateKeyException($object, $xactions, $ex);
@@ -929,7 +972,11 @@ abstract class PhabricatorApplicationTransactionEditor
         $read_locking = false;
       }
 
-    $object->saveTransaction();
+      $object->saveTransaction();
+    } catch (Exception $ex) {
+      $object->killTransaction();
+      throw $ex;
+    }
 
     // Now that we've completely applied the core transaction set, try to apply
     // Herald rules. Herald rules are allowed to either take direct actions on
@@ -1318,17 +1365,28 @@ abstract class PhabricatorApplicationTransactionEditor
   private function buildSubscribeTransaction(
     PhabricatorLiskDAO $object,
     array $xactions,
-    array $blocks) {
+    array $changes) {
 
     if (!($object instanceof PhabricatorSubscribableInterface)) {
       return null;
     }
 
     if ($this->shouldEnableMentions($object, $xactions)) {
-      $texts = array_mergev($blocks);
-      $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+      // Identify newly mentioned users. We ignore users who were previously
+      // mentioned so that we don't re-subscribe users after an edit of text
+      // which mentions them.
+      $old_texts = mpull($changes, 'getOldValue');
+      $new_texts = mpull($changes, 'getNewValue');
+
+      $old_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
         $this->getActor(),
-        $texts);
+        $old_texts);
+
+      $new_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+        $this->getActor(),
+        $new_texts);
+
+      $phids = array_diff($new_phids, $old_phids);
     } else {
       $phids = array();
     }
@@ -1377,11 +1435,6 @@ abstract class PhabricatorApplicationTransactionEditor
     $xaction->setNewValue(array('+' => $phids));
 
     return $xaction;
-  }
-
-  protected function getRemarkupBlocksFromTransaction(
-    PhabricatorApplicationTransaction $transaction) {
-    return $transaction->getRemarkupBlocks();
   }
 
   protected function mergeTransactions(
@@ -1462,15 +1515,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $xactions = $this->applyImplicitCC($object, $xactions);
 
-    $blocks = array();
-    foreach ($xactions as $key => $xaction) {
-      $blocks[$key] = $this->getRemarkupBlocksFromTransaction($xaction);
-    }
+    $changes = $this->getRemarkupChanges($xactions);
 
     $subscribe_xaction = $this->buildSubscribeTransaction(
       $object,
       $xactions,
-      $blocks);
+      $changes);
     if ($subscribe_xaction) {
       $xactions[] = $subscribe_xaction;
     }
@@ -1482,7 +1532,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $block_xactions = $this->expandRemarkupBlockTransactions(
       $object,
       $xactions,
-      $blocks,
+      $changes,
       $engine);
 
     foreach ($block_xactions as $xaction) {
@@ -1492,27 +1542,46 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xactions;
   }
 
+  private function getRemarkupChanges(array $xactions) {
+    $changes = array();
+
+    foreach ($xactions as $key => $xaction) {
+      foreach ($this->getRemarkupChangesFromTransaction($xaction) as $change) {
+        $changes[] = $change;
+      }
+    }
+
+    return $changes;
+  }
+
+  private function getRemarkupChangesFromTransaction(
+    PhabricatorApplicationTransaction $transaction) {
+    return $transaction->getRemarkupChanges();
+  }
+
   private function expandRemarkupBlockTransactions(
     PhabricatorLiskDAO $object,
     array $xactions,
-    $blocks,
+    array $changes,
     PhutilMarkupEngine $engine) {
 
     $block_xactions = $this->expandCustomRemarkupBlockTransactions(
       $object,
       $xactions,
-      $blocks,
+      $changes,
       $engine);
 
     $mentioned_phids = array();
     if ($this->shouldEnableMentions($object, $xactions)) {
-      foreach ($blocks as $key => $xaction_blocks) {
-        foreach ($xaction_blocks as $block) {
-          $engine->markupText($block);
-          $mentioned_phids += $engine->getTextMetadata(
-            PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
-            array());
-        }
+      foreach ($changes as $change) {
+        // Here, we don't care about processing only new mentions after an edit
+        // because there is no way for an object to ever "unmention" itself on
+        // another object, so we can ignore the old value.
+        $engine->markupText($change->getNewValue());
+
+        $mentioned_phids += $engine->getTextMetadata(
+          PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
+          array());
       }
     }
 
@@ -1557,7 +1626,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function expandCustomRemarkupBlockTransactions(
     PhabricatorLiskDAO $object,
     array $xactions,
-    $blocks,
+    array $changes,
     PhutilMarkupEngine $engine) {
     return array();
   }
@@ -1982,6 +2051,12 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions) {
 
     $errors = array();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $errors[] = $xtype->validateTransactions($object, $xactions);
+    }
+
     switch ($type) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $errors[] = $this->validatePolicyTransaction(
@@ -2702,7 +2777,9 @@ abstract class PhabricatorApplicationTransactionEditor
     $object_href = null) {
 
     $headers = array();
+    $headers_html = array();
     $comments = array();
+    $details = array();
 
     foreach ($xactions as $xaction) {
       if ($xaction->shouldHideForMail($xactions)) {
@@ -2714,16 +2791,25 @@ abstract class PhabricatorApplicationTransactionEditor
         $headers[] = $header;
       }
 
+      $header_html = $xaction->getTitleForHTMLMail();
+      if ($header_html !== null) {
+        $headers_html[] = $header_html;
+      }
+
       $comment = $xaction->getBodyForMail();
       if ($comment !== null) {
         $comments[] = $comment;
+      }
+
+      if ($xaction->hasChangeDetailsForMail()) {
+        $details[] = $xaction;
       }
     }
 
     $headers_text = implode("\n", $headers);
     $body->addRawPlaintextSection($headers_text);
 
-    $headers_html = phutil_implode_html(phutil_tag('br'), $headers);
+    $headers_html = phutil_implode_html(phutil_tag('br'), $headers_html);
 
     $header_button = null;
     if ($object_label !== null) {
@@ -2763,7 +2849,13 @@ abstract class PhabricatorApplicationTransactionEditor
       array(
         'style' => implode(' ', $xactions_style),
       ),
-      $headers_html);
+      array(
+        $headers_html,
+        // Add an extra newline to prevent the "View Object" button from
+        // running into the transaction text in Mail.app text snippet
+        // previews.
+        "\n",
+      ));
 
     $headers_html = phutil_tag(
       'table',
@@ -2775,6 +2867,14 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($comments as $comment) {
       $body->addRemarkupSection(null, $comment);
     }
+
+    foreach ($details as $xaction) {
+      $details = $xaction->renderChangeDetailsForMail($body->getViewer());
+      if ($details !== null) {
+        $body->addHTMLSection(pht('EDIT DETAILS'), $details);
+      }
+    }
+
   }
 
   /**
@@ -3069,11 +3169,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $blocks = array();
-    foreach ($xactions as $xaction) {
-      $blocks[] = $this->getRemarkupBlocksFromTransaction($xaction);
-    }
-    $blocks = array_mergev($blocks);
+    $changes = $this->getRemarkupChanges($xactions);
+    $blocks = mpull($changes, 'getNewValue');
 
     $phids = array();
     if ($blocks) {
@@ -3083,9 +3180,16 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     foreach ($xactions as $xaction) {
-      $phids[] = $this->extractFilePHIDsFromCustomTransaction(
-        $object,
-        $xaction);
+      $type = $xaction->getTransactionType();
+
+      $xtype = $this->getModularTransactionType($type);
+      if ($xtype) {
+        $phids[] = $xtype->extractFilePHIDs($object, $xaction->getNewValue());
+      } else {
+        $phids[] = $this->extractFilePHIDsFromCustomTransaction(
+          $object,
+          $xaction);
+      }
     }
 
     $phids = array_unique(array_filter(array_mergev($phids)));
@@ -3601,6 +3705,95 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return true;
+  }
+
+  private function updateWorkboardColumns($object, $const, $old, $new) {
+    // If an object is removed from a project, remove it from any proxy
+    // columns for that project. This allows a task which is moved up from a
+    // milestone to the parent to move back into the "Backlog" column on the
+    // parent workboard.
+
+    if ($const != PhabricatorProjectObjectHasProjectEdgeType::EDGECONST) {
+      return;
+    }
+
+    // TODO: This should likely be some future WorkboardInterface.
+    $appears_on_workboards = ($object instanceof ManiphestTask);
+    if (!$appears_on_workboards) {
+      return;
+    }
+
+    $removed_phids = array_keys(array_diff_key($old, $new));
+    if (!$removed_phids) {
+      return;
+    }
+
+    // Find any proxy columns for the removed projects.
+    $proxy_columns = id(new PhabricatorProjectColumnQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withProxyPHIDs($removed_phids)
+      ->execute();
+    if (!$proxy_columns) {
+      return array();
+    }
+
+    $proxy_phids = mpull($proxy_columns, 'getPHID');
+
+    $position_table = new PhabricatorProjectColumnPosition();
+    $conn_w = $position_table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE objectPHID = %s AND columnPHID IN (%Ls)',
+      $position_table->getTableName(),
+      $object->getPHID(),
+      $proxy_phids);
+  }
+
+  private function getModularTransactionTypes() {
+    if ($this->modularTypes === null) {
+      $template = $this->object->getApplicationTransactionTemplate();
+      if ($template instanceof PhabricatorModularTransaction) {
+        $xtypes = $template->newModularTransactionTypes();
+        foreach ($xtypes as $key => $xtype) {
+          $xtype = clone $xtype;
+          $xtype->setEditor($this);
+          $xtypes[$key] = $xtype;
+        }
+      } else {
+        $xtypes = array();
+      }
+
+      $this->modularTypes = $xtypes;
+    }
+
+    return $this->modularTypes;
+  }
+
+  private function getModularTransactionType($type) {
+    $types = $this->getModularTransactionTypes();
+    return idx($types, $type);
+  }
+
+  private function willApplyTransactions($object, array $xactions) {
+    foreach ($xactions as $xaction) {
+      $type = $xaction->getTransactionType();
+
+      $xtype = $this->getModularTransactionType($type);
+      if (!$xtype) {
+        continue;
+      }
+
+      $xtype->willApplyTransactions($object, $xactions);
+    }
+  }
+
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this object.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created an object: %s.', $author, $object);
   }
 
 }

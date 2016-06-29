@@ -191,11 +191,6 @@ final class PhabricatorRepositoryURI
     return self::IO_NONE;
   }
 
-
-  public function getDisplayURI() {
-    return $this->getURIObject(false);
-  }
-
   public function getNormalizedURI() {
     $vcs = $this->getRepository()->getVersionControlSystem();
 
@@ -216,8 +211,12 @@ final class PhabricatorRepositoryURI
     return $normal_uri->getNormalizedURI();
   }
 
+  public function getDisplayURI() {
+    return $this->getURIObject();
+  }
+
   public function getEffectiveURI() {
-    return $this->getURIObject(true);
+    return $this->getURIObject();
   }
 
   public function getURIEnvelope() {
@@ -243,11 +242,10 @@ final class PhabricatorRepositoryURI
     return new PhutilOpaqueEnvelope((string)$uri);
   }
 
-  private function getURIObject($normalize) {
+  private function getURIObject() {
     // Users can provide Git/SCP-style URIs in the form "user@host:path".
-    // These are equivalent to "ssh://user@host/path". We use the more standard
-    // form internally, and convert to it if we need to specify a port number,
-    // but try to preserve what the user typed when displaying the URI.
+    // In the general case, these are not equivalent to any "ssh://..." form
+    // because the path is relative.
 
     if ($this->isBuiltin()) {
       $builtin_protocol = $this->getForcedProtocol();
@@ -271,43 +269,22 @@ final class PhabricatorRepositoryURI
     // with it; this should always be provided by the associated credential.
     $uri->setPass(null);
 
-    if (!$uri->getProtocol()) {
-      $git_uri = new PhutilGitURI($raw_uri);
-
-      // We must normalize this Git-style URI into a normal URI
-      $must_normalize = ($port && ($port != $default_ports['ssh']));
-      if ($must_normalize || $normalize) {
-        $domain = $git_uri->getDomain();
-
-
-        $uri = id(new PhutilURI("ssh://{$domain}"))
-          ->setUser($git_uri->getUser())
-          ->setPath($git_uri->getPath());
-      } else {
-        $uri = $git_uri;
-      }
+    $protocol = $this->getForcedProtocol();
+    if ($protocol) {
+      $uri->setProtocol($protocol);
     }
 
-    $is_normal = ($uri instanceof PhutilURI);
+    if ($port) {
+      $uri->setPort($port);
+    }
 
-    if ($is_normal) {
-      $protocol = $this->getForcedProtocol();
-      if ($protocol) {
-        $uri->setProtocol($protocol);
-      }
+    // Remove any explicitly set default ports.
+    $uri_port = $uri->getPort();
+    $uri_protocol = $uri->getProtocol();
 
-      if ($port) {
-        $uri->setPort($port);
-      }
-
-      // Remove any explicitly set default ports.
-      $uri_port = $uri->getPort();
-      $uri_protocol = $uri->getProtocol();
-
-      $uri_default = idx($default_ports, $uri_protocol);
-      if ($uri_default && ($uri_default == $uri_port)) {
-        $uri->setPort(null);
-      }
+    $uri_default = idx($default_ports, $uri_protocol);
+    if ($uri_default && ($uri_default == $uri_port)) {
+      $uri->setPort(null);
     }
 
     $user = $this->getForcedUser();
@@ -379,14 +356,40 @@ final class PhabricatorRepositoryURI
   }
 
   private function getForcedPort() {
-    switch ($this->getBuiltinProtocol()) {
-      case self::BUILTIN_PROTOCOL_SSH:
-        return PhabricatorEnv::getEnvConfig('diffusion.ssh-port');
-      case self::BUILTIN_PROTOCOL_HTTP:
-      case self::BUILTIN_PROTOCOL_HTTPS:
-      default:
-        return null;
+    $protocol = $this->getBuiltinProtocol();
+
+    if ($protocol == self::BUILTIN_PROTOCOL_SSH) {
+      return PhabricatorEnv::getEnvConfig('diffusion.ssh-port');
     }
+
+    // If Phabricator is running on a nonstandard port, use that as the defualt
+    // port for URIs with the same protocol.
+
+    $is_http = ($protocol == self::BUILTIN_PROTOCOL_HTTP);
+    $is_https = ($protocol == self::BUILTIN_PROTOCOL_HTTPS);
+
+    if ($is_http || $is_https) {
+      $uri = PhabricatorEnv::getURI('/');
+      $uri = new PhutilURI($uri);
+
+      $port = $uri->getPort();
+      if (!$port) {
+        return null;
+      }
+
+      $uri_protocol = $uri->getProtocol();
+      $use_port =
+        ($is_http && ($uri_protocol == 'http')) ||
+        ($is_https && ($uri_protocol == 'https'));
+
+      if (!$use_port) {
+        return null;
+      }
+
+      return $port;
+    }
+
+    return null;
   }
 
   private function getForcedPath() {
@@ -561,28 +564,34 @@ final class PhabricatorRepositoryURI
 
   public function newCommandEngine() {
     $repository = $this->getRepository();
-    $protocol = $this->getEffectiveURI()->getProtocol();
 
     return DiffusionCommandEngine::newCommandEngine($repository)
       ->setCredentialPHID($this->getCredentialPHID())
-      ->setProtocol($protocol);
+      ->setURI($this->getEffectiveURI());
   }
 
   public function getURIScore() {
     $score = 0;
 
     $io_points = array(
-      self::IO_READWRITE => 20,
-      self::IO_READ => 10,
+      self::IO_READWRITE => 200,
+      self::IO_READ => 100,
     );
     $score += idx($io_points, $this->getEffectiveIoType(), 0);
 
     $protocol_points = array(
-      self::BUILTIN_PROTOCOL_SSH => 3,
-      self::BUILTIN_PROTOCOL_HTTPS => 2,
-      self::BUILTIN_PROTOCOL_HTTP => 1,
+      self::BUILTIN_PROTOCOL_SSH => 30,
+      self::BUILTIN_PROTOCOL_HTTPS => 20,
+      self::BUILTIN_PROTOCOL_HTTP => 10,
     );
     $score += idx($protocol_points, $this->getBuiltinProtocol(), 0);
+
+    $identifier_points = array(
+      self::BUILTIN_IDENTIFIER_SHORTNAME => 3,
+      self::BUILTIN_IDENTIFIER_CALLSIGN => 2,
+      self::BUILTIN_IDENTIFIER_ID => 1,
+    );
+    $score += idx($identifier_points, $this->getBuiltinIdentifier(), 0);
 
     return $score;
   }

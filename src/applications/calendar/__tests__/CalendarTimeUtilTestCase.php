@@ -4,7 +4,7 @@ final class CalendarTimeUtilTestCase extends PhabricatorTestCase {
 
   public function testTimestampsAtMidnight() {
     $u = new PhabricatorUser();
-    $u->setTimezoneIdentifier('America/Los_Angeles');
+    $u->overrideTimezoneIdentifier('America/Los_Angeles');
     $days = $this->getAllDays();
     foreach ($days as $day) {
       $data = CalendarTimeUtil::getCalendarWidgetTimestamps(
@@ -19,7 +19,7 @@ final class CalendarTimeUtilTestCase extends PhabricatorTestCase {
 
   public function testTimestampsStartDay() {
     $u = new PhabricatorUser();
-    $u->setTimezoneIdentifier('America/Los_Angeles');
+    $u->overrideTimezoneIdentifier('America/Los_Angeles');
     $days = $this->getAllDays();
     foreach ($days as $day) {
       $data = CalendarTimeUtil::getTimestamps(

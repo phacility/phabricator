@@ -175,9 +175,10 @@ final class DifferentialInlineCommentQuery
 
     $viewer = $this->getViewer();
 
-    $pref = $viewer->loadPreferences()->getPreference(
-      PhabricatorUserPreferences::PREFERENCE_DIFF_GHOSTS);
-    if ($pref == 'disabled') {
+    $no_ghosts = $viewer->compareUserSetting(
+      PhabricatorOlderInlinesSetting::SETTINGKEY,
+      PhabricatorOlderInlinesSetting::VALUE_GHOST_INLINES_DISABLED);
+    if ($no_ghosts) {
       return $inlines;
     }
 

@@ -54,10 +54,62 @@ if (!$repository->isHosted()) {
 
 $engine->setRepository($repository);
 
+$args = new PhutilArgumentParser($argv);
+$args->parsePartial(
+  array(
+    array(
+      'name' => 'hook-mode',
+      'param' => 'mode',
+      'help' => pht('Hook execution mode.'),
+    ),
+  ));
+
+$argv = array_merge(
+  array($argv[0]),
+  $args->getUnconsumedArgumentVector());
 
 // Figure out which user is writing the commit.
+$hook_mode = $args->getArg('hook-mode');
+if ($hook_mode !== null) {
+  $known_modes = array(
+    'svn-revprop' => true,
+  );
 
-if ($repository->isGit() || $repository->isHg()) {
+  if (empty($known_modes[$hook_mode])) {
+    throw new Exception(
+      pht(
+        'Invalid Hook Mode: This hook was invoked in "%s" mode, but this '.
+        'is not a recognized hook mode. Valid modes are: %s.',
+        $hook_mode,
+        implode(', ', array_keys($known_modes))));
+  }
+}
+
+$is_svnrevprop = ($hook_mode == 'svn-revprop');
+
+if ($is_svnrevprop) {
+  // For now, we let these through if the repository allows dangerous changes
+  // and prevent them if it doesn't. See T11208 for discussion.
+
+  $revprop_key = $argv[5];
+
+  if ($repository->shouldAllowDangerousChanges()) {
+    $err = 0;
+  } else {
+    $err = 1;
+
+    $console = PhutilConsole::getConsole();
+    $console->writeErr(
+      pht(
+        "DANGEROUS CHANGE: Dangerous change protection is enabled for this ".
+        "repository, so you can not change revision properties (you are ".
+        "attempting to edit \"%s\").\n".
+        "Edit the repository configuration before making dangerous changes.",
+        $revprop_key));
+  }
+
+  exit($err);
+} else if ($repository->isGit() || $repository->isHg()) {
   $username = getenv(DiffusionCommitHookEngine::ENV_USER);
   if (!strlen($username)) {
     throw new Exception(

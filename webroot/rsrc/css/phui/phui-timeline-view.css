@@ -47,6 +47,7 @@
   height: 9px;
   border-radius: 2px;
   margin-left: 76px;
+  margin-bottom: 20px;
 }
 
 .device-desktop .phui-timeline-wedge {
@@ -415,4 +416,8 @@ a.phui-timeline-menu .phui-icon-view {
 
 .phui-timeline-badges .phui-badge-mini .phui-icon-view {
   font-size: 10px;
+}
+
+.phui-comment-preview-view {
+  margin-bottom: 20px;
 }

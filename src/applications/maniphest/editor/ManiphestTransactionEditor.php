@@ -325,7 +325,7 @@ final class ManiphestTransactionEditor
       ManiphestTransaction::MAILTAG_PROJECTS =>
         pht("A task's associated projects change."),
       ManiphestTransaction::MAILTAG_UNBLOCK =>
-        pht('One of the tasks a task is blocked by changes status.'),
+        pht("One of a task's subtasks changes status."),
       ManiphestTransaction::MAILTAG_COLUMN =>
         pht('A task is moved between columns on a workboard.'),
       ManiphestTransaction::MAILTAG_COMMENT =>

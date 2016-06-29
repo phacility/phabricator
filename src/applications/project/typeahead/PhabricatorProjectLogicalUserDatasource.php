@@ -46,7 +46,7 @@ final class PhabricatorProjectLogicalUserDatasource
         ->setIcon('fa-asterisk')
         ->setPHID('projects('.$result->getPHID().')')
         ->setDisplayName(pht("User's Projects: %s", $result->getDisplayName()))
-        ->setName($result->getName().' projects');
+        ->setName('projects '.$result->getName());
     }
 
     return $results;

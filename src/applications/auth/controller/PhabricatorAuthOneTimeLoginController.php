@@ -139,7 +139,10 @@ final class PhabricatorAuthOneTimeLoginController
             ->save();
         unset($unguarded);
 
-        $next = (string)id(new PhutilURI('/settings/panel/password/'))
+        $username = $target_user->getUsername();
+        $panel_uri = "/settings/user/{$username}/page/password/";
+
+        $next = (string)id(new PhutilURI($panel_uri))
           ->setQueryParams(
             array(
               'key' => $key,

@@ -150,11 +150,14 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
-    $prefs = $viewer->loadPreferences();
-    $pref_unified = PhabricatorUserPreferences::PREFERENCE_DIFF_UNIFIED;
-    if ($prefs->getPreference($pref_unified) == 'unified') {
+    $is_unified = $viewer->compareUserSetting(
+      PhabricatorUnifiedDiffsSetting::SETTINGKEY,
+      PhabricatorUnifiedDiffsSetting::VALUE_ALWAYS_UNIFIED);
+
+    if ($is_unified) {
       return '1up';
     }
+
     return null;
   }
 
@@ -458,6 +461,10 @@ final class DifferentialChangesetParser extends Phobject {
   }
 
   public function saveCache() {
+    if (PhabricatorEnv::isReadOnly()) {
+      return false;
+    }
+
     if ($this->highlightErrors) {
       return false;
     }

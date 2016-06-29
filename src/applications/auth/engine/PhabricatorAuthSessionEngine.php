@@ -7,6 +7,7 @@
  * @task hisec    High Security
  * @task partial  Partial Sessions
  * @task onetime  One Time Login URIs
+ * @task cache    User Cache
  */
 final class PhabricatorAuthSessionEngine extends Phobject {
 
@@ -111,9 +112,8 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     $conn_r = $session_table->establishConnection('r');
     $session_key = PhabricatorHash::digest($session_token);
 
-    // NOTE: We're being clever here because this happens on every page load,
-    // and by joining we can save a query. This might be getting too clever
-    // for its own good, though...
+    $cache_parts = $this->getUserCacheQueryParts($conn_r);
+    list($cache_selects, $cache_joins, $cache_map, $types_map) = $cache_parts;
 
     $info = queryfx_one(
       $conn_r,
@@ -125,12 +125,15 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           s.isPartial AS s_isPartial,
           s.signedLegalpadDocuments as s_signedLegalpadDocuments,
           u.*
+          %Q
         FROM %T u JOIN %T s ON u.phid = s.userPHID
-        AND s.type = %s AND s.sessionKey = %s',
+        AND s.type = %s AND s.sessionKey = %s %Q',
+      $cache_selects,
       $user_table->getTableName(),
       $session_table->getTableName(),
       $session_type,
-      $session_key);
+      $session_key,
+      $cache_joins);
 
     if (!$info) {
       return null;
@@ -141,14 +144,27 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       'sessionKey' => $session_key,
       'type' => $session_type,
     );
+
+    $cache_raw = array_fill_keys($cache_map, null);
     foreach ($info as $key => $value) {
       if (strncmp($key, 's_', 2) === 0) {
         unset($info[$key]);
         $session_dict[substr($key, 2)] = $value;
+        continue;
+      }
+
+      if (isset($cache_map[$key])) {
+        unset($info[$key]);
+        $cache_raw[$cache_map[$key]] = $value;
+        continue;
       }
     }
 
     $user = $user_table->loadFromArray($info);
+
+    $cache_raw = $this->filterRawCacheData($user, $types_map, $cache_raw);
+    $user->attachRawCacheData($cache_raw);
+
     switch ($session_type) {
       case PhabricatorAuthSession::TYPE_WEB:
         // Explicitly prevent bots and mailing lists from establishing web
@@ -730,6 +746,97 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     }
 
     return PhabricatorHash::digest(implode(':', $parts));
+  }
+
+
+/* -(  User Cache  )--------------------------------------------------------- */
+
+
+  /**
+   * @task cache
+   */
+  private function getUserCacheQueryParts(AphrontDatabaseConnection $conn) {
+    $cache_selects = array();
+    $cache_joins = array();
+    $cache_map = array();
+
+    $keys = array();
+    $types_map = array();
+
+    $cache_types = PhabricatorUserCacheType::getAllCacheTypes();
+    foreach ($cache_types as $cache_type) {
+      foreach ($cache_type->getAutoloadKeys() as $autoload_key) {
+        $keys[] = $autoload_key;
+        $types_map[$autoload_key] = $cache_type;
+      }
+    }
+
+    $cache_table = id(new PhabricatorUserCache())->getTableName();
+
+    $cache_idx = 1;
+    foreach ($keys as $key) {
+      $join_as = 'ucache_'.$cache_idx;
+      $select_as = 'ucache_'.$cache_idx.'_v';
+
+      $cache_selects[] = qsprintf(
+        $conn,
+        '%T.cacheData %T',
+        $join_as,
+        $select_as);
+
+      $cache_joins[] = qsprintf(
+        $conn,
+        'LEFT JOIN %T AS %T ON u.phid = %T.userPHID
+          AND %T.cacheIndex = %s',
+        $cache_table,
+        $join_as,
+        $join_as,
+        $join_as,
+        PhabricatorHash::digestForIndex($key));
+
+      $cache_map[$select_as] = $key;
+
+      $cache_idx++;
+    }
+
+    if ($cache_selects) {
+      $cache_selects = ', '.implode(', ', $cache_selects);
+    } else {
+      $cache_selects = '';
+    }
+
+    if ($cache_joins) {
+      $cache_joins = implode(' ', $cache_joins);
+    } else {
+      $cache_joins = '';
+    }
+
+    return array($cache_selects, $cache_joins, $cache_map, $types_map);
+  }
+
+  private function filterRawCacheData(
+    PhabricatorUser $user,
+    array $types_map,
+    array $cache_raw) {
+
+    foreach ($cache_raw as $cache_key => $cache_data) {
+      $type = $types_map[$cache_key];
+      if ($type->shouldValidateRawCacheData()) {
+        if (!$type->isRawCacheDataValid($user, $cache_key, $cache_data)) {
+          unset($cache_raw[$cache_key]);
+        }
+      }
+    }
+
+    return $cache_raw;
+  }
+
+  public function willServeRequestForUser(PhabricatorUser $user) {
+    // We allow the login user to generate any missing cache data inline.
+    $user->setAllowInlineCacheGeneration(true);
+
+    // Switch to the user's translation.
+    PhabricatorEnv::setLocaleCode($user->getTranslation());
   }
 
 }

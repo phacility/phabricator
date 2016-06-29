@@ -327,9 +327,7 @@ final class PHUITimelineEventView extends AphrontView {
           'sigil' => $sigil,
           'aria-haspopup' => 'true',
           'aria-expanded' => 'false',
-          'meta' => array(
-            'items' => hsprintf('%s', $action_list),
-          ),
+          'meta' => $action_list->getDropdownMenuMetadata(),
         ),
         array(
           $aural,

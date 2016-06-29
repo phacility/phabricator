@@ -14,6 +14,10 @@ final class PhabricatorActionView extends AphrontView {
   private $metadata;
   private $selected;
   private $openInNewWindow;
+  private $submenu = array();
+  private $hidden;
+  private $depth;
+  private $id;
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -66,6 +70,10 @@ final class PhabricatorActionView extends AphrontView {
     return $this;
   }
 
+  public function getName() {
+    return $this->name;
+  }
+
   public function setLabel($label) {
     $this->label = $label;
     return $this;
@@ -95,7 +103,60 @@ final class PhabricatorActionView extends AphrontView {
     return $this->openInNewWindow;
   }
 
+  public function getID() {
+    if (!$this->id) {
+      $this->id = celerity_generate_unique_node_id();
+    }
+    return $this->id;
+  }
+
+  public function setSubmenu(array $submenu) {
+    $this->submenu = $submenu;
+
+    if (!$this->getHref()) {
+      $this->setHref('#');
+    }
+
+    return $this;
+  }
+
+  public function getItems($depth = 0) {
+    $items = array();
+
+    $items[] = $this;
+    foreach ($this->submenu as $action) {
+      foreach ($action->getItems($depth + 1) as $item) {
+        $item
+          ->setHidden(true)
+          ->setDepth($depth + 1);
+
+        $items[] = $item;
+      }
+    }
+
+    return $items;
+  }
+
+  public function setHidden($hidden) {
+    $this->hidden = $hidden;
+    return $this;
+  }
+
+  public function getHidden() {
+    return $this->hidden;
+  }
+
+  public function setDepth($depth) {
+    $this->depth = $depth;
+    return $this;
+  }
+
+  public function getDepth() {
+    return $this->depth;
+  }
+
   public function render() {
+    $caret_id = celerity_generate_unique_node_id();
 
     $icon = null;
     if ($this->icon) {
@@ -155,6 +216,18 @@ final class PhabricatorActionView extends AphrontView {
           $target = null;
         }
 
+        if ($this->submenu) {
+          $caret = javelin_tag(
+            'span',
+            array(
+              'class' => 'caret-right',
+              'id' => $caret_id,
+            ),
+            '');
+        } else {
+          $caret = null;
+        }
+
         $item = javelin_tag(
           'a',
           array(
@@ -164,7 +237,7 @@ final class PhabricatorActionView extends AphrontView {
             'sigil' => $sigils,
             'meta' => $this->metadata,
           ),
-          array($icon, $this->name));
+          array($icon, $this->name, $caret));
       }
     } else {
       $item = phutil_tag(
@@ -190,10 +263,47 @@ final class PhabricatorActionView extends AphrontView {
       $classes[] = 'phabricator-action-view-selected';
     }
 
-    return phutil_tag(
+    if ($this->submenu) {
+      $classes[] = 'phabricator-action-view-submenu';
+    }
+
+    $style = array();
+
+    if ($this->hidden) {
+      $style[] = 'display: none;';
+    }
+
+    if ($this->depth) {
+      $indent = ($this->depth * 16);
+      $style[] = "margin-left: {$indent}px;";
+    }
+
+    $sigil = null;
+    $meta = null;
+
+    if ($this->submenu) {
+      Javelin::initBehavior('phui-submenu');
+      $sigil = 'phui-submenu';
+
+      $item_ids = array();
+      foreach ($this->submenu as $subitem) {
+        $item_ids[] = $subitem->getID();
+      }
+
+      $meta = array(
+        'itemIDs' => $item_ids,
+        'caretID' => $caret_id,
+      );
+    }
+
+    return javelin_tag(
       'li',
       array(
+        'id' => $this->getID(),
         'class' => implode(' ', $classes),
+        'style' => implode(' ', $style),
+        'sigil' => $sigil,
+        'meta' => $meta,
       ),
       $item);
   }

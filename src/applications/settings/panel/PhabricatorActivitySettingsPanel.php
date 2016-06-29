@@ -2,10 +2,6 @@
 
 final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
 
-  public function isEditableByAdministrators() {
-    return true;
-  }
-
   public function getPanelKey() {
     return 'activity';
   }
@@ -14,12 +10,8 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
     return pht('Activity Logs');
   }
 
-  public function getPanelGroup() {
-    return pht('Sessions and Logs');
-  }
-
-  public function isEnabled() {
-    return true;
+  public function getPanelGroupKey() {
+    return PhabricatorSettingsLogsPanelGroup::PANELGROUPKEY;
   }
 
   public function processRequest(AphrontRequest $request) {
@@ -63,6 +55,10 @@ final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
       ->appendChild($pager);
 
     return array($panel, $pager_box);
+  }
+
+  public function isManagementPanel() {
+    return true;
   }
 
 }

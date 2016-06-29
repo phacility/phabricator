@@ -79,6 +79,7 @@
   margin-left: 1%;
   float: left;
   margin-bottom: 4px;
+  word-wrap: break-word;
 }
 
 .device-desktop .phui-property-list-has-actions .phui-property-list-value {
@@ -160,10 +161,17 @@
   min-width: 240px;
 }
 
+.phui-property-list-video {
+  display: block;
+  margin: 0 auto;
+  max-width: 95%;
+}
+
 /* When tags appear in property lists, give them a little more vertical
    spacing. */
-.phui-property-list-view .phui-tag-view {
+.phui-property-list-value .phui-tag-view {
   margin: 2px 0;
+  white-space: pre-wrap;
 }
 
 .phui-property-list-has-actions .phui-property-list-properties-wrap {

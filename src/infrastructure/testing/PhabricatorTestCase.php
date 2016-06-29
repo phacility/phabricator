@@ -202,6 +202,14 @@ abstract class PhabricatorTestCase extends PhutilTestCase {
     $editor->setActor($user);
     $editor->createNewUser($user, $email);
 
+    // When creating a new test user, we prefill their setting cache as empty.
+    // This is a little more efficient than doing a query to load the empty
+    // settings.
+    $user->attachRawCacheData(
+      array(
+        PhabricatorUserPreferencesCacheType::KEY_PREFERENCES => '[]',
+      ));
+
     return $user;
   }
 

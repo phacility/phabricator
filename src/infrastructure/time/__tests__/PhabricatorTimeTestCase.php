@@ -15,10 +15,10 @@ final class PhabricatorTimeTestCase extends PhabricatorTestCase {
 
   public function testParseLocalTime() {
     $u = new PhabricatorUser();
-    $u->setTimezoneIdentifier('UTC');
+    $u->overrideTimezoneIdentifier('UTC');
 
     $v = new PhabricatorUser();
-    $v->setTimezoneIdentifier('America/Los_Angeles');
+    $v->overrideTimezoneIdentifier('America/Los_Angeles');
 
     $t = 1370202281; // 2013-06-02 12:44:41 -0700
     $time = PhabricatorTime::pushTime($t, 'America/Los_Angeles');

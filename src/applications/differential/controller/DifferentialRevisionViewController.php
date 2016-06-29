@@ -375,18 +375,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $crumbs->addTextCrumb($object_id, '/'.$object_id);
     $crumbs->setBorder(true);
 
-    $prefs = $viewer->loadPreferences();
-    $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
+    $filetree_on = $viewer->compareUserSetting(
+      PhabricatorShowFiletreeSetting::SETTINGKEY,
+      PhabricatorShowFiletreeSetting::VALUE_ENABLE_FILETREE);
+
     $nav = null;
-    if ($prefs->getPreference($pref_filetree)) {
-      $collapsed = $prefs->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED,
-        false);
+    if ($filetree_on) {
+      $collapsed_key = PhabricatorFiletreeVisibleSetting::SETTINGKEY;
+      $collapsed_value = $viewer->getUserSetting($collapsed_key);
 
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
         ->setTitle('D'.$revision->getID())
         ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
-        ->setCollapsed((bool)$collapsed)
+        ->setCollapsed((bool)$collapsed_value)
         ->build($changesets);
     }
 

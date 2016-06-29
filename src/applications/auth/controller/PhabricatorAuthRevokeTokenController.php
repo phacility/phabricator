@@ -24,7 +24,10 @@ final class PhabricatorAuthRevokeTokenController
       }
     }
 
-    $panel_uri = '/settings/panel/tokens/';
+    $panel_uri = id(new PhabricatorTokensSettingsPanel())
+      ->setViewer($viewer)
+      ->setUser($viewer)
+      ->getPanelURI();
 
     if (!$tokens) {
       return $this->newDialog()

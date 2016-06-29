@@ -114,7 +114,7 @@ final class PHUITwoColumnView extends AphrontTagView {
       $curtain = $this->getCurtain();
       if ($curtain) {
         $action_list = $curtain->getActionList();
-        $this->header->setActionList($action_list);
+        $this->header->setActionListID($action_list->getID());
       }
 
       $header = phutil_tag_div(

@@ -20,12 +20,19 @@ final class DiffusionPreCommitContentRevisionAcceptedHeraldField
       return null;
     }
 
-    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
-    if ($revision->getStatus() != $status_accepted) {
-      return null;
+    switch ($revision->getStatus()) {
+      case ArcanistDifferentialRevisionStatus::ACCEPTED:
+        return $revision->getPHID();
+      case ArcanistDifferentialRevisionStatus::CLOSED:
+        if ($revision->getProperty(
+          DifferentialRevision::PROPERTY_CLOSED_FROM_ACCEPTED)) {
+
+          return $revision->getPHID();
+        }
+        break;
     }
 
-    return $revision->getPHID();
+    return null;
   }
 
   protected function getHeraldFieldStandardType() {

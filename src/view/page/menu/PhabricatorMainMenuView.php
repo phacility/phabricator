@@ -186,11 +186,6 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
 
       $result = $search;
-
-      $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
-      if ($viewer->loadPreferences()->getPreference($pref_shortcut, true)) {
-        $keyboard_config['searchID'] = $search->getID();
-      }
     }
 
     Javelin::initBehavior('phabricator-keyboard-shortcuts', $keyboard_config);

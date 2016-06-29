@@ -325,10 +325,10 @@ abstract class PhabricatorFileStorageEngine extends Phobject {
     return $engine->getChunkSize();
   }
 
-  public function getFileDataIterator(PhabricatorFile $file, $begin, $end) {
+  public function getRawFileDataIterator(PhabricatorFile $file, $begin, $end) {
     // The default implementation is trivial and just loads the entire file
     // upfront.
-    $data = $file->loadFileData();
+    $data = $this->readFile($file->getStorageHandle());
 
     if ($begin !== null && $end !== null) {
       $data = substr($data, $begin, ($end - $begin));

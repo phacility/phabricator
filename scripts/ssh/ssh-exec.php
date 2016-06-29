@@ -103,6 +103,9 @@ try {
           'Invalid username ("%s"). There is no user with this username.',
           $user_name));
     }
+
+    id(new PhabricatorAuthSessionEngine())
+      ->willServeRequestForUser($user);
   } else if (strlen($device_name)) {
     if (!$remote_address) {
       throw new Exception(
@@ -187,12 +190,14 @@ try {
       'P' => $user->getPHID(),
     ));
 
-  if (!$user->canEstablishSSHSessions()) {
-    throw new Exception(
-      pht(
-        'Your account ("%s") does not have permission to establish SSH '.
-        'sessions. Visit the web interface for more information.',
-        $user_name));
+  if (!$device) {
+    if (!$user->canEstablishSSHSessions()) {
+      throw new Exception(
+        pht(
+          'Your account ("%s") does not have permission to establish SSH '.
+          'sessions. Visit the web interface for more information.',
+          $user_name));
+    }
   }
 
   $workflows = id(new PhutilClassMapQuery())

@@ -422,6 +422,10 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       $participant->save();
     }
 
+    PhabricatorUserCache::clearCaches(
+      PhabricatorUserMessageCountCacheType::KEY_COUNT,
+      array_keys($participants));
+
     if ($xactions) {
       $data = array(
         'type'        => 'message',
@@ -533,30 +537,41 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $to_phids = array();
+
     $participants = $object->getParticipants();
-    if (empty($participants)) {
+    if (!$participants) {
       return $to_phids;
     }
-    $preferences = id(new PhabricatorUserPreferences())
-      ->loadAllWhere('userPHID in (%Ls)', array_keys($participants));
-    $preferences = mpull($preferences, null, 'getUserPHID');
+
+    $participant_phids = mpull($participants, 'getParticipantPHID');
+
+    $users = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($participant_phids)
+      ->needUserSettings(true)
+      ->execute();
+    $users = mpull($users, null, 'getPHID');
+
+    $notification_key = PhabricatorConpherenceNotificationsSetting::SETTINGKEY;
+    $notification_email =
+      PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL;
+
     foreach ($participants as $phid => $participant) {
-      $default = ConpherenceSettings::EMAIL_ALWAYS;
-      $preference = idx($preferences, $phid);
-      if ($preference) {
-        $default = $preference->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_CONPH_NOTIFICATIONS,
-          ConpherenceSettings::EMAIL_ALWAYS);
+      $user = idx($users, $phid);
+      if ($user) {
+        $default = $user->getUserSetting($notification_key);
+      } else {
+        $default = $notification_email;
       }
+
       $settings = $participant->getSettings();
-      $notifications = idx(
-        $settings,
-        'notifications',
-        $default);
-      if ($notifications == ConpherenceSettings::EMAIL_ALWAYS) {
+      $notifications = idx($settings, 'notifications', $default);
+
+      if ($notifications == $notification_email) {
         $to_phids[] = $phid;
       }
     }
+
     return $to_phids;
   }
 

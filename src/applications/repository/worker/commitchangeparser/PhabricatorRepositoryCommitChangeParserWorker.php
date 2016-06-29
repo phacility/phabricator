@@ -3,6 +3,10 @@
 abstract class PhabricatorRepositoryCommitChangeParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  protected function getImportStepFlag() {
+    return PhabricatorRepositoryCommit::IMPORTED_CHANGE;
+  }
+
   public function getRequiredLeaseTime() {
     // It can take a very long time to parse commits; some commits in the
     // Facebook repository affect many millions of paths. Acquire 24h leases.
@@ -23,9 +27,15 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
       return;
     }
 
-    $results = $this->parseCommitChanges($repository, $commit);
-    if ($results) {
-      $this->writeCommitChanges($repository, $commit, $results);
+    if (!$this->shouldSkipImportStep()) {
+      $results = $this->parseCommitChanges($repository, $commit);
+      if ($results) {
+        $this->writeCommitChanges($repository, $commit, $results);
+      }
+
+      $commit->writeImportStatusFlag($this->getImportStepFlag());
+
+      PhabricatorSearchWorker::queueDocumentForIndexing($commit->getPHID());
     }
 
     $this->finishParse();
@@ -85,12 +95,6 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
 
   protected function finishParse() {
     $commit = $this->commit;
-
-    $commit->writeImportStatusFlag(
-      PhabricatorRepositoryCommit::IMPORTED_CHANGE);
-
-    PhabricatorSearchWorker::queueDocumentForIndexing($commit->getPHID());
-
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(
         'PhabricatorRepositoryCommitOwnersWorker',

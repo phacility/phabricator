@@ -195,14 +195,13 @@ final class PhabricatorPolicyQuery
     $viewer = $this->getViewer();
 
     if ($viewer->getPHID()) {
-      $pref_key = PhabricatorUserPreferences::PREFERENCE_FAVORITE_POLICIES;
+      $pref_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
 
       $favorite_limit = 10;
       $default_limit = 5;
 
       // If possible, show the user's 10 most recently used projects.
-      $preferences = $viewer->loadPreferences();
-      $favorites = $preferences->getPreference($pref_key);
+      $favorites = $viewer->getUserSetting($pref_key);
       if (!is_array($favorites)) {
         $favorites = array();
       }

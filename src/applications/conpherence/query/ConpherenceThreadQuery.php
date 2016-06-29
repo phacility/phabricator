@@ -100,7 +100,7 @@ final class ConpherenceThreadQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT conpherence_thread.* FROM %T conpherence_thread %Q %Q %Q %Q %Q',
+      'SELECT thread.* FROM %T thread %Q %Q %Q %Q %Q',
       $table->getTableName(),
       $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
@@ -144,7 +144,7 @@ final class ConpherenceThreadQuery
 
   protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->participantPHIDs !== null || strlen($this->fulltext)) {
-      return 'GROUP BY conpherence_thread.id';
+      return 'GROUP BY thread.id';
     } else {
       return $this->buildApplicationSearchGroupClause($conn_r);
     }
@@ -156,14 +156,14 @@ final class ConpherenceThreadQuery
     if ($this->participantPHIDs !== null) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T p ON p.conpherencePHID = conpherence_thread.phid',
+        'JOIN %T p ON p.conpherencePHID = thread.phid',
         id(new ConpherenceParticipant())->getTableName());
     }
 
     if (strlen($this->fulltext)) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T idx ON idx.threadPHID = conpherence_thread.phid',
+        'JOIN %T idx ON idx.threadPHID = thread.phid',
         id(new ConpherenceIndex())->getTableName());
     }
 
@@ -179,14 +179,14 @@ final class ConpherenceThreadQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'conpherence_thread.id IN (%Ld)',
+        'thread.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'conpherence_thread.phid IN (%Ls)',
+        'thread.phid IN (%Ls)',
         $this->phids);
     }
 
@@ -436,6 +436,10 @@ final class ConpherenceThreadQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorConpherenceApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'thread';
   }
 
 }
