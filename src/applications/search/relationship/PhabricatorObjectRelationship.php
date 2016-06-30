@@ -104,6 +104,10 @@ abstract class PhabricatorObjectRelationship extends Phobject {
     return "/search/rel/{$type}/{$phid}/";
   }
 
+  public function getMaximumSelectionSize() {
+    return null;
+  }
+
   public function canUndoRelationship() {
     return true;
   }

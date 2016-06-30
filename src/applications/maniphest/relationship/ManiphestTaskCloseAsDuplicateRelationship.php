@@ -53,16 +53,11 @@ final class ManiphestTaskCloseAsDuplicateRelationship
     return false;
   }
 
+  public function getMaximumSelectionSize() {
+    return 1;
+  }
+
   public function willUpdateRelationships($object, array $add, array $rem) {
-
-    // TODO: Communicate this in the UI before users hit this error.
-    if (count($add) > 1) {
-      throw new Exception(
-        pht(
-          'A task can only be closed as a duplicate of exactly one other '.
-          'task.'));
-    }
-
     $task = head($add);
     return $this->newMergeIntoTransactions($task);
   }

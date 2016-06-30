@@ -39,10 +39,22 @@ final class PhabricatorSearchRelationshipController
     $done_uri = $src_handle->getURI();
     $initial_phids = $dst_phids;
 
+    $maximum = $relationship->getMaximumSelectionSize();
+
     if ($request->isFormPost()) {
       $phids = explode(';', $request->getStr('phids'));
       $phids = array_filter($phids);
       $phids = array_values($phids);
+
+      // The UI normally enforces this with Javascript, so this is just a
+      // sanity check and does not need to be particularly user-friendly.
+      if ($maximum && (count($phids) > $maximum)) {
+        throw new Exception(
+          pht(
+            'Too many relationships (%s, of type "%s").',
+            phutil_count($phids),
+            $relationship->getRelationshipConstant()));
+      }
 
       $initial_phids = $request->getStrList('initialPHIDs');
 
@@ -175,6 +187,7 @@ final class PhabricatorSearchRelationshipController
       ->setHeader($dialog_header)
       ->setButtonText($dialog_button)
       ->setInstructions($dialog_instructions)
+      ->setMaximumSelectionSize($maximum)
       ->buildDialog();
   }
 
