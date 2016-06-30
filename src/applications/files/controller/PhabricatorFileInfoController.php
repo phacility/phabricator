@@ -182,8 +182,16 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $tab_group = id(new PHUITabGroupView());
+    $box->addTabGroup($tab_group);
+
     $properties = id(new PHUIPropertyListView());
-    $box->addPropertyList($properties, pht('Details'));
+
+    $tab_group->addTab(
+      id(new PHUITabView())
+        ->setName(pht('Details'))
+        ->setKey('details')
+        ->appendChild($properties));
 
     if ($file->getAuthorPHID()) {
       $properties->addProperty(
@@ -195,9 +203,13 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       pht('Created'),
       phabricator_datetime($file->getDateCreated(), $viewer));
 
-
     $finfo = id(new PHUIPropertyListView());
-    $box->addPropertyList($finfo, pht('File Info'));
+
+    $tab_group->addTab(
+      id(new PHUITabView())
+        ->setName(pht('File Info'))
+        ->setKey('info')
+        ->appendChild($finfo));
 
     $finfo->addProperty(
       pht('Size'),
@@ -262,7 +274,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     }
 
     $storage_properties = new PHUIPropertyListView();
-    $box->addPropertyList($storage_properties, pht('Storage'));
+
+    $tab_group->addTab(
+      id(new PHUITabView())
+        ->setName(pht('Storage'))
+        ->setKey('storage')
+        ->appendChild($storage_properties));
 
     $storage_properties->addProperty(
       pht('Engine'),
@@ -285,7 +302,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $phids = $file->getObjectPHIDs();
     if ($phids) {
       $attached = new PHUIPropertyListView();
-      $box->addPropertyList($attached, pht('Attached'));
+
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Attached'))
+          ->setKey('attached')
+          ->appendChild($attached));
 
       $attached->addProperty(
         pht('Attached To'),
@@ -357,7 +379,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     if ($engine) {
       if ($engine->isChunkEngine()) {
         $chunkinfo = new PHUIPropertyListView();
-        $box->addPropertyList($chunkinfo, pht('Chunks'));
+
+        $tab_group->addTab(
+          id(new PHUITabView())
+            ->setName(pht('Chunks'))
+            ->setKey('chunks')
+            ->appendChild($chunkinfo));
 
         $chunks = id(new PhabricatorFileChunkQuery())
           ->setViewer($viewer)

@@ -5,6 +5,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $headerText;
   private $color;
   private $background;
+  private $tabGroups = array();
   private $formErrors = null;
   private $formSaved = false;
   private $infoView;
@@ -128,6 +129,11 @@ final class PHUIObjectBoxView extends AphrontTagView {
     return $this;
   }
 
+  public function addTabGroup(PHUITabGroupView $view) {
+    $this->tabGroups[] = $view;
+    return $this;
+  }
+
   public function setInfoView(PHUIInfoView $view) {
     $this->infoView = $view;
     return $this;
@@ -211,7 +217,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $i = 0;
       foreach ($list as $item) {
         $group->addPropertyList($item);
-        if ($i > 0) {
+        if ($i > 0 || $this->tabGroups) {
           $item->addClass('phui-property-list-section-noninitial');
         }
         $i++;
@@ -405,6 +411,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $this->formSaved,
       $exception_errors,
       $this->form,
+      $this->tabGroups,
       $tabs,
       $this->tabLists,
       $showhide,
