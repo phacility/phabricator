@@ -270,10 +270,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $file->setByteSize($length);
 
-    // TODO: We might be able to test the first chunk in order to figure
-    // this out more reliably, since MIME detection usually examines headers.
-    // However, enormous files are probably always either actually raw data
-    // or reasonable to treat like raw data.
+    // NOTE: Once we receive the first chunk, we'll detect its MIME type and
+    // update the parent file. This matters for large media files like video.
     $file->setMimeType('application/octet-stream');
 
     $chunked_hash = idx($params, 'chunkedHash');
