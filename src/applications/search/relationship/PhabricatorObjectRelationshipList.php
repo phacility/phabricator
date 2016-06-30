@@ -46,6 +46,26 @@ final class PhabricatorObjectRelationshipList extends Phobject {
     return $this->relationships;
   }
 
+  public function newActionSubmenu(array $keys) {
+    $object = $this->getObject();
+
+    $actions = array();
+
+    foreach ($keys as $key) {
+      $relationship = $this->getRelationship($key);
+      if (!$relationship) {
+        throw new Exception(
+          pht(
+            'No object relationship of type "%s" exists.',
+            $key));
+      }
+
+      $actions[$key] = $relationship->newAction($object);
+    }
+
+    return $this->newMenuWithActions($actions);
+  }
+
   public function newActionMenu() {
     $relationships = $this->getRelationships();
     $object = $this->getObject();
@@ -65,9 +85,22 @@ final class PhabricatorObjectRelationshipList extends Phobject {
 
     $actions = msort($actions, 'getName');
 
-    return id(new PhabricatorActionView())
+    return $this->newMenuWithActions($actions)
       ->setName(pht('Edit Related Objects...'))
-      ->setIcon('fa-link')
+      ->setIcon('fa-link');
+  }
+
+  private function newMenuWithActions(array $actions) {
+    $any_enabled = false;
+    foreach ($actions as $action) {
+      if (!$action->getDisabled()) {
+        $any_enabled = true;
+        break;
+      }
+    }
+
+    return id(new PhabricatorActionView())
+      ->setDisabled(!$any_enabled)
       ->setSubmenu($actions);
   }
 

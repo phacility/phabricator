@@ -2,13 +2,6 @@
 
 abstract class PhabricatorSearchBaseController extends PhabricatorController {
 
-
-  const ACTION_ATTACH       = 'attach';
-  const ACTION_MERGE        = 'merge';
-  const ACTION_DEPENDENCIES = 'dependencies';
-  const ACTION_BLOCKS       = 'blocks';
-  const ACTION_EDGE         = 'edge';
-
   protected function loadRelationshipObject() {
     $request = $this->getRequest();
     $viewer = $this->getViewer();

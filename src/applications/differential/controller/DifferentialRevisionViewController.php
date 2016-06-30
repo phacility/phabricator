@@ -527,22 +527,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $viewer,
       $revision);
 
-    $parent_key = DifferentialRevisionHasParentRelationship::RELATIONSHIPKEY;
-    $child_key = DifferentialRevisionHasChildRelationship::RELATIONSHIPKEY;
+    $revision_actions = array(
+      DifferentialRevisionHasParentRelationship::RELATIONSHIPKEY,
+      DifferentialRevisionHasChildRelationship::RELATIONSHIPKEY,
+    );
 
-    $revision_submenu = array();
+    $revision_submenu = $relationship_list->newActionSubmenu($revision_actions)
+      ->setName(pht('Edit Related Revisions...'))
+      ->setIcon('fa-cog');
 
-    $revision_submenu[] = $relationship_list->getRelationship($parent_key)
-      ->newAction($revision);
-
-    $revision_submenu[] = $relationship_list->getRelationship($child_key)
-      ->newAction($revision);
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Related Revisions...'))
-        ->setIcon('fa-cog')
-        ->setSubmenu($revision_submenu));
+    $curtain->addAction($revision_submenu);
 
     $relationship_submenu = $relationship_list->newActionMenu();
     if ($relationship_submenu) {

@@ -84,6 +84,10 @@ final class PhabricatorActionView extends AphrontView {
     return $this;
   }
 
+  public function getDisabled() {
+    return $this->disabled;
+  }
+
   public function setWorkflow($workflow) {
     $this->workflow = $workflow;
     return $this;
