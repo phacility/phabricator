@@ -142,6 +142,14 @@ final class PhameBlogViewController extends PhameLiveController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setUser($viewer)
+        ->setIcon('fa-search')
+        ->setHref(
+          $this->getApplicationURI('post/?blog='.$blog->getPHID()))
+        ->setName(pht('Search Posts')));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setUser($viewer)
         ->setIcon('fa-globe')
         ->setHref($blog->getLiveURI())
         ->setName(pht('View Live')));
