@@ -1031,28 +1031,26 @@ final class DifferentialRevisionViewController extends DifferentialController {
       );
     }
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Diff Detail'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setUser($viewer);
+    $tab_group = id(new PHUITabGroupView())
+      ->setHideSingleTab(true);
 
-    $last_tab = null;
     foreach ($property_lists as $key => $property_list) {
       list($tab_name, $list_view) = $property_list;
 
-      $tab = id(new PHUIListItemView())
+      $tab = id(new PHUITabView())
         ->setKey($key)
-        ->setName($tab_name);
+        ->setName($tab_name)
+        ->appendChild($list_view);
 
-      $box->addPropertyList($list_view, $tab);
-      $last_tab = $tab;
+      $tab_group->addTab($tab);
+      $tab_group->selectTab($key);
     }
 
-    if ($last_tab) {
-      $last_tab->setSelected(true);
-    }
-
-    return $box;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Diff Detail'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setUser($viewer)
+      ->addTabGroup($tab_group);
   }
 
   private function buildDiffPropertyList(

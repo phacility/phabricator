@@ -3,9 +3,21 @@
 final class PHUITabGroupView extends AphrontTagView {
 
   private $tabs = array();
+  private $selectedTab;
+
+  private $hideSingleTab;
 
   protected function canAppendChild() {
     return false;
+  }
+
+  public function setHideSingleTab($hide_single_tab) {
+    $this->hideSingleTab = $hide_single_tab;
+    return $this;
+  }
+
+  public function getHideSingleTab() {
+    return $this->hideSingleTab;
   }
 
   public function addTab(PHUITabView $tab) {
@@ -25,9 +37,26 @@ final class PHUITabGroupView extends AphrontTagView {
     return $this;
   }
 
-  public function getSelectedTab() {
+  public function selectTab($key) {
+    if (empty($this->tabs[$key])) {
+      throw new Exception(
+        pht(
+          'Unable to select tab ("%s") which does not exist.',
+          $key));
+    }
+
+    $this->selectedTab = $key;
+
+    return $this;
+  }
+
+  public function getSelectedTabKey() {
     if (!$this->tabs) {
       return null;
+    }
+
+    if ($this->selectedTab !== null) {
+      return $this->selectedTab;
     }
 
     return head($this->tabs)->getKey();
@@ -51,7 +80,7 @@ final class PHUITabGroupView extends AphrontTagView {
       ->setType(PHUIListView::NAVBAR_LIST);
     $content = array();
 
-    $selected_tab = $this->getSelectedTab();
+    $selected_tab = $this->getSelectedTabKey();
     foreach ($this->tabs as $tab) {
       $item = $tab->newMenuItem();
       $tab_key = $tab->getKey();
@@ -72,6 +101,10 @@ final class PHUITabGroupView extends AphrontTagView {
           'id' => $tab->getContentID(),
         ),
         $tab);
+    }
+
+    if ($this->hideSingleTab && (count($this->tabs) == 1)) {
+      $tabs = null;
     }
 
     return array(
