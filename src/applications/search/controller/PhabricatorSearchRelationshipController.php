@@ -150,14 +150,6 @@ final class PhabricatorSearchRelationshipController
     $handles = iterator_to_array($handles);
     $handles = array_select_keys($handles, $dst_phids);
 
-    // TODO: These are hard-coded for now.
-    $filters = array(
-      'assigned' => pht('Assigned to Me'),
-      'created' => pht('Created By Me'),
-      'open' => pht('All Open Objects'),
-      'all' => pht('All Objects'),
-    );
-
     $dialog_title = $relationship->getDialogTitleText();
     $dialog_header = $relationship->getDialogHeaderText();
     $dialog_button = $relationship->getDialogButtonText();
@@ -165,12 +157,17 @@ final class PhabricatorSearchRelationshipController
 
     $source_uri = $relationship->getSourceURI($object);
 
+    $source = $relationship->newSource();
+
+    $filters = $source->getFilters();
+    $selected_filter = $source->getSelectedFilter();
+
     return id(new PhabricatorObjectSelectorDialog())
       ->setUser($viewer)
       ->setInitialPHIDs($initial_phids)
       ->setHandles($handles)
       ->setFilters($filters)
-      ->setSelectedFilter('created')
+      ->setSelectedFilter($selected_filter)
       ->setExcluded($src_phid)
       ->setCancelURI($done_uri)
       ->setSearchURI($source_uri)

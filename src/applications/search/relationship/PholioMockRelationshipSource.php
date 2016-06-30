@@ -17,4 +17,10 @@ final class PholioMockRelationshipSource
     );
   }
 
+  public function getFilters() {
+    $filters = parent::getFilters();
+    unset($filters['assigned']);
+    return $filters;
+  }
+
 }

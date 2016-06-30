@@ -38,7 +38,8 @@ final class ManiphestTaskCloseAsDuplicateRelationship
   }
 
   protected function newRelationshipSource() {
-    return new ManiphestTaskRelationshipSource();
+    return id(new ManiphestTaskRelationshipSource())
+      ->setSelectedFilter('open');
   }
 
   public function getRequiredRelationshipCapabilities() {

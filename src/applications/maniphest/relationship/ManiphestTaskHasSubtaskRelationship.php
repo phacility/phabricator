@@ -38,7 +38,8 @@ final class ManiphestTaskHasSubtaskRelationship
   }
 
   protected function newRelationshipSource() {
-    return new ManiphestTaskRelationshipSource();
+    return id(new ManiphestTaskRelationshipSource())
+      ->setSelectedFilter('open');
   }
 
 }
