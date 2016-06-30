@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'b6b40555',
+    'core.pkg.css' => 'ee796570',
     'core.pkg.js' => 'f2139810',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3e81ae60',
@@ -105,7 +105,7 @@ return array(
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => 'd0801452',
     'rsrc/css/core/remarkup.css' => '523d34bb',
-    'rsrc/css/core/syntax.css' => '9fc496d5',
+    'rsrc/css/core/syntax.css' => '769d3498',
     'rsrc/css/core/z-index.css' => '5b6fcf3f',
     'rsrc/css/diviner/diviner-shared.css' => 'aa3656aa',
     'rsrc/css/font/font-aleo.css' => '8bdb2835',
@@ -890,7 +890,7 @@ return array(
     'sprite-menu-css' => '9dd65b92',
     'sprite-tokens-css' => '4f399012',
     'syntax-default-css' => '9923583c',
-    'syntax-highlighting-css' => '9fc496d5',
+    'syntax-highlighting-css' => '769d3498',
     'tokens-css' => '3d0f239e',
     'typeahead-browse-css' => '8904346a',
     'unhandled-exception-css' => '4c96257a',
@@ -1463,6 +1463,9 @@ return array(
       'javelin-vector',
       'javelin-dom',
     ),
+    '769d3498' => array(
+      'syntax-default-css',
+    ),
     '76b9fc3e' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1673,9 +1676,6 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'javelin-vector',
-    ),
-    '9fc496d5' => array(
-      'syntax-default-css',
     ),
     'a0b57eb8' => array(
       'javelin-behavior',
