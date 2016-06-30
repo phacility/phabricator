@@ -118,7 +118,7 @@ final class PhamePostViewController
         array(
           $user_icon,
           ' ',
-          $blogger_profile->getTitle(),
+          $blogger_profile->getDisplayTitle(),
         ))
       ->setImage($blogger->getProfileImageURI())
       ->setImageHref($author_uri);
@@ -142,12 +142,16 @@ final class PhamePostViewController
       ->setUser($viewer)
       ->setObject($post);
 
+    $is_live = $this->getIsLive();
+    $is_external = $this->getIsExternal();
     $next_view = new PhameNextPostView();
     if ($next) {
-      $next_view->setNext($next->getTitle(), $next->getLiveURI());
+      $next_view->setNext($next->getTitle(),
+        $next->getBestURI($is_live, $is_external));
     }
     if ($prev) {
-      $next_view->setPrevious($prev->getTitle(), $prev->getLiveURI());
+      $next_view->setPrevious($prev->getTitle(),
+        $prev->getBestURI($is_live, $is_external));
     }
 
     $document->setFoot($next_view);

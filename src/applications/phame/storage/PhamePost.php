@@ -86,6 +86,18 @@ final class PhamePost extends PhameDAO
     return "/phame/post/view/{$id}/{$slug}/";
   }
 
+  public function getBestURI($is_live, $is_external) {
+    if ($is_live) {
+      if ($is_external) {
+        return $this->getExternalLiveURI();
+      } else {
+        return $this->getInternalLiveURI();
+      }
+    } else {
+      return $this->getViewURI();
+    }
+  }
+
   public function getEditURI() {
     return '/phame/post/edit/'.$this->getID().'/';
   }

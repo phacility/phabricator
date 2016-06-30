@@ -96,6 +96,10 @@ final class PhameBlogEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('domainFullURI')
         ->setLabel(pht('Full Domain URI'))
+        ->setControlInstructions(pht('Set Full Domain URI if you plan to '.
+          'serve this blog on another hosted domain. Parent Site Name and '.
+          'Parent Site URI are optional but helpful since they provide '.
+          'a link from the blog back to your parent site.'))
         ->setDescription(pht('Blog full domain URI.'))
         ->setConduitDescription(pht('Change the blog full domain URI.'))
         ->setConduitTypeDescription(pht('New blog full domain URI.'))
@@ -103,7 +107,7 @@ final class PhameBlogEditEngine
         ->setTransactionType(PhameBlogTransaction::TYPE_FULLDOMAIN),
       id(new PhabricatorTextEditField())
         ->setKey('parentSite')
-        ->setLabel(pht('Parent Site'))
+        ->setLabel(pht('Parent Site Name'))
         ->setDescription(pht('Blog parent site name.'))
         ->setConduitDescription(pht('Change the blog parent site name.'))
         ->setConduitTypeDescription(pht('New blog parent site name.'))
@@ -111,7 +115,7 @@ final class PhameBlogEditEngine
         ->setTransactionType(PhameBlogTransaction::TYPE_PARENTSITE),
       id(new PhabricatorTextEditField())
         ->setKey('parentDomain')
-        ->setLabel(pht('Parent Domain'))
+        ->setLabel(pht('Parent Site URI'))
         ->setDescription(pht('Blog parent domain name.'))
         ->setConduitDescription(pht('Change the blog parent domain.'))
         ->setConduitTypeDescription(pht('New blog parent domain.'))
