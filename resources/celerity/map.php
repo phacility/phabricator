@@ -518,9 +518,9 @@ return array(
     'rsrc/js/core/phtize.js' => 'd254d646',
     'rsrc/js/phui/behavior-phui-dropdown-menu.js' => '1aa4c968',
     'rsrc/js/phui/behavior-phui-file-upload.js' => 'b003d4fb',
-    'rsrc/js/phui/behavior-phui-object-box-tabs.js' => '2bfa2836',
     'rsrc/js/phui/behavior-phui-profile-menu.js' => '12884df9',
     'rsrc/js/phui/behavior-phui-submenu.js' => 'a6f7a73b',
+    'rsrc/js/phui/behavior-phui-tab-group.js' => '0a0b10e9',
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '8cf6d262',
     'rsrc/js/phuix/PHUIXAutocomplete.js' => '9196fb06',
@@ -673,9 +673,9 @@ return array(
     'javelin-behavior-phui-dropdown-menu' => '1aa4c968',
     'javelin-behavior-phui-file-upload' => 'b003d4fb',
     'javelin-behavior-phui-hovercards' => 'bcaccd64',
-    'javelin-behavior-phui-object-box-tabs' => '2bfa2836',
     'javelin-behavior-phui-profile-menu' => '12884df9',
     'javelin-behavior-phui-submenu' => 'a6f7a73b',
+    'javelin-behavior-phui-tab-group' => '0a0b10e9',
     'javelin-behavior-policy-control' => 'd0c516d5',
     'javelin-behavior-policy-rule-editor' => '5e9f347c',
     'javelin-behavior-project-boards' => '14a1faae',
@@ -977,6 +977,11 @@ return array(
       'javelin-stratcom',
       'javelin-vector',
     ),
+    '0a0b10e9' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+    ),
     '0a3f3021' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1106,11 +1111,6 @@ return array(
     '2b8de964' => array(
       'javelin-install',
       'javelin-util',
-    ),
-    '2bfa2836' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
     ),
     '2c426492' => array(
       'javelin-behavior',

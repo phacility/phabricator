@@ -64,7 +64,7 @@ final class PHUITabView extends AphrontTagView {
       ->setKey($this->getKey())
       ->setType(PHUIListItemView::TYPE_LINK)
       ->setHref('#')
-      ->addSigil('phui-object-box-tab')
+      ->addSigil('phui-tab-view')
       ->setMetadata(
         array(
           'tabKey' => $this->getKey(),

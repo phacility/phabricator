@@ -66,7 +66,7 @@ final class PHUITabGroupView extends AphrontTagView {
     $tab_map = mpull($this->tabs, 'getContentID', 'getKey');
 
     return array(
-      'sigil' => 'phui-object-box',
+      'sigil' => 'phui-tab-group-view',
       'meta' => array(
         'tabMap' => $tab_map,
       ),
@@ -74,7 +74,7 @@ final class PHUITabGroupView extends AphrontTagView {
   }
 
   protected function getTagContent() {
-    Javelin::initBehavior('phui-object-box-tabs');
+    Javelin::initBehavior('phui-tab-group');
 
     $tabs = id(new PHUIListView())
       ->setType(PHUIListView::NAVBAR_LIST);
