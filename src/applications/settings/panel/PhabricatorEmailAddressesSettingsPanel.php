@@ -227,8 +227,7 @@ final class PhabricatorEmailAddressesSettingsPanel
 
           $object->sendVerificationEmail($user);
 
-          $dialog = id(new AphrontDialogView())
-            ->setUser($user)
+          $dialog = $this->newDialog()
             ->addHiddenInput('new',  'verify')
             ->setTitle(pht('Verification Email Sent'))
             ->appendChild(phutil_tag('p', array(), pht(
@@ -259,8 +258,7 @@ final class PhabricatorEmailAddressesSettingsPanel
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
           ->setError($e_email));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    $dialog = $this->newDialog()
       ->addHiddenInput('new', 'true')
       ->setTitle(pht('New Address'))
       ->appendChild($errors)
