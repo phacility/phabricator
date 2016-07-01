@@ -292,7 +292,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         '/differential/comment/inline/edit/'.$revision->getID().'/');
     }
 
-    $diff_history = id(new DifferentialRevisionUpdateHistoryView())
+    $history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($viewer)
       ->setDiffs($diffs)
       ->setSelectedVersusDiffID($diff_vs)
@@ -300,7 +300,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setSelectedWhitespace($whitespace)
       ->setCommitsForLinks($commits_for_links);
 
-    $local_view = id(new DifferentialLocalCommitsView())
+    $local_table = id(new DifferentialLocalCommitsView())
       ->setUser($viewer)
       ->setLocalCommits(idx($props, 'local:commits'))
       ->setCommitsForLinks($commits_for_links);
@@ -323,6 +323,36 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $changesets,
       $visible_changesets,
       $target->loadCoverageMap($viewer));
+
+    $tab_group = id(new PHUITabGroupView())
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Files'))
+          ->setKey('files')
+          ->appendChild($toc_view))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('History'))
+          ->setKey('history')
+          ->appendChild($history))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Commits'))
+          ->setKey('commits')
+          ->appendChild($local_table));
+
+    if ($other_view) {
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Similar'))
+          ->setKey('similar')
+          ->appendChild($other_view));
+    }
+
+    $tab_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Revision Contents'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addTabGroup($tab_group);
 
     $comment_form = null;
     if (!$viewer_is_anonymous) {
@@ -348,15 +378,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
             'The content of this revision is hidden until the author has '.
             'signed all of the required legal agreements.'));
     } else {
-      $footer[] =
-        array(
-          $diff_history,
-          $warning,
-          $local_view,
-          $toc_view,
-          $other_view,
-          $changeset_view,
-        );
+      $anchor = id(new PhabricatorAnchorView())
+        ->setAnchorName('toc')
+        ->setNavigationMarker(true);
+
+      $footer[] = array(
+        $anchor,
+        $warning,
+        $tab_view,
+        $changeset_view,
+      );
     }
 
     if ($comment_form) {
@@ -870,9 +901,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setHeader(pht('Recent Similar Revisions'));
 
     $view = id(new DifferentialRevisionListView())
-      ->setHeader($header)
       ->setRevisions($revisions)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setNoBox(true)
       ->setUser($viewer);
 
     $phids = $view->getRequiredHandlePHIDs();

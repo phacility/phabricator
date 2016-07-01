@@ -303,10 +303,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $show_diff,
       ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Revision Update History'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($content);
+    return $content;
   }
 
   const STAR_NONE = 'none';
