@@ -28,6 +28,7 @@ abstract class PhabricatorObjectGraph
   abstract protected function newQuery();
   abstract protected function newTableRow($phid, $object, $trace);
   abstract protected function newTable(AphrontTableView $table);
+  abstract protected function isClosed($object);
 
   final public function setSeedPHID($phid) {
     $this->seedPHID = $phid;
@@ -132,14 +133,28 @@ abstract class PhabricatorObjectGraph
       $object = idx($objects, $phid);
       $rows[] = $this->newTableRow($phid, $object, $traces[$ii++]);
 
+      $classes = array();
       if ($phid == $this->seedPHID) {
-        $rowc[] = 'highlighted';
-      } else {
-        $rowc[] = null;
+        $classes[] = 'highlighted';
       }
+
+      if ($object) {
+        if ($this->isClosed($object)) {
+          $classes[] = 'closed';
+        }
+      }
+
+      if ($classes) {
+        $classes = implode(' ', $classes);
+      } else {
+        $classes = null;
+      }
+
+      $rowc[] = $classes;
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setClassName('object-graph-table')
       ->setRowClasses($rowc);
 
     $this->objects = $objects;

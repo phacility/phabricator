@@ -18,6 +18,10 @@ final class ManiphestTaskGraph
     return new ManiphestTaskQuery();
   }
 
+  protected function isClosed($object) {
+    return $object->isClosed();
+  }
+
   protected function newTableRow($phid, $object, $trace) {
     $viewer = $this->getViewer();
 
@@ -78,9 +82,9 @@ final class ManiphestTaskGraph
       ->setColumnClasses(
         array(
           'threads',
+          'graph-status',
           null,
-          null,
-          'wide',
+          'wide object-link',
         ));
   }
 

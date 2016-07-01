@@ -18,6 +18,10 @@ final class DifferentialRevisionGraph
     return new DifferentialRevisionQuery();
   }
 
+  protected function isClosed($object) {
+    return $object->isClosed();
+  }
+
   protected function newTableRow($phid, $object, $trace) {
     $viewer = $this->getViewer();
 
@@ -68,9 +72,9 @@ final class DifferentialRevisionGraph
       ->setColumnClasses(
         array(
           'threads',
+          'graph-status',
           null,
-          null,
-          'wide',
+          'wide object-link',
         ));
   }
 
