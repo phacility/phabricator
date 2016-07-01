@@ -14,7 +14,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5),
 only screen and (min-resolution: 1.5dppx) {
   .sprite-tokens {
     background-image: url(/rsrc/image/sprite-tokens-X2.png);
-    background-size: 68px 68px;
+    background-size: 76px 76px;
   }
 }
 
@@ -24,61 +24,61 @@ only screen and (min-resolution: 1.5dppx) {
 }
 
 .tokens-coin-2 {
-  background-position: -17px 0px;
+  background-position: -19px 0px;
 }
 
 .tokens-coin-3 {
-  background-position: -34px 0px;
+  background-position: -38px 0px;
 }
 
 .tokens-coin-4 {
-  background-position: -51px 0px;
+  background-position: -57px 0px;
 }
 
 .tokens-heart-1 {
-  background-position: 0px -17px;
+  background-position: 0px -19px;
 }
 
 .tokens-heart-2 {
-  background-position: -17px -17px;
+  background-position: -19px -19px;
 }
 
 .tokens-like-1 {
-  background-position: -34px -17px;
+  background-position: -38px -19px;
 }
 
 .tokens-like-2 {
-  background-position: -51px -17px;
+  background-position: -57px -19px;
 }
 
 .tokens-medal-1 {
-  background-position: 0px -34px;
+  background-position: 0px -38px;
 }
 
 .tokens-medal-2 {
-  background-position: -17px -34px;
+  background-position: -19px -38px;
 }
 
 .tokens-medal-3 {
-  background-position: -34px -34px;
+  background-position: -38px -38px;
 }
 
 .tokens-medal-4 {
-  background-position: -51px -34px;
+  background-position: -57px -38px;
 }
 
 .tokens-misc-1 {
-  background-position: 0px -51px;
+  background-position: 0px -57px;
 }
 
 .tokens-misc-2 {
-  background-position: -17px -51px;
+  background-position: -19px -57px;
 }
 
 .tokens-misc-3 {
-  background-position: -34px -51px;
+  background-position: -38px -57px;
 }
 
 .tokens-misc-4 {
-  background-position: -51px -51px;
+  background-position: -57px -57px;
 }
