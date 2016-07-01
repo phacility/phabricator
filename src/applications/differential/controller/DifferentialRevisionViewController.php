@@ -344,6 +344,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $stack_graph = id(new DifferentialRevisionGraph())
       ->setViewer($viewer)
       ->setSeedPHID($revision->getPHID())
+      ->setLoadEntireGraph(true)
       ->loadGraph();
     if (!$stack_graph->isEmpty()) {
       $stack_table = $stack_graph->newGraphTable();

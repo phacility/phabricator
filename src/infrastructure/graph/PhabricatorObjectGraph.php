@@ -5,8 +5,10 @@ abstract class PhabricatorObjectGraph
 
   private $viewer;
   private $edges = array();
+  private $edgeReach = array();
   private $seedPHID;
   private $objects;
+  private $loadEntireGraph = false;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -29,6 +31,7 @@ abstract class PhabricatorObjectGraph
 
   final public function setSeedPHID($phid) {
     $this->seedPHID = $phid;
+    $this->edgeReach[$phid] = array_fill_keys($this->getEdgeTypes(), true);
 
     return $this->addNodes(
       array(
@@ -41,7 +44,30 @@ abstract class PhabricatorObjectGraph
   }
 
   final public function getEdges($type) {
-    return idx($this->edges, $type, array());
+    $edges = idx($this->edges, $type, array());
+
+    // Remove any nodes which we never reached. We can get these when loading
+    // only part of the graph: for example, they point at other subtasks of
+    // parents or other parents of subtasks.
+    $nodes = $this->getNodes();
+    foreach ($edges as $src => $dsts) {
+      foreach ($dsts as $key => $dst) {
+        if (!isset($nodes[$dst])) {
+          unset($edges[$src][$key]);
+        }
+      }
+    }
+
+    return $edges;
+  }
+
+  final public function setLoadEntireGraph($load_entire_graph) {
+    $this->loadEntireGraph = $load_entire_graph;
+    return $this;
+  }
+
+  final public function getLoadEntireGraph() {
+    return $this->loadEntireGraph;
   }
 
   final protected function loadEdges(array $nodes) {
@@ -52,6 +78,8 @@ abstract class PhabricatorObjectGraph
       ->withEdgeTypes($edge_types);
 
     $query->execute();
+
+    $whole_graph = $this->getLoadEntireGraph();
 
     $map = array();
     foreach ($nodes as $node) {
@@ -64,7 +92,10 @@ abstract class PhabricatorObjectGraph
 
         $this->edges[$edge_type][$node] = $dst_phids;
         foreach ($dst_phids as $dst_phid) {
-          $map[$node][] = $dst_phid;
+          if ($whole_graph || isset($this->edgeReach[$node][$edge_type])) {
+            $map[$node][] = $dst_phid;
+          }
+          $this->edgeReach[$dst_phid][$edge_type] = true;
         }
       }
 
