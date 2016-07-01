@@ -341,12 +341,29 @@ final class DifferentialRevisionViewController extends DifferentialController {
           ->setKey('commits')
           ->appendChild($local_table));
 
-    $stack_graph = id(new DifferentialStackGraph())
-      ->setSeedRevision($revision)
+    $stack_graph = id(new DifferentialRevisionGraph())
+      ->setViewer($viewer)
+      ->setSeedPHID($revision->getPHID())
       ->loadGraph();
     if (!$stack_graph->isEmpty()) {
-      $stack_view = $this->renderStackView($revision, $stack_graph);
-      list($stack_name, $stack_color, $stack_table) = $stack_view;
+      $stack_table = $stack_graph->newGraphTable();
+
+      $parent_type = DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST;
+      $reachable = $stack_graph->getReachableObjects($parent_type);
+
+      foreach ($reachable as $key => $reachable_revision) {
+        if ($reachable_revision->isClosed()) {
+          unset($reachable[$key]);
+        }
+      }
+
+      if ($reachable) {
+        $stack_name = pht('Stack (%s Open)', phutil_count($reachable));
+        $stack_color = PHUIListItemView::STATUS_FAIL;
+      } else {
+        $stack_name = pht('Stack');
+        $stack_color = null;
+      }
 
       $tab_group->addTab(
         id(new PHUITabView())
@@ -1210,152 +1227,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setUnitMessages($diff->getUnitMessages())
       ->setLimit(5)
       ->setShowViewAll(true);
-  }
-
-
-  private function renderStackView(
-    DifferentialRevision $current,
-    DifferentialStackGraph $graph) {
-
-    $ancestry = $graph->getParentEdges();
-    $viewer = $this->getViewer();
-
-    $revisions = id(new DifferentialRevisionQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array_keys($ancestry))
-      ->execute();
-    $revisions = mpull($revisions, null, 'getPHID');
-
-    $order = id(new PhutilDirectedScalarGraph())
-      ->addNodes($ancestry)
-      ->getTopographicallySortedNodes();
-
-    $ancestry = array_select_keys($ancestry, $order);
-
-    $traces = id(new PHUIDiffGraphView())
-      ->renderGraph($ancestry);
-
-    // Load author handles, and also revision handles for any revisions which
-    // we failed to load (they might be policy restricted).
-    $handle_phids = mpull($revisions, 'getAuthorPHID');
-    foreach ($order as $phid) {
-      if (empty($revisions[$phid])) {
-        $handle_phids[] = $phid;
-      }
-    }
-    $handles = $viewer->loadHandles($handle_phids);
-
-    $rows = array();
-    $rowc = array();
-
-    $ii = 0;
-    $seen = false;
-    foreach ($ancestry as $phid => $ignored) {
-      $revision = idx($revisions, $phid);
-      if ($revision) {
-        $status_icon = $revision->getStatusIcon();
-        $status_name = $revision->getStatusDisplayName();
-
-        $status = array(
-          id(new PHUIIconView())->setIcon($status_icon),
-          ' ',
-          $status_name,
-        );
-
-        $author = $viewer->renderHandle($revision->getAuthorPHID());
-        $title = phutil_tag(
-          'a',
-          array(
-            'href' => $revision->getURI(),
-          ),
-          array(
-            $revision->getMonogram(),
-            ' ',
-            $revision->getTitle(),
-          ));
-      } else {
-        $status = null;
-        $author = null;
-        $title = $viewer->renderHandle($phid);
-      }
-
-      $rows[] = array(
-        $traces[$ii++],
-        $status,
-        $author,
-        $title,
-      );
-
-      if ($phid == $current->getPHID()) {
-        $rowc[] = 'highlighted';
-      } else {
-        $rowc[] = null;
-      }
-    }
-
-    $stack_table = id(new AphrontTableView($rows))
-      ->setHeaders(
-        array(
-          null,
-          pht('Status'),
-          pht('Author'),
-          pht('Revision'),
-        ))
-      ->setRowClasses($rowc)
-      ->setColumnClasses(
-        array(
-          'threads',
-          null,
-          null,
-          'wide',
-        ));
-
-    // Count how many revisions this one depends on that are not yet closed.
-    $seen = array();
-    $look = array($current->getPHID());
-    while ($look) {
-      $phid = array_pop($look);
-
-      $parents = idx($ancestry, $phid, array());
-      foreach ($parents as $parent) {
-        if (isset($seen[$parent])) {
-          continue;
-        }
-
-        $seen[$parent] = $parent;
-        $look[] = $parent;
-      }
-    }
-
-    $blocking_count = 0;
-    foreach ($seen as $parent) {
-      if ($parent == $current->getPHID()) {
-        continue;
-      }
-
-      $revision = idx($revisions, $parent);
-      if (!$revision) {
-        continue;
-      }
-
-      if ($revision->isClosed()) {
-        continue;
-      }
-
-      $blocking_count++;
-    }
-
-    if (!$blocking_count) {
-      $stack_name = pht('Stack');
-      $stack_color = null;
-    } else {
-      $stack_name = pht(
-        'Stack (%s Open)',
-        new PhutilNumber($blocking_count));
-      $stack_color = PHUIListItemView::STATUS_FAIL;
-    }
-
-    return array($stack_name, $stack_color, $stack_table);
   }
 
 }
