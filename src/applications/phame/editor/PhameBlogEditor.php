@@ -21,6 +21,9 @@ final class PhameBlogEditor
     $types[] = PhameBlogTransaction::TYPE_PARENTSITE;
     $types[] = PhameBlogTransaction::TYPE_PARENTDOMAIN;
     $types[] = PhameBlogTransaction::TYPE_STATUS;
+    $types[] = PhameBlogTransaction::TYPE_HEADERIMAGE;
+    $types[] = PhameBlogTransaction::TYPE_PROFILEIMAGE;
+
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -44,6 +47,10 @@ final class PhameBlogEditor
         return $object->getParentSite();
       case PhameBlogTransaction::TYPE_PARENTDOMAIN:
         return $object->getParentDomain();
+      case PhameBlogTransaction::TYPE_PROFILEIMAGE:
+        return $object->getProfileImagePHID();
+      case PhameBlogTransaction::TYPE_HEADERIMAGE:
+        return $object->getHeaderImagePHID();
       case PhameBlogTransaction::TYPE_STATUS:
         return $object->getStatus();
     }
@@ -59,7 +66,8 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_STATUS:
       case PhameBlogTransaction::TYPE_PARENTSITE:
-      case PhameBlogTransaction::TYPE_PARENTDOMAIN:
+      case PhameBlogTransaction::TYPE_PROFILEIMAGE:
+      case PhameBlogTransaction::TYPE_HEADERIMAGE:
         return $xaction->getNewValue();
       case PhameBlogTransaction::TYPE_FULLDOMAIN:
         $domain = $xaction->getNewValue();
@@ -92,6 +100,10 @@ final class PhameBlogEditor
         }
         $object->setDomainFullURI($new_value);
         return;
+      case PhameBlogTransaction::TYPE_PROFILEIMAGE:
+        return $object->setProfileImagePHID($xaction->getNewValue());
+      case PhameBlogTransaction::TYPE_HEADERIMAGE:
+        return $object->setHeaderImagePHID($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_STATUS:
         return $object->setStatus($xaction->getNewValue());
       case PhameBlogTransaction::TYPE_PARENTSITE:
@@ -114,6 +126,8 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_FULLDOMAIN:
       case PhameBlogTransaction::TYPE_PARENTSITE:
       case PhameBlogTransaction::TYPE_PARENTDOMAIN:
+      case PhameBlogTransaction::TYPE_HEADERIMAGE:
+      case PhameBlogTransaction::TYPE_PROFILEIMAGE:
       case PhameBlogTransaction::TYPE_STATUS:
         return;
     }
