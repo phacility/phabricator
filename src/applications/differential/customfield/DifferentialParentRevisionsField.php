@@ -23,24 +23,6 @@ final class DifferentialParentRevisionsField
     return pht('Lists revisions this one depends on.');
   }
 
-  public function shouldAppearInPropertyView() {
-    return true;
-  }
-
-  public function renderPropertyViewLabel() {
-    return $this->getFieldName();
-  }
-
-  public function getRequiredHandlePHIDsForPropertyView() {
-    return PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getObject()->getPHID(),
-      DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST);
-  }
-
-  public function renderPropertyViewValue(array $handles) {
-    return $this->renderHandleList($handles);
-  }
-
   public function getProTips() {
     return array(
       pht(

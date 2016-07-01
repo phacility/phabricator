@@ -6,6 +6,7 @@ final class PHUITabView extends AphrontTagView {
   private $key;
   private $keyLocked;
   private $contentID;
+  private $color;
 
   public function setKey($key) {
     if ($this->keyLocked) {
@@ -58,8 +59,17 @@ final class PHUITabView extends AphrontTagView {
     return $this->contentID;
   }
 
+  public function setColor($color) {
+    $this->color = $color;
+    return $this;
+  }
+
+  public function getColor() {
+    return $this->color;
+  }
+
   public function newMenuItem() {
-    return id(new PHUIListItemView())
+    $item = id(new PHUIListItemView())
       ->setName($this->getName())
       ->setKey($this->getKey())
       ->setType(PHUIListItemView::TYPE_LINK)
@@ -69,6 +79,13 @@ final class PHUITabView extends AphrontTagView {
         array(
           'tabKey' => $this->getKey(),
         ));
+
+    $color = $this->getColor();
+    if ($color !== null) {
+      $item->setStatusColor($color);
+    }
+
+    return $item;
   }
 
 }
