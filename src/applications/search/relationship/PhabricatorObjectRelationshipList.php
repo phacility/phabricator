@@ -52,6 +52,12 @@ final class PhabricatorObjectRelationshipList extends Phobject {
     $actions = array();
 
     foreach ($keys as $key) {
+      // If we're passed a menu item, just include it verbatim.
+      if ($key instanceof PhabricatorActionView) {
+        $actions[] = $key;
+        continue;
+      }
+
       $relationship = $this->getRelationship($key);
       if (!$relationship) {
         throw new Exception(

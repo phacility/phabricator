@@ -55,6 +55,8 @@ abstract class PhabricatorObjectGraph
 
     $map = array();
     foreach ($nodes as $node) {
+      $map[$node] = array();
+
       foreach ($edge_types as $edge_type) {
         $dst_phids = $query->getDestinationPHIDs(
           array($node),

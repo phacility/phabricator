@@ -31,8 +31,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setTargetObject($task);
 
     $e_commit = ManiphestTaskHasCommitEdgeType::EDGECONST;
-    $e_dep_on = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-    $e_dep_by = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
     $e_rev    = ManiphestTaskHasRevisionEdgeType::EDGECONST;
     $e_mock   = ManiphestTaskHasMockEdgeType::EDGECONST;
 
@@ -43,8 +41,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->withEdgeTypes(
         array(
           $e_commit,
-          $e_dep_on,
-          $e_dep_by,
           $e_rev,
           $e_mock,
         ));
@@ -90,6 +86,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ))
       ->addPropertySection(pht('Description'), $description)
       ->addPropertySection(pht('Details'), $details);
+
+    $task_graph = id(new ManiphestTaskGraph())
+      ->setViewer($viewer)
+      ->setSeedPHID($task->getPHID())
+      ->loadGraph();
+    if (!$task_graph->isEmpty()) {
+      $graph_table = $task_graph->newGraphTable();
+      $view->addPropertySection(pht('Task Graph'), $graph_table);
+    }
 
     return $this->newPage()
       ->setTitle($title)
@@ -186,9 +191,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $edit_uri = $this->getApplicationURI($edit_uri);
     }
 
-    $task_submenu = array();
-
-    $task_submenu[] = id(new PhabricatorActionView())
+    $subtask_item = id(new PhabricatorActionView())
       ->setName(pht('Create Subtask'))
       ->setHref($edit_uri)
       ->setIcon('fa-level-down')
@@ -200,6 +203,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $task);
 
     $submenu_actions = array(
+      $subtask_item,
       ManiphestTaskHasParentRelationship::RELATIONSHIPKEY,
       ManiphestTaskHasSubtaskRelationship::RELATIONSHIPKEY,
       ManiphestTaskMergeInRelationship::RELATIONSHIPKEY,
@@ -280,10 +284,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $edge_types = array(
-      ManiphestTaskDependedOnByTaskEdgeType::EDGECONST
-        => pht('Parent Tasks'),
-      ManiphestTaskDependsOnTaskEdgeType::EDGECONST
-        => pht('Subtasks'),
       ManiphestTaskHasRevisionEdgeType::EDGECONST
         => pht('Differential Revisions'),
       ManiphestTaskHasMockEdgeType::EDGECONST

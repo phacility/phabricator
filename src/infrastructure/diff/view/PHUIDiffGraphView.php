@@ -137,12 +137,31 @@ final class PHUIDiffGraphView extends Phobject {
       );
     }
 
-    // If this is the last page in history, replace the "o" with an "x" so we
-    // do not draw a connecting line downward, and replace "^" with an "X" for
-    // repositories with exactly one commit.
+    // If this is the last page in history, replace any "o" characters at the
+    // bottom of columns with "x" characters so we do not draw a connecting
+    // line downward, and replace "^" with an "X" for repositories with
+    // exactly one commit.
     if ($this->getIsTail() && $graph) {
+      $terminated = array();
+      foreach (array_reverse(array_keys($graph)) as $key) {
+        $line = $graph[$key]['line'];
+        $len = strlen($line);
+        for ($ii = 0; $ii < $len; $ii++) {
+          if (isset($terminated[$ii])) {
+            continue;
+          }
+
+          $c = $line[$ii];
+          if ($c == 'o') {
+            $terminated[$ii] = true;
+            $graph[$key]['line'][$ii] = 'x';
+          } else if ($c != ' ') {
+            $terminated[$ii] = true;
+          }
+        }
+      }
+
       $last = array_pop($graph);
-      $last['line'] = str_replace('o', 'x', $last['line']);
       $last['line'] = str_replace('^', 'X', $last['line']);
       $graph[] = $last;
     }
