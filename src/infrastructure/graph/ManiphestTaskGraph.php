@@ -30,8 +30,11 @@ final class ManiphestTaskGraph
       $priority = $object->getPriority();
       $status_icon = ManiphestTaskStatus::getStatusIcon($status);
       $status_name = ManiphestTaskStatus::getTaskStatusName($status);
-      $priority_color = ManiphestTaskPriority::getTaskPriorityColor($priority);
 
+      $priority_color = ManiphestTaskPriority::getTaskPriorityColor($priority);
+      if ($object->isClosed()) {
+        $priority_color = 'grey';
+      }
 
       $status = array(
         id(new PHUIIconView())->setIcon($status_icon, $priority_color),

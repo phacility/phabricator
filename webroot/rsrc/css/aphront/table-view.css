@@ -235,10 +235,7 @@ span.single-display-line-content {
 }
 
 .aphront-table-view tr.closed td.graph-status,
-.aphront-table-view tr.alt-closed td.graph-status {
-  opacity: 0.5;
-}
-
+.aphront-table-view tr.alt-closed td.graph-status,
 .object-graph-table em {
   color: {$lightgreytext};
 }
