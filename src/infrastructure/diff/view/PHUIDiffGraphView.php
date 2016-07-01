@@ -23,7 +23,7 @@ final class PHUIDiffGraphView extends Phobject {
     return $this->isTail;
   }
 
-  public function renderGraph(array $parents) {
+  public function renderRawGraph(array $parents) {
     // This keeps our accumulated information about each line of the
     // merge/branch graph.
     $graph = array();
@@ -47,7 +47,10 @@ final class PHUIDiffGraphView extends Phobject {
       $line = '';
       $found = false;
       $pos = count($threads);
-      for ($n = 0; $n < $count; $n++) {
+
+      $thread_count = $pos;
+      for ($n = 0; $n < $thread_count; $n++) {
+
         if (empty($threads[$n])) {
           $line .= ' ';
           continue;
@@ -147,16 +150,30 @@ final class PHUIDiffGraphView extends Phobject {
         $line = $graph[$key]['line'];
         $len = strlen($line);
         for ($ii = 0; $ii < $len; $ii++) {
-          if (isset($terminated[$ii])) {
-            continue;
-          }
-
           $c = $line[$ii];
           if ($c == 'o') {
+            // If we've already terminated this thread, we don't need to add
+            // a terminator.
+            if (isset($terminated[$ii])) {
+              continue;
+            }
+
             $terminated[$ii] = true;
+
+            // If this thread is joinining some other node here, we don't want
+            // to terminate it.
+            if (isset($graph[$key + 1])) {
+              $joins = $graph[$key + 1]['join'];
+              if (in_array($ii, $joins)) {
+                continue;
+              }
+            }
+
             $graph[$key]['line'][$ii] = 'x';
           } else if ($c != ' ') {
             $terminated[$ii] = true;
+          } else {
+            unset($terminated[$ii]);
           }
         }
       }
@@ -165,6 +182,12 @@ final class PHUIDiffGraphView extends Phobject {
       $last['line'] = str_replace('^', 'X', $last['line']);
       $graph[] = $last;
     }
+
+    return array($graph, $count);
+  }
+
+  public function renderGraph(array $parents) {
+    list($graph, $count) = $this->renderRawGraph($parents);
 
     // Render into tags for the behavior.
 
