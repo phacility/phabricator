@@ -54,11 +54,13 @@ final class ManiphestTaskGraph
         array(
           'href' => $object->getURI(),
         ),
-        array(
-          $object->getMonogram(),
-          ' ',
-          $object->getTitle(),
-        ));
+        $object->getTitle());
+
+      $link = array(
+        $object->getMonogram(),
+        ' ',
+        $link,
+      );
     } else {
       $status = null;
       $assigned = null;
@@ -87,7 +89,7 @@ final class ManiphestTaskGraph
           'threads',
           'graph-status',
           null,
-          'wide object-link',
+          'wide pri object-link',
         ));
   }
 
