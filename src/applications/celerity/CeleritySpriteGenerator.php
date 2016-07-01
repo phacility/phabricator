@@ -61,7 +61,7 @@ final class CeleritySpriteGenerator extends Phobject {
       '2x' => 2,
     );
     $template = id(new PhutilSprite())
-      ->setSourceSize(16, 16);
+      ->setSourceSize(18, 18);
 
     $sprites = array();
     $prefix = 'tokens_';

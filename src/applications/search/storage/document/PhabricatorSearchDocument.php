@@ -26,6 +26,9 @@ final class PhabricatorSearchDocument extends PhabricatorSearchDAO {
         'documentCreated' => array(
           'columns' => array('documentCreated'),
         ),
+        'key_type' => array(
+          'columns' => array('documentType', 'documentCreated'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

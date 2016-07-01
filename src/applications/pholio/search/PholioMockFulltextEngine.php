@@ -20,6 +20,14 @@ final class PholioMockFulltextEngine
       $mock->getAuthorPHID(),
       PhabricatorPeopleUserPHIDType::TYPECONST,
       $mock->getDateCreated());
+
+    $document->addRelationship(
+      $mock->isClosed()
+        ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
+        : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+      $mock->getPHID(),
+      PholioMockPHIDType::TYPECONST,
+      PhabricatorTime::getNow());
   }
 
 }

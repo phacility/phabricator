@@ -72,7 +72,7 @@ Each key should have these properties:
   - `default`: //Optional bool.// Optionally, mark exactly one key as the
     default key to enable encryption of newly uploaded file data.
 
-The key material is sensitive an an attacker who learns it can decrypt data
+The key material is sensitive and an attacker who learns it can decrypt data
 from the storage engine.
 
 

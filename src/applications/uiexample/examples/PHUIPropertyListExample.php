@@ -16,24 +16,6 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $details1 = id(new PHUIListItemView())
-      ->setName(pht('Details'))
-      ->setSelected(true);
-
-    $details2 = id(new PHUIListItemView())
-      ->setName(pht('Rainbow Info'))
-      ->setStatusColor(PHUIListItemView::STATUS_WARN);
-
-    $details3 = id(new PHUIListItemView())
-      ->setName(pht('Pasta Haiku'))
-      ->setStatusColor(PHUIListItemView::STATUS_FAIL);
-
-    $statustabs = id(new PHUIListView())
-      ->setType(PHUIListView::NAVBAR_LIST)
-      ->addMenuItem($details1)
-      ->addMenuItem($details2)
-      ->addMenuItem($details3);
-
     $view = new PHUIPropertyListView();
 
     $view->addProperty(
@@ -54,7 +36,6 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
       'viverra. Nunc tempus tempor quam id iaculis. Maecenas lectus '.
       'velit, aliquam et consequat quis, tincidunt id dolor.');
 
-
     $view2 = new PHUIPropertyListView();
     $view2->addSectionHeader(pht('Colors of the Rainbow'));
 
@@ -66,7 +47,6 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
     $view2->addProperty('I', pht('Indigo'));
     $view2->addProperty('V', pht('Violet'));
 
-
     $view3 = new PHUIPropertyListView();
     $view3->addSectionHeader(pht('Haiku About Pasta'));
 
@@ -77,11 +57,29 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
         pht('haiku. it is very bad.'),
         pht('what did you expect?')));
 
+    $details1 = id(new PHUITabView())
+      ->setName(pht('Details'))
+      ->setKey('details')
+      ->appendChild($view);
+
+    $details2 = id(new PHUITabView())
+      ->setName(pht('Rainbow Info'))
+      ->setKey('rainbow')
+      ->appendChild($view2);
+
+    $details3 = id(new PHUITabView())
+      ->setName(pht('Pasta Haiku'))
+      ->setKey('haiku')
+      ->appendChild($view3);
+
+    $tab_group = id(new PHUITabGroupView())
+      ->addTab($details1)
+      ->addTab($details2)
+      ->addTab($details3);
+
     $object_box1 = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('%s Stackered', 'PHUIPropertyListView'))
-      ->addPropertyList($view, $details1)
-      ->addPropertyList($view2, $details2)
-      ->addPropertyList($view3, $details3);
+      ->addTabGroup($tab_group);
 
     $edge_cases_view = new PHUIPropertyListView();
 

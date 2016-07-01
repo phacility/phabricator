@@ -99,6 +99,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
           'port'      => $conf->getPort(),
           'database'  => $database,
           'retries'   => 3,
+          'timeout' => 10,
         ),
       ));
   }

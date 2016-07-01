@@ -79,6 +79,7 @@ JX.behavior('diffusion-commit-graph', function(config) {
       c = data.line.charAt(jj);
       switch (c) {
         case 'o':
+        case 'x':
         case '^':
           origin = xpos(jj);
           break;
@@ -91,6 +92,7 @@ JX.behavior('diffusion-commit-graph', function(config) {
     for (jj = 0; jj < data.join.length; jj++) {
       var join = data.join[jj];
       x = xpos(join);
+
       cxt.beginPath();
         cxt.moveTo(x, 0);
         cxt.bezierCurveTo(x, h/4, origin, h/4, origin, h/2);

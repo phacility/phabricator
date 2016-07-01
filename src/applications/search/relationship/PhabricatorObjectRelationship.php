@@ -3,6 +3,7 @@
 abstract class PhabricatorObjectRelationship extends Phobject {
 
   private $viewer;
+  private $contentSource;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -11,6 +12,15 @@ abstract class PhabricatorObjectRelationship extends Phobject {
 
   public function getViewer() {
     return $this->viewer;
+  }
+
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->contentSource = $content_source;
+    return $this;
+  }
+
+  public function getContentSource() {
+    return $this->contentSource;
   }
 
   final public function getRelationshipConstant() {
@@ -47,6 +57,28 @@ abstract class PhabricatorObjectRelationship extends Phobject {
       PhabricatorPolicyCapability::CAN_EDIT);
   }
 
+  public function getRequiredRelationshipCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  final public function newSource() {
+    $viewer = $this->getViewer();
+
+    return $this->newRelationshipSource()
+      ->setViewer($viewer);
+  }
+
+  abstract protected function newRelationshipSource();
+
+  final public function getSourceURI($object) {
+    $relationship_key = $this->getRelationshipConstant();
+    $object_phid = $object->getPHID();
+
+    return "/search/source/{$relationship_key}/{$object_phid}/";
+  }
+
   final public function newAction($object) {
     $is_enabled = $this->isActionEnabled($object);
     $action_uri = $this->getActionURI($object);
@@ -70,6 +102,22 @@ abstract class PhabricatorObjectRelationship extends Phobject {
     $phid = $object->getPHID();
     $type = $this->getRelationshipConstant();
     return "/search/rel/{$type}/{$phid}/";
+  }
+
+  public function getMaximumSelectionSize() {
+    return null;
+  }
+
+  public function canUndoRelationship() {
+    return true;
+  }
+
+  public function willUpdateRelationships($object, array $add, array $rem) {
+    return array();
+  }
+
+  public function didUpdateRelationships($object, array $add, array $rem) {
+    return;
   }
 
 }

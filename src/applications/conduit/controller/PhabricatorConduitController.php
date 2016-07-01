@@ -25,6 +25,8 @@ abstract class PhabricatorConduitController extends PhabricatorController {
   }
 
   protected function renderExampleBox(ConduitAPIMethod $method, $params) {
+    $viewer = $this->getViewer();
+
     $arc_example = id(new PHUIPropertyListView())
       ->addRawContent($this->renderExample($method, 'arc', $params));
 
@@ -34,10 +36,15 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     $php_example = id(new PHUIPropertyListView())
       ->addRawContent($this->renderExample($method, 'php', $params));
 
+    $panel_uri = id(new PhabricatorConduitTokensSettingsPanel())
+      ->setViewer($viewer)
+      ->setUser($viewer)
+      ->getPanelURI();
+
     $panel_link = phutil_tag(
       'a',
       array(
-        'href' => '/settings/panel/apitokens/',
+        'href' => $panel_uri,
       ),
       pht('Conduit API Tokens'));
 
@@ -53,13 +60,28 @@ abstract class PhabricatorConduitController extends PhabricatorController {
       ->setErrors($messages)
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
 
+    $tab_group = id(new PHUITabGroupView())
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('arc call-conduit'))
+          ->setKey('arc')
+          ->appendChild($arc_example))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('cURL'))
+          ->setKey('curl')
+          ->appendChild($curl_example))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('PHP'))
+          ->setKey('php')
+          ->appendChild($php_example));
+
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Examples'))
       ->setInfoView($info_view)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($arc_example, pht('arc call-conduit'))
-      ->addPropertyList($curl_example, pht('cURL'))
-      ->addPropertyList($php_example, pht('PHP'));
+      ->addTabGroup($tab_group);
   }
 
   private function renderExample(

@@ -1,34 +1,44 @@
 <?php
 
-final class PhabricatorSearchSelectController
+final class PhabricatorSearchRelationshipSourceController
   extends PhabricatorSearchBaseController {
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
-    $type = $request->getURIData('type');
-    $action = $request->getURIData('action');
+    $viewer = $request->getViewer();
 
+    $object = $this->loadRelationshipObject();
+    if (!$object) {
+      return new Aphront404Response();
+    }
+
+    $relationship = $this->loadRelationship($object);
+    if (!$relationship) {
+      return new Aphront404Response();
+    }
+
+    $source = $relationship->newSource();
     $query = new PhabricatorSavedQuery();
+
+    $action = $request->getURIData('action');
     $query_str = $request->getStr('query');
+    $filter = $request->getStr('filter');
 
     $query->setEngineClassName('PhabricatorSearchApplicationSearchEngine');
     $query->setParameter('query', $query_str);
-    $query->setParameter('types', array($type));
+
+    $types = $source->getResultPHIDTypes();
+    $query->setParameter('types', $types);
 
     $status_open = PhabricatorSearchRelationship::RELATIONSHIP_OPEN;
 
-    switch ($request->getStr('filter')) {
+    switch ($filter) {
       case 'assigned':
-        $query->setParameter('ownerPHIDs', array($user->getPHID()));
+        $query->setParameter('ownerPHIDs', array($viewer->getPHID()));
         $query->setParameter('statuses', array($status_open));
         break;
       case 'created';
-        $query->setParameter('authorPHIDs', array($user->getPHID()));
-        // TODO - if / when we allow pholio mocks to be archived, etc
-        // update this
-        if ($type != PholioMockPHIDType::TYPECONST) {
-          $query->setParameter('statuses', array($status_open));
-        }
+        $query->setParameter('authorPHIDs', array($viewer->getPHID()));
+        $query->setParameter('statuses', array($status_open));
         break;
       case 'open':
         $query->setParameter('statuses', array($status_open));
@@ -37,17 +47,10 @@ final class PhabricatorSearchSelectController
 
     $query->setParameter('excludePHIDs', array($request->getStr('exclude')));
 
-    $capabilities = array(PhabricatorPolicyCapability::CAN_VIEW);
-    switch ($action) {
-      case self::ACTION_MERGE:
-        $capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
-        break;
-      default:
-        break;
-    }
+    $capabilities = $relationship->getRequiredRelationshipCapabilities();
 
     $results = id(new PhabricatorSearchDocumentQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->requireObjectCapabilities($capabilities)
       ->withSavedQuery($query)
       ->setOffset(0)
@@ -55,10 +58,10 @@ final class PhabricatorSearchSelectController
       ->execute();
 
     $phids = array_fill_keys(mpull($results, 'getPHID'), true);
-    $phids += $this->queryObjectNames($query_str, $capabilities);
+    $phids = $this->queryObjectNames($query, $capabilities) + $phids;
 
     $phids = array_keys($phids);
-    $handles = $this->loadViewerHandles($phids);
+    $handles = $viewer->loadHandles($phids);
 
     $data = array();
     foreach ($handles as $handle) {
@@ -69,15 +72,21 @@ final class PhabricatorSearchSelectController
     return id(new AphrontAjaxResponse())->setContent($data);
   }
 
-  private function queryObjectNames($query, $capabilities) {
+  private function queryObjectNames(
+    PhabricatorSavedQuery $query,
+    array $capabilities) {
+
     $request = $this->getRequest();
     $viewer = $request->getUser();
+
+    $types = $query->getParameter('types');
+    $match = $query->getParameter('query');
 
     $objects = id(new PhabricatorObjectQuery())
       ->setViewer($viewer)
       ->requireCapabilities($capabilities)
-      ->withTypes(array($request->getURIData('type')))
-      ->withNames(array($query))
+      ->withTypes($query->getParameter('types'))
+      ->withNames(array($match))
       ->execute();
 
     return mpull($objects, 'getPHID');

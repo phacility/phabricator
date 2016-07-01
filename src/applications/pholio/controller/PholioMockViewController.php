@@ -150,13 +150,14 @@ final class PholioMockViewController extends PholioController {
         ->setWorkflow(true));
     }
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-      ->setIcon('fa-anchor')
-      ->setName(pht('Edit Maniphest Tasks'))
-      ->setHref("/search/attach/{$mock->getPHID()}/TASK/edge/")
-      ->setDisabled(!$viewer->isLoggedIn())
-      ->setWorkflow(true));
+    $relationship_list = PhabricatorObjectRelationshipList::newForObject(
+      $viewer,
+      $mock);
+
+    $relationship_submenu = $relationship_list->newActionMenu();
+    if ($relationship_submenu) {
+      $curtain->addAction($relationship_submenu);
+    }
 
     if ($this->getManiphestTaskPHIDs()) {
       $curtain->newPanel()
