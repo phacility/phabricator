@@ -684,7 +684,7 @@ final class DiffusionBrowseController extends DiffusionController {
     } else {
       require_celerity_resource('syntax-highlighting-css');
 
-      if (!$can_highlight) {
+      if ($can_highlight) {
         $highlighted = PhabricatorSyntaxHighlighter::highlightWithFilename(
           $path,
           $file_corpus);
