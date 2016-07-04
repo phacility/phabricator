@@ -183,7 +183,8 @@ abstract class PhabricatorApplication
         $item = id(new PHUIListItemView())
           ->setName($article['name'])
           ->setIcon('fa-book')
-          ->setHref($article['href']);
+          ->setHref($article['href'])
+          ->setOpenInNewWindow(true);
 
         $items[] = $item;
       }
@@ -203,7 +204,8 @@ abstract class PhabricatorApplication
         $item = id(new PHUIListItemView())
           ->setName($spec['name'])
           ->setIcon('fa-envelope-o')
-          ->setHref($href);
+          ->setHref($href)
+          ->setOpenInNewWindow(true);
         $items[] = $item;
       }
     }
