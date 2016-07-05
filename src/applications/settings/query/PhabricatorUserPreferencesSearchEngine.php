@@ -27,7 +27,7 @@ final class PhabricatorUserPreferencesSearchEngine
   }
 
   protected function getURI($path) {
-    return '/settings/list/'.$path;
+    return '/settings/'.$path;
   }
 
   protected function getBuiltinQueryNames() {
