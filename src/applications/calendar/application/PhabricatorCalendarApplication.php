@@ -47,6 +47,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
           '(?P<month>\d+)/)?(?:(?P<day>\d+)/)?)?'
           => 'PhabricatorCalendarEventListController',
         'event/' => array(
+          $this->getEditRoutePattern('editpro/')
+            => 'PhabricatorCalendarEventEditProController',
           'create/'
             => 'PhabricatorCalendarEventEditController',
           'edit/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
