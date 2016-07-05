@@ -759,6 +759,13 @@ final class PhabricatorRepositoryDiscoveryEngine
       'repositoryPHID = %s',
       $repository->getPHID());
 
+    // If we don't have any refs to update, bail out before building a graph
+    // stream. In particular, this improves behavior in empty repositories,
+    // where `git log` exits with an error.
+    if (!$old_refs) {
+      return;
+    }
+
     // We can share a single graph stream across all the checks we need to do.
     $stream = new PhabricatorGitGraphStream($repository);
 
