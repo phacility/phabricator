@@ -70,7 +70,8 @@ Beyond an operating system, you will need **a webserver**.
 You will also need:
 
   - **MySQL**: You need MySQL. We strongly recommend MySQL 5.5 or newer.
-  - **PHP**: You need PHP 5.2 or newer.
+  - **PHP**: You need PHP 5.2 or newer, but note that PHP 7 is
+    **not supported**.
 
 You'll probably also need a **domain name**. In particular, you should read this
 note:
