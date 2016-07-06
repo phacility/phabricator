@@ -9,7 +9,7 @@ final class PhamePostMailReceiver
   }
 
   protected function getObjectPattern() {
-    return 'POST[1-9]\d*';
+    return 'J[1-9]\d*';
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {

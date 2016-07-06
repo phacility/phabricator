@@ -51,6 +51,10 @@ final class PhamePost extends PhameDAO
     return $this->assertAttached($this->blog);
   }
 
+  public function getMonogram() {
+    return 'J'.$this->getID();
+  }
+
   public function getLiveURI() {
     $blog = $this->getBlog();
     $is_draft = $this->isDraft();

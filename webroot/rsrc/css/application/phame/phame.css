@@ -308,3 +308,7 @@
   font-family: 'Aleo', {$fontfamily};
   padding-top: 8px;
 }
+
+.phame-comment-view .aphront-form-control.aphront-form-control-select {
+  display: none;
+}
