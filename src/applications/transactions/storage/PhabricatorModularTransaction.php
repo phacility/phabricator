@@ -116,6 +116,11 @@ abstract class PhabricatorModularTransaction
     return parent::getColor();
   }
 
+  public function attachViewer(PhabricatorUser $viewer) {
+    $this->getTransactionImplementation()->setViewer($viewer);
+    return parent::attachViewer($viewer);
+  }
+
   final public function hasChangeDetails() {
     if ($this->getTransactionImplementation()->hasChangeDetailView()) {
       return true;

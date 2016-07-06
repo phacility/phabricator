@@ -129,6 +129,18 @@ abstract class PhabricatorModularTransactionType
     return $this->getStorage()->renderHandleLink($object_phid);
   }
 
+  final protected function renderHandle($phid) {
+    $viewer = $this->getViewer();
+    $display = $viewer->renderHandle($phid);
+
+    $rendering_target = $this->getStorage()->getRenderingTarget();
+    if ($rendering_target == PhabricatorApplicationTransaction::TARGET_TEXT) {
+      $display->setAsText(true);
+    }
+
+    return $display;
+  }
+
   final protected function newError($title, $message, $xaction = null) {
     return new PhabricatorApplicationTransactionValidationError(
       $this->getTransactionTypeConstant(),
