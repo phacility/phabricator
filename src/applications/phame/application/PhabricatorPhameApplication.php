@@ -31,10 +31,6 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     );
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getRoutes() {
     return array(
       '/J(?P<id>[1-9]\d*)' => 'PhamePostViewController',

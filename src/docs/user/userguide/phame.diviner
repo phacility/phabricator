@@ -1,37 +1,44 @@
 @title Phame User Guide
 @group userguide
 
-Journal about your thoughts and feelings. Share with others. Profit.
+Phame is an internal and external blogging tool. Use it to communicate both
+internally to your users or externally to others.
 
 = Overview =
 
-IMPORTANT: Phame is a prototype application.
-
-Phame is a simple blogging platform. You can write drafts which only you can
-see. Later, you can publish these drafts as posts which anyone who can access
-the Phabricator instance can see. You can also add posts to blogs to increase
-your distribution.
+Phame is a simple blogging platform. You can create and own multiple blogs
+for various purposes internal to your organization. We include tools like
+Phame in Phabricator because we believe having a single stack for all
+internal tools is the best way to see they get adopted.
 
 Overall, Phame is intended to help an individual spread their message. As
 such, pertinent design decisions skew towards favoring the individual
-rather than the collective.
+rather than the collective. Phame fully integrates with Phabricator on
+key levels such as Feed, Comments, Subscriptions, Policies, and more.
 
 = Drafts =
 
-Drafts are completely private so draft away.
+By default all new posts are visible unless you set the visibility to
+draft when initially composing. This restricts the post to only members
+with Phame Blog edit privileges. Those members may also see and edit
+the post before it goes live.
 
 = Posts =
 
-Posts are accessible to anyone who has access to the Phabricator instance.
+Posts are accessible to the individual Phame Blog's view policy. This allows
+you to separate your content according to audience. So you can restrict a
+Engineering Blog to just engineers, or keep contractors out of the Security
+Blog. If you've configured an external blog, all those posts will be publicly
+viewable on publish.
 
 = Blogs =
 
 Blogs are collections of posts. Each blog has associated metadata like
-a name, description, and set of bloggers who can add posts to the blog.
-Each blogger can also edit metadata about the blog and delete the blog
-outright.
+a name, description, and set of bloggers who can add posts to the blog as
+dictated by the blog's edit policy. Each blogger can also edit metadata
+about the blog, the header images, or archive it.
 
-NOTE: removing a blogger from a given blog does not remove their posts that
+NOTE: Removing a blogger from a given blog does not remove their posts that
 are already associated with the blog. Rather, it removes their ability to edit
 metadata about and add posts to the blog.
 
@@ -48,12 +55,11 @@ Phabricator instance. For the Phabricator instance, you must
 For your DNS authority, simply point the pertinent domain name at your
 Phabricator instance. e.g. by IP address.
 
-= Comment Widgets =
+There are three fields to know about when setting up a blog for external use.
 
-Phame supports comment widgets from Facebook and Disqus. The administrator
-of the Phabricator instance must properly configure Phabricator to enable
-this functionality.
+ - **Full Domain URI:** Set this to the full URI you intend to serve the Phame
+ blog from.
+ - **Parent Site Name/URI:** Phame serves Blogs with a very minimal UI.
+ To help provide some context and navigation, these field may be set to give
+ users a way back to the parent site the blog was originally linked from.
 
-A given comment widget is tied 1:1 with a given post. This means the same
-instance of a given comment widget will appear for a given post regardless
-of whether that post is being viewed in the context of a blog.
