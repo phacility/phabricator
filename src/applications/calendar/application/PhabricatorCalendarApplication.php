@@ -40,7 +40,7 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/E(?P<id>[1-9]\d*)(?:/(?P<sequence>\d+))?'
+      '/E(?P<id>[1-9]\d*)(?:/(?P<sequence>\d+)/)?'
         => 'PhabricatorCalendarEventViewController',
       '/calendar/' => array(
         '(?:query/(?P<queryKey>[^/]+)/(?:(?P<year>\d+)/'.
@@ -51,15 +51,15 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarEventEditProController',
           'create/'
             => 'PhabricatorCalendarEventEditController',
-          'edit/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
+          'edit/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventEditController',
           'drag/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventDragController',
-          'cancel/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
+          'cancel/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventCancelController',
           '(?P<action>join|decline|accept)/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventJoinController',
-          'comment/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
+          'comment/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventCommentController',
         ),
       ),

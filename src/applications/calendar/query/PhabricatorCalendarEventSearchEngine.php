@@ -113,7 +113,15 @@ final class PhabricatorCalendarEventSearchEngine
         break;
     }
 
-    return $query->setGenerateGhosts(true);
+    // Generate ghosts (and ignore stub events) if we aren't querying for
+    // specific events.
+    if (!$map['ids'] && !$map['phids']) {
+      $query
+        ->withIsStub(false)
+        ->setGenerateGhosts(true);
+    }
+
+    return $query;
   }
 
   private function getQueryDateRange(

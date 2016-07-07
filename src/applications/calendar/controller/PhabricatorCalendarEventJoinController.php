@@ -20,12 +20,11 @@ final class PhabricatorCalendarEventJoinController
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->executeOne();
-
     if (!$event) {
       return new Aphront404Response();
     }
 
-    $cancel_uri = '/E'.$event->getID();
+    $cancel_uri = $event->getURI();
     $validation_exception = null;
 
     $is_attending = $event->getIsUserAttending($viewer->getPHID());

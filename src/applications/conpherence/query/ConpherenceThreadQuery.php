@@ -314,6 +314,8 @@ final class ConpherenceThreadQuery
 
     $events = array();
     if ($participant_phids) {
+      // TODO: All of this Calendar code is probably extra-broken, but none
+      // of it is currently reachable in the UI.
       $events = id(new PhabricatorCalendarEventQuery())
         ->setViewer($this->getViewer())
         ->withInvitedPHIDs($participant_phids)

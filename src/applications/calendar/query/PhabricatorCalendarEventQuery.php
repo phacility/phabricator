@@ -12,6 +12,7 @@ final class PhabricatorCalendarEventQuery
   private $isCancelled;
   private $eventsWithNoParent;
   private $instanceSequencePairs;
+  private $isStub;
 
   private $generateGhosts = false;
 
@@ -52,6 +53,11 @@ final class PhabricatorCalendarEventQuery
 
   public function withIsCancelled($is_cancelled) {
     $this->isCancelled = $is_cancelled;
+    return $this;
+  }
+
+  public function withIsStub($is_stub) {
+    $this->isStub = $is_stub;
     return $this;
   }
 
@@ -183,7 +189,7 @@ final class PhabricatorCalendarEventQuery
         $sequence_start = max(1, $sequence_start);
 
         for ($index = $sequence_start; $index < $sequence_end; $index++) {
-          $events[] = $event->generateNthGhost($index, $viewer);
+          $events[] = $event->newGhost($viewer, $index);
         }
 
         // NOTE: We're slicing results every time because this makes it cheaper
@@ -201,40 +207,66 @@ final class PhabricatorCalendarEventQuery
       }
     }
 
-    $map = array();
-    $instance_sequence_pairs = array();
+    // Now that we're done generating ghost events, we're going to remove any
+    // ghosts that we have concrete events for (or which we can load the
+    // concrete events for). These concrete events are generated when users
+    // edit a ghost, and replace the ghost events.
 
-    foreach ($events as $key => $event) {
+    // First, generate a map of all concrete <parentPHID, sequence> events we
+    // already loaded. We don't need to load these again.
+    $have_pairs = array();
+    foreach ($events as $event) {
       if ($event->getIsGhostEvent()) {
-        $index = $event->getSequenceIndex();
-        $instance_sequence_pairs[] = array($event->getPHID(), $index);
-        $map[$event->getPHID()][$index] = $key;
+        continue;
       }
+
+      $parent_phid = $event->getInstanceOfEventPHID();
+      $sequence = $event->getSequenceIndex();
+
+      $have_pairs[$parent_phid][$sequence] = true;
     }
 
-    if (count($instance_sequence_pairs) > 0) {
-      $sub_query = id(new PhabricatorCalendarEventQuery())
-        ->setViewer($viewer)
-        ->setParentQuery($this)
-        ->withInstanceSequencePairs($instance_sequence_pairs)
-        ->execute();
-
-      foreach ($sub_query as $edited_ghost) {
-        $indexes = idx($map, $edited_ghost->getInstanceOfEventPHID());
-        $key = idx($indexes, $edited_ghost->getSequenceIndex());
-        $events[$key] = $edited_ghost;
+    // Now, generate a map of all <parentPHID, sequence> events we generated
+    // ghosts for. We need to try to load these if we don't already have them.
+    $map = array();
+    $parent_pairs = array();
+    foreach ($events as $key => $event) {
+      if (!$event->getIsGhostEvent()) {
+        continue;
       }
 
-      $id_map = array();
-      foreach ($events as $key => $event) {
-        if ($event->getIsGhostEvent()) {
-          continue;
-        }
-        if (isset($id_map[$event->getID()])) {
-          unset($events[$key]);
-        } else {
-          $id_map[$event->getID()] = true;
-        }
+      $parent_phid = $event->getInstanceOfEventPHID();
+      $sequence = $event->getSequenceIndex();
+
+      // We already loaded the concrete version of this event, so we can just
+      // throw out the ghost and move on.
+      if (isset($have_pairs[$parent_phid][$sequence])) {
+        unset($events[$key]);
+        continue;
+      }
+
+      // We didn't load the concrete version of this event, so we need to
+      // try to load it if it exists.
+      $parent_pairs[] = array($parent_phid, $sequence);
+      $map[$parent_phid][$sequence] = $key;
+    }
+
+    if ($parent_pairs) {
+      $instances = id(new self())
+        ->setViewer($viewer)
+        ->setParentQuery($this)
+        ->withInstanceSequencePairs($parent_pairs)
+        ->execute();
+
+      foreach ($instances as $instance) {
+        $parent_phid = $instance->getInstanceOfEventPHID();
+        $sequence = $instance->getSequenceIndex();
+
+        $indexes = idx($map, $parent_phid);
+        $key = idx($indexes, $sequence);
+
+        // Replace the ghost with the corresponding concrete event.
+        $events[$key] = $instance;
       }
     }
 
@@ -327,6 +359,13 @@ final class PhabricatorCalendarEventQuery
         $conn,
         '%Q',
         implode(' OR ', $sql));
+    }
+
+    if ($this->isStub !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.isStub = %d',
+        (int)$this->isStub);
     }
 
     return $where;

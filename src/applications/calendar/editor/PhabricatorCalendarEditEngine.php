@@ -55,6 +55,10 @@ final class PhabricatorCalendarEditEngine
     return $object->getURI();
   }
 
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('event/editpro/');
+  }
+
   protected function buildCustomEditFields($object) {
     $fields = array(
       id(new PhabricatorTextEditField())

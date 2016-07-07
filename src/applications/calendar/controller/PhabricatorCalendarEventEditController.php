@@ -77,39 +77,16 @@ final class PhabricatorCalendarEventEditController
       $cancel_uri = $this->getApplicationURI();
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($this->id))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-
+        ->setViewer($viewer)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$event) {
         return new Aphront404Response();
-      }
-
-      if ($request->getURIData('sequence')) {
-        $index = $request->getURIData('sequence');
-
-        $result = $this->getEventAtIndexForGhostPHID(
-          $viewer,
-          $event->getPHID(),
-          $index);
-
-        if ($result) {
-          return id(new AphrontRedirectResponse())
-            ->setURI('/calendar/event/edit/'.$result->getID().'/');
-        }
-
-        $event = $this->createEventFromGhost(
-          $viewer,
-          $event,
-          $index);
-
-        return id(new AphrontRedirectResponse())
-          ->setURI('/calendar/event/edit/'.$event->getID().'/');
       }
 
       $end_value = AphrontFormDateControlValue::newFromEpoch(
@@ -137,7 +114,7 @@ final class PhabricatorCalendarEventEditController
         }
       }
 
-      $cancel_uri = '/'.$event->getMonogram();
+      $cancel_uri = $event->getURI();
     }
 
     if ($this->isCreate()) {
@@ -153,7 +130,7 @@ final class PhabricatorCalendarEventEditController
     $description = $event->getDescription();
     $is_all_day = $event->getIsAllDay();
     $is_recurring = $event->getIsRecurring();
-    $is_parent = $event->getIsRecurrenceParent();
+    $is_parent = $event->isParentEvent();
     $frequency = idx($event->getRecurrenceFrequency(), 'rule');
     $icon = $event->getIcon();
     $edit_policy = $event->getEditPolicy();

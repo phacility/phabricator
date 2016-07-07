@@ -11,6 +11,47 @@ final class PhabricatorCalendarEventEditor
     return pht('Calendar');
   }
 
+  protected function shouldApplyInitialEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function applyInitialEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $actor = $this->requireActor();
+    $object->removeViewerTimezone($actor);
+
+    if ($object->getIsStub()) {
+      $this->materializeStub($object);
+    }
+  }
+
+  private function materializeStub(PhabricatorCalendarEvent $event) {
+    if (!$event->getIsStub()) {
+      throw new Exception(
+        pht('Can not materialize an event stub: this event is not a stub.'));
+    }
+
+    $actor = $this->getActor();
+    $event->copyFromParent($actor);
+    $event->setIsStub(0);
+
+    $invitees = $event->getParentEvent()->getInvitees();
+    foreach ($invitees as $invitee) {
+      $invitee = id(new PhabricatorCalendarEventInvitee())
+        ->setEventPHID($event->getPHID())
+        ->setInviteePHID($invitee->getInviteePHID())
+        ->setInviterPHID($invitee->getInviterPHID())
+        ->setStatus($invitee->getStatus())
+        ->save();
+    }
+
+    $event->save();
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -194,15 +235,6 @@ final class PhabricatorCalendarEventEditor
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
-  }
-
-  protected function didApplyInternalEffects(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    $object->removeViewerTimezone($this->requireActor());
-
-    return $xactions;
   }
 
   protected function applyFinalEffects(

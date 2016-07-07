@@ -22,6 +22,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $isAllDay;
   protected $icon;
   protected $mailKey;
+  protected $isStub;
 
   protected $isRecurring = 0;
   protected $recurrenceFrequency = array();
@@ -71,6 +72,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
+      ->setIsStub(0)
       ->setIsRecurring($is_recurring)
       ->setIcon(self::DEFAULT_ICON)
       ->setViewPolicy($view_policy)
@@ -78,6 +80,116 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
       ->applyViewerTimezone($actor);
+  }
+
+  private function newChild(PhabricatorUser $actor, $sequence) {
+    if (!$this->isParentEvent()) {
+      throw new Exception(
+        pht(
+          'Unable to generate a new child event for an event which is not '.
+          'a recurring parent event!'));
+    }
+
+    $child = id(new self())
+      ->setIsCancelled(0)
+      ->setIsStub(0)
+      ->setInstanceOfEventPHID($this->getPHID())
+      ->setSequenceIndex($sequence)
+      ->setIsRecurring(true)
+      ->setRecurrenceFrequency($this->getRecurrenceFrequency())
+      ->attachParentEvent($this);
+
+    return $child->copyFromParent($actor);
+  }
+
+  protected function readField($field) {
+    static $inherit = array(
+      'userPHID' => true,
+      'isAllDay' => true,
+      'icon' => true,
+      'spacePHID' => true,
+      'viewPolicy' => true,
+      'editPolicy' => true,
+      'name' => true,
+      'description' => true,
+    );
+
+    // Read these fields from the parent event instead of this event. For
+    // example, we want any changes to the parent event's name to
+    if (isset($inherit[$field])) {
+      if ($this->getIsStub()) {
+        // TODO: This should be unconditional, but the execution order of
+        // CalendarEventQuery and applyViewerTimezone() are currently odd.
+        if ($this->parentEvent !== self::ATTACHABLE) {
+          return $this->getParentEvent()->readField($field);
+        }
+      }
+    }
+
+    return parent::readField($field);
+  }
+
+
+  public function copyFromParent(PhabricatorUser $actor) {
+    if (!$this->isChildEvent()) {
+      throw new Exception(
+        pht(
+          'Unable to copy from parent event: this is not a child event.'));
+    }
+
+    $parent = $this->getParentEvent();
+
+    $this
+      ->setUserPHID($parent->getUserPHID())
+      ->setIsAllDay($parent->getIsAllDay())
+      ->setIcon($parent->getIcon())
+      ->setSpacePHID($parent->getSpacePHID())
+      ->setViewPolicy($parent->getViewPolicy())
+      ->setEditPolicy($parent->getEditPolicy())
+      ->setName($parent->getName())
+      ->setDescription($parent->getDescription());
+
+    $frequency = $parent->getFrequencyUnit();
+    $modify_key = '+'.$this->getSequenceIndex().' '.$frequency;
+
+    $date = $parent->getDateFrom();
+    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
+    $date_time->modify($modify_key);
+    $date = $date_time->format('U');
+
+    $duration = $parent->getDateTo() - $parent->getDateFrom();
+
+    $this
+      ->setDateFrom($date)
+      ->setDateTo($date + $duration);
+
+    return $this;
+  }
+
+  public function newStub(PhabricatorUser $actor, $sequence) {
+    $stub = $this->newChild($actor, $sequence);
+
+    $stub->setIsStub(1);
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $stub->save();
+    unset($unguarded);
+
+    $stub->applyViewerTimezone($actor);
+
+    return $stub;
+  }
+
+  public function newGhost(PhabricatorUser $actor, $sequence) {
+    $ghost = $this->newChild($actor, $sequence);
+
+    $ghost
+      ->setIsGhostEvent(true)
+      ->makeEphemeral();
+
+    $ghost->applyViewerTimezone($actor);
+
+    return $ghost;
   }
 
   public function applyViewerTimezone(PhabricatorUser $viewer) {
@@ -211,6 +323,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'recurrenceEndDate' => 'epoch?',
         'instanceOfEventPHID' => 'phid?',
         'sequenceIndex' => 'uint32?',
+        'isStub' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID_dateFrom' => array(
@@ -285,38 +398,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
-  public function generateNthGhost(
-    $sequence_index,
-    PhabricatorUser $actor) {
-
-    $frequency = $this->getFrequencyUnit();
-    $modify_key = '+'.$sequence_index.' '.$frequency;
-
-    $instance_of = ($this->getPHID()) ?
-      $this->getPHID() : $this->instanceOfEventPHID;
-
-    $date = $this->dateFrom;
-    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
-    $date_time->modify($modify_key);
-    $date = $date_time->format('U');
-
-    $duration = $this->dateTo - $this->dateFrom;
-
-    $edit_policy = PhabricatorPolicies::POLICY_NOONE;
-
-    $ghost_event = id(clone $this)
-      ->setIsGhostEvent(true)
-      ->setDateFrom($date)
-      ->setDateTo($date + $duration)
-      ->setIsRecurring(true)
-      ->setRecurrenceFrequency($this->recurrenceFrequency)
-      ->setInstanceOfEventPHID($instance_of)
-      ->setSequenceIndex($sequence_index)
-      ->setEditPolicy($edit_policy);
-
-    return $ghost_event;
-  }
-
   public function getFrequencyUnit() {
     $frequency = idx($this->recurrenceFrequency, 'rule');
 
@@ -335,11 +416,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getURI() {
-    $uri = '/'.$this->getMonogram();
-    if ($this->isGhostEvent) {
-      $uri = $uri.'/'.$this->sequenceIndex;
+    if ($this->getIsGhostEvent()) {
+      $base = $this->getParentEvent()->getURI();
+      $sequence = $this->getSequenceIndex();
+      return "{$base}/{$sequence}/";
     }
-    return $uri;
+
+    return '/'.$this->getMonogram();
   }
 
   public function getParentEvent() {
@@ -351,37 +434,25 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
-  public function getIsCancelled() {
-    $instance_of = $this->instanceOfEventPHID;
-    if ($instance_of != null && $this->getIsParentCancelled()) {
-      return true;
-    }
-    return $this->isCancelled;
+  public function isParentEvent() {
+    return ($this->isRecurring && !$this->instanceOfEventPHID);
   }
 
-  public function getIsRecurrenceParent() {
-    if ($this->isRecurring && !$this->instanceOfEventPHID) {
-      return true;
-    }
-    return false;
+  public function isChildEvent() {
+    return ($this->instanceOfEventPHID !== null);
   }
 
-  public function getIsRecurrenceException() {
-    if ($this->instanceOfEventPHID && !$this->isGhostEvent) {
+  public function isCancelledEvent() {
+    if ($this->getIsCancelled()) {
       return true;
     }
-    return false;
-  }
 
-  public function getIsParentCancelled() {
-    if ($this->instanceOfEventPHID == null) {
-      return false;
+    if ($this->isChildEvent()) {
+      if ($this->getParentEvent()->getIsCancelled()) {
+        return true;
+      }
     }
 
-    $recurring_event = $this->getParentEvent();
-    if ($recurring_event->getIsCancelled()) {
-      return true;
-    }
     return false;
   }
 
@@ -407,6 +478,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
           round($minutes, 0));
     }
   }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 
