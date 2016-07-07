@@ -33,4 +33,8 @@ final class ManiphestTaskHasRevisionRelationship
     return pht('Save Related Revisions');
   }
 
+  protected function newRelationshipSource() {
+    return new DifferentialRevisionRelationshipSource();
+  }
+
 }

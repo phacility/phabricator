@@ -51,6 +51,16 @@ final class FileUploadChunkConduitAPIMethod
       $start,
       $start + $length);
 
+    // If this is the initial chunk, leave the MIME type unset so we detect
+    // it and can update the parent file. If this is any other chunk, it has
+    // no meaningful MIME type. Provide a default type so we can avoid writing
+    // it to disk to perform MIME type detection.
+    if (!$start) {
+      $mime_type = null;
+    } else {
+      $mime_type = 'application/octet-stream';
+    }
+
     // NOTE: These files have a view policy which prevents normal access. They
     // are only accessed through the storage engine.
     $chunk_data = PhabricatorFile::newFromFileData(
@@ -58,13 +68,26 @@ final class FileUploadChunkConduitAPIMethod
       array(
         'name' => $file->getMonogram().'.chunk-'.$chunk->getID(),
         'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+        'mime-type' => $mime_type,
       ));
 
     $chunk->setDataFilePHID($chunk_data->getPHID())->save();
 
+    $needs_update = false;
+
     $missing = $this->loadAnyMissingChunk($viewer, $file);
     if (!$missing) {
-      $file->setIsPartial(0)->save();
+      $file->setIsPartial(0);
+      $needs_update = true;
+    }
+
+    if (!$start) {
+      $file->setMimeType($chunk_data->getMimeType());
+      $needs_update = true;
+    }
+
+    if ($needs_update) {
+      $file->save();
     }
 
     return null;

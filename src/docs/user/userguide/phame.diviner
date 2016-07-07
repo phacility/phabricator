@@ -1,59 +1,121 @@
 @title Phame User Guide
 @group userguide
 
-Journal about your thoughts and feelings. Share with others. Profit.
+Phame is a blogging platform.
 
-= Overview =
+Overview
+========
 
-IMPORTANT: Phame is a prototype application.
+Phame is a simple platform for writing blogs and blog posts. Content published
+through Phame is integrated with other Phabricator applications (like Feed,
+Herald and Dashboards).
 
-Phame is a simple blogging platform. You can write drafts which only you can
-see. Later, you can publish these drafts as posts which anyone who can access
-the Phabricator instance can see. You can also add posts to blogs to increase
-your distribution.
+You can use Phame to write and publish posts on any topic. You might use it to
+make announcements, hold discussions, or provide progress updates about a
+project.
 
-Overall, Phame is intended to help an individual spread their message. As
-such, pertinent design decisions skew towards favoring the individual
-rather than the collective.
+In the upstream, we use several Phame blogs to discuss changes to Phabricator,
+make company announcements, photograph food, and provide visionary thought
+leadership.
 
-= Drafts =
 
-Drafts are completely private so draft away.
+Blogs
+=====
 
-= Posts =
+To get started with Phame, create a blog. Blogs can be personal or edited
+by a group: the **Editable By** policy controls who is allowed to write new
+posts.
 
-Posts are accessible to anyone who has access to the Phabricator instance.
+You can provide a title, subtitle, and description to help users understand
+the role and purpose of the blog.
 
-= Blogs =
+After creating a blog, you can optionally provide a header image (a large
+image shown on the main blog page, like a beautiful photograph of food) and
+a picture (a small logo or profile image shown in various places in the UI to
+help identify the blog).
 
-Blogs are collections of posts. Each blog has associated metadata like
-a name, description, and set of bloggers who can add posts to the blog.
-Each blogger can also edit metadata about the blog and delete the blog
-outright.
+Blogs can also be hosted externally. See "External Blogs", below, for
+more information.
 
-NOTE: removing a blogger from a given blog does not remove their posts that
-are already associated with the blog. Rather, it removes their ability to edit
-metadata about and add posts to the blog.
 
-Blogs can be useful for powering external websites, like
+Posts
+=====
 
-  blog.yourcompany.com
+After creating a blog, you're ready to write your first post. You can navigate
+to the blog and choose {nav Write Post} to get started.
 
-by making pertinent configuration changes with your DNS authority and
-Phabricator instance. For the Phabricator instance, you must
+Posts have a **Visibility** field which controls who can see them. The options
+are:
 
- - Enable `policy.allow-public` in Phabricator configuration.
- - Configure the blog to have the view policy `public`.
+  - **Published**: Anyone who can see the blog will be able to read the post.
+  - **Draft**: Allows you to work on posts before publishing them. Only users
+    who can edit the blog will be able to see the post.
+  - **Archived**: Allows you to remove old posts. Only users who can edit
+    the blog will be able to see the post, and it won't appear in the pending
+    drafts list.
 
-For your DNS authority, simply point the pertinent domain name at your
-Phabricator instance. e.g. by IP address.
+After publishing a post, it will appear on the blog and on the Phame home page
+for all users who can see it.
 
-= Comment Widgets =
 
-Phame supports comment widgets from Facebook and Disqus. The administrator
-of the Phabricator instance must properly configure Phabricator to enable
-this functionality.
+Using Phame With Other Applications
+===================================
 
-A given comment widget is tied 1:1 with a given post. This means the same
-instance of a given comment widget will appear for a given post regardless
-of whether that post is being viewed in the context of a blog.
+Phame integrates with other Phabricator applications, so you can do a few
+interesting things:
+
+**Dashboards**: You can create a dashboard panel which shows posts on a
+particular blog, then put the panel on the homepage or a custom dashboard.
+
+This is an easy way to create a list of recent announcements.
+
+**Herald**: You can use Herald rules to make sure you get notified whenever
+your favorite author publishes a new post.
+
+**Remarkup**: You can reference a blog post in any other application using the
+`J123` monogram for the post, or embed a more detailed link with `{J123}`.
+
+(We ran out of letters a while ago, but thinking about **j**ournal may be
+helpful in remembering this.)
+
+
+External Blogs
+==============
+
+WARNING: This feature is still a prototype and has some known issues.
+
+You can host a Phame blog on an external domain, like `blog.mycompany.com`. The
+Phacility corporate blog is an example of an external Phame blog:
+
+> https://blog.phacility.com/
+
+External blogs are public (they do not require login) and are only supported if
+your Phabricator install is also public. You can make an install public by
+adjusting `policy.allow-public` in Config, but make sure you understand the
+effects of adjusting this setting before touching it.
+
+Once you've made your install public, configure the blog that you want to host
+like this:
+
+  - **View Policy**: Set the "View Policy" for the blog to "Public". Blogs must
+    have a public view policy to be served from an external domain.
+  - **Full Domain URI**: Set this to the full URI of your external domain,
+    like `https://blog.mycompany.com/`. When users visit this URI, Phabricator
+    will serve the blog to them.
+
+To configure the blog's navigation breadcrumbs so that it links back to the
+right parent site, set these options:
+
+  - **Parent Site Name**: Put the parent site name here (like "MyCompany").
+  - **Parent Site URI**: Put the parent site URI here (like
+    `https://www.mycompany.com`).
+
+Configuring these options will add a new breadcrumb to the navigation to let
+users return to the blog's parent site. It will look something like this:
+
+  - {nav My Company > Blog Name}
+
+Finally, configure DNS for `blog.mycompany.com` to point at Phabricator.
+
+If everything is set up properly, visiting `blog.mycompany.com` should now
+serve your blog.

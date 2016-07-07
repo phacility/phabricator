@@ -18,25 +18,36 @@ final class PhamePostSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
-    if (strlen($map['visibility'])) {
-      $query->withVisibility(array($map['visibility']));
+    if ($map['visibility']) {
+      $query->withVisibility($map['visibility']);
     }
+    if ($map['blogPHIDs']) {
+      $query->withBlogPHIDs($map['blogPHIDs']);
+    }
+
 
     return $query;
   }
 
   protected function buildCustomSearchFields() {
     return array(
-      id(new PhabricatorSearchSelectField())
+      id(new PhabricatorSearchCheckboxesField())
         ->setKey('visibility')
         ->setLabel(pht('Visibility'))
         ->setOptions(
           array(
-            '' => pht('All'),
             PhameConstants::VISIBILITY_PUBLISHED => pht('Published'),
             PhameConstants::VISIBILITY_DRAFT => pht('Draft'),
             PhameConstants::VISIBILITY_ARCHIVED => pht('Archived'),
           )),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Blogs'))
+        ->setKey('blogPHIDs')
+        ->setAliases(array('blog', 'blogs', 'blogPHIDs'))
+        ->setDescription(
+          pht('Search for posts within certain blogs.'))
+        ->setDatasource(new PhameBlogDatasource()),
+
     );
   }
 
@@ -63,13 +74,13 @@ final class PhamePostSearchEngine
         return $query;
       case 'live':
         return $query->setParameter(
-          'visibility', PhameConstants::VISIBILITY_PUBLISHED);
+          'visibility', array(PhameConstants::VISIBILITY_PUBLISHED));
       case 'draft':
         return $query->setParameter(
-          'visibility', PhameConstants::VISIBILITY_DRAFT);
+          'visibility', array(PhameConstants::VISIBILITY_DRAFT));
       case 'archived':
         return $query->setParameter(
-          'visibility', PhameConstants::VISIBILITY_ARCHIVED);
+          'visibility', array(PhameConstants::VISIBILITY_ARCHIVED));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -97,6 +108,7 @@ final class PhamePostSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($post)
+        ->setObjectName($post->getMonogram())
         ->setHeader($post->getTitle())
         ->setStatusIcon('fa-star')
         ->setHref($post->getViewURI())

@@ -682,16 +682,20 @@ final class DiffusionBrowseController extends DiffusionController {
         $blame_commits,
         $show_blame);
     } else {
-      if ($can_highlight) {
-        require_celerity_resource('syntax-highlighting-css');
+      require_celerity_resource('syntax-highlighting-css');
 
+      if ($can_highlight) {
         $highlighted = PhabricatorSyntaxHighlighter::highlightWithFilename(
           $path,
           $file_corpus);
-        $lines = phutil_split_lines($highlighted);
       } else {
-        $lines = phutil_split_lines($file_corpus);
+        // Highlight as plain text to escape the content properly.
+        $highlighted = PhabricatorSyntaxHighlighter::highlightWithLanguage(
+          'txt',
+          $file_corpus);
       }
+
+      $lines = phutil_split_lines($highlighted);
 
       $rows = $this->buildDisplayRows(
         $lines,

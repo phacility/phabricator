@@ -68,12 +68,25 @@ final class PhameBlogProfilePictureController
 
       if (!$errors) {
         if ($is_default) {
-          $blog->setProfileImagePHID(null);
+          $new_value = null;
         } else {
-          $blog->setProfileImagePHID($xformed->getPHID());
           $xformed->attachToObject($blog->getPHID());
+          $new_value = $xformed->getPHID();
         }
-        $blog->save();
+
+        $xactions = array();
+        $xactions[] = id(new PhameBlogTransaction())
+          ->setTransactionType(PhameBlogTransaction::TYPE_PROFILEIMAGE)
+          ->setNewValue($new_value);
+
+        $editor = id(new PhameBlogEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($blog, $xactions);
+
         return id(new AphrontRedirectResponse())->setURI($blog_uri);
       }
     }

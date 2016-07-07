@@ -12,7 +12,8 @@
 }
 
 .remarkup-code td span {
-  display: inline-block;
+  display: inline;
+  word-break: break-all;
 }
 
 .remarkup-code .rbw_r { color: red; }

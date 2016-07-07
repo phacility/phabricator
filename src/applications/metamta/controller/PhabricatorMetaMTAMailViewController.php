@@ -36,13 +36,32 @@ final class PhabricatorMetaMTAMailViewController
       ->addTextCrumb(pht('Mail %d', $mail->getID()))
       ->setBorder(true);
 
+    $tab_group = id(new PHUITabGroupView())
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Message'))
+          ->setKey('message')
+          ->appendChild($this->buildMessageProperties($mail)))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Headers'))
+          ->setKey('headers')
+          ->appendChild($this->buildHeaderProperties($mail)))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Delivery'))
+          ->setKey('delivery')
+          ->appendChild($this->buildDeliveryProperties($mail)))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Metadata'))
+          ->setKey('metadata')
+          ->appendChild($this->buildMetadataProperties($mail)));
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Mail'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($this->buildMessageProperties($mail), pht('Message'))
-      ->addPropertyList($this->buildHeaderProperties($mail), pht('Headers'))
-      ->addPropertyList($this->buildDeliveryProperties($mail), pht('Delivery'))
-      ->addPropertyList($this->buildMetadataProperties($mail), pht('Metadata'));
+      ->addTabGroup($tab_group);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

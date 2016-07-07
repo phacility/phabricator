@@ -47,5 +47,13 @@ final class DiffusionCommitFulltextEngine
       $repository->getPHID(),
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       $date_created);
+
+    $document->addRelationship(
+      $commit->isUnreachable()
+        ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
+        : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+      $commit->getPHID(),
+      PhabricatorRepositoryCommitPHIDType::TYPECONST,
+      PhabricatorTime::getNow());
   }
 }

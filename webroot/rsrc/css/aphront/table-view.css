@@ -228,6 +228,23 @@ span.single-display-line-content {
   position: static;
 }
 
+.aphront-table-view tr.closed td.object-link,
+.aphront-table-view tr.alt-closed td.object-link {
+  text-decoration: line-through;
+  color: rgba({$alphablack}, 0.5);
+}
+
+.aphront-table-view tr.closed td.object-link a,
+.aphront-table-view tr.alt-closed td.object-link a {
+  color: rgba({$alphablack}, 0.5);
+}
+
+.aphront-table-view tr.closed td.graph-status,
+.aphront-table-view tr.alt-closed td.graph-status,
+.object-graph-table em {
+  color: {$lightgreytext};
+}
+
 .aphront-table-view tr.highlighted {
   background: #fdf9e4;
 }

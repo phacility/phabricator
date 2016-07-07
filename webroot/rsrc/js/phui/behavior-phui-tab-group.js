@@ -1,23 +1,25 @@
 /**
- * @provides javelin-behavior-phui-object-box-tabs
+ * @provides javelin-behavior-phui-tab-group
  * @requires javelin-behavior
  *           javelin-stratcom
  *           javelin-dom
  */
 
-JX.behavior('phui-object-box-tabs', function() {
+JX.behavior('phui-tab-group', function() {
 
   JX.Stratcom.listen(
     'click',
-    'phui-object-box-tab',
+    'phui-tab-view',
     function (e) {
       e.kill();
-      var key = e.getNodeData('phui-object-box-tab').tabKey;
-      var map = e.getNodeData('phui-object-box').tabMap;
-      var tab = e.getNode('phui-object-box-tab');
 
-      var box = e.getNode('phui-object-box');
-      var tabs = JX.DOM.scry(box, 'li', 'phui-object-box-tab');
+      var map = e.getNodeData('phui-tab-group-view').tabMap;
+      var key = e.getNodeData('phui-tab-view').tabKey;
+
+      var group = e.getNode('phui-tab-group-view');
+      var tab = e.getNode('phui-tab-view');
+      var tabs = JX.DOM.scry(group, 'li', 'phui-tab-view');
+
       for (var ii = 0; ii < tabs.length; ii++) {
         JX.DOM.alterClass(
           tabs[ii],
