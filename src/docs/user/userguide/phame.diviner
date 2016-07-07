@@ -1,65 +1,121 @@
 @title Phame User Guide
 @group userguide
 
-Phame is an internal and external blogging tool. Use it to communicate both
-internally to your users or externally to others.
+Phame is a blogging platform.
 
-= Overview =
+Overview
+========
 
-Phame is a simple blogging platform. You can create and own multiple blogs
-for various purposes internal to your organization. We include tools like
-Phame in Phabricator because we believe having a single stack for all
-internal tools is the best way to see they get adopted.
+Phame is a simple platform for writing blogs and blog posts. Content published
+through Phame is integrated with other Phabricator applications (like Feed,
+Herald and Dashboards).
 
-Overall, Phame is intended to help an individual spread their message. As
-such, pertinent design decisions skew towards favoring the individual
-rather than the collective. Phame fully integrates with Phabricator on
-key levels such as Feed, Comments, Subscriptions, Policies, and more.
+You can use Phame to write and publish posts on any topic. You might use it to
+make announcements, hold discussions, or provide progress updates about a
+project.
 
-= Drafts =
+In the upstream, we use several Phame blogs to discuss changes to Phabricator,
+make company announcements, photograph food, and provide visionary thought
+leadership.
 
-By default all new posts are visible unless you set the visibility to
-draft when initially composing. This restricts the post to only members
-with Phame Blog edit privileges. Those members may also see and edit
-the post before it goes live.
 
-= Posts =
+Blogs
+=====
 
-Posts are accessible to the individual Phame Blog's view policy. This allows
-you to separate your content according to audience. So you can restrict a
-Engineering Blog to just engineers, or keep contractors out of the Security
-Blog. If you've configured an external blog, all those posts will be publicly
-viewable on publish.
+To get started with Phame, create a blog. Blogs can be personal or edited
+by a group: the **Editable By** policy controls who is allowed to write new
+posts.
 
-= Blogs =
+You can provide a title, subtitle, and description to help users understand
+the role and purpose of the blog.
 
-Blogs are collections of posts. Each blog has associated metadata like
-a name, description, and set of bloggers who can add posts to the blog as
-dictated by the blog's edit policy. Each blogger can also edit metadata
-about the blog, the header images, or archive it.
+After creating a blog, you can optionally provide a header image (a large
+image shown on the main blog page, like a beautiful photograph of food) and
+a picture (a small logo or profile image shown in various places in the UI to
+help identify the blog).
 
-NOTE: Removing a blogger from a given blog does not remove their posts that
-are already associated with the blog. Rather, it removes their ability to edit
-metadata about and add posts to the blog.
+Blogs can also be hosted externally. See "External Blogs", below, for
+more information.
 
-Blogs can be useful for powering external websites, like
 
-  blog.yourcompany.com
+Posts
+=====
 
-by making pertinent configuration changes with your DNS authority and
-Phabricator instance. For the Phabricator instance, you must
+After creating a blog, you're ready to write your first post. You can navigate
+to the blog and choose {nav Write Post} to get started.
 
- - Enable `policy.allow-public` in Phabricator configuration.
- - Configure the blog to have the view policy `public`.
+Posts have a **Visibility** field which controls who can see them. The options
+are:
 
-For your DNS authority, simply point the pertinent domain name at your
-Phabricator instance. e.g. by IP address.
+  - **Published**: Anyone who can see the blog will be able to read the post.
+  - **Draft**: Allows you to work on posts before publishing them. Only users
+    who can edit the blog will be able to see the post.
+  - **Archived**: Allows you to remove old posts. Only users who can edit
+    the blog will be able to see the post, and it won't appear in the pending
+    drafts list.
 
-There are three fields to know about when setting up a blog for external use.
+After publishing a post, it will appear on the blog and on the Phame home page
+for all users who can see it.
 
- - **Full Domain URI:** Set this to the full URI you intend to serve the Phame
- blog from.
- - **Parent Site Name/URI:** Phame serves Blogs with a very minimal UI.
- To help provide some context and navigation, these field may be set to give
- users a way back to the parent site the blog was originally linked from.
 
+Using Phame With Other Applications
+===================================
+
+Phame integrates with other Phabricator applications, so you can do a few
+interesting things:
+
+**Dashboards**: You can create a dashboard panel which shows posts on a
+particular blog, then put the panel on the homepage or a custom dashboard.
+
+This is an easy way to create a list of recent announcements.
+
+**Herald**: You can use Herald rules to make sure you get notified whenever
+your favorite author publishes a new post.
+
+**Remarkup**: You can reference a blog post in any other application using the
+`J123` monogram for the post, or embed a more detailed link with `{J123}`.
+
+(We ran out of letters a while ago, but thinking about **j**ournal may be
+helpful in remembering this.)
+
+
+External Blogs
+==============
+
+WARNING: This feature is still a prototype and has some known issues.
+
+You can host a Phame blog on an external domain, like `blog.mycompany.com`. The
+Phacility corporate blog is an example of an external Phame blog:
+
+> https://blog.phacility.com/
+
+External blogs are public (they do not require login) and are only supported if
+your Phabricator install is also public. You can make an install public by
+adjusting `policy.allow-public` in Config, but make sure you understand the
+effects of adjusting this setting before touching it.
+
+Once you've made your install public, configure the blog that you want to host
+like this:
+
+  - **View Policy**: Set the "View Policy" for the blog to "Public". Blogs must
+    have a public view policy to be served from an external domain.
+  - **Full Domain URI**: Set this to the full URI of your external domain,
+    like `https://blog.mycompany.com/`. When users visit this URI, Phabricator
+    will serve the blog to them.
+
+To configure the blog's navigation breadcrumbs so that it links back to the
+right parent site, set these options:
+
+  - **Parent Site Name**: Put the parent site name here (like "MyCompany").
+  - **Parent Site URI**: Put the parent site URI here (like
+    `https://www.mycompany.com`).
+
+Configuring these options will add a new breadcrumb to the navigation to let
+users return to the blog's parent site. It will look something like this:
+
+  - {nav My Company > Blog Name}
+
+Finally, configure DNS for `blog.mycompany.com` to point at Phabricator.
+
+If everything is set up properly, visiting `blog.mycompany.com` should now
+serve your blog.
