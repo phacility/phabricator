@@ -56,9 +56,30 @@ final class DiffusionRepositoryEditController
       $layout->addColumn($action);
     }
 
+    $hints = id(new AphrontMultiColumnView())
+      ->setFluidLayout(true);
+
+    $observe_href = PhabricatorEnv::getDoclink(
+      'Diffusion User Guide: Existing Repositories');
+
+    $hints->addColumn(
+      id(new PHUIActionPanelView())
+        ->setIcon('fa-book')
+        ->setHeader(pht('Import or Observe an Existing Repository'))
+        ->setHref($observe_href)
+        ->setSubheader(
+          pht(
+            'Review the documentation describing how to import or observe an '.
+            'existing repository.')));
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter($layout);
+      ->setFooter(
+        array(
+          $layout,
+          phutil_tag('br'),
+          $hints,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
