@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '4e7e9bde',
-    'core.pkg.js' => '1bcca0f3',
+    'core.pkg.js' => '13c7e56a',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3e81ae60',
     'differential.pkg.js' => '634399e9',
@@ -439,7 +439,7 @@ return array(
     'rsrc/js/application/transactions/behavior-comment-actions.js' => '06460e71',
     'rsrc/js/application/transactions/behavior-reorder-configs.js' => 'd7a74243',
     'rsrc/js/application/transactions/behavior-reorder-fields.js' => 'b59e1e96',
-    'rsrc/js/application/transactions/behavior-show-older-transactions.js' => 'dbbf48b6',
+    'rsrc/js/application/transactions/behavior-show-older-transactions.js' => '94c65b72',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => 'b23b49e6',
     'rsrc/js/application/transactions/behavior-transaction-list.js' => '13c739ea',
     'rsrc/js/application/typeahead/behavior-typeahead-browse.js' => '635de1ec',
@@ -663,7 +663,7 @@ return array(
     'javelin-behavior-phabricator-remarkup-assist' => '116cf19b',
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '06c32383',
-    'javelin-behavior-phabricator-show-older-transactions' => 'dbbf48b6',
+    'javelin-behavior-phabricator-show-older-transactions' => '94c65b72',
     'javelin-behavior-phabricator-tooltips' => '42fcb747',
     'javelin-behavior-phabricator-transaction-comment-form' => 'b23b49e6',
     'javelin-behavior-phabricator-transaction-list' => '13c739ea',
@@ -1655,6 +1655,12 @@ return array(
       'javelin-resource',
       'javelin-routable',
     ),
+    '94c65b72' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'phabricator-busy',
+    ),
     '988040b4' => array(
       'javelin-install',
       'javelin-dom',
@@ -2013,12 +2019,6 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-shaped-request',
-    ),
-    'dbbf48b6' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'phabricator-busy',
     ),
     'de2e896f' => array(
       'javelin-behavior',
