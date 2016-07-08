@@ -141,6 +141,20 @@ abstract class PhabricatorModularTransactionType
     return $display;
   }
 
+  final protected function renderValue($value) {
+    $rendering_target = $this->getStorage()->getRenderingTarget();
+    if ($rendering_target == PhabricatorApplicationTransaction::TARGET_TEXT) {
+      return sprintf('"%s"', $value);
+    }
+
+    return phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-timeline-value',
+      ),
+      $value);
+  }
+
   final protected function newError($title, $message, $xaction = null) {
     return new PhabricatorApplicationTransactionValidationError(
       $this->getTransactionTypeConstant(),
