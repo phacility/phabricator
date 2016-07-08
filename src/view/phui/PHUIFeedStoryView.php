@@ -17,6 +17,7 @@ final class PHUIFeedStoryView extends AphrontView {
   private $chronologicalKey;
   private $tags;
   private $authorIcon;
+  private $showTimestamp = true;
 
   public function setTags($tags) {
     $this->tags = $tags;
@@ -97,6 +98,15 @@ final class PHUIFeedStoryView extends AphrontView {
     return $this;
   }
 
+  public function setShowTimestamp($show_timestamp) {
+    $this->showTimestamp = $show_timestamp;
+    return $this;
+  }
+
+  public function getShowTimestamp() {
+    return $this->showTimestamp;
+  }
+
   public function addProject($project) {
     $this->projects[] = $project;
     return $this;
@@ -136,20 +146,25 @@ final class PHUIFeedStoryView extends AphrontView {
     if (!$this->viewed) {
       $classes[] = 'phabricator-notification-unread';
     }
-    if ($this->epoch) {
-      if ($user) {
-        $foot = phabricator_datetime($this->epoch, $user);
-        $foot = phutil_tag(
-          'span',
-          array(
-            'class' => 'phabricator-notification-date',
-          ),
-          $foot);
+
+    if ($this->getShowTimestamp()) {
+      if ($this->epoch) {
+        if ($user) {
+          $foot = phabricator_datetime($this->epoch, $user);
+          $foot = phutil_tag(
+            'span',
+            array(
+              'class' => 'phabricator-notification-date',
+            ),
+            $foot);
+        } else {
+          $foot = null;
+        }
       } else {
-        $foot = null;
+        $foot = pht('No time specified.');
       }
     } else {
-      $foot = pht('No time specified.');
+      $foot = null;
     }
 
     return javelin_tag(
