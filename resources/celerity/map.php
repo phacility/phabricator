@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '2fbe65a2',
-    'core.pkg.js' => '49f8bdc0',
+    'core.pkg.js' => '1bcca0f3',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3e81ae60',
     'differential.pkg.js' => '634399e9',
@@ -491,7 +491,7 @@ return array(
     'rsrc/js/core/behavior-history-install.js' => '7ee2b591',
     'rsrc/js/core/behavior-hovercard.js' => 'bcaccd64',
     'rsrc/js/core/behavior-keyboard-pager.js' => 'a8da01f0',
-    'rsrc/js/core/behavior-keyboard-shortcuts.js' => '7835f8c9',
+    'rsrc/js/core/behavior-keyboard-shortcuts.js' => '01fca1f0',
     'rsrc/js/core/behavior-lightbox-attachments.js' => 'f8ba29d7',
     'rsrc/js/core/behavior-line-linker.js' => '1499a8cb',
     'rsrc/js/core/behavior-more.js' => 'a80d0378',
@@ -654,7 +654,7 @@ return array(
     'javelin-behavior-phabricator-gesture' => '3ab51e2c',
     'javelin-behavior-phabricator-gesture-example' => '558829c2',
     'javelin-behavior-phabricator-keyboard-pager' => 'a8da01f0',
-    'javelin-behavior-phabricator-keyboard-shortcuts' => '7835f8c9',
+    'javelin-behavior-phabricator-keyboard-shortcuts' => '01fca1f0',
     'javelin-behavior-phabricator-line-linker' => '1499a8cb',
     'javelin-behavior-phabricator-nav' => '56a1ca03',
     'javelin-behavior-phabricator-notification-example' => '8ce821c5',
@@ -920,6 +920,13 @@ return array(
       'javelin-stratcom',
       'javelin-workflow',
       'phabricator-draggable-list',
+    ),
+    '01fca1f0' => array(
+      'javelin-behavior',
+      'javelin-workflow',
+      'javelin-json',
+      'javelin-dom',
+      'phabricator-keyboard-shortcut',
     ),
     '031cee25' => array(
       'javelin-behavior',
@@ -1498,13 +1505,6 @@ return array(
       'phabricator-prefab',
       'multirow-row-manager',
       'javelin-json',
-    ),
-    '7835f8c9' => array(
-      'javelin-behavior',
-      'javelin-workflow',
-      'javelin-json',
-      'javelin-dom',
-      'phabricator-keyboard-shortcut',
     ),
     '7927a7d3' => array(
       'javelin-behavior',
