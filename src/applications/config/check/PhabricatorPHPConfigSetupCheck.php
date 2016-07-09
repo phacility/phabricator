@@ -11,6 +11,23 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
+    if (version_compare(phpversion(), 7, '>=')) {
+      $message = pht(
+        'This version of Phabricator does not support PHP 7. You '.
+        'are running PHP %s.',
+        phpversion());
+
+      $this->newIssue('php.version7')
+        ->setIsFatal(true)
+        ->setName(pht('PHP 7 Not Supported'))
+        ->setMessage($message)
+        ->addLink(
+          'https://phurl.io/u/php7',
+          pht('Phabricator PHP 7 Compatibility Information'));
+
+      return;
+    }
+
     $safe_mode = ini_get('safe_mode');
     if ($safe_mode) {
       $message = pht(

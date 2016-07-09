@@ -174,12 +174,13 @@ final class PhabricatorRepositoryDiscoveryEngine
         continue;
       }
 
-      // In Git, it's possible to tag a tag. We just skip these, we'll discover
-      // them when we process the target tag. See T11180.
+      // In Git, it's possible to tag anything. We just skip tags that don't
+      // point to a commit. See T11301.
       $fields = $ref->getRawFields();
+      $ref_type = idx($fields, 'objecttype');
       $tag_type = idx($fields, '*objecttype');
-      if ($tag_type == 'tag') {
-        $this->log(pht('Skipping, this is a tag of a tag.'));
+      if ($ref_type != 'commit' && $tag_type != 'commit') {
+        $this->log(pht('Skipping, this is not a commit.'));
         continue;
       }
 
@@ -758,6 +759,13 @@ final class PhabricatorRepositoryDiscoveryEngine
     $old_refs = id(new PhabricatorRepositoryOldRef())->loadAllWhere(
       'repositoryPHID = %s',
       $repository->getPHID());
+
+    // If we don't have any refs to update, bail out before building a graph
+    // stream. In particular, this improves behavior in empty repositories,
+    // where `git log` exits with an error.
+    if (!$old_refs) {
+      return;
+    }
 
     // We can share a single graph stream across all the checks we need to do.
     $stream = new PhabricatorGitGraphStream($repository);

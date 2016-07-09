@@ -195,7 +195,9 @@ abstract class PhameLiveController extends PhameController {
     }
 
     if ($post) {
-      $crumbs->addTextCrumb($post->getTitle());
+      if (!$is_external) {
+        $crumbs->addTextCrumb('J'.$post->getID());
+      }
     }
 
     return $crumbs;

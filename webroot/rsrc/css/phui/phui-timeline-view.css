@@ -256,6 +256,11 @@
   color: {$lightgreytext};
 }
 
+.phui-timeline-title .phui-timeline-value {
+  font-style: italic;
+  color: black;
+}
+
 .device-desktop .phui-timeline-extra {
   float: right;
 }

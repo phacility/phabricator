@@ -12,6 +12,7 @@ final class PhabricatorDatabaseRef
   const REPLICATION_MASTER_REPLICA = 'master-replica';
   const REPLICATION_REPLICA_NONE = 'replica-none';
   const REPLICATION_SLOW = 'replica-slow';
+  const REPLICATION_NOT_REPLICATING = 'not-replicating';
 
   const KEY_REFS = 'cluster.db.refs';
   const KEY_INDIVIDUAL = 'cluster.db.individual';
@@ -196,12 +197,17 @@ final class PhabricatorDatabaseRef
       self::REPLICATION_REPLICA_NONE => array(
         'icon' => 'fa-download',
         'color' => 'red',
-        'label' => pht('Not Replicating'),
+        'label' => pht('Not A Replica'),
       ),
       self::REPLICATION_SLOW => array(
         'icon' => 'fa-hourglass',
         'color' => 'red',
         'label' => pht('Slow Replication'),
+      ),
+      self::REPLICATION_NOT_REPLICATING => array(
+        'icon' => 'fa-exclamation-triangle',
+        'color' => 'red',
+        'label' => pht('Not Replicating'),
       ),
     );
   }
@@ -330,14 +336,19 @@ final class PhabricatorDatabaseRef
         }
 
         if ($is_replica) {
-          $latency = (int)idx($replica_status, 'Seconds_Behind_Master');
-          $ref->setReplicaDelay($latency);
-          if ($latency > 30) {
-            $ref->setReplicaStatus(self::REPLICATION_SLOW);
-            $ref->setReplicaMessage(
-              pht(
-                'This replica is lagging far behind the master. Data is at '.
-                'risk!'));
+          $latency = idx($replica_status, 'Seconds_Behind_Master');
+          if (!strlen($latency)) {
+            $ref->setReplicaStatus(self::REPLICATION_NOT_REPLICATING);
+          } else {
+            $latency = (int)$latency;
+            $ref->setReplicaDelay($latency);
+            if ($latency > 30) {
+              $ref->setReplicaStatus(self::REPLICATION_SLOW);
+              $ref->setReplicaMessage(
+                pht(
+                  'This replica is lagging far behind the master. Data is at '.
+                  'risk!'));
+            }
           }
         }
       }

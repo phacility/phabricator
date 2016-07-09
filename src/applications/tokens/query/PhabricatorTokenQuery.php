@@ -43,6 +43,14 @@ final class PhabricatorTokenQuery
       array('misc-2', pht('Evil Spooky Haunted Tree')),
       array('misc-3', pht('Baby Tequila')),
       array('misc-4', pht('The World Burns')),
+      array('emoji-1', pht('100')),
+      array('emoji-2', pht('Party Time')),
+      array('emoji-3', pht('Y So Serious')),
+      array('emoji-4', pht('Dat Boi')),
+      array('emoji-5', pht('Cup of Joe')),
+      array('emoji-6', pht('Hungry Hippo')),
+      array('emoji-7', pht('Burninate')),
+      array('emoji-8', pht('Pirate Logo')),
     );
 
     $type = PhabricatorTokenTokenPHIDType::TYPECONST;

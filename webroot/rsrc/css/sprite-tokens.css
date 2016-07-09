@@ -14,7 +14,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5),
 only screen and (min-resolution: 1.5dppx) {
   .sprite-tokens {
     background-image: url(/rsrc/image/sprite-tokens-X2.png);
-    background-size: 76px 76px;
+    background-size: 95px 95px;
   }
 }
 
@@ -35,50 +35,82 @@ only screen and (min-resolution: 1.5dppx) {
   background-position: -57px 0px;
 }
 
-.tokens-heart-1 {
+.tokens-emoji-1 {
+  background-position: -76px 0px;
+}
+
+.tokens-emoji-2 {
   background-position: 0px -19px;
 }
 
-.tokens-heart-2 {
+.tokens-emoji-3 {
   background-position: -19px -19px;
 }
 
-.tokens-like-1 {
+.tokens-emoji-4 {
   background-position: -38px -19px;
 }
 
-.tokens-like-2 {
+.tokens-emoji-5 {
   background-position: -57px -19px;
 }
 
-.tokens-medal-1 {
+.tokens-emoji-6 {
+  background-position: -76px -19px;
+}
+
+.tokens-emoji-7 {
   background-position: 0px -38px;
 }
 
-.tokens-medal-2 {
+.tokens-emoji-8 {
   background-position: -19px -38px;
 }
 
-.tokens-medal-3 {
+.tokens-heart-1 {
   background-position: -38px -38px;
 }
 
-.tokens-medal-4 {
+.tokens-heart-2 {
   background-position: -57px -38px;
 }
 
-.tokens-misc-1 {
+.tokens-like-1 {
+  background-position: -76px -38px;
+}
+
+.tokens-like-2 {
   background-position: 0px -57px;
 }
 
-.tokens-misc-2 {
+.tokens-medal-1 {
   background-position: -19px -57px;
 }
 
-.tokens-misc-3 {
+.tokens-medal-2 {
   background-position: -38px -57px;
 }
 
-.tokens-misc-4 {
+.tokens-medal-3 {
   background-position: -57px -57px;
+}
+
+.tokens-medal-4 {
+  background-position: -76px -57px;
+}
+
+.tokens-misc-1 {
+  background-position: 0px -76px;
+}
+
+.tokens-misc-2 {
+  background-position: -19px -76px;
+}
+
+.tokens-misc-3 {
+  background-position: -38px -76px;
+}
+
+.tokens-misc-4 {
+  background-position: -57px -76px;
 }

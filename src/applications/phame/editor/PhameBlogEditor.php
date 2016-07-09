@@ -66,6 +66,7 @@ final class PhameBlogEditor
       case PhameBlogTransaction::TYPE_DESCRIPTION:
       case PhameBlogTransaction::TYPE_STATUS:
       case PhameBlogTransaction::TYPE_PARENTSITE:
+      case PhameBlogTransaction::TYPE_PARENTDOMAIN:
       case PhameBlogTransaction::TYPE_PROFILEIMAGE:
       case PhameBlogTransaction::TYPE_HEADERIMAGE:
         return $xaction->getNewValue();

@@ -54,6 +54,8 @@ final class DifferentialRevisionGraph
       $link = $viewer->renderHandle($phid);
     }
 
+    $link = AphrontTableView::renderSingleDisplayLine($link);
+
     return array(
       $trace,
       $status,

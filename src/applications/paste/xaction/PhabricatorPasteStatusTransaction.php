@@ -14,7 +14,7 @@ final class PhabricatorPasteStatusTransaction
   }
 
   private function isActivate() {
-    return ($this->getNewValue() == PhabricatorPaste::STATUS_ARCHIVED);
+    return ($this->getNewValue() == PhabricatorPaste::STATUS_ACTIVE);
   }
 
   public function getIcon() {

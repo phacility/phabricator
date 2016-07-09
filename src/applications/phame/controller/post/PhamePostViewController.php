@@ -123,18 +123,21 @@ final class PhamePostViewController
       ->setImage($blogger->getProfileImageURI())
       ->setImageHref($author_uri);
 
+    $monogram = $post->getMonogram();
     $timeline = $this->buildTransactionTimeline(
       $post,
       id(new PhamePostTransactionQuery())
       ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
-    $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
+    $timeline->setQuoteRef($monogram);
 
     if ($is_external) {
       $add_comment = null;
     } else {
-      $add_comment = $this->buildCommentForm($post);
-      $add_comment = phutil_tag_div('mlb mlt', $add_comment);
+      $add_comment = $this->buildCommentForm($post, $timeline);
+      $add_comment = phutil_tag_div('mlb mlt phame-comment-view', $add_comment);
     }
+
+    $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
 
     list($prev, $next) = $this->loadAdjacentPosts($post);
 
@@ -273,19 +276,13 @@ final class PhamePostViewController
     return $actions;
   }
 
-  private function buildCommentForm(PhamePost $post) {
+  private function buildCommentForm(PhamePost $post, $timeline) {
     $viewer = $this->getViewer();
 
-    $draft = PhabricatorDraft::newFromUserAndKey(
-      $viewer, $post->getPHID());
-
-    $box = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($post->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText(pht('Add Comment'))
-      ->setAction($this->getApplicationURI('post/comment/'.$post->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
+    $box = id(new PhamePostEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($post)
+      ->setTransactionTimeline($timeline);
 
     return phutil_tag_div('phui-document-view-pro-box', $box);
   }

@@ -186,9 +186,17 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
 
       $result = $search;
+      $keyboard_config['searchID'] = $search->getID();
     }
 
-    Javelin::initBehavior('phabricator-keyboard-shortcuts', $keyboard_config);
+    $keyboard_config['pht'] = array(
+      '/' => pht('Give keyboard focus to the search box.'),
+      '?' => pht('Show keyboard shortcut help for the current page.'),
+    );
+
+    Javelin::initBehavior(
+      'phabricator-keyboard-shortcuts',
+      $keyboard_config);
 
     if ($result) {
       $result = id(new PHUIListItemView())

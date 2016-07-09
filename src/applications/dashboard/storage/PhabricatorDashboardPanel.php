@@ -10,7 +10,6 @@ final class PhabricatorDashboardPanel
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorProjectInterface,
     PhabricatorDestructibleInterface {
 
   protected $name;
@@ -70,6 +69,10 @@ final class PhabricatorDashboardPanel
 
   public function getMonogram() {
     return 'W'.$this->getID();
+  }
+
+  public function getURI() {
+    return '/'.$this->getMonogram();
   }
 
   public function getPanelTypes() {

@@ -108,6 +108,7 @@ final class PhamePostSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($post)
+        ->setObjectName($post->getMonogram())
         ->setHeader($post->getTitle())
         ->setStatusIcon('fa-star')
         ->setHref($post->getViewURI())

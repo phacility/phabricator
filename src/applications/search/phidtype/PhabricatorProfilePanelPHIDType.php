@@ -33,7 +33,6 @@ final class PhabricatorProfilePanelPHIDType
       $config = $objects[$phid];
 
       $handle->setName(pht('Profile Panel'));
-      $handle->setURI($config->getURI());
     }
   }
 

@@ -68,6 +68,10 @@ final class PhamePostEditEngine
     return $object->getViewURI();
   }
 
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('post/edit/');
+  }
+
   protected function buildCustomEditFields($object) {
     $blog_phid = $object->getBlog()->getPHID();
 

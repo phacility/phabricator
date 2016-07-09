@@ -135,10 +135,6 @@ Import a Repository
 If you have an existing repository that you want to move so it is hosted on
 Phabricator, there are three ways to do it:
 
-**Push Everything**: //(Git, Mercurial)// Create a new empty hosted repository
-according to the instructions above. Once the empty repository initializes,
-push your entire existing repository to it.
-
 **Observe First**: //(Git, Mercurial)// Observe the existing repository first,
 according to the instructions above. Once Phabricator's copy of the repository
 is fully synchronized, change the **I/O Type** for the **Observe** URI to
@@ -148,6 +144,12 @@ By default, this will automatically make Phabricator's copy of the repository
 writable, and you can begin pushing to it. If you've adjusted URI
 configuration away from the defaults, you may need to set at least one URI
 to **Read/Write** mode so you can push to it.
+
+**Push Everything**: //(Git, Mercurial, Subversion)// Create a new empty hosted
+repository according to the instructions above. Once the empty repository
+initializes, push your entire existing repository to it.
+
+In Subversion, you can do this with the `svnsync` tool.
 
 **Copy on Disk**: //(Git, Mercurial, Subversion)// Create a new empty hosted
 repository according to the instructions above, but do not activate it yet.

@@ -15,15 +15,19 @@ final class PhabricatorPasteLanguageTransaction
 
   public function getTitle() {
     return pht(
-      "%s updated the paste's language.",
-      $this->renderAuthor());
+      "%s updated the paste's language from %s to %s.",
+      $this->renderAuthor(),
+      $this->renderValue($this->getOldValue()),
+      $this->renderValue($this->getNewValue()));
   }
 
   public function getTitleForFeed() {
     return pht(
-      '%s updated the language for %s.',
+      '%s updated the language for %s from %s to %s.',
       $this->renderAuthor(),
-      $this->renderObject());
+      $this->renderObject(),
+      $this->renderValue($this->getOldValue()),
+      $this->renderValue($this->getNewValue()));
   }
 
 }
