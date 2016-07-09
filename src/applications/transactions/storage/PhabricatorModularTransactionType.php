@@ -141,8 +141,7 @@ abstract class PhabricatorModularTransactionType
     $viewer = $this->getViewer();
     $display = $viewer->renderHandle($phid);
 
-    $rendering_target = $this->getStorage()->getRenderingTarget();
-    if ($rendering_target == PhabricatorApplicationTransaction::TARGET_TEXT) {
+    if ($this->isTextMode()) {
       $display->setAsText(true);
     }
 
@@ -154,8 +153,7 @@ abstract class PhabricatorModularTransactionType
     $display = $viewer->renderHandleList($phids)
       ->setAsInline(true);
 
-    $rendering_target = $this->getStorage()->getRenderingTarget();
-    if ($rendering_target == PhabricatorApplicationTransaction::TARGET_TEXT) {
+    if ($this->isTextMode()) {
       $display->setAsText(true);
     }
 
@@ -163,8 +161,7 @@ abstract class PhabricatorModularTransactionType
   }
 
   final protected function renderValue($value) {
-    $rendering_target = $this->getStorage()->getRenderingTarget();
-    if ($rendering_target == PhabricatorApplicationTransaction::TARGET_TEXT) {
+    if ($this->isTextMode()) {
       return sprintf('"%s"', $value);
     }
 
@@ -189,7 +186,19 @@ abstract class PhabricatorModularTransactionType
 
     $display = phabricator_datetime($epoch, $viewer);
 
-    // TODO: When rendering for email, include the UTC offset. See T10633.
+    // When rendering to text, we explicitly render the offset from UTC to
+    // provide context to the date: the mail may be generating with the
+    // server's settings, or the user may later refer back to it after changing
+    // timezones.
+
+    if ($this->isTextMode()) {
+      $offset = $viewer->getTimeZoneOffsetInHours();
+      if ($offset >= 0) {
+        $display = pht('%s (UTC+%d)', $display, $offset);
+      } else {
+        $display = pht('%s (UTC-%d)', $display, abs($offset));
+      }
+    }
 
     return $this->renderValue($display);
   }
@@ -231,5 +240,9 @@ abstract class PhabricatorModularTransactionType
     return !strlen($value);
   }
 
+  private function isTextMode() {
+    $target = $this->getStorage()->getRenderingTarget();
+    return ($target == PhabricatorApplicationTransaction::TARGET_TEXT);
+  }
 
 }
