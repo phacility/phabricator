@@ -65,11 +65,40 @@ final class PhabricatorCalendarEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the event.'))
+        ->setIsRequired(true)
+        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_NAME)
         ->setConduitDescription(pht('Rename the event.'))
         ->setConduitTypeDescription(pht('New event name.'))
-        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_NAME)
-        ->setIsRequired(true)
         ->setValue($object->getName()),
+      id(new PhabricatorRemarkupEditField())
+        ->setKey('description')
+        ->setLabel(pht('Description'))
+        ->setDescription(pht('Description of the event.'))
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
+        ->setConduitDescription(pht('Update the event description.'))
+        ->setConduitTypeDescription(pht('New event description.'))
+        ->setValue($object->getDescription()),
+      id(new PhabricatorBoolEditField())
+        ->setKey('cancelled')
+        ->setOptions(pht('Active'), pht('Cancelled'))
+        ->setLabel(pht('Cancelled'))
+        ->setDescription(pht('Cancel the event.'))
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_CANCEL)
+        ->setIsConduitOnly(true)
+        ->setConduitDescription(pht('Cancel or restore the event.'))
+        ->setConduitTypeDescription(pht('True to cancel the event.'))
+        ->setValue($object->getIsCancelled()),
+      id(new PhabricatorIconSetEditField())
+        ->setKey('icon')
+        ->setLabel(pht('Icon'))
+        ->setIconSet(new PhabricatorCalendarIconSet())
+        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_ICON)
+        ->setDescription(pht('Event icon.'))
+        ->setConduitDescription(pht('Change the event icon.'))
+        ->setConduitTypeDescription(pht('New event icon.'))
+        ->setValue($object->getIcon()),
     );
 
     return $fields;
