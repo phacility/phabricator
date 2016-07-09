@@ -1160,7 +1160,11 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       $saved_query->setParameter($field->getKey(), $value);
     }
 
-    $this->saveQuery($saved_query);
+    // NOTE: Currently, when running an ad-hoc query we never persist it into
+    // a saved query. We might want to add an option to do this in the future
+    // (for example, to enable a CLI-to-Web workflow where user can view more
+    // details about results by following a link), but have no use cases for
+    // it today. If we do identify a use case, we could save the query here.
 
     $query = $this->buildQueryFromSavedQuery($saved_query);
     $pager = $this->newPagerForSavedQuery($saved_query);
@@ -1234,6 +1238,7 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       'data' => $data,
       'maps' => $method->getQueryMaps($query),
       'query' => array(
+        // This may be `null` if we have not saved the query.
         'queryKey' => $saved_query->getQueryKey(),
       ),
       'cursor' => array(
