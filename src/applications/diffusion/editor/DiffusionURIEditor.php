@@ -78,10 +78,12 @@ final class DiffusionURIEditor
         } else {
           $old_uri = null;
 
-          // When creating a URI, we may not have processed the repository
-          // transaction yet. Attach the repository here to make sure we
-          // have it for the calls below.
-          $object->attachRepository($this->repository);
+          // When creating a URI via the API, we may not have processed the
+          // repository transaction yet. Attach the repository here to make
+          // sure we have it for the calls below.
+          if ($this->repository) {
+            $object->attachRepository($this->repository);
+          }
         }
 
         $object->setURI($xaction->getNewValue());
