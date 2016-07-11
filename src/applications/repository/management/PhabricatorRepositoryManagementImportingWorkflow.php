@@ -40,11 +40,15 @@ final class PhabricatorRepositoryManagementImportingWorkflow
     $rows = queryfx_all(
       $conn_r,
       'SELECT repositoryID, commitIdentifier, importStatus FROM %T
-        WHERE repositoryID IN (%Ld) AND (importStatus & %d) != %d',
+        WHERE repositoryID IN (%Ld)
+          AND (importStatus & %d) != %d
+          AND (importStatus & %d) != %d',
       $table->getTableName(),
       array_keys($repos),
       PhabricatorRepositoryCommit::IMPORTED_ALL,
-      PhabricatorRepositoryCommit::IMPORTED_ALL);
+      PhabricatorRepositoryCommit::IMPORTED_ALL,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+      PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
 
     $console = PhutilConsole::getConsole();
     if ($rows) {
