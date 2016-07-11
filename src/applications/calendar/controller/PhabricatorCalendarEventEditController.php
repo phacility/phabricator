@@ -91,10 +91,10 @@ final class PhabricatorCalendarEventEditController
 
       $end_value = AphrontFormDateControlValue::newFromEpoch(
         $viewer,
-        $event->getDateTo());
+        $event->getViewerDateTo());
       $start_value = AphrontFormDateControlValue::newFromEpoch(
         $viewer,
-        $event->getDateFrom());
+        $event->getViewerDateFrom());
       $recurrence_end_date_value = id(clone $end_value)
         ->setOptional(true);
 
@@ -137,7 +137,17 @@ final class PhabricatorCalendarEventEditController
     $view_policy = $event->getViewPolicy();
     $space = $event->getSpacePHID();
 
+
     if ($request->isFormPost()) {
+      $is_all_day = $request->getStr('isAllDay');
+
+      if ($is_all_day) {
+        // TODO: This is a very gross temporary hack to get this working
+        // reasonably: if this is an all day event, force the viewer's
+        // timezone to UTC so the date controls get interpreted as UTC.
+        $viewer->overrideTimezoneIdentifier('UTC');
+      }
+
       $xactions = array();
       $name = $request->getStr('name');
 
@@ -159,7 +169,6 @@ final class PhabricatorCalendarEventEditController
       $space = $request->getStr('spacePHID');
       $is_recurring = $request->getStr('isRecurring') ? 1 : 0;
       $frequency = $request->getStr('frequency');
-      $is_all_day = $request->getStr('isAllDay');
       $icon = $request->getStr('icon');
 
       $invitees = $request->getArr('invitees');
@@ -192,7 +201,7 @@ final class PhabricatorCalendarEventEditController
           $xactions[] = id(new PhabricatorCalendarEventTransaction())
             ->setTransactionType(
               PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
-            ->setNewValue($recurrence_end_date_value);
+            ->setNewValue($recurrence_end_date_value->getEpoch());
         }
       }
 
@@ -210,12 +219,12 @@ final class PhabricatorCalendarEventEditController
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_START_DATE)
-          ->setNewValue($start_value);
+          ->setNewValue($start_value->getEpoch());
 
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_END_DATE)
-          ->setNewValue($end_value);
+          ->setNewValue($end_value->getEpoch());
       }
 
 

@@ -198,29 +198,29 @@ final class PhabricatorCalendarEventViewController
       ->setUser($viewer);
 
     if ($event->getIsAllDay()) {
-      $date_start = phabricator_date($event->getDateFrom(), $viewer);
-      $date_end = phabricator_date($event->getDateTo(), $viewer);
+      $date_start = phabricator_date($event->getViewerDateFrom(), $viewer);
+      $date_end = phabricator_date($event->getViewerDateTo(), $viewer);
 
       if ($date_start == $date_end) {
         $properties->addProperty(
           pht('Time'),
-          phabricator_date($event->getDateFrom(), $viewer));
+          phabricator_date($event->getViewerDateFrom(), $viewer));
       } else {
         $properties->addProperty(
           pht('Starts'),
-          phabricator_date($event->getDateFrom(), $viewer));
+          phabricator_date($event->getViewerDateFrom(), $viewer));
         $properties->addProperty(
           pht('Ends'),
-          phabricator_date($event->getDateTo(), $viewer));
+          phabricator_date($event->getViewerDateTo(), $viewer));
       }
     } else {
       $properties->addProperty(
         pht('Starts'),
-        phabricator_datetime($event->getDateFrom(), $viewer));
+        phabricator_datetime($event->getViewerDateFrom(), $viewer));
 
       $properties->addProperty(
         pht('Ends'),
-        phabricator_datetime($event->getDateTo(), $viewer));
+        phabricator_datetime($event->getViewerDateTo(), $viewer));
     }
 
     if ($event->getIsRecurring()) {

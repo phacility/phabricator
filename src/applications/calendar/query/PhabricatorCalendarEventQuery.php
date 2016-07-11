@@ -90,7 +90,7 @@ final class PhabricatorCalendarEventQuery
   protected function getPagingValueMap($cursor, array $keys) {
     $event = $this->loadCursorObject($cursor);
     return array(
-      'start' => $event->getDateFrom(),
+      'start' => $event->getViewerDateFrom(),
       'id' => $event->getID(),
     );
   }
@@ -121,7 +121,7 @@ final class PhabricatorCalendarEventQuery
     foreach ($events as $key => $event) {
       $sequence_start = 0;
       $sequence_end = null;
-      $duration = $event->getDateTo() - $event->getDateFrom();
+      $duration = $event->getDuration();
       $end = null;
 
       $instance_of = $event->getInstanceOfEventPHID();
@@ -137,9 +137,10 @@ final class PhabricatorCalendarEventQuery
         $frequency = $event->getFrequencyUnit();
         $modify_key = '+1 '.$frequency;
 
-        if ($this->rangeBegin && $this->rangeBegin > $event->getDateFrom()) {
+        if (($this->rangeBegin !== null) &&
+            ($this->rangeBegin > $event->getViewerDateFrom())) {
           $max_date = $this->rangeBegin - $duration;
-          $date = $event->getDateFrom();
+          $date = $event->getViewerDateFrom();
           $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
 
           while ($date < $max_date) {
@@ -151,7 +152,7 @@ final class PhabricatorCalendarEventQuery
 
           $start = $this->rangeBegin;
         } else {
-          $start = $event->getDateFrom() - $duration;
+          $start = $event->getViewerDateFrom() - $duration;
         }
 
         $date = $start;
@@ -199,9 +200,9 @@ final class PhabricatorCalendarEventQuery
 
         if ($raw_limit) {
           if (count($events) >= $raw_limit) {
-            $events = msort($events, 'getDateFrom');
+            $events = msort($events, 'getViewerDateFrom');
             $events = array_slice($events, 0, $raw_limit, true);
-            $enforced_end = last($events)->getDateFrom();
+            $enforced_end = last($events)->getViewerDateFrom();
           }
         }
       }
@@ -303,18 +304,22 @@ final class PhabricatorCalendarEventQuery
         $this->phids);
     }
 
+    // NOTE: The date ranges we query for are larger than the requested ranges
+    // because we need to catch all-day events. We'll refine this range later
+    // after adjusting the visible range of events we load.
+
     if ($this->rangeBegin) {
       $where[] = qsprintf(
         $conn,
         'event.dateTo >= %d OR event.isRecurring = 1',
-        $this->rangeBegin);
+        $this->rangeBegin - phutil_units('16 hours in seconds'));
     }
 
     if ($this->rangeEnd) {
       $where[] = qsprintf(
         $conn,
         'event.dateFrom <= %d',
-        $this->rangeEnd);
+        $this->rangeEnd + phutil_units('16 hours in seconds'));
     }
 
     if ($this->inviteePHIDs !== null) {
@@ -399,8 +404,8 @@ final class PhabricatorCalendarEventQuery
     $viewer = $this->getViewer();
 
     foreach ($events as $key => $event) {
-      $event_start = $event->getDateFrom();
-      $event_end = $event->getDateTo();
+      $event_start = $event->getViewerDateFrom();
+      $event_end = $event->getViewerDateTo();
 
       if ($range_start && $event_end < $range_start) {
         unset($events[$key]);
@@ -466,7 +471,7 @@ final class PhabricatorCalendarEventQuery
       }
     }
 
-    $events = msort($events, 'getDateFrom');
+    $events = msort($events, 'getViewerDateFrom');
 
     return $events;
   }

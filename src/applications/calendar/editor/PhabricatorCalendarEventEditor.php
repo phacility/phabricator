@@ -22,8 +22,6 @@ final class PhabricatorCalendarEventEditor
     array $xactions) {
 
     $actor = $this->requireActor();
-    $object->removeViewerTimezone($actor);
-
     if ($object->getIsStub()) {
       $this->materializeStub($object);
     }
@@ -151,7 +149,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
-        return $xaction->getNewValue()->getEpoch();
+        return $xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -308,6 +306,8 @@ final class PhabricatorCalendarEventEditor
     }
 
     if ($phids) {
+      $object->applyViewerTimezone($this->getActor());
+
       $user = new PhabricatorUser();
       $conn_w = $user->establishConnection('w');
       queryfx(
@@ -344,15 +344,16 @@ final class PhabricatorCalendarEventEditor
 
     foreach ($xactions as $xaction) {
       if ($xaction->getTransactionType() == $start_date_xaction) {
-        $start_date = $xaction->getNewValue()->getEpoch();
+        $start_date = $xaction->getNewValue();
       } else if ($xaction->getTransactionType() == $end_date_xaction) {
-        $end_date = $xaction->getNewValue()->getEpoch();
+        $end_date = $xaction->getNewValue();
       } else if ($xaction->getTransactionType() == $recurrence_end_xaction) {
         $recurrence_end = $xaction->getNewValue();
       } else if ($xaction->getTransactionType() == $is_recurrence_xaction) {
         $is_recurring = $xaction->getNewValue();
       }
     }
+
     if ($start_date > $end_date) {
       $type = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
       $errors[] = new PhabricatorApplicationTransactionValidationError(
@@ -397,20 +398,6 @@ final class PhabricatorCalendarEventEditor
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
-        }
-        break;
-      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
-      case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
-      case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
-        foreach ($xactions as $xaction) {
-          $date_value = $xaction->getNewValue();
-          if (!$date_value->isValid()) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              pht('Invalid date.'),
-              $xaction);
-          }
         }
         break;
     }

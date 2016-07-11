@@ -29,7 +29,7 @@ final class PhabricatorCalendarEventDragController
 
     $xactions = array();
 
-    $duration = $event->getDateTo() - $event->getDateFrom();
+    $duration = $event->getDuration();
 
     $start = $request->getInt('start');
     $start_value = id(AphrontFormDateControlValue::newFromEpoch(
@@ -49,7 +49,6 @@ final class PhabricatorCalendarEventDragController
     $xactions[] = id(new PhabricatorCalendarEventTransaction())
       ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_END_DATE)
       ->setNewValue($end_value);
-
 
     $editor = id(new PhabricatorCalendarEventEditor())
       ->setActor($viewer)

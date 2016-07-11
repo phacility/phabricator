@@ -311,11 +311,10 @@ final class PhabricatorCalendarEventSearchEngine
         $item->addAttribute($attending);
       }
 
-      if (strlen($event->getDuration()) > 0) {
+      if ($event->getDuration()) {
         $duration = pht(
           'Duration: %s',
-          $event->getDuration());
-
+          $event->getDisplayDuration());
         $item->addIcon('none', $duration);
       }
 
@@ -370,7 +369,9 @@ final class PhabricatorCalendarEventSearchEngine
       $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
 
       $event = new AphrontCalendarEventView();
-      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+      $event->setEpochRange(
+        $status->getViewerDateFrom(),
+        $status->getViewerDateTo());
       $event->setIsAllDay($status->getIsAllDay());
       $event->setIcon($status->getIcon());
 
@@ -434,7 +435,9 @@ final class PhabricatorCalendarEventSearchEngine
       $event = new AphrontCalendarEventView();
       $event->setCanEdit($can_edit);
       $event->setEventID($status->getID());
-      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+      $event->setEpochRange(
+        $status->getViewerDateFrom(),
+        $status->getViewerDateTo());
       $event->setIsAllDay($status->getIsAllDay());
       $event->setIcon($status->getIcon());
       $event->setViewerIsInvited($viewer_is_invited);
@@ -553,10 +556,10 @@ final class PhabricatorCalendarEventSearchEngine
     $viewer = $this->requireViewer();
 
     $from_datetime = PhabricatorTime::getDateTimeFromEpoch(
-      $event->getDateFrom(),
+      $event->getViewerDateFrom(),
       $viewer);
     $to_datetime = PhabricatorTime::getDateTimeFromEpoch(
-      $event->getDateTo(),
+      $event->getViewerDateTo(),
       $viewer);
 
     $from_date_formatted = $from_datetime->format('Y m d');
@@ -566,23 +569,23 @@ final class PhabricatorCalendarEventSearchEngine
       if ($from_date_formatted == $to_date_formatted) {
         return pht(
           '%s, All Day',
-          phabricator_date($event->getDateFrom(), $viewer));
+          phabricator_date($event->getViewerDateFrom(), $viewer));
       } else {
         return pht(
           '%s - %s, All Day',
-          phabricator_date($event->getDateFrom(), $viewer),
-          phabricator_date($event->getDateTo(), $viewer));
+          phabricator_date($event->getViewerDateFrom(), $viewer),
+          phabricator_date($event->getViewerDateTo(), $viewer));
       }
     } else if ($from_date_formatted == $to_date_formatted) {
       return pht(
         '%s - %s',
-        phabricator_datetime($event->getDateFrom(), $viewer),
-        phabricator_time($event->getDateTo(), $viewer));
+        phabricator_datetime($event->getViewerDateFrom(), $viewer),
+        phabricator_time($event->getViewerDateTo(), $viewer));
     } else {
       return pht(
         '%s - %s',
-        phabricator_datetime($event->getDateFrom(), $viewer),
-        phabricator_datetime($event->getDateTo(), $viewer));
+        phabricator_datetime($event->getViewerDateFrom(), $viewer),
+        phabricator_datetime($event->getViewerDateTo(), $viewer));
     }
   }
 }

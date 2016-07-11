@@ -41,7 +41,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
-  private $appliedViewer;
+
+  private $viewerDateFrom;
+  private $viewerDateTo;
 
   // Frequency Constants
   const FREQUENCY_DAILY = 'daily';
@@ -157,7 +159,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $date_time->modify($modify_key);
     $date = $date_time->format('U');
 
-    $duration = $parent->getDateTo() - $parent->getDateFrom();
+    $duration = $this->getDuration();
 
     $this
       ->setDateFrom($date)
@@ -192,74 +194,49 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $ghost;
   }
 
+  public function getViewerDateFrom() {
+    if ($this->viewerDateFrom === null) {
+      throw new PhutilInvalidStateException('applyViewerTimezone');
+    }
+
+    return $this->viewerDateFrom;
+  }
+
+  public function getViewerDateTo() {
+    if ($this->viewerDateTo === null) {
+      throw new PhutilInvalidStateException('applyViewerTimezone');
+    }
+
+    return $this->viewerDateTo;
+  }
+
   public function applyViewerTimezone(PhabricatorUser $viewer) {
-    if ($this->appliedViewer) {
-      throw new Exception(pht('Viewer timezone is already applied!'));
-    }
-
-    $this->appliedViewer = $viewer;
-
     if (!$this->getIsAllDay()) {
-      return $this;
-    }
+      $this->viewerDateFrom = $this->getDateFrom();
+      $this->viewerDateTo = $this->getDateTo();
+    } else {
+      $zone = $viewer->getTimeZone();
 
-    $zone = $viewer->getTimeZone();
-
-
-    $this->setDateFrom(
-      $this->getDateEpochForTimeZone(
+      $this->viewerDateFrom = $this->getDateEpochForTimeZone(
         $this->getDateFrom(),
-        new DateTimeZone('Pacific/Kiritimati'),
+        new DateTimeZone('UTC'),
         'Y-m-d',
         null,
-        $zone));
+        $zone);
 
-    $this->setDateTo(
-      $this->getDateEpochForTimeZone(
+      $this->viewerDateTo = $this->getDateEpochForTimeZone(
         $this->getDateTo(),
-        new DateTimeZone('Pacific/Midway'),
+        new DateTimeZone('UTC'),
         'Y-m-d 23:59:00',
-        '-1 day',
-        $zone));
+        null,
+        $zone);
+    }
 
     return $this;
   }
 
-
-  public function removeViewerTimezone(PhabricatorUser $viewer) {
-    if (!$this->appliedViewer) {
-      throw new Exception(pht('Viewer timezone is not applied!'));
-    }
-
-    if ($viewer->getPHID() != $this->appliedViewer->getPHID()) {
-      throw new Exception(pht('Removed viewer must match applied viewer!'));
-    }
-
-    $this->appliedViewer = null;
-
-    if (!$this->getIsAllDay()) {
-      return $this;
-    }
-
-    $zone = $viewer->getTimeZone();
-
-    $this->setDateFrom(
-      $this->getDateEpochForTimeZone(
-        $this->getDateFrom(),
-        $zone,
-        'Y-m-d',
-        null,
-        new DateTimeZone('Pacific/Kiritimati')));
-
-    $this->setDateTo(
-      $this->getDateEpochForTimeZone(
-        $this->getDateTo(),
-        $zone,
-        'Y-m-d',
-        '+1 day',
-        new DateTimeZone('Pacific/Midway')));
-
-    return $this;
+  public function getDuration() {
+    return $this->getDateTo() - $this->getDateFrom();
   }
 
   private function getDateEpochForTimeZone(
@@ -281,12 +258,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function save() {
-    if ($this->appliedViewer) {
-      throw new Exception(
-        pht(
-          'Can not save event with viewer timezone still applied!'));
-    }
-
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
@@ -298,13 +269,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
    * Get the event start epoch for evaluating invitee availability.
    *
    * When assessing availability, we pretend events start earlier than they
-   * really. This allows us to mark users away for the entire duration of a
+   * really do. This allows us to mark users away for the entire duration of a
    * series of back-to-back meetings, even if they don't strictly overlap.
    *
    * @return int Event start date for availability caches.
    */
   public function getDateFromForCache() {
-    return ($this->getDateFrom() - phutil_units('15 minutes in seconds'));
+    return ($this->getViewerDateFrom() - phutil_units('15 minutes in seconds'));
   }
 
   protected function getConfiguration() {
@@ -456,8 +427,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return false;
   }
 
-  public function getDuration() {
-    $seconds = $this->dateTo - $this->dateFrom;
+  public function getDisplayDuration() {
+    $seconds = $this->getDuration();
     $minutes = round($seconds / 60, 1);
     $hours = round($minutes / 60, 3);
     $days = round($hours / 24, 2);
@@ -470,12 +441,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         round($days, 1));
     } else if ($hours >= 1) {
       return pht(
-          '%s hour(s)',
-          round($hours, 1));
+        '%s hour(s)',
+        round($hours, 1));
     } else if ($minutes >= 1) {
       return pht(
-          '%s minute(s)',
-          round($minutes, 0));
+        '%s minute(s)',
+        round($minutes, 0));
     }
   }
 
