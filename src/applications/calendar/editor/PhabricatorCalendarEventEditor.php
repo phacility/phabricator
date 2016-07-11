@@ -68,6 +68,8 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_INVITE;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_ALL_DAY;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_ICON;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_ACCEPT;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_DECLINE;
 
     $types[] = PhabricatorCalendarEventTransaction::TYPE_RECURRING;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_FREQUENCY;
@@ -104,6 +106,10 @@ final class PhabricatorCalendarEventEditor
         return (int)$object->getIsAllDay();
       case PhabricatorCalendarEventTransaction::TYPE_ICON:
         return $object->getIcon();
+      case PhabricatorCalendarEventTransaction::TYPE_ACCEPT:
+      case PhabricatorCalendarEventTransaction::TYPE_DECLINE:
+        $actor_phid = $this->getActingAsPHID();
+        return $object->getUserInviteStatus($actor_phid);
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
         $phids = array_keys($map);
@@ -136,6 +142,10 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
       case PhabricatorCalendarEventTransaction::TYPE_ICON:
         return $xaction->getNewValue();
+      case PhabricatorCalendarEventTransaction::TYPE_ACCEPT:
+        return PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+      case PhabricatorCalendarEventTransaction::TYPE_DECLINE:
+        return PhabricatorCalendarEventInvitee::STATUS_DECLINED;
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return (int)$xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
@@ -181,6 +191,8 @@ final class PhabricatorCalendarEventEditor
         $object->setIcon($xaction->getNewValue());
         return;
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+      case PhabricatorCalendarEventTransaction::TYPE_ACCEPT:
+      case PhabricatorCalendarEventTransaction::TYPE_DECLINE:
         return;
     }
 
@@ -223,6 +235,28 @@ final class PhabricatorCalendarEventEditor
         }
         $object->attachInvitees($invitees);
         return;
+      case PhabricatorCalendarEventTransaction::TYPE_ACCEPT:
+      case PhabricatorCalendarEventTransaction::TYPE_DECLINE:
+        $acting_phid = $this->getActingAsPHID();
+
+        $invitees = $object->getInvitees();
+        $invitees = mpull($invitees, null, 'getInviteePHID');
+
+        $invitee = idx($invitees, $acting_phid);
+        if (!$invitee) {
+          $invitee = id(new PhabricatorCalendarEventInvitee())
+            ->setEventPHID($object->getPHID())
+            ->setInviteePHID($acting_phid)
+            ->setInviterPHID($acting_phid);
+          $invitees[$acting_phid] = $invitee;
+        }
+
+        $invitee
+          ->setStatus($xaction->getNewValue())
+          ->save();
+
+        $object->attachInvitees($invitees);
+        return;
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
@@ -251,6 +285,12 @@ final class PhabricatorCalendarEventEditor
           // For these kinds of changes, we need to invalidate the availabilty
           // caches for all attendees.
           $invalidate_all = true;
+          break;
+
+        case PhabricatorCalendarEventTransaction::TYPE_ACCEPT:
+        case PhabricatorCalendarEventTransaction::TYPE_DECLINE:
+          $acting_phid = $this->getActingAsPHID();
+          $invalidate_phids[$acting_phid] = $acting_phid;
           break;
         case PhabricatorCalendarEventTransaction::TYPE_INVITE:
           foreach ($xaction->getNewValue() as $phid => $ignored) {

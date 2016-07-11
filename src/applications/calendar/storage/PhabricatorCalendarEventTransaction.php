@@ -11,10 +11,13 @@ final class PhabricatorCalendarEventTransaction
   const TYPE_ALL_DAY = 'calendar.allday';
   const TYPE_ICON = 'calendar.icon';
   const TYPE_INVITE = 'calendar.invite';
+  const TYPE_ACCEPT = 'calendar.accept';
+  const TYPE_DECLINE = 'calendar.decline';
 
   const TYPE_RECURRING = 'calendar.recurring';
   const TYPE_FREQUENCY = 'calendar.frequency';
   const TYPE_RECURRENCE_END_DATE = 'calendar.recurrenceenddate';
+
 
   const MAILTAG_RESCHEDULE = 'calendar-reschedule';
   const MAILTAG_CONTENT = 'calendar-content';
@@ -163,6 +166,14 @@ final class PhabricatorCalendarEventTransaction
             '%s reinstated this event.',
             $this->renderHandleLink($author_phid));
         }
+      case self::TYPE_ACCEPT:
+        return pht(
+          '%s is attending this event.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_DECLINE:
+        return pht(
+          '%s declined this event.',
+          $this->renderHandleLink($author_phid));
       case self::TYPE_INVITE:
         $text = null;
 
@@ -363,6 +374,16 @@ final class PhabricatorCalendarEventTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         }
+      case self::TYPE_ACCEPT:
+        return pht(
+          '%s is attending %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case self::TYPE_DECLINE:
+        return pht(
+          '%s declined %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
       case self::TYPE_INVITE:
         $text = null;
 
