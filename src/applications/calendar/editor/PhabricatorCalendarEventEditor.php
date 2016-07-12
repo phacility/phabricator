@@ -465,6 +465,34 @@ final class PhabricatorCalendarEventEditor
           }
         }
         break;
+      case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
+      case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+        foreach ($xactions as $xaction) {
+          if ($xaction->getNewValue()->isValid()) {
+            continue;
+          }
+
+          switch ($type) {
+            case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
+              $message = pht('Start date is invalid.');
+              break;
+            case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
+              $message = pht('End date is invalid.');
+              break;
+            case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
+              $message = pht('Repeat until date is invalid.');
+              break;
+          }
+
+          $errors[] = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            $message,
+            $xaction);
+        }
+        break;
+
     }
 
     return $errors;
