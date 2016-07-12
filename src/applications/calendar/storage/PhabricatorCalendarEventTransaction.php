@@ -176,10 +176,7 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_INVITE:
         $text = null;
 
-        // Fill in any new invitees as "uninvited" in the old data, to make
-        // some of the rendering logic a little easier.
-        $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
-        $old = $old + array_fill_keys(array_keys($new), $status_uninvited);
+        list($old, $new) = $this->getSimpleInvites($old, $new);
 
         if (count($old) === 1
           && count($new) === 1
@@ -396,8 +393,7 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_INVITE:
         $text = null;
 
-        $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
-        $old = $old + array_fill_keys(array_keys($new), $status_uninvited);
+        list($old, $new) = $this->getSimpleInvites($old, $new);
 
         if (count($old) === 1
           && count($new) === 1
@@ -591,5 +587,27 @@ final class PhabricatorCalendarEventTransaction
     }
     return $tags;
   }
+
+  private function getSimpleInvites(array $old, array $new) {
+    // Fill in any new invitees as "uninvited" in the old data, to make
+    // some of the rendering logic a little easier.
+    $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+    $old = $old + array_fill_keys(array_keys($new), $status_uninvited);
+
+    $all = $old + $new;
+    foreach (array_keys($all) as $key) {
+      // If the invitee exists in both the old and new lists with the same
+      // value, remove it from both.
+      if (isset($old[$key]) && isset($new[$key])) {
+        if ($old[$key] == $new[$key]) {
+          unset($old[$key]);
+          unset($new[$key]);
+        }
+      }
+    }
+
+    return array($old, $new);
+  }
+
 
 }

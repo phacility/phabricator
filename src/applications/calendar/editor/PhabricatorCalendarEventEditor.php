@@ -163,6 +163,8 @@ final class PhabricatorCalendarEventEditor
             $map[$phid] = $status_uninvited;
           } else if (!$is_old && $is_new) {
             $map[$phid] = $status_invited;
+          } else {
+            $map[$phid] = $invitees[$phid]->getStatus();
           }
         }
 
