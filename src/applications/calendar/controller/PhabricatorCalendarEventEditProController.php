@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCalendarEventEditProController
-  extends ManiphestController {
+  extends PhabricatorCalendarController {
 
   public function handleRequest(AphrontRequest $request) {
     return id(new PhabricatorCalendarEditEngine())

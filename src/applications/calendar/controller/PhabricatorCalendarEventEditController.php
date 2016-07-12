@@ -185,7 +185,7 @@ final class PhabricatorCalendarEventEditController
           $xactions[] = id(new PhabricatorCalendarEventTransaction())
             ->setTransactionType(
               PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
-            ->setNewValue($recurrence_end_date_value->getEpoch());
+            ->setNewValue($recurrence_end_date_value);
         }
       }
 
@@ -203,12 +203,12 @@ final class PhabricatorCalendarEventEditController
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_START_DATE)
-          ->setNewValue($start_value->getEpoch());
+          ->setNewValue($start_value);
 
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_END_DATE)
-          ->setNewValue($end_value->getEpoch());
+          ->setNewValue($end_value);
       }
 
 

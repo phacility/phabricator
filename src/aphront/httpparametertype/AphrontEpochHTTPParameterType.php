@@ -3,13 +3,30 @@
 final class AphrontEpochHTTPParameterType
   extends AphrontHTTPParameterType {
 
+  private $allowNull;
+
+  public function setAllowNull($allow_null) {
+    $this->allowNull = $allow_null;
+    return $this;
+  }
+
+  public function getAllowNull() {
+    return $this->allowNull;
+  }
+
   protected function getParameterExists(AphrontRequest $request, $key) {
     return $request->getExists($key) ||
            $request->getExists($key.'_d');
   }
 
   protected function getParameterValue(AphrontRequest $request, $key) {
-    return AphrontFormDateControlValue::newFromRequest($request, $key);
+    $value = AphrontFormDateControlValue::newFromRequest($request, $key);
+
+    if ($this->getAllowNull()) {
+      $value->setOptional(true);
+    }
+
+    return $value;
   }
 
   protected function getParameterTypeName() {

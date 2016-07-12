@@ -265,8 +265,13 @@ final class PhabricatorCalendarEventTransaction
           $this->renderHandleLink($author_phid));
         return $text;
       case self::TYPE_FREQUENCY:
+        $rule = $new;
+        if (is_array($rule)) {
+          $rule = idx($rule, 'rule');
+        }
+
         $text = '';
-        switch ($new['rule']) {
+        switch ($rule) {
           case PhabricatorCalendarEvent::FREQUENCY_DAILY:
             $text = pht('%s set this event to repeat daily.',
               $this->renderHandleLink($author_phid));
@@ -487,8 +492,13 @@ final class PhabricatorCalendarEventTransaction
           $this->renderHandleLink($object_phid));
         return $text;
       case self::TYPE_FREQUENCY:
+        $rule = $new;
+        if (is_array($rule)) {
+          $rule = idx($rule, 'rule');
+        }
+
         $text = '';
-        switch ($new['rule']) {
+        switch ($rule) {
           case PhabricatorCalendarEvent::FREQUENCY_DAILY:
             $text = pht('%s set %s to repeat daily.',
               $this->renderHandleLink($author_phid),

@@ -6633,7 +6633,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEventCancelController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventDragController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventEditController' => 'PhabricatorCalendarController',
-    'PhabricatorCalendarEventEditProController' => 'ManiphestController',
+    'PhabricatorCalendarEventEditProController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorCalendarEventEmailCommand' => 'MetaMTAEmailTransactionCommand',
     'PhabricatorCalendarEventFulltextEngine' => 'PhabricatorFulltextEngine',

@@ -85,9 +85,9 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
-        return $object->getIsRecurring();
+        return (int)$object->getIsRecurring();
       case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
-        return $object->getRecurrenceFrequency();
+        return $object->getFrequencyUnit();
       case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
         return $object->getRecurrenceEndDate();
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
@@ -120,7 +120,6 @@ final class PhabricatorCalendarEventEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
       case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
@@ -132,11 +131,12 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_DECLINE:
         return PhabricatorCalendarEventInvitee::STATUS_DECLINED;
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
+      case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
         return (int)$xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
-        return $xaction->getNewValue();
+        return $xaction->getNewValue()->getEpoch();
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
         $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
@@ -187,9 +187,12 @@ final class PhabricatorCalendarEventEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorCalendarEventTransaction::TYPE_RECURRING:
-        return $object->setIsRecurring($xaction->getNewValue());
+        return $object->setIsRecurring((int)$xaction->getNewValue());
       case PhabricatorCalendarEventTransaction::TYPE_FREQUENCY:
-        return $object->setRecurrenceFrequency($xaction->getNewValue());
+        return $object->setRecurrenceFrequency(
+          array(
+            'rule' => $xaction->getNewValue(),
+          ));
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
@@ -370,11 +373,11 @@ final class PhabricatorCalendarEventEditor
 
     foreach ($xactions as $xaction) {
       if ($xaction->getTransactionType() == $start_date_xaction) {
-        $start_date = $xaction->getNewValue();
+        $start_date = $xaction->getNewValue()->getEpoch();
       } else if ($xaction->getTransactionType() == $end_date_xaction) {
-        $end_date = $xaction->getNewValue();
+        $end_date = $xaction->getNewValue()->getEpoch();
       } else if ($xaction->getTransactionType() == $recurrence_end_xaction) {
-        $recurrence_end = $xaction->getNewValue();
+        $recurrence_end = $xaction->getNewValue()->getEpoch();
       } else if ($xaction->getTransactionType() == $is_recurrence_xaction) {
         $is_recurring = $xaction->getNewValue();
       }

@@ -21,7 +21,8 @@ final class PhabricatorEpochEditField
   }
 
   protected function newHTTPParameterType() {
-    return new AphrontEpochHTTPParameterType();
+    return id(new AphrontEpochHTTPParameterType())
+      ->setAllowNull($this->getAllowNull());
   }
 
   protected function newConduitParameterType() {
