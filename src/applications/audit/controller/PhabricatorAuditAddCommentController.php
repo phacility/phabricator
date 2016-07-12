@@ -3,9 +3,8 @@
 final class PhabricatorAuditAddCommentController
   extends PhabricatorAuditController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     if (!$request->isFormPost()) {
       return new Aphront403Response();
@@ -13,7 +12,7 @@ final class PhabricatorAuditAddCommentController
 
     $commit_phid = $request->getStr('commit');
     $commit = id(new DiffusionCommitQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array($commit_phid))
       ->needAuditRequests(true)
       ->executeOne();
@@ -61,7 +60,7 @@ final class PhabricatorAuditAddCommentController
     }
 
     $inlines = PhabricatorAuditInlineComment::loadDraftComments(
-      $user,
+      $viewer,
       $commit->getPHID());
     foreach ($inlines as $inline) {
       $xactions[] = id(new PhabricatorAuditTransaction())
@@ -70,22 +69,20 @@ final class PhabricatorAuditAddCommentController
     }
 
     id(new PhabricatorAuditEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContentSourceFromRequest($request)
       ->setContinueOnMissingFields(true)
       ->applyTransactions($commit, $xactions);
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
-      $user->getPHID(),
+      $viewer->getPHID(),
       'diffusion-audit-'.$commit->getID());
     if ($draft) {
       $draft->delete();
     }
 
-    $monogram = $commit->getRepository()->getMonogram();
-    $identifier = $commit->getCommitIdentifier();
-    $uri = '/'.$monogram.$identifier;
+    $uri = $commit->getURI();
 
     return id(new AphrontRedirectResponse())->setURI($uri);
   }

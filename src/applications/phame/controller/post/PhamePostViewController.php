@@ -1,96 +1,197 @@
 <?php
 
-final class PhamePostViewController extends PhameController {
+final class PhamePostViewController
+  extends PhameLiveController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $post = id(new PhamePostQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
-      ->executeOne();
-
-    if (!$post) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->setupLiveEnvironment();
+    if ($response) {
+      return $response;
     }
 
-    $nav = $this->renderSideNavFilterView();
+    $viewer = $request->getViewer();
+    $moved = $request->getStr('moved');
 
-    $this->loadHandles(
-      array(
-        $post->getBlogPHID(),
-        $post->getBloggerPHID(),
-      ));
-    $actions = $this->renderActions($post, $user);
-    $properties = $this->renderProperties($post, $user, $actions);
+    $post = $this->getPost();
+    $blog = $this->getBlog();
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setActionList($actions);
-    $crumbs->addTextCrumb(
-      $post->getTitle(),
-      $this->getApplicationURI('post/view/'.$post->getID().'/'));
-
-    $nav->appendChild($crumbs);
+    $is_live = $this->getIsLive();
+    $is_external = $this->getIsExternal();
 
     $header = id(new PHUIHeaderView())
-        ->setHeader($post->getTitle())
-        ->setUser($user)
-        ->setPolicyObject($post);
+      ->setHeader($post->getTitle())
+      ->setUser($viewer);
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    if (!$is_external) {
+      $actions = $this->renderActions($post);
+      $header->setPolicyObject($post);
+      $header->setActionList($actions);
+    }
+
+    $document = id(new PHUIDocumentViewPro())
+      ->setHeader($header);
+
+    if ($moved) {
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+          ->appendChild(pht('Post moved successfully.')));
+    }
 
     if ($post->isDraft()) {
-      $object_box->appendChild(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
           ->appendChild(
             pht('Only you can see this draft until you publish it. '.
-                'Use "Preview / Publish" to publish this post.')));
+                'Use "Publish" to publish this post.')));
+    }
+
+    if ($post->isArchived()) {
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
+          ->setTitle(pht('Archived Post'))
+          ->appendChild(
+            pht('Only you can see this archived post until you publish it. '.
+                'Use "Publish" to publish this post.')));
     }
 
     if (!$post->getBlog()) {
-      $object_box->appendChild(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+      $document->appendChild(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
           ->appendChild(
             pht('This post is not associated with a blog (the blog may have '.
                 'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
-    $nav->appendChild(
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer)
+      ->addObject($post, PhamePost::MARKUP_FIELD_BODY)
+      ->process();
+
+    $document->appendChild(
+      phutil_tag(
+         'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY)));
+
+    $blogger = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($post->getBloggerPHID()))
+      ->needProfileImage(true)
+      ->executeOne();
+    $blogger_profile = $blogger->loadUserProfile();
+
+
+    $author_uri = '/p/'.$blogger->getUsername().'/';
+    $author_uri = PhabricatorEnv::getURI($author_uri);
+
+    $author = phutil_tag(
+      'a',
       array(
-        $object_box,
+        'href' => $author_uri,
+      ),
+      $blogger->getUsername());
+
+    $date = phabricator_datetime($post->getDatePublished(), $viewer);
+    if ($post->isDraft()) {
+      $subtitle = pht('Unpublished draft by %s.', $author);
+    } else if ($post->isArchived()) {
+      $subtitle = pht('Archived post by %s.', $author);
+    } else {
+      $subtitle = pht('Written by %s on %s.', $author, $date);
+    }
+
+    $user_icon = $blogger_profile->getIcon();
+    $user_icon = PhabricatorPeopleIconSet::getIconIcon($user_icon);
+    $user_icon = id(new PHUIIconView())->setIcon($user_icon);
+
+    $about = id(new PhameDescriptionView())
+      ->setTitle($subtitle)
+      ->setDescription(
+        array(
+          $user_icon,
+          ' ',
+          $blogger_profile->getDisplayTitle(),
+        ))
+      ->setImage($blogger->getProfileImageURI())
+      ->setImageHref($author_uri);
+
+    $monogram = $post->getMonogram();
+    $timeline = $this->buildTransactionTimeline(
+      $post,
+      id(new PhamePostTransactionQuery())
+      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
+    $timeline->setQuoteRef($monogram);
+
+    if ($is_external) {
+      $add_comment = null;
+    } else {
+      $add_comment = $this->buildCommentForm($post, $timeline);
+      $add_comment = phutil_tag_div('mlb mlt phame-comment-view', $add_comment);
+    }
+
+    $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
+
+    list($prev, $next) = $this->loadAdjacentPosts($post);
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setObject($post);
+
+    $is_live = $this->getIsLive();
+    $is_external = $this->getIsExternal();
+    $next_view = new PhameNextPostView();
+    if ($next) {
+      $next_view->setNext($next->getTitle(),
+        $next->getBestURI($is_live, $is_external));
+    }
+    if ($prev) {
+      $next_view->setPrevious($prev->getTitle(),
+        $prev->getBestURI($is_live, $is_external));
+    }
+
+    $document->setFoot($next_view);
+    $crumbs = $this->buildApplicationCrumbs();
+    $properties = phutil_tag_div('phui-document-view-pro-box', $properties);
+
+    $page = $this->newPage()
+      ->setTitle($post->getTitle())
+      ->setPageObjectPHIDs(array($post->getPHID()))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $document,
+          $about,
+          $properties,
+          $timeline,
+          $add_comment,
       ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $post->getTitle(),
-      ));
+    if ($is_live) {
+      $page
+        ->setShowChrome(false)
+        ->setShowFooter(false);
+    }
+
+    return $page;
   }
 
-  private function renderActions(
-    PhamePost $post,
-    PhabricatorUser $user) {
+  private function renderActions(PhamePost $post) {
+    $viewer = $this->getViewer();
 
     $actions = id(new PhabricatorActionListView())
       ->setObject($post)
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->setUser($user);
+      ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $user,
+      $viewer,
       $post,
       PhabricatorPolicyCapability::CAN_EDIT);
 
@@ -101,8 +202,7 @@ final class PhamePostViewController extends PhameController {
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
         ->setName(pht('Edit Post'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setDisabled(!$can_edit));
 
     $actions->addAction(
       id(new PhabricatorActionView())
@@ -110,95 +210,101 @@ final class PhamePostViewController extends PhameController {
         ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
         ->setName(pht('Move Post'))
         ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setWorkflow(true));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-history')
+        ->setHref($this->getApplicationURI('post/history/'.$id.'/'))
+        ->setName(pht('View History')));
 
     if ($post->isDraft()) {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('fa-eye')
           ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
-          ->setName(pht('Preview / Publish')));
+          ->setName(pht('Publish'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI('post/archive/'.$id.'/'))
+          ->setName(pht('Archive'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else if ($post->isArchived()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-eye')
+          ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
+          ->setName(pht('Publish'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
     } else {
       $actions->addAction(
         id(new PhabricatorActionView())
           ->setIcon('fa-eye-slash')
           ->setHref($this->getApplicationURI('post/unpublish/'.$id.'/'))
           ->setName(pht('Unpublish'))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI('post/archive/'.$id.'/'))
+          ->setName(pht('Archive'))
+          ->setDisabled(!$can_edit)
           ->setWorkflow(true));
     }
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
-        ->setName(pht('Delete Post'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
-    $blog = $post->getBlog();
-    $can_view_live = $blog && !$post->isDraft();
-
-    if ($can_view_live) {
-      $live_uri = $blog->getLiveURI($post);
+    if ($post->isDraft()) {
+      $live_name = pht('Preview');
     } else {
-      $live_uri = 'post/notlive/'.$post->getID().'/';
-      $live_uri = $this->getApplicationURI($live_uri);
+      $live_name = pht('View Live');
     }
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setUser($user)
-        ->setIcon('fa-globe')
-        ->setHref($live_uri)
-        ->setName(pht('View Live'))
-        ->setDisabled(!$can_view_live)
-        ->setWorkflow(!$can_view_live));
+    if (!$post->isArchived()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setUser($viewer)
+          ->setIcon('fa-globe')
+          ->setHref($post->getLiveURI())
+          ->setName($live_name));
+    }
 
     return $actions;
   }
 
-  private function renderProperties(
-    PhamePost $post,
-    PhabricatorUser $user,
-    PhabricatorActionListView $actions) {
+  private function buildCommentForm(PhamePost $post, $timeline) {
+    $viewer = $this->getViewer();
 
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($user)
-      ->setObject($post)
-      ->setActionList($actions);
+    $box = id(new PhamePostEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($post)
+      ->setTransactionTimeline($timeline);
 
-    $properties->addProperty(
-      pht('Blog'),
-      $post->getBlogPHID()
-        ? $this->getHandle($post->getBlogPHID())->renderLink()
-        : null);
+    return phutil_tag_div('phui-document-view-pro-box', $box);
+  }
 
-    $properties->addProperty(
-      pht('Blogger'),
-      $this->getHandle($post->getBloggerPHID())->renderLink());
+  private function loadAdjacentPosts(PhamePost $post) {
+    $viewer = $this->getViewer();
 
-    $properties->addProperty(
-      pht('Published'),
-      $post->isDraft()
-        ? pht('Draft')
-        : phabricator_datetime($post->getDatePublished(), $user));
+    $query = id(new PhamePostQuery())
+      ->setViewer($viewer)
+      ->withVisibility(array(PhameConstants::VISIBILITY_PUBLISHED))
+      ->withBlogPHIDs(array($post->getBlog()->getPHID()))
+      ->setLimit(1);
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user)
-      ->addObject($post, PhamePost::MARKUP_FIELD_BODY)
-      ->process();
+    $prev = id(clone $query)
+      ->setAfterID($post->getID())
+      ->execute();
 
-    $properties->invokeWillRenderEvent();
+    $next = id(clone $query)
+      ->setBeforeID($post->getID())
+      ->execute();
 
-    $properties->addTextContent(
-      phutil_tag(
-         'div',
-        array(
-          'class' => 'phabricator-remarkup',
-        ),
-        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY)));
-
-    return $properties;
+    return array(head($prev), head($next));
   }
 
 }

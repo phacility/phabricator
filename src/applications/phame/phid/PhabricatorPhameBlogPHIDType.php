@@ -12,6 +12,10 @@ final class PhabricatorPhameBlogPHIDType extends PhabricatorPHIDType {
     return new PhameBlog();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPhameApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
@@ -30,6 +34,11 @@ final class PhabricatorPhameBlogPHIDType extends PhabricatorPHIDType {
       $handle->setName($blog->getName());
       $handle->setFullName($blog->getName());
       $handle->setURI('/phame/blog/view/'.$blog->getID().'/');
+
+      if ($blog->isArchived()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
+
     }
   }
 

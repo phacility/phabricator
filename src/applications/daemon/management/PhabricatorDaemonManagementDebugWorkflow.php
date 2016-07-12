@@ -7,7 +7,7 @@ final class PhabricatorDaemonManagementDebugWorkflow
     return true;
   }
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('debug')
       ->setExamples('**debug** __daemon__')
@@ -21,19 +21,46 @@ final class PhabricatorDaemonManagementDebugWorkflow
             'name' => 'argv',
             'wildcard' => true,
           ),
+          array(
+            'name' => 'as-current-user',
+            'help' => pht(
+              'Run the daemon as the current user '.
+              'instead of the configured %s',
+              'phd.user'),
+          ),
+          array(
+            'name' => 'autoscale',
+            'help' => pht('Put the daemon in an autoscale group.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $argv = $args->getArg('argv');
+    $run_as_current_user = $args->getArg('as-current-user');
 
     if (!$argv) {
       throw new PhutilArgumentUsageException(
         pht('You must specify which daemon to debug.'));
     }
 
-    $daemon_class = array_shift($argv);
-    return $this->launchDaemon($daemon_class, $argv, $is_debug = true);
+    $config = array();
+
+    $config['class'] = array_shift($argv);
+    $config['argv'] = $argv;
+
+    if ($args->getArg('autoscale')) {
+      $config['autoscale'] = array(
+        'group' => 'debug',
+      );
+    }
+
+    return $this->launchDaemons(
+      array(
+        $config,
+      ),
+      $is_debug = true,
+      $run_as_current_user);
   }
 
 }

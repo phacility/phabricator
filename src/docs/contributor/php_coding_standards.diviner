@@ -19,22 +19,21 @@ guidelines, you probably don't need to read this super thoroughly.
 
   - Use two spaces for indentation. Don't use tab literal characters.
   - Use Unix linebreaks ("\n"), not MSDOS ("\r\n") or OS9 ("\r").
-  - Use K&R style braces and spacing.
-  - Put a space after control keywords like ##if## and ##for##.
+  - Put a space after control keywords like `if` and `for`.
   - Put a space after commas in argument lists.
-  - Put a space around operators like ##=##, ##<##, etc.
+  - Put a space around operators like `=`, `<`, etc.
   - Don't put spaces after function names.
   - Parentheses should hug their contents.
   - Generally, prefer to wrap code at 80 columns.
 
 = Case and Capitalization =
 
-  - Name variables and functions using ##lowercase_with_underscores##.
-  - Name classes using ##UpperCamelCase##.
-  - Name methods and properties using ##lowerCamelCase##.
+  - Name variables and functions using `lowercase_with_underscores`.
+  - Name classes using `UpperCamelCase`.
+  - Name methods and properties using `lowerCamelCase`.
   - Use uppercase for common acronyms like ID and HTML.
-  - Name constants using ##UPPERCASE##.
-  - Write ##true##, ##false## and ##null## in lowercase.
+  - Name constants using `UPPERCASE`.
+  - Write `true`, `false` and `null` in lowercase.
 
 = Comments =
 
@@ -44,9 +43,9 @@ guidelines, you probably don't need to read this super thoroughly.
 = PHP Language Style =
 
   - Use "<?php", not the "<?" short form. Omit the closing "?>" tag.
-  - Prefer casts like ##(string)## to casting functions like ##strval()##.
-  - Prefer type checks like ##$v === null## to type functions like
-    ##is_null()##.
+  - Prefer casts like `(string)` to casting functions like `strval()`.
+  - Prefer type checks like `$v === null` to type functions like
+    `is_null()`.
   - Avoid all crazy alternate forms of language constructs like "endwhile"
     and "<>".
   - Always put braces around conditional and loop blocks.
@@ -68,6 +67,7 @@ guidelines, you probably don't need to read this super thoroughly.
 
 **if/else:**
 
+  lang=php
   if ($some_variable > 3) {
     // ...
   } else if ($some_variable === null) {
@@ -82,6 +82,7 @@ use the "endif" construct, and write "else if" as two words.
 
 **for:**
 
+  lang=php
   for ($ii = 0; $ii < 10; $ii++) {
     // ...
   }
@@ -91,12 +92,14 @@ visually and react better to "Find Next..." in editors.
 
 **foreach:**
 
+  lang=php
   foreach ($map as $key => $value) {
     // ...
   }
 
 **switch:**
 
+  lang=php
   switch ($value) {
     case 1:
       // ...
@@ -116,6 +119,7 @@ visually and react better to "Find Next..." in editors.
 
 **array literals:**
 
+  lang=php
   $junk = array(
     'nuts',
     'bolts',
@@ -127,6 +131,7 @@ diffs which add elements to the array affect only one line.
 
 **operators:**
 
+  lang=php
   $a + $b;                // Put spaces around operators.
   $omg.$lol;              // Exception: no spaces around string concatenation.
   $arr[] = $element;      // Couple [] with the array when appending.
@@ -134,6 +139,7 @@ diffs which add elements to the array affect only one line.
 
 **function/method calls:**
 
+  lang=php
   // One line
   eject($cargo);
 
@@ -144,6 +150,7 @@ diffs which add elements to the array affect only one line.
 
 **function/method definitions:**
 
+  lang=php
   function example_function($base_value, $additional_value) {
     return $base_value + $additional_value;
   }
@@ -158,6 +165,7 @@ diffs which add elements to the array affect only one line.
 
 **class:**
 
+  lang=php
   class Dog extends Animal {
 
     const CIRCLES_REQUIRED_TO_LIE_DOWN = 3;

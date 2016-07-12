@@ -25,30 +25,38 @@ JX.install('Workflow', {
     this.setData(data || {});
   },
 
-  events : ['error', 'finally', 'submit'],
+  events : ['error', 'finally', 'submit', 'start'],
 
   statics : {
     _stack   : [],
-    newFromForm : function(form, data) {
+    newFromForm : function(form, data, keep_enabled) {
       var pairs = JX.DOM.convertFormToListOfPairs(form);
       for (var k in data) {
         pairs.push([k, data[k]]);
       }
 
-      // Disable form elements during the request
-      var inputs = [].concat(
-        JX.DOM.scry(form, 'input'),
-        JX.DOM.scry(form, 'button'),
-        JX.DOM.scry(form, 'textarea'));
-      for (var ii = 0; ii < inputs.length; ii++) {
-        if (inputs[ii].disabled) {
-          delete inputs[ii];
-        } else {
-          inputs[ii].disabled = true;
+      var inputs;
+      if (keep_enabled) {
+        inputs = [];
+      } else {
+        // Disable form elements during the request
+        inputs = [].concat(
+          JX.DOM.scry(form, 'input'),
+          JX.DOM.scry(form, 'button'),
+          JX.DOM.scry(form, 'textarea'));
+        for (var ii = 0; ii < inputs.length; ii++) {
+          if (inputs[ii].disabled) {
+            delete inputs[ii];
+          } else {
+            inputs[ii].disabled = true;
+          }
         }
       }
 
       var workflow = new JX.Workflow(form.getAttribute('action'), {});
+
+      workflow._form = form;
+
       workflow.setDataWithListOfPairs(pairs);
       workflow.setMethod(form.getAttribute('method'));
       workflow.listen('finally', function() {
@@ -57,6 +65,7 @@ JX.install('Workflow', {
           inputs[ii] && (inputs[ii].disabled = false);
         }
       });
+
       return workflow;
     },
     newFromLink : function(link) {
@@ -131,9 +140,14 @@ JX.install('Workflow', {
       data.push([button.name, button.value || true]);
 
       var active = JX.Workflow._getActiveWorkflow();
+
+      active._form = form;
+
       var e = active.invoke('submit', {form: form, data: data});
       if (!e.getStopped()) {
-        active._destroy();
+        // NOTE: Don't remove the current dialog yet because additional
+        // handlers may still want to access the nodes.
+
         active
           .setURI(form.getAttribute('action') || active.getURI())
           .setDataWithListOfPairs(data)
@@ -143,6 +157,80 @@ JX.install('Workflow', {
     _getActiveWorkflow : function() {
       var stack = JX.Workflow._stack;
       return stack[stack.length - 1];
+    },
+
+    _onresizestart: function(e) {
+      var self = JX.Workflow;
+      if (self._resizing) {
+        return;
+      }
+
+      var workflow = self._getActiveWorkflow();
+      if (!workflow) {
+        return;
+      }
+
+      e.kill();
+
+      var form = JX.DOM.find(workflow._root, 'div', 'jx-dialog');
+      var resize = e.getNodeData('jx-dialog-resize');
+      var node_y = JX.$(resize.resizeY);
+
+      var dim = JX.Vector.getDim(form);
+      dim.y = JX.Vector.getDim(node_y).y;
+
+      if (!form._minimumSize) {
+        form._minimumSize = dim;
+      }
+
+      self._resizing = {
+        min: form._minimumSize,
+        form: form,
+        startPos: JX.$V(e),
+        startDim: dim,
+        resizeY: node_y,
+        resizeX: resize.resizeX
+      };
+    },
+
+    _onmousemove: function(e) {
+      var self = JX.Workflow;
+      if (!self._resizing) {
+        return;
+      }
+
+      var spec = self._resizing;
+      var form = spec.form;
+      var min = spec.min;
+
+      var delta = JX.$V(e).add(-spec.startPos.x, -spec.startPos.y);
+      var src_dim = spec.startDim;
+      var dst_dim = JX.$V(src_dim.x + delta.x, src_dim.y + delta.y);
+
+      if (dst_dim.x < min.x) {
+        dst_dim.x = min.x;
+      }
+
+      if (dst_dim.y < min.y) {
+        dst_dim.y = min.y;
+      }
+
+      if (spec.resizeX) {
+        JX.$V(dst_dim.x, null).setDim(form);
+      }
+
+      if (spec.resizeY) {
+        JX.$V(null, dst_dim.y).setDim(spec.resizeY);
+      }
+    },
+
+    _onmouseup: function() {
+      var self = JX.Workflow;
+      if (!self._resizing) {
+        return;
+      }
+
+      self._resizing = false;
     }
   },
 
@@ -150,7 +238,41 @@ JX.install('Workflow', {
     _root : null,
     _pushed : false,
     _data : null,
+
+    _form: null,
+    _paused: 0,
+    _nextCallback: null,
+
+    getSourceForm: function() {
+      return this._form;
+    },
+
+    pause: function() {
+      this._paused++;
+      return this;
+    },
+
+    resume: function() {
+      if (!this._paused) {
+        JX.$E('Resuming a workflow which is not paused!');
+      }
+
+      this._paused--;
+
+      if (!this._paused) {
+        var next = this._nextCallback;
+        this._nextCallback = null;
+        if (next) {
+          next();
+        }
+      }
+
+      return this;
+    },
+
     _onload : function(r) {
+      this._destroy();
+
       // It is permissible to send back a falsey redirect to force a page
       // reload, so we need to take this branch if the key is present.
       if (r && (typeof r.redirect != 'undefined')) {
@@ -171,7 +293,19 @@ JX.install('Workflow', {
           'didSyntheticSubmit',
           [],
           JX.Workflow._onsyntheticsubmit);
+
+        JX.DOM.listen(
+          this._root,
+          'mousedown',
+          'jx-dialog-resize',
+          JX.Workflow._onresizestart);
+
+        // Note that even in the presence of a content frame, we're doing
+        // everything here at top level: dialogs are fully modal and cover
+        // the entire window.
+
         document.body.appendChild(this._root);
+
         var d = JX.Vector.getDim(this._root);
         var v = JX.Vector.getViewport();
         var s = JX.Vector.getScroll();
@@ -180,7 +314,7 @@ JX.install('Workflow', {
         // Use more space if the dialog is large (at least roughly the size
         // of the viewport).
         var offset = Math.min(Math.max(20, (v.y - d.y) / 2), 100);
-        JX.$V((v.x - d.x) / 2, s.y + offset).setPos(this._root);
+        JX.$V(0, s.y + offset).setPos(this._root);
 
         try {
           JX.DOM.focus(JX.DOM.find(this._root, 'button', '__default__'));
@@ -204,6 +338,8 @@ JX.install('Workflow', {
         // The `focus()` call may have scrolled the window. Scroll it back to
         // where it was before -- we want to focus the control, but not adjust
         // the scroll position.
+
+        // Dialogs are window-level, so scroll the window explicitly.
         window.scrollTo(s.x, s.y);
 
       } else if (this.getHandler()) {
@@ -233,7 +369,19 @@ JX.install('Workflow', {
         this._root = null;
       }
     },
+
     start : function() {
+      var next = JX.bind(this, this._send);
+
+      this.pause();
+      this._nextCallback = next;
+
+      this.invoke('start', this);
+
+      this.resume();
+    },
+
+    _send: function() {
       var uri = this.getURI();
       var method = this.getMethod();
       var r = new JX.Request(uri, JX.bind(this, this._onload));
@@ -274,6 +422,11 @@ JX.install('Workflow', {
       for (var k in dictionary) {
         this._data.push([k, dictionary[k]]);
       }
+      return this;
+    },
+
+    addData: function(key, value) {
+      this._data.push([key, value]);
       return this;
     },
 
@@ -340,6 +493,9 @@ JX.install('Workflow', {
     }
 
     JX.Stratcom.listen('keydown', null, close_dialog_when_user_presses_escape);
+
+    JX.Stratcom.listen('mousemove', null, JX.Workflow._onmousemove);
+    JX.Stratcom.listen('mouseup', null, JX.Workflow._onmouseup);
   }
 
 });

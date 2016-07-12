@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Responds to "Whats new?" with some recent feed content
+ * Responds to "Whats new?" with some recent feed content.
  */
 final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
 

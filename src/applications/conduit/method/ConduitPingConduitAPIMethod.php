@@ -11,19 +11,15 @@ final class ConduitPingConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Basic ping for monitoring or a health-check.';
+    return pht('Basic ping for monitoring or a health-check.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'string';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

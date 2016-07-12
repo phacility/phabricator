@@ -10,19 +10,19 @@ final class PhrictionInfoConduitAPIMethod extends PhrictionConduitAPIMethod {
     return pht('Retrieve information about a Phriction document.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'slug' => 'required string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-DOCUMENT' => 'No such document exists.',
+      'ERR-BAD-DOCUMENT' => pht('No such document exists.'),
     );
   }
 

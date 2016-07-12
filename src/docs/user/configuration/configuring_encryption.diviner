@@ -1,0 +1,196 @@
+@title Configuring Encryption
+@group config
+
+Setup guide for configuring encryption.
+
+Overview
+========
+
+Phabricator supports at-rest encryption of uploaded file data stored in the
+"Files" application.
+
+Configuring at-rest file data encryption does not encrypt any other data or
+resources. In particular, it does not encrypt the database and does not encrypt
+Passphrase credentials.
+
+Attackers who compromise a Phabricator host can read the master key and decrypt
+the data. In most configurations, this does not represent a significant
+barrier above and beyond accessing the file data. Thus, configuring at-rest
+encryption is primarily useful for two types of installs:
+
+  - If you maintain your own webserver and database hardware but want to use
+    Amazon S3 or a similar cloud provider as a blind storage server, file data
+    encryption can let you do so without needing to trust the cloud provider.
+  - If you face a regulatory or compliance need to encrypt data at rest but do
+    not need to actually secure this data, encrypting the data and placing the
+    master key in plaintext next to it may satisfy compliance requirements.
+
+The remainder of this document discusses how to configure at-rest encryption.
+
+
+Quick Start
+===========
+
+To configure encryption, you will generally follow these steps:
+
+  - Generate a master key with `bin/files generate-key`.
+  - Add the master key it to the `keyring`, but don't mark it as `default` yet.
+  - Use `bin/files encode ...` to test encrypting a few files.
+  - Mark the key as `default` to automatically encrypt new files.
+  - Use `bin/files encode --all ...` to encrypt any existing files.
+
+See the following sections for detailed guidance on these steps.
+
+
+Configuring a Keyring
+=====================
+
+To configure a keyring, set `keyring` with `bin/config` or by using another
+configuration source. This option should be a list of keys in this format:
+
+```lang=json
+...
+"keyring": [
+  {
+    "name": "master.key",
+    "type": "aes-256-cbc",
+    "material.base64": "UcHUJqq8MhZRwhvDV8sJwHj7bNJoM4tWfOIi..."
+    "default": true
+  },
+  ...
+]
+...
+```
+
+Each key should have these properties:
+
+  - `name`: //Required string.// A unique key name.
+  - `type`: //Required string.// Type of the key. Only `aes-256-cbc` is
+    supported.
+  - `material.base64`: //Required string.// The key material. See below for
+    details.
+  - `default`: //Optional bool.// Optionally, mark exactly one key as the
+    default key to enable encryption of newly uploaded file data.
+
+The key material is sensitive and an attacker who learns it can decrypt data
+from the storage engine.
+
+
+Format: Raw Data
+================
+
+The `raw` storage format is automatically selected for all newly uploaded
+file data if no key is makred as the `default` key in the keyring. This is
+the behavior of Phabricator if you haven't configured anything.
+
+This format stores raw data without modification.
+
+
+Format: AES256
+==============
+
+The `aes-256-cbc` storage format is automatically selected for all newly
+uploaded file data if an AES256 key is marked as the `default` key in the
+keyring.
+
+This format uses AES256 in CBC mode. Each block of file data is encrypted with
+a unique, randomly generated private key. That key is then encrypted with the
+master key. Among other motivations, this strategy allows the master key to be
+cycled relatively cheaply later (see "Cycling Master Keys" below).
+
+AES256 keys should be randomly generated and 256 bits (32 characters) in
+length, then base64 encoded when represented in `keyring`.
+
+You can generate a valid, properly encoded AES256 master key with this command:
+
+```
+phabricator/ $ ./bin/files generate-key --type aes-256-cbc
+```
+
+This mode is generally similar to the default server-side encryption mode
+supported by Amazon S3.
+
+
+Format: ROT13
+=============
+
+The `rot13` format is a test format that is never selected by default. You can
+select this format explicitly with `bin/files encode` to test storage and
+encryption behavior.
+
+This format applies ROT13 encoding to file data.
+
+
+Changing File Storage Formats
+=============================
+
+To test configuration, you can explicitly change the storage format of a file.
+
+This will read the file data, decrypt it if necessary, write a new copy of the
+data with the desired encryption, then update the file to point at the new
+data. You can use this to make sure encryption works before turning it on by
+default.
+
+To change the format of an individual file, run this command:
+
+```
+phabricator/ $ ./bin/files encode --as <format> F123 [--key <key>]
+```
+
+This will change the storage format of the sepcified file.
+
+
+Verifying Storage Formats
+=========================
+
+You can review the storage format of a file from the web UI, in the
+{nav Storage} tab under "Format". You can also use the "Engine" and "Handle"
+properties to identify where the underlying data is stored and verify that
+it is encrypted or encoded in the way you expect.
+
+See @{article:Configuring File Storage} for more information on storage
+engines.
+
+
+Cycling Master Keys
+===================
+
+If you need to cycle your master key, some storage formats support key cycling.
+
+Cycling a file's encryption key decodes the local key for the data using the
+old master key, then re-encodes it using the new master key. This is primarily
+useful if you believe your master key may have been compromised.
+
+First, add a new key to the keyring and mark it as the default key. You need
+to leave the old key in place for now so existing data can be decrypted.
+
+To cycle an individual file, run this command:
+
+```
+phabricator/ $ ./bin/files cycle F123
+```
+
+Verify that cycling worked properly by examining the command output and
+accessing the file to check that the data is present and decryptable. You
+can cycle additional files to gain additional confidence.
+
+You can cycle all files with this command:
+
+```
+phabricator/ $ ./bin/files cycle --all
+```
+
+Once all files have been cycled, remove the old master key from the keyring.
+
+Not all storage formats support key cycling: cycling a file only has an effect
+if the storage format is an encrypted format. For example, cycling a file that
+uses the `raw` storage format has no effect.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - understanding storage engines with @{article:Configuring File Storage}; or
+  - returning to the @{article:Configuration Guide}.

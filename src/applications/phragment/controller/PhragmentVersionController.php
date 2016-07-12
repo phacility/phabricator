@@ -2,23 +2,17 @@
 
 final class PhragmentVersionController extends PhragmentController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id', 0);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $version = id(new PhragmentFragmentVersionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if ($version === null) {
       return new Aphront404Response();
@@ -32,11 +26,6 @@ final class PhragmentVersionController extends PhragmentController {
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
     $crumbs->addTextCrumb(pht('View Version %d', $version->getSequence()));
-
-    $phids = array();
-    $phids[] = $version->getFilePHID();
-
-    $this->loadHandles($phids);
 
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
@@ -56,8 +45,7 @@ final class PhragmentVersionController extends PhragmentController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($version)
-      ->setObjectURI($version->getURI());
+      ->setObject($version);
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Download Version'))
@@ -71,29 +59,29 @@ final class PhragmentVersionController extends PhragmentController {
       ->setActionList($actions);
     $properties->addProperty(
       pht('File'),
-      $this->renderHandlesForPHIDs(array($version->getFilePHID())));
+      $viewer->renderHandle($version->getFilePHID()));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $box,
-        $this->renderPreviousVersionList($version),
-      ),
-      array(
-        'title' => pht('View Version'),
-      ));
+    $title = pht('View Version');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $box,
+      $this->renderPreviousVersionList($version),
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function renderPreviousVersionList(
     PhragmentFragmentVersion $version) {
-
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $previous_versions = id(new PhragmentFragmentVersionQuery())
       ->setViewer($viewer)
@@ -106,7 +94,7 @@ final class PhragmentVersionController extends PhragmentController {
 
     foreach ($previous_versions as $previous_version) {
       $item = id(new PHUIObjectItemView());
-      $item->setHeader('Version '.$previous_version->getSequence());
+      $item->setHeader(pht('Version %s', $previous_version->getSequence()));
       $item->setHref($previous_version->getURI());
       $item->addAttribute(phabricator_datetime(
         $previous_version->getDateCreated(),
@@ -122,8 +110,8 @@ final class PhragmentVersionController extends PhragmentController {
     }
 
     $item = id(new PHUIObjectItemView());
-    $item->setHeader('Prior to Version 0');
-    $item->addAttribute('Prior to any content (empty file)');
+    $item->setHeader(pht('Prior to Version 0'));
+    $item->addAttribute(pht('Prior to any content (empty file)'));
     $item->addAction(id(new PHUIListItemView())
       ->setIcon('fa-file-o')
       ->setName(pht('Get Patch'))

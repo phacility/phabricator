@@ -87,9 +87,10 @@ final class PhabricatorSetupIssueView extends AphrontView {
         "OS X, you might want to try Homebrew.");
 
       $restart_info = pht(
-        'After installing new PHP extensions, <strong>restart your webserver '.
-        'for the changes to take effect</strong>.',
-        hsprintf(''));
+        'After installing new PHP extensions, <strong>restart Phabricator '.
+        'for the changes to take effect</strong>. For help with restarting '.
+        'Phabricator, see %s in the documentation.',
+        $this->renderRestartLink());
 
       $description[] = phutil_tag(
         'div',
@@ -105,6 +106,11 @@ final class PhabricatorSetupIssueView extends AphrontView {
           phutil_tag('p', array(), $restart_info),
         ));
 
+    }
+
+    $related_links = $issue->getLinks();
+    if ($related_links) {
+      $description[] = $this->renderRelatedLinks($related_links);
     }
 
     $actions = array();
@@ -187,7 +193,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-tail',
       ),
-      array($actions, $next));
+      array($actions));
 
     $issue = phutil_tag(
       'div',
@@ -214,6 +220,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       array(
         $issue,
+        $next,
         $debug_info,
       ));
   }
@@ -268,20 +275,21 @@ final class PhabricatorSetupIssueView extends AphrontView {
       $update = array();
       foreach ($configs as $config) {
         if (idx($options, $config) && $options[$config]->getLocked()) {
-          continue;
+          $name = pht('View "%s"', $config);
+        } else {
+          $name = pht('Edit "%s"', $config);
         }
         $link = phutil_tag(
           'a',
           array(
             'href' => '/config/edit/'.$config.'/?issue='.$issue->getIssueKey(),
           ),
-          pht('Edit %s', $config));
+          $name);
         $update[] = phutil_tag('li', array(), $link);
       }
       if ($update) {
         $update = phutil_tag('ul', array(), $update);
         if (!$related) {
-
           $update_info = phutil_tag(
           'p',
           array(),
@@ -380,8 +388,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
         'p',
         array(),
         pht(
-          'PHP also loaded these configuration file(s):',
-          count($more_loc)));
+          'PHP also loaded these %s configuration file(s):',
+          phutil_count($more_loc)));
       $info[] = phutil_tag(
         'pre',
         array(),
@@ -406,9 +414,10 @@ final class PhabricatorSetupIssueView extends AphrontView {
       'p',
       array(),
       pht(
-        'After editing the PHP configuration, <strong>restart your '.
-        'webserver for the changes to take effect</strong>.',
-        hsprintf('')));
+        'After editing the PHP configuration, <strong>restart Phabricator for '.
+        'the changes to take effect</strong>. For help with restarting '.
+        'Phabricator, see %s in the documentation.',
+        $this->renderRestartLink()));
 
     return phutil_tag(
       'div',
@@ -425,7 +434,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
   private function renderMySQLConfig(array $config) {
     $values = array();
     foreach ($config as $key) {
-      $value = PhabricatorSetupCheckMySQL::loadRawConfigValue($key);
+      $value = PhabricatorMySQLSetupCheck::loadRawConfigValue($key);
       if ($value === null) {
         $value = phutil_tag(
           'em',
@@ -506,6 +515,50 @@ final class PhabricatorSetupIssueView extends AphrontView {
     } else {
       return PhabricatorConfigJSON::prettyPrintJSON($value);
     }
+  }
+
+  private function renderRelatedLinks(array $links) {
+    $link_info = phutil_tag(
+      'p',
+      array(),
+      pht(
+        '%d related link(s):',
+        count($links)));
+
+    $link_list = array();
+    foreach ($links as $link) {
+      $link_tag = phutil_tag(
+        'a',
+        array(
+          'target' => '_blank',
+          'href' => $link['href'],
+        ),
+        $link['name']);
+      $link_item = phutil_tag('li', array(), $link_tag);
+      $link_list[] = $link_item;
+    }
+    $link_list = phutil_tag('ul', array(), $link_list);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-config',
+      ),
+      array(
+        $link_info,
+        $link_list,
+      ));
+  }
+
+  private function renderRestartLink() {
+    $doc_href = PhabricatorEnv::getDoclink('Restarting Phabricator');
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $doc_href,
+        'target' => '_blank',
+      ),
+      pht('Restarting Phabricator'));
   }
 
 }

@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_owners.owners_package
+  ADD dominion VARCHAR(32) NOT NULL COLLATE {$COLLATE_TEXT};

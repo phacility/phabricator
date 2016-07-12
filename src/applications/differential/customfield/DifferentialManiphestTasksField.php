@@ -35,7 +35,7 @@ final class DifferentialManiphestTasksField
     return $this->getFieldName();
   }
 
-  public function readValueFromRevision(DifferentialRevision $revision) {
+  protected function readValueFromRevision(DifferentialRevision $revision) {
     if (!$revision->getPHID()) {
       return array();
     }
@@ -106,8 +106,9 @@ final class DifferentialManiphestTasksField
   public function getProTips() {
     return array(
       pht(
-        'Write "Fixes T123" in your summary to automatically close the '.
-        'corresponding task when this change lands.'),
+        'Write "%s" in your summary to automatically close the '.
+        'corresponding task when this change lands.',
+        'Fixes T123'),
     );
   }
 

@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialChangeType {
+final class DifferentialChangeType extends Phobject {
 
   const TYPE_ADD        = 1;
   const TYPE_CHANGE     = 2;
@@ -38,6 +38,22 @@ final class DifferentialChangeType {
     return idx($types, coalesce($type, '?'), '~');
   }
 
+  public static function getSummaryColorForChangeType($type) {
+    static $types = array(
+      self::TYPE_ADD        => 'green',
+      self::TYPE_CHANGE     => 'black',
+      self::TYPE_DELETE     => 'red',
+      self::TYPE_MOVE_AWAY  => 'orange',
+      self::TYPE_COPY_AWAY  => 'black',
+      self::TYPE_MOVE_HERE  => 'green',
+      self::TYPE_COPY_HERE  => 'green',
+      self::TYPE_MULTICOPY  => 'orange',
+      self::TYPE_MESSAGE    => 'black',
+      self::TYPE_CHILD      => 'black',
+    );
+    return idx($types, coalesce($type, '?'), 'black');
+  }
+
   public static function getShortNameForFileType($type) {
     static $names = array(
       self::FILE_TEXT       => null,
@@ -50,44 +66,74 @@ final class DifferentialChangeType {
     return idx($names, coalesce($type, '?'), '???');
   }
 
+  public static function getIconForFileType($type) {
+    static $icons = array(
+      self::FILE_TEXT => 'fa-file-text-o',
+      self::FILE_IMAGE => 'fa-file-image-o',
+      self::FILE_BINARY => 'fa-file',
+      self::FILE_DIRECTORY => 'fa-folder-open',
+      self::FILE_SYMLINK => 'fa-link',
+      self::FILE_DELETED => 'fa-file',
+      self::FILE_NORMAL => 'fa-file-text-o',
+      self::FILE_SUBMODULE => 'fa-folder-open-o',
+    );
+
+    return idx($icons, $type, 'fa-file');
+  }
+
+  public static function getIconColorForFileType($type) {
+    static $icons = array(
+      self::FILE_TEXT => 'black',
+      self::FILE_IMAGE => 'black',
+      self::FILE_BINARY => 'green',
+      self::FILE_DIRECTORY => 'blue',
+      self::FILE_SYMLINK => 'blue',
+      self::FILE_DELETED => 'red',
+      self::FILE_NORMAL => 'black',
+      self::FILE_SUBMODULE => 'blue',
+    );
+
+    return idx($icons, $type, 'black');
+  }
+
   public static function isOldLocationChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_MOVE_AWAY  => true,
-      DifferentialChangeType::TYPE_COPY_AWAY  => true,
-      DifferentialChangeType::TYPE_MULTICOPY  => true,
+      self::TYPE_MOVE_AWAY  => true,
+      self::TYPE_COPY_AWAY  => true,
+      self::TYPE_MULTICOPY  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isNewLocationChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_MOVE_HERE  => true,
-      DifferentialChangeType::TYPE_COPY_HERE  => true,
+      self::TYPE_MOVE_HERE  => true,
+      self::TYPE_COPY_HERE  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isDeleteChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_DELETE     => true,
-      DifferentialChangeType::TYPE_MOVE_AWAY  => true,
-      DifferentialChangeType::TYPE_MULTICOPY  => true,
+      self::TYPE_DELETE     => true,
+      self::TYPE_MOVE_AWAY  => true,
+      self::TYPE_MULTICOPY  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isCreateChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_ADD        => true,
-      DifferentialChangeType::TYPE_COPY_HERE  => true,
-      DifferentialChangeType::TYPE_MOVE_HERE  => true,
+      self::TYPE_ADD        => true,
+      self::TYPE_COPY_HERE  => true,
+      self::TYPE_MOVE_HERE  => true,
     );
     return isset($types[$type]);
   }
 
   public static function isModifyChangeType($type) {
     static $types = array(
-      DifferentialChangeType::TYPE_CHANGE     => true,
+      self::TYPE_CHANGE     => true,
     );
     return isset($types[$type]);
   }
@@ -105,7 +151,7 @@ final class DifferentialChangeType {
       self::TYPE_MESSAGE    => pht('Commit Message'),
       self::TYPE_CHILD      => pht('Contents Modified'),
     );
-    return idx($types, coalesce($type, '?'), 'Unknown');
+    return idx($types, coalesce($type, '?'), pht('Unknown'));
   }
 
 }

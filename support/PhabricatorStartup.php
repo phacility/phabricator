@@ -34,15 +34,17 @@
  * @task apocalypse   In Case Of Apocalypse
  * @task validation   Validation
  * @task ratelimit    Rate Limiting
+ * @task phases       Startup Phase Timers
  */
 final class PhabricatorStartup {
 
   private static $startTime;
   private static $debugTimeLimit;
-  private static $globals = array();
+  private static $accessLog;
   private static $capturingOutput;
   private static $rawInput;
   private static $oldMemoryLimit;
+  private static $phases;
 
   // TODO: For now, disable rate limiting entirely by default. We need to
   // iterate on it a bit for Conduit, some of the specific score levels, and
@@ -72,30 +74,35 @@ final class PhabricatorStartup {
   /**
    * @task info
    */
-  public static function setGlobal($key, $value) {
-    self::validateGlobal($key);
-
-    self::$globals[$key] = $value;
+  public static function setAccessLog($access_log) {
+    self::$accessLog = $access_log;
   }
 
-
-  /**
-   * @task info
-   */
-  public static function getGlobal($key, $default = null) {
-    self::validateGlobal($key);
-
-    if (!array_key_exists($key, self::$globals)) {
-      return $default;
-    }
-
-    return self::$globals[$key];
-  }
 
   /**
    * @task info
    */
   public static function getRawInput() {
+    if (self::$rawInput === null) {
+      $stream = new AphrontRequestStream();
+
+      if (isset($_SERVER['HTTP_CONTENT_ENCODING'])) {
+        $encoding = trim($_SERVER['HTTP_CONTENT_ENCODING']);
+        $stream->setEncoding($encoding);
+      }
+
+      $input = '';
+      do {
+        $bytes = $stream->readData();
+        if ($bytes === null) {
+          break;
+        }
+        $input .= $bytes;
+      } while (true);
+
+      self::$rawInput = $input;
+    }
+
     return self::$rawInput;
   }
 
@@ -104,11 +111,15 @@ final class PhabricatorStartup {
 
 
   /**
+   * @param float Request start time, from `microtime(true)`.
    * @task hook
    */
-  public static function didStartup() {
-    self::$startTime = microtime(true);
-    self::$globals = array();
+  public static function didStartup($start_time) {
+    self::$startTime = $start_time;
+
+    self::$phases = array();
+
+    self::$accessLog = null;
 
     static $registered;
     if (!$registered) {
@@ -122,6 +133,10 @@ final class PhabricatorStartup {
     self::setupPHP();
     self::verifyPHP();
 
+    // If we've made it this far, the environment isn't completely broken so
+    // we can switch over to relying on our own exception recovery mechanisms.
+    ini_set('display_errors', 0);
+
     if (isset($_SERVER['REMOTE_ADDR'])) {
       self::rateLimitRequest($_SERVER['REMOTE_ADDR']);
     }
@@ -133,8 +148,6 @@ final class PhabricatorStartup {
     self::detectPostMaxSizeTriggered();
 
     self::beginOutputCapture();
-
-    self::$rawInput = (string)file_get_contents('php://input');
   }
 
 
@@ -251,7 +264,7 @@ final class PhabricatorStartup {
     static $initialized;
     if (!$initialized) {
       declare(ticks=1);
-      register_tick_function(array('PhabricatorStartup', 'onDebugTick'));
+      register_tick_function(array(__CLASS__, 'onDebugTick'));
     }
   }
 
@@ -344,8 +357,7 @@ final class PhabricatorStartup {
     }
 
     self::endOutputCapture();
-    $access_log = self::getGlobal('log.access');
-
+    $access_log = self::$accessLog;
     if ($access_log) {
       // We may end up here before the access log is initialized, e.g. from
       // verifyPHP().
@@ -398,9 +410,15 @@ final class PhabricatorStartup {
    */
   private static function normalizeInput() {
     // Replace superglobals with unfiltered versions, disrespect php.ini (we
-    // filter ourselves)
-    $filter = array(INPUT_GET, INPUT_POST,
-      INPUT_SERVER, INPUT_ENV, INPUT_COOKIE,
+    // filter ourselves).
+
+    // NOTE: We don't filter INPUT_SERVER because we don't want to overwrite
+    // changes made in "preamble.php".
+    $filter = array(
+      INPUT_GET,
+      INPUT_POST,
+      INPUT_ENV,
+      INPUT_COOKIE,
     );
     foreach ($filter as $type) {
       $filtered = filter_input_array($type, FILTER_UNSAFE_RAW);
@@ -408,9 +426,6 @@ final class PhabricatorStartup {
         continue;
       }
       switch ($type) {
-        case INPUT_SERVER:
-          $_SERVER = array_merge($_SERVER, $filtered);
-          break;
         case INPUT_GET:
           $_GET = array_merge($_GET, $filtered);
           break;
@@ -421,7 +436,8 @@ final class PhabricatorStartup {
           $_POST = array_merge($_POST, $filtered);
           break;
         case INPUT_ENV;
-          $_ENV = array_merge($_ENV, $filtered);
+          $env = array_merge($_ENV, $filtered);
+          $_ENV = self::filterEnvSuperglobal($env);
           break;
       }
     }
@@ -453,6 +469,30 @@ final class PhabricatorStartup {
       }
     }
   }
+
+
+  /**
+   * Adjust `$_ENV` before execution.
+   *
+   * Adjustments here primarily impact the environment as seen by subprocesses.
+   * The environment is forwarded explicitly by @{class:ExecFuture}.
+   *
+   * @param map<string, wild> Input `$_ENV`.
+   * @return map<string, string> Suitable `$_ENV`.
+   * @task validation
+   */
+  private static function filterEnvSuperglobal(array $env) {
+
+    // In some configurations, we may get "argc" and "argv" set in $_ENV.
+    // These are not real environmental variables, and "argv" may have an array
+    // value which can not be forwarded to subprocesses. Remove these from the
+    // environment if they are present.
+    unset($env['argc']);
+    unset($env['argv']);
+
+    return $env;
+  }
+
 
   /**
    * @task validation
@@ -518,21 +558,6 @@ final class PhabricatorStartup {
         "Request parameter '__path__' is set, but empty. Your rewrite rules ".
         "are not configured correctly. The '__path__' should always ".
         "begin with a '/'.");
-    }
-  }
-
-
-  /**
-   * @task validation
-   */
-  private static function validateGlobal($key) {
-    static $globals = array(
-      'log.access' => true,
-      'csrf.salt'  => true,
-    );
-
-    if (empty($globals[$key])) {
-      throw new Exception("Access to unknown startup global '{$key}'!");
     }
   }
 
@@ -618,7 +643,7 @@ final class PhabricatorStartup {
     // populated into $_POST, but it wasn't.
 
     $config = ini_get('post_max_size');
-    PhabricatorStartup::didFatal(
+    self::didFatal(
       "As received by the server, this request had a nonzero content length ".
       "but no POST data.\n\n".
       "Normally, this indicates that it exceeds the 'post_max_size' setting ".
@@ -851,6 +876,60 @@ final class PhabricatorStartup {
     echo $message;
 
     exit(1);
+  }
+
+
+/* -(  Startup Timers  )----------------------------------------------------- */
+
+
+  /**
+   * Record the beginning of a new startup phase.
+   *
+   * For phases which occur before @{class:PhabricatorStartup} loads, save the
+   * time and record it with @{method:recordStartupPhase} after the class is
+   * available.
+   *
+   * @param string Phase name.
+   * @task phases
+   */
+  public static function beginStartupPhase($phase) {
+    self::recordStartupPhase($phase, microtime(true));
+  }
+
+
+  /**
+   * Record the start time of a previously executed startup phase.
+   *
+   * For startup phases which occur after @{class:PhabricatorStartup} loads,
+   * use @{method:beginStartupPhase} instead. This method can be used to
+   * record a time before the class loads, then hand it over once the class
+   * becomes available.
+   *
+   * @param string Phase name.
+   * @param float Phase start time, from `microtime(true)`.
+   * @task phases
+   */
+  public static function recordStartupPhase($phase, $time) {
+    self::$phases[$phase] = $time;
+  }
+
+
+  /**
+   * Get information about startup phase timings.
+   *
+   * Sometimes, performance problems can occur before we start the profiler.
+   * Since the profiler can't examine these phases, it isn't useful in
+   * understanding their performance costs.
+   *
+   * Instead, the startup process marks when it enters various phases using
+   * @{method:beginStartupPhase}. A later call to this method can retrieve this
+   * information, which can be examined to gain greater insight into where
+   * time was spent. The output is still crude, but better than nothing.
+   *
+   * @task phases
+   */
+  public static function getPhases() {
+    return self::$phases;
   }
 
 }

@@ -1,0 +1,107 @@
+/**
+ * @provides phui-workboard-view-css
+ */
+
+.phui-workboard-view {
+  width: 100%;
+}
+
+.device-phone .phui-workboard-view {
+  width: auto;
+}
+
+.device-desktop .phui-workboard-view-shadow {
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: absolute;
+  top: 79px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background-color: #fff;
+}
+
+.device-desktop .page-has-warning .phui-workboard-view-shadow {
+  top: 113px;
+}
+
+.device-desktop.with-durable-column .phui-workboard-view-shadow {
+  right: 300px;
+}
+
+.device-desktop.with-durable-margin .phui-workboard-view-shadow {
+  right: 312px;
+}
+
+.phui-workboard-view-shadow::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: rgba(200,200,200,.6);
+}
+
+.phui-workboard-view-shadow::-webkit-scrollbar-thumb {
+  background: {$lightbluetext};
+}
+
+.device-desktop .project-board-wrapper .phui-workboard-view-shadow {
+  left: {$menu.profile.width};
+}
+
+.device-desktop .phui-profile-menu-collapsed .project-board-wrapper
+  .phui-workboard-view-shadow {
+  left: {$menu.profile.width.collapsed};
+}
+
+!print .project-board-wrapper .phui-workboard-view-shadow {
+  position: static;
+}
+
+!print .project-board-wrapper .aphront-multi-column-column-outer {
+  display: block;
+  margin: 0 0 18px;
+  page-break-inside: avoid;
+}
+
+.device-desktop .phui-workboard-view .aphront-multi-column-fixed
+  .aphront-multi-column-inner {
+    margin-left: 0;
+}
+
+.device .project-board-wrapper {
+  margin: 16px;
+}
+
+.device-desktop .phui-workboard-view .aphront-multi-column-view {
+  pointer-events: none;
+}
+
+.device-desktop .phui-workpanel-view {
+  pointer-events: auto;
+  cursor: auto;
+}
+
+/* Fullscreen */
+
+.device-desktop .phui-workboard-fullscreen .phabricator-main-menu {
+  display: none;
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phui-workboard-view-shadow {
+    top: 35px;
+    left: 0;
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-workpanel-body-content {
+  max-height: calc(100vh - 120px);
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phabricator-nav-local {
+    display: none;
+}
+
+.device .phui-workboard-expand-icon {
+  display: none;
+}

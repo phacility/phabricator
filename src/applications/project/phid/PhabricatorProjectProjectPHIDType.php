@@ -8,16 +8,16 @@ final class PhabricatorProjectProjectPHIDType extends PhabricatorPHIDType {
     return pht('Project');
   }
 
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorProjectApplication';
-  }
-
   public function getTypeIcon() {
     return 'fa-briefcase bluegrey';
   }
 
   public function newObject() {
     return new PhabricatorProject();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorProjectApplication';
   }
 
   protected function buildQueryForObjects(
@@ -37,19 +37,25 @@ final class PhabricatorProjectProjectPHIDType extends PhabricatorPHIDType {
     foreach ($handles as $phid => $handle) {
       $project = $objects[$phid];
 
-      $name = $project->getName();
+      $name = $project->getDisplayName();
       $id = $project->getID();
       $slug = $project->getPrimarySlug();
 
       $handle->setName($name);
-      $handle->setObjectName('#'.$slug);
-      $handle->setURI("/tag/{$slug}/");
+
+      if (strlen($slug)) {
+        $handle->setObjectName('#'.$slug);
+        $handle->setURI("/tag/{$slug}/");
+      } else {
+        $handle->setURI("/project/view/{$id}/");
+      }
+
       $handle->setImageURI($project->getProfileImageURI());
-      $handle->setIcon($project->getIcon());
-      $handle->setTagColor($project->getColor());
+      $handle->setIcon($project->getDisplayIconIcon());
+      $handle->setTagColor($project->getDisplayColor());
 
       if ($project->isArchived()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

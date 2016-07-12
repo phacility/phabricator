@@ -2,15 +2,9 @@
 
 final class PonderQuestionCommentController extends PonderController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
@@ -18,14 +12,13 @@ final class PonderQuestionCommentController extends PonderController {
 
     $question = id(new PonderQuestionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }
 
     $is_preview = $request->isPreviewRequest();
-//    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $qid = $question->getID();
     $view_uri = "/Q{$qid}";
@@ -50,10 +43,6 @@ final class PonderQuestionCommentController extends PonderController {
         ->setCancelURI($view_uri)
         ->setException($ex);
     }
-
-//    if ($draft) {
-//      $draft->replaceOrDelete();
-//    }
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())

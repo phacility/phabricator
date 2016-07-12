@@ -8,7 +8,7 @@ final class ReleephReasonFieldSpecification
   }
 
   public function getName() {
-    return 'Reason';
+    return pht('Reason');
   }
 
   public function getStorageKey() {
@@ -36,7 +36,7 @@ final class ReleephReasonFieldSpecification
 
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTextAreaControl())
-      ->setLabel('Reason')
+      ->setLabel(pht('Reason'))
       ->setName('reason')
       ->setError($this->error)
       ->setValue($this->getValue());
@@ -44,17 +44,17 @@ final class ReleephReasonFieldSpecification
 
   public function validate($reason) {
     if (!$reason) {
-      $this->error = 'Required';
+      $this->error = pht('Required');
       throw new ReleephFieldParseException(
         $this,
-        'You must give a reason for your request.');
+        pht('You must give a reason for your request.'));
     }
   }
 
   public function renderHelpForArcanist() {
-    $text =
-      "Fully explain why you are requesting this code be included ".
-      "in the next release.\n";
+    $text = pht(
+      'Fully explain why you are requesting this code be included '.
+      'in the next release.')."\n";
     return phutil_console_wrap($text, 8);
   }
 
@@ -63,7 +63,7 @@ final class ReleephReasonFieldSpecification
   }
 
   public function renderLabelForCommitMessage() {
-    return 'Request Reason';
+    return pht('Request Reason');
   }
 
   public function renderValueForCommitMessage() {

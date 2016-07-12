@@ -17,6 +17,32 @@ final class ManiphestTaskPriority extends ManiphestConstants {
 
 
   /**
+   * Get the priorities and their command keywords.
+   *
+   * @return map Priorities to lists of command keywords.
+   */
+  public static function getTaskPriorityKeywordsMap() {
+    $map = self::getConfig();
+    foreach ($map as $key => $spec) {
+      $words = idx($spec, 'keywords', array());
+      if (!is_array($words)) {
+        $words = array($words);
+      }
+
+      foreach ($words as $word_key => $word) {
+        $words[$word_key] = phutil_utf8_strtolower($word);
+      }
+
+      $words = array_unique($words);
+
+      $map[$key] = $words;
+    }
+
+    return $map;
+  }
+
+
+  /**
    * Get the priorities and their related short (one-word) descriptions.
    *
    * @return  map Priorities to short descriptions.
@@ -75,11 +101,56 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     return idx(self::getColorMap(), $priority, 'black');
   }
 
+  public static function getTaskPriorityIcon($priority) {
+    return 'fa-arrow-right';
+  }
+
+  public static function isDisabledPriority($priority) {
+    $config = idx(self::getConfig(), $priority, array());
+    return idx($config, 'disabled', false);
+  }
 
   private static function getConfig() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.priorities');
     krsort($config);
     return $config;
+  }
+
+  public static function validateConfiguration($config) {
+    if (!is_array($config)) {
+      throw new Exception(
+        pht(
+          'Configuration is not valid. Maniphest priority configurations '.
+          'must be dictionaries.',
+          $config));
+    }
+
+    foreach ($config as $key => $value) {
+      if (!ctype_digit((string)$key)) {
+        throw new Exception(
+          pht(
+            'Key "%s" is not a valid priority constant. Priority constants '.
+            'must be nonnegative integers.',
+            $key));
+      }
+
+      if (!is_array($value)) {
+        throw new Exception(
+          pht(
+            'Value for key "%s" should be a dictionary.',
+            $key));
+      }
+
+      PhutilTypeSpec::checkMap(
+        $value,
+        array(
+          'name' => 'string',
+          'short' => 'optional string',
+          'color' => 'optional string',
+          'keywords' => 'optional list<string>',
+          'disabled' => 'optional bool',
+        ));
+    }
   }
 
 }

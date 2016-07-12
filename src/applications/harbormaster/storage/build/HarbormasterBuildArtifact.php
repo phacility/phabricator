@@ -8,21 +8,21 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   protected $artifactIndex;
   protected $artifactKey;
   protected $artifactData = array();
+  protected $isReleased = 0;
 
   private $buildTarget = self::ATTACHABLE;
-
-  const TYPE_FILE = 'file';
-  const TYPE_HOST = 'host';
-  const TYPE_URI = 'uri';
+  private $artifactImplementation;
 
   public static function initializeNewBuildArtifact(
     HarbormasterBuildTarget $build_target) {
     return id(new HarbormasterBuildArtifact())
+      ->attachBuildTarget($build_target)
       ->setBuildTargetPHID($build_target->getPHID());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'artifactData' => self::SERIALIZATION_JSON,
       ),
@@ -30,6 +30,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
         'artifactType' => 'text32',
         'artifactIndex' => 'bytes12',
         'artifactKey' => 'text255',
+        'isReleased' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_artifact' => array(
@@ -39,8 +40,16 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
         'key_garbagecollect' => array(
           'columns' => array('artifactType', 'dateCreated'),
         ),
+        'key_target' => array(
+          'columns' => array('buildTargetPHID', 'artifactType'),
+        ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      HarbormasterBuildArtifactPHIDType::TYPECONST);
   }
 
   public function attachBuildTarget(HarbormasterBuildTarget $build_target) {
@@ -52,109 +61,63 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     return $this->assertAttached($this->buildTarget);
   }
 
-  public function setArtifactKey($build_phid, $build_gen, $key) {
-    $this->artifactIndex =
-      PhabricatorHash::digestForIndex($build_phid.$build_gen.$key);
+  public function setArtifactKey($key) {
+    $target = $this->getBuildTarget();
+    $this->artifactIndex = self::getArtifactIndex($target, $key);
     $this->artifactKey = $key;
     return $this;
   }
 
-  public function getObjectItemView(PhabricatorUser $viewer) {
-    $data = $this->getArtifactData();
-    switch ($this->getArtifactType()) {
-      case self::TYPE_FILE:
-        $handle = id(new PhabricatorHandleQuery())
-          ->setViewer($viewer)
-          ->withPHIDs($data)
-          ->executeOne();
+  public static function getArtifactIndex(
+    HarbormasterBuildTarget $target,
+    $artifact_key) {
 
-        return id(new PHUIObjectItemView())
-          ->setObjectName(pht('File'))
-          ->setHeader($handle->getFullName())
-          ->setHref($handle->getURI());
-      case self::TYPE_HOST:
-        $leases = id(new DrydockLeaseQuery())
-          ->setViewer($viewer)
-          ->withIDs(array($data['drydock-lease']))
-          ->execute();
-        $lease = $leases[$data['drydock-lease']];
+    $build = $target->getBuild();
 
-        return id(new PHUIObjectItemView())
-          ->setObjectName(pht('Drydock Lease'))
-          ->setHeader($lease->getID())
-          ->setHref('/drydock/lease/'.$lease->getID());
-      case self::TYPE_URI:
-        return id(new PHUIObjectItemView())
-          ->setObjectName($data['name'])
-          ->setHeader($data['uri'])
-          ->setHref($data['uri']);
-      default:
+    $parts = array(
+      $build->getPHID(),
+      $target->getBuildGeneration(),
+      $artifact_key,
+    );
+    $parts = implode("\0", $parts);
+
+    return PhabricatorHash::digestForIndex($parts);
+  }
+
+  public function releaseArtifact() {
+    if ($this->getIsReleased()) {
+      return $this;
+    }
+
+    $impl = $this->getArtifactImplementation();
+    if ($impl) {
+      $impl->releaseArtifact(PhabricatorUser::getOmnipotentUser());
+    }
+
+    return $this
+      ->setIsReleased(1)
+      ->save();
+  }
+
+  public function getArtifactImplementation() {
+    if ($this->artifactImplementation === null) {
+      $type = $this->getArtifactType();
+      $impl = HarbormasterArtifact::getArtifactType($type);
+      if (!$impl) {
         return null;
+      }
+
+      $impl = clone $impl;
+      $impl->setBuildArtifact($this);
+      $this->artifactImplementation = $impl;
     }
+
+    return $this->artifactImplementation;
   }
 
-  public function loadDrydockLease() {
-    if ($this->getArtifactType() !== self::TYPE_HOST) {
-      throw new Exception(
-        '`loadDrydockLease` may only be called on host artifacts.');
-    }
 
-    $data = $this->getArtifactData();
-
-    // FIXME: Is there a better way of doing this?
-    // TODO: Policy stuff, etc.
-    $lease = id(new DrydockLease())->load(
-      $data['drydock-lease']);
-    if ($lease === null) {
-      throw new Exception('Associated Drydock lease not found!');
-    }
-    $resource = id(new DrydockResource())->load(
-      $lease->getResourceID());
-    if ($resource === null) {
-      throw new Exception('Associated Drydock resource not found!');
-    }
-    $lease->attachResource($resource);
-
-    return $lease;
-  }
-
-  public function loadPhabricatorFile() {
-    if ($this->getArtifactType() !== self::TYPE_FILE) {
-      throw new Exception(
-        '`loadPhabricatorFile` may only be called on file artifacts.');
-    }
-
-    $data = $this->getArtifactData();
-
-    // The data for TYPE_FILE is an array with a single PHID in it.
-    $phid = $data['filePHID'];
-
-    $file = id(new PhabricatorFileQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array($phid))
-      ->executeOne();
-    if ($file === null) {
-      throw new Exception('Associated file not found!');
-    }
-    return $file;
-  }
-
-  public function release() {
-    switch ($this->getArtifactType()) {
-      case self::TYPE_HOST:
-        $this->releaseDrydockLease();
-        break;
-    }
-  }
-
-  public function releaseDrydockLease() {
-    $lease = $this->loadDrydockLease();
-    $resource = $lease->getResource();
-    $blueprint = $resource->getBlueprint();
-
-    if ($lease->isActive()) {
-      $blueprint->releaseLease($resource, $lease);
-    }
+  public function getProperty($key, $default = null) {
+    return idx($this->artifactData, $key, $default);
   }
 
 
@@ -178,8 +141,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'Users must be able to see a buildable to see its artifacts.');
+    return pht('Users must be able to see a buildable to see its artifacts.');
   }
 
 }

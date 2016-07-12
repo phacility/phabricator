@@ -5,13 +5,9 @@ final class PhabricatorDashboardInstallController
 
   private $id;
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->id = $request->getURIData('id');
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
@@ -49,11 +45,6 @@ final class PhabricatorDashboardInstallController
     $application_class = $request->getStr(
       'applicationClass',
       'PhabricatorHomeApplication');
-
-    $handles = $this->loadHandles(array(
-      $object_phid,
-      $installer_phid,
-    ));
 
     if ($request->isFormPost()) {
       $dashboard_install = id(new PhabricatorDashboardInstall())
@@ -121,7 +112,7 @@ final class PhabricatorDashboardInstallController
               phutil_tag(
                 'strong',
                 array(),
-                $this->getHandle($object_phid)->getName())));
+                $viewer->renderHandle($object_phid))));
         }
         break;
       default:

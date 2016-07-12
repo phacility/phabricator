@@ -3,24 +3,18 @@
 final class DifferentialRevisionEditController
   extends DifferentialController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if (!$this->id) {
-      $this->id = $request->getInt('revisionID');
+    if (!$id) {
+      $id = $request->getInt('revisionID');
     }
 
-    if ($this->id) {
+    if ($id) {
       $revision = id(new DifferentialRevisionQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->needRelationships(true)
         ->needReviewerStatus(true)
         ->needActiveDiffs(true)
@@ -49,7 +43,8 @@ final class DifferentialRevisionEditController
       }
       if ($diff->getRevisionID()) {
         // TODO: Redirect?
-        throw new Exception('This diff is already attached to a revision!');
+        throw new Exception(
+          pht('This diff is already attached to a revision!'));
       }
     } else {
       $diff = null;
@@ -71,16 +66,48 @@ final class DifferentialRevisionEditController
       ->setViewer($viewer)
       ->readFieldsFromStorage($revision);
 
+    if ($request->getStr('viaDiffView') && $diff) {
+      $repo_key = id(new DifferentialRepositoryField())->getFieldKey();
+      $repository_field = idx(
+        $field_list->getFields(),
+        $repo_key);
+      if ($repository_field) {
+        $repository_field->setValue($request->getStr($repo_key));
+      }
+      $view_policy_key = id(new DifferentialViewPolicyField())->getFieldKey();
+      $view_policy_field = idx(
+        $field_list->getFields(),
+        $view_policy_key);
+      if ($view_policy_field) {
+        $view_policy_field->setValue($diff->getViewPolicy());
+      }
+    }
+
     $validation_exception = null;
     if ($request->isFormPost() && !$request->getStr('viaDiffView')) {
+
+      $editor = id(new DifferentialTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new DifferentialTransaction(),
         $request);
 
       if ($diff) {
+        $repository_phid = null;
+        $repository_tokenizer = $request->getArr(
+          id(new DifferentialRepositoryField())->getFieldKey());
+        if ($repository_tokenizer) {
+          $repository_phid = reset($repository_tokenizer);
+        }
+
         $xactions[] = id(new DifferentialTransaction())
           ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
           ->setNewValue($diff->getPHID());
+
+        $editor->setRepositoryPHIDOverride($repository_phid);
       }
 
       $comments = $request->getStr('comments');
@@ -91,11 +118,6 @@ final class DifferentialRevisionEditController
             id(new DifferentialTransactionComment())
               ->setContent($comments));
       }
-
-      $editor = id(new DifferentialTransactionEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true);
 
       try {
         $editor->applyTransactions($revision, $xactions);
@@ -149,35 +171,44 @@ final class DifferentialRevisionEditController
     $crumbs = $this->buildApplicationCrumbs();
     if ($revision->getID()) {
       if ($diff) {
-        $title = pht('Update Differential Revision');
+        $header_icon = 'fa-upload';
+        $title = pht('Update Revision');
         $crumbs->addTextCrumb(
           'D'.$revision->getID(),
           '/differential/diff/'.$diff->getID().'/');
       } else {
-        $title = pht('Edit Differential Revision');
+        $header_icon = 'fa-pencil';
+        $title = pht('Edit Revision: %s', $revision->getTitle());
         $crumbs->addTextCrumb(
           'D'.$revision->getID(),
           '/D'.$revision->getID());
       }
     } else {
+      $header_icon = 'fa-plus-square';
       $title = pht('Create New Differential Revision');
     }
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText('Revision')
       ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

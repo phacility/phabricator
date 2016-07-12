@@ -16,17 +16,17 @@ final class PhabricatorAuthManagementRefreshWorkflow
           array(
             'name' => 'user',
             'param' => 'user',
-            'help' => 'Refresh tokens for a given user.',
+            'help' => pht('Refresh tokens for a given user.'),
           ),
           array(
             'name' => 'type',
             'param' => 'provider',
-            'help' => 'Refresh tokens for a given provider type.',
+            'help' => pht('Refresh tokens for a given provider type.'),
           ),
           array(
             'name' => 'domain',
             'param' => 'domain',
-            'help' => 'Refresh tokens for a given domain.',
+            'help' => pht('Refresh tokens for a given domain.'),
           ),
         ));
   }
@@ -78,7 +78,7 @@ final class PhabricatorAuthManagementRefreshWorkflow
         "%s\n",
         pht(
           'Found %s account(s) to refresh.',
-          new PhutilNumber(count($accounts))));
+          phutil_count($accounts)));
     }
 
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();

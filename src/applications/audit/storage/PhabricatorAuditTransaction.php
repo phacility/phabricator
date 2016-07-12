@@ -3,6 +3,19 @@
 final class PhabricatorAuditTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_COMMIT = 'audit:commit';
+
+  const MAILTAG_ACTION_CONCERN = 'audit-action-concern';
+  const MAILTAG_ACTION_ACCEPT  = 'audit-action-accept';
+  const MAILTAG_ACTION_RESIGN  = 'audit-action-resign';
+  const MAILTAG_ACTION_CLOSE   = 'audit-action-close';
+  const MAILTAG_ADD_AUDITORS   = 'audit-add-auditors';
+  const MAILTAG_ADD_CCS        = 'audit-add-ccs';
+  const MAILTAG_COMMENT        = 'audit-comment';
+  const MAILTAG_COMMIT         = 'audit-commit';
+  const MAILTAG_PROJECTS       = 'audit-projects';
+  const MAILTAG_OTHER          = 'audit-other';
+
   public function getApplicationName() {
     return 'audit';
   }
@@ -15,12 +28,39 @@ final class PhabricatorAuditTransaction
     return new PhabricatorAuditTransactionComment();
   }
 
+  public function getApplicationTransactionViewObject() {
+    return new PhabricatorAuditTransactionView();
+  }
+
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    switch ($this->getTransactionType()) {
+    case self::TYPE_COMMIT:
+      $data = $this->getNewValue();
+      $blocks[] = $data['description'];
+      break;
+    }
+
+    return $blocks;
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 
     $type = $this->getTransactionType();
 
     switch ($type) {
+      case self::TYPE_COMMIT:
+        $phids[] = $this->getObjectPHID();
+        $data = $this->getNewValue();
+        if ($data['authorPHID']) {
+          $phids[] = $data['authorPHID'];
+        }
+        if ($data['committerPHID']) {
+          $phids[] = $data['committerPHID'];
+        }
+        break;
       case PhabricatorAuditActionConstants::ADD_CCS:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         $old = $this->getOldValue();
@@ -59,6 +99,8 @@ final class PhabricatorAuditTransaction
         break;
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         return pht('Added Auditors');
+      case self::TYPE_COMMIT:
+        return pht('Committed');
     }
 
     return parent::getActionName();
@@ -75,10 +117,35 @@ final class PhabricatorAuditTransaction
             return 'red';
           case PhabricatorAuditActionConstants::ACCEPT:
             return 'green';
+          case PhabricatorAuditActionConstants::RESIGN:
+            return 'black';
+          case PhabricatorAuditActionConstants::CLOSE:
+            return 'indigo';
         }
     }
 
     return parent::getColor();
+  }
+
+  public function getIcon() {
+
+    $type = $this->getTransactionType();
+
+    switch ($type) {
+      case PhabricatorAuditActionConstants::ACTION:
+        switch ($this->getNewValue()) {
+          case PhabricatorAuditActionConstants::CONCERN:
+            return 'fa-exclamation-circle';
+          case PhabricatorAuditActionConstants::ACCEPT:
+            return 'fa-check';
+          case PhabricatorAuditActionConstants::RESIGN:
+            return 'fa-plane';
+          case PhabricatorAuditActionConstants::CLOSE:
+            return 'fa-check';
+        }
+    }
+
+    return parent::getIcon();
   }
 
   public function getTitle() {
@@ -104,10 +171,47 @@ final class PhabricatorAuditTransaction
     }
 
     switch ($type) {
+      case self::TYPE_COMMIT:
+        $author = null;
+        if ($new['authorPHID']) {
+          $author = $this->renderHandleLink($new['authorPHID']);
+        } else {
+          $author = $new['authorName'];
+        }
+
+        $committer = null;
+        if ($new['committerPHID']) {
+          $committer = $this->renderHandleLink($new['committerPHID']);
+        } else if ($new['committerName']) {
+          $committer = $new['committerName'];
+        }
+
+        $commit = $this->renderHandleLink($this->getObjectPHID());
+
+        if (!$committer) {
+          $committer = $author;
+          $author = null;
+        }
+
+        if ($author) {
+          $title = pht(
+            '%s committed %s (authored by %s).',
+            $committer,
+            $commit,
+            $author);
+        } else {
+          $title = pht(
+            '%s committed %s.',
+            $committer,
+            $commit);
+        }
+        return $title;
+
       case PhabricatorAuditActionConstants::INLINE:
         return pht(
           '%s added inline comments.',
           $author_handle);
+
       case PhabricatorAuditActionConstants::ADD_CCS:
         if ($add && $rem) {
           return pht(
@@ -179,7 +283,7 @@ final class PhabricatorAuditTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
@@ -203,6 +307,40 @@ final class PhabricatorAuditTransaction
     }
 
     switch ($type) {
+      case self::TYPE_COMMIT:
+        $author = null;
+        if ($new['authorPHID']) {
+          $author = $this->renderHandleLink($new['authorPHID']);
+        } else {
+          $author = $new['authorName'];
+        }
+
+        $committer = null;
+        if ($new['committerPHID']) {
+          $committer = $this->renderHandleLink($new['committerPHID']);
+        } else if ($new['committerName']) {
+          $committer = $new['committerName'];
+        }
+
+        if (!$committer) {
+          $committer = $author;
+          $author = null;
+        }
+
+        if ($author) {
+          $title = pht(
+            '%s committed %s (authored by %s).',
+            $committer,
+            $object_handle,
+            $author);
+        } else {
+          $title = pht(
+            '%s committed %s.',
+            $committer,
+            $object_handle);
+        }
+        return $title;
+
       case PhabricatorAuditActionConstants::INLINE:
         return pht(
           '%s added inline comments to %s.',
@@ -262,35 +400,86 @@ final class PhabricatorAuditTransaction
 
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
-
-  // TODO: These two mail methods can likely be abstracted by introducing a
-  // formal concept of "inline comment" transactions.
-
-  public function shouldHideForMail(array $xactions) {
-    $type_inline = PhabricatorAuditActionConstants::INLINE;
+  public function getBodyForFeed(PhabricatorFeedStory $story) {
     switch ($this->getTransactionType()) {
-      case $type_inline:
-        foreach ($xactions as $xaction) {
-          if ($xaction->getTransactionType() != $type_inline) {
-            return true;
-          }
-        }
-        return ($this !== head($xactions));
+      case self::TYPE_COMMIT:
+        $data = $this->getNewValue();
+        return $story->renderSummary($data['summary']);
+    }
+    return parent::getBodyForFeed($story);
+  }
+
+  public function isInlineCommentTransaction() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorAuditActionConstants::INLINE:
+        return true;
     }
 
-    return parent::shouldHideForMail($xactions);
+    return parent::isInlineCommentTransaction();
   }
 
   public function getBodyForMail() {
     switch ($this->getTransactionType()) {
-      case PhabricatorAuditActionConstants::INLINE:
-        return null;
+      case self::TYPE_COMMIT:
+        $data = $this->getNewValue();
+        return $data['description'];
     }
 
     return parent::getBodyForMail();
   }
 
+  public function getMailTags() {
+    $tags = array();
+    switch ($this->getTransactionType()) {
+      case PhabricatorAuditActionConstants::ACTION:
+        switch ($this->getNewValue()) {
+          case PhabricatorAuditActionConstants::CONCERN:
+            $tags[] = self::MAILTAG_ACTION_CONCERN;
+            break;
+          case PhabricatorAuditActionConstants::ACCEPT:
+            $tags[] = self::MAILTAG_ACTION_ACCEPT;
+            break;
+          case PhabricatorAuditActionConstants::RESIGN:
+            $tags[] = self::MAILTAG_ACTION_RESIGN;
+            break;
+          case PhabricatorAuditActionConstants::CLOSE:
+            $tags[] = self::MAILTAG_ACTION_CLOSE;
+            break;
+        }
+        break;
+      case PhabricatorAuditActionConstants::ADD_AUDITORS:
+        $tags[] = self::MAILTAG_ADD_AUDITORS;
+        break;
+      case PhabricatorAuditActionConstants::ADD_CCS:
+        $tags[] = self::MAILTAG_ADD_CCS;
+        break;
+      case PhabricatorAuditActionConstants::INLINE:
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = self::MAILTAG_COMMENT;
+        break;
+      case self::TYPE_COMMIT:
+        $tags[] = self::MAILTAG_COMMIT;
+        break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        switch ($this->getMetadataValue('edge:type')) {
+          case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
+            $tags[] = self::MAILTAG_PROJECTS;
+            break;
+          case PhabricatorObjectHasSubscriberEdgeType::EDGECONST:
+            $tags[] = self::MAILTAG_ADD_CCS;
+            break;
+          default:
+            $tags[] = self::MAILTAG_OTHER;
+            break;
+        }
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
+  }
 }

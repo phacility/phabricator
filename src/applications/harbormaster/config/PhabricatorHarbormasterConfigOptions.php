@@ -11,6 +11,14 @@ final class PhabricatorHarbormasterConfigOptions
     return pht('Configure Harbormaster build engine.');
   }
 
+  public function getIcon() {
+    return 'fa-ship';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array();
   }

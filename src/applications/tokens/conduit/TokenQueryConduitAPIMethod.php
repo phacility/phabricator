@@ -10,19 +10,15 @@ final class TokenQueryConduitAPIMethod extends TokenConduitAPIMethod {
     return pht('Query tokens.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
-  public function defineErrorTypes() {
-    return array();
-  }
-
-  public function execute(ConduitAPIRequest $request) {
+  protected function execute(ConduitAPIRequest $request) {
     $query = id(new PhabricatorTokenQuery())
       ->setViewer($request->getUser());
 

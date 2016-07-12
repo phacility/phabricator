@@ -2,38 +2,29 @@
 
 final class DiffusionPathValidateController extends DiffusionController {
 
-  public function willProcessRequest(array $data) {
-    // Don't build a DiffusionRequest.
+  protected function getRepositoryIdentifierFromRequest(
+    AphrontRequest $request) {
+    return $request->getStr('repositoryPHID');
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-
-    $repository_phid = $request->getStr('repositoryPHID');
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($request->getUser())
-      ->withPHIDs(array($repository_phid))
-      ->executeOne();
-    if (!$repository) {
-      return new Aphront400Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
     }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
 
     $path = $request->getStr('path');
     $path = ltrim($path, '/');
-
-    $drequest = DiffusionRequest::newFromDictionary(
-      array(
-        'user' => $request->getUser(),
-        'repository' => $repository,
-        'path' => $path,
-      ));
-    $this->setDiffusionRequest($drequest);
 
     $browse_results = DiffusionBrowseResultSet::newFromConduit(
       $this->callConduitWithDiffusionRequest(
         'diffusion.browsequery',
         array(
-          'path' => $drequest->getPath(),
+          'path' => $path,
           'commit' => $drequest->getCommit(),
           'needValidityOnly' => true,
         )));
@@ -59,7 +50,7 @@ final class DiffusionPathValidateController extends DiffusionController {
       if ($branch) {
         $message = pht('Not found in %s', $branch);
       } else {
-        $message = pht('Not found at HEAD');
+        $message = pht('Not found at %s', 'HEAD');
       }
     } else {
       $message = pht('OK');

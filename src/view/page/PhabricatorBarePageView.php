@@ -75,11 +75,40 @@ class PhabricatorBarePageView extends AphrontPageView {
                        'maximum-scale=1',
         ));
     }
-    $icon_tag = phutil_tag(
+
+    $mask_icon = phutil_tag(
+      'link',
+      array(
+        'rel' => 'mask-icon',
+        'color' => '#3D4B67',
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/mask-icon.svg'),
+      ));
+
+    $icon_tag_76 = phutil_tag(
       'link',
       array(
         'rel' => 'apple-touch-icon',
-        'href' => celerity_get_resource_uri('/rsrc/image/apple-touch-icon.png'),
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/apple-touch-icon-76x76.png'),
+      ));
+
+    $icon_tag_120 = phutil_tag(
+      'link',
+      array(
+        'rel' => 'apple-touch-icon',
+        'sizes' => '120x120',
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/apple-touch-icon-120x120.png'),
+      ));
+
+    $icon_tag_152 = phutil_tag(
+      'link',
+      array(
+        'rel' => 'apple-touch-icon',
+        'sizes' => '152x152',
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/apple-touch-icon-152x152.png'),
       ));
 
     $apple_tag = phutil_tag(
@@ -98,11 +127,25 @@ class PhabricatorBarePageView extends AphrontPageView {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
+    if ($this->getRequest()) {
+      $viewer = $this->getRequest()->getViewer();
+      if ($viewer) {
+        $postprocessor_key = $viewer->getUserSetting(
+          PhabricatorAccessibilitySetting::SETTINGKEY);
+        if (strlen($postprocessor_key)) {
+          $response->setPostProcessorKey($postprocessor_key);
+        }
+      }
+    }
+
     $developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
     return hsprintf(
-      '%s%s%s%s%s%s',
+      '%s%s%s%s%s%s%s%s%s',
       $viewport_tag,
-      $icon_tag,
+      $mask_icon,
+      $icon_tag_76,
+      $icon_tag_120,
+      $icon_tag_152,
       $apple_tag,
       $referrer_tag,
       CelerityStaticResourceResponse::renderInlineScript(

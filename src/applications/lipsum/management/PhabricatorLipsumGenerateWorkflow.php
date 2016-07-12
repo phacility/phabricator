@@ -7,7 +7,7 @@ final class PhabricatorLipsumGenerateWorkflow
     $this
       ->setName('generate')
       ->setExamples('**generate**')
-      ->setSynopsis('Generate some lipsum.')
+      ->setSynopsis(pht('Generate synthetic test objects.'))
       ->setArguments(
         array(
           array(
@@ -18,61 +18,144 @@ final class PhabricatorLipsumGenerateWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $supported_types = id(new PhutilSymbolLoader())
+    $config_key = 'phabricator.developer-mode';
+    if (!PhabricatorEnv::getEnvConfig($config_key)) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'lipsum is a development and testing tool and may only be run '.
+          'on installs in developer mode. Enable "%s" in your configuration '.
+          'to enable lipsum.',
+          $config_key));
+    }
+
+    $all_generators = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorTestDataGenerator')
-      ->loadObjects();
-    echo "These are the types of data you can generate:\n";
-    foreach (array_keys($supported_types) as $typetmp) {
-      echo "\t".$typetmp."\n";
-    }
-    echo "\n";
-    $prompt = 'Are you sure you want to generate lots of test data?';
-    if (!phutil_console_confirm($prompt, $default_no = true)) {
-      return;
-    }
+      ->execute();
+
     $argv = $args->getArg('args');
-    if (count($argv) == 0 ||
-      (count($argv) == 1 && $argv[0] == 'all')) {
-      $this->infinitelyGenerate($supported_types);
-    } else {
-      $new_supported_types = array();
-      for ($i = 0; $i < count($argv);$i++) {
-        $arg = $argv[$i];
-        if (array_key_exists($arg, $supported_types)) {
-           $new_supported_types[$arg] = $supported_types[$arg];
-        } else {
-          echo "The type ".$arg." is not supported by the lipsum generator.\n";
+    $all = 'all';
+
+    if (!$argv) {
+      $names = mpull($all_generators, 'getGeneratorName');
+      sort($names);
+
+      $list = id(new PhutilConsoleList())
+        ->setWrap(false)
+        ->addItems($names);
+
+      id(new PhutilConsoleBlock())
+        ->addParagraph(
+          pht(
+            'Choose which type or types of test data you want to generate, '.
+            'or select "%s".',
+            $all))
+        ->addList($list)
+        ->draw();
+
+      return 0;
+    }
+
+    $generators = array();
+    foreach ($argv as $arg_original) {
+      $arg = phutil_utf8_strtolower($arg_original);
+
+      $match = false;
+      foreach ($all_generators as $generator) {
+        $name = phutil_utf8_strtolower($generator->getGeneratorName());
+
+        if ($arg == $all) {
+          $generators[] = $generator;
+          $match = true;
+          break;
+        }
+
+        if (strpos($name, $arg) !== false) {
+          $generators[] = $generator;
+          $match = true;
+          break;
         }
       }
-      $this->infinitelyGenerate($new_supported_types);
-    }
-    echo "None of the input types were supported.\n";
-    echo "The supported types are:\n";
-    echo implode("\n", array_keys($supported_types));
-  }
 
-  protected function infinitelyGenerate(array $supported_types) {
-    if (count($supported_types) == 0) {
-      echo "None of the input types were supported.\n";
+      if (!$match) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'Argument "%s" does not match the name of any generators.',
+            $arg_original));
+      }
+    }
+
+    echo tsprintf(
+      "**<bg:blue> %s </bg>** %s\n",
+      pht('GENERATORS'),
+      pht(
+        'Selected generators: %s.',
+        implode(', ', mpull($generators, 'getGeneratorName'))));
+
+    echo tsprintf(
+      "**<bg:yellow> %s </bg>** %s\n",
+      pht('WARNING'),
+      pht(
+        'This command generates synthetic test data, including user '.
+        'accounts. It is intended for use in development environments '.
+        'so you can test features more easily. There is no easy way to '.
+        'delete this data or undo the effects of this command. If you run '.
+        'it in a production environment, it will pollute your data with '.
+        'large amounts of meaningless garbage that you can not get rid of.'));
+
+    $prompt = pht('Are you sure you want to generate piles of garbage?');
+    if (!phutil_console_confirm($prompt, true)) {
       return;
     }
-    echo 'GENERATING: ';
-    echo strtoupper(implode(' , ', array_keys($supported_types)));
-    echo "\n";
+
+    echo tsprintf(
+      "**<bg:green> %s </bg>** %s\n",
+      pht('LIPSUM'),
+      pht(
+        'Generating synthetic test objects forever. '.
+        'Use ^C to stop when satisfied.'));
+
+    $this->generate($generators);
+  }
+
+  protected function generate(array $generators) {
+    $viewer = $this->getViewer();
+
+    foreach ($generators as $generator) {
+      $generator->setViewer($this->getViewer());
+    }
+
     while (true) {
-      $type = $supported_types[array_rand($supported_types)];
-      $admin = $this->getViewer();
+      $generator = $generators[array_rand($generators)];
 
-      $taskgen = newv($type, array());
-      $object = $taskgen->generate();
-      $handle = id(new PhabricatorHandleQuery())
-        ->setViewer($admin)
-        ->withPHIDs(array($object->getPHID()))
-        ->executeOne();
-      echo "Generated ".$handle->getTypeName().": ".
-        $handle->getFullName()."\n";
+      try {
+        $object = $generator->generateObject();
+      } catch (Exception $ex) {
+        echo tsprintf(
+          "**<bg:yellow> %s </bg>** %s\n",
+          pht('OOPS'),
+          pht(
+            'Generator ("%s") was unable to generate an object.',
+            $generator->getGeneratorName()));
 
-      usleep(200000);
+        echo tsprintf(
+          "%B\n",
+          $ex->getMessage());
+
+        continue;
+      }
+
+      $object_phid = $object->getPHID();
+
+      $handles = $viewer->loadHandles(array($object_phid));
+
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'Generated "%s": %s',
+          $handles[$object_phid]->getTypeName(),
+          $handles[$object_phid]->getFullName()));
+
+      sleep(1);
     }
   }
 

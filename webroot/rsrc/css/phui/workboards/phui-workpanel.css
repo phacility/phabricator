@@ -1,0 +1,139 @@
+/**
+ * @provides phui-workpanel-view-css
+ * @requires phui-workcard-view-css
+ */
+
+.phui-workpanel-view .phui-header-shell {
+  padding: 8px;
+  width: 284px;
+}
+
+.phui-workpanel-view .phui-header-shell .phui-header-header {
+  font-size: {$biggerfontsize};
+  line-height: 18px;
+  color: {$darkbluetext};
+}
+
+.phui-workpanel-view .phui-header-shell .phui-header-subheader {
+  padding: 0 4px;
+  margin: 0;
+  display: inline-block;
+  color: {$lightgreytext};
+  font-size: {$normalfontsize};
+}
+
+.device .phui-workpanel-view .phui-header-shell {
+  width: auto;
+}
+
+.phui-workboard-view {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.phui-workpanel-view .phui-box-grey {
+  background-color: rgba({$alphablue},0.1);
+}
+
+.phui-workpanel-view.phui-workboard-column-milestone .phui-box-grey {
+  background-color: rgba(234, 230, 247, 0.85);
+}
+
+.phui-workpanel-view .phui-header-col2 .phui-icon-view {
+  margin-right: 4px;
+}
+
+.phui-workpanel-view .phui-workpanel-header-action {
+  float: right;
+  width: 24px;
+}
+
+.phui-workpanel-view .phui-workpanel-body {
+  padding: 8px 4px 8px 0;
+}
+
+.phui-workpanel-view .phui-workpanel-body-content {
+  padding: 0 4px 0 8px;
+}
+
+.device .phui-workpanel-view .phui-workpanel-body {
+  padding: 8px 0;
+}
+
+.phui-workpanel-view .phui-workpanel-footer-action a {
+  color: {$darkbluetext};
+  font-weight: bold;
+}
+
+.device-desktop .phui-workpanel-view .phui-workpanel-footer-action:hover {
+  background-color: rgba(100,100,100,.1);
+  border-radius: 3px;
+}
+
+.device-desktop .aphront-multi-column-fixed .phui-workpanel-view {
+  width: 300px;
+}
+
+.device-phone .aphront-multi-column-fixed .phui-workpanel-view,
+.device-phone .phui-workpanel-view .phui-header-shell {
+  width: auto;
+}
+
+.phui-workpanel-body .phui-object-item-list-view {
+  min-height: 54px;
+  background-color: transparent;
+}
+
+.device .aphront-multi-column-outer
+  div.aphront-multi-column-column-outer .phui-workpanel-body {
+  width: auto;
+}
+
+.project-panel-hidden {
+  opacity: 0.75;
+}
+
+.device-desktop .phui-workpanel-body-content {
+  max-height: calc(100vh - 162px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.device-desktop .phui-workpanel-body-content::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: rgba({$alphablue},0.2);
+  border-radius: 4px;
+}
+
+.device-desktop .phui-workpanel-body-content::-webkit-scrollbar-thumb {
+  background: rgba({$alphablue},0.4);
+  border-radius: 4px;
+}
+
+.project-panel-empty .phui-object-item-list-view {
+  background: rgba(234, 230, 247, 0.85);
+  border-radius: 3px;
+  margin-bottom: 4px;
+  border: 1px dashed {$sh-indigoborder};
+}
+
+.project-panel-empty .phui-object-item-list-view .drag-ghost {
+  display: none;
+}
+
+.project-panel-empty .phui-object-item-list-view.drag-target-list {
+  background: rgba({$alphawhite},.7);
+}
+
+.phui-workpanel-view.project-panel-over-limit .phui-header-header {
+  color: {$red};
+}
+
+.phui-workpanel-view.project-panel-over-limit .phui-header-shell {
+  border-color: {$red};
+}

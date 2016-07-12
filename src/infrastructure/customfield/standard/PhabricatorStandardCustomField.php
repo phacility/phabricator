@@ -15,17 +15,21 @@ abstract class PhabricatorStandardCustomField
   private $fieldError;
   private $required;
   private $default;
+  private $isCopyable;
+  private $hasStorageValue;
+  private $isBuiltin;
 
   abstract public function getFieldType();
 
   public static function buildStandardFields(
     PhabricatorCustomField $template,
-    array $config) {
+    array $config,
+    $builtin = false) {
 
-    $types = id(new PhutilSymbolLoader())
+    $types = id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
-    $types = mpull($types, null, 'getFieldType');
+      ->setUniqueMethod('getFieldType')
+      ->execute();
 
     $fields = array();
     foreach ($config as $key => $value) {
@@ -45,6 +49,10 @@ abstract class PhabricatorStandardCustomField
         ->setFieldKey($full_key)
         ->setFieldConfig($value)
         ->setApplicationField($template);
+
+      if ($builtin) {
+        $standard->setIsBuiltin(true);
+      }
 
       $field = $template->setProxy($standard);
       $fields[] = $field;
@@ -91,6 +99,15 @@ abstract class PhabricatorStandardCustomField
     return $this;
   }
 
+  public function setIsBuiltin($is_builtin) {
+    $this->isBuiltin = $is_builtin;
+    return $this;
+  }
+
+  public function getIsBuiltin() {
+    return $this->isBuiltin;
+  }
+
   public function setFieldConfig(array $config) {
     foreach ($config as $key => $value) {
       switch ($key) {
@@ -114,6 +131,9 @@ abstract class PhabricatorStandardCustomField
           break;
         case 'default':
           $this->setFieldValue($value);
+          break;
+        case 'copy':
+          $this->setIsCopyable($value);
           break;
         case 'type':
           // We set this earlier on.
@@ -185,8 +205,22 @@ abstract class PhabricatorStandardCustomField
     return idx($this->strings, $key, $default);
   }
 
+  public function setIsCopyable($is_copyable) {
+    $this->isCopyable = $is_copyable;
+    return $this;
+  }
+
+  public function getIsCopyable() {
+    return $this->isCopyable;
+  }
+
   public function shouldUseStorage() {
-    return true;
+    try {
+      $object = $this->newStorageObject();
+      return true;
+    } catch (PhabricatorCustomFieldImplementationIncompleteException $ex) {
+      return false;
+    }
   }
 
   public function getValueForStorage() {
@@ -195,6 +229,19 @@ abstract class PhabricatorStandardCustomField
 
   public function setValueFromStorage($value) {
     return $this->setFieldValue($value);
+  }
+
+  public function didSetValueFromStorage() {
+    $this->hasStorageValue = true;
+    return $this;
+  }
+
+  public function getOldValueForApplicationTransactions() {
+    if ($this->hasStorageValue) {
+      return $this->getValueForStorage();
+    } else {
+      return null;
+    }
   }
 
   public function shouldAppearInApplicationTransactions() {
@@ -282,8 +329,7 @@ abstract class PhabricatorStandardCustomField
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
     return;
   }
 
@@ -360,8 +406,7 @@ abstract class PhabricatorStandardCustomField
   }
 
   public function getApplicationTransactionTitleForFeed(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorFeedStory $story) {
+    PhabricatorApplicationTransaction $xaction) {
 
     $author_phid = $xaction->getAuthorPHID();
     $object_phid = $xaction->getObjectPHID();
@@ -401,5 +446,55 @@ abstract class PhabricatorStandardCustomField
     $key = coalesce($key, $this->getRawStandardFieldKey());
     return 'std:control:'.$key;
   }
+
+  public function shouldAppearInGlobalSearch() {
+    return $this->getFieldConfigValue('fulltext', false);
+  }
+
+  public function updateAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+
+    $field_key = $this->getFieldConfigValue('fulltext');
+
+    // If the caller or configuration didn't specify a valid field key,
+    // generate one automatically from the field index.
+    if (!is_string($field_key) || (strlen($field_key) != 4)) {
+      $field_key = '!'.substr($this->getFieldIndex(), 0, 3);
+    }
+
+    $field_value = $this->getFieldValue();
+    if (strlen($field_value)) {
+      $document->addField($field_key, $field_value);
+    }
+  }
+
+  protected function newStandardEditField() {
+    $short = $this->getModernFieldKey();
+
+    return parent::newStandardEditField()
+      ->setEditTypeKey($short)
+      ->setIsCopyable($this->getIsCopyable());
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  public function shouldAppearInConduitDictionary() {
+    return true;
+  }
+
+  public function getModernFieldKey() {
+    if ($this->getIsBuiltin()) {
+      return $this->getRawStandardFieldKey();
+    } else {
+      return 'custom.'.$this->getRawStandardFieldKey();
+    }
+  }
+
+  public function getConduitDictionaryValue() {
+    return $this->getFieldValue();
+  }
+
 
 }

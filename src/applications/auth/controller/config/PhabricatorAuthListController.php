@@ -3,15 +3,17 @@
 final class PhabricatorAuthListController
   extends PhabricatorAuthProviderConfigController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $configs = id(new PhabricatorAuthProviderConfigQuery())
       ->setViewer($viewer)
       ->execute();
 
     $list = new PHUIObjectItemListView();
+    $can_manage = $this->hasApplicationCapability(
+        AuthManageProvidersCapability::CAPABILITY);
+
     foreach ($configs as $config) {
       $item = new PHUIObjectItemView();
 
@@ -28,8 +30,7 @@ final class PhabricatorAuthListController
         $name = $config->getProviderType().' ('.$config->getProviderClass().')';
       }
 
-      $item
-        ->setHeader($name);
+      $item->setHeader($name);
 
       if ($provider) {
         $item->setHref($edit_uri);
@@ -47,22 +48,26 @@ final class PhabricatorAuthListController
 
       if ($config->getShouldAllowRegistration()) {
         $item->addAttribute(pht('Allows Registration'));
+      } else {
+        $item->addAttribute(pht('Does Not Allow Registration'));
       }
 
       if ($config->getIsEnabled()) {
-        $item->setBarColor('green');
+        $item->setState(PHUIObjectItemView::STATE_SUCCESS);
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-times')
             ->setHref($disable_uri)
+            ->setDisabled(!$can_manage)
             ->addSigil('workflow'));
       } else {
-        $item->setBarColor('grey');
+        $item->setState(PHUIObjectItemView::STATE_FAIL);
         $item->addIcon('fa-times grey', pht('Disabled'));
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-plus')
             ->setHref($enable_uri)
+            ->setDisabled(!$can_manage)
             ->addSigil('workflow'));
       }
 
@@ -87,49 +92,102 @@ final class PhabricatorAuthListController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Auth Providers'));
+    $crumbs->setBorder(true);
 
-    $config_name = 'auth.email-domains';
-    $config_href = '/config/edit/'.$config_name.'/';
-    $config_link = phutil_tag(
-      'a',
-      array(
-        'href' => $config_href,
-        'target' => '_blank',
-      ),
-      $config_name);
+    $domains_key = 'auth.email-domains';
+    $domains_link = $this->renderConfigLink($domains_key);
+    $domains_value = PhabricatorEnv::getEnvConfig($domains_key);
 
-    $warning = new AphrontErrorView();
+    $approval_key = 'auth.require-approval';
+    $approval_link = $this->renderConfigLink($approval_key);
+    $approval_value = PhabricatorEnv::getEnvConfig($approval_key);
 
-    $email_domains = PhabricatorEnv::getEnvConfig($config_name);
-    if ($email_domains) {
-      $warning->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $warning->setTitle(pht('Registration is Restricted'));
-      $warning->appendChild(
-        pht(
-          'Only users with a verified email address at one of the %s domains '.
-          'will be able to register a Phabricator account: %s',
-          $config_link,
-          phutil_tag('strong', array(), implode(', ', $email_domains))));
+    $issues = array();
+    if ($domains_value) {
+      $issues[] = pht(
+        'Phabricator is configured with an email domain whitelist (in %s), so '.
+        'only users with a verified email address at one of these %s '.
+        'allowed domain(s) will be able to register an account: %s',
+        $domains_link,
+        phutil_count($domains_value),
+        phutil_tag('strong', array(), implode(', ', $domains_value)));
     } else {
-      $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $warning->setTitle(pht('Anyone Can Register an Account'));
-      $warning->appendChild(
-        pht(
-          'Anyone who can browse to this Phabricator install will be able to '.
-          'register an account. To restrict who can register an account, '.
-          'configure %s.',
-          $config_link));
+      $issues[] = pht(
+        'Anyone who can browse to this Phabricator install will be able to '.
+        'register an account. To add email domain restrictions, configure '.
+        '%s.',
+        $domains_link);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    if ($approval_value) {
+      $issues[] = pht(
+        'Administrative approvals are enabled (in %s), so all new users must '.
+        'have their accounts approved by an administrator.',
+        $approval_link);
+    } else {
+      $issues[] = pht(
+        'Administrative approvals are disabled, so users who register will '.
+        'be able to use their accounts immediately. To enable approvals, '.
+        'configure %s.',
+        $approval_link);
+    }
+
+    if (!$domains_value && !$approval_value) {
+      $severity = PHUIInfoView::SEVERITY_WARNING;
+      $issues[] = pht(
+        'You can safely ignore this warning if the install itself has '.
+        'access controls (for example, it is deployed on a VPN) or if all of '.
+        'the configured providers have access controls (for example, they are '.
+        'all private LDAP or OAuth servers).');
+    } else {
+      $severity = PHUIInfoView::SEVERITY_NOTICE;
+    }
+
+    $warning = id(new PHUIInfoView())
+      ->setSeverity($severity)
+      ->setErrors($issues);
+
+    $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setHref($this->getApplicationURI('config/new/'))
+        ->setIcon('fa-plus')
+        ->setDisabled(!$can_manage)
+        ->setText(pht('Add Provider'));
+
+    $list->setFlush(true);
+    $list = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Providers'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($list);
+
+    $title = pht('Auth Providers');
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-key')
+      ->addActionLink($button);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $warning,
         $list,
-      ),
-      array(
-        'title' => pht('Authentication Providers'),
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+  }
+
+  private function renderConfigLink($key) {
+    return phutil_tag(
+      'a',
+      array(
+        'href' => '/config/edit/'.$key.'/',
+        'target' => '_blank',
+      ),
+      $key);
   }
 
 }

@@ -8,10 +8,10 @@ final class DiffusionFileContentQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve file content from a repository.';
+    return pht('Retrieve file content from a repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 
@@ -19,29 +19,48 @@ final class DiffusionFileContentQueryConduitAPIMethod
     return array(
       'path' => 'required string',
       'commit' => 'required string',
-      'needsBlame' => 'optional bool',
+      'timeout' => 'optional int',
+      'byteLimit' => 'optional int',
     );
   }
 
   protected function getResult(ConduitAPIRequest $request) {
     $drequest = $this->getDiffusionRequest();
-    $needs_blame = $request->getValue('needsBlame');
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $drequest);
-    $file_query
-      ->setViewer($request->getUser())
-      ->setNeedsBlame($needs_blame);
-    $file_content = $file_query->loadFileContent();
-    if ($needs_blame) {
-      list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
-    } else {
-      $text_list = $rev_list = $blame_dict = array();
+
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest);
+
+    $timeout = $request->getValue('timeout');
+    if ($timeout) {
+      $file_query->setTimeout($timeout);
     }
-    $file_content
-      ->setBlameDict($blame_dict)
-      ->setRevList($rev_list)
-      ->setTextList($text_list);
-    return $file_content->toDictionary();
+
+    $byte_limit = $request->getValue('byteLimit');
+    if ($byte_limit) {
+      $file_query->setByteLimit($byte_limit);
+    }
+
+    $file = $file_query->execute();
+
+    $too_slow = (bool)$file_query->getExceededTimeLimit();
+    $too_huge = (bool)$file_query->getExceededByteLimit();
+
+    $file_phid = null;
+    if (!$too_slow && !$too_huge) {
+      $repository = $drequest->getRepository();
+      $repository_phid = $repository->getPHID();
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $file->attachToObject($repository_phid);
+      unset($unguarded);
+
+      $file_phid = $file->getPHID();
+    }
+
+    return array(
+      'tooSlow' => $too_slow,
+      'tooHuge' => $too_huge,
+      'filePHID' => $file_phid,
+    );
   }
 
 }

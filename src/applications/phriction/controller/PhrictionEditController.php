@@ -3,22 +3,15 @@
 final class PhrictionEditController
   extends PhrictionController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $current_version = null;
-    if ($this->id) {
+    if ($id) {
       $document = id(new PhrictionDocumentQuery())
-        ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->needContent(true)
         ->requireCapabilities(
           array(
@@ -53,7 +46,7 @@ final class PhrictionEditController
       }
 
       $document = id(new PhrictionDocumentQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withSlugs(array($slug))
         ->needContent(true)
         ->executeOne();
@@ -62,25 +55,8 @@ final class PhrictionEditController
         $content = $document->getContent();
         $current_version = $content->getVersion();
       } else {
-        if (PhrictionDocument::isProjectSlug($slug)) {
-          $project = id(new PhabricatorProjectQuery())
-            ->setViewer($user)
-            ->withPhrictionSlugs(array(
-              PhrictionDocument::getProjectSlugIdentifier($slug),
-            ))
-            ->executeOne();
-          if (!$project) {
-            return new Aphront404Response();
-          }
-        }
-        $document = new PhrictionDocument();
-        $document->setSlug($slug);
-
-        $content  = new PhrictionContent();
-        $content->setSlug($slug);
-
-        $default_title = PhabricatorSlug::getDefaultTitle($slug);
-        $content->setTitle($default_title);
+        $document = PhrictionDocument::initializeNewDocument($viewer, $slug);
+        $content = $document->getContent();
       }
     }
 
@@ -95,119 +71,13 @@ final class PhrictionEditController
       }
       $draft = id(new PhabricatorDraft())->loadOneWhere(
         'authorPHID = %s AND draftKey = %s',
-        $user->getPHID(),
+        $viewer->getPHID(),
         $draft_key);
     }
 
-    require_celerity_resource('phriction-document-css');
-
-    $e_title = true;
-    $notes = null;
-    $errors = array();
-
-    if ($request->isFormPost()) {
-
-      $overwrite = $request->getBool('overwrite');
-      if (!$overwrite) {
-        $edit_version = $request->getStr('contentVersion');
-        if ($edit_version != $current_version) {
-          $dialog = $this->newDialog()
-            ->setTitle(pht('Edit Conflict!'))
-            ->appendParagraph(
-              pht(
-                'Another user made changes to this document after you began '.
-                'editing it. Do you want to overwrite their changes?'))
-            ->appendParagraph(
-              pht(
-                'If you choose to overwrite their changes, you should review '.
-                'the document edit history to see what you overwrote, and '.
-                'then make another edit to merge the changes if necessary.'))
-            ->addSubmitButton(pht('Overwrite Changes'))
-            ->addCancelButton($request->getRequestURI());
-
-          $dialog->addHiddenInput('overwrite', 'true');
-          foreach ($request->getPassthroughRequestData() as $key => $value) {
-            $dialog->addHiddenInput($key, $value);
-          }
-
-          return $dialog;
-        }
-      }
-
-
-      $title = $request->getStr('title');
-      $notes = $request->getStr('description');
-
-      if (!strlen($title)) {
-        $e_title = pht('Required');
-        $errors[] = pht('Document title is required.');
-      } else {
-        $e_title = null;
-      }
-
-      if ($document->getID()) {
-        if ($content->getTitle() == $title &&
-            $content->getContent() == $request->getStr('content')) {
-
-          $dialog = new AphrontDialogView();
-          $dialog->setUser($user);
-          $dialog->setTitle(pht('No Edits'));
-          $dialog->appendChild(phutil_tag('p', array(), pht(
-            'You did not make any changes to the document.')));
-          $dialog->addCancelButton($request->getRequestURI());
-
-          return id(new AphrontDialogResponse())->setDialog($dialog);
-        }
-      } else if (!strlen($request->getStr('content'))) {
-
-        // We trigger this only for new pages. For existing pages, deleting
-        // all the content counts as deleting the page.
-
-        $dialog = new AphrontDialogView();
-        $dialog->setUser($user);
-        $dialog->setTitle(pht('Empty Page'));
-        $dialog->appendChild(phutil_tag('p', array(), pht(
-          'You can not create an empty document.')));
-        $dialog->addCancelButton($request->getRequestURI());
-
-        return id(new AphrontDialogResponse())->setDialog($dialog);
-      }
-
-      if (!count($errors)) {
-        $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
-          ->setActor($user)
-          ->setTitle($title)
-          ->setContent($request->getStr('content'))
-          ->setDescription($notes);
-
-        $editor->save();
-
-        if ($draft) {
-          $draft->delete();
-        }
-
-        $uri = PhrictionDocument::getSlugURI($document->getSlug());
-        return id(new AphrontRedirectResponse())->setURI($uri);
-      }
-    }
-
-    if ($document->getID()) {
-      $panel_header = pht('Edit Phriction Document');
-      $submit_button = pht('Save Changes');
-    } else {
-      $panel_header = pht('Create New Phriction Document');
-      $submit_button = pht('Create Document');
-    }
-
-    $uri = $document->getSlug();
-    $uri = PhrictionDocument::getSlugURI($uri);
-    $uri = PhabricatorEnv::getProductionURI($uri);
-
-    $cancel_uri = PhrictionDocument::getSlugURI($document->getSlug());
-
     if ($draft &&
-        strlen($draft->getDraft()) &&
-        ($draft->getDraft() != $content->getContent())) {
+      strlen($draft->getDraft()) &&
+      ($draft->getDraft() != $content->getContent())) {
       $content_text = $draft->getDraft();
 
       $discard = phutil_tag(
@@ -217,28 +87,134 @@ final class PhrictionEditController
         ),
         pht('discard this draft'));
 
-      $draft_note = new AphrontErrorView();
-      $draft_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $draft_note->setTitle('Recovered Draft');
-      $draft_note->appendChild(hsprintf(
-        '<p>Showing a saved draft of your edits, you can %s.</p>',
-        $discard));
+      $draft_note = new PHUIInfoView();
+      $draft_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
+      $draft_note->setTitle(pht('Recovered Draft'));
+      $draft_note->appendChild(
+        hsprintf(
+          '<p>%s</p>',
+          pht(
+            'Showing a saved draft of your edits, you can %s.',
+            $discard)));
     } else {
       $content_text = $content->getContent();
       $draft_note = null;
     }
 
+    require_celerity_resource('phriction-document-css');
+
+    $e_title = true;
+    $e_content = true;
+    $validation_exception = null;
+    $notes = null;
+    $title = $content->getTitle();
+    $overwrite = false;
+    $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $document->getPHID());
+
+    if ($request->isFormPost()) {
+
+      $title = $request->getStr('title');
+      $content_text = $request->getStr('content');
+      $notes = $request->getStr('description');
+      $current_version = $request->getInt('contentVersion');
+      $v_view = $request->getStr('viewPolicy');
+      $v_edit = $request->getStr('editPolicy');
+      $v_cc   = $request->getArr('cc');
+
+      $xactions = array();
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+        ->setNewValue($title);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+        ->setNewValue($content_text);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($v_view);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+        ->setNewValue($v_edit);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('=' => $v_cc));
+
+      $editor = id(new PhrictionTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setDescription($notes)
+        ->setProcessContentVersionError(!$request->getBool('overwrite'))
+        ->setContentVersion($current_version);
+
+      try {
+        $editor->applyTransactions($document, $xactions);
+
+        if ($draft) {
+          $draft->delete();
+        }
+
+        $uri = PhrictionDocument::getSlugURI($document->getSlug());
+        return id(new AphrontRedirectResponse())->setURI($uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+        $e_title = nonempty(
+          $ex->getShortMessage(PhrictionTransaction::TYPE_TITLE),
+          true);
+        $e_content = nonempty(
+          $ex->getShortMessage(PhrictionTransaction::TYPE_CONTENT),
+          true);
+
+        // if we're not supposed to process the content version error, then
+        // overwrite that content...!
+        if (!$editor->getProcessContentVersionError()) {
+          $overwrite = true;
+        }
+
+        $document->setViewPolicy($v_view);
+        $document->setEditPolicy($v_edit);
+      }
+    }
+
+    if ($document->getID()) {
+      $panel_header = pht('Edit Document: %s', $content->getTitle());
+      $page_title = pht('Edit Document');
+      $header_icon = 'fa-pencil';
+      if ($overwrite) {
+        $submit_button = pht('Overwrite Changes');
+      } else {
+        $submit_button = pht('Save Changes');
+      }
+    } else {
+      $panel_header = pht('Create New Phriction Document');
+      $submit_button = pht('Create Document');
+      $page_title = pht('Create Document');
+      $header_icon = 'fa-plus-square';
+    }
+
+    $uri = $document->getSlug();
+    $uri = PhrictionDocument::getSlugURI($uri);
+    $uri = PhabricatorEnv::getProductionURI($uri);
+
+    $cancel_uri = PhrictionDocument::getSlugURI($document->getSlug());
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($document)
+      ->execute();
+    $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
+    $edit_capability = PhabricatorPolicyCapability::CAN_EDIT;
+
     $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->setWorkflow(true)
-      ->setAction($request->getRequestURI()->getPath())
+      ->setUser($viewer)
       ->addHiddenInput('slug', $document->getSlug())
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
       ->addHiddenInput('contentVersion', $current_version)
+      ->addHiddenInput('overwrite', $overwrite)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
-          ->setValue($content->getTitle())
+          ->setValue($title)
           ->setError($e_title)
           ->setName('title'))
       ->appendChild(
@@ -249,10 +225,34 @@ final class PhrictionEditController
         id(new PhabricatorRemarkupControl())
           ->setLabel(pht('Content'))
           ->setValue($content_text)
+          ->setError($e_content)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
           ->setID('document-textarea')
-          ->setUser($user))
+          ->setUser($viewer))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Subscribers'))
+          ->setName('cc')
+          ->setValue($v_cc)
+          ->setUser($viewer)
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('viewPolicy')
+          ->setPolicyObject($document)
+          ->setCapability($view_capability)
+          ->setPolicies($policies)
+          ->setCaption(
+            $document->describeAutomaticCapability($view_capability)))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('editPolicy')
+          ->setPolicyObject($document)
+          ->setCapability($edit_capability)
+          ->setPolicies($policies)
+          ->setCaption(
+            $document->describeAutomaticCapability($edit_capability)))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Edit Notes'))
@@ -265,15 +265,16 @@ final class PhrictionEditController
           ->setValue($submit_button));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edit Document'))
-      ->setFormErrors($errors)
+      ->setHeaderText(pht('Document'))
+      ->setValidationException($validation_exception)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
-      ->setHeader(pht('Document Preview'))
-      ->setPreviewURI('/phriction/preview/')
+      ->setHeader($content->getTitle())
+      ->setPreviewURI('/phriction/preview/'.$document->getSlug())
       ->setControlID('document-textarea')
-      ->setSkin('document');
+      ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($document->getID()) {
@@ -284,17 +285,25 @@ final class PhrictionEditController
     } else {
       $crumbs->addTextCrumb(pht('Create'));
     }
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($panel_header)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $draft_note,
         $form_box,
         $preview,
-      ),
-      array(
-        'title'   => pht('Edit Document'),
       ));
+
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

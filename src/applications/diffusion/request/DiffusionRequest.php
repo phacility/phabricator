@@ -7,9 +7,8 @@
  * @task new Creating Requests
  * @task uri Managing Diffusion URIs
  */
-abstract class DiffusionRequest {
+abstract class DiffusionRequest extends Phobject {
 
-  protected $callsign;
   protected $path;
   protected $line;
   protected $branch;
@@ -22,11 +21,12 @@ abstract class DiffusionRequest {
   protected $repository;
   protected $repositoryCommit;
   protected $repositoryCommitData;
-  protected $arcanistProjects;
 
+  private $isClusterRequest = false;
   private $initFromConduit = true;
   private $user;
   private $branchObject = false;
+  private $refAlternatives;
 
   abstract public function supportsBranches();
   abstract protected function isStableCommit($symbol);
@@ -46,9 +46,8 @@ abstract class DiffusionRequest {
    *
    * Parameters are:
    *
-   *   - `callsign` Repository callsign. Provide this or `repository`.
-   *   - `user` Viewing user. Required if `callsign` is provided.
-   *   - `repository` Repository object. Provide this or `callsign`.
+   *   - `repository` Repository object or identifier.
+   *   - `user` Viewing user. Required if `repository` is an identifier.
    *   - `branch` Optional, branch name.
    *   - `path` Optional, file path.
    *   - `commit` Optional, commit identifier.
@@ -59,54 +58,64 @@ abstract class DiffusionRequest {
    * @task new
    */
   final public static function newFromDictionary(array $data) {
-    if (isset($data['repository']) && isset($data['callsign'])) {
+    $repository_key = 'repository';
+    $identifier_key = 'callsign';
+    $viewer_key = 'user';
+
+    $repository = idx($data, $repository_key);
+    $identifier = idx($data, $identifier_key);
+
+    $have_repository = ($repository !== null);
+    $have_identifier = ($identifier !== null);
+
+    if ($have_repository && $have_identifier) {
       throw new Exception(
-        "Specify 'repository' or 'callsign', but not both.");
-    } else if (!isset($data['repository']) && !isset($data['callsign'])) {
-      throw new Exception(
-        "One of 'repository' and 'callsign' is required.");
-    } else if (isset($data['callsign']) && empty($data['user'])) {
-      throw new Exception(
-        "Parameter 'user' is required if 'callsign' is provided.");
+        pht(
+          'Specify "%s" or "%s", but not both.',
+          $repository_key,
+          $identifier_key));
     }
 
-    if (isset($data['repository'])) {
-      $object = self::newFromRepository($data['repository']);
+    if (!$have_repository && !$have_identifier) {
+      throw new Exception(
+        pht(
+          'One of "%s" and "%s" is required.',
+          $repository_key,
+          $identifier_key));
+    }
+
+    if ($have_repository) {
+      if (!($repository instanceof PhabricatorRepository)) {
+        if (empty($data[$viewer_key])) {
+          throw new Exception(
+            pht(
+              'Parameter "%s" is required if "%s" is provided.',
+              $viewer_key,
+              $identifier_key));
+        }
+
+        $identifier = $repository;
+        $repository = null;
+      }
+    }
+
+    if ($identifier !== null) {
+      $object = self::newFromIdentifier(
+        $identifier,
+        $data[$viewer_key],
+        idx($data, 'edit'));
     } else {
-      $object = self::newFromCallsign($data['callsign'], $data['user']);
+      $object = self::newFromRepository($repository);
+    }
+
+    if (!$object) {
+      return null;
     }
 
     $object->initializeFromDictionary($data);
 
     return $object;
   }
-
-
-  /**
-   * Create a new request from an Aphront request dictionary. This is an
-   * internal method that you generally should not call directly; instead,
-   * call @{method:newFromDictionary}.
-   *
-   * @param   map                 Map of Aphront request data.
-   * @return  DiffusionRequest    New request object.
-   * @task new
-   */
-  final public static function newFromAphrontRequestDictionary(
-    array $data,
-    AphrontRequest $request) {
-
-    $callsign = phutil_unescape_uri_path_component(idx($data, 'callsign'));
-    $object = self::newFromCallsign($callsign, $request->getUser());
-
-    $use_branches = $object->supportsBranches();
-    $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
-
-    $object->setUser($request->getUser());
-    $object->initializeFromDictionary($parsed);
-    $object->lint = $request->getStr('lint');
-    return $object;
-  }
-
 
   /**
    * Internal.
@@ -121,22 +130,33 @@ abstract class DiffusionRequest {
   /**
    * Internal. Use @{method:newFromDictionary}, not this method.
    *
-   * @param   string              Repository callsign.
+   * @param   string              Repository identifier.
    * @param   PhabricatorUser     Viewing user.
    * @return  DiffusionRequest    New request object.
    * @task new
    */
-  final private static function newFromCallsign(
-    $callsign,
-    PhabricatorUser $viewer) {
+  final private static function newFromIdentifier(
+    $identifier,
+    PhabricatorUser $viewer,
+    $need_edit = false) {
 
-    $repository = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
-      ->withCallsigns(array($callsign))
-      ->executeOne();
+      ->withIdentifiers(array($identifier))
+      ->needURIs(true);
+
+    if ($need_edit) {
+      $query->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ));
+    }
+
+    $repository = $query->executeOne();
 
     if (!$repository) {
-      throw new Exception("No such repository '{$callsign}'.");
+      return null;
     }
 
     return self::newFromRepository($repository);
@@ -163,13 +183,12 @@ abstract class DiffusionRequest {
     $class = idx($map, $repository->getVersionControlSystem());
 
     if (!$class) {
-      throw new Exception('Unknown version control system!');
+      throw new Exception(pht('Unknown version control system!'));
     }
 
     $object = new $class();
 
     $object->repository = $repository;
-    $object->callsign   = $repository->getCallsign();
 
     return $object;
   }
@@ -183,9 +202,16 @@ abstract class DiffusionRequest {
    * @task new
    */
   final private function initializeFromDictionary(array $data) {
-    $this->path            = idx($data, 'path');
-    $this->line            = idx($data, 'line');
+    $blob = idx($data, 'blob');
+    if (strlen($blob)) {
+      $blob = self::parseRequestBlob($blob, $this->supportsBranches());
+      $data = $blob + $data;
+    }
+
+    $this->path = idx($data, 'path');
+    $this->line = idx($data, 'line');
     $this->initFromConduit = idx($data, 'initFromConduit', true);
+    $this->lint = idx($data, 'lint');
 
     $this->symbolicCommit = idx($data, 'commit');
     if ($this->supportsBranches()) {
@@ -196,16 +222,14 @@ abstract class DiffusionRequest {
       $user = idx($data, 'user');
       if (!$user) {
         throw new Exception(
-          'You must provide a PhabricatorUser in the dictionary!');
+          pht(
+            'You must provide a %s in the dictionary!',
+            'PhabricatorUser'));
       }
       $this->setUser($user);
     }
 
     $this->didInitialize();
-  }
-
-  final protected function shouldInitFromConduit() {
-    return $this->initFromConduit;
   }
 
   final public function setUser(PhabricatorUser $user) {
@@ -218,10 +242,6 @@ abstract class DiffusionRequest {
 
   public function getRepository() {
     return $this->repository;
-  }
-
-  public function getCallsign() {
-    return $this->callsign;
   }
 
   public function setPath($path) {
@@ -380,28 +400,17 @@ abstract class DiffusionRequest {
     if (empty($this->repositoryCommit)) {
       $repository = $this->getRepository();
 
-      // TODO: (T603) This should be a real query, but we need to sort out
-      // the viewer.
-      $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-        'repositoryID = %d AND commitIdentifier = %s',
-        $repository->getID(),
-        $this->getStableCommit());
+      $commit = id(new DiffusionCommitQuery())
+        ->setViewer($this->getUser())
+        ->withRepository($repository)
+        ->withIdentifiers(array($this->getStableCommit()))
+        ->executeOne();
       if ($commit) {
         $commit->attachRepository($repository);
       }
       $this->repositoryCommit = $commit;
     }
     return $this->repositoryCommit;
-  }
-
-  public function loadArcanistProjects() {
-    if (empty($this->arcanistProjects)) {
-      $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
-        'repositoryID = %d',
-        $this->getRepository()->getID());
-      $this->arcanistProjects = $projects;
-    }
-    return $this->arcanistProjects;
   }
 
   public function loadCommitData() {
@@ -413,7 +422,7 @@ abstract class DiffusionRequest {
       if (!$data) {
         $data = new PhabricatorRepositoryCommitData();
         $data->setCommitMessage(
-          '(This commit has not been fully parsed yet.)');
+          pht('(This commit has not been fully parsed yet.)'));
       }
       $this->repositoryCommitData = $data;
     }
@@ -423,15 +432,6 @@ abstract class DiffusionRequest {
 /* -(  Managing Diffusion URIs  )-------------------------------------------- */
 
 
-  /**
-   * Generate a Diffusion URI using this request to provide defaults. See
-   * @{method:generateDiffusionURI} for details. This method is the same, but
-   * preserves the request parameters if they are not overridden.
-   *
-   * @param   map         See @{method:generateDiffusionURI}.
-   * @return  PhutilURI   Generated URI.
-   * @task uri
-   */
   public function generateURI(array $params) {
     if (empty($params['stable'])) {
       $default_commit = $this->getSymbolicCommit();
@@ -440,166 +440,20 @@ abstract class DiffusionRequest {
     }
 
     $defaults = array(
-      'callsign'  => $this->getCallsign(),
       'path'      => $this->getPath(),
       'branch'    => $this->getBranch(),
       'commit'    => $default_commit,
       'lint'      => idx($params, 'lint', $this->getLint()),
     );
+
     foreach ($defaults as $key => $val) {
       if (!isset($params[$key])) { // Overwrite NULL.
         $params[$key] = $val;
       }
     }
-    return self::generateDiffusionURI($params);
+
+    return $this->getRepository()->generateURI($params);
   }
-
-
-  /**
-   * Generate a Diffusion URI from a parameter map. Applies the correct encoding
-   * and formatting to the URI. Parameters are:
-   *
-   *   - `action` One of `history`, `browse`, `change`, `lastmodified`,
-   *     `branch`, `tags`, `branches`,  or `revision-ref`. The action specified
-   *      by the URI.
-   *   - `callsign` Repository callsign.
-   *   - `branch` Optional if action is not `branch`, branch name.
-   *   - `path` Optional, path to file.
-   *   - `commit` Optional, commit identifier.
-   *   - `line` Optional, line range.
-   *   - `lint` Optional, lint code.
-   *   - `params` Optional, query parameters.
-   *
-   * The function generates the specified URI and returns it.
-   *
-   * @param   map         See documentation.
-   * @return  PhutilURI   Generated URI.
-   * @task uri
-   */
-  public static function generateDiffusionURI(array $params) {
-    $action = idx($params, 'action');
-
-    $callsign = idx($params, 'callsign');
-    $path     = idx($params, 'path');
-    $branch   = idx($params, 'branch');
-    $commit   = idx($params, 'commit');
-    $line     = idx($params, 'line');
-
-    if (strlen($callsign)) {
-      $callsign = phutil_escape_uri_path_component($callsign).'/';
-    }
-
-    if (strlen($branch)) {
-      $branch = phutil_escape_uri_path_component($branch).'/';
-    }
-
-    if (strlen($path)) {
-      $path = ltrim($path, '/');
-      $path = str_replace(array(';', '$'), array(';;', '$$'), $path);
-      $path = phutil_escape_uri($path);
-    }
-
-    $path = "{$branch}{$path}";
-
-    if (strlen($commit)) {
-      $commit = str_replace('$', '$$', $commit);
-      $commit = ';'.phutil_escape_uri($commit);
-    }
-
-    if (strlen($line)) {
-      $line = '$'.phutil_escape_uri($line);
-    }
-
-    $req_callsign = false;
-    $req_branch   = false;
-    $req_commit   = false;
-
-    switch ($action) {
-      case 'history':
-      case 'browse':
-      case 'change':
-      case 'lastmodified':
-      case 'tags':
-      case 'branches':
-      case 'lint':
-        $req_callsign = true;
-        break;
-      case 'branch':
-        $req_callsign = true;
-        $req_branch = true;
-        break;
-      case 'commit':
-        $req_callsign = true;
-        $req_commit = true;
-        break;
-    }
-
-    if ($req_callsign && !strlen($callsign)) {
-      throw new Exception(
-        "Diffusion URI action '{$action}' requires callsign!");
-    }
-
-    if ($req_commit && !strlen($commit)) {
-      throw new Exception(
-        "Diffusion URI action '{$action}' requires commit!");
-    }
-
-    switch ($action) {
-      case 'change':
-      case 'history':
-      case 'browse':
-      case 'lastmodified':
-      case 'tags':
-      case 'branches':
-      case 'lint':
-      case 'pathtree':
-        $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
-        break;
-      case 'branch':
-        if (strlen($path)) {
-          $uri = "/diffusion/{$callsign}repository/{$path}";
-        } else {
-          $uri = "/diffusion/{$callsign}";
-        }
-        break;
-      case 'external':
-        $commit = ltrim($commit, ';');
-        $uri = "/diffusion/external/{$commit}/";
-        break;
-      case 'rendering-ref':
-        // This isn't a real URI per se, it's passed as a query parameter to
-        // the ajax changeset stuff but then we parse it back out as though
-        // it came from a URI.
-        $uri = rawurldecode("{$path}{$commit}");
-        break;
-      case 'commit':
-        $commit = ltrim($commit, ';');
-        $callsign = rtrim($callsign, '/');
-        $uri = "/r{$callsign}{$commit}";
-        break;
-      default:
-        throw new Exception("Unknown Diffusion URI action '{$action}'!");
-    }
-
-    if ($action == 'rendering-ref') {
-      return $uri;
-    }
-
-    $uri = new PhutilURI($uri);
-
-    if (isset($params['lint'])) {
-      $params['params'] = idx($params, 'params', array()) + array(
-        'lint' => $params['lint'],
-      );
-    }
-
-    if (idx($params, 'params')) {
-      $uri->setQueryParams($params['params']);
-    }
-
-    return $uri;
-  }
-
 
   /**
    * Internal. Public only for unit tests.
@@ -665,7 +519,7 @@ abstract class DiffusionRequest {
       // Prevent any hyjinx since we're ultimately shipping this to the
       // filesystem under a lot of workflows.
       if ($part == '..') {
-        throw new Exception('Invalid path URI.');
+        throw new Exception(pht('Invalid path URI.'));
       }
     }
 
@@ -689,71 +543,152 @@ abstract class DiffusionRequest {
 
   protected function raisePermissionException() {
     $host = php_uname('n');
-    $callsign = $this->getRepository()->getCallsign();
     throw new DiffusionSetupException(
-      "The clone of this repository ('{$callsign}') on the local machine ".
-      "('{$host}') could not be read. Ensure that the repository is in a ".
-      "location where the web server has read permissions.");
+      pht(
+        'The clone of this repository ("%s") on the local machine ("%s") '.
+        'could not be read. Ensure that the repository is in a '.
+        'location where the web server has read permissions.',
+        $this->getRepository()->getDisplayName(),
+        $host));
   }
 
   protected function raiseCloneException() {
     $host = php_uname('n');
-    $callsign = $this->getRepository()->getCallsign();
     throw new DiffusionSetupException(
-      "The working copy for this repository ('{$callsign}') hasn't been ".
-      "cloned yet on this machine ('{$host}'). Make sure you've started the ".
-      "Phabricator daemons. If this problem persists for longer than a clone ".
-      "should take, check the daemon logs (in the Daemon Console) to see if ".
-      "there were errors cloning the repository. Consult the 'Diffusion User ".
-      "Guide' in the documentation for help setting up repositories.");
+      pht(
+        'The working copy for this repository ("%s") has not been cloned yet '.
+        'on this machine ("%s"). Make sure you havestarted the Phabricator '.
+        'daemons. If this problem persists for longer than a clone should '.
+        'take, check the daemon logs (in the Daemon Console) to see if there '.
+        'were errors cloning the repository. Consult the "Diffusion User '.
+        'Guide" in the documentation for help setting up repositories.',
+        $this->getRepository()->getDisplayName(),
+        $host));
   }
 
   private function queryStableCommit() {
+    $types = array();
     if ($this->symbolicCommit) {
       $ref = $this->symbolicCommit;
     } else {
       if ($this->supportsBranches()) {
-        $ref = $this->getResolvableBranchName($this->getBranch());
+        $ref = $this->getBranch();
+        $types = array(
+          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+        );
       } else {
         $ref = 'HEAD';
       }
     }
 
-    $results = $this->resolveRefs(array($ref));
+    $results = $this->resolveRefs(array($ref), $types);
 
     $matches = idx($results, $ref, array());
-    if (count($matches) !== 1) {
-      $message = pht('Ref "%s" is ambiguous or does not exist.', $ref);
+    if (!$matches) {
+      $message = pht(
+        'Ref "%s" does not exist in this repository.',
+        $ref);
       throw id(new DiffusionRefNotFoundException($message))
         ->setRef($ref);
     }
 
-    $match = head($matches);
+    if (count($matches) > 1) {
+      $match = $this->chooseBestRefMatch($ref, $matches);
+    } else {
+      $match = head($matches);
+    }
 
     $this->stableCommit = $match['identifier'];
     $this->symbolicType = $match['type'];
   }
 
-  protected function getResolvableBranchName($branch) {
-    return $branch;
+  public function getRefAlternatives() {
+    // Make sure we've resolved the reference into a stable commit first.
+    try {
+      $this->getStableCommit();
+    } catch (DiffusionRefNotFoundException $ex) {
+      // If we have a bad reference, just return the empty set of
+      // alternatives.
+    }
+    return $this->refAlternatives;
   }
 
-  private function resolveRefs(array $refs) {
-    if ($this->shouldInitFromConduit()) {
-      return DiffusionQuery::callConduitWithDiffusionRequest(
+  private function chooseBestRefMatch($ref, array $results) {
+    // First, filter out less-desirable matches.
+    $candidates = array();
+    foreach ($results as $result) {
+      // Exclude closed heads.
+      if ($result['type'] == 'branch') {
+        if (idx($result, 'closed')) {
+          continue;
+        }
+      }
+
+      $candidates[] = $result;
+    }
+
+    // If we filtered everything, undo the filtering.
+    if (!$candidates) {
+      $candidates = $results;
+    }
+
+    // TODO: Do a better job of selecting the best match?
+    $match = head($candidates);
+
+    // After choosing the best alternative, save all the alternatives so the
+    // UI can show them to the user.
+    if (count($candidates) > 1) {
+      $this->refAlternatives = $candidates;
+    }
+
+    return $match;
+  }
+
+  private function resolveRefs(array $refs, array $types) {
+    // First, try to resolve refs from fast cache sources.
+    $cached_query = id(new DiffusionCachedResolveRefsQuery())
+      ->setRepository($this->getRepository())
+      ->withRefs($refs);
+
+    if ($types) {
+      $cached_query->withTypes($types);
+    }
+
+    $cached_results = $cached_query->execute();
+
+    // Throw away all the refs we resolved. Hopefully, we'll throw away
+    // everything here.
+    foreach ($refs as $key => $ref) {
+      if (isset($cached_results[$ref])) {
+        unset($refs[$key]);
+      }
+    }
+
+    // If we couldn't pull everything out of the cache, execute the underlying
+    // VCS operation.
+    if ($refs) {
+      $vcs_results = DiffusionQuery::callConduitWithDiffusionRequest(
         $this->getUser(),
         $this,
         'diffusion.resolverefs',
         array(
+          'types' => $types,
           'refs' => $refs,
         ));
     } else {
-      return id(new DiffusionLowLevelResolveRefsQuery())
-        ->setRepository($this->getRepository())
-        ->withRefs($refs)
-        ->execute();
+      $vcs_results = array();
     }
+
+    return $vcs_results + $cached_results;
   }
 
+  public function setIsClusterRequest($is_cluster_request) {
+    $this->isClusterRequest = $is_cluster_request;
+    return $this;
+  }
+
+  public function getIsClusterRequest() {
+    return $this->isClusterRequest;
+  }
 
 }

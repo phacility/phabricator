@@ -3,19 +3,19 @@
 final class PhabricatorFilesManagementPurgeWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('purge')
-      ->setSynopsis('Delete files with missing data.')
+      ->setSynopsis(pht('Delete files with missing data.'))
       ->setArguments(
         array(
           array(
             'name'      => 'all',
-            'help'      => 'Update all files.',
+            'help'      => pht('Update all files.'),
           ),
           array(
             'name'      => 'dry-run',
-            'help'      => 'Show what would be updated.',
+            'help'      => pht('Show what would be updated.'),
           ),
           array(
             'name'      => 'names',
@@ -30,8 +30,10 @@ final class PhabricatorFilesManagementPurgeWorkflow
     $iterator = $this->buildIterator($args);
     if (!$iterator) {
       throw new PhutilArgumentUsageException(
-        'Either specify a list of files to purge, or use `--all` '.
-        'to purge all files.');
+        pht(
+          'Either specify a list of files to purge, or use `%s` '.
+          'to purge all files.',
+          '--all'));
     }
 
     $is_dry_run = $args->getArg('dry-run');
@@ -48,17 +50,17 @@ final class PhabricatorFilesManagementPurgeWorkflow
 
       if ($okay) {
         $console->writeOut(
-          "%s: File data is OK, not purging.\n",
-          $fid);
+          "%s\n",
+          pht('%s: File data is OK, not purging.', $fid));
       } else {
         if ($is_dry_run) {
           $console->writeOut(
-            "%s: Would purge (dry run).\n",
-            $fid);
+            "%s\n",
+            pht('%s: Would purge (dry run).', $fid));
         } else {
           $console->writeOut(
-            "%s: Purging.\n",
-            $fid);
+            "%s\n",
+            pht('%s: Purging.', $fid));
           $file->delete();
         }
       }

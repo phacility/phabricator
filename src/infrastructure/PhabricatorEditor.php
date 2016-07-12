@@ -17,7 +17,7 @@ abstract class PhabricatorEditor extends Phobject {
   final public function requireActor() {
     $actor = $this->getActor();
     if (!$actor) {
-      throw new Exception('You must setActor()!');
+      throw new PhutilInvalidStateException('setActor');
     }
     return $actor;
   }

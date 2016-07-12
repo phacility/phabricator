@@ -9,6 +9,10 @@ final class PhabricatorDashboardPanelCoreCustomField
   }
 
   public function createFields($object) {
+    if (!$object->getPanelType()) {
+      return array();
+    }
+
     $impl = $object->requireImplementation();
     $specs = $impl->getFieldSpecifications();
     return PhabricatorStandardCustomField::buildStandardFields($this, $specs);
@@ -21,6 +25,7 @@ final class PhabricatorDashboardPanelCoreCustomField
   public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
     $key = $this->getProxy()->getRawStandardFieldKey();
     $this->setValueFromStorage($object->getProperty($key));
+    $this->didSetValueFromStorage();
   }
 
   public function applyApplicationTransactionInternalEffects(

@@ -23,6 +23,7 @@ JX.install('DraggableList', {
     JX.Stratcom.listen('mousemove', null, JX.bind(this, this._onmove));
     JX.Stratcom.listen('scroll', null, JX.bind(this, this._onmove));
     JX.Stratcom.listen('mouseup', null, JX.bind(this, this._ondrop));
+    JX.Stratcom.listen('keypress', null, JX.bind(this, this._onkey));
   },
 
   events : [
@@ -37,23 +38,30 @@ JX.install('DraggableList', {
     'didReceive'],
 
   properties : {
-    findItemsHandler : null
+    findItemsHandler: null,
+    canDragX: false,
+    outerContainer: null,
+    hasInfiniteHeight: false
   },
 
   members : {
     _root : null,
     _dragging : null,
     _locked : 0,
-    _origin : null,
-    _originScroll : null,
     _target : null,
     _targets : null,
-    _dimensions : null,
     _ghostHandler : null,
     _ghostNode : null,
     _group : null,
-    _lastMousePosition: null,
-    _lastAdjust: null,
+    _cursorPosition: null,
+    _cursorOrigin: null,
+    _cursorScroll: null,
+    _frame: null,
+    _clone: null,
+    _offset: null,
+    _autoscroll: null,
+    _autoscroller: null,
+    _autotimer: null,
 
     getRootNode : function() {
       return this._root;
@@ -98,10 +106,6 @@ JX.install('DraggableList', {
       return this;
     },
 
-    _canDragX : function() {
-      return this._hasGroup();
-    },
-
     _hasGroup : function() {
       return (this._group.length > 1);
     },
@@ -132,7 +136,17 @@ JX.install('DraggableList', {
         }
       }
 
-      return handler();
+      var items = handler();
+
+      // Make sure the clone element is never included as a target.
+      for (var ii = 0; ii < items.length; ii++) {
+        if (items[ii] === this._clone) {
+          items.splice(ii, 1);
+          break;
+        }
+      }
+
+      return items;
     },
 
     _ondrag : function(e) {
@@ -168,25 +182,73 @@ JX.install('DraggableList', {
 
       e.kill();
 
-      this._dragging = e.getNode(this._sigil);
-      this._origin = JX.$V(e);
-      this._originScroll = JX.Vector.getAggregateScrollForNode(this._dragging);
-      this._dimensions = JX.$V(this._dragging);
+      var drag = e.getNode(this._sigil);
+
+      this._autoscroll = {};
+      this._autoscroller = setInterval(JX.bind(this, this._onautoscroll), 10);
+      this._autotimer = null;
 
       for (var ii = 0; ii < this._group.length; ii++) {
         this._group[ii]._clearTarget();
       }
 
-      if (!this.invoke('didBeginDrag', this._dragging).getPrevented()) {
-        // Set the height of all the ghosts in the group. In the normal case,
-        // this just sets this list's ghost height.
-        for (var jj = 0; jj < this._group.length; jj++) {
-          var ghost = this._group[jj].getGhostNode();
-          ghost.style.height = JX.Vector.getDim(this._dragging).y + 'px';
-        }
+      var pos = JX.$V(drag);
+      var dim = JX.Vector.getDim(drag);
 
-        JX.DOM.alterClass(this._dragging, 'drag-dragging', true);
+      // Create and adjust the ghost nodes.
+      for (var jj = 0; jj < this._group.length; jj++) {
+        var ghost = this._group[jj].getGhostNode();
+        ghost.style.height = dim.y + 'px';
       }
+
+      // Here's what's going on: we're cloning the thing that's being dragged.
+      // This is the "clone", stored in "this._clone". We're going to leave the
+      // original where it is in the document, and put the clone at top-level
+      // so it can be freely dragged around the whole document, even if it's
+      // inside a container with overflow hidden.
+
+      // Because the clone has been moved up, CSS classes which rely on some
+      // parent selector won't work. Draggable objects need to pick up all of
+      // their CSS properties without relying on container classes. This isn't
+      // great, but leaving them where they are in the document creates a large
+      // number of positioning problems with scrollable, absolute, relative,
+      // or overflow hidden containers.
+
+      // Note that we don't actually want to let the user drag it outside the
+      // document. One problem is that doing so lets the user drag objects
+      // infinitely far to the right by dragging them to the edge so the
+      // document extends, scrolling the document, dragging them to the edge
+      // of the new larger document, scrolling the document, and so on forever.
+
+      // To prevent this, we're putting a "frame" (stored in "this._frame") at
+      // top level, then putting the clone inside the frame. The frame has the
+      // same size as the entire viewport, and overflow hidden, so dragging the
+      // item outside the document just cuts it off.
+
+      // Create the clone for dragging.
+      var clone = drag.cloneNode(true);
+
+      pos.setPos(clone);
+      dim.setDim(clone);
+
+      JX.DOM.alterClass(drag, 'drag-dragging', true);
+      JX.DOM.alterClass(clone, 'drag-clone', true);
+
+      var frame = JX.$N('div', {className: 'drag-frame'});
+      frame.appendChild(clone);
+
+      document.body.appendChild(frame);
+
+      this._dragging = drag;
+      this._clone = clone;
+      this._frame = frame;
+
+      var cursor = JX.$V(e);
+      this._offset = new JX.Vector(pos.x - cursor.x, pos.y - cursor.y);
+
+      JX.Tooltip.lock();
+
+      this.invoke('didBeginDrag', this._dragging);
     },
 
     _getTargets : function() {
@@ -197,18 +259,6 @@ JX.install('DraggableList', {
           var item = items[ii];
 
           var ipos = JX.$V(item);
-          if (item == this._dragging) {
-            // If the item we're measuring is also the item we're dragging,
-            // we need to measure its position as though it was still in the
-            // list, not its current position in the document (which is
-            // under the cursor). To do this, adjust the measured position by
-            // removing the offsets we added to put the item underneath the
-            // cursor.
-            if (this._lastAdjust) {
-              ipos.x -= this._lastAdjust.x;
-              ipos.y -= this._lastAdjust.y;
-            }
-          }
 
           targets.push({
             item: items[ii],
@@ -237,12 +287,22 @@ JX.install('DraggableList', {
 
     _getTargetList : function(p) {
       var target_list;
+      var infinity;
       if (this._hasGroup()) {
         var group = this._group;
         for (var ii = 0; ii < group.length; ii++) {
           var root = group[ii].getRootNode();
           var rp = JX.$V(root);
           var rd = JX.Vector.getDim(root);
+
+          if (group[ii].getHasInfiniteHeight()) {
+            // The math doesn't work out quite right if we actually use
+            // Math.Infinity, so approximate infinity as the document height.
+            infinity = infinity || JX.Vector.getDocument().y;
+
+            rp.y = 0;
+            rd.y = infinity;
+          }
 
           var is_target = false;
           if (p.x >= rp.x && p.y >= rp.y) {
@@ -259,6 +319,10 @@ JX.install('DraggableList', {
       }
 
       return target_list;
+    },
+
+    _getTarget: function() {
+      return this._target;
     },
 
     _setTarget : function(cur_target) {
@@ -290,6 +354,11 @@ JX.install('DraggableList', {
       }
 
       this._target = false;
+
+      // Clear the target position cache, since adding or removing ghosts
+      // changes element positions.
+      this._dirtyTargetCache();
+
       return this;
     },
 
@@ -297,9 +366,6 @@ JX.install('DraggableList', {
       var ghost = this.getGhostNode();
       var targets = this._getTargets();
       var dragging = this._dragging;
-
-      var adjust_h = JX.Vector.getDim(ghost).y;
-      var adjust_y = JX.$V(ghost).y;
 
       // Find the node we're dragging the object underneath. This is the first
       // node in the list that's above the cursor. If that node is the node
@@ -314,34 +380,23 @@ JX.install('DraggableList', {
       var cur_target = null;
       var trigger;
       for (var ii = 0; ii < targets.length; ii++) {
-
-        // If the drop target indicator is above the target, we need to adjust
-        // the target's trigger height down accordingly. This makes dragging
-        // items down the list smoother, because the target doesn't jump to the
-        // next item while the cursor is over it.
-
         trigger = targets[ii].y;
-        if (adjust_y <= trigger) {
-          trigger += adjust_h;
-        }
 
         // If the cursor is above this target, we aren't dropping underneath it.
-
         if (trigger >= p.y) {
           continue;
         }
 
         // Don't choose the dragged row or its predecessor as targets.
-
         cur_target = targets[ii].item;
         if (!dragging) {
           // If the item on the cursor isn't from this list, it can't be
           // dropped onto itself or its predecessor in this list.
         } else {
-          if (cur_target == dragging) {
+          if (cur_target === dragging) {
             cur_target = false;
           }
-          if (targets[ii - 1] && targets[ii - 1].item == dragging) {
+          if (targets[ii - 1] && (targets[ii - 1].item === dragging)) {
             cur_target = false;
           }
         }
@@ -368,14 +423,16 @@ JX.install('DraggableList', {
       // reuse the known position.
 
       if (e.getType() == 'mousemove') {
-        this._lastMousePosition = JX.$V(e);
+        this._cursorPosition = JX.$V(e);
+        this._cursorOrigin = JX.$V(e);
+        this._cursorScroll = JX.Vector.getScroll();
       }
 
       if (!this._dragging) {
         return;
       }
 
-      if (!this._lastMousePosition) {
+      if (!this._cursorPosition) {
         return;
       }
 
@@ -383,9 +440,15 @@ JX.install('DraggableList', {
         // If this is a scroll event, the positions of drag targets may have
         // changed.
         this._dirtyTargetCache();
+
+        // Correct the cursor position to account for scrolling.
+        var s = JX.Vector.getScroll();
+        this._cursorPosition = new JX.$V(
+          this._cursorOrigin.x - (this._cursorScroll.x - s.x),
+          this._cursorOrigin.y - (this._cursorScroll.y - s.y));
       }
 
-      var p = JX.$V(this._lastMousePosition.x, this._lastMousePosition.y);
+      var p = JX.$V(this._cursorPosition.x, this._cursorPosition.y);
 
       var group = this._group;
       var target_list = this._getTargetList(p);
@@ -409,86 +472,245 @@ JX.install('DraggableList', {
         }
       }
 
-      // If the drop target indicator is above the cursor in the document,
-      // adjust the cursor position for the change in node document position.
-      // Do this before choosing a new target to avoid a flash of nonsense.
+      this._updateAutoscroll(this._cursorPosition);
 
-      var scroll = JX.Vector.getAggregateScrollForNode(this._dragging);
+      var f = JX.$V(this._frame);
+      p.x -= f.x;
+      p.y -= f.y;
 
-      var origin = {
-        x: this._origin.x + (this._originScroll.x - scroll.x),
-        y: this._origin.y + (this._originScroll.y - scroll.y)
-      };
+      p.y += this._offset.y;
+      this._clone.style.top = p.y + 'px';
 
-      var adjust_h = 0;
-      var adjust_y = 0;
-      if (this._target !== false) {
-        var ghost = this.getGhostNode();
-        adjust_h = JX.Vector.getDim(ghost).y;
-        adjust_y = JX.$V(ghost).y;
-
-        if (adjust_y <= origin.y) {
-          p.y -= adjust_h;
-        }
+      if (this.getCanDragX()) {
+        p.x += this._offset.x;
+        this._clone.style.left = p.x + 'px';
       }
-
-      if (this._canDragX()) {
-        p.x -= origin.x;
-      } else {
-        p.x = 0;
-      }
-
-      p.y -= origin.y;
-      this._lastAdjust = new JX.Vector(p.x, p.y);
-      p.setPos(this._dragging);
 
       e.kill();
     },
 
+    _updateAutoscroll: function(p) {
+      var container = this._getScrollAnchor().parentNode;
+      var autoscroll = {};
+
+      var outer = this.getOuterContainer();
+
+      var cpos;
+      var cdim;
+
+      while (container) {
+        if (outer && (container == outer)) {
+          break;
+        }
+
+        try {
+          cpos = JX.Vector.getPos(container);
+          cdim = JX.Vector.getDim(container);
+          if (container == document.body) {
+            cdim = JX.Vector.getViewport();
+            cpos.x += container.scrollLeft;
+            cpos.y += container.scrollTop;
+          }
+        } catch (ignored) {
+          break;
+        }
+
+        var fuzz = 64;
+
+        if (p.y <= cpos.y + fuzz) {
+          autoscroll.up = container;
+        }
+
+        if (p.y >= cpos.y + cdim.y - fuzz) {
+          autoscroll.down = container;
+        }
+
+        if (p.x <= cpos.x + fuzz) {
+          autoscroll.left = container;
+        }
+
+        if (p.x >= cpos.x + cdim.x - fuzz) {
+          autoscroll.right = container;
+        }
+
+        if (container == document.body) {
+          break;
+        }
+
+        container = container.parentNode;
+      }
+
+      this._autoscroll = autoscroll;
+    },
+
+    _onkey: function(e) {
+      // Cancel any current drag if the user presses escape.
+      if (this._dragging && (e.getSpecialKey() == 'esc')) {
+        e.kill();
+        this._drop(null);
+        return;
+      }
+    },
+
     _ondrop : function(e) {
+      if (this._dragging) {
+        e.kill();
+      }
+
+      var p = JX.$V(e);
+      this._drop(p);
+    },
+
+    _drop: function(cursor) {
       if (!this._dragging) {
         return;
       }
 
-      var p = JX.$V(e);
-
       var dragging = this._dragging;
       this._dragging = null;
+      clearInterval(this._autoscroller);
+      this._autoscroller = null;
+
+      JX.DOM.remove(this._frame);
+      this._frame = null;
+      this._clone = null;
 
       var target = false;
       var ghost = false;
 
-      var target_list = this._getTargetList(p);
-      if (target_list) {
-        target = target_list._target;
-        ghost = target_list.getGhostNode();
+      if (cursor) {
+        var target_list = this._getTargetList(cursor);
+        if (target_list) {
+          target = target_list._target;
+          ghost = target_list.getGhostNode();
+        }
       }
 
       JX.$V(0, 0).setPos(dragging);
 
-      if (target !== false) {
+      if (target === false) {
+        this.invoke('didCancelDrag', dragging);
+      } else {
         JX.DOM.remove(dragging);
         JX.DOM.replace(ghost, dragging);
         this.invoke('didSend', dragging, target_list);
         target_list.invoke('didReceive', dragging, this);
         target_list.invoke('didDrop', dragging, target, this);
-      } else {
-        this.invoke('didCancelDrag', dragging);
       }
 
       var group = this._group;
       for (var ii = 0; ii < group.length; ii++) {
         JX.DOM.alterClass(group[ii].getRootNode(), 'drag-target-list', false);
         group[ii]._clearTarget();
-        group[ii]._dirtyTargetCache();
-        group[ii]._lastAdjust = null;
       }
 
-      if (!this.invoke('didEndDrag', dragging).getPrevented()) {
-        JX.DOM.alterClass(dragging, 'drag-dragging', false);
+      JX.DOM.alterClass(dragging, 'drag-dragging', false);
+      JX.Tooltip.unlock();
+
+      this.invoke('didEndDrag', dragging);
+    },
+
+    _getScrollAnchor: function() {
+      // If you drag an item from column "A" into column "B", then move the
+      // mouse to the top or bottom of the screen, we need to scroll the target
+      // column (column "B"), not the original column.
+
+      var group = this._group;
+      for (var ii = 0; ii < group.length; ii++) {
+        var target = group[ii]._getTarget();
+        if (target) {
+          return group[ii]._ghostNode;
+        }
       }
 
-      e.kill();
+      return this._dragging;
+    },
+
+    _onautoscroll: function() {
+      var u = this._autoscroll.up;
+      var d = this._autoscroll.down;
+      var l = this._autoscroll.left;
+      var r = this._autoscroll.right;
+
+      var now = +new Date();
+
+      if (!this._autotimer) {
+        this._autotimer = now;
+        return;
+      }
+
+      var delta = now - this._autotimer;
+      this._autotimer = now;
+
+      var amount = 12 * (delta / 10);
+
+      var anchor = this._getScrollAnchor();
+
+      if (u && (u != d)) {
+        this._tryScroll(anchor, u, 'scrollTop', amount);
+      }
+
+      if (d && (d != u)) {
+        this._tryScroll(anchor, d, 'scrollTop', -amount);
+      }
+
+      if (l && (l != r)) {
+        this._tryScroll(anchor, l, 'scrollLeft', amount);
+      }
+
+      if (r && (r != l)) {
+        this._tryScroll(anchor, r, 'scrollLeft', -amount);
+      }
+    },
+
+    /**
+     * Walk up the tree from a node to some parent, trying to scroll every
+     * container. Stop when we find a container which we're able to scroll.
+     */
+    _tryScroll: function(from, to, property, amount) {
+      var value;
+
+      var container = from.parentNode;
+      while (container) {
+
+        // In Safari, we'll eventually reach `window.document`, which is not
+        // sufficently node-like to support sigil tests.
+        var lock = false;
+        if (container === window.document) {
+          lock = false;
+        } else {
+          // Some elements may respond to, e.g., `scrollTop` adjustment, even
+          // though they are not scrollable. This sigil disables adjustment
+          // for them.
+          var lock_sigil;
+          if (property == 'scrollTop') {
+            lock_sigil = 'lock-scroll-y-while-dragging';
+          }
+
+          if (lock_sigil) {
+            lock = JX.Stratcom.hasSigil(container, lock_sigil);
+          }
+        }
+
+        if (!lock) {
+          // Read the current scroll value.
+          value = container[property];
+
+          // Try to scroll.
+          container[property] -= amount;
+
+          // If we scrolled it, we're all done.
+          if (container[property] != value) {
+            break;
+          }
+
+          if (container == to) {
+            break;
+          }
+        }
+
+        container = container.parentNode;
+      }
     },
 
     lock : function() {

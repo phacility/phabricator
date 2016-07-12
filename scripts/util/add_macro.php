@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('load files as image macros');
+$args->setTagline(pht('load files as image macros'));
 $args->setSynopsis(<<<EOHELP
 **add_macro.php** __image__ [--as __name__]
     Add an image macro. This can be useful for importing a large number
@@ -19,8 +19,8 @@ $args->parse(
     array(
       'name'  => 'as',
       'param' => 'name',
-      'help'  => 'Use a specific name instead of the first part of the image '.
-                 'name.',
+      'help'  => pht(
+        'Use a specific name instead of the first part of the image name.'),
     ),
     array(
       'name'      => 'more',
@@ -45,7 +45,7 @@ $existing = id(new PhabricatorFileImageMacro())->loadOneWhere(
   'name = %s',
   $name);
 if ($existing) {
-  throw new Exception("A macro already exists with the name '{$name}'!");
+  throw new Exception(pht("A macro already exists with the name '%s'!", $name));
 }
 
 $file = PhabricatorFile::newFromFileData(
@@ -62,4 +62,4 @@ $macro = id(new PhabricatorFileImageMacro())
 
 $id = $file->getID();
 
-echo "Added macro '{$name}' (F{$id}).\n";
+echo pht("Added macro '%s' (%s).", $name, "F{$id}")."\n";

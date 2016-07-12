@@ -8,25 +8,19 @@ final class PhrequentTrackingConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return pht(
-      'Returns current objects being tracked in Phrequent.');
+    return pht('Returns current objects being tracked in Phrequent.');
   }
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -3,14 +3,12 @@
 final class PhabricatorNotificationPanelController
   extends PhabricatorNotificationController {
 
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $query = id(new PhabricatorNotificationQuery())
-      ->setViewer($user)
-      ->withUserPHIDs(array($user->getPHID()))
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
       ->setLimit(15);
 
     $stories = $query->execute();
@@ -18,7 +16,9 @@ final class PhabricatorNotificationPanelController
     $clear_ui_class = 'phabricator-notification-clear-all';
     $clear_uri = id(new PhutilURI('/notification/clear/'));
     if ($stories) {
-      $builder = new PhabricatorNotificationBuilder($stories);
+      $builder = id(new PhabricatorNotificationBuilder($stories))
+        ->setUser($viewer);
+
       $notifications_view = $builder->buildView();
       $content = $notifications_view->render();
       $clear_uri->setQueryParam(
@@ -34,7 +34,7 @@ final class PhabricatorNotificationPanelController
       'a',
       array(
         'sigil' => 'workflow',
-        'href' => (string) $clear_uri,
+        'href' => (string)$clear_uri,
         'class' => $clear_ui_class,
       ),
       pht('Mark All Read'));
@@ -46,17 +46,8 @@ final class PhabricatorNotificationPanelController
       ),
       pht('Notifications'));
 
-    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
-      $connection_status = new PhabricatorNotificationStatusView();
-    } else {
-      $connection_status = phutil_tag(
-        'a',
-        array(
-          'href' => PhabricatorEnv::getDoclink(
-            'Notifications User Guide: Setup and Configuration'),
-        ),
-        pht('Notification Server not enabled.'));
-    }
+    $connection_status = new PhabricatorNotificationStatusView();
+
     $connection_ui = phutil_tag(
       'div',
       array(
@@ -80,8 +71,7 @@ final class PhabricatorNotificationPanelController
       $content,
       $connection_ui);
 
-    $unread_count = id(new PhabricatorFeedStoryNotification())
-      ->countUnread($user);
+    $unread_count = $viewer->getUnreadNotificationCount();
 
     $json = array(
       'content' => $content,

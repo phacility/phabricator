@@ -3,7 +3,7 @@
 final class PhabricatorFactManagementDestroyWorkflow
   extends PhabricatorFactManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('destroy')
       ->setSynopsis(pht('Destroy all facts.'))

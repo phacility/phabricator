@@ -18,18 +18,31 @@ final class PhabricatorPeopleListController
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
     $this->requireApplicationCapability(
       PeopleBrowseUserDirectoryCapability::CAPABILITY);
 
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->key)
       ->setSearchEngine(new PhabricatorPeopleSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
   }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $viewer = $this->getRequest()->getUser();
+
+    if ($viewer->getIsAdmin()) {
+      $crumbs->addAction(
+        id(new PHUIListItemView())
+        ->setName(pht('Create New User'))
+        ->setHref($this->getApplicationURI('create/'))
+        ->setIcon('fa-plus-square'));
+    }
+
+    return $crumbs;
+  }
+
 
 }

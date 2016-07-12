@@ -7,7 +7,7 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
   protected $chronologicalKey;
   protected $hasViewed;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_IDS          => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS   => false,
@@ -25,13 +25,23 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
         'userPHID_2' => array(
           'columns' => array('userPHID', 'hasViewed', 'primaryObjectPHID'),
         ),
+        'key_object' => array(
+          'columns' => array('primaryObjectPHID'),
+        ),
+        'key_chronological' => array(
+          'columns' => array('chronologicalKey'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
 
-  static public function updateObjectNotificationViews(
+  public static function updateObjectNotificationViews(
     PhabricatorUser $user,
     $object_phid) {
+
+    if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
@@ -50,20 +60,10 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
       $object_phid);
 
     unset($unguarded);
-  }
 
-  public function countUnread(PhabricatorUser $user) {
-    $conn = $this->establishConnection('r');
-
-    $data = queryfx_one(
-      $conn,
-      'SELECT COUNT(*) as count
-       FROM %T
-       WHERE userPHID = %s AND hasViewed = 0',
-      $this->getTableName(),
-      $user->getPHID());
-
-    return $data['count'];
+    $count_key = PhabricatorUserNotificationCountCacheType::KEY_COUNT;
+    PhabricatorUserCache::clearCache($count_key, $user->getPHID());
+    $user->clearCacheData($count_key);
   }
 
 }

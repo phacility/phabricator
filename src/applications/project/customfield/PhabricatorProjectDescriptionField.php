@@ -11,8 +11,10 @@ final class PhabricatorProjectDescriptionField
           'name'        => pht('Description'),
           'type'        => 'remarkup',
           'description' => pht('Short project description.'),
+          'fulltext'    => PhabricatorSearchDocumentFieldType::FIELD_BODY,
         ),
-      ));
+      ),
+      $internal = true);
   }
 
 }

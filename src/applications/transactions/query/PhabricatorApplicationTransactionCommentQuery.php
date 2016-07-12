@@ -1,16 +1,19 @@
 <?php
 
-final class PhabricatorApplicationTransactionCommentQuery
+abstract class PhabricatorApplicationTransactionCommentQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $template;
-
+  private $ids;
+  private $authorPHIDs;
   private $phids;
   private $transactionPHIDs;
+  private $isDeleted;
+  private $hasTransaction;
 
-  public function setTemplate(
-    PhabricatorApplicationTransactionComment $template) {
-    $this->template = $template;
+  abstract protected function getTemplate();
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
@@ -24,13 +27,28 @@ final class PhabricatorApplicationTransactionCommentQuery
     return $this;
   }
 
+  public function withAuthorPHIDs(array $phids) {
+    $this->authorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withIsDeleted($deleted) {
+    $this->isDeleted = $deleted;
+    return $this;
+  }
+
+  public function withHasTransaction($has_transaction) {
+    $this->hasTransaction = $has_transaction;
+    return $this;
+  }
+
   protected function loadPage() {
-    $table = $this->template;
+    $table = $this->getTemplate();
     $conn_r = $table->establishConnection('r');
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T xc %Q %Q %Q',
+      'SELECT * FROM %T xcomment %Q %Q %Q',
       $table->getTableName(),
       $this->buildWhereClause($conn_r),
       $this->buildOrderClause($conn_r),
@@ -39,24 +57,63 @@ final class PhabricatorApplicationTransactionCommentQuery
     return $table->loadAllFromArray($data);
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+    return $this->formatWhereClause($this->buildWhereClauseComponents($conn_r));
+  }
+
+  protected function buildWhereClauseComponents(
+    AphrontDatabaseConnection $conn_r) {
+
     $where = array();
 
-    if ($this->phids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
+        'xcomment.id IN (%Ld)',
+        $this->ids);
+    }
+
+    if ($this->phids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'xcomment.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->transactionPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'transactionPHID IN (%Ls)',
+        'xcomment.authorPHID IN (%Ls)',
+        $this->authorPHIDs);
+    }
+
+    if ($this->transactionPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'xcomment.transactionPHID IN (%Ls)',
         $this->transactionPHIDs);
     }
 
-    return $this->formatWhereClause($where);
+    if ($this->isDeleted !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'xcomment.isDeleted = %d',
+        (int)$this->isDeleted);
+    }
+
+    if ($this->hasTransaction !== null) {
+      if ($this->hasTransaction) {
+        $where[] = qsprintf(
+          $conn_r,
+          'xcomment.transactionPHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn_r,
+          'xcomment.transactionPHID IS NULL');
+      }
+    }
+
+    return $where;
   }
 
   public function getQueryApplicationClass() {

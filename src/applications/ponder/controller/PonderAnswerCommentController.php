@@ -2,15 +2,9 @@
 
 final class PonderAnswerCommentController extends PonderController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
@@ -18,18 +12,19 @@ final class PonderAnswerCommentController extends PonderController {
 
     $answer = id(new PonderAnswerQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$answer) {
       return new Aphront404Response();
     }
 
     $is_preview = $request->isPreviewRequest();
-//    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $qid = $answer->getQuestion()->getID();
     $aid = $answer->getID();
-    $view_uri = "Q{$qid}#A{$aid}";
+
+    // TODO, this behaves badly when redirecting to the answer
+    $view_uri = "/Q{$qid}";
 
     $xactions = array();
     $xactions[] = id(new PonderAnswerTransaction())
@@ -52,9 +47,6 @@ final class PonderAnswerCommentController extends PonderController {
         ->setException($ex);
     }
 
-//    if ($draft) {
-//      $draft->replaceOrDelete();
-//    }
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())

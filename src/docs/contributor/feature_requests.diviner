@@ -1,0 +1,243 @@
+@title Contributing Feature Requests
+@group detail
+
+Describes how to file an effective Phabricator feature request.
+
+Describe Your Problem!
+======================
+
+IMPORTANT: When filing a feature request, you **MUST** describe the root
+problem you are facing. We will not accept feature requests which do not
+include a problem description. See below for details.
+
+Overview
+========
+
+Have a feature you'd like to see in Phabricator? This article describes how
+to file an effective feature request.
+
+The most important things to do are:
+
+  - understand the upstream;
+  - make sure your feature makes sense in the project;
+  - align your expectations around timelines and priorities;
+  - describe your problem, not your solution; and
+  - file a task in
+    [[ http://secure.phabricator.com/u/newfeature/ | Maniphest ]].
+
+The rest of this article walks through these points in detail.
+
+If you have a bug report (not a feature request), see
+@{article:Contributing Bug Reports} for a more tailored guide.
+
+For general information on contributing to Phabricator, see
+@{article:Contributor Introduction}.
+
+
+Understanding the Upstream
+==========================
+
+Before filing a feature request, it may be useful to understand how the
+upstream operates.
+
+The Phabricator upstream is [[ https://www.phacility.com | Phacility, Inc ]].
+We maintain total control over the project and roadmap. There is no democratic
+process, voting, or community-driven decision making. This model is better
+at some things and worse at others than a more community-focused model would
+be, but it is the model we operate under.
+
+We have a cohesive vision for the project in the long term, and a general
+roadmap that extends for years into the future. While the specifics of how
+we get there are flexible, many major milestones are well-established.
+
+Although we set project direction, the community is also a critical part of
+Phabricator. We aren't all-knowing, and we rely on feedback to help us identify
+issues, guide product direction, prioritize changes, and suggest features.
+
+Feature requests are an important part of this, but we ultimately build only
+features which make sense as part of the long term plan.
+
+Since it's hard to absorb a detailed understanding of that vision, //describing
+a problem// is often more effective than //requesting a feature//. We have the
+context to develop solutions which fit into our plans, address similar use
+cases, make sense with the available infrastructure, and work within the
+boundaries of our product vision. For more details on this, see below.
+
+
+Target Audiences
+================
+
+Some feature requests support very unusual use cases. Although we are broadly
+inclusive of many different kinds of users and use cases, we are not trying
+to make the software all things to all users. Use cases which are far afield
+from the things the majority of users do with Phabricator often face substantial
+barriers.
+
+Phabricator is primarily targeted at software projects and organizations with
+a heavy software focus. We are most likely to design, build, and prioritize
+features which serve these organizations and projects.
+
+Phabricator is primarily targeted at software professionals and other
+professionals with adjacent responsibilities (like project management and
+operations). Particularly, we assume users are proficient computer users and
+familiar with software development concepts. We are most likely to design, build
+and prioritize features which serve these users.
+
+Phabricator is primarily targeted at professionals working in teams on full-time
+projects. Particularly, we assume most users will use the software regularly and
+are often willing to spend a little more time up front to get a more efficient
+workflow in the long run. We are most likely to design, build and prioritize
+features which serve these use cases.
+
+Phabricator is not limited to these kinds of organizations, users and use cases,
+but features which are aimed at a different group of users (like students,
+casual projects, or inexperienced computer users) may be harder to get
+upstreamed. Features aimed at very different groups of users (like wedding
+planners, book clubs, or dogs) will be much harder to get upstreamed.
+
+In many cases, a feature makes something better for all users. For example,
+suppose we fixed an issue where colorblind users had difficulty doing something.
+Dogs would benefit the most, but colorblind human users would also benefit, and
+no one would be worse off. If the benefit for core users is very small these
+kinds of features may be hard to prioritize, but there is no exceptional barrier
+to getting them upstreamed.
+
+In other cases, a feature makes something better for some users and worse for
+other users. These kinds of features face a high barrier if they make the
+software better at planning weddings and worse at reviewing code.
+
+
+Setting Expectations
+====================
+
+We have a lot of users and a small team. Even if your feature is something we're
+interested in and a good fit for where we want the product to go, it may take
+us a long time to get around to building it.
+
+We work full time on Phabricator, and our long-term roadmap (which we call our
+[[ https://secure.phabricator.com/w/starmap/ | Starmap ]]) has many years worth
+of work. Your feature request is competing against thousands of other requests
+for priority.
+
+In general, we try to prioritize work that will have the greatest impact on the
+most users. Many feature requests are perfectly reasonable requests, but have
+very little impact, impact only a few users, and/or are complex to develop and
+support relative to their impact. It can take us a long time to get to these.
+
+Even if your feature request is simple and has substantial impact for a large
+number of users, the size of the request queue means that it is mathematically
+unlikely to be near the top.
+
+You can find some information about how we prioritize in
+[[ https://secure.phabricator.com/w/planning/ | Planning ]]. In particular,
+we reprioritize frequently and can not accurately predict when we'll build a
+feature which isn't very near to top of the queue.
+
+As a whole, this means that the overwhelming majority of feature requests will
+sit in queue for a long time without any updates, and that we won't be able to
+give you any updates or predictions about timelines. One day, out of nowhere,
+your feature will materialize. That day may be a decade from now. You should
+have realistic expectations about this when filing a feature request.
+
+If you want a concrete timeline, you can work with us to pay for some control
+over our roadmap. For details, see
+[[ https://secure.phabricator.com/w/prioritization/ | Prioritization ]].
+
+
+Describe Problems
+=================
+
+When you file a feature request, we need you to describe the problem you're
+facing first, not just your desired solution. Describing the problem you are
+facing is the **most important part** of a feature request.
+
+Often, your problem may have a lot in common with other similar problems. If we
+understand your use case we can compare it to other use cases and sometimes find
+a more powerful or more general solution which solves several problems at once.
+
+At other times, we'll have a planned solution to the problem that might be
+different from your desired solution but accomplish the same goal. Understanding
+the root issue can let us merge and contextualize things.
+
+Sometimes there's already a way to solve your problem that might just not be
+obvious.
+
+Finally, your proposed solution may not be compatible with the direction we
+want to take the product, but we may be able to come up with another solution
+which has approximately the same effect and does fit into the product direction.
+
+If you only describe the solution and not the problem, we can't generalize,
+contextualize, merge, reframe, or offer alternative solutions or workarounds.
+
+You must describe the problem you are facing when filing a feature request. We
+will not accept feature requests which do not contextualize the request by
+describing the root problem.
+
+If you aren't sure exactly what we're after when we ask you to describe a root
+problem, you can find examples and more discussion in
+@{article:Describing Root Problems}.
+
+
+Hypotheticals
+=============
+
+We sometimes receive hypothetical feature requests about anticipated problems
+or concerns which haven't actually occurred yet. We usually can't do much about
+these until the problems actually occur, since the context required to
+understand and properly fix the root issue won't exist.
+
+One situation where this happens is when installs are thinking about adopting
+Phabricator and trying to guess what problems users might encounter during the
+transition. More generally, this includes any request like "if users do **X**,
+they might find **Y** confusing", where no actual users have encountered
+confusion yet.
+
+These requests are necessarily missing important context, maybe including the
+answers to questions like these:
+
+  - Why did users do **X**?
+  - What were they trying to do?
+  - What did they expect to happen?
+  - How often do users do this?
+
+The answers to these questions are important in establishing that the issue is
+really a problem, figuring out the best solution for it, and prioritizing the
+issue relative to other issues.
+
+Without knowing this information, we can't be confident that we've found a good
+solution to the problem, can't know if we've actually fixed the problem, and
+can't even know if the issue was really a problem in the first place (some
+hypothetical requests describe problems which no users ever encounter).
+
+We usually can't move forward without this information. In particular, we don't
+want to spend time solving hypothetical problems which no real users will ever
+encounter: the value of those changes is zero (or negative, by making the
+product more complex without providing a benefit), but they consume development
+time which could be better spent building much more valuable features.
+
+Generally, you should wait until a problem actually occurs before filing a
+request about it.
+
+
+Create a Task in Maniphest
+==========================
+
+If you think your feature might be a good fit for the upstream, have reasonable
+expectations about it, and have a good description of the problem you're trying
+to solve, you're ready to file a feature request.
+
+It is **particularly critical** that you describe the problem you are facing,
+not just the feature you want. We will not accept feature requests which do
+not describe the root problem the feature is intended to resolve.
+
+(NOTE) https://secure.phabricator.com/u/newfeature/
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - learning about @{article: Contributing Bug Reports}; or
+  - reading general support information in @{article:Support Resources}; or
+  - returning to the @{article:Contributor Introduction}.

@@ -2,12 +2,14 @@
 
 final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSpacesInterface {
 
   const RESPONSES_VISIBLE = 0;
   const RESPONSES_VOTERS  = 1;
@@ -22,8 +24,10 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   protected $responseVisibility;
   protected $shuffle;
   protected $method;
+  protected $mailKey;
   protected $viewPolicy;
   protected $isClosed = 0;
+  protected $spacePHID;
 
   private $options = self::ATTACHABLE;
   private $choices = self::ATTACHABLE;
@@ -40,10 +44,11 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
 
     return id(new PhabricatorSlowvotePoll())
       ->setAuthorPHID($actor->getPHID())
-      ->setViewPolicy($view_policy);
+      ->setViewPolicy($view_policy)
+      ->setSpacePHID($actor->getDefaultSpacePHID());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -53,6 +58,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
         'method' => 'uint32',
         'description' => 'text',
         'isClosed' => 'bool',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -102,6 +108,40 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return $this;
   }
 
+  public function getMonogram() {
+    return 'V'.$this->getID();
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorSlowvoteEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorSlowvoteTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -139,14 +179,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return ($phid == $this->getAuthorPHID());
   }
 
-  public function shouldShowSubscribersProperty() {
-    return true;
-  }
-
-  public function shouldAllowSubscription($phid) {
-    return true;
-  }
-
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
@@ -175,6 +207,12 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
       }
       $this->delete();
     $this->saveTransaction();
+  }
+
+  /* -(  PhabricatorSpacesInterface  )--------------------------------------- */
+
+  public function getSpacePHID() {
+    return $this->spacePHID;
   }
 
 }

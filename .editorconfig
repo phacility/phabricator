@@ -3,12 +3,31 @@
 [*]
 indent_style = space
 indent_size = 2
+end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
+max_line_length = 80
+
+[.arclint]
+max_line_length =
+
+[resources/sql/**.sql]
+max_line_length =
+
+[scripts/install/install_*.sh]
+max_line_length =
+
+[src/applications/differential/parser/__tests__/data/*.diff]
+trim_trailing_whitespace = false
+
+[src/applications/differential/parser/__tests__/messages/long-title.txt]
+max_line_length =
+
+[src/applications/diffusion/ssh/__tests__/hgwiredata/*.txt]
+max_line_length =
 
 [externals/**]
-; Use editor default (possible autodetection).
 indent_style =
 indent_size =
 trim_trailing_whitespace = false

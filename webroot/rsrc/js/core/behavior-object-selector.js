@@ -10,18 +10,31 @@ JX.behavior('phabricator-object-selector', function(config) {
   var n = 0;
 
   var phids = {};
+  var display = [];
+
   var handles = config.handles;
   for (var k in handles) {
     phids[k] = true;
   }
-  var button_list = {};
+
   var query_timer = null;
   var query_delay = 50;
 
-  var phid_input = JX.DOM.find(
+  // TODO: This is fairly grotesque, but the dialog has two different forms
+  // inside it and there's no way to sigil the inputs in the "real" form right
+  // now. Clean this up when the dialog as a whole gets cleaned up.
+
+  var inputs = JX.DOM.scry(
     JX.$(config.form),
     'input',
     'aphront-dialog-application-input');
+  var phid_input;
+  for (var ii = 0; ii < inputs.length; ii++) {
+    if (inputs[ii].name == 'phids') {
+      phid_input = inputs[ii];
+      break;
+    }
+  }
 
   var last_value = JX.$(config.query).value;
 
@@ -30,37 +43,82 @@ JX.behavior('phabricator-object-selector', function(config) {
       return;
     }
 
-    var display = [];
-    button_list = {};
+    display = [];
     for (var k in r) {
       handles[r[k].phid] = r[k];
-      display.push(renderHandle(r[k], true));
+      display.push({phid: r[k].phid});
     }
 
-    if (!display.length) {
-      display = renderNote('No results.');
-    }
-
-    JX.DOM.setContent(JX.$(config.results), display);
+    redrawList(true);
   }
 
   function redrawAttached() {
-    var display = [];
+    var attached = [];
 
     for (var k in phids) {
-      display.push(renderHandle(handles[k], false));
+      attached.push(renderHandle(handles[k], false).item);
     }
 
-    if (!display.length) {
-      display = renderNote('Nothing attached.');
+    if (!attached.length) {
+      attached = renderNote('Nothing attached.');
     }
 
-    JX.DOM.setContent(JX.$(config.current), display);
+    JX.DOM.setContent(JX.$(config.current), attached);
     phid_input.value = JX.keys(phids).join(';');
   }
 
-  function renderHandle(h, attach) {
+  function redrawList(rebuild) {
+    var ii;
+    var content;
 
+    if (rebuild) {
+      if (display.length) {
+        var handle;
+
+        content = [];
+        for (ii = 0; ii < display.length; ii++) {
+          handle = handles[display[ii].phid];
+
+          display[ii].node = renderHandle(handle, true);
+          content.push(display[ii].node.item);
+        }
+      } else {
+        content = renderNote('No results.');
+      }
+
+      JX.DOM.setContent(JX.$(config.results), content);
+    }
+
+    var phid;
+    var is_disabled;
+    var button;
+
+    var at_maximum = !canSelectMore();
+
+    for (ii = 0; ii < display.length; ii++) {
+      phid = display[ii].phid;
+
+      is_disabled = false;
+
+      // If this object is already selected, you can not select it again.
+      if (phids.hasOwnProperty(phid)) {
+        is_disabled = true;
+      }
+
+      // If the maximum number of objects are already selected, you can
+      // not select more.
+      if (at_maximum) {
+        is_disabled = true;
+      }
+
+      button = display[ii].node.button;
+      JX.DOM.alterClass(button, 'disabled', is_disabled);
+      button.disabled = is_disabled;
+    }
+
+  }
+
+  function renderHandle(h, attach) {
     var some_icon = JX.$N(
       'span',
       {className: 'phui-icon-view phui-font-fa ' +
@@ -74,7 +132,7 @@ JX.behavior('phabricator-object-selector', function(config) {
 
     var select_object_link = JX.$N(
       'a',
-      {href: '#', sigil: 'object-attacher'},
+      {href: h.uri, sigil: 'object-attacher'},
       h.name);
 
     var select_object_button = JX.$N(
@@ -100,15 +158,10 @@ JX.behavior('phabricator-object-selector', function(config) {
           meta: {handle: h, table:table}},
         cells));
 
-    if (attach) {
-      button_list[h.phid] = select_object_button;
-      if (h.phid in phids) {
-        JX.DOM.alterClass(select_object_button, 'disabled', true);
-        select_object_button.disabled = true;
-      }
-    }
-
-    return table;
+    return {
+      item: table,
+      button: select_object_button
+    };
   }
 
   function renderNote(note) {
@@ -127,6 +180,18 @@ JX.behavior('phabricator-object-selector', function(config) {
       .send();
   }
 
+  function canSelectMore() {
+    if (!config.maximum) {
+      return true;
+    }
+
+    if (JX.keys(phids).length < config.maximum) {
+      return true;
+    }
+
+    return false;
+  }
+
   JX.DOM.listen(
     JX.$(config.results),
     'click',
@@ -140,10 +205,13 @@ JX.behavior('phabricator-object-selector', function(config) {
         return;
       }
 
-      phids[phid] = true;
-      JX.DOM.alterClass(button_list[phid], 'disabled', true);
-      button_list[phid].disabled = true;
+      if (!canSelectMore()) {
+        return;
+      }
 
+      phids[phid] = true;
+
+      redrawList(false);
       redrawAttached();
     });
 
@@ -159,13 +227,7 @@ JX.behavior('phabricator-object-selector', function(config) {
 
       delete phids[phid];
 
-      // NOTE: We may not have a button in the button list, if this result is
-      // not visible in the current search results.
-      if (button_list[phid]) {
-        JX.DOM.alterClass(button_list[phid], 'disabled', false);
-        button_list[phid].disabled = false;
-      }
-
+      redrawList(false);
       redrawAttached();
     });
 
@@ -194,6 +256,7 @@ JX.behavior('phabricator-object-selector', function(config) {
     });
 
   sendQuery();
-  redrawAttached();
 
+  redrawList(true);
+  redrawAttached();
 });

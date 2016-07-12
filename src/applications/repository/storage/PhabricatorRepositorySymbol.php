@@ -8,21 +8,23 @@
  */
 final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
 
-  protected $arcanistProjectID;
+  protected $repositoryPHID;
   protected $symbolContext;
   protected $symbolName;
   protected $symbolType;
   protected $symbolLanguage;
   protected $pathID;
   protected $lineNumber;
+  private $isExternal;
+  private $source;
+  private $location;
+  private $externalURI;
 
   private $path = self::ATTACHABLE;
-  private $arcanistProject = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
-      self::CONFIG_IDS => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
         'id' => null,
@@ -42,11 +44,8 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getURI() {
-    if (!$this->repository) {
-      // This symbol is in the index, but we don't know which Repository it's
-      // part of. Usually this means the Arcanist Project hasn't been linked
-      // to a Repository. We can't generate a URI, so just fail.
-      return null;
+    if ($this->isExternal) {
+      return $this->externalURI;
     }
 
     $request = DiffusionRequest::newFromDictionary(
@@ -75,18 +74,37 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
     return $this->assertAttached($this->repository);
   }
 
-  public function attachRepository($repository) {
+  public function attachRepository(PhabricatorRepository $repository) {
     $this->repository = $repository;
     return $this;
   }
 
-  public function getArcanistProject() {
-    return $this->assertAttached($this->arcanistProject);
+  public function isExternal() {
+    return $this->isExternal;
   }
-
-  public function attachArcanistProject($project) {
-    $this->arcanistProject = $project;
+  public function setIsExternal($is_external) {
+    $this->isExternal = $is_external;
     return $this;
   }
 
+  public function getSource() {
+    return $this->source;
+  }
+  public function setSource($source) {
+    $this->source = $source;
+    return $this;
+  }
+
+  public function getLocation() {
+    return $this->location;
+  }
+  public function setLocation($location) {
+    $this->location = $location;
+    return $this;
+  }
+
+  public function setExternalURI($external_uri) {
+    $this->externalURI = $external_uri;
+    return $this;
+  }
 }

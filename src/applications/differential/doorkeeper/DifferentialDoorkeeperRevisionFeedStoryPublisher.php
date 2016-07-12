@@ -57,16 +57,11 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
   }
 
   public function getObjectTitle($object) {
-    $prefix = $this->getTitlePrefix($object);
-
-    $lines = new PhutilNumber($object->getLineCount());
-    $lines = pht('[Request, %d lines]', $lines);
-
     $id = $object->getID();
 
     $title = $object->getTitle();
 
-    return ltrim("{$prefix} {$lines} D{$id}: {$title}");
+    return "D{$id}: {$title}";
   }
 
   public function getObjectURI($object) {

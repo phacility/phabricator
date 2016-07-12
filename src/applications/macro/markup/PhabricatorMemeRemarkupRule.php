@@ -10,12 +10,12 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
 
   public function apply($text) {
     return preg_replace_callback(
-      '@{meme,((?:[^}\\\\]+|\\\\.)+)}$@m',
+      '@{meme,((?:[^}\\\\]+|\\\\.)+)}@m',
       array($this, 'markupMeme'),
       $text);
   }
 
-  public function markupMeme($matches) {
+  public function markupMeme(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }
@@ -34,6 +34,10 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
       ->alter('uppertext', $options['above'])
       ->alter('lowertext', $options['below']);
 
+    if ($this->getEngine()->isHTMLMailMode()) {
+      $uri = PhabricatorEnv::getProductionURI($uri);
+    }
+
     if ($this->getEngine()->isTextMode()) {
       $img =
         ($options['above'] != '' ? "\"{$options['above']}\"\n" : '').
@@ -51,6 +55,7 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
         array(
           'src' => $uri,
           'alt' => $alt_text,
+          'class' => 'phabricator-remarkup-macro',
         ));
     }
 

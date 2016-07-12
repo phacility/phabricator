@@ -10,6 +10,7 @@ final class PhabricatorWorkingCopyPullTestCase
   }
 
   public function testHgPullBasic() {
+    $this->requireBinaryForTest('hg');
     $repo = $this->buildPulledRepository('HT');
 
     $this->assertTrue(Filesystem::pathExists($repo->getLocalPath().'/.hg'));

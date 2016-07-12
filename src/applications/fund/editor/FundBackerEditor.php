@@ -13,7 +13,9 @@ final class FundBackerEditor
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
+
     $types[] = FundBackerTransaction::TYPE_STATUS;
+    $types[] = FundBackerTransaction::TYPE_REFUND;
 
     return $types;
   }
@@ -24,6 +26,8 @@ final class FundBackerEditor
     switch ($xaction->getTransactionType()) {
       case FundBackerTransaction::TYPE_STATUS:
         return $object->getStatus();
+      case FundBackerTransaction::TYPE_REFUND:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -35,6 +39,7 @@ final class FundBackerEditor
 
     switch ($xaction->getTransactionType()) {
       case FundBackerTransaction::TYPE_STATUS:
+      case FundBackerTransaction::TYPE_REFUND:
         return $xaction->getNewValue();
     }
 
@@ -49,6 +54,8 @@ final class FundBackerEditor
       case FundBackerTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         return;
+      case FundBackerTransaction::TYPE_REFUND:
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -60,6 +67,7 @@ final class FundBackerEditor
 
     switch ($xaction->getTransactionType()) {
       case FundBackerTransaction::TYPE_STATUS:
+      case FundBackerTransaction::TYPE_REFUND:
         return;
     }
 

@@ -74,40 +74,14 @@ foreach ($applications as $application) {
 
 /* -(  User preferences  )--------------------------------------------------- */
 
-echo "Migrating user preferences...\n";
-$table = new PhabricatorUserPreferences();
-$conn_w = $table->establishConnection('w');
-$pref_pinned = PhabricatorUserPreferences::PREFERENCE_APP_PINNED;
 
-foreach (new LiskMigrationIterator(new PhabricatorUser()) as $user) {
-  $user_preferences = $user->loadPreferences();
-
-  $old_pinned_apps = $user_preferences->getPreference($pref_pinned);
-  $new_pinned_apps = array();
-
-  if (!$old_pinned_apps) {
-    continue;
-  }
-
-  foreach ($old_pinned_apps as $pinned_app) {
-    $new_pinned_apps[] = idx($map, $pinned_app, $pinned_app);
-  }
-
-  $user_preferences
-    ->setPreference($pref_pinned, $new_pinned_apps);
-
-  queryfx(
-    $conn_w,
-    'UPDATE %T SET preferences = %s WHERE id = %d',
-    $user_preferences->getTableName(),
-    json_encode($user_preferences->getPreferences()),
-    $user_preferences->getID());
-}
+// This originally migrated pinned applications in user preferences, but was
+// removed to simplify preference changes after about 22 months.
 
 
 /* -(  Dashboard installs  )------------------------------------------------- */
 
-echo "Migrating dashboard installs...\n";
+echo pht('Migrating dashboard installs...')."\n";
 $table = new PhabricatorDashboardInstall();
 $conn_w = $table->establishConnection('w');
 
@@ -126,7 +100,7 @@ foreach (new LiskMigrationIterator($table) as $dashboard_install) {
 /* -(  Phabricator configuration  )------------------------------------------ */
 
 $config_key = 'phabricator.uninstalled-applications';
-echo "Migrating `{$config_key}` config...\n";
+echo pht('Migrating `%s` config...', $config_key)."\n";
 
 $config = PhabricatorConfigEntry::loadConfigEntry($config_key);
 $old_config = $config->getValue();
@@ -147,7 +121,7 @@ if ($old_config) {
 /* -(  phabricator.application-settings  )----------------------------------- */
 
 $config_key = 'phabricator.application-settings';
-echo "Migrating `{$config_key}` config...\n";
+echo pht('Migrating `%s` config...', $config_key)."\n";
 
 $config = PhabricatorConfigEntry::loadConfigEntry($config_key);
 $old_config = $config->getValue();

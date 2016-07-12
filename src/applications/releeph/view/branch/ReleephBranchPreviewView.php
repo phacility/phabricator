@@ -17,14 +17,14 @@ final class ReleephBranchPreviewView extends AphrontFormControl {
     return $this;
   }
 
-  public function getCustomControlClass() {
+  protected function getCustomControlClass() {
     require_celerity_resource('releeph-preview-branch');
     return 'releeph-preview-branch';
   }
 
-  public function renderInput() {
+  protected function renderInput() {
     static $required_params = array(
-      'arcProjectID',
+      'repositoryPHID',
       'projectName',
       'isSymbolic',
       'template',
@@ -34,16 +34,18 @@ final class ReleephBranchPreviewView extends AphrontFormControl {
     foreach ($required_params as $param_name) {
       if (idx($all_params, $param_name) === null) {
         throw new Exception(
-          "'{$param_name}' is not set as either a static or dynamic!");
+          pht(
+            "'%s' is not set as either a static or dynamic!",
+            $param_name));
       }
     }
 
     $output_id = celerity_generate_unique_node_id();
 
     Javelin::initBehavior('releeph-preview-branch', array(
-      'uri'           => '/releeph/branch/preview/',
-      'outputID'      => $output_id,
-      'params'        => array(
+      'uri'      => '/releeph/branch/preview/',
+      'outputID' => $output_id,
+      'params'   => array(
         'static'  => $this->statics,
         'dynamic' => $this->dynamics,
       ),

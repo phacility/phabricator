@@ -1,0 +1,57 @@
+@title Cluster: Daemons
+@group cluster
+
+Configuring Phabricator to use multiple daemon hosts.
+
+Overview
+========
+
+You can run daemons on multiple hosts. The advantages of doing this are:
+
+  - you can completely survive the loss of multiple daemon hosts; and
+  - worker queue throughput may improve.
+
+This configuration is simple, but you must configure repositories first. For
+details, see @{article:Cluster: Repositories}.
+
+Since repository hosts must run daemons anyway, you usually do not need to do
+any additional work and can skip this entirely if you have already configured
+multiple repository hosts.
+
+
+Adding Daemon Hosts
+===================
+
+After configuring repositories for clustering, launch daemons on every
+repository host according to the documentation in
+@{article:Cluster: Repositories}. These daemons are necessary: repositories
+will not fetch, update, or synchronize properly without them.
+
+If your repository clustering is redundant (you have at least two repository
+hosts), these daemons are also likely to be sufficient in most cases. If you
+want to launch additional hosts anyway (for example, to increase queue capacity
+for unusual workloads), see "Dedicated Daemon Hosts" below.
+
+
+Dedicated Daemon Hosts
+======================
+
+You can launch additional daemon hosts without any special configuration.
+Daemon hosts must be able to reach other hosts on the network, but do not need
+to run any services (like HTTP or SSH). Simply deploy the Phabricator software
+and configuration and start the daemons.
+
+Normally, there is little reason to deploy dedicated daemon hosts. They can
+improve queue capacity, but generally do not improve availability or increase
+resistance to data loss on their own. Instead, consider deploying more
+repository hosts: repository hosts run daemons, so this will increase queue
+capacity but also improve repository availability and cluster resistance.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Clustering Introduction}; or
+  - configuring repositories first with @{article:Cluster: Repositories}.

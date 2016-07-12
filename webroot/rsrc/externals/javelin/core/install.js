@@ -236,7 +236,7 @@ JX.createClass = function(junk) {
     };
   };
   var getter = function(prop) {
-    return function(v) {
+    return function() {
       return this[prop];
     };
   };

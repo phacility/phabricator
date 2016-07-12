@@ -8,12 +8,16 @@ final class PhabricatorProjectColumnPHIDType extends PhabricatorPHIDType {
     return pht('Project Column');
   }
 
+  public function getTypeIcon() {
+    return 'fa-columns bluegrey';
+  }
+
   public function newObject() {
     return new PhabricatorProjectColumn();
   }
 
-  public function getTypeIcon() {
-    return 'fa-columns bluegrey';
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorProjectApplication';
   }
 
   protected function buildQueryForObjects(
@@ -34,7 +38,10 @@ final class PhabricatorProjectColumnPHIDType extends PhabricatorPHIDType {
 
       $handle->setName($column->getDisplayName());
       $handle->setURI('/project/board/'.$column->getProject()->getID().'/');
-      $handle->setDisabled($column->isHidden());
+
+      if ($column->isHidden()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
     }
   }
 

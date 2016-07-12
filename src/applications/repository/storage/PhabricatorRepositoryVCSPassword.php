@@ -6,7 +6,7 @@ final class PhabricatorRepositoryVCSPassword extends PhabricatorRepositoryDAO {
   protected $userPHID;
   protected $passwordHash;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'passwordHash' => 'text128',
@@ -40,7 +40,7 @@ final class PhabricatorRepositoryVCSPassword extends PhabricatorRepositoryDAO {
     PhutilOpaqueEnvelope $password,
     PhabricatorUser $user) {
     if ($user->getPHID() != $this->getUserPHID()) {
-      throw new Exception('User does not match password user PHID!');
+      throw new Exception(pht('User does not match password user PHID!'));
     }
 
     $raw_input = PhabricatorHash::digestPassword($password, $user->getPHID());

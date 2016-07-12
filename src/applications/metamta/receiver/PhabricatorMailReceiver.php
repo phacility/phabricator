@@ -1,9 +1,43 @@
 <?php
 
-abstract class PhabricatorMailReceiver {
+abstract class PhabricatorMailReceiver extends Phobject {
+
+  private $applicationEmail;
+
+  public function setApplicationEmail(
+    PhabricatorMetaMTAApplicationEmail $email) {
+    $this->applicationEmail = $email;
+    return $this;
+  }
+
+  public function getApplicationEmail() {
+    return $this->applicationEmail;
+  }
 
   abstract public function isEnabled();
   abstract public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail);
+  final protected function canAcceptApplicationMail(
+    PhabricatorApplication $app,
+    PhabricatorMetaMTAReceivedMail $mail) {
+
+    $application_emails = id(new PhabricatorMetaMTAApplicationEmailQuery())
+      ->setViewer($this->getViewer())
+      ->withApplicationPHIDs(array($app->getPHID()))
+      ->execute();
+
+    foreach ($mail->getToAddresses() as $to_address) {
+      foreach ($application_emails as $application_email) {
+        $create_address = $application_email->getAddress();
+        if ($this->matchAddresses($create_address, $to_address)) {
+          $this->setApplicationEmail($application_email);
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
 
   abstract protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
@@ -13,6 +47,10 @@ abstract class PhabricatorMailReceiver {
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
     $this->processReceivedMail($mail, $sender);
+  }
+
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
   }
 
   public function validateSender(
@@ -103,7 +141,7 @@ abstract class PhabricatorMailReceiver {
     if ($allow_email_users) {
       $from_obj = new PhutilEmailAddress($from);
       $xuser = id(new PhabricatorExternalAccountQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($this->getViewer())
         ->withAccountTypes(array('email'))
         ->withAccountDomains(array($from_obj->getDomainName(), 'self'))
         ->withAccountIDs(array($from_obj->getAddress()))
@@ -122,6 +160,27 @@ abstract class PhabricatorMailReceiver {
         'To interact with Phabricator, add this address ("%s") to your '.
         'account.',
         $raw_from);
+    }
+
+    if ($this->getApplicationEmail()) {
+      $application_email = $this->getApplicationEmail();
+      $default_user_phid = $application_email->getConfigValue(
+        PhabricatorMetaMTAApplicationEmail::CONFIG_DEFAULT_AUTHOR);
+
+      if ($default_user_phid) {
+        $user = id(new PhabricatorUser())->loadOneWhere(
+          'phid = %s',
+          $default_user_phid);
+        if ($user) {
+          return $user;
+        }
+      }
+
+      $reasons[] = pht(
+        "Phabricator is misconfigured, the application email ".
+        "'%s' is set to user '%s' but that user does not exist.",
+        $application_email->getAddress(),
+        $default_user_phid);
     }
 
     $reasons = implode("\n\n", $reasons);

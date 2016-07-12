@@ -2,6 +2,7 @@
 
 final class ReleephRequest extends ReleephDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface {
 
@@ -126,15 +127,18 @@ final class ReleephRequest extends ReleephDAO
       if ($this->getInBranch()) {
         return ReleephRequestStatus::STATUS_NEEDS_REVERT;
       } else {
+        $intent_pass = self::INTENT_PASS;
+        $intent_want = self::INTENT_WANT;
+
         $has_been_in_branch = $this->getCommitIdentifier();
         // Regardless of why we reverted something, always say reverted if it
         // was once in the branch.
         if ($has_been_in_branch) {
           return ReleephRequestStatus::STATUS_REVERTED;
-        } else if ($this->getPusherIntent() === ReleephRequest::INTENT_PASS) {
+        } else if ($this->getPusherIntent() === $intent_pass) {
           // Otherwise, if it has never been in the branch, explicitly say why:
           return ReleephRequestStatus::STATUS_REJECTED;
-        } else if ($this->getRequestorIntent() === ReleephRequest::INTENT_WANT) {
+        } else if ($this->getRequestorIntent() === $intent_want) {
           return ReleephRequestStatus::STATUS_REQUESTED;
         } else {
           return ReleephRequestStatus::STATUS_ABANDONED;
@@ -146,7 +150,7 @@ final class ReleephRequest extends ReleephDAO
 
 /* -(  Lisk mechanics  )----------------------------------------------------- */
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -286,13 +290,29 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function setStatus($value) {
-    throw new Exception('`status` is now deprecated!');
+    throw new Exception(pht('`%s` is now deprecated!', 'status'));
   }
 
-/* -(  Make magic Lisk methods private  )------------------------------------ */
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
-  private function setUserIntents(array $ar) {
-    return parent::setUserIntents($ar);
+
+  public function getApplicationTransactionEditor() {
+    return new ReleephRequestTransactionalEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ReleephRequestTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

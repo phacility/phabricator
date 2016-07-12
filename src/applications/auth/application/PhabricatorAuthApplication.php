@@ -10,8 +10,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     return '/auth/';
   }
 
-  public function getIconName() {
-    return 'authentication';
+  public function getIcon() {
+    return 'fa-key';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
@@ -26,53 +26,16 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     return pht('Login/Registration');
   }
 
-  public function getHelpURI() {
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
     // NOTE: Although reasonable help exists for this in "Configuring Accounts
-    // and Registration", specifying a help URI here means we get the menu
+    // and Registration", specifying help items here means we get the menu
     // item in all the login/link interfaces, which is confusing and not
     // helpful.
 
     // TODO: Special case this, or split the auth and auth administration
     // applications?
 
-    return null;
-  }
-
-  public function buildMainMenuItems(
-    PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-
-    $items = array();
-
-    if ($user->isLoggedIn()) {
-      $item = id(new PHUIListItemView())
-        ->addClass('core-menu-item')
-        ->setName(pht('Log Out'))
-        ->setIcon('logout-sm')
-        ->setWorkflow(true)
-        ->setHref('/logout/')
-        ->setSelected(($controller instanceof PhabricatorLogoutController))
-        ->setAural(pht('Log Out'))
-        ->setOrder(900);
-      $items[] = $item;
-    } else {
-      if ($controller instanceof PhabricatorAuthController) {
-        // Don't show the "Login" item on auth controllers, since they're
-        // generally all related to logging in anyway.
-      } else {
-        $item = id(new PHUIListItemView())
-          ->addClass('core-menu-item')
-          ->setName(pht('Log In'))
-          // TODO: Login icon?
-          ->setIcon('power')
-          ->setHref('/auth/start/')
-          ->setAural(pht('Log In'))
-          ->setOrder(900);
-        $items[] = $item;
-      }
-    }
-
-    return $items;
+    return array();
   }
 
   public function getApplicationGroup() {
@@ -92,6 +55,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         ),
         'login/(?P<pkey>[^/]+)/(?:(?P<extra>[^/]+)/)?'
           => 'PhabricatorAuthLoginController',
+        '(?P<loggedout>loggedout)/' => 'PhabricatorAuthStartController',
+        'invite/(?P<code>[^/]+)/' => 'PhabricatorAuthInviteController',
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',
@@ -109,6 +74,16 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           => 'PhabricatorAuthDowngradeSessionController',
         'multifactor/'
           => 'PhabricatorAuthNeedsMultiFactorController',
+        'sshkey/' => array(
+          $this->getQueryRoutePattern('for/(?P<forPHID>[^/]+)/')
+            => 'PhabricatorAuthSSHKeyListController',
+          'generate/' => 'PhabricatorAuthSSHKeyGenerateController',
+          'upload/' => 'PhabricatorAuthSSHKeyEditController',
+          'edit/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyEditController',
+          'deactivate/(?P<id>\d+)/'
+            => 'PhabricatorAuthSSHKeyDeactivateController',
+          'view/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyViewController',
+        ),
       ),
 
       '/oauth/(?P<provider>\w+)/login/'
@@ -133,4 +108,11 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      AuthManageProvidersCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
+  }
 }

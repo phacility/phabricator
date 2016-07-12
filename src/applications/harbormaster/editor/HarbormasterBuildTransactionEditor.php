@@ -71,17 +71,25 @@ final class HarbormasterBuildTransactionEditor
       case HarbormasterBuildCommand::COMMAND_RESTART:
         $issuable = $build->canRestartBuild();
         break;
-      case HarbormasterBuildCommand::COMMAND_STOP:
-        $issuable = $build->canStopBuild();
+      case HarbormasterBuildCommand::COMMAND_PAUSE:
+        $issuable = $build->canPauseBuild();
         break;
       case HarbormasterBuildCommand::COMMAND_RESUME:
         $issuable = $build->canResumeBuild();
         break;
+      case HarbormasterBuildCommand::COMMAND_ABORT:
+        $issuable = $build->canAbortBuild();
+        break;
       default:
-        throw new Exception("Unknown command $command");
+        throw new Exception(pht('Unknown command %s', $command));
     }
 
     if (!$issuable) {
+      return;
+    }
+
+    $actor = $this->getActor();
+    if (!$build->canIssueCommand($actor, $command)) {
       return;
     }
 
@@ -95,6 +103,9 @@ final class HarbormasterBuildTransactionEditor
       'HarbormasterBuildWorker',
       array(
         'buildID' => $build->getID(),
+      ),
+      array(
+        'objectPHID' => $build->getPHID(),
       ));
   }
 

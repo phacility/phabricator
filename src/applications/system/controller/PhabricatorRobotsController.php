@@ -32,6 +32,7 @@ final class PhabricatorRobotsController extends PhabricatorController {
 
     return id(new AphrontPlainTextResponse())
       ->setContent($content)
-      ->setCacheDurationInSeconds(phutil_units('2 hours in seconds'));
+      ->setCacheDurationInSeconds(phutil_units('2 hours in seconds'))
+      ->setCanCDN(true);
   }
 }

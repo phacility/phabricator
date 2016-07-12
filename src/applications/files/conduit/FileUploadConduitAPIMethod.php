@@ -7,10 +7,10 @@ final class FileUploadConduitAPIMethod extends FileConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Upload a file to the server.';
+    return pht('Upload a file to the server.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'data_base64' => 'required nonempty base64-bytes',
       'name' => 'optional string',
@@ -19,33 +19,25 @@ final class FileUploadConduitAPIMethod extends FileConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty guid';
   }
 
-  public function defineErrorTypes() {
-    return array(
-    );
-  }
-
   protected function execute(ConduitAPIRequest $request) {
-    $data = $request->getValue('data_base64');
+    $viewer = $request->getUser();
+
     $name = $request->getValue('name');
     $can_cdn = $request->getValue('canCDN');
     $view_policy = $request->getValue('viewPolicy');
 
-    $user = $request->getUser();
-    $data = base64_decode($data, $strict = true);
-
-    if (!$view_policy) {
-      $view_policy = PhabricatorPolicies::getMostOpenPolicy();
-    }
+    $data = $request->getValue('data_base64');
+    $data = $this->decodeBase64($data);
 
     $file = PhabricatorFile::newFromFileData(
       $data,
       array(
         'name' => $name,
-        'authorPHID' => $user->getPHID(),
+        'authorPHID' => $viewer->getPHID(),
         'viewPolicy' => $view_policy,
         'canCDN' => $can_cdn,
         'isExplicitUpload' => true,

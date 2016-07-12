@@ -2,6 +2,8 @@
 
 final class PhabricatorYoutubeRemarkupRule extends PhutilRemarkupRule {
 
+  private $uri;
+
   public function getPriority() {
     return 350.0;
   }
@@ -20,8 +22,10 @@ final class PhabricatorYoutubeRemarkupRule extends PhutilRemarkupRule {
 
   public function markupYoutubeLink() {
     $v = idx($this->uri->getQueryParams(), 'v');
+    $text_mode = $this->getEngine()->isTextMode();
+    $mail_mode = $this->getEngine()->isHTMLMailMode();
 
-    if ($this->getEngine()->isTextMode()) {
+    if ($text_mode || $mail_mode) {
       return $this->getEngine()->storeText('http://youtu.be/'.$v);
     }
 

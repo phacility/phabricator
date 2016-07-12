@@ -1,0 +1,230 @@
+@title Harbormaster User Guide
+@group userguide
+
+Guide to Harbormaster, a build and continuous integration application.
+
+Overview
+========
+
+WARNING: Harbormaster is still very rough. Read this document carefully to
+understand what it can and can not do and what to expect in the future.
+
+The Harbormaster application provides build and continuous integration support
+for Phabricator.
+
+Harbormaster is not a mature application. You should expect it to have major
+missing capabilities and to change substantially over time. The current version
+of Harbormaster can perform some basic build tasks, but has many limitations
+and is not a complete build platform.
+
+In particular, you should be aware of these common limitations:
+
+  - **Creating Build Plans**: Harbormaster ships with only very basic, crude
+    tools for writing build plans. There are no default integrations with
+    `arc unit` or systems like Jenkins. Build plans are likely to change
+    substantially over time.
+  - **Triggering Builds**: Harbormaster can only trigger builds through Herald
+    rules. It can not currently run periodic builds.
+  - **Executing Builds**: Harbormaster can only execute builds in a remote
+    system, like Jenkins. It can not currently host builds.
+  - **Change Handoff**: Change handoff is covered in rough edges and tradeoffs.
+
+
+Harbormaster Basics
+===================
+
+Use Harbormaster to run builds or tests on code reviews and commits. In general,
+the Harbormaster workflow looks like this today:
+
+  - You create a new "Build Plan" which describes how to build a project (which
+    tests to run, which commands to execute, etc).
+  - You configure Harbormaster to trigger the plan when relevant code reviews
+    are created or relevant commits are pushed or discovered.
+  - Harbormaster executes the plan and reports the results, allowing you to see
+    if a change or commit breaks tests.
+
+The remainder of this document walks through these steps in more detail.
+
+
+Concepts and Terminology
+========================
+
+Harbormaster uses these concepts to describe builds:
+
+  - **Build Step**: Describes a single step in a build process, like running a
+    command.
+  - **Build Plan**: A collection of build steps which describe a build process.
+    You'll create build plans to tell Harbormaster which commands it needs to
+    run to perform a build.
+  - **Buildable**: A reference to an object from another application which can
+    have builds run against it. In the upstream, code reviews (from
+    Differential) and commits (from Diffusion) are buildable.
+  - **Build**: Created by running a build plan against a buildable. Collects
+    results from running build commands and shows build progress, status and
+    results. A build describes what happened when an entire build plan was
+    run.
+  - **Build Target**: Builds are made up of build targets, which are created
+    automatically when Harbormaster runs the individual steps in a build. A
+    build target describes what happened when a specific build step was run.
+
+
+Creating a Build Plan
+=====================
+
+NOTE: Build plans are currently crude and subject to change in future versions
+of Harbormaster.
+
+A build plan tells Harbormaster how to run a build: which commands to run,
+services to call, and so on. Builds start with a build plan.
+
+To create a build plan, navigate to {nav Harbormaster > Manage Build Plans >
+New Build Plan}.
+
+Build plans are composed of "Build Steps". Each step describes an individual
+action (like running a command) and the sequence of steps as a whole comprise
+the plan. For example, you might want to run one command to build a binary,
+then a second command to execute unit tests. Add steps to your build plan
+with {nav Add Build Step}.
+
+Currently, the only useful type of build step is "Make HTTP Request", which you
+can use to make a call to an external build system like Jenkins. Today, most
+plans should therefor look something like this:
+
+  - Use a "Make HTTP Request" step to tell Jenkins or some other similar
+    external build system about the code.
+  - Have the build step "Wait for Message" after the external system is
+    notified.
+  - Write custom code on the build server to respond to the request, run a
+    build, then report the results back to Phabricator by calling the
+    `harbormaster.sendmessage` Conduit API.
+
+You'll need to write a nontrivial amount of code to get this working today.
+In the future, Harbormaster will become more powerful and have more builtin
+support for interacting with build systems.
+
+
+Triggering Builds
+=================
+
+NOTE: Harbormaster can not currently watch a branch (like "build 'master' every
+time it changes") or run periodic builds (like "build every hour"). These
+capabilities may be added in the future.
+
+You can run builds manually by using {nav Run Plan Manually} from the detail
+screen of a build plan. This will execute a manual build immediately, and can
+be used to test that plans work properly.
+
+To trigger a build automatically, write a Herald rule which executes the "Run
+build plans" action. The simplest rule would just use the "Always" condition
+and run a single build plan, but you can use more complex conditions to control
+which plans run on which code.
+
+This action is available for commits and revisions, as either can be built
+with Harbormaster. This action is only available for "Project" or "Global"
+rules.
+
+Change Handoff
+==============
+
+NOTE: Change handoff is currently very rough. It may improve in the future.
+
+If you want to build code reviews in an external system, it will need to be
+able to construct a working copy with the changes before it can build them.
+
+There are three ways to do this:
+
+  - **Automatic Staging Areas**: Recommended. This is the simplest and
+    cleanest way to hand changes to an external build system.
+  - **Manual Staging Areas**: Recommended if you can not use automatic
+    staging areas. This is a simple way to hand changes to an external build
+    system, but not as clean as automatic staging areas.
+  - **`arc patch`**: Not recommended. This mechanism is the most difficult to
+    configure and debug, and is not nearly as reliable as handoff via staging
+    areas.
+
+With staging areas, `arc` pushes a copy of the local changes somewhere as a
+side effect of running `arc diff`. In Git, it pushes changes to a tag like
+`phabricator/diff/123` in a designated remote.
+
+The build system can then interact with this copy using normal VCS commands.
+This is simpler to configure, use, troubleshoot and work with than `arc patch`.
+
+With `arc patch`, the build system downloads patches from Phabricator and
+applies them to a local working copy. This is more complex and more error-prone
+than staging areas.
+
+**Automatic Staging Areas**: This is the recommended mechanism for change
+handoff. This mechanism has not been built yet, so you can not use it.
+
+**Manual Staging Areas**: If you can not use automatic staging areas, manual
+staging areas are the next best approach. Manual staging areas are only
+supported under Git, but work with both hosted and imported repositories.
+
+Manual staging areas work like this:
+
+  - You configure a staging area for the repository you want to be able to
+    run builds for. A staging area is just a remote repository that you're
+    designating for temporary storage.
+  - Once a staging area is configured, `arc diff` will automatically push a
+    copy of the changes to the staging area as a side effect when creating
+    and updating reviews.
+  - Your build system can pull changes directly from the configured staging
+    area.
+
+Configure a staging area by navigating to {nav Diffusion >
+(Choose a Repository) > Edit Repository > Edit Staging}. You'll enter the
+remote URI of a repository to use as a staging area, and `arc diff` will push
+changes to tags like `phabricator/diff/123`.
+
+There are several ways to select a staging area:
+
+  - You can use the repository itself as its own staging area, but this will
+    clog it up with a lot of tags that users probably don't care about. This is
+    simplest to configure but will be disruptive and potentially confusing to
+    users.
+  - You can create a single staging repository and have all other
+    repositories use it as a staging area. This is simple to configure and
+    won't disrupt or confuse users, but you won't be able to set granular
+    permissions on the staging repository: all the staged changes in a
+    repository are visible to anyone who has access to the repository, even if
+    they came from a repository that the viewer does not have access to.
+  - You can create a staging repository for each standard repository. This will
+    give you the most control, but is also the most time consuming to configure.
+  - You can use a hybrid approach and have several staging repositories, each
+    of which is used for one or more standard repositories. This will let you
+    strike a balance between setup costs and granularity.
+  - Using automatic staging areas avoids all this complexity by using the
+    repository as its own staging area but hiding the tags from users.
+
+Once you've configured a staging area, have your build system clone the staging
+area repository and do a checkout of the relevant tag in order to perform a
+build.
+
+**`arc patch`**: You can also have the build system pull changes out of
+Phabricator as patches and apply them with `arc patch`. This mechanism is the
+most complex to configure and debug, and is much less reliable than using
+staging areas. It is not recommended.
+
+To use `arc patch`-based handoff, install PHP on your build server and set up
+`arc`. Create a "bot" user for your build system and generate a Conduit token
+in {nav Settings > Conduit API Tokens}. Then have your build system clone the
+repository and run `arc patch` to apply the changes:
+
+  $ arc patch --conduit-token <token> --diff <diff-id>
+
+This will usually work, but is more complex and less reliable than using a
+staging area.
+
+
+Troubleshooting
+===============
+
+You can troubleshoot Harbormaster by using `bin/harbormaster` from the command
+line. Run it as `bin/harbormaster help` for details.
+
+In particular, you can run manual builds in the foreground from the CLI to see
+more details about what they're doing:
+
+  phabricator/ $ ./bin/harbormaster build D123 --plan 456 --trace
+
+This may help you understand or debug issues with a build plan.

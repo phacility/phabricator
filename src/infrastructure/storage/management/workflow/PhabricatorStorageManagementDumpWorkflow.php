@@ -3,68 +3,89 @@
 final class PhabricatorStorageManagementDumpWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('dump')
       ->setExamples('**dump** [__options__]')
-      ->setSynopsis('Dump all data in storage to stdout.');
+      ->setSynopsis(pht('Dump all data in storage to stdout.'))
+      ->setArguments(
+        array(
+          array(
+            'name' => 'for-replica',
+            'help' => pht(
+              'Add __--master-data__ to the __mysqldump__ command, '.
+              'generating a CHANGE MASTER statement in the output.'),
+          ),
+        ));
   }
 
-  public function execute(PhutilArgumentParser $args) {
+  protected function isReadOnlyWorkflow() {
+    return true;
+  }
+
+  public function didExecute(PhutilArgumentParser $args) {
     $api = $this->getAPI();
     $patches = $this->getPatches();
+
+    $console = PhutilConsole::getConsole();
 
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
       $namespace = $api->getNamespace();
-      echo phutil_console_wrap(
-        phutil_console_format(
-          "**No Storage**: There is no database storage initialized in this ".
-          "storage namespace ('{$namespace}'). Use '**storage upgrade**' to ".
-          "initialize storage.\n"));
+      $console->writeErr(
+        pht(
+          '**Storage Not Initialized**: There is no database storage '.
+          'initialized in this storage namespace ("%s"). Use '.
+          '**%s** to initialize storage.',
+          $namespace,
+          './bin/storage upgrade'));
       return 1;
     }
 
-    $databases = $api->getDatabaseList($patches, $only_living = true);
+    $databases = $api->getDatabaseList($patches, true);
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
-    $flag_password = '';
+    $has_password = false;
 
     $password = $api->getPassword();
     if ($password) {
       if (strlen($password->openEnvelope())) {
-        $flag_password = csprintf('-p%P', $password);
+        $has_password = true;
       }
     }
 
-    $flag_port = $port
-      ? csprintf('--port %d', $port)
-      : '';
+    $argv = array();
+    $argv[] = '--hex-blob';
+    $argv[] = '--single-transaction';
+    $argv[] = '--default-character-set=utf8';
 
-    return phutil_passthru(
-      'mysqldump --single-transaction --default-character-set=utf8 '.
-      '-u %s %C -h %s %C --databases %Ls',
-      $api->getUser(),
-      $flag_password,
-      $host,
-      $flag_port,
-      $databases);
-  }
-
-  private function getBareHostAndPort($host) {
-    // Split out port information, since the command-line client requires a
-    // separate flag for the port.
-    $uri = new PhutilURI('mysql://'.$host);
-    if ($uri->getPort()) {
-      $port = $uri->getPort();
-      $bare_hostname = $uri->getDomain();
-    } else {
-      $port = null;
-      $bare_hostname = $host;
+    if ($args->getArg('for-replica')) {
+      $argv[] = '--master-data';
     }
 
-    return array($bare_hostname, $port);
+    $argv[] = '-u';
+    $argv[] = $api->getUser();
+    $argv[] = '-h';
+    $argv[] = $host;
+
+    if ($port) {
+      $argv[] = '--port';
+      $argv[] = $port;
+    }
+
+    $argv[] = '--databases';
+    foreach ($databases as $database) {
+      $argv[] = $database;
+    }
+
+    if ($has_password) {
+      $err = phutil_passthru('mysqldump -p%P %Ls', $password, $argv);
+    } else {
+      $err = phutil_passthru('mysqldump %Ls', $argv);
+    }
+
+    return $err;
   }
 
 }

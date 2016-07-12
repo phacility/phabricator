@@ -1,0 +1,41 @@
+/**
+ * @provides phui-curtain-view-css
+ */
+
+.phui-curtain-panel {
+  padding: 16px 0;
+  margin: 0 4px;
+}
+
+.device .phui-curtain-panel {
+  padding: 8px 0;
+  margin: 0;
+}
+
+.device-desktop .phui-curtain-panel {
+  border-top: 1px solid rgba({$alphablue}, .1);
+}
+
+.phui-curtain-panel-header {
+  padding: 0 0 4px;
+  color: {$bluetext};
+  font-weight: bold;
+}
+
+.phui-curtain-panel-body {
+  padding: 4px 0 0;
+}
+
+.device .phui-curtain-panel-body {
+  padding: 0;
+}
+
+/* Project tags */
+
+.phui-curtain-panel-body .phabricator-handle-tag-list-item {
+  line-height: 21px;
+}
+
+.phui-side-column .phui-curtain-panel-body .phui-tag-view {
+  white-space: pre-wrap;
+}

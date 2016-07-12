@@ -30,7 +30,7 @@ final class DifferentialChangesetQuery
     return $this;
   }
 
-  public function willExecute() {
+  protected function willExecute() {
     // If we fail to load any changesets (which is possible in the case of an
     // empty commit) we'll never call didFilterPage(). Attach empty changeset
     // lists now so that we end up with the right result.
@@ -41,7 +41,7 @@ final class DifferentialChangesetQuery
     }
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new DifferentialChangeset();
     $conn_r = $table->establishConnection('r');
 
@@ -56,7 +56,7 @@ final class DifferentialChangesetQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $changesets) {
+  protected function willFilterPage(array $changesets) {
     // First, attach all the diffs we already have. We can just do this
     // directly without worrying about querying for them. When we don't have
     // a diff, record that we need to load it.
@@ -103,7 +103,7 @@ final class DifferentialChangesetQuery
     return $changesets;
   }
 
-  public function didFilterPage(array $changesets) {
+  protected function didFilterPage(array $changesets) {
     if ($this->needAttachToDiffs) {
       $changeset_groups = mgroup($changesets, 'getDiffID');
       foreach ($this->diffs as $diff) {
@@ -124,7 +124,7 @@ final class DifferentialChangesetQuery
     return $changesets;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->diffs !== null) {
@@ -148,10 +148,6 @@ final class DifferentialChangesetQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDifferentialApplication';
-  }
-
-  protected function getReversePaging() {
-    return true;
   }
 
 }

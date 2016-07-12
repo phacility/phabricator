@@ -2,19 +2,13 @@
 
 final class ReleephBranchCreateController extends ReleephProductController {
 
-  private $productID;
-
-  public function willProcessRequest(array $data) {
-    $this->productID = $data['projectID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('projectID');
 
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->productID))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -94,17 +88,16 @@ final class ReleephBranchCreateController extends ReleephProductController {
           ->setLabel(pht('Symbolic Name'))
           ->setName('symbolicName')
           ->setValue($symbolic_name)
-          ->setCaption(pht('Mutable alternate name, for easy reference, '.
-              '(e.g. "LATEST")')))
+          ->setCaption(pht(
+            'Mutable alternate name, for easy reference, (e.g. "LATEST")')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Cut point'))
           ->setName('cutPoint')
           ->setValue($cut_point)
           ->setError($e_cut)
-          ->setCaption(
-              pht('A commit ID for your repo type, or a '.
-              'Diffusion ID like "rE123"')))
+          ->setCaption(pht(
+            'A commit ID for your repo type, or a Diffusion ID like "rE123"')))
       ->appendChild($branch_date_control)
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -112,20 +105,29 @@ final class ReleephBranchCreateController extends ReleephProductController {
           ->addCancelButton($product_uri));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('New Branch'))
+      ->setHeaderText(pht('Branch'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('New Branch'));
+    $title = pht('New Branch');
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => pht('New Branch'),
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 }

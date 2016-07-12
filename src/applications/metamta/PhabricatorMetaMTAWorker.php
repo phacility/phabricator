@@ -11,14 +11,14 @@ final class PhabricatorMetaMTAWorker
     return ($task->getFailureCount() * 15);
   }
 
-  public function doWork() {
+  protected function doWork() {
     $message = $this->loadMessage();
     if (!$message) {
       throw new PhabricatorWorkerPermanentFailureException(
         pht('Unable to load message!'));
     }
 
-    if ($message->getStatus() != PhabricatorMetaMTAMail::STATUS_QUEUE) {
+    if ($message->getStatus() != PhabricatorMailOutboundStatus::STATUS_QUEUE) {
       return;
     }
 

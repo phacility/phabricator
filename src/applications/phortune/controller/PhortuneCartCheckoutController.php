@@ -3,19 +3,13 @@
 final class PhortuneCartCheckoutController
   extends PhortuneCartController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $cart = id(new PhortuneCartQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needPurchases(true)
       ->executeOne();
     if (!$cart) {
@@ -39,37 +33,13 @@ final class PhortuneCartCheckoutController
         // This is the expected, normal state for a cart that's ready for
         // checkout.
         break;
-      case PhortuneCart::STATUS_PURCHASING:
-        // We've started the purchase workflow for this cart, but were not able
-        // to complete it. If the workflow is on an external site, this could
-        // happen because the user abandoned the workflow. Just return them to
-        // the right place so they can resume where they left off.
-        $uri = $cart->getMetadataValue('provider.checkoutURI');
-        if ($uri !== null) {
-          return id(new AphrontRedirectResponse())
-            ->setIsExternal(true)
-            ->setURI($uri);
-        }
-
-        return $this->newDialog()
-          ->setTitle(pht('Charge Failed'))
-          ->appendParagraph(
-            pht(
-              'Failed to charge this cart.'))
-          ->addCancelButton($cancel_uri);
-        break;
       case PhortuneCart::STATUS_CHARGED:
-        // TODO: This is really bad (we took your money and at least partially
-        // failed to fulfill your order) and should have better steps forward.
-
-        return $this->newDialog()
-          ->setTitle(pht('Purchase Failed'))
-          ->appendParagraph(
-            pht(
-              'This cart was charged but the purchase could not be '.
-              'completed.'))
-          ->addCancelButton($cancel_uri);
+      case PhortuneCart::STATUS_PURCHASING:
+      case PhortuneCart::STATUS_HOLD:
+      case PhortuneCart::STATUS_REVIEW:
       case PhortuneCart::STATUS_PURCHASED:
+        // For these states, kick the user to the order page to give them
+        // information and options.
         return id(new AphrontRedirectResponse())->setURI($cart->getDetailURI());
       default:
         throw new Exception(
@@ -111,18 +81,36 @@ final class PhortuneCartCheckoutController
         $provider = $method->buildPaymentProvider();
 
         $charge = $cart->willApplyCharge($viewer, $provider, $method);
-        $provider->applyCharge($method, $charge);
+
+        try {
+          $provider->applyCharge($method, $charge);
+        } catch (Exception $ex) {
+          $cart->didFailCharge($charge);
+          return $this->newDialog()
+            ->setTitle(pht('Charge Failed'))
+            ->appendParagraph(
+              pht(
+                'Unable to make payment: %s',
+                $ex->getMessage()))
+            ->addCancelButton($cart->getCheckoutURI(), pht('Continue'));
+        }
+
         $cart->didApplyCharge($charge);
 
-        $done_uri = $cart->getDoneURI();
+        $done_uri = $cart->getCheckoutURI();
         return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
     }
 
-    $cart_box = $this->buildCartContents($cart);
-    $cart_box->setFormErrors($errors);
+    $cart_table = $this->buildCartContentTable($cart);
 
-    $title = pht('Buy Stuff');
+    $cart_box = id(new PHUIObjectBoxView())
+      ->setFormErrors($errors)
+      ->setHeaderText(pht('Cart Contents'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($cart_table);
+
+    $title = $cart->getName();
 
     if (!$methods) {
       $method_control = id(new AphrontFormStaticControl())
@@ -166,7 +154,6 @@ final class PhortuneCartCheckoutController
         array(
           'class' => 'button grey',
           'href'  => $payment_method_uri,
-          'sigil' => 'workflow',
         ),
         pht('Add New Payment Method'));
       $form->appendChild(
@@ -208,27 +195,39 @@ final class PhortuneCartCheckoutController
       $provider_form = new PHUIFormLayoutView();
       $provider_form->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel('Pay With')
+          ->setLabel(pht('Pay With'))
           ->setValue($one_time_options));
     }
 
     $payment_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Choose Payment Method'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form)
       ->appendChild($provider_form);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title);
+    $description_box = $this->renderCartDescription($cart);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Checkout'));
+    $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-shopping-cart');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $cart_box,
+        $description_box,
         $payment_box,
-      ),
-      array(
-        'title'   => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
 
   }
 }

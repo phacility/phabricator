@@ -22,7 +22,21 @@ final class PHUITimelineEventView extends AphrontView {
   private $token;
   private $tokenRemoved;
   private $quoteTargetID;
+  private $isNormalComment;
   private $quoteRef;
+  private $reallyMajorEvent;
+  private $hideCommentOptions = false;
+  private $authorPHID;
+  private $badges = array();
+
+  public function setAuthorPHID($author_phid) {
+    $this->authorPHID = $author_phid;
+    return $this;
+  }
+
+  public function getAuthorPHID() {
+    return $this->authorPHID;
+  }
 
   public function setQuoteRef($quote_ref) {
     $this->quoteRef = $quote_ref;
@@ -40,6 +54,15 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function getQuoteTargetID() {
     return $this->quoteTargetID;
+  }
+
+  public function setIsNormalComment($is_normal_comment) {
+    $this->isNormalComment = $is_normal_comment;
+    return $this;
+  }
+
+  public function getIsNormalComment() {
+    return $this->isNormalComment;
   }
 
   public function setHideByDefault($hide_by_default) {
@@ -138,6 +161,11 @@ final class PHUITimelineEventView extends AphrontView {
     return $this;
   }
 
+  public function addBadge(PHUIBadgeMiniView $badge) {
+    $this->badges[] = $badge;
+    return $this;
+  }
+
   public function setIcon($icon) {
     $this->icon = $icon;
     return $this;
@@ -146,6 +174,20 @@ final class PHUITimelineEventView extends AphrontView {
   public function setColor($color) {
     $this->color = $color;
     return $this;
+  }
+
+  public function setReallyMajorEvent($me) {
+    $this->reallyMajorEvent = $me;
+    return $this;
+  }
+
+  public function setHideCommentOptions($hide_comment_options) {
+    $this->hideCommentOptions = $hide_comment_options;
+    return $this;
+  }
+
+  public function getHideCommentOptions() {
+    return $this->hideCommentOptions;
   }
 
   public function setToken($token, $removed = false) {
@@ -190,11 +232,12 @@ final class PHUITimelineEventView extends AphrontView {
       $fill_classes = array();
       $fill_classes[] = 'phui-timeline-icon-fill';
       if ($this->color) {
+        $fill_classes[] = 'fill-has-color';
         $fill_classes[] = 'phui-timeline-icon-fill-'.$this->color;
       }
 
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon.' white')
+        ->setIcon($this->icon)
         ->addClass('phui-timeline-icon');
 
       $icon = phutil_tag(
@@ -243,7 +286,7 @@ final class PHUITimelineEventView extends AphrontView {
     $menu = null;
     $items = array();
     $has_menu = false;
-    if (!$this->getIsPreview()) {
+    if (!$this->getIsPreview() && !$this->getHideCommentOptions()) {
       foreach ($this->getEventGroup() as $event) {
         $items[] = $event->getMenuItems($this->anchor);
         if ($event->hasChildren()) {
@@ -255,7 +298,7 @@ final class PHUITimelineEventView extends AphrontView {
 
     if ($items || $has_menu) {
       $icon = id(new PHUIIconView())
-        ->setIconFont('fa-caret-down');
+        ->setIcon('fa-caret-down');
       $aural = javelin_tag(
         'span',
         array(
@@ -264,8 +307,8 @@ final class PHUITimelineEventView extends AphrontView {
         pht('Comment Actions'));
 
       if ($items) {
-        $sigil = 'phui-timeline-menu';
-        Javelin::initBehavior('phui-timeline-dropdown-menu');
+        $sigil = 'phui-dropdown-menu';
+        Javelin::initBehavior('phui-dropdown-menu');
       } else {
         $sigil = null;
       }
@@ -284,9 +327,7 @@ final class PHUITimelineEventView extends AphrontView {
           'sigil' => $sigil,
           'aria-haspopup' => 'true',
           'aria-expanded' => 'false',
-          'meta' => array(
-            'items' => hsprintf('%s', $action_list),
-          ),
+          'meta' => $action_list->getDropdownMenuMetadata(),
         ),
         array(
           $aural,
@@ -298,6 +339,8 @@ final class PHUITimelineEventView extends AphrontView {
 
     // Render "extra" information (timestamp, etc).
     $extra = $this->renderExtra($events);
+
+    $show_badges = false;
 
     $group_titles = array();
     $group_items = array();
@@ -315,6 +358,7 @@ final class PHUITimelineEventView extends AphrontView {
 
       if ($event->hasChildren()) {
         $group_children[] = $event->renderChildren();
+        $show_badges = true;
       }
     }
 
@@ -328,13 +372,29 @@ final class PHUITimelineEventView extends AphrontView {
       ),
       '');
 
-    $image = phutil_tag(
-      'div',
-      array(
-        'style' => 'background-image: url('.$image_uri.')',
-        'class' => 'phui-timeline-image',
-      ),
-      '');
+    $image = null;
+    $badges = null;
+    if ($image_uri) {
+      $image = phutil_tag(
+        ($this->userHandle->getURI()) ? 'a' : 'div',
+        array(
+          'style' => 'background-image: url('.$image_uri.')',
+          'class' => 'phui-timeline-image',
+          'href' => $this->userHandle->getURI(),
+        ),
+        '');
+      if ($this->badges && $show_badges) {
+        $flex = new PHUIBadgeBoxView();
+        $flex->addItems($this->badges);
+        $flex->setCollapsed(true);
+        $badges = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-timeline-badges',
+          ),
+          $flex);
+      }
+    }
 
     $content_classes = array();
     $content_classes[] = 'phui-timeline-content';
@@ -375,7 +435,7 @@ final class PHUITimelineEventView extends AphrontView {
       array(
         'class' => implode(' ', $content_classes),
       ),
-      array($image, $wedge, $content));
+      array($image, $badges, $wedge, $content));
 
     $outer_classes = $this->classes;
     $outer_classes[] = 'phui-timeline-shell';
@@ -401,20 +461,35 @@ final class PHUITimelineEventView extends AphrontView {
       );
     }
 
-    return javelin_tag(
-      'div',
-      array(
-        'class' => implode(' ', $outer_classes),
-        'id' => $this->anchor ? 'anchor-'.$this->anchor : null,
-        'sigil' => $sigil,
-        'meta' => $meta,
-      ),
-      phutil_tag(
+    $major_event = null;
+    if ($this->reallyMajorEvent) {
+      $major_event = phutil_tag(
         'div',
         array(
-          'class' => implode(' ', $classes),
+          'class' => 'phui-timeline-event-view '.
+                     'phui-timeline-spacer '.
+                     'phui-timeline-spacer-bold',
+          '',
+        ));
+    }
+
+    return array(
+      javelin_tag(
+        'div',
+        array(
+          'class' => implode(' ', $outer_classes),
+          'id' => $this->anchor ? 'anchor-'.$this->anchor : null,
+          'sigil' => $sigil,
+          'meta' => $meta,
         ),
-        $content));
+        phutil_tag(
+          'div',
+          array(
+            'class' => implode(' ', $classes),
+          ),
+          $content)),
+      $major_event,
+    );
   }
 
   private function renderExtra(array $events) {
@@ -431,11 +506,12 @@ final class PHUITimelineEventView extends AphrontView {
       }
 
       $source = $this->getContentSource();
+      $content_source = null;
       if ($source) {
-        $extra[] = id(new PhabricatorContentSourceView())
+        $content_source = id(new PhabricatorContentSourceView())
           ->setContentSource($source)
-          ->setUser($this->getUser())
-          ->render();
+          ->setUser($this->getUser());
+        $content_source = pht('Via %s', $content_source->getSourceName());
       }
 
       $date_created = null;
@@ -455,6 +531,7 @@ final class PHUITimelineEventView extends AphrontView {
           $this->getUser());
         if ($this->anchor) {
           Javelin::initBehavior('phabricator-watch-anchor');
+          Javelin::initBehavior('phabricator-tooltips');
 
           $anchor = id(new PhabricatorAnchorView())
             ->setAnchorName($this->anchor)
@@ -462,10 +539,14 @@ final class PHUITimelineEventView extends AphrontView {
 
           $date = array(
             $anchor,
-            phutil_tag(
+            javelin_tag(
               'a',
               array(
                 'href' => '#'.$this->anchor,
+                'sigil' => 'has-tooltip',
+                'meta' => array(
+                  'tip' => $content_source,
+          ),
               ),
               $date),
           );
@@ -528,8 +609,9 @@ final class PHUITimelineEventView extends AphrontView {
             'uri' => '/transactions/quote/'.$xaction_phid.'/',
             'ref' => $ref,
           ));
+    }
 
-      // if there is something to quote then there is something to view raw
+    if ($this->getIsNormalComment()) {
       $items[] = id(new PhabricatorActionView())
         ->setIcon('fa-cutlery')
         ->setHref('/transactions/raw/'.$xaction_phid.'/')
@@ -541,9 +623,9 @@ final class PHUITimelineEventView extends AphrontView {
           ));
 
       $content_source = $this->getContentSource();
-      $source_email = PhabricatorContentSource::SOURCE_EMAIL;
+      $source_email = PhabricatorEmailContentSource::SOURCECONST;
       if ($content_source->getSource() == $source_email) {
-        $source_id = $content_source->getParam('id');
+        $source_id = $content_source->getContentSourceParameter('id');
         if ($source_id) {
           $items[] = id(new PhabricatorActionView())
             ->setIcon('fa-envelope-o')

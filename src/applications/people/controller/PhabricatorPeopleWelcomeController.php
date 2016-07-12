@@ -3,25 +3,30 @@
 final class PhabricatorPeopleWelcomeController
   extends PhabricatorPeopleController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $admin = $this->getViewer();
 
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($admin)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
     }
 
     $profile_uri = '/p/'.$user->getUsername().'/';
+
+    if (!$user->canEstablishWebSessions()) {
+      return $this->newDialog()
+        ->setTitle(pht('Not a Normal User'))
+        ->appendParagraph(
+          pht(
+            'You can not send this user a welcome mail because they are not '.
+            'a normal user and can not log in to the web interface. Special '.
+            'users (like bots and mailing lists) are unable to establish web '.
+            'sessions.'))
+        ->addCancelButton($profile_uri, pht('Done'));
+    }
 
     if ($request->isFormPost()) {
       $user->sendWelcomeEmail($admin);
@@ -40,9 +45,7 @@ final class PhabricatorPeopleWelcomeController
           'The email contains a link to log in to their account. Sending '.
           'another copy of the email can be useful if the original was lost '.
           'or never sent.'))
-      ->appendParagraph(
-        pht(
-          'The email will identify you as the sender.'))
+      ->appendParagraph(pht('The email will identify you as the sender.'))
       ->addSubmitButton(pht('Send Email'))
       ->addCancelButton($profile_uri);
   }

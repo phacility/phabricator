@@ -2,28 +2,19 @@
 
 final class DrydockSSHCommandInterface extends DrydockCommandInterface {
 
-  private $passphraseSSHKey;
+  private $credential;
   private $connectTimeout;
 
-  private function openCredentialsIfNotOpen() {
-    if ($this->passphraseSSHKey !== null) {
-      return;
+  private function loadCredential() {
+    if ($this->credential === null) {
+      $credential_phid = $this->getConfig('credentialPHID');
+
+      $this->credential = PassphraseSSHKey::loadFromPHID(
+        $credential_phid,
+        PhabricatorUser::getOmnipotentUser());
     }
 
-    $credential = id(new PassphraseCredentialQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($this->getConfig('credential')))
-      ->needSecrets(true)
-      ->executeOne();
-
-    if ($credential->getProvidesType() !==
-      PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE) {
-      throw new Exception('Only private key credentials are supported.');
-    }
-
-    $this->passphraseSSHKey = PassphraseSSHKey::loadFromPHID(
-      $credential->getPHID(),
-      PhabricatorUser::getOmnipotentUser());
+    return $this->credential;
   }
 
   public function setConnectTimeout($timeout) {
@@ -32,68 +23,36 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
   }
 
   public function getExecFuture($command) {
-    $this->openCredentialsIfNotOpen();
+    $credential = $this->loadCredential();
 
     $argv = func_get_args();
+    $argv = $this->applyWorkingDirectoryToArgv($argv);
+    $full_command = call_user_func_array('csprintf', $argv);
 
-    if ($this->getConfig('platform') === 'windows') {
-      // Handle Windows by executing the command under PowerShell.
-      $command = id(new PhutilCommandString($argv))
-        ->setEscapingMode(PhutilCommandString::MODE_POWERSHELL);
+    $flags = array();
+    $flags[] = '-o';
+    $flags[] = 'LogLevel=quiet';
 
-      $change_directory = '';
-      if ($this->getWorkingDirectory() !== null) {
-        $change_directory .= 'cd '.$this->getWorkingDirectory();
-      }
+    $flags[] = '-o';
+    $flags[] = 'StrictHostKeyChecking=no';
 
-      $script = <<<EOF
-$change_directory
-$command
-if (\$LastExitCode -ne 0) {
-  exit \$LastExitCode
-}
-EOF;
+    $flags[] = '-o';
+    $flags[] = 'UserKnownHostsFile=/dev/null';
 
-      // When Microsoft says "Unicode" they don't mean UTF-8.
-      $script = mb_convert_encoding($script, 'UTF-16LE');
+    $flags[] = '-o';
+    $flags[] = 'BatchMode=yes';
 
-      $script = base64_encode($script);
-
-      $powershell =
-        'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
-      $powershell .=
-        ' -ExecutionPolicy Bypass'.
-        ' -NonInteractive'.
-        ' -InputFormat Text'.
-        ' -OutputFormat Text'.
-        ' -EncodedCommand '.$script;
-
-      $full_command = $powershell;
-    } else {
-      // Handle UNIX by executing under the native shell.
-      $argv = $this->applyWorkingDirectoryToArgv($argv);
-
-      $full_command = call_user_func_array('csprintf', $argv);
-    }
-
-    $command_timeout = '';
-    if ($this->connectTimeout !== null) {
-      $command_timeout = csprintf(
-        '-o %s',
-        'ConnectTimeout='.$this->connectTimeout);
+    if ($this->connectTimeout) {
+      $flags[] = '-o';
+      $flags[] = 'ConnectTimeout='.$this->connectTimeout;
     }
 
     return new ExecFuture(
-      'ssh '.
-      '-o LogLevel=quiet '.
-      '-o StrictHostKeyChecking=no '.
-      '-o UserKnownHostsFile=/dev/null '.
-      '-o BatchMode=yes '.
-      '%C -p %s -i %P %P@%s -- %s',
-      $command_timeout,
+      'ssh %Ls -l %P -p %s -i %P %s -- %s',
+      $flags,
+      $credential->getUsernameEnvelope(),
       $this->getConfig('port'),
-      $this->passphraseSSHKey->getKeyfileEnvelope(),
-      $this->passphraseSSHKey->getUsernameEnvelope(),
+      $credential->getKeyfileEnvelope(),
       $this->getConfig('host'),
       $full_command);
   }

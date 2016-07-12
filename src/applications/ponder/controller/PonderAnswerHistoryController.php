@@ -2,62 +2,49 @@
 
 final class PonderAnswerHistoryController extends PonderController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $answer = id(new PonderAnswerQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$answer) {
       return new Aphront404Response();
     }
 
-    $xactions = id(new PonderAnswerTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($answer->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($answer->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $answer,
+      new PonderAnswerTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $qid = $answer->getQuestion()->getID();
     $aid = $answer->getID();
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb("Q{$qid}", "/Q{$qid}");
     $crumbs->addTextCrumb("A{$aid}", "/Q{$qid}#{$aid}");
     $crumbs->addTextCrumb(pht('History'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $timeline,
-      ),
-      array(
-        'title' => pht('Answer History'),
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Answer History'))
+      ->setHeaderIcon('fa-history');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($timeline);
+
+    return $this->newPage()
+      ->setTitle(pht('Answer History'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

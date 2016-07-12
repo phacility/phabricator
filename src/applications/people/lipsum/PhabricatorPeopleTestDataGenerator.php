@@ -3,7 +3,11 @@
 final class PhabricatorPeopleTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
-  public function generate() {
+  public function getGeneratorName() {
+    return pht('User Accounts');
+  }
+
+  public function generateObject() {
 
     while (true) {
       try {
@@ -30,7 +34,7 @@ final class PhabricatorPeopleTestDataGenerator
   }
 
   protected function generateRealname() {
-    $realname_generator = new PhutilRealnameContextFreeGrammar();
+    $realname_generator = new PhutilRealNameContextFreeGrammar();
     $random_real_name = $realname_generator->generate();
     return $random_real_name;
   }
@@ -46,8 +50,7 @@ final class PhabricatorPeopleTestDataGenerator
       foreach ($words as $w) {
          if ($w == end($words)) {
           $reduced .= $w;
-        }
-        else {
+        } else {
           $reduced .= $w[0];
         }
       }
@@ -55,8 +58,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0]) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0];
           }
         }
@@ -64,8 +66,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0];
           }
         }
@@ -73,8 +74,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0].'.';
           }
         }
@@ -82,8 +82,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0].'_';
           }
         }

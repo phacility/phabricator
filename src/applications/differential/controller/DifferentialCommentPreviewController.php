@@ -3,19 +3,13 @@
 final class DifferentialCommentPreviewController
   extends DifferentialController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$revision) {
       return new Aphront404Response();
@@ -41,7 +35,7 @@ final class DifferentialCommentPreviewController
         break;
     }
 
-    $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
     $reviewers = $request->getStrList('reviewers');
     if (DifferentialAction::allowReviewers($action) && $reviewers) {
@@ -119,7 +113,7 @@ final class DifferentialCommentPreviewController
       $metadata['action'] = $action;
     }
 
-    $draft_key = 'differential-comment-'.$this->id;
+    $draft_key = 'differential-comment-'.$id;
     $draft = id(new PhabricatorDraft())
       ->setAuthorPHID($viewer->getPHID())
       ->setDraftKey($draft_key)

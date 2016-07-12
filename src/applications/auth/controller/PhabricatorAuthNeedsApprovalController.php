@@ -15,25 +15,23 @@ final class PhabricatorAuthNeedsApprovalController
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $wait_for_approval = pht(
       "Your account has been created, but needs to be approved by an ".
       "administrator. You'll receive an email once your account is approved.");
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle(pht('Wait for Approval'))
       ->appendChild($wait_for_approval)
       ->addCancelButton('/', pht('Wait Patiently'));
 
-    return $this->buildApplicationPage(
-      $dialog,
-      array(
-        'title' => pht('Wait For Approval'),
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Wait For Approval'))
+      ->appendChild($dialog);
+
   }
 
 }

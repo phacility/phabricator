@@ -39,6 +39,7 @@ final class DifferentialSummaryField
 
   public function renderEditControl(array $handles) {
     return id(new PhabricatorRemarkupControl())
+      ->setUser($this->getViewer())
       ->setName($this->getFieldKey())
       ->setValue($this->getValue())
       ->setError($this->getFieldError())
@@ -57,8 +58,7 @@ final class DifferentialSummaryField
   }
 
   public function getApplicationTransactionTitleForFeed(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorFeedStory $story) {
+    PhabricatorApplicationTransaction $xaction) {
 
     $object_phid = $xaction->getObjectPHID();
     $author_phid = $xaction->getAuthorPHID();
@@ -122,12 +122,7 @@ final class DifferentialSummaryField
       return null;
     }
 
-    return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setPreserveLinebreaks(true)
-        ->setContent($this->getValue()),
-      'default',
-      $this->getViewer());
+    return new PHUIRemarkupView($this->getViewer(), $this->getValue());
   }
 
   public function getApplicationTransactionRemarkupBlocks(
@@ -165,7 +160,7 @@ final class DifferentialSummaryField
       return;
     }
 
-    $body->addTextSection(pht('REVISION SUMMARY'), $summary);
+    $body->addRemarkupSection(pht('REVISION SUMMARY'), $summary);
   }
 
 }

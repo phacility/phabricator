@@ -12,22 +12,18 @@ final class ReleephWorkGetAuthorInfoConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Return a string to use as the VCS author.';
+    return pht('Return a string to use as the VCS author.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'userPHID'  => 'required string',
       'vcsType'   => 'required string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty string';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

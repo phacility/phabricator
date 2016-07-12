@@ -1,0 +1,14 @@
+/**
+ * @provides diffusion-readme-css
+ */
+
+.device .diffusion-readme-view .phui-document-fluid .phui-document-view,
+.device-desktop .diffusion-readme-view .phui-document-fluid
+  .phui-document-view {
+    margin: 0;
+    padding: 0 8px;
+}
+
+.diffusion-readme-view .phui-document-container {
+  border: none;
+}

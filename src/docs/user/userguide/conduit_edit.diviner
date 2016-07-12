@@ -1,0 +1,115 @@
+@title Conduit API: Using Edit Endpoints
+@group conduit
+
+Describes how to use edit endpoints to create and update objects.
+
+Overview
+========
+
+Many applications provide `edit` endpoints, which are the primary way to
+create and update objects (like tasks) using the API.
+
+To create or edit an object, you'll build a list of //transactions// and pass
+them to the endpoint. Each transaction applies a change to a field or property
+on the object.
+
+For example, a transaction might change the title of an object or add
+subscribers.
+
+When creating an object, transactions will be applied to an empty object. When
+editing an object, transactions will be applied to an existing object.
+
+The best reference for a particular `edit` endpoint is the Conduit API console.
+For example, you can find the console page for `maniphest.edit` by navigating
+to {nav Conduit > maniphest.edit} in the web UI. This page contains detailed
+information about the endpoint and how it can be used.
+
+Creating Objects
+================
+
+To create objects, pass a list of transactions but leave `objectIdentfier`
+blank. This tells the endpoint that you want to create a new, empty object and
+then apply the transactions to it.
+
+
+Editing Objects
+===============
+
+To edit objects, pass a list of transactions and use `objectIdentifier` to
+specify which object to apply them to. You can normally pass an ID or PHID,
+and many applicaitons also allow you to pass a monogram (for example, you can
+edit a task by passing `T123`).
+
+
+Building Transactions
+=====================
+
+When creating or editing objects, you'll build a list of transactions to
+apply. This transaction list will look something like this:
+
+```lang=json, name="Example Transaction List"
+[
+  {
+    "type": "title",
+    "value": "Assemble in the barnyard"
+  },
+  {
+    "type": "description",
+    "value": "All animals should assemble in the barnyard promptly."
+  },
+  {
+    "type": "subscribers.add",
+    "value": ["dog", "cat", "mouse"]
+  }
+]
+```
+
+Applied to an empty object (say, a task), these transactions would create a new
+task with the specified title, description and subscribers.
+
+Applied to an existing object, they would retitle the task, change its
+description, and add new subscribers.
+
+The particular transactions available on each object are documented on the
+Conduit API console page for that object.
+
+
+Return Type
+===========
+
+WARNING: The structure of the return value from these methods is likely to
+change as ApplicationEditor evolves.
+
+Return values look something like this for now:
+
+```lang=json, name=Example Return Value
+{
+  "object": {
+    "phid": "PHID-XXXX-1111"
+  },
+  "transactions": [
+    {
+      "phid": "PHID-YYYY-1111",
+    },
+    {
+      "phid": "PHID-YYYY-2222",
+    }
+  ]
+}
+```
+
+The `object` key contains information about the object which was created or
+edited.
+
+The `transactions` key contains information about the transactions which were
+actually applied. For many reasons, the transactions which actually apply may
+be greater or fewer in number than the transactions you provided, or may differ
+in their nature in other ways.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Conduit API Overview}.

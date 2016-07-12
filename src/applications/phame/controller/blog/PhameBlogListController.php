@@ -1,84 +1,26 @@
 <?php
 
-final class PhameBlogListController extends PhameController {
+final class PhameBlogListController extends PhameBlogController {
 
-  private $filter;
-
-  public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter');
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $nav = $this->renderSideNavFilterView(null);
-    $filter = $nav->selectFilter('blog/'.$this->filter, 'blog/user');
-
-    $query = id(new PhameBlogQuery())
-      ->setViewer($user);
-
-    switch ($filter) {
-      case 'blog/all':
-        $title = pht('All Blogs');
-        $nodata = pht('No blogs have been created.');
-        break;
-      case 'blog/user':
-        $title = pht('Joinable Blogs');
-        $nodata = pht('There are no blogs you can contribute to.');
-        $query->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_JOIN,
-          ));
-        break;
-      default:
-        throw new Exception("Unknown filter '{$filter}'!");
-    }
-
-    $pager = id(new AphrontPagerView())
-      ->setURI($request->getRequestURI(), 'offset')
-      ->setOffset($request->getInt('offset'));
-
-    $blogs = $query->executeWithOffsetPager($pager);
-
-    $blog_list = $this->renderBlogList($blogs, $user, $nodata);
-    $blog_list->setPager($pager);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title, $this->getApplicationURI());
-
-    $nav->appendChild(
-      array(
-        $crumbs,
-        $blog_list,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+  public function handleRequest(AphrontRequest $request) {
+    return id(new PhameBlogSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
-  private function renderBlogList(
-    array $blogs,
-    PhabricatorUser $user,
-    $nodata) {
 
-    $view = new PHUIObjectItemListView();
-    $view->setNoDataString($nodata);
-    $view->setUser($user);
-    foreach ($blogs as $blog) {
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($blog->getName())
-        ->setHref($this->getApplicationURI('blog/view/'.$blog->getID().'/'))
-        ->setObject($blog);
+    id(new PhameBlogEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
-      $view->addItem($item);
-    }
-
-    return $view;
+    return $crumbs;
   }
 
 }

@@ -3,9 +3,8 @@
 final class PhabricatorConfigAllController
   extends PhabricatorConfigController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $db_values = id(new PhabricatorConfigEntry())
       ->loadAllWhere('namespace = %s', 'default');
@@ -17,9 +16,7 @@ final class PhabricatorConfigAllController
     foreach ($options as $option) {
       $key = $option->getKey();
 
-      if ($option->getMasked()) {
-        $value = phutil_tag('em', array(), pht('Masked'));
-      } else if ($option->getHidden()) {
+      if ($option->getHidden()) {
         $value = phutil_tag('em', array(), pht('Hidden'));
       } else {
         $value = PhabricatorEnv::getEnvConfig($key);
@@ -59,79 +56,22 @@ final class PhabricatorConfigAllController
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Current Settings'));
-    $panel->appendChild($table);
-
-    $versions = $this->loadVersions();
-
-    $version_property_list = id(new PHUIPropertyListView());
-    foreach ($versions as $version) {
-      list($name, $hash) = $version;
-      $version_property_list->addProperty($name, $hash);
-    }
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Current Version'))
-      ->addPropertyList($version_property_list);
-
-    $phabricator_root = dirname(phutil_get_library_root('phabricator'));
-    $version_path = $phabricator_root.'/conf/local/VERSION';
-    if (Filesystem::pathExists($version_path)) {
-      $version_from_file = Filesystem::readFile($version_path);
-      $version_property_list->addProperty(
-        pht('Local Version'),
-        $version_from_file);
-    }
+    $panel->setTable($table);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('all/');
-    $nav->setCrumbs($crumbs);
-    $nav->appendChild($object_box);
-    $nav->appendChild($panel);
 
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $panel,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
-
-  private function loadVersions() {
-    $specs = array(
-      array(
-        'name' => pht('Phabricator Version'),
-        'root' => 'phabricator',
-      ),
-      array(
-        'name' => pht('Arcanist Version'),
-        'root' => 'arcanist',
-      ),
-      array(
-        'name' => pht('libphutil Version'),
-        'root' => 'phutil',
-      ),
-    );
-
-    $futures = array();
-    foreach ($specs as $key => $spec) {
-      $root = dirname(phutil_get_library_root($spec['root']));
-      $futures[$key] = id(new ExecFuture('git log --format=%%H -n 1 --'))
-        ->setCWD($root);
-    }
-
-    $results = array();
-    foreach ($futures as $key => $future) {
-      list($err, $stdout) = $future->resolve();
-      if (!$err) {
-        $name = trim($stdout);
-      } else {
-        $name = pht('Unknown');
-      }
-      $results[$key] = array($specs[$key]['name'], $name);
-    }
-
-    return array_select_keys($results, array_keys($specs));
-  }
-
 
 }

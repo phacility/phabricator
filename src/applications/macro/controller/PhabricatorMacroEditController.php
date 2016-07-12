@@ -2,23 +2,17 @@
 
 final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
     $this->requireApplicationCapability(
       PhabricatorMacroManageCapability::CAPABILITY);
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $macro = id(new PhabricatorMacroQuery())
-        ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->needFiles(true)
         ->executeOne();
       if (!$macro) {
@@ -26,14 +20,13 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
       }
     } else {
       $macro = new PhabricatorFileImageMacro();
-      $macro->setAuthorPHID($user->getPHID());
+      $macro->setAuthorPHID($viewer->getPHID());
     }
 
     $errors = array();
     $e_name = true;
     $e_file = null;
     $file = null;
-    $can_fetch = PhabricatorEnv::getEnvConfig('security.allow-outbound-http');
 
     if ($request->isFormPost()) {
       $original = clone $macro;
@@ -57,32 +50,65 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
         }
       }
 
+      $uri = $request->getStr('url');
+
+      $engine = new PhabricatorDestructionEngine();
+
       $file = null;
       if ($request->getFileExists('file')) {
         $file = PhabricatorFile::newFromPHPUpload(
           $_FILES['file'],
           array(
             'name' => $request->getStr('name'),
-            'authorPHID' => $user->getPHID(),
+            'authorPHID' => $viewer->getPHID(),
             'isExplicitUpload' => true,
             'canCDN' => true,
           ));
-      } else if ($request->getStr('url')) {
+      } else if ($uri) {
         try {
+          // Rate limit outbound fetches to make this mechanism less useful for
+          // scanning networks and ports.
+          PhabricatorSystemActionEngine::willTakeAction(
+            array($viewer->getPHID()),
+            new PhabricatorFilesOutboundRequestAction(),
+            1);
+
           $file = PhabricatorFile::newFromFileDownload(
-            $request->getStr('url'),
+            $uri,
             array(
               'name' => $request->getStr('name'),
-              'authorPHID' => $user->getPHID(),
+              'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
               'isExplicitUpload' => true,
               'canCDN' => true,
             ));
+
+          if (!$file->isViewableInBrowser()) {
+            $mime_type = $file->getMimeType();
+            $engine->destroyObject($file);
+            $file = null;
+            throw new Exception(
+              pht(
+                'The URI "%s" does not correspond to a valid image file, got '.
+                'a file with MIME type "%s". You must specify the URI of a '.
+                'valid image file.',
+                $uri,
+                $mime_type));
+          } else {
+            $file
+              ->setAuthorPHID($viewer->getPHID())
+              ->save();
+          }
+        } catch (HTTPFutureHTTPResponseStatus $status) {
+          $errors[] = pht(
+            'The URI "%s" could not be loaded, got %s error.',
+            $uri,
+            $status->getStatusCode());
         } catch (Exception $ex) {
-          $errors[] = pht('Could not fetch URL: %s', $ex->getMessage());
+          $errors[] = $ex->getMessage();
         }
       } else if ($request->getStr('phid')) {
         $file = id(new PhabricatorFileQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs(array($request->getStr('phid')))
           ->executeOne();
       }
@@ -109,18 +135,18 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
           if ($new_name !== null) {
             $xactions[] = id(new PhabricatorMacroTransaction())
-              ->setTransactionType(PhabricatorMacroTransactionType::TYPE_NAME)
+              ->setTransactionType(PhabricatorMacroTransaction::TYPE_NAME)
               ->setNewValue($new_name);
           }
 
           if ($file) {
             $xactions[] = id(new PhabricatorMacroTransaction())
-              ->setTransactionType(PhabricatorMacroTransactionType::TYPE_FILE)
+              ->setTransactionType(PhabricatorMacroTransaction::TYPE_FILE)
               ->setNewValue($file->getPHID());
           }
 
           $editor = id(new PhabricatorMacroEditor())
-            ->setActor($user)
+            ->setActor($viewer)
             ->setContinueOnNoEffect(true)
             ->setContentSourceFromRequest($request);
 
@@ -175,14 +201,12 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
         $other_label = pht('File');
       }
 
-      if ($can_fetch) {
-        $form->appendChild(
-          id(new AphrontFormTextControl())
-            ->setLabel(pht('URL'))
-            ->setName('url')
-            ->setValue($request->getStr('url'))
-            ->setError($request->getFileExists('file') ? false : $e_file));
-      }
+      $form->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('URL'))
+          ->setName('url')
+          ->setValue($request->getStr('url'))
+          ->setError($request->getFileExists('file') ? false : $e_file));
 
       $form->appendChild(
         id(new AphrontFormFileControl())
@@ -209,16 +233,19 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
     $crumbs = $this->buildApplicationCrumbs();
 
     if ($macro->getID()) {
-      $title = pht('Edit Image Macro');
+      $title = pht('Edit Macro: %s', $macro->getName());
       $crumb = pht('Edit Macro');
+      $header_icon = 'fa-pencil';
 
-      $crumbs->addTextCrumb(pht('Macro "%s"', $macro->getName()), $view_uri);
+      $crumbs->addTextCrumb(pht('Macro: %s', $macro->getName()), $view_uri);
     } else {
       $title = pht('Create Image Macro');
       $crumb = pht('Create Macro');
+      $header_icon = 'fa-plus-square';
     }
 
     $crumbs->addTextCrumb($crumb, $request->getRequestURI());
+    $crumbs->setBorder(true);
 
     $upload = null;
     if ($macro->getID()) {
@@ -226,13 +253,11 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
         ->setEncType('multipart/form-data')
         ->setUser($request->getUser());
 
-      if ($can_fetch) {
-        $upload_form->appendChild(
-          id(new AphrontFormTextControl())
-            ->setLabel(pht('URL'))
-            ->setName('url')
-            ->setValue($request->getStr('url')));
-      }
+      $upload_form->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('URL'))
+          ->setName('url')
+          ->setValue($request->getStr('url')));
 
       $upload_form
         ->appendChild(
@@ -245,23 +270,32 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
       $upload = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Upload New File'))
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setForm($upload_form);
     }
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Macro'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
         $upload,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

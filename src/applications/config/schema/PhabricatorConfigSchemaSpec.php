@@ -7,6 +7,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   private $utf8BinaryCollation;
   private $utf8SortingCollation;
 
+  const DATATYPE_UNKNOWN = '<unknown>';
+
   public function setUTF8SortingCollation($utf8_sorting_collation) {
     $this->utf8SortingCollation = $utf8_sorting_collation;
     return $this;
@@ -199,7 +201,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
     $is_binary = ($this->getUTF8Charset() == 'binary');
     $matches = null;
-    if (preg_match('/^(fulltext|sort|text)(\d+)?\z/', $data_type, $matches)) {
+    $pattern = '/^(fulltext|sort|text|char)(\d+)?\z/';
+    if (preg_match($pattern, $data_type, $matches)) {
 
       // Limit the permitted column lengths under the theory that it would
       // be nice to eventually reduce this to a small set of standard lengths.
@@ -218,6 +221,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         'text8' => true,
         'text4' => true,
         'text' => true,
+        'char3' => true,
         'sort255' => true,
         'sort128' => true,
         'sort64' => true,
@@ -233,36 +237,62 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $type = $matches[1];
       $size = idx($matches, 2);
 
-      if ($is_binary) {
-        if ($size) {
-          $column_type = 'varbinary('.$size.')';
-        } else {
-          $column_type = 'longblob';
-        }
-
-        // MySQL (at least, under MyISAM) refuses to create a FULLTEXT index
-        // on a LONGBLOB column. We'd also lose case insensitivity in search.
-        // Force this column to utf8 collation. This will truncate results with
-        // 4-byte UTF characters in their text, but work reasonably in the
-        // majority of cases.
-
-        if ($type == 'fulltext') {
+      switch ($type) {
+        case 'text':
+          if ($is_binary) {
+            if ($size) {
+              $column_type = 'varbinary('.$size.')';
+            } else {
+              $column_type = 'longblob';
+            }
+          } else {
+            if ($size) {
+              $column_type = 'varchar('.$size.')';
+            } else {
+              $column_type = 'longtext';
+            }
+          }
+          break;
+        case 'sort':
+          if ($size) {
+            $column_type = 'varchar('.$size.')';
+          } else {
+            $column_type = 'longtext';
+          }
+          break;
+        case 'fulltext';
+          // MySQL (at least, under MyISAM) refuses to create a FULLTEXT index
+          // on a LONGBLOB column. We'd also lose case insensitivity in search.
+          // Force this column to utf8 collation. This will truncate results
+          // with 4-byte UTF characters in their text, but work reasonably in
+          // the majority of cases.
           $column_type = 'longtext';
-          $charset = 'utf8';
-          $collation = 'utf8_general_ci';
-        }
-      } else {
-        if ($size) {
-          $column_type = 'varchar('.$size.')';
-        } else {
-          $column_type = 'longtext';
-        }
-        $charset = $this->getUTF8Charset();
-        if ($type == 'sort' || $type == 'fulltext') {
+          break;
+        case 'char':
+          $column_type = 'char('.$size.')';
+          break;
+      }
+
+      switch ($type) {
+        case 'text':
+        case 'char':
+          if ($is_binary) {
+            // We leave collation and character set unspecified in order to
+            // generate valid SQL.
+          } else {
+            $charset = $this->getUTF8Charset();
+            $collation = $this->getUTF8BinaryCollation();
+          }
+          break;
+        case 'sort':
+        case 'fulltext':
+          if ($is_binary) {
+            $charset = 'utf8';
+          } else {
+            $charset = $this->getUTF8Charset();
+          }
           $collation = $this->getUTF8SortingCollation();
-        } else {
-          $collation = $this->getUTF8BinaryCollation();
-        }
+          break;
       }
     } else {
       switch ($data_type) {
@@ -291,6 +321,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
           break;
         case 'phid':
         case 'policy';
+        case 'hashpath64':
+        case 'ipaddress':
           $column_type = 'varbinary(64)';
           break;
         case 'bytes64':
@@ -324,9 +356,9 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
           $column_type = 'date';
           break;
         default:
-          $column_type = pht('<unknown>');
-          $charset = pht('<unknown>');
-          $collation = pht('<unknown>');
+          $column_type = self::DATATYPE_UNKNOWN;
+          $charset = self::DATATYPE_UNKNOWN;
+          $collation = self::DATATYPE_UNKNOWN;
           break;
       }
     }

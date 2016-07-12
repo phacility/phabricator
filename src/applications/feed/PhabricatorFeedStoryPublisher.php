@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFeedStoryPublisher {
+final class PhabricatorFeedStoryPublisher extends Phobject {
 
   private $relatedPHIDs;
   private $storyType;
@@ -74,21 +74,29 @@ final class PhabricatorFeedStoryPublisher {
   public function publish() {
     $class = $this->storyType;
     if (!$class) {
-      throw new Exception('Call setStoryType() before publishing!');
+      throw new Exception(
+        pht(
+          'Call %s before publishing!',
+          'setStoryType()'));
     }
 
     if (!class_exists($class)) {
       throw new Exception(
-        "Story type must be a valid class name and must subclass ".
-        "PhabricatorFeedStory. ".
-        "'{$class}' is not a loadable class.");
+        pht(
+          "Story type must be a valid class name and must subclass %s. ".
+          "'%s' is not a loadable class.",
+          'PhabricatorFeedStory',
+          $class));
     }
 
     if (!is_subclass_of($class, 'PhabricatorFeedStory')) {
       throw new Exception(
-        "Story type must be a valid class name and must subclass ".
-        "PhabricatorFeedStory. ".
-        "'{$class}' is not a subclass of PhabricatorFeedStory.");
+        pht(
+          "Story type must be a valid class name and must subclass %s. ".
+          "'%s' is not a subclass of %s.",
+          'PhabricatorFeedStory',
+          $class,
+          'PhabricatorFeedStory'));
     }
 
     $chrono_key = $this->generateChronologicalKey();
@@ -121,8 +129,8 @@ final class PhabricatorFeedStoryPublisher {
     }
 
     $subscribed_phids = $this->subscribedPHIDs;
-    $subscribed_phids = $this->filterSubscribedPHIDs($subscribed_phids);
     if ($subscribed_phids) {
+      $subscribed_phids = $this->filterSubscribedPHIDs($subscribed_phids);
       $this->insertNotifications($chrono_key, $subscribed_phids);
       $this->sendNotification($chrono_key, $subscribed_phids);
     }
@@ -139,7 +147,10 @@ final class PhabricatorFeedStoryPublisher {
   private function insertNotifications($chrono_key, array $subscribed_phids) {
     if (!$this->primaryObjectPHID) {
       throw new Exception(
-        'You must call setPrimaryObjectPHID() if you setSubscribedPHIDs()!');
+        pht(
+          'You must call %s if you %s!',
+          'setPrimaryObjectPHID()',
+          'setSubscribedPHIDs()'));
     }
 
     $notif = new PhabricatorFeedStoryNotification();
@@ -148,7 +159,8 @@ final class PhabricatorFeedStoryPublisher {
 
     $will_receive_mail = array_fill_keys($this->mailRecipientPHIDs, true);
 
-    foreach (array_unique($subscribed_phids) as $user_phid) {
+    $user_phids = array_unique($subscribed_phids);
+    foreach ($user_phids as $user_phid) {
       if (isset($will_receive_mail[$user_phid])) {
         $mark_read = 1;
       } else {
@@ -164,12 +176,19 @@ final class PhabricatorFeedStoryPublisher {
         $mark_read);
     }
 
-    queryfx(
-      $conn,
-      'INSERT INTO %T (primaryObjectPHID, userPHID, chronologicalKey, hasViewed)
-        VALUES %Q',
-      $notif->getTableName(),
-      implode(', ', $sql));
+    if ($sql) {
+      queryfx(
+        $conn,
+        'INSERT INTO %T '.
+        '(primaryObjectPHID, userPHID, chronologicalKey, hasViewed) '.
+        'VALUES %Q',
+        $notif->getTableName(),
+        implode(', ', $sql));
+    }
+
+    PhabricatorUserCache::clearCaches(
+      PhabricatorUserNotificationCountCacheType::KEY_COUNT,
+      $user_phids);
   }
 
   private function sendNotification($chrono_key, array $subscribed_phids) {
@@ -189,16 +208,20 @@ final class PhabricatorFeedStoryPublisher {
    * @return list<phid> List of actual subscribers.
    */
   private function filterSubscribedPHIDs(array $phids) {
+    $phids = $this->expandRecipients($phids);
+
     $tags = $this->getMailTags();
     if ($tags) {
-      $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID in (%Ls)',
-        $phids);
+      $all_prefs = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withUserPHIDs($phids)
+        ->needSyntheticPreferences(true)
+        ->execute();
       $all_prefs = mpull($all_prefs, null, 'getUserPHID');
     }
 
-    $pref_default = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
-    $pref_ignore = PhabricatorUserPreferences::MAILTAG_PREFERENCE_IGNORE;
+    $pref_default = PhabricatorEmailTagsSetting::VALUE_EMAIL;
+    $pref_ignore = PhabricatorEmailTagsSetting::VALUE_IGNORE;
 
     $keep = array();
     foreach ($phids as $phid) {
@@ -207,9 +230,8 @@ final class PhabricatorFeedStoryPublisher {
       }
 
       if ($tags && isset($all_prefs[$phid])) {
-        $mailtags = $all_prefs[$phid]->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
-          array());
+        $mailtags = $all_prefs[$phid]->getSettingValue(
+          PhabricatorEmailTagsSetting::SETTINGKEY);
 
         $notify = false;
         foreach ($tags as $tag) {
@@ -229,6 +251,13 @@ final class PhabricatorFeedStoryPublisher {
     }
 
     return array_values(array_unique($keep));
+  }
+
+  private function expandRecipients(array $phids) {
+    return id(new PhabricatorMetaMTAMemberQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($phids)
+      ->executeExpansion();
   }
 
   /**

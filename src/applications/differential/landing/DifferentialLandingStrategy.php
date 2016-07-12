@@ -1,8 +1,8 @@
 <?php
 
-abstract class DifferentialLandingStrategy {
+abstract class DifferentialLandingStrategy extends Phobject {
 
-  public abstract function processLandRequest(
+  abstract public function processLandRequest(
     AphrontRequest $request,
     DifferentialRevision $revision,
     PhabricatorRepository $repository);
@@ -10,7 +10,7 @@ abstract class DifferentialLandingStrategy {
   /**
    * @return PhabricatorActionView or null.
    */
-  abstract function createMenuItem(
+  abstract public function createMenuItem(
     PhabricatorUser $viewer,
     DifferentialRevision $revision,
     PhabricatorRepository $repository);
@@ -62,9 +62,11 @@ abstract class DifferentialLandingStrategy {
    */
   protected function getGitWorkspace(PhabricatorRepository $repository) {
     try {
-        return DifferentialGetWorkingCopy::getCleanGitWorkspace($repository);
+      return DifferentialGetWorkingCopy::getCleanGitWorkspace($repository);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to allocate a workspace', $e);
+      throw new PhutilProxyException(
+        pht('Failed to allocate a workspace.'),
+        $e);
     }
   }
 
@@ -76,7 +78,9 @@ abstract class DifferentialLandingStrategy {
       return DifferentialGetWorkingCopy::getCleanMercurialWorkspace(
         $repository);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to allocate a workspace', $e);
+      throw new PhutilProxyException(
+        pht('Failed to allocate a workspace.'),
+        $e);
     }
   }
 

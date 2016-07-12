@@ -3,7 +3,6 @@
 final class DiffusionPushLogListView extends AphrontView {
 
   private $logs;
-  private $handles;
 
   public function setLogs(array $logs) {
     assert_instances_of($logs, 'PhabricatorRepositoryPushLog');
@@ -11,15 +10,20 @@ final class DiffusionPushLogListView extends AphrontView {
     return $this;
   }
 
-  public function setHandles(array $handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
   public function render() {
     $logs = $this->logs;
-    $viewer = $this->getUser();
-    $handles = $this->handles;
+    $viewer = $this->getViewer();
+
+    $handle_phids = array();
+    foreach ($logs as $log) {
+      $handle_phids[] = $log->getPusherPHID();
+      $device_phid = $log->getDevicePHID();
+      if ($device_phid) {
+        $handle_phids[] = $device_phid;
+      }
+    }
+
+    $handles = $viewer->loadHandles($handle_phids);
 
     // Figure out which repositories are editable. We only let you see remote
     // IPs if you have edit capability on a repository.
@@ -38,20 +42,36 @@ final class DiffusionPushLogListView extends AphrontView {
     }
 
     $rows = array();
+    $any_host = false;
     foreach ($logs as $log) {
+      $repository = $log->getRepository();
 
       // Reveal this if it's valid and the user can edit the repository.
-      $remote_addr = '-';
+      $remote_address = '-';
       if (isset($editable_repos[$log->getRepositoryPHID()])) {
-        $remote_long = $log->getPushEvent()->getRemoteAddress();
-        if ($remote_long) {
-          $remote_addr = long2ip($remote_long);
-        }
+        $remote_address = $log->getPushEvent()->getRemoteAddress();
       }
 
       $event_id = $log->getPushEvent()->getID();
 
-      $callsign = $log->getRepository()->getCallsign();
+      $old_ref_link = null;
+      if ($log->getRefOld() != DiffusionCommitHookEngine::EMPTY_HASH) {
+        $old_ref_link = phutil_tag(
+          'a',
+          array(
+            'href' => $repository->getCommitURI($log->getRefOld()),
+          ),
+          $log->getRefOldShort());
+      }
+
+      $device_phid = $log->getDevicePHID();
+      if ($device_phid) {
+        $device = $viewer->renderHandle($device_phid);
+        $any_host = true;
+      } else {
+        $device = null;
+      }
+
       $rows[] = array(
         phutil_tag(
           'a',
@@ -62,31 +82,27 @@ final class DiffusionPushLogListView extends AphrontView {
         phutil_tag(
           'a',
           array(
-            'href' => '/diffusion/'.$callsign.'/',
+            'href' => $repository->getURI(),
           ),
-          $callsign),
-        $handles[$log->getPusherPHID()]->renderLink(),
-        $remote_addr,
+          $repository->getDisplayName()),
+        $viewer->renderHandle($log->getPusherPHID()),
+        $remote_address,
         $log->getPushEvent()->getRemoteProtocol(),
+        $device,
         $log->getRefType(),
         $log->getRefName(),
+        $old_ref_link,
         phutil_tag(
           'a',
           array(
-            'href' => '/r'.$callsign.$log->getRefOld(),
-          ),
-          $log->getRefOldShort()),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/r'.$callsign.$log->getRefNew(),
+            'href' => $repository->getCommitURI($log->getRefNew()),
           ),
           $log->getRefNewShort()),
 
         // TODO: Make these human-readable.
         $log->getChangeFlags(),
         $log->getPushEvent()->getRejectCode(),
-        phabricator_datetime($log->getEpoch(), $viewer),
+        $viewer->formatShortDateTime($log->getEpoch()),
       );
     }
 
@@ -98,6 +114,7 @@ final class DiffusionPushLogListView extends AphrontView {
           pht('Pusher'),
           pht('From'),
           pht('Via'),
+          pht('Host'),
           pht('Type'),
           pht('Name'),
           pht('Old'),
@@ -114,10 +131,20 @@ final class DiffusionPushLogListView extends AphrontView {
           '',
           '',
           '',
+          '',
           'wide',
           'n',
           'n',
-          'date',
+          'right',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          true,
+          true,
+          true,
+          true,
+          $any_host,
         ));
 
     return $table;

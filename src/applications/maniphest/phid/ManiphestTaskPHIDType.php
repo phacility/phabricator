@@ -5,15 +5,15 @@ final class ManiphestTaskPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'TASK';
 
   public function getTypeName() {
-    return pht('Task');
-  }
-
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorManiphestApplication';
+    return pht('Maniphest Task');
   }
 
   public function newObject() {
     return new ManiphestTask();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorManiphestApplication';
   }
 
   protected function buildQueryForObjects(
@@ -39,7 +39,7 @@ final class ManiphestTaskPHIDType extends PhabricatorPHIDType {
       $handle->setURI("/T{$id}");
 
       if ($task->isClosed()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

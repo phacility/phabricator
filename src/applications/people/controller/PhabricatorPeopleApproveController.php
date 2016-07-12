@@ -31,14 +31,15 @@ final class PhabricatorPeopleApproveController
 
       $title = pht(
         'Phabricator Account "%s" Approved',
-        $user->getUsername(),
-        $admin->getUsername());
+        $user->getUsername());
 
-      $body = pht(
-        "Your Phabricator account (%s) has been approved by %s. You can ".
-        "login here:\n\n  %s\n\n",
-        $user->getUsername(),
-        $admin->getUsername(),
+      $body = sprintf(
+        "%s\n\n  %s\n\n",
+        pht(
+          'Your Phabricator account (%s) has been approved by %s. You can '.
+          'login here:',
+          $user->getUsername(),
+          $admin->getUsername()),
         PhabricatorEnv::getProductionURI('/'));
 
       $mail = id(new PhabricatorMetaMTAMail())
@@ -52,8 +53,7 @@ final class PhabricatorPeopleApproveController
       return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($admin)
+    return $this->newDialog()
       ->setTitle(pht('Confirm Approval'))
       ->appendChild(
         pht(
@@ -61,7 +61,5 @@ final class PhabricatorPeopleApproveController
           phutil_tag('strong', array(), $user->getUsername())))
       ->addCancelButton($done_uri)
       ->addSubmitButton(pht('Approve Account'));
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 }

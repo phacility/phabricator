@@ -15,20 +15,20 @@ final class PhragmentGetPatchConduitAPIMethod
     return pht('Retrieve the patches to apply for a given set of files.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'path' => 'required string',
       'state' => 'required dict<string, string>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_FRAGMENT' => 'No such fragment exists',
+      'ERR_BAD_FRAGMENT' => pht('No such fragment exists.'),
     );
   }
 

@@ -1,6 +1,6 @@
 <?php
 
-echo "Migrating differential.revisionPHID to edges...\n";
+echo pht('Migrating %s to edges...', 'differential.revisionPHID')."\n";
 $commit_table = new PhabricatorRepositoryCommit();
 $data_table = new PhabricatorRepositoryCommitData();
 $editor = new PhabricatorEdgeEditor();
@@ -18,7 +18,7 @@ foreach (new LiskMigrationIterator($commit_table) as $commit) {
     continue;
   }
 
-  $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
+  $commit_drev = DiffusionCommitHasRevisionEdgeType::EDGECONST;
   $editor->addEdge($commit->getPHID(), $commit_drev, $revision_phid);
   $edges++;
   if ($edges % 256 == 0) {
@@ -30,4 +30,4 @@ foreach (new LiskMigrationIterator($commit_table) as $commit) {
 
 echo '.';
 $editor->save();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

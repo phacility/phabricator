@@ -14,8 +14,8 @@ final class PhabricatorUIExamplesApplication extends PhabricatorApplication {
     return pht('UIExamples');
   }
 
-  public function getIconName() {
-    return 'uiexamples';
+  public function getIcon() {
+    return 'fa-magnet';
   }
 
   public function getTitleGlyph() {
@@ -28,6 +28,10 @@ final class PhabricatorUIExamplesApplication extends PhabricatorApplication {
 
   public function getApplicationGroup() {
     return self::GROUP_DEVELOPER;
+  }
+
+  public function isPrototype() {
+    return true;
   }
 
   public function getApplicationOrder() {

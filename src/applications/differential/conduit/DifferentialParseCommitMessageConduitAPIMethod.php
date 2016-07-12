@@ -13,19 +13,15 @@ final class DifferentialParseCommitMessageConduitAPIMethod
     return pht('Parse commit messages for Differential fields.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'corpus'  => 'required string',
       'partial' => 'optional bool',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -81,9 +77,20 @@ final class DifferentialParseCommitMessageConduitAPIMethod
       }
     }
 
+    // grab some extra information about the Differential Revision: field...
+    $revision_id_field = new DifferentialRevisionIDField();
+    $revision_id_value = idx(
+      $corpus_map,
+      $revision_id_field->getFieldKeyForConduit());
+    $revision_id_valid_domain = PhabricatorEnv::getProductionURI('');
+
     return array(
       'errors' => $this->errors,
       'fields' => $values,
+      'revisionIDFieldInfo' => array(
+        'value' => $revision_id_value,
+        'validDomain' => $revision_id_valid_domain,
+      ),
     );
   }
 

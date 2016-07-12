@@ -4,6 +4,7 @@
 # Diviner
 /docs/
 /.divinercache/
+/src/.cache/
 
 # libphutil
 /src/.phutil_module_cache
@@ -13,8 +14,10 @@
 /conf/local/local.json
 /conf/local/ENVIRONMENT
 /conf/local/VERSION
-/conf/local/HOSTKEY
-/conf/local/HOSTID
+/conf/keys/device.pub
+/conf/keys/device.key
+/conf/keys/device.id
+/conf/aphlict/aphlict.custom.json
 
 # Impact Font
 /resources/font/impact.ttf
@@ -30,3 +33,10 @@
 
 # User extensions
 /src/extensions/*
+
+# NPM local packages
+/support/aphlict/server/node_modules/
+
+# Places for users to add custom resources.
+/resources/cows/custom/*
+/resources/figlet/custom/*

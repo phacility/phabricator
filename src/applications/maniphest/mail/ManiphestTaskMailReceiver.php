@@ -3,8 +3,8 @@
 final class ManiphestTaskMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorManiphestApplication';
-    return PhabricatorApplication::isClassInstalled($app_class);
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorManiphestApplication');
   }
 
   protected function getObjectPattern() {
@@ -17,24 +17,15 @@ final class ManiphestTaskMailReceiver extends PhabricatorObjectMailReceiver {
     $results = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->execute();
 
     return head($results);
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    $handler = PhabricatorEnv::newObjectFromConfig(
-      'metamta.maniphest.reply-handler');
-    $handler->setMailReceiver($object);
-
-    $handler->setActor($sender);
-    $handler->setExcludeMailRecipientPHIDs(
-      $mail->loadExcludeMailRecipientPHIDs());
-    $handler->processEmail($mail);
+  protected function getTransactionReplyHandler() {
+    return new ManiphestReplyHandler();
   }
 
 }

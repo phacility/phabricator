@@ -77,32 +77,26 @@ final class LegalpadDocumentSignatureSearchEngine
     $document_phids = $saved_query->getParameter('documentPHIDs', array());
     $signer_phids = $saved_query->getParameter('signerPHIDs', array());
 
-    $phids = array_merge($document_phids, $signer_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
     if (!$this->document) {
       $form
-        ->appendChild(
+        ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setDatasource(new LegalpadDocumentDatasource())
             ->setName('documents')
             ->setLabel(pht('Documents'))
-            ->setValue(array_select_keys($handles, $document_phids)));
+            ->setValue($document_phids));
     }
 
     $name_contains = $saved_query->getParameter('nameContains', '');
     $email_contains = $saved_query->getParameter('emailContains', '');
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('signers')
           ->setLabel(pht('Signers'))
-          ->setValue(array_select_keys($handles, $signer_phids)))
+          ->setValue($signer_phids))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name Contains'))
@@ -123,7 +117,7 @@ final class LegalpadDocumentSignatureSearchEngine
     }
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Signatures'),
     );
@@ -189,7 +183,7 @@ final class LegalpadDocumentSignatureSearchEngine
       pht('Exemption'));
 
     id(new PHUIIconView())
-      ->setIconFont('fa-envelope', 'red')
+      ->setIcon('fa-envelope', 'red')
       ->addSigil('has-tooltip')
       ->setMetadata(array('tip' => pht('Unverified Email')));
 
@@ -273,38 +267,32 @@ final class LegalpadDocumentSignatureSearchEngine
           'right',
         ));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Signatures'));
-
+    $button = null;
     if ($this->document) {
       $document_id = $this->document->getID();
 
-      $header->addActionLink(
-        id(new PHUIButtonView())
-          ->setText(pht('Add Signature Exemption'))
+      $button = id(new PHUIButtonView())
+          ->setText(pht('Add Exemption'))
           ->setTag('a')
           ->setHref($this->getApplicationURI('addsignature/'.$document_id.'/'))
           ->setWorkflow(true)
-          ->setIcon(id(new PHUIIconView())->setIconFont('fa-pencil')));
+          ->setIcon('fa-pencil');
     }
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->appendChild($table);
 
     if (!$this->document) {
-      $policy_notice = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(
-          array(
-            pht(
-              'NOTE: You can only see your own signatures and signatures on '.
-              'documents you have permission to edit.'),
-          ));
-      $box->setErrorView($policy_notice);
+      $table->setNotice(
+        pht('NOTE: You can only see your own signatures and signatures on '.
+            'documents you have permission to edit.'));
     }
 
-    return $box;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setTable($table);
+    if ($button) {
+      $result->addAction($button);
+    }
+
+    return $result;
+
   }
 
   private function renderIcon($icon, $color, $title) {
@@ -312,7 +300,7 @@ final class LegalpadDocumentSignatureSearchEngine
 
     return array(
       id(new PHUIIconView())
-        ->setIconFont($icon, $color)
+        ->setIcon($icon, $color)
         ->addSigil('has-tooltip')
         ->setMetadata(array('tip' => $title)),
       javelin_tag(

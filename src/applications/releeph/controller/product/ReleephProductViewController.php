@@ -1,35 +1,27 @@
 <?php
 
-final class ReleephProductViewController extends ReleephProductController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
-
-  private $productID;
-  private $queryKey;
+final class ReleephProductViewController extends ReleephProductController {
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->productID = idx($data, 'projectID');
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $id = $request->getURIData('projectID');
+    $query_key = $request->getURIData('queryKey');
+    $viewer = $request->getViewer();
 
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->productID))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$product) {
       return new Aphront404Response();
     }
     $this->setProduct($product);
 
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->queryKey)
+    $controller = id(new PhabricatorApplicationSearchController())
+      ->setQueryKey($query_key)
       ->setPreface($this->renderPreface())
       ->setSearchEngine(
         id(new ReleephBranchSearchEngine())
@@ -37,94 +29,6 @@ final class ReleephProductViewController extends ReleephProductController
       ->setNavigation($this->buildSideNavView());
 
     return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(
-    array $branches,
-    PhabricatorSavedQuery $saved) {
-    assert_instances_of($branches, 'ReleephBranch');
-
-    $viewer = $this->getRequest()->getUser();
-
-    $products = mpull($branches, 'getProduct');
-    $repo_phids = mpull($products, 'getRepositoryPHID');
-
-    $repos = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($repo_phids)
-      ->execute();
-    $repos = mpull($repos, null, 'getPHID');
-
-    $phids = mpull($branches, 'getCreatedByUserPHID');
-    $this->loadHandles($phids);
-
-    $requests = array();
-    if ($branches) {
-      $requests = id(new ReleephRequestQuery())
-        ->setViewer($viewer)
-        ->withBranchIDs(mpull($branches, 'getID'))
-        ->withStatus(ReleephRequestQuery::STATUS_OPEN)
-        ->execute();
-      $requests = mgroup($requests, 'getBranchID');
-    }
-
-    $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
-    foreach ($branches as $branch) {
-      $diffusion_href = null;
-      $repo = idx($repos, $branch->getProduct()->getRepositoryPHID());
-      if ($repo) {
-        $drequest = DiffusionRequest::newFromDictionary(
-          array(
-            'user' => $viewer,
-            'repository' => $repo,
-          ));
-
-        $diffusion_href = $drequest->generateURI(
-          array(
-            'action' => 'branch',
-            'branch' => $branch->getName(),
-          ));
-      }
-
-      $branch_link = $branch->getName();
-      if ($diffusion_href) {
-        $branch_link = phutil_tag(
-          'a',
-          array(
-            'href' => $diffusion_href,
-          ),
-          $branch_link);
-      }
-
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($branch->getDisplayName())
-        ->setHref($this->getApplicationURI('branch/'.$branch->getID().'/'))
-        ->addAttribute($branch_link);
-
-      if (!$branch->getIsActive()) {
-        $item->setDisabled(true);
-      }
-
-      $commit = $branch->getCutPointCommit();
-      if ($commit) {
-        $item->addIcon(
-          'none',
-          phabricator_datetime($commit->getEpoch(), $viewer));
-      }
-
-      $open_count = count(idx($requests, $branch->getID(), array()));
-      if ($open_count) {
-        $item->setBarColor('orange');
-        $item->addIcon(
-          'fa-code-fork',
-          pht('%d Open Pull Request(s)', new PhutilNumber($open_count)));
-      }
-
-      $list->addItem($item);
-    }
-
-    return $list;
   }
 
   public function buildSideNavView($for_app = false) {
@@ -148,7 +52,7 @@ final class ReleephProductViewController extends ReleephProductController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $product = $this->getProduct();
@@ -182,8 +86,7 @@ final class ReleephProductViewController extends ReleephProductController
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
-      ->setObject($product)
-      ->setObjectURI($this->getRequest()->getRequestURI());
+      ->setObject($product);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -237,10 +140,9 @@ final class ReleephProductViewController extends ReleephProductController
 
     $pushers = $product->getPushers();
     if ($pushers) {
-      $this->loadHandles($pushers);
       $properties->addProperty(
         pht('Pushers'),
-        $this->renderHandlesForPHIDs($pushers));
+        $viewer->renderHandleList($pushers));
     }
 
     return id(new PHUIObjectBoxView())

@@ -1,10 +1,13 @@
 <?php
 
 final class AlmanacDeviceQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+  extends AlmanacQuery {
 
   private $ids;
   private $phids;
+  private $names;
+  private $namePrefix;
+  private $nameSuffix;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -16,41 +19,111 @@ final class AlmanacDeviceQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new AlmanacDevice();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function withNames(array $names) {
+    $this->names = $names;
+    return $this;
   }
 
-  protected function buildWhereClause($conn_r) {
-    $where = array();
+  public function withNamePrefix($prefix) {
+    $this->namePrefix = $prefix;
+    return $this;
+  }
+
+  public function withNameSuffix($suffix) {
+    $this->nameSuffix = $suffix;
+    return $this;
+  }
+
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new AlmanacDeviceNameNgrams(),
+      $ngrams);
+  }
+
+  public function newResultObject() {
+    return new AlmanacDevice();
+  }
+
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'id IN (%Ld)',
+        $conn,
+        'device.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'phid IN (%Ls)',
+        $conn,
+        'device.phid IN (%Ls)',
         $this->phids);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->names !== null) {
+      $hashes = array();
+      foreach ($this->names as $name) {
+        $hashes[] = PhabricatorHash::digestForIndex($name);
+      }
+      $where[] = qsprintf(
+        $conn,
+        'device.nameIndex IN (%Ls)',
+        $hashes);
+    }
 
-    return $this->formatWhereClause($where);
+    if ($this->namePrefix !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'device.name LIKE %>',
+        $this->namePrefix);
+    }
+
+    if ($this->nameSuffix !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'device.name LIKE %<',
+        $this->nameSuffix);
+    }
+
+    return $where;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'device';
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'name',
+        'type' => 'string',
+        'unique' => true,
+        'reverse' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $device = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $device->getID(),
+      'name' => $device->getName(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Device Name'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
   public function getQueryApplicationClass() {

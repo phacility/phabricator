@@ -7,17 +7,16 @@ $conn_w->openTransaction();
 $src_table = 'audit_inlinecomment';
 $dst_table = 'audit_transaction_comment';
 
-echo "Migrating Audit inline comments to new format...\n";
+echo pht('Migrating Audit inline comments to new format...')."\n";
 
 $content_source = PhabricatorContentSource::newForSource(
-  PhabricatorContentSource::SOURCE_LEGACY,
-  array())->serialize();
+  PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
 $rows = new LiskRawMigrationIterator($conn_w, $src_table);
 foreach ($rows as $row) {
   $id = $row['id'];
 
-  echo "Migrating inline #{$id}...\n";
+  echo pht('Migrating inline #%d...', $id);
 
   if ($row['auditCommentID']) {
     $xaction_phid = PhabricatorPHID::generateNewPHID(
@@ -74,4 +73,4 @@ foreach ($rows as $row) {
 }
 
 $conn_w->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

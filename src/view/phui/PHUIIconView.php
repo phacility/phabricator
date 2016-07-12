@@ -2,11 +2,8 @@
 
 final class PHUIIconView extends AphrontTagView {
 
-  const SPRITE_APPS = 'apps';
   const SPRITE_TOKENS = 'tokens';
-  const SPRITE_PAYMENTS = 'payments';
   const SPRITE_LOGIN = 'login';
-  const SPRITE_PROJECTS = 'projects';
 
   const HEAD_SMALL = 'phuihead-small';
   const HEAD_MEDIUM = 'phuihead-medium';
@@ -51,13 +48,13 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
-  public function setIconFont($icon, $color = null) {
+  public function setIcon($icon, $color = null) {
     $this->iconFont = $icon;
     $this->iconColor = $color;
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     $tag = 'span';
     if ($this->href) {
       $tag = 'a';
@@ -65,13 +62,11 @@ final class PHUIIconView extends AphrontTagView {
     return $tag;
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     require_celerity_resource('phui-icon-view-css');
-
     $style = null;
     $classes = array();
     $classes[] = 'phui-icon-view';
-
     if ($this->spriteIcon) {
       require_celerity_resource('sprite-'.$this->spriteSheet.'-css');
       $classes[] = 'sprite-'.$this->spriteSheet;
@@ -90,7 +85,6 @@ final class PHUIIconView extends AphrontTagView {
       }
       $style = 'background-image: url('.$this->image.');';
     }
-
     if ($this->text) {
       $classes[] = 'phui-icon-has-text';
       $this->appendChild($this->text);
@@ -108,10 +102,10 @@ final class PHUIIconView extends AphrontTagView {
     $root = dirname(phutil_get_library_root('phabricator'));
     $path = $root.'/resources/sprite/manifest/'.$sheet.'.json';
     $data = Filesystem::readFile($path);
-    return idx(json_decode($data, true), 'sprites');
+    return idx(phutil_json_decode($data), 'sprites');
   }
 
-  public static function getFontIcons() {
+  public static function getIcons() {
     return array(
       'fa-glass',
       'fa-music',
@@ -565,10 +559,222 @@ final class PHUIIconView extends AphrontTagView {
       'fa-share-alt',
       'fa-share-alt-square',
       'fa-bomb',
+      'fa-soccer-ball',
+      'fa-futbol-o',
+      'fa-tty',
+      'fa-binoculars',
+      'fa-plug',
+      'fa-slideshare',
+      'fa-twitch',
+      'fa-yelp',
+      'fa-newspaper-o',
+      'fa-wifi',
+      'fa-calculator',
+      'fa-paypal',
+      'fa-google-wallet',
+      'fa-cc-visa',
+      'fa-cc-mastercard',
+      'fa-cc-discover',
+      'fa-cc-amex',
+      'fa-cc-paypal',
+      'fa-cc-stripe',
+      'fa-bell-slash',
+      'fa-bell-slash-o',
+      'fa-trash',
+      'fa-copyright',
+      'fa-at',
+      'fa-eyedropper',
+      'fa-paint-brush',
+      'fa-birthday-cake',
+      'fa-area-chart',
+      'fa-pie-chart',
+      'fa-line-chart',
+      'fa-lastfm',
+      'fa-lastfm-square',
+      'fa-toggle-off',
+      'fa-toggle-on',
+      'fa-bicycle',
+      'fa-bus',
+      'fa-ioxhost',
+      'fa-angellist',
+      'fa-cc',
+      'fa-shekel',
+      'fa-sheqel',
+      'fa-ils',
+      'fa-meanpath',
+      'fa-buysellads',
+      'fa-connectdevelop',
+      'fa-dashcube',
+      'fa-forumbee',
+      'fa-leanpub',
+      'fa-sellsy',
+      'fa-shirtsinbulk',
+      'fa-simplybuilt',
+      'fa-skyatlas',
+      'fa-cart-plus',
+      'fa-cart-arrow-down',
+      'fa-diamond',
+      'fa-ship',
+      'fa-user-secret',
+      'fa-motorcycle',
+      'fa-street-view',
+      'fa-heartbeat',
+      'fa-venus',
+      'fa-mars',
+      'fa-mercury',
+      'fa-transgender',
+      'fa-transgender-alt',
+      'fa-venus-double',
+      'fa-mars-double',
+      'fa-venus-mars',
+      'fa-mars-stroke',
+      'fa-mars-stroke-v',
+      'fa-mars-stroke-h',
+      'fa-neuter',
+      'fa-facebook-official',
+      'fa-pinterest-p',
+      'fa-whatsapp',
+      'fa-server',
+      'fa-user-plus',
+      'fa-user-times',
+      'fa-hotel',
+      'fa-bed',
+      'fa-viacoin',
+      'fa-train',
+      'fa-subway',
+      'fa-medium',
+      'fa-git',
+      'fa-y-combinator-square',
+      'fa-yc-square',
+      'fa-hacker-news',
+      'fa-yc',
+      'fa-y-combinator',
+      'fa-optin-monster',
+      'fa-opencart',
+      'fa-expeditedssl',
+      'fa-battery-4',
+      'fa-battery-full',
+      'fa-battery-3',
+      'fa-battery-three-quarters',
+      'fa-battery-2',
+      'fa-battery-half',
+      'fa-battery-1',
+      'fa-battery-quarter',
+      'fa-battery-0',
+      'fa-battery-empty',
+      'fa-mouse-pointer',
+      'fa-i-cursor',
+      'fa-object-group',
+      'fa-object-ungroup',
+      'fa-sticky-note',
+      'fa-sticky-note-o',
+      'fa-cc-jcb',
+      'fa-cc-diners-club',
+      'fa-clone',
+      'fa-balance-scale',
+      'fa-hourglass-o',
+      'fa-hourglass-1',
+      'fa-hourglass-start',
+      'fa-hourglass-2',
+      'fa-hourglass-half',
+      'fa-hourglass-3',
+      'fa-hourglass-end',
+      'fa-hourglass',
+      'fa-hand-grab-o',
+      'fa-hand-rock-o',
+      'fa-hand-stop-o',
+      'fa-hand-paper-o',
+      'fa-hand-scissors-o',
+      'fa-hand-lizard-o',
+      'fa-hand-spock-o',
+      'fa-hand-pointer-o',
+      'fa-hand-peace-o',
+      'fa-trademark',
+      'fa-registered',
+      'fa-creative-commons',
+      'fa-gg',
+      'fa-gg-circle',
+      'fa-tripadvisor',
+      'fa-odnoklassniki',
+      'fa-odnoklassniki-square',
+      'fa-get-pocket',
+      'fa-wikipedia-w',
+      'fa-safari',
+      'fa-chrome',
+      'fa-firefox',
+      'fa-opera',
+      'fa-internet-explorer',
+      'fa-tv',
+      'fa-television',
+      'fa-contao',
+      'fa-500px',
+      'fa-amazon',
+      'fa-calendar-plus-o',
+      'fa-calendar-minus-o',
+      'fa-calendar-times-o',
+      'fa-calendar-check-o',
+      'fa-industry',
+      'fa-map-pin',
+      'fa-map-signs',
+      'fa-map-o',
+      'fa-map',
+      'fa-commenting',
+      'fa-commenting-o',
+      'fa-houzz',
+      'fa-vimeo',
+      'fa-black-tie',
+      'fa-fonticons',
+      'fa-reddit-alien',
+      'fa-edge',
+      'fa-credit-card-alt',
+      'fa-codiepie:before',
+      'fa-modx',
+      'fa-fort-awesome',
+      'fa-usb',
+      'fa-product-hunt',
+      'fa-mixcloud',
+      'fa-scribd',
+      'fa-pause-circle',
+      'fa-pause-circle-o',
+      'fa-stop-circle',
+      'fa-stop-circle-o',
+      'fa-shopping-bag',
+      'fa-shopping-basket',
+      'fa-hashtag',
+      'fa-bluetooth',
+      'fa-bluetooth-b',
+      'fa-percent',
+      'fa-gitlab',
+      'fa-wpbeginner',
+      'fa-wpforms',
+      'fa-envira',
+      'fa-universal-access',
+      'fa-wheelchair-alt',
+      'fa-question-circle-o',
+      'fa-blind',
+      'fa-audio-description',
+      'fa-volume-control-phone',
+      'fa-braille',
+      'fa-assistive-listening-systems',
+      'fa-asl-interpreting',
+      'fa-american-sign-language-interpreting',
+      'fa-deafness',
+      'fa-hard-of-hearing',
+      'fa-deaf',
+      'fa-glide',
+      'fa-glide-g',
+      'fa-signing',
+      'fa-sign-language',
+      'fa-low-vision',
+      'fa-viadeo',
+      'fa-viadeo-square',
+      'fa-snapchat',
+      'fa-snapchat-ghost',
+      'fa-snapchat-square',
     );
   }
 
-  public static function getFontIconColors() {
+  public static function getIconColors() {
     return array(
       'bluegrey',
       'white',
@@ -580,6 +786,7 @@ final class PHUIIconView extends AphrontTagView {
       'sky',
       'indigo',
       'violet',
+      'pink',
       'lightgreytext',
       'lightbluetext',
     );

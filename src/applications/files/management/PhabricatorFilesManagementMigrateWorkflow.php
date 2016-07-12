@@ -3,24 +3,38 @@
 final class PhabricatorFilesManagementMigrateWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('migrate')
-      ->setSynopsis('Migrate files between storage engines.')
+      ->setSynopsis(pht('Migrate files between storage engines.'))
       ->setArguments(
         array(
           array(
             'name'      => 'engine',
             'param'     => 'storage_engine',
-            'help'      => 'Migrate to the named storage engine.',
+            'help'      => pht('Migrate to the named storage engine.'),
           ),
           array(
             'name'      => 'dry-run',
-            'help'      => 'Show what would be migrated.',
+            'help'      => pht('Show what would be migrated.'),
+          ),
+          array(
+            'name' => 'min-size',
+            'param' => 'bytes',
+            'help' => pht(
+              'Do not migrate data for files which are smaller than a given '.
+              'filesize.'),
+          ),
+          array(
+            'name' => 'max-size',
+            'param' => 'bytes',
+            'help' => pht(
+              'Do not migrate data for files which are larger than a given '.
+              'filesize.'),
           ),
           array(
             'name'      => 'all',
-            'help'      => 'Migrate all files.',
+            'help'      => pht('Migrate all files.'),
           ),
           array(
             'name'      => 'names',
@@ -30,77 +44,170 @@ final class PhabricatorFilesManagementMigrateWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $console = PhutilConsole::getConsole();
-
-    $engine_id = $args->getArg('engine');
-    if (!$engine_id) {
+    $target_key = $args->getArg('engine');
+    if (!$target_key) {
       throw new PhutilArgumentUsageException(
-        'Specify an engine to migrate to with `--engine`. '.
-        'Use `files engines` to get a list of engines.');
+        pht(
+          'Specify an engine to migrate to with `%s`. '.
+          'Use `%s` to get a list of engines.',
+          '--engine',
+          'files engines'));
     }
 
-    $engine = PhabricatorFile::buildEngine($engine_id);
+    $target_engine = PhabricatorFile::buildEngine($target_key);
 
     $iterator = $this->buildIterator($args);
     if (!$iterator) {
       throw new PhutilArgumentUsageException(
-        'Either specify a list of files to migrate, or use `--all` '.
-        'to migrate all files.');
+        pht(
+          'Either specify a list of files to migrate, or use `%s` '.
+          'to migrate all files.',
+          '--all'));
     }
 
     $is_dry_run = $args->getArg('dry-run');
 
+    $min_size = (int)$args->getArg('min-size');
+    $max_size = (int)$args->getArg('max-size');
+
     $failed = array();
-
+    $engines = PhabricatorFileStorageEngine::loadAllEngines();
+    $total_bytes = 0;
+    $total_files = 0;
     foreach ($iterator as $file) {
-      $fid = 'F'.$file->getID();
+      $monogram = $file->getMonogram();
 
-      if ($file->getStorageEngine() == $engine_id) {
-        $console->writeOut(
-          "%s: Already stored on '%s'\n",
-          $fid,
-          $engine_id);
+      $engine_key = $file->getStorageEngine();
+      $engine = idx($engines, $engine_key);
+
+      if (!$engine) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: Uses unknown storage engine "%s".',
+            $monogram,
+            $engine_key));
+        $failed[] = $file;
+        continue;
+      }
+
+      if ($engine->isChunkEngine()) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: Stored as chunks, no data to migrate directly.',
+            $monogram));
+        continue;
+      }
+
+      if ($engine_key === $target_key) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: Already stored in engine "%s".',
+            $monogram,
+            $target_key));
+        continue;
+      }
+
+      $byte_size = $file->getByteSize();
+
+      if ($min_size && ($byte_size < $min_size)) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: File size (%s) is smaller than minimum size (%s).',
+            $monogram,
+            phutil_format_bytes($byte_size),
+            phutil_format_bytes($min_size)));
+        continue;
+      }
+
+      if ($max_size && ($byte_size > $max_size)) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: File size (%s) is larger than maximum size (%s).',
+            $monogram,
+            phutil_format_bytes($byte_size),
+            phutil_format_bytes($max_size)));
         continue;
       }
 
       if ($is_dry_run) {
-        $console->writeOut(
-          "%s: Would migrate from '%s' to '%s' (dry run)\n",
-          $fid,
-          $file->getStorageEngine(),
-          $engine_id);
-        continue;
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: (%s) Would migrate from "%s" to "%s" (dry run)...',
+            $monogram,
+            phutil_format_bytes($byte_size),
+            $engine_key,
+            $target_key));
+      } else {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            '%s: (%s) Migrating from "%s" to "%s"...',
+            $monogram,
+            phutil_format_bytes($byte_size),
+            $engine_key,
+            $target_key));
       }
-
-      $console->writeOut(
-        "%s: Migrating from '%s' to '%s'...",
-        $fid,
-        $file->getStorageEngine(),
-        $engine_id);
 
       try {
-        $file->migrateToEngine($engine);
-        $console->writeOut("done.\n");
+        if ($is_dry_run) {
+          // Do nothing, this is a dry run.
+        } else {
+          $file->migrateToEngine($target_engine);
+        }
+
+        $total_files += 1;
+        $total_bytes += $byte_size;
+
+        echo tsprintf(
+          "%s\n",
+          pht('Done.'));
+
       } catch (Exception $ex) {
-        $console->writeOut("failed!\n");
-        $console->writeErr("%s\n", (string)$ex);
+        echo tsprintf(
+          "%s\n",
+          pht('Failed! %s', (string)$ex));
         $failed[] = $file;
+
+        throw $ex;
       }
+    }
+
+    echo tsprintf(
+      "%s\n",
+      pht(
+        'Total Migrated Files: %s',
+        new PhutilNumber($total_files)));
+
+    echo tsprintf(
+      "%s\n",
+      pht(
+        'Total Migrated Bytes: %s',
+        phutil_format_bytes($total_bytes)));
+
+    if ($is_dry_run) {
+      echo tsprintf(
+        "%s\n",
+        pht(
+          'This was a dry run, so no real migrations were performed.'));
     }
 
     if ($failed) {
-      $console->writeOut("**Failures!**\n");
-      $ids = array();
-      foreach ($failed as $file) {
-        $ids[] = 'F'.$file->getID();
-      }
-      $console->writeOut("%s\n", implode(', ', $ids));
+      $monograms = mpull($failed, 'getMonogram');
+
+      echo tsprintf(
+        "%s\n",
+        pht('Failures: %s.', implode(', ', $monograms)));
 
       return 1;
-    } else {
-      $console->writeOut("**Success!**\n");
-      return 0;
     }
+
+    return 0;
   }
 
 }

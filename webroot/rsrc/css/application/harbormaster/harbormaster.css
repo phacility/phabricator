@@ -3,13 +3,8 @@
  */
 
 .harbormaster-artifact-io {
-  margin: 0 0 0 8px;
-  padding: 4px 8px;
-  border-width: 1px 0 0 1px;
-  border-style: solid;
-  box-shadow: inset 2px 2px 1px rgba(0, 0, 0, 0.075);
-  background: {$lightbluebackground};
-  border-color: {$lightblueborder};
+  margin: 4px 0 4px 8px;
+  padding: 8px;
 }
 
 .harbormaster-artifact-summary-header {
@@ -23,5 +18,15 @@
   border: 1px solid {$yellow};
   text-align: center;
   padding: 12px;
+  margin: 0 0 20px 0;
+  border-radius: 3px;
   color: {$darkgreytext};
+}
+
+.harbormaster-unit-details {
+  margin: 8px 0 4px;
+  overflow: hidden;
+  white-space: pre;
+  text-overflow: ellipsis;
+  color: {$lightgreytext};
 }

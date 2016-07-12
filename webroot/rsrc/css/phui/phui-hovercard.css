@@ -1,0 +1,103 @@
+/**
+ * @provides phui-hovercard-view-css
+ */
+
+.jx-hovercard-container {
+  position: absolute;
+}
+
+.phui-hovercard-wrapper {
+  width: 400px;
+}
+
+.device-phone .phui-hovercard-wrapper {
+  width: 300px;
+}
+
+.phui-hovercard-container {
+  width: 100%;
+  box-shadow: {$dropshadow};
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  background-color: #fff;
+}
+
+.phui-hovercard-head .phui-header-shell {
+  padding: 6px 8px 6px 12px;
+  background-color: {$bluebackground};
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.phui-hovercard-head .phui-header-header {
+  font-size: {$biggerfontsize};
+}
+
+.phui-hovercard-head .phui-tag-type-state {
+  color: {$darkbluetext};
+  text-shadow: none;
+  font-weight: normal;
+}
+
+.phui-hovercard-tags {
+  float: right;
+  white-space: normal;
+}
+
+.phui-hovercard-body {
+  padding: 12px;
+  color: {$darkgreytext};
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+  position: relative;
+}
+
+.phui-hovercard-body-item {
+  margin: 4px 0 0 0;
+}
+
+.phui-hovercard-body-header {
+  font-size: 14px;
+  padding-bottom: 4px;
+  color: {$darkgreytext};
+  line-height: 18px;
+}
+
+.phui-hovercard-body .phui-hovercard-body-image {
+  width: 58px;
+}
+
+.phui-hovercard-body .phui-hovercard-body-details {
+  margin-left: 58px;
+}
+
+.phui-hovercard-body .profile-header-picture-frame {
+  float: left;
+  width: 50px;
+  height: 50px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100%;
+}
+
+.hovercard-badges {
+  margin: 8px 0 0 0;
+}
+
+.hovercard-badges .phui-badge-flex-item {
+  float: left;
+}
+
+.phui-hovercard-tail {
+  width: 396px;
+  float: left;
+  padding: 2px;
+  border-top: 1px solid {$thinblueborder};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.phui-hovercard-tail button,
+.phui-hovercard-tail a.button {
+  margin: 3px;
+}

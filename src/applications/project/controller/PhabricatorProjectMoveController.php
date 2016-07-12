@@ -3,15 +3,11 @@
 final class PhabricatorProjectMoveController
   extends PhabricatorProjectController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $request->validateCSRF();
 
     $column_phid = $request->getStr('columnPHID');
     $object_phid = $request->getStr('objectPHID');
@@ -19,22 +15,24 @@ final class PhabricatorProjectMoveController
     $before_phid = $request->getStr('beforePHID');
     $order = $request->getStr('order', PhabricatorProjectColumn::DEFAULT_ORDER);
 
-
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
         ))
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
 
-    $object = id(new PhabricatorObjectQuery())
+    $board_phid = $project->getPHID();
+
+    $object = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($object_phid))
+      ->needProjectPHIDs(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -59,95 +57,44 @@ final class PhabricatorProjectMoveController
       return new Aphront404Response();
     }
 
-    $positions = id(new PhabricatorProjectColumnPositionQuery())
+    $engine = id(new PhabricatorBoardLayoutEngine())
       ->setViewer($viewer)
-      ->withColumns($columns)
-      ->withObjectPHIDs(array($object_phid))
-      ->execute();
+      ->setBoardPHIDs(array($board_phid))
+      ->setObjectPHIDs(array($object_phid))
+      ->executeLayout();
+
+    $columns = $engine->getObjectColumns($board_phid, $object_phid);
+    $old_column_phids = mpull($columns, 'getPHID');
 
     $xactions = array();
 
+    $order_params = array();
     if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
-      $order_params = array(
-        'afterPHID' => $after_phid,
-        'beforePHID' => $before_phid,
-      );
-    } else {
-      $order_params = array();
+      if ($after_phid) {
+        $order_params['afterPHID'] = $after_phid;
+      } else if ($before_phid) {
+        $order_params['beforePHID'] = $before_phid;
+      }
     }
 
     $xactions[] = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
+      ->setTransactionType(PhabricatorTransactions::TYPE_COLUMNS)
       ->setNewValue(
         array(
-          'columnPHIDs' => array($column->getPHID()),
-          'projectPHID' => $column->getProjectPHID(),
-        ) + $order_params)
-      ->setOldValue(
-        array(
-          'columnPHIDs' => mpull($positions, 'getColumnPHID'),
-          'projectPHID' => $column->getProjectPHID(),
+          array(
+            'columnPHID' => $column->getPHID(),
+          ) + $order_params,
         ));
 
-    $task_phids = array();
-    if ($after_phid) {
-      $task_phids[] = $after_phid;
-    }
-    if ($before_phid) {
-      $task_phids[] = $before_phid;
-    }
-
-    if ($task_phids && ($order == PhabricatorProjectColumn::ORDER_PRIORITY)) {
-      $tasks = id(new ManiphestTaskQuery())
-        ->setViewer($viewer)
-        ->withPHIDs($task_phids)
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->execute();
-      if (count($tasks) != count($task_phids)) {
-        return new Aphront404Response();
+    if ($order == PhabricatorProjectColumn::ORDER_PRIORITY) {
+      $priority_xactions = $this->getPriorityTransactions(
+        $object,
+        $after_phid,
+        $before_phid);
+      foreach ($priority_xactions as $xaction) {
+        $xactions[] = $xaction;
       }
-      $tasks = mpull($tasks, null, 'getPHID');
-
-      $a_task = idx($tasks, $after_phid);
-      $b_task = idx($tasks, $before_phid);
-
-      if ($a_task &&
-         (($a_task->getPriority() < $object->getPriority()) ||
-          ($a_task->getPriority() == $object->getPriority() &&
-           $a_task->getSubpriority() >= $object->getSubpriority()))) {
-
-        $after_pri = $a_task->getPriority();
-        $after_sub = $a_task->getSubpriority();
-
-        $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
-          ->setNewValue(array(
-            'newPriority' => $after_pri,
-            'newSubpriorityBase' => $after_sub,
-            'direction' => '>',
-          ));
-
-       } else if ($b_task &&
-                 (($b_task->getPriority() > $object->getPriority()) ||
-                  ($b_task->getPriority() == $object->getPriority() &&
-                   $b_task->getSubpriority() <= $object->getSubpriority()))) {
-
-        $before_pri = $b_task->getPriority();
-        $before_sub = $b_task->getSubpriority();
-
-        $xactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
-          ->setNewValue(array(
-            'newPriority' => $before_pri,
-            'newSubpriorityBase' => $before_sub,
-            'direction' => '<',
-          ));
-      }
-   }
+    }
 
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($viewer)
@@ -157,22 +104,100 @@ final class PhabricatorProjectMoveController
 
     $editor->applyTransactions($object, $xactions);
 
-    $owner = null;
-    if ($object->getOwnerPHID()) {
-      $owner = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($object->getOwnerPHID()))
-        ->executeOne();
-    }
-    $card = id(new ProjectBoardTaskCard())
-      ->setViewer($viewer)
-      ->setTask($object)
-      ->setOwner($owner)
-      ->setCanEdit(true)
-      ->getItem();
+    return $this->newCardResponse($board_phid, $object_phid);
+  }
 
-    return id(new AphrontAjaxResponse())->setContent(
-      array('task' => $card));
- }
+  private function getPriorityTransactions(
+    ManiphestTask $task,
+    $after_phid,
+    $before_phid) {
+
+    list($after_task, $before_task) = $this->loadPriorityTasks(
+      $after_phid,
+      $before_phid);
+
+    $must_move = false;
+    if ($after_task && !$task->isLowerPriorityThan($after_task)) {
+      $must_move = true;
+    }
+
+    if ($before_task && !$task->isHigherPriorityThan($before_task)) {
+      $must_move = true;
+    }
+
+    // The move doesn't require a priority change to be valid, so don't
+    // change the priority since we are not being forced to.
+    if (!$must_move) {
+      return array();
+    }
+
+    $try = array(
+      array($after_task, true),
+      array($before_task, false),
+    );
+
+    $pri = null;
+    $sub = null;
+    foreach ($try as $spec) {
+      list($task, $is_after) = $spec;
+
+      if (!$task) {
+        continue;
+      }
+
+      list($pri, $sub) = ManiphestTransactionEditor::getAdjacentSubpriority(
+        $task,
+        $is_after);
+    }
+
+    $xactions = array();
+    if ($pri !== null) {
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+        ->setNewValue($pri);
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
+        ->setNewValue($sub);
+    }
+
+    return $xactions;
+  }
+
+  private function loadPriorityTasks($after_phid, $before_phid) {
+    $viewer = $this->getViewer();
+
+    $task_phids = array();
+
+    if ($after_phid) {
+      $task_phids[] = $after_phid;
+    }
+    if ($before_phid) {
+      $task_phids[] = $before_phid;
+    }
+
+    if (!$task_phids) {
+      return array(null, null);
+    }
+
+    $tasks = id(new ManiphestTaskQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($task_phids)
+      ->execute();
+    $tasks = mpull($tasks, null, 'getPHID');
+
+    if ($after_phid) {
+      $after_task = idx($tasks, $after_phid);
+    } else {
+      $after_task = null;
+    }
+
+    if ($before_phid) {
+      $before_task = idx($tasks, $before_phid);
+    } else {
+      $before_task = null;
+    }
+
+    return array($after_task, $before_task);
+  }
 
 }

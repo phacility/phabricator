@@ -1,0 +1,8 @@
+chkfont
+figlet
+tags
+*.o
+core
+*~
+tests.log
+*.tar.gz

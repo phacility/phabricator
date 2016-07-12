@@ -3,19 +3,13 @@
 final class FundInitiativeBackController
   extends FundController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $initiative = id(new FundInitiativeQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$initiative) {
       return new Aphront404Response();
@@ -39,11 +33,25 @@ final class FundInitiativeBackController
         ->addCancelButton($initiative_uri);
     }
 
+    $accounts = PhortuneAccountQuery::loadAccountsForUser(
+      $viewer,
+      PhabricatorContentSource::newFromRequest($request));
+
     $v_amount = null;
     $e_amount = true;
+
+    $v_account = head($accounts)->getPHID();
+
     $errors = array();
     if ($request->isFormPost()) {
       $v_amount = $request->getStr('amount');
+      $v_account = $request->getStr('accountPHID');
+
+      if (empty($accounts[$v_account])) {
+        $errors[] = pht('You must specify an account.');
+      } else {
+        $account = $accounts[$v_account];
+      }
 
       if (!strlen($v_amount)) {
         $errors[] = pht(
@@ -73,10 +81,6 @@ final class FundInitiativeBackController
           ->setViewer($viewer)
           ->withClassAndRef('FundBackerProduct', $initiative->getPHID())
           ->executeOne();
-
-        $account = PhortuneAccountQuery::loadActiveAccountForUser(
-          $viewer,
-          PhabricatorContentSource::newFromRequest($request));
 
         $cart_implementation = id(new FundBackerCart())
           ->setInitiative($initiative);
@@ -110,6 +114,12 @@ final class FundInitiativeBackController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('accountPHID')
+          ->setLabel(pht('Account'))
+          ->setValue($v_account)
+          ->setOptions(mpull($accounts, 'getName', 'getPHID')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('amount')

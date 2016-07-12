@@ -11,6 +11,10 @@ final class HarbormasterHTTPRequestBuildStepImplementation
     return pht('Make an HTTP request.');
   }
 
+  public function getBuildStepGroupKey() {
+    return HarbormasterExternalBuildStepGroup::GROUPKEY;
+  }
+
   public function getDescription() {
     $domain = null;
     $uri = $this->getSetting('uri');
@@ -47,9 +51,6 @@ final class HarbormasterHTTPRequestBuildStepImplementation
       $settings['uri'],
       $variables);
 
-    $log_body = $build->createLog($build_target, $uri, 'http-body');
-    $start = $log_body->start();
-
     $method = nonempty(idx($settings, 'method'), 'POST');
 
     $future = id(new HTTPSFuture($uri))
@@ -66,16 +67,16 @@ final class HarbormasterHTTPRequestBuildStepImplementation
         $key->getPasswordEnvelope());
     }
 
-    list($status, $body, $headers) = $this->resolveFuture(
+    $this->resolveFutures(
       $build,
       $build_target,
-      $future);
+      array($future));
 
-    $log_body->append($body);
-    $log_body->finalize($start);
+    $this->logHTTPResponse($build, $build_target, $future, $uri);
 
-    if ($status->getStatusCode() != 200) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+    list($status) = $future->resolve();
+    if ($status->isError()) {
+      throw new HarbormasterBuildFailureException();
     }
   }
 
@@ -95,9 +96,9 @@ final class HarbormasterHTTPRequestBuildStepImplementation
         'name' => pht('Credentials'),
         'type' => 'credential',
         'credential.type'
-          => PassphraseCredentialTypePassword::CREDENTIAL_TYPE,
+          => PassphrasePasswordCredentialType::CREDENTIAL_TYPE,
         'credential.provides'
-          => PassphraseCredentialTypePassword::PROVIDES_TYPE,
+          => PassphrasePasswordCredentialType::PROVIDES_TYPE,
       ),
     );
   }

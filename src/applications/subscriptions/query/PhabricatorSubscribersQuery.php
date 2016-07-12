@@ -29,7 +29,7 @@ final class PhabricatorSubscribersQuery extends PhabricatorQuery {
   public function execute() {
     $query = new PhabricatorEdgeQuery();
 
-    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER;
+    $edge_type = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
 
     $query->withSourcePHIDs($this->objectPHIDs);
     $query->withEdgeTypes(array($edge_type));

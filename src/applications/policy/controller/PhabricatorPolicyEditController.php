@@ -3,24 +3,60 @@
 final class PhabricatorPolicyEditController
   extends PhabricatorPolicyController {
 
-  private $phid;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-  }
+    $object_phid = $request->getURIData('objectPHID');
+    if ($object_phid) {
+      $object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($object_phid))
+        ->executeOne();
+      if (!$object) {
+        return new Aphront404Response();
+      }
+    } else {
+      $object_type = $request->getURIData('objectType');
+      if (!$object_type) {
+        $object_type = $request->getURIData('templateType');
+      }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+      $phid_types = PhabricatorPHIDType::getAllInstalledTypes($viewer);
+      if (empty($phid_types[$object_type])) {
+        return new Aphront404Response();
+      }
+      $object = $phid_types[$object_type]->newObject();
+      if (!$object) {
+        return new Aphront404Response();
+      }
+    }
+
+    $phid = $request->getURIData('phid');
+    switch ($phid) {
+      case AphrontFormPolicyControl::getSelectProjectKey():
+        return $this->handleProjectRequest($request);
+      case AphrontFormPolicyControl::getSelectCustomKey():
+        $phid = null;
+        break;
+      default:
+        break;
+    }
 
     $action_options = array(
       PhabricatorPolicy::ACTION_ALLOW => pht('Allow'),
       PhabricatorPolicy::ACTION_DENY => pht('Deny'),
     );
 
-    $rules = id(new PhutilSymbolLoader())
+    $rules = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorPolicyRule')
-      ->loadObjects();
+      ->execute();
+
+    foreach ($rules as $key => $rule) {
+      if (!$rule->canApplyToObject($object)) {
+        unset($rules[$key]);
+      }
+    }
+
     $rules = msort($rules, 'getRuleOrder');
 
     $default_rule = array(
@@ -29,10 +65,10 @@ final class PhabricatorPolicyEditController
       'value' => null,
     );
 
-    if ($this->phid) {
+    if ($phid) {
       $policies = id(new PhabricatorPolicyQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($this->phid))
+        ->withPHIDs(array($phid))
         ->execute();
       if (!$policies) {
         return new Aphront404Response();
@@ -52,9 +88,12 @@ final class PhabricatorPolicyEditController
     $errors = array();
     if ($request->isFormPost()) {
       $data = $request->getStr('rules');
-      $data = @json_decode($data, true);
-      if (!is_array($data)) {
-        throw new Exception('Failed to JSON decode rule data!');
+      try {
+        $data = phutil_json_decode($data);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht('Failed to JSON decode rule data!'),
+          $ex);
       }
 
       $rule_data = array();
@@ -65,12 +104,12 @@ final class PhabricatorPolicyEditController
           case 'deny':
             break;
           default:
-            throw new Exception("Invalid action '{$action}'!");
+            throw new Exception(pht("Invalid action '%s'!", $action));
         }
 
         $rule_class = idx($rule, 'rule');
         if (empty($rules[$rule_class])) {
-          throw new Exception("Invalid rule class '{$rule_class}'!");
+          throw new Exception(pht("Invalid rule class '%s'!", $rule_class));
         }
 
         $rule_obj = $rules[$rule_class];
@@ -138,7 +177,7 @@ final class PhabricatorPolicyEditController
       ));
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())
+      $errors = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 
@@ -153,7 +192,7 @@ final class PhabricatorPolicyEditController
             'sigil' => 'rules',
           )))
       ->appendChild(
-        id(new AphrontFormInsetView())
+        id(new PHUIFormInsetView())
           ->setTitle(pht('Rules'))
           ->setRightButton(
             javelin_tag(
@@ -165,8 +204,7 @@ final class PhabricatorPolicyEditController
                 'mustcapture' => true,
               ),
               pht('New Rule')))
-          ->setDescription(
-            pht('These rules are processed in order.'))
+          ->setDescription(pht('These rules are processed in order.'))
           ->setContent(javelin_tag(
             'table',
             array(
@@ -205,15 +243,105 @@ final class PhabricatorPolicyEditController
         'defaultRule' => $default_rule,
       ));
 
+    $title = pht('Custom Policy');
+
+    $key = $request->getStr('capability');
+    if ($key) {
+      $capability = PhabricatorPolicyCapability::getCapabilityByKey($key);
+      $title = pht('Custom "%s" Policy', $capability->getCapabilityName());
+    }
+
     $dialog = id(new AphrontDialogView())
       ->setWidth(AphrontDialogView::WIDTH_FULL)
       ->setUser($viewer)
-      ->setTitle(pht('Edit Policy'))
+      ->setTitle($title)
       ->appendChild($form)
       ->addSubmitButton(pht('Save Policy'))
       ->addCancelButton('#');
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
+  }
+
+  private function handleProjectRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+
+    $errors = array();
+    $e_project = true;
+
+    if ($request->isFormPost()) {
+      $project_phids = $request->getArr('projectPHIDs');
+      $project_phid = head($project_phids);
+
+      $project = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($project_phid))
+        ->executeOne();
+
+      if ($project) {
+        // Save this project as one of the user's most recently used projects,
+        // so we'll show it by default in future menus.
+
+        $favorites_key = PhabricatorPolicyFavoritesSetting::SETTINGKEY;
+        $favorites = $viewer->getUserSetting($favorites_key);
+        if (!is_array($favorites)) {
+          $favorites = array();
+        }
+
+        // Add this, or move it to the end of the list.
+        unset($favorites[$project_phid]);
+        $favorites[$project_phid] = true;
+
+        $preferences = PhabricatorUserPreferences::loadUserPreferences($viewer);
+
+        $editor = id(new PhabricatorUserPreferencesEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true);
+
+        $xactions = array();
+        $xactions[] = $preferences->newTransaction($favorites_key, $favorites);
+        $editor->applyTransactions($preferences, $xactions);
+
+        $data = array(
+          'phid' => $project->getPHID(),
+          'info' => array(
+            'name' => $project->getName(),
+            'full' => $project->getName(),
+            'icon' => $project->getDisplayIconIcon(),
+          ),
+        );
+
+        return id(new AphrontAjaxResponse())->setContent($data);
+      } else {
+        $errors[] = pht('You must choose a project.');
+        $e_project = pht('Required');
+      }
+    }
+
+    $project_datasource = id(new PhabricatorProjectDatasource())
+      ->setParameters(
+        array(
+          'policy' => 1,
+        ));
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Members Of'))
+          ->setName('projectPHIDs')
+          ->setLimit(1)
+          ->setError($e_project)
+          ->setDatasource($project_datasource));
+
+    return $this->newDialog()
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setErrors($errors)
+      ->setTitle(pht('Select Project'))
+      ->appendForm($form)
+      ->addSubmitButton(pht('Done'))
+      ->addCancelButton('#');
   }
 
 }

@@ -5,15 +5,15 @@ final class PonderQuestionPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'QUES';
 
   public function getTypeName() {
-    return pht('Question');
-  }
-
-  public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorPonderApplication';
+    return pht('Ponder Question');
   }
 
   public function newObject() {
     return new PonderQuestion();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPonderApplication';
   }
 
   protected function buildQueryForObjects(

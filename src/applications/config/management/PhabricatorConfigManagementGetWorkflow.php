@@ -7,7 +7,7 @@ final class PhabricatorConfigManagementGetWorkflow
     $this
       ->setName('get')
       ->setExamples('**get** __key__')
-      ->setSynopsis('Get a local configuration value.')
+      ->setSynopsis(pht('Get a local configuration value.'))
       ->setArguments(
         array(
           array(
@@ -23,32 +23,79 @@ final class PhabricatorConfigManagementGetWorkflow
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
       throw new PhutilArgumentUsageException(
-        'Specify a configuration key to get.');
+        pht('Specify a configuration key to get.'));
     }
 
     $key = $argv[0];
 
     if (count($argv) > 1) {
       throw new PhutilArgumentUsageException(
-        'Too many arguments: expected one key.');
+        pht('Too many arguments: expected one key.'));
     }
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$key])) {
       throw new PhutilArgumentUsageException(
-        "No such configuration key '{$key}'! Use `config list` to list all ".
-        "keys.");
+        pht(
+          "No such configuration key '%s'! Use `%s` to list all keys.",
+          $key,
+          'config list'));
     }
 
+    $values = array();
     $config = new PhabricatorConfigLocalSource();
-    $values = $config->getKeys(array($key));
+    $local_value = $config->getKeys(array($key));
+    if (empty($local_value)) {
+      $values['local'] = array(
+        'key' => $key,
+        'value' => null,
+        'status' => 'unset',
+        'errorInfo' => null,
+      );
+    } else {
+      $values['local'] = array(
+        'key' => $key,
+        'value' => reset($local_value),
+        'status' => 'set',
+        'errorInfo' => null,
+      );
+    }
+
+    try {
+      $database_config = new PhabricatorConfigDatabaseSource('default');
+      $database_value = $database_config->getKeys(array($key));
+      if (empty($database_value)) {
+        $values['database'] = array(
+          'key' => $key,
+          'value' => null,
+          'status' => 'unset',
+          'errorInfo' => null,
+        );
+      } else {
+        $values['database'] = array(
+          'key' => $key,
+          'value' => reset($database_value),
+          'status' => 'set',
+          'errorInfo' => null,
+        );
+      }
+    } catch (Exception $e) {
+      $values['database'] = array(
+        'key' => $key,
+        'value' => null,
+        'status' => 'error',
+        'errorInfo' => pht('Database source is not configured properly'),
+      );
+    }
 
     $result = array();
-    foreach ($values as $key => $value) {
+    foreach ($values as $source => $value) {
       $result[] = array(
-        'key' => $key,
-        'source' => 'local',
-        'value' => $value,
+        'key' => $value['key'],
+        'source' => $source,
+        'value' => $value['value'],
+        'status' => $value['status'],
+        'errorInfo' => $value['errorInfo'],
       );
     }
     $result = array(

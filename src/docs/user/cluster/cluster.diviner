@@ -1,0 +1,326 @@
+@title Clustering Introduction
+@group cluster
+
+Guide to configuring Phabricator across multiple hosts for availability and
+performance.
+
+
+Overview
+========
+
+WARNING: This feature is a prototype. Installs should expect a challenging
+adventure when deploying clusters. In the best of times, configuring a
+cluster is complex and requires significant operations experience.
+
+Phabricator can be configured to run on multiple hosts with redundant services
+to improve its availability and scalability, and make disaster recovery much
+easier.
+
+Clustering is more complex to setup and maintain than running everything on a
+single host, but greatly reduces the cost of recovering from hardware and
+network failures.
+
+Each Phabricator service has an array of clustering options that can be
+configured somewhat independently. Configuring a cluster is inherently complex,
+and this is an advanced feature aimed at installs with large userbases and
+experienced operations personnel who need this high degree of flexibility.
+
+The remainder of this document summarizes how to add redundancy to each
+service and where your efforts are likely to have the greatest impact.
+
+For additional guidance on setting up a cluster, see "Overlaying Services"
+and "Cluster Recipes" at the bottom of this document.
+
+
+Clusterable Services
+====================
+
+This table provides an overview of clusterable services, their setup
+complexity, and the rough impact that converting them to run on multiple hosts
+will have on availability, resistance to data loss, and scalability.
+
+| Service | Setup | Availability | Loss Resistance | Scalability
+|---------|-------|--------------|-----------|------------
+| **Databases** | Moderate | **High** | **High** | Low
+| **Repositories** | Complex | Moderate | **High** | Moderate
+| **Daemons** | Minimal | Low | No Risk | Low
+| **SSH Servers** | Minimal | Low | No Risk | Low
+| **Web Servers** | Minimal | **High** | No Risk | Moderate
+| **Notifications** | Minimal | Low | No Risk | Low
+
+See below for a walkthrough of these services in greater detail.
+
+
+Preparing for Clustering
+========================
+
+To begin deploying Phabricator in cluster mode, set up `cluster.addresses`
+in your configuration.
+
+This option should contain a list of network address blocks which are considered
+to be part of the cluster. Hosts in this list are allowed to bend (or even
+break) some of the security and policy rules when they make requests to other
+hosts in the cluster, so this list should be as small as possible. See "Cluster
+Whitelist Security" below for discussion.
+
+If you are deploying hardware in EC2, a reasonable approach is to launch a
+dedicated Phabricator VPC, whitelist the whole VPC as a Phabricator cluster,
+and then deploy only Phabricator services into that VPC.
+
+If you have additional auxiliary hosts which run builds and tests via Drydock,
+you should //not// include them in the cluster address definition. For more
+detailed discussion of the Drydock security model, see
+@{article:Drydock User Guide: Security}.
+
+Most other clustering features will not work until you define a cluster by
+configuring `cluster.addresses`.
+
+
+Cluster Whitelist Security
+========================
+
+When you configure `cluster.addresses`, you should keep the list of trusted
+cluster hosts as small as possible. Hosts on this list gain additional
+capabilities, including these:
+
+**Trusted HTTP Headers**: Normally, Phabricator distrusts the load balancer
+HTTP headers `X-Forwarded-For` and `X-Forwarded-Proto` because they may be
+client-controlled and can be set to arbitrary values by an attacker if no load
+balancer is deployed. In particular, clients can set `X-Forwarded-For` to any
+value and spoof traffic from arbitrary remotes.
+
+These headers are trusted when they are received from a host on the cluster
+address whitelist. This allows requests from cluster loadbalancers to be
+interpreted correctly by default without requiring additional custom code or
+configuration.
+
+**Intracluster HTTP**: Requests from cluster hosts are not required to use
+HTTPS, even if `security.require-https` is enabled, because it is common to
+terminate HTTPS on load balancers and use plain HTTP for requests within a
+cluster.
+
+**Special Authentication Mechanisms**: Cluster hosts are allowed to connect to
+other cluster hosts with "root credentials", and to impersonate any user
+account.
+
+The use of root credentials is required because the daemons must be able to
+bypass policies in order to function properly: they need to send mail about
+private conversations and import commits in private repositories.
+
+The ability to impersonate users is required because SSH nodes must receive,
+interpret, modify, and forward SSH traffic. They can not use the original
+credentials to do this because SSH authentication is asymmetric and they do not
+have the user's private key. Instead, they use root credentials and impersonate
+the user within the cluster.
+
+These mechanisms are still authenticated (and use asymmetric keys, like SSH
+does), so access to a host in the cluster address block does not mean that an
+attacker can immediately compromise the cluster. However, an over-broad cluster
+address whitelist may give an attacker who gains some access additional tools
+to escalate access.
+
+Note that if an attacker gains access to an actual cluster host, these extra
+powers are largely moot. Most cluster hosts must be able to connect to the
+master database to function properly, so the attacker will just do that and
+freely read or modify whatever data they want.
+
+
+Cluster: Databases
+=================
+
+Configuring multiple database hosts is moderately complex, but normally has the
+highest impact on availability and resistance to data loss. This is usually the
+most important service to make redundant if your focus is on availability and
+disaster recovery.
+
+Configuring replicas allows Phabricator to run in read-only mode if you lose
+the master and to quickly promote the replica as a replacement.
+
+For details, see @{article:Cluster: Databases}.
+
+
+Cluster: Repositories
+=====================
+
+Configuring multiple repository hosts is complex, but is required before you
+can add multiple daemon or web hosts.
+
+Repository replicas are important for availability if you host repositories
+on Phabricator, but less important if you host repositories elsewhere
+(instead, you should focus on making that service more available).
+
+The distributed nature of Git and Mercurial tend to mean that they are
+naturally somewhat resistant to data loss: every clone of a repository includes
+the entire history.
+
+Repositories may become a scalability bottleneck, although this is rare unless
+your install has an unusually heavy repository read volume. Slow clones/fetches
+may hint at a repository capacity problem. Adding more repository hosts will
+provide an approximately linear increase in capacity.
+
+For details, see @{article:Cluster: Repositories}.
+
+
+Cluster: Daemons
+================
+
+Configuring multiple daemon hosts is straightforward, but you must configure
+repositories first.
+
+With daemons running on multiple hosts you can transparently survive the loss
+of any subset of hosts without an interruption to daemon services, as long as
+at least one host remains alive. Daemons are stateless, so spreading daemons
+across multiple hosts provides no resistance to data loss.
+
+Daemons can become a bottleneck, particularly if your install sees a large
+volume of write traffic to repositories. If the daemon task queue has a
+backlog, that hints at a capacity problem. If existing hosts have unused
+resources, increase `phd.taskmasters` until they are fully utilized. From
+there, adding more daemon hosts will provide an approximately linear increase
+in capacity.
+
+For details, see @{article:Cluster: Daemons}.
+
+
+Cluster: SSH Servers
+====================
+
+Configuring multiple SSH hosts is straightforward, but you must configure
+repositories first.
+
+With multiple SSH hosts you can transparently survive the loss of any subset
+of hosts without interruption to repository services, as long as at last one
+host remains alive. SSH services are stateless, so putting multiple hosts in
+service provides no resistance to data loss because no data is at risk.
+
+SSH hosts are very rarely a scalability bottleneck.
+
+For details, see @{article:Cluster: SSH Servers}.
+
+
+Cluster: Web Servers
+====================
+
+Configuring multiple web hosts is straightforward, but you must configure
+repositories first.
+
+With multiple web hosts you can transparently survive the loss of any subset
+of hosts as long as at least one host remains alive. Web services are stateless,
+so putting multiple hosts in service provides no resistance to data loss
+because no data is at risk.
+
+Web hosts can become a bottleneck, particularly if you have a workload that is
+heavily focused on reads from the web UI (like a public install with many
+anonymous users). Slow responses to web requests may hint at a web capacity
+problem. Adding more hosts will provide an approximately linear increase in
+capacity.
+
+For details, see @{article:Cluster: Web Servers}.
+
+
+Cluster: Notifications
+======================
+
+Configuring multiple notification hosts is simple and has no pre-requisites.
+
+With multiple notification hosts, you can survive the loss of any subset of
+hosts as long as at least one host remains alive. Service may be breifly
+disrupted directly after the incident which destroys the other hosts.
+
+Notifications are noncritical, so this normally has little practical impact
+on service availability. Notifications are also stateless, so clustering this
+service provides no resistance to data loss because no data is at risk.
+
+Notification delivery normally requires very few resources, so adding more
+hosts is unlikely to have much impact on scalability.
+
+For details, see @{article:Cluster: Notifications}.
+
+
+Overlaying Services
+===================
+
+Although hosts can run a single dedicated service type, certain groups of
+services work well together. Phabricator clusters usually do not need to be
+very large, so deploying a small number of hosts with multiple services is a
+good place to start.
+
+In planning a cluster, consider these blended host types:
+
+**Everything**: Run HTTP, SSH, MySQL, notifications, repositories and daemons
+on a single host. This is the starting point for single-node setups, and
+usually also the best configuration when adding the second node.
+
+**Everything Except Databases**: Run HTTP, SSH, notifications, repositories and
+daemons on one host, and MySQL on a different host. MySQL uses many of the same
+resources that other services use. It's also simpler to separate than other
+services, and tends to benefit the most from dedicated hardware.
+
+**Repositories and Daemons**: Run repositories and daemons on the same host.
+Repository hosts //must// run daemons, and it normally makes sense to
+completely overlay repositories and daemons. These services tend to use
+different resources (repositories are heavier on I/O and lighter on CPU/RAM;
+daemons are heavier on CPU/RAM and lighter on I/O).
+
+Repositories and daemons are also both less latency sensitive than other
+service types, so there's a wider margin of error for under provisioning them
+before performance is noticeably affected.
+
+These nodes tend to use system resources in a balanced way. Individual nodes
+in this class do not need to be particularly powerful.
+
+**Frontend Servers**: Run HTTP and SSH on the same host. These are easy to set
+up, stateless, and you can scale the pool up or down easily to meet demand.
+Routing both types of ingress traffic through the same initial tier can
+simplify load balancing.
+
+These nodes tend to need relatively little RAM.
+
+
+Cluster Recipes
+===============
+
+This section provides some guidance on reasonable ways to scale up a cluster.
+
+The smallest possible cluster is **two hosts**. Run everything (web, ssh,
+database, notifications, repositories, and daemons) on each host. One host will
+serve as the master; the other will serve as a replica.
+
+Ideally, you should physically separate these hosts to reduce the chance that a
+natural disaster or infrastructure disruption could disable or destroy both
+hosts at the same time.
+
+From here, you can choose how you expand the cluster.
+
+To improve **scalability and performance**, separate loaded services onto
+dedicated hosts and then add more hosts of that type to increase capacity. If
+you have a two-node cluster, the best way to improve scalability by adding one
+host is likely to separate the master database onto its own host.
+
+Note that increasing scale may //decrease// availability by leaving you with
+too little capacity after a failure. If you have three hosts handling traffic
+and one datacenter fails, too much traffic may be sent to the single remaining
+host in the surviving datacenter. You can hedge against this by mirroring new
+hosts in other datacenters (for example, also separate the replica database
+onto its own host).
+
+After separating databases, separating repository + daemon nodes is likely
+the next step to consider.
+
+To improve **availability**, add another copy of everything you run in one
+datacenter to a new datacenter. For example, if you have a two-node cluster,
+the best way to improve availability is to run everything on a third host in a
+third datacenter. If you have a 6-node cluster with a web node, a database node
+and a repo + daemon node in two datacenters, add 3 more nodes to create a copy
+of each node in a third datacenter.
+
+You can continue adding hosts until you run out of hosts.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - learning how Phacility configures and operates a large, multi-tenant
+    production cluster in ((cluster)).

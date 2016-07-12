@@ -7,6 +7,10 @@ final class PhabricatorKeyValueDatabaseCache
   const CACHE_FORMAT_DEFLATE    = 'deflate';
 
   public function setKeys(array $keys, $ttl = null) {
+    if (PhabricatorEnv::isReadOnly()) {
+      return;
+    }
+
     if ($keys) {
       $map = $this->digestKeys(array_keys($keys));
       $conn_w = $this->establishConnection('w');
@@ -30,19 +34,19 @@ final class PhabricatorKeyValueDatabaseCache
 
       $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
         foreach (PhabricatorLiskDAO::chunkSQL($sql) as $chunk) {
-            queryfx(
-              $conn_w,
-              'INSERT INTO %T
-                (cacheKeyHash, cacheKey, cacheFormat, cacheData,
-                  cacheCreated, cacheExpires) VALUES %Q
-                ON DUPLICATE KEY UPDATE
-                  cacheKey = VALUES(cacheKey),
-                  cacheFormat = VALUES(cacheFormat),
-                  cacheData = VALUES(cacheData),
-                  cacheCreated = VALUES(cacheCreated),
-                  cacheExpires = VALUES(cacheExpires)',
-              $this->getTableName(),
-              $chunk);
+          queryfx(
+            $conn_w,
+            'INSERT INTO %T
+              (cacheKeyHash, cacheKey, cacheFormat, cacheData,
+                cacheCreated, cacheExpires) VALUES %Q
+              ON DUPLICATE KEY UPDATE
+                cacheKey = VALUES(cacheKey),
+                cacheFormat = VALUES(cacheFormat),
+                cacheData = VALUES(cacheData),
+                cacheCreated = VALUES(cacheCreated),
+                cacheExpires = VALUES(cacheExpires)',
+            $this->getTableName(),
+            $chunk);
         }
       unset($guard);
     }
@@ -136,7 +140,7 @@ final class PhabricatorKeyValueDatabaseCache
 
   private function willWriteValue($key, $value) {
     if (!is_string($value)) {
-      throw new Exception('Only strings may be written to the DB cache!');
+      throw new Exception(pht('Only strings may be written to the DB cache!'));
     }
 
     static $can_deflate;
@@ -162,7 +166,7 @@ final class PhabricatorKeyValueDatabaseCache
       case self::CACHE_FORMAT_DEFLATE:
         return PhabricatorCaches::inflateData($value);
       default:
-        throw new Exception('Unknown cache format.');
+        throw new Exception(pht('Unknown cache format.'));
     }
   }
 

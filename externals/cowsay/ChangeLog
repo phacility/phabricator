@@ -1,0 +1,31 @@
+3.03	28 May 1999
+	- Added cows/tux.cow, as suggested by xmanoel@i.am
+	- Compatibility with 5.6.0, due to a change in qw().
+	- Renamed devil.cow to daemon.cow, since I know better. :-)
+
+3.02	04 November 1999
+	- Fixed boneheaded code placement so that cowsay -l actually works.
+
+3.01    01 November 1999
+	- Fixed compatibility issues between the Text::Wrap module
+	  that changed between 5.005_02 and 5.005_03.
+	- Fixed tab expansion issues with Text::Tabs.
+
+3.0	13 April 1999, released 14 August 1999
+	- Rewritten into Perl 5 and presented to the world.
+
+-- Not present in CVS from here on down --
+
+2.x	Date?
+	- Arbitrary messages. 
+	- Figlet support (-n). 
+	- Line wrap length (-w). 
+	- Multiple pre-set expressions.
+	- Better arg parsing loop.
+	- Message from stdin or command line.
+
+1.0	Date?
+	- SUBJECT is VERB OBJECT
+
+$Id: ChangeLog,v 1.4 2000/05/29 17:55:24 tony Exp $
+This file is part of cowsay.  (c) 1999-2000 Tony Monroe.

@@ -7,10 +7,10 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query audit requests.';
+    return pht('Query audit requests.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $statuses = array(
       DiffusionCommitQuery::AUDIT_STATUS_ANY,
       DiffusionCommitQuery::AUDIT_STATUS_OPEN,
@@ -30,19 +30,15 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {
 
     $query = id(new DiffusionCommitQuery())
-      ->setViewer($request->getUser());
+      ->setViewer($request->getUser())
+      ->needAuditRequests(true);
 
     $auditor_phids = $request->getValue('auditorPHIDs', array());
     if ($auditor_phids) {

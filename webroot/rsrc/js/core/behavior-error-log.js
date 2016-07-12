@@ -3,6 +3,8 @@
  * @requires javelin-dom
  */
 
+/* exported show_details */
+
 var current_details = null;
 
 function show_details(row) {

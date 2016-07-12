@@ -9,19 +9,22 @@ final class PhabricatorRepositoryQuery
   private $types;
   private $uuids;
   private $nameContains;
-  private $remoteURIs;
-  private $anyProjectPHIDs;
+  private $uris;
+  private $datasourceQuery;
+  private $slugs;
+
+  private $numericIdentifiers;
+  private $callsignIdentifiers;
+  private $phidIdentifiers;
+  private $monogramIdentifiers;
+  private $slugIdentifiers;
+
+  private $identifierMap;
 
   const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
   const STATUS_ALL = 'status-all';
   private $status = self::STATUS_ALL;
-
-  const ORDER_CREATED = 'order-created';
-  const ORDER_COMMITTED = 'order-committed';
-  const ORDER_CALLSIGN = 'order-callsign';
-  const ORDER_NAME = 'order-name';
-  private $order = self::ORDER_CREATED;
 
   const HOSTED_PHABRICATOR = 'hosted-phab';
   const HOSTED_REMOTE = 'hosted-remote';
@@ -31,6 +34,7 @@ final class PhabricatorRepositoryQuery
   private $needMostRecentCommits;
   private $needCommitCounts;
   private $needProjectPHIDs;
+  private $needURIs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -44,6 +48,49 @@ final class PhabricatorRepositoryQuery
 
   public function withCallsigns(array $callsigns) {
     $this->callsigns = $callsigns;
+    return $this;
+  }
+
+  public function withIdentifiers(array $identifiers) {
+    $identifiers = array_fuse($identifiers);
+
+    $ids = array();
+    $callsigns = array();
+    $phids = array();
+    $monograms = array();
+    $slugs = array();
+
+    foreach ($identifiers as $identifier) {
+      if (ctype_digit((string)$identifier)) {
+        $ids[$identifier] = $identifier;
+        continue;
+      }
+
+      if (preg_match('/^(r[A-Z]+|R[1-9]\d*)\z/', $identifier)) {
+        $monograms[$identifier] = $identifier;
+        continue;
+      }
+
+      $repository_type = PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
+      if (phid_get_type($identifier) === $repository_type) {
+        $phids[$identifier] = $identifier;
+        continue;
+      }
+
+      if (preg_match('/^[A-Z]+\z/', $identifier)) {
+        $callsigns[$identifier] = $identifier;
+        continue;
+      }
+
+      $slugs[$identifier] = $identifier;
+    }
+
+    $this->numericIdentifiers = $ids;
+    $this->callsignIdentifiers = $callsigns;
+    $this->phidIdentifiers = $phids;
+    $this->monogramIdentifiers = $monograms;
+    $this->slugIdentifiers = $slugs;
+
     return $this;
   }
 
@@ -72,13 +119,18 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function withRemoteURIs(array $uris) {
-    $this->remoteURIs = $uris;
+  public function withURIs(array $uris) {
+    $this->uris = $uris;
     return $this;
   }
 
-  public function withAnyProjects(array $projects) {
-    $this->anyProjectPHIDs = $projects;
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
+    return $this;
+  }
+
+  public function withSlugs(array $slugs) {
+    $this->slugs = $slugs;
     return $this;
   }
 
@@ -97,24 +149,50 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function setOrder($order) {
-    $this->order = $order;
+  public function needURIs($need_uris) {
+    $this->needURIs = $need_uris;
     return $this;
   }
 
+  public function getBuiltinOrders() {
+    return array(
+      'committed' => array(
+        'vector' => array('committed', 'id'),
+        'name' => pht('Most Recent Commit'),
+      ),
+      'name' => array(
+        'vector' => array('name', 'id'),
+        'name' => pht('Name'),
+      ),
+      'callsign' => array(
+        'vector' => array('callsign'),
+        'name' => pht('Callsign'),
+      ),
+      'size' => array(
+        'vector' => array('size', 'id'),
+        'name' => pht('Size'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getIdentifierMap() {
+    if ($this->identifierMap === null) {
+      throw new PhutilInvalidStateException('execute');
+    }
+    return $this->identifierMap;
+  }
+
+  protected function willExecute() {
+    $this->identifierMap = array();
+  }
+
+  public function newResultObject() {
+    return new PhabricatorRepository();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorRepository();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T r %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinsClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
+    $table = $this->newResultObject();
+    $data = $this->loadStandardPageRows($table);
     $repositories = $table->loadAllFromArray($data);
 
     if ($this->needCommitCounts) {
@@ -147,7 +225,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function willFilterPage(array $repositories) {
+  protected function willFilterPage(array $repositories) {
     assert_instances_of($repositories, 'PhabricatorRepository');
 
     // TODO: Denormalize repository status into the PhabricatorRepository
@@ -187,17 +265,70 @@ final class PhabricatorRepositoryQuery
         case self::HOSTED_ALL:
           break;
         default:
-          throw new Exception("Uknown hosted failed '${hosted}'!");
+          throw new Exception(pht("Unknown hosted failed '%s'!", $hosted));
       }
     }
 
-    // TODO: Denormalize this, too.
-    if ($this->remoteURIs) {
-      $try_uris = $this->getNormalizedPaths();
-      $try_uris = array_fuse($try_uris);
-      foreach ($repositories as $key => $repository) {
-        if (!isset($try_uris[$repository->getNormalizedPath()])) {
-          unset($repositories[$key]);
+    // Build the identifierMap
+    if ($this->numericIdentifiers) {
+      foreach ($this->numericIdentifiers as $id) {
+        if (isset($repositories[$id])) {
+          $this->identifierMap[$id] = $repositories[$id];
+        }
+      }
+    }
+
+    if ($this->callsignIdentifiers) {
+      $repository_callsigns = mpull($repositories, null, 'getCallsign');
+
+      foreach ($this->callsignIdentifiers as $callsign) {
+        if (isset($repository_callsigns[$callsign])) {
+          $this->identifierMap[$callsign] = $repository_callsigns[$callsign];
+        }
+      }
+    }
+
+    if ($this->phidIdentifiers) {
+      $repository_phids = mpull($repositories, null, 'getPHID');
+
+      foreach ($this->phidIdentifiers as $phid) {
+        if (isset($repository_phids[$phid])) {
+          $this->identifierMap[$phid] = $repository_phids[$phid];
+        }
+      }
+    }
+
+    if ($this->monogramIdentifiers) {
+      $monogram_map = array();
+      foreach ($repositories as $repository) {
+        foreach ($repository->getAllMonograms() as $monogram) {
+          $monogram_map[$monogram] = $repository;
+        }
+      }
+
+      foreach ($this->monogramIdentifiers as $monogram) {
+        if (isset($monogram_map[$monogram])) {
+          $this->identifierMap[$monogram] = $monogram_map[$monogram];
+        }
+      }
+    }
+
+    if ($this->slugIdentifiers) {
+      $slug_map = array();
+      foreach ($repositories as $repository) {
+        $slug = $repository->getRepositorySlug();
+        if ($slug === null) {
+          continue;
+        }
+
+        $normal = phutil_utf8_strtolower($slug);
+        $slug_map[$normal] = $repository;
+      }
+
+      foreach ($this->slugIdentifiers as $slug) {
+        $normal = phutil_utf8_strtolower($slug);
+        if (isset($slug_map[$normal])) {
+          $this->identifierMap[$slug] = $slug_map[$normal];
         }
       }
     }
@@ -205,7 +336,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function didFilterPage(array $repositories) {
+  protected function didFilterPage(array $repositories) {
     if ($this->needProjectPHIDs) {
       $type_project = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
 
@@ -223,209 +354,319 @@ final class PhabricatorRepositoryQuery
       }
     }
 
+    $viewer = $this->getViewer();
+
+    if ($this->needURIs) {
+      $uris = id(new PhabricatorRepositoryURIQuery())
+        ->setViewer($viewer)
+        ->withRepositories($repositories)
+        ->execute();
+      $uri_groups = mgroup($uris, 'getRepositoryPHID');
+      foreach ($repositories as $repository) {
+        $repository_uris = idx($uri_groups, $repository->getPHID(), array());
+        $repository->attachURIs($repository_uris);
+      }
+    }
+
     return $repositories;
   }
 
-  public function getReversePaging() {
-    switch ($this->order) {
-      case self::ORDER_CALLSIGN:
-      case self::ORDER_NAME:
-        return true;
-    }
-    return false;
+  protected function getPrimaryTableAlias() {
+    return 'r';
   }
 
-  protected function getPagingColumn() {
-    $order = $this->order;
-    switch ($order) {
-      case self::ORDER_CREATED:
-        return 'r.id';
-      case self::ORDER_COMMITTED:
-        return 's.epoch';
-      case self::ORDER_CALLSIGN:
-        return 'r.callsign';
-      case self::ORDER_NAME:
-        return 'r.name';
-      default:
-        throw new Exception("Unknown order '{$order}!'");
-    }
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'committed' => array(
+        'table' => 's',
+        'column' => 'epoch',
+        'type' => 'int',
+        'null' => 'tail',
+      ),
+      'callsign' => array(
+        'table' => 'r',
+        'column' => 'callsign',
+        'type' => 'string',
+        'unique' => true,
+        'reverse' => true,
+      ),
+      'name' => array(
+        'table' => 'r',
+        'column' => 'name',
+        'type' => 'string',
+        'reverse' => true,
+      ),
+      'size' => array(
+        'table' => 's',
+        'column' => 'size',
+        'type' => 'int',
+        'null' => 'tail',
+      ),
+    );
   }
 
-  private function loadCursorObject($id) {
-    $query = id(new PhabricatorRepositoryQuery())
-      ->setViewer($this->getPagingViewer())
-      ->withIDs(array((int)$id));
+  protected function willExecuteCursorQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+    $vector = $this->getOrderVector();
 
-    if ($this->order == self::ORDER_COMMITTED) {
+    if ($vector->containsKey('committed')) {
       $query->needMostRecentCommits(true);
     }
 
-    $results = $query->execute();
-    return head($results);
+    if ($vector->containsKey('size')) {
+      $query->needCommitCounts(true);
+    }
   }
 
-  protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
-    $default = parent::buildPagingClause($conn_r);
+  protected function getPagingValueMap($cursor, array $keys) {
+    $repository = $this->loadCursorObject($cursor);
 
-    $before_id = $this->getBeforeID();
-    $after_id = $this->getAfterID();
-
-    if (!$before_id && !$after_id) {
-      return $default;
-    }
-
-    $order = $this->order;
-    if ($order == self::ORDER_CREATED) {
-      return $default;
-    }
-
-    if ($before_id) {
-      $cursor = $this->loadCursorObject($before_id);
-    } else {
-      $cursor = $this->loadCursorObject($after_id);
-    }
-
-    if (!$cursor) {
-      return null;
-    }
-
-    $id_column = array(
-      'name' => 'r.id',
-      'type' => 'int',
-      'value' => $cursor->getID(),
+    $map = array(
+      'id' => $repository->getID(),
+      'callsign' => $repository->getCallsign(),
+      'name' => $repository->getName(),
     );
 
-    $columns = array();
-    switch ($order) {
-      case self::ORDER_COMMITTED:
-        $commit = $cursor->getMostRecentCommit();
-        if (!$commit) {
-          return null;
-        }
-        $columns[] = array(
-          'name' => 's.epoch',
-          'type' => 'int',
-          'value' => $commit->getEpoch(),
-        );
-        $columns[] = $id_column;
-        break;
-      case self::ORDER_CALLSIGN:
-        $columns[] = array(
-          'name' => 'r.callsign',
-          'type' => 'string',
-          'value' => $cursor->getCallsign(),
-          'reverse' => true,
-        );
-        break;
-      case self::ORDER_NAME:
-        $columns[] = array(
-          'name' => 'r.name',
-          'type' => 'string',
-          'value' => $cursor->getName(),
-          'reverse' => true,
-        );
-        $columns[] = $id_column;
-        break;
-      default:
-        throw new Exception("Unknown order '{$order}'!");
+    foreach ($keys as $key) {
+      switch ($key) {
+        case 'committed':
+          $commit = $repository->getMostRecentCommit();
+          if ($commit) {
+            $map[$key] = $commit->getEpoch();
+          } else {
+            $map[$key] = null;
+          }
+          break;
+        case 'size':
+          $count = $repository->getCommitCount();
+          if ($count) {
+            $map[$key] = $count;
+          } else {
+            $map[$key] = null;
+          }
+          break;
+      }
     }
 
-    return $this->buildPagingClauseFromMultipleColumns(
-      $conn_r,
-      $columns,
-      array(
-        // TODO: Clean up the column ordering stuff and then make this
-        // depend on getReversePaging().
-        'reversed' => (bool)($before_id),
-      ));
+    return $map;
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $parts = parent::buildSelectClauseParts($conn);
 
-    $join_summary_table = $this->needCommitCounts ||
-                          $this->needMostRecentCommits ||
-                          ($this->order == self::ORDER_COMMITTED);
+    $parts[] = 'r.*';
 
-    if ($join_summary_table) {
+    if ($this->shouldJoinSummaryTable()) {
+      $parts[] = 's.*';
+    }
+
+    return $parts;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
+
+    if ($this->shouldJoinSummaryTable()) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'LEFT JOIN %T s ON r.id = s.repositoryID',
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
-    if ($this->anyProjectPHIDs) {
+    if ($this->shouldJoinURITable()) {
       $joins[] = qsprintf(
-        $conn_r,
-        'JOIN edge e ON e.src = r.phid');
+        $conn,
+        'LEFT JOIN %T uri ON r.phid = uri.repositoryPHID',
+        id(new PhabricatorRepositoryURIIndex())->getTableName());
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldJoinURITable()) {
+      return true;
+    }
 
-    if ($this->ids) {
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  private function shouldJoinURITable() {
+    return ($this->uris !== null);
+  }
+
+  private function shouldJoinSummaryTable() {
+    if ($this->needCommitCounts) {
+      return true;
+    }
+
+    if ($this->needMostRecentCommits) {
+      return true;
+    }
+
+    $vector = $this->getOrderVector();
+    if ($vector->containsKey('committed')) {
+      return true;
+    }
+
+    if ($vector->containsKey('size')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->callsigns) {
+    if ($this->callsigns !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.callsign IN (%Ls)',
         $this->callsigns);
     }
 
+    if ($this->numericIdentifiers ||
+      $this->callsignIdentifiers ||
+      $this->phidIdentifiers ||
+      $this->monogramIdentifiers ||
+      $this->slugIdentifiers) {
+      $identifier_clause = array();
+
+      if ($this->numericIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn,
+          'r.id IN (%Ld)',
+          $this->numericIdentifiers);
+      }
+
+      if ($this->callsignIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn,
+          'r.callsign IN (%Ls)',
+          $this->callsignIdentifiers);
+      }
+
+      if ($this->phidIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn,
+          'r.phid IN (%Ls)',
+          $this->phidIdentifiers);
+      }
+
+      if ($this->monogramIdentifiers) {
+        $monogram_callsigns = array();
+        $monogram_ids = array();
+
+        foreach ($this->monogramIdentifiers as $identifier) {
+          if ($identifier[0] == 'r') {
+            $monogram_callsigns[] = substr($identifier, 1);
+          } else {
+            $monogram_ids[] = substr($identifier, 1);
+          }
+        }
+
+        if ($monogram_ids) {
+          $identifier_clause[] = qsprintf(
+            $conn,
+            'r.id IN (%Ld)',
+            $monogram_ids);
+        }
+
+        if ($monogram_callsigns) {
+          $identifier_clause[] = qsprintf(
+            $conn,
+            'r.callsign IN (%Ls)',
+            $monogram_callsigns);
+        }
+      }
+
+      if ($this->slugIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn,
+          'r.repositorySlug IN (%Ls)',
+          $this->slugIdentifiers);
+      }
+
+      $where = array('('.implode(' OR ', $identifier_clause).')');
+    }
+
     if ($this->types) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.versionControlSystem IN (%Ls)',
         $this->types);
     }
 
     if ($this->uuids) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'r.uuid IN (%Ls)',
         $this->uuids);
     }
 
     if (strlen($this->nameContains)) {
       $where[] = qsprintf(
-        $conn_r,
-        'name LIKE %~',
+        $conn,
+        'r.name LIKE %~',
         $this->nameContains);
     }
 
-    if ($this->anyProjectPHIDs) {
+    if (strlen($this->datasourceQuery)) {
+      // This handles having "rP" match callsigns starting with "P...".
+      $query = trim($this->datasourceQuery);
+      if (preg_match('/^r/', $query)) {
+        $callsign = substr($query, 1);
+      } else {
+        $callsign = $query;
+      }
       $where[] = qsprintf(
-        $conn_r,
-        'e.dst IN (%Ls)',
-        $this->anyProjectPHIDs);
+        $conn,
+        'r.name LIKE %> OR r.callsign LIKE %> OR r.repositorySlug LIKE %>',
+        $query,
+        $callsign,
+        $query);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->slugs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'r.repositorySlug IN (%Ls)',
+        $this->slugs);
+    }
 
-    return $this->formatWhereClause($where);
+    if ($this->uris !== null) {
+      $try_uris = $this->getNormalizedURIs();
+      $try_uris = array_fuse($try_uris);
+
+      $where[] = qsprintf(
+        $conn,
+        'uri.repositoryURI IN (%Ls)',
+        $try_uris);
+    }
+
+    return $where;
   }
-
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDiffusionApplication';
   }
 
-  private function getNormalizedPaths() {
+  private function getNormalizedURIs() {
     $normalized_uris = array();
 
     // Since we don't know which type of repository this URI is in the general
@@ -434,19 +675,15 @@ final class PhabricatorRepositoryQuery
     // or an `svn+ssh` URI, we could deduce how to normalize it. However, this
     // would be more complicated and it's not clear if it matters in practice.
 
-    foreach ($this->remoteURIs as $uri) {
-      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
-        PhabricatorRepositoryURINormalizer::TYPE_GIT,
-        $uri);
-      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
-        PhabricatorRepositoryURINormalizer::TYPE_SVN,
-        $uri);
-      $normalized_uris[] = new PhabricatorRepositoryURINormalizer(
-        PhabricatorRepositoryURINormalizer::TYPE_MERCURIAL,
-        $uri);
+    $types = PhabricatorRepositoryURINormalizer::getAllURITypes();
+    foreach ($this->uris as $uri) {
+      foreach ($types as $type) {
+        $normalized_uri = new PhabricatorRepositoryURINormalizer($type, $uri);
+        $normalized_uris[] = $normalized_uri->getNormalizedURI();
+      }
     }
 
-    return array_unique(mpull($normalized_uris, 'getNormalizedPath'));
+    return array_unique($normalized_uris);
   }
 
 }

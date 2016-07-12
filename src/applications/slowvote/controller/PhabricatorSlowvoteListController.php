@@ -3,24 +3,26 @@
 final class PhabricatorSlowvoteListController
   extends PhabricatorSlowvoteController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
+  public function handleRequest(AphrontRequest $request) {
+    return id(new PhabricatorSlowvoteSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->queryKey)
-      ->setSearchEngine(new PhabricatorSlowvoteSearchEngine())
-      ->setNavigation($this->buildSideNavView());
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
-    return $this->delegateToController($controller);
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Poll'))
+        ->setHref($this->getApplicationURI('create/'))
+        ->setIcon('fa-plus-square'));
+
+    return $crumbs;
   }
 
 }

@@ -11,6 +11,14 @@ final class PhabricatorExtendingPhabricatorConfigOptions
     return pht('Make Phabricator even cooler!');
   }
 
+  public function getIcon() {
+    return 'fa-rocket';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('load-libraries', 'list<string>', array())

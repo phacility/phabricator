@@ -1,6 +1,7 @@
 <?php
 
-final class HarbormasterBuildLog extends HarbormasterDAO
+final class HarbormasterBuildLog
+  extends HarbormasterDAO
   implements PhabricatorPolicyInterface {
 
   protected $buildTargetPHID;
@@ -10,13 +11,20 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   protected $live;
 
   private $buildTarget = self::ATTACHABLE;
+  private $rope;
+  private $isOpen;
 
   const CHUNK_BYTE_LIMIT = 102400;
 
-  /**
-   * The log is encoded as plain text.
-   */
-  const ENCODING_TEXT = 'text';
+  public function __construct() {
+    $this->rope = new PhutilRope();
+  }
+
+  public function __destruct() {
+    if ($this->isOpen) {
+      $this->closeBuildLog();
+    }
+  }
 
   public static function initializeNewBuildLog(
     HarbormasterBuildTarget $build_target) {
@@ -27,7 +35,38 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       ->setLive(0);
   }
 
-  public function getConfiguration() {
+  public function openBuildLog() {
+    if ($this->isOpen) {
+      throw new Exception(pht('This build log is already open!'));
+    }
+
+    $this->isOpen = true;
+
+    return $this
+      ->setLive(1)
+      ->save();
+  }
+
+  public function closeBuildLog() {
+    if (!$this->isOpen) {
+      throw new Exception(pht('This build log is not open!'));
+    }
+
+    if ($this->canCompressLog()) {
+      $this->compressLog();
+    }
+
+    $start = $this->getDateCreated();
+    $now = PhabricatorTime::getNow();
+
+    return $this
+      ->setDuration($now - $start)
+      ->setLive(0)
+      ->save();
+  }
+
+
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -66,117 +105,176 @@ final class HarbormasterBuildLog extends HarbormasterDAO
     return pht('Build Log');
   }
 
-  public function start() {
-    if ($this->getLive()) {
-      throw new Exception('Live logging has already started for this log.');
-    }
-
-    $this->setLive(1);
-    $this->save();
-
-    return time();
-  }
-
   public function append($content) {
     if (!$this->getLive()) {
-      throw new Exception('Start logging before appending data to the log.');
-    }
-    if (strlen($content) === 0) {
-      return;
+      throw new PhutilInvalidStateException('openBuildLog');
     }
 
-    // If the length of the content is greater than the chunk size limit,
-    // then we can never fit the content in a single record. We need to
-    // split our content out and call append on it for as many parts as there
-    // are to the content.
-    if (strlen($content) > self::CHUNK_BYTE_LIMIT) {
-      $current = $content;
-      while (strlen($current) > self::CHUNK_BYTE_LIMIT) {
-        $part = substr($current, 0, self::CHUNK_BYTE_LIMIT);
-        $current = substr($current, self::CHUNK_BYTE_LIMIT);
-        $this->append($part);
+    $content = (string)$content;
+
+    $this->rope->append($content);
+    $this->flush();
+
+    return $this;
+  }
+
+  private function flush() {
+
+    // TODO: Maybe don't flush more than a couple of times per second. If a
+    // caller writes a single character over and over again, we'll currently
+    // spend a lot of time flushing that.
+
+    $chunk_table = id(new HarbormasterBuildLogChunk())->getTableName();
+    $chunk_limit = self::CHUNK_BYTE_LIMIT;
+    $encoding_text = HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT;
+
+    $rope = $this->rope;
+
+    while (true) {
+      $length = $rope->getByteLength();
+      if (!$length) {
+        break;
       }
-      $this->append($current);
-      return;
-    }
 
-    // Retrieve the size of last chunk from the DB for this log. If the
-    // chunk is over 500K, then we need to create a new log entry.
-    $conn = $this->establishConnection('w');
-    $result = queryfx_all(
-      $conn,
-      'SELECT id, size, encoding '.
-      'FROM harbormaster_buildlogchunk '.
-      'WHERE logID = %d '.
-      'ORDER BY id DESC '.
-      'LIMIT 1',
-      $this->getID());
-    if (count($result) === 0 ||
-      $result[0]['size'] + strlen($content) > self::CHUNK_BYTE_LIMIT ||
-      $result[0]['encoding'] !== self::ENCODING_TEXT) {
+      $conn_w = $this->establishConnection('w');
+      $last = $this->loadLastChunkInfo();
 
-      // We must insert a new chunk because the data we are appending
-      // won't fit into the existing one, or we don't have any existing
-      // chunk data.
-      queryfx(
-        $conn,
-        'INSERT INTO harbormaster_buildlogchunk '.
-        '(logID, encoding, size, chunk) '.
-        'VALUES '.
-        '(%d, %s, %d, %s)',
-        $this->getID(),
-        self::ENCODING_TEXT,
-        strlen($content),
-        $content);
-    } else {
-      // We have a resulting record that we can append our content onto.
-      queryfx(
-        $conn,
-        'UPDATE harbormaster_buildlogchunk '.
-        'SET chunk = CONCAT(chunk, %s), size = LENGTH(CONCAT(chunk, %s))'.
-        'WHERE id = %d',
-        $content,
-        $content,
-        $result[0]['id']);
+      $can_append =
+        ($last) &&
+        ($last['encoding'] == $encoding_text) &&
+        ($last['size'] < $chunk_limit);
+      if ($can_append) {
+        $append_id = $last['id'];
+        $prefix_size = $last['size'];
+      } else {
+        $append_id = null;
+        $prefix_size = 0;
+      }
+
+      $data_limit = ($chunk_limit - $prefix_size);
+      $append_data = $rope->getPrefixBytes($data_limit);
+      $data_size = strlen($append_data);
+
+      if ($append_id) {
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET chunk = CONCAT(chunk, %B), size = %d WHERE id = %d',
+          $chunk_table,
+          $append_data,
+          $prefix_size + $data_size,
+          $append_id);
+      } else {
+        $this->writeChunk($encoding_text, $data_size, $append_data);
+      }
+
+      $rope->removeBytesFromHead($data_size);
     }
   }
 
-  public function finalize($start = 0) {
-    if (!$this->getLive()) {
-      throw new Exception('Start logging before finalizing it.');
-    }
+  public function newChunkIterator() {
+    return id(new HarbormasterBuildLogChunkIterator($this))
+      ->setPageSize(32);
+  }
 
-    // TODO: Encode the log contents in a gzipped format.
-    $this->reload();
-    if ($start > 0) {
-      $this->setDuration(time() - $start);
-    }
-    $this->setLive(0);
-    $this->save();
+  private function loadLastChunkInfo() {
+    $chunk_table = new HarbormasterBuildLogChunk();
+    $conn_w = $chunk_table->establishConnection('w');
+
+    return queryfx_one(
+      $conn_w,
+      'SELECT id, size, encoding FROM %T WHERE logID = %d
+        ORDER BY id DESC LIMIT 1',
+      $chunk_table->getTableName(),
+      $this->getID());
   }
 
   public function getLogText() {
-    // TODO: This won't cope very well if we're pulling like a 700MB
-    // log file out of the DB. We should probably implement some sort
-    // of optional limit parameter so that when we're rendering out only
-    // 25 lines in the UI, we don't wastefully read in the whole log.
+    // TODO: Remove this method since it won't scale for big logs.
 
-    // We have to read our content out of the database and stitch all of
-    // the log data back together.
-    $conn = $this->establishConnection('r');
-    $result = queryfx_all(
-      $conn,
-      'SELECT chunk '.
-      'FROM harbormaster_buildlogchunk '.
-      'WHERE logID = %d '.
-      'ORDER BY id ASC',
-      $this->getID());
+    $all_chunks = $this->newChunkIterator();
 
-    $content = '';
-    foreach ($result as $row) {
-      $content .= $row['chunk'];
+    $full_text = array();
+    foreach ($all_chunks as $chunk) {
+      $full_text[] = $chunk->getChunkDisplayText();
     }
-    return $content;
+
+    return implode('', $full_text);
+  }
+
+  private function canCompressLog() {
+    return function_exists('gzdeflate');
+  }
+
+  public function compressLog() {
+    $this->processLog(HarbormasterBuildLogChunk::CHUNK_ENCODING_GZIP);
+  }
+
+  public function decompressLog() {
+    $this->processLog(HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT);
+  }
+
+  private function processLog($mode) {
+    $chunks = $this->newChunkIterator();
+
+    // NOTE: Because we're going to insert new chunks, we need to stop the
+    // iterator once it hits the final chunk which currently exists. Otherwise,
+    // it may start consuming chunks we just wrote and run forever.
+    $last = $this->loadLastChunkInfo();
+    if ($last) {
+      $chunks->setRange(null, $last['id']);
+    }
+
+    $byte_limit = self::CHUNK_BYTE_LIMIT;
+    $rope = new PhutilRope();
+
+    $this->openTransaction();
+
+    foreach ($chunks as $chunk) {
+      $rope->append($chunk->getChunkDisplayText());
+      $chunk->delete();
+
+      while ($rope->getByteLength() > $byte_limit) {
+        $this->writeEncodedChunk($rope, $byte_limit, $mode);
+      }
+    }
+
+    while ($rope->getByteLength()) {
+      $this->writeEncodedChunk($rope, $byte_limit, $mode);
+    }
+
+    $this->saveTransaction();
+  }
+
+  private function writeEncodedChunk(PhutilRope $rope, $length, $mode) {
+    $data = $rope->getPrefixBytes($length);
+    $size = strlen($data);
+
+    switch ($mode) {
+      case HarbormasterBuildLogChunk::CHUNK_ENCODING_TEXT:
+        // Do nothing.
+        break;
+      case HarbormasterBuildLogChunk::CHUNK_ENCODING_GZIP:
+        $data = gzdeflate($data);
+        if ($data === false) {
+          throw new Exception(pht('Failed to gzdeflate() log data!'));
+        }
+        break;
+      default:
+        throw new Exception(pht('Unknown chunk encoding "%s"!', $mode));
+    }
+
+    $this->writeChunk($mode, $size, $data);
+
+    $rope->removeBytesFromHead($size);
+  }
+
+  private function writeChunk($encoding, $raw_size, $data) {
+    return id(new HarbormasterBuildLogChunk())
+      ->setLogID($this->getID())
+      ->setEncoding($encoding)
+      ->setSize($raw_size)
+      ->setChunk($data)
+      ->save();
   }
 
 
@@ -201,7 +299,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function describeAutomaticCapability($capability) {
     return pht(
-      'Users must be able to see a build target to view it\'s build log.');
+      "Users must be able to see a build target to view it's build log.");
   }
 
 

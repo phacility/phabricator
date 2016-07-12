@@ -6,8 +6,8 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
     return '/countdown/';
   }
 
-  public function getIconName() {
-    return 'countdown';
+  public function getIcon() {
+    return 'fa-rocket';
   }
 
   public function getName() {
@@ -38,20 +38,33 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
+      '/C(?P<id>[1-9]\d*)' => 'PhabricatorCountdownViewController',
       '/countdown/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorCountdownListController',
-        '(?P<id>[1-9]\d*)/' => 'PhabricatorCountdownViewController',
-        'edit/(?:(?P<id>[1-9]\d*)/)?' => 'PhabricatorCountdownEditController',
-        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorCountdownDeleteController',
+        '(?P<id>[1-9]\d*)/'
+          => 'PhabricatorCountdownViewController',
+        'comment/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorCountdownCommentController',
+        $this->getEditRoutePattern('edit/')
+          => 'PhabricatorCountdownEditController',
+        'delete/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorCountdownDeleteController',
       ),
     );
   }
 
-  public function getCustomCapabilities() {
+  protected function getCustomCapabilities() {
     return array(
       PhabricatorCountdownDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for new countdowns.'),
+        'template' => PhabricatorCountdownCountdownPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      PhabricatorCountdownDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht('Default edit policy for new countdowns.'),
+        'template' => PhabricatorCountdownCountdownPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
     );
   }

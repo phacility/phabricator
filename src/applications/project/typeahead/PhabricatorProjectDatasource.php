@@ -3,6 +3,10 @@
 final class PhabricatorProjectDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a project name...');
   }
@@ -18,17 +22,26 @@ final class PhabricatorProjectDatasource
 
     // Allow users to type "#qa" or "qa" to find "Quality Assurance".
     $raw_query = ltrim($raw_query, '#');
+    $tokens = self::tokenizeString($raw_query);
 
-    if (!strlen($raw_query)) {
-      return array();
+    $query = id(new PhabricatorProjectQuery())
+      ->needImages(true)
+      ->needSlugs(true);
+
+    if ($tokens) {
+      $query->withNameTokens($tokens);
     }
 
-    $projs = id(new PhabricatorProjectQuery())
-      ->setViewer($viewer)
-      ->needImages(true)
-      ->needSlugs(true)
-      ->withDatasourceQuery($raw_query)
-      ->execute();
+    // If this is for policy selection, prevent users from using milestones.
+    $for_policy = $this->getParameter('policy');
+    if ($for_policy) {
+      $query->withIsMilestone(false);
+    }
+
+    $for_autocomplete = $this->getParameter('autocomplete');
+
+    $projs = $this->executeQuery($query);
+
     $projs = mpull($projs, null, 'getPHID');
 
     $must_have_cols = $this->getParameter('mustHaveColumns', false);
@@ -42,31 +55,87 @@ final class PhabricatorProjectDatasource
       $has_cols = array_fill_keys(array_keys($projs), true);
     }
 
+    $is_browse = $this->getIsBrowse();
+    if ($is_browse && $projs) {
+      // TODO: This is a little ad-hoc, but we don't currently have
+      // infrastructure for bulk querying custom fields efficiently.
+      $table = new PhabricatorProjectCustomFieldStorage();
+      $descriptions = $table->loadAllWhere(
+        'objectPHID IN (%Ls) AND fieldIndex = %s',
+        array_keys($projs),
+        PhabricatorHash::digestForIndex('std:project:internal:description'));
+      $descriptions = mpull($descriptions, 'getFieldValue', 'getObjectPHID');
+    } else {
+      $descriptions = array();
+    }
+
     $results = array();
     foreach ($projs as $proj) {
-      if (!isset($has_cols[$proj->getPHID()])) {
+      $phid = $proj->getPHID();
+
+      if (!isset($has_cols[$phid])) {
         continue;
       }
+
+      $slug = $proj->getPrimarySlug();
+      if (!strlen($slug)) {
+        foreach ($proj->getSlugs() as $slug_object) {
+          $slug = $slug_object->getSlug();
+          if (strlen($slug)) {
+            break;
+          }
+        }
+      }
+
+      // If we're building results for the autocompleter and this project
+      // doesn't have any usable slugs, don't return it as a result.
+      if ($for_autocomplete && !strlen($slug)) {
+        continue;
+      }
+
       $closed = null;
       if ($proj->isArchived()) {
         $closed = pht('Archived');
       }
 
-      $all_strings = mpull($proj->getSlugs(), 'getSlug');
-      $all_strings[] = $proj->getName();
+      $all_strings = array();
+      $all_strings[] = $proj->getDisplayName();
+
+      // Add an extra space after the name so that the original project
+      // sorts ahead of milestones. This is kind of a hack but ehh?
+      $all_strings[] = null;
+
+      foreach ($proj->getSlugs() as $project_slug) {
+        $all_strings[] = $project_slug->getSlug();
+      }
       $all_strings = implode(' ', $all_strings);
 
       $proj_result = id(new PhabricatorTypeaheadResult())
         ->setName($all_strings)
-        ->setDisplayName($proj->getName())
-        ->setDisplayType('Project')
-        ->setURI('/tag/'.$proj->getPrimarySlug().'/')
-        ->setPHID($proj->getPHID())
-        ->setIcon($proj->getIcon().' bluegrey')
+        ->setDisplayName($proj->getDisplayName())
+        ->setDisplayType($proj->getDisplayIconName())
+        ->setURI($proj->getURI())
+        ->setPHID($phid)
+        ->setIcon($proj->getDisplayIconIcon())
+        ->setColor($proj->getColor())
         ->setPriorityType('proj')
         ->setClosed($closed);
 
+      if (strlen($slug)) {
+        $proj_result->setAutocomplete('#'.$slug);
+      }
+
       $proj_result->setImageURI($proj->getProfileImageURI());
+
+      if ($is_browse) {
+        $proj_result->addAttribute($proj->getDisplayIconName());
+
+        $description = idx($descriptions, $phid);
+        if (strlen($description)) {
+          $summary = PhabricatorMarkupEngine::summarize($description);
+          $proj_result->addAttribute($summary);
+        }
+      }
 
       $results[] = $proj_result;
     }

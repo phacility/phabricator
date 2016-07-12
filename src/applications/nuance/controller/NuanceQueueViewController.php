@@ -1,42 +1,76 @@
 <?php
 
-final class NuanceQueueViewController extends NuanceController {
+final class NuanceQueueViewController
+  extends NuanceQueueController {
 
-  private $queueID;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-  public function setQueueID($queue_id) {
-    $this->queueID = $queue_id;
-    return $this;
-  }
-  public function getQueueID() {
-    return $this->queueID;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->setQueueID($data['id']);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $queue_id = $this->getQueueID();
     $queue = id(new NuanceQueueQuery())
-      ->setViewer($user)
-      ->withIDs(array($queue_id))
+      ->setViewer($viewer)
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
-
     if (!$queue) {
       return new Aphront404Response();
     }
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $title = 'TODO';
+    $title = $queue->getName();
 
-    return $this->buildApplicationPage(
-      $crumbs,
-      array(
-        'title' => $title,
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Queues'), $this->getApplicationURI('queue/'));
+    $crumbs->addTextCrumb($queue->getName());
+    $crumbs->setBorder(true);
+
+    $header = $this->buildHeaderView($queue);
+    $curtain = $this->buildCurtain($queue);
+
+    $timeline = $this->buildTransactionTimeline(
+      $queue,
+      new NuanceQueueTransactionQuery());
+    $timeline->setShouldTerminate(true);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn($timeline);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
+
+  private function buildHeaderView(NuanceQueue $queue) {
+    $viewer = $this->getViewer();
+
+    $header = id(new PHUIHeaderView())
+      ->setUser($viewer)
+      ->setHeader($queue->getName())
+      ->setPolicyObject($queue);
+
+    return $header;
+  }
+
+  private function buildCurtain(NuanceQueue $queue) {
+    $viewer = $this->getViewer();
+    $id = $queue->getID();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $queue,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $curtain = $this->newCurtainView($queue);
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Queue'))
+        ->setIcon('fa-pencil')
+        ->setHref($this->getApplicationURI("queue/edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    return $curtain;
+  }
+
 }

@@ -5,8 +5,8 @@ create table {$NAMESPACE}_worker.worker_task (
   leaseExpires int unsigned,
   priority bigint unsigned not null,
   failureCount int unsigned not null,
-  key(taskClass),
-  key(leaseOwner),
+  key(taskClass(128)),
+  key(leaseOwner(128)),
   key(leaseExpires)
 );
 

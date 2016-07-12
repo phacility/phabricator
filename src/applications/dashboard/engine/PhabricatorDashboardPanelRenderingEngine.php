@@ -154,20 +154,18 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($title)
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($title);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($title)
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($title);
         break;
     }
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-warning red msr');
+      ->setIcon('fa-warning red msr');
     $content = id(new PHUIBoxView())
       ->addClass('dashboard-box')
       ->appendChild($icon)
@@ -187,20 +185,30 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     if (!$id) {
       $id = celerity_generate_unique_node_id();
     }
-    return javelin_tag(
-      'div',
-      array(
-        'id' => $id,
-        'sigil' => 'dashboard-panel',
-        'meta' => array(
-          'objectPHID' => $panel->getPHID(),
-        ),
-        'class' => 'dashboard-panel',
-      ),
-      array(
-        $header,
-        $content,
-      ));
+
+    $box = new PHUIObjectBoxView();
+
+    $interface = 'PhabricatorApplicationSearchResultView';
+    if ($content instanceof $interface) {
+      if ($content->getObjectList()) {
+        $box->setObjectList($content->getObjectList());
+      }
+      if ($content->getTable()) {
+        $box->setTable($content->getTable());
+      }
+      if ($content->getContent()) {
+        $box->appendChild($content->getContent());
+      }
+    } else {
+      $box->appendChild($content);
+    }
+
+    $box->setHeader($header)
+      ->setID($id)
+      ->addSigil('dashboard-panel')
+      ->setMetadata(array('objectPHID' => $panel->getPHID()));
+
+    return phutil_tag_div('dashboard-pane', $box);
   }
 
 
@@ -212,23 +220,27 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($panel->getName());
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($panel->getName());
+        $panel_type = $panel->getImplementation();
+        $header = $panel_type->adjustPanelHeader(
+          $this->getViewer(),
+          $panel,
+          $this,
+          $header);
         break;
     }
     return $header;
   }
 
   private function addPanelHeaderActions(
-    PHUIActionHeaderView $header) {
+    PHUIHeaderView $header) {
     $panel = $this->getPanel();
 
     $dashboard_id = $this->getDashboardID();
@@ -238,23 +250,24 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       $edit_uri->setQueryParam('dashboardID', $dashboard_id);
     }
     $action_edit = id(new PHUIIconView())
-      ->setIconFont('fa-pencil')
+      ->setIcon('fa-pencil')
       ->setWorkflow(true)
-      ->setHref((string) $edit_uri);
-    $header->addAction($action_edit);
+      ->setHref((string)$edit_uri);
+    $header->addActionItem($action_edit);
 
     if ($dashboard_id) {
       $uri = id(new PhutilURI(
         '/dashboard/removepanel/'.$dashboard_id.'/'))
         ->setQueryParam('panelPHID', $panel->getPHID());
       $action_remove = id(new PHUIIconView())
-        ->setIconFont('fa-trash-o')
-        ->setHref((string) $uri)
+        ->setIcon('fa-trash-o')
+        ->setHref((string)$uri)
         ->setWorkflow(true);
-      $header->addAction($action_remove);
+      $header->addActionItem($action_remove);
     }
     return $header;
   }
+
 
   /**
    * Detect graph cycles in panels, and deeply nested panels.
@@ -270,9 +283,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
    */
   private function detectRenderingCycle(PhabricatorDashboardPanel $panel) {
     if ($this->parentPanelPHIDs === null) {
-      throw new Exception(
-        pht(
-          'You must call setParentPanelPHIDs() before rendering panels.'));
+      throw new PhutilInvalidStateException('setParentPanelPHIDs');
     }
 
     $max_depth = 4;

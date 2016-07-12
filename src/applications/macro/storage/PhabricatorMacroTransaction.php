@@ -3,6 +3,13 @@
 final class PhabricatorMacroTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_NAME       = 'macro:name';
+  const TYPE_DISABLED   = 'macro:disabled';
+  const TYPE_FILE       = 'macro:file';
+
+  const TYPE_AUDIO = 'macro:audio';
+  const TYPE_AUDIO_BEHAVIOR = 'macro:audiobehavior';
+
   public function getApplicationName() {
     return 'file';
   }
@@ -26,8 +33,8 @@ final class PhabricatorMacroTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_FILE:
-      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case self::TYPE_FILE:
+      case self::TYPE_AUDIO:
         if ($old !== null) {
           $phids[] = $old;
         }
@@ -43,7 +50,7 @@ final class PhabricatorMacroTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         return ($old === null);
     }
 
@@ -57,14 +64,14 @@ final class PhabricatorMacroTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         return pht(
           '%s renamed this macro from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $old,
           $new);
         break;
-      case PhabricatorMacroTransactionType::TYPE_DISABLED:
+      case self::TYPE_DISABLED:
         if ($new) {
           return pht(
             '%s disabled this macro.',
@@ -76,7 +83,7 @@ final class PhabricatorMacroTransaction
         }
         break;
 
-      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case self::TYPE_AUDIO:
         if (!$old) {
           return pht(
             '%s attached audio: %s.',
@@ -90,7 +97,7 @@ final class PhabricatorMacroTransaction
             $this->renderHandleLink($new));
         }
 
-      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+      case self::TYPE_AUDIO_BEHAVIOR:
         switch ($new) {
           case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
             return pht(
@@ -106,7 +113,7 @@ final class PhabricatorMacroTransaction
               $this->renderHandleLink($author_phid));
         }
 
-      case PhabricatorMacroTransactionType::TYPE_FILE:
+      case self::TYPE_FILE:
         if ($old === null) {
           return pht(
             '%s created this macro.',
@@ -124,7 +131,7 @@ final class PhabricatorMacroTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -132,14 +139,14 @@ final class PhabricatorMacroTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         return pht(
           '%s renamed %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid),
           $old,
           $new);
-      case PhabricatorMacroTransactionType::TYPE_DISABLED:
+      case self::TYPE_DISABLED:
         if ($new) {
           return pht(
             '%s disabled %s.',
@@ -151,7 +158,7 @@ final class PhabricatorMacroTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($object_phid));
         }
-      case PhabricatorMacroTransactionType::TYPE_FILE:
+      case self::TYPE_FILE:
         if ($old === null) {
           return pht(
             '%s created %s.',
@@ -164,7 +171,7 @@ final class PhabricatorMacroTransaction
             $this->renderHandleLink($object_phid));
         }
 
-      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case self::TYPE_AUDIO:
         if (!$old) {
           return pht(
             '%s attached audio to %s: %s.',
@@ -180,7 +187,7 @@ final class PhabricatorMacroTransaction
             $this->renderHandleLink($new));
         }
 
-      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+      case self::TYPE_AUDIO_BEHAVIOR:
         switch ($new) {
           case PhabricatorFileImageMacro::AUDIO_BEHAVIOR_ONCE:
             return pht(
@@ -201,7 +208,7 @@ final class PhabricatorMacroTransaction
 
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
   public function getActionName() {
@@ -209,29 +216,29 @@ final class PhabricatorMacroTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht('Created');
         } else {
           return pht('Renamed');
         }
-      case PhabricatorMacroTransactionType::TYPE_DISABLED:
+      case self::TYPE_DISABLED:
         if ($new) {
           return pht('Disabled');
         } else {
           return pht('Restored');
         }
-      case PhabricatorMacroTransactionType::TYPE_FILE:
+      case self::TYPE_FILE:
         if ($old === null) {
           return pht('Created');
         } else {
           return pht('Edited Image');
         }
 
-      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case self::TYPE_AUDIO:
         return pht('Audio');
 
-      case PhabricatorMacroTransactionType::TYPE_AUDIO_BEHAVIOR:
+      case self::TYPE_AUDIO_BEHAVIOR:
         return pht('Audio Behavior');
 
     }
@@ -241,9 +248,9 @@ final class PhabricatorMacroTransaction
 
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_DISABLED:
+      case self::TYPE_DISABLED:
         return 2.0;
-      case PhabricatorMacroTransactionType::TYPE_FILE:
+      case self::TYPE_FILE:
         return 1.5;
     }
     return parent::getActionStrength();
@@ -254,21 +261,21 @@ final class PhabricatorMacroTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         return 'fa-pencil';
-      case PhabricatorMacroTransactionType::TYPE_FILE:
+      case self::TYPE_FILE:
         if ($old === null) {
           return 'fa-plus';
         } else {
           return 'fa-pencil';
         }
-      case PhabricatorMacroTransactionType::TYPE_DISABLED:
+      case self::TYPE_DISABLED:
         if ($new) {
           return 'fa-times';
         } else {
           return 'fa-undo';
         }
-      case PhabricatorMacroTransactionType::TYPE_AUDIO:
+      case self::TYPE_AUDIO:
         return 'fa-headphones';
     }
 
@@ -280,17 +287,17 @@ final class PhabricatorMacroTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorMacroTransactionType::TYPE_NAME:
+      case self::TYPE_NAME:
         return PhabricatorTransactions::COLOR_BLUE;
-      case PhabricatorMacroTransactionType::TYPE_FILE:
+      case self::TYPE_FILE:
         if ($old === null) {
           return PhabricatorTransactions::COLOR_GREEN;
         } else {
           return PhabricatorTransactions::COLOR_BLUE;
         }
-      case PhabricatorMacroTransactionType::TYPE_DISABLED:
+      case self::TYPE_DISABLED:
         if ($new) {
-          return PhabricatorTransactions::COLOR_BLACK;
+          return PhabricatorTransactions::COLOR_RED;
         } else {
           return PhabricatorTransactions::COLOR_SKY;
         }

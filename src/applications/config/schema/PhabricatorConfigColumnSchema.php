@@ -121,28 +121,34 @@ final class PhabricatorConfigColumnSchema
     return 0;
   }
 
-  public function compareToSimilarSchema(
+  protected function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
 
     $issues = array();
-    if ($this->getCharacterSet() != $expect->getCharacterSet()) {
-      $issues[] = self::ISSUE_CHARSET;
-    }
 
-    if ($this->getCollation() != $expect->getCollation()) {
-      $issues[] = self::ISSUE_COLLATION;
-    }
+    $type_unknown = PhabricatorConfigSchemaSpec::DATATYPE_UNKNOWN;
+    if ($expect->getColumnType() == $type_unknown) {
+      $issues[] = self::ISSUE_UNKNOWN;
+    } else {
+      if ($this->getCharacterSet() != $expect->getCharacterSet()) {
+        $issues[] = self::ISSUE_CHARSET;
+      }
 
-    if ($this->getColumnType() != $expect->getColumnType()) {
-      $issues[] = self::ISSUE_COLUMNTYPE;
-    }
+      if ($this->getCollation() != $expect->getCollation()) {
+        $issues[] = self::ISSUE_COLLATION;
+      }
 
-    if ($this->getNullable() !== $expect->getNullable()) {
-      $issues[] = self::ISSUE_NULLABLE;
-    }
+      if ($this->getColumnType() != $expect->getColumnType()) {
+        $issues[] = self::ISSUE_COLUMNTYPE;
+      }
 
-    if ($this->getAutoIncrement() !== $expect->getAutoIncrement()) {
-      $issues[] = self::ISSUE_AUTOINCREMENT;
+      if ($this->getNullable() !== $expect->getNullable()) {
+        $issues[] = self::ISSUE_NULLABLE;
+      }
+
+      if ($this->getAutoIncrement() !== $expect->getAutoIncrement()) {
+        $issues[] = self::ISSUE_AUTOINCREMENT;
+      }
     }
 
     return $issues;

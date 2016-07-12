@@ -3,14 +3,18 @@
 final class PhabricatorRepositoryCommitOwnersWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  protected function getImportStepFlag() {
+    return PhabricatorRepositoryCommit::IMPORTED_OWNERS;
+  }
+
   protected function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $this->triggerOwnerAudits($repository, $commit);
-
-    $commit->writeImportStatusFlag(
-      PhabricatorRepositoryCommit::IMPORTED_OWNERS);
+    if (!$this->shouldSkipImportStep()) {
+      $this->triggerOwnerAudits($repository, $commit);
+      $commit->writeImportStatusFlag($this->getImportStepFlag());
+    }
 
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(
@@ -25,7 +29,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    if ($repository->getDetail('herald-disabled')) {
+    if (!$repository->shouldPublish()) {
       return;
     }
 
@@ -33,103 +37,133 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $repository,
       $commit,
       PhabricatorUser::getOmnipotentUser());
+
     $affected_packages = PhabricatorOwnersPackage::loadAffectedPackages(
       $repository,
       $affected_paths);
 
-    if ($affected_packages) {
-      $requests = id(new PhabricatorRepositoryAuditRequest())
-        ->loadAllWhere(
-          'commitPHID = %s',
-          $commit->getPHID());
-      $requests = mpull($requests, null, 'getAuditorPHID');
-
-      foreach ($affected_packages as $package) {
-        $request = idx($requests, $package->getPHID());
-        if ($request) {
-          // Don't update request if it exists already.
-          continue;
-        }
-
-        if ($package->getAuditingEnabled()) {
-          $reasons = $this->checkAuditReasons($commit, $package);
-          if ($reasons) {
-            $audit_status =
-              PhabricatorAuditStatusConstants::AUDIT_REQUIRED;
-          } else {
-            $audit_status =
-              PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
-          }
-        } else {
-          $reasons = array();
-          $audit_status = PhabricatorAuditStatusConstants::NONE;
-        }
-
-        $relationship = new PhabricatorRepositoryAuditRequest();
-        $relationship->setAuditorPHID($package->getPHID());
-        $relationship->setCommitPHID($commit->getPHID());
-        $relationship->setAuditReasons($reasons);
-        $relationship->setAuditStatus($audit_status);
-
-        $relationship->save();
-
-        $requests[$package->getPHID()] = $relationship;
-      }
-
-      $commit->updateAuditStatus($requests);
-      $commit->save();
+    if (!$affected_packages) {
+      return;
     }
-  }
-
-  private function checkAuditReasons(
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorOwnersPackage $package) {
 
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
+    $commit->attachCommitData($data);
+
+    $author_phid = $data->getCommitDetail('authorPHID');
+    $revision_id = $data->getCommitDetail('differential.revisionID');
+    if ($revision_id) {
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withIDs(array($revision_id))
+        ->needReviewerStatus(true)
+        ->executeOne();
+    } else {
+      $revision = null;
+    }
+
+    $requests = id(new PhabricatorRepositoryAuditRequest())
+      ->loadAllWhere(
+        'commitPHID = %s',
+        $commit->getPHID());
+    $requests = mpull($requests, null, 'getAuditorPHID');
+
+
+    foreach ($affected_packages as $package) {
+      $request = idx($requests, $package->getPHID());
+      if ($request) {
+        // Don't update request if it exists already.
+        continue;
+      }
+
+      if ($package->isArchived()) {
+        // Don't trigger audits if the package is archived.
+        continue;
+      }
+
+      if ($package->getAuditingEnabled()) {
+        $reasons = $this->checkAuditReasons(
+          $commit,
+          $package,
+          $author_phid,
+          $revision);
+
+        if ($reasons) {
+          $audit_status = PhabricatorAuditStatusConstants::AUDIT_REQUIRED;
+        } else {
+          $audit_status = PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
+        }
+      } else {
+        $reasons = array();
+        $audit_status = PhabricatorAuditStatusConstants::NONE;
+      }
+
+      $relationship = new PhabricatorRepositoryAuditRequest();
+      $relationship->setAuditorPHID($package->getPHID());
+      $relationship->setCommitPHID($commit->getPHID());
+      $relationship->setAuditReasons($reasons);
+      $relationship->setAuditStatus($audit_status);
+
+      $relationship->save();
+
+      $requests[$package->getPHID()] = $relationship;
+    }
+
+    $commit->updateAuditStatus($requests);
+    $commit->save();
+  }
+
+  private function checkAuditReasons(
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorOwnersPackage $package,
+    $author_phid,
+    $revision) {
+
+    $owner_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
+      array(
+        $package->getID(),
+      ));
+    $owner_phids = array_fuse($owner_phids);
 
     $reasons = array();
 
-    if ($data->getCommitDetail('vsDiff')) {
-      $reasons[] = 'Changed After Revision Was Accepted';
+    if (!$author_phid) {
+      $reasons[] = pht('Commit Author Not Recognized');
+    } else if (isset($owner_phids[$author_phid])) {
+      return $reasons;
     }
 
-    $commit_author_phid = $data->getCommitDetail('authorPHID');
-    if (!$commit_author_phid) {
-      $reasons[] = 'Commit Author Not Recognized';
+    if (!$revision) {
+      $reasons[] = pht('No Revision Specified');
+      return $reasons;
     }
 
-    $revision_id = $data->getCommitDetail('differential.revisionID');
+    $accepted_statuses = array(
+      DifferentialReviewerStatus::STATUS_ACCEPTED,
+      DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER,
+    );
+    $accepted_statuses = array_fuse($accepted_statuses);
 
-    $revision_author_phid = null;
-    $commit_reviewedby_phid = null;
+    $found_accept = false;
+    foreach ($revision->getReviewerStatus() as $reviewer) {
+      $reviewer_phid = $reviewer->getReviewerPHID();
 
-    if ($revision_id) {
-      // TODO: (T603) This is probably safe to use an omnipotent user on,
-      // but check things more closely.
-      $revision = id(new DifferentialRevision())->load($revision_id);
-      if ($revision) {
-        $revision_author_phid = $revision->getAuthorPHID();
-        $commit_reviewedby_phid = $data->getCommitDetail('reviewerPHID');
-        if ($revision_author_phid !== $commit_author_phid) {
-          $reasons[] = 'Author Not Matching with Revision';
-        }
-      } else {
-        $reasons[] = 'Revision Not Found';
+      // If this reviewer isn't a package owner, just ignore them.
+      if (empty($owner_phids[$reviewer_phid])) {
+        continue;
       }
 
-    } else {
-      $reasons[] = 'No Revision Specified';
+      // If this reviewer accepted the revision and owns the package, we're
+      // all clear and do not need to trigger an audit.
+      if (isset($accepted_statuses[$reviewer->getStatus()])) {
+        $found_accept = true;
+        break;
+      }
     }
 
-    $owners_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
-      array($package->getID()));
-
-    if (!($commit_author_phid && in_array($commit_author_phid, $owners_phids) ||
-        $commit_reviewedby_phid && in_array($commit_reviewedby_phid,
-          $owners_phids))) {
-      $reasons[] = 'Owners Not Involved';
+    if (!$found_accept) {
+      $reasons[] = pht('Owners Not Involved');
     }
 
     return $reasons;

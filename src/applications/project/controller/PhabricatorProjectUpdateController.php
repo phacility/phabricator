@@ -3,38 +3,28 @@
 final class PhabricatorProjectUpdateController
   extends PhabricatorProjectController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $capabilities = array(
       PhabricatorPolicyCapability::CAN_VIEW,
     );
 
-    $process_action = false;
-    switch ($this->action) {
+    switch ($action) {
       case 'join':
         $capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
-        $process_action = $request->isFormPost();
         break;
       case 'leave':
-        $process_action = $request->isDialogFormPost();
         break;
       default:
         return new Aphront404Response();
     }
 
     $project = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needMembers(true)
       ->requireCapabilities($capabilities)
       ->executeOne();
@@ -42,12 +32,21 @@ final class PhabricatorProjectUpdateController
       return new Aphront404Response();
     }
 
-    $project_uri = '/project/view/'.$project->getID().'/';
+    $done_uri = "/project/members/{$id}/";
 
-    if ($process_action) {
+    if (!$project->supportsEditMembers()) {
+      $copy = pht('Parent projects and milestones do not support adding '.
+        'members. You can add members directly to any non-parent subproject.');
 
+      return $this->newDialog()
+        ->setTitle(pht('Unsupported Project'))
+        ->appendParagraph($copy)
+        ->addCancelButton($done_uri);
+    }
+
+    if ($request->isFormPost()) {
       $edge_action = null;
-      switch ($this->action) {
+      switch ($action) {
         case 'join':
           $edge_action = '+';
           break;
@@ -56,9 +55,10 @@ final class PhabricatorProjectUpdateController
           break;
       }
 
-      $type_member = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+
       $member_spec = array(
-        $edge_action => array($user->getPHID() => $user->getPHID()),
+        $edge_action => array($viewer->getPHID() => $viewer->getPHID()),
       );
 
       $xactions = array();
@@ -68,52 +68,53 @@ final class PhabricatorProjectUpdateController
         ->setNewValue($member_spec);
 
       $editor = id(new PhabricatorProjectTransactionEditor($project))
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
         ->applyTransactions($project, $xactions);
 
-      return id(new AphrontRedirectResponse())->setURI($project_uri);
+      return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
 
-    $dialog = null;
-    switch ($this->action) {
-      case 'leave':
-        $dialog = new AphrontDialogView();
-        $dialog->setUser($user);
-        if ($this->userCannotLeave($project)) {
-         $dialog->setTitle(pht('You can not leave this project.'));
-          $body = pht('The membership is locked for this project.');
-        } else {
-          $dialog->setTitle(pht('Really leave project?'));
-          $body = pht(
-            'Your tremendous contributions to this project will be sorely '.
-            'missed. Are you sure you want to leave?');
-          $dialog->addSubmitButton(pht('Leave Project'));
-        }
-        $dialog->appendParagraph($body);
-        $dialog->addCancelButton($project_uri);
-        break;
-      default:
-        return new Aphront404Response();
+    $is_locked = $project->getIsMembershipLocked();
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+    $can_leave = ($can_edit || !$is_locked);
+
+    $button = null;
+    if ($action == 'leave') {
+      if ($can_leave) {
+        $title = pht('Leave Project');
+        $body = pht(
+          'Your tremendous contributions to this project will be sorely '.
+          'missed. Are you sure you want to leave?');
+        $button = pht('Leave Project');
+      } else {
+        $title = pht('Membership Locked');
+        $body = pht(
+          'Membership for this project is locked. You can not leave.');
+      }
+    } else {
+      $title = pht('Join Project');
+      $body = pht(
+        'Join this project? You will become a member and enjoy whatever '.
+        'benefits membership may confer.');
+      $button = pht('Join Project');
     }
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    $dialog = $this->newDialog()
+      ->setTitle($title)
+      ->appendParagraph($body)
+      ->addCancelButton($done_uri);
+
+    if ($button) {
+      $dialog->addSubmitButton($button);
+    }
+
+    return $dialog;
   }
 
-  /**
-   * This is enforced in @{class:PhabricatorProjectTransactionEditor}. We use
-   * this logic to render a better form for users hitting this case.
-   */
-  private function userCannotLeave(PhabricatorProject $project) {
-    $user = $this->getRequest()->getUser();
-
-    return
-      $project->getIsMembershipLocked() &&
-      !PhabricatorPolicyFilter::hasCapability(
-        $user,
-        $project,
-        PhabricatorPolicyCapability::CAN_EDIT);
-  }
 }

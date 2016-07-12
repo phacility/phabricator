@@ -9,19 +9,21 @@ Phabricator can maintain a symbol index, which keeps track of where classes
 and functions are defined in the codebase. Once you set up indexing, you can
 use the index to do things like:
 
-  - link symbol uses in Differential code reviews to their definitions
-  - allow you to search for symbols
+  - jump to symbol definitions from Differential code reviews and Diffusion
+    code browsing by ctrl-clicking (cmd-click on Mac) symbols
+  - search for symbols from the quick-search
   - let the IRC bot answer questions like "Where is SomeClass?"
 
-NOTE: Symbol indexing is somewhat new, and has broader support for PHP than for
-other languages.
+NOTE: Because this feature depends on the syntax highlighter, it will work
+better for some languages than others. It currently works fairly well for PHP,
+but your mileage may vary for other languages.
 
 = Populating the Index =
 
 To populate the index, you need to write a script which identifies symbols in
 your codebase and set up a cronjob which pipes its output to:
 
-  ./scripts/symbols/import_project_symbols.php
+  ./scripts/symbols/import_repository_symbols.php
 
 Phabricator includes a script which can identify symbols in PHP projects:
 
@@ -34,7 +36,7 @@ Exuberant Ctags (http://ctags.sourceforge.net):
   ./scripts/symbols/generate_ctags_symbols.php
 
 If you want to identify symbols from another language, you need to write a
-script which can export them (for example, maybe by parsing a ##ctags## file).
+script which can export them (for example, maybe by parsing a `ctags` file).
 
 The output format of the script should be one symbol per line:
 
@@ -48,48 +50,48 @@ Context is, broadly speaking, the scope or namespace where the symbol is
 defined. For object-oriented languages, this is probably a class name. The
 symbols with that context are class constants, methods, properties, nested
 classes, etc. When printing symbols without a context (those that are defined
-globally, for instance), the ##<context>## field should be empty (that is, the
+globally, for instance), the `<context>` field should be empty (that is, the
 line should start with a space).
 
 Your script should enumerate all the symbols in your project, and provide paths
 from the project root (where ".arcconfig" is) beginning with a "/".
 
-You can look at ##generate_php_symbols.php## for an example of how you might
+You can look at `generate_php_symbols.php` for an example of how you might
 write such a script, and run this command to see its output:
 
   $ cd phabricator/
   $ find . -type f -name '*.php' | ./scripts/symbols/generate_php_symbols.php
 
 To actually build the symbol index, pipe this data to the
-`import_project_symbols.php` script, providing the project name:
+`import_repository_symbols.php` script, providing the repository callsign:
 
-  $ ./scripts/symbols/import_project_symbols.php yourproject < symbols_data
+  $ ./scripts/symbols/import_repository_symbols.php REPO < symbols_data
 
 Then just set up a cronjob to run that however often you like.
 
 You can test that the import worked by querying for symbols using the Conduit
-method ##differential.findsymbols##. Some features (like that method, and the
+method `diffusion.findsymbols`. Some features (like that method, and the
 IRC bot integration) will start working immediately. Others will require more
 configuration.
 
-= Configuring Differential Integration =
+= Advanced Configuration =
 
-To configure Differential integration, you need to tell Phabricator which
-projects have symbol indexes you want to use, and which other projects they
-should pull symbols from. To do this, go to
-{nav Repositories > Arcanist Projects > Edit} as an administrator. You need to
-fill out these fields:
+You can configure some more options by going to {nav Diffusion > (Select
+ repository) > Edit Repository > Edit Symbols}, and filling out these fields:
 
-  - **Repository**: Associate the project with a tracked repository.
   - **Indexed Languages**: Fill in all the languages you've built indexes for.
-  - **Uses Symbols From**: If this project depends on other projects, add the
-    other projects which symbols should be looked for here. For example,
+    You can leave this blank for "All languages".
+  - **Uses Symbols From**: If this project depends on other repositories, add
+    the other repositories which symbols should be looked for here. For example,
     Phabricator lists "Arcanist" and "libphutil" because it uses classes and
-    functions from these projects.
+    functions from these repositories.
 
-Once you've configured a project, new revisions in that project will
-automatically link symbols in Differential.
+== External Symbols ==
 
-NOTE: Because this feature depends on the syntax highlighter, it will work
-better for some languages than others. It currently works fairly well for PHP,
-but your mileage may vary for other languages.
+By @{article@phabcontrib:Adding New Classes}, you can teach Phabricator
+about symbols from the outside world.
+Extend @{class:DiffusionExternalSymbolsSource}; Once loaded, your new
+implementation will be used any time a symbol is queried.
+
+See @{class:DiffusionPhpExternalSymbolsSource} and
+@{class:DiffusionPythonExternalSymbolsSource} for example implementations.

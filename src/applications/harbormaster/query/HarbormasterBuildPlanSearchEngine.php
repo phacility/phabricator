@@ -11,54 +11,47 @@ final class HarbormasterBuildPlanSearchEngine
     return 'PhabricatorHarbormasterApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'status',
-      $this->readListFromRequest($request, 'status'));
-
-    return $saved;
+  public function newQuery() {
+    return new HarbormasterBuildPlanQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new HarbormasterBuildPlanQuery());
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for namespaces by name substring.')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Status'))
+        ->setKey('status')
+        ->setAliases(array('statuses'))
+        ->setOptions(
+          array(
+            HarbormasterBuildPlan::STATUS_ACTIVE => pht('Active'),
+            HarbormasterBuildPlan::STATUS_DISABLED => pht('Disabled'),
+          )),
+    );
+  }
 
-    $status = $saved->getParameter('status', array());
-    if ($status) {
-      $query->withStatuses($status);
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
+
+    if ($map['status']) {
+      $query->withStatuses($map['status']);
     }
 
     return $query;
-  }
-
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $status = $saved_query->getParameter('status', array());
-
-    $form
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->setLabel('Status')
-          ->addCheckbox(
-            'status[]',
-            HarbormasterBuildPlan::STATUS_ACTIVE,
-            pht('Active'),
-            in_array(HarbormasterBuildPlan::STATUS_ACTIVE, $status))
-          ->addCheckbox(
-            'status[]',
-            HarbormasterBuildPlan::STATUS_DISABLED,
-            pht('Disabled'),
-            in_array(HarbormasterBuildPlan::STATUS_DISABLED, $status)));
   }
 
   protected function getURI($path) {
     return '/harbormaster/plan/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active Plans'),
       'all' => pht('All Plans'),
@@ -91,24 +84,55 @@ final class HarbormasterBuildPlanSearchEngine
 
     $viewer = $this->requireViewer();
 
+    if ($plans) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($plans, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+
+      $edge_query->execute();
+    }
+
     $list = new PHUIObjectItemListView();
     foreach ($plans as $plan) {
       $id = $plan->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Plan %d', $plan->getID()))
+        ->setObjectName(pht('Plan %d', $id))
         ->setHeader($plan->getName());
 
       if ($plan->isDisabled()) {
         $item->setDisabled(true);
       }
 
+      if ($plan->isAutoplan()) {
+        $item->addIcon('fa-lock grey', pht('Autoplan'));
+      }
+
       $item->setHref($this->getApplicationURI("plan/{$id}/"));
+
+      $phid = $plan->getPHID();
+      $project_phids = $edge_query->getDestinationPHIDs(array($phid));
+      $project_handles = $viewer->loadHandles($project_phids);
+
+      $item->addAttribute(
+        id(new PHUIHandleTagListView())
+          ->setLimit(4)
+          ->setNoDataString(pht('No Projects'))
+          ->setSlim(true)
+          ->setHandles($project_handles));
 
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No build plans found.'));
+
+    return $result;
+
   }
 
 }

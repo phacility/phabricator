@@ -8,19 +8,8 @@ final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
   }
 
   public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $config_key = 'metamta.paste.public-create-email';
-    $create_address = PhabricatorEnv::getEnvConfig($config_key);
-    if (!$create_address) {
-      return false;
-    }
-
-    foreach ($mail->getToAddresses() as $to_address) {
-      if ($this->matchAddresses($create_address, $to_address)) {
-        return true;
-      }
-    }
-
-    return false;
+    $paste_app = new PhabricatorPasteApplication();
+    return $this->canAcceptApplicationMail($paste_app, $mail);
   }
 
   protected function processReceivedMail(
@@ -32,32 +21,19 @@ final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
       $title = pht('Email Paste');
     }
 
-    $file = PhabricatorPasteEditor::initializeFileForPaste(
-      $sender,
-      $title,
-      $mail->getCleanTextBody());
-
     $xactions = array();
 
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
-      ->setNewValue($file->getPHID());
+      ->setTransactionType(PhabricatorPasteContentTransaction::TRANSACTIONTYPE)
+      ->setNewValue($mail->getCleanTextBody());
 
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
+      ->setTransactionType(PhabricatorPasteTitleTransaction::TRANSACTIONTYPE)
       ->setNewValue($title);
-
-    $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
-      ->setNewValue(''); // auto-detect
 
     $paste = PhabricatorPaste::initializeNewPaste($sender);
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_EMAIL,
-      array(
-        'id' => $mail->getID(),
-      ));
+    $content_source = $mail->newContentSource();
 
     $editor = id(new PhabricatorPasteEditor())
       ->setActor($sender)
@@ -84,5 +60,6 @@ final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
       ->setBody($body->render())
       ->saveAndSend();
   }
+
 
 }

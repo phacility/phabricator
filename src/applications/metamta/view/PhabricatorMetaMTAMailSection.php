@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Helper for building a rendered section.
  *
@@ -6,8 +7,7 @@
  * @task render   Rendering
  * @group metamta
  */
-
-final class PhabricatorMetaMTAMailSection {
+final class PhabricatorMetaMTAMailSection extends Phobject {
   private $plaintextFragments = array();
   private $htmlFragments = array();
 
@@ -22,7 +22,6 @@ final class PhabricatorMetaMTAMailSection {
   public function addHTMLFragment($fragment) {
     $this->htmlFragments[] = $fragment;
     return $this;
-
   }
 
   public function addPlaintextFragment($fragment) {

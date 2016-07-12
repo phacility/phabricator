@@ -1,262 +1,199 @@
-/**
- * Notification server. Launch with:
- *
- *   sudo node aphlict_server.js --user=aphlict
- *
- * You can also specify `port`, `admin`, `host` and `log`.
- */
+'use strict';
 
 var JX = require('./lib/javelin').JX;
-
-JX.require('lib/AphlictFlashPolicyServer', __dirname);
-JX.require('lib/AphlictListenerList', __dirname);
-JX.require('lib/AphlictLog', __dirname);
-
-var debug = new JX.AphlictLog()
-  .addConsole(console);
-
-var clients = new JX.AphlictListenerList();
-
-var config = parse_command_line_arguments(process.argv);
-
-if (config.logfile) {
-  debug.addLogfile(config.logfile);
-}
+var http = require('http');
+var https = require('https');
+var util = require('util');
+var fs = require('fs');
 
 function parse_command_line_arguments(argv) {
-  var config = {
-    port: 22280,
-    admin: 22281,
-    host: '127.0.0.1',
-    user: null,
-    log: '/var/log/aphlict.log'
+  var args = {
+    test: false,
+    config: null
   };
 
   for (var ii = 2; ii < argv.length; ii++) {
     var arg = argv[ii];
     var matches = arg.match(/^--([^=]+)=(.*)$/);
     if (!matches) {
-      throw new Error("Unknown argument '" + arg + "'!");
+      throw new Error('Unknown argument "' + arg + '"!');
     }
-    if (!(matches[1] in config)) {
-      throw new Error("Unknown argument '" + matches[1] + "'!");
+    if (!(matches[1] in args)) {
+      throw new Error('Unknown argument "' + matches[1] + '"!');
     }
-    config[matches[1]] = matches[2];
+    args[matches[1]] = matches[2];
   }
 
-  config.port = parseInt(config.port, 10);
-  config.admin = parseInt(config.admin, 10);
-
-  return config;
+  return args;
 }
 
-if (process.getuid() !== 0) {
-  console.log(
-    "ERROR: " +
-    "This server must be run as root because it needs to bind to privileged " +
-    "port 843 to start a Flash policy server. It will downgrade to run as a " +
-    "less-privileged user after binding if you pass a user in the command " +
-    "line arguments with '--user=alincoln'.");
-  process.exit(1);
+function parse_config(args) {
+  var data = fs.readFileSync(args.config);
+  return JSON.parse(data);
 }
 
-var net = require('net');
-var http = require('http');
+require('./lib/AphlictLog');
+
+var debug = new JX.AphlictLog()
+  .addConsole(console);
+
+var args = parse_command_line_arguments(process.argv);
+var config = parse_config(args);
+
+function set_exit_code(code) {
+  process.on('exit', function() {
+    process.exit(code);
+  });
+}
 
 process.on('uncaughtException', function(err) {
-  debug.log('\n<<< UNCAUGHT EXCEPTION! >>>\n' + err.stack);
+  var context = null;
+  if (err.code == 'EACCES') {
+    context = util.format(
+      'Unable to open file ("%s"). Check that permissions are set ' +
+      'correctly.',
+      err.path);
+  }
 
-  process.exit(1);
+  var message = [
+    '\n<<< UNCAUGHT EXCEPTION! >>>',
+  ];
+  if (context) {
+    message.push(context);
+  }
+  message.push(err.stack);
+
+  debug.log(message.join('\n\n'));
+  set_exit_code(1);
 });
 
-var flash_server = new JX.AphlictFlashPolicyServer()
-  .setDebugLog(debug)
-  .setAccessPort(config.port)
-  .start();
+try {
+  require('ws');
+} catch (ex) {
+  throw new Error(
+    'You need to install the Node.js "ws" module for websocket support. ' +
+    'See "Notifications User Guide: Setup and Configuration" in the ' +
+    'documentation for instructions. ' + ex.toString());
+}
 
+// NOTE: Require these only after checking for the "ws" module, since they
+// depend on it.
 
-var send_server = net.createServer(function(socket) {
-  var listener = clients.addListener(socket);
+require('./lib/AphlictAdminServer');
+require('./lib/AphlictClientServer');
+require('./lib/AphlictPeerList');
+require('./lib/AphlictPeer');
 
-  debug.log('<%s> Connected from %s',
-    listener.getDescription(),
-    socket.remoteAddress);
+var ii;
 
-  var buffer = new Buffer([]);
-  var length = 0;
+var logs = config.logs || [];
+for (ii = 0; ii < logs.length; ii++) {
+  debug.addLog(logs[ii].path);
+}
 
-  socket.on('data', function(data) {
-    buffer = Buffer.concat([buffer, new Buffer(data)]);
+var servers = [];
+for (ii = 0; ii < config.servers.length; ii++) {
+  var spec = config.servers[ii];
 
-    while (buffer.length) {
-      if (!length) {
-        length = buffer.readUInt16BE(0);
-        buffer = buffer.slice(2);
-      }
+  spec.listen = spec.listen || '0.0.0.0';
 
-      if (buffer.length < length) {
-        // We need to wait for the rest of the data.
-        return;
-      }
+  if (spec['ssl.key']) {
+    spec['ssl.key'] = fs.readFileSync(spec['ssl.key']);
+  }
 
-      var message;
-      try {
-        message = JSON.parse(buffer.toString('utf8', 0, length));
-      } catch (err) {
-        debug.log('<%s> Received invalid data.', listener.getDescription());
-        continue;
-      } finally {
-        buffer = buffer.slice(length);
-        length = 0;
-      }
+  if (spec['ssl.cert']){
+    spec['ssl.cert'] = fs.readFileSync(spec['ssl.cert']);
+  }
 
-      debug.log('<%s> Received data: %s',
-        listener.getDescription(),
-        JSON.stringify(message));
+  if (spec['ssl.chain']){
+    spec['ssl.chain'] = fs.readFileSync(spec['ssl.chain']);
+  }
 
-      switch (message.command) {
-        case 'subscribe':
-          debug.log(
-            '<%s> Subscribed to: %s',
-            listener.getDescription(),
-            JSON.stringify(message.data));
-          listener.subscribe(message.data);
-          break;
+  servers.push(spec);
+}
 
-        case 'unsubscribe':
-          debug.log(
-            '<%s> Unsubscribed from: %s',
-            listener.getDescription(),
-            JSON.stringify(message.data));
-          listener.unsubscribe(message.data);
-          break;
+// If we're just doing a configuration test, exit here before starting any
+// servers.
+if (args.test) {
+  debug.log('Configuration test OK.');
+  set_exit_code(0);
+  return;
+}
 
-        default:
-          debug.log('<s> Unrecognized command.', listener.getDescription());
-      }
+debug.log('Starting servers (service PID %d).', process.pid);
+
+for (ii = 0; ii < logs.length; ii++) {
+  debug.log('Logging to "%s".', logs[ii].path);
+}
+
+var aphlict_servers = [];
+var aphlict_clients = [];
+var aphlict_admins = [];
+for (ii = 0; ii < servers.length; ii++) {
+  var server = servers[ii];
+  var is_client = (server.type == 'client');
+
+  var http_server;
+  if (server['ssl.key']) {
+    var https_config = {
+      key: server['ssl.key'],
+      cert: server['ssl.cert'],
+    };
+
+    if (server['ssl.chain']) {
+      https_config.ca = server['ssl.chain'];
     }
-  });
 
-  socket.on('close', function() {
-    clients.removeListener(listener);
-    debug.log('<%s> Disconnected', listener.getDescription());
-  });
-
-  socket.on('timeout', function() {
-    debug.log('<%s> Timed Out', listener.getDescription());
-  });
-
-  socket.on('end', function() {
-    debug.log('<%s> Ended Connection', listener.getDescription());
-  });
-
-  socket.on('error', function(e) {
-    debug.log('<%s> Error: %s', listener.getDescription(), e);
-  });
-
-}).listen(config.port);
-
-
-var messages_out = 0;
-var messages_in = 0;
-var start_time = new Date().getTime();
-
-var receive_server = http.createServer(function(request, response) {
-  // Publishing a notification.
-  if (request.url == '/') {
-    if (request.method == 'POST') {
-      var body = '';
-
-      request.on('data', function(data) {
-        body += data;
-      });
-
-      request.on('end', function() {
-        try {
-          var msg = JSON.parse(body);
-
-          debug.log('notification: ' + JSON.stringify(msg));
-          ++messages_in;
-
-          try {
-            transmit(msg);
-            response.writeHead(200, {'Content-Type': 'text/plain'});
-          } catch (err) {
-            debug.log(
-              '<%s> Internal Server Error! %s',
-              request.socket.remoteAddress,
-              err);
-            response.statusCode = 500;
-            response.write('500 Internal Server Error\n');
-          }
-        } catch (err) {
-          debug.log(
-            '<%s> Bad Request! %s',
-            request.socket.remoteAddress,
-            err);
-          response.statusCode = 400;
-          response.write('400 Bad Request\n');
-        } finally {
-          response.end();
-        }
-      });
-    } else {
-      response.statusCode = 405;
-      response.write('405 Method Not Allowed\n');
-      response.end();
-    }
-  } else if (request.url == '/status/') {
-    request.on('data', function() {
-      // We just ignore the request data, but newer versions of Node don't
-      // get to 'end' if we don't process the data. See T2953.
-    });
-
-    request.on('end', function() {
-      var status = {
-        'uptime': (new Date().getTime() - start_time),
-        'clients.active': clients.getActiveListenerCount(),
-        'clients.total': clients.getTotalListenerCount(),
-        'messages.in': messages_in,
-        'messages.out': messages_out,
-        'log': config.log,
-        'version': 6
-      };
-
-      response.writeHead(200, {'Content-Type': 'text/plain'});
-      response.write(JSON.stringify(status));
-      response.end();
-    });
+    http_server = https.createServer(https_config);
   } else {
-    response.statusCode = 404;
-    response.write('404 Not Found\n');
-    response.end();
+    http_server = http.createServer();
   }
-}).listen(config.admin, config.host);
 
-function transmit(msg) {
-  var listeners = clients.getListeners().filter(function(client) {
-    return client.isSubscribedToAny(msg.subscribers);
-  });
+  var aphlict_server;
+  if (is_client) {
+    aphlict_server = new JX.AphlictClientServer(http_server);
+  } else {
+    aphlict_server = new JX.AphlictAdminServer(http_server);
+  }
 
-  for (var i = 0; i < listeners.length; i++) {
-    var listener = listeners[i];
+  aphlict_server.setLogger(debug);
+  aphlict_server.listen(server.port, server.listen);
 
-    try {
-      listener.writeMessage(msg);
+  debug.log(
+    'Started %s server (Port %d, %s).',
+    server.type,
+    server.port,
+    server['ssl.key'] ? 'With SSL' : 'No SSL');
 
-      ++messages_out;
-      debug.log('<%s> Wrote Message', listener.getDescription());
-    } catch (error) {
-      clients.removeListener(listener);
-      debug.log('<%s> Write Error: %s', listener.getDescription(), error);
-    }
+  aphlict_servers.push(aphlict_server);
+
+  if (is_client) {
+    aphlict_clients.push(aphlict_server);
+  } else {
+    aphlict_admins.push(aphlict_server);
   }
 }
 
-// If we're configured to drop permissions, get rid of them now that we've
-// bound to the ports we need and opened logfiles.
-if (config.user) {
-  process.setuid(config.user);
+var peer_list = new JX.AphlictPeerList();
+
+debug.log(
+  'This server has fingerprint "%s".',
+  peer_list.getFingerprint());
+
+var cluster = config.cluster || [];
+for (ii = 0; ii < cluster.length; ii++) {
+  var peer = cluster[ii];
+
+  var peer_client = new JX.AphlictPeer()
+    .setHost(peer.host)
+    .setPort(peer.port)
+    .setProtocol(peer.protocol);
+
+  peer_list.addPeer(peer_client);
 }
 
-debug.log('Started Server (PID %d)', process.pid);
+for (ii = 0; ii < aphlict_admins.length; ii++) {
+  var admin_server = aphlict_admins[ii];
+  admin_server.setClientServers(aphlict_clients);
+  admin_server.setPeerList(peer_list);
+}

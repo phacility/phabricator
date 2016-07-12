@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorObjectSelectorDialog {
+final class PhabricatorObjectSelectorDialog extends Phobject {
 
   private $user;
   private $filters = array();
@@ -10,6 +10,8 @@ final class PhabricatorObjectSelectorDialog {
   private $searchURI;
   private $selectedFilter;
   private $excluded;
+  private $initialPHIDs;
+  private $maximumSelectionSize;
 
   private $title;
   private $header;
@@ -75,6 +77,24 @@ final class PhabricatorObjectSelectorDialog {
   public function setInstructions($instructions) {
     $this->instructions = $instructions;
     return $this;
+  }
+
+  public function setInitialPHIDs(array $initial_phids) {
+    $this->initialPHIDs = $initial_phids;
+    return $this;
+  }
+
+  public function getInitialPHIDs() {
+    return $this->initialPHIDs;
+  }
+
+  public function setMaximumSelectionSize($maximum_selection_size) {
+    $this->maximumSelectionSize = $maximum_selection_size;
+    return $this;
+  }
+
+  public function getMaximumSelectionSize() {
+    return $this->maximumSelectionSize;
   }
 
   public function buildDialog() {
@@ -171,8 +191,16 @@ final class PhabricatorObjectSelectorDialog {
       $view = new PhabricatorHandleObjectSelectorDataView($handle);
       $handle_views[$phid] = $view->renderData();
     }
+
     $dialog->addHiddenInput('phids', implode(';', array_keys($this->handles)));
 
+    $initial_phids = $this->getInitialPHIDs();
+    if ($initial_phids) {
+      $initial_phids = implode(', ', $initial_phids);
+      $dialog->addHiddenInput('initialPHIDs', $initial_phids);
+    }
+
+    $maximum = $this->getMaximumSelectionSize();
 
     Javelin::initBehavior(
       'phabricator-object-selector',
@@ -186,9 +214,13 @@ final class PhabricatorObjectSelectorDialog {
         'exclude' => $this->excluded,
         'uri'     => $this->searchURI,
         'handles' => $handle_views,
+        'maximum' => $maximum,
       ));
 
-   return $dialog;
+    $dialog->setResizeX(true);
+    $dialog->setResizeY($results_id);
+
+    return $dialog;
   }
 
 }

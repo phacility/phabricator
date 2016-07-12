@@ -11,6 +11,11 @@ final class PhabricatorFileQuery
   private $dateCreatedAfter;
   private $dateCreatedBefore;
   private $contentHashes;
+  private $minLength;
+  private $maxLength;
+  private $names;
+  private $isPartial;
+  private $needTransforms;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -80,12 +85,31 @@ final class PhabricatorFileQuery
           empty($spec['originalPHID']) ||
           empty($spec['transform'])) {
         throw new Exception(
-          "Transform specification must be a dictionary with keys ".
-          "'originalPHID' and 'transform'!");
+          pht(
+            "Transform specification must be a dictionary with keys ".
+            "'%s' and '%s'!",
+            'originalPHID',
+            'transform'));
       }
     }
 
     $this->transforms = $specs;
+    return $this;
+  }
+
+  public function withLengthBetween($min, $max) {
+    $this->minLength = $min;
+    $this->maxLength = $max;
+    return $this;
+  }
+
+  public function withNames(array $names) {
+    $this->names = $names;
+    return $this;
+  }
+
+  public function withIsPartial($partial) {
+    $this->isPartial = $partial;
     return $this;
   }
 
@@ -94,29 +118,29 @@ final class PhabricatorFileQuery
     return $this;
   }
 
+  public function needTransforms(array $transforms) {
+    $this->needTransforms = $transforms;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new PhabricatorFile();
+  }
+
   protected function loadPage() {
-    $table = new PhabricatorFile();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT f.* FROM %T f %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $files = $table->loadAllFromArray($data);
+    $files = $this->loadStandardPage(new PhabricatorFile());
 
     if (!$files) {
       return $files;
     }
 
+    $viewer = $this->getViewer();
+    $is_omnipotent = $viewer->isOmnipotent();
+
     // We need to load attached objects to perform policy checks for files.
     // First, load the edges.
 
-    $edge_type = PhabricatorEdgeConfig::TYPE_FILE_HAS_OBJECT;
+    $edge_type = PhabricatorFileHasObjectEdgeType::EDGECONST;
     $file_phids = mpull($files, 'getPHID');
     $edges = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs($file_phids)
@@ -127,6 +151,21 @@ final class PhabricatorFileQuery
     foreach ($files as $file) {
       $phids = array_keys($edges[$file->getPHID()][$edge_type]);
       $file->attachObjectPHIDs($phids);
+
+      if ($file->getIsProfileImage()) {
+        // If this is a profile image, don't bother loading related files.
+        // It will always be visible, and we can get into trouble if we try
+        // to load objects and end up stuck in a cycle. See T8478.
+        continue;
+      }
+
+      if ($is_omnipotent) {
+        // If the viewer is omnipotent, we don't need to load the associated
+        // objects either since they can certainly see the object. Skipping
+        // this can improve performance and prevent cycles.
+        continue;
+      }
+
       foreach ($phids as $phid) {
         $object_phids[$phid] = true;
       }
@@ -195,96 +234,161 @@ final class PhabricatorFileQuery
     return $files;
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function didFilterPage(array $files) {
+    $xform_keys = $this->needTransforms;
+    if ($xform_keys !== null) {
+      $xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
+        'originalPHID IN (%Ls) AND transform IN (%Ls)',
+        mpull($files, 'getPHID'),
+        $xform_keys);
+
+      if ($xforms) {
+        $xfiles = id(new PhabricatorFile())->loadAllWhere(
+          'phid IN (%Ls)',
+          mpull($xforms, 'getTransformedPHID'));
+        $xfiles = mpull($xfiles, null, 'getPHID');
+      }
+
+      $xform_map = array();
+      foreach ($xforms as $xform) {
+        $xfile = idx($xfiles, $xform->getTransformedPHID());
+        if (!$xfile) {
+          continue;
+        }
+        $original_phid = $xform->getOriginalPHID();
+        $xform_key = $xform->getTransform();
+        $xform_map[$original_phid][$xform_key] = $xfile;
+      }
+
+      $default_xforms = array_fill_keys($xform_keys, null);
+
+      foreach ($files as $file) {
+        $file_xforms = idx($xform_map, $file->getPHID(), array());
+        $file_xforms += $default_xforms;
+        $file->attachTransforms($file_xforms);
+      }
+    }
+
+    return $files;
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->transforms) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T t ON t.transformedPHID = f.phid',
         id(new PhabricatorTransformedFile())->getTableName());
     }
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->explicitUploads) {
+    if ($this->explicitUploads !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'f.isExplicitUpload = true');
+        $conn,
+        'f.isExplicitUpload = %d',
+        (int)$this->explicitUploads);
     }
 
-    if ($this->transforms) {
+    if ($this->transforms !== null) {
       $clauses = array();
       foreach ($this->transforms as $transform) {
         if ($transform['transform'] === true) {
           $clauses[] = qsprintf(
-            $conn_r,
+            $conn,
             '(t.originalPHID = %s)',
             $transform['originalPHID']);
         } else {
           $clauses[] = qsprintf(
-            $conn_r,
+            $conn,
             '(t.originalPHID = %s AND t.transform = %s)',
             $transform['originalPHID'],
             $transform['transform']);
         }
       }
-      $where[] = qsprintf($conn_r, '(%Q)', implode(') OR (', $clauses));
+      $where[] = qsprintf($conn, '(%Q)', implode(') OR (', $clauses));
     }
 
-    if ($this->dateCreatedAfter) {
+    if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
-    if ($this->dateCreatedBefore) {
+    if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
-    if ($this->contentHashes) {
+    if ($this->contentHashes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'f.contentHash IN (%Ls)',
         $this->contentHashes);
     }
 
-    return $this->formatWhereClause($where);
+    if ($this->minLength !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'byteSize >= %d',
+        $this->minLength);
+    }
+
+    if ($this->maxLength !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'byteSize <= %d',
+        $this->maxLength);
+    }
+
+    if ($this->names !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'name in (%Ls)',
+        $this->names);
+    }
+
+    if ($this->isPartial !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isPartial = %d',
+        (int)$this->isPartial);
+    }
+
+    return $where;
   }
 
-  protected function getPagingColumn() {
-    return 'f.id';
+  protected function getPrimaryTableAlias() {
+    return 'f';
   }
 
   public function getQueryApplicationClass() {

@@ -11,8 +11,8 @@ final class AphrontGlyphBarView extends AphrontBarView {
   private $fgGlyph;
   private $bgGlyph;
 
-  public function getDefaultColor() {
-    return AphrontBarView::COLOR_AUTO_GOODNESS;
+  protected function getDefaultColor() {
+    return parent::COLOR_AUTO_GOODNESS;
   }
 
   public function setValue($value) {

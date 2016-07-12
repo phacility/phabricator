@@ -50,14 +50,6 @@ final class AphrontStackTraceView extends AphrontView {
       if ($file) {
         if (isset($callsigns[$lib])) {
           $attrs = array('title' => $file);
-          try {
-            $attrs['href'] = $user->loadEditorLink(
-              '/src/'.$relative,
-              $part['line'],
-              $callsigns[$lib]);
-          } catch (Exception $ex) {
-            // The database can be inaccessible.
-          }
           if (empty($attrs['href'])) {
             $attrs['href'] = sprintf($path, $callsigns[$lib]).
               str_replace(DIRECTORY_SEPARATOR, '/', $relative).
@@ -92,10 +84,10 @@ final class AphrontStackTraceView extends AphrontView {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Depth',
-        'Library',
-        'File',
-        'Where',
+        pht('Depth'),
+        pht('Library'),
+        pht('File'),
+        pht('Where'),
       ));
     $table->setColumnClasses(
       array(
@@ -107,14 +99,10 @@ final class AphrontStackTraceView extends AphrontView {
 
     return phutil_tag(
       'div',
-      array('class' => 'exception-trace'),
       array(
-        phutil_tag(
-          'div',
-          array('class' => 'exception-trace-header'),
-          pht('Stack Trace')),
-        $table->render(),
-      ));
+        'class' => 'exception-trace',
+      ),
+      $table->render());
   }
 
 }

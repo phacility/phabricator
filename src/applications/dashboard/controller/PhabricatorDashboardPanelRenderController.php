@@ -3,23 +3,17 @@
 final class PhabricatorDashboardPanelRenderController
   extends PhabricatorDashboardController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $panel = id(new PhabricatorDashboardPanelQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$panel) {
       return new Aphront404Response();
@@ -56,20 +50,18 @@ final class PhabricatorDashboardPanelRenderController
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Panels'), $this->getApplicationURI('panel/'))
       ->addTextCrumb($panel->getMonogram(), '/'.$panel->getMonogram())
-      ->addTextCrumb(pht('Standalone View'));
+      ->addTextCrumb(pht('Standalone View'))
+      ->setBorder(true);
 
     $view = id(new PHUIBoxView())
       ->addClass('dashboard-view')
       ->appendChild($rendered_panel);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $view,
-      ),
-      array(
-        'title' => array(pht('Panel'), $panel->getName()),
-      ));
+    return $this->newPage()
+      ->setTitle(array(pht('Panel'), $panel->getName()))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

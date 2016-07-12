@@ -10,8 +10,7 @@ final class PhabricatorPeopleLogsController
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new PhabricatorPeopleLogSearchEngine())
       ->setNavigation($this->buildSideNavView());
@@ -19,7 +18,7 @@ final class PhabricatorPeopleLogsController
     return $this->delegateToController($controller);
   }
 
-  public function buildSideNavView() {
+  public function buildSideNavView($for_app = false) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 

@@ -55,42 +55,26 @@ final class PhabricatorRepositoryPushLogSearchEngine
     $repository_phids = $saved_query->getParameter('repositoryPHIDs', array());
     $pusher_phids = $saved_query->getParameter('pusherPHIDs', array());
 
-    $all_phids = array_merge(
-      $repository_phids,
-      $pusher_phids);
-
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    } else {
-      $handles = array();
-    }
-
-    $repository_handles = array_select_keys($handles, $repository_phids);
-    $pusher_handles = array_select_keys($handles, $pusher_phids);
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new DiffusionRepositoryDatasource())
           ->setName('repositories')
           ->setLabel(pht('Repositories'))
-          ->setValue($repository_handles))
-      ->appendChild(
+          ->setValue($repository_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('pushers')
           ->setLabel(pht('Pushers'))
-          ->setValue($pusher_handles));
+          ->setValue($pusher_phids));
   }
 
   protected function getURI($path) {
     return '/diffusion/pushlog/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Push Logs'),
     );
@@ -108,27 +92,17 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $logs,
-    PhabricatorSavedQuery $query) {
-    return mpull($logs, 'getPusherPHID');
-  }
-
   protected function renderResultList(
     array $logs,
     PhabricatorSavedQuery $query,
     array $handles) {
 
     $table = id(new DiffusionPushLogListView())
-      ->setUser($this->requireViewer())
-      ->setHandles($handles)
+      ->setViewer($this->requireViewer())
       ->setLogs($logs);
 
-    $box = id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->appendChild($table);
-
-    return $box;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setTable($table);
   }
 
 }

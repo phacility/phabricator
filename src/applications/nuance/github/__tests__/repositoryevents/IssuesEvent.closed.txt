@@ -1,0 +1,74 @@
+{
+  "id": "3740905151",
+  "type": "IssuesEvent",
+  "actor": {
+    "id": 102631,
+    "login": "epriestley",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/epriestley",
+    "avatar_url": "https://avatars.githubusercontent.com/u/102631?"
+  },
+  "repo": {
+    "id": 14627834,
+    "name": "epriestley/poems",
+    "url": "https://api.github.com/repos/epriestley/poems"
+  },
+  "payload": {
+    "action": "closed",
+    "issue": {
+      "url": "https://api.github.com/repos/epriestley/poems/issues/1",
+      "repository_url": "https://api.github.com/repos/epriestley/poems",
+      "labels_url": "https://api.github.com/repos/epriestley/poems/issues/1/labels{/name}",
+      "comments_url": "https://api.github.com/repos/epriestley/poems/issues/1/comments",
+      "events_url": "https://api.github.com/repos/epriestley/poems/issues/1/events",
+      "html_url": "https://github.com/epriestley/poems/issues/1",
+      "id": 139138813,
+      "number": 1,
+      "title": "Enforce haiku in commit messages edit",
+      "user": {
+        "login": "epriestley",
+        "id": 102631,
+        "avatar_url": "https://avatars.githubusercontent.com/u/102631?v=3",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/epriestley",
+        "html_url": "https://github.com/epriestley",
+        "followers_url": "https://api.github.com/users/epriestley/followers",
+        "following_url": "https://api.github.com/users/epriestley/following{/other_user}",
+        "gists_url": "https://api.github.com/users/epriestley/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/epriestley/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/epriestley/subscriptions",
+        "organizations_url": "https://api.github.com/users/epriestley/orgs",
+        "repos_url": "https://api.github.com/users/epriestley/repos",
+        "events_url": "https://api.github.com/users/epriestley/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/epriestley/received_events",
+        "type": "User",
+        "site_admin": false
+      },
+      "labels": [
+
+      ],
+      "state": "closed",
+      "locked": false,
+      "assignee": null,
+      "milestone": null,
+      "comments": 2,
+      "created_at": "2016-03-08T00:41:08Z",
+      "updated_at": "2016-03-09T12:43:48Z",
+      "closed_at": "2016-03-09T12:43:48Z",
+      "body": "OK"
+    }
+  },
+  "public": true,
+  "created_at": "2016-03-09T12:43:48Z"
+}
+~~~~~
+{
+  "repository.name.full": "epriestley/poems",
+  "is.issue": true,
+  "is.pull": false,
+  "issue.number": 1,
+  "id": 3740905151,
+  "uri": "https://github.com/epriestley/poems/issues/1#event-3740905151",
+  "title.full": "GitHub epriestley/poems Issue #1 (Closed)",
+  "actor.id": 102631
+}

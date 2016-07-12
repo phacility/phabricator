@@ -4,8 +4,8 @@ final class LegalpadTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
   protected $documentID;
-  protected $lineNumber;
-  protected $lineLength;
+  protected $lineNumber = 0;
+  protected $lineLength = 0;
   protected $fixedState;
   protected $hasReplies = 0;
   protected $replyToCommentPHID;
@@ -19,7 +19,7 @@ final class LegalpadTransactionComment
     return ($this->getTransactionPHID() != null);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $config = parent::getConfiguration();
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
       'documentID' => 'id?',

@@ -3,11 +3,10 @@
 final class PhabricatorNotificationTestController
   extends PhabricatorNotificationController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-    $story_type = 'PhabricatorNotificationAdHocFeedStory';
+    $story_type = 'PhabricatorNotificationTestFeedStory';
     $story_data = array(
       'title' => pht(
         'This is a test notification, sent at %s.',
@@ -15,6 +14,11 @@ final class PhabricatorNotificationTestController
     );
 
     $viewer_phid = $viewer->getPHID();
+
+    // NOTE: Because we don't currently show you your own notifications, make
+    // sure this comes from a different PHID.
+    $application_phid = id(new PhabricatorNotificationsApplication())
+      ->getPHID();
 
     // TODO: When it's easier to get these buttons to render as forms, this
     // would be slightly nicer as a more standard isFormPost() check.
@@ -24,7 +28,7 @@ final class PhabricatorNotificationTestController
         ->setStoryType($story_type)
         ->setStoryData($story_data)
         ->setStoryTime(time())
-        ->setStoryAuthorPHID($viewer_phid)
+        ->setStoryAuthorPHID($application_phid)
         ->setRelatedPHIDs(array($viewer_phid))
         ->setPrimaryObjectPHID($viewer_phid)
         ->setSubscribedPHIDs(array($viewer_phid))

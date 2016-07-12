@@ -12,12 +12,16 @@ final class PhabricatorAuthAuthFactorPHIDType extends PhabricatorPHIDType {
     return new PhabricatorAuthFactorConfig();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorAuthApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     // TODO: Maybe we need this eventually?
-    throw new Exception(pht('Not Supported'));
+    throw new PhutilMethodNotImplementedException();
   }
 
   public function loadHandles(

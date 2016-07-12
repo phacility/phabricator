@@ -3,29 +3,31 @@
 final class PhabricatorDaemonTaskGarbageCollector
   extends PhabricatorGarbageCollector {
 
-  public function collectGarbage() {
-    $key = 'gcdaemon.ttl.task-archive';
-    $ttl = PhabricatorEnv::getEnvConfig($key);
-    if ($ttl <= 0) {
-      return false;
-    }
+  const COLLECTORCONST = 'worker.tasks';
 
+  public function getCollectorName() {
+    return pht('Archived Tasks');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('14 days in seconds');
+  }
+
+  protected function collectGarbage() {
     $table = new PhabricatorWorkerArchiveTask();
     $data_table = new PhabricatorWorkerTaskData();
     $conn_w = $table->establishConnection('w');
 
-    $rows = queryfx_all(
-      $conn_w,
-      'SELECT id, dataID FROM %T WHERE dateCreated < %d LIMIT 100',
-      $table->getTableName(),
-      time() - $ttl);
-
-    if (!$rows) {
+    $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withDateCreatedBefore($this->getGarbageEpoch())
+      ->setLimit(100)
+      ->execute();
+    if (!$tasks) {
       return false;
     }
 
-    $data_ids = array_filter(ipull($rows, 'dataID'));
-    $task_ids = ipull($rows, 'id');
+    $data_ids = array_filter(mpull($tasks, 'getDataID'));
+    $task_ids = mpull($tasks, 'getID');
 
     $table->openTransaction();
       if ($data_ids) {

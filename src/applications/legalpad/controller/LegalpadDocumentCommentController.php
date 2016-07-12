@@ -2,23 +2,17 @@
 
 final class LegalpadDocumentCommentController extends LegalpadController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
     $document = id(new LegalpadDocumentQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->needDocumentBodies(true)
       ->executeOne();
 
@@ -48,7 +42,7 @@ final class LegalpadDocumentCommentController extends LegalpadController {
     }
 
     $editor = id(new LegalpadDocumentEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContentSourceFromRequest($request)
       ->setContinueOnNoEffect($request->isContinueRequest())
       ->setIsPreview($is_preview);
@@ -67,7 +61,7 @@ final class LegalpadDocumentCommentController extends LegalpadController {
 
     if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->setTransactions($xactions)
         ->setIsPreview($is_preview);
     } else {

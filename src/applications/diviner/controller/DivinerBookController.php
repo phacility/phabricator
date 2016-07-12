@@ -2,31 +2,29 @@
 
 final class DivinerBookController extends DivinerController {
 
-  private $bookName;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->bookName = $data['book'];
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $book_name = $request->getURIData('book');
 
     $book = id(new DivinerBookQuery())
       ->setViewer($viewer)
-      ->withNames(array($this->bookName))
+      ->withNames(array($book_name))
+      ->needRepositories(true)
       ->executeOne();
 
     if (!$book) {
       return new Aphront404Response();
     }
 
-    $crumbs = $this->buildApplicationCrumbs();
+    $actions = $this->buildActionView($viewer, $book);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(
       $book->getShortTitle(),
       '/book/'.$book->getName().'/');
@@ -34,19 +32,28 @@ final class DivinerBookController extends DivinerController {
     $header = id(new PHUIHeaderView())
       ->setHeader($book->getTitle())
       ->setUser($viewer)
-      ->setPolicyObject($book);
+      ->setPolicyObject($book)
+      ->setEpoch($book->getDateModified())
+      ->setActionList($actions);
 
-    $document = new PHUIDocumentView();
+    // TODO: This could probably look better.
+    if ($book->getRepositoryPHID()) {
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_STATE)
+          ->setBackgroundColor(PHUITagView::COLOR_BLUE)
+          ->setName($book->getRepository()->getMonogram()));
+    }
+
+    $document = new PHUIDocumentViewPro();
     $document->setHeader($header);
     $document->addClass('diviner-view');
-
-    $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
-
-    $properties = $this->buildPropertyList($book);
 
     $atoms = id(new DivinerAtomQuery())
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
+      ->withGhosts(false)
+      ->withIsDocumentable(true)
       ->execute();
 
     $atoms = msort($atoms, 'getSortKey');
@@ -79,41 +86,41 @@ final class DivinerBookController extends DivinerController {
     $preface = $book->getPreface();
     $preface_view = null;
     if (strlen($preface)) {
-      $preface_view =
-        PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())->setContent($preface),
-          'default',
-          $viewer);
+      $preface_view = new PHUIRemarkupView($viewer, $preface);
     }
 
-    $document->appendChild($properties);
     $document->appendChild($preface_view);
     $document->appendChild($out);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    return $this->newPage()
+      ->setTitle($book->getTitle())
+      ->setCrumbs($crumbs)
+      ->appendChild(array(
         $document,
-      ),
-      array(
-        'title' => $book->getTitle(),
       ));
   }
 
-  private function buildPropertyList(DivinerLiveBook $book) {
-    $viewer = $this->getRequest()->getUser();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer);
+  private function buildActionView(
+    PhabricatorUser $user,
+    DivinerLiveBook $book) {
 
-    $policies = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $book);
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $book,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
-    $view->addProperty(
-      pht('Updated'),
-      phabricator_datetime($book->getDateModified(), $viewer));
+    $action_view = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObject($book);
 
-    return $view;
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Book'))
+        ->setIcon('fa-pencil')
+        ->setHref('/book/'.$book->getName().'/edit/')
+        ->setDisabled(!$can_edit));
+
+    return $action_view;
   }
 
 }

@@ -7,13 +7,13 @@ final class PhabricatorHelpKeyboardShortcutController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $keys = $request->getStr('keys');
-    $keys = json_decode($keys, true);
-    if (!is_array($keys)) {
+    try {
+      $keys = phutil_json_decode($keys);
+    } catch (PhutilJSONParserException $ex) {
       return new Aphront400Response();
     }
 
@@ -57,14 +57,11 @@ final class PhabricatorHelpKeyboardShortcutController
       array('class' => 'keyboard-shortcut-help'),
       $rows);
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+    return $this->newDialog()
       ->setTitle(pht('Keyboard Shortcuts'))
       ->appendChild($table)
       ->addCancelButton('#', pht('Close'));
 
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
 }

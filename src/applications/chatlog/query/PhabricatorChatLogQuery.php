@@ -33,7 +33,7 @@ final class PhabricatorChatLogQuery
     return $logs;
   }
 
-  public function willFilterPage(array $events) {
+  protected function willFilterPage(array $events) {
     $channel_ids = mpull($events, 'getChannelID', 'getChannelID');
 
     $channels = id(new PhabricatorChatLogChannelQuery())
@@ -55,7 +55,7 @@ final class PhabricatorChatLogQuery
     return $events;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn_r);

@@ -1,20 +1,20 @@
 <?php
 
 final class PhabricatorOAuthServerAuthController
-  extends PhabricatorAuthController {
+  extends PhabricatorOAuthServerController {
 
-  public function shouldRequireLogin() {
-    return true;
+  protected function buildApplicationCrumbs() {
+    // We're specifically not putting an "OAuth Server" application crumb
+    // on the auth pages because it doesn't make sense to send users there.
+    return new PHUICrumbsView();
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-    $server        = new PhabricatorOAuthServer();
-    $client_phid   = $request->getStr('client_id');
-    $scope         = $request->getStr('scope', array());
-    $redirect_uri  = $request->getStr('redirect_uri');
+    $server = new PhabricatorOAuthServer();
+    $client_phid = $request->getStr('client_id');
+    $redirect_uri = $request->getStr('redirect_uri');
     $response_type = $request->getStr('response_type');
 
     // state is an opaque value the client sent us for their own purposes
@@ -30,6 +30,19 @@ final class PhabricatorOAuthServerAuthController
           phutil_tag('strong', array(), 'client_id')));
     }
 
+    // We require that users must be able to see an OAuth application
+    // in order to authorize it. This allows an application's visibility
+    // policy to be used to restrict authorized users.
+    try {
+      $client = id(new PhabricatorOAuthServerClientQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($client_phid))
+        ->executeOne();
+    } catch (PhabricatorPolicyException $ex) {
+      $ex->setContext(self::CONTEXT_AUTHORIZE);
+      throw $ex;
+    }
+
     $server->setUser($viewer);
     $is_authorized = false;
     $authorization = null;
@@ -39,15 +52,21 @@ final class PhabricatorOAuthServerAuthController
     // one giant try / catch around all the exciting database stuff so we
     // can return a 'server_error' response if something goes wrong!
     try {
-      $client = id(new PhabricatorOAuthServerClient())
-        ->loadOneWhere('phid = %s', $client_phid);
-
       if (!$client) {
         return $this->buildErrorResponse(
           'invalid_request',
           pht('Invalid Client Application'),
           pht(
             'Request parameter %s does not specify a valid client application.',
+            phutil_tag('strong', array(), 'client_id')));
+      }
+
+      if ($client->getIsDisabled()) {
+        return $this->buildErrorResponse(
+          'invalid_request',
+          pht('Application Disabled'),
+          pht(
+            'The %s OAuth application has been disabled.',
             phutil_tag('strong', array(), 'client_id')));
       }
 
@@ -94,17 +113,11 @@ final class PhabricatorOAuthServerAuthController
             implode(', ', array('code'))));
       }
 
-      if ($scope) {
-        if (!PhabricatorOAuthServerScope::validateScopesList($scope)) {
-          return $this->buildErrorResponse(
-            'invalid_scope',
-            pht('Invalid Scope'),
-            pht(
-              'Request parameter %s specifies an unsupported scope.',
-              phutil_tag('strong', array(), 'scope')));
-        }
-        $scope = PhabricatorOAuthServerScope::scopesListToDict($scope);
-      }
+
+      $requested_scope = $request->getStrList('scope');
+      $requested_scope = array_fuse($requested_scope);
+
+      $scope = PhabricatorOAuthServerScope::filterScope($requested_scope);
 
       // NOTE: We're always requiring a confirmation dialog to redirect.
       // Partly this is a general defense against redirect attacks, and
@@ -115,9 +128,6 @@ final class PhabricatorOAuthServerAuthController
       list($is_authorized, $authorization) = $auth_info;
 
       if ($request->isFormPost()) {
-        // TODO: We should probably validate this more? It feels a little funky.
-        $scope = PhabricatorOAuthServerScope::getScopesFromRequest($request);
-
         if ($authorization) {
           $authorization->setScope($scope)->save();
         } else {
@@ -161,6 +171,12 @@ final class PhabricatorOAuthServerAuthController
           'state' => $state,
         ));
 
+      if ($client->getIsTrusted()) {
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI((string)$full_uri);
+      }
+
       // TODO: It would be nice to give the user more options here, like
       // reviewing permissions, canceling the authorization, or aborting
       // the workflow.
@@ -179,25 +195,10 @@ final class PhabricatorOAuthServerAuthController
     }
 
     // Here, we're confirming authorization for the application.
-
-    if ($scope) {
-      if ($authorization) {
-        $desired_scopes = array_merge($scope,
-                                      $authorization->getScope());
-      } else {
-        $desired_scopes = $scope;
-      }
-      if (!PhabricatorOAuthServerScope::validateScopesDict($desired_scopes)) {
-        return $this->buildErrorResponse(
-          'invalid_scope',
-          pht('Invalid Scope'),
-          pht('The requested scope is invalid, unknown, or malformed.'));
-      }
+    if ($authorization) {
+      $missing_scope = array_diff_key($scope, $authorization->getScope());
     } else {
-      $desired_scopes = array(
-        PhabricatorOAuthServerScope::SCOPE_WHOAMI         => 1,
-        PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1,
-      );
+      $missing_scope = $scope;
     }
 
     $form = id(new AphrontFormView())
@@ -206,9 +207,7 @@ final class PhabricatorOAuthServerAuthController
       ->addHiddenInput('response_type', $response_type)
       ->addHiddenInput('state', $state)
       ->addHiddenInput('scope', $request->getStr('scope'))
-      ->setUser($viewer)
-      ->appendChild(
-        PhabricatorOAuthServerScope::getCheckboxControl($desired_scopes));
+      ->setUser($viewer);
 
     $cancel_msg = pht('The user declined to authorize this application.');
     $cancel_uri = $this->addQueryParams(
@@ -218,36 +217,64 @@ final class PhabricatorOAuthServerAuthController
         'error_description' => $cancel_msg,
       ));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    $dialog = $this->newDialog()
+      ->setShortTitle(pht('Authorize Access'))
       ->setTitle(pht('Authorize "%s"?', $name))
       ->setSubmitURI($request->getRequestURI()->getPath())
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->appendParagraph(
         pht(
           'Do you want to authorize the external application "%s" to '.
-          'access your Phabricator account data?',
+          'access your Phabricator account data, including your primary '.
+          'email address?',
           phutil_tag('strong', array(), $name)))
-      ->appendChild($form->buildLayoutView())
+      ->appendForm($form)
       ->addSubmitButton(pht('Authorize Access'))
       ->addCancelButton((string)$cancel_uri, pht('Do Not Authorize'));
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    if ($missing_scope) {
+      $dialog->appendParagraph(
+        pht(
+          'This application has requested these additional permissions. '.
+          'Authorizing it will grant it the permissions it requests:'));
+      foreach ($missing_scope as $scope_key => $ignored) {
+        // TODO: Once we introduce more scopes, explain them here.
+      }
+    }
+
+    $unknown_scope = array_diff_key($requested_scope, $scope);
+    if ($unknown_scope) {
+      $dialog->appendParagraph(
+        pht(
+          'This application also requested additional unrecognized '.
+          'permissions. These permissions may have existed in an older '.
+          'version of Phabricator, or may be from a future version of '.
+          'Phabricator. They will not be granted.'));
+
+      $unknown_form = id(new AphrontFormView())
+        ->setViewer($viewer)
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel(pht('Unknown Scope'))
+            ->setValue(implode(', ', array_keys($unknown_scope)))
+            ->setDisabled(true));
+
+      $dialog->appendForm($unknown_form);
+    }
+
+    return $dialog;
   }
 
 
   private function buildErrorResponse($code, $title, $message) {
     $viewer = $this->getRequest()->getUser();
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setTitle(pht('OAuth: %s', $title))
       ->appendParagraph($message)
       ->appendParagraph(
         pht('OAuth Error Code: %s', phutil_tag('tt', array(), $code)))
       ->addCancelButton('/', pht('Alas!'));
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 

@@ -2,51 +2,38 @@
 
 final class ReleephProductHistoryController extends ReleephProductController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['projectID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('projectID');
 
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$product) {
       return new Aphront404Response();
     }
     $this->setProduct($product);
 
-    $xactions = id(new ReleephProductTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($product->getPHID()))
-      ->execute();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($product->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+    $timeline = $this->buildTransactionTimeline(
+      $product,
+      new ReleephProductTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('History'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $timeline,
-      ),
-      array(
-        'title' => pht('Product History'),
-      ));
+    $title = pht('Product History');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($timeline);
   }
 
 }

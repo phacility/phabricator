@@ -2,17 +2,17 @@
 
 final class ManiphestSubpriorityController extends ManiphestController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     if (!$request->validateCSRF()) {
       return new Aphront403Response();
     }
 
     $task = id(new ManiphestTaskQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($request->getInt('task')))
+      ->needProjectPHIDs(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -25,29 +25,33 @@ final class ManiphestSubpriorityController extends ManiphestController {
 
     if ($request->getInt('after')) {
       $after_task = id(new ManiphestTaskQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withIDs(array($request->getInt('after')))
         ->executeOne();
       if (!$after_task) {
         return new Aphront404Response();
       }
-      $after_pri = $after_task->getPriority();
-      $after_sub = $after_task->getSubpriority();
+      list($pri, $sub) = ManiphestTransactionEditor::getAdjacentSubpriority(
+        $after_task,
+        $is_after = true);
     } else {
-      $after_pri = $request->getInt('priority');
-      $after_sub = null;
+      list($pri, $sub) = ManiphestTransactionEditor::getEdgeSubpriority(
+        $request->getInt('priority'),
+        $is_end = false);
     }
 
-    $xactions = array(id(new ManiphestTransaction())
+    $xactions = array();
+
+    $xactions[] = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_PRIORITY)
+      ->setNewValue($pri);
+
+    $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransaction::TYPE_SUBPRIORITY)
-      ->setNewValue(array(
-        'newPriority' => $after_pri,
-        'newSubpriorityBase' => $after_sub,
-        'direction' => '>',
-      )),
-    );
+      ->setNewValue($sub);
+
     $editor = id(new ManiphestTransactionEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect(true)
       ->setContentSourceFromRequest($request);

@@ -3,19 +3,13 @@
 final class PassphraseCredentialLockController
   extends PassphraseController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $credential = id(new PassphraseCredentialQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -38,15 +32,17 @@ final class PassphraseCredentialLockController
       return $this->newDialog()
         ->setTitle(pht('Credential Already Locked'))
         ->appendChild(
-          pht(
-            'This credential has been locked and the secret is '.
-            'hidden forever. Anything relying on this credential will '.
-            'still function. This operation can not be undone.'))
+          pht('This credential is already locked.'))
         ->addCancelButton($view_uri, pht('Close'));
     }
 
     if ($request->isFormPost()) {
       $xactions = array();
+
+      $xactions[] = id(new PassphraseCredentialTransaction())
+        ->setTransactionType(PassphraseCredentialTransaction::TYPE_CONDUIT)
+        ->setNewValue(0);
+
       $xactions[] = id(new PassphraseCredentialTransaction())
         ->setTransactionType(PassphraseCredentialTransaction::TYPE_LOCK)
         ->setNewValue(1);
@@ -54,6 +50,7 @@ final class PassphraseCredentialLockController
       $editor = id(new PassphraseCredentialTransactionEditor())
         ->setActor($viewer)
         ->setContinueOnMissingFields(true)
+        ->setContinueOnNoEffect(true)
         ->setContentSourceFromRequest($request)
         ->applyTransactions($credential, $xactions);
 
@@ -61,12 +58,13 @@ final class PassphraseCredentialLockController
     }
 
     return $this->newDialog()
-      ->setTitle(pht('Really lock credential?'))
+      ->setTitle(pht('Lock Credential'))
       ->appendChild(
         pht(
-          'This credential will be locked and the secret will be '.
-          'hidden forever. Anything relying on this credential will '.
-          'still function. This operation can not be undone.'))
+          'This credential will be locked and the secret will be hidden '.
+          'forever. If Conduit access is enabled, it will be revoked. '.
+          'Anything relying on this credential will still function. This '.
+          'operation can not be undone.'))
       ->addSubmitButton(pht('Lock Credential'))
       ->addCancelButton($view_uri);
   }

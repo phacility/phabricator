@@ -24,11 +24,8 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
   }
 
   public function render() {
+    $viewer = $this->getViewer();
     $rows = array();
-
-    if (!$this->user) {
-      throw new Exception('Call setUser() before rendering!');
-    }
 
     foreach ($this->events as $event) {
 
@@ -83,8 +80,8 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
 
       $row = array(
         $event->getLogType(),
-        phabricator_date($event->getEpoch(), $this->user),
-        phabricator_time($event->getEpoch(), $this->user),
+        phabricator_date($event->getEpoch(), $viewer),
+        phabricator_time($event->getEpoch(), $viewer),
         array(
           $message,
           $more,
@@ -99,7 +96,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
             array(
               'href' => '/daemon/log/'.$event->getLogID().'/',
             ),
-            'Daemon '.$event->getLogID()));
+            pht('Daemon %s', $event->getLogID())));
       }
 
       $rows[] = $row;

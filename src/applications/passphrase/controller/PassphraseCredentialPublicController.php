@@ -3,19 +3,13 @@
 final class PassphraseCredentialPublicController
   extends PassphraseController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $credential = id(new PassphraseCredentialQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -46,14 +40,12 @@ final class PassphraseCredentialPublicController
           ->setReadOnly(true)
           ->setValue($public_key));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle(pht('Public Key (%s)', $credential->getMonogram()))
       ->appendChild($body)
       ->addCancelButton($view_uri, pht('Done'));
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

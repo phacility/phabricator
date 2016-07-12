@@ -52,11 +52,19 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
       case self::TYPE_MERCURIAL:
         break;
       default:
-        throw new Exception(pht('Unknown URI type "%s"!'));
+        throw new Exception(pht('Unknown URI type "%s"!', $type));
     }
 
     $this->type = $type;
     $this->uri = $uri;
+  }
+
+  public static function getAllURITypes() {
+    return array(
+      self::TYPE_GIT,
+      self::TYPE_SVN,
+      self::TYPE_MERCURIAL,
+    );
   }
 
 
@@ -70,16 +78,7 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     switch ($this->type) {
       case self::TYPE_GIT:
         $uri = new PhutilURI($this->uri);
-        if ($uri->getProtocol()) {
-          return $uri->getPath();
-        }
-
-        $uri = new PhutilGitURI($this->uri);
-        if ($uri->getDomain()) {
-          return $uri->getPath();
-        }
-
-        return $this->uri;
+        return $uri->getPath();
       case self::TYPE_SVN:
       case self::TYPE_MERCURIAL:
         $uri = new PhutilURI($this->uri);
@@ -89,6 +88,10 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
 
         return $this->uri;
     }
+  }
+
+  public function getNormalizedURI() {
+    return $this->getNormalizedDomain().'/'.$this->getNormalizedPath();
   }
 
 
@@ -113,11 +116,25 @@ final class PhabricatorRepositoryURINormalizer extends Phobject {
     // example.
 
     $matches = null;
-    if (preg_match('@^(diffusion/[A-Z]+)@', $path, $matches)) {
+    if (preg_match('@^(diffusion/(?:[A-Z]+|\d+))@', $path, $matches)) {
       $path = $matches[1];
     }
 
     return $path;
   }
+
+  public function getNormalizedDomain() {
+    $domain = null;
+
+    $uri = new PhutilURI($this->uri);
+    $domain = $uri->getDomain();
+
+    if (!strlen($domain)) {
+      $domain = '<void>';
+    }
+
+    return phutil_utf8_strtolower($domain);
+  }
+
 
 }

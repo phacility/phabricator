@@ -19,13 +19,44 @@ final class PHUIListItemView extends AphrontTagView {
   private $isExternal;
   private $key;
   private $icon;
-  private $appIcon;
   private $selected;
   private $disabled;
   private $renderNameAsTooltip;
   private $statusColor;
   private $order;
   private $aural;
+  private $profileImage;
+  private $indented;
+  private $hideInApplicationMenu;
+  private $icons = array();
+  private $openInNewWindow = false;
+
+  public function setOpenInNewWindow($open_in_new_window) {
+    $this->openInNewWindow = $open_in_new_window;
+    return $this;
+  }
+
+  public function getOpenInNewWindow() {
+    return $this->openInNewWindow;
+  }
+
+    public function setHideInApplicationMenu($hide) {
+    $this->hideInApplicationMenu = $hide;
+    return $this;
+  }
+
+  public function getHideInApplicationMenu() {
+    return $this->hideInApplicationMenu;
+  }
+
+  public function setDropdownMenu(PhabricatorActionListView $actions) {
+    Javelin::initBehavior('phui-dropdown-menu');
+
+    $this->addSigil('phui-dropdown-menu');
+    $this->setMetadata($actions->getDropdownMenuMetadata());
+
+    return $this;
+  }
 
   public function setAural($aural) {
     $this->aural = $aural;
@@ -68,13 +99,22 @@ final class PHUIListItemView extends AphrontTagView {
     return $this;
   }
 
-  public function setAppIcon($icon) {
-    $this->appIcon = $icon;
+  public function setProfileImage($image) {
+    $this->profileImage = $image;
     return $this;
   }
 
   public function getIcon() {
     return $this->icon;
+  }
+
+  public function setIndented($indented) {
+    $this->indented = $indented;
+    return $this;
+  }
+
+  public function getIndented() {
+    return $this->indented;
   }
 
   public function setKey($key) {
@@ -127,6 +167,15 @@ final class PHUIListItemView extends AphrontTagView {
     return $this;
   }
 
+  public function addIcon($icon) {
+    $this->icons[] = $icon;
+    return $this;
+  }
+
+  public function getIcons() {
+    return $this->icons;
+  }
+
   protected function getTagName() {
     return 'li';
   }
@@ -136,12 +185,16 @@ final class PHUIListItemView extends AphrontTagView {
     $classes[] = 'phui-list-item-view';
     $classes[] = 'phui-list-item-'.$this->type;
 
-    if ($this->icon || $this->appIcon) {
+    if ($this->icon) {
       $classes[] = 'phui-list-item-has-icon';
     }
 
     if ($this->selected) {
       $classes[] = 'phui-list-item-selected';
+    }
+
+    if ($this->disabled) {
+      $classes[] = 'phui-list-item-disabled';
     }
 
     if ($this->statusColor) {
@@ -170,9 +223,11 @@ final class PHUIListItemView extends AphrontTagView {
 
     if ($this->name) {
       if ($this->getRenderNameAsTooltip()) {
+        Javelin::initBehavior('phabricator-tooltips');
         $sigil = 'has-tooltip';
         $meta = array(
           'tip' => $this->name,
+          'align' => 'E',
         );
       } else {
         $external = null;
@@ -221,27 +276,40 @@ final class PHUIListItemView extends AphrontTagView {
 
       $icon = id(new PHUIIconView())
         ->addClass('phui-list-item-icon')
-        ->setIconFont($icon_name);
+        ->setIcon($icon_name);
     }
 
-    if ($this->appIcon) {
+    if ($this->profileImage) {
       $icon = id(new PHUIIconView())
+        ->setHeadSize(PHUIIconView::HEAD_SMALL)
         ->addClass('phui-list-item-icon')
-        ->setSpriteSheet(PHUIIconView::SPRITE_APPS)
-        ->setSpriteIcon($this->appIcon);
+        ->setImage($this->profileImage);
     }
+
+    $classes = array();
+    if ($this->href) {
+      $classes[] = 'phui-list-item-href';
+    }
+
+    if ($this->indented) {
+      $classes[] = 'phui-list-item-indented';
+    }
+
+    $icons = $this->getIcons();
 
     return javelin_tag(
       $this->href ? 'a' : 'div',
       array(
         'href' => $this->href,
-        'class' => $this->href ? 'phui-list-item-href' : null,
+        'class' => implode(' ', $classes),
         'meta' => $meta,
         'sigil' => $sigil,
+        'target' => $this->getOpenInNewWindow() ? '_blank' : null,
       ),
       array(
         $aural,
         $icon,
+        $icons,
         $this->renderChildren(),
         $name,
       ));

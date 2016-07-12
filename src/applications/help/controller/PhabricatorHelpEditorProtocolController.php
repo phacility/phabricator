@@ -7,12 +7,10 @@ final class PhabricatorHelpEditorProtocolController
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setMethod('GET')
       ->setSubmitURI('/settings/panel/display/')
       ->setTitle(pht('Unsupported Editor Protocol'))
@@ -25,9 +23,6 @@ final class PhabricatorHelpEditorProtocolController
           phutil_tag('tt', array(), 'uri.allowed-editor-protocols')))
       ->addSubmitButton(pht('Change Settings'))
       ->addCancelButton('/');
-
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
   }
 
   public static function hasAllowedProtocol($uri) {

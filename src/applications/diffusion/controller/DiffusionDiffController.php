@@ -6,21 +6,18 @@ final class DiffusionDiffController extends DiffusionController {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $data = $data + array(
-      'dblob' => $this->getRequest()->getStr('ref'),
-    );
-    $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
-      $data,
-      $this->getRequest());
-
-    $this->diffusionRequest = $drequest;
+  protected function getDiffusionBlobFromRequest(AphrontRequest $request) {
+    return $request->getStr('ref');
   }
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
-    $request = $this->getRequest();
-    $user = $request->getUser();
 
     if (!$request->isAjax()) {
 
@@ -54,7 +51,8 @@ final class DiffusionDiffController extends DiffusionController {
       ));
     $drequest->updateSymbolicCommit($data['effectiveCommit']);
     $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
-    $diff = DifferentialDiff::newFromRawChanges($raw_changes);
+    $diff = DifferentialDiff::newEphemeralFromRawChanges(
+      $raw_changes);
     $changesets = $diff->getChangesets();
     $changeset = reset($changesets);
 
@@ -63,20 +61,21 @@ final class DiffusionDiffController extends DiffusionController {
     }
 
     $parser = new DifferentialChangesetParser();
-    $parser->setUser($user);
+    $parser->setUser($viewer);
     $parser->setChangeset($changeset);
     $parser->setRenderingReference($drequest->generateURI(
       array(
         'action' => 'rendering-ref',
       )));
 
-    $parser->setCharacterEncoding($request->getStr('encoding'));
-    $parser->setHighlightAs($request->getStr('highlight'));
+    $parser->readParametersFromRequest($request);
 
     $coverage = $drequest->loadCoverage();
     if ($coverage) {
       $parser->setCoverage($coverage);
     }
+
+    $commit = $drequest->loadCommit();
 
     $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
     $ids = $pquery->loadPathIDs();
@@ -84,13 +83,17 @@ final class DiffusionDiffController extends DiffusionController {
 
     $parser->setLeftSideCommentMapping($path_id, false);
     $parser->setRightSideCommentMapping($path_id, true);
+    $parser->setCanMarkDone(
+      ($commit->getAuthorPHID()) &&
+      ($viewer->getPHID() == $commit->getAuthorPHID()));
+    $parser->setObjectOwnerPHID($commit->getAuthorPHID());
 
     $parser->setWhitespaceMode(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
 
     $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
-      $user,
-      $drequest->loadCommit()->getPHID(),
+      $viewer,
+      $commit->getPHID(),
       $path_id);
 
     if ($inlines) {
@@ -104,7 +107,7 @@ final class DiffusionDiffController extends DiffusionController {
     }
 
     $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($user);
+    $engine->setViewer($viewer);
 
     foreach ($inlines as $inline) {
       $engine->addObject(
@@ -119,9 +122,12 @@ final class DiffusionDiffController extends DiffusionController {
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
-    $output = $parser->render($range_s, $range_e, $mask);
+
+    $parser->setRange($range_s, $range_e);
+    $parser->setMask($mask);
 
     return id(new PhabricatorChangesetResponse())
-      ->setRenderedChangeset($output);
+      ->setRenderedChangeset($parser->renderChangeset())
+      ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
   }
 }

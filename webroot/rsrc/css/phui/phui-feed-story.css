@@ -2,33 +2,51 @@
  * @provides phui-feed-story-css
  */
 
-.phui-feed-story {
-  background: 5px 2px no-repeat;
-  min-height: 44px;
-  background-color: #fff;
+.phui-object-box .phui-box.phui-feed-story {
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-object-box .phui-box.phui-feed-story:last-child {
+  border: none;
+}
+
+.phui-feed-story-head .phui-feed-story-actor {
+  width: 35px;
+  height: 35px;
+  float: left;
+  margin-right: 8px;
+  border-radius: 3px;
+  box-shadow: {$borderinset};
 }
 
 .phui-feed-story-head .phui-feed-story-actor-image {
-  width: 35px;
-  height: 35px;
   background-size: 35px;
-  float: left;
-  margin-right: 8px;
+}
+
+.phui-feed-story-head .phui-feed-story-actor-icon {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 24px;
+  line-height: 32px;
+  color: #fff;
+  background-color: #c4cde0;
 }
 
 .phui-feed-story-head {
- padding: 8px;
- overflow: hidden;
- color: {$greytext};
+  padding: 12px 4px;
+  overflow: hidden;
+  color: {$greytext};
+  word-break: break-word;
 }
 
 .phui-feed-story-head .phui-link-person {
- color: {$darkgreytext};
- font-weight: bold;
+  color: {$darkgreytext};
+  font-weight: bold;
 }
 
 .phui-feed-story-body {
-  margin: 0 8px 8px;
+  margin: 4px 4px 8px;
+  padding-bottom: 8px;
   color: {$darkgreytext};
   word-break: break-word;
   max-height: 300px;
@@ -36,10 +54,8 @@
 }
 
 .phui-feed-story-foot {
-  font-size: 11px;
-  background: {$lightgreybackground};
-  padding: 8px;
-  line-height: 14px;
+  font-size: {$smallerfontsize};
+  padding: 0 4px 12px;
 }
 
 .phui-feed-story-foot,
@@ -47,10 +63,7 @@
   color: {$greytext};
 }
 
-.phui-feed-story-foot .phui-icon-view,
-.phui-feed-story-oneline-foot .phui-icon-view {
-  float: left;
-  display: inline-block;
+.phui-feed-story-foot .phui-icon-view {
   margin-right: 5px;
 }
 
@@ -60,8 +73,7 @@
 }
 
 .phui-feed-story-bigtext-post h3 {
-  font-size: 18px;
-  font-weight: 200;
+  font-size: {$biggestfontsize};
   line-height: 18px;
   color: {$darkgreytext};
   margin: 0 0 5px 0;
@@ -93,21 +105,4 @@
 
 .phui-feed-story-action-list .phui-icon-view {
   display: block;
-}
-
-.phui-feed-story-oneline .phui-feed-story-head {
-  padding: 8px;
-}
-
-.phui-feed-story-oneline .phui-feed-story-body {
-  padding: 0;
-}
-
-.phui-feed-story-oneline-foot,
-.phui-feed-story-oneline-foot a {
-  font-size: 11px;
-  color: {$lightgreytext};
-  margin-top: 2px;
-  line-height: 14px;
-  font-weight: normal;
 }

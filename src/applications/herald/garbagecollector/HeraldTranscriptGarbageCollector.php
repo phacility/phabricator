@@ -3,12 +3,17 @@
 final class HeraldTranscriptGarbageCollector
   extends PhabricatorGarbageCollector {
 
-  public function collectGarbage() {
-    $ttl = PhabricatorEnv::getEnvConfig('gcdaemon.ttl.herald-transcripts');
-    if ($ttl <= 0) {
-      return false;
-    }
+  const COLLECTORCONST = 'herald.transcripts';
 
+  public function getCollectorName() {
+    return pht('Herald Transcripts');
+  }
+
+  public function getDefaultRetentionPolicy() {
+    return phutil_units('30 days in seconds');
+  }
+
+  protected function collectGarbage() {
     $table = new HeraldTranscript();
     $conn_w = $table->establishConnection('w');
 
@@ -20,10 +25,10 @@ final class HeraldTranscriptGarbageCollector
           conditionTranscripts = "",
           applyTranscripts     = "",
           garbageCollected     = 1
-        WHERE garbageCollected = 0 AND `time` < %d
+        WHERE garbageCollected = 0 AND time < %d
         LIMIT 100',
       $table->getTableName(),
-      time() - $ttl);
+      $this->getGarbageEpoch());
 
     return ($conn_w->getAffectedRows() == 100);
   }

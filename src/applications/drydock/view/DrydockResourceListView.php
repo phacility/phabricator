@@ -16,27 +16,28 @@ final class DrydockResourceListView extends AphrontView {
 
     $view = new PHUIObjectItemListView();
     foreach ($resources as $resource) {
-      $name = pht('Resource %d', $resource->getID()).': '.$resource->getName();
+      $id = $resource->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setHref('/drydock/resource/'.$resource->getID().'/')
-        ->setHeader($name);
+        ->setHref("/drydock/resource/{$id}/")
+        ->setObjectName(pht('Resource %d', $id))
+        ->setHeader($resource->getResourceName());
 
       $status = DrydockResourceStatus::getNameForStatus($resource->getStatus());
       $item->addAttribute($status);
 
       switch ($resource->getStatus()) {
         case DrydockResourceStatus::STATUS_PENDING:
-          $item->setBarColor('yellow');
+          $item->setStatusIcon('fa-dot-circle-o yellow');
           break;
-        case DrydockResourceStatus::STATUS_OPEN:
-          $item->setBarColor('green');
+        case DrydockResourceStatus::STATUS_ACTIVE:
+          $item->setStatusIcon('fa-dot-circle-o green');
           break;
         case DrydockResourceStatus::STATUS_DESTROYED:
-          $item->setBarColor('black');
+          $item->setStatusIcon('fa-times-circle-o black');
           break;
         default:
-          $item->setBarColor('red');
+          $item->setStatusIcon('fa-dot-circle-o red');
           break;
       }
 

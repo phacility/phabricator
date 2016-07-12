@@ -1,6 +1,6 @@
 <?php
 
-echo "Migrating user emails...\n";
+echo pht('Migrating user emails...')."\n";
 
 $table  = new PhabricatorUser();
 $table->openTransaction();
@@ -19,7 +19,7 @@ foreach ($emails as $phid => $email) {
   // NOTE: Grandfather all existing email in as primary / verified. We generate
   // verification codes because they are used for password resets, etc.
 
-  echo "Migrating '{$phid}'...\n";
+  echo pht("Migrating '%s'...", $phid)."\n";
   queryfx(
     $conn,
     'INSERT INTO %T (userPHID, address, verificationCode, isVerified, isPrimary)
@@ -31,4 +31,4 @@ foreach ($emails as $phid => $email) {
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

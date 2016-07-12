@@ -7,6 +7,7 @@ final class DoorkeeperImportEngine extends Phobject {
   private $phids = array();
   private $localOnly;
   private $throwOnMissingLink;
+  private $context = array();
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -37,6 +38,10 @@ final class DoorkeeperImportEngine extends Phobject {
     return $this;
   }
 
+  public function setContextProperty($key, $value) {
+    $this->context[$key] = $value;
+    return $this;
+  }
 
   /**
    * Configure behavior if remote refs can not be retrieved because an
@@ -88,16 +93,15 @@ final class DoorkeeperImportEngine extends Phobject {
     }
 
     if (!$this->localOnly) {
-      $bridges = id(new PhutilSymbolLoader())
+      $bridges = id(new PhutilClassMapQuery())
         ->setAncestorClass('DoorkeeperBridge')
-        ->loadObjects();
+        ->setFilterMethod('isEnabled')
+        ->execute();
 
       foreach ($bridges as $key => $bridge) {
-        if (!$bridge->isEnabled()) {
-          unset($bridges[$key]);
-        }
         $bridge->setViewer($viewer);
         $bridge->setThrowOnMissingLink($this->throwOnMissingLink);
+        $bridge->setContext($this->context);
       }
 
       $working_set = $refs;

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorEventEngine {
+final class PhabricatorEventEngine extends Phobject {
 
   public static function initialize() {
     // NOTE: If any of this fails, we just log it and move on. It's important
@@ -9,9 +9,9 @@ final class PhabricatorEventEngine {
     // be able to run `bin/config` in order to remove an invalid listener.
 
     // Load automatic listeners.
-    $listeners = id(new PhutilSymbolLoader())
+    $listeners = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorAutoEventListener')
-      ->loadObjects();
+      ->execute();
 
     // Load configured listeners.
     $config_listeners = PhabricatorEnv::getEnvConfig('events.listeners');
@@ -23,7 +23,7 @@ final class PhabricatorEventEngine {
       }
     }
 
-    // Add builtin listeners.
+    // Add built-in listeners.
     $listeners[] = new DarkConsoleEventPluginAPI();
 
     // Add application listeners.

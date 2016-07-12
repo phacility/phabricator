@@ -1,0 +1,47 @@
+@title Cluster: SSH Servers
+@group cluster
+
+Configuring Phabricator to use multiple SSH servers.
+
+Overview
+========
+
+You can run Phabricator on multiple SSH servers. The advantages of doing this
+are:
+
+  - you can completely survive the loss of multiple SSH hosts.
+
+This configuration is simple, but you must configure repositories first. For
+details, see @{article:Cluster: Repositories}.
+
+SSH servers accept SSH requests from commands like `git clone` and relay them
+to hosts that can serve the requests.
+
+
+Adding SSH Hosts
+================
+
+After configuring repositories in cluster mode, you can add more web hosts
+at any time.
+
+First, deploy the Phabricator software and configuration to a host, then
+register the host as a cluster device if it is not already registered (for
+help, see @{article:Cluster: Devices}.)
+
+Once the host is registered, start the SSH server, and then add the host to the
+SSH load balancer pool.
+
+Phabricator SSH servers are stateless, so you can pull them in and out of
+production freely.
+
+You may also want to run web services on these hosts, since the service is very
+similar to SSH, also stateless, and it may be simpler to load balance the
+services together. For details, see @{article:Cluster: Web Servers}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Clustering Introduction}.

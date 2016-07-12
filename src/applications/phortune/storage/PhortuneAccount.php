@@ -7,7 +7,9 @@
  * a personal account).
  */
 final class PhortuneAccount extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $name;
 
@@ -25,18 +27,18 @@ final class PhortuneAccount extends PhortuneDAO
     PhabricatorUser $actor,
     PhabricatorContentSource $content_source) {
 
-    $account = PhortuneAccount::initializeNewAccount($actor);
+    $account = self::initializeNewAccount($actor);
 
     $xactions = array();
     $xactions[] = id(new PhortuneAccountTransaction())
       ->setTransactionType(PhortuneAccountTransaction::TYPE_NAME)
-      ->setNewValue(pht('Account (%s)', $actor->getUserName()));
+      ->setNewValue(pht('Default Account'));
 
     $xactions[] = id(new PhortuneAccountTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue(
         'edge:type',
-        PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER)
+        PhortuneAccountHasMemberEdgeType::EDGECONST)
       ->setNewValue(
         array(
           '=' => array($actor->getPHID() => $actor->getPHID()),
@@ -71,7 +73,7 @@ final class PhortuneAccount extends PhortuneDAO
     return $cart->save();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -95,6 +97,29 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
 
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhortuneAccountEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhortuneAccountTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -106,17 +131,35 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    if ($this->getPHID() === null) {
-      // Allow a user to create an account for themselves.
-      return PhabricatorPolicies::POLICY_USER;
-    } else {
-      return PhabricatorPolicies::POLICY_NOONE;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        if ($this->getPHID() === null) {
+          // Allow a user to create an account for themselves.
+          return PhabricatorPolicies::POLICY_USER;
+        } else {
+          return PhabricatorPolicies::POLICY_NOONE;
+        }
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     $members = array_fuse($this->getMemberPHIDs());
-    return isset($members[$viewer->getPHID()]);
+    if (isset($members[$viewer->getPHID()])) {
+      return true;
+    }
+
+    // If the viewer is acting on behalf of a merchant, they can see
+    // payment accounts.
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      foreach ($viewer->getAuthorities() as $authority) {
+        if ($authority instanceof PhortuneMerchant) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {

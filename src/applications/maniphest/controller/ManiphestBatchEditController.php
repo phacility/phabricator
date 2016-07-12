@@ -2,60 +2,98 @@
 
 final class ManiphestBatchEditController extends ManiphestController {
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+
     $this->requireApplicationCapability(
       ManiphestBulkEditCapability::CAPABILITY);
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $project = null;
+    $board_id = $request->getInt('board');
+    if ($board_id) {
+      $project = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($board_id))
+        ->executeOne();
+      if (!$project) {
+        return new Aphront404Response();
+      }
+    }
 
     $task_ids = $request->getArr('batch');
+    if (!$task_ids) {
+      $task_ids = $request->getStrList('batch');
+    }
+
+    if (!$task_ids) {
+      throw new Exception(
+        pht(
+          'No tasks are selected.'));
+    }
+
     $tasks = id(new ManiphestTaskQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs($task_ids)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
+      ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->execute();
+
+    if (!$tasks) {
+      throw new Exception(
+        pht("You don't have permission to edit any of the selected tasks."));
+    }
+
+    if ($project) {
+      $cancel_uri = '/project/board/'.$project->getID().'/';
+      $redirect_uri = $cancel_uri;
+    } else {
+      $cancel_uri = '/maniphest/';
+      $redirect_uri = '/maniphest/?ids='.implode(',', mpull($tasks, 'getID'));
+    }
 
     $actions = $request->getStr('actions');
     if ($actions) {
-      $actions = json_decode($actions, true);
+      $actions = phutil_json_decode($actions);
     }
 
-    if ($request->isFormPost() && is_array($actions)) {
-      foreach ($tasks as $task) {
-        $field_list = PhabricatorCustomField::getObjectFields(
-          $task,
-          PhabricatorCustomField::ROLE_EDIT);
-        $field_list->readFieldsFromStorage($task);
+    if ($request->isFormPost() && $actions) {
+      $job = PhabricatorWorkerBulkJob::initializeNewJob(
+        $viewer,
+        new ManiphestTaskEditBulkJobType(),
+        array(
+          'taskPHIDs' => mpull($tasks, 'getPHID'),
+          'actions' => $actions,
+          'cancelURI' => $cancel_uri,
+          'doneURI' => $redirect_uri,
+        ));
 
-        $xactions = $this->buildTransactions($actions, $task);
-        if ($xactions) {
-          // TODO: Set content source to "batch edit".
+      $type_status = PhabricatorWorkerBulkJobTransaction::TYPE_STATUS;
 
-          $editor = id(new ManiphestTransactionEditor())
-            ->setActor($user)
-            ->setContentSourceFromRequest($request)
-            ->setContinueOnNoEffect(true)
-            ->setContinueOnMissingFields(true)
-            ->applyTransactions($task, $xactions);
-        }
-      }
+      $xactions = array();
+      $xactions[] = id(new PhabricatorWorkerBulkJobTransaction())
+        ->setTransactionType($type_status)
+        ->setNewValue(PhabricatorWorkerBulkJob::STATUS_CONFIRM);
 
-      $task_ids = implode(',', mpull($tasks, 'getID'));
+      $editor = id(new PhabricatorWorkerBulkJobEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($job, $xactions);
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/maniphest/?ids='.$task_ids);
+        ->setURI($job->getMonitorURI());
     }
 
-    $handles = ManiphestTaskListView::loadTaskHandles($user, $tasks);
+    $handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
 
     $list = new ManiphestTaskListView();
     $list->setTasks($tasks);
-    $list->setUser($user);
+    $list->setUser($viewer);
     $list->setHandles($handles);
 
     $template = new AphrontTokenizerTemplateView();
@@ -63,7 +101,11 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     $projects_source = new PhabricatorProjectDatasource();
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $owner_source = new PhabricatorTypeaheadOwnerDatasource();
+    $mailable_source->setViewer($viewer);
+    $owner_source = new ManiphestAssigneeDatasource();
+    $owner_source->setViewer($viewer);
+    $spaces_source = id(new PhabricatorSpacesNamespaceDatasource())
+      ->setViewer($viewer);
 
     require_celerity_resource('maniphest-batch-editor');
     Javelin::initBehavior(
@@ -73,17 +115,26 @@ final class ManiphestBatchEditController extends ManiphestController {
         'tokenizerTemplate' => $template,
         'sources' => array(
           'project' => array(
-            'src'           => $projects_source->getDatasourceURI(),
-            'placeholder'   => $projects_source->getPlaceholderText(),
+            'src' => $projects_source->getDatasourceURI(),
+            'placeholder' => $projects_source->getPlaceholderText(),
+            'browseURI' => $projects_source->getBrowseURI(),
           ),
           'owner' => array(
-            'src'           => $owner_source->getDatasourceURI(),
-            'placeholder'   => $owner_source->getPlaceholderText(),
-            'limit'         => 1,
+            'src' => $owner_source->getDatasourceURI(),
+            'placeholder' => $owner_source->getPlaceholderText(),
+            'browseURI' => $owner_source->getBrowseURI(),
+            'limit' => 1,
           ),
-          'cc'    => array(
-            'src'           => $mailable_source->getDatasourceURI(),
-            'placeholder'   => $mailable_source->getPlaceholderText(),
+          'cc' => array(
+            'src' => $mailable_source->getDatasourceURI(),
+            'placeholder' => $mailable_source->getPlaceholderText(),
+            'browseURI' => $mailable_source->getBrowseURI(),
+          ),
+          'spaces' => array(
+            'src' => $spaces_source->getDatasourceURI(),
+            'placeholder' => $spaces_source->getPlaceholderText(),
+            'browseURI' => $spaces_source->getBrowseURI(),
+            'limit' => 1,
           ),
         ),
         'input' => 'batch-form-actions',
@@ -91,9 +142,10 @@ final class ManiphestBatchEditController extends ManiphestController {
         'statusMap'   => ManiphestTaskStatus::getTaskStatusMap(),
       ));
 
-    $form = new AphrontFormView();
-    $form->setUser($user);
-    $form->setID('maniphest-batch-edit-form');
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->addHiddenInput('board', $board_id)
+      ->setID('maniphest-batch-edit-form');
 
     foreach ($tasks as $task) {
       $form->appendChild(
@@ -115,11 +167,8 @@ final class ManiphestBatchEditController extends ManiphestController {
           'id'   => 'batch-form-actions',
         )));
     $form->appendChild(
-      phutil_tag('p', array(), pht('These tasks will be edited:')));
-    $form->appendChild($list);
-    $form->appendChild(
-      id(new AphrontFormInsetView())
-        ->setTitle('Actions')
+      id(new PHUIFormInsetView())
+        ->setTitle(pht('Actions'))
         ->setRightButton(javelin_tag(
             'a',
             array(
@@ -139,213 +188,39 @@ final class ManiphestBatchEditController extends ManiphestController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Update Tasks'))
-          ->addCancelButton('/maniphest/'));
+          ->addCancelButton($cancel_uri));
 
     $title = pht('Batch Editor');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Batch Editor'))
+      ->setHeaderIcon('fa-pencil-square-o');
+
+    $task_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Selected Tasks'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($list);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Batch Edit Tasks'))
+      ->setHeaderText(pht('Actions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $task_box,
         $form_box,
-      ),
-      array(
-        'title' => $title,
-        'device' => false,
       ));
-  }
 
-  private function buildTransactions($actions, ManiphestTask $task) {
-    $value_map = array();
-    $type_map = array(
-      'add_comment'     => PhabricatorTransactions::TYPE_COMMENT,
-      'assign'          => ManiphestTransaction::TYPE_OWNER,
-      'status'          => ManiphestTransaction::TYPE_STATUS,
-      'priority'        => ManiphestTransaction::TYPE_PRIORITY,
-      'add_project'     => ManiphestTransaction::TYPE_PROJECTS,
-      'remove_project'  => ManiphestTransaction::TYPE_PROJECTS,
-      'add_ccs'         => ManiphestTransaction::TYPE_CCS,
-      'remove_ccs'      => ManiphestTransaction::TYPE_CCS,
-    );
-
-    $edge_edit_types = array(
-      'add_project'    => true,
-      'remove_project' => true,
-      'add_ccs'        => true,
-      'remove_ccs'     => true,
-    );
-
-    $xactions = array();
-    foreach ($actions as $action) {
-      if (empty($type_map[$action['action']])) {
-        throw new Exception("Unknown batch edit action '{$action}'!");
-      }
-
-      $type = $type_map[$action['action']];
-
-      // Figure out the current value, possibly after modifications by other
-      // batch actions of the same type. For example, if the user chooses to
-      // "Add Comment" twice, we should add both comments. More notably, if the
-      // user chooses "Remove Project..." and also "Add Project...", we should
-      // avoid restoring the removed project in the second transaction.
-
-      if (array_key_exists($type, $value_map)) {
-        $current = $value_map[$type];
-      } else {
-        switch ($type) {
-          case PhabricatorTransactions::TYPE_COMMENT:
-            $current = null;
-            break;
-          case ManiphestTransaction::TYPE_OWNER:
-            $current = $task->getOwnerPHID();
-            break;
-          case ManiphestTransaction::TYPE_STATUS:
-            $current = $task->getStatus();
-            break;
-          case ManiphestTransaction::TYPE_PRIORITY:
-            $current = $task->getPriority();
-            break;
-          case ManiphestTransaction::TYPE_PROJECTS:
-            $current = $task->getProjectPHIDs();
-            break;
-          case ManiphestTransaction::TYPE_CCS:
-            $current = $task->getCCPHIDs();
-            break;
-        }
-      }
-
-      // Check if the value is meaningful / provided, and normalize it if
-      // necessary. This discards, e.g., empty comments and empty owner
-      // changes.
-
-      $value = $action['value'];
-      switch ($type) {
-        case PhabricatorTransactions::TYPE_COMMENT:
-          if (!strlen($value)) {
-            continue 2;
-          }
-          break;
-        case ManiphestTransaction::TYPE_OWNER:
-          if (empty($value)) {
-            continue 2;
-          }
-          $value = head($value);
-          if ($value === ManiphestTaskOwner::OWNER_UP_FOR_GRABS) {
-            $value = null;
-          }
-          break;
-        case ManiphestTransaction::TYPE_PROJECTS:
-          if (empty($value)) {
-            continue 2;
-          }
-          break;
-        case ManiphestTransaction::TYPE_CCS:
-          if (empty($value)) {
-            continue 2;
-          }
-          break;
-      }
-
-      // If the edit doesn't change anything, go to the next action. This
-      // check is only valid for changes like "owner", "status", etc, not
-      // for edge edits, because we should still apply an edit like
-      // "Remove Projects: A, B" to a task with projects "A, B".
-
-      if (empty($edge_edit_types[$action['action']])) {
-        if ($value == $current) {
-          continue;
-        }
-      }
-
-      // Apply the value change; for most edits this is just replacement, but
-      // some need to merge the current and edited values (add/remove project).
-
-      switch ($type) {
-        case PhabricatorTransactions::TYPE_COMMENT:
-          if (strlen($current)) {
-            $value = $current."\n\n".$value;
-          }
-          break;
-        case ManiphestTransaction::TYPE_PROJECTS:
-        case ManiphestTransaction::TYPE_CCS:
-          $remove_actions = array(
-            'remove_project' => true,
-            'remove_ccs'    => true,
-          );
-          $is_remove = isset($remove_actions[$action['action']]);
-
-          $current = array_fill_keys($current, true);
-          $value   = array_fill_keys($value, true);
-
-          $new = $current;
-          $did_something = false;
-
-          if ($is_remove) {
-            foreach ($value as $phid => $ignored) {
-              if (isset($new[$phid])) {
-                unset($new[$phid]);
-                $did_something = true;
-              }
-            }
-          } else {
-            foreach ($value as $phid => $ignored) {
-              if (empty($new[$phid])) {
-                $new[$phid] = true;
-                $did_something = true;
-              }
-            }
-          }
-
-          if (!$did_something) {
-            continue 2;
-          }
-
-          $value = array_keys($new);
-          break;
-      }
-
-      $value_map[$type] = $value;
-    }
-
-    $template = new ManiphestTransaction();
-
-    foreach ($value_map as $type => $value) {
-      $xaction = clone $template;
-      $xaction->setTransactionType($type);
-
-      switch ($type) {
-        case PhabricatorTransactions::TYPE_COMMENT:
-          $xaction->attachComment(
-            id(new ManiphestTransactionComment())
-              ->setContent($value));
-          break;
-        case ManiphestTransaction::TYPE_PROJECTS:
-
-          // TODO: Clean this mess up.
-          $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-          $xaction
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-            ->setMetadataValue('edge:type', $project_type)
-            ->setNewValue(
-              array(
-                '=' => array_fuse($value),
-              ));
-          break;
-        default:
-          $xaction->setNewValue($value);
-          break;
-      }
-
-      $xactions[] = $xaction;
-    }
-
-    return $xactions;
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

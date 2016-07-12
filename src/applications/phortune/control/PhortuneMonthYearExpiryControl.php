@@ -38,7 +38,7 @@ final class PhortuneMonthYearExpiryControl extends AphrontFormControl {
 
   protected function renderInput() {
     if (!$this->getUser()) {
-      throw new Exception('You must setUser() before render()!');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     // represent months like a credit card does

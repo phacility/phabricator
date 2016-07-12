@@ -6,6 +6,7 @@ final class HarbormasterBuildLogQuery
   private $ids;
   private $phids;
   private $buildPHIDs;
+  private $buildTargetPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -62,7 +63,7 @@ final class HarbormasterBuildLogQuery
     return $page;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids) {

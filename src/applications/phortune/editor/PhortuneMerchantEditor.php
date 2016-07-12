@@ -17,7 +17,7 @@ final class PhortuneMerchantEditor
     $types[] = PhortuneMerchantTransaction::TYPE_NAME;
     $types[] = PhortuneMerchantTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
-    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     return $types;
   }
@@ -105,6 +105,5 @@ final class PhortuneMerchantEditor
 
     return $errors;
   }
-
 
 }

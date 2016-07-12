@@ -1,25 +1,16 @@
 <?php
 
-abstract class ManiphestExcelFormat {
+abstract class ManiphestExcelFormat extends Phobject {
 
   final public static function loadAllFormats() {
-    $classes = id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-
-    $objects = array();
-    foreach ($classes as $class) {
-      $objects[$class['name']] = newv($class['name'], array());
-    }
-
-    $objects = msort($objects, 'getOrder');
-
-    return $objects;
+      ->setSortMethod('getOrder')
+      ->execute();
   }
 
-  public abstract function getName();
-  public abstract function getFileName();
+  abstract public function getName();
+  abstract public function getFileName();
 
   public function getOrder() {
     return 0;
@@ -35,7 +26,7 @@ abstract class ManiphestExcelFormat {
   /**
    * @phutil-external-symbol class PHPExcel
    */
-  public abstract function buildWorkbook(
+  abstract public function buildWorkbook(
     PHPExcel $workbook,
     array $tasks,
     array $handles,

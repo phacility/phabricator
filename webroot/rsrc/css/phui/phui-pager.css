@@ -1,0 +1,8 @@
+/**
+ * @provides phui-pager-css
+ */
+
+.phui-pager-view {
+  clear: both;
+  text-align: right;
+}

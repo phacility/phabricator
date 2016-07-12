@@ -3,6 +3,10 @@
 abstract class PhabricatorRepositoryCommitChangeParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  protected function getImportStepFlag() {
+    return PhabricatorRepositoryCommit::IMPORTED_CHANGE;
+  }
+
   public function getRequiredLeaseTime() {
     // It can take a very long time to parse commits; some commits in the
     // Facebook repository affect many millions of paths. Acquire 24h leases.
@@ -17,19 +21,21 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $identifier = $commit->getCommitIdentifier();
-    $callsign = $repository->getCallsign();
-    $full_name = 'r'.$callsign.$identifier;
-
-    $this->log("Parsing %s...\n", $full_name);
-    if ($this->isBadCommit($full_name)) {
-      $this->log('This commit is marked bad!');
+    $this->log("%s\n", pht('Parsing "%s"...', $commit->getMonogram()));
+    if ($this->isBadCommit($commit)) {
+      $this->log(pht('This commit is marked bad!'));
       return;
     }
 
-    $results = $this->parseCommitChanges($repository, $commit);
-    if ($results) {
-      $this->writeCommitChanges($repository, $commit, $results);
+    if (!$this->shouldSkipImportStep()) {
+      $results = $this->parseCommitChanges($repository, $commit);
+      if ($results) {
+        $this->writeCommitChanges($repository, $commit, $results);
+      }
+
+      $commit->writeImportStatusFlag($this->getImportStepFlag());
+
+      PhabricatorSearchWorker::queueDocumentForIndexing($commit->getPHID());
     }
 
     $this->finishParse();
@@ -89,14 +95,6 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
 
   protected function finishParse() {
     $commit = $this->commit;
-
-    $commit->writeImportStatusFlag(
-      PhabricatorRepositoryCommit::IMPORTED_CHANGE);
-
-    id(new PhabricatorSearchIndexer())
-      ->queueDocumentForIndexing($commit->getPHID());
-
-    PhabricatorOwnersPackagePathValidator::updateOwnersPackagePaths($commit);
     if ($this->shouldQueueFollowupTasks()) {
       $this->queueTask(
         'PhabricatorRepositoryCommitOwnersWorker',

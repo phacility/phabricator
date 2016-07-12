@@ -10,10 +10,9 @@ final class DiffusionLowLevelParentsQuery
     return $this;
   }
 
-  public function executeQuery() {
+  protected function executeQuery() {
     if (!strlen($this->identifier)) {
-      throw new Exception(
-        pht('You must provide an identifier with withIdentifier()!'));
+      throw new PhutilInvalidStateException('withIdentifier');
     }
 
     $type = $this->getRepository()->getVersionControlSystem();
@@ -51,7 +50,9 @@ final class DiffusionLowLevelParentsQuery
     list($stdout) = $repository->execxLocalCommand(
       'log --debug --limit 1 --template={parents} --rev %s',
       $this->identifier);
-    $stdout = PhabricatorRepository::filterMercurialDebugOutput($stdout);
+
+    $stdout = DiffusionMercurialCommandEngine::filterMercurialDebugOutput(
+      $stdout);
 
     $hashes = preg_split('/\s+/', trim($stdout));
     foreach ($hashes as $key => $value) {
@@ -71,7 +72,21 @@ final class DiffusionLowLevelParentsQuery
   }
 
   private function loadSubversionParents() {
-    $n = (int)$this->identifier;
+    $repository = $this->getRepository();
+    $identifier = $this->identifier;
+
+    $refs = id(new DiffusionCachedResolveRefsQuery())
+      ->setRepository($repository)
+      ->withRefs(array($identifier))
+      ->execute();
+    if (!$refs) {
+      throw new Exception(
+        pht(
+          'No commit "%s" in this repository.',
+          $identifier));
+    }
+
+    $n = (int)$identifier;
     if ($n > 1) {
       $ids = array($n - 1);
     } else {

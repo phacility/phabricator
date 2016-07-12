@@ -1,0 +1,68 @@
+@title Conduit API Overview
+@group conduit
+
+Overview of the Conduit API.
+
+Overview
+========
+
+Conduit is the HTTP API for Phabricator. It is roughly JSON-RPC: you usually
+pass a JSON blob, and usually get a JSON blob back, although both call and
+result formats are flexible in some cases.
+
+API Clients
+===========
+
+The primary ways to make Conduit calls are:
+
+**Web Console**: The {nav Conduit} application provides a web UI for exploring
+the API and making calls. This is the best starting point for learning about
+the API. See the next section for details.
+
+`ConduitClient`: This is the official client available in `libphutil`, and
+the one used by `arc`.
+
+`arc call-conduit`: You can use this `arc` command to execute low-level
+Conduit calls by piping JSON in to stdin. This can provide a simple way
+to explore the API, or a quick way to get API access from a script written
+in another language without needing a real client.
+
+`curl`: You can format a call with basic HTTP parameters and cURL. The console
+includes examples which show how to format calls.
+
+**Other Clients**: There are also clients available in other languages. You
+can check the [[ https://secure.phabricator.com/w/community_resources/ |
+Community Resources ]] page for links.
+
+API Console
+===========
+
+The easiest way to begin exploring Conduit is by visiting {nav Conduit} in the
+web UI. The application provides an API console which you can use to explore
+available methods, make calls, read documentation, and see examples.
+
+The API console has details about how to construct calls and generate API
+tokens for authentication.
+
+
+Querying and Reading Objects
+============================
+
+For information on searching for objects and reading their properties and
+information, see @{article:Conduit API: Using Search Endpoints}.
+
+
+Creating and Editing Objects
+============================
+
+For information on creating, editing and updating objects, see
+@{article:Conduit API: Using Edit Endpoints}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - reading recommendations on responding to API changes in
+    @{article:Managing Conduit Changes}.

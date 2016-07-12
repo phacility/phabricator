@@ -1,0 +1,36 @@
+/**
+ * @provides phui-head-thing-view-css
+ */
+
+.phui-head-thing-view {
+  height: 24px;
+  line-height: 22px;
+  color: {$greytext};
+}
+
+.phui-head-thing-view.phui-head-has-image {
+  position: relative;
+  padding-left: 32px;
+}
+
+.device-phone .phui-two-column-subheader .phui-head-thing-view {
+  min-height: 24px;
+  height: auto;
+  line-height: inherit;
+}
+
+.phui-head-thing-view a {
+  color: {$darkgreytext};
+}
+
+.phui-head-thing-image {
+  height: 24px;
+  width: 24px;
+  background-size: 100%;
+  margin-right: 8px;
+  border-radius: 3px;
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}

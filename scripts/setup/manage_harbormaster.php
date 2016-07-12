@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('manage Harbormaster');
+$args->setTagline(pht('manage Harbormaster'));
 $args->setSynopsis(<<<EOSYNOPSIS
 **harbormaster** __command__ [__options__]
   Manage and debug Harbormaster.
@@ -14,8 +14,8 @@ EOSYNOPSIS
   );
 $args->parseStandardArguments();
 
-$workflows = id(new PhutilSymbolLoader())
+$workflows = id(new PhutilClassMapQuery())
   ->setAncestorClass('HarbormasterManagementWorkflow')
-  ->loadObjects();
+  ->execute();
 $workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);

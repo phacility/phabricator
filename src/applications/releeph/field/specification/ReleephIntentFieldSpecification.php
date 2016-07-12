@@ -8,7 +8,7 @@ final class ReleephIntentFieldSpecification
   }
 
   public function getName() {
-    return 'Intent';
+    return pht('Intent');
   }
 
   public function getRequiredHandlePHIDsForPropertyView() {
@@ -83,11 +83,11 @@ final class ReleephIntentFieldSpecification
   }
 
   public function renderLabelForCommitMessage() {
-    return 'Approved By';
+    return pht('Approved By');
   }
 
   public function renderLabelForRevertMessage() {
-    return 'Rejected By';
+    return pht('Rejected By');
   }
 
   public function renderValueForCommitMessage() {
@@ -120,13 +120,13 @@ final class ReleephIntentFieldSpecification
 
         if ($is_pusher) {
           if ($is_requestor) {
-            $token = "{$name} (pusher and requestor)";
+            $token = pht('%s (pusher and requestor)', $name);
           } else {
             $token = "{$name} (pusher)";
           }
         } else {
           if ($is_requestor) {
-            $token = "{$name} (requestor)";
+            $token = pht('%s (requestor)', $name);
           } else {
             $token = $name;
           }

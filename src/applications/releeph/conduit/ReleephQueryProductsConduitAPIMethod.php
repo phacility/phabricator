@@ -11,7 +11,7 @@ final class ReleephQueryProductsConduitAPIMethod
     return pht('Query information about Releeph products.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<id>',
       'phids' => 'optional list<phid>',
@@ -20,12 +20,8 @@ final class ReleephQueryProductsConduitAPIMethod
     ) + $this->getPagerParamTypes();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'query-results';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

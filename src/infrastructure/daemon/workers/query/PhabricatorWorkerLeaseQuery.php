@@ -5,11 +5,15 @@
  */
 final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
+  const PHASE_LEASED = 'leased';
   const PHASE_UNLEASED = 'unleased';
   const PHASE_EXPIRED  = 'expired';
 
   private $ids;
+  private $objectPHIDs;
   private $limit;
+  private $skipLease;
+  private $leased = false;
 
   public static function getDefaultWaitBeforeRetry() {
     return phutil_units('5 minutes in seconds');
@@ -19,8 +23,47 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     return phutil_units('2 hours in seconds');
   }
 
+  /**
+   * Set this flag to select tasks from the top of the queue without leasing
+   * them.
+   *
+   * This can be used to show which tasks are coming up next without altering
+   * the queue's behavior.
+   *
+   * @param bool True to skip the lease acquisition step.
+   */
+  public function setSkipLease($skip) {
+    $this->skipLease = $skip;
+    return $this;
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withObjectPHIDs(array $phids) {
+    $this->objectPHIDs = $phids;
+    return $this;
+  }
+
+  /**
+   * Select only leased tasks, only unleased tasks, or both types of task.
+   *
+   * By default, queries select only unleased tasks (equivalent to passing
+   * `false` to this method). You can pass `true` to select only leased tasks,
+   * or `null` to ignore the lease status of tasks.
+   *
+   * If your result set potentially includes leased tasks, you must disable
+   * leasing using @{method:setSkipLease}. These options are intended for use
+   * when displaying task status information.
+   *
+   * @param mixed `true` to select only leased tasks, `false` to select only
+   *              unleased tasks (default), or `null` to select both.
+   * @return this
+   */
+  public function withLeasedTasks($leased) {
+    $this->leased = $leased;
     return $this;
   }
 
@@ -31,7 +74,19 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   public function execute() {
     if (!$this->limit) {
-      throw new Exception('You must setLimit() when leasing tasks.');
+      throw new Exception(
+        pht('You must %s when leasing tasks.', 'setLimit()'));
+    }
+
+    if ($this->leased !== false) {
+      if (!$this->skipLease) {
+        throw new Exception(
+          pht(
+            'If you potentially select leased tasks using %s, '.
+            'you MUST disable lease acquisition by calling %s.',
+            'withLeasedTasks()',
+            'setSkipLease()'));
+      }
     }
 
     $task_table = new PhabricatorWorkerActiveTask();
@@ -44,13 +99,20 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     // find enough tasks, try tasks with expired leases (i.e., tasks which have
     // previously failed).
 
-    $phases = array(
-      self::PHASE_UNLEASED,
-      self::PHASE_EXPIRED,
-    );
+    // If we're selecting leased tasks, look for them first.
+
+    $phases = array();
+    if ($this->leased !== false) {
+      $phases[] = self::PHASE_LEASED;
+    }
+    if ($this->leased !== true) {
+      $phases[] = self::PHASE_UNLEASED;
+      $phases[] = self::PHASE_EXPIRED;
+    }
     $limit = $this->limit;
 
     $leased = 0;
+    $task_ids = array();
     foreach ($phases as $phase) {
       // NOTE: If we issue `UPDATE ... WHERE ... ORDER BY id ASC`, the query
       // goes very, very slowly. The `ORDER BY` triggers this, although we get
@@ -62,7 +124,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         $conn_w,
         'SELECT id, leaseOwner FROM %T %Q %Q %Q',
         $task_table->getTableName(),
-        $this->buildWhereClause($conn_w, $phase),
+        $this->buildCustomWhereClause($conn_w, $phase),
         $this->buildOrderClause($conn_w, $phase),
         $this->buildLimitClause($conn_w, $limit - $leased));
 
@@ -74,17 +136,23 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       // total runtime, so keep it simple for the moment.
 
       if ($rows) {
-        queryfx(
-          $conn_w,
-          'UPDATE %T task
-            SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + %d
-            %Q',
-          $task_table->getTableName(),
-          $lease_ownership_name,
-          self::getDefaultLeaseDuration(),
-          $this->buildUpdateWhereClause($conn_w, $phase, $rows));
+        if ($this->skipLease) {
+          $leased += count($rows);
+          $task_ids += array_fuse(ipull($rows, 'id'));
+        } else {
+          queryfx(
+            $conn_w,
+            'UPDATE %T task
+              SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + %d
+              %Q',
+            $task_table->getTableName(),
+            $lease_ownership_name,
+            self::getDefaultLeaseDuration(),
+            $this->buildUpdateWhereClause($conn_w, $phase, $rows));
 
-        $leased += $conn_w->getAffectedRows();
+          $leased += $conn_w->getAffectedRows();
+        }
+
         if ($leased == $limit) {
           break;
         }
@@ -95,16 +163,27 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       return array();
     }
 
+    if ($this->skipLease) {
+      $selection_condition = qsprintf(
+        $conn_w,
+        'task.id IN (%Ld)',
+        $task_ids);
+    } else {
+      $selection_condition = qsprintf(
+        $conn_w,
+        'task.leaseOwner = %s AND leaseExpires > UNIX_TIMESTAMP()',
+        $lease_ownership_name);
+    }
+
     $data = queryfx_all(
       $conn_w,
       'SELECT task.*, taskdata.data _taskData, UNIX_TIMESTAMP() _serverTime
         FROM %T task LEFT JOIN %T taskdata
           ON taskdata.id = task.dataID
-        WHERE leaseOwner = %s AND leaseExpires > UNIX_TIMESTAMP()
-        %Q %Q',
+        WHERE %Q %Q %Q',
       $task_table->getTableName(),
       $taskdata_table->getTableName(),
-      $lease_ownership_name,
+      $selection_condition,
       $this->buildOrderClause($conn_w, $phase),
       $this->buildLimitClause($conn_w, $limit));
 
@@ -121,13 +200,25 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       $tasks[$row['id']]->setData($task_data);
     }
 
+    if ($this->skipLease) {
+      // Reorder rows into the original phase order if this is a status query.
+      $tasks = array_select_keys($tasks, $task_ids);
+    }
+
     return $tasks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_w, $phase) {
+  protected function buildCustomWhereClause(
+    AphrontDatabaseConnection $conn_w,
+    $phase) {
+
     $where = array();
 
     switch ($phase) {
+      case self::PHASE_LEASED:
+        $where[] = 'leaseOwner IS NOT NULL';
+        $where[] = 'leaseExpires >= UNIX_TIMESTAMP()';
+        break;
       case self::PHASE_UNLEASED:
         $where[] = 'leaseOwner IS NULL';
         break;
@@ -135,11 +226,15 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         $where[] = 'leaseExpires < UNIX_TIMESTAMP()';
         break;
       default:
-        throw new Exception("Unknown phase '{$phase}'!");
+        throw new Exception(pht("Unknown phase '%s'!", $phase));
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf($conn_w, 'id IN (%Ld)', $this->ids);
+    }
+
+    if ($this->objectPHIDs !== null) {
+      $where[] = qsprintf($conn_w, 'objectPHID IN (%Ls)', $this->objectPHIDs);
     }
 
     return $this->formatWhereClause($where);
@@ -156,6 +251,11 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     // `IN (NULL)` doesn't match NULL.
 
     switch ($phase) {
+      case self::PHASE_LEASED:
+        throw new Exception(
+          pht(
+            'Trying to lease tasks selected in the leased phase! This is '.
+            'intended to be impossible.'));
       case self::PHASE_UNLEASED:
         $where[] = qsprintf($conn_w, 'leaseOwner IS NULL');
         $where[] = qsprintf($conn_w, 'id IN (%Ld)', ipull($rows, 'id'));
@@ -172,7 +272,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         $where[] = qsprintf($conn_w, '(%Q)', implode(' OR ', $in));
         break;
       default:
-        throw new Exception("Unknown phase '{$phase}'!");
+        throw new Exception(pht('Unknown phase "%s"!', $phase));
     }
 
     return $this->formatWhereClause($where);
@@ -180,10 +280,14 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   private function buildOrderClause(AphrontDatabaseConnection $conn_w, $phase) {
     switch ($phase) {
+      case self::PHASE_LEASED:
+        // Ideally we'd probably order these by lease acquisition time, but
+        // we don't have that handy and this is a good approximation.
+        return qsprintf($conn_w, 'ORDER BY priority ASC, id ASC');
       case self::PHASE_UNLEASED:
         // When selecting new tasks, we want to consume them in order of
-        // decreasing priority (and then FIFO).
-        return qsprintf($conn_w, 'ORDER BY id ASC');
+        // increasing priority (and then FIFO).
+        return qsprintf($conn_w, 'ORDER BY priority ASC, id ASC');
       case self::PHASE_EXPIRED:
         // When selecting failed tasks, we want to consume them in roughly
         // FIFO order of their failures, which is not necessarily their original
@@ -207,10 +311,23 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   private function getLeaseOwnershipName() {
     static $sequence = 0;
 
+    // TODO: If the host name is very long, this can overflow the 64-character
+    // column, so we pick just the first part of the host name. It might be
+    // useful to just use a random hash as the identifier instead and put the
+    // pid / time / host (which are somewhat useful diagnostically) elsewhere.
+    // Likely, we could store a daemon ID instead and use that to identify
+    // when and where code executed. See T6742.
+
+    $host = php_uname('n');
+    $host = id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes(32)
+      ->setTerminator('...')
+      ->truncateString($host);
+
     $parts = array(
       getmypid(),
       time(),
-      php_uname('n'),
+      $host,
       ++$sequence,
     );
 

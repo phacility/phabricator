@@ -2,7 +2,7 @@
 
 final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('conduit');
     $this->setArguments(
       array(
@@ -18,21 +18,25 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
 
     $methodv = $args->getArg('method');
     if (!$methodv) {
-      throw new Exception('No Conduit method provided.');
+      throw new Exception(pht('No Conduit method provided.'));
     } else if (count($methodv) > 1) {
-      throw new Exception('Too many Conduit methods provided.');
+      throw new Exception(pht('Too many Conduit methods provided.'));
     }
 
     $method = head($methodv);
 
     $json = $this->readAllInput();
-    $raw_params = json_decode($json, true);
-    if (!is_array($raw_params)) {
-      throw new Exception('Invalid JSON input.');
+    $raw_params = null;
+    try {
+      $raw_params = phutil_json_decode($json);
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht('Invalid JSON input.'),
+        $ex);
     }
 
     $params = idx($raw_params, 'params', '[]');
-    $params = json_decode($params, true);
+    $params = phutil_json_decode($params);
     $metadata = idx($params, '__conduit__', array());
     unset($params['__conduit__']);
 

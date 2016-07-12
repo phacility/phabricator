@@ -1,67 +1,50 @@
 <?php
 
 /**
- * @task lease      Lease Acquisition
- * @task resource   Resource Allocation
- * @task log        Logging
+ * @task lease Lease Acquisition
+ * @task resource Resource Allocation
+ * @task interface Resource Interfaces
+ * @task log Logging
  */
-abstract class DrydockBlueprintImplementation {
-
-  private $activeResource;
-  private $activeLease;
-  private $instance;
+abstract class DrydockBlueprintImplementation extends Phobject {
 
   abstract public function getType();
-  abstract public function getInterface(
-    DrydockResource $resource,
-    DrydockLease $lease,
-    $type);
 
   abstract public function isEnabled();
 
   abstract public function getBlueprintName();
   abstract public function getDescription();
 
-  public function getBlueprintClass() {
-    return get_class($this);
-  }
-
-  protected function loadLease($lease_id) {
-    // TODO: Get rid of this?
-    $query = id(new DrydockLeaseQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($lease_id))
-      ->execute();
-
-    $lease = idx($query, $lease_id);
-
-    if (!$lease) {
-      throw new Exception("No such lease '{$lease_id}'!");
-    }
-
-    return $lease;
-  }
-
-  protected function getInstance() {
-    if (!$this->instance) {
-      throw new Exception(
-        'Attach the blueprint instance to the implementation.');
-    }
-
-    return $this->instance;
-  }
-
-  public function attachInstance(DrydockBlueprint $instance) {
-    $this->instance = $instance;
-    return $this;
+  public function getBlueprintIcon() {
+    return 'fa-map-o';
   }
 
   public function getFieldSpecifications() {
+    $fields = array();
+
+    $fields += $this->getCustomFieldSpecifications();
+
+    if ($this->shouldUseConcurrentResourceLimit()) {
+      $fields += array(
+        'allocator.limit' => array(
+          'name' => pht('Limit'),
+          'caption' => pht(
+            'Maximum number of resources this blueprint can have active '.
+            'concurrently.'),
+          'type' => 'int',
+        ),
+      );
+    }
+
+    return $fields;
+  }
+
+  protected function getCustomFieldSpecifications() {
     return array();
   }
 
-  public function getDetail($key, $default = null) {
-    return $this->getInstance()->getDetail($key, $default);
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
   }
 
 
@@ -69,401 +52,438 @@ abstract class DrydockBlueprintImplementation {
 
 
   /**
-   * @task lease
-   */
-  final public function filterResource(
-    DrydockResource $resource,
-    DrydockLease $lease) {
-
-    $scope = $this->pushActiveScope($resource, $lease);
-
-    return $this->canAllocateLease($resource, $lease);
-  }
-
-
-  /**
    * Enforce basic checks on lease/resource compatibility. Allows resources to
    * reject leases if they are incompatible, even if the resource types match.
    *
    * For example, if a resource represents a 32-bit host, this method might
-   * reject leases that need a 64-bit host. If a resource represents a working
-   * copy of repository "X", this method might reject leases which need a
-   * working copy of repository "Y". Generally, although the main types of
-   * a lease and resource may match (e.g., both "host"), it may not actually be
-   * possible to satisfy the lease with a specific resource.
+   * reject leases that need a 64-bit host. The blueprint might also reject
+   * a resource if the lease needs 8GB of RAM and the resource only has 6GB
+   * free.
    *
-   * This method generally should not enforce limits or perform capacity
-   * checks. Perform those in @{method:shouldAllocateLease} instead. It also
-   * should not perform actual acquisition of the lease; perform that in
-   * @{method:executeAcquireLease} instead.
+   * This method should not acquire locks or expect anything to be locked. This
+   * is a coarse compatibility check between a lease and a resource.
    *
-   * @param   DrydockResource   Candidiate resource to allocate the lease on.
-   * @param   DrydockLease      Pending lease that wants to allocate here.
-   * @return  bool              True if the resource and lease are compatible.
+   * @param DrydockBlueprint Concrete blueprint to allocate for.
+   * @param DrydockResource Candidiate resource to allocate the lease on.
+   * @param DrydockLease Pending lease that wants to allocate here.
+   * @return bool True if the resource and lease are compatible.
    * @task lease
    */
-  abstract protected function canAllocateLease(
+  abstract public function canAcquireLeaseOnResource(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease);
 
 
   /**
-   * @task lease
-   */
-  final public function allocateLease(
-    DrydockResource $resource,
-    DrydockLease $lease) {
-
-    $scope = $this->pushActiveScope($resource, $lease);
-
-    $this->log('Trying to Allocate Lease');
-
-    $lease->setStatus(DrydockLeaseStatus::STATUS_ACQUIRING);
-    $lease->setResourceID($resource->getID());
-    $lease->attachResource($resource);
-
-    $ephemeral_lease = id(clone $lease)->makeEphemeral();
-
-    $allocated = false;
-    $allocation_exception = null;
-
-    $resource->openTransaction();
-      $resource->beginReadLocking();
-        $resource->reload();
-
-        // TODO: Policy stuff.
-        $other_leases = id(new DrydockLease())->loadAllWhere(
-          'status IN (%Ld) AND resourceID = %d',
-          array(
-            DrydockLeaseStatus::STATUS_ACQUIRING,
-            DrydockLeaseStatus::STATUS_ACTIVE,
-          ),
-          $resource->getID());
-
-        try {
-          $allocated = $this->shouldAllocateLease(
-            $resource,
-            $ephemeral_lease,
-            $other_leases);
-        } catch (Exception $ex) {
-          $allocation_exception = $ex;
-        }
-
-        if ($allocated) {
-          $lease->save();
-        }
-      $resource->endReadLocking();
-    if ($allocated) {
-      $resource->saveTransaction();
-      $this->log('Allocated Lease');
-    } else {
-      $resource->killTransaction();
-      $this->log('Failed to Allocate Lease');
-    }
-
-    if ($allocation_exception) {
-      $this->logException($allocation_exception);
-    }
-
-    return $allocated;
-  }
-
-
-  /**
-   * Enforce lease limits on resources. Allows resources to reject leases if
-   * they would become over-allocated by accepting them.
-   *
-   * For example, if a resource represents disk space, this method might check
-   * how much space the lease is asking for (say, 200MB) and how much space is
-   * left unallocated on the resource. It could grant the lease (return true)
-   * if it has enough remaining space (more than 200MB), and reject the lease
-   * (return false) if it does not (less than 200MB).
-   *
-   * A resource might also allow only exclusive leases. In this case it could
-   * accept a new lease (return true) if there are no active leases, or reject
-   * the new lease (return false) if there any other leases.
-   *
-   * A lock is held on the resource while this method executes to prevent
-   * multiple processes from allocating leases on the resource simultaneously.
-   * However, this means you should implement the method as cheaply as possible.
-   * In particular, do not perform any actual acquisition or setup in this
-   * method.
-   *
-   * If allocation is permitted, the lease will be moved to `ACQUIRING` status
-   * and @{method:executeAcquireLease} will be called to actually perform
-   * acquisition.
-   *
-   * General compatibility checks unrelated to resource limits and capacity are
-   * better implemented in @{method:canAllocateLease}, which serves as a
-   * cheap filter before lock acquisition.
-   *
-   * @param   DrydockResource     Candidate resource to allocate the lease on.
-   * @param   DrydockLease        Pending lease that wants to allocate here.
-   * @param   list<DrydockLease>  Other allocated and acquired leases on the
-   *                              resource. The implementation can inspect them
-   *                              to verify it can safely add the new lease.
-   * @return  bool                True to allocate the lease on the resource;
-   *                              false to reject it.
-   * @task lease
-   */
-  abstract protected function shouldAllocateLease(
-    DrydockResource $resource,
-    DrydockLease $lease,
-    array $other_leases);
-
-
-  /**
-   * @task lease
-   */
-  final public function acquireLease(
-    DrydockResource $resource,
-    DrydockLease $lease) {
-
-    $scope = $this->pushActiveScope($resource, $lease);
-
-    $this->log('Acquiring Lease');
-    $lease->setStatus(DrydockLeaseStatus::STATUS_ACTIVE);
-    $lease->setResourceID($resource->getID());
-    $lease->attachResource($resource);
-
-    $ephemeral_lease = id(clone $lease)->makeEphemeral();
-
-    try {
-      $this->executeAcquireLease($resource, $ephemeral_lease);
-    } catch (Exception $ex) {
-      $this->logException($ex);
-      throw $ex;
-    }
-
-    $lease->setAttributes($ephemeral_lease->getAttributes());
-    $lease->save();
-    $this->log('Acquired Lease');
-  }
-
-
-  /**
-   * Acquire and activate an allocated lease. Allows resources to peform setup
-   * as leases are brought online.
-   *
-   * Following a successful call to @{method:canAllocateLease}, a lease is moved
-   * to `ACQUIRING` status and this method is called after resource locks are
-   * released. Nothing is locked while this method executes; the implementation
-   * is free to perform expensive operations like writing files and directories,
-   * executing commands, etc.
-   *
-   * After this method executes, the lease status is moved to `ACTIVE` and the
-   * original leasee may access it.
+   * Acquire a lease. Allows resources to peform setup as leases are brought
+   * online.
    *
    * If acquisition fails, throw an exception.
    *
-   * @param   DrydockResource   Resource to acquire a lease on.
-   * @param   DrydockLease      Lease to acquire.
-   * @return  void
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource to acquire a lease on.
+   * @param DrydockLease Requested lease.
+   * @return void
+   * @task lease
    */
-  abstract protected function executeAcquireLease(
+  abstract public function acquireLease(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease);
 
 
-
-  final public function releaseLease(
+  /**
+   * @return void
+   * @task lease
+   */
+  public function activateLease(
+    DrydockBlueprint $blueprint,
     DrydockResource $resource,
     DrydockLease $lease) {
-    $scope = $this->pushActiveScope(null, $lease);
-
-    $released = false;
-
-    $lease->openTransaction();
-      $lease->beginReadLocking();
-        $lease->reload();
-
-        if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE) {
-          $lease->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
-          $lease->save();
-          $released = true;
-        }
-
-      $lease->endReadLocking();
-    $lease->saveTransaction();
-
-    if (!$released) {
-      throw new Exception('Unable to release lease: lease not active!');
-    }
-
+    throw new PhutilMethodNotImplementedException();
   }
 
+
+  /**
+   * React to a lease being released.
+   *
+   * This callback is primarily useful for automatically releasing resources
+   * once all leases are released.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource a lease was released on.
+   * @param DrydockLease Recently released lease.
+   * @return void
+   * @task lease
+   */
+  abstract public function didReleaseLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease);
+
+
+  /**
+   * Destroy any temporary data associated with a lease.
+   *
+   * If a lease creates temporary state while held, destroy it here.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource the lease is acquired on.
+   * @param DrydockLease The lease being destroyed.
+   * @return void
+   * @task lease
+   */
+  abstract public function destroyLease(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease);
 
 
 /* -(  Resource Allocation  )------------------------------------------------ */
 
 
-  public function canAllocateMoreResources(array $pool) {
-    return true;
+  /**
+   * Enforce fundamental implementation/lease checks. Allows implementations to
+   * reject a lease which no concrete blueprint can ever satisfy.
+   *
+   * For example, if a lease only builds ARM hosts and the lease needs a
+   * PowerPC host, it may be rejected here.
+   *
+   * This is the earliest rejection phase, and followed by
+   * @{method:canEverAllocateResourceForLease}.
+   *
+   * This method should not actually check if a resource can be allocated
+   * right now, or even if a blueprint which can allocate a suitable resource
+   * really exists, only if some blueprint may conceivably exist which could
+   * plausibly be able to build a suitable resource.
+   *
+   * @param DrydockLease Requested lease.
+   * @return bool True if some concrete blueprint of this implementation's
+   *   type might ever be able to build a resource for the lease.
+   * @task resource
+   */
+  abstract public function canAnyBlueprintEverAllocateResourceForLease(
+    DrydockLease $lease);
+
+
+  /**
+   * Enforce basic blueprint/lease checks. Allows blueprints to reject a lease
+   * which they can not build a resource for.
+   *
+   * This is the second rejection phase. It follows
+   * @{method:canAnyBlueprintEverAllocateResourceForLease} and is followed by
+   * @{method:canAllocateResourceForLease}.
+   *
+   * This method should not check if a resource can be built right now, only
+   * if the blueprint as configured may, at some time, be able to build a
+   * suitable resource.
+   *
+   * @param DrydockBlueprint Blueprint which may be asked to allocate a
+   *   resource.
+   * @param DrydockLease Requested lease.
+   * @return bool True if this blueprint can eventually build a suitable
+   *   resource for the lease, as currently configured.
+   * @task resource
+   */
+  abstract public function canEverAllocateResourceForLease(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease);
+
+
+  /**
+   * Enforce basic availability limits. Allows blueprints to reject resource
+   * allocation if they are currently overallocated.
+   *
+   * This method should perform basic capacity/limit checks. For example, if
+   * it has a limit of 6 resources and currently has 6 resources allocated,
+   * it might reject new leases.
+   *
+   * This method should not acquire locks or expect locks to be acquired. This
+   * is a coarse check to determine if the operation is likely to succeed
+   * right now without needing to acquire locks.
+   *
+   * It is expected that this method will sometimes return `true` (indicating
+   * that a resource can be allocated) but find that another allocator has
+   * eaten up free capacity by the time it actually tries to build a resource.
+   * This is normal and the allocator will recover from it.
+   *
+   * @param DrydockBlueprint The blueprint which may be asked to allocate a
+   *   resource.
+   * @param DrydockLease Requested lease.
+   * @return bool True if this blueprint appears likely to be able to allocate
+   *   a suitable resource.
+   * @task resource
+   */
+  abstract public function canAllocateResourceForLease(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease);
+
+
+  /**
+   * Allocate a suitable resource for a lease.
+   *
+   * This method MUST acquire, hold, and manage locks to prevent multiple
+   * allocations from racing. World state is not locked before this method is
+   * called. Blueprints are entirely responsible for any lock handling they
+   * need to perform.
+   *
+   * @param DrydockBlueprint The blueprint which should allocate a resource.
+   * @param DrydockLease Requested lease.
+   * @return DrydockResource Allocated resource.
+   * @task resource
+   */
+  abstract public function allocateResource(
+    DrydockBlueprint $blueprint,
+    DrydockLease $lease);
+
+
+  /**
+   * @task resource
+   */
+  public function activateResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource) {
+    throw new PhutilMethodNotImplementedException();
   }
 
-  abstract protected function executeAllocateResource(DrydockLease $lease);
+
+  /**
+   * Destroy any temporary data associated with a resource.
+   *
+   * If a resource creates temporary state when allocated, destroy that state
+   * here. For example, you might shut down a virtual host or destroy a working
+   * copy on disk.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource being destroyed.
+   * @return void
+   * @task resource
+   */
+  abstract public function destroyResource(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource);
 
 
-  final public function allocateResource(DrydockLease $lease) {
-    $scope = $this->pushActiveScope(null, $lease);
+  /**
+   * Get a human readable name for a resource.
+   *
+   * @param DrydockBlueprint Blueprint which built the resource.
+   * @param DrydockResource Resource to get the name of.
+   * @return string Human-readable resource name.
+   * @task resource
+   */
+  abstract public function getResourceName(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource);
 
-    $this->log(
-      pht(
-        "Blueprint '%s': Allocating Resource for '%s'",
-        $this->getBlueprintClass(),
-        $lease->getLeaseName()));
 
-    try {
-      $resource = $this->executeAllocateResource($lease);
-      $this->validateAllocatedResource($resource);
-    } catch (Exception $ex) {
-      $this->logException($ex);
-      throw $ex;
-    }
+/* -(  Resource Interfaces  )------------------------------------------------ */
 
-    return $resource;
-  }
+
+  abstract public function getInterface(
+    DrydockBlueprint $blueprint,
+    DrydockResource $resource,
+    DrydockLease $lease,
+    $type);
 
 
 /* -(  Logging  )------------------------------------------------------------ */
 
 
-  /**
-   * @task log
-   */
-  protected function logException(Exception $ex) {
-    $this->log($ex->getMessage());
-  }
-
-
-  /**
-   * @task log
-   */
-  protected function log($message) {
-    self::writeLog(
-      $this->activeResource,
-      $this->activeLease,
-      $message);
-  }
-
-
-  /**
-   * @task log
-   */
-  public static function writeLog(
-    DrydockResource $resource = null,
-    DrydockLease $lease = null,
-    $message) {
-
-    $log = id(new DrydockLog())
-      ->setEpoch(time())
-      ->setMessage($message);
-
-    if ($resource) {
-      $log->setResourceID($resource->getID());
-    }
-
-    if ($lease) {
-      $log->setLeaseID($lease->getID());
-    }
-
-    $log->save();
-  }
-
-
   public static function getAllBlueprintImplementations() {
-    static $list = null;
-
-    if ($list === null) {
-      $blueprints = id(new PhutilSymbolLoader())
-        ->setType('class')
-        ->setAncestorClass('DrydockBlueprintImplementation')
-        ->setConcreteOnly(true)
-        ->selectAndLoadSymbols();
-      $list = ipull($blueprints, 'name', 'name');
-      foreach ($list as $class_name => $ignored) {
-        $list[$class_name] = newv($class_name, array());
-      }
-    }
-
-    return $list;
-  }
-
-  public static function getAllBlueprintImplementationsForResource($type) {
-    static $groups = null;
-    if ($groups === null) {
-      $groups = mgroup(self::getAllBlueprintImplementations(), 'getType');
-    }
-    return idx($groups, $type, array());
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->execute();
   }
 
   public static function getNamedImplementation($class) {
     return idx(self::getAllBlueprintImplementations(), $class);
   }
 
-  protected function newResourceTemplate($name) {
+  protected function newResourceTemplate(DrydockBlueprint $blueprint) {
+
     $resource = id(new DrydockResource())
-      ->setBlueprintPHID($this->getInstance()->getPHID())
-      ->setBlueprintClass($this->getBlueprintClass())
+      ->setBlueprintPHID($blueprint->getPHID())
+      ->attachBlueprint($blueprint)
       ->setType($this->getType())
-      ->setStatus(DrydockResourceStatus::STATUS_PENDING)
-      ->setName($name)
-      ->save();
+      ->setStatus(DrydockResourceStatus::STATUS_PENDING);
 
-    $this->activeResource = $resource;
-
-    $this->log(
-      pht(
-        "Blueprint '%s': Created New Template",
-        $this->getBlueprintClass()));
+    // Pre-allocate the resource PHID.
+    $resource->setPHID($resource->generatePHID());
 
     return $resource;
   }
 
+  protected function newLease(DrydockBlueprint $blueprint) {
+    return DrydockLease::initializeNewLease()
+      ->setAuthorizingPHID($blueprint->getPHID());
+  }
+
+  protected function requireActiveLease(DrydockLease $lease) {
+    $lease_status = $lease->getStatus();
+
+    switch ($lease_status) {
+      case DrydockLeaseStatus::STATUS_PENDING:
+      case DrydockLeaseStatus::STATUS_ACQUIRED:
+        throw new PhabricatorWorkerYieldException(15);
+      case DrydockLeaseStatus::STATUS_ACTIVE:
+        return;
+      default:
+        throw new Exception(
+          pht(
+            'Lease ("%s") is in bad state ("%s"), expected "%s".',
+            $lease->getPHID(),
+            $lease_status,
+            DrydockLeaseStatus::STATUS_ACTIVE));
+    }
+  }
+
+
   /**
-   * Sanity checks that the blueprint is implemented properly.
+   * Does this implementation use concurrent resource limits?
+   *
+   * Implementations can override this method to opt into standard limit
+   * behavior, which provides a simple concurrent resource limit.
+   *
+   * @return bool True to use limits.
    */
-  private function validateAllocatedResource($resource) {
-    $blueprint = $this->getBlueprintClass();
-
-    if (!($resource instanceof DrydockResource)) {
-      throw new Exception(
-        "Blueprint '{$blueprint}' is not properly implemented: ".
-        "executeAllocateResource() must return an object of type ".
-        "DrydockResource or throw, but returned something else.");
-    }
-
-    $current_status = $resource->getStatus();
-    $req_status = DrydockResourceStatus::STATUS_OPEN;
-    if ($current_status != $req_status) {
-      $current_name = DrydockResourceStatus::getNameForStatus($current_status);
-      $req_name = DrydockResourceStatus::getNameForStatus($req_status);
-      throw new Exception(
-        "Blueprint '{$blueprint}' is not properly implemented: ".
-        "executeAllocateResource() must return a DrydockResource with ".
-        "status '{$req_name}', but returned one with status ".
-        "'{$current_name}'.");
-    }
+  protected function shouldUseConcurrentResourceLimit() {
+    return false;
   }
 
-  private function pushActiveScope(
-    DrydockResource $resource = null,
-    DrydockLease $lease = null) {
 
-    if (($this->activeResource !== null) ||
-        ($this->activeLease !== null)) {
-      throw new Exception('There is already an active resource or lease!');
+  /**
+   * Get the effective concurrent resource limit for this blueprint.
+   *
+   * @param DrydockBlueprint Blueprint to get the limit for.
+   * @return int|null Limit, or `null` for no limit.
+   */
+  protected function getConcurrentResourceLimit(DrydockBlueprint $blueprint) {
+    if ($this->shouldUseConcurrentResourceLimit()) {
+      $limit = $blueprint->getFieldValue('allocator.limit');
+      $limit = (int)$limit;
+      if ($limit > 0) {
+        return $limit;
+      } else {
+        return null;
+      }
     }
 
-    $this->activeResource = $resource;
-    $this->activeLease = $lease;
-
-    return new DrydockBlueprintScopeGuard($this);
+    return null;
   }
 
-  public function popActiveScope() {
-    $this->activeResource = null;
-    $this->activeLease = null;
+
+  protected function getConcurrentResourceLimitSlotLock(
+    DrydockBlueprint $blueprint) {
+
+    $limit = $this->getConcurrentResourceLimit($blueprint);
+    if ($limit === null) {
+      return;
+    }
+
+    $blueprint_phid = $blueprint->getPHID();
+
+    // TODO: This logic shouldn't do anything awful, but is a little silly. It
+    // would be nice to unify the "huge limit" and "small limit" cases
+    // eventually but it's a little tricky.
+
+    // If the limit is huge, just pick a random slot. This is just stopping
+    // us from exploding if someone types a billion zillion into the box.
+    if ($limit > 1024) {
+      $slot = mt_rand(0, $limit - 1);
+      return "allocator({$blueprint_phid}).limit({$slot})";
+    }
+
+    // For reasonable limits, actually check for an available slot.
+    $locks = DrydockSlotLock::loadLocks($blueprint_phid);
+    $locks = mpull($locks, null, 'getLockKey');
+
+    $slots = range(0, $limit - 1);
+    shuffle($slots);
+
+    foreach ($slots as $slot) {
+      $slot_lock = "allocator({$blueprint_phid}).limit({$slot})";
+      if (empty($locks[$slot_lock])) {
+        return $slot_lock;
+      }
+    }
+
+    // If we found no free slot, just return whatever we checked last (which
+    // is just a random slot). There's a small chance we'll get lucky and the
+    // lock will be free by the time we try to take it, but usually we'll just
+    // fail to grab the lock, throw an appropriate lock exception, and get back
+    // on the right path to retry later.
+    return $slot_lock;
+  }
+
+
+
+  /**
+   * Apply standard limits on resource allocation rate.
+   *
+   * @param DrydockBlueprint The blueprint requesting an allocation.
+   * @return bool True if further allocations should be limited.
+   */
+  protected function shouldLimitAllocatingPoolSize(
+    DrydockBlueprint $blueprint) {
+
+    // TODO: If this mechanism sticks around, these values should be
+    // configurable by the blueprint implementation.
+
+    // Limit on total number of active resources.
+    $total_limit = $this->getConcurrentResourceLimit($blueprint);
+
+    // Always allow at least this many allocations to be in flight at once.
+    $min_allowed = 1;
+
+    // Allow this fraction of allocating resources as a fraction of active
+    // resources.
+    $growth_factor = 0.25;
+
+    $resource = new DrydockResource();
+    $conn_r = $resource->establishConnection('r');
+
+    $counts = queryfx_all(
+      $conn_r,
+      'SELECT status, COUNT(*) N FROM %T
+        WHERE blueprintPHID = %s AND status != %s
+        GROUP BY status',
+      $resource->getTableName(),
+      $blueprint->getPHID(),
+      DrydockResourceStatus::STATUS_DESTROYED);
+    $counts = ipull($counts, 'N', 'status');
+
+    $n_alloc = idx($counts, DrydockResourceStatus::STATUS_PENDING, 0);
+    $n_active = idx($counts, DrydockResourceStatus::STATUS_ACTIVE, 0);
+    $n_broken = idx($counts, DrydockResourceStatus::STATUS_BROKEN, 0);
+    $n_released = idx($counts, DrydockResourceStatus::STATUS_RELEASED, 0);
+
+    // If we're at the limit on total active resources, limit additional
+    // allocations.
+    if ($total_limit !== null) {
+      $n_total = ($n_alloc + $n_active + $n_broken + $n_released);
+      if ($n_total >= $total_limit) {
+        return true;
+      }
+    }
+
+    // If the number of in-flight allocations is fewer than the minimum number
+    // of allowed allocations, don't impose a limit.
+    if ($n_alloc < $min_allowed) {
+      return false;
+    }
+
+    $allowed_alloc = (int)ceil($n_active * $growth_factor);
+
+    // If the number of in-flight allocation is fewer than the number of
+    // allowed allocations according to the pool growth factor, don't impose
+    // a limit.
+    if ($n_alloc < $allowed_alloc) {
+      return false;
+    }
+
+    return true;
   }
 
 }

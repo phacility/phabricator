@@ -28,7 +28,7 @@ final class PhragmentSnapshotQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhragmentSnapshot();
     $conn_r = $table->establishConnection('r');
 
@@ -43,7 +43,7 @@ final class PhragmentSnapshotQuery
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids) {

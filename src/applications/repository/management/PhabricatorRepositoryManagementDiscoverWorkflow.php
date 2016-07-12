@@ -3,21 +3,21 @@
 final class PhabricatorRepositoryManagementDiscoverWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('discover')
       ->setExamples('**discover** [__options__] __repository__ ...')
-      ->setSynopsis('Discover __repository__, named by callsign.')
+      ->setSynopsis(pht('Discover __repository__.'))
       ->setArguments(
         array(
           array(
             'name'        => 'verbose',
-            'help'        => 'Show additional debugging information.',
+            'help'        => pht('Show additional debugging information.'),
           ),
           array(
             'name'        => 'repair',
-            'help'        => 'Repair a repository with gaps in commit '.
-                             'history.',
+            'help'        => pht(
+              'Repair a repository with gaps in commit history.'),
           ),
           array(
             'name'        => 'repos',
@@ -27,16 +27,20 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $repos = $this->loadRepositories($args, 'repos');
+    $repos = $this->loadLocalRepositories($args, 'repos');
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        'Specify one or more repositories to discover, by callsign.');
+        pht('Specify one or more repositories to discover.'));
     }
 
     $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
-      $console->writeOut("Discovering '%s'...\n", $repo->getCallsign());
+      $console->writeOut(
+        "%s\n",
+        pht(
+          'Discovering "%s"...',
+          $repo->getDisplayName()));
 
       id(new PhabricatorRepositoryDiscoveryEngine())
         ->setRepository($repo)
@@ -45,7 +49,7 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
         ->discoverCommits();
     }
 
-    $console->writeOut("Done.\n");
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

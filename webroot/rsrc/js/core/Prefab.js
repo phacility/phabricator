@@ -19,18 +19,41 @@
 JX.install('Prefab', {
 
   statics : {
-    renderSelect : function(map, selected, attrs) {
+    renderSelect : function(map, selected, attrs, order) {
       var select = JX.$N('select', attrs || {});
-      for (var k in map) {
+
+      // Callers may optionally pass "order" to force options into a specific
+      // order. Although most browsers do retain order, maps in Javascript
+      // aren't technically ordered. Safari, at least, will reorder maps with
+      // numeric keys.
+
+      order = order || JX.keys(map);
+
+      var k;
+      for (var ii = 0; ii < order.length; ii++) {
+        k = order[ii];
         select.options[select.options.length] = new Option(map[k], k);
         if (k == selected) {
           select.value = k;
         }
       }
-      select.value = select.value || JX.keys(map)[0];
+
+      select.value = select.value || order[0];
+
       return select;
     },
 
+    newTokenizerFromTemplate: function(markup, config) {
+      var template = JX.$H(markup).getFragment().firstChild;
+      var container = JX.DOM.find(template, 'div', 'tokenizer-container');
+
+      container.id = '';
+      config.root = container;
+
+      var build = JX.Prefab.buildTokenizer(config);
+      build.node = template;
+      return build;
+    },
 
     /**
      * Build a Phabricator tokenizer out of a configuration with application
@@ -76,74 +99,8 @@ JX.install('Prefab', {
         datasource = new JX.TypeaheadPreloadedSource(config.src);
       }
 
-      // Sort results so that the viewing user always comes up first; after
-      // that, prefer unixname matches to realname matches.
-
-      var sort_handler = function(value, list, cmp) {
-        var priority_hits = {};
-        var self_hits     = {};
-
-        var tokens = this.tokenize(value);
-
-        for (var ii = 0; ii < list.length; ii++) {
-          var item = list[ii];
-          if (!item.priority) {
-            continue;
-          }
-
-          if (config.username && item.priority == config.username) {
-            self_hits[item.id] = true;
-          }
-
-          for (var jj = 0; jj < tokens.length; jj++) {
-            if (item.priority.substr(0, tokens[jj].length) == tokens[jj]) {
-              priority_hits[item.id] = true;
-            }
-          }
-        }
-
-        list.sort(function(u, v) {
-          if (self_hits[u.id] != self_hits[v.id]) {
-            return self_hits[v.id] ? 1 : -1;
-          }
-
-          // If one result is open and one is closed, show the open result
-          // first. The "!" tricks here are becaused closed values are display
-          // strings, so the value is either `null` or some truthy string. If
-          // we compare the values directly, we'll apply this rule to two
-          // objects which are both closed but for different reasons, like
-          // "Archived" and "Disabled".
-
-          var u_open = !u.closed;
-          var v_open = !v.closed;
-
-          if (u_open != v_open) {
-            if (u_open) {
-              return -1;
-            } else {
-              return 1;
-            }
-          }
-
-          if (priority_hits[u.id] != priority_hits[v.id]) {
-            return priority_hits[v.id] ? 1 : -1;
-          }
-
-          // Sort users ahead of other result types.
-          if (u.priorityType != v.priorityType) {
-            if (u.priorityType == 'user') {
-              return -1;
-            }
-            if (v.priorityType == 'user') {
-              return 1;
-            }
-          }
-
-          return cmp(u, v);
-        });
-      };
-
-      datasource.setSortHandler(JX.bind(datasource, sort_handler));
+      datasource.setSortHandler(
+        JX.bind(datasource, JX.Prefab.sortHandler, config));
       datasource.setFilterHandler(JX.Prefab.filterClosedResults);
       datasource.setTransformer(JX.Prefab.transformDatasourceResults);
 
@@ -154,23 +111,42 @@ JX.install('Prefab', {
 
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
-      tokenizer.setRenderTokenCallback(function(value, key) {
-        var result = datasource.getResult(key);
+      tokenizer.setRenderTokenCallback(function(value, key, container) {
+        var result;
+        if (value && (typeof value == 'object') && ('id' in value)) {
+          // TODO: In this case, we've been passed the decoded wire format
+          // dictionary directly. Token rendering is kind of a huge mess that
+          // should be cleaned up and made more consistent. Just force our
+          // way through for now.
+          result = value;
+        } else {
+          result = datasource.getResult(key);
+        }
 
         var icon;
+        var type;
+        var color;
         if (result) {
           icon = result.icon;
           value = result.displayName;
+          type = result.tokenType;
+          color = result.color;
         } else {
-          icon = config.icons[key];
+          icon = (config.icons || {})[key];
+          type = (config.types || {})[key];
+          color = (config.colors || {})[key];
         }
 
         if (icon) {
           icon = JX.Prefab._renderIcon(icon);
         }
 
-        // TODO: Maybe we should render these closed tags in grey? Figure out
-        // how we're going to use color.
+        type = type || 'object';
+        JX.DOM.alterClass(container, 'jx-tokenizer-token-' + type, true);
+
+        if (color) {
+          JX.DOM.alterClass(container, color, true);
+        }
 
         return [icon, value];
       });
@@ -187,12 +163,114 @@ JX.install('Prefab', {
         tokenizer.setInitialValue(config.value);
       }
 
+      if (config.browseURI) {
+        tokenizer.setBrowseURI(config.browseURI);
+      }
+
+      if (config.disabled) {
+        tokenizer.setDisabled(true);
+      }
+
       JX.Stratcom.addData(root, {'tokenizer' : tokenizer});
 
       return {
         tokenizer: tokenizer
       };
     },
+
+    sortHandler: function(config, value, list, cmp) {
+      // Sort results so that the viewing user always comes up first; after
+      // that, prefer unixname matches to realname matches.
+      var priority_hits = {};
+      var self_hits = {};
+
+      // We'll put matches where the user's input is a prefix of the name
+      // above mathches where that isn't true.
+      var prefix_hits = {};
+
+      var tokens = this.tokenize(value);
+      var normal = this.normalize(value);
+
+      for (var ii = 0; ii < list.length; ii++) {
+        var item = list[ii];
+
+        if (this.normalize(item.name).indexOf(normal) === 0) {
+          prefix_hits[item.id] = true;
+        }
+
+        for (var jj = 0; jj < tokens.length; jj++) {
+          if (item.name.indexOf(tokens[jj]) === 0) {
+            priority_hits[item.id] = true;
+          }
+        }
+
+        if (!item.priority) {
+          continue;
+        }
+
+        if (config.username && item.priority == config.username) {
+          self_hits[item.id] = true;
+        }
+
+        for (var hh = 0; hh < tokens.length; hh++) {
+          if (item.priority.substr(0, tokens[hh].length) == tokens[hh]) {
+            priority_hits[item.id] = true;
+          }
+        }
+      }
+
+      list.sort(function(u, v) {
+        if (self_hits[u.id] != self_hits[v.id]) {
+          return self_hits[v.id] ? 1 : -1;
+        }
+
+        // If one result is open and one is closed, show the open result
+        // first. The "!" tricks here are becaused closed values are display
+        // strings, so the value is either `null` or some truthy string. If
+        // we compare the values directly, we'll apply this rule to two
+        // objects which are both closed but for different reasons, like
+        // "Archived" and "Disabled".
+
+        var u_open = !u.closed;
+        var v_open = !v.closed;
+
+        if (u_open != v_open) {
+          if (u_open) {
+            return -1;
+          } else {
+            return 1;
+          }
+        }
+
+        if (priority_hits[u.id] != priority_hits[v.id]) {
+          return priority_hits[v.id] ? 1 : -1;
+        }
+
+        if (prefix_hits[u.id] != prefix_hits[v.id]) {
+          return prefix_hits[v.id] ? 1 : -1;
+        }
+
+        // Sort users ahead of other result types.
+        if (u.priorityType != v.priorityType) {
+          if (u.priorityType == 'user') {
+            return -1;
+          }
+          if (v.priorityType == 'user') {
+            return 1;
+          }
+        }
+
+        // Sort functions after other result types.
+        var uf = (u.tokenType == 'function');
+        var vf = (v.tokenType == 'function');
+        if (uf != vf) {
+          return uf ? 1 : -1;
+        }
+
+        return cmp(u, v);
+      });
+    },
+
 
     /**
      * Filter callback for tokenizers and typeaheads which filters out closed
@@ -265,7 +343,11 @@ JX.install('Prefab', {
         icon: icon,
         closed: closed,
         type: fields[5],
-        sprite: fields[10]
+        sprite: fields[10],
+        color: fields[11],
+        tokenType: fields[12],
+        unique: fields[13] || false,
+        autocomplete: fields[14]
       };
     },
 

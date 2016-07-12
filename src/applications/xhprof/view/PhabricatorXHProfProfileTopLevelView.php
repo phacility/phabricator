@@ -54,7 +54,7 @@ final class PhabricatorXHProfProfileTopLevelView
 
     $rows = array();
     $rows[] = array(
-      'Total',
+      pht('Total'),
       number_format($totals['ct']),
       number_format($totals['wt']).' us',
       '100.0%',
@@ -82,33 +82,35 @@ final class PhabricatorXHProfProfileTopLevelView
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Symbol',
-        'Count',
+        pht('Symbol'),
+        pht('Count'),
         javelin_tag(
           'span',
           array(
             'sigil' => 'has-tooltip',
             'meta'  => array(
-              'tip' => 'Total wall time spent in this function and all of '.
-                       'its children (children are other functions it called '.
-                       'while executing).',
+              'tip' => pht(
+                'Total wall time spent in this function and all of '.
+                'its children (children are other functions it called '.
+                'while executing).'),
               'size' => 200,
             ),
           ),
-          'Wall Time (Inclusive)'),
+          pht('Wall Time (Inclusive)')),
         '%',
         javelin_tag(
           'span',
           array(
             'sigil' => 'has-tooltip',
             'meta'  => array(
-              'tip' => 'Wall time spent in this function, excluding time '.
-                       'spent in children (children are other functions it '.
-                       'called while executing).',
+              'tip' => pht(
+                'Wall time spent in this function, excluding time '.
+                'spent in children (children are other functions it '.
+                'called while executing).'),
               'size' => 200,
             ),
           ),
-          'Wall Time (Exclusive)'),
+          pht('Wall Time (Exclusive)')),
         '%',
       ));
     $table->setColumnClasses(
@@ -121,21 +123,20 @@ final class PhabricatorXHProfProfileTopLevelView
         'n',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('XHProf Profile');
+    $panel = new PHUIObjectBoxView();
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('XHProf Profile'));
 
     if ($this->file) {
-      $panel->addButton(
-        phutil_tag(
-          'a',
-          array(
-            'href' => $this->file->getBestURI(),
-            'class' => 'green button',
-          ),
-          'Download .xhprof Profile'));
+      $button = id(new PHUIButtonView())
+        ->setHref($this->file->getBestURI())
+        ->setText(pht('Download %s Profile', '.xhprof'))
+        ->setTag('a');
+      $header->addActionLink($button);
     }
 
-    $panel->appendChild($table);
+    $panel->setHeader($header);
+    $panel->setTable($table);
 
     return $panel->render();
   }

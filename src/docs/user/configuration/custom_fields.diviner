@@ -16,11 +16,12 @@ These applications currently support custom fields:
 
 | Application | Support |
 |-------------|---------|
-| Maniphest | Full Support |
-| Projects | Full Support |
-| People | Full Support |
 | Differential | Partial Support |
 | Diffusion | Limited Support |
+| Maniphest | Full Support |
+| Owners | Full Support |
+| People | Full Support |
+| Projects | Full Support |
 
 Custom fields can appear in many interfaces and support search, editing, and
 other features.
@@ -38,11 +39,12 @@ The relevant configuration settings are:
 
 | Application | Add Fields | Select Fields |
 |-------------|------------|---------------|
-| Maniphest | `maniphest.custom-field-definitions` | `maniphest.fields` |
-| Projects | `projects.custom-field-definitions` | `projects.fields` |
-| People | `user.custom-field-definitions` | `user.fields` |
 | Differential | Planned | `differential.fields` |
 | Diffusion | Planned | Planned |
+| Maniphest | `maniphest.custom-field-definitions` | `maniphest.fields` |
+| Owners | `owners.custom-field-definitions` | `owners.fields` |
+| People | `user.custom-field-definitions` | `user.fields` |
+| Projects | `projects.custom-field-definitions` | `projects.fields` |
 
 When adding fields, you'll specify a JSON blob like this (for example, as the
 value of `maniphest.custom-field-definitions`):
@@ -96,12 +98,16 @@ When defining custom fields using a configuration option like
     - **users**: A typeahead which allows multiple users to be input.
     - **date**: A date/time picker.
     - **header**: Renders a visual divider which you can use to group fields.
+    - **link**: A text field which allows the user to enter a link.
   - **edit**: Show this field on the application's edit interface (this
     defaults to `true`).
   - **view**: Show this field on the application's view interface (this
-    defaults to `true`).
+    defaults to `true`). (Note: Empty fields are not shown.)
   - **search**: Show this field on the application's search interface, allowing
     users to filter objects by the field value.
+  - **fulltext**: Index the text in this field as part of the object's global
+    full-text index. This allows users to find the object by searching for
+    the field's contents using global search.
   - **caption**: A caption to display underneath the field (optional).
   - **required**: True if the user should be required to provide a value.
   - **options**: If type is set to **select**, provide options for the dropdown
@@ -113,6 +119,8 @@ When defining custom fields using a configuration option like
     above the control when rendered on the edit view.
   - **placeholder**: A placeholder text that appears on text boxes. Only
     supported in text, int and remarkup fields (optional).
+  - **copy**: If true, this field's value will be copied when an object is
+    created using another object as a template.
 
 The `strings` value supports different strings per control type. They are:
 
@@ -122,15 +130,6 @@ The `strings` value supports different strings per control type. They are:
     - **search.default** Text for the search interface, defaults to "(Any)".
     - **search.require** Text for the search interface, defaults to "Require".
 
-Some applications have specific options which only work in that application.
-
-In **Maniphest**:
-
-  - **copy**: When a user creates a task, the UI gives them an option to
-    "Create Another Similar Task". Some fields from the original task are copied
-    into the new task, while others are not; by default, fields are not copied.
-    If you want this field to be copied, specify `true` for the `copy` property.
-
 Internally, Phabricator implements some additional custom field types and
 options. These are not intended for general use and are subject to abrupt
 change, but are documented here for completeness:
@@ -138,6 +137,9 @@ change, but are documented here for completeness:
   - **Credentials**: Controls with type `credential` allow selection of a
     Passphrase credential which provides `credential.provides`, and creation
     of credentials of `credential.type`.
+  - **Datasource**: Controls with type `datasource` allow selection of tokens
+    from an arbitrary datasource, controlled with `datasource.class` and
+    `datasource.parameters`.
 
 = Advanced Custom Fields =
 
@@ -153,16 +155,19 @@ want to add a field to:
 
 | Application | Extend  |
 |-------------|---------|
-| Maniphest | @{class:ManiphestCustomField} |
-| Projects | @{class:PhabricatorProjectCustomField} |
-| People | @{class:PhabricatorUserCustomField} |
 | Differential | @{class:DifferentialCustomField} |
 | Diffusion | @{class:PhabricatorCommitCustomField} |
+| Maniphest | @{class:ManiphestCustomField} |
+| Owners | @{class:PhabricatorOwnersCustomField} |
+| People | @{class:PhabricatorUserCustomField} |
+| Projects | @{class:PhabricatorProjectCustomField} |
 
 The easiest way to get started is to drop your subclass into
-`phabricator/src/extensions/`, which should make it immediately available in the
-UI (if you use APC, you may need to restart your webserver). For example, this
-is a simple template which adds a custom field to Maniphest:
+`phabricator/src/extensions/`. If Phabricator is configured in development
+mode, the class should immediately be available in the UI. If not, you can
+restart Phabricator (for help, see @{article:Restarting Phabricator}).
+
+For example, this is a simple template which adds a custom field to Maniphest:
 
   name=ExampleManiphestCustomField.php
   <?php
@@ -203,5 +208,5 @@ integrations, see the base class for your application and
 Continue by:
 
   - learning more about extending Phabricator with custom code in
-    @{article:libphutil Libraries User Guide};
+    @{article@phabcontrib:Adding New Classes};
   - or returning to the @{article: Configuration Guide}.

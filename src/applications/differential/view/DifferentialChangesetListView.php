@@ -8,6 +8,8 @@ final class DifferentialChangesetListView extends AphrontView {
   private $inlineURI;
   private $renderURI = '/differential/changeset/';
   private $whitespace;
+  private $background;
+  private $header;
 
   private $standaloneURI;
   private $leftRawFileURI;
@@ -20,6 +22,16 @@ final class DifferentialChangesetListView extends AphrontView {
   private $vsMap = array();
 
   private $title;
+  private $parser;
+
+  public function setParser(DifferentialChangesetParser $parser) {
+    $this->parser = $parser;
+    return $this;
+  }
+
+  public function getParser() {
+    return $this->parser;
+  }
 
   public function setTitle($title) {
     $this->title = $title;
@@ -102,7 +114,19 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
+  public function setBackground($background) {
+    $this->background = $background;
+    return $this;
+  }
+
+  public function setHeader($header) {
+    $this->header = $header;
+    return $this;
+  }
+
   public function render() {
+    $viewer = $this->getViewer();
+
     $this->requireResource('differential-changeset-view-css');
 
     $changesets = $this->changesets;
@@ -113,13 +137,14 @@ final class DifferentialChangesetListView extends AphrontView {
         'collapsed' => pht('This file content has been collapsed.'),
       ),
     ));
+
     Javelin::initBehavior(
       'differential-dropdown-menus',
       array(
         'pht' => array(
           'Open in Editor' => pht('Open in Editor'),
-          'Show Entire File' => pht('Show Entire File'),
-          'Entire File Shown' => pht('Entire File Shown'),
+          'Show All Context' => pht('Show All Context'),
+          'All Context Shown' => pht('All Context Shown'),
           "Can't Toggle Unloaded File" => pht("Can't Toggle Unloaded File"),
           'Expand File' => pht('Expand File'),
           'Collapse File' => pht('Collapse File'),
@@ -130,11 +155,14 @@ final class DifferentialChangesetListView extends AphrontView {
           'Configure Editor' => pht('Configure Editor'),
           'Load Changes' => pht('Load Changes'),
           'View Side-by-Side' => pht('View Side-by-Side'),
-          'View Unified' => pht('View Unified (Barely Works!)'),
+          'View Unified' => pht('View Unified'),
           'Change Text Encoding...' => pht('Change Text Encoding...'),
           'Highlight As...' => pht('Highlight As...'),
         ),
       ));
+
+    $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
+      $viewer);
 
     $output = array();
     $ids = array();
@@ -148,7 +176,8 @@ final class DifferentialChangesetListView extends AphrontView {
 
       $ref = $this->references[$key];
 
-      $detail = new DifferentialChangesetDetailView();
+      $detail = id(new DifferentialChangesetDetailView())
+        ->setUser($viewer);
 
       $uniq_id = 'diff-'.$changeset->getAnchorName();
       $detail->setID($uniq_id);
@@ -164,36 +193,46 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
       $detail->setEditable(true);
       $detail->setRenderingRef($ref);
-      $detail->setAutoload(isset($this->visibleChangesets[$key]));
 
       $detail->setRenderURI($this->renderURI);
       $detail->setWhitespace($this->whitespace);
+      $detail->setRenderer($renderer);
 
-      if (isset($this->visibleChangesets[$key])) {
-        $load = 'Loading...';
+      if ($this->getParser()) {
+        $detail->appendChild($this->getParser()->renderChangeset());
+        $detail->setLoaded(true);
       } else {
-        $load = javelin_tag(
-          'a',
-          array(
-            'href' => '#'.$uniq_id,
-            'sigil' => 'differential-load',
-            'meta' => array(
-              'id' => $detail->getID(),
-              'kill' => true,
+        $detail->setAutoload(isset($this->visibleChangesets[$key]));
+        if (isset($this->visibleChangesets[$key])) {
+          $load = pht('Loading...');
+        } else {
+          $load = javelin_tag(
+            'a',
+            array(
+              'class' => 'button grey',
+              'href' => '#'.$uniq_id,
+              'sigil' => 'differential-load',
+              'meta' => array(
+                'id' => $detail->getID(),
+                'kill' => true,
+              ),
+              'mustcapture' => true,
             ),
-            'mustcapture' => true,
-          ),
-          pht('Load'));
+            pht('Load File'));
+        }
+        $detail->appendChild(
+          phutil_tag(
+            'div',
+            array(
+              'id' => $uniq_id,
+            ),
+            phutil_tag(
+              'div',
+              array('class' => 'differential-loading'),
+              $load)));
       }
-      $detail->appendChild(
-        phutil_tag(
-          'div',
-          array(
-            'id' => $uniq_id,
-          ),
-          phutil_tag('div', array('class' => 'differential-loading'), $load)));
-      $output[] = $detail->render();
 
+      $output[] = $detail->render();
       $ids[] = $detail->getID();
     }
 
@@ -203,25 +242,22 @@ final class DifferentialChangesetListView extends AphrontView {
       'changesetViewIDs' => $ids,
     ));
 
-    $this->initBehavior('differential-show-more', array(
-      'uri' => $this->renderURI,
-      'whitespace' => $this->whitespace,
-    ));
-
     $this->initBehavior('differential-comment-jump', array());
 
     if ($this->inlineURI) {
-      $undo_templates = $this->renderUndoTemplates();
-
       Javelin::initBehavior('differential-edit-inline-comments', array(
-        'uri'             => $this->inlineURI,
-        'undo_templates'  => $undo_templates,
-        'stage'           => 'differential-review-stage',
+        'uri' => $this->inlineURI,
+        'stage' => 'differential-review-stage',
+        'revealIcon' => hsprintf('%s', new PHUIDiffRevealIconView()),
       ));
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($this->getTitle());
+    if ($this->header) {
+      $header = $this->header;
+    } else {
+      $header = id(new PHUIHeaderView())
+        ->setHeader($this->getTitle());
+    }
 
     $content = phutil_tag(
       'div',
@@ -233,53 +269,18 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground($this->background)
+      ->setCollapsed(true)
       ->appendChild($content);
 
     return $object_box;
-  }
-
-  /**
-   * Render the "Undo" markup for the inline comment undo feature.
-   */
-  private function renderUndoTemplates() {
-    $link = javelin_tag(
-      'a',
-      array(
-        'href'  => '#',
-        'sigil' => 'differential-inline-comment-undo',
-      ),
-      pht('Undo'));
-
-    $div = phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-inline-undo',
-      ),
-      array('Changes discarded. ', $link));
-
-    return array(
-      'l' => phutil_tag('table', array(),
-        phutil_tag('tr', array(), array(
-          phutil_tag('th', array()),
-          phutil_tag('td', array(), $div),
-          phutil_tag('th', array()),
-          phutil_tag('td', array('colspan' => 3)),
-        ))),
-
-      'r' => phutil_tag('table', array(),
-        phutil_tag('tr', array(), array(
-          phutil_tag('th', array()),
-          phutil_tag('td', array()),
-          phutil_tag('th', array()),
-          phutil_tag('td', array('colspan' => 3), $div),
-        ))),
-    );
   }
 
   private function renderViewOptionsDropdown(
     DifferentialChangesetDetailView $detail,
     $ref,
     DifferentialChangeset $changeset) {
+    $viewer = $this->getViewer();
 
     $meta = array();
 
@@ -299,7 +300,7 @@ final class DifferentialChangesetListView extends AphrontView {
       try {
         $meta['diffusionURI'] =
           (string)$repository->getDiffusionBrowseURIForPath(
-            $this->user,
+            $viewer,
             $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
             idx($changeset->getMetadata(), 'line:first'),
             $this->getBranch());
@@ -327,14 +328,12 @@ final class DifferentialChangesetListView extends AphrontView {
       }
     }
 
-    $user = $this->user;
-    if ($user && $repository) {
+    if ($viewer && $repository) {
       $path = ltrim(
         $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
         '/');
       $line = idx($changeset->getMetadata(), 'line:first', 1);
-      $callsign = $repository->getCallsign();
-      $editor_link = $user->loadEditorLink($path, $line, $callsign);
+      $editor_link = $viewer->loadEditorLink($path, $line, $repository);
       if ($editor_link) {
         $meta['editor'] = $editor_link;
       } else {
@@ -348,7 +347,7 @@ final class DifferentialChangesetListView extends AphrontView {
     return javelin_tag(
       'a',
       array(
-        'class'   => 'button grey small dropdown',
+        'class'   => 'button grey dropdown',
         'meta'    => $meta,
         'href'    => idx($meta, 'detailURI', '#'),
         'target'  => '_blank',

@@ -65,6 +65,10 @@ final class PhortunePaymentMethodQuery
       $method->attachAccount($account);
     }
 
+    if (!$methods) {
+      return $methods;
+    }
+
     $merchants = id(new PhortuneMerchantQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs(mpull($methods, 'getMerchantPHID'))
@@ -78,6 +82,10 @@ final class PhortunePaymentMethodQuery
         continue;
       }
       $method->attachMerchant($merchant);
+    }
+
+    if (!$methods) {
+      return $methods;
     }
 
     $provider_configs = id(new PhortunePaymentProviderConfigQuery())
@@ -98,7 +106,7 @@ final class PhortunePaymentMethodQuery
     return $methods;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {

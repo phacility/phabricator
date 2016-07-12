@@ -6,8 +6,8 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
     return '/config/';
   }
 
-  public function getIconName() {
-    return 'setup';
+  public function getIcon() {
+    return 'fa-sliders';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
@@ -39,6 +39,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
       '/config/' => array(
         '' => 'PhabricatorConfigListController',
         'all/' => 'PhabricatorConfigAllController',
+        'history/' => 'PhabricatorConfigHistoryController',
         'edit/(?P<key>[\w\.\-]+)/' => 'PhabricatorConfigEditController',
         'group/(?P<key>[^/]+)/' => 'PhabricatorConfigGroupController',
         'welcome/' => 'PhabricatorConfigWelcomeController',
@@ -53,6 +54,18 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
         'issue/' => array(
           '' => 'PhabricatorConfigIssueListController',
           '(?P<key>[^/]+)/' => 'PhabricatorConfigIssueViewController',
+        ),
+        'cache/' => array(
+          '' => 'PhabricatorConfigCacheController',
+          'purge/' => 'PhabricatorConfigPurgeCacheController',
+        ),
+        'module/' => array(
+          '(?P<module>[^/]+)/' => 'PhabricatorConfigModuleController',
+        ),
+        'cluster/' => array(
+          'databases/' => 'PhabricatorConfigClusterDatabasesController',
+          'notifications/' => 'PhabricatorConfigClusterNotificationsController',
+          'repositories/' => 'PhabricatorConfigClusterRepositoriesController',
         ),
       ),
     );

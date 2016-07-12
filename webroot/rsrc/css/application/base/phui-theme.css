@@ -1,0 +1,63 @@
+/**
+ * @provides phui-theme-css
+ */
+
+/*--- Header Colors ----------------------------------------------------------*/
+
+.phui-theme-blindigo .phabricator-main-menu-background {
+  background: #41506e;
+}
+
+.phui-theme-dark .phabricator-main-menu-background {
+  background: #171c20;
+}
+
+.phui-theme-indigo .phabricator-main-menu-background {
+  background: #2C1D4A;
+}
+
+.phui-theme-red .phabricator-main-menu-background {
+  background: #650404;
+}
+
+.phui-theme-blue .phabricator-main-menu-background {
+  background: #003965;
+}
+
+.phui-theme-green .phabricator-main-menu-background {
+  background: #124A1B;
+}
+
+/*--- Profile Nav Colors -----------------------------------------------------*/
+
+
+.phui-theme-blindigo .phui-profile-menu .phabricator-side-menu,
+.phui-theme-blindigo .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background: #525867;
+}
+
+.phui-theme-dark .phui-profile-menu .phabricator-side-menu,
+.phui-theme-dark .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background: #30333A;
+}
+
+.phui-theme-indigo .phui-profile-menu .phabricator-side-menu,
+.phui-theme-indigo .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background: #423658;
+}
+
+.phui-theme-red .phui-profile-menu .phabricator-side-menu,
+.phui-theme-red .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background: #420C0C;
+}
+
+.phui-theme-blue .phui-profile-menu .phabricator-side-menu,
+.phui-theme-blue .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background: #062842;
+}
+
+.phui-theme-green .phui-profile-menu .phabricator-side-menu,
+.phui-theme-green .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background: #122916;
+}
+

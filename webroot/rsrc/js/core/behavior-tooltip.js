@@ -18,7 +18,7 @@ JX.behavior('phabricator-tooltips', function() {
         return;
       }
 
-      if (JX.Device.getDevice() != 'desktop') {
+      if (e.getIsTouchEvent()) {
         return;
       }
 

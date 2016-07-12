@@ -7,8 +7,9 @@ final class PHUIHandleTagListView extends AphrontTagView {
   private $limit;
   private $noDataString;
   private $slim;
+  private $showHovercards;
 
-  public function setHandles(array $handles) {
+  public function setHandles($handles) {
     $this->handles = $handles;
     return $this;
   }
@@ -33,6 +34,11 @@ final class PHUIHandleTagListView extends AphrontTagView {
     return $this;
   }
 
+  public function setShowHovercards($show_hovercards) {
+    $this->showHovercards = $show_hovercards;
+    return $this;
+  }
+
   protected function getTagName() {
     return 'ul';
   }
@@ -47,7 +53,7 @@ final class PHUIHandleTagListView extends AphrontTagView {
     $handles = $this->handles;
 
     // If the list is empty, we may render a "No Projects" tag.
-    if (!$handles) {
+    if (!count($handles)) {
       if (strlen($this->noDataString)) {
         $no_data_tag = $this->newPlaceholderTag()
           ->setName($this->noDataString);
@@ -55,13 +61,19 @@ final class PHUIHandleTagListView extends AphrontTagView {
       }
     }
 
-    if ($this->limit) {
+    if ($this->limit && (count($handles) > $this->limit)) {
+      if (!is_array($handles)) {
+        $handles = iterator_to_array($handles);
+      }
       $handles = array_slice($handles, 0, $this->limit);
     }
 
     $list = array();
     foreach ($handles as $handle) {
       $tag = $handle->renderTag();
+      if ($this->showHovercards) {
+        $tag->setPHID($handle->getPHID());
+      }
       if ($this->slim) {
         $tag->setSlimShady(true);
       }
@@ -73,7 +85,7 @@ final class PHUIHandleTagListView extends AphrontTagView {
     }
 
     if ($this->limit) {
-      if ($this->limit < count($this->handles)) {
+      if (count($this->handles) > $this->limit) {
         $tip_text = implode(', ', mpull($this->handles, 'getName'));
 
         $more = $this->newPlaceholderTag()

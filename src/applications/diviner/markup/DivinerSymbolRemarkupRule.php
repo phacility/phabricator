@@ -33,7 +33,7 @@ final class DivinerSymbolRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupSymbol($matches) {
+  public function markupSymbol(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }
@@ -140,6 +140,10 @@ final class DivinerSymbolRemarkupRule extends PhutilRemarkupRule {
           $link = $title;
         }
       } else if ($href) {
+        if ($this->getEngine()->isHTMLMailMode()) {
+          $href = PhabricatorEnv::getProductionURI($href);
+        }
+
         $link = $this->newTag(
           'a',
           array(

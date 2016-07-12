@@ -2,21 +2,15 @@
 
 final class PhragmentHistoryController extends PhragmentController {
 
-  private $dblob;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, 'dblob', '');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $dblob = $request->getURIData('dblob');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $parents = $this->loadParentFragments($this->dblob);
+    $parents = $this->loadParentFragments($dblob);
     if ($parents === null) {
       return new Aphront404Response();
     }
@@ -59,7 +53,7 @@ final class PhragmentHistoryController extends PhragmentController {
     $first = true;
     foreach ($versions as $version) {
       $item = id(new PHUIObjectItemView());
-      $item->setHeader('Version '.$version->getSequence());
+      $item->setHeader(pht('Version %s', $version->getSequence()));
       $item->setHref($version->getURI());
       $item->addAttribute(phabricator_datetime(
         $version->getDateCreated(),
@@ -67,7 +61,7 @@ final class PhragmentHistoryController extends PhragmentController {
 
       if ($version->getFilePHID() === null) {
         $item->setDisabled(true);
-        $item->addAttribute('Deletion');
+        $item->addAttribute(pht('Deletion'));
       }
 
       if (!$first && $can_edit) {
@@ -97,16 +91,19 @@ final class PhragmentHistoryController extends PhragmentController {
       $first = false;
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $current_box,
-        $list,
-      ),
-      array(
-        'title' => pht('Fragment History'),
-      ));
+    $title = pht('Fragment History');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $current_box,
+      $list,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

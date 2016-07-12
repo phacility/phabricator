@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorSMSImplementationAdapter {
+abstract class PhabricatorSMSImplementationAdapter extends Phobject {
 
   private $fromNumber;
   private $toNumber;
@@ -81,6 +81,8 @@ abstract class PhabricatorSMSImplementationAdapter {
         'toNumbers'  => $to_numbers,
         'body'       => $body,
       ),
-      PhabricatorWorker::PRIORITY_ALERTS);
+      array(
+        'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+      ));
   }
 }

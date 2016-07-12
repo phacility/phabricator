@@ -5,7 +5,6 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ids;
   private $blogPHIDs;
   private $bloggerPHIDs;
-  private $phameTitles;
   private $visibility;
   private $publishedAfter;
   private $phids;
@@ -30,12 +29,7 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function withPhameTitles(array $phame_titles) {
-    $this->phameTitles = $phame_titles;
-    return $this;
-  }
-
-  public function withVisibility($visibility) {
+  public function withVisibility(array $visibility) {
     $this->visibility = $visibility;
     return $this;
   }
@@ -45,97 +39,117 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function newResultObject() {
+    return new PhamePost();
+  }
+
   protected function loadPage() {
-    $table  = new PhamePost();
-    $conn_r = $table->establishConnection('r');
+    return $this->loadStandardPage($this->newResultObject());
+  }
 
-    $where_clause = $this->buildWhereClause($conn_r);
-    $order_clause = $this->buildOrderClause($conn_r);
-    $limit_clause = $this->buildLimitClause($conn_r);
+  protected function willFilterPage(array $posts) {
+    // We require blogs to do visibility checks, so load them unconditionally.
+    $blog_phids = mpull($posts, 'getBlogPHID');
 
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T p %Q %Q %Q',
-      $table->getTableName(),
-      $where_clause,
-      $order_clause,
-      $limit_clause);
+    $blogs = id(new PhameBlogQuery())
+      ->setViewer($this->getViewer())
+      ->needProfileImage(true)
+      ->withPHIDs($blog_phids)
+      ->execute();
 
-    $posts = $table->loadAllFromArray($data);
+    $blogs = mpull($blogs, null, 'getPHID');
+    foreach ($posts as $key => $post) {
+      $blog_phid = $post->getBlogPHID();
 
-    if ($posts) {
-      // We require these to do visibility checks, so load them unconditionally.
-      $blog_phids = mpull($posts, 'getBlogPHID');
-      $blogs = id(new PhameBlogQuery())
-        ->setViewer($this->getViewer())
-        ->withPHIDs($blog_phids)
-        ->execute();
-      $blogs = mpull($blogs, null, 'getPHID');
-      foreach ($posts as $post) {
-        if (isset($blogs[$post->getBlogPHID()])) {
-          $post->setBlog($blogs[$post->getBlogPHID()]);
-        }
+      $blog = idx($blogs, $blog_phid);
+      if (!$blog) {
+        $this->didRejectResult($post);
+        unset($posts[$key]);
+        continue;
       }
+
+      $post->attachBlog($blog);
     }
 
     return $posts;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids) {
       $where[] = qsprintf(
-        $conn_r,
-        'p.id IN (%Ld)',
+        $conn,
+        'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
-        $conn_r,
-        'p.phid IN (%Ls)',
+        $conn,
+        'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->bloggerPHIDs) {
       $where[] = qsprintf(
-        $conn_r,
-        'p.bloggerPHID IN (%Ls)',
+        $conn,
+        'bloggerPHID IN (%Ls)',
         $this->bloggerPHIDs);
     }
 
-    if ($this->phameTitles) {
+    if ($this->visibility) {
       $where[] = qsprintf(
-        $conn_r,
-        'p.phameTitle IN (%Ls)',
-        $this->phameTitles);
-    }
-
-    if ($this->visibility !== null) {
-      $where[] = qsprintf(
-        $conn_r,
-        'p.visibility = %d',
+        $conn,
+        'visibility IN (%Ld)',
         $this->visibility);
     }
 
     if ($this->publishedAfter !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'p.datePublished > %d',
+        $conn,
+        'datePublished > %d',
         $this->publishedAfter);
     }
 
-    if ($this->blogPHIDs) {
+    if ($this->blogPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'p.blogPHID in (%Ls)',
+        $conn,
+        'blogPHID in (%Ls)',
         $this->blogPHIDs);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    return $where;
+  }
 
-    return $this->formatWhereClause($where);
+  public function getBuiltinOrders() {
+    return array(
+      'datePublished' => array(
+        'vector' => array('datePublished', 'id'),
+        'name' => pht('Publish Date'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'datePublished' => array(
+        'column' => 'datePublished',
+        'type' => 'int',
+        'reverse' => false,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $post = $this->loadCursorObject($cursor);
+
+    $map = array(
+      'datePublished' => $post->getDatePublished(),
+      'id' => $post->getID(),
+    );
+
+    return $map;
   }
 
   public function getQueryApplicationClass() {

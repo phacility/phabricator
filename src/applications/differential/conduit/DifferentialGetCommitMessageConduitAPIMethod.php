@@ -8,10 +8,10 @@ final class DifferentialGetCommitMessageConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve Differential commit messages or message templates.';
+    return pht('Retrieve Differential commit messages or message templates.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $edit_types = array('edit', 'create');
 
     return array(
@@ -21,13 +21,13 @@ final class DifferentialGetCommitMessageConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty string';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_NOT_FOUND' => 'Revision was not found.',
+      'ERR_NOT_FOUND' => pht('Revision was not found.'),
     );
   }
 

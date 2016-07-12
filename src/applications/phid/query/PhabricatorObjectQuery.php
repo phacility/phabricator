@@ -24,7 +24,7 @@ final class PhabricatorObjectQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     if ($this->namedResults === null) {
       $this->namedResults = array();
     }
@@ -78,7 +78,7 @@ final class PhabricatorObjectQuery
 
   public function getNamedResults() {
     if ($this->namedResults === null) {
-      throw new Exception('Call execute() before getNamedResults()!');
+      throw new PhutilInvalidStateException('execute');
     }
     return $this->namedResults;
   }
@@ -106,29 +106,45 @@ final class PhabricatorObjectQuery
   private function loadObjectsByPHID(array $types, array $phids) {
     $results = array();
 
-    $workspace = $this->getObjectsFromWorkspace($phids);
-
-    foreach ($phids as $key => $phid) {
-      if (isset($workspace[$phid])) {
-        $results[$phid] = $workspace[$phid];
-        unset($phids[$key]);
-      }
-    }
-
-    if (!$phids) {
-      return $results;
-    }
-
     $groups = array();
     foreach ($phids as $phid) {
       $type = phid_get_type($phid);
       $groups[$type][] = $phid;
     }
 
+    $in_flight = $this->getPHIDsInFlight();
     foreach ($groups as $type => $group) {
-      if (isset($types[$type])) {
+      // We check the workspace for each group, because some groups may trigger
+      // other groups to load (for example, transactions load their objects).
+      $workspace = $this->getObjectsFromWorkspace($group);
+
+      foreach ($group as $key => $phid) {
+        if (isset($workspace[$phid])) {
+          $results[$phid] = $workspace[$phid];
+          unset($group[$key]);
+        }
+      }
+
+      if (!$group) {
+        continue;
+      }
+
+      // Don't try to load PHIDs which are already "in flight"; this prevents
+      // us from recursing indefinitely if policy checks or edges form a loop.
+      // We will decline to load the corresponding objects.
+      foreach ($group as $key => $phid) {
+        if (isset($in_flight[$phid])) {
+          unset($group[$key]);
+        }
+      }
+
+      if ($group && isset($types[$type])) {
+        $this->putPHIDsInFlight($group);
         $objects = $types[$type]->loadObjects($this, $group);
-        $results += mpull($objects, null, 'getPHID');
+
+        $map = mpull($objects, null, 'getPHID');
+        $this->putObjectsInWorkspace($map);
+        $results += $map;
       }
     }
 
@@ -144,16 +160,58 @@ final class PhabricatorObjectQuery
   }
 
   /**
-   * This query disables policy filtering because it is performed in the
-   * subqueries which actually load objects. We don't need to re-filter
-   * results, since policies have already been applied.
+   * This query disables policy filtering if the only required capability is
+   * the view capability.
+   *
+   * The view capability is always checked in the subqueries, so we do not need
+   * to re-filter results. For any other set of required capabilities, we do.
    */
   protected function shouldDisablePolicyFiltering() {
-    return true;
+    $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
+    if ($this->getRequiredCapabilities() === array($view_capability)) {
+      return true;
+    }
+    return false;
   }
 
   public function getQueryApplicationClass() {
     return null;
+  }
+
+
+  /**
+   * Select invalid or restricted PHIDs from a list.
+   *
+   * PHIDs are invalid if their objects do not exist or can not be seen by the
+   * viewer. This method is generally used to validate that PHIDs affected by
+   * a transaction are valid.
+   *
+   * @param PhabricatorUser Viewer.
+   * @param list<phid> List of ostensibly valid PHIDs.
+   * @return list<phid> List of invalid or restricted PHIDs.
+   */
+  public static function loadInvalidPHIDsForViewer(
+    PhabricatorUser $viewer,
+    array $phids) {
+
+    if (!$phids) {
+      return array();
+    }
+
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($phids)
+      ->execute();
+    $objects = mpull($objects, null, 'getPHID');
+
+    $invalid = array();
+    foreach ($phids as $phid) {
+      if (empty($objects[$phid])) {
+        $invalid[] = $phid;
+      }
+    }
+
+    return $invalid;
   }
 
 }

@@ -1,0 +1,149 @@
+@title Profile Menu User Guide
+@group userguide
+
+Master profile menus for projects and other objects.
+
+Overview
+========
+
+Some objects, like projects, have customizable menus called "profile menus".
+This guide discusses how to add, remove, reorder, configure and extend these
+menus.
+
+
+Supported Applications
+======================
+
+These applications currently support profile menus:
+
+| Application | Support |
+|-----|-----|
+| Projects | Full |
+| People | //Read-Only// |
+
+
+Collapsing and Expanding
+========================
+
+To collapse a full-width profile menu, click
+{nav icon="angle-left", name="Collapse"}. To expand a narrow menu, click
+{nav icon="angle-right", name="Expand"}.
+
+If you're logged in, this setting is sticky, and all menus will respect your
+preference.
+
+
+Editing Menus
+=============
+
+You can only edit an object's menu if you can edit the object. For example, you
+must have permission to edit a project in order to reconfigure the menu for the
+project.
+
+To edit a menu, click {nav icon="cogs", name="Manage"} in the menu, then click
+{nav icon="th-list", name="Edit Menu"}. This brings you to the menu
+configuration interface which allows you to add and remove items, reorder the
+menu, edit existing items, and choose a default item.
+
+Menus are comprised of a list of items. Some of the items are builtin
+(for example, projects have builtin "Profile", "Workboard" and "Members"
+items). You can also add custom items. Builtin and custom items mostly
+behave in similar ways, but there are a few exceptions (for example, you can
+not completely delete builtin items).
+
+
+Adding Items
+============
+
+To add new items to a menu, use {nav icon="cog", name="Configure Menu"} and
+choose a type of item to add. See below for more details on available items.
+
+You can also find a link to this documentation in the same menu, if you want
+to reference it later.
+
+
+Reordering Items
+================
+
+To reorder items, drag and drop them to the desired position. Your changes
+will be reflected in the item ordering in the menu.
+
+
+Setting a Default
+=================
+
+The default item controls what content is shown when a user browses to the
+object's main page. For example, the default item for a project controls where
+the user ends up when they click a link to the project from another
+application.
+
+To choose a default item, click {nav icon="thumb-tack", name="Make Default"}.
+Not all kinds of items can be set as the default item. For example, you can not
+set a separator line as a default because the item can't be selected and has no
+content.
+
+If no default is explicitly selected, or a default is deleted or disabled, the
+first item which is eligible to be a default is used as the default item.
+
+
+Removing Items
+==============
+
+To remove items, click the {nav icon="times", name="Delete"} action.
+
+Builtin items can not be deleted and have a
+{nav icon="times", name="Disable"} action instead, which will hide them but
+not delete them. You an re-enable a disabled item with the
+{nav icon="plus', name="Enable"} action.
+
+A few items can not be hidden or deleted. For example, the
+{nav icon="cogs", name="Manage"} item must always be available in the menu
+because if you hid it by accident there would no longer be a way to access
+the configuration interface and fix the mistake.
+
+Removing or hiding an item does not disable the underlying functionality.
+For example, if you hide the "Members" item for a project, that just removes
+it from the menu. The project still has members, and users can still navigate
+to the members page by following a link to it from elsewhere in the application
+or entering the URI manually.
+
+
+Editing Items
+=============
+
+To edit an item, click the name of the item. This will show you available
+configuration for the item and allow you to edit it.
+
+Which properties are editable depends on what sort of item you are editing.
+Most items can be renamed, and some items have more settings available. For
+example, when editing a link, you can choose the link target and select an
+icon for the item.
+
+A few items have no configuration. For example, visual separator lines are
+purely cosmetic and have no available settings.
+
+
+Available Items
+===============
+
+When you add items, you can choose between different types of items to add.
+Which item types are available depends on what sort of object you are editing
+the menu for, but most objects support these items:
+
+  - {icon link} **Link**: Allows you to create an item which links to
+    somewhere else in Phabricator, or to an external site.
+  - {icon minus} **Divider**: Adds a visual separator to the menu. This is
+    purely cosmetic.
+  - {icon coffee} **Motivator**: Motivate your employees with inspirational
+    quotes. A new quote every day!
+
+To learn more about how an item works, try adding it. You can always delete
+it later if it doesn't do what you wanted.
+
+
+Writing New Item Types
+======================
+
+IMPORTANT: This feature is not stable, and the API is subject to change.
+
+To add new types of items, subclass @{class:PhabricatorProfilePanel}.

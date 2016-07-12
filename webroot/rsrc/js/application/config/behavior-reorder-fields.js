@@ -54,4 +54,5 @@ JX.behavior('config-reorder-fields', function(config) {
     JX.$(config.inputID).value = JX.JSON.stringify(order);
   };
 
+  write_state_to_form();
 });

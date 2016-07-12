@@ -10,11 +10,15 @@ final class PhabricatorRepositoryRepositoryPHIDType
   }
 
   public function getTypeIcon() {
-    return 'fa-database';
+    return 'fa-code';
   }
 
   public function newObject() {
     return new PhabricatorRepository();
+  }
+
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorDiffusionApplication';
   }
 
   protected function buildQueryForObjects(
@@ -34,43 +38,46 @@ final class PhabricatorRepositoryRepositoryPHIDType
       $repository = $objects[$phid];
 
       $monogram = $repository->getMonogram();
-      $callsign = $repository->getCallsign();
       $name = $repository->getName();
+      $uri = $repository->getURI();
 
       $handle->setName($monogram);
       $handle->setFullName("{$monogram} {$name}");
-      $handle->setURI("/diffusion/{$callsign}/");
+      $handle->setURI($uri);
     }
   }
 
   public function canLoadNamedObject($name) {
-    return preg_match('/^r[A-Z]+$/', $name);
+    return preg_match('/^(r[A-Z]+|R[1-9]\d*)\z/', $name);
   }
 
   public function loadNamedObjects(
     PhabricatorObjectQuery $query,
     array $names) {
 
+    $results = array();
     $id_map = array();
-    foreach ($names as $name) {
+    foreach ($names as $key => $name) {
       $id = substr($name, 1);
       $id_map[$id][] = $name;
+      $names[$key] = substr($name, 1);
     }
 
-    $objects = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($query->getViewer())
-      ->withCallsigns(array_keys($id_map))
-      ->execute();
+      ->withIdentifiers($names);
 
-    $results = array();
-    foreach ($objects as $object) {
-      $callsign = $object->getCallsign();
-      foreach (idx($id_map, $callsign, array()) as $name) {
-        $results[$name] = $object;
+    if ($query->execute()) {
+      $objects = $query->getIdentifierMap();
+      foreach ($objects as $key => $object) {
+        foreach (idx($id_map, $key, array()) as $name) {
+          $results[$name] = $object;
+        }
       }
+      return $results;
+    } else {
+      return array();
     }
-
-    return $results;
   }
 
 }

@@ -1,0 +1,52 @@
+@title User Guide: Project Tone
+@group userguide
+
+Explains why Phabricator uses a lighthearted tone.
+
+Overview
+========
+
+Phabricator uses a lighthearted tone in documentation and some interfaces, and
+includes some features which primarily exist to add flavor or make things
+sillier.
+
+We use this tone because we like building software like this, and the feedback
+we receive about it from users is overwhelmingly (and often effusively)
+positive.
+
+
+Removing Flavor
+===============
+
+Although almost all feedback about project tone that we receive is positive, a
+few users don't like the tone very much (possibly including you if you've been
+linked to this document). If you prefer a more straightforward tone, you can
+disable most of the flavor by turning on the `phabricator.serious-business`
+setting in the {nav Config} application.
+
+(Not everything is covered by this setting. For example, it won't change the
+documentation.)
+
+If you don't like a piece of flavor because it creates legitimate difficulty or
+confusion for you or your users and makes it harder to use Phabricator, let us
+know. We don't intend flavor or tone to get in the way of usability, and can
+sometimes take a joke too far (particularly for users who don't speak English
+natively).
+
+If you don't like a piece of flavor because it's a joke that you don't get or
+don't find particularly funny, but it doesn't impact your ability to understand
+or use the software, we're less likely to remove it. We find all our jokes very
+very funny and cherish each of them dearly.
+
+(If you're committed to removing flavor on grounds of taste, we //might// be
+willing to accept changes which replace our objectively very very funny jokes
+with even better ones.)
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - ignoring this document and complaining about a joke that you don't think is
+    very funny with @{article:Contributing Bug Reports}.

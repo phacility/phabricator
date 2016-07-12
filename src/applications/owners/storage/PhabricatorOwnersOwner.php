@@ -9,7 +9,7 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
   // you want to recursively grab all user ids that own a package
   protected $userPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_KEY_SCHEMA => array(
@@ -40,28 +40,42 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
     if (!$package_ids) {
       return array();
     }
+
     $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
       'packageID IN (%Ls)',
       $package_ids);
 
-    $all_phids = phid_group_by_type(mpull($owners, 'getUserPHID'));
+    $type_user = PhabricatorPeopleUserPHIDType::TYPECONST;
+    $type_project = PhabricatorProjectProjectPHIDType::TYPECONST;
 
-    $user_phids = idx($all_phids,
-      PhabricatorPeopleUserPHIDType::TYPECONST,
-      array());
-
-    $users_in_project_phids = array();
-    $project_phids = idx(
-      $all_phids,
-      PhabricatorProjectProjectPHIDType::TYPECONST);
-    if ($project_phids) {
-      $query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs($project_phids)
-        ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_PROJ_MEMBER));
-      $query->execute();
-      $users_in_project_phids = $query->getDestinationPHIDs();
+    $user_phids = array();
+    $project_phids = array();
+    foreach ($owners as $owner) {
+      $owner_phid = $owner->getUserPHID();
+      switch (phid_get_type($owner_phid)) {
+        case PhabricatorPeopleUserPHIDType::TYPECONST:
+          $user_phids[] = $owner_phid;
+          break;
+        case PhabricatorProjectProjectPHIDType::TYPECONST:
+          $project_phids[] = $owner_phid;
+          break;
+      }
     }
 
-    return array_unique(array_merge($users_in_project_phids, $user_phids));
+    if ($project_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($project_phids)
+        ->needMembers(true)
+        ->execute();
+      foreach ($projects as $project) {
+        foreach ($project->getMemberPHIDs() as $member_phid) {
+          $user_phids[] = $member_phid;
+        }
+      }
+    }
+
+    $user_phids = array_fuse($user_phids);
+    return array_values($user_phids);
   }
 }

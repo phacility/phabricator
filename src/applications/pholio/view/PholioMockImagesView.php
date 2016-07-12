@@ -7,6 +7,10 @@ final class PholioMockImagesView extends AphrontView {
   private $requestURI;
   private $commentFormID;
 
+  private $panelID;
+  private $viewportID;
+  private $behaviorConfig;
+
   public function setCommentFormID($comment_form_id) {
     $this->commentFormID = $comment_form_id;
     return $this;
@@ -39,30 +43,34 @@ final class PholioMockImagesView extends AphrontView {
     return $this;
   }
 
-  public function render() {
-    if (!$this->mock) {
-      throw new Exception('Call setMock() before render()!');
+  public function getMock() {
+    return $this->mock;
+  }
+
+  public function __construct() {
+    $this->panelID = celerity_generate_unique_node_id();
+    $this->viewportID = celerity_generate_unique_node_id();
+  }
+
+  public function getBehaviorConfig() {
+    if (!$this->getMock()) {
+      throw new PhutilInvalidStateException('setMock');
     }
 
-    $mock = $this->mock;
-
-    require_celerity_resource('javelin-behavior-pholio-mock-view');
-
-    $images = array();
-    $panel_id = celerity_generate_unique_node_id();
-    $viewport_id = celerity_generate_unique_node_id();
-
-    $ids = mpull($mock->getImages(), 'getID');
-    if ($this->imageID && isset($ids[$this->imageID])) {
-      $selected_id = $this->imageID;
-    } else {
-      $selected_id = head_key($ids);
+    if ($this->behaviorConfig === null) {
+      $this->behaviorConfig = $this->calculateBehaviorConfig();
     }
+    return $this->behaviorConfig;
+  }
+
+  private function calculateBehaviorConfig() {
+    $mock = $this->getMock();
 
     // TODO: We could maybe do a better job with tailoring this, which is the
     // image shown on the review stage.
-    $nonimage_uri = celerity_get_resource_uri(
-      'rsrc/image/icon/fatcow/thumbnails/default.p100.png');
+    $viewer = $this->getUser();
+
+    $default = PhabricatorFile::loadBuiltin($viewer, 'image-100x100.png');
 
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($this->getUser());
@@ -70,6 +78,8 @@ final class PholioMockImagesView extends AphrontView {
       $engine->addObject($image, 'default');
     }
     $engine->process();
+
+    $images = array();
     $current_set = 0;
     foreach ($mock->getAllImages() as $image) {
       $file = $image->getFile();
@@ -82,24 +92,41 @@ final class PholioMockImagesView extends AphrontView {
         $current_set++;
       }
 
+      $description = $engine->getOutput($image, 'default');
+      if (strlen($description)) {
+        $description = phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-remarkup',
+          ),
+          $description);
+      }
+
       $history_uri = '/pholio/image/history/'.$image->getID().'/';
       $images[] = array(
         'id' => $image->getID(),
         'fullURI' => $file->getBestURI(),
         'stageURI' => ($file->isViewableImage()
           ? $file->getBestURI()
-          : $nonimage_uri),
+          : $default->getBestURI()),
         'pageURI' => $this->getImagePageURI($image, $mock),
         'downloadURI' => $file->getDownloadURI(),
         'historyURI' => $history_uri,
         'width' => $x,
         'height' => $y,
         'title' => $image->getName(),
-        'descriptionMarkup' => $engine->getOutput($image, 'default'),
+        'descriptionMarkup' => $description,
         'isObsolete' => (bool)$image->getIsObsolete(),
         'isImage' => $file->isViewableImage(),
         'isViewable' => $file->isViewableInBrowser(),
       );
+    }
+
+    $ids = mpull($mock->getImages(), 'getID');
+    if ($this->imageID && isset($ids[$this->imageID])) {
+      $selected_id = $this->imageID;
+    } else {
+      $selected_id = head_key($ids);
     }
 
     $navsequence = array();
@@ -109,38 +136,56 @@ final class PholioMockImagesView extends AphrontView {
 
     $full_icon = array(
       javelin_tag('span', array('aural' => true), pht('View Raw File')),
-      id(new PHUIIconView())->setIconFont('fa-file-image-o'),
+      id(new PHUIIconView())->setIcon('fa-file-image-o'),
     );
 
     $download_icon = array(
       javelin_tag('span', array('aural' => true), pht('Download File')),
-      id(new PHUIIconView())->setIconFont('fa-download'),
+      id(new PHUIIconView())->setIcon('fa-download'),
     );
 
     $login_uri = id(new PhutilURI('/login/'))
-      ->setQueryParam('next', (string) $this->getRequestURI());
+      ->setQueryParam('next', (string)$this->getRequestURI());
+
     $config = array(
       'mockID' => $mock->getID(),
-      'panelID' => $panel_id,
-      'viewportID' => $viewport_id,
+      'panelID' => $this->panelID,
+      'viewportID' => $this->viewportID,
       'commentFormID' => $this->getCommentFormID(),
       'images' => $images,
       'selectedID' => $selected_id,
       'loggedIn' => $this->getUser()->isLoggedIn(),
-      'logInLink' => (string) $login_uri,
+      'logInLink' => (string)$login_uri,
       'navsequence' => $navsequence,
       'fullIcon' => hsprintf('%s', $full_icon),
       'downloadIcon' => hsprintf('%s', $download_icon),
       'currentSetSize' => $current_set,
     );
-    Javelin::initBehavior('pholio-mock-view', $config);
+    return $config;
+  }
+
+  public function render() {
+    if (!$this->getMock()) {
+      throw new PhutilInvalidStateException('setMock');
+    }
+    $mock = $this->getMock();
+
+    require_celerity_resource('javelin-behavior-pholio-mock-view');
+
+    $panel_id = $this->panelID;
+    $viewport_id = $this->viewportID;
+
+    $config = $this->getBehaviorConfig();
+    Javelin::initBehavior(
+      'pholio-mock-view',
+      $this->getBehaviorConfig());
 
     $mockview = '';
 
     $mock_wrapper = javelin_tag(
       'div',
       array(
-        'id' => $viewport_id,
+        'id' => $this->viewportID,
         'sigil' => 'mock-viewport',
         'class' => 'pholio-mock-image-viewport',
       ),
@@ -157,7 +202,7 @@ final class PholioMockImagesView extends AphrontView {
     $mock_wrapper = javelin_tag(
       'div',
       array(
-        'id' => $panel_id,
+        'id' => $this->panelID,
         'sigil' => 'mock-panel touchable',
         'class' => 'pholio-mock-image-panel',
       ),

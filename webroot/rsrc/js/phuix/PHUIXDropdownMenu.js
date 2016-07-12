@@ -42,7 +42,7 @@ JX.install('PHUIXDropdownMenu', {
     JX.Stratcom.listen('keydown', null, JX.bind(this, this._onkey));
   },
 
-  events: ['open'],
+  events: ['open', 'close'],
 
   properties: {
     width: null,
@@ -82,6 +82,8 @@ JX.install('PHUIXDropdownMenu', {
       }
       this._open = false;
       this._hide();
+
+      this.invoke('close');
 
       return this;
     },

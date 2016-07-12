@@ -2,9 +2,8 @@
 
 final class PassphraseCredentialCreateController extends PassphraseController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $types = PassphraseCredentialType::getAllCreateableTypes();
     $types = mpull($types, null, 'getCredentialType');
@@ -50,20 +49,26 @@ final class PassphraseCredentialCreateController extends PassphraseController {
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Create'));
+    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Create New Credential'))
+      ->setHeaderText(pht('Credential'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

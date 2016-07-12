@@ -6,11 +6,14 @@ final class DiffusionChangeController extends DiffusionController {
     return true;
   }
 
-  public function processRequest() {
-    $drequest = $this->diffusionRequest;
-    $viewer = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
-    $content = array();
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
 
     $data = $this->callConduitWithDiffusionRequest(
       'diffusion.diffquery',
@@ -22,7 +25,8 @@ final class DiffusionChangeController extends DiffusionController {
     $drequest->updateSymbolicCommit($data['effectiveCommit']);
 
     $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
-    $diff = DifferentialDiff::newFromRawChanges($raw_changes);
+    $diff = DifferentialDiff::newEphemeralFromRawChanges(
+      $raw_changes);
     $changesets = $diff->getChangesets();
     $changeset = reset($changesets);
 
@@ -32,14 +36,15 @@ final class DiffusionChangeController extends DiffusionController {
     }
 
     $repository = $drequest->getRepository();
-    $callsign = $repository->getCallsign();
     $changesets = array(
       0 => $changeset,
     );
 
+    $changeset_header = $this->buildChangesetHeader($drequest);
+
     $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setTitle(pht('Change'));
     $changeset_view->setChangesets($changesets);
+    $changeset_view->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
       array(
@@ -58,15 +63,16 @@ final class DiffusionChangeController extends DiffusionController {
     $left_uri = $drequest->generateURI($raw_params);
     $changeset_view->setRawFileURIs($left_uri, $right_uri);
 
-    $changeset_view->setRenderURI('/diffusion/'.$callsign.'/diff/');
+    $changeset_view->setRenderURI($repository->getPathURI('diff/'));
+
     $changeset_view->setWhitespace(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
-    $changeset_view->setUser($this->getRequest()->getUser());
+    $changeset_view->setUser($viewer);
+    $changeset_view->setHeader($changeset_header);
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
-    $content[] = $changeset_view->render();
 
     $crumbs = $this->buildCrumbs(
       array(
@@ -74,46 +80,63 @@ final class DiffusionChangeController extends DiffusionController {
         'path'   => true,
         'view'   => 'change',
       ));
+    $crumbs->setBorder(true);
 
     $links = $this->renderPathLinks($drequest, $mode = 'browse');
+    $header = $this->buildHeader($drequest, $links);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setMainColumn(array(
+      ))
+      ->setFooter(array(
+        $changeset_view,
+      ));
+
+    return $this->newPage()
+      ->setTitle(
+        array(
+          basename($drequest->getPath()),
+          $repository->getDisplayName(),
+        ))
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
+        ));
+  }
+
+  private function buildHeader(
+    DiffusionRequest $drequest,
+    $links) {
+    $viewer = $this->getViewer();
+
+    $tag = $this->renderCommitHashTag($drequest);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($links)
       ->setUser($viewer)
-      ->setPolicyObject($drequest->getRepository());
-    $actions = $this->buildActionView($drequest);
-    $properties = $this->buildPropertyView($drequest, $actions);
+      ->setPolicyObject($drequest->getRepository())
+      ->addTag($tag);
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $content,
-      ),
-      array(
-        'title' => pht('Change'),
-        'device' => false,
-      ));
+    return $header;
   }
 
-  private function buildActionView(DiffusionRequest $drequest) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildChangesetHeader(DiffusionRequest $drequest) {
+    $viewer = $this->getViewer();
 
-    $view = id(new PhabricatorActionListView())
-      ->setUser($viewer);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Changes'));
 
     $history_uri = $drequest->generateURI(
       array(
         'action' => 'history',
       ));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View History'))
+    $header->addActionLink(
+      id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('View History'))
         ->setHref($history_uri)
         ->setIcon('fa-clock-o'));
 
@@ -122,13 +145,14 @@ final class DiffusionChangeController extends DiffusionController {
         'action' => 'browse',
       ));
 
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Browse Content'))
+    $header->addActionLink(
+      id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Browse Content'))
         ->setHref($browse_uri)
         ->setIcon('fa-files-o'));
 
-    return $view;
+    return $header;
   }
 
   protected function buildPropertyView(
@@ -142,7 +166,6 @@ final class DiffusionChangeController extends DiffusionController {
       ->setActionList($actions);
 
     $stable_commit = $drequest->getStableCommit();
-    $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(
       pht('Commit'),

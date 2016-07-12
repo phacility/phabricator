@@ -21,8 +21,7 @@ final class ReleephProductSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new ReleephProductQuery())
-      ->setOrder(ReleephProductQuery::ORDER_NAME)
-      ->needArcanistProjects(true);
+      ->setOrder(ReleephProductQuery::ORDER_NAME);
 
     $active = $saved->getParameter('active');
     $value = idx($this->getActiveValues(), $active);
@@ -49,7 +48,7 @@ final class ReleephProductSearchEngine
     return '/releeph/project/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active'),
       'all' => pht('All'),
@@ -74,7 +73,7 @@ final class ReleephProductSearchEngine
   private function getActiveOptions() {
     return array(
       'all'       => pht('Active and Inactive Products'),
-      'active'    => pht('Active Prodcuts'),
+      'active'    => pht('Active Products'),
       'inactive'  => pht('Inactive Products'),
     );
   }
@@ -115,19 +114,17 @@ final class ReleephProductSearchEngine
         phutil_tag(
           'a',
           array(
-            'href' => '/diffusion/'.$repo->getCallsign().'/',
+            'href' => $repo->getURI(),
           ),
-          'r'.$repo->getCallsign()));
-
-      $arc = $product->getArcanistProject();
-      if ($arc) {
-        $item->addAttribute($arc->getName());
-      }
+          $repo->getMonogram()));
 
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+
+    return $result;
   }
 
 }

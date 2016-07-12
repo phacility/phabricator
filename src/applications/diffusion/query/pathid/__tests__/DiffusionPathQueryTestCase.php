@@ -6,19 +6,19 @@ final class DiffusionPathQueryTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       '/',
       DiffusionPathIDQuery::getParentPath('/'),
-      'Parent of /');
+      pht('Parent of %s', '/'));
     $this->assertEqual(
       '/',
       DiffusionPathIDQuery::getParentPath('x.txt'),
-      'Parent of x.txt');
+      pht('Parent of %s', 'x.txt'));
     $this->assertEqual(
       '/a',
       DiffusionPathIDQuery::getParentPath('/a/b'),
-      'Parent of /a/b');
+      pht('Parent of %s', '/a/b'));
     $this->assertEqual(
       '/a',
       DiffusionPathIDQuery::getParentPath('/a///b'),
-      'Parent of /a///b');
+      pht('Parent of %s', '/a///b'));
   }
 
   public function testExpandEdgeCases() {

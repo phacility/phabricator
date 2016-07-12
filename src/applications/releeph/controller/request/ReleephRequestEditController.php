@@ -2,22 +2,16 @@
 
 final class ReleephRequestEditController extends ReleephBranchController {
 
-  private $requestID;
-  private $branchID;
+  public function handleRequest(AphrontRequest $request) {
+    $action = $request->getURIData('action');
+    $request_id = $request->getURIData('requestID');
+    $branch_id = $request->getURIData('branchID');
+    $viewer = $request->getViewer();
 
-  public function willProcessRequest(array $data) {
-    $this->requestID = idx($data, 'requestID');
-    $this->branchID = idx($data, 'branchID');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->requestID) {
+    if ($request_id) {
       $pull = id(new ReleephRequestQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->requestID))
+        ->withIDs(array($request_id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -34,7 +28,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
     } else {
       $branch = id(new ReleephBranchQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->branchID))
+        ->withIDs(array($branch_id))
         ->executeOne();
       if (!$branch) {
         return new Aphront404Response();
@@ -77,8 +71,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
     $field_list->readFieldsFromStorage($pull);
 
 
-    if ($this->branchID) {
-      $cancel_uri = $this->getApplicationURI('branch/'.$this->branchID.'/');
+    if ($branch_id) {
+      $cancel_uri = $this->getApplicationURI('branch/'.$branch_id.'/');
     } else {
       $cancel_uri = '/'.$pull->getMonogram();
     }
@@ -93,8 +87,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
         if ($request_identifier ===
           ReleephRequestTypeaheadControl::PLACEHOLDER) {
 
-          $errors[] = 'No commit ID was provided.';
-          $e_request_identifier = 'Required';
+          $errors[] = pht('No commit ID was provided.');
+          $e_request_identifier = pht('Required');
         } else {
           $pr_commit = null;
           $finder = id(new ReleephCommitFinder())
@@ -103,9 +97,10 @@ final class ReleephRequestEditController extends ReleephBranchController {
           try {
             $pr_commit = $finder->fromPartial($request_identifier);
           } catch (Exception $e) {
-            $e_request_identifier = 'Invalid';
-            $errors[] =
-              "Request {$request_identifier} is probably not a valid commit";
+            $e_request_identifier = pht('Invalid');
+            $errors[] = pht(
+              'Request %s is probably not a valid commit.',
+              $request_identifier);
             $errors[] = $e->getMessage();
           }
 
@@ -126,7 +121,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
           if ($existing) {
             return id(new AphrontRedirectResponse())
               ->setURI('/releeph/request/edit/'.$existing->getID().
-                       '?existing=1');
+                '?existing=1');
           }
 
           $xactions[] = id(new ReleephRequestTransaction())
@@ -204,14 +199,14 @@ final class ReleephRequestEditController extends ReleephBranchController {
     $notice_view = null;
     if ($request->getInt('existing')) {
       $notice_messages = array(
-        'You are editing an existing pick request!',
-        hsprintf(
+        pht('You are editing an existing pick request!'),
+        pht(
           'Requested %s by %s',
           $age_string,
           $handles[$pull->getRequestUserPHID()]->renderLink()),
       );
-      $notice_view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $notice_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors($notice_messages);
     }
 
@@ -222,12 +217,12 @@ final class ReleephRequestEditController extends ReleephBranchController {
       $form
         ->appendChild(
           id(new AphrontFormMarkupControl())
-            ->setLabel('Original Commit')
+            ->setLabel(pht('Original Commit'))
             ->setValue(
               $handles[$pull->getRequestCommitPHID()]->renderLink()))
         ->appendChild(
           id(new AphrontFormMarkupControl())
-            ->setLabel('Requestor')
+            ->setLabel(pht('Requestor'))
             ->setValue(hsprintf(
               '%s %s',
               $handles[$pull->getRequestUserPHID()]->renderLink(),
@@ -249,7 +244,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
           ->addHiddenInput('requestIdentifierRaw', 'D'.$diff_rev_id)
           ->appendChild(
             id(new AphrontFormStaticControl())
-              ->setLabel('Diff')
+              ->setLabel(pht('Diff'))
               ->setValue($title));
       } else {
         $origin = $branch->getURI();
@@ -261,14 +256,15 @@ final class ReleephRequestEditController extends ReleephBranchController {
         $form->appendChild(
           id(new ReleephRequestTypeaheadControl())
             ->setName('requestIdentifierRaw')
-            ->setLabel('Commit ID')
+            ->setLabel(pht('Commit ID'))
             ->setRepo($repo)
             ->setValue($request_identifier)
             ->setError($e_request_identifier)
             ->setStartTime($branch_cut_point->getEpoch())
             ->setCaption(
-              'Start typing to autocomplete on commit title, '.
-              'or give a Phabricator commit identifier like rFOO1234'));
+              pht(
+                'Start typing to autocomplete on commit title, '.
+                'or give a Phabricator commit identifier like rFOO1234.')));
       }
     }
 
@@ -279,34 +275,46 @@ final class ReleephRequestEditController extends ReleephBranchController {
     if ($is_edit) {
       $title = pht('Edit Pull Request');
       $submit_name = pht('Save');
+      $header_icon = 'fa-pencil';
 
       $crumbs->addTextCrumb($pull->getMonogram(), '/'.$pull->getMonogram());
       $crumbs->addTextCrumb(pht('Edit'));
     } else {
       $title = pht('Create Pull Request');
       $submit_name = pht('Create Pull Request');
+      $header_icon = 'fa-plus-square';
 
       $crumbs->addTextCrumb(pht('New Pull Request'));
     }
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->addCancelButton($cancel_uri, 'Cancel')
+        ->addCancelButton($cancel_uri, pht('Cancel'))
         ->setValue($submit_name));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Request'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $crumbs->setBorder(true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $notice_view,
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 }

@@ -1,0 +1,68 @@
+@title Diffusion User Guide: Existing Repositories
+@group userguide
+
+Quick guide for importing or observing existing repositories.
+
+
+Overview
+========
+
+If you have an existing repository, you can observe or import it into
+Diffusion.
+
+Observing a repository creates a read-only copy in Phabricator that is kept
+up to date by continuously importing new changes.
+
+Importing a repository creates a read-write copy.
+
+This document is a quick guide to getting started. For an overview of
+Diffusion, see @{article:Diffusion User Guide}. For a more detailed guide
+about managing repositories and URIs in Diffusion, see
+@{article:Diffusion User Guide: URIs}.
+
+
+Observing Repositories
+======================
+
+To observe an existing repository:
+
+  - Create a repository in Diffusion, but do not activate it yet.
+  - Add the URI for the existing repository you wish to observe in the
+    **URIs** section, in **Observe** mode.
+  - Activate the repository in Diffusion.
+
+This creates a read-only copy of the repository in Phabricator. Phabricator
+will keep its copy in sync with the remote by periodically polling the remote
+for changes.
+
+For more details, see @{article:Diffusion User Guide: URIs}.
+
+
+Importing Repositories
+======================
+
+There are two primary ways to import an existing repository:
+
+**Observe First**: In Git or Mercurial, you can observe the repository first.
+Once the import completes, disable the **Observe** URI to automatically convert
+it into a hosted repository.
+
+**Push to Empty Repository**: Create an activate an empty repository, then push
+all of your changes to empty the repository.
+
+In Git and Mercurial, you can do this with `git push` or `hg push`.
+
+In Subversion, you can do this with `svnsync`.
+
+For more details, see @{article:Diffusion User Guide: URIs}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - reading an overview of Diffusion in
+    @{article:Diffusion User Guide}; or
+  - learning more about managing remote repository URIs in
+    @{article:Diffusion User Guide: URIs}.

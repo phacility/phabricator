@@ -6,8 +6,10 @@
 final class PhabricatorDashboardPanel
   extends PhabricatorDashboardDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
+    PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface {
 
   protected $name;
@@ -37,7 +39,7 @@ final class PhabricatorDashboardPanel
     return $dst;
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -69,6 +71,28 @@ final class PhabricatorDashboardPanel
     return 'W'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
+  public function getPanelTypes() {
+    $panel_types = PhabricatorDashboardPanelType::getAllPanelTypes();
+    $panel_types = mpull($panel_types, 'getPanelTypeName', 'getPanelTypeKey');
+    asort($panel_types);
+    $panel_types = (array('' => pht('(All Types)')) + $panel_types);
+    return $panel_types;
+  }
+
+  public function getStatuses() {
+    $statuses =
+      array(
+        '' => pht('(All Panels)'),
+        'active' => pht('Active Panels'),
+        'archived' => pht('Archived Panels'),
+      );
+    return $statuses;
+  }
+
   public function getImplementation() {
     return idx(
       PhabricatorDashboardPanelType::getAllPanelTypes(),
@@ -86,6 +110,29 @@ final class PhabricatorDashboardPanel
           $this->getPanelType()));
     }
     return $impl;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorDashboardPanelTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorDashboardPanelTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

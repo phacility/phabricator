@@ -11,19 +11,19 @@ final class DifferentialCloseConduitAPIMethod
     return pht('Close a Differential revision.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revisionID' => 'required int',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_NOT_FOUND' => 'Revision was not found.',
+      'ERR_NOT_FOUND' => pht('Revision was not found.'),
     );
   }
 
@@ -45,13 +45,11 @@ final class DifferentialCloseConduitAPIMethod
       ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
       ->setNewValue(DifferentialAction::ACTION_CLOSE);
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_CONDUIT,
-      array());
+    $content_source = $request->newContentSource();
 
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)
-      ->setContentSourceFromConduitRequest($request)
+      ->setContentSource($request->newContentSource())
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect(true);
 

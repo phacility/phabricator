@@ -27,7 +27,7 @@ final class AphrontMoreView extends AphrontView {
     $content[] = $this->some;
 
     if ($this->more && $this->more != $this->some) {
-      $text = "(Show More\xE2\x80\xA6)";
+      $text = "(".pht('Show More')."\xE2\x80\xA6)";
       if ($this->expandtext !== null) {
         $text = $this->expandtext;
       }

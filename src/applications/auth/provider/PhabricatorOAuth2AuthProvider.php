@@ -159,7 +159,7 @@ abstract class PhabricatorOAuth2AuthProvider
             '%s set the OAuth application secret for this provider.',
             $xaction->renderHandleLink($author_phid));
         }
-      case self::PROPERTY_APP_NOTE:
+      case self::PROPERTY_NOTE:
         if (strlen($old)) {
           return pht(
             '%s updated the OAuth application notes for this provider.',
@@ -198,7 +198,7 @@ abstract class PhabricatorOAuth2AuthProvider
     $force_refresh = false) {
 
     if ($account->getProviderKey() !== $this->getProviderKey()) {
-      throw new Exception('Account does not match provider!');
+      throw new Exception(pht('Account does not match provider!'));
     }
 
     if (!$force_refresh) {
@@ -262,8 +262,7 @@ abstract class PhabricatorOAuth2AuthProvider
             phabricator_datetime($oauth_expires, $viewer)));
       } else {
         $item->addAttribute(
-          pht(
-            'Active OAuth Token'));
+          pht('Active OAuth Token'));
       }
     } else if ($is_invalid) {
       $item->addAttribute(pht('Invalid OAuth Access Token'));
@@ -272,6 +271,19 @@ abstract class PhabricatorOAuth2AuthProvider
     }
 
     parent::willRenderLinkedAccount($viewer, $item, $account);
+  }
+
+  public function supportsAutoLogin() {
+    return true;
+  }
+
+  public function getAutoLoginURI(AphrontRequest $request) {
+    $csrf_code = $this->getAuthCSRFCode($request);
+
+    $adapter = $this->getAdapter();
+    $adapter->setState($csrf_code);
+
+    return $adapter->getAuthenticateURI();
   }
 
 }

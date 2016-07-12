@@ -1,22 +1,17 @@
 <?php
 
-final class PhamePostPublishController extends PhameController {
+final class PhamePostPublishController extends PhamePostController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
+    $id = $request->getURIData('id');
     $post = id(new PhamePostQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
+          PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
@@ -24,64 +19,52 @@ final class PhamePostPublishController extends PhameController {
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
+    $cancel_uri = $post->getViewURI();
+
+    $action = $request->getURIData('action');
+    $is_publish = ($action == 'publish');
 
     if ($request->isFormPost()) {
-      $post->setVisibility(PhamePost::VISIBILITY_PUBLISHED);
-      $post->setDatePublished(time());
-      $post->save();
+      $xactions = array();
 
-      return id(new AphrontRedirectResponse())->setURI($view_uri);
+      if ($is_publish) {
+        $new_value = PhameConstants::VISIBILITY_PUBLISHED;
+      } else {
+        $new_value = PhameConstants::VISIBILITY_DRAFT;
+      }
+
+      $xactions[] = id(new PhamePostTransaction())
+        ->setTransactionType(PhamePostTransaction::TYPE_VISIBILITY)
+        ->setNewValue($new_value);
+
+      id(new PhamePostEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setContinueOnMissingFields(true)
+        ->applyTransactions($post, $xactions);
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($cancel_uri);
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Publish Post'))
-          ->addCancelButton($view_uri));
+    if ($is_publish) {
+      $title = pht('Publish Post');
+      $body = pht('This post will go live once you publish it.');
+      $button = pht('Publish');
+    } else {
+      $title = pht('Unpublish Post');
+      $body = pht(
+        'This post will revert to draft status and no longer be visible '.
+        'to other users.');
+      $button = pht('Unpublish');
+    }
 
-    $frame = $this->renderPreviewFrame($post);
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Preview Post'))
-      ->setForm($form);
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Preview'), $view_uri);
-
-    $nav = $this->renderSideNavFilterView(null);
-    $nav->appendChild(
-      array(
-        $crumbs,
-        $form_box,
-        $frame,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title'   => pht('Preview Post'),
-      ));
-  }
-
-  private function renderPreviewFrame(PhamePost $post) {
-
-    // TODO: Clean up this CSS.
-
-    return phutil_tag(
-      'div',
-      array(
-        'style' => 'text-align: center; padding: 1em;',
-      ),
-      phutil_tag(
-        'iframe',
-        array(
-          'style' => 'width: 100%; height: 600px; '.
-                     'border: 1px solid #303030;',
-          'src' => $this->getApplicationURI('/post/framed/'.$post->getID().'/'),
-        ),
-        ''));
+    return $this->newDialog()
+      ->setTitle($title)
+      ->appendParagraph($body)
+      ->addSubmitButton($button)
+      ->addCancelButton($cancel_uri);
   }
 
 }

@@ -4,13 +4,11 @@
 
 .diffusion-source {
   width: 100%;
-  font-family: "Monaco", Consolas, monospace;
-  font-size: 10px;
   background: #fff;
 }
 
 .diffusion-source tr.phabricator-source-highlight {
-  background: #ffff00;
+  background: {$sh-yellowbackground};
 }
 
 .diffusion-source th {
@@ -19,17 +17,15 @@
   background: {$lightgreybackground};
   color: {$bluetext};
   border-right: 1px solid {$thinblueborder};
-  font-size: 11px;
 }
 
 .diffusion-source td {
-  letter-spacing:     0.0083334px;
-  vertical-align:     top;
-  white-space:        pre-wrap;
-  padding-bottom:     1px;
-  padding-left:       8px;
-  line-height:        16px;
-  width:              100%;
+  vertical-align: top;
+  white-space: pre-wrap;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 8px;
+  width: 100%;
 }
 
 .diffusion-browse-type-form {

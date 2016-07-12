@@ -33,20 +33,54 @@ JX.install('TextAreaUtils', {
 
     setSelectionRange : function(area, start, end) {
       if ('setSelectionRange' in area) {
+
+        // Chrome scrolls the textarea to the bottom as a side effect of
+        // calling focus(), so save the scroll position, focus, then restore
+        // the scroll position.
+        var scroll_top = area.scrollTop;
         area.focus();
+        area.scrollTop = scroll_top;
+
         area.setSelectionRange(start, end);
       }
     },
 
-    setSelectionText : function(area, text) {
+    setSelectionText : function(area, text, select) {
       var v = area.value;
       var r = JX.TextAreaUtils.getSelectionRange(area);
 
       v = v.substring(0, r.start) + text + v.substring(r.end, v.length);
       area.value = v;
 
-      JX.TextAreaUtils.setSelectionRange(area, r.start, r.start + text.length);
+      var start = r.start;
+      var end = r.start + text.length;
+
+      if (!select) {
+        start = end;
+      }
+
+      JX.TextAreaUtils.setSelectionRange(area, start, end);
     },
+
+
+    /**
+     * Insert a reference to a given uploaded file into a textarea.
+     */
+    insertFileReference: function(area, file) {
+      var ref = '{F' + file.getID() + '}';
+
+      // If we're inserting immediately after a "}" (usually, another file
+      // reference), put some newlines before our token so that multiple file
+      // uploads get laid out more nicely.
+      var range = JX.TextAreaUtils.getSelectionRange(area);
+      var before = area.value.substring(0, range.start);
+      if (before.match(/\}$/)) {
+        ref = '\n\n' + ref;
+      }
+
+      JX.TextAreaUtils.setSelectionText(area, ref, false);
+    },
+
 
     /**
      * Get the document pixel positions of the beginning and end of a character

@@ -60,19 +60,13 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     $order = $saved_query->getParameter(
       'order', PhrequentUserTimeQuery::ORDER_ENDED_DESC);
 
-    $phids = array_merge($user_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('users')
           ->setLabel(pht('Users'))
-          ->setValue($handles))
+          ->setValue($user_phids))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Ended'))
@@ -91,7 +85,7 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/phrequent/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'tracking' => pht('Currently Tracking'),
       'all' => pht('All Tracked'),
@@ -189,13 +183,16 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
                 '/phrequent/track/stop/'.
                 $usertime->getObjectPHID().'/'));
         }
-        $item->setBarColor('green');
+        $item->setStatusIcon('fa-clock-o green');
       }
 
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+
+    return $result;
   }
 
 }

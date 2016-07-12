@@ -8,7 +8,7 @@
 }
 
 .phabricator-object-selector-dialog .aphront-dialog-body {
-  padding: 0;
+  padding: 0 12px;
 }
 
 .phabricator-object-selector-search {
@@ -27,11 +27,12 @@ td.phabricator-object-selector-search-text {
 }
 
 .phabricator-object-selector-row:hover {
-  background-color: {$greybackground};
+  background-color: {$hoverblue};
 }
 
 .phabricator-object-selector-row:hover a {
   text-decoration: none;
+  color: #000;
 }
 
 .phabricator-object-selector-search-text input {
@@ -56,8 +57,10 @@ td.phabricator-object-selector-search-text {
 
 .phabricator-object-selector-handle {
   width: 100%;
-  background: {$lightgreybackground};
-  margin-bottom: 1px;
+}
+
+.phabricator-object-selector-handle + .phabricator-object-selector-handle {
+  border-top: 1px solid {$thinblueborder};
 }
 
 .phabricator-object-selector-handle td {
@@ -77,25 +80,23 @@ td.phabricator-object-selector-search-text {
 }
 
 .phabricator-object-selector-header {
-  margin-bottom: 8px;
   font-weight: bold;
   text-transform: uppercase;
-  color: {$bluetext};
+  color: {$darkbluetext};
+  background-color: {$lightgreybackground};
+  border-bottom: 1px solid {$thinblueborder};
+  padding: 6px 8px;
 }
 
 .phabricator-object-selector-attach-explicit {
   padding: 4px;
-  background: #f3f3f3;
-  border: solid #bbbbbb;
+  background: {$lightgreybackground};
+  border: solid {$blueborder};
   border-width: 1px 0px;
 }
 
 .phabricator-object-selector-current {
   border-top: 1px solid {$thinblueborder};
-}
-
-.phabricator-object-selector-currently-attached {
-  padding: 8px;
 }
 
 .object-selector-nothing {
@@ -105,7 +106,7 @@ td.phabricator-object-selector-search-text {
 }
 
 .phabricator-object-selector-instructions {
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   color: {$greytext};
   margin-top: 1.25em;
 }

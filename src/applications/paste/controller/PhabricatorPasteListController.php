@@ -2,25 +2,24 @@
 
 final class PhabricatorPasteListController extends PhabricatorPasteController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
+  public function handleRequest(AphrontRequest $request) {
+    return id(new PhabricatorPasteSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->queryKey)
-      ->setSearchEngine(new PhabricatorPasteSearchEngine())
-      ->setNavigation($this->buildSideNavView());
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
-    return $this->delegateToController($controller);
+    id(new PhabricatorPasteEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
+
+    return $crumbs;
   }
-
 
 }

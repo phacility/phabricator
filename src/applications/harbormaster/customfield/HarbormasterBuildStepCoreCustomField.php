@@ -9,7 +9,12 @@ final class HarbormasterBuildStepCoreCustomField
   }
 
   public function createFields($object) {
-    $impl = $object->getStepImplementation();
+    try {
+      $impl = $object->getStepImplementation();
+    } catch (Exception $ex) {
+      return array();
+    }
+
     $specs = $impl->getFieldSpecifications();
 
     if ($impl->supportsWaitForMessage()) {
@@ -67,9 +72,8 @@ final class HarbormasterBuildStepCoreCustomField
     $object->setDetail($key, $value);
   }
 
-  public function applyApplicationTransactionExternalEffects(
-    PhabricatorApplicationTransaction $xaction) {
-    return;
+  public function getBuildTargetFieldValue() {
+    return $this->getProxy()->getFieldValue();
   }
 
 }

@@ -18,33 +18,35 @@ final class DiffusionLookSoonConduitAPIMethod
       'commits to that repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
-      'callsigns' => 'required list<string>',
+      'callsigns' => 'optional list<string> (deprecated)',
+      'repositories' => 'optional list<string>',
       'urgency' => 'optional string',
     );
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {
     // NOTE: The "urgency" parameter does nothing, it is just a hilarious joke
     // which exemplifies the boundless clever wit of this project.
 
-    $callsigns = $request->getValue('callsigns');
-    if (!$callsigns) {
+    $identifiers = $request->getValue('repositories');
+
+    if (!$identifiers) {
+      $identifiers = $request->getValue('callsigns');
+    }
+
+    if (!$identifiers) {
       return null;
     }
 
     $repositories = id(new PhabricatorRepositoryQuery())
       ->setViewer($request->getUser())
-      ->withCallsigns($callsigns)
+      ->withIdentifiers($identifiers)
       ->execute();
 
     foreach ($repositories as $repository) {

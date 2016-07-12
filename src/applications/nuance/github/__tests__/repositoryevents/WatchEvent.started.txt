@@ -1,0 +1,33 @@
+{
+  "id": "3740950917",
+  "type": "WatchEvent",
+  "actor": {
+    "id": 102631,
+    "login": "epriestley",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/epriestley",
+    "avatar_url": "https://avatars.githubusercontent.com/u/102631?"
+  },
+  "repo": {
+    "id": 14627834,
+    "name": "epriestley/poems",
+    "url": "https://api.github.com/repos/epriestley/poems"
+  },
+  "payload": {
+    "action": "started"
+  },
+  "public": true,
+  "created_at": "2016-03-09T12:56:28Z"
+}
+~~~~~
+{
+  "repository.name.full": "epriestley/poems",
+  "is.issue": false,
+  "is.pull": false,
+  "issue.number": null,
+  "pull.number": null,
+  "id": 3740950917,
+  "uri": null,
+  "title.full": "GitHub epriestley/poems User epriestley (Watched)",
+  "actor.id": 102631
+}

@@ -3,9 +3,8 @@
 final class PhabricatorConfigDatabaseIssueController
   extends PhabricatorConfigDatabaseController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $query = $this->buildSchemaQuery();
 
@@ -133,10 +132,6 @@ final class PhabricatorConfigDatabaseIssueController
 
     $errors = array();
 
-    $errors[] = pht(
-      'IMPORTANT: This feature is in development and the information below '.
-      'is not accurate! Ignore it for now. See T1191.');
-
     if (isset($counts[PhabricatorConfigStorageSchema::STATUS_FAIL])) {
       $errors[] = pht(
         'Detected %s serious issue(s) with the schemata.',
@@ -152,23 +147,23 @@ final class PhabricatorConfigDatabaseIssueController
     $title = pht('Database Issues');
 
     $table_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->setFormErrors($errors)
-      ->appendChild($table);
+      ->setTable($table);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('dbissue/');
-    $nav->appendChild(
-      array(
-        $crumbs,
-        $table_box,
-      ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $table_box,
+    ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

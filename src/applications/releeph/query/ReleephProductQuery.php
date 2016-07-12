@@ -8,9 +8,6 @@ final class ReleephProductQuery
   private $phids;
   private $repositoryPHIDs;
 
-  private $needArcanistProjects;
-
-  private $order    = 'order-id';
   const ORDER_ID    = 'order-id';
   const ORDER_NAME  = 'order-name';
 
@@ -20,7 +17,16 @@ final class ReleephProductQuery
   }
 
   public function setOrder($order) {
-    $this->order = $order;
+    switch ($order) {
+      case self::ORDER_ID:
+        $this->setOrderVector(array('id'));
+        break;
+      case self::ORDER_NAME:
+        $this->setOrderVector(array('name'));
+        break;
+      default:
+        throw new Exception(pht('Order "%s" not supported.', $order));
+    }
     return $this;
   }
 
@@ -39,12 +45,7 @@ final class ReleephProductQuery
     return $this;
   }
 
-  public function needArcanistProjects($need) {
-    $this->needArcanistProjects = $need;
-    return $this;
-  }
-
-  public function loadPage() {
+  protected function loadPage() {
     $table = new ReleephProject();
     $conn_r = $table->establishConnection('r');
 
@@ -59,7 +60,7 @@ final class ReleephProductQuery
     return $table->loadAllFromArray($rows);
   }
 
-  public function willFilterPage(array $projects) {
+  protected function willFilterPage(array $projects) {
     assert_instances_of($projects, 'ReleephProject');
 
     $repository_phids = mpull($projects, 'getRepositoryPHID');
@@ -82,28 +83,7 @@ final class ReleephProductQuery
     return $projects;
   }
 
-  public function didFilterPage(array $products) {
-    if ($this->needArcanistProjects) {
-      $project_ids = array_filter(mpull($products, 'getArcanistProjectID'));
-      if ($project_ids) {
-        $projects = id(new PhabricatorRepositoryArcanistProject())
-          ->loadAllWhere('id IN (%Ld)', $project_ids);
-        $projects = mpull($projects, null, 'getID');
-      } else {
-        $projects = array();
-      }
-
-      foreach ($products as $product) {
-        $project_id = $product->getArcanistProjectID();
-        $project = idx($projects, $project_id);
-        $product->attachArcanistProject($project);
-      }
-    }
-
-    return $products;
-  }
-
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->active !== null) {
@@ -139,31 +119,24 @@ final class ReleephProductQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getReversePaging() {
-    switch ($this->order) {
-      case self::ORDER_NAME:
-        return true;
-    }
-    return parent::getReversePaging();
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'column' => 'name',
+        'unique' => true,
+        'reverse' => true,
+        'type' => 'string',
+      ),
+    );
   }
 
-  protected function getPagingValue($result) {
-    switch ($this->order) {
-      case self::ORDER_NAME:
-        return $result->getName();
-    }
-    return parent::getPagingValue();
-  }
+  protected function getPagingValueMap($cursor, array $keys) {
+    $product = $this->loadCursorObject($cursor);
 
-  protected function getPagingColumn() {
-    switch ($this->order) {
-      case self::ORDER_NAME:
-        return 'name';
-      case self::ORDER_ID:
-        return parent::getPagingColumn();
-      default:
-        throw new Exception("Uknown order '{$this->order}'!");
-    }
+    return array(
+      'id' => $product->getID(),
+      'name' => $product->getName(),
+    );
   }
 
   public function getQueryApplicationClass() {

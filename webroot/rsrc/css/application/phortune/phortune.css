@@ -24,3 +24,13 @@
   margin: 0 0 8px 0;
   width: 100%;
 }
+
+.printable.phortune-cart-page .phui-two-column-view .phui-two-column-content
+  .phui-main-column {
+    width: auto;
+}
+
+.printable.phortune-cart-page .phui-two-column-view .phui-two-column-content
+  .phui-side-column {
+    display: none;
+}

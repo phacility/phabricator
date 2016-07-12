@@ -9,6 +9,7 @@ final class PhabricatorConduitMethodQuery
   private $applicationNames;
   private $nameContains;
   private $methods;
+  private $isInternal;
 
   public function withMethods(array $methods) {
     $this->methods = $methods;
@@ -40,21 +41,22 @@ final class PhabricatorConduitMethodQuery
     return $this;
   }
 
-  public function loadPage() {
+  public function withIsInternal($is_internal) {
+    $this->isInternal = $is_internal;
+    return $this;
+  }
+
+  protected function loadPage() {
     $methods = $this->getAllMethods();
     $methods = $this->filterMethods($methods);
     return $methods;
   }
 
   private function getAllMethods() {
-    static $methods;
-    if ($methods === null) {
-      $methods = id(new PhutilSymbolLoader())
-        ->setAncestorClass('ConduitAPIMethod')
-        ->loadObjects();
-      $methods = msort($methods, 'getSortOrder');
-    }
-    return $methods;
+    return id(new PhutilClassMapQuery())
+      ->setAncestorClass('ConduitAPIMethod')
+      ->setSortMethod('getSortOrder')
+      ->execute();
   }
 
   private function filterMethods(array $methods) {
@@ -113,6 +115,51 @@ final class PhabricatorConduitMethodQuery
         if (empty($map[$needle])) {
           unset($methods[$key]);
         }
+      }
+    }
+
+    if ($this->isInternal !== null) {
+      foreach ($methods as $key => $method) {
+        if ($method->isInternalAPI() !== $this->isInternal) {
+          unset($methods[$key]);
+        }
+      }
+    }
+
+    return $methods;
+  }
+
+  protected function willFilterPage(array $methods) {
+    $application_phids = array();
+    foreach ($methods as $method) {
+      $application = $method->getApplication();
+      if ($application === null) {
+        continue;
+      }
+      $application_phids[] = $application->getPHID();
+    }
+
+    if ($application_phids) {
+      $applications = id(new PhabricatorApplicationQuery())
+        ->setParentQuery($this)
+        ->setViewer($this->getViewer())
+        ->withPHIDs($application_phids)
+        ->execute();
+      $applications = mpull($applications, null, 'getPHID');
+    } else {
+      $applications = array();
+    }
+
+    // Remove methods which belong to an application the viewer can not see.
+    foreach ($methods as $key => $method) {
+      $application = $method->getApplication();
+      if ($application === null) {
+        continue;
+      }
+
+      if (empty($applications[$application->getPHID()])) {
+        $this->didRejectResult($method);
+        unset($methods[$key]);
       }
     }
 

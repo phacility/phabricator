@@ -10,11 +10,12 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
   protected $failureCount;
   protected $dataID;
   protected $priority;
+  protected $objectPHID;
 
   private $data;
   private $executionException;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'taskClass' => 'text64',
@@ -23,6 +24,12 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
         'failureCount' => 'uint32',
         'failureTime' => 'epoch?',
         'priority' => 'uint32',
+        'objectPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_object' => array(
+          'columns' => array('objectPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -53,14 +60,22 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
     $id = $this->getID();
     $class = $this->getTaskClass();
 
-    if (!class_exists($class)) {
+    try {
+      // NOTE: If the class does not exist, libphutil will throw an exception.
+      class_exists($class);
+    } catch (PhutilMissingSymbolException $ex) {
       throw new PhabricatorWorkerPermanentFailureException(
-        "Task class '{$class}' does not exist!");
+        pht(
+          "Task class '%s' does not exist!",
+          $class));
     }
 
     if (!is_subclass_of($class, 'PhabricatorWorker')) {
       throw new PhabricatorWorkerPermanentFailureException(
-        "Task class '{$class}' does not extend PhabricatorWorker.");
+        pht(
+          "Task class '%s' does not extend %s.",
+          $class,
+          'PhabricatorWorker'));
     }
 
     return newv($class, array($this->getData()));

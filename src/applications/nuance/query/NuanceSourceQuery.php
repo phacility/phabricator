@@ -5,8 +5,9 @@ final class NuanceSourceQuery
 
   private $ids;
   private $phids;
-  private $creatorPHIDs;
   private $types;
+  private $isDisabled;
+  private $hasCursors;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -18,66 +19,119 @@ final class NuanceSourceQuery
     return $this;
   }
 
-  public function withCreatorPHIDs(array $phids) {
-    $this->CreatorPHIDs = $phids;
-    return $this;
-  }
-
   public function withTypes($types) {
     $this->types = $types;
     return $this;
   }
 
-
-  public function loadPage() {
-    $table = new NuanceSource();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function withIsDisabled($disabled) {
+    $this->isDisabled = $disabled;
+    return $this;
   }
 
-  protected function buildWhereClause($conn_r) {
-    $where = array();
+  public function withHasImportCursors($has_cursors) {
+    $this->hasCursors = $has_cursors;
+    return $this;
+  }
 
-    $where[] = $this->buildPagingClause($conn_r);
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new NuanceSourceNameNgrams(),
+      $ngrams);
+  }
 
-    if ($this->creatorPHIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'creatorPHID IN (%Ls)',
-        $this->creatorPHIDs);
+  public function newResultObject() {
+    return new NuanceSource();
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'source';
+  }
+
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function willFilterPage(array $sources) {
+    $all_types = NuanceSourceDefinition::getAllDefinitions();
+
+    foreach ($sources as $key => $source) {
+      $definition = idx($all_types, $source->getType());
+      if (!$definition) {
+        $this->didRejectResult($source);
+        unset($sources[$key]);
+        continue;
+      }
+      $source->attachDefinition($definition);
     }
 
-    if ($this->types) {
+    return $sources;
+  }
+
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->types !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'type IN (%Ld)',
+        $conn,
+        'source.type IN (%Ls)',
         $this->types);
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'id IN (%Ld)',
+        $conn,
+        'source.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
-        'phid IN (%Ls)',
+        $conn,
+        'source.phid IN (%Ls)',
         $this->phids);
     }
 
-    return $this->formatWhereClause($where);
+    if ($this->isDisabled !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'source.isDisabled = %d',
+        (int)$this->isDisabled);
+    }
+
+    if ($this->hasCursors !== null) {
+      $cursor_types = array();
+
+      $definitions = NuanceSourceDefinition::getAllDefinitions();
+      foreach ($definitions as $key => $definition) {
+        if ($definition->hasImportCursors()) {
+          $cursor_types[] = $key;
+        }
+      }
+
+      if ($this->hasCursors) {
+        if (!$cursor_types) {
+          throw new PhabricatorEmptyQueryException();
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            'source.type IN (%Ls)',
+            $cursor_types);
+        }
+      } else {
+        if (!$cursor_types) {
+          // Apply no constraint.
+        } else {
+          $where[] = qsprintf(
+            $conn,
+            'source.type NOT IN (%Ls)',
+            $cursor_types);
+        }
+      }
+    }
+
+    return $where;
   }
 
 }

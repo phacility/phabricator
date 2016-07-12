@@ -1,52 +1,35 @@
 <?php
 
-final class PhabricatorNotificationClient {
+final class PhabricatorNotificationClient extends Phobject {
 
-  const EXPECT_VERSION = 6;
+  public static function tryAnyConnection() {
+    $servers = PhabricatorNotificationServerRef::getEnabledAdminServers();
 
-  public static function getServerStatus() {
-    $uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
-    $uri = new PhutilURI($uri);
-
-    $uri->setPath('/status/');
-
-    list($body) = id(new HTTPSFuture($uri))
-      ->setTimeout(3)
-      ->resolvex();
-
-    $status = json_decode($body, true);
-    if (!is_array($status)) {
-      throw new Exception(
-        pht(
-          'Expected JSON response from notification server, received: %s',
-          $body));
-    }
-
-    return $status;
-  }
-
-  public static function tryToPostMessage(array $data) {
-    if (!PhabricatorEnv::getEnvConfig('notification.enabled')) {
+    if (!$servers) {
       return;
     }
 
-    try {
-      self::postMessage($data);
-    } catch (Exception $ex) {
-      // Just ignore any issues here.
-      phlog($ex);
+    foreach ($servers as $server) {
+      $server->loadServerStatus();
+      return;
     }
+
+    return;
   }
 
-  private static function postMessage(array $data) {
-    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
-    $server_uri = id(new PhutilURI($server_uri))
-      ->setPath('/');
+  public static function tryToPostMessage(array $data) {
+    $servers = PhabricatorNotificationServerRef::getEnabledAdminServers();
 
-    id(new HTTPSFuture($server_uri, json_encode($data)))
-      ->setMethod('POST')
-      ->setTimeout(1)
-      ->resolvex();
+    shuffle($servers);
+
+    foreach ($servers as $server) {
+      try {
+        $server->postMessage($data);
+        return;
+      } catch (Exception $ex) {
+        // Just ignore any issues here.
+      }
+    }
   }
 
 }

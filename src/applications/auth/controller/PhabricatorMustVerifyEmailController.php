@@ -3,23 +3,18 @@
 final class PhabricatorMustVerifyEmailController
   extends PhabricatorAuthController {
 
-  public function shouldRequireLogin() {
-    return false;
-  }
-
   public function shouldRequireEmailVerification() {
     // NOTE: We don't technically need this since PhabricatorController forces
     // us here in either case, but it's more consistent with intent.
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-    $email = $user->loadPrimaryEmail();
+    $email = $viewer->loadPrimaryEmail();
 
-    if ($user->getIsEmailVerified()) {
+    if ($viewer->getIsEmailVerified()) {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
 
@@ -27,9 +22,9 @@ final class PhabricatorMustVerifyEmailController
 
     $sent = null;
     if ($request->isFormPost()) {
-      $email->sendVerificationEmail($user);
-      $sent = new AphrontErrorView();
-      $sent->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $email->sendVerificationEmail($viewer);
+      $sent = new PHUIInfoView();
+      $sent->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $sent->setTitle(pht('Email Sent'));
       $sent->appendChild(
         pht(
@@ -48,20 +43,21 @@ final class PhabricatorMustVerifyEmailController
       'to try sending another one.');
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle(pht('Check Your Email'))
       ->appendParagraph($must_verify)
       ->appendParagraph($send_again)
       ->addSubmitButton(pht('Send Another Email'));
 
-    return $this->buildApplicationPage(
-      array(
-        $sent,
-        $dialog,
-      ),
-      array(
-        'title' => pht('Must Verify Email'),
-      ));
+    $view = array(
+      $sent,
+      $dialog,
+    );
+
+    return $this->newPage()
+      ->setTitle(pht('Must Verify Email'))
+      ->appendChild($view);
+
   }
 
 }

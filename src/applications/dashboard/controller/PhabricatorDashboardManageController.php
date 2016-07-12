@@ -3,16 +3,10 @@
 final class PhabricatorDashboardManageController
   extends PhabricatorDashboardController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $id = $this->id;
     $dashboard_uri = $this->getApplicationURI('view/'.$id.'/');
 
     // TODO: This UI should drop a lot of capabilities if the user can't
@@ -21,7 +15,7 @@ final class PhabricatorDashboardManageController
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needPanels(true)
       ->executeOne();
     if (!$dashboard) {
@@ -40,25 +34,25 @@ final class PhabricatorDashboardManageController
       pht('Dashboard %d', $dashboard->getID()),
       $dashboard_uri);
     $crumbs->addTextCrumb(pht('Manage'));
+    $crumbs->setBorder(true);
 
     $header = $this->buildHeaderView($dashboard);
-    $actions = $this->buildActionView($dashboard);
+    $curtain = $this->buildCurtainview($dashboard);
     $properties = $this->buildPropertyView($dashboard);
 
-    $properties->setActionList($actions);
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
+    $timeline = $this->buildTransactionTimeline(
+      $dashboard,
+      new PhabricatorDashboardTransactionQuery());
 
+    $info_view = null;
     if (!$can_edit) {
       $no_edit = pht(
         'You do not have permission to edit this dashboard. If you want to '.
         'make changes, make a copy first.');
 
-      $box->setErrorView(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-          ->setErrors(array($no_edit)));
+      $info_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->setErrors(array($no_edit));
     }
 
     $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
@@ -67,54 +61,95 @@ final class PhabricatorDashboardManageController
       ->setArrangeMode($can_edit)
       ->renderDashboard();
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $rendered_dashboard,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $dashboard_box = id(new PHUIBoxView())
+      ->addClass('dashboard-preview-box')
+      ->appendChild($rendered_dashboard);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(array(
+        $info_view,
+        $properties,
+        $timeline,
+      ))
+      ->setFooter($dashboard_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function buildHeaderView(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
+    $id = $dashboard->getID();
+
+    if ($dashboard->isArchived()) {
+      $status_icon = 'fa-ban';
+      $status_color = 'dark';
+    } else {
+      $status_icon = 'fa-check';
+      $status_color = 'bluegrey';
+    }
+
+    $status_name = idx(
+      PhabricatorDashboard::getStatusNameMap(),
+      $dashboard->getStatus());
+
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View Dashboard'))
+      ->setIcon('fa-columns')
+      ->setHref($this->getApplicationURI("view/{$id}/"));
 
     return id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($dashboard->getName())
-      ->setPolicyObject($dashboard);
+      ->setPolicyObject($dashboard)
+      ->setStatus($status_icon, $status_color, $status_name)
+      ->setHeaderIcon('fa-dashboard')
+      ->addActionLink($button);
   }
 
-  private function buildActionView(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
+  private function buildCurtainView(PhabricatorDashboard $dashboard) {
+    $viewer = $this->getViewer();
     $id = $dashboard->getID();
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI('view/'.$dashboard->getID().'/'))
-      ->setUser($viewer);
+    $curtain = $this->newCurtainView($dashboard);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $dashboard,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View Dashboard'))
-        ->setIcon('fa-columns')
-        ->setHref($this->getApplicationURI("view/{$id}/")));
-
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Dashboard'))
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+        ->setDisabled(!$can_edit));
 
-    $actions->addAction(
+    if ($dashboard->isArchived()) {
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Activate Dashboard'))
+          ->setIcon('fa-check')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit));
+    } else {
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Archive Dashboard'))
+          ->setIcon('fa-ban')
+          ->setHref($this->getApplicationURI("archive/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow($can_edit));
+    }
+
+    $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Copy Dashboard'))
         ->setIcon('fa-files-o')
@@ -134,28 +169,21 @@ final class PhabricatorDashboardManageController
       $title_install = pht('Install Dashboard');
       $href_install = "install/{$id}/";
     }
-    $actions->addAction(
+    $curtain->addAction(
       id(new PhabricatorActionView())
       ->setName($title_install)
       ->setIcon('fa-wrench')
       ->setHref($this->getApplicationURI($href_install))
       ->setWorkflow(true));
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('View History'))
-        ->setIcon('fa-history')
-        ->setHref($this->getApplicationURI("history/{$id}/")));
-
-    return $actions;
+    return $curtain;
   }
 
   private function buildPropertyView(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($dashboard);
+      ->setUser($viewer);
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $viewer,
@@ -165,14 +193,14 @@ final class PhabricatorDashboardManageController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
-    $panel_phids = $dashboard->getPanelPHIDs();
-    $this->loadHandles($panel_phids);
-
     $properties->addProperty(
       pht('Panels'),
-      $this->renderHandlesForPHIDs($panel_phids));
+      $viewer->renderHandleList($dashboard->getPanelPHIDs()));
 
-    return $properties;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Details'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addPropertyList($properties);
   }
 
 }

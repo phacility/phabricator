@@ -7,10 +7,10 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query users.';
+    return pht('Query users.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'usernames'    => 'optional list<string>',
       'emails'       => 'optional list<string>',
@@ -22,13 +22,13 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
+      'ERR-INVALID-PARAMETER' => pht('Missing or malformed parameter.'),
     );
   }
 
@@ -41,8 +41,10 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
     $offset      = $request->getValue('offset',    0);
     $limit       = $request->getValue('limit',     100);
 
-    $query = new PhabricatorPeopleQuery();
-    $query->setViewer($request->getUser());
+    $query = id(new PhabricatorPeopleQuery())
+      ->setViewer($request->getUser())
+      ->needProfileImage(true)
+      ->needAvailability(true);
 
     if ($usernames) {
       $query->withUsernames($usernames);
@@ -67,14 +69,12 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
     }
     $users = $query->execute();
 
-    $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
-      mpull($users, 'getPHID'));
-
     $results = array();
     foreach ($users as $user) {
       $results[] = $this->buildUserInformationDictionary(
         $user,
-        idx($statuses, $user->getPHID()));
+        $with_email = false,
+        $with_availability = true);
     }
     return $results;
   }

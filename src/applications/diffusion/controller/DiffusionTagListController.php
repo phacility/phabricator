@@ -6,43 +6,50 @@ final class DiffusionTagListController extends DiffusionController {
     return true;
   }
 
-  public function processRequest() {
-    $drequest = $this->getDiffusionRequest();
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $pager = new AphrontPagerView();
-    $pager->setURI($request->getRequestURI(), 'offset');
-    $pager->setOffset($request->getInt('offset'));
+    $pager = id(new PHUIPagerView())
+      ->readFromRequest($request);
 
     $params = array(
       'limit' => $pager->getPageSize() + 1,
       'offset' => $pager->getOffset(),
     );
 
-    if ($drequest->getSymbolicCommit()) {
+    if (strlen($drequest->getSymbolicCommit())) {
       $is_commit = true;
       $params['commit'] = $drequest->getSymbolicCommit();
     } else {
       $is_commit = false;
     }
 
-    $tags = array();
-    try {
-      $conduit_result = $this->callConduitWithDiffusionRequest(
-        'diffusion.tagsquery',
-        $params);
-      $tags = DiffusionRepositoryTag::newFromConduit($conduit_result);
-    } catch (ConduitException $ex) {
-      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
-        throw $ex;
-      }
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $tags = array();
+        break;
+      default:
+        $conduit_result = $this->callConduitWithDiffusionRequest(
+          'diffusion.tagsquery',
+          $params);
+        $tags = DiffusionRepositoryTag::newFromConduit($conduit_result);
+        break;
     }
     $tags = $pager->sliceResults($tags);
 
     $content = null;
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Tags'))
+      ->setHeaderIcon('fa-tags');
+
     if (!$tags) {
       $content = $this->renderStatusMessage(
         pht('No Tags'),
@@ -67,12 +74,7 @@ final class DiffusionTagListController extends DiffusionController {
       $handles = $this->loadViewerHandles($phids);
       $view->setHandles($handles);
 
-      $panel = id(new AphrontPanelView())
-        ->setNoBackground(true)
-        ->appendChild($view)
-        ->appendChild($pager);
-
-      $content = $panel;
+      $content = $view;
     }
 
     $crumbs = $this->buildCrumbs(
@@ -80,19 +82,30 @@ final class DiffusionTagListController extends DiffusionController {
         'tags' => true,
         'commit' => $drequest->getSymbolicCommit(),
       ));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-      ),
-      array(
-        'title' => array(
-          pht('Tags'),
-          $repository->getCallsign().' Repository',
-        ),
-        'device' => false,
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($repository->getDisplayName())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($view);
+
+    $pager_box = $this->renderTablePagerBox($pager);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
+        $pager_box,
       ));
+
+    return $this->newPage()
+      ->setTitle(
+        array(
+          pht('Tags'),
+          $repository->getDisplayName(),
+        ))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

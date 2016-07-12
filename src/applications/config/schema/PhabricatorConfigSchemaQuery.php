@@ -11,7 +11,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
   protected function getAPI() {
     if (!$this->api) {
-      throw new Exception(pht('Call setAPI() before issuing a query!'));
+      throw new PhutilInvalidStateException('setAPI');
     }
     return $this->api;
   }
@@ -46,6 +46,25 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
         WHERE SCHEMA_NAME IN (%Ls)',
       $databases);
     $database_info = ipull($database_info, null, 'SCHEMA_NAME');
+
+    // Find databases which exist, but which the user does not have permission
+    // to see.
+    $invisible_databases = array();
+    foreach ($databases as $database_name) {
+      if (isset($database_info[$database_name])) {
+        continue;
+      }
+
+      try {
+        queryfx($conn, 'SHOW TABLES IN %T', $database_name);
+      } catch (AphrontAccessDeniedQueryException $ex) {
+        // This database exists, the user just doesn't have permission to
+        // see it.
+        $invisible_databases[] = $database_name;
+      } catch (AphrontSchemaQueryException $ex) {
+        // This database is legitimately missing.
+      }
+    }
 
     $sql = array();
     foreach ($tables as $table) {
@@ -148,27 +167,33 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $server_schema->addDatabase($database_schema);
     }
 
+    foreach ($invisible_databases as $database_name) {
+      $server_schema->addDatabase(
+        id(new PhabricatorConfigDatabaseSchema())
+          ->setName($database_name)
+          ->setAccessDenied(true));
+    }
+
     return $server_schema;
   }
 
   public function loadExpectedSchema() {
     $databases = $this->getDatabaseNames();
+    $info = $this->getAPI()->getCharsetInfo();
 
-    $api = $this->getAPI();
-
-    $charset_info = $api->getCharsetInfo();
-    list($charset, $collate_text, $collate_sort) = $charset_info;
-
-    $specs = id(new PhutilSymbolLoader())
+    $specs = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorConfigSchemaSpec')
-      ->loadObjects();
+      ->execute();
 
     $server_schema = new PhabricatorConfigServerSchema();
     foreach ($specs as $spec) {
       $spec
-        ->setUTF8Charset($charset)
-        ->setUTF8BinaryCollation($collate_text)
-        ->setUTF8SortingCollation($collate_sort)
+        ->setUTF8Charset(
+          $info[PhabricatorStorageManagementAPI::CHARSET_DEFAULT])
+        ->setUTF8BinaryCollation(
+          $info[PhabricatorStorageManagementAPI::COLLATE_TEXT])
+        ->setUTF8SortingCollation(
+          $info[PhabricatorStorageManagementAPI::COLLATE_SORT])
         ->setServer($server_schema)
         ->buildSchemata($server_schema);
     }
@@ -195,6 +220,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       if (!$actual_database) {
         $actual_database = $expect_database->newEmptyClone();
       }
+
       if (!$expect_database) {
         $expect_database = $actual_database->newEmptyClone();
       }

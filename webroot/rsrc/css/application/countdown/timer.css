@@ -3,35 +3,43 @@
  */
 
 .phabricator-timer {
-  width: 90%;
-  margin: 12px auto;
-  border: 1px solid {$greytext};
-  border-radius: 4px;
-  background: #ffffff;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+  margin: 16px 16px 0 16px;
 }
 
-.phabricator-remarkup .phabricator-timer {
-  width: 300px;
+.device .phabricator-timer {
+  margin-left: 12px;
+  margin-right: 12px;
 }
 
-.phabricator-timer-header {
-  font-size: 14px;
-  font-weight: bold;
-  padding: 4px 8px;
-  background: #f0f0f0;
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #d7d7d7;
+.phabricator-remarkup .phabricator-timer-view {
+  max-width: 460px;
+  margin: 0 0 12px 0;
+}
+
+body .phabricator-timer .countdown-description.phabricator-remarkup {
+  border-bottom: 1px solid {$thinblueborder};
+  padding: 0 0 16px;
+  margin: 0;
+}
+
+.phabricator-timer .countdown-description.phabricator-remarkup
+  .phabricator-remarkup {
+    padding: 0;
+}
+
+.device-phone .phabricator-remarkup .phabricator-timer {
+  width: auto;
 }
 
 .phabricator-timer-table {
   width: 100%;
-  margin: 8px 0;
+  margin: 8px 0 0 0;
 }
 
 .phabricator-timer-table th {
   text-align: center;
-  color: {$greytext};
+  font-size: {$biggerfontsize};
+  color: {$bluetext};
   width: 10%;
   padding: 4px;
 }
@@ -40,10 +48,22 @@
   padding: 4px;
   text-align: center;
   font-size: 36px;
+  font-weight: bold;
   overflow: hidden;
   line-height: auto;
   height: auto;
-  line-height: 36px;
+  line-height: 44px;
+}
+
+.phabricator-timer-table td.phabricator-timer-foot {
+  font-size: {$biggerfontsize};
+  line-height: 16px;
+  border-top: 1px solid {$thinblueborder};
+  color: {$bluetext};
+  padding: 12px 0;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+  text-align: center;
 }
 
 .phabricator-timer-table small {

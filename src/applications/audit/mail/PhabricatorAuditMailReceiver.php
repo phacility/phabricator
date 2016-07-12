@@ -3,16 +3,16 @@
 final class PhabricatorAuditMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorAuditApplication';
-    return PhabricatorApplication::isClassInstalled($app_class);
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorAuditApplication');
   }
 
   protected function getObjectPattern() {
-    return 'C[1-9]\d*';
+    return 'COMMIT[1-9]\d*';
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'C');
+    $id = (int)preg_replace('/^COMMIT/', '', $pattern);
 
     return id(new DiffusionCommitQuery())
       ->setViewer($viewer)
@@ -21,17 +21,8 @@ final class PhabricatorAuditMailReceiver extends PhabricatorObjectMailReceiver {
       ->executeOne();
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    $handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit($object);
-
-    $handler->setActor($sender);
-    $handler->setExcludeMailRecipientPHIDs(
-      $mail->loadExcludeMailRecipientPHIDs());
-    $handler->processEmail($mail);
+  protected function getTransactionReplyHandler() {
+    return new PhabricatorAuditReplyHandler();
   }
 
 }

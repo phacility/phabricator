@@ -32,13 +32,13 @@ abstract class PassphraseAbstractKey extends Phobject {
     PassphraseCredential $credential,
     $provides_type) {
 
-    $type = $credential->getCredentialTypeImplementation();
+    $type = $credential->getImplementation();
 
     if (!$type) {
       throw new Exception(
         pht(
           'Credential "%s" is of unknown type "%s"!',
-          'K'.$credential->getID(),
+          $credential->getMonogram(),
           $credential->getCredentialType()));
     }
 
@@ -46,7 +46,7 @@ abstract class PassphraseAbstractKey extends Phobject {
       throw new Exception(
         pht(
           'Credential "%s" must provide "%s", but provides "%s"!',
-          'K'.$credential->getID(),
+          $credential->getMonogram(),
           $provides_type,
           $type->getProvidesType()));
     }

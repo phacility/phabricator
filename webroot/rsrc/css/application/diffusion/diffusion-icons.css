@@ -2,37 +2,9 @@
  * @provides diffusion-icons-css
  */
 
-.diffusion-path-icon {
-  display: block;
-  padding-left: 28px;
-  background-repeat: no-repeat;
-  background-position: 1px 1px;
-  height: 18px;
-  padding-top: 1px;
-}
-
-.diffusion-path-icon-ext {
-  background-image: url(/rsrc/image/icon/fatcow/folder_go.png);
-}
-
-.diffusion-path-icon-dir {
-  background-image: url(/rsrc/image/icon/fatcow/folder.png);
-}
-
-.diffusion-path-icon-file {
-  background-image: url(/rsrc/image/icon/fatcow/page_white_text.png);
-}
-
-.diffusion-path-icon-link {
-  background-image: url(/rsrc/image/icon/fatcow/page_white_link.png);
-}
-
 input.diffusion-clone-uri {
   display: block;
   width: 100%;
-  border: 1px solid #efefef;
-  box-shadow: none;
-  height: 24px;
 }
 
 .diffusion-clone-extras {
@@ -41,6 +13,37 @@ input.diffusion-clone-uri {
   color: {$lightgreytext};
 }
 
-.diffusion-locate-file-view {
-  border-bottom: 1px solid {$thinblueborder};
+.diffusion-browse-name {
+  margin-left: 8px;
+}
+
+.diffusion-link-icon + .diffusion-link-icon {
+  margin-left: 6px;
+}
+
+.diffusion-search-boxen {
+  padding: 16px;
+}
+
+.diffusion-search-boxen .phui-form-view {
+  padding: 0;
+}
+
+.diffusion-clone-uri-table {
+  width: 100%;
+}
+
+.diffusion-clone-uri-table th {
+  width: 24px;
+  padding: 0 0 0 4px;
+}
+
+.diffusion-clone-uri-table th a.button {
+  width: 12px;
+  height: 19px;
+}
+
+.diffusion-clone-uri-table th a.button .phui-icon-view {
+  left: 12px;
+  top: 7px;
 }

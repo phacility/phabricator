@@ -6,13 +6,16 @@ final class FeedPublisherWorker extends FeedPushWorker {
     $story = $this->loadFeedStory();
 
     $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks');
-    foreach ($uris as $uri) {
-      $this->queueTask(
-        'FeedPublisherHTTPWorker',
-        array(
-          'key' => $story->getChronologicalKey(),
-          'uri' => $uri,
-        ));
+
+    if ($uris) {
+      foreach ($uris as $uri) {
+        $this->queueTask(
+          'FeedPublisherHTTPWorker',
+          array(
+            'key' => $story->getChronologicalKey(),
+            'uri' => $uri,
+          ));
+      }
     }
 
     $argv = array(
@@ -20,6 +23,7 @@ final class FeedPublisherWorker extends FeedPushWorker {
     );
 
     // Find and schedule all the enabled Doorkeeper publishers.
+    // TODO: Use PhutilClassMapQuery?
     $doorkeeper_workers = id(new PhutilSymbolLoader())
       ->setAncestorClass('DoorkeeperFeedWorker')
       ->loadObjects($argv);

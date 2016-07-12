@@ -3,48 +3,49 @@
 final class PhabricatorWorkerTaskDetailController
   extends PhabricatorDaemonController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $task = id(new PhabricatorWorkerActiveTask())->load($this->id);
+    $task = id(new PhabricatorWorkerActiveTask())->load($id);
     if (!$task) {
-      $task = id(new PhabricatorWorkerArchiveTask())->load($this->id);
+      $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+        ->withIDs(array($id))
+        ->execute();
+      $task = reset($tasks);
     }
+
+    $header = new PHUIHeaderView();
 
     if (!$task) {
       $title = pht('Task Does Not Exist');
 
-      $error_view = new AphrontErrorView();
+      $header->setHeader(pht('Task %d Missing', $id));
+
+      $error_view = new PHUIInfoView();
       $error_view->setTitle(pht('No Such Task'));
       $error_view->appendChild(phutil_tag(
         'p',
         array(),
         pht('This task may have recently been garbage collected.')));
-      $error_view->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+      $error_view->setSeverity(PHUIInfoView::SEVERITY_NODATA);
 
       $content = $error_view;
     } else {
       $title = pht('Task %d', $task->getID());
 
-      $header = id(new PHUIHeaderView())
-        ->setHeader(pht('Task %d (%s)',
+      $header->setHeader(
+        pht(
+          'Task %d: %s',
           $task->getID(),
           $task->getTaskClass()));
 
-      $actions = $this->buildActionListView($task);
-      $properties = $this->buildPropertyListView($task, $actions);
+      $properties = $this->buildPropertyListView($task);
 
       $object_box = id(new PHUIObjectBoxView())
-        ->setHeader($header)
+        ->setHeaderText($title)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->addPropertyList($properties);
-
 
       $retry_head = id(new PHUIHeaderView())
         ->setHeader(pht('Retries'));
@@ -53,6 +54,7 @@ final class PhabricatorWorkerTaskDetailController
 
       $retry_box = id(new PHUIObjectBoxView())
         ->setHeader($retry_head)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->addPropertyList($retry_info);
 
       $content = array(
@@ -61,70 +63,28 @@ final class PhabricatorWorkerTaskDetailController
       );
     }
 
+    $header->setHeaderIcon('fa-sort');
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $content,
-      ),
-      array(
-        'title' => $title,
-      ));
-  }
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($content);
 
-  private function buildActionListView(PhabricatorWorkerTask $task) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-    $id = $task->getID();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($user)
-      ->setObjectURI($request->getRequestURI());
-
-    if ($task->isArchived()) {
-      $result_success = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;
-      $can_retry = ($task->getResult() != $result_success);
-
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Retry Task'))
-          ->setHref($this->getApplicationURI('/task/'.$id.'/retry/'))
-          ->setIcon('fa-refresh')
-          ->setWorkflow(true)
-          ->setDisabled(!$can_retry));
-    } else {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Cancel Task'))
-          ->setHref($this->getApplicationURI('/task/'.$id.'/cancel/'))
-          ->setIcon('fa-times')
-          ->setWorkflow(true));
-    }
-
-    $can_release = (!$task->isArchived()) &&
-                   ($task->getLeaseOwner());
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Free Lease'))
-        ->setHref($this->getApplicationURI('/task/'.$id.'/release/'))
-        ->setIcon('fa-unlock')
-        ->setWorkflow(true)
-        ->setDisabled(!$can_release));
-
-    return $view;
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   private function buildPropertyListView(
-    PhabricatorWorkerTask $task,
-    PhabricatorActionListView $actions) {
+    PhabricatorWorkerTask $task) {
 
     $viewer = $this->getRequest()->getUser();
 
     $view = new PHUIPropertyListView();
-    $view->setActionList($actions);
 
     if ($task->isArchived()) {
       switch ($task->getResult()) {
@@ -138,7 +98,7 @@ final class PhabricatorWorkerTaskDetailController
           $status = pht('Cancelled');
           break;
         default:
-          throw new Exception('Unknown task status!');
+          throw new Exception(pht('Unknown task status!'));
       }
     } else {
       $status = pht('Queued');
@@ -184,7 +144,7 @@ final class PhabricatorWorkerTaskDetailController
       $expires);
 
     if ($task->isArchived()) {
-      $duration = number_format($task->getDuration()).' us';
+      $duration = pht('%s us', new PhutilNumber($task->getDuration()));
     } else {
       $duration = phutil_tag('em', array(), pht('Not Completed'));
     }
@@ -198,9 +158,9 @@ final class PhabricatorWorkerTaskDetailController
     $worker = $task->getWorkerInstance();
     $data = $worker->renderForDisplay($viewer);
 
-    $view->addProperty(
-      pht('Data'),
-      $data);
+    if ($data !== null) {
+      $view->addProperty(pht('Data'), $data);
+    }
 
     return $view;
   }

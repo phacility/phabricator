@@ -8,7 +8,9 @@
  * then constructing a real @{class:AphrontAjaxResponse} in
  * @{method:reduceProxyResponse}.
  */
-abstract class AphrontProxyResponse extends AphrontResponse {
+abstract class AphrontProxyResponse
+  extends AphrontResponse
+  implements AphrontResponseProducerInterface {
 
   private $proxy;
 
@@ -34,6 +36,11 @@ abstract class AphrontProxyResponse extends AphrontResponse {
 
   public function setCacheDurationInSeconds($duration) {
     $this->getProxy()->setCacheDurationInSeconds($duration);
+    return $this;
+  }
+
+  public function setCanCDN($can_cdn) {
+    $this->getProxy()->setCanCDN($can_cdn);
     return $this;
   }
 
@@ -65,7 +72,18 @@ abstract class AphrontProxyResponse extends AphrontResponse {
 
   final public function buildResponseString() {
     throw new Exception(
-      'AphrontProxyResponse must implement reduceProxyResponse().');
+      pht(
+        '%s must implement %s.',
+        __CLASS__,
+        'reduceProxyResponse()'));
+  }
+
+
+/* -(  AphrontResponseProducerInterface  )----------------------------------- */
+
+
+  public function produceAphrontResponse() {
+    return $this->reduceProxyResponse();
   }
 
 }

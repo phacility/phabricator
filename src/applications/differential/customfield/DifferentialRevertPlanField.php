@@ -44,12 +44,7 @@ final class DifferentialRevertPlanField
       return null;
     }
 
-    return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())
-        ->setPreserveLinebreaks(true)
-        ->setContent($this->getValue()),
-      'default',
-      $this->getViewer());
+    return new PHUIRemarkupView($this->getViewer(), $this->getValue());
   }
 
   public function shouldAppearInGlobalSearch() {
@@ -85,6 +80,7 @@ final class DifferentialRevertPlanField
 
   public function renderEditControl(array $handles) {
     return id(new PhabricatorRemarkupControl())
+      ->setUser($this->getViewer())
       ->setName($this->getFieldKey())
       ->setValue($this->getValue())
       ->setLabel($this->getFieldName());
@@ -102,8 +98,7 @@ final class DifferentialRevertPlanField
   }
 
   public function getApplicationTransactionTitleForFeed(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorFeedStory $story) {
+    PhabricatorApplicationTransaction $xaction) {
 
     $object_phid = $xaction->getObjectPHID();
     $author_phid = $xaction->getAuthorPHID();

@@ -64,12 +64,38 @@ final class PhabricatorApplicationTransactionCommentEditor
         $comment->setTransactionPHID($xaction->getPHID());
         $comment->save();
 
+        $old_comment = $xaction->getComment();
+        $comment->attachOldComment($old_comment);
+
         $xaction->setCommentVersion($new_version);
         $xaction->setCommentPHID($comment->getPHID());
         $xaction->setViewPolicy($comment->getViewPolicy());
         $xaction->setEditPolicy($comment->getEditPolicy());
         $xaction->save();
+        $xaction->attachComment($comment);
 
+        // For comment edits, we need to make sure there are no automagical
+        // transactions like adding mentions or projects.
+        if ($new_version > 1) {
+          $object = id(new PhabricatorObjectQuery())
+            ->withPHIDs(array($xaction->getObjectPHID()))
+            ->setViewer($this->getActor())
+            ->executeOne();
+          if ($object &&
+              $object instanceof PhabricatorApplicationTransactionInterface) {
+            $editor = $object->getApplicationTransactionEditor();
+            $editor->setActor($this->getActor());
+            $support_xactions = $editor->getExpandedSupportTransactions(
+              $object,
+              $xaction);
+            if ($support_xactions) {
+              $editor
+                ->setContentSource($this->getContentSource())
+                ->setContinueOnNoEffect(true)
+                ->applyTransactions($object, $support_xactions);
+            }
+          }
+        }
       $xaction->endReadLocking();
     $xaction->saveTransaction();
 
@@ -79,13 +105,11 @@ final class PhabricatorApplicationTransactionCommentEditor
       foreach ($file_phids as $file_phid) {
         $editor->addEdge(
           $xaction->getObjectPHID(),
-          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE,
+          PhabricatorObjectHasFileEdgeType::EDGECONST ,
           $file_phid);
       }
       $editor->save();
     }
-
-    $xaction->attachComment($comment);
 
     return $this;
   }
@@ -100,20 +124,21 @@ final class PhabricatorApplicationTransactionCommentEditor
 
     if (!$xaction->getPHID()) {
       throw new Exception(
-        'Transaction must have a PHID before calling applyEdit()!');
+        pht(
+          'Transaction must have a PHID before calling %s!',
+          'applyEdit()'));
     }
 
     $type_comment = PhabricatorTransactions::TYPE_COMMENT;
     if ($xaction->getTransactionType() == $type_comment) {
       if ($comment->getPHID()) {
         throw new Exception(
-          'Transaction comment must not yet have a PHID!');
+          pht('Transaction comment must not yet have a PHID!'));
       }
     }
 
     if (!$this->getContentSource()) {
-      throw new Exception(
-        'Call setContentSource() before applyEdit()!');
+      throw new PhutilInvalidStateException('applyEdit');
     }
 
     $actor = $this->requireActor();

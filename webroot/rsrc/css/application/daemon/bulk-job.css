@@ -1,0 +1,32 @@
+/**
+ * @provides bulk-job-css
+ */
+
+.bulk-job-progress-bar {
+  position: relative;
+  width: 100%;
+  border: 1px solid {$lightgreyborder};
+  height: 32px;
+}
+
+.bulk-job-progress-slice {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.bulk-job-progress-slice-green {
+  background-color: {$green};
+}
+
+.bulk-job-progress-slice-blue {
+  background-color: {$blue};
+}
+
+.bulk-job-progress-slice-red {
+  background-color: {$red};
+}
+
+.bulk-job-progress-slice-empty {
+  background-color: {$lightbluebackground};
+}

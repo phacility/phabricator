@@ -18,8 +18,8 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getIconName() {
-    return 'phrequent';
+  public function getIcon() {
+    return 'fa-clock-o';
   }
 
   public function getApplicationGroup() {
@@ -48,15 +48,22 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
 
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
+    $limit = self::MAX_STATUS_ITEMS;
 
     // Show number of objects that are currently
     // being tracked for a user.
 
-    $count = PhrequentUserTimeQuery::getUserTotalObjectsTracked($user);
+    $count = PhrequentUserTimeQuery::getUserTotalObjectsTracked($user, $limit);
+    if ($count >= $limit) {
+      $count_str = pht('%s+ Object(s) Tracked', new PhutilNumber($limit - 1));
+    } else {
+      $count_str = pht('%s Object(s) Tracked', new PhutilNumber($count));
+    }
+
     $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Object(s) Tracked', $count))
+      ->setText($count_str)
       ->setCount($count);
 
     return $status;

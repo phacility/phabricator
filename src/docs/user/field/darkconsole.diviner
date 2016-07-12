@@ -1,0 +1,181 @@
+@title Using DarkConsole
+@group fieldmanual
+
+Enabling and using the built-in debugging and performance console.
+
+Overview
+========
+
+DarkConsole is a debugging console built into Phabricator which exposes
+configuration, performance and error information. It can help you detect,
+understand and resolve bugs and performance problems in Phabricator
+applications.
+
+
+Security Warning
+================
+
+WARNING: Because DarkConsole exposes some configuration and debugging
+information, it is disabled by default and you should be cautious about
+enabling it in production.
+
+Particularly, DarkConsole may expose some information about your session
+details or other private material. It has some crude safeguards against this,
+but does not completely sanitize output.
+
+This is mostly a risk if you take screenshots or copy/paste output and share
+it with others.
+
+
+Enabling DarkConsole
+====================
+
+You enable DarkConsole in your configuration, by setting `darkconsole.enabled`
+to `true`, and then turning it on in {nav Settings > Developer Settings}.
+
+Once DarkConsole is enabled, you can show or hide it by pressing ##`## on your
+keyboard.
+
+Since the setting is not available to logged-out users, you can also set
+`darkconsole.always-on` if you need to access DarkConsole on logged-out pages.
+
+DarkConsole has a number of tabs, each of which is powered by a "plugin". You
+can use them to access different debugging and performance features.
+
+
+Plugin: Error Log
+=================
+
+The "Error Log" plugin shows errors that occurred while generating the page,
+similar to the httpd `error.log`. You can send information to the error log
+explicitly with the @{function@libphutil:phlog} function.
+
+If errors occurred, a red dot will appear on the plugin tab.
+
+
+Plugin: Request
+===============
+
+The "Request" plugin shows information about the HTTP request the server
+received, and the server itself.
+
+
+Plugin: Services
+================
+
+The "Services" plugin lists calls a page made to external services, like
+MySQL and subprocesses.
+
+The Services tab can help you understand and debug issues related to page
+behavior: for example, you can use it to see exactly what queries or commands a
+page is running. In some cases, you can re-run those queries or commands
+yourself to examine their output and look for problems.
+
+This tab can also be particularly useful in understanding page performance,
+because many performance problems are caused by inefficient queries (queries
+with bad query plans or which take too long) or repeated queries (queries which
+could be better structured or benefit from caching).
+
+When analyzing performance problems, the major things to look for are:
+
+**Summary**: In the summary table at the top of the tab, are any categories
+of events dominating the performance cost? For normal pages, the costs should
+be roughly along these lines:
+
+| Event Type | Approximate Cost |
+|---|---|
+| Connect | 1%-10% |
+| Query | 10%-40% |
+| Cache | 1% |
+| Event | 1% |
+| Conduit | 0%-80% |
+| Exec | 0%-80% |
+| All Services | 10%-75% |
+| Entire Page | 100ms - 1000ms |
+
+These ranges are rough, but should usually be what you expect from a page
+summary. If any of these numbers are way off (for example, "Event" is taking
+50% of runtime), that points toward a possible problem in that section of the
+code, and can guide you to examining the related service calls more carefully.
+
+**Duration**: In the Duration column, look for service calls that take a long
+time. Sometimes these calls are just what the page is doing, but sometimes they
+may indicate a problem.
+
+Some questions that may help understanding this column are: are there a small
+number of calls which account for a majority of the total page generation time?
+Do these calls seem fundamental to the behavior of the page, or is it not clear
+why they need to be made? Do some of them seem like they could be cached?
+
+If there are queries which look slow, using the "Analyze Query Plans" button
+may help reveal poor query plans.
+
+Generally, this column can help pinpoint these kinds of problems:
+
+  - Queries or other service calls which are huge and inefficient.
+  - Work the page is doing which it could cache instead.
+  - Problems with network services.
+  - Missing keys or poor query plans.
+
+**Repeated Calls**: In the "Details" column, look for service calls that are
+being made over and over again. Sometimes this is normal, but usually it
+indicates a call that can be batched or cached.
+
+Some things to look for are: are similar calls being made over and over again?
+Do calls mostly make sense given what the page is doing? Could any calls be
+cached? Could multiple small calls be collected into one larger call? Are any
+of the service calls clearly goofy nonsense that shouldn't be happening?
+
+Generally, this column can help pinpoint these kinds of problems:
+
+  - Unbatched queries which should be batched (see
+    @{article:Performance: N+1 Query Problem}).
+  - Opportunities to improve performance with caching.
+  - General goofiness in how service calls are woking.
+
+If the services tab looks fine, and particularly if a page is slow but the
+"All Services" cost is small, that may indicate a problem in PHP. The best
+tool to understand problems in PHP is XHProf.
+
+
+Plugin: Startup
+===============
+
+The "Startup" plugin shows information about startup phases. This information
+can provide insight about performance problems which occur before the profiler
+can start.
+
+Normally, the profiler is the best tool for understanding runtime performance,
+but some work is performed before the profiler starts (for example, loading
+libraries and configuration). If there is a substantial difference between the
+wall time reported by the profiler and the "Entire Page" cost reported by the
+Services tab, the Startup tab can help account for that time.
+
+It is normal for starting the profiler to increase the cost of the page
+somewhat: the profiler itself adds overhead while it is running, and the page
+must do some work after the profiler is stopped to save the profile and
+complete other shutdown operations.
+
+
+Plugin: XHProf
+==============
+
+The "XHProf" plugin gives you access to the XHProf profiler. To use it, you need
+to install the corresponding PHP plugin.
+
+Once it is installed, you can use XHProf to profile the runtime performance of
+a page. This will show you a detailed breakdown of where PHP spent time. This
+can help find slow or inefficient application code, and is the most powerful
+general-purpose performance tool available.
+
+For instructions on installing and using XHProf, see @{article:Using XHProf}.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - installing XHProf with @{article:Using XHProf}; or
+  - understanding and reporting performance issues with
+    @{article:Troubleshooting Performance Problems}.

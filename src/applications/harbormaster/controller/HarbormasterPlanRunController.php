@@ -1,27 +1,31 @@
 <?php
 
-final class HarbormasterPlanRunController extends HarbormasterController {
+final class HarbormasterPlanRunController extends HarbormasterPlanController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $plan_id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $this->requireApplicationCapability(
-      HarbormasterManagePlansCapability::CAPABILITY);
-
-    $plan_id = $this->id;
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)
       ->withIDs(array($plan_id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$plan) {
       return new Aphront404Response();
+    }
+
+    $cancel_uri = $this->getApplicationURI("plan/{$plan_id}/");
+
+    if (!$plan->canRunManually()) {
+      return $this->newDialog()
+        ->setTitle(pht('Can Not Run Plan'))
+        ->appendParagraph(pht('This plan can not be run manually.'))
+        ->addCancelButton($cancel_uri);
     }
 
     $e_name = true;
@@ -55,7 +59,7 @@ final class HarbormasterPlanRunController extends HarbormasterController {
 
       if (!$errors) {
         $buildable->save();
-        $buildable->applyPlan($plan);
+        $buildable->applyPlan($plan, array(), $viewer->getPHID());
 
         $buildable_uri = '/B'.$buildable->getID();
         return id(new AphrontRedirectResponse())->setURI($buildable_uri);
@@ -63,11 +67,10 @@ final class HarbormasterPlanRunController extends HarbormasterController {
     }
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      $errors = id(new PHUIInfoView())->setErrors($errors);
     }
 
     $title = pht('Run Build Plan Manually');
-    $cancel_uri = $this->getApplicationURI("plan/{$plan_id}/");
     $save_button = pht('Run Plan Manually');
 
     $form = id(new PHUIFormLayoutView())
@@ -82,20 +85,17 @@ final class HarbormasterPlanRunController extends HarbormasterController {
           $plan->getID()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Buildable Name')
+          ->setLabel(pht('Buildable Name'))
           ->setName('buildablePHID')
           ->setError($e_name)
           ->setValue($v_name));
 
-    $dialog = id(new AphrontDialogView())
+    return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FULL)
-      ->setUser($viewer)
       ->setTitle($title)
       ->appendChild($form)
       ->addCancelButton($cancel_uri)
       ->addSubmitButton($save_button);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

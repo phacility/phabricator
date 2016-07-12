@@ -3,19 +3,13 @@
 final class PassphraseCredentialRevealController
   extends PassphraseController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $credential = id(new PassphraseCredentialQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -57,6 +51,7 @@ final class PassphraseCredentialRevealController
             id(new AphrontFormTextAreaControl())
               ->setLabel(pht('Plaintext'))
               ->setReadOnly(true)
+              ->setCustomClass('PhabricatorMonospaced')
               ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
               ->setValue($secret->openEnvelope()));
       }
@@ -73,9 +68,10 @@ final class PassphraseCredentialRevealController
         ->addCancelButton($view_uri, pht('Done'));
 
       $type_secret = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
-      $xactions = array(id(new PassphraseCredentialTransaction())
-        ->setTransactionType($type_secret)
-        ->setNewValue(true),
+      $xactions = array(
+        id(new PassphraseCredentialTransaction())
+          ->setTransactionType($type_secret)
+          ->setNewValue(true),
       );
 
       $editor = id(new PassphraseCredentialTransactionEditor())

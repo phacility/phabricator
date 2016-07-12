@@ -10,7 +10,7 @@ final class ConpherenceParticipant extends ConpherenceDAO {
   protected $dateTouched;
   protected $settings = array();
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'settings' => self::SERIALIZATION_JSON,
@@ -47,11 +47,16 @@ final class ConpherenceParticipant extends ConpherenceDAO {
       $this->setBehindTransactionPHID($xaction->getPHID());
       $this->setSeenMessageCount($conpherence->getMessageCount());
       $this->save();
+
+      PhabricatorUserCache::clearCache(
+        PhabricatorUserMessageCountCacheType::KEY_COUNT,
+        $this->getParticipantPHID());
     }
+
     return $this;
   }
 
-  private function isUpToDate(ConpherenceThread $conpherence) {
+  public function isUpToDate(ConpherenceThread $conpherence) {
     return
       ($this->getSeenMessageCount() == $conpherence->getMessageCount())
         &&

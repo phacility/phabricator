@@ -10,7 +10,7 @@ final class PhabricatorTokenCountQuery
     return $this;
   }
 
-  final public function execute() {
+  public function execute() {
     $table = new PhabricatorTokenCount();
     $conn_r = $table->establishConnection('r');
 
@@ -24,7 +24,7 @@ final class PhabricatorTokenCountQuery
     return ipull($rows, 'tokenCount', 'objectPHID');
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->objectPHIDs) {

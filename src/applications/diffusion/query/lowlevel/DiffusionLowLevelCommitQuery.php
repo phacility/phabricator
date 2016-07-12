@@ -15,10 +15,9 @@ final class DiffusionLowLevelCommitQuery
     return $this;
   }
 
-  public function executeQuery() {
+  protected function executeQuery() {
     if (!strlen($this->identifier)) {
-      throw new Exception(
-        pht('You must provide an identifier with withIdentifier()!'));
+      throw new PhutilInvalidStateException('withIdentifier');
     }
 
     $type = $this->getRepository()->getVersionControlSystem();
@@ -53,7 +52,7 @@ final class DiffusionLowLevelCommitQuery
       'UTF-8',
       implode(
         '%x00',
-        array('%e', '%cn', '%ce', '%an', '%ae', '%T', '%s%n%n%b')),
+        array('%e', '%cn', '%ce', '%an', '%ae', '%T', '%at', '%s%n%n%b')),
       $this->identifier);
 
     $parts = explode("\0", $info);
@@ -78,13 +77,19 @@ final class DiffusionLowLevelCommitQuery
         ->setHashValue($parts[4]),
     );
 
+    $author_epoch = (int)$parts[5];
+    if (!$author_epoch) {
+      $author_epoch = null;
+    }
+
     return id(new DiffusionCommitRef())
       ->setCommitterName($parts[0])
       ->setCommitterEmail($parts[1])
       ->setAuthorName($parts[2])
       ->setAuthorEmail($parts[3])
       ->setHashes($hashes)
-      ->setMessage($parts[5]);
+      ->setAuthorEpoch($author_epoch)
+      ->setMessage($parts[6]);
   }
 
   private function loadMercurialCommitRef() {

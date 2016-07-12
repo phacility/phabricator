@@ -3,30 +3,29 @@
 final class FundBackerListController
   extends FundController {
 
-  private $id;
-  private $queryKey;
   private $initiative;
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-    $this->queryKey = idx($data, 'queryKey');
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $querykey = $request->getURIData('queryKey');
 
-    if ($this->id) {
+    if ($id) {
       $this->initiative = id(new FundInitiativeQuery())
-        ->setViewer($request->getUser())
-        ->withIDs(array($this->id))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->executeOne();
       if (!$this->initiative) {
         return new Aphront404Response();
       }
     }
 
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->queryKey)
+    $controller = id(new PhabricatorApplicationSearchController())
+      ->setQueryKey($querykey)
       ->setSearchEngine($this->getEngine())
       ->setNavigation($this->buildSideNavView());
 
@@ -62,8 +61,7 @@ final class FundBackerListController
   }
 
   private function getEngine() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = $this->getViewer();
 
     $engine = id(new FundBackerSearchEngine())
       ->setViewer($viewer);

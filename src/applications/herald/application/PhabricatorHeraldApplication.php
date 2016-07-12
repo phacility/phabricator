@@ -6,8 +6,8 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
     return '/herald/';
   }
 
-  public function getIconName() {
-    return 'herald';
+  public function getIcon() {
+    return 'fa-bullhorn';
   }
 
   public function getName() {
@@ -22,8 +22,13 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
     return "\xE2\x98\xBF";
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Herald User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Herald User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Herald User Guide'),
+      ),
+    );
   }
 
   public function getFlavorText() {
@@ -42,19 +47,19 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
+      '/H(?P<id>[1-9]\d*)' => 'HeraldRuleViewController',
       '/herald/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'HeraldRuleListController',
         'new/' => 'HeraldNewController',
-        'rule/(?P<id>[1-9]\d*)/' => 'HeraldRuleViewController',
+        'create/' => 'HeraldNewController',
         'edit/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleController',
         'disable/(?P<id>[1-9]\d*)/(?P<action>\w+)/'
           => 'HeraldDisableController',
-        'history/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleEditHistoryController',
         'test/' => 'HeraldTestConsoleController',
         'transcript/' => array(
           '' => 'HeraldTranscriptListController',
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'HeraldTranscriptListController',
-          '(?P<id>[1-9]\d*)/(?:(?P<filter>\w+)/)?'
+          '(?P<id>[1-9]\d*)/'
             => 'HeraldTranscriptController',
         ),
       ),

@@ -1,38 +1,60 @@
 <?php
 
-abstract class PhabricatorSQLPatchList {
+abstract class PhabricatorSQLPatchList extends Phobject {
 
-  abstract function getNamespace();
-  abstract function getPatches();
+  abstract public function getNamespace();
+  abstract public function getPatches();
+
+  /**
+   * Examine a directory for `.php` and `.sql` files and build patch
+   * specifications for them.
+   */
+  protected function buildPatchesFromDirectory($directory) {
+    $patch_list = Filesystem::listDirectory(
+      $directory,
+      $include_hidden = false);
+
+    sort($patch_list);
+    $patches = array();
+
+    foreach ($patch_list as $patch) {
+      $matches = null;
+      if (!preg_match('/\.(sql|php)$/', $patch, $matches)) {
+        throw new Exception(
+          pht(
+            'Unknown patch "%s" in "%s", expected ".php" or ".sql" suffix.',
+            $patch,
+            $directory));
+      }
+
+      $patches[$patch] = array(
+        'type' => $matches[1],
+        'name' => rtrim($directory, '/').'/'.$patch,
+      );
+    }
+
+    return $patches;
+  }
 
   final public static function buildAllPatches() {
-    $patch_lists = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorSQLPatchList')
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
+    $patch_lists = id(new PhutilClassMapQuery())
+      ->setAncestorClass(__CLASS__)
+      ->setUniqueMethod('getNamespace')
+      ->execute();
 
     $specs = array();
     $seen_namespaces = array();
 
-    foreach ($patch_lists as $patch_class) {
-      $patch_class = $patch_class['name'];
-      $patch_list = newv($patch_class, array());
-
-      $namespace = $patch_list->getNamespace();
-      if (isset($seen_namespaces[$namespace])) {
-        $prior = $seen_namespaces[$namespace];
-        throw new Exception(
-          "PatchList '{$patch_class}' has the same namespace, '{$namespace}', ".
-          "as another patch list class, '{$prior}'. Each patch list MUST have ".
-          "a unique namespace.");
-      }
-
+    foreach ($patch_lists as $patch_list) {
       $last_key = null;
       foreach ($patch_list->getPatches() as $key => $patch) {
         if (!is_array($patch)) {
           throw new Exception(
-            "PatchList '{$patch_class}' has a patch '{$key}' which is not ".
-            "an array.");
+            pht(
+              "%s '%s' has a patch '%s' which is not an array.",
+              __CLASS__,
+              get_class($patch_list),
+              $key));
         }
 
         $valid = array(
@@ -46,30 +68,48 @@ abstract class PhabricatorSQLPatchList {
         foreach ($patch as $pkey => $pval) {
           if (empty($valid[$pkey])) {
             throw new Exception(
-              "PatchList '{$patch_class}' has a patch, '{$key}', with an ".
-              "unknown property, '{$pkey}'. Patches must have only valid ".
-              "keys: ".implode(', ', array_keys($valid)).'.');
+              pht(
+                "%s '%s' has a patch, '%s', with an unknown property, '%s'.".
+                "Patches must have only valid keys: %s.",
+                __CLASS__,
+                get_class($patch_list),
+                $key,
+                $pkey,
+                implode(', ', array_keys($valid))));
           }
         }
 
         if (is_numeric($key)) {
           throw new Exception(
-            "PatchList '{$patch_class}' has a patch with a numeric key, ".
-            "'{$key}'. Patches must use string keys.");
+            pht(
+              "%s '%s' has a patch with a numeric key, '%s'. ".
+              "Patches must use string keys.",
+              __CLASS__,
+              get_class($patch_list),
+              $key));
         }
 
         if (strpos($key, ':') !== false) {
           throw new Exception(
-            "PatchList '{$patch_class}' has a patch with a colon in the ".
-            "key name, '{$key}'. Patch keys may not contain colons.");
+            pht(
+              "%s '%s' has a patch with a colon in the key name, '%s'. ".
+              "Patch keys may not contain colons.",
+              __CLASS__,
+              get_class($patch_list),
+              $key));
         }
 
+        $namespace = $patch_list->getNamespace();
         $full_key = "{$namespace}:{$key}";
 
         if (isset($specs[$full_key])) {
           throw new Exception(
-            "PatchList '{$patch_class}' has a patch '{$key}' which ".
-            "duplicates an existing patch key.");
+            pht(
+              "%s '%s' has a patch '%s' which duplicates an ".
+              "existing patch key.",
+              __CLASS__,
+              get_class($patch_list),
+              $key));
         }
 
         $patch['key']     = $key;
@@ -79,8 +119,10 @@ abstract class PhabricatorSQLPatchList {
         if (isset($patch['legacy'])) {
           if ($namespace != 'phabricator') {
             throw new Exception(
-              "Only patches in the 'phabricator' namespace may contain ".
-              "'legacy' keys.");
+              pht(
+                "Only patches in the '%s' namespace may contain '%s' keys.",
+                'phabricator',
+                'legacy'));
           }
         } else {
           $patch['legacy'] = false;
@@ -89,11 +131,13 @@ abstract class PhabricatorSQLPatchList {
         if (!array_key_exists('after', $patch)) {
           if ($last_key === null) {
             throw new Exception(
-              "Patch '{$full_key}' is missing key 'after', and is the first ".
-              "patch in the patch list '{$patch_class}', so its application ".
-              "order can not be determined implicitly. The first patch in a ".
-              "patch list must list the patch or patches it depends on ".
-              "explicitly.");
+              pht(
+                "Patch '%s' is missing key 'after', and is the first patch ".
+                "in the patch list '%s', so its application order can not be ".
+                "determined implicitly. The first patch in a patch list must ".
+                "list the patch or patches it depends on explicitly.",
+                $full_key,
+                get_class($patch_list)));
           } else {
             $patch['after'] = array($last_key);
           }
@@ -109,8 +153,10 @@ abstract class PhabricatorSQLPatchList {
         $type = idx($patch, 'type');
         if (!$type) {
           throw new Exception(
-            "Patch '{$namespace}:{$key}' is missing key 'type'. Every patch ".
-            "must have a type.");
+            pht(
+              "Patch '%s' is missing key '%s'. Every patch must have a type.",
+              "{$namespace}:{$key}",
+              'type'));
         }
 
         switch ($type) {
@@ -120,7 +166,10 @@ abstract class PhabricatorSQLPatchList {
             break;
           default:
             throw new Exception(
-              "Patch '{$namespace}:{$key}' has unknown patch type '{$type}'.");
+              pht(
+                "Patch '%s' has unknown patch type '%s'.",
+                "{$namespace}:{$key}",
+                $type));
         }
 
         $specs[$full_key] = $patch;
@@ -131,8 +180,11 @@ abstract class PhabricatorSQLPatchList {
       foreach ($patch['after'] as $after) {
         if (empty($specs[$after])) {
           throw new Exception(
-            "Patch '{$key}' references nonexistent dependency, '{$after}'. ".
-            "Patches may only depend on patches which actually exist.");
+            pht(
+              "Patch '%s' references nonexistent dependency, '%s'. ".
+              "Patches may only depend on patches which actually exist.",
+              $key,
+              $after));
         }
       }
     }

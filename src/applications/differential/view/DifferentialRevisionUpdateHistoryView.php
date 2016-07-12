@@ -36,15 +36,14 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   }
 
   public function render() {
-
     $this->requireResource('differential-core-view-css');
     $this->requireResource('differential-revision-history-css');
 
     $data = array(
       array(
-        'name' => 'Base',
+        'name' => pht('Base'),
         'id'   => null,
-        'desc' => 'Base',
+        'desc' => pht('Base'),
         'age'  => null,
         'obj'  => null,
       ),
@@ -53,7 +52,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     $seq = 0;
     foreach ($this->diffs as $diff) {
       $data[] = array(
-        'name' => 'Diff '.(++$seq),
+        'name' => pht('Diff %d', ++$seq),
         'id'   => $diff->getID(),
         'desc' => $diff->getDescription(),
         'age'  => $diff->getDateCreated(),
@@ -62,6 +61,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     }
 
     $max_id = $diff->getID();
+    $revision_id = $diff->getRevisionID();
 
     $idx = 0;
     $rows = array();
@@ -169,12 +169,21 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
       $last_base = $base;
 
-      $id_link = phutil_tag(
-        'a',
-        array(
-          'href' => '/differential/diff/'.$id.'/',
-        ),
-        $id);
+      if ($revision_id) {
+        $id_link = phutil_tag(
+          'a',
+          array(
+            'href' => '/D'.$revision_id.'?id='.$id,
+          ),
+          $id);
+      } else {
+        $id_link = phutil_tag(
+          'a',
+          array(
+            'href' => '/differential/diff/'.$id.'/',
+          ),
+          $id);
+      }
 
       $rows[] = array(
         $name,
@@ -205,11 +214,11 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       ));
 
     $options = array(
-      DifferentialChangesetParser::WHITESPACE_IGNORE_FORCE => 'Ignore All',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL => 'Ignore Most',
+      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL => pht('Ignore All'),
+      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST => pht('Ignore Most'),
       DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING =>
-        'Ignore Trailing',
-      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => 'Show All',
+        pht('Ignore Trailing'),
+      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => pht('Show All'),
     );
 
     foreach ($options as $value => $label) {
@@ -294,10 +303,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $show_diff,
       ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Revision Update History'))
-      ->setFlush(true)
-      ->appendChild($content);
+    return $content;
   }
 
   const STAR_NONE = 'none';
@@ -314,7 +320,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialLintStatus::LINT_FAIL => self::STAR_FAIL,
       DifferentialLintStatus::LINT_SKIP => self::STAR_SKIP,
       DifferentialLintStatus::LINT_AUTO_SKIP => self::STAR_SKIP,
-      DifferentialLintStatus::LINT_POSTPONED => self::STAR_SKIP,
     );
 
     $star = idx($map, $diff->getLintStatus(), self::STAR_FAIL);
@@ -330,7 +335,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialUnitStatus::UNIT_FAIL => self::STAR_FAIL,
       DifferentialUnitStatus::UNIT_SKIP => self::STAR_SKIP,
       DifferentialUnitStatus::UNIT_AUTO_SKIP => self::STAR_SKIP,
-      DifferentialUnitStatus::UNIT_POSTPONED => self::STAR_SKIP,
     );
 
     $star = idx($map, $diff->getUnitStatus(), self::STAR_FAIL);
@@ -352,10 +356,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         return pht('Lint Skipped');
       case DifferentialLintStatus::LINT_AUTO_SKIP:
         return pht('Automatic diff as part of commit; lint not applicable.');
-      case DifferentialLintStatus::LINT_POSTPONED:
-        return pht('Lint Postponed');
     }
-    return '???';
+    return pht('Unknown');
   }
 
   public static function getDiffUnitMessage(DifferentialDiff $diff) {
@@ -373,10 +375,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       case DifferentialUnitStatus::UNIT_AUTO_SKIP:
         return pht(
           'Automatic diff as part of commit; unit tests not applicable.');
-      case DifferentialUnitStatus::UNIT_POSTPONED:
-        return pht('Unit Tests Postponed');
     }
-    return '???';
+    return pht('Unknown');
   }
 
   private static function renderDiffStar($star) {

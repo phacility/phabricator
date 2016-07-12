@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorFactSpec {
+abstract class PhabricatorFactSpec extends Phobject {
 
   const UNIT_COUNT = 'unit-count';
   const UNIT_EPOCH = 'unit-epoch';
@@ -33,8 +33,9 @@ abstract class PhabricatorFactSpec {
   }
 
   public function getName() {
-    $type = $this->getType();
-    return "Fact ({$type})";
+    return pht(
+      'Fact (%s)',
+      $this->getType());
   }
 
   public function formatValueForDisplay(PhabricatorUser $user, $value) {

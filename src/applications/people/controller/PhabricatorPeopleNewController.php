@@ -3,22 +3,22 @@
 final class PhabricatorPeopleNewController
   extends PhabricatorPeopleController {
 
-  private $type;
-
-  public function willProcessRequest(array $data) {
-    $this->type = $data['type'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $type = $request->getURIData('type');
     $admin = $request->getUser();
 
-    switch ($this->type) {
+    $is_bot = false;
+    $is_list = false;
+    switch ($type) {
       case 'standard':
-        $is_bot = false;
+        $this->requireApplicationCapability(
+          PeopleCreateUsersCapability::CAPABILITY);
         break;
       case 'bot':
         $is_bot = true;
+        break;
+      case 'list':
+        $is_list = true;
         break;
       default:
         return new Aphront404Response();
@@ -36,7 +36,6 @@ final class PhabricatorPeopleNewController
 
     $new_email = null;
 
-    $request = $this->getRequest();
     if ($request->isFormPost()) {
       $welcome_checked = $request->getInt('welcome');
 
@@ -82,8 +81,8 @@ final class PhabricatorPeopleNewController
           // Automatically approve the user, since an admin is creating them.
           $user->setIsApproved(1);
 
-          // If the user is a bot, approve their email too.
-          if ($is_bot) {
+          // If the user is a bot or list, approve their email too.
+          if ($is_bot || $is_list) {
             $email->setIsVerified(1);
           }
 
@@ -97,7 +96,13 @@ final class PhabricatorPeopleNewController
               ->makeSystemAgentUser($user, true);
           }
 
-          if ($welcome_checked && !$is_bot) {
+          if ($is_list) {
+            id(new PhabricatorUserEditor())
+              ->setActor($admin)
+              ->makeMailingListUser($user, true);
+          }
+
+          if ($welcome_checked && !$is_bot && !$is_list) {
             $user->sendWelcomeEmail($admin);
           }
 
@@ -128,12 +133,13 @@ final class PhabricatorPeopleNewController
 
     if ($is_bot) {
       $form->appendRemarkupInstructions(
-        pht(
-          'You are creating a new **bot/script** user account.'));
+        pht('You are creating a new **bot** user account.'));
+    } else if ($is_list) {
+      $form->appendRemarkupInstructions(
+        pht('You are creating a new **mailing list** user account.'));
     } else {
       $form->appendRemarkupInstructions(
-        pht(
-          'You are creating a new **standard** user account.'));
+        pht('You are creating a new **standard** user account.'));
     }
 
     $form
@@ -157,7 +163,7 @@ final class PhabricatorPeopleNewController
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
           ->setError($e_email));
 
-    if (!$is_bot) {
+    if (!$is_bot && !$is_list) {
       $form->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(
@@ -178,7 +184,7 @@ final class PhabricatorPeopleNewController
         ->appendChild(id(new AphrontFormDividerControl()))
         ->appendRemarkupInstructions(
           pht(
-            '**Why do bot/script accounts need an email address?**'.
+            '**Why do bot accounts need an email address?**'.
             "\n\n".
             'Although bots do not normally receive email from Phabricator, '.
             'they can interact with other systems which require an email '.
@@ -202,22 +208,28 @@ final class PhabricatorPeopleNewController
 
     $title = pht('Create New User');
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('User'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-user');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

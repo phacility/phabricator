@@ -13,7 +13,7 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupImageMacro($matches) {
+  public function markupImageMacro(array $matches) {
     if ($this->macros === null) {
       $this->macros = array();
 
@@ -109,17 +109,8 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
         $result = $spec['original'].' <'.$src_uri.'>';
         $engine->overwriteStoredText($spec['token'], $result);
         continue;
-      }
-
-      $file_data = $file->getMetadata();
-      $style = null;
-      $height = idx($file_data, PhabricatorFile::METADATA_IMAGE_HEIGHT);
-      $width = idx($file_data, PhabricatorFile::METADATA_IMAGE_WIDTH);
-      if ($height && $width) {
-        $style = sprintf(
-          'height: %dpx; width: %dpx;',
-          $height,
-          $width);
+      } else if ($this->getEngine()->isHTMLMailMode()) {
+        $src_uri = PhabricatorEnv::getProductionURI($src_uri);
       }
 
       $id = null;
@@ -152,7 +143,9 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
           'src'   => $src_uri,
           'alt'   => $spec['original'],
           'title' => $spec['original'],
-          'style' => $style,
+          'height' => $file->getImageHeight(),
+          'width' => $file->getImageWidth(),
+          'class' => 'phabricator-remarkup-macro',
         ));
 
       $engine->overwriteStoredText($spec['token'], $result);

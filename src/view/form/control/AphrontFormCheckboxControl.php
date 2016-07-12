@@ -4,12 +4,18 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
 
   private $boxes = array();
 
-  public function addCheckbox($name, $value, $label, $checked = false) {
+  public function addCheckbox(
+    $name,
+    $value,
+    $label,
+    $checked = false,
+    $id = null) {
     $this->boxes[] = array(
       'name'    => $name,
       'value'   => $value,
       'label'   => $label,
       'checked' => $checked,
+      'id'      => $id,
     );
     return $this;
   }
@@ -21,7 +27,10 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
   protected function renderInput() {
     $rows = array();
     foreach ($this->boxes as $box) {
-      $id = celerity_generate_unique_node_id();
+      $id = idx($box, 'id');
+      if ($id === null) {
+        $id = celerity_generate_unique_node_id();
+      }
       $checkbox = phutil_tag(
         'input',
         array(

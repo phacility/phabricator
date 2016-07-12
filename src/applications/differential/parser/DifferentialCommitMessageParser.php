@@ -19,7 +19,7 @@
  * @task support  Support Methods
  * @task internal Internals
  */
-final class DifferentialCommitMessageParser {
+final class DifferentialCommitMessageParser extends Phobject {
 
   private $labelMap;
   private $titleKey;
@@ -73,8 +73,10 @@ final class DifferentialCommitMessageParser {
     if (!$key_title || !$key_summary || ($label_map === null)) {
       throw new Exception(
         pht(
-          'Expected labelMap, summaryKey and titleKey to be set before '.
-          'parsing a corpus.'));
+          'Expected %s, %s and %s to be set before parsing a corpus.',
+          'labelMap',
+          'summaryKey',
+          'titleKey'));
     }
 
     $label_regexp = $this->buildLabelRegexp($label_map);
@@ -142,7 +144,7 @@ final class DifferentialCommitMessageParser {
       $terminal = '...';
       $title = $fields[$key_title];
       $short = id(new PhutilUTF8StringTruncator())
-        ->setMaximumGlyphs(250)
+        ->setMaximumBytes(250)
         ->setTerminator($terminal)
         ->truncateString($title);
 

@@ -65,7 +65,7 @@ final class PhabricatorFlagQuery
       ->executeOne();
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorFlag();
     $conn_r = $table->establishConnection('r');
 
@@ -80,7 +80,7 @@ final class PhabricatorFlagQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $flags) {
+  protected function willFilterPage(array $flags) {
     if ($this->needObjects) {
       $objects = id(new PhabricatorObjectQuery())
         ->setViewer($this->getViewer())
@@ -115,14 +115,15 @@ final class PhabricatorFlagQuery
       case self::GROUP_NONE:
         break;
       default:
-        throw new Exception("Unknown groupBy parameter: $this->groupBy");
+        throw new Exception(
+          pht('Unknown groupBy parameter: %s', $this->groupBy));
         break;
     }
 
     return $flags;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ownerPHIDs) {

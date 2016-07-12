@@ -3,15 +3,9 @@
 final class DifferentialCommentSaveController
   extends DifferentialController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
@@ -19,7 +13,7 @@ final class DifferentialCommentSaveController
 
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needReviewerStatus(true)
       ->needReviewerAuthority(true)
       ->executeOne();
@@ -33,7 +27,7 @@ final class DifferentialCommentSaveController
     $type_comment = PhabricatorTransactions::TYPE_COMMENT;
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
-    $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
     $xactions = array();
 
@@ -127,8 +121,9 @@ final class DifferentialCommentSaveController
         ->setCancelURI($revision_uri)
         ->setException($ex);
     } catch (PhabricatorApplicationTransactionValidationException $ex) {
-      // TODO: Provide a nice Response for rendering these in a clean way.
-      throw $ex;
+      return id(new PhabricatorApplicationTransactionValidationResponse())
+        ->setCancelURI($revision_uri)
+        ->setException($ex);
     }
 
     $user = $request->getUser();

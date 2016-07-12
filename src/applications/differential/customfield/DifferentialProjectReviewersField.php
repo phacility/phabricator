@@ -8,7 +8,7 @@ final class DifferentialProjectReviewersField
   }
 
   public function getFieldName() {
-    return pht('Project Reviewers');
+    return pht('Group Reviewers');
   }
 
   public function getFieldDescription() {
@@ -61,7 +61,8 @@ final class DifferentialProjectReviewersField
     return array(
       pht(
         'You can add a project as a subscriber or reviewer by writing '.
-        '"#projectname" in the appropriate field.'),
+        '"%s" in the appropriate field.',
+        '#projectname'),
     );
   }
 

@@ -4,11 +4,7 @@ function phabricator_date($epoch, PhabricatorUser $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,
-    _phutil_date_format($epoch));
-}
-
-function phabricator_on_relative_date($epoch, $user) {
-  return phabricator_relative_date($epoch, $user, true);
+    phutil_date_format($epoch));
 }
 
 function phabricator_relative_date($epoch, $user, $on = false) {
@@ -35,32 +31,21 @@ function phabricator_relative_date($epoch, $user, $on = false) {
 }
 
 function phabricator_time($epoch, $user) {
+  $time_key = PhabricatorTimeFormatSetting::SETTINGKEY;
   return phabricator_format_local_time(
     $epoch,
     $user,
-    _phabricator_time_format($user));
+    $user->getUserSetting($time_key));
 }
 
 function phabricator_datetime($epoch, $user) {
+  $time_key = PhabricatorTimeFormatSetting::SETTINGKEY;
   return phabricator_format_local_time(
     $epoch,
     $user,
     pht('%s, %s',
-      _phutil_date_format($epoch),
-      _phabricator_time_format($user)));
-}
-
-function _phabricator_time_format($user) {
-  $prefs = $user->loadPreferences();
-
-  $pref = $prefs->getPreference(
-    PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
-
-  if (strlen($pref)) {
-    return $pref;
-  }
-
-  return pht('g:i A');
+      phutil_date_format($epoch),
+      $user->getUserSetting($time_key)));
 }
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhortuneProductImplementation {
+abstract class PhortuneProductImplementation extends Phobject {
 
   abstract public function loadImplementationsForRefs(
     PhabricatorUser $viewer,
@@ -12,8 +12,7 @@ abstract class PhortuneProductImplementation {
 
   protected function getContentSource() {
     return PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_PHORTUNE,
-      array());
+      PhabricatorPhortuneContentSource::SOURCECONST);
   }
 
   public function getPurchaseName(
@@ -26,6 +25,19 @@ abstract class PhortuneProductImplementation {
     PhortuneProduct $product,
     PhortunePurchase $purchase) {
     return;
+  }
+
+  public function didRefundProduct(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase,
+    PhortuneCurrency $amount) {
+    return;
+  }
+
+  public function getPurchaseURI(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return null;
   }
 
 }

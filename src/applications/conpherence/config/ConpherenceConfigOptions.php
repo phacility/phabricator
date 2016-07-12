@@ -11,6 +11,14 @@ final class ConpherenceConfigOptions
     return pht('Configure Conpherence messaging.');
   }
 
+  public function getIcon() {
+    return 'fa-comments';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

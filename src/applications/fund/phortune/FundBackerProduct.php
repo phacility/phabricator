@@ -21,10 +21,15 @@ final class FundBackerProduct extends PhortuneProductImplementation {
 
   public function getName(PhortuneProduct $product) {
     $initiative = $this->getInitiative();
-    return pht(
-      'Fund %s %s',
-      $initiative->getMonogram(),
-      $initiative->getName());
+
+    if (!$initiative) {
+      return pht('Fund <Unknown Initiative>');
+    } else {
+      return pht(
+        'Fund %s %s',
+        $initiative->getMonogram(),
+        $initiative->getName());
+    }
   }
 
   public function getPriceAsCurrency(PhortuneProduct $product) {
@@ -86,24 +91,56 @@ final class FundBackerProduct extends PhortuneProductImplementation {
       ->withPHIDs(array($purchase->getMetadataValue('backerPHID')))
       ->executeOne();
     if (!$backer) {
-      throw new Exception(pht('Unable to load FundBacker!'));
+      throw new Exception(pht('Unable to load %s!', 'FundBacker'));
     }
 
-    $xactions = array();
-    $xactions[] = id(new FundBackerTransaction())
-      ->setTransactionType(FundBackerTransaction::TYPE_STATUS)
-      ->setNewValue(FundBacker::STATUS_PURCHASED);
+    // Load the actual backing user -- they may not be the curent viewer if this
+    // product purchase is completing from a background worker or a merchant
+    // action.
 
-    $editor = id(new FundBackerEditor())
-      ->setActor($viewer)
-      ->setContentSource($this->getContentSource());
-
-    $editor->applyTransactions($backer, $xactions);
-
+    $actor = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($backer->getBackerPHID()))
+      ->executeOne();
 
     $xactions = array();
     $xactions[] = id(new FundInitiativeTransaction())
       ->setTransactionType(FundInitiativeTransaction::TYPE_BACKER)
+      ->setMetadataValue(
+        FundInitiativeTransaction::PROPERTY_AMOUNT,
+        $backer->getAmountAsCurrency()->serializeForStorage())
+      ->setNewValue($backer->getPHID());
+
+    $editor = id(new FundInitiativeEditor())
+      ->setActor($actor)
+      ->setContentSource($this->getContentSource());
+
+    $editor->applyTransactions($this->getInitiative(), $xactions);
+  }
+
+  public function didRefundProduct(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase,
+    PhortuneCurrency $amount) {
+    $viewer = $this->getViewer();
+
+    $backer = id(new FundBackerQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($purchase->getMetadataValue('backerPHID')))
+      ->executeOne();
+    if (!$backer) {
+      throw new Exception(pht('Unable to load %s!', 'FundBacker'));
+    }
+
+    $xactions = array();
+    $xactions[] = id(new FundInitiativeTransaction())
+      ->setTransactionType(FundInitiativeTransaction::TYPE_REFUND)
+      ->setMetadataValue(
+        FundInitiativeTransaction::PROPERTY_AMOUNT,
+        $amount->serializeForStorage())
+      ->setMetadataValue(
+        FundInitiativeTransaction::PROPERTY_BACKER,
+        $backer->getBackerPHID())
       ->setNewValue($backer->getPHID());
 
     $editor = id(new FundInitiativeEditor())
@@ -111,8 +148,6 @@ final class FundBackerProduct extends PhortuneProductImplementation {
       ->setContentSource($this->getContentSource());
 
     $editor->applyTransactions($this->getInitiative(), $xactions);
-
-    return;
   }
 
 }

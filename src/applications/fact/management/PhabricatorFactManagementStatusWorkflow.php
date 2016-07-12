@@ -3,7 +3,7 @@
 final class PhabricatorFactManagementStatusWorkflow
   extends PhabricatorFactManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('status')
       ->setSynopsis(pht('Show status of fact data.'))

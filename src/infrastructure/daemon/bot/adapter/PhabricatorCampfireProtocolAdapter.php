@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCampfireProtocolAdapter
-  extends PhabricatorBotBaseStreamingProtocolAdapter {
+  extends PhabricatorStreamingProtocolAdapter {
 
   public function getServiceType() {
     return 'Campfire';
@@ -16,7 +16,7 @@ final class PhabricatorCampfireProtocolAdapter
     return $url;
   }
 
-  protected function processMessage($m_obj) {
+  protected function processMessage(array $m_obj) {
       $command = null;
       switch ($m_obj['type']) {
         case 'TextMessage':

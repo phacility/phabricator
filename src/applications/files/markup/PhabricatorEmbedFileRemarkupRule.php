@@ -16,6 +16,10 @@ final class PhabricatorEmbedFileRemarkupRule
     $objects = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withIDs($ids)
+      ->needTransforms(
+        array(
+          PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW,
+        ))
       ->execute();
 
     $phids_key = self::KEY_EMBED_FILE_PHIDS;
@@ -28,19 +32,38 @@ final class PhabricatorEmbedFileRemarkupRule
     return $objects;
   }
 
-  protected function renderObjectEmbed($object, $handle, $options) {
+  protected function renderObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $options = $this->getFileOptions($options) + array(
       'name' => $object->getName(),
     );
 
     $is_viewable_image = $object->isViewableImage();
     $is_audio = $object->isAudio();
+    $is_video = $object->isVideo();
     $force_link = ($options['layout'] == 'link');
 
-    $options['viewable'] = ($is_viewable_image || $is_audio);
+    // If a file is both audio and video, as with "application/ogg" by default,
+    // render it as video but allow the user to specify `media=audio` if they
+    // want to force it to render as audio.
+    if ($is_audio && $is_video) {
+      $media = $options['media'];
+      if ($media == 'audio') {
+        $is_video = false;
+      } else {
+        $is_audio = false;
+      }
+    }
+
+    $options['viewable'] = ($is_viewable_image || $is_audio || $is_video);
 
     if ($is_viewable_image && !$force_link) {
       return $this->renderImageFile($object, $handle, $options);
+    } else if ($is_video && !$force_link) {
+      return $this->renderVideoFile($object, $handle, $options);
     } else if ($is_audio && !$force_link) {
       return $this->renderAudioFile($object, $handle, $options);
     } else {
@@ -50,12 +73,15 @@ final class PhabricatorEmbedFileRemarkupRule
 
   private function getFileOptions($option_string) {
     $options = array(
-      'size'    => null,
-      'layout'  => 'left',
-      'float'   => false,
-      'width'   => null,
-      'height'  => null,
+      'size' => null,
+      'layout' => 'left',
+      'float' => false,
+      'width' => null,
+      'height' => null,
       'alt' => null,
+      'media' => null,
+      'autoplay' => null,
+      'loop' => null,
     );
 
     if ($option_string) {
@@ -75,7 +101,7 @@ final class PhabricatorEmbedFileRemarkupRule
     require_celerity_resource('lightbox-attachment-css');
 
     $attrs = array();
-    $image_class = null;
+    $image_class = 'phabricator-remarkup-embed-image';
 
     $use_size = true;
     if (!$options['size']) {
@@ -96,17 +122,39 @@ final class PhabricatorEmbedFileRemarkupRule
         case 'full':
           $attrs += array(
             'src' => $file->getBestURI(),
+            'height' => $file->getImageHeight(),
+            'width' => $file->getImageWidth(),
           );
           $image_class = 'phabricator-remarkup-embed-image-full';
           break;
+        // Displays "full" in normal Remarkup, "wide" in Documents
+        case 'wide':
+          $attrs += array(
+            'src' => $file->getBestURI(),
+            'width' => $file->getImageWidth(),
+          );
+          $image_class = 'phabricator-remarkup-embed-image-wide';
+          break;
         case 'thumb':
         default:
-          $attrs['src'] = $file->getPreview220URI();
-          $dimensions =
-            PhabricatorImageTransformer::getPreviewDimensions($file, 220);
-          $attrs['width'] = $dimensions['sdx'];
-          $attrs['height'] = $dimensions['sdy'];
-          $image_class = 'phabricator-remarkup-embed-image';
+          $preview_key = PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW;
+          $xform = PhabricatorFileTransform::getTransformByKey($preview_key);
+
+          $existing_xform = $file->getTransform($preview_key);
+          if ($existing_xform) {
+            $xform_uri = $existing_xform->getCDNURI();
+          } else {
+            $xform_uri = $file->getURIForTransform($xform);
+          }
+
+          $attrs['src'] = $xform_uri;
+
+          $dimensions = $xform->getTransformedDimensions($file);
+          if ($dimensions) {
+            list($x, $y) = $dimensions;
+            $attrs['width'] = $x;
+            $attrs['height'] = $y;
+          }
           break;
       }
     }
@@ -124,9 +172,9 @@ final class PhabricatorEmbedFileRemarkupRule
         'class'       => $image_class,
         'sigil'       => 'lightboxable',
         'meta'        => array(
-          'phid' => $file->getPHID(),
-          'uri' => $file->getBestURI(),
-          'dUri' => $file->getDownloadURI(),
+          'phid'     => $file->getPHID(),
+          'uri'      => $file->getBestURI(),
+          'dUri'     => $file->getDownloadURI(),
           'viewable' => true,
         ),
       ),
@@ -160,7 +208,7 @@ final class PhabricatorEmbedFileRemarkupRule
     }
 
     return phutil_tag(
-      'div',
+      ($options['layout'] == 'inline' ? 'span' : 'div'),
       array(
         'class' => $layout_class,
       ),
@@ -171,22 +219,47 @@ final class PhabricatorEmbedFileRemarkupRule
     PhabricatorFile $file,
     PhabricatorObjectHandle $handle,
     array $options) {
+    return $this->renderMediaFile('audio', $file, $handle, $options);
+  }
+
+  private function renderVideoFile(
+    PhabricatorFile $file,
+    PhabricatorObjectHandle $handle,
+    array $options) {
+    return $this->renderMediaFile('video', $file, $handle, $options);
+  }
+
+  private function renderMediaFile(
+    $tag,
+    PhabricatorFile $file,
+    PhabricatorObjectHandle $handle,
+    array $options) {
+
+    $is_video = ($tag == 'video');
 
     if (idx($options, 'autoplay')) {
       $preload = 'auto';
       $autoplay = 'autoplay';
     } else {
-      $preload = 'none';
+      // If we don't preload video, the user can't see the first frame and
+      // has no clue what they're looking at, so always preload.
+      if ($is_video) {
+        $preload = 'auto';
+      } else {
+        $preload = 'none';
+      }
       $autoplay = null;
     }
 
     return $this->newTag(
-      'audio',
+      $tag,
       array(
         'controls' => 'controls',
         'preload' => $preload,
         'autoplay' => $autoplay,
         'loop' => idx($options, 'loop') ? 'loop' : null,
+        'alt' => $options['alt'],
+        'class' => 'phabricator-media',
       ),
       $this->newTag(
         'source',

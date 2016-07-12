@@ -1,7 +1,12 @@
 <?php
 
 /**
- * @task factors  Multi-Factor Authentication
+ * @task availability Availability
+ * @task image-cache Profile Image Cache
+ * @task factors Multi-Factor Authentication
+ * @task handles Managing Handles
+ * @task settings Settings
+ * @task cache User Cache
  */
 final class PhabricatorUser
   extends PhabricatorUserDAO
@@ -9,7 +14,12 @@ final class PhabricatorUser
     PhutilPerson,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorSSHPublicKeyInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -17,20 +27,16 @@ final class PhabricatorUser
 
   protected $userName;
   protected $realName;
-  protected $sex;
-  protected $translation;
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
-  protected $timezoneIdentifier = '';
-
-  protected $consoleEnabled = 0;
-  protected $consoleVisible = 0;
-  protected $consoleTab = '';
+  protected $availabilityCache;
+  protected $availabilityCacheTTL;
 
   protected $conduitCertificate;
 
   protected $isSystemAgent = 0;
+  protected $isMailingList = 0;
   protected $isAdmin = 0;
   protected $isDisabled = 0;
   protected $isEmailVerified = 0;
@@ -39,23 +45,28 @@ final class PhabricatorUser
 
   protected $accountSecret;
 
-  private $profileImage = self::ATTACHABLE;
   private $profile = null;
-  private $status = self::ATTACHABLE;
+  private $availability = self::ATTACHABLE;
   private $preferences = null;
   private $omnipotent = false;
   private $customFields = self::ATTACHABLE;
+  private $badgePHIDs = self::ATTACHABLE;
 
   private $alternateCSRFString = self::ATTACHABLE;
   private $session = self::ATTACHABLE;
+  private $rawCacheData = array();
+  private $usableCacheData = array();
+
+  private $authorities = array();
+  private $handlePool;
+  private $csrfSalt;
+
+  private $settingCacheKeys = array();
+  private $settingCache = array();
+  private $allowInlineCacheGeneration;
 
   protected function readField($field) {
     switch ($field) {
-      case 'timezoneIdentifier':
-        // If the user hasn't set one, guess the server's time.
-        return nonempty(
-          $this->timezoneIdentifier,
-          date_default_timezone_get());
       // Make sure these return booleans.
       case 'isAdmin':
         return (bool)$this->isAdmin;
@@ -63,6 +74,8 @@ final class PhabricatorUser
         return (bool)$this->isDisabled;
       case 'isSystemAgent':
         return (bool)$this->isSystemAgent;
+      case 'isMailingList':
+        return (bool)$this->isMailingList;
       case 'isEmailVerified':
         return (bool)$this->isEmailVerified;
       case 'isApproved':
@@ -81,6 +94,14 @@ final class PhabricatorUser
    * @return bool True if this is a standard, usable account.
    */
   public function isUserActivated() {
+    if (!$this->isLoggedIn()) {
+      return false;
+    }
+
+    if ($this->isOmnipotent()) {
+      return true;
+    }
+
     if ($this->getIsDisabled()) {
       return false;
     }
@@ -98,6 +119,55 @@ final class PhabricatorUser
     return true;
   }
 
+  public function canEstablishWebSessions() {
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    if ($this->getIsSystemAgent()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function canEstablishAPISessions() {
+    if ($this->getIsDisabled()) {
+      return false;
+    }
+
+    // Intracluster requests are permitted even if the user is logged out:
+    // in particular, public users are allowed to issue intracluster requests
+    // when browsing Diffusion.
+    if (PhabricatorEnv::isClusterRemoteAddress()) {
+      if (!$this->isLoggedIn()) {
+        return true;
+      }
+    }
+
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function canEstablishSSHSessions() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if ($this->getIsMailingList()) {
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Returns `true` if this is a standard user who is logged in. Returns `false`
    * for logged out, anonymous, or external users.
@@ -110,29 +180,26 @@ final class PhabricatorUser
     return $this->getPHID() && (phid_get_type($this->getPHID()) == $type_user);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'userName' => 'text64',
+        'userName' => 'sort64',
         'realName' => 'text128',
-        'sex' => 'text4?',
-        'translation' => 'text64?',
         'passwordSalt' => 'text32?',
         'passwordHash' => 'text128?',
         'profileImagePHID' => 'phid?',
-        'consoleEnabled' => 'bool',
-        'consoleVisible' => 'bool',
-        'consoleTab' => 'text64',
         'conduitCertificate' => 'text255',
         'isSystemAgent' => 'bool',
+        'isMailingList' => 'bool',
         'isDisabled' => 'bool',
         'isAdmin' => 'bool',
-        'timezoneIdentifier' => 'text255',
         'isEmailVerified' => 'uint32',
         'isApproved' => 'uint32',
         'accountSecret' => 'bytes64',
         'isEnrolledInMultiFactor' => 'bool',
+        'availabilityCache' => 'text255?',
+        'availabilityCacheTTL' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -151,6 +218,10 @@ final class PhabricatorUser
           'columns' => array('isApproved'),
         ),
       ),
+      self::CONFIG_NO_MUTATE => array(
+        'availabilityCache' => true,
+        'availabilityCacheTTL' => true,
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -162,8 +233,9 @@ final class PhabricatorUser
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
     if (!$this->getPHID()) {
       throw new Exception(
-        'You can not set a password for an unsaved user because their PHID '.
-        'is a salt component in the password hash.');
+        pht(
+          'You can not set a password for an unsaved user because their PHID '.
+          'is a salt component in the password hash.'));
     }
 
     if (!strlen($envelope->openEnvelope())) {
@@ -176,26 +248,8 @@ final class PhabricatorUser
     return $this;
   }
 
-  // To satisfy PhutilPerson.
-  public function getSex() {
-    return $this->sex;
-  }
-
   public function getMonogram() {
     return '@'.$this->getUsername();
-  }
-
-  public function getTranslation() {
-    try {
-      if ($this->translation &&
-          class_exists($this->translation) &&
-          is_subclass_of($this->translation, 'PhabricatorTranslation')) {
-        return $this->translation;
-      }
-    } catch (PhutilMissingSymbolException $ex) {
-      return null;
-    }
-    return null;
   }
 
   public function isLoggedIn() {
@@ -219,8 +273,7 @@ final class PhabricatorUser
 
     $this->updateNameTokens();
 
-    id(new PhabricatorSearchIndexer())
-      ->queueDocumentForIndexing($this->getPHID());
+    PhabricatorSearchWorker::queueDocumentForIndexing($this->getPHID());
 
     return $result;
   }
@@ -288,36 +341,38 @@ final class PhabricatorUser
       self::CSRF_TOKEN_LENGTH);
   }
 
-  /**
-   * @phutil-external-symbol class PhabricatorStartup
-   */
   public function getCSRFToken() {
-    $salt = PhabricatorStartup::getGlobal('csrf.salt');
-    if (!$salt) {
-      $salt = Filesystem::readRandomCharacters(self::CSRF_SALT_LENGTH);
-      PhabricatorStartup::setGlobal('csrf.salt', $salt);
+    if ($this->isOmnipotent()) {
+      // We may end up here when called from the daemons. The omnipotent user
+      // has no meaningful CSRF token, so just return `null`.
+      return null;
     }
+
+    if ($this->csrfSalt === null) {
+      $this->csrfSalt = Filesystem::readRandomCharacters(
+        self::CSRF_SALT_LENGTH);
+    }
+
+    $salt = $this->csrfSalt;
 
     // Generate a token hash to mitigate BREACH attacks against SSL. See
     // discussion in T3684.
     $token = $this->getRawCSRFToken();
     $hash = PhabricatorHash::digest($token, $salt);
-    return 'B@'.$salt.substr($hash, 0, self::CSRF_TOKEN_LENGTH);
+    return self::CSRF_BREACH_PREFIX.$salt.substr(
+        $hash, 0, self::CSRF_TOKEN_LENGTH);
   }
 
   public function validateCSRFToken($token) {
-    $salt = null;
-    $version = 'plain';
-
-    // This is a BREACH-mitigating token. See T3684.
+    // We expect a BREACH-mitigating token. See T3684.
     $breach_prefix = self::CSRF_BREACH_PREFIX;
     $breach_prelen = strlen($breach_prefix);
-
-    if (!strncmp($token, $breach_prefix, $breach_prelen)) {
-      $version = 'breach';
-      $salt = substr($token, $breach_prelen, self::CSRF_SALT_LENGTH);
-      $token = substr($token, $breach_prelen + self::CSRF_SALT_LENGTH);
+    if (strncmp($token, $breach_prefix, $breach_prelen) !== 0) {
+      return false;
     }
+
+    $salt = substr($token, $breach_prelen, self::CSRF_SALT_LENGTH);
+    $token = substr($token, $breach_prelen + self::CSRF_SALT_LENGTH);
 
     // When the user posts a form, we check that it contains a valid CSRF token.
     // Tokens cycle each hour (every CSRF_CYLCE_FREQUENCY seconds) and we accept
@@ -348,22 +403,11 @@ final class PhabricatorUser
 
     for ($ii = -$csrf_window; $ii <= 1; $ii++) {
       $valid = $this->getRawCSRFToken($ii);
-      switch ($version) {
-        // TODO: We can remove this after the BREACH version has been in the
-        // wild for a while.
-        case 'plain':
-          if ($token == $valid) {
-            return true;
-          }
-          break;
-        case 'breach':
-          $digest = PhabricatorHash::digest($valid, $salt);
-          if (substr($digest, 0, self::CSRF_TOKEN_LENGTH) == $token) {
-            return true;
-          }
-          break;
-        default:
-          throw new Exception('Unknown CSRF token format!');
+
+      $digest = PhabricatorHash::digest($valid, $salt);
+      $digest = substr($digest, 0, self::CSRF_TOKEN_LENGTH);
+      if (phutil_hashes_are_identical($digest, $token)) {
+        return true;
       }
     }
 
@@ -387,6 +431,10 @@ final class PhabricatorUser
     return substr(PhabricatorHash::digest($vec), 0, $len);
   }
 
+  public function getUserProfile() {
+    return $this->assertAttached($this->profile);
+  }
+
   public function attachUserProfile(PhabricatorUserProfile $profile) {
     $this->profile = $profile;
     return $this;
@@ -402,8 +450,7 @@ final class PhabricatorUser
       $this->getPHID());
 
     if (!$this->profile) {
-      $profile_dao->setUserPHID($this->getPHID());
-      $this->profile = $profile_dao;
+      $this->profile = PhabricatorUserProfile::initializeNewProfile($this);
     }
 
     return $this->profile;
@@ -412,7 +459,7 @@ final class PhabricatorUser
   public function loadPrimaryEmailAddress() {
     $email = $this->loadPrimaryEmail();
     if (!$email) {
-      throw new Exception('User has no primary email address!');
+      throw new Exception(pht('User has no primary email address!'));
     }
     return $email->getAddress();
   }
@@ -425,54 +472,138 @@ final class PhabricatorUser
       '(isPrimary = 1)');
   }
 
-  public function loadPreferences() {
-    if ($this->preferences) {
-      return $this->preferences;
+
+/* -(  Settings  )----------------------------------------------------------- */
+
+
+  public function getUserSetting($key) {
+    // NOTE: We store available keys and cached values separately to make it
+    // faster to check for `null` in the cache, which is common.
+    if (isset($this->settingCacheKeys[$key])) {
+      return $this->settingCache[$key];
     }
 
-    $preferences = null;
+    $settings_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
     if ($this->getPHID()) {
-      $preferences = id(new PhabricatorUserPreferences())->loadOneWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $settings = $this->requireCacheData($settings_key);
+    } else {
+      $settings = array();
     }
 
-    if (!$preferences) {
-      $preferences = new PhabricatorUserPreferences();
-      $preferences->setUserPHID($this->getPHID());
+    // NOTE: To slightly improve performance, we're using all settings here,
+    // not just settings that are enabled for the current viewer. It's fine to
+    // get the value of a setting that we wouldn't let the user edit in the UI.
+    $defaults = PhabricatorSetting::getAllSettings();
 
-      $default_dict = array(
-        PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
-        PhabricatorUserPreferences::PREFERENCE_EDITOR => '',
-        PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '',
-        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0,
-      );
+    if (array_key_exists($key, $settings)) {
+      $value = $settings[$key];
 
-      $preferences->setPreferences($default_dict);
+      // Make sure the value is valid before we return it. This makes things
+      // more robust when options are changed or removed.
+      if (isset($defaults[$key])) {
+        try {
+          id(clone $defaults[$key])
+            ->setViewer($this)
+            ->assertValidValue($value);
+
+          return $this->writeUserSettingCache($key, $value);
+        } catch (Exception $ex) {
+          // Fall through below and return the default value.
+        }
+      } else {
+        // This is an ad-hoc setting with no controlling object.
+        return $this->writeUserSettingCache($key, $value);
+      }
     }
 
-    $this->preferences = $preferences;
-    return $preferences;
+    if (isset($defaults[$key])) {
+      $value = id(clone $defaults[$key])
+        ->setViewer($this)
+        ->getSettingDefaultValue();
+    } else {
+      $value = null;
+    }
+
+    return $this->writeUserSettingCache($key, $value);
   }
 
-  public function loadEditorLink($path, $line, $callsign) {
-    $editor = $this->loadPreferences()->getPreference(
-      PhabricatorUserPreferences::PREFERENCE_EDITOR);
+
+  /**
+   * Test if a given setting is set to a particular value.
+   *
+   * @param const Setting key.
+   * @param wild Value to compare.
+   * @return bool True if the setting has the specified value.
+   * @task settings
+   */
+  public function compareUserSetting($key, $value) {
+    $actual = $this->getUserSetting($key);
+    return ($actual == $value);
+  }
+
+  private function writeUserSettingCache($key, $value) {
+    $this->settingCacheKeys[$key] = true;
+    $this->settingCache[$key] = $value;
+    return $value;
+  }
+
+  public function getTranslation() {
+    return $this->getUserSetting(PhabricatorTranslationSetting::SETTINGKEY);
+  }
+
+  public function getTimezoneIdentifier() {
+    return $this->getUserSetting(PhabricatorTimezoneSetting::SETTINGKEY);
+  }
+
+
+  /**
+   * Override the user's timezone identifier.
+   *
+   * This is primarily useful for unit tests.
+   *
+   * @param string New timezone identifier.
+   * @return this
+   * @task settings
+   */
+  public function overrideTimezoneIdentifier($identifier) {
+    $timezone_key = PhabricatorTimezoneSetting::SETTINGKEY;
+    $this->settingCacheKeys[$timezone_key] = true;
+    $this->settingCache[$timezone_key] = $identifier;
+    return $this;
+  }
+
+  public function getSex() {
+    return $this->getUserSetting(PhabricatorPronounSetting::SETTINGKEY);
+  }
+
+  public function loadEditorLink(
+    $path,
+    $line,
+    PhabricatorRepository $repository = null) {
+
+    $editor = $this->getUserSetting(PhabricatorEditorSetting::SETTINGKEY);
 
     if (is_array($path)) {
-      $multiedit = $this->loadPreferences()->getPreference(
-        PhabricatorUserPreferences::PREFERENCE_MULTIEDIT);
+      $multi_key = PhabricatorEditorMultipleSetting::SETTINGKEY;
+      $multiedit = $this->getUserSetting($multi_key);
       switch ($multiedit) {
-        case '':
+        case PhabricatorEditorMultipleSetting::VALUE_SPACES:
           $path = implode(' ', $path);
           break;
-        case 'disable':
+        case PhabricatorEditorMultipleSetting::VALUE_SINGLE:
+        default:
           return null;
       }
     }
 
     if (!strlen($editor)) {
       return null;
+    }
+
+    if ($repository) {
+      $callsign = $repository->getCallsign();
+    } else {
+      $callsign = null;
     }
 
     $uri = strtr($editor, array(
@@ -538,6 +669,13 @@ final class PhabricatorUser
   }
 
   public function sendWelcomeEmail(PhabricatorUser $admin) {
+    if (!$this->canEstablishWebSessions()) {
+      throw new Exception(
+        pht(
+          'Can not send welcome mail to users who can not establish '.
+          'web sessions!'));
+    }
+
     $admin_username = $admin->getUserName();
     $admin_realname = $admin->getRealName();
     $user_username = $this->getUserName();
@@ -551,36 +689,31 @@ final class PhabricatorUser
       $this->loadPrimaryEmail(),
       PhabricatorAuthSessionEngine::ONETIME_WELCOME);
 
-    $body = <<<EOBODY
-Welcome to Phabricator!
-
-{$admin_username} ({$admin_realname}) has created an account for you.
-
-  Username: {$user_username}
-
-To login to Phabricator, follow this link and set a password:
-
-  {$uri}
-
-After you have set a password, you can login in the future by going here:
-
-  {$base_uri}
-
-EOBODY;
+    $body = pht(
+      "Welcome to Phabricator!\n\n".
+      "%s (%s) has created an account for you.\n\n".
+      "  Username: %s\n\n".
+      "To login to Phabricator, follow this link and set a password:\n\n".
+      "  %s\n\n".
+      "After you have set a password, you can login in the future by ".
+      "going here:\n\n".
+      "  %s\n",
+      $admin_username,
+      $admin_realname,
+      $user_username,
+      $uri,
+      $base_uri);
 
     if (!$is_serious) {
-      $body .= <<<EOBODY
-
-Love,
-Phabricator
-
-EOBODY;
+      $body .= sprintf(
+        "\n%s\n",
+        pht("Love,\nPhabricator"));
     }
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Welcome to Phabricator')
+      ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
       ->setBody($body)
       ->saveAndSend();
   }
@@ -600,31 +733,36 @@ EOBODY;
         $this,
         null,
         PhabricatorAuthSessionEngine::ONETIME_USERNAME);
-      $password_instructions = <<<EOTXT
-If you use a password to login, you'll need to reset it before you can login
-again. You can reset your password by following this link:
-
-  {$uri}
-
-And, of course, you'll need to use your new username to login from now on. If
-you use OAuth to login, nothing should change.
-
-EOTXT;
+      $password_instructions = sprintf(
+        "%s\n\n  %s\n\n%s\n",
+        pht(
+          "If you use a password to login, you'll need to reset it ".
+          "before you can login again. You can reset your password by ".
+          "following this link:"),
+        $uri,
+        pht(
+          "And, of course, you'll need to use your new username to login ".
+          "from now on. If you use OAuth to login, nothing should change."));
     }
 
-    $body = <<<EOBODY
-{$admin_username} ({$admin_realname}) has changed your Phabricator username.
-
-  Old Username: {$old_username}
-  New Username: {$new_username}
-
-{$password_instructions}
-EOBODY;
+    $body = sprintf(
+      "%s\n\n  %s\n  %s\n\n%s",
+      pht(
+        '%s (%s) has changed your Phabricator username.',
+        $admin_username,
+        $admin_realname),
+      pht(
+        'Old Username: %s',
+        $old_username),
+      pht(
+        'New Username: %s',
+        $new_username),
+      $password_instructions);
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Username Changed')
+      ->setSubject(pht('[Phabricator] Username Changed'))
       ->setBody($body)
       ->saveAndSend();
   }
@@ -656,47 +794,19 @@ EOBODY;
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
   }
 
-  public function attachStatus(PhabricatorCalendarEvent $status) {
-    $this->status = $status;
-    return $this;
-  }
-
-  public function getStatus() {
-    return $this->assertAttached($this->status);
-  }
-
-  public function hasStatus() {
-    return $this->status !== self::ATTACHABLE;
-  }
-
-  public function attachProfileImageURI($uri) {
-    $this->profileImage = $uri;
-    return $this;
-  }
-
   public function getProfileImageURI() {
-    return $this->assertAttached($this->profileImage);
+    $uri_key = PhabricatorUserProfileImageCacheType::KEY_URI;
+    return $this->requireCacheData($uri_key);
   }
 
-  public function loadProfileImageURI() {
-    if ($this->profileImage && ($this->profileImage !== self::ATTACHABLE)) {
-      return $this->profileImage;
-    }
+  public function getUnreadNotificationCount() {
+    $notification_key = PhabricatorUserNotificationCountCacheType::KEY_COUNT;
+    return $this->requireCacheData($notification_key);
+  }
 
-    $src_phid = $this->getProfileImagePHID();
-
-    if ($src_phid) {
-      // TODO: (T603) Can we get rid of this entirely and move it to
-      // PeopleQuery with attach/attachable?
-      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-      if ($file) {
-        $this->profileImage = $file->getBestURI();
-        return $this->profileImage;
-      }
-    }
-
-    $this->profileImage = self::getDefaultProfileImageURI();
-    return $this->profileImage;
+  public function getUnreadMessageCount() {
+    $message_key = PhabricatorUserMessageCountCacheType::KEY_COUNT;
+    return $this->requireCacheData($message_key);
   }
 
   public function getFullName() {
@@ -705,6 +815,53 @@ EOBODY;
     } else {
       return $this->getUsername();
     }
+  }
+
+  public function getTimeZone() {
+    return new DateTimeZone($this->getTimezoneIdentifier());
+  }
+
+  public function getTimeZoneOffset() {
+    $timezone = $this->getTimeZone();
+    $now = new DateTime('@'.PhabricatorTime::getNow());
+    $offset = $timezone->getOffset($now);
+
+    // Javascript offsets are in minutes and have the opposite sign.
+    $offset = -(int)($offset / 60);
+
+    return $offset;
+  }
+
+  public function formatShortDateTime($when, $now = null) {
+    if ($now === null) {
+      $now = PhabricatorTime::getNow();
+    }
+
+    try {
+      $when = new DateTime('@'.$when);
+      $now = new DateTime('@'.$now);
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    $zone = $this->getTimeZone();
+
+    $when->setTimeZone($zone);
+    $now->setTimeZone($zone);
+
+    if ($when->format('Y') !== $now->format('Y')) {
+      // Different year, so show "Feb 31 2075".
+      $format = 'M j Y';
+    } else if ($when->format('Ymd') !== $now->format('Ymd')) {
+      // Same year but different month and day, so show "Feb 31".
+      $format = 'M j';
+    } else {
+      // Same year, month and day so show a time of day.
+      $pref_time = PhabricatorTimeFormatSetting::SETTINGKEY;
+      $format = $this->getUserSetting($pref_time);
+    }
+
+    return $when->format($format);
   }
 
   public function __toString() {
@@ -722,6 +879,143 @@ EOBODY;
       'phid = %s',
       $email->getUserPHID());
   }
+
+  public function getDefaultSpacePHID() {
+    // TODO: We might let the user switch which space they're "in" later on;
+    // for now just use the global space if one exists.
+
+    // If the viewer has access to the default space, use that.
+    $spaces = PhabricatorSpacesNamespaceQuery::getViewerActiveSpaces($this);
+    foreach ($spaces as $space) {
+      if ($space->getIsDefaultNamespace()) {
+        return $space->getPHID();
+      }
+    }
+
+    // Otherwise, use the space with the lowest ID that they have access to.
+    // This just tends to keep the default stable and predictable over time,
+    // so adding a new space won't change behavior for users.
+    if ($spaces) {
+      $spaces = msort($spaces, 'getID');
+      return head($spaces)->getPHID();
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Grant a user a source of authority, to let them bypass policy checks they
+   * could not otherwise.
+   */
+  public function grantAuthority($authority) {
+    $this->authorities[] = $authority;
+    return $this;
+  }
+
+
+  /**
+   * Get authorities granted to the user.
+   */
+  public function getAuthorities() {
+    return $this->authorities;
+  }
+
+
+/* -(  Availability  )------------------------------------------------------- */
+
+
+  /**
+   * @task availability
+   */
+  public function attachAvailability(array $availability) {
+    $this->availability = $availability;
+    return $this;
+  }
+
+
+  /**
+   * Get the timestamp the user is away until, if they are currently away.
+   *
+   * @return int|null Epoch timestamp, or `null` if the user is not away.
+   * @task availability
+   */
+  public function getAwayUntil() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    return idx($availability, 'until');
+  }
+
+
+  /**
+   * Describe the user's availability.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @return string Human-readable description of away status.
+   * @task availability
+   */
+  public function getAvailabilityDescription(PhabricatorUser $viewer) {
+    $until = $this->getAwayUntil();
+    if ($until) {
+      return pht('Away until %s', phabricator_datetime($until, $viewer));
+    } else {
+      return pht('Available');
+    }
+  }
+
+
+  /**
+   * Get cached availability, if present.
+   *
+   * @return wild|null Cache data, or null if no cache is available.
+   * @task availability
+   */
+  public function getAvailabilityCache() {
+    $now = PhabricatorTime::getNow();
+    if ($this->availabilityCacheTTL <= $now) {
+      return null;
+    }
+
+    try {
+      return phutil_json_decode($this->availabilityCache);
+    } catch (Exception $ex) {
+      return null;
+    }
+  }
+
+
+  /**
+   * Write to the availability cache.
+   *
+   * @param wild Availability cache data.
+   * @param int|null Cache TTL.
+   * @return this
+   * @task availability
+   */
+  public function writeAvailabilityCache(array $availability, $ttl) {
+    if (PhabricatorEnv::isReadOnly()) {
+      return $this;
+    }
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET availabilityCache = %s, availabilityCacheTTL = %nd
+        WHERE id = %d',
+      $this->getTableName(),
+      json_encode($availability),
+      $ttl,
+      $this->getID());
+    unset($unguarded);
+
+    return $this;
+  }
+
 
 /* -(  Multi-Factor Authentication  )---------------------------------------- */
 
@@ -808,6 +1102,87 @@ EOBODY;
   }
 
 
+  /**
+   * Get a scalar string identifying this user.
+   *
+   * This is similar to using the PHID, but distinguishes between ominpotent
+   * and public users explicitly. This allows safe construction of cache keys
+   * or cache buckets which do not conflate public and omnipotent users.
+   *
+   * @return string Scalar identifier.
+   */
+  public function getCacheFragment() {
+    if ($this->isOmnipotent()) {
+      return 'u.omnipotent';
+    }
+
+    $phid = $this->getPHID();
+    if ($phid) {
+      return 'u.'.$phid;
+    }
+
+    return 'u.public';
+  }
+
+
+/* -(  Managing Handles  )--------------------------------------------------- */
+
+
+  /**
+   * Get a @{class:PhabricatorHandleList} which benefits from this viewer's
+   * internal handle pool.
+   *
+   * @param list<phid> List of PHIDs to load.
+   * @return PhabricatorHandleList Handle list object.
+   * @task handle
+   */
+  public function loadHandles(array $phids) {
+    if ($this->handlePool === null) {
+      $this->handlePool = id(new PhabricatorHandlePool())
+        ->setViewer($this);
+    }
+
+    return $this->handlePool->newHandleList($phids);
+  }
+
+
+  /**
+   * Get a @{class:PHUIHandleView} for a single handle.
+   *
+   * This benefits from the viewer's internal handle pool.
+   *
+   * @param phid PHID to render a handle for.
+   * @return PHUIHandleView View of the handle.
+   * @task handle
+   */
+  public function renderHandle($phid) {
+    return $this->loadHandles(array($phid))->renderHandle($phid);
+  }
+
+
+  /**
+   * Get a @{class:PHUIHandleListView} for a list of handles.
+   *
+   * This benefits from the viewer's internal handle pool.
+   *
+   * @param list<phid> List of PHIDs to render.
+   * @return PHUIHandleListView View of the handles.
+   * @task handle
+   */
+  public function renderHandleList(array $phids) {
+    return $this->loadHandles($phids)->renderList();
+  }
+
+  public function attachBadgePHIDs(array $phids) {
+    $this->badgePHIDs = $phids;
+    return $this;
+  }
+
+  public function getBadgePHIDs() {
+    return $this->assertAttached($this->badgePHIDs);
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -823,7 +1198,7 @@ EOBODY;
       case PhabricatorPolicyCapability::CAN_VIEW:
         return PhabricatorPolicies::POLICY_PUBLIC;
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getIsSystemAgent()) {
+        if ($this->getIsSystemAgent() || $this->getIsMailingList()) {
           return PhabricatorPolicies::POLICY_ADMIN;
         } else {
           return PhabricatorPolicies::POLICY_NOONE;
@@ -882,11 +1257,12 @@ EOBODY;
         $external->delete();
       }
 
-      $prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $prefs = id(new PhabricatorUserPreferencesQuery())
+        ->setViewer($engine->getViewer())
+        ->withUsers(array($this))
+        ->execute();
       foreach ($prefs as $pref) {
-        $pref->delete();
+        $engine->destroyObject($pref);
       }
 
       $profiles = id(new PhabricatorUserProfile())->loadAllWhere(
@@ -896,11 +1272,12 @@ EOBODY;
         $profile->delete();
       }
 
-      $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
-        'userPHID = %s',
-        $this->getPHID());
+      $keys = id(new PhabricatorAuthSSHKeyQuery())
+        ->setViewer($engine->getViewer())
+        ->withObjectPHIDs(array($this->getPHID()))
+        ->execute();
       foreach ($keys as $key) {
-        $key->delete();
+        $engine->destroyObject($key);
       }
 
       $emails = id(new PhabricatorUserEmail())->loadAllWhere(
@@ -927,5 +1304,197 @@ EOBODY;
     $this->saveTransaction();
   }
 
+
+/* -(  PhabricatorSSHPublicKeyInterface  )----------------------------------- */
+
+
+  public function getSSHPublicKeyManagementURI(PhabricatorUser $viewer) {
+    if ($viewer->getPHID() == $this->getPHID()) {
+      // If the viewer is managing their own keys, take them to the normal
+      // panel.
+      return '/settings/panel/ssh/';
+    } else {
+      // Otherwise, take them to the administrative panel for this user.
+      return '/settings/'.$this->getID().'/panel/ssh/';
+    }
+  }
+
+  public function getSSHKeyDefaultName() {
+    return 'id_rsa_phabricator';
+  }
+
+  public function getSSHKeyNotifyPHIDs() {
+    return array(
+      $this->getPHID(),
+    );
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorUserProfileEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorUserTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
+
+/* -(  PhabricatorFulltextInterface  )--------------------------------------- */
+
+
+  public function newFulltextEngine() {
+    return new PhabricatorUserFulltextEngine();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('username')
+        ->setType('string')
+        ->setDescription(pht("The user's username.")),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('realName')
+        ->setType('string')
+        ->setDescription(pht("The user's real name.")),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('roles')
+        ->setType('list<string>')
+        ->setDescription(pht('List of acccount roles.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $roles = array();
+
+    if ($this->getIsDisabled()) {
+      $roles[] = 'disabled';
+    }
+
+    if ($this->getIsSystemAgent()) {
+      $roles[] = 'bot';
+    }
+
+    if ($this->getIsMailingList()) {
+      $roles[] = 'list';
+    }
+
+    if ($this->getIsAdmin()) {
+      $roles[] = 'admin';
+    }
+
+    if ($this->getIsEmailVerified()) {
+      $roles[] = 'verified';
+    }
+
+    if ($this->getIsApproved()) {
+      $roles[] = 'approved';
+    }
+
+    if ($this->isUserActivated()) {
+      $roles[] = 'activated';
+    }
+
+    return array(
+      'username' => $this->getUsername(),
+      'realName' => $this->getRealName(),
+      'roles' => $roles,
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
+
+/* -(  User Cache  )--------------------------------------------------------- */
+
+
+  /**
+   * @task cache
+   */
+  public function attachRawCacheData(array $data) {
+    $this->rawCacheData = $data + $this->rawCacheData;
+    return $this;
+  }
+
+  public function setAllowInlineCacheGeneration($allow_cache_generation) {
+    $this->allowInlineCacheGeneration = $allow_cache_generation;
+    return $this;
+  }
+
+  /**
+   * @task cache
+   */
+  protected function requireCacheData($key) {
+    if (isset($this->usableCacheData[$key])) {
+      return $this->usableCacheData[$key];
+    }
+
+    $type = PhabricatorUserCacheType::requireCacheTypeForKey($key);
+
+    if (isset($this->rawCacheData[$key])) {
+      $raw_value = $this->rawCacheData[$key];
+
+      $usable_value = $type->getValueFromStorage($raw_value);
+      $this->usableCacheData[$key] = $usable_value;
+
+      return $usable_value;
+    }
+
+    // By default, we throw if a cache isn't available. This is consistent
+    // with the standard `needX()` + `attachX()` + `getX()` interaction.
+    if (!$this->allowInlineCacheGeneration) {
+      throw new PhabricatorDataNotAttachedException($this);
+    }
+
+    $usable_value = $type->getDefaultValue();
+
+    $user_phid = $this->getPHID();
+    if ($user_phid) {
+      $map = $type->newValueForUsers($key, array($this));
+      if (array_key_exists($user_phid, $map)) {
+        $raw_value = $map[$user_phid];
+        $usable_value = $type->getValueFromStorage($raw_value);
+
+        $this->rawCacheData[$key] = $raw_value;
+        PhabricatorUserCache::writeCache(
+          $type,
+          $key,
+          $user_phid,
+          $raw_value);
+      }
+    }
+
+    $this->usableCacheData[$key] = $usable_value;
+
+    return $usable_value;
+  }
+
+
+  /**
+   * @task cache
+   */
+  public function clearCacheData($key) {
+    unset($this->rawCacheData[$key]);
+    unset($this->usableCacheData[$key]);
+    return $this;
+  }
 
 }

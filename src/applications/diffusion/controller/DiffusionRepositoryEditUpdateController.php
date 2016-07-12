@@ -1,33 +1,26 @@
 <?php
 
 final class DiffusionRepositoryEditUpdateController
-  extends DiffusionRepositoryEditController {
+  extends DiffusionRepositoryManageController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
-    $repository = $drequest->getRepository();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-    if (!$repository) {
-      return new Aphront404Response();
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
     }
 
-    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $panel_uri = id(new DiffusionRepositoryStatusManagementPanel())
+      ->setRepository($repository)
+      ->getPanelURI();
 
     if ($request->isFormPost()) {
       $params = array(
-        'callsigns' => array(
-          $repository->getCallsign(),
+        'repositories' => array(
+          $repository->getPHID(),
         ),
       );
 
@@ -35,7 +28,7 @@ final class DiffusionRepositoryEditUpdateController
         ->setUser($viewer)
         ->execute();
 
-      return id(new AphrontRedirectResponse())->setURI($edit_uri);
+      return id(new AphrontRedirectResponse())->setURI($panel_uri);
     }
 
     $doc_name = 'Diffusion User Guide: Repository Updates';
@@ -67,7 +60,7 @@ final class DiffusionRepositoryEditUpdateController
           'To learn more about how Phabricator updates repositories, '.
           'read %s in the documentation.',
           $doc_link))
-      ->addCancelButton($edit_uri)
+      ->addCancelButton($panel_uri)
       ->addSubmitButton(pht('Schedule Update'));
   }
 

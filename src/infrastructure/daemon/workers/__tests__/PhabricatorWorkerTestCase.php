@@ -10,7 +10,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
 
   public function testLeaseTask() {
     $task = $this->scheduleTask();
-    $this->expectNextLease($task, 'Leasing should work.');
+    $this->expectNextLease($task, pht('Leasing should work.'));
   }
 
   public function testMultipleLease() {
@@ -19,7 +19,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     $this->expectNextLease($task);
     $this->expectNextLease(
       null,
-      'We should not be able to lease a task multiple times.');
+      pht('We should not be able to lease a task multiple times.'));
   }
 
   public function testOldestFirst() {
@@ -28,7 +28,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
 
     $this->expectNextLease(
       $task1,
-      'Older tasks should lease first, all else being equal.');
+      pht('Older tasks should lease first, all else being equal.'));
     $this->expectNextLease($task2);
   }
 
@@ -42,8 +42,9 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
 
     $this->expectNextLease(
       $task2,
-      'Tasks not previously leased should lease before previously '.
-      'leased tasks.');
+      pht(
+        'Tasks not previously leased should lease before previously '.
+        'leased tasks.'));
     $this->expectNextLease($task1);
   }
 
@@ -156,22 +157,24 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
 
     $this->expectNextLease(
       $task2,
-      'Tasks which expired earlier should lease first, all else being equal.');
+      pht(
+        'Tasks which expired earlier should lease first, '.
+        'all else being equal.'));
     $this->expectNextLease($task1);
   }
 
-  public function testLeasedIsHighestPriority() {
+  public function testLeasedIsLowestPriority() {
     $task1 = $this->scheduleTask(array(), 2);
-    $task2 = $this->scheduleTask(array(), 1);
+    $task2 = $this->scheduleTask(array(), 2);
     $task3 = $this->scheduleTask(array(), 1);
 
     $this->expectNextLease(
-      $task1,
-      'Tasks with a higher priority should be scheduled first.');
+      $task3,
+      pht('Tasks with a lower priority should be scheduled first.'));
     $this->expectNextLease(
-      $task2,
-      'Tasks with the same priority should be FIFO.');
-    $this->expectNextLease($task3);
+      $task1,
+      pht('Tasks with the same priority should be FIFO.'));
+    $this->expectNextLease($task2);
   }
 
   private function expectNextLease($task, $message = null) {
@@ -206,7 +209,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     return PhabricatorWorker::scheduleTask(
       'PhabricatorTestWorker',
       $data,
-      $priority);
+      array('priority' => $priority));
   }
 
 }

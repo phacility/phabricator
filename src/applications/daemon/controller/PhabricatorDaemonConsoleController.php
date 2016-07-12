@@ -3,9 +3,8 @@
 final class PhabricatorDaemonConsoleController
   extends PhabricatorDaemonController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $window_start = (time() - (60 * 15));
 
@@ -14,9 +13,9 @@ final class PhabricatorDaemonConsoleController
     // but we'd rather show that utilization is too high than too low.
     $lease_overhead = 0.250;
 
-    $completed = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
-      'dateModified > %d',
-      $window_start);
+    $completed = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withDateModifiedSince($window_start)
+      ->execute();
 
     $failed = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'failureTime > %d',
@@ -51,14 +50,15 @@ final class PhabricatorDaemonConsoleController
       $rows[] = array(
         $class,
         number_format($info['n']),
-        number_format((int)($info['duration'] / $info['n'])).' us',
+        pht('%s us', new PhutilNumber((int)($info['duration'] / $info['n']))),
       );
     }
 
     if ($failed) {
       // Add the time it takes to restart the daemons. This includes a guess
       // about other overhead of 2X.
-      $usage_total += PhutilDaemonOverseer::RESTART_WAIT * count($failed) * 2;
+      $restart_delay = PhutilDaemonHandle::getWaitBeforeRestart();
+      $usage_total += $restart_delay * count($failed) * 2;
       foreach ($failed as $failed_task) {
         $usage_start = min($usage_start, $failed_task->getFailureTime());
       }
@@ -71,7 +71,7 @@ final class PhabricatorDaemonConsoleController
     }
 
     $logs = id(new PhabricatorDaemonLogQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
       ->setAllowStatusWrites(true)
       ->execute();
@@ -117,67 +117,31 @@ final class PhabricatorDaemonConsoleController
         'n',
       ));
 
-    $completed_panel = new PHUIObjectBoxView();
-    $completed_panel->setHeaderText(
-      pht('Recently Completed Tasks (Last 15m)'));
-    $completed_panel->appendChild($completed_table);
+    $completed_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Recently Completed Tasks (Last 15m)'))
+      ->setTable($completed_table);
 
-    $daemon_table = new PhabricatorDaemonLogListView();
-    $daemon_table->setUser($user);
-    $daemon_table->setDaemonLogs($logs);
+    $daemon_table = id(new PhabricatorDaemonLogListView())
+      ->setUser($viewer)
+      ->setDaemonLogs($logs);
 
-    $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
-      'leaseOwner IS NOT NULL');
+    $daemon_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Active Daemons'))
+      ->setTable($daemon_table);
 
-    $rows = array();
-    foreach ($tasks as $task) {
-      $rows[] = array(
-        $task->getID(),
-        $task->getTaskClass(),
-        $task->getLeaseOwner(),
-        $task->getLeaseExpires() - time(),
-        $task->getPriority(),
-        $task->getFailureCount(),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/daemon/task/'.$task->getID().'/',
-            'class' => 'button small grey',
-          ),
-          pht('View Task')),
-      );
-    }
+    $tasks = id(new PhabricatorWorkerLeaseQuery())
+      ->setSkipLease(true)
+      ->withLeasedTasks(true)
+      ->setLimit(100)
+      ->execute();
 
-    $daemon_panel = new PHUIObjectBoxView();
-    $daemon_panel->setHeaderText(pht('Active Daemons'));
-    $daemon_panel->appendChild($daemon_table);
+    $tasks_table = id(new PhabricatorDaemonTasksTableView())
+      ->setTasks($tasks)
+      ->setNoDataString(pht('No tasks are leased by workers.'));
 
-    $leased_table = new AphrontTableView($rows);
-    $leased_table->setHeaders(
-      array(
-        pht('ID'),
-        pht('Class'),
-        pht('Owner'),
-        pht('Expires'),
-        pht('Priority'),
-        pht('Failures'),
-        '',
-      ));
-    $leased_table->setColumnClasses(
-      array(
-        'n',
-        'wide',
-        '',
-        '',
-        'n',
-        'n',
-        'action',
-      ));
-    $leased_table->setNoDataString(pht('No tasks are leased by workers.'));
-
-    $leased_panel = new PHUIObjectBoxView();
-    $leased_panel->setHeaderText(pht('Leased Tasks'));
-    $leased_panel->appendChild($leased_table);
+    $leased_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Leased Tasks'))
+      ->setTable($tasks_table);
 
     $task_table = new PhabricatorWorkerActiveTask();
     $queued = queryfx_all(
@@ -209,7 +173,33 @@ final class PhabricatorDaemonConsoleController
 
     $queued_panel = new PHUIObjectBoxView();
     $queued_panel->setHeaderText(pht('Queued Tasks'));
-    $queued_panel->appendChild($queued_table);
+    $queued_panel->setTable($queued_table);
+
+    $upcoming = id(new PhabricatorWorkerLeaseQuery())
+      ->setLimit(10)
+      ->setSkipLease(true)
+      ->execute();
+
+    $upcoming_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Next In Queue'))
+      ->setTable(
+        id(new PhabricatorDaemonTasksTableView())
+          ->setTasks($upcoming)
+          ->setNoDataString(pht('Task queue is empty.')));
+
+    $triggers = id(new PhabricatorWorkerTriggerQuery())
+      ->setViewer($viewer)
+      ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)
+      ->withNextEventBetween(0, null)
+      ->needEvents(true)
+      ->setLimit(10)
+      ->execute();
+
+    $triggers_table = $this->buildTriggersTable($triggers);
+
+    $triggers_panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Upcoming Triggers'))
+      ->setTable($triggers_table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
@@ -223,14 +213,57 @@ final class PhabricatorDaemonConsoleController
         $daemon_panel,
         $queued_panel,
         $leased_panel,
+        $upcoming_panel,
+        $triggers_panel,
       ));
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Console'),
-        'device' => false,
-      ));
+    return $this->newPage()
+      ->setTitle(pht('Console'))
+      ->appendChild($nav);
+
+  }
+
+  private function buildTriggersTable(array $triggers) {
+    $viewer = $this->getViewer();
+
+    $rows = array();
+    foreach ($triggers as $trigger) {
+      $event = $trigger->getEvent();
+      if ($event) {
+        $last_epoch = $event->getLastEventEpoch();
+        $next_epoch = $event->getNextEventEpoch();
+      } else {
+        $last_epoch = null;
+        $next_epoch = null;
+      }
+
+      $rows[] = array(
+        $trigger->getID(),
+        $trigger->getClockClass(),
+        $trigger->getActionClass(),
+        $last_epoch ? phabricator_datetime($last_epoch, $viewer) : null,
+        $next_epoch ? phabricator_datetime($next_epoch, $viewer) : null,
+      );
+    }
+
+    return id(new AphrontTableView($rows))
+      ->setNoDataString(pht('There are no upcoming event triggers.'))
+      ->setHeaders(
+        array(
+          pht('ID'),
+          pht('Clock'),
+          pht('Action'),
+          pht('Last'),
+          pht('Next'),
+        ))
+      ->setColumnClasses(
+        array(
+          '',
+          '',
+          'wide',
+          'date',
+          'date',
+        ));
   }
 
 }

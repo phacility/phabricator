@@ -4,19 +4,21 @@
 
 .jx-tooltip-container {
   position: absolute;
+  padding: 5px;
+}
+
+.jx-tooltip-inner {
+  position: relative;
+  background: rgba({$alphablack}, .9);
+  border-radius: 3px;
 }
 
 .jx-tooltip {
-  background: #000;
   color: #f9f9f9;
-  font-size: 12px;
-  padding: 4px 8px;
+  font-size: {$normalfontsize};
+  padding: 6px 8px;
   overflow: hidden;
   white-space: pre-wrap;
-  border-radius: 3px;
-  opacity: 0.9;
-
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
 .jx-tooltip:after {
@@ -26,7 +28,7 @@
   width: 0;
   position: absolute;
   pointer-events: none;
-  border-color: rgba(0, 0, 0, 0);
+  border-color: rgba({$alphablack}, 0);
   border-width: 5px;
 }
 
@@ -41,6 +43,10 @@
   top: 50%;
 }
 
+.jx-tooltip-align-E {
+  margin-right: 5px;
+}
+
 .jx-tooltip-align-W .jx-tooltip:after {
   margin-top: -5px;
   border-left-color: #000;
@@ -49,7 +55,7 @@
 }
 
 .jx-tooltip-align-N {
-  margin-top: -5px;
+  margin-bottom: 5px;
 }
 
 .jx-tooltip-align-N .jx-tooltip:after {
@@ -57,6 +63,10 @@
   border-top-color: #000;
   top: 100%;
   left: 50%;
+}
+
+.jx-tooltip-align-N {
+  margin-top: 5px;
 }
 
 .jx-tooltip-align-S .jx-tooltip:after {

@@ -11,20 +11,16 @@ final class DifferentialCreateRawDiffConduitAPIMethod
     return pht('Create a new Differential diff from a raw diff source.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'diff' => 'required string',
       'repositoryPHID' => 'optional string',
+      'viewPolicy' => 'optional string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -41,29 +37,58 @@ final class DifferentialCreateRawDiffConduitAPIMethod
         throw new Exception(
           pht('No such repository "%s"!', $repository_phid));
       }
-    } else {
-      $repository = null;
     }
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw_diff);
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newFromRawChanges($viewer, $changes);
 
-    $diff->setLintStatus(DifferentialLintStatus::LINT_SKIP);
-    $diff->setUnitStatus(DifferentialUnitStatus::UNIT_SKIP);
+    // We're bounded by doing INSERTs for all the hunks and changesets, so
+    // estimate the number of inserts we'll require.
+    $size = 0;
+    foreach ($diff->getChangesets() as $changeset) {
+      $hunks = $changeset->getHunks();
+      $size += 1 + count($hunks);
+    }
 
-    $diff->setAuthorPHID($viewer->getPHID());
-    $diff->setCreationMethod('web');
+    $raw_limit = 10000;
+    if ($size > $raw_limit) {
+      throw new Exception(
+        pht(
+          'The raw diff you have submitted is too large to parse (it affects '.
+          'more than %s paths and hunks). Differential should only be used '.
+          'for changes which are small enough to receive detailed human '.
+          'review. See "Differential User Guide: Large Changes" in the '.
+          'documentation for more information.',
+          new PhutilNumber($raw_limit)));
+    }
 
-    if ($repository) {
-      $diff->setRepositoryPHID($repository->getPHID());
+    $diff_data_dict = array(
+      'creationMethod' => 'web',
+      'authorPHID' => $viewer->getPHID(),
+      'repositoryPHID' => $repository_phid,
+      'lintStatus' => DifferentialLintStatus::LINT_SKIP,
+      'unitStatus' => DifferentialUnitStatus::UNIT_SKIP,
+    );
+
+    $xactions = array(
+      id(new DifferentialDiffTransaction())
+        ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
+        ->setNewValue($diff_data_dict),
+    );
+
+    if ($request->getValue('viewPolicy')) {
+      $xactions[] = id(new DifferentialDiffTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($request->getValue('viewPolicy'));
     }
 
     id(new DifferentialDiffEditor())
       ->setActor($viewer)
-      ->setContentSource(
-        PhabricatorContentSource::newFromConduitRequest($request))
-      ->saveDiff($diff);
+      ->setContentSource($request->newContentSource())
+      ->setContinueOnNoEffect(true)
+      ->setLookupRepository(false) // respect user choice
+      ->applyTransactions($diff, $xactions);
 
     return $this->buildDiffInfoDictionary($diff);
   }

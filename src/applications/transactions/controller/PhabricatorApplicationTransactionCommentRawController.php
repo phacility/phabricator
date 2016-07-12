@@ -3,19 +3,13 @@
 final class PhabricatorApplicationTransactionCommentRawController
   extends PhabricatorApplicationTransactionController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $phid = $request->getURIData('phid');
 
     $xaction = id(new PhabricatorObjectQuery())
-      ->withPHIDs(array($this->phid))
-      ->setViewer($user)
+      ->withPHIDs(array($phid))
+      ->setViewer($viewer)
       ->executeOne();
 
     if (!$xaction) {
@@ -34,7 +28,7 @@ final class PhabricatorApplicationTransactionCommentRawController
 
     $obj_phid = $xaction->getObjectPHID();
     $obj_handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withPHIDs(array($obj_phid))
       ->executeOne();
 
@@ -43,9 +37,9 @@ final class PhabricatorApplicationTransactionCommentRawController
     $addendum = null;
     if ($request->getExists('email')) {
       $content_source = $xaction->getContentSource();
-      $source_email = PhabricatorContentSource::SOURCE_EMAIL;
+      $source_email = PhabricatorEmailContentSource::SOURCECONST;
       if ($content_source->getSource() == $source_email) {
-        $source_id = $content_source->getParam('id');
+        $source_id = $content_source->getContentSourceParameter('id');
         if ($source_id) {
           $message = id(new PhabricatorMetaMTAReceivedMail())->loadOneWhere(
             'id = %d',
@@ -56,16 +50,13 @@ final class PhabricatorApplicationTransactionCommentRawController
             $details_text = pht(
               'For full details, run `/bin/mail show-outbound --id %d`',
               $source_id);
-            $addendum = PhabricatorMarkupEngine::renderOneObject(
-              id(new PhabricatorMarkupOneOff())->setContent($details_text),
-              'default',
-              $user);
+            $addendum = new PHUIRemarkupView($viewer, $details_text);
           }
         }
       }
     }
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->addCancelButton($obj_handle->getURI())
       ->setTitle($title);
 
@@ -83,6 +74,10 @@ final class PhabricatorApplicationTransactionCommentRawController
     }
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
+  }
+
+  public function shouldAllowPublic() {
+    return true;
   }
 
 }

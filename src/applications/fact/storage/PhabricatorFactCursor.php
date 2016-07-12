@@ -5,7 +5,7 @@ final class PhabricatorFactCursor extends PhabricatorFactDAO {
   protected $name;
   protected $position;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text64',

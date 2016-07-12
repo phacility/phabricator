@@ -2,39 +2,33 @@
 
 final class LegalpadDocumentEditController extends LegalpadController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if (!$this->id) {
+    if (!$id) {
       $is_create = true;
 
       $this->requireApplicationCapability(
         LegalpadCreateDocumentsCapability::CAPABILITY);
 
-      $document = LegalpadDocument::initializeNewDocument($user);
+      $document = LegalpadDocument::initializeNewDocument($viewer);
       $body = id(new LegalpadDocumentBody())
-        ->setCreatorPHID($user->getPHID());
+        ->setCreatorPHID($viewer->getPHID());
       $document->attachDocumentBody($body);
       $document->setDocumentBodyPHID(PhabricatorPHIDConstants::PHID_VOID);
     } else {
       $is_create = false;
 
       $document = id(new LegalpadDocumentQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->needDocumentBodies(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->executeOne();
       if (!$document) {
         return new Aphront404Response();
@@ -48,6 +42,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $text = $document->getDocumentBody()->getText();
     $v_signature_type = $document->getSignatureType();
     $v_preamble = $document->getPreamble();
+    $v_require_signature = $document->getRequireSignature();
 
     $errors = array();
     $can_view = null;
@@ -62,7 +57,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         $errors[] = pht('The document title may not be blank.');
       } else {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransactionType::TYPE_TITLE)
+          ->setTransactionType(LegalpadTransaction::TYPE_TITLE)
           ->setNewValue($title);
       }
 
@@ -72,7 +67,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         $errors[] = pht('The document may not be blank.');
       } else {
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransactionType::TYPE_TEXT)
+          ->setTransactionType(LegalpadTransaction::TYPE_TEXT)
           ->setNewValue($text);
       }
 
@@ -88,20 +83,38 @@ final class LegalpadDocumentEditController extends LegalpadController {
       if ($is_create) {
         $v_signature_type = $request->getStr('signatureType');
         $xactions[] = id(new LegalpadTransaction())
-          ->setTransactionType(LegalpadTransactionType::TYPE_SIGNATURE_TYPE)
+          ->setTransactionType(LegalpadTransaction::TYPE_SIGNATURE_TYPE)
           ->setNewValue($v_signature_type);
       }
 
       $v_preamble = $request->getStr('preamble');
       $xactions[] = id(new LegalpadTransaction())
-        ->setTransactionType(LegalpadTransactionType::TYPE_PREAMBLE)
+        ->setTransactionType(LegalpadTransaction::TYPE_PREAMBLE)
         ->setNewValue($v_preamble);
+
+      $v_require_signature = $request->getBool('requireSignature', 0);
+      if ($v_require_signature) {
+        if (!$viewer->getIsAdmin()) {
+          $errors[] = pht('Only admins may require signature.');
+        }
+        $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+        if ($v_signature_type != $individual) {
+          $errors[] = pht(
+            'Only documents with signature type "individual" may require '.
+            'signing to use Phabricator.');
+        }
+      }
+      if ($viewer->getIsAdmin()) {
+        $xactions[] = id(new LegalpadTransaction())
+          ->setTransactionType(LegalpadTransaction::TYPE_REQUIRE_SIGNATURE)
+          ->setNewValue($v_require_signature);
+      }
 
       if (!$errors) {
         $editor = id(new LegalpadDocumentEditor())
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)
-          ->setActor($user);
+          ->setActor($viewer);
 
         $xactions = $editor->applyTransactions($document, $xactions);
 
@@ -117,7 +130,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setID('document-title')
@@ -133,47 +146,68 @@ final class LegalpadDocumentEditController extends LegalpadController {
           ->setName(pht('signatureType'))
           ->setValue($v_signature_type)
           ->setOptions(LegalpadDocument::getSignatureTypeMap()));
+      $show_require = true;
+      $caption = pht('Applies only to documents individuals sign.');
     } else {
       $form->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Who Should Sign?'))
           ->setValue($document->getSignatureTypeName()));
+      $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+      $show_require = $document->getSignatureType() == $individual;
+      $caption = null;
+    }
+
+    if ($show_require) {
+      $form
+        ->appendChild(
+          id(new AphrontFormCheckboxControl())
+          ->setDisabled(!$viewer->getIsAdmin())
+          ->setLabel(pht('Require Signature'))
+          ->addCheckbox(
+            'requireSignature',
+            'requireSignature',
+            pht('Should signing this document be required to use Phabricator?'),
+            $v_require_signature)
+          ->setCaption($caption));
     }
 
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-        ->setID('preamble')
-        ->setLabel(pht('Preamble'))
-        ->setValue($v_preamble)
-        ->setName('preamble')
-        ->setCaption(
-          pht('Optional help text for users signing this document.')))
+          ->setUser($viewer)
+          ->setID('preamble')
+          ->setLabel(pht('Preamble'))
+          ->setValue($v_preamble)
+          ->setName('preamble')
+          ->setCaption(
+            pht('Optional help text for users signing this document.')))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-        ->setID('document-text')
-        ->setLabel(pht('Document Body'))
-        ->setError($e_text)
-        ->setValue($text)
-        ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-        ->setName('text'));
+          ->setUser($viewer)
+          ->setID('document-text')
+          ->setLabel(pht('Document Body'))
+          ->setError($e_text)
+          ->setValue($text)
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+          ->setName('text'));
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($document)
       ->execute();
 
     $form
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
         ->setPolicyObject($document)
         ->setPolicies($policies)
         ->setName('can_view'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($user)
+        ->setUser($viewer)
         ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
         ->setPolicyObject($document)
         ->setPolicies($policies)
@@ -186,43 +220,53 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $submit->addCancelButton($this->getApplicationURI());
       $title = pht('Create Document');
       $short = pht('Create');
+      $header_icon = 'fa-plus-square';
     } else {
-      $submit->setValue(pht('Edit Document'));
+      $submit->setValue(pht('Save Document'));
       $submit->addCancelButton(
           $this->getApplicationURI('view/'.$document->getID()));
-      $title = pht('Edit Document');
+      $title = pht('Edit Document: %s', $document->getTitle());
       $short = pht('Edit');
+      $header_icon = 'fa-pencil';
 
       $crumbs->addTextCrumb(
         $document->getMonogram(),
         $this->getApplicationURI('view/'.$document->getID()));
     }
 
-    $form
-      ->appendChild($submit);
+    $form->appendChild($submit);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Document'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs->addTextCrumb($short);
+    $crumbs->setBorder(true);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
-      ->setHeader(pht('Document Preview'))
+      ->setHeader($document->getTitle())
       ->setPreviewURI($this->getApplicationURI('document/preview/'))
       ->setControlID('document-text')
-      ->setSkin('document');
+      ->setPreviewType(PHUIRemarkupPreviewPanel::DOCUMENT);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $form_box,
         $preview,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

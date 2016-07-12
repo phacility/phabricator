@@ -11,10 +11,12 @@ final class PhabricatorWorkingCopyDiscoveryTestCase
         1368319448,
       ),
       mpull($refs, 'getEpoch'),
-      'Commit Epochs');
+      pht('Commit Epochs'));
   }
 
   public function testMercurialCommitDiscovery() {
+    $this->requireBinaryForTest('hg');
+
     $refs = $this->discoverRefs('HT');
     $this->assertEqual(
       array(
@@ -28,6 +30,7 @@ final class PhabricatorWorkingCopyDiscoveryTestCase
     $this->assertEqual(
       array(
         '763d4ab372445551c95fb5cccd1a7a223f5b2ac8',
+        '41fa35914aa19c1aa6e57004d9745c05929c3563',
       ),
       mpull($refs, 'getIdentifier'));
   }

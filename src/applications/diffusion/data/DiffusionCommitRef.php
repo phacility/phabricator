@@ -3,11 +3,33 @@
 final class DiffusionCommitRef extends Phobject {
 
   private $message;
+  private $authorEpoch;
   private $authorName;
   private $authorEmail;
   private $committerName;
   private $committerEmail;
   private $hashes = array();
+
+  public static function newFromConduitResult(array $result) {
+    $ref = id(new DiffusionCommitRef())
+      ->setAuthorEpoch(idx($result, 'authorEpoch'))
+      ->setCommitterEmail(idx($result, 'committerEmail'))
+      ->setCommitterName(idx($result, 'committerName'))
+      ->setAuthorEmail(idx($result, 'authorEmail'))
+      ->setAuthorName(idx($result, 'authorName'))
+      ->setMessage(idx($result, 'message'));
+
+    $hashes = array();
+    foreach (idx($result, 'hashes', array()) as $hash_result) {
+      $hashes[] = id(new DiffusionCommitHash())
+        ->setHashType(idx($hash_result, 'type'))
+        ->setHashValue(idx($hash_result, 'value'));
+    }
+
+    $ref->setHashes($hashes);
+
+    return $ref;
+  }
 
   public function setHashes(array $hashes) {
     $this->hashes = $hashes;
@@ -16,6 +38,15 @@ final class DiffusionCommitRef extends Phobject {
 
   public function getHashes() {
     return $this->hashes;
+  }
+
+  public function setAuthorEpoch($author_epoch) {
+    $this->authorEpoch = $author_epoch;
+    return $this;
+  }
+
+  public function getAuthorEpoch() {
+    return $this->authorEpoch;
   }
 
   public function setCommitterEmail($committer_email) {

@@ -16,10 +16,10 @@ abstract class PassphraseCredentialType extends Phobject {
   }
 
   public static function getAllTypes() {
-    $types = id(new PhutilSymbolLoader())
+    return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->loadObjects();
-    return $types;
+      ->setUniqueMethod('getCredentialType')
+      ->execute();
   }
 
   public static function getAllCreateableTypes() {
@@ -129,6 +129,10 @@ abstract class PassphraseCredentialType extends Phobject {
     PhutilOpaqueEnvelope $secret,
     PhutilOpaqueEnvelope $password) {
     return $secret;
+  }
+
+  public function shouldRequireUsername() {
+    return true;
   }
 
 }

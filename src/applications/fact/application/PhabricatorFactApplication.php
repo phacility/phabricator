@@ -14,8 +14,8 @@ final class PhabricatorFactApplication extends PhabricatorApplication {
     return '/fact/';
   }
 
-  public function getIconName() {
-    return 'fact';
+  public function getIcon() {
+    return 'fa-line-chart';
   }
 
   public function getApplicationGroup() {

@@ -3,20 +3,14 @@
 final class PhortuneProviderEditController
   extends PhortuneMerchantController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $provider_config = id(new PhortunePaymentProviderConfigQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -183,6 +177,7 @@ final class PhortuneProviderEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($merchant->getName(), $cancel_uri);
+    $crumbs->setBorder(true);
 
     if ($is_new) {
       $crumbs->addTextCrumb(pht('Add Provider'));
@@ -191,19 +186,27 @@ final class PhortuneProviderEditController
         pht('Edit Provider %d', $provider_config->getID()));
     }
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-pencil');
+
     $box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Properties'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
   private function processChooseClassRequest(
@@ -260,8 +263,7 @@ final class PhortuneProviderEditController
       ->setUser($viewer)
       ->addHiddenInput('merchantID', $merchant->getID())
       ->appendRemarkupInstructions(
-        pht(
-          'Choose the type of payment provider to add:'))
+        pht('Choose the type of payment provider to add:'))
       ->appendChild($panel_classes)
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -273,20 +275,28 @@ final class PhortuneProviderEditController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($merchant->getName(), $cancel_uri);
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Provider'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

@@ -3,15 +3,9 @@
 final class PhabricatorProjectBoardReorderController
   extends PhabricatorProjectBoardController {
 
-  private $projectID;
-
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $projectid = $request->getURIData('projectID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -20,24 +14,22 @@ final class PhabricatorProjectBoardReorderController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($projectid))
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
 
     $this->setProject($project);
-
-
     $project_id = $project->getID();
 
-    $board_uri = $this->getApplicationURI("board/{$project_id}/");
+    $manage_uri = $this->getApplicationURI("board/{$project_id}/manage/");
     $reorder_uri = $this->getApplicationURI("board/{$project_id}/reorder/");
 
     if ($request->isFormPost()) {
       // User clicked "Done", make sure the page reloads to show the new
       // column order.
-      return id(new AphrontRedirectResponse())->setURI($board_uri);
+      return id(new AphrontRedirectResponse())->setURI($manage_uri);
     }
 
     $columns = id(new PhabricatorProjectColumnQuery())
@@ -102,12 +94,23 @@ final class PhabricatorProjectBoardReorderController
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
       ->setID($list_id)
-      ->setFlush(true)
-      ->setStackable(true);
+      ->setFlush(true);
 
     foreach ($columns as $column) {
+      // Don't allow milestone columns to be reordered.
+      $proxy = $column->getProxy();
+      if ($proxy && $proxy->isMilestone()) {
+        continue;
+      }
+
+      // At least for now, don't show subproject column.
+      if ($proxy) {
+        continue;
+      }
+
       $item = id(new PHUIObjectItemView())
-        ->setHeader($column->getDisplayName());
+        ->setHeader($column->getDisplayName())
+        ->addIcon($column->getHeaderIcon(), $column->getDisplayType());
 
       if ($column->isHidden()) {
         $item->setDisabled(true);
@@ -131,10 +134,14 @@ final class PhabricatorProjectBoardReorderController
         'reorderURI' => $reorder_uri,
       ));
 
+    $note = id(new PHUIInfoView())
+      ->appendChild(pht('Drag and drop columns to reorder them.'))
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
+
     return $this->newDialog()
       ->setTitle(pht('Reorder Columns'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendParagraph(pht('Drag and drop columns to reorder them.'))
+      ->appendChild($note)
       ->appendChild($list)
       ->addSubmitButton(pht('Done'));
   }

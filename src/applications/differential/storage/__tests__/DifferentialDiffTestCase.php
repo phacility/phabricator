@@ -1,18 +1,38 @@
 <?php
 
-final class DifferentialDiffTestCase extends ArcanistPhutilTestCase {
+final class DifferentialDiffTestCase extends PhutilTestCase {
 
   public function testDetectCopiedCode() {
-    $root = dirname(__FILE__).'/diff/';
-    $parser = new ArcanistDiffParser();
-
-    $diff = DifferentialDiff::newFromRawChanges(
-      $parser->parseDiff(Filesystem::readFile($root.'lint_engine.diff')));
-    $copies = idx(head($diff->getChangesets())->getMetadata(), 'copy:lines');
+    $copies = $this->detectCopiesIn('lint_engine.diff');
 
     $this->assertEqual(
       array_combine(range(237, 252), range(167, 182)),
       ipull($copies, 1));
+  }
+
+  public function testDetectCopiedOverlaidCode() {
+    $copies = $this->detectCopiesIn('copy_overlay.diff');
+
+    $this->assertEqual(
+      array(
+        7 => 22,
+        8 => 23,
+        9 => 24,
+        10 => 25,
+        11 => 26,
+        12 => 27,
+      ),
+      ipull($copies, 1));
+  }
+
+  private function detectCopiesIn($file) {
+    $root = dirname(__FILE__).'/diff/';
+    $parser = new ArcanistDiffParser();
+
+    $diff = DifferentialDiff::newFromRawChanges(
+      PhabricatorUser::getOmnipotentUser(),
+      $parser->parseDiff(Filesystem::readFile($root.$file)));
+    return idx(head($diff->getChangesets())->getMetadata(), 'copy:lines');
   }
 
   public function testDetectSlowCopiedCode() {
@@ -46,7 +66,9 @@ index 123457..0000000
 {$oblock}
 EODIFF;
 
-    $diff = DifferentialDiff::newFromRawChanges($parser->parseDiff($raw_diff));
+    $diff = DifferentialDiff::newFromRawChanges(
+      PhabricatorUser::getOmnipotentUser(),
+      $parser->parseDiff($raw_diff));
 
     $this->assertTrue(true);
   }

@@ -13,7 +13,8 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
       "(WARNING) Examine the table below for information on how password ".
       "hashes will be stored in the database.\n\n".
       "(NOTE) You can select a minimum password length by setting ".
-      "`account.minimum-password-length` in configuration.");
+      "`%s` in configuration.",
+      'account.minimum-password-length');
   }
 
   public function renderConfigurationFooter() {
@@ -94,7 +95,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   public function getDescriptionForCreate() {
@@ -135,9 +136,32 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     return $this->renderPasswordLoginForm($request);
   }
 
+  public function buildInviteForm(
+    PhabricatorAuthStartController $controller) {
+    $request = $controller->getRequest();
+    $viewer = $request->getViewer();
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->addHiddenInput('invite', true)
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Username'))
+          ->setName('username'));
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->setTitle(pht('Register an Account'))
+      ->appendForm($form)
+      ->setSubmitURI('/auth/register/')
+      ->addSubmitButton(pht('Continue'));
+
+    return $dialog;
+  }
+
   public function buildLinkForm(
     PhabricatorAuthLinkController $controller) {
-    throw new Exception("Password providers can't be linked.");
+    throw new Exception(pht("Password providers can't be linked."));
   }
 
   private function renderPasswordLoginForm(
@@ -182,8 +206,9 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
         $errors[] = pht('CAPTCHA was not entered correctly.');
       } else {
         $e_captcha = pht('Required');
-        $errors[] = pht('Too many login failures recently. You must '.
-                    'submit a CAPTCHA with your login request.');
+        $errors[] = pht(
+          'Too many login failures recently. You must '.
+          'submit a CAPTCHA with your login request.');
       }
     } else if ($request->isHTTPPost()) {
       // NOTE: This is intentionally vague so as not to disclose whether a
@@ -194,7 +219,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     }
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      $errors = id(new PHUIInfoView())->setErrors($errors);
     }
 
     $form = id(new PHUIFormLayoutView())
@@ -202,13 +227,13 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
       ->appendChild($errors)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Username or Email')
+          ->setLabel(pht('Username or Email'))
           ->setName('username')
           ->setValue($v_user)
           ->setError($e_user))
       ->appendChild(
         id(new AphrontFormPasswordControl())
-          ->setLabel('Password')
+          ->setLabel(pht('Password'))
           ->setName('password')
           ->setError($e_pass));
 

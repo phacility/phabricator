@@ -3,9 +3,8 @@
 final class PhabricatorMacroMemeDialogController
   extends PhabricatorMacroController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $phid = head($request->getArr('macro'));
     $above = $request->getStr('above');
@@ -19,7 +18,7 @@ final class PhabricatorMacroMemeDialogController
         $errors[] = pht('Macro name is required.');
       } else {
         $macro = id(new PhabricatorMacroQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withPHIDs(array($phid))
           ->executeOne();
         if (!$macro) {
@@ -44,8 +43,9 @@ final class PhabricatorMacroMemeDialogController
       }
     }
 
-    $view = id(new PHUIFormLayoutView())
-      ->appendChild(
+    $view = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Macro'))
           ->setName('macro')
@@ -64,11 +64,11 @@ final class PhabricatorMacroMemeDialogController
           ->setValue($below));
 
     $dialog = id(new AphrontDialogView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setTitle(pht('Create Meme'))
-      ->appendChild($view)
+      ->appendForm($view)
       ->addCancelButton('/')
-      ->addSubmitButton(pht('rofllolo!!~'));
+      ->addSubmitButton(pht('Llama Diorama'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

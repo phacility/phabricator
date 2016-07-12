@@ -3,7 +3,7 @@
 abstract class PhortuneCartController
   extends PhortuneController {
 
-  protected function buildCartContents(PhortuneCart $cart) {
+  protected function buildCartContentTable(PhortuneCart $cart) {
 
     $rows = array();
     foreach ($cart->getPurchases() as $purchase) {
@@ -39,9 +39,25 @@ abstract class PhortuneCartController
         'right',
       ));
 
+    return $table;
+  }
+
+  protected function renderCartDescription(PhortuneCart $cart) {
+    $description = $cart->getDescription();
+    if (!strlen($description)) {
+      return null;
+    }
+
+    $output = new PHUIRemarkupView($this->getViewer(), $description);
+
+    $box = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($output);
+
     return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Cart Contents'))
-      ->appendChild($table);
+      ->setHeaderText(pht('Description'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($box);
   }
 
 }

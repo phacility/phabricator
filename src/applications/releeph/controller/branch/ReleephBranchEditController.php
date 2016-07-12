@@ -2,15 +2,9 @@
 
 final class ReleephBranchEditController extends ReleephBranchController {
 
-  private $branchID;
-
-  public function willProcessRequest(array $data) {
-    $this->branchID = $data['branchID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('branchID');
 
     $branch = id(new ReleephBranchQuery())
       ->setViewer($viewer)
@@ -19,7 +13,7 @@ final class ReleephBranchEditController extends ReleephBranchController {
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->branchID))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$branch) {
       return new Aphront404Response();
@@ -40,8 +34,7 @@ final class ReleephBranchEditController extends ReleephBranchController {
               $symbolic_name);
 
       $branch->openTransaction();
-      $branch
-        ->setSymbolicName($symbolic_name);
+      $branch->setSymbolicName($symbolic_name);
 
       if ($existing_with_same_symbolic_name) {
         $existing_with_same_symbolic_name
@@ -85,31 +78,37 @@ final class ReleephBranchEditController extends ReleephBranchController {
           ->setLabel(pht('Symbolic Name'))
           ->setName('symbolicName')
           ->setValue($symbolic_name)
-          ->setCaption(pht('Mutable alternate name, for easy reference, '.
-              '(e.g. "LATEST")')))
+          ->setCaption(pht(
+            'Mutable alternate name, for easy reference, (e.g. "LATEST")')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($this->getBranchViewURI($branch))
           ->setValue(pht('Save Branch')));
 
     $title = pht(
-      'Edit Branch %s',
+      'Edit Branch: %s',
       $branch->getDisplayNameWithDetail());
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Branch'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Edit'));
+    $crumbs->setBorder(true);
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->appendChild($form);
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Branch'))
+      ->setHeaderIcon('fa-pencil');
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 }

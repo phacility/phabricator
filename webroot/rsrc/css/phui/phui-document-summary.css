@@ -1,0 +1,54 @@
+/**
+ * @provides phui-document-summary-view-css
+ */
+
+.phui-document-summary-view {
+  margin-top: 8px;
+  border-bottom: 1px solid rgba({$alphagrey},.1);
+}
+
+.phui-document-summary-view.is-draft {
+  opacity: 0.5;
+}
+
+body .phui-document-view .phui-document-summary-view h2.remarkup-header {
+  margin: 0;
+  padding: 0;
+}
+
+.phui-document-summary-view h2.remarkup-header a {
+  color: #000;
+}
+
+.phui-document-summary-view h2.remarkup-header a:hover {
+  color: {$violet};
+  text-decoration: none;
+}
+
+.phui-document-view .phui-document-summary-body div.phabricator-remarkup {
+  padding-bottom: 4px;
+}
+
+a.phui-document-read-more {
+  color: {$lightgreytext};
+  font-size: {$smallerfontsize};
+  display: block;
+  padding-bottom: 12px;
+}
+
+a.phui-document-read-more:hover {
+  color: {$violet};
+}
+
+.phui-document-summary-subtitle {
+  color: {$lightgreytext};
+  font-size: {$normalfontsize};
+}
+
+.phui-document-summary-subtitle a {
+  color: {$darkbluetext};
+}
+
+.phui-document-summary-subtitle a:hover {
+  color: {$violet};
+}

@@ -1,0 +1,191 @@
+@title Managing Storage Adjustments
+@group config
+
+Explains how to apply storage adjustments to the MySQL schemata.
+
+Overview
+========
+
+Phabricator uses a workflow called //storage adjustment// to make some minor
+kinds of changes to the MySQL schema. This workflow compliments the //storage
+upgrade// workflow, which makes major changes.
+
+You can perform storage adjustment by running:
+
+  phabricator/ $ ./bin/storage adjust
+
+This document describes what adjustments are, how they relate to storage
+upgrades, how to perform them, and how to troubleshoot issues with storage
+adjustment.
+
+
+Understanding Adjustments
+===================
+
+Storage adjustments make minor changes to the Phabricator MySQL schemata to
+improve consistency, unicode handling, and performance. Changes covered by
+adjustment include:
+
+  - Character set and collation settings for columns, tables, and databases.
+  - Setting and removing "Auto Increment" on columns.
+  - Adding, removing, renaming and adjusting keys.
+
+Adjustment does not make major changes to the schemata, like creating or
+removing columns or tables or migrating data. (Major changes are performed by
+the upgrade workflow.)
+
+Adjustments are separate from upgrades primarily because adjustments depend on
+the MySQL version, while upgrades do not. If you update MySQL, better collations
+may become available, and the adjustment workflow will convert your schemata to
+use them.
+
+All changes covered by adjustment are minor, and technically optional. However,
+you are strongly encouraged to apply outstanding adjustments: if you do not,
+you may encounter issues storing or sorting some unicode data, and may suffer
+poor performance on some queries.
+
+
+Reviewing Outstanding Adjustments
+=================================
+
+There are two ways to review outstanding adjustments: you can use the web UI,
+or you can use the CLI.
+
+To access the web UI, navigate to {nav Config > Database Status} or
+{nav Config > Database Issues}. The //Database Status// panel provides a general
+overview of all schemata. The //Database Issues// panel shows outstanding
+issues.
+
+These interfaces report //Errors//, which are serious issues that can not be
+resolved through adjustment, and //Warnings//, which are minor issues that the
+adjustment workflow can resolve.
+
+You can also review adjustments from the CLI, by running:
+
+  phabricator/ $ ./bin/storage adjust
+
+Before you're prompted to actually apply adjustments, you'll be given a list of
+available adjustments. You can then make a choice to apply them.
+
+
+Performing Adjustments
+======================
+
+To perform adjustments, run the `adjust` workflow:
+
+  phabricator/ $ ./bin/storage adjust
+
+For details about flags, use:
+
+  phabricator/ $ ./bin/storage help adjust
+
+You do not normally need to run this workflow manually: it will be run
+automatically after you run the `upgrade` workflow.
+
+
+History and Rationale
+=====================
+
+The primary motivation for the adjustment workflow is MySQL's handling of
+unicode character sets. Before MySQL 5.5, MySQL supports a character set called
+`utf8`. However, this character set can not store 4-byte unicode characters
+(including emoji). Inserting 4-byte characters into a `utf8` column truncates
+the data.
+
+With MySQL 5.5, a new `utf8mb4` character set was introduced. This character
+set can safely store 4-byte unicode characters.
+
+The adjustment workflow allows us to alter the schema to primarily use
+`binary` character sets on older MySQL, and primarily use `utf8mb4` character
+sets on newer MySQL. The net effect is that Phabricator works consistently and
+can store 4-byte unicode characters regardless of the MySQL version. Under
+newer MySQL, we can also take advantage of the better collation rules the
+`utf8mb4` character set offers.
+
+The adjustment workflow was introduced in November 2014. If your install
+predates its introduction, your first adjustment may take a long time (we must
+convert all of the data out of `utf8` and into the appropriate character set).
+If your install was set up after November 2014, adjustments should generally
+be very minor and complete quickly, unless you perform a major MySQL update and
+make new character sets available.
+
+If you plan to update MySQL from an older version to 5.5 or newer, it is
+advisable to update first, then run the adjustment workflow. If you adjust
+first, you'll need to adjust again after updating, so you'll end up spending
+twice as much time performing schemata adjustments.
+
+
+Troubleshooting
+===============
+
+When you apply adjustments, some adjustments may fail. Some of the most common
+errors you may encounter are:
+
+  - **#1406 Data Too Long**: Usually this is caused by a very long object name
+    (like a task title) which contains multibyte unicode characters. When the
+    column type is converted to `binary`, only the first part of the title still
+    fits in the column. Depending on what is failing, you may be able to find
+    the relevant object in the web UI and retitle it so the adjustment succeeds.
+    Alternatively, you can use `--unsafe` to force the adjustment to truncate
+    the title. This will destroy some data, but usually the data is not
+    important (just the end of very long titles).
+  - **#1366 Incorrect String Value**: This can occur when converting invalid
+    or truncated multibyte unicode characters to a unicode character set.
+    In both cases, the old value can not be represented under the new character
+    set. You may be able to identify the object and edit it to allow the
+    adjustment to proceed, or you can use the `--unsafe` flag to truncate the
+    data at the invalid character. Usually, the truncated data is not important.
+
+As with most commands, you can add the `--trace` flag to get more details about
+what `bin/storage adjust` is doing. This may help you diagnose or understand any
+issues you encounter, and this data is useful if you file reports in the
+upstream.
+
+In general, adjustments are not critical. If you run into issues applying
+adjustments, it is safe to file a task in the upstream describing the problem
+you've encountered and continue using Phabricator normally until the issue can
+be resolved.
+
+Surplus Schemata
+================
+
+After performing adjustment, you may receive an error that a table or column is
+"Surplus". The error looks something like this:
+
+| Target | Error |
+| --- | --- |
+| phabricator_example.example_table | Surplus |
+
+Generally, "Surplus" means that Phabricator does not expect the table or column
+to exist. These surpluses usually exist because you (or someone else
+with database access) added the table or column manually. Rarely, they can
+also exist for other reasons. They are usually safe to delete, but because
+deleting them destroys data and Phabricator can not be sure that the table or
+column doesn't have anything important in it, it does not delete them
+automatically.
+
+If you recognize the schema causing the issue as something you added and you
+don't need it anymore, you can safely delete it. If you aren't sure whether
+you added it or not, you can move the data somewhere else and delete it later.
+
+To move a table, first create a database for it like `my_backups`. Then, rename
+the table to move it into that database (use the table name given in the error
+message):
+
+```lang=sql
+CREATE DATABASE my_backups;
+RENAME TABLE phabricator_example.example_table
+  TO my_backups.example_table;
+```
+
+Phabricator will ignore tables that aren't in databases it owns, so you can
+safely move anything you aren't sure about outside of the Phabricator databases.
+
+If you're sure you don't need a table, use `DROP TABLE` to destroy it,
+specifying the correct table name (the one given in the error message):
+
+```lang=sql
+DROP TABLE phabricator_example.example_table;
+```
+
+This will destroy the table permanently.

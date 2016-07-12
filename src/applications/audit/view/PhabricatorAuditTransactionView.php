@@ -72,7 +72,7 @@ final class PhabricatorAuditTransactionView
           $inlines[] = $xaction;
           break;
         default:
-          throw new Exception('Unknown grouped transaction type!');
+          throw new Exception(pht('Unknown grouped transaction type!'));
       }
     }
 

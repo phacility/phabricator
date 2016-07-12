@@ -3,17 +3,11 @@
 final class PhabricatorProjectColumnHideController
   extends PhabricatorProjectBoardController {
 
-  private $id;
-  private $projectID;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $project_id = $request->getURIData('projectID');
 
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
       ->requireCapabilities(
@@ -21,7 +15,7 @@ final class PhabricatorProjectColumnHideController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($project_id))
       ->executeOne();
 
     if (!$project) {
@@ -31,7 +25,7 @@ final class PhabricatorProjectColumnHideController
 
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -44,7 +38,7 @@ final class PhabricatorProjectColumnHideController
 
     $column_phid = $column->getPHID();
 
-    $view_uri = $this->getApplicationURI('/board/'.$this->projectID.'/');
+    $view_uri = $this->getApplicationURI('/board/'.$project_id.'/');
     $view_uri = new PhutilURI($view_uri);
     foreach ($request->getPassthroughRequestData() as $key => $value) {
       $view_uri->setQueryParam($key, $value);
@@ -58,41 +52,81 @@ final class PhabricatorProjectColumnHideController
         ->addCancelButton($view_uri, pht('Okay'));
     }
 
+    $proxy = $column->getProxy();
+
     if ($request->isFormPost()) {
-      if ($column->isHidden()) {
-        $new_status = PhabricatorProjectColumn::STATUS_ACTIVE;
+      if ($proxy) {
+        if ($proxy->isArchived()) {
+          $new_status = PhabricatorProjectStatus::STATUS_ACTIVE;
+        } else {
+          $new_status = PhabricatorProjectStatus::STATUS_ARCHIVED;
+        }
+
+        $xactions = array();
+
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_STATUS)
+          ->setNewValue($new_status);
+
+        id(new PhabricatorProjectTransactionEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true)
+          ->applyTransactions($proxy, $xactions);
       } else {
-        $new_status = PhabricatorProjectColumn::STATUS_HIDDEN;
+        if ($column->isHidden()) {
+          $new_status = PhabricatorProjectColumn::STATUS_ACTIVE;
+        } else {
+          $new_status = PhabricatorProjectColumn::STATUS_HIDDEN;
+        }
+
+        $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
+        $xactions = array(
+          id(new PhabricatorProjectColumnTransaction())
+            ->setTransactionType($type_status)
+            ->setNewValue($new_status),
+        );
+
+        $editor = id(new PhabricatorProjectColumnTransactionEditor())
+          ->setActor($viewer)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true)
+          ->setContentSourceFromRequest($request)
+          ->applyTransactions($column, $xactions);
       }
-
-      $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
-      $xactions = array(id(new PhabricatorProjectColumnTransaction())
-        ->setTransactionType($type_status)
-        ->setNewValue($new_status),
-      );
-
-      $editor = id(new PhabricatorProjectColumnTransactionEditor())
-        ->setActor($viewer)
-        ->setContinueOnNoEffect(true)
-        ->setContentSourceFromRequest($request)
-        ->applyTransactions($column, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($view_uri);
     }
 
-    if ($column->isHidden()) {
-      $title = pht('Show Column');
+    if ($proxy) {
+      if ($column->isHidden()) {
+        $title = pht('Activate and Show Column');
+        $body = pht(
+          'This column is hidden because it represents an archived '.
+          'subproject. Do you want to activate the subproject so the '.
+          'column is visible again?');
+        $button = pht('Activate Subproject');
+      } else {
+        $title = pht('Archive and Hide Column');
+        $body = pht(
+          'This column is visible because it represents an active '.
+          'subproject. Do you want to hide the column by archiving the '.
+          'subproject?');
+        $button = pht('Archive Subproject');
+      }
     } else {
-      $title = pht('Hide Column');
-    }
-
-    if ($column->isHidden()) {
-      $body = pht(
-        'Are you sure you want to show this column?');
-    } else {
-      $body = pht(
-        'Are you sure you want to hide this column? It will no longer '.
-        'appear on the workboard.');
+      if ($column->isHidden()) {
+        $title = pht('Show Column');
+        $body = pht('Are you sure you want to show this column?');
+        $button = pht('Show Column');
+      } else {
+        $title = pht('Hide Column');
+        $body = pht(
+          'Are you sure you want to hide this column? It will no longer '.
+          'appear on the workboard.');
+        $button = pht('Hide Column');
+      }
     }
 
     $dialog = $this->newDialog()
@@ -101,7 +135,7 @@ final class PhabricatorProjectColumnHideController
       ->appendChild($body)
       ->setDisableWorkflowOnCancel(true)
       ->addCancelButton($view_uri)
-      ->addSubmitButton($title);
+      ->addSubmitButton($button);
 
     foreach ($request->getPassthroughRequestData() as $key => $value) {
       $dialog->addHiddenInput($key, $value);

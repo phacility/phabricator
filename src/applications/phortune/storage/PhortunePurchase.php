@@ -31,12 +31,13 @@ final class PhortunePurchase extends PhortuneDAO
     return id(new PhortunePurchase())
       ->setAuthorPHID($actor->getPHID())
       ->setProductPHID($product->getPHID())
+      ->attachProduct($product)
       ->setQuantity(1)
       ->setStatus(self::STATUS_PENDING)
       ->setBasePriceAsCurrency($product->getPriceAsCurrency());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -86,8 +87,19 @@ final class PhortunePurchase extends PhortuneDAO
     return $this->getProduct()->getPurchaseName($this);
   }
 
+  public function getURI() {
+    return $this->getProduct()->getPurchaseURI($this);
+  }
+
   public function getTotalPriceAsCurrency() {
-    return $this->getBasePriceAsCurrency();
+    $base = $this->getBasePriceAsCurrency();
+
+    $price = PhortuneCurrency::newEmptyCurrency();
+    for ($ii = 0; $ii < $this->getQuantity(); $ii++) {
+      $price = $price->add($base);
+    }
+
+    return $price;
   }
 
   public function getMetadataValue($key, $default = null) {

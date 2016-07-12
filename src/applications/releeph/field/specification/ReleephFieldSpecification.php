@@ -48,8 +48,7 @@ abstract class ReleephFieldSpecification
        * Storage keys are reused for form controls, and periods in form control
        * names break HTML forms.
        */
-      throw new Exception(
-        "You can't use '.' in storage keys!");
+      throw new Exception(pht("You can't use '%s' in storage keys!", '.'));
     }
     return $key;
   }
@@ -111,6 +110,7 @@ abstract class ReleephFieldSpecification
       $this->getRequiredStorageKey());
     $this->validate($value);
     $this->setValue($value);
+    return $this;
   }
 
 

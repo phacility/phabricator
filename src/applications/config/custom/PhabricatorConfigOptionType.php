@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorConfigOptionType {
+abstract class PhabricatorConfigOptionType extends Phobject {
 
   public function validateOption(PhabricatorConfigOption $option, $value) {
     return;
@@ -24,8 +24,7 @@ abstract class PhabricatorConfigOptionType {
     $value) {
 
     if (is_array($value)) {
-      $json = new PhutilJSON();
-      return $json->encodeFormatted($value);
+      return PhabricatorConfigJSON::prettyPrintJSON($value);
     } else {
       return $value;
     }

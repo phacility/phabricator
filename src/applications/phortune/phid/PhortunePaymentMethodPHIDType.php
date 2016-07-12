@@ -12,6 +12,10 @@ final class PhortunePaymentMethodPHIDType extends PhabricatorPHIDType {
     return new PhortunePaymentMethod();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
@@ -31,7 +35,6 @@ final class PhortunePaymentMethodPHIDType extends PhabricatorPHIDType {
       $id = $method->getID();
 
       $handle->setName($method->getFullDisplayName());
-      $handle->setURI("/phortune/method/{$id}/");
     }
   }
 

@@ -326,6 +326,18 @@ JX.install('Vector', {
       return new JX.$V(x, y);
     },
 
+
+    /**
+     * Get the sum of a node's position and its parent scroll offsets.
+     *
+     * @param   Node        Node to determine aggregate position for.
+     * @return  JX.Vector   New vector with aggregate position.
+     */
+    getPosWithScroll: function(node) {
+      return JX.$V(node).add(JX.Vector.getAggregateScrollForNode(node));
+    },
+
+
     /**
      * Determine the size of the viewport (basically, the browser window) by
      * building a new vector where the 'x' component corresponds to the width

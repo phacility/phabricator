@@ -9,13 +9,9 @@ final class PhabricatorDashboardViewController
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->id = $request->getURIData('id');
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
@@ -28,6 +24,7 @@ final class PhabricatorDashboardViewController
 
     $title = $dashboard->getName();
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(pht('Dashboard %d', $dashboard->getID()));
 
     if ($dashboard->getPanelPHIDs()) {
@@ -39,17 +36,13 @@ final class PhabricatorDashboardViewController
       $rendered_dashboard = $this->buildEmptyView();
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $rendered_dashboard,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($rendered_dashboard);
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $id = $this->id;
 
@@ -66,8 +59,8 @@ final class PhabricatorDashboardViewController
     $id = $this->id;
     $manage_uri = $this->getApplicationURI("manage/{$id}/");
 
-    return id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+    return id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
       ->appendChild(
         pht('This dashboard has no panels '.
           'yet. Use %s to add panels.',

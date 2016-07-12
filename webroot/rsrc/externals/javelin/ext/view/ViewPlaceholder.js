@@ -53,12 +53,12 @@
 
 
 
-JX.behavior('view-placeholder', function(config, statics) {
+JX.behavior('view-placeholder', function(config) {
   JX.ViewPlaceholder.register(config.trigger_id, config.id, function() {
     var replace = JX.$(config.id);
 
     var children = config.children;
-    if (typeof children === "string") {
+    if (typeof children === 'string') {
       children = JX.$H(children);
     }
 

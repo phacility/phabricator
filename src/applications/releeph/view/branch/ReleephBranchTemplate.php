@@ -1,8 +1,13 @@
 <?php
 
-final class ReleephBranchTemplate {
+final class ReleephBranchTemplate extends Phobject {
 
   const KEY = 'releeph.default-branch-template';
+
+  private $commitHandle;
+  private $branchDate = null;
+  private $projectName;
+  private $isSymbolic;
 
   public static function getDefaultTemplate() {
     return PhabricatorEnv::getEnvConfig(self::KEY);
@@ -11,7 +16,7 @@ final class ReleephBranchTemplate {
   public static function getRequiredDefaultTemplate() {
     $template = self::getDefaultTemplate();
     if (!$template) {
-      throw new Exception(sprintf(
+      throw new Exception(pht(
         "Config setting '%s' must be set, ".
         "or you must provide a branch-template for each project!",
         self::KEY));
@@ -19,23 +24,22 @@ final class ReleephBranchTemplate {
     return $template;
   }
 
-  public static function getFakeCommitHandleFor($arc_project_id) {
-    $arc_project = id(new PhabricatorRepositoryArcanistProject())
-      ->load($arc_project_id);
-    if (!$arc_project) {
-      throw new Exception(
-        "No Arc project found with id '{$arc_project_id}'!");
+  public static function getFakeCommitHandleFor(
+    $repository_phid,
+    PhabricatorUser $viewer) {
+
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($repository_phid))
+      ->executeOne();
+
+    $fake_handle = 'SOFAKE';
+    if ($repository) {
+      $fake_handle = id(new PhabricatorObjectHandle())
+        ->setName($repository->formatCommitName('100000000000'));
     }
-
-    $repository = $arc_project->loadRepository();
-    return id(new PhabricatorObjectHandle())
-      ->setName($repository->formatCommitName('100000000000'));
+    return $fake_handle;
   }
-
-  private $commitHandle;
-  private $branchDate = null;
-  private $projectName;
-  private $isSymbolic;
 
   public function setCommitHandle(PhabricatorObjectHandle $handle) {
     $this->commitHandle = $handle;
@@ -152,7 +156,7 @@ final class ReleephBranchTemplate {
     }
 
     if (!$is_symbolic && !$variable_interpolations) {
-      $errors[] = "Include additional interpolations that aren't static!";
+      $errors[] = pht("Include additional interpolations that aren't static!");
     }
 
     return array($name, $errors);
@@ -162,24 +166,27 @@ final class ReleephBranchTemplate {
     $errors = array();
 
     if (preg_match('{^/}', $name) || preg_match('{/$}', $name)) {
-      $errors[] = "Branches cannot begin or end with '/'";
+      $errors[] = pht("Branches cannot begin or end with '%s'", '/');
     }
 
     if (preg_match('{//+}', $name)) {
-      $errors[] = "Branches cannot contain multiple consective '/'";
+      $errors[] = pht("Branches cannot contain multiple consecutive '%s'", '/');
     }
 
     $parts = array_filter(explode('/', $name));
     foreach ($parts as $index => $part) {
       $part_error = null;
       if (preg_match('{^\.}', $part) || preg_match('{\.$}', $part)) {
-        $errors[] = "Path components cannot begin or end with '.'";
+        $errors[] = pht("Path components cannot begin or end with '%s'", '.');
       } else if (preg_match('{^(?!\w)}', $part)) {
-        $errors[] = 'Path components must begin with an alphanumeric';
+        $errors[] = pht('Path components must begin with an alphanumeric.');
       } else if (!preg_match('{^\w ([\w-_%\.]* [\w-_%])?$}x', $part)) {
-        $errors[] =
+        $errors[] = pht(
           "Path components may only contain alphanumerics ".
-          "or '-', '_', or '.'";
+          "or '%s', '%s' or '%s'.",
+          '-',
+          '_',
+          '.');
       }
     }
 

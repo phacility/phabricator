@@ -8,6 +8,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
   const ACTION_LOGIN_FULL     = 'login-full';
   const ACTION_LOGOUT         = 'logout';
   const ACTION_LOGIN_FAILURE  = 'login-fail';
+  const ACTION_LOGIN_LEGALPAD = 'login-legalpad';
   const ACTION_RESET_PASSWORD = 'reset-pass';
 
   const ACTION_CREATE         = 'create';
@@ -15,6 +16,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
 
   const ACTION_ADMIN          = 'admin';
   const ACTION_SYSTEM_AGENT   = 'system-agent';
+  const ACTION_MAILING_LIST   = 'mailing-list';
   const ACTION_DISABLE        = 'disable';
   const ACTION_APPROVE        = 'approve';
   const ACTION_DELETE         = 'delete';
@@ -26,6 +28,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
   const ACTION_EMAIL_REMOVE     = 'email-remove';
   const ACTION_EMAIL_ADD        = 'email-add';
   const ACTION_EMAIL_VERIFY     = 'email-verify';
+  const ACTION_EMAIL_REASSIGN   = 'email-reassign';
 
   const ACTION_CHANGE_PASSWORD  = 'change-password';
   const ACTION_CHANGE_USERNAME  = 'change-username';
@@ -52,12 +55,15 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
       self::ACTION_LOGIN_PARTIAL => pht('Login: Partial Login'),
       self::ACTION_LOGIN_FULL => pht('Login: Upgrade to Full'),
       self::ACTION_LOGIN_FAILURE => pht('Login: Failure'),
+      self::ACTION_LOGIN_LEGALPAD =>
+        pht('Login: Signed Required Legalpad Documents'),
       self::ACTION_LOGOUT => pht('Logout'),
       self::ACTION_RESET_PASSWORD => pht('Reset Password'),
       self::ACTION_CREATE => pht('Create Account'),
       self::ACTION_EDIT => pht('Edit Account'),
       self::ACTION_ADMIN => pht('Add/Remove Administrator'),
       self::ACTION_SYSTEM_AGENT => pht('Add/Remove System Agent'),
+      self::ACTION_MAILING_LIST => pht('Add/Remove Mailing List'),
       self::ACTION_DISABLE => pht('Enable/Disable'),
       self::ACTION_APPROVE => pht('Approve Registration'),
       self::ACTION_DELETE => pht('Delete User'),
@@ -69,6 +75,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
       self::ACTION_EMAIL_ADD => pht('Email: Add Address'),
       self::ACTION_EMAIL_REMOVE => pht('Email: Remove Address'),
       self::ACTION_EMAIL_VERIFY => pht('Email: Verify'),
+      self::ACTION_EMAIL_REASSIGN => pht('Email: Reassign'),
       self::ACTION_CHANGE_PASSWORD => pht('Change Password'),
       self::ACTION_CHANGE_USERNAME => pht('Change Username'),
       self::ACTION_ENTER_HISEC => pht('Hisec: Enter'),
@@ -82,8 +89,8 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
 
   public static function initializeNewLog(
     PhabricatorUser $actor = null,
-    $object_phid,
-    $action) {
+    $object_phid = null,
+    $action = null) {
 
     $log = new PhabricatorUserLog();
 
@@ -122,7 +129,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
     return parent::save();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'oldValue' => self::SERIALIZATION_JSON,

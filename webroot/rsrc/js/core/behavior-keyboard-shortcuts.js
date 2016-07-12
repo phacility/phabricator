@@ -11,10 +11,10 @@
  * Define global keyboard shortcuts.
  */
 JX.behavior('phabricator-keyboard-shortcuts', function(config) {
+  var pht = JX.phtize(config.pht);
   var workflow = null;
 
-  var desc = 'Show keyboard shortcut help for the current page.';
-  new JX.KeyboardShortcut('?', desc)
+  new JX.KeyboardShortcut('?', pht('?'))
     .setHandler(function(manager) {
       if (workflow) {
         // Already showing the dialog.
@@ -31,8 +31,7 @@ JX.behavior('phabricator-keyboard-shortcuts', function(config) {
     .register();
 
   if (config.searchID) {
-    desc = 'Give keyboard focus to the search box.';
-    new JX.KeyboardShortcut('/', desc)
+    new JX.KeyboardShortcut('/', pht('/'))
       .setHandler(function() {
         var search = JX.$(config.searchID);
         search.focus();
@@ -40,4 +39,5 @@ JX.behavior('phabricator-keyboard-shortcuts', function(config) {
       })
       .register();
   }
+
 });

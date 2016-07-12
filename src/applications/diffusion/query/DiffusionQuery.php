@@ -32,7 +32,7 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 
     $name = idx($map, $repository->getVersionControlSystem());
     if (!$name) {
-      throw new Exception('Unsupported VCS!');
+      throw new Exception(pht('Unsupported VCS!'));
     }
 
     $class = str_replace('Diffusion', 'Diffusion'.$name, $base_class);
@@ -53,21 +53,35 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $repository = $drequest->getRepository();
 
     $core_params = array(
-      'callsign' => $repository->getCallsign(),
+      'repository' => $repository->getPHID(),
     );
 
     if ($drequest->getBranch() !== null) {
       $core_params['branch'] = $drequest->getBranch();
     }
 
+    // If the method we're calling doesn't actually take some of the implicit
+    // parameters we derive from the DiffusionRequest, omit them.
+    $method_object = ConduitAPIMethod::getConduitMethod($method);
+    $method_params = $method_object->getParamTypes();
+    foreach ($core_params as $key => $value) {
+      if (empty($method_params[$key])) {
+        unset($core_params[$key]);
+      }
+    }
+
     $params = $params + $core_params;
 
-    return id(new ConduitCall(
-      $method,
-      $params
-    ))
-    ->setUser($user)
-    ->execute();
+    $client = $repository->newConduitClient(
+      $user,
+      $drequest->getIsClusterRequest());
+    if (!$client) {
+      return id(new ConduitCall($method, $params))
+        ->setUser($user)
+        ->execute();
+    } else {
+      return $client->callMethodSynchronous($method, $params);
+    }
   }
 
   public function execute() {

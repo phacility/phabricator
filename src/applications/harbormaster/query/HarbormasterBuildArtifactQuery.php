@@ -6,9 +6,10 @@ final class HarbormasterBuildArtifactQuery
   private $ids;
   private $buildTargetPHIDs;
   private $artifactTypes;
-  private $artifactKeys;
+  private $artifactIndexes;
   private $keyBuildPHID;
   private $keyBuildGeneration;
+  private $isReleased;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -25,29 +26,22 @@ final class HarbormasterBuildArtifactQuery
     return $this;
   }
 
-  public function withArtifactKeys(
-    $build_phid,
-    $build_gen,
-    array $artifact_keys) {
-    $this->keyBuildPHID = $build_phid;
-    $this->keyBuildGeneration = $build_gen;
-    $this->artifactKeys = $artifact_keys;
+  public function withArtifactIndexes(array $artifact_indexes) {
+    $this->artifactIndexes = $artifact_indexes;
     return $this;
   }
 
+  public function withIsReleased($released) {
+    $this->isReleased = $released;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new HarbormasterBuildArtifact();
+  }
+
   protected function loadPage() {
-    $table = new HarbormasterBuildArtifact();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+    return $this->loadStandardPage($this->newResultObject());
   }
 
   protected function willFilterPage(array $page) {
@@ -75,46 +69,45 @@ final class HarbormasterBuildArtifactQuery
     return $page;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->buildTargetPHIDs) {
+    if ($this->buildTargetPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'buildTargetPHID IN (%Ls)',
         $this->buildTargetPHIDs);
     }
 
-    if ($this->artifactTypes) {
+    if ($this->artifactTypes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'artifactType in (%Ls)',
         $this->artifactTypes);
     }
 
-    if ($this->artifactKeys) {
-      $indexes = array();
-      foreach ($this->artifactKeys as $key) {
-        $indexes[] = PhabricatorHash::digestForIndex(
-          $this->keyBuildPHID.$this->keyBuildGeneration.$key);
-      }
-
+    if ($this->artifactIndexes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'artifactIndex IN (%Ls)',
-        $indexes);
+        $this->artifactIndexes);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->isReleased !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'isReleased = %d',
+        (int)$this->isReleased);
+    }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

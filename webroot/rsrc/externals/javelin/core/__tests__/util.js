@@ -29,7 +29,7 @@ describe('JX.isArray', function() {
 
   it('should identify an array from another context as an array', function() {
     var iframe = document.createElement('iframe');
-    var name = iframe.name = 'javelin-iframe-test';
+    iframe.name = 'javelin-iframe-test';
     iframe.style.display = 'none';
 
     document.body.insertBefore(iframe, document.body.firstChild);

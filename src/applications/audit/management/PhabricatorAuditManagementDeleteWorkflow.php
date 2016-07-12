@@ -3,55 +3,58 @@
 final class PhabricatorAuditManagementDeleteWorkflow
   extends PhabricatorAuditManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('delete')
       ->setExamples('**delete** [--dry-run] ...')
-      ->setSynopsis('Delete audit requests matching parameters.')
+      ->setSynopsis(pht('Delete audit requests matching parameters.'))
       ->setArguments(
         array(
           array(
             'name' => 'dry-run',
-            'help' => 'Show what would be deleted, but do not actually delete '.
-                      'anything.',
+            'help' => pht(
+              'Show what would be deleted, but do not actually delete '.
+              'anything.'),
           ),
           array(
             'name' => 'users',
             'param' => 'names',
-            'help' => 'Select only audits by a given list of users.',
+            'help' => pht('Select only audits by a given list of users.'),
           ),
           array(
             'name' => 'repositories',
             'param' => 'repos',
-            'help' => 'Select only audits in a given list of repositories.',
+            'help' => pht(
+              'Select only audits in a given list of repositories.'),
           ),
           array(
             'name' => 'commits',
             'param' => 'commits',
-            'help' => 'Select only audits for the given commits.',
+            'help' => pht('Select only audits for the given commits.'),
           ),
           array(
             'name' => 'min-commit-date',
             'param' => 'date',
-            'help' => 'Select only audits for commits on or after the given '.
-                      'date.',
+            'help' => pht(
+              'Select only audits for commits on or after the given date.'),
           ),
           array(
             'name' => 'max-commit-date',
             'param' => 'date',
-            'help' => 'Select only audits for commits on or before the given '.
-                      'date.',
+            'help' => pht(
+              'Select only audits for commits on or before the given date.'),
           ),
           array(
             'name' => 'status',
             'param' => 'status',
-            'help' => 'Select only audits in the given status. By default, '.
-                      'only open audits are selected.',
+            'help' => pht(
+              'Select only audits in the given status. By default, '.
+              'only open audits are selected.'),
           ),
           array(
             'name' => 'ids',
             'param' => 'ids',
-            'help' => 'Select only audits with the given IDs.',
+            'help' => pht('Select only audits with the given IDs.'),
           ),
         ));
   }
@@ -72,7 +75,7 @@ final class PhabricatorAuditManagementDeleteWorkflow
     $max_date = $this->loadDate($args->getArg('max-commit-date'));
     if ($min_date && $max_date && ($min_date > $max_date)) {
       throw new PhutilArgumentUsageException(
-        'Specified max date must come after specified min date.');
+        pht('Specified maximum date must come after specified minimum date.'));
     }
 
     $is_dry_run = $args->getArg('dry-run');
@@ -219,22 +222,23 @@ final class PhabricatorAuditManagementDeleteWorkflow
     return $list;
   }
 
-  private function loadRepos($callsigns) {
-    $callsigns = $this->parseList($callsigns);
-    if (!$callsigns) {
+  private function loadRepos($identifiers) {
+    $identifiers = $this->parseList($identifiers);
+    if (!$identifiers) {
       return null;
     }
 
-    $repos = id(new PhabricatorRepositoryQuery())
+    $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
-      ->withCallsigns($callsigns)
-      ->execute();
-    $repos = mpull($repos, null, 'getCallsign');
+      ->withIdentifiers($identifiers);
 
-    foreach ($callsigns as $sign) {
-      if (empty($repos[$sign])) {
+    $repos = $query->execute();
+
+    $map = $query->getIdentifierMap();
+    foreach ($identifiers as $identifier) {
+      if (empty($map[$identifier])) {
         throw new PhutilArgumentUsageException(
-          pht('No such repository with callsign "%s"!', $sign));
+          pht('No repository "%s" exists!', $identifier));
       }
     }
 
@@ -250,8 +254,9 @@ final class PhabricatorAuditManagementDeleteWorkflow
     if (!$epoch || $epoch < 1) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Unable to parse date "%s". Use a format like "2000-01-01".',
-          $date));
+          'Unable to parse date "%s". Use a format like "%s".',
+          $date,
+          '2000-01-01'));
     }
 
     return $epoch;

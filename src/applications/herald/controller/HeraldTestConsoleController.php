@@ -2,13 +2,8 @@
 
 final class HeraldTestConsoleController extends HeraldController {
 
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $request = $this->getRequest();
-
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
     $object_name = trim($request->getStr('object_name'));
 
     $e_name = true;
@@ -21,7 +16,7 @@ final class HeraldTestConsoleController extends HeraldController {
 
       if (!$errors) {
         $object = id(new PhabricatorObjectQuery())
-          ->setViewer($user)
+          ->setViewer($viewer)
           ->withNames(array($object_name))
           ->executeOne();
 
@@ -47,14 +42,23 @@ final class HeraldTestConsoleController extends HeraldController {
           } else if ($object instanceof PholioMock) {
             $adapter = id(new HeraldPholioMockAdapter())
               ->setMock($object);
+          } else if ($object instanceof PhrictionDocument) {
+            $adapter = id(new PhrictionDocumentHeraldAdapter())
+              ->setDocument($object);
+          } else if ($object instanceof PonderQuestion) {
+            $adapter = id(new HeraldPonderQuestionAdapter())
+              ->setQuestion($object);
+          } else if ($object instanceof PhabricatorMetaMTAMail) {
+            $adapter = id(new PhabricatorMailOutboundMailHeraldAdapter())
+              ->setObject($object);
           } else {
-            throw new Exception('Can not build adapter for object!');
+            throw new Exception(pht('Can not build adapter for object!'));
           }
 
           $adapter->setIsNewObject(false);
 
           $rules = id(new HeraldRuleQuery())
-            ->setViewer($user)
+            ->setViewer($viewer)
             ->withContentTypes(array($adapter->getAdapterContentType()))
             ->withDisabled(false)
             ->needConditionsAndActions(true)
@@ -77,7 +81,7 @@ final class HeraldTestConsoleController extends HeraldController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendRemarkupInstructions(
         pht(
         'Enter an object to test rules for, like a Diffusion commit (e.g., '.
@@ -94,23 +98,31 @@ final class HeraldTestConsoleController extends HeraldController {
           ->setValue(pht('Test Rules')));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Herald Test Console'))
       ->setFormErrors($errors)
       ->setForm($form);
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('test');
-    $nav->appendChild($box);
-
     $crumbs = id($this->buildApplicationCrumbs())
-      ->addTextCrumb(pht('Test Console'));
-    $nav->setCrumbs($crumbs);
+      ->addTextCrumb(pht('Test Console'))
+      ->setBorder(true);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Test Console'),
+    $title = pht('Test Console');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-desktop');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
+
   }
 
 }

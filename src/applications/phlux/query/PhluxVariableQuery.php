@@ -3,8 +3,14 @@
 final class PhluxVariableQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $keys;
   private $phids;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
@@ -31,38 +37,55 @@ final class PhluxVariableQuery
     return $table->loadAllFromArray($rows);
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
+    }
 
-    if ($this->keys) {
+    if ($this->keys !== null) {
       $where[] = qsprintf(
         $conn_r,
         'variableKey IN (%Ls)',
         $this->keys);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
     }
 
+    $where[] = $this->buildPagingClause($conn_r);
+
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    return 'variableKey';
+  protected function getDefaultOrderVector() {
+    return array('key');
   }
 
-  protected function getPagingValue($result) {
-    return $result->getVariableKey();
+  public function getOrderableColumns() {
+    return array(
+      'key' => array(
+        'column' => 'variableKey',
+        'type' => 'string',
+        'reverse' => true,
+        'unique' => true,
+      ),
+    );
   }
 
-  protected function getReversePaging() {
-    return true;
+  protected function getPagingValueMap($cursor, array $keys) {
+    $object = $this->loadCursorObject($cursor);
+    return array(
+      'key' => $object->getVariableKey(),
+    );
   }
 
   public function getQueryApplicationClass() {

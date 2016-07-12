@@ -1,0 +1,398 @@
+/**
+ * @provides phui-inline-comment-view-css
+ */
+
+.differential-diff td.anchor-target {
+  background: {$lightyellow};
+}
+
+/*  In the document, the anchor is positioned inside the inline comment, but
+    this makes the browser jump into the comment so the top isn't visible.
+    Instead, artificially position it a bit above the comment so we'll jump a
+    bit before the comment. This allows us to see the entire comment (and
+    generally the commented-on lines, at least in the case of one or two-line
+    comments) after the jump.
+*/
+.differential-inline-comment-anchor {
+  position: absolute;
+  display: block;
+  margin-top: -72px;
+}
+
+.differential-inline-comment-content {
+  overflow: auto;
+}
+
+.differential-inline-comment,
+.differential-inline-comment-edit {
+  background: #fff;
+  border: 1px solid {$sh-yellowborder};
+  font: {$basefont};
+  margin: 0;
+  width: 100%;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: normal;
+  border-radius: 3px;
+}
+
+.inline-state-is-draft {
+  border: 1px dashed {$greyborder};
+}
+
+.differential-inline-comment-head {
+  font-weight:  bold;
+  color: {$darkbluetext};
+  border-bottom: 1px solid {$sh-lightyellowborder};
+  padding: 4px 5px 4px 8px;
+  background-color: {$sh-yellowbackground};
+}
+
+.differential-inline-comment-content {
+  padding: 12px;
+}
+
+.inline-state-is-draft .differential-inline-comment-head {
+  border-bottom: 1px dashed {$lightgreyborder};
+  background-color: {$lightgreybackground};
+}
+
+/* Tighten up spacing on replies */
+.differential-inline-comment.inline-comment-is-reply {
+  margin-top: -12px;
+}
+
+.differential-inline-comment .inline-head-right {
+  float: right;
+  padding-right: 4px;
+}
+
+.differential-inline-comment .inline-head-right .button {
+  vertical-align: top;
+}
+
+.differential-inline-comment .inline-head-left {
+  float: left;
+  padding: 4px;
+}
+
+.device-phone .differential-inline-comment .inline-head-left {
+  float: none;
+}
+
+.device-phone .differential-inline-comment .inline-head-right {
+  margin: 12px 0 4px 4px;
+}
+
+.device-phone .differential-inline-comment .inline-head-right .mml {
+  margin: 0 4px 0 0;
+}
+
+
+/* - Sythetic Comment ---------------------------------------------------------
+
+  Comments left by our robot overlords.
+
+*/
+
+.differential-inline-comment.differential-inline-comment-synthetic {
+  border: 1px solid {$blue};
+}
+
+.differential-inline-comment.differential-inline-comment-synthetic
+  .differential-inline-comment-head {
+    border-bottom: 1px solid {$blueborder};
+    background-color: {$lightblue};
+}
+
+.differential-inline-comment.differential-inline-comment-synthetic
+  .differential-inline-comment-head {
+    padding-bottom: 4px;
+}
+
+/* - Ghost Comment ------------------------------------------------------------
+
+  Comments from older or newer versions of the changeset.
+
+*/
+
+.differential-inline-comment.inline-comment-ghost {
+  border: 1px solid {$lightgreyborder};
+  opacity: 0.75;
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .differential-inline-comment-head {
+    border-bottom: 1px solid {$lightgreyborder};
+    background-color: {$lightgreybackground};
+}
+
+/* - New/Edit Inline Comment --------------------------------------------------
+
+  Styles for when you are creating or editing an inline comment.
+
+*/
+
+.differential-inline-comment .done-label {
+  display: inline-block;
+  color: {$sh-yellowicon};
+  padding: 4px;
+}
+
+.differential-inline-comment.inline-state-is-draft .done-label,
+.differential-inline-comment.inline-comment-ghost .done-label {
+  color: {$lightgreytext};
+}
+
+/* - New/Edit Inline Comment --------------------------------------------------
+
+  Styles for when you are creating or editing an inline comment.
+
+*/
+
+.differential-inline-comment-edit-body .aphront-form-input {
+  margin: 0;
+  width: 100%;
+}
+
+.differential-inline-comment-edit {
+  padding: 8px;
+}
+
+.differential-inline-comment-edit-buttons {
+  padding: 8px 0 0 0;
+}
+
+.differential-inline-comment-edit-buttons button {
+  float: right;
+  margin-left: 6px;
+}
+
+.differential-inline-comment-edit-title {
+  font-weight: bold;
+  color: {$darkbluetext};
+  padding: 4px 0 12px;
+  font-size: {$biggerfontsize};
+}
+
+.differential-inline-comment-edit {
+  background-color: {$lightgreybackground};
+  border: 1px solid {$lightgreyborder};
+}
+
+.differential-inline-comment-edit .remarkup-assist-textarea {
+  border-left-color: {$lightgreyborder};
+  border-right-color: {$lightgreyborder};
+  border-bottom-color: {$greyborder};
+}
+
+.differential-inline-comment-edit .remarkup-assist-bar {
+  border-left-color: {$lightgreyborder};
+  border-right-color: {$lightgreyborder};
+  border-top-color: {$lightgreyborder};
+}
+
+.differential-inline-comment-edit .aphront-form-control-textarea {
+  padding: 0;
+}
+
+
+/* - Action Buttons -----------------------------------------------------------
+
+  Reply, Edit, Delete, View, Button Bars...
+
+*/
+
+.differential-inline-comment .differential-inline-done-label {
+  border-color: {$sh-yellowborder};
+  color: {$sh-yellowicon};
+}
+
+.differential-inline-comment.inline-state-is-draft
+  .differential-inline-done-label,
+.differential-inline-comment.inline-state-is-draft
+  .button.simple,
+.differential-inline-comment.inline-comment-ghost
+  .button.simple {
+  color: {$lightgreytext};
+}
+
+/* - Done Button --------------------------------------------------------------
+
+  Default colors, hovers, checked styles for the Done Button.
+
+*/
+
+.differential-inline-done-label {
+  border: 1px solid {$sh-yellowborder};
+  border-radius: 3px;
+  display: inline-block;
+  padding: 3px 8px 4px;
+  cursor: pointer;
+}
+
+.differential-inline-done-label .differential-inline-done {
+  margin: 0 6px 0 0;
+  display: inline;
+  cursor: pointer;
+}
+
+.differential-inline-comment.inline-is-done
+  .differential-inline-done-label {
+    background-color: #fff;
+    border-color: {$lightblueborder};
+    color: {$sky};
+    opacity: 1;
+}
+
+.device-desktop .differential-inline-comment.inline-is-done
+  .differential-inline-done-label:hover {
+    background-color: #fff;
+    color: {$sky};
+}
+
+.differential-inline-comment.inline-is-done .differential-inline-comment-head
+  .button-done {
+    color: {$sky};
+}
+
+
+/* - Inline Is Done -----------------------------------------------------------
+
+  Is Done for Diff Author = grey, for Diff Viewer = yellow.
+
+*/
+
+.differential-inline-comment.inline-is-done {
+  border-color: {$lightgreyborder};
+}
+
+.differential-inline-comment.inline-is-done
+   .differential-inline-comment-head {
+    background-color: {$lightgreybackground};
+    border-bottom-color: {$lightgreyborder};
+}
+
+.differential-inline-comment.inline-is-done .differential-inline-comment-head
+  .button.simple {
+    border-color: {$lightgreyborder};
+    color: {$lightgreytext};
+}
+
+.differential-inline-comment.inline-is-done .differential-inline-comment-head
+  .differential-inline-done-label {
+    color: {$sky};
+    background-color: #fff;
+    border-color: {$sky};
+}
+
+/* - Inline State is Draft ----------------------------------------------------
+
+  The Unsubmitted state of the comment / done checkbox styles.
+
+*/
+
+.differential-inline-comment .inline-draft-text {
+  display: none;
+}
+
+.differential-inline-comment.inline-state-is-draft .inline-draft-text {
+  display: inline-block;
+}
+
+.inline-state-is-draft .differential-inline-done-label {
+  border-style: dashed;
+}
+
+
+/* - Undo ---------------------------------------------------------------------
+
+  A wild undo box appears!
+
+*/
+
+.differential-inline-undo {
+  padding: 8px;
+  text-align: center;
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-yellowborder};
+  margin: 4px 0;
+  color: {$darkgreytext};
+  font: {$basefont};
+  font-size: {$normalfontsize};
+  border-radius: 3px;
+}
+
+.differential-inline-undo a {
+  font-weight: bold;
+}
+
+/* - Spooky Ghost UI -----------------------------------------------------------
+
+  Hide your codez.
+
+*/
+
+.inline-comment-ghost .differential-inline-comment-head {
+  padding-left: 40px;
+}
+
+.ghost-icon {
+  background: rgba({$alphagrey},.07);
+  float: left;
+  padding: 2px 4px 2px 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.ghost-icon .phui-icon-view {
+  padding: 8px 7px;
+  font-size: 16px;
+  color: {$lightbluetext};
+}
+
+.device-desktop .ghost-icon .phui-icon-view:hover {
+  color: {$fire};
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .differential-inline-comment-head {
+    position: relative;
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .differential-inline-done-label,
+.differential-inline-comment.inline-comment-ghost {
+    border-color: {$lightgreyborder};
+    color: {$lightgreytext};
+}
+
+
+/* - Hiding Inlines ------------------------------------------------------------
+*/
+
+.reveal-inlines {
+  float: left;
+  margin-left: 4px;
+  color: {$lightbluetext};
+}
+
+.reveal-inlines span.phui-icon-view {
+  color: {$lightbluetext};
+}
+
+.reveal-inlines:hover span.phui-icon-view {
+  color: {$darkbluetext};
+}
+
+.inline-button-divider {
+  border-left: 1px solid rgba({$alphagrey},.25);
+  margin-left: 8px;
+}
+
+.differential-inline-comment-synthetic .inline-button-divider {
+  border: none;
+}

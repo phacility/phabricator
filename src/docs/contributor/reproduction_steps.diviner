@@ -1,0 +1,252 @@
+@title Providing Reproduction Steps
+@group detail
+
+Describes how to provide reproduction steps.
+
+Overview
+========
+
+When you submit a bug report about Phabricator, you **MUST** include
+reproduction steps. We can not help you with bugs we can not reproduce, and
+will not accept reports which omit reproduction steps or have incomplete or
+insufficient instructions.
+
+This document explains what we're looking for in good reproduction steps.
+Briefly:
+
+  - Reproduction steps must allow us to reproduce the problem locally on a
+    clean, up-to-date install of Phabricator.
+  - Reproduction should be as simple as possible.
+
+Good reproduction steps can take time to write out clearly, simplify, and
+verify. As a reporter, we expect you to shoulder as much of this burden as you
+can, to make make it easy for us to reproduce and resolve bugs.
+
+We do not have the resources to pursue reports with limited, inaccurate, or
+incomplete reproduction steps, and will not accept them. These reports require
+large amounts of our time and are often fruitless.
+
+
+Example Reproduction Steps
+==========================
+
+Here's an example of what good reproduction steps might look like:
+
+---
+
+Reproduction steps:
+
+  - Click "Create Event" in Calendar.
+  - Fill in the required fields with any text (name, description, etc).
+  - Set an invalid time for one of the dates, like the meaningless string
+    "Tea Time". This is not valid, so we're expecting an error when we
+    submit the form.
+  - Click "Create" to save the event.
+
+Expected result:
+
+  - Form reloads with an error message about the specific mistake.
+  - All field values are retained.
+
+Actual result:
+
+  - Form reloads with an error message about the specific mistake.
+  - Most values are discarded, so I have to re-type the name, description, etc.
+
+---
+
+These steps are **complete** and **self-contained**: anyone can reproduce the
+issue by following these steps. These steps are **clear** and **easy to
+follow**. These steps are also simple and minimal: they don't include any
+extra unnecessary steps.
+
+Finally, these steps explain what the reporter expected to happen, what they
+observed, and how those behaviors differ. This isn't as important when the
+observation is an obvious error like an exception, but can be important if a
+behavior is merely odd or ambiguous.
+
+
+Reliable Reproduction
+=====================
+
+When you file a bug report, the first thing we do to fix it is to try to
+reproduce the problem locally on an up-to-date install of Phabricator. We will
+do this by following the steps you provide. If we can recreate the issue
+locally, we can almost always resolve the problem (often very promptly).
+
+However, many reports do not have enough information, are missing important
+steps, or rely on data (like commits, users, other projects, permission
+settings, feed stories, etc) that we don't have access to. We either can't
+follow these steps, or can't reproduce issues by following them.
+
+Reproduction steps must be complete and self-contained, and must allow
+**anyone** to reproduce the issue on a new, empty install of Phabricator. If
+the bug you're seeing depends on data or configuration which would not be
+present on a new install, you need to include that information in your steps.
+
+For example, if you're seeing an issue which depends on a particular policy
+setting or configuration setting, you need to include instructions for creating
+the policy or adjusting the setting in your steps.
+
+
+Getting Started
+===============
+
+To generate reproduction steps, first find a sequence of actions which
+reproduce the issue you're seeing reliably.
+
+Next, write down everything you did as clearly as possible. Make sure each step
+is self-contained: anyone should be able to follow your steps, without access
+to private or proprietary data.
+
+Now, to verify that your steps provide a complete, self-contained way to
+reproduce the issue, follow them yourself on a new, empty, up-to-date instance
+of Phabricator.
+
+If you can't easily start an empty instance locally, you can launch an empty
+instance on Phacility in about 60 seconds (see the "Resources" section for
+details).
+
+If you can follow your steps and reproduce the issue on a clean instance,
+we'll probably be able to follow them and reproduce the issue ourselves.
+
+If you can't follow your steps because they depend on information which is not
+available on a clean instance (for example, a certain config setting), rewrite
+them to include instrutions to create that information (for example, adjusting
+the config to the problematic value).
+
+If you follow your instructions but the issue does not reproduce, the issue
+might already be fixed. Make sure your install is up to date.
+
+If your install is up to date and the issue still doesn't reproduce on a clean
+install, your reproduction steps are missing important information. You need to
+figure out what key element differs between your install and the clean install.
+
+Once you have working reproduction steps, your steps may have details which
+aren't actually necessary to reproduce the issue. You may be able to simplify
+them by removing some steps or describing steps more narrowly. For help, see
+"Simplifying Steps" below.
+
+
+Resources
+=========
+
+We provide some resources which can make it easier to start building steps, or
+to simplify steps.
+
+**Phacility Test Instances**: You can launch a new, up-to-date instance of
+Phabricator on Phacility in about a minute at <https://admin.phacility.com>.
+These instances run `stable`.
+
+You can use these instances to make sure that issues haven't already been
+fixed, that they reproduce on a clean install, or that your steps are really
+complete, and that the root cause isn't custom code or local extensions. Using
+a test instance will avoid disrupting other users on your install.
+
+**Test Repositories**: There are several test repositories on
+`secure.phabricator.com` which you can push commits to if you need to build
+an example to demonstrate a problem.
+
+For example, if you're seeing an issue with a certain filename but the commit
+where the problem occurs is in a proprietary internal repository, push a commit
+that affects a file with a similar name to a test repository, then reproduce
+against the test data. This will allow you to generate steps which anyone can
+follow.
+
+
+Simplifying Steps
+=================
+
+If you aren't sure how to simplify reproduction steps, this section has some
+advice.
+
+In general, you'll simplify reproduction steps by first finding a scenario
+where the issue reproduces reliably (a "bad" case) and a second, similar
+situation where it does not reproduce (a "good" case). Once you have a "bad"
+case and a "good" case, you'll change the scenarios step-by-step to be more
+similar to each other, until you have two scenarios which differ only a very
+small amount. This remaining difference usually points clearly at the root
+cause of the issue.
+
+For example, suppose you notice that you get an error if you commit a file
+named `A Banana.doc`, but not if you commit a file named `readme.md`. In
+this case, `A Banana.doc` is your "bad" case and `readme.md` is your "good"
+case.
+
+There are several differences between these file names, and any of them might
+be causing the problem. To narrow this down, you can try making the scenarios
+more similar. For example, do these files work?
+
+  - `A_Banana.doc` - Problem with spaces?
+  - `A Banana.md` - File extension issue?
+  - `A Ban.doc` - Path length issue?
+  - `a banana.doc` - Issue with letter case?
+
+Some of these probably work, while others might not. These could lead you to a
+smaller case which reproduces the problem, which might be something like this:
+
+  - Files like `a b`, which contain spaces, do not work.
+  - Files like `a.doc`, which have the `.doc` extension, do not work.
+  - Files like `AAAAAAAAAA`, which have more than 9 letters, do not work.
+  - Files like `A`, which have uppercase letters, do not work.
+
+With a simpler reproduction scenario, you can simplify your steps to be more
+tailored and mimimal. This will help us pointpoint the issue more quickly and
+be more certain that we've understood and resolved it.
+
+It is more important that steps be complete than that they be simple, and it's
+acceptable to submit complex instructions if you have difficulty simplifying
+them, so long as they are complete, self-contained, and accurately reproduce
+the issue.
+
+
+Things to Avoid
+===============
+
+These are common mistakes when providing reproduction instructions:
+
+**Insufficient Information**: The most common issue we see is instructions
+which do not have enough information: they are missing critical details which
+are necessary in order to follow them on a clean install.
+
+**Inaccurate Steps**: The second most common issue we see is instructions
+which do not actually reproduce a problem when followed on a clean, up-to-date
+install. Verify your steps by testing them.
+
+**Private Information**: Some users provide reports which hinge on the
+particulars of private commits in proprietary repositories we can not access.
+This is not useful, because we can not examine the underlying commit to figure
+out why it is causing an issue.
+
+Instead, reproduce the issue in a public repository. There are several test
+repositories available which you can push commits to in order to construct a
+reproduction case.
+
+**Screenshots**: Screenshots can be helpful to explain a set of steps or show
+what you're seeing, but they usually aren't sufficient on their own because
+they don't contain all the information we need to reproduce them.
+
+For example, a screenshot may show a particular policy or object, but not have
+enough information for us rebuild a similar object locally.
+
+
+Alternatives
+============
+
+If you have an issue which you can't build reproduction steps for, or which
+only reproduces in your environment, or which you don't want to narrow down
+to a minimal reproduction case, we can't accept it as a bug report. These
+issues are tremendously time consuming for us to pursue and rarely benefit
+more than one install.
+
+If the issue is important but falls outside the scope of permissible bug
+reports, we're happy to provide more tailored support at consulting rates. See
+[[ https://secure.phabricator.com/w/consulting/ | Consulting ]] for details.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Contributing Bug Reports}.

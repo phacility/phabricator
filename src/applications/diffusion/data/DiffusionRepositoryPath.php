@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionRepositoryPath {
+final class DiffusionRepositoryPath extends Phobject {
 
   private $fullPath;
   private $path;

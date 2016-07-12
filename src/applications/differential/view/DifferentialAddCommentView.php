@@ -10,7 +10,7 @@ final class DifferentialAddCommentView extends AphrontView {
   private $ccs = array();
   private $errorView;
 
-  public function setErrorView(AphrontErrorView $error_view) {
+  public function setInfoView(PHUIInfoView $error_view) {
     $this->errorView = $error_view;
     return $this;
   }
@@ -50,6 +50,7 @@ final class DifferentialAddCommentView extends AphrontView {
   }
 
   public function render() {
+    $viewer = $this->getViewer();
 
     $this->requireResource('differential-revision-add-comment-css');
     $revision = $this->revision;
@@ -69,10 +70,15 @@ final class DifferentialAddCommentView extends AphrontView {
       'resign' => pht('Suggest Reviewers'),
     );
 
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+
+    // TODO: This should be a reviewers datasource, but it's a mess.
+    $reviewer_source = new PhabricatorMetaMTAMailableDatasource();
+
     $form = new AphrontFormView();
     $form
       ->setWorkflow(true)
-      ->setUser($this->user)
+      ->setViewer($viewer)
       ->setAction($this->actionURI)
       ->addHiddenInput('revision_id', $revision->getID())
       ->appendChild(
@@ -89,7 +95,7 @@ final class DifferentialAddCommentView extends AphrontView {
           $pci_compliance,
           pht('I Have evaluated this review against OWASP Top 10'),
           true))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel($enable_reviewers ? $add_reviewers_labels[$action] :
             $add_reviewers_labels['add_reviewers'])
@@ -97,28 +103,27 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setControlID('add-reviewers')
           ->setControlStyle($enable_reviewers ? null : 'display: none')
           ->setID('add-reviewers-tokenizer')
-          ->setDisableBehavior(true))
-      ->appendChild(
+          ->setDisableBehavior(true)
+          ->setDatasource($reviewer_source))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Add Subscribers'))
           ->setName('ccs')
           ->setControlID('add-ccs')
           ->setControlStyle($enable_ccs ? null : 'display: none')
           ->setID('add-ccs-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($mailable_source))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('comment')
           ->setID('comment-content')
           ->setLabel(pht('Comment'))
           ->setValue($this->draft ? $this->draft->getDraft() : null)
-          ->setUser($this->user))
+          ->setViewer($viewer))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Submit')));
-
-    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $reviewer_source = new PhabricatorProjectOrUserDatasource();
 
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',
@@ -169,7 +174,7 @@ final class DifferentialAddCommentView extends AphrontView {
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $header_text = $is_serious
       ? pht('Add Comment')
-      : pht('Leap Into Action');
+      : pht('Leap Into Action!');
 
     $header = id(new PHUIHeaderView())
       ->setHeader($header_text);
@@ -197,7 +202,7 @@ final class DifferentialAddCommentView extends AphrontView {
       ->appendChild($form);
 
     if ($this->errorView) {
-      $comment_box->setErrorView($this->errorView);
+      $comment_box->setInfoView($this->errorView);
     }
 
     return array($comment_box, $preview);

@@ -3,10 +3,10 @@
 final class PhabricatorFilesManagementEnginesWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('engines')
-      ->setSynopsis('List available storage engines.')
+      ->setSynopsis(pht('List available storage engines.'))
       ->setArguments(array());
   }
 
@@ -15,7 +15,7 @@ final class PhabricatorFilesManagementEnginesWorkflow
 
     $engines = PhabricatorFile::buildAllEngines();
     if (!$engines) {
-      throw new Exception('No storage engines are available.');
+      throw new Exception(pht('No storage engines are available.'));
     }
 
     foreach ($engines as $engine) {

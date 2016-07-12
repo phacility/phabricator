@@ -6,24 +6,23 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+ public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request);
 
     $tokens_given = id(new PhabricatorTokenGivenQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->executeWithCursorPager($pager);
 
     $handles = array();
     if ($tokens_given) {
       $object_phids = mpull($tokens_given, 'getObjectPHID');
-      $user_phids = mpull($tokens_given, 'getAuthorPHID');
-      $handle_phids = array_merge($object_phids, $user_phids);
+      $viewer_phids = mpull($tokens_given, 'getAuthorPHID');
+      $handle_phids = array_merge($object_phids, $viewer_phids);
       $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withPHIDs($handle_phids)
         ->execute();
     }
@@ -32,7 +31,7 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
     if ($tokens_given) {
       $token_phids = mpull($tokens_given, 'getTokenPHID');
       $tokens = id(new PhabricatorTokenQuery())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->withPHIDs($token_phids)
         ->execute();
       $tokens = mpull($tokens, null, 'getPHID');
@@ -53,13 +52,15 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
         pht(
           'Given by %s on %s',
           $handles[$token_given->getAuthorPHID()]->renderLink(),
-          phabricator_date($token_given->getDateCreated(), $user)));
+          phabricator_date($token_given->getDateCreated(), $viewer)));
 
       $list->addItem($item);
     }
-    $list->setPager($pager);
-
     $title = pht('Tokens Given');
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->setObjectList($list);
 
     $nav = $this->buildSideNav();
     $nav->setCrumbs(
@@ -67,14 +68,13 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
         ->addTextCrumb($title));
     $nav->selectFilter('given/');
 
-    $nav->appendChild($list);
+    $nav->appendChild($box);
+    $nav->appendChild($pager);
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->appendChild($nav);
+
   }
-
 
 }

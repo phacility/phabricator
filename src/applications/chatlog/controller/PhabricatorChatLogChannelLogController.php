@@ -3,19 +3,13 @@
 final class PhabricatorChatLogChannelLogController
   extends PhabricatorChatLogController {
 
-  private $channelID;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->channelID = $data['channelID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('channelID');
 
     $uri = clone $request->getRequestURI();
     $uri->setQueryParams(array());
@@ -25,13 +19,13 @@ final class PhabricatorChatLogChannelLogController
     $pager->setPageSize(250);
 
     $query = id(new PhabricatorChatLogQuery())
-      ->setViewer($user)
-      ->withChannelIDs(array($this->channelID));
+      ->setViewer($viewer)
+      ->withChannelIDs(array($id));
 
     $channel = id(new PhabricatorChatLogChannelQuery())
-              ->setViewer($user)
-              ->withIDs(array($this->channelID))
-              ->executeOne();
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->executeOne();
 
     if (!$channel) {
       return new Aphront404Response();
@@ -115,7 +109,7 @@ final class PhabricatorChatLogChannelLogController
 
       $href = $uri->alter('at', $block['id']);
       $timestamp = $block['epoch'];
-      $timestamp = phabricator_datetime($timestamp, $user);
+      $timestamp = phabricator_datetime($timestamp, $viewer);
       $timestamp = phutil_tag(
         'a',
           array(
@@ -179,11 +173,6 @@ final class PhabricatorChatLogChannelLogController
         pht('Older')." \xE2\x80\xBA");
     }
 
-    $pager_top = phutil_tag(
-      'div',
-      array('class' => 'phabricator-chat-log-pager-top'),
-      $links);
-
     $pager_bottom = phutil_tag(
       'div',
       array('class' => 'phabricator-chat-log-pager-bottom'),
@@ -194,7 +183,7 @@ final class PhabricatorChatLogChannelLogController
       ->addTextCrumb($channel->getChannelName(), $uri);
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setMethod('GET')
       ->setAction($uri)
       ->appendChild(
@@ -205,9 +194,6 @@ final class PhabricatorChatLogChannelLogController
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Jump')));
-
-    $filter = new AphrontListFilterView();
-    $filter->appendChild($form);
 
     $table = phutil_tag(
       'table',
@@ -223,19 +209,11 @@ final class PhabricatorChatLogChannelLogController
         ),
         $table);
 
-    $jump_link = phutil_tag(
-      'a',
-        array(
-          'href' => '#latest',
-        ),
-        pht('Jump to Bottom')." \xE2\x96\xBE");
-
-    $jump = phutil_tag(
-      'div',
-        array(
-          'class' => 'phabricator-chat-log-jump',
-        ),
-        $jump_link);
+    $jump_link = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setHref('#latest')
+      ->setText(pht('Jump to Bottom'))
+      ->setIcon('fa-arrow-circle-down');
 
     $jump_target = phutil_tag(
       'div',
@@ -249,22 +227,32 @@ final class PhabricatorChatLogChannelLogController
           'class' => 'phabricator-chat-log-wrap',
         ),
         array(
-          $jump,
-          $pager_top,
           $log,
           $jump_target,
           $pager_bottom,
         ));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $filter,
-        $content,
-      ),
-      array(
-        'title' => pht('Channel Log'),
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($channel->getChannelName())
+      ->setSubHeader($channel->getServiceName())
+      ->addActionLink($jump_link);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setCollapsed(true)
+      ->appendChild($content);
+
+    $box->setShowHide(
+      pht('Search Dates'),
+      pht('Hide Dates'),
+      $form,
+      '#');
+
+    return $this->newPage()
+      ->setTitle(pht('Channel Log'))
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
+
   }
 
   /**
@@ -276,7 +264,7 @@ final class PhabricatorChatLogChannelLogController
     AphrontRequest $request,
     PhabricatorChatLogQuery $query) {
 
-    $user = $request->getUser();
+    $viewer = $request->getViewer();
 
     $at_id = $request->getInt('at');
     $at_date = $request->getStr('date');
@@ -301,7 +289,7 @@ final class PhabricatorChatLogChannelLogController
       );
 
     } else if ($at_date) {
-      $timestamp = PhabricatorTime::parseLocalTime($at_date, $user);
+      $timestamp = PhabricatorTime::parseLocalTime($at_date, $viewer);
 
       if ($timestamp) {
         $context_logs = $query

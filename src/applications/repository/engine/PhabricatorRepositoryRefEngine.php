@@ -19,32 +19,37 @@ final class PhabricatorRepositoryRefEngine
 
     $repository = $this->getRepository();
 
+    $branches_may_close = false;
+
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // No meaningful refs of any type in Subversion.
-        $branches = array();
-        $bookmarks = array();
-        $tags = array();
+        $maps = array();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $branches = $this->loadMercurialBranchPositions($repository);
         $bookmarks = $this->loadMercurialBookmarkPositions($repository);
-        $tags = array();
+        $maps = array(
+          PhabricatorRepositoryRefCursor::TYPE_BRANCH => $branches,
+          PhabricatorRepositoryRefCursor::TYPE_BOOKMARK => $bookmarks,
+        );
+
+        $branches_may_close = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $branches = $this->loadGitBranchPositions($repository);
-        $bookmarks = array();
-        $tags = $this->loadGitTagPositions($repository);
+        $maps = $this->loadGitRefPositions($repository);
         break;
       default:
         throw new Exception(pht('Unknown VCS "%s"!', $vcs));
     }
 
-    $maps = array(
-      PhabricatorRepositoryRefCursor::TYPE_BRANCH => $branches,
-      PhabricatorRepositoryRefCursor::TYPE_TAG => $tags,
-      PhabricatorRepositoryRefCursor::TYPE_BOOKMARK => $bookmarks,
+    // Fill in any missing types with empty lists.
+    $maps = $maps + array(
+      PhabricatorRepositoryRefCursor::TYPE_BRANCH => array(),
+      PhabricatorRepositoryRefCursor::TYPE_TAG => array(),
+      PhabricatorRepositoryRefCursor::TYPE_BOOKMARK => array(),
+      PhabricatorRepositoryRefCursor::TYPE_REF => array(),
     );
 
     $all_cursors = id(new PhabricatorRepositoryRefCursorQuery())
@@ -80,12 +85,65 @@ final class PhabricatorRepositoryRefEngine
           $ref->save();
         }
         foreach ($this->deadRefs as $ref) {
+          // Shove this ref into the old refs table so the discovery engine
+          // can check if any commits have been rendered unreachable.
+          id(new PhabricatorRepositoryOldRef())
+            ->setRepositoryPHID($repository->getPHID())
+            ->setCommitIdentifier($ref->getCommitIdentifier())
+            ->save();
+
           $ref->delete();
         }
       $repository->saveTransaction();
 
       $this->newRefs = array();
       $this->deadRefs = array();
+    }
+
+    $branches = $maps[PhabricatorRepositoryRefCursor::TYPE_BRANCH];
+    if ($branches && $branches_may_close) {
+      $this->updateBranchStates($repository, $branches);
+    }
+  }
+
+  private function updateBranchStates(
+    PhabricatorRepository $repository,
+    array $branches) {
+
+    assert_instances_of($branches, 'DiffusionRepositoryRef');
+
+    $all_cursors = id(new PhabricatorRepositoryRefCursorQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->execute();
+
+    $state_map = array();
+    $type_branch = PhabricatorRepositoryRefCursor::TYPE_BRANCH;
+    foreach ($all_cursors as $cursor) {
+      if ($cursor->getRefType() !== $type_branch) {
+        continue;
+      }
+      $raw_name = $cursor->getRefNameRaw();
+      $hash = $cursor->getCommitIdentifier();
+
+      $state_map[$raw_name][$hash] = $cursor;
+    }
+
+    foreach ($branches as $branch) {
+      $cursor = idx($state_map, $branch->getShortName(), array());
+      $cursor = idx($cursor, $branch->getCommitIdentifier());
+      if (!$cursor) {
+        continue;
+      }
+
+      $fields = $branch->getRawFields();
+
+      $cursor_state = (bool)$cursor->getIsClosed();
+      $branch_state = (bool)idx($fields, 'closed');
+
+      if ($cursor_state != $branch_state) {
+        $cursor->setIsClosed((int)$branch_state)->save();
+      }
     }
   }
 
@@ -262,15 +320,36 @@ final class PhabricatorRepositoryRefEngine
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         if ($all_closing_heads) {
-          $escheads = array();
+          $parts = array();
           foreach ($all_closing_heads as $head) {
-            $escheads[] = hgsprintf('%s', $head);
+            $parts[] = hgsprintf('%s', $head);
           }
-          $escheads = implode(' or ', $escheads);
+
+          // See T5896. Mercurial can not parse an "X or Y or ..." rev list
+          // with more than about 300 items, because it exceeds the maximum
+          // allowed recursion depth. Split all the heads into chunks of
+          // 256, and build a query like this:
+          //
+          //   ((1 or 2 or ... or 255) or (256 or 257 or ... 511))
+          //
+          // If we have more than 65535 heads, we'll do that again:
+          //
+          //   (((1 or ...) or ...) or ((65536 or ...) or ...))
+
+          $chunk_size = 256;
+          while (count($parts) > $chunk_size) {
+            $chunks = array_chunk($parts, $chunk_size);
+            foreach ($chunks as $key => $chunk) {
+              $chunks[$key] = '('.implode(' or ', $chunk).')';
+            }
+            $parts = array_values($chunks);
+          }
+          $parts = '('.implode(' or ', $parts).')';
+
           list($stdout) = $this->getRepository()->execxLocalCommand(
             'log --template %s --rev %s',
             '{node}\n',
-            hgsprintf('%s', $new_head).' - ('.$escheads.')');
+            hgsprintf('%s', $new_head).' - '.$parts);
         } else {
           list($stdout) = $this->getRepository()->execxLocalCommand(
             'log --template %s --rev %s',
@@ -328,7 +407,7 @@ final class PhabricatorRepositoryRefEngine
         $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
         break;
       default:
-        throw new Exception("Unknown repository type '{$vcs}'!");
+        throw new Exception(pht("Unknown repository type '%s'!", $vcs));
     }
 
     $all_commits = queryfx_all(
@@ -369,6 +448,8 @@ final class PhabricatorRepositoryRefEngine
         PhabricatorWorker::scheduleTask($class, $data);
       }
     }
+
+    return $this;
   }
 
 
@@ -378,22 +459,12 @@ final class PhabricatorRepositoryRefEngine
   /**
    * @task git
    */
-  private function loadGitBranchPositions(PhabricatorRepository $repository) {
-    return id(new DiffusionLowLevelGitRefQuery())
+  private function loadGitRefPositions(PhabricatorRepository $repository) {
+    $refs = id(new DiffusionLowLevelGitRefQuery())
       ->setRepository($repository)
-      ->withIsOriginBranch(true)
       ->execute();
-  }
 
-
-  /**
-   * @task git
-   */
-  private function loadGitTagPositions(PhabricatorRepository $repository) {
-    return id(new DiffusionLowLevelGitRefQuery())
-      ->setRepository($repository)
-      ->withIsTag(true)
-      ->execute();
+    return mgroup($refs, 'getRefType');
   }
 
 

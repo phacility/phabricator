@@ -6,12 +6,13 @@
  * application.
  */
 
-final class DifferentialRevisionStatus {
+final class DifferentialRevisionStatus extends Phobject {
 
-  const COLOR_STATUS_DEFAULT = 'status';
-  const COLOR_STATUS_DARK = 'status-dark';
-  const COLOR_STATUS_GREEN = 'status-green';
-  const COLOR_STATUS_RED = 'status-red';
+  const COLOR_STATUS_DEFAULT = 'bluegrey';
+  const COLOR_STATUS_DARK = 'indigo';
+  const COLOR_STATUS_BLUE = 'blue';
+  const COLOR_STATUS_GREEN = 'green';
+  const COLOR_STATUS_RED = 'red';
 
   public static function getRevisionStatusColor($status) {
     $default = self::COLOR_STATUS_DEFAULT;
@@ -30,7 +31,7 @@ final class DifferentialRevisionStatus {
       ArcanistDifferentialRevisionStatus::ABANDONED      =>
         self::COLOR_STATUS_DARK,
       ArcanistDifferentialRevisionStatus::IN_PREPARATION =>
-        self::COLOR_STATUS_DARK,
+        self::COLOR_STATUS_BLUE,
     );
     return idx($map, $status, $default);
   }
@@ -42,38 +43,30 @@ final class DifferentialRevisionStatus {
       ArcanistDifferentialRevisionStatus::NEEDS_REVIEW   =>
         'fa-square-o bluegrey',
       ArcanistDifferentialRevisionStatus::NEEDS_REVISION =>
-        'fa-square-o red',
+        'fa-refresh',
       ArcanistDifferentialRevisionStatus::CHANGES_PLANNED =>
-        'fa-square-o red',
+        'fa-headphones',
       ArcanistDifferentialRevisionStatus::ACCEPTED       =>
-        'fa-square-o green',
+        'fa-check',
       ArcanistDifferentialRevisionStatus::CLOSED         =>
         'fa-check-square-o',
       ArcanistDifferentialRevisionStatus::ABANDONED      =>
-        'fa-check-square-o',
+        'fa-plane',
       ArcanistDifferentialRevisionStatus::IN_PREPARATION =>
-        'fa-question-circle blue',
+        'fa-question-circle',
     );
     return idx($map, $status, $default);
   }
 
   public static function renderFullDescription($status) {
-    $color = self::getRevisionStatusColor($status);
     $status_name =
       ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
-    $img = id(new PHUIIconView())
-      ->setIconFont(self::getRevisionStatusIcon($status));
-
-    $tag = phutil_tag(
-      'span',
-      array(
-        'class' => 'phui-header-'.$color.' plr',
-      ),
-      array(
-        $img,
-        $status_name,
-      ));
+    $tag = id(new PHUITagView())
+      ->setName($status_name)
+      ->setIcon(self::getRevisionStatusIcon($status))
+      ->setShade(self::getRevisionStatusColor($status))
+      ->setType(PHUITagView::TYPE_SHADE);
 
     return $tag;
   }

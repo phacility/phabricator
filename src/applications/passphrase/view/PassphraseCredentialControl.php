@@ -42,9 +42,49 @@ final class PassphraseCredentialControl extends AphrontFormControl {
     foreach ($this->options as $option) {
       $options_map[$option->getPHID()] = pht(
         '%s %s',
-        'K'.$option->getID(),
+        $option->getMonogram(),
         $option->getName());
     }
+
+    // The user editing the form may not have permission to see the current
+    // credential. Populate it into the menu to allow them to save the form
+    // without making any changes.
+    $current_phid = $this->getValue();
+    if (strlen($current_phid) && empty($options_map[$current_phid])) {
+      $viewer = $this->getViewer();
+
+      $user_credential = id(new PassphraseCredentialQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($current_phid))
+        ->executeOne();
+      if (!$user_credential) {
+        // Pull the credential with the ominipotent viewer so we can look up
+        // the ID and tell if it's restricted or invalid.
+        $omnipotent_credential = id(new PassphraseCredentialQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs(array($current_phid))
+          ->executeOne();
+        if ($omnipotent_credential) {
+          $current_name = pht(
+            '%s (Restricted Credential)',
+            $omnipotent_credential->getMonogram());
+        } else {
+          $current_name = pht(
+            'Invalid Credential ("%s")',
+            $current_phid);
+        }
+      } else {
+        $current_name = pht(
+          '%s %s',
+          $user_credential->getMonogram(),
+          $user_credential->getName());
+      }
+
+      $options_map = array(
+        $current_phid => $current_name,
+      ) + $options_map;
+    }
+
 
     $disabled = $this->getDisabled();
     if ($this->allowNull) {

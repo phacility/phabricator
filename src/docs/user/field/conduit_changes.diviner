@@ -1,0 +1,59 @@
+@title Managing Conduit Changes
+@group fieldmanual
+
+Help with managing Conduit API changes.
+
+Overview
+========
+
+Many parts of the Conduit API are stable, but some parts are subject to change.
+For example, when we write a new application, it usually adds several new API
+methods and may update older methods.
+
+This document discusses API stability and how to minimize disruption when
+transitionig between API versions.
+
+
+Method Statuses
+===============
+
+Methods have one of three statuses:
+
+  - **Unstable**: This is a new or experimental method which is subject to
+    change. You may call these methods to get access to recently released
+    features, but should expect that you may need to adjust your usage of
+    them before they stabilize.
+  - **Stable**: This is an established method which generally will not change.
+  - **Deprecated**: This method will be removed in a future version of
+    Phabricator and callers should cease using it.
+
+Normally, a method is deprecated only when it is obsolete or a new, more
+powerful method is available to replace it.
+
+
+Finding Deprecated Calls
+========================
+
+You can identify calls to deprecated methods in {nav Conduit > Call Logs}.
+Use {nav My Deprecated Calls} to find calls to deprecated methods you have
+made, and {nav Deprecated Call Logs} to find deprecated calls by all users.
+
+You can also search for calls by specific users. For example, it may be useful
+to search for any bot accounts you run to make sure they aren't calling
+outdated APIs.
+
+The most common cause of calls to deprecated methods is users running very
+old versions of Arcanist. They can normally upgrade by running `arc upgrade`.
+
+When the changelogs mention a method deprecation, you can use the call logs
+to identify callers and notify them to upgrade or switch away. When the
+changelogs mention a method removal, you can use the call logs to verify that
+you will not be impacted.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Conduit API Overview}.

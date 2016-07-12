@@ -26,17 +26,16 @@
  *             and generating @{class:PhabricatorOAuthServerAccessToken}s
  * @task internal Internals
  */
-final class PhabricatorOAuthServer {
+final class PhabricatorOAuthServer extends Phobject {
 
   const AUTHORIZATION_CODE_TIMEOUT = 300;
-  const ACCESS_TOKEN_TIMEOUT       = 3600;
 
   private $user;
   private $client;
 
   private function getUser() {
     if (!$this->user) {
-      throw new Exception('You must setUser before you can getUser!');
+      throw new PhutilInvalidStateException('setUser');
     }
     return $this->user;
   }
@@ -48,7 +47,7 @@ final class PhabricatorOAuthServer {
 
   private function getClient() {
     if (!$this->client) {
-      throw new Exception('You must setClient before you can getClient!');
+      throw new PhutilInvalidStateException('setClient');
     }
     return $this->client;
   }
@@ -64,17 +63,17 @@ final class PhabricatorOAuthServer {
    */
   public function userHasAuthorizedClient(array $scope) {
 
-    $authorization = id(new PhabricatorOAuthClientAuthorization())->
-      loadOneWhere('userPHID = %s AND clientPHID = %s',
-                   $this->getUser()->getPHID(),
-                   $this->getClient()->getPHID());
+    $authorization = id(new PhabricatorOAuthClientAuthorization())
+      ->loadOneWhere(
+        'userPHID = %s AND clientPHID = %s',
+        $this->getUser()->getPHID(),
+        $this->getClient()->getPHID());
     if (empty($authorization)) {
       return array(false, null);
     }
 
     if ($scope) {
-      $missing_scope = array_diff_key($scope,
-                                      $authorization->getScope());
+      $missing_scope = array_diff_key($scope, $authorization->getScope());
     } else {
       $missing_scope = false;
     }
@@ -112,7 +111,7 @@ final class PhabricatorOAuthServer {
     $authorization_code->setClientPHID($client->getPHID());
     $authorization_code->setClientSecret($client->getSecret());
     $authorization_code->setUserPHID($this->getUser()->getPHID());
-    $authorization_code->setRedirectURI((string) $redirect_uri);
+    $authorization_code->setRedirectURI((string)$redirect_uri);
     $authorization_code->save();
 
     return $authorization_code;
@@ -158,65 +157,78 @@ final class PhabricatorOAuthServer {
   /**
    * @task token
    */
-  public function validateAccessToken(
-    PhabricatorOAuthServerAccessToken $token,
-    $required_scope) {
+  public function authorizeToken(
+    PhabricatorOAuthServerAccessToken $token) {
 
-    $created_time    = $token->getDateCreated();
-    $must_be_used_by = $created_time + self::ACCESS_TOKEN_TIMEOUT;
-    $expired         = time() > $must_be_used_by;
-    $authorization   = id(new PhabricatorOAuthClientAuthorization())
-                         ->loadOneWhere(
-                           'userPHID = %s AND clientPHID = %s',
-                           $token->getUserPHID(),
-                           $token->getClientPHID());
+    $user_phid = $token->getUserPHID();
+    $client_phid = $token->getClientPHID();
 
+    $authorization = id(new PhabricatorOAuthClientAuthorizationQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUserPHIDs(array($user_phid))
+      ->withClientPHIDs(array($client_phid))
+      ->executeOne();
     if (!$authorization) {
-      return false;
-    }
-    $token_scope = $authorization->getScope();
-    if (!isset($token_scope[$required_scope])) {
-      return false;
+      return null;
     }
 
-    $valid = true;
-    if ($expired) {
-      $valid = false;
-      // check if the scope includes "offline_access", which makes the
-      // token valid despite being expired
-      if (isset(
-        $token_scope[PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS])) {
-        $valid = true;
-      }
+    $application = $authorization->getClient();
+    if ($application->getIsDisabled()) {
+      return null;
     }
 
-    return $valid;
+    return $authorization;
+  }
+
+  public function validateRedirectURI($uri) {
+    try {
+      $this->assertValidRedirectURI($uri);
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
   }
 
   /**
    * See http://tools.ietf.org/html/draft-ietf-oauth-v2-23#section-3.1.2
    * for details on what makes a given redirect URI "valid".
    */
-  public function validateRedirectURI(PhutilURI $uri) {
-    if (!PhabricatorEnv::isValidRemoteWebResource($uri)) {
-      return false;
+  public function assertValidRedirectURI($raw_uri) {
+    // This covers basics like reasonable formatting and the existence of a
+    // protocol.
+    PhabricatorEnv::requireValidRemoteURIForLink($raw_uri);
+
+    $uri = new PhutilURI($raw_uri);
+
+    $fragment = $uri->getFragment();
+    if (strlen($fragment)) {
+      throw new Exception(
+        pht(
+          'OAuth application redirect URIs must not contain URI '.
+          'fragments, but the URI "%s" has a fragment ("%s").',
+          $raw_uri,
+          $fragment));
     }
 
-    if ($uri->getFragment()) {
-      return false;
+    $protocol = $uri->getProtocol();
+    switch ($protocol) {
+      case 'http':
+      case 'https':
+        break;
+      default:
+        throw new Exception(
+          pht(
+            'OAuth application redirect URIs must only use the "http" or '.
+            '"https" protocols, but the URI "%s" uses the "%s" protocol.',
+            $raw_uri,
+            $protocol));
     }
-
-    if (!$uri->getDomain()) {
-      return false;
-    }
-
-    return true;
   }
 
   /**
    * If there's a URI specified in an OAuth request, it must be validated in
-   * its own right. Further, it must have the same domain and (at least) the
-   * same query parameters as the primary URI.
+   * its own right. Further, it must have the same domain, the same path, the
+   * same port, and (at least) the same query parameters as the primary URI.
    */
   public function validateSecondaryRedirectURI(
     PhutilURI $secondary_uri,
@@ -229,6 +241,16 @@ final class PhabricatorOAuthServer {
 
     // Both URIs must point at the same domain.
     if ($secondary_uri->getDomain() != $primary_uri->getDomain()) {
+      return false;
+    }
+
+    // Both URIs must have the same path
+    if ($secondary_uri->getPath() != $primary_uri->getPath()) {
+      return false;
+    }
+
+    // Both URIs must have the same port
+    if ($secondary_uri->getPort() != $primary_uri->getPort()) {
       return false;
     }
 

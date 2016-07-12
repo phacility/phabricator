@@ -56,7 +56,7 @@ final class PhabricatorSubscriptionsEditor extends PhabricatorEditor {
 
   public function save() {
     if (!$this->object) {
-      throw new Exception('Call setObject() before save()!');
+      throw new PhutilInvalidStateException('setObject');
     }
     $actor = $this->requireActor();
 
@@ -65,7 +65,7 @@ final class PhabricatorSubscriptionsEditor extends PhabricatorEditor {
     if ($this->implicitSubscribePHIDs) {
       $unsub = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $src,
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+        PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
       $unsub = array_fill_keys($unsub, true);
       $this->implicitSubscribePHIDs = array_diff_key(
         $this->implicitSubscribePHIDs,
@@ -80,8 +80,8 @@ final class PhabricatorSubscriptionsEditor extends PhabricatorEditor {
     $add = array_diff_key($add, $del);
 
     if ($add || $del) {
-      $u_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER;
-      $s_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER;
+      $u_type = PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST;
+      $s_type = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
 
       $editor = new PhabricatorEdgeEditor();
 

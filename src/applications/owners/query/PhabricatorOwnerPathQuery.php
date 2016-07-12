@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorOwnerPathQuery {
+final class PhabricatorOwnerPathQuery extends Phobject {
 
   public static function loadAffectedPaths(
     PhabricatorRepository $repository,

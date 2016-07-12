@@ -3,34 +3,22 @@
 final class PhabricatorOAuthClientListController
   extends PhabricatorOAuthClientController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
+  public function handleRequest(AphrontRequest $request) {
+    return id(new PhabricatorOAuthServerClientSearchEngine())
+      ->setController($this)
+      ->buildResponse();
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->queryKey)
-      ->setSearchEngine(new PhabricatorOAuthServerClientSearchEngine())
-      ->setNavigation($this->buildSideNavView());
-
-    return $this->delegateToController($controller);
-  }
-
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setHref($this->getApplicationURI('client/create/'))
-        ->setName(pht('Create Application'))
-        ->setIcon('fa-plus-square'));
+    id(new PhabricatorOAuthServerEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
     return $crumbs;
   }

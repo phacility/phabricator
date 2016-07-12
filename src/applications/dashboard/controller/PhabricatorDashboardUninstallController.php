@@ -3,19 +3,13 @@
 final class PhabricatorDashboardUninstallController
   extends PhabricatorDashboardController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$dashboard) {
       return new Aphront404Response();
@@ -53,7 +47,6 @@ final class PhabricatorDashboardUninstallController
     }
 
     $installer_phid = $viewer->getPHID();
-    $handles = $this->loadHandles(array($object_phid, $installer_phid));
 
     if ($request->isFormPost()) {
       $dashboard_install->delete();
@@ -74,7 +67,7 @@ final class PhabricatorDashboardUninstallController
       ->setTitle(pht('Uninstall Dashboard'))
       ->appendChild($form->buildLayoutView())
       ->addCancelButton($this->getCancelURI(
-        $application_class, $object_phid))
+        $application_class, $object_phid, $id))
       ->addSubmitButton(pht('Uninstall Dashboard'));
   }
 
@@ -82,6 +75,8 @@ final class PhabricatorDashboardUninstallController
     $application_class,
     $object_phid,
     $installer_phid) {
+
+    $viewer = $this->getViewer();
 
     $body = array();
     switch ($application_class) {
@@ -106,18 +101,18 @@ final class PhabricatorDashboardUninstallController
             pht(
               'Are you sure you want to uninstall this dashboard as the home '.
               'page for %s?',
-              $this->getHandle($object_phid)->getName()));
+              $viewer->renderHandle($object_phid)));
         }
         break;
     }
     return $body;
   }
 
-  private function getCancelURI($application_class, $object_phid) {
+  private function getCancelURI($application_class, $object_phid, $id) {
     $uri = null;
     switch ($application_class) {
       case 'PhabricatorHomeApplication':
-        $uri = '/dashboard/view/'.$this->id.'/';
+        $uri = '/dashboard/view/'.$id.'/';
         break;
     }
     return $uri;

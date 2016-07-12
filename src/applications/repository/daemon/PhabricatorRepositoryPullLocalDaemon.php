@@ -6,7 +6,7 @@
  *
  * By default, the daemon pulls **every** repository. If you want it to be
  * responsible for only some repositories, you can launch it with a list of
- * PHIDs or callsigns:
+ * repositories:
  *
  *   ./phd launch repositorypulllocal -- X Q Z
  *
@@ -27,6 +27,7 @@
 final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
+  private $statusMessageCursor = 0;
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
 
@@ -34,7 +35,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task pull
    */
-  public function run() {
+  protected function run() {
     $argv = $this->getArgv();
     array_unshift($argv, __CLASS__);
     $args = new PhutilArgumentParser($argv);
@@ -42,18 +43,18 @@ final class PhabricatorRepositoryPullLocalDaemon
       array(
         array(
           'name'      => 'no-discovery',
-          'help'      => 'Pull only, without discovering commits.',
+          'help'      => pht('Pull only, without discovering commits.'),
         ),
         array(
           'name'      => 'not',
           'param'     => 'repository',
           'repeat'    => true,
-          'help'      => 'Do not pull __repository__.',
+          'help'      => pht('Do not pull __repository__.'),
         ),
         array(
           'name'      => 'repositories',
           'wildcard'  => true,
-          'help'      => 'Pull specific __repositories__ instead of all.',
+          'help'      => pht('Pull specific __repositories__ instead of all.'),
         ),
       ));
 
@@ -72,11 +73,14 @@ final class PhabricatorRepositoryPullLocalDaemon
     $queue = array();
 
     while (!$this->shouldExit()) {
-      $pullable = $this->loadPullableRepositories($include, $exclude);
+      PhabricatorCaches::destroyRequestCache();
+      $device = AlmanacKeys::getLiveDevice();
+
+      $pullable = $this->loadPullableRepositories($include, $exclude, $device);
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them
       // as soon as possible.
-      $need_update_messages = $this->loadRepositoryUpdateMessages();
+      $need_update_messages = $this->loadRepositoryUpdateMessages(true);
       foreach ($need_update_messages as $message) {
         $repo = idx($pullable, $message->getRepositoryID());
         if (!$repo) {
@@ -149,7 +153,8 @@ final class PhabricatorRepositoryPullLocalDaemon
           if (!$repository) {
             $this->log(
               pht('Repository %s is no longer pullable; skipping.', $id));
-            break;
+            unset($queue[$id]);
+            continue;
           }
 
           $monogram = $repository->getMonogram();
@@ -169,7 +174,7 @@ final class PhabricatorRepositoryPullLocalDaemon
           pht(
             'Not enough process slots to schedule the other %s '.
             'repository(s) for updates yet.',
-            new PhutilNumber(count($queue))));
+            phutil_count($queue)));
       }
 
       if ($futures) {
@@ -225,9 +230,8 @@ final class PhabricatorRepositoryPullLocalDaemon
       $flags[] = '--no-discovery';
     }
 
-    $callsign = $repository->getCallsign();
-
-    $future = new ExecFuture('%s update %Ls -- %s', $bin, $flags, $callsign);
+    $monogram = $repository->getMonogram();
+    $future = new ExecFuture('%s update %Ls -- %s', $bin, $flags, $monogram);
 
     // Sometimes, the underlying VCS commands will hang indefinitely. We've
     // observed this occasionally with GitHub, and other users have observed
@@ -255,44 +259,92 @@ final class PhabricatorRepositoryPullLocalDaemon
 
 
   /**
+   * Check for repositories that should be updated immediately.
+   *
+   * With the `$consume` flag, an internal cursor will also be incremented so
+   * that these messages are not returned by subsequent calls.
+   *
+   * @param bool Pass `true` to consume these messages, so the process will
+   *   not see them again.
+   * @return list<wild> Pending update messages.
+   *
    * @task pull
    */
-  private function loadRepositoryUpdateMessages() {
+  private function loadRepositoryUpdateMessages($consume = false) {
     $type_need_update = PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE;
-    return id(new PhabricatorRepositoryStatusMessage())
-      ->loadAllWhere('statusType = %s', $type_need_update);
+    $messages = id(new PhabricatorRepositoryStatusMessage())->loadAllWhere(
+      'statusType = %s AND id > %d',
+      $type_need_update,
+      $this->statusMessageCursor);
+
+    // Keep track of messages we've seen so that we don't load them again.
+    // If we reload messages, we can get stuck a loop if we have a failing
+    // repository: we update immediately in response to the message, but do
+    // not clear the message because the update does not succeed. We then
+    // immediately retry. Instead, messages are only permitted to trigger
+    // an immediate update once.
+
+    if ($consume) {
+      foreach ($messages as $message) {
+        $this->statusMessageCursor = max(
+          $this->statusMessageCursor,
+          $message->getID());
+      }
+    }
+
+    return $messages;
   }
 
 
   /**
    * @task pull
    */
-  private function loadPullableRepositories(array $include, array $exclude) {
+  private function loadPullableRepositories(
+    array $include,
+    array $exclude,
+    AlmanacDevice $device = null) {
+
     $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer());
 
     if ($include) {
-      $query->withCallsigns($include);
+      $query->withIdentifiers($include);
     }
 
     $repositories = $query->execute();
+    $repositories = mpull($repositories, null, 'getPHID');
 
     if ($include) {
-      $by_callsign = mpull($repositories, null, 'getCallsign');
-      foreach ($include as $name) {
-        if (empty($by_callsign[$name])) {
+      $map = $query->getIdentifierMap();
+      foreach ($include as $identifier) {
+        if (empty($map[$identifier])) {
           throw new Exception(
-            "No repository exists with callsign '{$name}'!");
+            pht(
+              'No repository "%s" exists!',
+              $identifier));
         }
       }
     }
 
     if ($exclude) {
-      $exclude = array_fuse($exclude);
-      foreach ($repositories as $key => $repository) {
-        if (isset($exclude[$repository->getCallsign()])) {
-          unset($repositories[$key]);
+      $xquery = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withIdentifiers($exclude);
+
+      $excluded_repos = $xquery->execute();
+      $xmap = $xquery->getIdentifierMap();
+
+      foreach ($exclude as $identifier) {
+        if (empty($xmap[$identifier])) {
+          throw new Exception(
+            pht(
+              'No repository "%s" exists!',
+              $identifier));
         }
+      }
+
+      foreach ($excluded_repos as $excluded_repo) {
+        unset($repositories[$excluded_repo->getPHID()]);
       }
     }
 
@@ -300,6 +352,19 @@ final class PhabricatorRepositoryPullLocalDaemon
       if (!$repository->isTracked()) {
         unset($repositories[$key]);
       }
+    }
+
+    $viewer = $this->getViewer();
+
+    $filter = id(new DiffusionLocalRepositoryFilter())
+      ->setViewer($viewer)
+      ->setDevice($device)
+      ->setRepositories($repositories);
+
+    $repositories = $filter->execute();
+
+    foreach ($filter->getRejectionReasons() as $reason) {
+      $this->log($reason);
     }
 
     // Shuffle the repositories, then re-key the array since shuffle()
@@ -344,13 +409,6 @@ final class PhabricatorRepositoryPullLocalDaemon
         $stderr);
       phlog($stderr_msg);
     }
-
-    // For now, continue respecting this deprecated setting for raising the
-    // minimum pull frequency.
-    // TODO: Remove this some day once this code has been completely stable
-    // for a while.
-    $sleep_for = (int)$repository->getDetail('pull-frequency');
-    $min_sleep = max($sleep_for, $min_sleep);
 
     $smart_wait = $repository->loadUpdateInterval($min_sleep);
 

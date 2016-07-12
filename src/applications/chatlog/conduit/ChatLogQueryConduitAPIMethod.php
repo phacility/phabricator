@@ -11,22 +11,18 @@ final class ChatLogQueryConduitAPIMethod extends ChatLogConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve chatter.';
+    return pht('Retrieve chatter.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'channels' => 'optional list<string>',
       'limit'    => 'optional int (default = 100)',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

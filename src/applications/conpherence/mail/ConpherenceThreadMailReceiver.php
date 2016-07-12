@@ -9,11 +9,11 @@ final class ConpherenceThreadMailReceiver
   }
 
   protected function getObjectPattern() {
-    return 'E[1-9]\d*';
+    return 'Z[1-9]\d*';
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'E');
+    $id = (int)trim($pattern, 'Z');
 
     return id(new ConpherenceThreadQuery())
       ->setViewer($viewer)
@@ -21,18 +21,8 @@ final class ConpherenceThreadMailReceiver
       ->executeOne();
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    $handler = id(new ConpherenceReplyHandler())
-      ->setMailReceiver($object);
-
-    $handler->setActor($sender);
-    $handler->setExcludeMailRecipientPHIDs(
-      $mail->loadExcludeMailRecipientPHIDs());
-    $handler->processEmail($mail);
+  protected function getTransactionReplyHandler() {
+    return new ConpherenceReplyHandler();
   }
 
 }

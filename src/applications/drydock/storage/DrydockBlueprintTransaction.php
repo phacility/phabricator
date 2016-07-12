@@ -3,7 +3,8 @@
 final class DrydockBlueprintTransaction
   extends PhabricatorApplicationTransaction {
 
-  const TYPE_NAME       = 'drydock:blueprint:name';
+  const TYPE_NAME = 'drydock:blueprint:name';
+  const TYPE_DISABLED = 'drydock:blueprint:disabled';
 
   public function getApplicationName() {
     return 'drydock';
@@ -30,6 +31,16 @@ final class DrydockBlueprintTransaction
             $author_handle,
             $old,
             $new);
+        }
+      case self::TYPE_DISABLED:
+        if ($new) {
+          return pht(
+            '%s disabled this blueprint.',
+            $author_handle);
+        } else {
+          return pht(
+            '%s enabled this blueprint.',
+            $author_handle);
         }
     }
 

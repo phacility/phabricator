@@ -38,6 +38,37 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return ipull(self::getEnabledStatusMap(), 'name');
   }
 
+
+  /**
+   * Get the statuses and their command keywords.
+   *
+   * @return map Statuses to lists of command keywords.
+   */
+  public static function getTaskStatusKeywordsMap() {
+    $map = self::getEnabledStatusMap();
+    foreach ($map as $key => $spec) {
+      $words = idx($spec, 'keywords', array());
+      if (!is_array($words)) {
+        $words = array($words);
+      }
+
+      // For statuses, we include the status name because it's usually
+      // at least somewhat meaningful.
+      $words[] = $key;
+
+      foreach ($words as $word_key => $word) {
+        $words[$word_key] = phutil_utf8_strtolower($word);
+      }
+
+      $words = array_unique($words);
+
+      $map[$key] = $words;
+    }
+
+    return $map;
+  }
+
+
   public static function getTaskStatusName($status) {
     return self::getStatusAttribute($status, 'name', pht('Unknown Status'));
   }
@@ -51,27 +82,22 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return self::getStatusAttribute($status, 'name', pht('Unknown Status'));
   }
 
-  public static function renderFullDescription($status) {
+  public static function renderFullDescription($status, $priority) {
     if (self::isOpenStatus($status)) {
-      $color = 'status';
-      $icon = 'fa-square-o bluegrey';
+      $name = pht('%s, %s', self::getTaskStatusFullName($status), $priority);
+      $color = 'grey';
+      $icon = 'fa-square-o';
     } else {
-      $color = 'status-dark';
+      $name = self::getTaskStatusFullName($status);
+      $color = 'indigo';
       $icon = 'fa-check-square-o';
     }
 
-    $img = id(new PHUIIconView())
-      ->setIconFont($icon);
-
-    $tag = phutil_tag(
-      'span',
-      array(
-        'class' => 'phui-header-'.$color.' plr',
-      ),
-      array(
-        $img,
-        self::getTaskStatusFullName($status),
-      ));
+    $tag = id(new PHUITagView())
+      ->setName($name)
+      ->setIcon($icon)
+      ->setType(PHUITagView::TYPE_SHADE)
+      ->setShade($color);
 
     return $tag;
   }
@@ -122,6 +148,10 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return false;
   }
 
+  public static function isClaimStatus($status) {
+    return self::getStatusAttribute($status, 'claim', true);
+  }
+
   public static function isClosedStatus($status) {
     return !self::isOpenStatus($status);
   }
@@ -134,8 +164,21 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return self::getStatusAttribute($status, 'transaction.color');
   }
 
+  public static function isDisabledStatus($status) {
+    return self::getStatusAttribute($status, 'disabled');
+  }
+
   public static function getStatusIcon($status) {
-    return self::getStatusAttribute($status, 'transaction.icon');
+    $icon = self::getStatusAttribute($status, 'transaction.icon');
+    if ($icon) {
+      return $icon;
+    }
+
+    if (self::isOpenStatus($status)) {
+      return 'fa-exclamation-circle';
+    } else {
+      return 'fa-check-square-o';
+    }
   }
 
   public static function getStatusPrefixMap() {
@@ -231,6 +274,9 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'silly' => 'optional bool',
           'prefixes' => 'optional list<string>',
           'suffixes' => 'optional list<string>',
+          'keywords' => 'optional list<string>',
+          'disabled' => 'optional bool',
+          'claim' => 'optional bool',
         ));
     }
 

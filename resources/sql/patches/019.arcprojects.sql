@@ -2,7 +2,7 @@ CREATE TABLE {$NAMESPACE}_repository.repository_arcanistproject (
   id int unsigned not null auto_increment primary key,
   phid varchar(64) binary not null,
   unique key(phid),
-  name varchar(255) not null,
+  name varchar(255) COLLATE `binary` not null,
   unique key (name),
   repositoryID int unsigned
 );

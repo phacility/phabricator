@@ -3,16 +3,10 @@
 final class PhabricatorDaemonLogEventViewController
   extends PhabricatorDaemonController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-
-    $event = id(new PhabricatorDaemonLogEvent())->load($this->id);
+    $event = id(new PhabricatorDaemonLogEvent())->load($id);
     if (!$event) {
       return new Aphront404Response();
     }
@@ -23,9 +17,9 @@ final class PhabricatorDaemonLogEventViewController
       ->setCombinedLog(true)
       ->setShowFullMessage(true);
 
-    $log_panel = new AphrontPanelView();
-    $log_panel->appendChild($event_view);
-    $log_panel->setNoBackground();
+    $log_panel = id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->appendChild($event_view);
 
     $daemon_id = $event->getLogID();
 
@@ -33,18 +27,21 @@ final class PhabricatorDaemonLogEventViewController
       ->addTextCrumb(
         pht('Daemon %s', $daemon_id),
         $this->getApplicationURI("log/{$daemon_id}/"))
-      ->addTextCrumb(pht('Event %s', $event->getID()));
+      ->addTextCrumb(pht('Event %s', $event->getID()))
+      ->setBorder(true);
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Combined Log'))
+      ->setHeaderIcon('fa-file-text');
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $log_panel,
-      ),
-      array(
-        'title' => pht('Combined Daemon Log'),
-        'device' => false,
-      ));
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($log_panel);
+
+    return $this->newPage()
+      ->setTitle(pht('Combined Daemon Log'))
+      ->appendChild($view);
+
   }
 
 }

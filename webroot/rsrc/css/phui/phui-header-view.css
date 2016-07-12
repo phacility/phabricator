@@ -3,11 +3,39 @@
  */
 
 .phui-header-shell {
-  background-color: #e0e3ec;
-  border-width: 1px 0;
-  border-style: solid;
-  border-color: {$hovergrey};
+  border-bottom: 1px solid {$thinblueborder};
   overflow: hidden;
+  padding: 0 4px 12px;
+}
+
+.phui-header-view {
+  display: table;
+  width: 100%
+}
+
+.phui-header-row {
+  display: table-row;
+}
+
+.phui-header-col1 {
+  display: table-cell;
+  vertical-align: middle;
+  width: 62px;
+}
+
+.phui-header-col2 {
+  display: table-cell;
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+.phui-header-col3 {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.device-phone .phui-header-col3 {
+  vertical-align: top;
 }
 
 body .phui-header-shell.phui-header-no-backgound {
@@ -25,7 +53,7 @@ body .phui-header-shell.phui-bleed-header {
 body .phui-header-shell.phui-bleed-header
   .phui-header-view {
   padding: 8px 24px 8px 0;
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
 .phui-header-shell + .phabricator-form-view {
@@ -37,36 +65,52 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-header-view {
-  padding: 16px;
-  font-size: 15px;
-  color: {$darkbluetext};
   position: relative;
+  font-size: {$normalfontsize};
 }
 
-.phui-header-view a,
-.phui-header-view a.simple {
+.phui-header-header {
+  font-size: 16px;
+  line-height: 24px;
   color: {$darkbluetext};
+}
+
+.phui-header-header .phui-header-icon {
+  margin-right: 8px;
+  color: {$lightbluetext};
+
+  /* This allows the header text to be triple-clicked to select it in Firefox,
+     see T10905 for discussion. */
+  display: inline;
+}
+
+.phui-object-box .phui-header-tall .phui-header-header,
+.phui-document-view .phui-header-tall .phui-header-header {
+  font-size: 18px;
+}
+
+.phui-header-view .phui-header-header a {
+  color: {$darkbluetext};
+}
+
+.device-desktop .phui-header-view .phui-header-header a:hover {
+  text-decoration: none;
+  color: {$blue};
 }
 
 .phui-header-view .phui-header-action-links {
-  position: absolute;
-  top: 24px;
-  right: 12px;
+  float: right;
 }
 
 .phui-object-box .phui-header-view .phui-header-action-links {
-  top: 5px;
-  right: 3px;
+  margin-right: 4px;
+  font-size: {$normalfontsize};
 }
 
-.phui-object-box .phui-header-has-image .phui-header-view
- .phui-header-action-links {
-  top: 15px;
-}
-
-.phui-document-view .phui-header-view .phui-header-action-links {
-  right: 8px;
-  top: 12px;
+.phui-header-action-link {
+  margin-bottom: 4px;
+  margin-top: 4px;
+  float: right;
 }
 
 .device-phone .phui-header-action-link .phui-button-text {
@@ -75,19 +119,20 @@ body .phui-header-shell.phui-bleed-header
   margin-left: 8px;
 }
 
+.device-phone .phui-header-action-link.button .phui-icon-view {
+  width: 12px;
+  text-align: center;
+}
+
 .phui-header-divider {
   margin: 0 4px;
   font-weight: normal;
   color: {$lightbluetext};
 }
 
-body.device-phone .phui-header-view {
-  padding: 12px 8px;
-}
-
 .phui-header-tags {
   margin-left: 12px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .phui-header-tags .phui-tag-view {
@@ -97,42 +142,193 @@ body.device-phone .phui-header-view {
 .phui-header-image {
   display: inline-block;
   background-repeat: no-repeat;
-  border: 1px solid white;
+  background-size: 100%;
   width: 50px;
   height: 50px;
-  margin: 12px;
-  float: left;
+  border-radius: 3px;
+}
+
+.phui-header-image-href {
+  position: relative;
+  display: block;
+}
+
+.phui-header-image-edit {
+  display: none;
+}
+
+.device-desktop .phui-header-image-href:hover .phui-header-image-edit {
+  display: block;
+  position: absolute;
+  left: 0;
+  background: rgba({$alphablack},0.4);
+  color: #fff;
+  font-weight: normal;
+  bottom: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.device-desktop .phui-header-image-edit:hover {
+  text-decoration: underline;
 }
 
 .phui-header-subheader {
-  color: {$lightbluetext};
   font-weight: normal;
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: {$biggerfontsize};
+  margin-top: 8px;
 }
 
 .phui-header-subheader .phui-icon-view {
+  margin-right: 4px;
+}
+
+.phui-header-subheader .phui-tag-view .phui-icon-view,
+.phui-header-subheader .policy-header-callout .phui-icon-view {
   display: inline-block;
   margin: -2px 4px -2px 0;
+  font-size: 15px;
 }
 
-.phui-header-subheader {
-  color: {$bluetext};
-}
-
+.phui-header-subheader,
 .phui-header-subheader .policy-link {
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
-.phui-header-subheader .phui-header-status-dark {
-  color: #111;
-  text-shadow: 0 1px #fff;
+.policy-header-callout,
+.phui-header-subheader .phui-tag-core {
+  padding: 3px 9px;
+  border-radius: 3px;
+  background: rgba({$alphablue}, 0.1);
+  margin-right: 8px;
+  -webkit-font-smoothing: auto;
+  border-color: transparent;
 }
 
-.phui-header-subheader .phui-header-status-red {
-  color: {$red};
+
+.phui-header-subheader .phui-tag-view,
+.phui-header-subheader .phui-tag-type-shade .phui-tag-core {
+  border: none;
+  font-weight: normal;
+  -webkit-font-smoothing: auto;
 }
 
-.phui-header-subheader .phui-header-status-green {
-  color: {$green};
+.policy-header-callout.policy-adjusted-weaker {
+  background: {$sh-greenbackground};
+}
+
+.policy-header-callout.policy-adjusted-weaker .policy-link,
+.policy-header-callout.policy-adjusted-weaker .phui-icon-view {
+  color: {$sh-greentext};
+}
+
+.policy-header-callout.policy-adjusted-stronger {
+  background: {$sh-redbackground};
+}
+
+.policy-header-callout.policy-adjusted-stronger .policy-link,
+.policy-header-callout.policy-adjusted-stronger .phui-icon-view {
+  color: {$sh-redtext};
+}
+
+.policy-header-callout.policy-adjusted-different {
+  background: {$sh-orangebackground};
+}
+
+.policy-header-callout.policy-adjusted-different .policy-link,
+.policy-header-callout.policy-adjusted-different .phui-icon-view {
+  color: {$sh-orangetext};
+}
+
+.phui-header-action-links .phui-mobile-menu {
+  display: none;
+}
+
+.device .phui-header-action-links .phui-mobile-menu {
+  display: inline-block;
+}
+
+.phui-header-action-list {
+  float: right;
+}
+
+.phui-header-action-list li {
+  margin: 0 0 0 8px;
+  float: right;
+}
+
+.phui-header-action-list .phui-header-action-item .phui-icon-view {
+  height: 18px;
+  width: 16px;
+  font-size: 16px;
+  line-height: 20px;
+  display: block;
+}
+
+.spaces-name {
+  color: {$lightbluetext};
+}
+
+.phui-object-box .phui-header-tall .spaces-name {
+  font-size: 18px;
+}
+
+.spaces-name .phui-handle,
+.spaces-name a.phui-handle {
+  color: {$sh-redtext};
+}
+
+.device-desktop .spaces-name a.phui-handle:hover {
+  color: {$sh-redtext};
+  text-decoration: underline;
+}
+
+.phui-header-subheader .phui-badge-flex-view {
+  display: inline;
+  margin-right: 4px;
+}
+
+.phui-header-subheader .phui-badge-flex-view:after {
+  display: inline;
+}
+
+/*** Profile Header ***********************************************************/
+
+.phui-profile-header {
+  padding: 24px 20px 20px 24px;
+}
+
+.device-phone .phui-profile-header {
+  padding: 12px;
+}
+
+.phui-profile-header.phui-header-shell {
+  margin: 0;
+  border: none;
+}
+
+.phui-profile-header .phui-header-image {
+  height: 80px;
+  width: 80px;
+}
+
+.phui-profile-header .phui-header-col1 {
+  width: 96px;
+}
+
+.phui-profile-header .phui-header-subheader {
+  margin-top: 12px;
+}
+
+.phui-profile-header.phui-header-shell .phui-header-header {
+  font-family: 'Aleo', {$fontfamily};
+  font-size: 24px;
+}
+
+.phui-profile-header .phui-header-col3 {
+  vertical-align: top;
+}
+
+.phui-header-view .phui-tag-shade-indigo a {
+  color: {$sh-indigotext};
 }

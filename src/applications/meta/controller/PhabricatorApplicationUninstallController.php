@@ -6,20 +6,20 @@ final class PhabricatorApplicationUninstallController
   private $application;
   private $action;
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->action = $request->getURIData('action');
+    $this->application = $request->getURIData('application');
 
-  public function willProcessRequest(array $data) {
-    $this->application = $data['application'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $selected = PhabricatorApplication::getByClass($this->application);
+    $selected = id(new PhabricatorApplicationQuery())
+      ->setViewer($viewer)
+      ->withClasses(array($this->application))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
 
     if (!$selected) {
       return new Aphront404Response();
@@ -31,8 +31,8 @@ final class PhabricatorApplicationUninstallController
       'phabricator.show-prototypes');
 
     $dialog = id(new AphrontDialogView())
-               ->setUser($user)
-               ->addCancelButton($view_uri);
+      ->setUser($viewer)
+      ->addCancelButton($view_uri);
 
     if ($selected->isPrototype() && !$prototypes_enabled) {
       $dialog
@@ -52,26 +52,50 @@ final class PhabricatorApplicationUninstallController
 
     if ($this->action == 'install') {
       if ($selected->canUninstall()) {
-        $dialog->setTitle('Confirmation')
-               ->appendChild(
-                 'Install '.$selected->getName().' application?')
-               ->addSubmitButton('Install');
+        $dialog
+          ->setTitle(pht('Confirmation'))
+          ->appendChild(
+            pht(
+              'Install %s application?',
+              $selected->getName()))
+          ->addSubmitButton(pht('Install'));
 
       } else {
-        $dialog->setTitle('Information')
-               ->appendChild('You cannot install an installed application.');
+        $dialog
+          ->setTitle(pht('Information'))
+          ->appendChild(pht('You cannot install an installed application.'));
       }
     } else {
       if ($selected->canUninstall()) {
-        $dialog->setTitle('Confirmation')
-               ->appendChild(
-                 'Really Uninstall '.$selected->getName().' application?')
-               ->addSubmitButton('Uninstall');
+        $dialog->setTitle(pht('Really Uninstall Application?'));
+
+        if ($selected instanceof PhabricatorHomeApplication) {
+          $dialog
+            ->appendParagraph(
+              pht(
+                'Are you absolutely certain you want to uninstall the Home '.
+                'application?'))
+            ->appendParagraph(
+              pht(
+                'This is very unusual and will leave you without any '.
+                'content on the Phabricator home page. You should only '.
+                'do this if you are certain you know what you are doing.'))
+            ->addSubmitButton(pht('Completely Break Phabricator'));
+        } else {
+          $dialog
+            ->appendParagraph(
+              pht(
+                'Really uninstall the %s application?',
+                $selected->getName()))
+            ->addSubmitButton(pht('Uninstall'));
+        }
       } else {
-        $dialog->setTitle('Information')
-               ->appendChild(
-                 'This application cannot be uninstalled,
-                 because it is required for Phabricator to work.');
+        $dialog
+          ->setTitle(pht('Information'))
+          ->appendChild(
+            pht(
+              'This application cannot be uninstalled, '.
+              'because it is required for Phabricator to work.'));
       }
     }
     return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -90,7 +114,10 @@ final class PhabricatorApplicationUninstallController
     }
 
     PhabricatorConfigEditor::storeNewValue(
-     $config_entry, $list, $this->getRequest());
+      $this->getViewer(),
+      $config_entry,
+      $list,
+      PhabricatorContentSource::newFromRequest($this->getRequest()));
   }
 
 }

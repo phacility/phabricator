@@ -6,6 +6,10 @@
   padding: 16px;
 }
 
+.device-phone .phui-object-box .phui-form-view {
+  padding: 0;
+}
+
 .phui-form-view.phui-form-full-width {
   padding: 0;
 }
@@ -22,7 +26,7 @@
   float: left;
   text-align: right;
   font-weight: bold;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   color: {$bluetext};
   -webkit-font-smoothing: antialiased;
 }
@@ -43,6 +47,8 @@
 }
 
 .device-phone .aphront-form-input,
+.device .aphront-form-input select,
+.device .aphront-form-input pre,
 .phui-form-full-width .aphront-form-input {
   margin-left: 0%;
   margin-right: 0%;
@@ -71,8 +77,8 @@
   padding-top: 5px;
 }
 
-.aphront-dialog-body .phui-form-full-width {
-  margin-top: -10px;
+.aphront-form-label .aphront-form-error {
+  display: none;
 }
 
 .aphront-dialog-body .phui-form-view {
@@ -81,8 +87,15 @@
 
 .device-phone .aphront-form-error,
 .phui-form-full-width .aphront-form-error {
-  float: none;
-  width: 100%;
+  display: none;
+}
+
+.device-phone .aphront-form-label .aphront-form-error,
+.phui-form-full-width .aphront-form-label .aphront-form-error {
+  display: block;
+  float: right;
+  padding: 0;
+  width: auto;
 }
 
 .device-phone .aphront-form-drag-and-drop-upload {
@@ -92,12 +105,16 @@
 .aphront-form-required {
   font-weight: normal;
   color: {$lightgreytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   -webkit-font-smoothing: antialiased;
 }
 
 .aphront-form-input input {
   width: 100%;
+}
+
+.aphront-form-cvc-input input {
+  width: 64px;
 }
 
 .aphront-form-input textarea {
@@ -142,24 +159,18 @@
 }
 
 .phui-form-view .aphront-form-caption {
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   color: {$bluetext};
-  padding: 8px 4px;
-  text-align: right;
+  padding: 8px 0;
   margin-right: 20%;
   margin-left: 20%;
   -webkit-font-smoothing: antialiased;
-  line-height: 15px;
+  line-height: 16px;
 }
 
 .device-phone .phui-form-view .aphront-form-caption,
 .phui-form-full-width .phui-form-view .aphront-form-caption {
-  margin-right: 0%;
-}
-
-/* override for when inside an aphront-panel-view */
-.aphront-panel-view .phui-form-view h1 {
-  padding: 0em 0em .8em 0em;
+  margin: 0;
 }
 
 .aphront-form-instructions {
@@ -188,7 +199,7 @@
 .aphront-form-control-static .aphront-form-input,
 .aphront-form-control-markup .aphront-form-input {
   padding-top: 6px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 .aphront-form-control-togglebuttons .aphront-form-input {
@@ -198,7 +209,7 @@
 table.aphront-form-control-radio-layout,
 table.aphront-form-control-checkbox-layout {
   margin-top: 3px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
 }
 
 table.aphront-form-control-radio-layout th {
@@ -230,9 +241,9 @@ table.aphront-form-control-checkbox-layout th {
 
 .aphront-form-radio-caption {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   font-weight: normal;
-  color: #555;
+  color: {$bluetext};
 }
 
 .aphront-form-control-image span {
@@ -251,17 +262,20 @@ table.aphront-form-control-checkbox-layout th {
   position: relative;
 }
 
-.aphront-form-inset {
-  margin: 0 0 8px;
+.phui-form-inset {
+  margin: 12px 0;
   padding: 8px;
-  background: #fff;
-  border: 1px solid #d4dae0;
+  background: #f7f9fd;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
 }
 
-.aphront-form-inset h1 {
-  color: {$greytext};
-  font-weight: normal;
+.phui-form-inset h1 {
+  color: {$bluetext};
   padding-bottom: 8px;
+  margin-bottom: 8px;
+  font-size: {$biggerfontsize};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .aphront-form-drag-and-drop-file-list {
@@ -270,7 +284,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .drag-and-drop-instructions {
   color: {$darkgreytext};
-  font-size: 11px;
+  font-size: {$smallestfontsize};
   padding: 6px 8px;
 }
 
@@ -319,9 +333,24 @@ table.aphront-form-control-checkbox-layout th {
   font-size: 16px;
 }
 
-.aphront-form-date-container input.aphront-form-date-time-input {
+.aphront-form-date-container .aphront-form-time-input-container,
+.aphront-form-date-container .aphront-form-date-input-container {
+  position: relative;
+  display: inline-block;
   width: 7em;
-  display: inline;
+}
+
+.aphront-form-date-container input.aphront-form-time-input,
+.aphront-form-date-container input.aphront-form-date-input {
+  width: 7em;
+}
+
+.aphront-form-time-input-container div.jx-typeahead-results a.jx-result {
+  border: none;
+}
+
+.phui-time-typeahead-value {
+  padding: 4px;
 }
 
 .fancy-datepicker {
@@ -331,7 +360,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .fancy-datepicker-core {
   padding: 1px;
-  font-size: 12px;
+  font-size: {$smallerfontsize};
   text-align: center;
 }
 
@@ -345,7 +374,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .fancy-datepicker-core .month-table {
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: {$normalfontsize};
   background-color: {$hoverblue};
   border-radius: 2px;
 }
@@ -427,9 +456,25 @@ table.aphront-form-control-checkbox-layout th {
   background-color: white;
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border-radius: 3px;
 }
+
+/* When the activation checkbox for the control is toggled off, visually
+disable the individual controls. We don't actually use the "disabled" property
+because we still want the values to submit. This is just a visual hint that
+the controls won't be used. The controls themselves are still live, work
+properly, and submit values. */
+.datepicker-disabled select,
+.datepicker-disabled .calendar-button,
+.datepicker-disabled input[type="text"] {
+  opacity: 0.5;
+}
+
+.aphront-form-date-container.no-time .aphront-form-time-input{
+  display: none;
+}
+
 
 .login-to-comment {
   margin: 12px;
@@ -438,7 +483,7 @@ table.aphront-form-control-checkbox-layout th {
 .phui-form-divider hr {
   height: 1px;
   border: 0;
-  background: #c0c0c0;
+  background: {$thinblueborder};
   width: 85%;
   margin: 15px auto;
 }
@@ -473,12 +518,24 @@ table.aphront-form-control-checkbox-layout th {
   width: 180px;
 }
 
-
-.aphront-form-choose-table td {
+.phui-form-iconset-table td {
   vertical-align: middle;
   padding: 4px 0;
 }
 
-.aphront-form-choose-table .aphront-form-choose-button-cell {
+.phui-form-iconset-table .phui-form-iconset-button-cell {
   padding: 4px 8px;
+}
+
+.aphront-form-preview-hidden {
+  opacity: 0.5;
+}
+
+.aphront-form-error .phui-icon-view {
+  color: {$lightgreyborder};
+  font-size: 16px;
+}
+
+.device-desktop .aphront-form-error .phui-icon-view:hover {
+  color: {$darkgreyborder};
 }

@@ -3,19 +3,13 @@
 final class PhortunePaymentMethodDisableController
   extends PhortuneController {
 
-  private $methodID;
-
-  public function willProcessRequest(array $data) {
-    $this->methodID = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $method_id = $request->getURIData('id');
 
     $method = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->methodID))
+      ->withIDs(array($method_id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -44,11 +38,10 @@ final class PhortunePaymentMethodDisableController
     }
 
     return $this->newDialog()
-      ->setTitle(pht('Disable Payment Method?'))
-      ->setShortTitle(pht('Disable Payment Method'))
+      ->setTitle(pht('Remove Payment Method'))
       ->appendParagraph(
         pht(
-          'Disable the payment method "%s"?',
+          'Remove the payment method "%s" from your account?',
           phutil_tag(
             'strong',
             array(),
@@ -56,9 +49,9 @@ final class PhortunePaymentMethodDisableController
       ->appendParagraph(
         pht(
           'You will no longer be able to make payments using this payment '.
-          'method. Disabled payment methods can not be reactivated.'))
+          'method.'))
       ->addCancelButton($account_uri)
-      ->addSubmitButton(pht('Disable Payment Method'));
+      ->addSubmitButton(pht('Remove Payment Method'));
   }
 
 }

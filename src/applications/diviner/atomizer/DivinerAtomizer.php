@@ -3,15 +3,15 @@
 /**
  * Generate @{class:DivinerAtom}s from source code.
  */
-abstract class DivinerAtomizer {
+abstract class DivinerAtomizer extends Phobject {
 
   private $book;
   private $fileName;
   private $atomContext;
 
   /**
-   * If you make a significant change to an atomizer, you can bump this
-   * version to drop all the old atom caches.
+   * If you make a significant change to an atomizer, you can bump this version
+   * to drop all the old atom caches.
    */
   public static function getAtomizerVersion() {
     return 1;
@@ -22,7 +22,7 @@ abstract class DivinerAtomizer {
     $this->atomContext = $context;
     $atoms = $this->executeAtomize($file_name, $file_data);
 
-    // Promote the "@group" special to a property. If there's no "@group" on
+    // Promote the `@group` special to a property. If there's no `@group` on
     // an atom but the file it's in matches a group pattern, associate it with
     // the right group.
     foreach ($atoms as $atom) {

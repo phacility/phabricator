@@ -2,89 +2,6 @@
  * @provides aphront-panel-view-css
  */
 
-
-.aphront-panel-view {
-  background: {$lightgreybackground};
-  border: 1px solid #c0c0c0;
-  border-width: 1px 0 0;
-  padding: 8px 16px;
-  margin: 20px 16px 32px 16px;
-}
-
-.device-phone .aphront-panel-view {
-  margin: 20px 8px 40px 8px;
-}
-
-.aphront-unpadded-panel-view {
-  padding: 0;
-}
-
-.aphront-panel-view.aphront-panel-plain {
-  padding: 0;
-  border: none;
-  background: transparent;
-}
-
-.aphront-panel-view .aphront-panel-header {
-  margin: 0 0 8px 0;
-}
-
-.aphront-panel-view h1 {
-  font-size: 16px;
-  font-weight: bold;
-  color: {$darkbluetext};
-  text-shadow: 0 1px 1px #fff;
-  padding: 4px 0 0 0;
-}
-
-.aphront-panel-view h1 a {
-  color: {$darkbluetext};
-  text-decoration: none;
-}
-
-.aphront-panel-view h1 a:hover {
-  text-decoration: underline;
-}
-
-.aphront-panel-plain h1 {
-  padding: 0;
-}
-
-.aphront-panel-view-caption {
-  font-size: 11px;
-  color: {$greytext};
-  margin-top: 4px;
-  margin-bottom: 4px;
-}
-
-.aphront-panel-view-buttons {
-  float: right;
-}
-
-.device-desktop .aphront-panel-width-form {
-  width: 720px;
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.device-desktop .aphront-panel-width-wide {
-  width: 1080px;
-  margin-right: auto;
-  margin-left: auto;
-}
-
-.aphront-panel-accent {
-  background: #f1f1f1;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-}
-
-.aphront-panel-accent .phui-form-view {
-  background: {$lightgreybackground};
-  border: 1px solid #c4c4c0;
-  border-radius: 3px;
-}
-
 .aphront-panel-preview {
   padding: 16px;
 }
@@ -93,41 +10,10 @@
   display: none;
 }
 
-.aphront-panel-preview-wide {
-  width: 1080px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 2em;
-  padding-right: 2em;
-}
-
 .aphront-panel-preview-loading-text {
   color: {$greytext};
 }
 
 .aphront-panel-flush {
   margin: 0;
-}
-
-.aphront-panel-view-drag-and-drop {
-  background: #99ff99;
-  border-color: #669966;
-}
-
-.aphront-panel-view-drag-and-drop .phui-form-view {
-  background: #ccffcc;
-  border-color: #669966;
-}
-
-.aphront-mini-panel-view {
-  background: #fff;
-  padding: 10px;
-  margin: 4px 16px;
-  border: 1px solid {$lightgreyborder};
-  border-bottom: 1px solid {$greyborder};
-}
-
-.aphront-mini-panel-view p {
-  font-size: 12px;
-  color: {$greytext};
 }

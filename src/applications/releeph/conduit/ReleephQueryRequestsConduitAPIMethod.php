@@ -8,23 +8,19 @@ final class ReleephQueryRequestsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Return information about all Releeph requests linked to the given ids.';
+    return pht(
+      'Return information about all Releeph requests linked to the given ids.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revisionPHIDs'         => 'optional list<phid>',
       'requestedCommitPHIDs'  => 'optional list<phid>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $conduit_request) {
@@ -46,31 +42,31 @@ final class ReleephQueryRequestsConduitAPIMethod
       $query->withRequestedCommitPHIDs($requested_commit_phids);
     }
 
-    $releephRequests = $query->execute();
+    $releeph_requests = $query->execute();
 
-    foreach ($releephRequests as $releephRequest) {
-      $branch = $releephRequest->getBranch();
+    foreach ($releeph_requests as $releeph_request) {
+      $branch = $releeph_request->getBranch();
 
-      $request_commit_phid = $releephRequest->getRequestCommitPHID();
+      $request_commit_phid = $releeph_request->getRequestCommitPHID();
 
-      $object = $releephRequest->getRequestedObject();
+      $object = $releeph_request->getRequestedObject();
       if ($object instanceof DifferentialRevision) {
         $object_phid = $object->getPHID();
-      }  else {
+      } else {
         $object_phid = null;
       }
 
-      $status = $releephRequest->getStatus();
-      $statusName = ReleephRequestStatus::getStatusDescriptionFor($status);
-      $url = PhabricatorEnv::getProductionURI('/RQ'.$releephRequest->getID());
+      $status = $releeph_request->getStatus();
+      $status_name = ReleephRequestStatus::getStatusDescriptionFor($status);
+      $url = PhabricatorEnv::getProductionURI('/RQ'.$releeph_request->getID());
 
       $result[] = array(
         'branchBasename' => $branch->getBasename(),
         'branchSymbolic' => $branch->getSymbolicName(),
-        'requestID'      => $releephRequest->getID(),
+        'requestID'      => $releeph_request->getID(),
         'revisionPHID'   => $object_phid,
         'status'         => $status,
-        'statusName'     => $statusName,
+        'status_name'    => $status_name,
         'url'            => $url,
       );
     }

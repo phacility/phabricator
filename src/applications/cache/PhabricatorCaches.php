@@ -1,11 +1,15 @@
 <?php
 
 /**
+ *
+ * @task request    Request Cache
  * @task immutable  Immutable Cache
  * @task setup      Setup Cache
  * @task compress   Compression
  */
-final class PhabricatorCaches {
+final class PhabricatorCaches extends Phobject {
+
+  private static $requestCache;
 
   public static function getNamespace() {
     return PhabricatorEnv::getEnvConfig('phabricator.cache-namespace');
@@ -18,8 +22,39 @@ final class PhabricatorCaches {
       ->setCaches($caches);
   }
 
+/* -(  Request Cache  )------------------------------------------------------ */
 
-/* -(  Local Cache  )-------------------------------------------------------- */
+
+  /**
+   * Get a request cache stack.
+   *
+   * This cache stack is destroyed after each logical request. In particular,
+   * it is destroyed periodically by the daemons, while `static` caches are
+   * not.
+   *
+   * @return PhutilKeyValueCacheStack Request cache stack.
+   */
+  public static function getRequestCache() {
+    if (!self::$requestCache) {
+      self::$requestCache = new PhutilInRequestKeyValueCache();
+    }
+    return self::$requestCache;
+  }
+
+
+  /**
+   * Destroy the request cache.
+   *
+   * This is called at the beginning of each logical request.
+   *
+   * @return void
+   */
+  public static function destroyRequestCache() {
+    self::$requestCache = null;
+  }
+
+
+/* -(  Immutable Cache  )---------------------------------------------------- */
 
 
   /**
@@ -139,6 +174,11 @@ final class PhabricatorCaches {
    * @task setup
    */
   private static function buildSetupCaches() {
+    // If this is the CLI, just build a setup cache.
+    if (php_sapi_name() == 'cli') {
+      return array();
+    }
+
     // In most cases, we should have APC. This is an ideal cache for our
     // purposes -- it's fast and empties on server restart.
     $apc = new PhutilAPCKeyValueCache();
@@ -171,40 +211,12 @@ final class PhabricatorCaches {
     // otherwise (we desire this property to give the cache the best hit rate
     // we can).
 
-    // In some setups, the parent PID is more stable and longer-lived that the
-    // PID (e.g., under apache, our PID will be a worker while the ppid will
-    // be the main httpd process). If we're confident we're running under such
-    // a setup, we can try to use the PPID as the basis for our cache instead
-    // of our own PID.
-    $use_ppid = false;
-
-    switch (php_sapi_name()) {
-      case 'cli-server':
-        // This is the PHP5.4+ built-in webserver. We should use the pid
-        // (the server), not the ppid (probably a shell or something).
-        $use_ppid = false;
-        break;
-      case 'fpm-fcgi':
-        // We should be safe to use PPID here.
-        $use_ppid = true;
-        break;
-      case 'apache2handler':
-        // We're definitely safe to use the PPID.
-        $use_ppid = true;
-        break;
-    }
+    // Unfortunately, we don't have a very good strategy for minimizing the
+    // churn rate of the cache. We previously tried to use the parent process
+    // PID in some cases, but this was not reliable. See T9599 for one case of
+    // this.
 
     $pid_basis = getmypid();
-    if ($use_ppid) {
-      if (function_exists('posix_getppid')) {
-        $parent_pid = posix_getppid();
-        // On most systems, normal processes can never have PIDs lower than 100,
-        // so something likely went wrong if we we get one of these.
-        if ($parent_pid > 100) {
-          $pid_basis = $parent_pid;
-        }
-      }
-    }
 
     // If possible, we also want to know when the process launched, so we can
     // drop the cache if a process restarts but gets the same PID an earlier
@@ -270,7 +282,7 @@ final class PhabricatorCaches {
   }
 
   private static function addNamespaceToCaches(array $caches) {
-    $namespace = PhabricatorCaches::getNamespace();
+    $namespace = self::getNamespace();
     if (!$namespace) {
       return $caches;
     }
@@ -332,7 +344,9 @@ final class PhabricatorCaches {
   public static function inflateData($value) {
     if (!function_exists('gzinflate')) {
       throw new Exception(
-        pht('gzinflate() is not available; unable to read deflated data!'));
+        pht(
+          '%s is not available; unable to read deflated data!',
+          'gzinflate()'));
     }
 
     $value = gzinflate($value);

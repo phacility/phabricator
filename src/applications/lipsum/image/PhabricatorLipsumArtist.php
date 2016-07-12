@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorLipsumArtist {
+abstract class PhabricatorLipsumArtist extends Phobject {
 
   protected function getHSBColor($h, $s, $b) {
     if ($s == 0) {

@@ -23,7 +23,7 @@ final class FundBackerCart extends PhortuneCartImplementation {
     return $this->initiative;
   }
 
-  public function getName() {
+  public function getName(PhortuneCart $cart) {
     return pht('Fund Initiative');
   }
 
@@ -33,8 +33,7 @@ final class FundBackerCart extends PhortuneCartImplementation {
 
     $initiative = $this->getInitiative();
     if (!$initiative) {
-      throw new Exception(
-        pht('Call setInitiative() before building a cart!'));
+      throw new PhutilInvalidStateException('setInitiative');
     }
 
     $cart->setMetadataValue('initiativePHID', $initiative->getPHID());
@@ -79,6 +78,10 @@ final class FundBackerCart extends PhortuneCartImplementation {
 
   public function getDoneURI(PhortuneCart $cart) {
     return '/'.$this->getInitiative()->getMonogram();
+  }
+
+  public function getDoneActionName(PhortuneCart $cart) {
+    return pht('Return to Initiative');
   }
 
 }

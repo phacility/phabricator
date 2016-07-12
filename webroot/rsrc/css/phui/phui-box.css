@@ -4,10 +4,113 @@
 
 .phui-box-border {
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
   background-color: #fff;
+  border-radius: 3px;
 }
 
 .phui-box.focus {
   box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.90);
+}
+
+.phui-box-grey {
+  background-color: #F7F7F9;
+  border-radius: 3px;
+  border-color: rgba({$alphagrey},.2);
+}
+
+.phui-box-blue {
+  background-color: {$bluebackground};
+  border-radius: 3px;
+  border-color: {$thinblueborder};
+}
+
+.phui-box-blue .phui-object-item,
+.phui-box-grey .phui-object-item {
+  background: transparent;
+}
+
+.phui-box-blue .phui-object-item-link,
+.phui-box-grey .phui-object-item-link {
+  color: {$darkbluetext};
+}
+
+.phui-box-blue .phui-object-item-list-view,
+.phui-box-grey .phui-object-item-list-view {
+  background-color: #fff;
+}
+
+.phui-box-blue .phui-header-shell {
+  border-color: {$thinblueborder};
+}
+
+.phui-box-grey .phui-header-shell {
+  border-color: rgba({$alphagrey},.1);
+}
+
+.phui-object-box.phui-box-blue div.phui-info-severity-nodata,
+.phui-object-box.phui-box-grey div.phui-info-severity-nodata {
+  background: transparent;
+  padding: 20px 4px 24px;
+  text-align: center;
+  border: none;
+  color: {$greytext};
+}
+
+
+/* Property Boxes */
+
+.phui-box.phui-box-blue-property {
+  border-radius: 3px;
+  border-color: {$lightblueborder};
+  margin: 0;
+  padding: 0;
+}
+
+.phui-box.phui-box-blue-property .phui-header-header .phui-header-icon {
+  margin-right: 6px;
+}
+
+.phui-box.phui-box-blue-property .phui-header-action-link {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.device .phui-box.phui-box-blue-property {
+  padding: 0;
+}
+
+.phui-box.phui-object-box.phui-box-blue-property .phui-header-shell {
+  background-color: #eff3fc;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  padding: 6px 16px;
+}
+
+body.device .phui-box.phui-box-blue-property .phui-header-shell,
+body.device .phui-box-blue-property.phui-object-box.phui-object-box-collapsed
+  .phui-header-shell {
+    padding: 6px 12px;
+    margin-top: 0;
+}
+
+.phui-box.phui-box-blue-property .phui-header-header {
+  font-size: {$biggerfontsize};
+  color: {$bluetext};
+}
+
+.phui-box-blue-property .phui-object-item-list-view {
+  padding: 2px 8px;
+}
+
+body .phui-box-blue-property.phui-object-box.phui-object-box-collapsed {
+  padding: 0;
+}
+
+body .phui-box-blue-property .phui-header-shell + .phui-object-box {
+  margin-bottom: 0;
+}
+
+.phui-box-blue-property .phui-header-shell + .phui-object-box
+  .phui-header-shell {
+    background: #fff;
 }

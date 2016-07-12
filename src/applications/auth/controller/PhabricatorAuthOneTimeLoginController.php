@@ -3,24 +3,16 @@
 final class PhabricatorAuthOneTimeLoginController
   extends PhabricatorAuthController {
 
-  private $id;
-  private $key;
-  private $emailID;
-  private $linkType;
-
   public function shouldRequireLogin() {
     return false;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->linkType = $data['type'];
-    $this->id = $data['id'];
-    $this->key = $data['key'];
-    $this->emailID = idx($data, 'emailID');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
+    $link_type = $request->getURIData('type');
+    $key = $request->getURIData('key');
+    $email_id = $request->getURIData('emailID');
 
     if ($request->getUser()->isLoggedIn()) {
       return $this->renderError(
@@ -29,7 +21,7 @@ final class PhabricatorAuthOneTimeLoginController
 
     $target_user = id(new PhabricatorPeopleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->executeOne();
     if (!$target_user) {
       return new Aphront404Response();
@@ -58,11 +50,11 @@ final class PhabricatorAuthOneTimeLoginController
     //  - get a "verified" address you don't control.
 
     $target_email = null;
-    if ($this->emailID) {
+    if ($email_id) {
       $target_email = id(new PhabricatorUserEmail())->loadOneWhere(
         'userPHID = %s AND id = %d',
         $target_user->getPHID(),
-        $this->emailID);
+        $email_id);
       if (!$target_email) {
         return new Aphront404Response();
       }
@@ -72,7 +64,7 @@ final class PhabricatorAuthOneTimeLoginController
     $token = $engine->loadOneTimeLoginKey(
       $target_user,
       $target_email,
-      $this->key);
+      $key);
 
     if (!$token) {
       return $this->newDialog()
@@ -92,28 +84,38 @@ final class PhabricatorAuthOneTimeLoginController
         ->addCancelButton('/login/email/', pht('Send Another Email'));
     }
 
+    if (!$target_user->canEstablishWebSessions()) {
+      return $this->newDialog()
+        ->setTitle(pht('Unable to Establish Web Session'))
+        ->setShortTitle(pht('Login Failure'))
+        ->appendParagraph(
+          pht(
+            'You are trying to gain access to an account ("%s") that can not '.
+            'establish a web session.',
+            $target_user->getUsername()))
+        ->appendParagraph(
+          pht(
+            'Special users like daemons and mailing lists are not permitted '.
+            'to log in via the web. Log in as a normal user instead.'))
+        ->addCancelButton('/');
+    }
+
     if ($request->isFormPost()) {
       // If we have an email bound into this URI, verify email so that clicking
       // the link in the "Welcome" email is good enough, without requiring users
       // to go through a second round of email verification.
 
+      $editor = id(new PhabricatorUserEditor())
+        ->setActor($target_user);
+
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         // Nuke the token and all other outstanding password reset tokens.
         // There is no particular security benefit to destroying them all, but
         // it should reduce HackerOne reports of nebulous harm.
-
-        PhabricatorAuthTemporaryToken::revokeTokens(
-          $target_user,
-          array($target_user->getPHID()),
-          array(
-            PhabricatorAuthSessionEngine::ONETIME_TEMPORARY_TOKEN_TYPE,
-            PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE,
-          ));
+        $editor->revokePasswordResetLinks($target_user);
 
         if ($target_email) {
-          id(new PhabricatorUserEditor())
-            ->setActor($target_user)
-            ->verifyEmail($target_user, $target_email);
+          $editor->verifyEmail($target_user, $target_email);
         }
       unset($unguarded);
 
@@ -125,18 +127,22 @@ final class PhabricatorAuthOneTimeLoginController
         // We're going to let the user reset their password without knowing
         // the old one. Generate a one-time token for that.
         $key = Filesystem::readRandomCharacters(16);
+        $password_type =
+          PhabricatorAuthPasswordResetTemporaryTokenType::TOKENTYPE;
 
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
           id(new PhabricatorAuthTemporaryToken())
-            ->setObjectPHID($target_user->getPHID())
-            ->setTokenType(
-              PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE)
+            ->setTokenResource($target_user->getPHID())
+            ->setTokenType($password_type)
             ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
             ->setTokenCode(PhabricatorHash::digest($key))
             ->save();
         unset($unguarded);
 
-        $next = (string)id(new PhutilURI('/settings/panel/password/'))
+        $username = $target_user->getUsername();
+        $panel_uri = "/settings/user/{$username}/page/password/";
+
+        $next = (string)id(new PhutilURI($panel_uri))
           ->setQueryParams(
             array(
               'key' => $key,
@@ -154,7 +160,7 @@ final class PhabricatorAuthOneTimeLoginController
     // then log a user in to an account they control via sneaky invisible
     // form submissions.
 
-    switch ($this->linkType) {
+    switch ($link_type) {
       case PhabricatorAuthSessionEngine::ONETIME_WELCOME:
         $title = pht('Welcome to Phabricator');
         break;

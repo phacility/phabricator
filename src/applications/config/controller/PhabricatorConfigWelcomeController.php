@@ -3,9 +3,8 @@
 final class PhabricatorConfigWelcomeController
   extends PhabricatorConfigController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('welcome/');
@@ -16,14 +15,16 @@ final class PhabricatorConfigWelcomeController
       ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Welcome'));
 
-    $nav->setCrumbs($crumbs);
-    $nav->appendChild($this->buildWelcomeScreen($request));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $this->buildWelcomeScreen($request),
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
   public function buildWelcomeScreen(AphrontRequest $request) {
@@ -31,10 +32,10 @@ final class PhabricatorConfigWelcomeController
     $this->requireResource('config-welcome-css');
 
     $content = pht(
-      "**Welcome to Phabricator!**\n\n".
+      "=== Install Phabricator ===\n\n".
       "You have successfully installed Phabricator. This screen will guide ".
-      "you through configuration and orientation.\n\n".
-      "These steps are optional, and you can go through them in any order.\n\n".
+      "you through configuration and orientation. ".
+      "These steps are optional, and you can go through them in any order. ".
       "If you want to get back to this screen later on, you can find it in ".
       "the **Config** application under **Welcome Screen**.");
 
@@ -42,37 +43,39 @@ final class PhabricatorConfigWelcomeController
 
     $setup[] = $this->newItem(
       $request,
-      pht('Install Phabricator'),
-      true,
+      'fa-check-square-o green',
       $content);
 
-    $issues_resolved = !PhabricatorSetupCheck::getOpenSetupIssueCount();
+    $issues_resolved = !PhabricatorSetupCheck::getOpenSetupIssueKeys();
 
     $setup_href = PhabricatorEnv::getURI('/config/issue/');
     if ($issues_resolved) {
       $content = pht(
-        "You've resolved (or ignored) all outstanding setup issues.\n\n".
+        "=== Resolve Setup Issues ===\n\n".
+        "You've resolved (or ignored) all outstanding setup issues. ".
         "You can review issues in the **Config** application, under ".
         "**[[ %s | Setup Issues ]]**.",
         $setup_href);
+        $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
+        "=== Resolve Setup Issues ===\n\n".
         "You have some unresolved setup issues to take care of. Click ".
         "the link in the yellow banner at the top of the screen to see ".
         "them, or find them in the **Config** application under ".
-        "**[[ %s | Setup Issues ]]**.\n\n".
+        "**[[ %s | Setup Issues ]]**. ".
         "Although most setup issues should be resolved, sometimes an issue ".
-        "is not applicable to an install.\n\n".
+        "is not applicable to an install. ".
         "If you don't intend to fix a setup issue (or don't want to fix ".
         "it for now), you can use the \"Ignore\" action to mark it as ".
         "something you don't plan to deal with.",
         $setup_href);
+        $icon = 'fa-warning red';
     }
 
     $setup[] = $this->newItem(
       $request,
-      pht('Resolve Setup Issues'),
-      $issues_resolved,
+      $icon,
       $content);
 
     $configs = id(new PhabricatorAuthProviderConfigQuery())
@@ -83,26 +86,29 @@ final class PhabricatorConfigWelcomeController
     $have_auth = (bool)$configs;
     if ($have_auth) {
       $content = pht(
+        "=== Login and Registration ===\n\n".
         "You've configured at least one authentication provider, so users ".
-        "can register or log in.\n\n".
+        "can register or log in. ".
         "To configure more providers or adjust settings, use the ".
         "**[[ %s | Auth Application ]]**.",
         $auth_href);
+        $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
-        "You haven't configured any authentication providers yet.\n\n".
+        "=== Login and Registration ===\n\n".
+        "You haven't configured any authentication providers yet. ".
         "Authentication providers allow users to register accounts and ".
         "log in to Phabricator. You can configure Phabricator to accept ".
-        "credentials like username and password, LDAP, or Google OAuth.\n\n".
+        "credentials like username and password, LDAP, or Google OAuth. ".
         "You can configure authentication using the ".
         "**[[ %s | Auth Application ]]**.",
         $auth_href);
+        $icon = 'fa-warning red';
     }
 
     $setup[] = $this->newItem(
       $request,
-      pht('Login and Registration'),
-      $have_auth,
+      $icon,
       $content);
 
     $config_href = PhabricatorEnv::getURI('/config/');
@@ -114,44 +120,56 @@ final class PhabricatorConfigWelcomeController
 
     if ($have_config) {
       $content = pht(
-        "You've configured at least one setting from the web interface.\n\n".
+        "=== Configure Phabricator Settings ===\n\n".
+        "You've configured at least one setting from the web interface. ".
         "To configure more settings later, use the ".
         "**[[ %s | Config Application ]]**.",
         $config_href);
+        $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
+        "=== Configure Phabricator Settings ===\n\n".
         'Many aspects of Phabricator are configurable. To explore and '.
         'adjust settings, use the **[[ %s | Config Application ]]**.',
         $config_href);
+        $icon = 'fa-info-circle';
     }
 
     $setup[] = $this->newItem(
       $request,
-      pht('Configure Phabricator Settings'),
-      $have_config,
+      $icon,
       $content);
 
     $settings_href = PhabricatorEnv::getURI('/settings/');
-    $prefs = $viewer->loadPreferences()->getPreferences();
-    $have_settings = !empty($prefs);
+
+    $preferences = id(new PhabricatorUserPreferencesQuery())
+      ->setViewer($viewer)
+      ->withUsers(array($viewer))
+      ->executeOne();
+
+    $have_settings = ($preferences && $preferences->getPreferences());
+
     if ($have_settings) {
       $content = pht(
-        "You've adjusted at least one setting on your account.\n\n".
+        "=== Adjust Account Settings ===\n\n".
+        "You've adjusted at least one setting on your account. ".
         "To make more adjustments, visit the ".
         "**[[ %s | Settings Application ]]**.",
         $settings_href);
+        $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
+        "=== Adjust Account Settings ===\n\n".
         'You can configure settings for your account by clicking the '.
         'wrench icon in the main menu bar, or visiting the '.
         '**[[ %s | Settings Application ]]** directly.',
         $settings_href);
+        $icon = 'fa-info-circle';
     }
 
     $setup[] = $this->newItem(
       $request,
-      pht('Adjust Account Settings'),
-      $have_settings,
+      $icon,
       $content);
 
     $dashboard_href = PhabricatorEnv::getURI('/dashboard/');
@@ -161,39 +179,43 @@ final class PhabricatorConfigWelcomeController
       'PhabricatorHomeApplication');
     if ($have_dashboard) {
       $content = pht(
+        "=== Customize Home Page ===\n\n".
         "You've installed a default dashboard to replace this welcome screen ".
-        "on the home page.\n\n".
+        "on the home page. ".
         "You can still visit the welcome screen here at any time if you ".
-        "have steps you want to complete later, or if you feel lonely.\n\n".
+        "have steps you want to complete later, or if you feel lonely. ".
         "If you've changed your mind about the dashboard you installed, ".
         "you can install a different default dashboard with the ".
         "**[[ %s | Dashboards Application ]]**.",
         $dashboard_href);
+        $icon = 'fa-check-square-o green';
     } else {
       $content = pht(
+        "=== Customize Home Page ===\n\n".
         "When you're done setting things up, you can create a custom ".
         "dashboard and install it. Your dashboard will replace this ".
-        "welcome screen on the Phabricator home page.\n\n".
+        "welcome screen on the Phabricator home page. ".
         "Dashboards can show users the information that's most important to ".
         "your organization. You can configure them to display things like: ".
         "a custom welcome message, a feed of recent activity, or a list of ".
-        "open tasks, waiting reviews, recent commits, and so on.\n\n".
+        "open tasks, waiting reviews, recent commits, and so on. ".
         "After you install a default dashboard, it will replace this page. ".
         "You can find this page later by visiting the **Config** ".
-        "application, under **Welcome Page**.\n\n".
+        "application, under **Welcome Page**. ".
         "To get started building a dashboard, use the ".
-        "**[[ %s | Dashboards Application ]]**.\n\n",
+        "**[[ %s | Dashboards Application ]]**. ",
         $dashboard_href);
+        $icon = 'fa-info-circle';
     }
 
     $setup[] = $this->newItem(
       $request,
-      pht('Customize Home Page'),
-      $have_dashboard,
+      $icon,
       $content);
 
     $apps_href = PhabricatorEnv::getURI('/applications/');
     $content = pht(
+      "=== Explore Applications ===\n\n".
       "Phabricator is a large suite of applications that work together to ".
       "help you develop software, manage tasks, and communicate. A few of ".
       "the most commonly used applications are pinned to the left navigation ".
@@ -202,28 +224,17 @@ final class PhabricatorConfigWelcomeController
       "uninstall applications you don't plan to use, visit the ".
       "**[[ %s | Applications Application ]]**. You can also click the ".
       "**Applications** button in the left navigation menu, or search for an ".
-      "application by name in the main menu bar.\n\n",
+      "application by name in the main menu bar. ",
       $apps_href);
 
     $explore = array();
     $explore[] = $this->newItem(
       $request,
-      pht('Explore Applications'),
-      null,
+      'fa-globe',
       $content);
 
-    $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
-    $content = pht(
-      'Having trouble getting something set up? See '.
-      '**[[ %s | Give Feedback! Get Support! ]]** for ways to get in touch '.
-      'to get answers to questions, report bugs, and request features.',
-      $support_href);
-
-    $explore[] = $this->newItem(
-      $request,
-      pht('Need Help with Setup?'),
-      null,
-      $content);
+    // TODO: Restore some sort of "Support" link here, but just nuke it for
+    // now as we figure stuff out.
 
     $differential_uri = PhabricatorEnv::getURI('/differential/');
     $differential_create_uri = PhabricatorEnv::getURI(
@@ -238,12 +249,12 @@ final class PhabricatorConfigWelcomeController
     $quick = array();
     $quick[] = $this->newItem(
       $request,
-      pht('Quick Start: Code Review'),
-      null,
+      'fa-gear',
       pht(
-        "Review code with **[[ %s | Differential ]]**.\n\n".
+        "=== Quick Start: Code Review ===\n\n".
+        "Review code with **[[ %s | Differential ]]**. ".
         "Engineers can use Differential to share, review, and approve ".
-        "changes to source code.\n\n".
+        "changes to source code. ".
         "To get started with code review:\n\n".
         "  - **[[ %s | Create a Revision ]]** //(Copy and paste a diff from ".
         "    the command line into the web UI to quickly get a feel for ".
@@ -262,17 +273,17 @@ final class PhabricatorConfigWelcomeController
 
 
     $maniphest_uri = PhabricatorEnv::getURI('/maniphest/');
-    $maniphest_create_uri = PhabricatorEnv::getURI('/maniphest/task/create/');
+    $maniphest_create_uri = PhabricatorEnv::getURI('/maniphest/task/edit/');
     $maniphest_all_uri = PhabricatorEnv::getURI('/maniphest/query/all/');
     $quick[] = $this->newItem(
       $request,
-      pht('Quick Start: Bugs and Tasks'),
-      null,
+      'fa-anchor',
       pht(
+        "=== Quick Start: Bugs and Tasks ===\n\n".
         "Track bugs and tasks in Phabricator with ".
-        "**[[ %s | Maniphest ]]**.\n\n".
+        "**[[ %s | Maniphest ]]**. ".
         "Users in all roles can use Maniphest to manage current and ".
-        "planned work and to track bugs and issues.\n\n".
+        "planned work and to track bugs and issues. ".
         "To get started with bugs and tasks:\n\n".
         "  - **[[ %s | Create a Task ]]**\n".
         "  - **[[ %s | View All Tasks ]]**\n",
@@ -287,12 +298,12 @@ final class PhabricatorConfigWelcomeController
 
     $quick[] = $this->newItem(
       $request,
-      pht('Quick Start: Design Review'),
-      null,
+      'fa-camera-retro',
       pht(
-        "Review proposed designs with **[[ %s | Pholio ]]**.\n\n".
+        "=== Quick Start: Design Review ===\n\n".
+        "Review proposed designs with **[[ %s | Pholio ]]**. ".
         "Designers can use Pholio to share images of what they're working on ".
-        "and show off things they've made.\n\n".
+        "and show off things they've made. ".
         "To get started with design review:\n\n".
         "  - **[[ %s | Create a Mock ]]**\n".
         "  - **[[ %s | View All Mocks ]]**",
@@ -311,15 +322,15 @@ final class PhabricatorConfigWelcomeController
 
     $quick[] = $this->newItem(
       $request,
-      pht('Quick Start: Repositories'),
-      null,
+      'fa-code',
       pht(
+        "=== Quick Start: Repositories ===\n\n".
         "Manage and browse source code repositories with ".
-        "**[[ %s | Diffusion ]]**.\n\n".
-        "Engineers can use Diffusion to browse and audit source code.\n\n".
+        "**[[ %s | Diffusion ]]**. ".
+        "Engineers can use Diffusion to browse and audit source code. ".
         "You can configure Phabricator to host repositories, or have it ".
         "track existing repositories hosted elsewhere (like GitHub, ".
-        "Bitbucket, or an internal server).\n\n".
+        "Bitbucket, or an internal server). ".
         "To get started with repositories:\n\n".
         "  - **[[ %s | Create a New Repository ]]**\n".
         "  - **[[ %s | View All Repositories ]]**\n\n".
@@ -335,72 +346,62 @@ final class PhabricatorConfigWelcomeController
         $diffusion_user_guide,
         $diffusion_setup_guide));
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Welcome to Phabricator'));
 
-    return array(
-      $this->newColumns(pht('Setup and Configuration'), $setup),
-      $this->newColumns(pht('Explore Phabricator'), $explore),
-      $this->newColumns(pht('Quick Start Guides'), $quick),
-    );
+    $setup_header = new PHUIRemarkupView(
+      $viewer, pht('=Setup and Configuration'));
+
+    $explore_header = new PHUIRemarkupView(
+      $viewer, pht('=Explore Phabricator'));
+
+    $quick_header = new PHUIRemarkupView(
+      $viewer, pht('=Quick Start Guide'));
+
+    return id(new PHUIDocumentView())
+      ->setHeader($header)
+      ->setFluid(true)
+      ->appendChild($setup_header)
+      ->appendChild($setup)
+      ->appendChild($explore_header)
+      ->appendChild($explore)
+      ->appendChild($quick_header)
+      ->appendChild($quick);
   }
 
-  private function newColumns($title, array $items) {
-    $col1 = array();
-    $col2 = array();
-    for ($ii = 0; $ii < count($items); $ii += 2) {
-      $col1[] = $items[$ii];
-      if (isset($items[$ii + 1])) {
-        $col2[] = $items[$ii + 1];
-      }
-    }
-
-    $header = id(new PHUIHeaderView())->setHeader($title);
-
-    $columns = id(new AphrontMultiColumnView())
-      ->addColumn($col1)
-      ->addColumn($col2)
-      ->setFluidLayout(true);
-
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'config-welcome',
-      ),
-      array(
-        $header,
-        $columns,
-      ));
-  }
-
-  private function newItem(AphrontRequest $request, $title, $done, $content) {
+  private function newItem(AphrontRequest $request, $icon, $content) {
     $viewer = $request->getUser();
 
-    $box = new PHUIObjectBoxView();
-    $header = new PHUIActionHeaderView();
-    $header->setHeaderTitle($title);
-    if ($done === true) {
-      $box->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN);
-      $header->addAction(id(new PHUIIconView())->setIconFont('fa-check'));
-    } else if ($done === false) {
-      $box->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET);
-      $header->addAction(id(new PHUIIconView())->setIconFont('fa-exclamation'));
-    }
+    $icon = id(new PHUIIconView())
+      ->setIcon($icon.' fa-2x');
 
-    $content = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($content),
-      'default',
-      $viewer);
+    $content = new PHUIRemarkupView($viewer, $content);
+
+    $icon = phutil_tag(
+      'div',
+      array(
+        'class' => 'config-welcome-icon',
+      ),
+      $icon);
 
     $content = phutil_tag(
       'div',
       array(
-        'class' => 'config-welcome-box-content',
+        'class' => 'config-welcome-content',
       ),
       $content);
 
-    $box->setHeader($header);
-    $box->appendChild($content);
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => 'config-welcome-box grouped',
+      ),
+      array(
+        $icon,
+        $content,
+      ));
 
-    return $box;
+    return $view;
   }
 
 }

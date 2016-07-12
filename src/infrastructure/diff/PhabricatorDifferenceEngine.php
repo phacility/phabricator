@@ -7,7 +7,7 @@
  * @task config Configuring the Engine
  * @task diff Generating Diffs
  */
-final class PhabricatorDifferenceEngine {
+final class PhabricatorDifferenceEngine extends Phobject {
 
 
   private $ignoreWhitespace;
@@ -163,7 +163,8 @@ final class PhabricatorDifferenceEngine {
     $diff = $this->generateRawDiffFromFileContent($old, $new);
 
     $changes = id(new ArcanistDiffParser())->parseDiff($diff);
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newEphemeralFromRawChanges(
+      $changes);
     return head($diff->getChangesets());
   }
 

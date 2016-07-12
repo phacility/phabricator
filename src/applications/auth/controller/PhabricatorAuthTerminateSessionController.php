@@ -3,23 +3,17 @@
 final class PhabricatorAuthTerminateSessionController
   extends PhabricatorAuthController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $is_all = ($this->id === 'all');
+    $is_all = ($id === 'all');
 
     $query = id(new PhabricatorAuthSessionQuery())
       ->setViewer($viewer)
       ->withIdentityPHIDs(array($viewer->getPHID()));
     if (!$is_all) {
-      $query->withIDs(array($this->id));
+      $query->withIDs(array($id));
     }
 
     $current_key = PhabricatorHash::digest(
@@ -27,7 +21,10 @@ final class PhabricatorAuthTerminateSessionController
 
     $sessions = $query->execute();
     foreach ($sessions as $key => $session) {
-      if ($session->getSessionKey() == $current_key) {
+      $is_current = phutil_hashes_are_identical(
+        $session->getSessionKey(),
+        $current_key);
+      if ($is_current) {
         // Don't terminate the current login session.
         unset($sessions[$key]);
       }

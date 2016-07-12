@@ -12,6 +12,10 @@ final class PholioImagePHIDType extends PhabricatorPHIDType {
     return new PholioImage();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPholioApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

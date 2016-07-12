@@ -15,27 +15,25 @@ final class DivinerSectionView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'div';
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     return array(
       'class' => 'diviner-document-section',
     );
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     require_celerity_resource('diviner-shared-css');
 
     $header = id(new PHUIHeaderView())
       ->setBleedHeader(true)
+      ->addClass('diviner-section-header')
       ->setHeader($this->header);
 
-    $content = id(new PHUIBoxView())
-      ->addPadding(PHUI::PADDING_LARGE_LEFT)
-      ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-      ->appendChild($this->content);
+    $content = phutil_tag_div('diviner-section-content', $this->content);
 
     return array($header, $content);
   }

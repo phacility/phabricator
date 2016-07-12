@@ -18,6 +18,8 @@ abstract class PhabricatorApplicationTransactionComment
   protected $contentSource;
   protected $isDeleted = 0;
 
+  private $oldComment = self::ATTACHABLE;
+
   abstract public function getApplicationTransactionObject();
 
   public function generatePHID() {
@@ -25,7 +27,7 @@ abstract class PhabricatorApplicationTransactionComment
       PhabricatorPHIDConstants::PHID_TYPE_XCMT);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -83,6 +85,20 @@ abstract class PhabricatorApplicationTransactionComment
       $this->setIsDeleted(0);
     }
     return $this;
+  }
+
+  public function attachOldComment(
+    PhabricatorApplicationTransactionComment $old_comment) {
+    $this->oldComment = $old_comment;
+    return $this;
+  }
+
+  public function getOldComment() {
+    return $this->assertAttached($this->oldComment);
+  }
+
+  public function hasOldComment() {
+    return ($this->oldComment !== self::ATTACHABLE);
   }
 
 
@@ -143,8 +159,9 @@ abstract class PhabricatorApplicationTransactionComment
   }
 
   public function describeAutomaticCapability($capability) {
-    // TODO: (T603) Policies are murky.
-    return null;
+    return pht(
+      'Comments are visible to users who can see the object which was '.
+      'commented on. Comments can be edited by their authors.');
   }
 
 

@@ -1,0 +1,97 @@
+/**
+ * @provides project-view-css
+ */
+
+.project-view-header-tag {
+  margin-left: 8px;
+  font-size: {$normalfontsize};
+  color: {$bluetext};
+  font-family: {$fontfamily};
+  font-weight: normal;
+}
+
+.device-phone .project-view-header-tag {
+  display: block;
+  margin-left: -4px;
+}
+
+.project-view-header-tag .phui-icon-view {
+  color: {$bluetext};
+}
+
+.device .project-view-home .phui-two-column-row {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.project-view-home .phui-box.project-view-properties {
+  margin: 0 0 16px 0;
+  padding: 0;
+  border: 1px solid rgba({$alphagrey}, .2);
+  background-color: #fff;
+}
+
+.device-desktop .phui-two-column-view .project-view-properties
+  .phui-property-list-container {
+    padding: 12px 0;
+  }
+
+.device-phone .phui-box.project-view-properties {
+  margin: 0 12px 0 12px;
+}
+
+.project-view-properties .phui-property-list-container +
+  .phui-property-list-text-content {
+  border-color: rgba({$alphagrey},.2);
+}
+
+.project-view-properties .phui-property-list-key {
+  width: auto;
+  margin-left: 4px;
+}
+
+.project-view-properties .phui-property-list-section-header {
+  border: none;
+  padding: 12px 4px 0;
+}
+
+.project-view-feed.phui-object-box.phui-box-border {
+  border: 1px solid rgba({$alphagrey}, .2);
+}
+
+.project-view-home .phui-box-grey {
+  padding: 0;
+}
+
+.project-view-home .phui-box-grey .phui-header-shell {
+  padding: 6px 6px 6px 12px;
+}
+
+.project-view-home .phui-box-grey .phui-header-header {
+  font-size: {$biggerfontsize};
+}
+
+.project-view-home .phui-box-grey .phui-header-action-link {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.project-view-home .phui-box-grey .phui-object-item-list-view {
+  padding: 4px 8px 0 8px;
+}
+
+.project-view-badges .phui-badge-flex-view {
+  background-color: #fff;
+}
+
+.project-view-home .phui-box-grey .phui-object-item-attribute .phui-icon-view {
+  color: {$lightgreytext};
+}
+
+.profile-no-badges {
+  padding: 24px 0;
+}
+
+.project-view-home .phabricator-remarkup .remarkup-code-block pre {
+  white-space: pre-wrap;
+}

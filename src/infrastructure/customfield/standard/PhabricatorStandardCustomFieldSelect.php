@@ -38,8 +38,7 @@ final class PhabricatorStandardCustomFieldSelect
   public function appendToApplicationSearchForm(
     PhabricatorApplicationSearchEngine $engine,
     AphrontFormView $form,
-    $value,
-    array $handles) {
+    $value) {
 
     if (!is_array($value)) {
       $value = array();
@@ -60,7 +59,7 @@ final class PhabricatorStandardCustomFieldSelect
     $form->appendChild($control);
   }
 
-  private function getOptions() {
+  public function getOptions() {
     return $this->getFieldConfigValue('options', array());
   }
 
@@ -79,7 +78,6 @@ final class PhabricatorStandardCustomFieldSelect
     }
     return idx($this->getOptions(), $this->getFieldValue());
   }
-
 
   public function getApplicationTransactionTitle(
     PhabricatorApplicationTransaction $xaction) {
@@ -109,6 +107,45 @@ final class PhabricatorStandardCustomFieldSelect
         $old,
         $new);
     }
+  }
+
+  public function shouldAppearInHerald() {
+    return true;
+  }
+
+  public function getHeraldFieldConditions() {
+    return array(
+      HeraldAdapter::CONDITION_IS_ANY,
+      HeraldAdapter::CONDITION_IS_NOT_ANY,
+    );
+  }
+
+  public function getHeraldFieldValueType($condition) {
+    $parameters = array(
+      'object' => get_class($this->getObject()),
+      'role' => PhabricatorCustomField::ROLE_HERALD,
+      'key' => $this->getFieldKey(),
+    );
+
+    $datasource = id(new PhabricatorStandardSelectCustomFieldDatasource())
+      ->setParameters($parameters);
+
+    return id(new HeraldTokenizerFieldValue())
+      ->setKey('custom.'.$this->getFieldKey())
+      ->setDatasource($datasource)
+      ->setValueMap($this->getOptions());
+  }
+
+  protected function getHTTPParameterType() {
+    return new AphrontSelectHTTPParameterType();
+  }
+
+  protected function newConduitSearchParameterType() {
+    return new ConduitStringListParameterType();
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
   }
 
 }

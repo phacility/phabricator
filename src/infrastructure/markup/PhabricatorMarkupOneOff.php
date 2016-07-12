@@ -1,22 +1,17 @@
 <?php
 
 /**
- * Concrete object for accessing the markup engine with arbitrary blobs of
- * text, like form instructions. Usage:
- *
- *   $output = PhabricatorMarkupEngine::renderOneObject(
- *     id(new PhabricatorMarkupOneOff())->setContent($some_content),
- *     'default',
- *     $viewer);
- *
- * This is less efficient than batching rendering, but appropriate for small
- * amounts of one-off text in form instructions.
+ * DEPRECATED. Use @{class:PHUIRemarkupView}.
  */
-final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
+final class PhabricatorMarkupOneOff
+  extends Phobject
+  implements PhabricatorMarkupInterface {
 
   private $content;
   private $preserveLinebreaks;
   private $engineRuleset;
+  private $engine;
+  private $disableCache;
 
   public function setEngineRuleset($engine_ruleset) {
     $this->engineRuleset = $engine_ruleset;
@@ -41,11 +36,33 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
     return $this->content;
   }
 
+  public function setEngine(PhutilMarkupEngine $engine) {
+    $this->engine = $engine;
+    return $this;
+  }
+
+  public function getEngine() {
+    return $this->engine;
+  }
+
+  public function setDisableCache($disable_cache) {
+    $this->disableCache = $disable_cache;
+    return $this;
+  }
+
+  public function getDisableCache() {
+    return $this->disableCache;
+  }
+
   public function getMarkupFieldKey($field) {
     return PhabricatorHash::digestForIndex($this->getContent()).':oneoff';
   }
 
   public function newMarkupEngine($field) {
+    if ($this->engine) {
+      return $this->engine;
+    }
+
     if ($this->engineRuleset) {
       return PhabricatorMarkupEngine::getEngine($this->engineRuleset);
     } else if ($this->preserveLinebreaks) {
@@ -74,6 +91,10 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
   }
 
   public function shouldUseMarkupCache($field) {
+    if ($this->getDisableCache()) {
+      return false;
+    }
+
     return true;
   }
 

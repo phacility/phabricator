@@ -5,7 +5,11 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ids;
   private $phids;
   private $domain;
+  private $statuses;
+
   private $needBloggers;
+  private $needProfileImage;
+  private $needHeaderImage;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -22,54 +26,116 @@ final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  protected function loadPage() {
-    $table  = new PhameBlog();
-    $conn_r = $table->establishConnection('r');
-
-    $where_clause = $this->buildWhereClause($conn_r);
-    $order_clause = $this->buildOrderClause($conn_r);
-    $limit_clause = $this->buildLimitClause($conn_r);
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T b %Q %Q %Q',
-      $table->getTableName(),
-      $where_clause,
-      $order_clause,
-      $limit_clause);
-
-    $blogs = $table->loadAllFromArray($data);
-
-    return $blogs;
+  public function withStatuses(array $status) {
+    $this->statuses = $status;
+    return $this;
   }
 
-  private function buildWhereClause($conn_r) {
-    $where = array();
+  public function needProfileImage($need) {
+    $this->needProfileImage = $need;
+    return $this;
+  }
 
-    if ($this->ids) {
+  public function needHeaderImage($need) {
+    $this->needHeaderImage = $need;
+    return $this;
+  }
+
+  public function newResultObject() {
+    return new PhameBlog();
+  }
+
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
+    }
+
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn,
         'id IN (%Ls)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->domain) {
+    if ($this->domain !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'domain = %s',
         $this->domain);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    return $where;
+  }
 
-    return $this->formatWhereClause($where);
+  protected function didFilterPage(array $blogs) {
+    if ($this->needProfileImage) {
+      $default = null;
+
+      $file_phids = mpull($blogs, 'getProfileImagePHID');
+      $file_phids = array_filter($file_phids);
+      if ($file_phids) {
+        $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+      } else {
+        $files = array();
+      }
+
+      foreach ($blogs as $blog) {
+        $file = idx($files, $blog->getProfileImagePHID());
+        if (!$file) {
+          if (!$default) {
+            $default = PhabricatorFile::loadBuiltin(
+              $this->getViewer(),
+              'blog.png');
+          }
+          $file = $default;
+        }
+        $blog->attachProfileImageFile($file);
+      }
+    }
+
+    if ($this->needHeaderImage) {
+      $file_phids = mpull($blogs, 'getHeaderImagePHID');
+      $file_phids = array_filter($file_phids);
+      if ($file_phids) {
+        $files = id(new PhabricatorFileQuery())
+          ->setParentQuery($this)
+          ->setViewer($this->getViewer())
+          ->withPHIDs($file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+      } else {
+        $files = array();
+      }
+
+      foreach ($blogs as $blog) {
+        $file = idx($files, $blog->getHeaderImagePHID());
+        if ($file) {
+          $blog->attachHeaderImageFile($file);
+        }
+      }
+    }
+    return $blogs;
   }
 
   public function getQueryApplicationClass() {

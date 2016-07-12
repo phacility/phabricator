@@ -2,28 +2,36 @@
 
 final class NuanceItem
   extends NuanceDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
-  const STATUS_OPEN     = 0;
-  const STATUS_ASSIGNED = 10;
-  const STATUS_CLOSED   = 20;
+  const STATUS_IMPORTING = 'importing';
+  const STATUS_ROUTING = 'routing';
+  const STATUS_OPEN = 'open';
+  const STATUS_ASSIGNED = 'assigned';
+  const STATUS_CLOSED = 'closed';
 
   protected $status;
   protected $ownerPHID;
   protected $requestorPHID;
   protected $sourcePHID;
-  protected $sourceLabel;
-  protected $data;
+  protected $queuePHID;
+  protected $itemType;
+  protected $itemKey;
+  protected $itemContainerKey;
+  protected $data = array();
   protected $mailKey;
-  protected $dateNuanced;
 
-  public static function initializeNewItem(PhabricatorUser $user) {
+  private $source = self::ATTACHABLE;
+  private $implementation = self::ATTACHABLE;
+
+  public static function initializeNewItem() {
     return id(new NuanceItem())
-      ->setDateNuanced(time())
-      ->setStatus(NuanceItem::STATUS_OPEN);
+      ->setStatus(self::STATUS_OPEN);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -31,20 +39,33 @@ final class NuanceItem
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'ownerPHID' => 'phid?',
-        'sourceLabel' => 'text255?',
-        'status' => 'uint32',
+        'requestorPHID' => 'phid?',
+        'queuePHID' => 'phid?',
+        'itemType' => 'text64',
+        'itemKey' => 'text64',
+        'itemContainerKey' => 'text64?',
+        'status' => 'text32',
         'mailKey' => 'bytes20',
-        'dateNuanced' => 'epoch',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_source' => array(
-          'columns' => array('sourcePHID', 'status', 'dateNuanced', 'id'),
+          'columns' => array('sourcePHID', 'status'),
         ),
         'key_owner' => array(
-          'columns' => array('ownerPHID', 'status', 'dateNuanced', 'id'),
+          'columns' => array('ownerPHID', 'status'),
         ),
-        'key_contacter' => array(
-          'columns' => array('requestorPHID', 'status', 'dateNuanced', 'id'),
+        'key_requestor' => array(
+          'columns' => array('requestorPHID', 'status'),
+        ),
+        'key_queue' => array(
+          'columns' => array('queuePHID', 'status'),
+        ),
+        'key_container' => array(
+          'columns' => array('sourcePHID', 'itemContainerKey'),
+        ),
+        'key_item' => array(
+          'columns' => array('sourcePHID', 'itemKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -66,32 +87,21 @@ final class NuanceItem
     return '/nuance/item/view/'.$this->getID().'/';
   }
 
-  public function getLabel(PhabricatorUser $viewer) {
-    // this is generated at the time the item is created based on
-    // the configuration from the item source. It is typically
-    // something like 'Twitter'.
-    $source_label = $this->getSourceLabel();
-
-    return pht(
-      'Item via %s @ %s.',
-      $source_label,
-      phabricator_datetime($this->getDateCreated(), $viewer));
-  }
-
-  public function getRequestor() {
-    return $this->assertAttached($this->requestor);
-  }
-
-  public function attachRequestor(NuanceRequestor $requestor) {
-    return $this->requestor = $requestor;
-  }
-
   public function getSource() {
     return $this->assertAttached($this->source);
   }
 
   public function attachSource(NuanceSource $source) {
     $this->source = $source;
+  }
+
+  public function getItemProperty($key, $default = null) {
+    return idx($this->data, $key, $default);
+  }
+
+  public function setItemProperty($key, $value) {
+    $this->data[$key] = $value;
+    return $this;
   }
 
   public function getCapabilities() {
@@ -121,17 +131,67 @@ final class NuanceItem
     return null;
   }
 
-  public function toDictionary() {
-    return array(
-      'id' => $this->getID(),
-      'phid' => $this->getPHID(),
-      'ownerPHID' => $this->getOwnerPHID(),
-      'requestorPHID' => $this->getRequestorPHID(),
-      'sourcePHID' => $this->getSourcePHID(),
-      'sourceLabel' => $this->getSourceLabel(),
-      'dateCreated' => $this->getDateCreated(),
-      'dateModified' => $this->getDateModified(),
-      'dateNuanced' => $this->getDateNuanced(),
-    );
+  public function getDisplayName() {
+    return $this->getImplementation()->getItemDisplayName($this);
   }
+
+  public function scheduleUpdate() {
+    PhabricatorWorker::scheduleTask(
+      'NuanceItemUpdateWorker',
+      array(
+        'itemPHID' => $this->getPHID(),
+      ),
+      array(
+        'objectPHID' => $this->getPHID(),
+      ));
+  }
+
+  public function issueCommand(
+    $author_phid,
+    $command,
+    array $parameters = array()) {
+
+    $command = id(NuanceItemCommand::initializeNewCommand())
+      ->setItemPHID($this->getPHID())
+      ->setAuthorPHID($author_phid)
+      ->setCommand($command)
+      ->setParameters($parameters)
+      ->save();
+
+    $this->scheduleUpdate();
+
+    return $this;
+  }
+
+  public function getImplementation() {
+    return $this->assertAttached($this->implementation);
+  }
+
+  public function attachImplementation(NuanceItemType $type) {
+    $this->implementation = $type;
+    return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new NuanceItemEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new NuanceItemTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
+  }
+
 }

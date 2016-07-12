@@ -134,6 +134,12 @@
 .phui-icon-view.indigo {
   color: {$indigo};
 }
+.phui-icon-view.pink {
+  color: {$pink};
+}
+.phui-icon-view.fire {
+  color: {$fire};
+}
 .phui-icon-view.violet {
   color: {$violet};
 }
@@ -142,7 +148,7 @@
 }
 .phui-icon-view.lightgreytext,
 .phui-icon-view.grey {
-  color: {$lightgreytext};
+  color: rgba({$alphagrey},0.3);
 }
 
 /* Hovers */

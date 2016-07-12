@@ -7,6 +7,7 @@ final class DiffusionRepositoryRef extends Phobject {
 
   private $shortName;
   private $commitIdentifier;
+  private $refType;
   private $rawFields = array();
 
   public function setRawFields(array $raw_fields) {
@@ -36,6 +37,25 @@ final class DiffusionRepositoryRef extends Phobject {
     return $this->shortName;
   }
 
+  public function setRefType($ref_type) {
+    $this->refType = $ref_type;
+    return $this;
+  }
+
+  public function getRefType() {
+    return $this->refType;
+  }
+
+  public function isBranch() {
+    $type_branch = PhabricatorRepositoryRefCursor::TYPE_BRANCH;
+    return ($this->getRefType() === $type_branch);
+  }
+
+  public function isTag() {
+    $type_tag = PhabricatorRepositoryRefCursor::TYPE_TAG;
+    return ($this->getRefType() === $type_tag);
+  }
+
 
 /* -(  Serialization  )------------------------------------------------------ */
 
@@ -44,6 +64,7 @@ final class DiffusionRepositoryRef extends Phobject {
     return array(
       'shortName' => $this->shortName,
       'commitIdentifier' => $this->commitIdentifier,
+      'refType' => $this->refType,
       'rawFields' => $this->rawFields,
     );
   }
@@ -52,6 +73,7 @@ final class DiffusionRepositoryRef extends Phobject {
     return id(new DiffusionRepositoryRef())
       ->setShortName($dict['shortName'])
       ->setCommitIdentifier($dict['commitIdentifier'])
+      ->setRefType($dict['refType'])
       ->setRawFields($dict['rawFields']);
   }
 

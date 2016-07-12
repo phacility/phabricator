@@ -14,7 +14,7 @@ final class ReleephSummaryFieldSpecification
   }
 
   public function getName() {
-    return 'Summary';
+    return pht('Summary');
   }
 
   public function getStorageKey() {
@@ -25,26 +25,26 @@ final class ReleephSummaryFieldSpecification
 
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
-      ->setLabel('Summary')
+      ->setLabel(pht('Summary'))
       ->setName('summary')
       ->setError($this->error)
       ->setValue($this->getValue())
-      ->setCaption(
-        'Leave this blank to use the original commit title');
+      ->setCaption(pht('Leave this blank to use the original commit title'));
   }
 
   public function renderHelpForArcanist() {
-    $text =
-      "A one-line title summarizing this request. ".
-      "Leave blank to use the original commit title.\n";
+    $text = pht(
+      'A one-line title summarizing this request. '.
+      'Leave blank to use the original commit title.')."\n";
     return phutil_console_wrap($text, 8);
   }
 
   public function validate($summary) {
     if ($summary && strlen($summary) > self::MAX_SUMMARY_LENGTH) {
-      $this->error = 'Too long!';
+      $this->error = pht('Too long!');
       throw new ReleephFieldParseException(
-        $this, sprintf(
+        $this,
+        pht(
           'Please keep your summary to under %d characters.',
           self::MAX_SUMMARY_LENGTH));
     }

@@ -49,8 +49,7 @@ final class PhrequentTrackController
           return $this->newDialog()
             ->setTitle(pht('Not Tracking Time'))
             ->appendParagraph(
-              pht(
-                'You are not currently tracking time on this object.'))
+              pht('You are not currently tracking time on this object.'))
             ->addCancelButton($done_uri);
         }
         break;
@@ -62,22 +61,22 @@ final class PhrequentTrackController
     $v_note = null;
     $e_date = null;
 
-    $epoch_control = id(new AphrontFormDateControl())
-      ->setUser($viewer)
-      ->setName('epoch')
-      ->setLabel($action_text)
-      ->setValue(time());
+    $timestamp = AphrontFormDateControlValue::newFromEpoch(
+      $viewer,
+      time());
 
     if ($request->isDialogFormPost()) {
       $v_note = $request->getStr('note');
-      $timestamp = $epoch_control->readValueFromRequest($request);
+      $timestamp = AphrontFormDateControlValue::newFromRequest(
+        $request,
+        'epoch');
 
-      if (!$epoch_control->isValid()) {
-        $errors[] = pht('Please choose an valid date.');
+      if (!$timestamp->isValid()) {
+        $errors[] = pht('Please choose a valid date.');
         $e_date = pht('Invalid');
       } else {
         $max_time = PhabricatorTime::getNow();
-        if ($timestamp > $max_time) {
+        if ($timestamp->getEpoch() > $max_time) {
           if ($this->isStoppingTracking()) {
             $errors[] = pht(
               'You can not stop tracking time at a future time. Enter the '.
@@ -92,9 +91,8 @@ final class PhrequentTrackController
 
         if ($this->isStoppingTracking()) {
           $min_time = $current_timer->getDateStarted();
-          if ($min_time > $timestamp) {
-            $errors[] = pht(
-              'Stop time must be after start time.');
+          if ($min_time > $timestamp->getEpoch()) {
+            $errors[] = pht('Stop time must be after start time.');
             $e_date = pht('Invalid');
           }
         }
@@ -103,17 +101,22 @@ final class PhrequentTrackController
       if (!$errors) {
         $editor = new PhrequentTrackingEditor();
         if ($this->isStartingTracking()) {
-          $editor->startTracking($viewer, $this->phid, $timestamp);
+          $editor->startTracking(
+            $viewer,
+            $this->phid,
+            $timestamp->getEpoch());
         } else if ($this->isStoppingTracking()) {
-          $editor->stopTracking($viewer, $this->phid, $timestamp, $v_note);
+          $editor->stopTracking(
+            $viewer,
+            $this->phid,
+            $timestamp->getEpoch(),
+            $v_note);
         }
 
         return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
 
     }
-
-    $epoch_control->setError($e_date);
 
     $dialog = $this->newDialog()
       ->setTitle($title_text)
@@ -136,7 +139,13 @@ final class PhrequentTrackController
           ->setValue($start_string));
     }
 
-    $form->appendChild($epoch_control);
+    $form->appendChild(
+      id(new AphrontFormDateControl())
+        ->setUser($viewer)
+        ->setName('epoch')
+        ->setLabel($action_text)
+        ->setError($e_date)
+        ->setValue($timestamp));
 
     if ($this->isStoppingTracking()) {
       $form->appendChild(

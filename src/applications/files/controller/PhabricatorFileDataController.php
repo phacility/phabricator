@@ -4,32 +4,16 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
 
   private $phid;
   private $key;
-  private $token;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-    $this->key  = $data['key'];
-    $this->token = idx($data, 'token');
-  }
+  private $file;
 
   public function shouldRequireLogin() {
     return false;
   }
 
-  protected function checkFileAndToken($file) {
-    if (!$file) {
-      return new Aphront404Response();
-    }
-
-    if (!$file->validateSecretKey($this->key)) {
-      return new Aphront403Response();
-    }
-
-    return null;
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $this->phid = $request->getURIData('phid');
+    $this->key = $request->getURIData('key');
 
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
@@ -38,110 +22,39 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $req_domain = $request->getHost();
     $main_domain = id(new PhutilURI($base_uri))->getDomain();
 
-    $cache_response = true;
-
-    if (empty($alt) || $main_domain == $alt_domain) {
-      // Alternate files domain isn't configured or it's set
-      // to the same as the default domain
-
-      // load the file with permissions checks;
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer($request->getUser())
-        ->withPHIDs(array($this->phid))
-        ->executeOne();
-
-      $error_response = $this->checkFileAndToken($file);
-      if ($error_response) {
-        return $error_response;
-      }
-
-      // when the file is not CDNable, don't allow cache
-      $cache_response = $file->getCanCDN();
+    if (!strlen($alt) || $main_domain == $alt_domain) {
+      // No alternate domain.
+      $should_redirect = false;
+      $is_alternate_domain = false;
     } else if ($req_domain != $alt_domain) {
-      // Alternate domain is configured but this request isn't using it
+      // Alternate domain, but this request is on the main domain.
+      $should_redirect = true;
+      $is_alternate_domain = false;
+    } else {
+      // Alternate domain, and on the alternate domain.
+      $should_redirect = false;
+      $is_alternate_domain = true;
+    }
 
-      // load the file with permissions checks;
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer($request->getUser())
-        ->withPHIDs(array($this->phid))
-        ->executeOne();
+    $response = $this->loadFile();
+    if ($response) {
+      return $response;
+    }
 
-      $error_response = $this->checkFileAndToken($file);
-      if ($error_response) {
-        return $error_response;
-      }
+    $file = $this->getFile();
 
-      // if the user can see the file, generate a token;
-      // redirect to the alt domain with the token;
+    if ($should_redirect) {
       return id(new AphrontRedirectResponse())
         ->setIsExternal(true)
-        ->setURI($file->getCDNURIWithToken());
-
-    } else {
-      // We are using the alternate domain
-
-      // load the file, bypassing permission checks;
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs(array($this->phid))
-        ->executeOne();
-
-      $error_response = $this->checkFileAndToken($file);
-      if ($error_response) {
-        return $error_response;
-      }
-
-      $acquire_token_uri = id(new PhutilURI($file->getViewURI()))
-        ->setDomain($main_domain);
-
-
-      if ($this->token) {
-        // validate the token, if it is valid, continue
-        $validated_token = $file->validateOneTimeToken($this->token);
-
-        if (!$validated_token) {
-          $dialog = $this->newDialog()
-            ->setShortTitle(pht('Expired File'))
-            ->setTitle(pht('File Link Has Expired'))
-            ->appendParagraph(
-              pht(
-                'The link you followed to view this file is invalid or '.
-                'expired.'))
-            ->appendParagraph(
-              pht(
-                'Continue to generate a new link to the file. You may be '.
-                'required to log in.'))
-            ->addCancelButton(
-              $acquire_token_uri,
-              pht('Continue'));
-
-          // Build an explicit response so we can respond with HTTP/403 instead
-          // of HTTP/200.
-          $response = id(new AphrontDialogResponse())
-            ->setDialog($dialog)
-            ->setHTTPResponseCode(403);
-
-          return $response;
-        }
-        // return the file data without cache headers
-        $cache_response = false;
-      } else if (!$file->getCanCDN()) {
-        // file cannot be served via cdn, and no token given
-        // redirect to the main domain to aquire a token
-
-        // This is marked as an "external" URI because it is fully qualified.
-        return id(new AphrontRedirectResponse())
-          ->setIsExternal(true)
-          ->setURI($acquire_token_uri);
-      }
+        ->setURI($file->getCDNURI());
     }
 
-    $data = $file->loadFileData();
     $response = new AphrontFileResponse();
-    $response->setContent($data);
-    if ($cache_response) {
-      $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
-    }
+    $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
+    $response->setCanCDN($file->getCanCDN());
+
+    $begin = null;
+    $end = null;
 
     // NOTE: It's important to accept "Range" requests when playing audio.
     // If we don't, Safari has difficulty figuring out how long sounds are
@@ -152,23 +65,26 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     if ($range) {
       $matches = null;
       if (preg_match('/^bytes=(\d+)-(\d+)$/', $range, $matches)) {
+        // Note that the "Range" header specifies bytes differently than
+        // we do internally: the range 0-1 has 2 bytes (byte 0 and byte 1).
+        $begin = (int)$matches[1];
+        $end = (int)$matches[2] + 1;
+
         $response->setHTTPResponseCode(206);
-        $response->setRange((int)$matches[1], (int)$matches[2]);
+        $response->setRange($begin, ($end - 1));
       }
-    } else if (isset($validated_token)) {
-      // consume the one-time token if we have one.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $validated_token->delete();
-      unset($unguarded);
     }
 
     $is_viewable = $file->isViewableInBrowser();
     $force_download = $request->getExists('download');
 
+    $request_type = $request->getHTTPHeader('X-Phabricator-Request-Type');
+    $is_lfs = ($request_type == 'git-lfs');
+
     if ($is_viewable && !$force_download) {
       $response->setMimeType($file->getViewableMimeType());
     } else {
-      if (!$request->isHTTPPost() && !$alt_domain) {
+      if (!$request->isHTTPPost() && !$is_alternate_domain && !$is_lfs) {
         // NOTE: Require POST to download files from the primary domain. We'd
         // rather go full-bore and do a real CSRF check, but can't currently
         // authenticate users on the file domain. This should blunt any
@@ -184,6 +100,90 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       $response->setDownload($file->getName());
     }
 
+    $iterator = $file->getFileDataIterator($begin, $end);
+
+    $response->setContentLength($file->getByteSize());
+    $response->setContentIterator($iterator);
+
     return $response;
   }
+
+  private function loadFile() {
+    // Access to files is provided by knowledge of a per-file secret key in
+    // the URI. Knowledge of this secret is sufficient to retrieve the file.
+
+    // For some requests, we also have a valid viewer. However, for many
+    // requests (like alternate domain requests or Git LFS requests) we will
+    // not. Even if we do have a valid viewer, use the omnipotent viewer to
+    // make this logic simpler and more consistent.
+
+    // Beyond making the policy check itself more consistent, this also makes
+    // sure we're consitent about returning HTTP 404 on bad requests instead
+    // of serving HTTP 200 with a login page, which can mislead some clients.
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
+
+    if (!$file) {
+      return new Aphront404Response();
+    }
+
+    // We may be on the CDN domain, so we need to use a fully-qualified URI
+    // here to make sure we end up back on the main domain.
+    $info_uri = PhabricatorEnv::getURI($file->getInfoURI());
+
+
+    if (!$file->validateSecretKey($this->key)) {
+      $dialog = $this->newDialog()
+        ->setTitle(pht('Invalid Authorization'))
+        ->appendParagraph(
+          pht(
+            'The link you followed to access this file is no longer '.
+            'valid. The visibility of the file may have changed after '.
+            'the link was generated.'))
+        ->appendParagraph(
+          pht(
+            'You can continue to the file detail page to get more '.
+            'information and attempt to access the file.'))
+        ->addCancelButton($info_uri, pht('Continue'));
+
+      return id(new AphrontDialogResponse())
+        ->setDialog($dialog)
+        ->setHTTPResponseCode(404);
+    }
+
+    if ($file->getIsPartial()) {
+      $dialog = $this->newDialog()
+        ->setTitle(pht('Partial Upload'))
+        ->appendParagraph(
+          pht(
+            'This file has only been partially uploaded. It must be '.
+            'uploaded completely before you can download it.'))
+        ->appendParagraph(
+          pht(
+            'You can continue to the file detail page to monitor the '.
+            'upload progress of the file.'))
+        ->addCancelButton($info_uri, pht('Continue'));
+
+      return id(new AphrontDialogResponse())
+        ->setDialog($dialog)
+        ->setHTTPResponseCode(404);
+    }
+
+    $this->file = $file;
+
+    return null;
+  }
+
+  private function getFile() {
+    if (!$this->file) {
+      throw new PhutilInvalidStateException('loadFile');
+    }
+    return $this->file;
+  }
+
 }

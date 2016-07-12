@@ -57,7 +57,7 @@ JX.install('ReactorNode', {
     /**
      * For internal use by the Reactor system
      */
-    getNextPulse : function(pulse) {
+    getNextPulse : function() {
       return this._nextPulse;
     },
     getTransformer : function() {

@@ -24,8 +24,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getConfigureProvidesDescription() {
-    return pht(
-      'This merchant accepts credit and debit cards via Stripe.');
+    return pht('This merchant accepts credit and debit cards via Stripe.');
   }
 
   public function getPaymentMethodDescription() {
@@ -116,8 +115,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   }
 
   public function runConfigurationTest() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/stripe-php/lib/Stripe.php';
+    $this->loadStripeAPILibraries();
 
     $secret_key = $this->getSecretKey();
     $account = Stripe_Account::retrieve($secret_key);
@@ -131,9 +129,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   protected function executeCharge(
     PhortunePaymentMethod $method,
     PhortuneCharge $charge) {
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/stripe-php/lib/Stripe.php';
+    $this->loadStripeAPILibraries();
 
     $price = $charge->getAmountAsCurrency();
 
@@ -146,20 +142,64 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
       'capture'     => true,
     );
 
-    try {
-      $stripe_charge = Stripe_Charge::create($params, $secret_key);
-    } catch (Stripe_CardError $ex) {
-      // TODO: Fail charge explicitly.
-      throw $ex;
-    }
+    $stripe_charge = Stripe_Charge::create($params, $secret_key);
 
     $id = $stripe_charge->id;
     if (!$id) {
-      throw new Exception('Stripe charge call did not return an ID!');
+      throw new Exception(pht('Stripe charge call did not return an ID!'));
     }
 
     $charge->setMetadataValue('stripe.chargeID', $id);
     $charge->save();
+  }
+
+  protected function executeRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+    $this->loadStripeAPILibraries();
+
+    $charge_id = $charge->getMetadataValue('stripe.chargeID');
+    if (!$charge_id) {
+      throw new Exception(
+        pht('Unable to refund charge; no Stripe chargeID!'));
+    }
+
+    $refund_cents = $refund
+      ->getAmountAsCurrency()
+      ->negate()
+      ->getValueInUSDCents();
+
+    $secret_key = $this->getSecretKey();
+    $params = array(
+      'amount' => $refund_cents,
+    );
+
+    $stripe_charge = Stripe_Charge::retrieve($charge_id, $secret_key);
+    $stripe_refund = $stripe_charge->refunds->create($params);
+
+    $id = $stripe_refund->id;
+    if (!$id) {
+      throw new Exception(pht('Stripe refund call did not return an ID!'));
+    }
+
+    $charge->setMetadataValue('stripe.refundID', $id);
+    $charge->save();
+  }
+
+  public function updateCharge(PhortuneCharge $charge) {
+    $this->loadStripeAPILibraries();
+
+    $charge_id = $charge->getMetadataValue('stripe.chargeID');
+    if (!$charge_id) {
+      throw new Exception(
+        pht('Unable to update charge; no Stripe chargeID!'));
+    }
+
+    $secret_key = $this->getSecretKey();
+    $stripe_charge = Stripe_Charge::retrieve($charge_id, $secret_key);
+
+    // TODO: Deal with disputes / chargebacks / surprising refunds.
+
   }
 
   private function getPublishableKey() {
@@ -191,11 +231,9 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     AphrontRequest $request,
     PhortunePaymentMethod $method,
     array $token) {
+    $this->loadStripeAPILibraries();
 
     $errors = array();
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/stripe-php/lib/Stripe.php';
 
     $secret_key = $this->getSecretKey();
     $stripe_token = $token['stripeCardToken'];
@@ -238,6 +276,8 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     array $errors) {
 
     $ccform = id(new PhortuneCreditCardForm())
+      ->setSecurityAssurance(
+        pht('Payments are processed securely by Stripe.'))
       ->setUser($request->getUser())
       ->setErrors($errors)
       ->addScript('https://js.stripe.com/v2/');
@@ -330,6 +370,11 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     }
 
     return null;
+  }
+
+  private function loadStripeAPILibraries() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/stripe-php/lib/Stripe.php';
   }
 
 }

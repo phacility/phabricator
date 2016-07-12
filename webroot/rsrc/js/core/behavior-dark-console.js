@@ -9,18 +9,59 @@
  */
 
 JX.behavior('dark-console', function(config, statics) {
-  var root = statics.root || setup_console();
-
-  config.key = config.key || root.getAttribute('data-console-key');
-
-  if (!('color' in config)) {
-    config.color = root.getAttribute('data-console-color');
-  }
-
-  add_request(config);
 
   // Do first-time setup.
   function setup_console() {
+    init_console(config.visible);
+
+    statics.selected = config.selected;
+
+    install_shortcut();
+
+    if (config.headers) {
+      // If the main page had profiling enabled, also enable it for any Ajax
+      // requests.
+      JX.Request.listen('open', function(r) {
+        for (var k in config.headers) {
+          r.getTransport().setRequestHeader(k, config.headers[k]);
+        }
+      });
+    }
+
+    // When the user clicks a tab, select it.
+    JX.Stratcom.listen('click', 'dark-console-tab', function(e) {
+      e.kill();
+      select_tab(e.getNodeData('dark-console-tab')['class']);
+    });
+
+    JX.Stratcom.listen(
+      'quicksand-redraw',
+      null,
+      function (e) {
+        var data = e.getData();
+        var new_console;
+        if (data.fromServer) {
+          new_console = JX.$('darkconsole');
+          // The correct key has to be pulled from the rendered console
+          statics.quicksand_key = new_console.getAttribute('data-console-key');
+          statics.quicksand_color =
+            new_console.getAttribute('data-console-color');
+        } else {
+          // we need to add a console holder back in since we blew it away
+          new_console = JX.$N(
+            'div',
+            { id : 'darkconsole', class : 'dark-console' });
+          JX.DOM.prependContent(
+            JX.$('phabricator-standard-page-body'),
+            new_console);
+        }
+        JX.DOM.replace(new_console, statics.root);
+      });
+
+    return statics.root;
+  }
+
+  function init_console(visible) {
     statics.root = JX.$('darkconsole');
     statics.req = {all: {}, current: null};
     statics.tab = {all: {}, current: null};
@@ -41,24 +82,10 @@ JX.behavior('dark-console', function(config, statics) {
 
     statics.cache = {};
 
-    statics.visible = config.visible;
-    statics.selected = config.selected;
-
-    install_shortcut();
-
-    if (config.headers) {
-      // If the main page had profiling enabled, also enable it for any Ajax
-      // requests.
-      JX.Request.listen('open', function(r) {
-        for (var k in config.headers) {
-          r.getTransport().setRequestHeader(k, config.headers[k]);
-        }
-      });
-    }
+    statics.visible = visible;
 
     return statics.root;
   }
-
 
   // Add a new request to the console (initial page load, or new Ajax response).
   function add_request(config) {
@@ -80,11 +107,20 @@ JX.behavior('dark-console', function(config, statics) {
     statics.el.reqs.appendChild(link);
     statics.req.all[config.key] = link;
 
+    // When the user clicks a request, select it.
+    JX.DOM.listen(
+      link,
+      'click',
+      'dark-console-request',
+      function(e) {
+        e.kill();
+        select_request(e.getNodeData('dark-console-request').key);
+      });
+
     if (!statics.req.current) {
       select_request(config.key);
     }
   }
-
 
   function get_bullet(color) {
     if (!color) {
@@ -93,28 +129,24 @@ JX.behavior('dark-console', function(config, statics) {
     return JX.$N('span', {style: {color: color}}, '\u2022');
   }
 
-
   // Select a request (on load, or when the user clicks one).
   function select_request(key) {
-    var req = statics.req;
-
-    if (req.current) {
-      JX.DOM.alterClass(req.all[req.current], 'dark-selected', false);
+    if (statics.req.current) {
+      JX.DOM.alterClass(
+        statics.req.all[statics.req.current],
+        'dark-selected',
+        false);
     }
     statics.req.current = key;
-    JX.DOM.alterClass(req.all[req.current], 'dark-selected', true);
+    JX.DOM.alterClass(
+      statics.req.all[statics.req.current],
+      'dark-selected',
+      true);
 
     if (statics.visible) {
       draw_request(key);
     }
   }
-
-  // When the user clicks a request, select it.
-  JX.Stratcom.listen('click', 'dark-console-request', function(e) {
-    e.kill();
-    select_request(e.getNodeData('dark-console-request').key);
-  });
-
 
   // After the user selects a request, draw its tabs.
   function draw_request(key) {
@@ -207,12 +239,6 @@ JX.behavior('dark-console', function(config, statics) {
     draw_panel();
   }
 
-  // When the user clicks a tab, select it.
-  JX.Stratcom.listen('click', 'dark-console-tab', function(e) {
-    e.kill();
-    select_tab(e.getNodeData('dark-console-tab')['class']);
-  });
-
   function draw_panel() {
     var data = statics.cache[statics.req.current];
     var tclass = JX.Stratcom.getData(statics.tab.current)['class'];
@@ -229,12 +255,12 @@ JX.behavior('dark-console', function(config, statics) {
         statics.visible = !statics.visible;
 
         if (statics.visible) {
-          JX.DOM.show(root);
+          JX.DOM.show(statics.root);
           if (statics.req.current) {
             draw_request(statics.req.current);
           }
         } else {
-          JX.DOM.hide(root);
+          JX.DOM.hide(statics.root);
         }
 
         // Save user preference.
@@ -247,5 +273,18 @@ JX.behavior('dark-console', function(config, statics) {
       })
       .register();
   }
+
+  statics.root = statics.root || setup_console();
+  if (config.quicksand && statics.quicksand_key) {
+    config.key = statics.quicksand_key;
+    config.color = statics.quicksand_color;
+    statics.quicksand_key = null;
+    statics.quicksand_color = null;
+  }
+  config.key = config.key || statics.root.getAttribute('data-console-key');
+  if (!('color' in config)) {
+    config.color = statics.root.getAttribute('data-console-color');
+  }
+  add_request(config);
 
 });

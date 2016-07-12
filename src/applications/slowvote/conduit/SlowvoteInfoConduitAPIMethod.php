@@ -7,22 +7,22 @@ final class SlowvoteInfoConduitAPIMethod extends SlowvoteConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve an array of information about a poll.';
+    return pht('Retrieve an array of information about a poll.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'poll_id' => 'required id',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_POLL' => 'No such poll exists',
+      'ERR_BAD_POLL' => pht('No such poll exists.'),
     );
   }
 

@@ -9,6 +9,7 @@
  *           phuix-dropdown-menu
  *           phuix-action-list-view
  *           phuix-action-view
+ *           conpherence-thread-manager
  * @provides javelin-behavior-conpherence-widget-pane
  */
 
@@ -80,16 +81,34 @@ JX.behavior('conpherence-widget-pane', function(config) {
         continue;
       }
 
+      var handler;
+      var href;
+      if (widget == 'widgets-edit') {
+        var threadManager = JX.ConpherenceThreadManager.getInstance();
+        handler = function(e) {
+          e.prevent();
+          menu.close();
+          threadManager.runUpdateWorkflowFromLink(
+            e.getTarget(),
+            {
+              action : 'metadata',
+              force_ajax : true,
+              stage : 'submit'
+            });
+        };
+        href = threadManager._getUpdateURI();
+      } else {
+        handler = JX.bind(null, function(widget, e) {
+          toggleWidget({widget: widget});
+          e.prevent();
+          menu.close();
+        }, widget);
+      }
       var item = new JX.PHUIXActionView()
         .setIcon(widget_data.icon || 'none')
         .setName(widget_data.name)
-        .setHandler(
-          JX.bind(null, function(widget, e) {
-            toggleWidget({widget: widget});
-            e.prevent();
-            menu.close();
-          }, widget));
-
+        .setHref(href)
+        .setHandler(handler);
       map[widget_data.name] = item;
       list.addItem(item);
     }
@@ -183,6 +202,8 @@ JX.behavior('conpherence-widget-pane', function(config) {
       var widget_pane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
       var widget_header = JX.DOM.find(widget_pane, 'a', 'widgets-selector');
       var adder = JX.DOM.find(widget_pane, 'a', 'conpherence-widget-adder');
+      var threadManager = JX.ConpherenceThreadManager.getInstance();
+      var disabled = !threadManager.getCanEditLoadedThread();
       JX.DOM.setContent(
         widget_header,
         widget_data.name);
@@ -191,6 +212,10 @@ JX.behavior('conpherence-widget-pane', function(config) {
         JX.$N('span', { className : 'caret' }));
       if (widget_data.hasCreate) {
         JX.DOM.show(adder);
+        JX.DOM.alterClass(
+          adder,
+          'disabled',
+          disabled);
       } else {
         JX.DOM.hide(adder);
       }
@@ -203,7 +228,6 @@ JX.behavior('conpherence-widget-pane', function(config) {
         // as a widget, but shown always on the desktop
         if (widget == 'conpherence-message-pane') {
           JX.$(widget).style.display = 'block';
-          JX.Stratcom.invoke('conpherence-redraw-thread', null, {});
         }
         continue;
       }
@@ -270,19 +294,18 @@ JX.behavior('conpherence-widget-pane', function(config) {
         href = create_data.customHref;
       }
 
-      var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-      var latest_transaction_dom = JX.DOM.find(
-        root,
-        'input',
-        'latest-transaction-id');
+      var threadManager = JX.ConpherenceThreadManager.getInstance();
+      var latest_transaction_id = threadManager.getLatestTransactionID();
       var data = {
-        latest_transaction_id : latest_transaction_dom.value,
+        latest_transaction_id : latest_transaction_id,
         action : create_data.action
       };
 
-      new JX.Workflow(href, data)
+      var workflow = new JX.Workflow(href, data)
         .setHandler(function (r) {
-          latest_transaction_dom.value = r.latest_transaction_id;
+          var threadManager = JX.ConpherenceThreadManager.getInstance();
+          threadManager.setLatestTransactionID(r.latest_transaction_id);
+          var root = JX.DOM.find(document, 'div', 'conpherence-layout');
           if (create_data.refreshFromResponse) {
             var messages = null;
             try {
@@ -291,7 +314,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
             }
             if (messages) {
               JX.DOM.appendContent(messages, JX.$H(r.transactions));
-              messages.scrollTop = messages.scrollHeight;
+              JX.Stratcom.invoke('conpherence-redraw-thread', null, {});
             }
 
             if (r.people_widget) {
@@ -315,8 +338,9 @@ JX.behavior('conpherence-widget-pane', function(config) {
                 widget : widget_to_update
               });
           }
-        })
-        .start();
+        });
+
+      threadManager.syncWorkflow(workflow, 'submit');
     }
   );
 
@@ -326,9 +350,25 @@ JX.behavior('conpherence-widget-pane', function(config) {
     function (e) {
       var href = config.widgetBaseUpdateURI + _loadedWidgetsID + '/';
       var data = e.getNodeData('remove-person');
-      // we end up re-directing to conpherence home
+
+      // While the user is removing themselves, disable the notification
+      // update behavior. If we don't do this, the user can get an error
+      // when they remove themselves about permissions as the notification
+      // code tries to load what jist happened.
+      var threadManager = JX.ConpherenceThreadManager.getInstance();
+      var loadedPhid = threadManager.getLoadedThreadPHID();
+      threadManager.setLoadedThreadPHID(null);
+
       new JX.Workflow(href, data)
-      .start();
+        .setCloseHandler(function() {
+          threadManager.setLoadedThreadPHID(loadedPhid);
+        })
+        // we re-direct to conpherence home so the thread manager will
+        // fix itself there
+        .setHandler(function(r) {
+          JX.$U(r.href).go();
+        })
+        .start();
     }
   );
 

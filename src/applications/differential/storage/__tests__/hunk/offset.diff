@@ -1,0 +1,16 @@
+diff --git a/src/ip/PhutilIPAddress.php b/src/ip/PhutilIPAddress.php
+index 47c8f2e..0e216d2 100644
+--- a/src/ip/PhutilIPAddress.php
++++ b/src/ip/PhutilIPAddress.php
+@@ -76,9 +76,10 @@ final class PhutilIPAddress extends Phobject {
+             $bits .= '0';
+           }
+         }
++        break;
+       }
+
+-      $this->bits = $bits;
++      $this->bits = $bytes;
+     }
+
+     return $this->bits;

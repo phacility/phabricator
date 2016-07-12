@@ -27,39 +27,39 @@ final class DivinerBookItemView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'a';
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     return array(
       'class' => 'diviner-book-item',
       'href' => $this->href,
     );
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     require_celerity_resource('diviner-shared-css');
 
     $title = phutil_tag(
       'span',
-        array(
-          'class' => 'diviner-book-item-title',
-        ),
+      array(
+        'class' => 'diviner-book-item-title',
+      ),
       $this->title);
 
     $subtitle = phutil_tag(
       'span',
-        array(
-          'class' => 'diviner-book-item-subtitle',
-        ),
+      array(
+        'class' => 'diviner-book-item-subtitle',
+      ),
       $this->subtitle);
 
     $type = phutil_tag(
       'span',
-        array(
-          'class' => 'diviner-book-item-type',
-        ),
+      array(
+        'class' => 'diviner-book-item-type',
+      ),
       $this->type);
 
     return array($title, $type, $subtitle);

@@ -4,15 +4,14 @@ $conn_w = id(new PhabricatorAuditTransaction())->establishConnection('w');
 $rows = new LiskRawMigrationIterator($conn_w, 'audit_comment');
 
 $content_source = PhabricatorContentSource::newForSource(
-  PhabricatorContentSource::SOURCE_LEGACY,
-  array())->serialize();
+  PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
-echo "Migrating Audit comment text to modern storage...\n";
+echo pht('Migrating Audit comment text to modern storage...')."\n";
 foreach ($rows as $row) {
   $id = $row['id'];
-  echo "Migrating Audit comment {$id}...\n";
+  echo pht('Migrating Audit comment %d...', $id)."\n";
   if (!strlen($row['content'])) {
-    echo "Comment has no text, continuing.\n";
+    echo pht('Comment has no text, continuing.')."\n";
     continue;
   }
 
@@ -58,4 +57,4 @@ foreach ($rows as $row) {
     $row['id']);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -1,0 +1,45 @@
+/**
+ * @provides conpherence-transaction-css
+ */
+
+.conpherence-transaction-view {
+  position: relative;
+}
+
+.conpherence-transaction-content {
+  overflow: auto;
+}
+
+.conpherence-transaction-header .phui-link-person {
+  font-weight: bold;
+}
+
+.conpherence-transaction-view.date-marker {
+  border-top: 1px solid {$thinblueborder};
+}
+.conpherence-transaction-view.date-marker .date {
+  position: relative;
+  top: -11px;
+  background-color: #fff;
+  color: #000;
+  font-weight: bold;
+}
+
+.conpherence-fulltext-results {
+  margin: 0 8px 8px;
+  background: {$lightgreybackground};
+  border: 1px solid {$lightgreyborder};
+}
+
+.conpherence-fulltext-result {
+  margin: 0 0 1px;
+  padding: 8px;
+}
+
+.conpherence-fulltext-match {
+  background: {$lightyellow};
+}
+
+.conpherence-fulltext-results .epoch-link {
+  float: right;
+}

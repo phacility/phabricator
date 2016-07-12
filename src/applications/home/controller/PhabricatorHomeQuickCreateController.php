@@ -3,10 +3,10 @@
 final class PhabricatorHomeQuickCreateController
   extends PhabricatorHomeController {
 
-  public function processRequest() {
-    $viewer = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-    $items = $this->getCurrentApplication()->loadAllQuickCreateItems($viewer);
+    $items = PhabricatorQuickActions::loadMenuItemsForUser($viewer);
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
@@ -19,18 +19,29 @@ final class PhabricatorHomeQuickCreateController
           ->setHref($item->getHref()));
     }
 
+    $title = pht('Quick Create');
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Quick Create'));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $list,
-      ),
-      array(
-        'title' => pht('Quick Create'),
-      ));
+    $box = id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($list);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
-
 
 }

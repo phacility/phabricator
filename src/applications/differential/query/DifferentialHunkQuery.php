@@ -17,7 +17,7 @@ final class DifferentialHunkQuery
     return $this;
   }
 
-  public function willExecute() {
+  protected function willExecute() {
     // If we fail to load any hunks at all (for example, because all of
     // the requested changesets are directories or empty files and have no
     // hunks) we'll never call didFilterPage(), and thus never have an
@@ -30,11 +30,11 @@ final class DifferentialHunkQuery
     }
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $all_results = array();
 
     // Load modern hunks.
-    $table = new DifferentialHunkModern();
+    $table = new DifferentialModernHunk();
     $conn_r = $table->establishConnection('r');
 
     $modern_data = queryfx_all(
@@ -48,7 +48,7 @@ final class DifferentialHunkQuery
 
 
     // Now, load legacy hunks.
-    $table = new DifferentialHunkLegacy();
+    $table = new DifferentialLegacyHunk();
     $conn_r = $table->establishConnection('r');
 
     $legacy_data = queryfx_all(
@@ -65,7 +65,7 @@ final class DifferentialHunkQuery
     return array_values(array_merge($legacy_results, $modern_results));
   }
 
-  public function willFilterPage(array $hunks) {
+  protected function willFilterPage(array $hunks) {
     $changesets = mpull($this->changesets, null, 'getID');
     foreach ($hunks as $key => $hunk) {
       $changeset = idx($changesets, $hunk->getChangesetID());
@@ -78,7 +78,7 @@ final class DifferentialHunkQuery
     return $hunks;
   }
 
-  public function didFilterPage(array $hunks) {
+  protected function didFilterPage(array $hunks) {
     if ($this->shouldAttachToChangesets) {
       $hunk_groups = mgroup($hunks, 'getChangesetID');
       foreach ($this->changesets as $changeset) {
@@ -90,12 +90,14 @@ final class DifferentialHunkQuery
     return $hunks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if (!$this->changesets) {
       throw new Exception(
-        pht('You must load hunks via changesets, with withChangesets()!'));
+        pht(
+          'You must load hunks via changesets, with %s!',
+          'withChangesets()'));
     }
 
     $where[] = qsprintf(
@@ -112,8 +114,9 @@ final class DifferentialHunkQuery
     return 'PhabricatorDifferentialApplication';
   }
 
-  protected function getReversePaging() {
-    return true;
+  protected function getDefaultOrderVector() {
+    // TODO: Do we need this?
+    return array('-id');
   }
 
 }

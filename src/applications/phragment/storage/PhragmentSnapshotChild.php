@@ -11,7 +11,7 @@ final class PhragmentSnapshotChild extends PhragmentDAO
   private $fragment = self::ATTACHABLE;
   private $fragmentVersion = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'fragmentVersionPHID' => 'phid?',

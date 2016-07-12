@@ -23,7 +23,7 @@ final class PhabricatorDashboardTransactionEditor
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue(
         'edge:type',
-        PhabricatorEdgeConfig::TYPE_DASHBOARD_HAS_PANEL)
+        PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST)
       ->setNewValue(
         array(
           '+' => array(
@@ -51,6 +51,7 @@ final class PhabricatorDashboardTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = PhabricatorDashboardTransaction::TYPE_NAME;
+    $types[] = PhabricatorDashboardTransaction::TYPE_STATUS;
     $types[] = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
 
     return $types;
@@ -65,6 +66,11 @@ final class PhabricatorDashboardTransactionEditor
           return null;
         }
         return $object->getName();
+      case PhabricatorDashboardTransaction::TYPE_STATUS:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return $object->getStatus();
       case PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE:
         if ($this->getIsNewObject()) {
           return null;
@@ -81,6 +87,7 @@ final class PhabricatorDashboardTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
+      case PhabricatorDashboardTransaction::TYPE_STATUS:
       case PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE:
         return $xaction->getNewValue();
     }
@@ -93,6 +100,9 @@ final class PhabricatorDashboardTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
+        return;
+      case PhabricatorDashboardTransaction::TYPE_STATUS:
+        $object->setStatus($xaction->getNewValue());
         return;
       case PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE:
         $old_layout = $object->getLayoutConfigObject();
@@ -109,14 +119,6 @@ final class PhabricatorDashboardTransactionEditor
         }
         $object->setLayoutConfigFromObject($new_layout);
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -128,11 +130,8 @@ final class PhabricatorDashboardTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
+      case PhabricatorDashboardTransaction::TYPE_STATUS:
       case PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return;
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 

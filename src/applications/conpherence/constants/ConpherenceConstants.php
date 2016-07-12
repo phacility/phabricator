@@ -1,3 +1,3 @@
 <?php
 
-abstract class ConpherenceConstants {}
+abstract class ConpherenceConstants extends Phobject {}

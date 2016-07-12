@@ -2,18 +2,10 @@
 
 final class HeraldDisableController extends HeraldController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $id = $this->id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $rule = id(new HeraldRuleQuery())
       ->setViewer($viewer)
@@ -33,9 +25,9 @@ final class HeraldDisableController extends HeraldController {
         HeraldManageGlobalRulesCapability::CAPABILITY);
     }
 
-    $view_uri = $this->getApplicationURI("rule/{$id}/");
+    $view_uri = '/'.$rule->getMonogram();
 
-    $is_disable = ($this->action === 'disable');
+    $is_disable = ($action === 'disable');
 
     if ($request->isFormPost()) {
       $xaction = id(new HeraldRuleTransaction())
@@ -52,13 +44,13 @@ final class HeraldDisableController extends HeraldController {
     }
 
     if ($is_disable) {
-      $title = pht('Really disable this rule?');
+      $title = pht('Really archive this rule?');
       $body = pht('This rule will no longer activate.');
-      $button = pht('Disable Rule');
+      $button = pht('Archive Rule');
     } else {
-      $title = pht('Really enable this rule?');
+      $title = pht('Really activate this rule?');
       $body = pht('This rule will become active again.');
-      $button = pht('Enable Rule');
+      $button = pht('Activate Rule');
     }
 
     $dialog = id(new AphrontDialogView())

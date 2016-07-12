@@ -6,20 +6,14 @@
   width: 100%;
 }
 
-.phui-property-list-value .phui-status-list-view {
-  margin-left: -4px;
-}
-
 .phui-status-list-view .phui-icon-view {
-  display: block;
   width: 14px;
   height: 14px;
-  margin: 3px 4px;
+  margin: 2px 4px 2px 0;
 }
 
 .phui-status-item-target {
-  padding: 0 12px 0 0;
-  line-height: 20px;
+  padding: 1px 8px;
   white-space: nowrap;
 }
 
@@ -27,14 +21,18 @@
   width: 100%;
   color: {$greytext};
   line-height: 14px;
-  padding: 3px 0;
+  padding: 3px 4px;
 }
 
 .phui-status-item-highlighted td {
-  background-color: {$lightyellow};
+  background-color: {$sh-yellowbackground};
+  border-radius: 3px;
+}
+
+.phui-status-list-view td a {
+ color: {$darkbluetext};
 }
 
 .phui-status-item-highlighted td.phui-status-item-note {
   background-color: transparent;
-  padding-left: 4px;
 }

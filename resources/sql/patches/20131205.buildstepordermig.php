@@ -9,7 +9,7 @@ $viewer = PhabricatorUser::getOmnipotentUser();
 
 foreach (new LiskMigrationIterator($table) as $plan) {
   $planname = $plan->getName();
-  echo "Migrating steps in {$planname}...\n";
+  echo pht('Migrating steps in %s...', $planname)."\n";
 
   $rows = queryfx_all(
     $conn_w,
@@ -23,10 +23,10 @@ foreach (new LiskMigrationIterator($table) as $plan) {
     $id = $row['id'];
     $existing = $row['sequence'];
     if ($existing != 0) {
-      echo "  - {$id} (already migrated)...\n";
+      echo "  - ".pht('%d (already migrated)...', $id)."\n";
       continue;
     }
-    echo "  - {$id} to position {$sequence}...\n";
+    echo "  - ".pht('%d to position %s...', $id, $sequence)."\n";
     queryfx(
       $conn_w,
       'UPDATE harbormaster_buildstep '.
@@ -38,4 +38,4 @@ foreach (new LiskMigrationIterator($table) as $plan) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -59,7 +59,7 @@ final class PhortunePaymentProviderConfigQuery
     return $provider_configs;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {

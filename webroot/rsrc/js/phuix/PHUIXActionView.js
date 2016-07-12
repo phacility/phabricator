@@ -13,6 +13,7 @@ JX.install('PHUIXActionView', {
     _name: null,
     _icon: 'none',
     _disabled: false,
+    _label: false,
     _handler: null,
     _selected: false,
 
@@ -28,6 +29,15 @@ JX.install('PHUIXActionView', {
 
       this._buildIconNode(true);
 
+      return this;
+    },
+
+    setLabel: function(label) {
+      this._label = label;
+      JX.DOM.alterClass(
+        this.getNode(),
+        'phabricator-action-view-label',
+        label);
       return this;
     },
 

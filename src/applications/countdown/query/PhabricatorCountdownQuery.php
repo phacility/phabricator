@@ -23,66 +23,86 @@ final class PhabricatorCountdownQuery
     return $this;
   }
 
-  public function withUpcoming($upcoming) {
+  public function withUpcoming() {
     $this->upcoming = true;
     return $this;
   }
 
   protected function loadPage() {
-    $table = new PhabricatorCountdown();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $countdowns = $table->loadAllFromArray($data);
-
-    return $countdowns;
+    return $this->loadStandardPage($this->newResultObject());
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  public function newResultObject() {
+    return new PhabricatorCountdown();
+  }
 
-    $where[] = $this->buildPagingClause($conn_r);
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'authorPHID in (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->upcoming) {
+    if ($this->upcoming !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'epoch >= %d',
-        time());
+        PhabricatorTime::getNow());
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorCountdownApplication';
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'ending' => array(
+        'vector' => array('-epoch', '-id'),
+        'name' => pht('End Date (Past to Future)'),
+      ),
+      'unending' => array(
+        'vector' => array('epoch', 'id'),
+        'name' => pht('End Date (Future to Past)'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'epoch' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'epoch',
+        'type' => 'int',
+      ),
+    ) + parent::getOrderableColumns();
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $countdown = $this->loadCursorObject($cursor);
+    return array(
+      'epoch' => $countdown->getEpoch(),
+      'id' => $countdown->getID(),
+    );
   }
 
 }

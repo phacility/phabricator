@@ -20,7 +20,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $owned_packages = id(new PhabricatorOwnersPackageQuery())
       ->setViewer($user)
-      ->withOwnerPHIDs(array($user->getPHID()))
+      ->withAuthorityPHIDs(array($user->getPHID()))
       ->execute();
     foreach ($owned_packages as $package) {
       $phids[$package->getPHID()] = true;
@@ -38,20 +38,15 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     return array_keys($phids);
   }
 
-  public static function newReplyHandlerForCommit($commit) {
-    $reply_handler = PhabricatorEnv::newObjectFromConfig(
-      'metamta.diffusion.reply-handler');
-    $reply_handler->setMailReceiver($commit);
-    return $reply_handler;
-  }
-
   public static function getMailThreading(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
     return array(
       'diffusion-audit-'.$commit->getPHID(),
-      'Commit r'.$repository->getCallsign().$commit->getCommitIdentifier(),
+      pht(
+        'Commit %s',
+        $commit->getMonogram()),
     );
   }
 

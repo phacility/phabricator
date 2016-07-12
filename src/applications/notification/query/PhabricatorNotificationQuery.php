@@ -76,7 +76,7 @@ final class PhabricatorNotificationQuery
     return $stories;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->userPHIDs !== null) {
@@ -103,7 +103,7 @@ final class PhabricatorNotificationQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingValue($item) {
+  protected function getResultCursor($item) {
     return $item->getChronologicalKey();
   }
 

@@ -9,6 +9,12 @@ final class DrydockBlueprintCoreCustomField
   }
 
   public function createFields($object) {
+    // If this is a generic object without an attached implementation (for
+    // example, via ApplicationSearch), just don't build any custom fields.
+    if (!$object->hasImplementation()) {
+      return array();
+    }
+
     $impl = $object->getImplementation();
     $specs = $impl->getFieldSpecifications();
 
@@ -22,6 +28,7 @@ final class DrydockBlueprintCoreCustomField
   public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
     $key = $this->getProxy()->getRawStandardFieldKey();
     $this->setValueFromStorage($object->getDetail($key));
+    $this->didSetValueFromStorage();
   }
 
   public function applyApplicationTransactionInternalEffects(
@@ -35,9 +42,8 @@ final class DrydockBlueprintCoreCustomField
     $object->setDetail($key, $value);
   }
 
-  public function applyApplicationTransactionExternalEffects(
-    PhabricatorApplicationTransaction $xaction) {
-    return;
+  public function getBlueprintFieldValue() {
+    return $this->getProxy()->getFieldValue();
   }
 
 }

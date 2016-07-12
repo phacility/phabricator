@@ -10,7 +10,7 @@ foreach (new LiskMigrationIterator($table) as $revision) {
   $revision_id = $revision->getID();
   $revision_phid = $revision->getPHID();
 
-  echo "Migrating reviewers for D{$revision_id}...\n";
+  echo pht('Migrating reviewers for %s...', "D{$revision_id}")."\n";
 
   $reviewer_phids = queryfx_all(
     $conn_w,
@@ -36,7 +36,7 @@ foreach (new LiskMigrationIterator($table) as $revision) {
 
     $editor->addEdge(
       $revision_phid,
-      PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
+      DifferentialRevisionHasReviewerEdgeType::EDGECONST,
       $dst,
       array(
         'data' => array(
@@ -48,4 +48,4 @@ foreach (new LiskMigrationIterator($table) as $revision) {
   $editor->save();
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -6,7 +6,7 @@
 abstract class AphrontView extends Phobject
   implements PhutilSafeHTMLProducerInterface {
 
-  protected $user;
+  private $viewer;
   protected $children = array();
 
 
@@ -14,19 +14,65 @@ abstract class AphrontView extends Phobject
 
 
   /**
-   * @task config
+   * Set the user viewing this element.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @return this
    */
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
     return $this;
   }
 
 
   /**
+   * Get the user viewing this element.
+   *
+   * Throws an exception if no viewer has been set.
+   *
+   * @return PhabricatorUser Viewing user.
+   */
+  public function getViewer() {
+    if (!$this->viewer) {
+      throw new PhutilInvalidStateException('setViewer');
+    }
+
+    return $this->viewer;
+  }
+
+
+  /**
+   * Test if a viewer has been set on this elmeent.
+   *
+   * @return bool True if a viewer is available.
+   */
+  public function hasViewer() {
+    return (bool)$this->viewer;
+  }
+
+
+  /**
+   * Deprecated, use @{method:setViewer}.
+   *
    * @task config
+   * @deprecated
+   */
+  public function setUser(PhabricatorUser $user) {
+    return $this->setViewer($user);
+  }
+
+
+  /**
+   * Deprecated, use @{method:getViewer}.
+   *
+   * @task config
+   * @deprecated
    */
   protected function getUser() {
-    return $this->user;
+    if (!$this->hasViewer()) {
+      return null;
+    }
+    return $this->getViewer();
   }
 
 
@@ -143,10 +189,27 @@ abstract class AphrontView extends Phobject
       $name,
       $config,
       $this->getDefaultResourceSource());
+    return $this;
   }
 
 
 /* -(  Rendering  )---------------------------------------------------------- */
+
+
+  /**
+   * Inconsistent, unreliable pre-rendering hook.
+   *
+   * This hook //may// fire before views render. It is not fired reliably, and
+   * may fire multiple times.
+   *
+   * If it does fire, views might use it to register data for later loads, but
+   * almost no datasources support this now; this is currently only useful for
+   * tokenizers. This mechanism might eventually see wider support or might be
+   * removed.
+   */
+  public function willRender() {
+    return;
+  }
 
 
   abstract public function render();

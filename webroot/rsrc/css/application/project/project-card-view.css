@@ -1,0 +1,155 @@
+/**
+ * @provides project-card-view-css
+ */
+
+.project-card-view {
+  margin: 0 12px 16px 0;
+  text-align: left;
+  background: #fff;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  box-shadow: {$dropshadow};
+  width: 380px;
+}
+
+.project-card-view .phui-header-shell {
+  margin: 0;
+  padding: 12px 12px 4px 12px;
+  border: none;
+  border-radius: 3px;
+}
+
+.project-card-view .phui-header-shell .phui-header-image {
+  border: 3px solid #fff;
+  border-radius: 3px;
+  background-color: #fff;
+}
+
+.project-card-view .phui-header-shell .phui-header-header {
+  font-size: 18px;
+  font-family: 'Aleo', {$fontfamily};
+  width: 290px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.project-card-view .phui-header-shell .phui-header-col1 {
+  vertical-align: top;
+  width: 64px;
+}
+
+.project-card-view .phui-header-subheader {
+  font-size: {$normalfontsize};
+  margin-top: 12px;
+  padding-bottom: 12px;
+}
+
+.project-card-view .phui-header-header .phui-tag-view {
+  display: block;
+  font-weight: normal;
+  color: {$bluetext};
+  font-size: {$normalfontsize};
+  font-family: {$fontfamily};
+  margin-top: 8px;
+}
+
+.project-card-view .phui-header-header .phui-tag-view .phui-tag-core {
+  padding: 0;
+}
+
+.project-card-view .phui-header-header .phui-tag-view .phui-icon-view {
+  margin-left: 0;
+  color: {$bluetext};
+}
+
+.project-card-view .project-card-body {
+  padding: 0 12px 12px 76px;
+  color: {$darkbluetext};
+}
+
+/* Colors */
+
+.project-card-view.project-card-red {
+  border-color: {$sh-redborder};
+}
+
+.project-card-view.project-card-red .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-redbackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-orange {
+  border-color: {$sh-orangeborder};
+}
+
+.project-card-view.project-card-orange .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-orangebackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-yellow {
+  border-color: {$sh-yellowborder};
+}
+
+.project-card-view.project-card-yellow .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-yellowbackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-green {
+  border-color: {$sh-greenborder};
+}
+
+.project-card-view.project-card-green .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-greenbackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-blue {
+  border-color: {$sh-blueborder};
+}
+
+.project-card-view.project-card-blue .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-bluebackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-indigo {
+  border-color: {$sh-indigoborder};
+}
+
+.project-card-view.project-card-indigo .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-indigobackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-violet {
+  border-color: {$sh-violetborder};
+}
+
+.project-card-view.project-card-violet .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-violetbackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-pink {
+  border-color: {$sh-pinkborder};
+}
+
+.project-card-view.project-card-pink .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-pinkbackground} 42px, #fff 42px);
+}
+
+.project-card-view.project-card-grey,
+.project-card-view.project-card-checkered {
+  border-color: {$sh-greyborder};
+}
+
+.project-card-view.project-card-grey .phui-header-shell,
+.project-card-view.project-card-checkered .phui-header-shell {
+  background: linear-gradient(to bottom,
+    {$sh-greybackground} 42px, #fff 42px);
+}

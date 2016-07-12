@@ -3,21 +3,32 @@
 final class PHUIButtonBarView extends AphrontTagView {
 
   private $buttons = array();
+  private $borderless;
 
   public function addButton($button) {
     $this->buttons[] = $button;
     return $this;
   }
 
+  public function setBorderless($borderless) {
+    $this->borderless = $borderless;
+    return $this;
+  }
+
   protected function getTagAttributes() {
-    return array('class' => 'phui-button-bar');
+    $classes = array();
+    $classes[] = 'phui-button-bar';
+    if ($this->borderless) {
+      $classes[] = 'phui-button-bar-borderless';
+    }
+    return array('class' => implode(' ', $classes));
   }
 
-  public function getTagName() {
-    return 'div';
+  protected function getTagName() {
+    return 'span';
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     require_celerity_resource('phui-button-css');
 
     $i = 1;

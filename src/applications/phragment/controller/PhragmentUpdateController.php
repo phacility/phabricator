@@ -2,17 +2,11 @@
 
 final class PhragmentUpdateController extends PhragmentController {
 
-  private $dblob;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $dblob = $request->getURIData('dblob');
 
-  public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, 'dblob', '');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $parents = $this->loadParentFragments($this->dblob);
+    $parents = $this->loadParentFragments($dblob);
     if ($parents === null) {
       return new Aphront404Response();
     }
@@ -43,7 +37,7 @@ final class PhragmentUpdateController extends PhragmentController {
         return id(new AphrontRedirectResponse())
           ->setURI('/phragment/browse/'.$fragment->getPath());
       } else {
-        $error_view = id(new AphrontErrorView())
+        $error_view = id(new PHUIInfoView())
           ->setErrors($errors)
           ->setTitle(pht('Errors while updating fragment'));
       }
@@ -69,15 +63,18 @@ final class PhragmentUpdateController extends PhragmentController {
       ->setValidationException(null)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $this->renderConfigurationWarningIfRequired(),
-        $box,
-      ),
-      array(
-        'title' => pht('Update Fragment'),
-      ));
+    $title = pht('Update Fragment');
+
+    $view = array(
+      $this->renderConfigurationWarningIfRequired(),
+      $box,
+    );
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

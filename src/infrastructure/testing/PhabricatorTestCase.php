@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
+abstract class PhabricatorTestCase extends PhutilTestCase {
 
   const NAMESPACE_PREFIX = 'phabricator_unittest_';
 
@@ -113,12 +113,21 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     // We can't stub this service right now, and it's not generally useful
     // to publish notifications about test execution.
     $this->env->overrideEnvConfig(
-      'notification.enabled',
-      false);
+      'notification.servers',
+      array());
 
     $this->env->overrideEnvConfig(
       'phabricator.base-uri',
       'http://phabricator.example.com');
+
+    $this->env->overrideEnvConfig(
+      'auth.email-domains',
+      array());
+
+    // Tests do their own stubbing/voiding for events.
+    $this->env->overrideEnvConfig('phabricator.silent', false);
+
+    $this->env->overrideEnvConfig('cluster.read-only', false);
   }
 
   protected function didRunTests() {
@@ -135,8 +144,10 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       unset($this->env);
     } catch (Exception $ex) {
       throw new Exception(
-        'Some test called PhabricatorEnv::beginScopedEnv(), but is still '.
-        'holding a reference to the scoped environment!');
+        pht(
+          'Some test called %s, but is still holding '.
+          'a reference to the scoped environment!',
+          'PhabricatorEnv::beginScopedEnv()'));
     }
   }
 
@@ -163,14 +174,6 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     return new PhabricatorStorageFixtureScopeGuard($name);
   }
 
-  protected function getLink($method) {
-    $phabricator_project = 'PHID-APRJ-3f1fc779edeab89b2171';
-    return
-      'https://secure.phabricator.com/diffusion/symbol/'.$method.
-      '/?lang=php&projects='.$phabricator_project.
-      '&jump=true&context='.get_class($this);
-  }
-
   /**
    * Returns an integer seed to use when building unique identifiers (e.g.,
    * non-colliding usernames). The seed is unstable and its value will change
@@ -187,7 +190,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $seed = $this->getNextObjectSeed();
 
     $user = id(new PhabricatorUser())
-      ->setRealName("Test User {$seed}}")
+      ->setRealName(pht('Test User %s', $seed))
       ->setUserName("test{$seed}")
       ->setIsApproved(1);
 
@@ -198,6 +201,14 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $editor = new PhabricatorUserEditor();
     $editor->setActor($user);
     $editor->createNewUser($user, $email);
+
+    // When creating a new test user, we prefill their setting cache as empty.
+    // This is a little more efficient than doing a query to load the empty
+    // settings.
+    $user->attachRawCacheData(
+      array(
+        PhabricatorUserPreferencesCacheType::KEY_PREFERENCES => '[]',
+      ));
 
     return $user;
   }
@@ -213,10 +224,24 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
   public static function assertExecutingUnitTests() {
     if (!self::$testsAreRunning) {
       throw new Exception(
-        'Executing test code outside of test execution! This code path can '.
-        'only be run during unit tests.');
+        pht(
+          'Executing test code outside of test execution! '.
+          'This code path can only be run during unit tests.'));
     }
   }
 
+  protected function requireBinaryForTest($binary) {
+    if (!Filesystem::binaryExists($binary)) {
+      $this->assertSkipped(
+        pht(
+          'No binary "%s" found on this system, skipping test.',
+          $binary));
+    }
+  }
+
+  protected function newContentSource() {
+    return PhabricatorContentSource::newForSource(
+      PhabricatorUnitTestContentSource::SOURCECONST);
+  }
 
 }

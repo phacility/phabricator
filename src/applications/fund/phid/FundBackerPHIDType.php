@@ -12,6 +12,10 @@ final class FundBackerPHIDType extends PhabricatorPHIDType {
     return new FundInitiative();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorFundApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

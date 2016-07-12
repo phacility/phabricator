@@ -32,17 +32,30 @@ final class PholioUploadedImageView extends AphrontView {
       ->setLabel(pht('Title'));
 
     $description = id(new PhabricatorRemarkupControl())
+      ->setUser($this->getUser())
       ->setName('description_'.$phid)
       ->setValue($image->getDescription())
       ->setSigil('image-description')
       ->setLabel(pht('Description'));
 
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
+    $thumbnail_uri = $file->getURIForTransform($xform);
+
+    $thumb_img = javelin_tag(
+      'img',
+      array(
+        'class' => 'pholio-thumb-img',
+        'src' => $thumbnail_uri,
+        'sigil' => 'pholio-uploaded-thumb',
+      ));
+
     $thumb_frame = phutil_tag(
       'div',
       array(
         'class' => 'pholio-thumb-frame',
-        'style' => 'background-image: url('.$file->getThumb280x210URI().');',
-      ));
+      ),
+      $thumb_img);
 
     $handle = javelin_tag(
       'div',

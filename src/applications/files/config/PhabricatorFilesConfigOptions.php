@@ -11,6 +11,14 @@ final class PhabricatorFilesConfigOptions
     return pht('Configure files and file storage.');
   }
 
+  public function getIcon() {
+    return 'fa-file';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     $viewable_default = array(
       'image/jpeg'  => 'image/jpeg',
@@ -26,9 +34,17 @@ final class PhabricatorFilesConfigOptions
       'image/x-icon'              => 'image/x-icon',
       'image/vnd.microsoft.icon'  => 'image/x-icon',
 
-      'audio/x-wav'     => 'audio/x-wav',
+      // This is a generic type for both OGG video and OGG audio.
       'application/ogg' => 'application/ogg',
-      'audio/mpeg'      => 'audio/mpeg',
+
+      'audio/x-wav' => 'audio/x-wav',
+      'audio/mpeg' => 'audio/mpeg',
+      'audio/ogg' => 'audio/ogg',
+
+      'video/mp4' => 'video/mp4',
+      'video/ogg' => 'video/ogg',
+      'video/webm' => 'video/webm',
+      'video/quicktime' => 'video/quicktime',
     );
 
     $image_default = array(
@@ -41,73 +57,117 @@ final class PhabricatorFilesConfigOptions
       'image/vnd.microsoft.icon'  => true,
     );
 
+
+    // The "application/ogg" type is listed as both an audio and video type,
+    // because it may contain either type of content.
+
     $audio_default = array(
-      'audio/x-wav'     => true,
+      'audio/x-wav' => true,
+      'audio/mpeg' => true,
+      'audio/ogg' => true,
+
+      // These are video or ambiguous types, but can be forced to render as
+      // audio with `media=audio`, which seems to work properly in browsers.
+      // (For example, you can embed a music video as audio if you just want
+      // to set the mood for your task without distracting viewers.)
+      'video/mp4' => true,
+      'video/ogg' => true,
+      'video/quicktime' => true,
       'application/ogg' => true,
-      'audio/mpeg'      => true,
+    );
+
+    $video_default = array(
+      'video/mp4' => true,
+      'video/ogg' => true,
+      'video/webm' => true,
+      'video/quicktime' => true,
+      'application/ogg' => true,
     );
 
     // largely lifted from http://en.wikipedia.org/wiki/Internet_media_type
     $icon_default = array(
       // audio file icon
-      'audio/basic' => 'docs_audio',
-      'audio/L24' => 'docs_audio',
-      'audio/mp4' => 'docs_audio',
-      'audio/mpeg' => 'docs_audio',
-      'audio/ogg' => 'docs_audio',
-      'audio/vorbis' => 'docs_audio',
-      'audio/vnd.rn-realaudio' => 'docs_audio',
-      'audio/vnd.wave' => 'docs_audio',
-      'audio/webm' => 'docs_audio',
+      'audio/basic' => 'fa-file-audio-o',
+      'audio/L24' => 'fa-file-audio-o',
+      'audio/mp4' => 'fa-file-audio-o',
+      'audio/mpeg' => 'fa-file-audio-o',
+      'audio/ogg' => 'fa-file-audio-o',
+      'audio/vorbis' => 'fa-file-audio-o',
+      'audio/vnd.rn-realaudio' => 'fa-file-audio-o',
+      'audio/vnd.wave' => 'fa-file-audio-o',
+      'audio/webm' => 'fa-file-audio-o',
       // movie file icon
-      'video/mpeg' => 'docs_movie',
-      'video/mp4' => 'docs_movie',
-      'video/ogg' => 'docs_movie',
-      'video/quicktime' => 'docs_movie',
-      'video/webm' => 'docs_movie',
-      'video/x-matroska' => 'docs_movie',
-      'video/x-ms-wmv' => 'docs_movie',
-      'video/x-flv' => 'docs_movie',
+      'video/mpeg' => 'fa-file-movie-o',
+      'video/mp4' => 'fa-file-movie-o',
+      'application/ogg' => 'fa-file-movie-o',
+      'video/ogg' => 'fa-file-movie-o',
+      'video/quicktime' => 'fa-file-movie-o',
+      'video/webm' => 'fa-file-movie-o',
+      'video/x-matroska' => 'fa-file-movie-o',
+      'video/x-ms-wmv' => 'fa-file-movie-o',
+      'video/x-flv' => 'fa-file-movie-o',
       // pdf file icon
-      'application/pdf' => 'docs_pdf',
+      'application/pdf' => 'fa-file-pdf-o',
       // zip file icon
-      'application/zip' => 'docs_zip',
+      'application/zip' => 'fa-file-zip-o',
       // msword icon
-      'application/msword' => 'docs_doc',
-    ) + array_fill_keys(array_keys($image_default), 'docs_image');
+      'application/msword' => 'fa-file-word-o',
+      // msexcel
+      'application/vnd.ms-excel' => 'fa-file-excel-o',
+      // mspowerpoint
+      'application/vnd.ms-powerpoint' => 'fa-file-powerpoint-o',
+
+    ) + array_fill_keys(array_keys($image_default), 'fa-file-image-o');
+
+    // NOTE: These options are locked primarily because adding "text/plain"
+    // as an image MIME type increases SSRF vulnerability by allowing users
+    // to load text files from remote servers as "images" (see T6755 for
+    // discussion).
 
     return array(
       $this->newOption('files.viewable-mime-types', 'wild', $viewable_default)
+        ->setLocked(true)
         ->setSummary(
           pht('Configure which MIME types are viewable in the browser.'))
         ->setDescription(
           pht(
-            'Configure which uploaded file types may be viewed directly '.
-            'in the browser. Other file types will be downloaded instead '.
-            'of displayed. This is mainly a usability consideration, since '.
-            'browsers tend to freak out when viewing enormous binary files.'.
+            "Configure which uploaded file types may be viewed directly ".
+            "in the browser. Other file types will be downloaded instead ".
+            "of displayed. This is mainly a usability consideration, since ".
+            "browsers tend to freak out when viewing enormous binary files.".
             "\n\n".
-            'The keys in this map are vieweable MIME types; the values are '.
-            'the MIME types they are delivered as when they are viewed in '.
-            'the browser.')),
+            "The keys in this map are viewable MIME types; the values are ".
+            "the MIME types they are delivered as when they are viewed in ".
+            "the browser.")),
       $this->newOption('files.image-mime-types', 'set', $image_default)
+        ->setLocked(true)
         ->setSummary(pht('Configure which MIME types are images.'))
         ->setDescription(
           pht(
-            'List of MIME types which can be used as the `src` for an '.
-            '`<img />` tag.')),
+            'List of MIME types which can be used as the `%s` for an `%s` tag.',
+            'src',
+            '<img />')),
       $this->newOption('files.audio-mime-types', 'set', $audio_default)
+        ->setLocked(true)
         ->setSummary(pht('Configure which MIME types are audio.'))
         ->setDescription(
           pht(
-            'List of MIME types which can be used to render an '.
-            '`<audio />` tag.')),
+            'List of MIME types which can be rendered with an `%s` tag.',
+            '<audio />')),
+      $this->newOption('files.video-mime-types', 'set', $video_default)
+        ->setSummary(pht('Configure which MIME types are video.'))
+        ->setDescription(
+          pht(
+            'List of MIME types which can be rendered with a `%s` tag.',
+            '<video />')),
       $this->newOption('files.icon-mime-types', 'wild', $icon_default)
+        ->setLocked(true)
         ->setSummary(pht('Configure which MIME types map to which icons.'))
         ->setDescription(
           pht(
             'Map of MIME type to icon name. MIME types which can not be '.
-            'found default to icon `doc_files`.')),
+            'found default to icon `%s`.',
+            'doc_files')),
       $this->newOption('storage.mysql-engine.max-size', 'int', 1000000)
         ->setSummary(
           pht(
@@ -135,47 +195,6 @@ final class PhabricatorFilesConfigOptions
             "must also configure S3 access keys in the 'Amazon Web Services' ".
             "group.")),
      $this->newOption(
-       'storage.engine-selector',
-       'class',
-       'PhabricatorDefaultFileStorageEngineSelector')
-        ->setBaseClass('PhabricatorFileStorageEngineSelector')
-        ->setSummary(pht('Storage engine selector.'))
-        ->setDescription(
-          pht(
-            'Phabricator uses a storage engine selector to choose which '.
-            'storage engine to use when writing file data. If you add new '.
-            'storage engines or want to provide very custom rules (e.g., '.
-            'write images to one storage engine and other files to a '.
-            'different one), you can provide an alternate implementation '.
-            'here. The default engine will use choose MySQL, Local Disk, and '.
-            'S3, in that order, if they have valid configurations above and '.
-            'a file fits within configured limits.')),
-     $this->newOption('storage.upload-size-limit', 'string', null)
-        ->setSummary(
-          pht('Limit to users in interfaces which allow uploading.'))
-        ->setDescription(
-          pht(
-            "Set the size of the largest file a user may upload. This is ".
-            "used to render text like 'Maximum file size: 10MB' on ".
-            "interfaces where users can upload files, and files larger than ".
-            "this size will be rejected. \n\n".
-            "NOTE: **Setting this to a large size is NOT sufficient to ".
-            "allow users to upload large files. You must also configure a ".
-            "number of other settings.** To configure file upload limits, ".
-            "consult the article 'Configuring File Upload Limits' in the ".
-            "documentation. Once you've configured some limit across all ".
-            "levels of the server, you can set this limit to an appropriate ".
-            "value and the UI will then reflect the actual configured ".
-            "limit.\n\n".
-            "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
-            "suffix."))
-        ->addExample('10M', pht('Allow Uploads 10MB or Smaller')),
-     $this->newOption(
-        'metamta.files.public-create-email',
-        'string',
-        null)
-        ->setDescription(pht('Allow uploaded files via email.')),
-     $this->newOption(
         'metamta.files.subject-prefix',
         'string',
         '[File]')
@@ -185,10 +204,14 @@ final class PhabricatorFilesConfigOptions
          array(
            pht('Enable'),
            pht('Disable'),
-         ))->setDescription(
-             pht("This option will enable animated gif images".
-                  "to be set as profile pictures. The 'convert' binary ".
-                  "should be available to the webserver for this to work")),
+         ))
+        ->setDescription(
+          pht(
+            'This option will use Imagemagick to rescale images, so animated '.
+            'GIFs can be thumbnailed and set as profile pictures. Imagemagick '.
+            'must be installed and the "%s" binary must be available to '.
+            'the webserver for this to work.',
+            'convert')),
 
     );
   }

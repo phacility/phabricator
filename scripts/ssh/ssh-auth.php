@@ -4,38 +4,62 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-$user_dao = new PhabricatorUser();
-$ssh_dao = new PhabricatorUserSSHKey();
-$conn_r = $user_dao->establishConnection('r');
+$keys = id(new PhabricatorAuthSSHKeyQuery())
+  ->setViewer(PhabricatorUser::getOmnipotentUser())
+  ->withIsActive(true)
+  ->execute();
 
-$rows = queryfx_all(
-  $conn_r,
-  'SELECT userName, keyBody, keyType FROM %T u JOIN %T ssh
-    ON u.phid = ssh.userPHID',
-  $user_dao->getTableName(),
-  $ssh_dao->getTableName());
-
-if (!$rows) {
+if (!$keys) {
   echo pht('No keys found.')."\n";
   exit(1);
 }
 
 $bin = $root.'/bin/ssh-exec';
-foreach ($rows as $row) {
-  $user = $row['userName'];
+foreach ($keys as $ssh_key) {
+  $key_argv = array();
+  $object = $ssh_key->getObject();
+  if ($object instanceof PhabricatorUser) {
+    $key_argv[] = '--phabricator-ssh-user';
+    $key_argv[] = $object->getUsername();
+  } else if ($object instanceof AlmanacDevice) {
+    if (!$ssh_key->getIsTrusted()) {
+      // If this key is not a trusted device key, don't allow SSH
+      // authentication.
+      continue;
+    }
+    $key_argv[] = '--phabricator-ssh-device';
+    $key_argv[] = $object->getName();
+  } else {
+    // We don't know what sort of key this is; don't permit SSH auth.
+    continue;
+  }
 
-  $cmd = csprintf('%s --phabricator-ssh-user %s', $bin, $user);
+  $key_argv[] = '--phabricator-ssh-key';
+  $key_argv[] = $ssh_key->getID();
+
+  $cmd = csprintf('%s %Ls', $bin, $key_argv);
+
+  $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+  if (strlen($instance)) {
+    $cmd = csprintf('PHABRICATOR_INSTANCE=%s %C', $instance, $cmd);
+  }
+
   // This is additional escaping for the SSH 'command="..."' string.
   $cmd = addcslashes($cmd, '"\\');
 
   // Strip out newlines and other nonsense from the key type and key body.
 
-  $type = $row['keyType'];
+  $type = $ssh_key->getKeyType();
   $type = preg_replace('@[\x00-\x20]+@', '', $type);
+  if (!strlen($type)) {
+    continue;
+  }
 
-  $key = $row['keyBody'];
+  $key = $ssh_key->getKeyBody();
   $key = preg_replace('@[\x00-\x20]+@', '', $key);
-
+  if (!strlen($key)) {
+    continue;
+  }
 
   $options = array(
     'command="'.$cmd.'"',

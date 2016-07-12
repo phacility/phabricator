@@ -10,7 +10,7 @@ final class PhabricatorConduitMethodCallLog
   protected $error;
   protected $duration;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'id' => 'auto64',

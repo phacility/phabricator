@@ -17,8 +17,13 @@
 
 .herald-action-table td,
 .herald-condition-table td {
-  padding: 2px 4px;
+  padding: 2px 8px 2px 0;
   vertical-align: middle;
+}
+
+.herald-action-table td.remove-column,
+.herald-condition-table td.remove-column {
+  padding: 2px 0 2px 4px;
 }
 
 .herald-condition-table td.value {
@@ -37,16 +42,16 @@
 }
 
 .herald-list-description {
-  color: {$darkgreytext};
-  padding: 8px 0;
+  color: {$bluetext};
+  font-weight: bold;
+  padding: 12px 0;
 }
 
 .herald-list-icon {
-  margin-left: 12px;
-  margin-right: 2px;
+  margin-right: 8px;
 }
 
 .herald-list-item {
   padding-bottom: 4px;
-  color: {$greytext};
+  color: {$darkbluetext};
 }

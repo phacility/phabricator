@@ -3,16 +3,16 @@
 final class PhabricatorRepositoryManagementMarkImportedWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('mark-imported')
       ->setExamples('**mark-imported** __repository__ ...')
-      ->setSynopsis('Mark __repository__, named by callsign, as imported.')
+      ->setSynopsis(pht('Mark __repository__ as imported.'))
       ->setArguments(
         array(
           array(
             'name'        => 'mark-not-imported',
-            'help'        => 'Instead, mark repositories as NOT imported.',
+            'help'        => pht('Instead, mark repositories as NOT imported.'),
           ),
           array(
             'name'        => 'repos',
@@ -26,32 +26,40 @@ final class PhabricatorRepositoryManagementMarkImportedWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        'Specify one or more repositories to mark imported, by callsign.');
+        pht('Specify one or more repositories to mark imported.'));
     }
 
     $new_importing_value = (bool)$args->getArg('mark-not-imported');
 
     $console = PhutilConsole::getConsole();
     foreach ($repos as $repo) {
-      $callsign = $repo->getCallsign();
+      $name = $repo->getDisplayName();
 
       if ($repo->isImporting() && $new_importing_value) {
         $console->writeOut(
           "%s\n",
-          pht("Repository '%s' is already importing.", $callsign));
+          pht(
+            'Repository "%s" is already importing.',
+            $name));
       } else if (!$repo->isImporting() && !$new_importing_value) {
         $console->writeOut(
           "%s\n",
-          pht("Repository '%s' is already imported.", $callsign));
+          pht(
+            'Repository "%s" is already imported.',
+            $name));
       } else {
         if ($new_importing_value) {
           $console->writeOut(
             "%s\n",
-            pht("Marking repository '%s' as importing.", $callsign));
+            pht(
+              'Marking repository "%s" as importing.',
+              $name));
         } else {
           $console->writeOut(
             "%s\n",
-            pht("Marking repository '%s' as imported.", $callsign));
+            pht(
+              'Marking repository "%s" as imported.',
+              $name));
         }
 
         $repo->setDetail('importing', $new_importing_value);
@@ -59,7 +67,7 @@ final class PhabricatorRepositoryManagementMarkImportedWorkflow
       }
     }
 
-    $console->writeOut("Done.\n");
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

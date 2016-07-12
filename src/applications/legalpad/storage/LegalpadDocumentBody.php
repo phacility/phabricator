@@ -13,7 +13,7 @@ final class LegalpadDocumentBody extends LegalpadDAO
   protected $title;
   protected $text;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -56,7 +56,7 @@ final class LegalpadDocumentBody extends LegalpadDAO
         $text = $this->getTitle();
         break;
       default:
-        throw new Exception('Unknown field: '.$field);
+        throw new Exception(pht('Unknown field: %s', $field));
         break;
     }
 

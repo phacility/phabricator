@@ -3,19 +3,14 @@
 final class PhabricatorProjectEditPictureController
   extends PhabricatorProjectController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
+      ->needImages(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -26,8 +21,10 @@ final class PhabricatorProjectEditPictureController
       return new Aphront404Response();
     }
 
-    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
-    $view_uri = $this->getApplicationURI('view/'.$project->getID().'/');
+    $this->setProject($project);
+
+    $edit_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
+    $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
     $e_file = true;
@@ -66,12 +63,9 @@ final class PhabricatorProjectEditPictureController
             'This server only supports these image formats: %s.',
             implode(', ', $supported_formats));
         } else {
-          $xformer = new PhabricatorImageTransformer();
-          $xformed = $xformer->executeProfileTransform(
-            $file,
-            $width = 50,
-            $min_height = 50,
-            $max_height = 50);
+          $xform = PhabricatorFileTransform::getTransformByKey(
+            PhabricatorFileThumbnailTransform::TRANSFORM_PROFILE);
+          $xformed = $xform->executeTransform($file);
         }
       }
 
@@ -100,10 +94,6 @@ final class PhabricatorProjectEditPictureController
     }
 
     $title = pht('Edit Project Picture');
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($project->getName(), $view_uri);
-    $crumbs->addTextCrumb(pht('Edit'), $edit_uri);
-    $crumbs->addTextCrumb(pht('Picture'));
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
@@ -133,7 +123,7 @@ final class PhabricatorProjectEditPictureController
 
     $images[PhabricatorPHIDConstants::PHID_VOID] = array(
       'uri' => $default_image->getBestURI(),
-      'tip' => pht('Default Picture'),
+      'tip' => pht('No Picture'),
     );
 
     require_celerity_resource('people-profile-css');
@@ -191,7 +181,11 @@ final class PhabricatorProjectEditPictureController
     $form->appendChild(
       id(new AphrontFormMarkupControl())
         ->setLabel(pht('Use Picture'))
-        ->setValue($buttons));
+        ->setValue(
+          array(
+            $this->renderDefaultForm($project),
+            $buttons,
+          )));
 
     $launch_id = celerity_generate_unique_node_id();
     $input_id = celerity_generate_unique_node_id();
@@ -260,14 +254,81 @@ final class PhabricatorProjectEditPictureController
       ->setHeaderText(pht('Upload New Picture'))
       ->setForm($upload_form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-        $upload_box,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $nav = $this->getProfileMenu();
+    $nav->selectFilter(PhabricatorProject::PANEL_MANAGE);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setNavigation($nav)
+      ->appendChild(
+        array(
+          $form_box,
+          $upload_box,
+        ));
   }
+
+  private function renderDefaultForm(PhabricatorProject $project) {
+    $viewer = $this->getViewer();
+    $compose_color = $project->getDisplayIconComposeColor();
+    $compose_icon = $project->getDisplayIconComposeIcon();
+
+    $default_builtin = id(new PhabricatorFilesComposeIconBuiltinFile())
+      ->setColor($compose_color)
+      ->setIcon($compose_icon);
+
+    $file_builtins = PhabricatorFile::loadBuiltins(
+      $viewer,
+      array($default_builtin));
+
+    $file_builtin = head($file_builtins);
+
+    $default_button = javelin_tag(
+      'button',
+      array(
+        'class' => 'grey profile-image-button',
+        'sigil' => 'has-tooltip',
+        'meta' => array(
+          'tip' => pht('Use Icon and Color'),
+          'size' => 300,
+        ),
+      ),
+      phutil_tag(
+        'img',
+        array(
+          'height' => 50,
+          'width' => 50,
+          'src' => $file_builtin->getBestURI(),
+        )));
+
+    $inputs = array(
+      'projectPHID' => $project->getPHID(),
+      'icon' => $compose_icon,
+      'color' => $compose_color,
+    );
+
+    foreach ($inputs as $key => $value) {
+      $inputs[$key] = javelin_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => $key,
+          'value' => $value,
+        ));
+    }
+
+    $default_form = phabricator_form(
+      $viewer,
+      array(
+        'class' => 'profile-image-form',
+        'method' => 'POST',
+        'action' => '/file/compose/',
+       ),
+      array(
+        $inputs,
+        $default_button,
+      ));
+
+    return $default_form;
+  }
+
 }

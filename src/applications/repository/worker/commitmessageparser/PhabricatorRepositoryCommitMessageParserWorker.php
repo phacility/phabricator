@@ -3,6 +3,54 @@
 abstract class PhabricatorRepositoryCommitMessageParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  protected function getImportStepFlag() {
+    return PhabricatorRepositoryCommit::IMPORTED_MESSAGE;
+  }
+
+  abstract protected function getFollowupTaskClass();
+
+  final protected function parseCommit(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    if (!$this->shouldSkipImportStep()) {
+      $viewer = PhabricatorUser::getOmnipotentUser();
+
+      $refs_raw = DiffusionQuery::callConduitWithDiffusionRequest(
+        $viewer,
+        DiffusionRequest::newFromDictionary(
+          array(
+            'repository' => $repository,
+            'user' => $viewer,
+          )),
+        'diffusion.querycommits',
+        array(
+          'repositoryPHID' => $repository->getPHID(),
+          'phids' => array($commit->getPHID()),
+          'bypassCache' => true,
+          'needMessages' => true,
+        ));
+
+      if (empty($refs_raw['data'])) {
+        throw new Exception(
+          pht(
+            'Unable to retrieve details for commit "%s"!',
+            $commit->getPHID()));
+      }
+
+      $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
+      $this->updateCommitData($ref);
+    }
+
+    if ($this->shouldQueueFollowupTasks()) {
+      $this->queueTask(
+        $this->getFollowupTaskClass(),
+        array(
+          'commitID' => $commit->getID(),
+        ));
+    }
+  }
+
   final protected function updateCommitData(DiffusionCommitRef $ref) {
     $commit = $this->commit;
     $author = $ref->getAuthor();
@@ -17,8 +65,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $data = new PhabricatorRepositoryCommitData();
     }
     $data->setCommitID($commit->getID());
-    $data->setAuthorName((string)$author);
+    $data->setAuthorName(id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes(255)
+      ->truncateString((string)$author));
 
+    $data->setCommitDetail('authorEpoch', $ref->getAuthorEpoch());
     $data->setCommitDetail('authorName', $ref->getAuthorName());
     $data->setCommitDetail('authorEmail', $ref->getAuthorEmail());
 
@@ -53,11 +104,12 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $differential_app = 'PhabricatorDifferentialApplication';
     $revision_id = null;
+    $low_level_query = null;
     if (PhabricatorApplication::isClassInstalled($differential_app)) {
-      $field_values = id(new DiffusionLowLevelCommitFieldsQuery())
+      $low_level_query = id(new DiffusionLowLevelCommitFieldsQuery())
         ->setRepository($repository)
-        ->withCommitRef($ref)
-        ->execute();
+        ->withCommitRef($ref);
+      $field_values = $low_level_query->execute();
       $revision_id = idx($field_values, 'revisionID');
 
       if (!empty($field_values['reviewedByPHIDs'])) {
@@ -81,9 +133,15 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     // aren't. Autoclose can be disabled for various reasons at the repository
     // or commit levels.
 
-    $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
+    $force_autoclose = idx($this->getTaskData(), 'forceAutoclose', false);
+    if ($force_autoclose) {
+      $autoclose_reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
+    } else {
+      $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
+    }
     $data->setCommitDetail('autocloseReason', $autoclose_reason);
-    $should_autoclose = $repository->shouldAutocloseCommit($commit);
+    $should_autoclose = $force_autoclose ||
+                        $repository->shouldAutocloseCommit($commit);
 
 
     // When updating related objects, we'll act under an omnipotent user to
@@ -123,7 +181,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             'precommitRevisionStatus',
             $revision->getStatus());
         }
-        $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
+        $commit_drev = DiffusionCommitHasRevisionEdgeType::EDGECONST;
         id(new PhabricatorEdgeEditor())
           ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
           ->save();
@@ -160,51 +218,32 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $commit_close_xaction->setMetadataValue(
             'authorName',
             $data->getAuthorName());
-          $commit_close_xaction->setMetadataValue(
-            'commitHashes',
-            $hashes);
 
-          $diff = $this->generateFinalDiff($revision, $acting_as_phid);
-
-          $vs_diff = $this->loadChangedByCommit($revision, $diff);
-          $changed_uri = null;
-          if ($vs_diff) {
-            $data->setCommitDetail('vsDiff', $vs_diff->getID());
-
-            $changed_uri = PhabricatorEnv::getProductionURI(
-              '/D'.$revision->getID().
-              '?vs='.$vs_diff->getID().
-              '&id='.$diff->getID().
-              '#toc');
+          if ($low_level_query) {
+            $commit_close_xaction->setMetadataValue(
+              'revisionMatchData',
+              $low_level_query->getRevisionMatchData());
+            $data->setCommitDetail(
+              'revisionMatchData',
+              $low_level_query->getRevisionMatchData());
           }
 
-          $xactions = array();
-          $xactions[] = id(new DifferentialTransaction())
-            ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
-            ->setIgnoreOnNoEffect(true)
-            ->setNewValue($diff->getPHID())
-            ->setMetadataValue('isCommitUpdate', true);
-          $xactions[] = $commit_close_xaction;
+          $extraction_engine = id(new DifferentialDiffExtractionEngine())
+            ->setViewer($actor)
+            ->setAuthorPHID($acting_as_phid);
 
-          $content_source = PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_DAEMON,
-            array());
+          $content_source = $this->newContentSource();
 
-          $editor = id(new DifferentialTransactionEditor())
-            ->setActor($actor)
-            ->setActingAsPHID($acting_as_phid)
-            ->setContinueOnMissingFields(true)
-            ->setContentSource($content_source)
-            ->setChangedPriorToCommitURI($changed_uri)
-            ->setIsCloseByCommit(true);
+          $update_data = $extraction_engine->updateRevisionWithCommit(
+            $revision,
+            $commit,
+            array(
+              $commit_close_xaction,
+            ),
+            $content_source);
 
-          try {
-            $editor->applyTransactions($revision, $xactions);
-          } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-            // NOTE: We've marked transactions other than the CLOSE transaction
-            // as ignored when they don't have an effect, so this means that we
-            // lost a race to close the revision. That's perfectly fine, we can
-            // just continue normally.
+          foreach ($update_data as $key => $value) {
+            $data->setCommitDetail($key, $value);
           }
         }
       }
@@ -223,180 +262,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $commit->writeImportStatusFlag(
       PhabricatorRepositoryCommit::IMPORTED_MESSAGE);
-  }
-
-  private function generateFinalDiff(
-    DifferentialRevision $revision,
-    $actor_phid) {
-
-    $viewer = PhabricatorUser::getOmnipotentUser();
-
-    $drequest = DiffusionRequest::newFromDictionary(array(
-      'user' => $viewer,
-      'repository' => $this->repository,
-    ));
-
-    $raw_diff = DiffusionQuery::callConduitWithDiffusionRequest(
-      $viewer,
-      $drequest,
-      'diffusion.rawdiffquery',
-      array(
-        'commit' => $this->commit->getCommitIdentifier(),
-      ));
-
-    // TODO: Support adds, deletes and moves under SVN.
-    if (strlen($raw_diff)) {
-      $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
-    } else {
-      // This is an empty diff, maybe made with `git commit --allow-empty`.
-      // NOTE: These diffs have the same tree hash as their ancestors, so
-      // they may attach to revisions in an unexpected way. Just let this
-      // happen for now, although it might make sense to special case it
-      // eventually.
-      $changes = array();
-    }
-
-    $diff = DifferentialDiff::newFromRawChanges($changes)
-      ->setRepositoryPHID($this->repository->getPHID())
-      ->setAuthorPHID($actor_phid)
-      ->setCreationMethod('commit')
-      ->setSourceControlSystem($this->repository->getVersionControlSystem())
-      ->setLintStatus(DifferentialLintStatus::LINT_AUTO_SKIP)
-      ->setUnitStatus(DifferentialUnitStatus::UNIT_AUTO_SKIP)
-      ->setDateCreated($this->commit->getEpoch())
-      ->setDescription(
-        'Commit r'.
-        $this->repository->getCallsign().
-        $this->commit->getCommitIdentifier());
-
-    // TODO: This is not correct in SVN where one repository can have multiple
-    // Arcanist projects.
-    $arcanist_project = id(new PhabricatorRepositoryArcanistProject())
-      ->loadOneWhere('repositoryID = %d LIMIT 1', $this->repository->getID());
-    if ($arcanist_project) {
-      $diff->setArcanistProjectPHID($arcanist_project->getPHID());
-    }
-
-    $parents = DiffusionQuery::callConduitWithDiffusionRequest(
-      $viewer,
-      $drequest,
-      'diffusion.commitparentsquery',
-      array(
-        'commit' => $this->commit->getCommitIdentifier(),
-      ));
-    if ($parents) {
-      $diff->setSourceControlBaseRevision(head($parents));
-    }
-
-    // TODO: Attach binary files.
-
-    return $diff->save();
-  }
-
-  private function loadChangedByCommit(
-    DifferentialRevision $revision,
-    DifferentialDiff $diff) {
-
-    $repository = $this->repository;
-
-    $vs_diff = id(new DifferentialDiffQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withRevisionIDs(array($revision->getID()))
-      ->needChangesets(true)
-      ->setLimit(1)
-      ->executeOne();
-    if (!$vs_diff) {
-      return null;
-    }
-
-    if ($vs_diff->getCreationMethod() == 'commit') {
-      return null;
-    }
-
-    $vs_changesets = array();
-    foreach ($vs_diff->getChangesets() as $changeset) {
-      $path = $changeset->getAbsoluteRepositoryPath($repository, $vs_diff);
-      $path = ltrim($path, '/');
-      $vs_changesets[$path] = $changeset;
-    }
-
-    $changesets = array();
-    foreach ($diff->getChangesets() as $changeset) {
-      $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
-      $path = ltrim($path, '/');
-      $changesets[$path] = $changeset;
-    }
-
-    if (array_fill_keys(array_keys($changesets), true) !=
-        array_fill_keys(array_keys($vs_changesets), true)) {
-      return $vs_diff;
-    }
-
-    $file_phids = array();
-    foreach ($vs_changesets as $changeset) {
-      $metadata = $changeset->getMetadata();
-      $file_phid = idx($metadata, 'new:binary-phid');
-      if ($file_phid) {
-        $file_phids[$file_phid] = $file_phid;
-      }
-    }
-
-    $files = array();
-    if ($file_phids) {
-      $files = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs($file_phids)
-        ->execute();
-      $files = mpull($files, null, 'getPHID');
-    }
-
-    foreach ($changesets as $path => $changeset) {
-      $vs_changeset = $vs_changesets[$path];
-
-      $file_phid = idx($vs_changeset->getMetadata(), 'new:binary-phid');
-      if ($file_phid) {
-        if (!isset($files[$file_phid])) {
-          return $vs_diff;
-        }
-        $drequest = DiffusionRequest::newFromDictionary(array(
-          'user' => PhabricatorUser::getOmnipotentUser(),
-          'initFromConduit' => false,
-          'repository' => $this->repository,
-          'commit' => $this->commit->getCommitIdentifier(),
-          'path' => $path,
-        ));
-        $corpus = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->loadFileContent()
-          ->getCorpus();
-        if ($files[$file_phid]->loadFileData() != $corpus) {
-          return $vs_diff;
-        }
-      } else {
-        $context = implode("\n", $changeset->makeChangesWithContext());
-        $vs_context = implode("\n", $vs_changeset->makeChangesWithContext());
-
-        // We couldn't just compare $context and $vs_context because following
-        // diffs will be considered different:
-        //
-        //   -(empty line)
-        //   -echo 'test';
-        //    (empty line)
-        //
-        //    (empty line)
-        //   -echo "test";
-        //   -(empty line)
-
-        $hunk = id(new DifferentialHunkModern())->setChanges($context);
-        $vs_hunk = id(new DifferentialHunkModern())->setChanges($vs_context);
-        if ($hunk->makeOldFile() != $vs_hunk->makeOldFile() ||
-            $hunk->makeNewFile() != $vs_hunk->makeNewFile()) {
-          return $vs_diff;
-        }
-      }
-    }
-
-    return null;
   }
 
   private function resolveUserPHID(
@@ -450,13 +315,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($actor)
       ->withIDs(array_keys($task_statuses))
+      ->needProjectPHIDs(true)
       ->execute();
 
     foreach ($tasks as $task_id => $task) {
       $xactions = array();
 
       $edge_type = ManiphestTaskHasCommitEdgeType::EDGECONST;
-      $xactions[] = id(new ManiphestTransaction())
+      $edge_xaction = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue('edge:type', $edge_type)
         ->setNewValue(
@@ -471,26 +337,16 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         if ($task->getStatus() != $status) {
           $xactions[] = id(new ManiphestTransaction())
             ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+            ->setMetadataValue('commitPHID', $commit->getPHID())
             ->setNewValue($status);
 
-          $commit_name = $repository->formatCommitName(
-            $commit->getCommitIdentifier());
-
-          $status_message = pht(
-            'Closed by commit %s.',
-            $commit_name);
-
-          $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-            ->attachComment(
-              id(new ManiphestTransactionComment())
-                ->setContent($status_message));
+          $edge_xaction->setMetadataValue('commitPHID', $commit->getPHID());
         }
       }
 
-      $content_source = PhabricatorContentSource::newForSource(
-        PhabricatorContentSource::SOURCE_DAEMON,
-        array());
+      $xactions[] = $edge_xaction;
+
+      $content_source = $this->newContentSource();
 
       $editor = id(new ManiphestTransactionEditor())
         ->setActor($actor)

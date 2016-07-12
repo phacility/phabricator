@@ -9,20 +9,36 @@
 }
 
 .phabricator-chromeless-page .phabricator-standard-page {
-  background:           transparent;
-  border-width:         0px;
+  background: transparent;
+  border-width: 0px;
+}
+
+.phabricator-standard-page-body {
+  clear: both;
 }
 
 .phabricator-standard-page-footer {
   text-align: right;
-  margin: 4px 16px;
+  margin: 44px 16px 16px;
   padding: 12px 0;
-  border-top: 1px solid {$lightgreyborder};
-  color: {$lightgreytext};
+  border-top: 1px solid rgba({$alphagrey},.1);
+  color: {$greytext};
+}
+
+.device .phabricator-standard-page-footer {
+  margin: 24px 8px 16px;
+}
+
+!print .phabricator-standard-page-footer {
+  display: none;
 }
 
 .device-desktop .has-local-nav + .phabricator-standard-page-footer {
   margin-left: 221px;
+}
+
+.device .phabricator-side-menu-home + .phabricator-standard-page-footer {
+  display: none;
 }
 
 .keyboard-shortcut-help td,
@@ -50,18 +66,6 @@
   border: 1px solid #999900;
 }
 
-.workflow-header {
-  background: #efefef;
-  padding: 6px 2em;
-  text-align: right;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #dfdfdf;
-}
-
-.workflow-header button {
-  float: right;
-}
-
 a.handle-status-closed {
   text-decoration: line-through;
   color: #676767;
@@ -72,23 +76,23 @@ a.handle-status-closed:hover {
   color: #19558D;
 }
 
-a.handle-disabled,
-a.handle-status-away,
-a.handle-status-sporadic {
+a.handle-availability-disabled,
+a.handle-availability-none,
+a.handle-availability-partial {
   padding-left: 11px;
   background-repeat: no-repeat;
   background-position: -4px center;
 }
 
-a.handle-status-away {
+a.handle-availability-none {
   background-image: url(/rsrc/image/icon/fatcow/bullet_red.png);
 }
 
-a.handle-status-sporadic {
+a.handle-availability-partial {
   background-image: url(/rsrc/image/icon/fatcow/bullet_orange.png);
 }
 
-a.handle-disabled {
+a.handle-availability-disabled {
   background-image: url(/rsrc/image/icon/fatcow/bullet_black.png);
 }
 
@@ -98,17 +102,86 @@ a.handle-disabled {
   background: #aa0000;
   color: white;
   text-align: center;
-  font-size: 11px;
-  font-family: "Verdana";
+  font-size: {$smallerfontsize};
 }
 
 .setup-warning-callout {
-  position: relative;
   padding: 8px 16px;
-  background: {$lightyellow};
+  background: {$lightred};
+  border-bottom: 1px solid {$sh-redborder};
+  position: relative;
+}
+
+.setup-warning-callout a {
+  color: {$red};
 }
 
 .phui-handle .phui-icon-view {
   display: inline-block;
   margin: 2px 2px -2px 0;
+}
+
+.jx-scrollbar-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.jx-scrollbar-viewport {
+  position: absolute;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.jx-scrollbar-test {
+  position: absolute;
+  left: -300px;
+}
+
+.jx-scrollbar-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 7px;
+  width: 11px;
+}
+
+.jx-scrollbar-bar .jx-scrollbar-handle {
+  position: absolute;
+  right: 2px;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  border-radius: 7px;
+  min-height: 10px;
+  width: 7px;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  -ms-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+  background: #6c6e71;
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+}
+
+.jx-scrollbar-bar:hover .jx-scrollbar-handle {
+  opacity: 0.7;
+  -webkit-transition: opacity 0 linear;
+  -moz-transition: opacity 0 linear;
+  -o-transition: opacity 0 linear;
+  -ms-transition: opacity 0 linear;
+  transition: opacity 0 linear;
+}
+
+.jx-scrollbar-bar .jx-scrollbar-visible {
+  opacity: 0.7;
+}
+
+.jx-scrollbar-link {
+  position: absolute;
+  left: -50px;
 }

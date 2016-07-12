@@ -14,24 +14,24 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     return $this->verbose;
   }
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('update')
       ->setExamples('**update** [options] __repository__')
       ->setSynopsis(
         pht(
-          'Update __repository__, named by callsign. '.
-          'This performs the __pull__, __discover__, __ref__ and __mirror__ '.
-          'operations and is primarily an internal workflow.'))
+          'Update __repository__. This performs the __pull__, __discover__, '.
+          '__refs__ and __mirror__ operations and is primarily an internal '.
+          'workflow.'))
       ->setArguments(
         array(
           array(
             'name'        => 'verbose',
-            'help'        => 'Show additional debugging information.',
+            'help'        => pht('Show additional debugging information.'),
           ),
           array(
             'name'        => 'no-discovery',
-            'help'        => 'Do not perform discovery.',
+            'help'        => pht('Do not perform discovery.'),
           ),
           array(
             'name'        => 'repos',
@@ -44,36 +44,29 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     $this->setVerbose($args->getArg('verbose'));
     $console = PhutilConsole::getConsole();
 
-    $repos = $this->loadRepositories($args, 'repos');
+    $repos = $this->loadLocalRepositories($args, 'repos');
     if (count($repos) !== 1) {
       throw new PhutilArgumentUsageException(
-        pht('Specify exactly one repository to update, by callsign.'));
+        pht('Specify exactly one repository to update.'));
     }
 
     $repository = head($repos);
-    $callsign = $repository->getCallsign();
-
-    $no_discovery = $args->getArg('no-discovery');
-
-    id(new PhabricatorRepositoryPullEngine())
-      ->setRepository($repository)
-      ->setVerbose($this->getVerbose())
-      ->pullRepository();
-
-    if ($no_discovery) {
-      return;
-    }
-
-    // TODO: It would be nice to discover only if we pulled something, but this
-    // isn't totally trivial. It's slightly more complicated with hosted
-    // repositories, too.
-
-    $lock_name = get_class($this).':'.$callsign;
-    $lock = PhabricatorGlobalLock::newLock($lock_name);
-
-    $lock->lock();
 
     try {
+      id(new PhabricatorRepositoryPullEngine())
+        ->setRepository($repository)
+        ->setVerbose($this->getVerbose())
+        ->pullRepository();
+
+      $no_discovery = $args->getArg('no-discovery');
+      if ($no_discovery) {
+        return 0;
+      }
+
+      // TODO: It would be nice to discover only if we pulled something, but
+      // this isn't totally trivial. It's slightly more complicated with
+      // hosted repositories, too.
+
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
         null);
@@ -89,6 +82,13 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_FETCH,
         PhabricatorRepositoryStatusMessage::CODE_OKAY);
+    } catch (DiffusionDaemonLockException $ex) {
+      // If we miss a pull or discover because some other process is already
+      // doing the work, just bail out.
+      echo tsprintf(
+        "%s\n",
+        $ex->getMessage());
+      return 0;
     } catch (Exception $ex) {
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_FETCH,
@@ -97,17 +97,14 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
           'message' => pht(
             'Error updating working copy: %s', $ex->getMessage()),
         ));
-
-      $lock->unlock();
       throw $ex;
     }
 
-    $lock->unlock();
-
-    $console->writeOut(
+    echo tsprintf(
+      "%s\n",
       pht(
-        'Updated repository **%s**.',
-        $repository->getMonogram())."\n");
+        'Updated repository "%s".',
+        $repository->getDisplayName()));
 
     return 0;
   }
@@ -132,7 +129,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       $proxy = new PhutilProxyException(
         pht(
           'Error while pushing "%s" repository to mirrors.',
-          $repository->getCallsign()),
+          $repository->getMonogram()),
         $ex);
       phlog($proxy);
     }

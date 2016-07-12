@@ -6,7 +6,7 @@ final class DivinerPublishCache extends DivinerDiskCache {
   private $index;
 
   public function __construct($cache_directory) {
-    return parent::__construct($cache_directory, 'diviner-publish-cache');
+    parent::__construct($cache_directory, 'diviner-publish-cache');
   }
 
 
@@ -44,6 +44,7 @@ final class DivinerPublishCache extends DivinerDiskCache {
 
 
 /* -(  Index  )-------------------------------------------------------------- */
+
 
   public function getIndex() {
     if ($this->index === null) {

@@ -8,7 +8,7 @@ final class DifferentialProjectsField
   }
 
   public function getFieldName() {
-    return pht('Projects');
+    return pht('Tags');
   }
 
   public function getFieldDescription() {
@@ -49,15 +49,12 @@ final class DifferentialProjectsField
     $this->setValue($request->getArr($this->getFieldKey()));
   }
 
-  public function getRequiredHandlePHIDsForEdit() {
-    return $this->getValue();
-  }
-
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTokenizerControl())
+      ->setUser($this->getViewer())
       ->setName($this->getFieldKey())
       ->setDatasource(new PhabricatorProjectDatasource())
-      ->setValue($handles)
+      ->setValue($this->getValue())
       ->setLabel($this->getFieldName());
   }
 
@@ -79,6 +76,7 @@ final class DifferentialProjectsField
 
   public function getCommitMessageLabels() {
     return array(
+      'Tags',
       'Project',
       'Projects',
     );

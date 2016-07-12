@@ -3,23 +3,13 @@
 final class PhabricatorApplicationEditController
   extends PhabricatorApplicationsController {
 
-  private $application;
-
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->application = $data['application'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $application = $request->getURIData('application');
 
     $application = id(new PhabricatorApplicationQuery())
       ->setViewer($user)
-      ->withClasses(array($this->application))
+      ->withClasses(array($application))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -104,9 +94,10 @@ final class PhabricatorApplicationEditController
           PhabricatorPolicyCapability::CAN_EDIT);
 
         PhabricatorConfigEditor::storeNewValue(
+          $user,
           $config_entry,
           $value,
-          $this->getRequest());
+          PhabricatorContentSource::newFromRequest($request));
       }
 
       return id(new AphrontRedirectResponse())->setURI($view_uri);
@@ -119,27 +110,55 @@ final class PhabricatorApplicationEditController
     $form = id(new AphrontFormView())
       ->setUser($user);
 
+    $locked_policies = PhabricatorEnv::getEnvConfig('policy.locked');
     foreach ($application->getCapabilities() as $capability) {
       $label = $application->getCapabilityLabel($capability);
       $can_edit = $application->isCapabilityEditable($capability);
+      $locked = idx($locked_policies, $capability);
       $caption = $application->getCapabilityCaption($capability);
 
-      if (!$can_edit) {
+      if (!$can_edit || $locked) {
         $form->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($label)
             ->setValue(idx($descriptions, $capability))
             ->setCaption($caption));
       } else {
-        $form->appendChild(
-          id(new AphrontFormPolicyControl())
+        $control = id(new AphrontFormPolicyControl())
           ->setUser($user)
+          ->setDisabled($locked)
           ->setCapability($capability)
           ->setPolicyObject($application)
           ->setPolicies($policies)
           ->setLabel($label)
           ->setName('policy:'.$capability)
-          ->setCaption($caption));
+          ->setCaption($caption);
+
+        $template = $application->getCapabilityTemplatePHIDType($capability);
+        if ($template) {
+          $phid_types = PhabricatorPHIDType::getAllTypes();
+          $phid_type = idx($phid_types, $template);
+          if ($phid_type) {
+            $template_object = $phid_type->newObject();
+            if ($template_object) {
+              $template_policies = id(new PhabricatorPolicyQuery())
+                ->setViewer($user)
+                ->setObject($template_object)
+                ->execute();
+
+              // NOTE: We want to expose both any object template policies
+              // (like "Subscribers") and any custom policy.
+              $all_policies = $template_policies + $policies;
+
+              $control->setPolicies($all_policies);
+              $control->setTemplateObject($template_object);
+            }
+          }
+
+          $control->setTemplatePHIDType($template);
+        }
+
+        $form->appendControl($control);
       }
 
     }
@@ -152,22 +171,27 @@ final class PhabricatorApplicationEditController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($application->getName(), $view_uri);
     $crumbs->addTextCrumb(pht('Edit Policies'));
+    $crumbs->setBorder(true);
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Edit Policies: %s', $application->getName()));
+      ->setHeader(pht('Edit Policies: %s', $application->getName()))
+      ->setHeaderIcon('fa-pencil');
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Policies'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
         $object_box,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
   }
 
 }

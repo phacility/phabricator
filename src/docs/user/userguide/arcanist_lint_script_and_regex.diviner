@@ -29,16 +29,13 @@ configure.
 == Script... ==
 
 The script will be invoked once for each file that is to be linted, with
-the file passed as the first argument. The file may begin with a "-"; ensure
+the file passed as the first argument. The file may begin with a `-`; ensure
 your script will not interpret such files as flags (perhaps by ending your
-script configuration with "--", if its argument parser supports that).
+script configuration with `--`, if its argument parser supports that).
 
-Note that when run via `arc diff`, the list of files to be linted includes
-deleted files and files that were moved away by the change. The linter should
-not assume the path it is given exists, and it is not an error for the
-linter to be invoked with paths which are no longer there. (Every affected
-path is subject to lint because some linters may raise errors in other files
-when a file is removed, or raise an error about its removal.)
+Note that when run via `arc diff`, the list of files to be linted does not
+include binary files, symlinks, deleted files, or directories. These special
+file types are not supported by this linter.
 
 The script should emit lint messages to stdout, which will be parsed with
 the provided regex.
@@ -112,7 +109,8 @@ The regex should capture these named patterns with `(?P<name>...)`:
     not specified, defaults to the linted file. It is generally not necessary
     to capture this unless the linter can raise messages in files other than
     the one it is linting.
-  - `line` (optional) The line number of the message.
+  - `line` (optional) The line number of the message. If no text is
+    captured, the message is assumed to affect the entire file.
   - `char` (optional) The character offset of the message.
   - `offset` (optional) The byte offset of the message. If captured, this
     supersedes `line` and `char`.

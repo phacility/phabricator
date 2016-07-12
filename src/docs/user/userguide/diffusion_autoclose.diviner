@@ -58,3 +58,11 @@ not necessarily that the repository is still importing.
     no containing branch was configured to autoclose.
   - //Field Not Present// This commit was processed before we implemented
     this diagnostic feature, and no information is available.
+
+Next Steps
+==========
+
+Continue by:
+
+  - troubleshooting in greater depth with
+    @{article:Troubleshooting Repository Imports}.

@@ -3,17 +3,19 @@
 final class PhabricatorManiphestTaskTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
-  public function generate() {
-    $authorPHID = $this->loadPhabrictorUserPHID();
+  public function getGeneratorName() {
+    return pht('Maniphest Tasks');
+  }
+
+  public function generateObject() {
+    $author_phid = $this->loadPhabrictorUserPHID();
     $author = id(new PhabricatorUser())
-          ->loadOneWhere('phid = %s', $authorPHID);
+      ->loadOneWhere('phid = %s', $author_phid);
     $task = ManiphestTask::initializeNewTask($author)
       ->setSubPriority($this->generateTaskSubPriority())
       ->setTitle($this->generateTitle());
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_UNKNOWN,
-      array());
+    $content_source = $this->getLipsumContentSource();
 
     $template = new ManiphestTransaction();
     // Accumulate Transactions
@@ -28,8 +30,8 @@ final class PhabricatorManiphestTaskTestDataGenerator
       $this->generateTaskStatus();
     $changes[ManiphestTransaction::TYPE_PRIORITY] =
       $this->generateTaskPriority();
-    $changes[ManiphestTransaction::TYPE_CCS] =
-      $this->getCCPHIDs();
+    $changes[PhabricatorTransactions::TYPE_SUBSCRIBERS] =
+      array('=' => $this->getCCPHIDs());
     $transactions = array();
     foreach ($changes as $type => $value) {
       $transaction = clone $template;

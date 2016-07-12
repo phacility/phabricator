@@ -2,19 +2,13 @@
 
 final class PonderAnswerEditController extends PonderController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $answer = id(new PonderAnswerQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -26,6 +20,7 @@ final class PonderAnswerEditController extends PonderController {
     }
 
     $v_content = $answer->getContent();
+    $v_status = $answer->getStatus();
     $e_content = true;
 
 
@@ -37,6 +32,7 @@ final class PonderAnswerEditController extends PonderController {
     $errors = array();
     if ($request->isFormPost()) {
       $v_content = $request->getStr('content');
+      $v_status = $request->getStr('status');
 
       if (!strlen($v_content)) {
         $errors[] = pht('You must provide some substance in your answer.');
@@ -48,6 +44,10 @@ final class PonderAnswerEditController extends PonderController {
         $xactions[] = id(new PonderAnswerTransaction())
           ->setTransactionType(PonderAnswerTransaction::TYPE_CONTENT)
           ->setNewValue($v_content);
+
+        $xactions[] = id(new PonderAnswerTransaction())
+          ->setTransactionType(PonderAnswerTransaction::TYPE_STATUS)
+          ->setNewValue($v_status);
 
         $editor = id(new PonderAnswerEditor())
           ->setActor($viewer)
@@ -70,7 +70,14 @@ final class PonderAnswerEditController extends PonderController {
           ->setLabel(pht('Question'))
           ->setValue($question->getTitle()))
       ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Status'))
+            ->setName('status')
+            ->setValue($v_status)
+            ->setOptions(PonderAnswerStatus::getAnswerStatusMap()))
+      ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setLabel(pht('Answer'))
           ->setName('content')
           ->setID($answer_content_id)
@@ -78,16 +85,22 @@ final class PonderAnswerEditController extends PonderController {
           ->setError($e_content))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Update Answer'))
+          ->setValue(pht('Submit'))
           ->addCancelButton($answer_uri));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb("Q{$qid}", $answer_uri);
     $crumbs->addTextCrumb(pht('Edit Answer'));
+    $crumbs->setBorder(true);
 
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edit Answer'))
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Edit Answer'))
+      ->setHeaderIcon('fa-pencil');
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Answer'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
@@ -95,15 +108,17 @@ final class PonderAnswerEditController extends PonderController {
       ->setControlID($answer_content_id)
       ->setPreviewURI($this->getApplicationURI('preview/'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
         $preview,
-      ),
-      array(
-        'title' => pht('Edit Answer'),
       ));
+
+    return $this->newPage()
+      ->setTitle(pht('Edit Answer'))
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
 
   }
 }

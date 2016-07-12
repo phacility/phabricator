@@ -1,14 +1,14 @@
 <?php
-
 final class PHUITimelineExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Timeline View';
+    return pht('Timeline View');
   }
 
   public function getDescription() {
-    return hsprintf(
-      'Use <tt>PHUITimelineView</tt> to comments and transactions.');
+    return pht(
+      'Use %s to comments and transactions.',
+      hsprintf('<tt>PHUITimelineView</tt>'));
   }
 
   public function renderExample() {
@@ -20,82 +20,86 @@ final class PHUITimelineExample extends PhabricatorUIExample {
       ->withPHIDs(array($user->getPHID()))
       ->executeOne();
 
+    $designer = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-camera-retro')
+      ->setHeader(pht('Designer'))
+      ->setQuality(PhabricatorBadgesQuality::EPIC);
+
+    $admin = id(new PHUIBadgeMiniView())
+      ->setIcon('fa-user')
+      ->setHeader(pht('Administrator'))
+      ->setQuality(PhabricatorBadgesQuality::RARE);
+
     $events = array();
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setTitle('A major event.')
-      ->appendChild('This is a major timeline event.');
+      ->setTitle(pht('A major event.'))
+      ->appendChild(pht('This is a major timeline event.'))
+      ->addBadge($designer)
+      ->addBadge($admin);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
       ->setIcon('fa-heart')
-      ->setTitle('A minor event.');
+      ->setTitle(pht('A minor event.'));
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
       ->setIcon('fa-comment')
-      ->appendChild('A major event with no title.');
+      ->appendChild(pht('A major event with no title.'));
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
       ->setIcon('fa-star')
-      ->setTitle('Another minor event.');
-
-    $events[] = id(new PHUITimelineEventView())
-      ->setIcon('fa-trophy')
-      ->setToken('medal-1')
-      ->setUserHandle($handle);
-
-    $events[] = id(new PHUITimelineEventView())
-      ->setIcon('fa-quote-left')
-      ->setToken('medal-1', true)
-      ->setUserHandle($handle);
+      ->setTitle(pht('Another minor event.'));
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setTitle('Major Red Event')
+      ->setTitle(pht('Major Red Event'))
       ->setIcon('fa-heart-o')
-      ->appendChild('This event is red!')
-      ->setColor(PhabricatorTransactions::COLOR_RED);
+      ->appendChild(pht('This event is red!'))
+      ->setColor(PhabricatorTransactions::COLOR_RED)
+      ->addBadge($designer);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
       ->setIcon('fa-female')
-      ->setTitle('Minor Red Event')
+      ->setTitle(pht('Minor Red Event'))
       ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PHUITimelineEventView())
       ->setIcon('fa-refresh')
       ->setUserHandle($handle)
-      ->setTitle('Minor Not-Red Event')
+      ->setTitle(pht('Minor Not-Red Event'))
       ->setColor(PhabricatorTransactions::COLOR_GREEN);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
       ->setIcon('fa-calendar-o')
-      ->setTitle('Minor Red Event')
+      ->setTitle(pht('Minor Red Event'))
       ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('fa-random')
-      ->setTitle('Minor Not-Red Event')
-      ->setColor(PhabricatorTransactions::COLOR_BLACK);
+      ->setIcon('fa-check')
+      ->setTitle(pht('Historically Important Action'))
+      ->setColor(PhabricatorTransactions::COLOR_BLACK)
+      ->setReallyMajorEvent(true);
 
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('tag')
-      ->setTitle('Major Green Event')
-      ->appendChild('This event is green!')
+      ->setIcon('fa-circle-o')
+      ->setTitle(pht('Major Green Disagreement Action'))
+      ->appendChild(pht('This event is green!'))
       ->setColor(PhabricatorTransactions::COLOR_GREEN);
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setIcon('tag')
-      ->setTitle(str_repeat('Long Text Title ', 64))
-      ->appendChild(str_repeat('Long Text Body ', 64))
+      ->setIcon('fa-tag')
+      ->setTitle(str_repeat(pht('Long Text Title').' ', 64))
+      ->appendChild(str_repeat(pht('Long Text Body').' ', 64))
       ->setColor(PhabricatorTransactions::COLOR_ORANGE);
 
     $events[] = id(new PHUITimelineEventView())
@@ -119,14 +123,14 @@ final class PHUITimelineExample extends PhabricatorUIExample {
 
     $events[] = id(new PHUITimelineEventView())
       ->setUserHandle($handle)
-      ->setTitle('Colorless')
-      ->setIcon('lock');
+      ->setTitle(pht('Colorless'))
+      ->setIcon('fa-lock');
 
     foreach ($colors as $color) {
       $events[] = id(new PHUITimelineEventView())
         ->setUserHandle($handle)
-        ->setTitle("Color '{$color}'")
-        ->setIcon('lock')
+        ->setTitle(pht("Color '%s'", $color))
+        ->setIcon('fa-paw')
         ->setColor($color);
     }
 
@@ -141,21 +145,21 @@ final class PHUITimelineExample extends PhabricatorUIExample {
         ->setUserHandle($handle)
         ->setTitle(pht('%s bought an apple.', $vhandle))
         ->setColor('green')
-        ->setIcon('check'));
+        ->setIcon('fa-apple'));
 
     $group_event->addEventToGroup(
       id(new PHUITimelineEventView())
         ->setUserHandle($handle)
         ->setTitle(pht('%s bought a banana.', $vhandle))
         ->setColor('yellow')
-        ->setIcon('check'));
+        ->setIcon('fa-check'));
 
     $group_event->addEventToGroup(
       id(new PHUITimelineEventView())
         ->setUserHandle($handle)
         ->setTitle(pht('%s bought a cherry.', $vhandle))
         ->setColor('red')
-        ->setIcon('check'));
+        ->setIcon('fa-check'));
 
     $group_event->addEventToGroup(
       id(new PHUITimelineEventView())
@@ -166,7 +170,7 @@ final class PHUITimelineExample extends PhabricatorUIExample {
       id(new PHUITimelineEventView())
         ->setUserHandle($handle)
         ->setTitle(pht('%s returned home.', $vhandle))
-        ->setIcon('home')
+        ->setIcon('fa-home')
         ->setColor('blue'));
 
     $group_event->addEventToGroup(
@@ -191,6 +195,7 @@ final class PHUITimelineExample extends PhabricatorUIExample {
     }
 
     $timeline = id(new PHUITimelineView());
+    $timeline->setUser($user);
     foreach ($events as $event) {
       $timeline->addEvent($event);
     }

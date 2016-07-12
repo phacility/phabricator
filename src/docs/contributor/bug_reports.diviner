@@ -1,0 +1,185 @@
+@title Contributing Bug Reports
+@group detail
+
+Describes how to file an effective Phabricator bug report.
+
+Include Reproduction Steps!
+===========================
+
+IMPORTANT: When filing a bug report, you **MUST** include reproduction
+instructions. We can not help fix bugs we can not reproduce, and will not
+accept reports which omit reproduction instructions.
+
+For help, see @{article:Providing Reproduction Steps}.
+
+Overview
+========
+
+Found a bug with Phabricator? Let us know! This article describes how to file
+an effective bug report so we can get your issue fixed or help you work around
+it.
+
+The most important things to do are:
+
+  - check the list of common fixes below;
+  - make sure Phabricator is up to date;
+  - make sure we support your setup;
+  - gather debugging information;
+  - explain how to reproduce the issue; and
+  - create a task in
+    [[ http://secure.phabricator.com/u/newbug/ | Maniphest ]].
+
+The rest of this article walks through these points in detail.
+
+If you have a feature request (not a bug report), see
+@{article:Contributing Feature Requests} for a more tailored guide.
+
+For general information on contributing to Phabricator, see
+@{article:Contributor Introduction}.
+
+
+Common Fixes
+============
+
+Before you file a report, here are some common solutions to problems:
+
+  - **Update Phabricator**: We receive a lot of bug reports about issues we have
+    already fixed in HEAD. Updating often resolves issues. It is common for
+    issues to be fixed in less than 24 hours, so even if you've updated recently
+    you should update again. If you aren't sure how to update, see the next
+    section.
+  - **Update Libraries**: Make sure `libphutil/`, `arcanist/` and
+    `phabricator/` are all up to date. Users often update `phabricator/` but
+    forget to update `arcanist/` or `libphutil/`. When you update, make sure you
+    update all three libraries.
+  - **Restart Apache or PHP-FPM**: Phabricator uses caches which don't get
+    reset until you restart Apache or PHP-FPM. After updating, make sure you
+    restart.
+
+
+Update Phabricator
+==================
+
+Before filing a bug, make sure you are up to date. We receive many bug reports
+for issues we have already fixed, and even if we haven't fixed an issue we'll
+be able to resolve it more easily if you file a report based on HEAD. (For
+example, an old stack trace may not have the right line numbers, which will
+make it more difficult for us to figure out what's going wrong.)
+
+To update Phabricator, use a script like the one described in
+@{article:Upgrading Phabricator}.
+
+**If you can not update** for some reason, please include the version of
+Phabricator you are running when you file a report.
+
+For help, see @{article:Providing Version Information}.
+
+
+Supported Issues
+================
+
+Before filing a bug, make sure you're filing an issue against something we
+support.
+
+**We can NOT help you with issues we can not reproduce.** It is critical that
+you explain how to reproduce the issue when filing a report.
+
+For help, see @{article:Providing Reproduction Steps}.
+
+**We do NOT support prototype applications.** If you're running into an issue
+with a prototype application, you're on your own. For more information about
+prototype applications, see @{article:User Guide: Prototype Applications}.
+
+**We do NOT support third-party packages or instructions.** If you installed
+Phabricator (or configured some aspect of it) using a third-party package or by
+following a third-party guide (like a blog post), we can not help you.
+Phabricator changes quickly and third-party information is unreliable and often
+falls out of date. Contact the maintainer of the package or guide you used,
+or reinstall following the upstream instructions.
+
+**We do NOT support custom code development or third-party libraries.** If
+you're writing an extension, you're on your own. We provide some documentation,
+but can not help you with extension or library development. If you downloaded a
+library from somewhere, contact the library maintainer.
+
+**We do NOT support bizarre environments.** If your issue is specific to an
+unusual installation environment, we generally will not help you find a
+workaround. Install Phabricator in a normal environment instead. Examples of
+unusual environments are shared hosts, nontraditional hosts (gaming consoles,
+storage appliances), and hosts with unusually tight resource constraints. The
+vast majority of users run Phabricator in normal environments (modern computers
+with root access) and these are the only environments we support.
+
+Otherwise, if you're having an issue with a supported first-party application
+and followed the upstream install instructions on a normal computer, we're happy
+to try to help.
+
+
+Getting More Information
+========================
+
+For some issues, there are places you can check for more information. This may
+help you resolve the issue yourself. Even if it doesn't, this information can
+help us figure out and resolve an issue.
+
+  - For issues with `arc` or any other command-line script, you can get more
+    details about what the script is doing by adding the `--trace` flag.
+  - For issues with Phabricator, check your webserver error logs.
+    - For Apache, this is often `/var/log/httpd/error.log`, or
+      `/var/log/apache2/error.log` or similar.
+    - For nginx, check both the nginx and php-fpm logs.
+  - For issues with the UI, check the Javascript error console in your web
+    browser.
+  - Some other things, like daemons, have their own debug flags or
+    troubleshooting steps. Check the documentation for information on
+    troubleshooting. Adjusting settings or enabling debugging modes may give
+    you more information about the issue.
+
+
+Reproducibility
+===============
+
+The most important part of your report content is instructions on how to
+reproduce the issue. What did you do? If you do it again, does it still break?
+Does it depend on a specific browser? Can you reproduce the issue on
+`secure.phabricator.com`?
+
+It is nearly impossible for us to resolve many issues if we can not reproduce
+them. We will not accept reports which do not contain the information required
+to reproduce problems.
+
+For help, see @{article:Providing Reproduction Steps}.
+
+
+Create a Task in Maniphest
+==========================
+
+If you're up to date, supported, have collected information about the problem,
+and have the best reproduction instructions you can come up with, you're ready
+to file an issue.
+
+It is **particularly critical** that you include reproduction steps. We will
+not accept reports which describe issues we can not reproduce.
+
+(NOTE) https://secure.phabricator.com/u/newbug/
+
+If you don't want to file there (or, for example, your bug relates to being
+unable to log in or unable to file an issue in Maniphest) you can file on any
+other channel, but we can address reports much more effectively if they're
+filed against the upstream than if they're filed somewhere else.
+
+| Effectiveness | Filing Method |
+|---|---|
+| Best | Upstream Maniphest |
+| Ehhh | Quora, StackOverflow, Facebook, Jelly, email, etc. |
+| What | Passive-aggressive tweet |
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - learning about @{article: Contributing Feature Requests}; or
+  - reading general support information in @{article:Support Resources}; or
+  - returning to the @{article:Contributor Introduction}.

@@ -7,21 +7,17 @@ final class PHIDLookupConduitAPIMethod extends PHIDConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Look up objects by name.';
+    return pht('Look up objects by name.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'names' => 'required list<string>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

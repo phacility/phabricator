@@ -3,17 +3,10 @@
 final class PhabricatorProjectColumnDetailController
   extends PhabricatorProjectBoardController {
 
-  private $id;
-  private $projectID;
-
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $project_id = $request->getURIData('projectID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -21,17 +14,19 @@ final class PhabricatorProjectColumnDetailController
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($project_id))
+      ->needImages(true)
       ->executeOne();
-
     if (!$project) {
       return new Aphront404Response();
     }
     $this->setProject($project);
 
+    $project_id = $project->getID();
+
     $column = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -41,43 +36,36 @@ final class PhabricatorProjectColumnDetailController
       return new Aphront404Response();
     }
 
-    $xactions = id(new PhabricatorProjectColumnTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($column->getPHID()))
-      ->execute();
+    $timeline = $this->buildTransactionTimeline(
+      $column,
+      new PhabricatorProjectColumnTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($column->getPHID())
-      ->setTransactions($xactions);
-
-    $title = pht('%s', $column->getDisplayName());
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      pht('Board'),
-      $this->getApplicationURI('board/'.$project->getID().'/'));
-    $crumbs->addTextCrumb($title);
+    $title = $column->getDisplayName();
 
     $header = $this->buildHeaderView($column);
     $actions = $this->buildActionView($column);
     $properties = $this->buildPropertyView($column, $actions);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Workboard'), "/project/board/{$project_id}/");
+    $crumbs->addTextCrumb(pht('Column: %s', $title));
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $box,
-        $timeline,
-      ),
-      array(
-        'title' => $title,
-      ));
+    $nav = $this->getProfileMenu();
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setNavigation($nav)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $box,
+          $timeline,
+        ));
   }
 
   private function buildHeaderView(PhabricatorProjectColumn $column) {
@@ -85,8 +73,7 @@ final class PhabricatorProjectColumnDetailController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($column->getDisplayName())
-      ->setPolicyObject($column);
+      ->setHeader($column->getDisplayName());
 
     if ($column->isHidden()) {
       $header->setStatus('fa-ban', 'dark', pht('Hidden'));
@@ -103,7 +90,6 @@ final class PhabricatorProjectColumnDetailController
     $base_uri = '/board/'.$project_id.'/';
 
     $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI($base_uri.'column/'.$id.'/'))
       ->setUser($viewer);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -132,19 +118,13 @@ final class PhabricatorProjectColumnDetailController
       ->setObject($column)
       ->setActionList($actions);
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $column);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
-
     $limit = $column->getPointLimit();
-    $properties->addProperty(
-      pht('Point Limit'),
-      $limit ? $limit : pht('No Limit'));
+    if ($limit === null) {
+      $limit_text = pht('No Limit');
+    } else {
+      $limit_text = $limit;
+    }
+    $properties->addProperty(pht('Point Limit'), $limit_text);
 
     return $properties;
   }

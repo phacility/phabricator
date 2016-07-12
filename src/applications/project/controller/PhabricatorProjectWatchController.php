@@ -3,21 +3,14 @@
 final class PhabricatorProjectWatchController
   extends PhabricatorProjectController {
 
-  private $id;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needMembers(true)
       ->needWatchers(true)
       ->executeOne();
@@ -25,27 +18,42 @@ final class PhabricatorProjectWatchController
       return new Aphront404Response();
     }
 
-    $project_uri = '/project/view/'.$project->getID().'/';
+    $via = $request->getStr('via');
+    if ($via == 'profile') {
+      $done_uri = "/project/profile/{$id}/";
+    } else {
+      $done_uri = "/project/members/{$id}/";
+    }
 
-    // You must be a member of a project to
-    if (!$project->isUserMember($viewer->getPHID())) {
-      return new Aphront400Response();
+    $is_watcher = $project->isUserWatcher($viewer->getPHID());
+    $is_ancestor = $project->isUserAncestorWatcher($viewer->getPHID());
+    if ($is_ancestor && !$is_watcher) {
+      $ancestor_phid = $project->getWatchedAncestorPHID($viewer->getPHID());
+      $handles = $viewer->loadHandles(array($ancestor_phid));
+      $ancestor_handle = $handles[$ancestor_phid];
+
+      return $this->newDialog()
+        ->setTitle(pht('Watching Ancestor'))
+        ->appendParagraph(
+          pht(
+            'You are already watching %s, an ancestor of this project, and '.
+            'are thus watching all of its subprojects.',
+            $ancestor_handle->renderTag()->render()))
+        ->addCancelbutton($done_uri);
     }
 
     if ($request->isDialogFormPost()) {
       $edge_action = null;
-      switch ($this->action) {
+      switch ($action) {
         case 'watch':
           $edge_action = '+';
-          $force_subscribe = true;
           break;
         case 'unwatch':
           $edge_action = '-';
-          $force_subscribe = false;
           break;
       }
 
-      $type_member = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+      $type_watcher = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
       $member_spec = array(
         $edge_action => array($viewer->getPHID() => $viewer->getPHID()),
       );
@@ -53,7 +61,7 @@ final class PhabricatorProjectWatchController
       $xactions = array();
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $type_member)
+        ->setMetadataValue('edge:type', $type_watcher)
         ->setNewValue($member_spec);
 
       $editor = id(new PhabricatorProjectTransactionEditor($project))
@@ -63,17 +71,21 @@ final class PhabricatorProjectWatchController
         ->setContinueOnMissingFields(true)
         ->applyTransactions($project, $xactions);
 
-      return id(new AphrontRedirectResponse())->setURI($project_uri);
+      return id(new AphrontRedirectResponse())->setURI($done_uri);
     }
 
     $dialog = null;
-    switch ($this->action) {
+    switch ($action) {
       case 'watch':
         $title = pht('Watch Project?');
-        $body = pht(
+        $body = array();
+        $body[] = pht(
           'Watching a project will let you monitor it closely. You will '.
           'receive email and notifications about changes to every object '.
-          'associated with projects you watch.');
+          'tagged with projects you watch.');
+        $body[] = pht(
+          'Watching a project also watches all subprojects and milestones of '.
+          'that project.');
         $submit = pht('Watch Project');
         break;
       case 'unwatch':
@@ -87,11 +99,17 @@ final class PhabricatorProjectWatchController
         return new Aphront404Response();
     }
 
-    return $this->newDialog()
+    $dialog = $this->newDialog()
       ->setTitle($title)
-      ->appendParagraph($body)
-      ->addCancelButton($project_uri)
+      ->addHiddenInput('via', $via)
+      ->addCancelButton($done_uri)
       ->addSubmitButton($submit);
+
+    foreach ((array)$body as $paragraph) {
+      $dialog->appendParagraph($paragraph);
+    }
+
+    return $dialog;
   }
 
 }

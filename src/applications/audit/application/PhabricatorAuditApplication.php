@@ -6,8 +6,8 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return '/audit/';
   }
 
-  public function getIconName() {
-    return 'audit';
+  public function getIcon() {
+    return 'fa-check-circle-o';
   }
 
   public function getName() {
@@ -22,13 +22,12 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Audit User Guide');
-  }
-
-  public function getEventListeners() {
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
     return array(
-      new AuditActionMenuEventListener(),
+      array(
+        'name' => pht('Audit User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Audit User Guide'),
+      ),
     );
   }
 
@@ -48,34 +47,52 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
 
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
+    $limit = self::MAX_STATUS_ITEMS;
 
     $phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
 
     $query = id(new DiffusionCommitQuery())
       ->setViewer($user)
       ->withAuthorPHIDs(array($user->getPHID()))
-      ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_CONCERN);
+      ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_CONCERN)
+      ->setLimit($limit);
     $commits = $query->execute();
 
     $count = count($commits);
+    if ($count >= $limit) {
+      $count_str = pht('%s+ Problem Commits', new PhutilNumber($limit - 1));
+    } else {
+      $count_str = pht('%s Problem Commit(s)', new PhutilNumber($count));
+    }
+
     $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Problem Commit(s)', $count))
+      ->setText($count_str)
       ->setCount($count);
 
     $query = id(new DiffusionCommitQuery())
       ->setViewer($user)
-      ->withAuditorPHIDs($phids)
+      ->withNeedsAuditByPHIDs($phids)
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_OPEN)
-      ->withAuditAwaitingUser($user);
+      ->setLimit($limit);
     $commits = $query->execute();
 
     $count = count($commits);
+    if ($count >= $limit) {
+      $count_str = pht(
+        '%s+ Commits Awaiting Audit',
+        new PhutilNumber($limit - 1));
+    } else {
+      $count_str = pht(
+        '%s Commit(s) Awaiting Audit',
+        new PhutilNumber($count));
+    }
+
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Commit(s) Awaiting Audit', $count))
+      ->setText($count_str)
       ->setCount($count);
 
     return $status;

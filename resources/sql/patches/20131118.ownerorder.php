@@ -9,7 +9,7 @@ $user_conn = $user_table->establishConnection('r');
 foreach (new LiskMigrationIterator($table) as $task) {
   $id = $task->getID();
 
-  echo "Checking task T{$id}...\n";
+  echo pht('Checking task %s...', "T{$id}")."\n";
   $owner_phid = $task->getOwnerPHID();
 
   if (!$owner_phid && !$task->getOwnerOrdering()) {
@@ -39,4 +39,4 @@ foreach (new LiskMigrationIterator($table) as $task) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

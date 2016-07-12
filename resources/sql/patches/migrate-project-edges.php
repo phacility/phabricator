@@ -1,12 +1,12 @@
 <?php
 
-echo "Migrating project members to edges...\n";
+echo pht('Migrating project members to edges...')."\n";
 $table = new PhabricatorProject();
 $table->establishConnection('w');
 
 foreach (new LiskMigrationIterator($table) as $proj) {
   $id = $proj->getID();
-  echo "Project {$id}: ";
+  echo pht('Project %d: ', $id);
 
   $members = queryfx_all(
     $proj->establishConnection('w'),
@@ -25,11 +25,11 @@ foreach (new LiskMigrationIterator($table) as $proj) {
   foreach ($members as $user_phid) {
     $editor->addEdge(
       $proj->getPHID(),
-      PhabricatorEdgeConfig::TYPE_PROJ_MEMBER,
+      PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
       $user_phid);
   }
   $editor->save();
-  echo "OKAY\n";
+  echo pht('OKAY')."\n";
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -48,13 +48,11 @@ final class PhortuneCurrency extends Phobject {
     $value = (int)round(100 * $value);
 
     $currency = idx($matches, 2, $default);
-    if ($currency) {
-      switch ($currency) {
-        case 'USD':
-          break;
-        default:
-          throw new Exception("Unsupported currency '{$currency}'!");
-      }
+    switch ($currency) {
+      case 'USD':
+        break;
+      default:
+        throw new Exception(pht("Unsupported currency '%s'!", $currency));
     }
 
     return self::newFromValueAndCurrency($value, $currency);
@@ -70,10 +68,10 @@ final class PhortuneCurrency extends Phobject {
   }
 
   public static function newFromList(array $list) {
-    assert_instances_of($list, 'PhortuneCurrency');
+    assert_instances_of($list, __CLASS__);
 
     if (!$list) {
-      return PhortuneCurrency::newEmptyCurrency();
+      return self::newEmptyCurrency();
     }
 
     $total = null;
@@ -123,12 +121,20 @@ final class PhortuneCurrency extends Phobject {
   }
 
   private static function throwFormatException($string) {
-    throw new Exception("Invalid currency format ('{$string}').");
+    throw new Exception(pht("Invalid currency format ('%s').", $string));
+  }
+
+  private function throwUnlikeCurrenciesException(PhortuneCurrency $other) {
+    throw new Exception(
+      pht(
+        'Trying to operate on unlike currencies ("%s" and "%s")!',
+        $this->currency,
+        $other->currency));
   }
 
   public function add(PhortuneCurrency $other) {
     if ($this->currency !== $other->currency) {
-      throw new Exception(pht('Trying to add unlike currencies!'));
+      $this->throwUnlikeCurrenciesException($other);
     }
 
     $currency = new PhortuneCurrency();
@@ -138,6 +144,46 @@ final class PhortuneCurrency extends Phobject {
     $currency->currency = $this->currency;
 
     return $currency;
+  }
+
+  public function subtract(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      $this->throwUnlikeCurrenciesException($other);
+    }
+
+    $currency = new PhortuneCurrency();
+
+    // TODO: This should check for integer overflows, etc.
+    $currency->value = $this->value - $other->value;
+    $currency->currency = $this->currency;
+
+    return $currency;
+  }
+
+  public function isEqualTo(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      $this->throwUnlikeCurrenciesException($other);
+    }
+
+    return ($this->value === $other->value);
+  }
+
+  public function negate() {
+    $currency = new PhortuneCurrency();
+    $currency->value = -$this->value;
+    $currency->currency = $this->currency;
+    return $currency;
+  }
+
+  public function isPositive() {
+    return ($this->value > 0);
+  }
+
+  public function isGreaterThan(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      $this->throwUnlikeCurrenciesException($other);
+    }
+    return $this->value > $other->value;
   }
 
   /**
@@ -155,8 +201,8 @@ final class PhortuneCurrency extends Phobject {
    */
   public function assertInRange($minimum, $maximum) {
     if ($minimum !== null && $maximum !== null) {
-      $min = PhortuneCurrency::newFromString($minimum);
-      $max = PhortuneCurrency::newFromString($maximum);
+      $min = self::newFromString($minimum);
+      $max = self::newFromString($maximum);
       if ($min->value > $max->value) {
         throw new Exception(
           pht(
@@ -167,7 +213,7 @@ final class PhortuneCurrency extends Phobject {
     }
 
     if ($minimum !== null) {
-      $min = PhortuneCurrency::newFromString($minimum);
+      $min = self::newFromString($minimum);
       if ($min->value > $this->value) {
         throw new Exception(
           pht(
@@ -177,7 +223,7 @@ final class PhortuneCurrency extends Phobject {
     }
 
     if ($maximum !== null) {
-      $max = PhortuneCurrency::newFromString($maximum);
+      $max = self::newFromString($maximum);
       if ($max->value < $this->value) {
         throw new Exception(
           pht(

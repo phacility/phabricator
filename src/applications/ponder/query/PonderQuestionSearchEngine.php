@@ -11,93 +11,55 @@ final class PonderQuestionSearchEngine
     return 'PhabricatorPonderApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter(
-      'authorPHIDs',
-      $this->readUsersFromRequest($request, 'authors'));
-
-    $saved->setParameter(
-      'answererPHIDs',
-      $this->readUsersFromRequest($request, 'answerers'));
-
-    $saved->setParameter('status', $request->getStr('status'));
-
-    return $saved;
+  public function newQuery() {
+    return id(new PonderQuestionQuery())
+      ->needProjectPHIDs(true);
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PonderQuestionQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $author_phids = $saved->getParameter('authorPHIDs');
-    if ($author_phids) {
-      $query->withAuthorPHIDs($author_phids);
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    $answerer_phids = $saved->getParameter('answererPHIDs');
-    if ($answerer_phids) {
-      $query->withAnswererPHIDs($answerer_phids);
+    if ($map['answerers']) {
+      $query->withAnswererPHIDs($map['answerers']);
     }
 
-    $status = $saved->getParameter('status');
-    if ($status != null) {
-      switch ($status) {
-        case 0:
-          $query->withStatus(PonderQuestionQuery::STATUS_OPEN);
-          break;
-        case 1:
-          $query->withStatus(PonderQuestionQuery::STATUS_CLOSED);
-          break;
-      }
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
-    $answerer_phids = $saved_query->getParameter('answererPHIDs', array());
-    $status = $saved_query->getParameter(
-      'status', PonderQuestionStatus::STATUS_OPEN);
-
-    $phids = array_merge($author_phids, $answerer_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setValue(array_select_keys($handles, $author_phids)))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('answerers')
-          ->setLabel(pht('Answered By'))
-          ->setValue(array_select_keys($handles, $answerer_phids)))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setValue($status)
-          ->setOptions(PonderQuestionStatus::getQuestionStatusMap()));
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorUsersSearchField())
+        ->setKey('authorPHIDs')
+        ->setAliases(array('authors'))
+        ->setLabel(pht('Authors')),
+      id(new PhabricatorUsersSearchField())
+        ->setKey('answerers')
+        ->setAliases(array('answerers'))
+        ->setLabel(pht('Answered By')),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setLabel(pht('Status'))
+        ->setKey('statuses')
+        ->setOptions(PonderQuestionStatus::getQuestionStatusMap()),
+    );
   }
 
   protected function getURI($path) {
     return '/ponder/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
+      'recent' => pht('Recent Questions'),
       'open' => pht('Open Questions'),
+      'resolved' => pht('Resolved Questions'),
       'all' => pht('All Questions'),
     );
 
@@ -110,7 +72,6 @@ final class PonderQuestionSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -118,14 +79,24 @@ final class PonderQuestionSearchEngine
       case 'all':
         return $query;
       case 'open':
-        return $query->setParameter('status', PonderQuestionQuery::STATUS_OPEN);
+        return $query->setParameter(
+          'statuses', array(PonderQuestionStatus::STATUS_OPEN));
+      case 'recent':
+        return $query->setParameter(
+          'statuses', array(
+            PonderQuestionStatus::STATUS_OPEN,
+            PonderQuestionStatus::STATUS_CLOSED_RESOLVED,
+          ));
+      case 'resolved':
+        return $query->setParameter(
+          'statuses', array(PonderQuestionStatus::STATUS_CLOSED_RESOLVED));
       case 'authored':
         return $query->setParameter(
           'authorPHIDs',
           array($this->requireViewer()->getPHID()));
       case 'answered':
         return $query->setParameter(
-          'answererPHIDs',
+          'answerers',
           array($this->requireViewer()->getPHID()));
     }
 
@@ -146,18 +117,38 @@ final class PonderQuestionSearchEngine
 
     $viewer = $this->requireViewer();
 
+    $proj_phids = array();
+    foreach ($questions as $question) {
+      foreach ($question->getProjectPHIDs() as $project_phid) {
+        $proj_phids[] = $project_phid;
+      }
+    }
+
+    $proj_handles = id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($proj_phids)
+      ->execute();
+
     $view = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
     foreach ($questions as $question) {
+      $color = PonderQuestionStatus::getQuestionStatusTagColor(
+        $question->getStatus());
+      $icon = PonderQuestionStatus::getQuestionStatusIcon(
+        $question->getStatus());
+      $full_status = PonderQuestionStatus::getQuestionStatusFullName(
+        $question->getStatus());
       $item = new PHUIObjectItemView();
       $item->setObjectName('Q'.$question->getID());
       $item->setHeader($question->getTitle());
       $item->setHref('/Q'.$question->getID());
       $item->setObject($question);
-      $item->setBarColor(
-        PonderQuestionStatus::getQuestionStatusTagColor(
-          $question->getStatus()));
+      $item->setStatusIcon($icon.' '.$color, $full_status);
+
+      $project_handles = array_select_keys(
+        $proj_handles,
+        $question->getProjectPHIDs());
 
       $created_date = phabricator_date($question->getDateCreated(), $viewer);
       $item->addIcon('none', $created_date);
@@ -167,12 +158,45 @@ final class PonderQuestionSearchEngine
           $handles[$question->getAuthorPHID()]->renderLink()));
 
       $item->addAttribute(
-        pht('%d Answer(s)', $question->getAnswerCount()));
+        pht(
+          '%s Answer(s)',
+          new PhutilNumber($question->getAnswerCount())));
+
+      if ($project_handles) {
+        $item->addAttribute(
+          id(new PHUIHandleTagListView())
+            ->setLimit(4)
+            ->setSlim(true)
+            ->setHandles($project_handles));
+      }
 
       $view->addItem($item);
     }
 
-    return $view;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($view);
+    $result->setNoDataString(pht('No questions found.'));
+
+    return $result;
+  }
+
+  protected function getNewUserBody() {
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Ask a Question'))
+      ->setHref('/ponder/question/create/')
+      ->setColor(PHUIButtonView::GREEN);
+
+    $icon = $this->getApplication()->getIcon();
+    $app_name =  $this->getApplication()->getName();
+    $view = id(new PHUIBigInfoView())
+      ->setIcon($icon)
+      ->setTitle(pht('Welcome to %s', $app_name))
+      ->setDescription(
+        pht('A simple questions and answers application for your teams.'))
+      ->addAction($create_button);
+
+      return $view;
   }
 
 }

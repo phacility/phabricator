@@ -23,6 +23,9 @@ final class PhabricatorSystemApplication extends PhabricatorApplication {
         'encoding/' => 'PhabricatorSystemSelectEncodingController',
         'highlight/' => 'PhabricatorSystemSelectHighlightController',
       ),
+      '/readonly/' => array(
+        '(?P<reason>[^/]+)/' => 'PhabricatorSystemReadOnlyController',
+      ),
     );
   }
 

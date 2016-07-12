@@ -3,28 +3,22 @@
 final class PhabricatorPeopleDeleteController
   extends PhabricatorPeopleController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getUser();
+    $id = $request->getURIData('id');
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer($admin)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($id))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
     }
 
-    $profile_uri = '/p/'.$user->getUsername().'/';
+    $manage_uri = $this->getApplicationURI("manage/{$id}/");
 
-    if ($user->getPHID() == $admin->getPHID()) {
-      return $this->buildDeleteSelfResponse($profile_uri);
+    if ($user->getPHID() == $viewer->getPHID()) {
+      return $this->buildDeleteSelfResponse($manage_uri);
     }
 
     $str1 = pht(
@@ -44,15 +38,14 @@ final class PhabricatorPeopleDeleteController
       'so on), but less safe to delete established users. If possible, '.
       'disable them instead.');
 
-    $str4 = pht(
-      'To permanently destroy this user, run this command:');
+    $str4 = pht('To permanently destroy this user, run this command:');
 
     $form = id(new AphrontFormView())
-      ->setUser($admin)
+      ->setUser($viewer)
       ->appendRemarkupInstructions(
-        pht(
-          "  phabricator/ $ ./bin/remove destroy %s\n",
-          csprintf('%R', '@'.$user->getUsername())));
+        csprintf(
+          "  phabricator/ $ ./bin/remove destroy %R\n",
+          '@'.$user->getUsername()));
 
     return $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)
@@ -63,20 +56,18 @@ final class PhabricatorPeopleDeleteController
       ->appendParagraph($str3)
       ->appendParagraph($str4)
       ->appendChild($form->buildLayoutView())
-      ->addCancelButton($profile_uri, pht('Close'));
+      ->addCancelButton($manage_uri, pht('Close'));
   }
 
-  private function buildDeleteSelfResponse($profile_uri) {
+  private function buildDeleteSelfResponse($cancel_uri) {
     return $this->newDialog()
       ->setTitle(pht('You Shall Journey No Farther'))
       ->appendParagraph(
         pht(
           'As you stare into the gaping maw of the abyss, something '.
           'holds you back.'))
-      ->appendParagraph(
-        pht(
-          'You can not delete your own account.'))
-      ->addCancelButton($profile_uri, pht('Turn Back'));
+      ->appendParagraph(pht('You can not delete your own account.'))
+      ->addCancelButton($cancel_uri, pht('Turn Back'));
   }
 
 

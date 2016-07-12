@@ -12,6 +12,10 @@ final class PhabricatorFileFilePHIDType extends PhabricatorPHIDType {
     return new PhabricatorFile();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorFilesApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

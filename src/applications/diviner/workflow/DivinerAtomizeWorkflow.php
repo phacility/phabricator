@@ -2,7 +2,7 @@
 
 final class DivinerAtomizeWorkflow extends DivinerWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('atomize')
       ->setSynopsis(pht('Build atoms from source.'))
@@ -11,7 +11,7 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
           array(
             'name' => 'atomizer',
             'param' => 'class',
-            'help' => pht('Specify a subclass of DivinerAtomizer.'),
+            'help' => pht('Specify a subclass of %s.', 'DivinerAtomizer'),
           ),
           array(
             'name' => 'book',
@@ -36,7 +36,10 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
 
     $atomizer_class = $args->getArg('atomizer');
     if (!$atomizer_class) {
-      throw new Exception('Specify an atomizer class with --atomizer.');
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify an atomizer class with %s.',
+          '--atomizer'));
     }
 
     $symbols = id(new PhutilSymbolLoader())
@@ -45,16 +48,18 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       ->setAncestorClass('DivinerAtomizer')
       ->selectAndLoadSymbols();
     if (!$symbols) {
-      throw new Exception(
-        "Atomizer class '{$atomizer_class}' must be a concrete subclass of ".
-        "DivinerAtomizer.");
+      throw new PhutilArgumentUsageException(
+        pht(
+          "Atomizer class '%s' must be a concrete subclass of %s.",
+          $atomizer_class,
+          'DivinerAtomizer'));
     }
 
     $atomizer = newv($atomizer_class, array());
 
     $files = $args->getArg('files');
     if (!$files) {
-      throw new Exception('Specify one or more files to atomize.');
+      throw new Exception(pht('Specify one or more files to atomize.'));
     }
 
     $file_atomizer = new DivinerFileAtomizer();
@@ -80,10 +85,10 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       $data = Filesystem::readFile($abs_path);
 
       if (!$this->shouldAtomizeFile($file, $data)) {
-        $console->writeLog("Skipping %s...\n", $file);
+        $console->writeLog("%s\n", pht('Skipping %s...', $file));
         continue;
       } else {
-        $console->writeLog("Atomizing %s...\n", $file);
+        $console->writeLog("%s\n", pht('Atomizing %s...', $file));
       }
 
       $context['group'] = null;
@@ -98,7 +103,8 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       $all_atoms[] = $file_atoms;
 
       if (count($file_atoms) !== 1) {
-        throw new Exception('Expected exactly one atom from file atomizer.');
+        throw new Exception(
+          pht('Expected exactly one atom from file atomizer.'));
       }
       $file_atom = head($file_atoms);
 
@@ -121,17 +127,15 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
     if ($args->getArg('ugly')) {
       $json = json_encode($all_atoms);
     } else {
-      $json_encoder = new PhutilJSON();
-      $json = $json_encoder->encodeFormatted($all_atoms);
+      $json = id(new PhutilJSON())->encodeFormatted($all_atoms);
     }
 
     $console->writeOut('%s', $json);
-
     return 0;
   }
 
   private function shouldAtomizeFile($file_name, $file_data) {
-    return (strpos($file_data, '@'.'undivinable') === false);
+    return strpos($file_data, '@'.'undivinable') === false;
   }
 
 }

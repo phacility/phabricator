@@ -2,9 +2,8 @@
 
 final class HeraldNewController extends HeraldController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $content_type_map = HeraldAdapter::getEnabledAdapterMap($viewer);
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
@@ -115,6 +114,7 @@ final class HeraldNewController extends HeraldController {
 
         $cancel_text = null;
         $cancel_uri = $this->getApplicationURI();
+        $title = pht('Create Herald Rule');
         break;
       case 1:
         $rule_types = $this->renderRuleTypeControl(
@@ -124,14 +124,6 @@ final class HeraldNewController extends HeraldController {
         $form
           ->addHiddenInput('content_type', $content_type)
           ->addHiddenInput('step', 2)
-          ->appendChild(
-            id(new AphrontFormStaticControl())
-              ->setLabel(pht('Rule for'))
-              ->setValue(
-                phutil_tag(
-                  'strong',
-                  array(),
-                  idx($content_type_map, $content_type))))
           ->appendChild($rule_types);
 
         $cancel_text = pht('Back');
@@ -142,6 +134,8 @@ final class HeraldNewController extends HeraldController {
               'step' => 0,
             ));
         $cancel_uri = $this->getApplicationURI($cancel_uri);
+        $title = pht('Create Herald Rule: %s',
+          idx($content_type_map, $content_type));
         break;
       case 2:
         $adapter = HeraldAdapter::getAdapterForContentType($content_type);
@@ -188,9 +182,10 @@ final class HeraldNewController extends HeraldController {
               'step' => 1,
             ));
         $cancel_uri = $this->getApplicationURI($cancel_uri);
+        $title = pht('Create Herald Rule: %s',
+          idx($content_type_map, $content_type));
         break;
     }
-
 
     $form
       ->appendChild(
@@ -200,20 +195,28 @@ final class HeraldNewController extends HeraldController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
-      ->setHeaderText(pht('Create Herald Rule'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Create Rule'));
+      ->addTextCrumb(pht('Create Rule'))
+      ->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => pht('Create Herald Rule'),
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon('fa-plus-square');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
   }
 

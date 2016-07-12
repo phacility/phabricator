@@ -32,16 +32,16 @@ final class PhabricatorApplicationTransactionNoEffectResponse
     $only_empty_comment = (count($xactions) == 1) &&
       (head($xactions)->getTransactionType() == $type_comment);
 
-    $count = new PhutilNumber(count($xactions));
+    $count = phutil_count($xactions);
 
     if ($ex->hasAnyEffect()) {
-      $title = pht('%d Action(s) With No Effect', $count);
-      $head = pht('Some of your %d action(s) have no effect:', $count);
+      $title = pht('%s Action(s) With No Effect', $count);
+      $head = pht('Some of your %s action(s) have no effect:', $count);
       $tail = pht('Apply remaining actions?');
       $continue = pht('Apply Remaining Actions');
     } else if ($ex->hasComment()) {
       $title = pht('Post as Comment');
-      $head = pht('The %d action(s) you are taking have no effect:', $count);
+      $head = pht('The %s action(s) you are taking have no effect:', $count);
       $tail = pht('Do you want to post your comment anyway?');
       $continue = pht('Post Comment');
     } else if ($only_empty_comment) {
@@ -52,8 +52,8 @@ final class PhabricatorApplicationTransactionNoEffectResponse
       $tail = null;
       $continue = null;
     } else {
-      $title = pht('%d Action(s) Have No Effect', $count);
-      $head = pht('The %d action(s) you are taking have no effect:', $count);
+      $title = pht('%s Action(s) Have No Effect', $count);
+      $head = pht('The %s action(s) you are taking have no effect:', $count);
       $tail = null;
       $continue = null;
     }
@@ -66,13 +66,12 @@ final class PhabricatorApplicationTransactionNoEffectResponse
 
     $list = array();
     foreach ($xactions as $xaction) {
-      $list[] = phutil_tag(
-        'li',
-        array(),
-        $xaction->getNoEffectDescription());
+      $list[] = $xaction->getNoEffectDescription();
     }
 
-    $dialog->appendChild(phutil_tag('ul', array(), $list));
+    if ($list) {
+      $dialog->appendList($list);
+    }
     $dialog->appendChild($tail);
 
     if ($continue) {

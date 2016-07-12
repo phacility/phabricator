@@ -35,6 +35,15 @@ interface PhabricatorApplicationTransactionInterface {
    */
   public function getApplicationTransactionTemplate();
 
+  /**
+   * Hook to augment the $timeline with additional data for rendering.
+   *
+   * @return PhabricatorApplicationTransactionView
+   */
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request);
+
 }
 
 // TEMPLATE IMPLEMENTATION /////////////////////////////////////////////////////
@@ -53,6 +62,13 @@ interface PhabricatorApplicationTransactionInterface {
 
   public function getApplicationTransactionTemplate() {
     return new <<<???>>>Transaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 */

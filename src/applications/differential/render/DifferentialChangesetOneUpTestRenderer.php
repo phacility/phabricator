@@ -7,4 +7,8 @@ final class DifferentialChangesetOneUpTestRenderer
     return true;
   }
 
+  public function getRendererKey() {
+    return '1up-test';
+  }
+
 }

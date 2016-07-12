@@ -20,7 +20,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $mailer = new PhabricatorMailImplementationTestAdapter();
     $mail->sendNow($force = true, $mailer);
     $this->assertEqual(
-      PhabricatorMetaMTAMail::STATUS_SENT,
+      PhabricatorMailOutboundStatus::STATUS_SENT,
       $mail->getStatus());
 
 
@@ -36,7 +36,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       // Ignore.
     }
     $this->assertEqual(
-      PhabricatorMetaMTAMail::STATUS_QUEUE,
+      PhabricatorMailOutboundStatus::STATUS_QUEUE,
       $mail->getStatus());
 
 
@@ -52,15 +52,13 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       // Ignore.
     }
     $this->assertEqual(
-      PhabricatorMetaMTAMail::STATUS_FAIL,
+      PhabricatorMailOutboundStatus::STATUS_FAIL,
       $mail->getStatus());
   }
 
   public function testRecipients() {
     $user = $this->generateNewTestUser();
     $phid = $user->getPHID();
-
-    $prefs = $user->loadPreferences();
 
     $mailer = new PhabricatorMailImplementationTestAdapter();
 
@@ -69,7 +67,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"To" is a recipient.');
+      pht('"To" is a recipient.'));
 
 
     // Test that the "No Self Mail" and "No Mail" preferences work correctly.
@@ -77,77 +75,80 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" does not exclude recipients by default.');
+      pht('"From" does not exclude recipients by default.'));
 
-    $prefs->setPreference(
-      PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL,
+    $user = $this->writeSetting(
+      $user,
+      PhabricatorEmailSelfActionsSetting::SETTINGKEY,
       true);
-    $prefs->save();
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" excludes recipients with no-self-mail set.');
+      pht('"From" excludes recipients with no-self-mail set.'));
 
-    $prefs->unsetPreference(
-      PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL);
-    $prefs->save();
+    $user = $this->writeSetting(
+      $user,
+      PhabricatorEmailSelfActionsSetting::SETTINGKEY,
+      null);
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" does not exclude recipients by default.');
+      pht('"From" does not exclude recipients by default.'));
 
-    $prefs->setPreference(
-      PhabricatorUserPreferences::PREFERENCE_NO_MAIL,
+    $user = $this->writeSetting(
+      $user,
+      PhabricatorEmailNotificationsSetting::SETTINGKEY,
       true);
-    $prefs->save();
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" excludes recipients with no-mail set.');
+      pht('"From" excludes recipients with no-mail set.'));
 
     $mail->setForceDelivery(true);
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" includes no-mail recipients when forced.');
+      pht('"From" includes no-mail recipients when forced.'));
 
     $mail->setForceDelivery(false);
 
-    $prefs->unsetPreference(
-      PhabricatorUserPreferences::PREFERENCE_NO_MAIL);
-    $prefs->save();
+    $user = $this->writeSetting(
+      $user,
+      PhabricatorEmailNotificationsSetting::SETTINGKEY,
+      null);
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
-      '"From" does not exclude recipients by default.');
-
+      pht('"From" does not exclude recipients by default.'));
 
     // Test that explicit exclusion works correctly.
     $mail->setExcludeMailRecipientPHIDs(array($phid));
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      'Explicit exclude excludes recipients.');
+      pht('Explicit exclude excludes recipients.'));
 
     $mail->setExcludeMailRecipientPHIDs(array());
 
 
     // Test that mail tag preferences exclude recipients.
-    $prefs->setPreference(
-      PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
+    $user = $this->writeSetting(
+      $user,
+      PhabricatorEmailTagsSetting::SETTINGKEY,
       array(
         'test-tag' => false,
       ));
-    $prefs->save();
 
     $mail->setMailTags(array('test-tag'));
 
     $this->assertFalse(
       in_array($phid, $mail->buildRecipientList()),
-      'Tag preference excludes recipients.');
+      pht('Tag preference excludes recipients.'));
 
-    $prefs->unsetPreference(PhabricatorUserPreferences::PREFERENCE_MAILTAGS);
-    $prefs->save();
+    $user = $this->writeSetting(
+      $user,
+      PhabricatorEmailTagsSetting::SETTINGKEY,
+      null);
 
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
@@ -194,19 +195,44 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       isset($dict['Thread-Index']),
-      "Expect Thread-Index header for case {$case}.");
+      pht('Expect Thread-Index header for case %s.', $case));
     $this->assertEqual(
       $expect_message_id,
       isset($dict['Message-ID']),
-      "Expectation about existence of Message-ID header for case {$case}.");
+      pht(
+        'Expectation about existence of Message-ID header for case %s.',
+        $case));
     $this->assertEqual(
       $expect_in_reply_to,
       isset($dict['In-Reply-To']),
-      "Expectation about existence of In-Reply-To header for case {$case}.");
+      pht(
+        'Expectation about existence of In-Reply-To header for case %s.',
+        $case));
     $this->assertEqual(
       $expect_references,
       isset($dict['References']),
-      "Expectation about existence of References header for case {$case}.");
+      pht(
+        'Expectation about existence of References header for case %s.',
+        $case));
+  }
+
+  private function writeSetting(PhabricatorUser $user, $key, $value) {
+    $preferences = PhabricatorUserPreferences::loadUserPreferences($user);
+
+    $editor = id(new PhabricatorUserPreferencesEditor())
+      ->setActor($user)
+      ->setContentSource($this->newContentSource())
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    $xactions = array();
+    $xactions[] = $preferences->newTransaction($key, $value);
+    $editor->applyTransactions($preferences, $xactions);
+
+    return id(new PhabricatorPeopleQuery())
+      ->setViewer($user)
+      ->withIDs(array($user->getID()))
+      ->executeOne();
   }
 
 }

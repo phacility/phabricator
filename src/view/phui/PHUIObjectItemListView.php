@@ -5,13 +5,12 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $header;
   private $items;
   private $pager;
-  private $stackable;
   private $noDataString;
   private $flush;
-  private $plain;
+  private $simple;
   private $allowEmptyList;
   private $states;
-
+  private $itemClass = 'phui-object-item-standard';
 
   public function setAllowEmptyList($allow_empty_list) {
     $this->allowEmptyList = $allow_empty_list;
@@ -27,11 +26,6 @@ final class PHUIObjectItemListView extends AphrontTagView {
     return $this;
   }
 
-  public function setPlain($plain) {
-    $this->plain = $plain;
-    return $this;
-  }
-
   public function setHeader($header) {
     $this->header = $header;
     return $this;
@@ -39,6 +33,11 @@ final class PHUIObjectItemListView extends AphrontTagView {
 
   public function setPager($pager) {
     $this->pager = $pager;
+    return $this;
+  }
+
+  public function setSimple($simple) {
+    $this->simple = $simple;
     return $this;
   }
 
@@ -52,13 +51,13 @@ final class PHUIObjectItemListView extends AphrontTagView {
     return $this;
   }
 
-  public function setStackable($stackable) {
-    $this->stackable = $stackable;
+  public function setStates($states) {
+    $this->states = $states;
     return $this;
   }
 
-  public function setStates($states) {
-    $this->states = $states;
+  public function setItemClass($item_class) {
+    $this->itemClass = $item_class;
     return $this;
   }
 
@@ -70,18 +69,14 @@ final class PHUIObjectItemListView extends AphrontTagView {
     $classes = array();
 
     $classes[] = 'phui-object-item-list-view';
-    if ($this->stackable) {
-      $classes[] = 'phui-object-list-stackable';
-    }
     if ($this->states) {
       $classes[] = 'phui-object-list-states';
-      $classes[] = 'phui-object-list-stackable';
     }
     if ($this->flush) {
       $classes[] = 'phui-object-list-flush';
     }
-    if ($this->plain) {
-      $classes[] = 'phui-object-list-plain';
+    if ($this->simple) {
+      $classes[] = 'phui-object-list-simple';
     }
 
     return array(
@@ -90,6 +85,7 @@ final class PHUIObjectItemListView extends AphrontTagView {
   }
 
   protected function getTagContent() {
+    $viewer = $this->getUser();
     require_celerity_resource('phui-object-item-list-view-css');
 
     $header = null;
@@ -103,13 +99,23 @@ final class PHUIObjectItemListView extends AphrontTagView {
     }
 
     if ($this->items) {
+      if ($viewer) {
+        foreach ($this->items as $item) {
+          $item->setUser($viewer);
+        }
+      }
+
+      foreach ($this->items as $item) {
+        $item->addClass($this->itemClass);
+      }
+
       $items = $this->items;
     } else if ($this->allowEmptyList) {
       $items = null;
     } else {
       $string = nonempty($this->noDataString, pht('No data.'));
-      $string = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      $string = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild($string);
       $items = phutil_tag(
         'li',

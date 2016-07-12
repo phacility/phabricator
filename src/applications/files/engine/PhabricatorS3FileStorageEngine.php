@@ -10,7 +10,7 @@ final class PhabricatorS3FileStorageEngine
   extends PhabricatorFileStorageEngine {
 
 
-/* -(  Implementation  )----------------------------------------------------- */
+/* -(  Engine Metadata  )---------------------------------------------------- */
 
 
   /**
@@ -19,6 +19,27 @@ final class PhabricatorS3FileStorageEngine
   public function getEngineIdentifier() {
     return 'amazon-s3';
   }
+
+  public function getEnginePriority() {
+    return 100;
+  }
+
+  public function canWriteFiles() {
+    $bucket = PhabricatorEnv::getEnvConfig('storage.s3.bucket');
+    $access_key = PhabricatorEnv::getEnvConfig('amazon-s3.access-key');
+    $secret_key = PhabricatorEnv::getEnvConfig('amazon-s3.secret-key');
+    $endpoint = PhabricatorEnv::getEnvConfig('amazon-s3.endpoint');
+    $region = PhabricatorEnv::getEnvConfig('amazon-s3.region');
+
+    return (strlen($bucket) &&
+      strlen($access_key) &&
+      strlen($secret_key) &&
+      strlen($endpoint) &&
+      strlen($region));
+  }
+
+
+/* -(  Managing File Data  )------------------------------------------------- */
 
 
   /**
@@ -32,12 +53,19 @@ final class PhabricatorS3FileStorageEngine
     // files more browsable with web/debugging tools like the S3 administration
     // tool.
     $seed = Filesystem::readRandomCharacters(20);
-    $parts = array(
-      substr($seed, 0, 2),
-      substr($seed, 2, 2),
-      substr($seed, 4),
-    );
-    $name = 'phabricator/'.implode('/', $parts);
+    $parts = array();
+    $parts[] = 'phabricator';
+
+    $instance_name = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance_name)) {
+      $parts[] = $instance_name;
+    }
+
+    $parts[] = substr($seed, 0, 2);
+    $parts[] = substr($seed, 2, 2);
+    $parts[] = substr($seed, 4);
+
+    $name = implode('/', $parts);
 
     AphrontWriteGuard::willWrite();
     $profiler = PhutilServiceProfiler::getInstance();
@@ -46,11 +74,11 @@ final class PhabricatorS3FileStorageEngine
         'type' => 's3',
         'method' => 'putObject',
       ));
-    $s3->putObject(
-      $data,
-      $this->getBucketName(),
-      $name,
-      $acl = 'private');
+
+    $s3
+      ->setParametersForPutObject($name, $data)
+      ->resolve();
+
     $profiler->endServiceCall($call_id, array());
 
     return $name;
@@ -62,24 +90,21 @@ final class PhabricatorS3FileStorageEngine
    */
   public function readFile($handle) {
     $s3 = $this->newS3API();
+
     $profiler = PhutilServiceProfiler::getInstance();
     $call_id = $profiler->beginServiceCall(
       array(
         'type' => 's3',
         'method' => 'getObject',
       ));
-    $result = $s3->getObject(
-      $this->getBucketName(),
-      $handle);
+
+    $result = $s3
+      ->setParametersForGetObject($handle)
+      ->resolve();
+
     $profiler->endServiceCall($call_id, array());
 
-    // NOTE: The implementation of the API that we're using may respond with
-    // a successful result that has length 0 and no body property.
-    if (isset($result->body)) {
-      return $result->body;
-    } else {
-      return '';
-    }
+    return $result;
   }
 
 
@@ -87,17 +112,20 @@ final class PhabricatorS3FileStorageEngine
    * Delete a blob from Amazon S3.
    */
   public function deleteFile($handle) {
-    AphrontWriteGuard::willWrite();
     $s3 = $this->newS3API();
+
+    AphrontWriteGuard::willWrite();
     $profiler = PhutilServiceProfiler::getInstance();
     $call_id = $profiler->beginServiceCall(
       array(
         'type' => 's3',
         'method' => 'deleteObject',
       ));
-    $s3->deleteObject(
-      $this->getBucketName(),
-      $handle);
+
+    $s3
+      ->setParametersForDeleteObject($handle)
+      ->resolve();
+
     $profiler->endServiceCall($call_id, array());
   }
 
@@ -114,7 +142,9 @@ final class PhabricatorS3FileStorageEngine
     $bucket = PhabricatorEnv::getEnvConfig('storage.s3.bucket');
     if (!$bucket) {
       throw new PhabricatorFileStorageConfigurationException(
-        "No 'storage.s3.bucket' specified!");
+        pht(
+          "No '%s' specified!",
+          'storage.s3.bucket'));
     }
     return $bucket;
   }
@@ -123,30 +153,19 @@ final class PhabricatorS3FileStorageEngine
    * Create a new S3 API object.
    *
    * @task internal
-   * @phutil-external-symbol class S3
    */
   private function newS3API() {
-    $libroot = dirname(phutil_get_library_root('phabricator'));
-    require_once $libroot.'/externals/s3/S3.php';
-
     $access_key = PhabricatorEnv::getEnvConfig('amazon-s3.access-key');
     $secret_key = PhabricatorEnv::getEnvConfig('amazon-s3.secret-key');
+    $region = PhabricatorEnv::getEnvConfig('amazon-s3.region');
     $endpoint = PhabricatorEnv::getEnvConfig('amazon-s3.endpoint');
 
-    if (!$access_key || !$secret_key) {
-      throw new PhabricatorFileStorageConfigurationException(
-        "Specify 'amazon-s3.access-key' and 'amazon-s3.secret-key'!");
-    }
-
-    if ($endpoint !== null) {
-      $s3 = new S3($access_key, $secret_key, $use_ssl = true, $endpoint);
-    } else {
-      $s3 = new S3($access_key, $secret_key, $use_ssl = true);
-    }
-
-    $s3->setExceptions(true);
-
-    return $s3;
+    return id(new PhutilAWSS3Future())
+      ->setAccessKey($access_key)
+      ->setSecretKey(new PhutilOpaqueEnvelope($secret_key))
+      ->setRegion($region)
+      ->setEndpoint($endpoint)
+      ->setBucket($this->getBucketName());
   }
 
 }

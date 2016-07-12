@@ -2,77 +2,63 @@
 
 final class DiffusionCommitEditController extends DiffusionController {
 
-  public function willProcessRequest(array $data) {
-    $data['user'] = $this->getRequest()->getUser();
-    $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
+    }
 
-  public function processRequest() {
-    $request    = $this->getRequest();
-    $user       = $request->getUser();
-    $drequest   = $this->getDiffusionRequest();
-    $callsign   = $drequest->getRepository()->getCallsign();
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
-    $commit     = $drequest->loadCommit();
-    $data = $commit->loadCommitData();
-    $page_title = pht('Edit Diffusion Commit');
+    $commit = $drequest->loadCommit();
 
     if (!$commit) {
       return new Aphront404Response();
     }
 
-    $commit_phid        = $commit->getPHID();
-    $edge_type          = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT;
+    $data = $commit->loadCommitData();
+    $page_title = pht('Edit Diffusion Commit');
+
+    $commit_phid = $commit->getPHID();
+    $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     $current_proj_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $commit_phid,
       $edge_type);
-    $handles = $this->loadViewerHandles($current_proj_phids);
-    $proj_t_values = $handles;
 
     if ($request->isFormPost()) {
+      $xactions = array();
       $proj_phids = $request->getArr('projects');
-      $new_proj_phids = array_values($proj_phids);
-      $rem_proj_phids = array_diff($current_proj_phids,
-                                   $new_proj_phids);
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $edge_type)
+        ->setNewValue(array('=' => array_fuse($proj_phids)));
 
-      $editor = id(new PhabricatorEdgeEditor());
-      foreach ($rem_proj_phids as $phid) {
-        $editor->removeEdge($commit_phid, $edge_type, $phid);
-      }
-      foreach ($new_proj_phids as $phid) {
-        $editor->addEdge($commit_phid, $edge_type, $phid);
-      }
-      $editor->save();
+      $editor = id(new PhabricatorAuditEditor())
+        ->setActor($viewer)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request);
 
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing($commit->getPHID());
+      $editor->applyTransactions($commit, $xactions);
 
       return id(new AphrontRedirectResponse())
-      ->setURI('/r'.$callsign.$commit->getCommitIdentifier());
+        ->setURI($commit->getURI());
     }
 
     $tokenizer_id = celerity_generate_unique_node_id();
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setAction($request->getRequestURI()->getPath())
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
         ->setLabel(pht('Projects'))
         ->setName('projects')
-        ->setValue($proj_t_values)
+        ->setValue($current_proj_phids)
         ->setID($tokenizer_id)
-        ->setCaption(
-          javelin_tag(
-            'a',
-            array(
-              'href'        => '/project/create/',
-              'mustcapture' => true,
-              'sigil'       => 'project-create',
-            ),
-            pht('Create New Project')))
         ->setDatasource(new PhabricatorProjectDatasource()));
 
     $reason = $data->getCommitDetail('autocloseReason', false);
+    $reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
     if ($reason !== false) {
       switch ($reason) {
         case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:
@@ -83,6 +69,9 @@ final class DiffusionCommitEditController extends DiffusionController {
           break;
         case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
           $desc = pht('No, Not On Autoclose Branch');
+          break;
+        case PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED:
+          $desc = pht('Yes, Forced Via bin/repository CLI Tool.');
           break;
         case null:
           $desc = pht('Yes');
@@ -107,33 +96,25 @@ final class DiffusionCommitEditController extends DiffusionController {
           ->setValue(array($desc, " \xC2\xB7 ", $doc_link)));
     }
 
+    $form->appendControl(
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Save'))
+        ->addCancelButton($commit->getURI()));
 
-    Javelin::initBehavior('project-create', array(
-      'tokenizerID' => $tokenizer_id,
-    ));
-
-    $submit = id(new AphrontFormSubmitControl())
-      ->setValue(pht('Save'))
-      ->addCancelButton('/r'.$callsign.$commit->getCommitIdentifier());
-    $form->appendChild($submit);
-
-    $crumbs = $this->buildCrumbs(array(
-      'commit' => true,
-    ));
+    $crumbs = $this->buildCrumbs(
+      array(
+        'commit' => true,
+      ));
     $crumbs->addTextCrumb(pht('Edit'));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $page_title,
-      ));
+    return $this->newPage()
+      ->setTitle($page_title)
+      ->setCrumbs($crumbs)
+      ->appendChild($form_box);
   }
 
 }

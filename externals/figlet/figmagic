@@ -1,0 +1,6 @@
+# Append this file to your /etc/magic or /usr/share/misc/magic file
+# to enable the ``file'' command to report on FIGlet fonts and controlfiles.
+0	string		flf		FIGlet font
+>3	string		>2a		version %-2.2s
+0	string		flc		FIGlet controlfile
+>3	string		>2a		version %-2.2s

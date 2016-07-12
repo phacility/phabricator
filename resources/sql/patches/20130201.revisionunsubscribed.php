@@ -1,6 +1,6 @@
 <?php
 
-echo "Migrating Differential unsubscribed users to edges...\n";
+echo pht('Migrating Differential unsubscribed users to edges...')."\n";
 $table = new DifferentialRevision();
 $table->openTransaction();
 
@@ -22,11 +22,11 @@ foreach ($revs as $rev) {
   foreach ($unsubscribed as $user_phid => $_) {
     $editor->addEdge(
       $rev['phid'],
-      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER,
+      PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST ,
       $user_phid);
   }
   $editor->save();
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

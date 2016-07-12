@@ -37,6 +37,14 @@ form.compose-dialog {
   background-color: {$darkgreytext};
 }
 
+.compose-dialog .compose-icon-bg {
+  color: rgba({$alphawhite},0.8);
+  line-height: 50px;
+  width: 50px;
+  text-align: center;
+  font-size: 32px;
+}
+
 .compose-dialog .compose-background-red {
   background-color: {$red};
 }
@@ -67,6 +75,10 @@ form.compose-dialog {
 
 .compose-dialog .compose-background-violet {
   background-color: {$violet};
+}
+
+.compose-dialog .compose-background-pink {
+  background-color: {$pink};
 }
 
 .compose-dialog .compose-background-charcoal {

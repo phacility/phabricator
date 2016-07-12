@@ -1,6 +1,7 @@
 <?php
 
 final class DefaultDatabaseConfigurationProvider
+  extends Phobject
   implements DatabaseConfigurationProvider {
 
   private $dao;
@@ -40,7 +41,7 @@ final class DefaultDatabaseConfigurationProvider
     return $this->namespace.'_'.$this->getDao()->getApplicationName();
   }
 
-  final protected function getDao() {
+  protected function getDao() {
     return $this->dao;
   }
 

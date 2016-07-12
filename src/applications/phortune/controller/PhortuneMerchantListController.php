@@ -3,20 +3,16 @@
 final class PhortuneMerchantListController
   extends PhortuneMerchantController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $querykey = $request->getURIData('queryKey');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->queryKey)
+    $controller = id(new PhabricatorApplicationSearchController())
+      ->setQueryKey($querykey)
       ->setSearchEngine(new PhortuneMerchantSearchEngine())
       ->setNavigation($this->buildSideNavView());
 
@@ -24,7 +20,7 @@ final class PhortuneMerchantListController
   }
 
   public function buildSideNavView() {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
@@ -38,7 +34,7 @@ final class PhortuneMerchantListController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(

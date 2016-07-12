@@ -10,56 +10,111 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return '/phame/';
   }
 
-  public function getIconName() {
-    return 'phame';
+  public function getIcon() {
+    return 'fa-star';
   }
 
   public function getShortDescription() {
-    return 'Blog';
+    return pht('Blog');
   }
 
   public function getTitleGlyph() {
     return "\xe2\x9c\xa9";
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Phame User Guide');
-  }
-
-  public function isPrototype() {
-    return true;
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Phame User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Phame User Guide'),
+      ),
+    );
   }
 
   public function getRoutes() {
     return array(
-     '/phame/' => array(
-        '' => 'PhamePostListController',
-        'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)'
-          => 'PhameResourceController',
+      '/J(?P<id>[1-9]\d*)' => 'PhamePostViewController',
+      '/phame/' => array(
+        '' => 'PhameHomeController',
 
-        'live/(?P<id>[^/]+)/(?P<more>.*)' => 'PhameBlogLiveController',
+        // NOTE: The live routes include an initial "/", so leave it off
+        // this route.
+        '(?P<live>live)/(?P<blogID>\d+)' => $this->getLiveRoutes(),
         'post/' => array(
-          '(?:(?P<filter>draft|all)/)?' => 'PhamePostListController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhamePostListController',
           'blogger/(?P<bloggername>[\w\.-_]+)/' => 'PhamePostListController',
-          'delete/(?P<id>[^/]+)/' => 'PhamePostDeleteController',
-          'edit/(?:(?P<id>[^/]+)/)?' => 'PhamePostEditController',
-          'view/(?P<id>\d+)/' => 'PhamePostViewController',
-          'publish/(?P<id>\d+)/' => 'PhamePostPublishController',
-          'unpublish/(?P<id>\d+)/' => 'PhamePostUnpublishController',
-          'notlive/(?P<id>\d+)/' => 'PhamePostNotLiveController',
-          'preview/' => 'PhamePostPreviewController',
-          'framed/(?P<id>\d+)/' => 'PhamePostFramedController',
-          'new/' => 'PhamePostNewController',
-          'move/(?P<id>\d+)/' => 'PhamePostNewController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhamePostEditController',
+          'history/(?P<id>\d+)/' => 'PhamePostHistoryController',
+          'view/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
+          '(?P<action>publish|unpublish)/(?P<id>\d+)/'
+            => 'PhamePostPublishController',
+          'preview/(?P<id>\d+)/' => 'PhamePostPreviewController',
+          'preview/' => 'PhabricatorMarkupPreviewController',
+          'move/(?P<id>\d+)/' => 'PhamePostMoveController',
+          'archive/(?P<id>\d+)/' => 'PhamePostArchiveController',
         ),
         'blog/' => array(
-          '(?:(?P<filter>user|all)/)?' => 'PhameBlogListController',
-          'delete/(?P<id>[^/]+)/' => 'PhameBlogDeleteController',
-          'edit/(?P<id>[^/]+)/' => 'PhameBlogEditController',
-          'view/(?P<id>[^/]+)/' => 'PhameBlogViewController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhameBlogListController',
+          'archive/(?P<id>[^/]+)/' => 'PhameBlogArchiveController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhameBlogEditController',
+          'view/(?P<blogID>\d+)/' => 'PhameBlogViewController',
+          'manage/(?P<id>[^/]+)/' => 'PhameBlogManageController',
           'feed/(?P<id>[^/]+)/' => 'PhameBlogFeedController',
-          'new/' => 'PhameBlogEditController',
+          'picture/(?P<id>[1-9]\d*)/' => 'PhameBlogProfilePictureController',
+          'header/(?P<id>[1-9]\d*)/' => 'PhameBlogHeaderPictureController',
         ),
+      ) + $this->getResourceSubroutes(),
+    );
+  }
+
+  public function getResourceRoutes() {
+    return array(
+      '/phame/' => $this->getResourceSubroutes(),
+    );
+  }
+
+  private function getResourceSubroutes() {
+    return array(
+      'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)' =>
+        'PhameResourceController',
+    );
+  }
+
+  public function getBlogRoutes() {
+    return $this->getLiveRoutes();
+  }
+
+  private function getLiveRoutes() {
+    return array(
+      '/' => array(
+        '' => 'PhameBlogViewController',
+        'post/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
+        '.*' => 'PhameBlog404Controller',
+      ),
+
+    );
+  }
+
+  public function getQuicksandURIPatternBlacklist() {
+    return array(
+      '/phame/live/.*',
+    );
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new PhamePostRemarkupRule(),
+    );
+  }
+
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhameBlogCreateCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_USER,
+        'caption' => pht('Default create policy for blogs.'),
       ),
     );
   }

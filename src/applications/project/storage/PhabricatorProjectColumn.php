@@ -3,8 +3,10 @@
 final class PhabricatorProjectColumn
   extends PhabricatorProjectDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorExtendedPolicyInterface {
 
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
@@ -16,18 +18,21 @@ final class PhabricatorProjectColumn
   protected $name;
   protected $status;
   protected $projectPHID;
+  protected $proxyPHID;
   protected $sequence;
   protected $properties = array();
 
   private $project = self::ATTACHABLE;
+  private $proxy = self::ATTACHABLE;
 
   public static function initializeNewColumn(PhabricatorUser $user) {
     return id(new PhabricatorProjectColumn())
       ->setName('')
-      ->setStatus(self::STATUS_ACTIVE);
+      ->setStatus(self::STATUS_ACTIVE)
+      ->attachProxy(null);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -37,6 +42,7 @@ final class PhabricatorProjectColumn
         'name' => 'text255',
         'status' => 'uint32',
         'sequence' => 'uint32',
+        'proxyPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_status' => array(
@@ -44,6 +50,10 @@ final class PhabricatorProjectColumn
         ),
         'key_sequence' => array(
           'columns' => array('projectPHID', 'sequence'),
+        ),
+        'key_proxy' => array(
+          'columns' => array('projectPHID', 'proxyPHID'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -63,15 +73,34 @@ final class PhabricatorProjectColumn
     return $this->assertAttached($this->project);
   }
 
+  public function attachProxy($proxy) {
+    $this->proxy = $proxy;
+    return $this;
+  }
+
+  public function getProxy() {
+    return $this->assertAttached($this->proxy);
+  }
+
   public function isDefaultColumn() {
     return (bool)$this->getProperty('isDefault');
   }
 
   public function isHidden() {
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->isArchived();
+    }
+
     return ($this->getStatus() == self::STATUS_HIDDEN);
   }
 
   public function getDisplayName() {
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->getProxyColumnName();
+    }
+
     $name = $this->getName();
     if (strlen($name)) {
       return $name;
@@ -84,27 +113,34 @@ final class PhabricatorProjectColumn
     return pht('Unnamed Column');
   }
 
+  public function getDisplayType() {
+    if ($this->isDefaultColumn()) {
+      return pht('(Default)');
+    }
+    if ($this->isHidden()) {
+      return pht('(Hidden)');
+    }
+
+    return null;
+  }
+
+  public function getDisplayClass() {
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->getProxyColumnClass();
+    }
+
+    return null;
+  }
+
   public function getHeaderIcon() {
-    $icon = null;
+    $proxy = $this->getProxy();
+    if ($proxy) {
+      return $proxy->getProxyColumnIcon();
+    }
 
     if ($this->isHidden()) {
-      $icon = 'fa-eye-slash';
-      $text = pht('Hidden');
-    }
-
-    if ($this->isDefaultColumn()) {
-      $icon = 'fa-archive';
-      $text = pht('Default');
-    }
-
-    if ($icon) {
-      return id(new PHUIIconView())
-        ->setIconFont($icon)
-        ->addSigil('has-tooltip')
-        ->setMetadata(
-          array(
-            'tip' => $text,
-          ));;
+      return 'fa-eye-slash';
     }
 
     return null;
@@ -128,6 +164,48 @@ final class PhabricatorProjectColumn
     return $this;
   }
 
+  public function getOrderingKey() {
+    $proxy = $this->getProxy();
+
+    // Normal columns and subproject columns go first, in a user-controlled
+    // order.
+
+    // All the milestone columns go last, in their sequential order.
+
+    if (!$proxy || !$proxy->isMilestone()) {
+      $group = 'A';
+      $sequence = $this->getSequence();
+    } else {
+      $group = 'B';
+      $sequence = $proxy->getMilestoneNumber();
+    }
+
+    return sprintf('%s%012d', $group, $sequence);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorProjectColumnTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorProjectColumnTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -140,7 +218,14 @@ final class PhabricatorProjectColumn
   }
 
   public function getPolicy($capability) {
-    return $this->getProject()->getPolicy($capability);
+    // NOTE: Column policies are enforced as an extended policy which makes
+    // them the same as the project's policies.
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_USER;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
@@ -151,6 +236,16 @@ final class PhabricatorProjectColumn
 
   public function describeAutomaticCapability($capability) {
     return pht('Users must be able to see a project to see its board.');
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    return array(
+      array($this->getProject(), $capability),
+    );
   }
 
 

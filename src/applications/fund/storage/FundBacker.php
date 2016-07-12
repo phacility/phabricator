@@ -23,7 +23,7 @@ final class FundBacker extends FundDAO
       ->setStatus(self::STATUS_NEW);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -116,6 +116,13 @@ final class FundBacker extends FundDAO
 
   public function getApplicationTransactionTemplate() {
     return new FundBackerTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 }

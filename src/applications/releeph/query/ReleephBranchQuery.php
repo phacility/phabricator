@@ -39,7 +39,7 @@ final class ReleephBranchQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new ReleephBranch();
     $conn_r = $table->establishConnection('r');
 
@@ -54,7 +54,7 @@ final class ReleephBranchQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willExecute() {
+  protected function willExecute() {
     if ($this->productPHIDs !== null) {
       $products = id(new ReleephProductQuery())
         ->setViewer($this->getViewer())
@@ -69,7 +69,7 @@ final class ReleephBranchQuery
     }
   }
 
-  public function willFilterPage(array $branches) {
+  protected function willFilterPage(array $branches) {
     $project_ids = mpull($branches, 'getReleephProjectID');
 
     $projects = id(new ReleephProductQuery())
@@ -103,7 +103,7 @@ final class ReleephBranchQuery
     return $branches;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids !== null) {
@@ -137,7 +137,7 @@ final class ReleephBranchQuery
           'isActive = 1');
         break;
       default:
-        throw new Exception("Unknown status constant '{$status}'!");
+        throw new Exception(pht("Unknown status constant '%s'!", $status));
     }
 
     $where[] = $this->buildPagingClause($conn_r);

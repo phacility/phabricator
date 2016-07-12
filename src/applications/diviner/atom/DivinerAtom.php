@@ -1,13 +1,13 @@
 <?php
 
-final class DivinerAtom {
+final class DivinerAtom extends Phobject {
 
-  const TYPE_FILE      = 'file';
   const TYPE_ARTICLE   = 'article';
-  const TYPE_METHOD    = 'method';
   const TYPE_CLASS     = 'class';
+  const TYPE_FILE      = 'file';
   const TYPE_FUNCTION  = 'function';
   const TYPE_INTERFACE = 'interface';
+  const TYPE_METHOD    = 'method';
 
   private $type;
   private $name;
@@ -95,14 +95,14 @@ final class DivinerAtom {
 
   public function getDocblockText() {
     if ($this->docblockText === null) {
-      throw new Exception('Call setDocblockRaw() before getDocblockText()!');
+      throw new PhutilInvalidStateException('setDocblockRaw');
     }
     return $this->docblockText;
   }
 
   public function getDocblockMeta() {
     if ($this->docblockMeta === null) {
-      throw new Exception('Call setDocblockRaw() before getDocblockMeta()!');
+      throw new PhutilInvalidStateException('setDocblockRaw');
     }
     return $this->docblockMeta;
   }
@@ -248,7 +248,7 @@ final class DivinerAtom {
 
   public function setParentHash($parent_hash) {
     if ($this->parentHash) {
-      throw new Exception('Atom already has a parent!');
+      throw new Exception(pht('Atom already has a parent!'));
     }
     $this->parentHash = $parent_hash;
     return $this;
@@ -260,7 +260,7 @@ final class DivinerAtom {
 
   public function setParent(DivinerAtom $atom) {
     if ($this->parentHash) {
-      throw new Exception('Parent hash has already been computed!');
+      throw new Exception(pht('Parent hash has already been computed!'));
     }
     $this->parent = $atom;
     return $this;
@@ -275,7 +275,7 @@ final class DivinerAtom {
 
   public function addChild(DivinerAtom $atom) {
     if ($this->childHashes) {
-      throw new Exception('Child hashes have already been computed!');
+      throw new Exception(pht('Child hashes have already been computed!'));
     }
 
     $atom->setParent($this);
@@ -294,11 +294,9 @@ final class DivinerAtom {
     return implode('/', $parts);
   }
 
-
   public function toDictionary() {
     // NOTE: If you change this format, bump the format version in
-    // getAtomSerializationVersion().
-
+    // @{method:getAtomSerializationVersion}.
     return array(
       'book'        => $this->getBook(),
       'type'        => $this->getType(),
@@ -372,6 +370,7 @@ final class DivinerAtom {
 
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
+    return $this;
   }
 
   public function getProperties() {
@@ -385,51 +384,51 @@ final class DivinerAtom {
 
   public static function getThisAtomIsNotDocumentedString($type) {
     switch ($type) {
+      case self::TYPE_ARTICLE:
+        return pht('This article is not documented.');
+      case self::TYPE_CLASS:
+        return pht('This class is not documented.');
       case self::TYPE_FILE:
         return pht('This file is not documented.');
       case self::TYPE_FUNCTION:
         return pht('This function is not documented.');
-      case self::TYPE_CLASS:
-        return pht('This class is not documented.');
-      case self::TYPE_ARTICLE:
-        return pht('This article is not documented.');
-      case self::TYPE_METHOD:
-        return pht('This method is not documented.');
       case self::TYPE_INTERFACE:
         return pht('This interface is not documented.');
+      case self::TYPE_METHOD:
+        return pht('This method is not documented.');
       default:
-        phlog("Need translation for '{$type}'.");
+        phlog(pht("Need translation for '%s'.", $type));
         return pht('This %s is not documented.', $type);
     }
   }
 
   public static function getAllTypes() {
     return array(
+      self::TYPE_ARTICLE,
+      self::TYPE_CLASS,
       self::TYPE_FILE,
       self::TYPE_FUNCTION,
-      self::TYPE_CLASS,
-      self::TYPE_ARTICLE,
-      self::TYPE_METHOD,
       self::TYPE_INTERFACE,
+      self::TYPE_METHOD,
     );
   }
 
   public static function getAtomTypeNameString($type) {
     switch ($type) {
+      case self::TYPE_ARTICLE:
+        return pht('Article');
+      case self::TYPE_CLASS:
+        return pht('Class');
       case self::TYPE_FILE:
         return pht('File');
       case self::TYPE_FUNCTION:
         return pht('Function');
-      case self::TYPE_CLASS:
-        return pht('Class');
-      case self::TYPE_ARTICLE:
-        return pht('Article');
-      case self::TYPE_METHOD:
-        return pht('Method');
       case self::TYPE_INTERFACE:
         return pht('Interface');
+      case self::TYPE_METHOD:
+        return pht('Method');
       default:
-        phlog("Need translation for '{$type}'.");
+        phlog(pht("Need translation for '%s'.", $type));
         return ucwords($type);
     }
   }

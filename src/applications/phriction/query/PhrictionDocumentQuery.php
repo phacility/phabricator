@@ -6,6 +6,9 @@ final class PhrictionDocumentQuery
   private $ids;
   private $phids;
   private $slugs;
+  private $depths;
+  private $slugPrefix;
+  private $statuses;
 
   private $needContent;
 
@@ -14,9 +17,9 @@ final class PhrictionDocumentQuery
   const STATUS_OPEN     = 'status-open';
   const STATUS_NONSTUB  = 'status-nonstub';
 
-  private $order        = 'order-created';
   const ORDER_CREATED   = 'order-created';
   const ORDER_UPDATED   = 'order-updated';
+  const ORDER_HIERARCHY = 'order-hierarchy';
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -33,6 +36,21 @@ final class PhrictionDocumentQuery
     return $this;
   }
 
+  public function withDepths(array $depths) {
+    $this->depths = $depths;
+    return $this;
+  }
+
+  public function  withSlugPrefix($slug_prefix) {
+    $this->slugPrefix = $slug_prefix;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
+    return $this;
+  }
+
   public function withStatus($status) {
     $this->status = $status;
     return $this;
@@ -44,7 +62,20 @@ final class PhrictionDocumentQuery
   }
 
   public function setOrder($order) {
-    $this->order = $order;
+    switch ($order) {
+      case self::ORDER_CREATED:
+        $this->setOrderVector(array('id'));
+        break;
+      case self::ORDER_UPDATED:
+        $this->setOrderVector(array('updated'));
+        break;
+      case self::ORDER_HIERARCHY:
+        $this->setOrderVector(array('depth', 'title', 'updated'));
+        break;
+      default:
+        throw new Exception(pht('Unknown order "%s".', $order));
+    }
+
     return $this;
   }
 
@@ -54,8 +85,9 @@ final class PhrictionDocumentQuery
 
     $rows = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
+      'SELECT d.* FROM %T d %Q %Q %Q %Q',
       $table->getTableName(),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
@@ -155,70 +187,72 @@ final class PhrictionDocumentQuery
       }
     }
 
-    foreach ($documents as $document) {
-      $document->attachProject(null);
-    }
-
-    $project_slugs = array();
-    foreach ($documents as $key => $document) {
-      $slug = $document->getSlug();
-      if (!PhrictionDocument::isProjectSlug($slug)) {
-        continue;
-      }
-      $project_slugs[$key] = PhrictionDocument::getProjectSlugIdentifier($slug);
-    }
-
-    if ($project_slugs) {
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->getViewer())
-        ->withPhrictionSlugs($project_slugs)
-        ->execute();
-      $projects = mpull($projects, null, 'getPhrictionSlug');
-      foreach ($documents as $key => $document) {
-        $slug = idx($project_slugs, $key);
-        if ($slug) {
-          $project = idx($projects, $slug);
-          if (!$project) {
-            unset($documents[$key]);
-            continue;
-          }
-          $document->attachProject($project);
-        }
-      }
-    }
-
     return $documents;
   }
 
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
+    $join = '';
+
+    if ($this->getOrderVector()->containsKey('updated')) {
+      $content_dao = new PhrictionContent();
+      $join = qsprintf(
+        $conn,
+        'JOIN %T c ON d.contentID = c.id',
+        $content_dao->getTableName());
+    }
+
+    return $join;
+  }
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'd.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'd.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->slugs) {
       $where[] = qsprintf(
         $conn,
-        'slug IN (%Ls)',
+        'd.slug IN (%Ls)',
         $this->slugs);
+    }
+
+    if ($this->statuses) {
+      $where[] = qsprintf(
+        $conn,
+        'd.status IN (%Ld)',
+        $this->statuses);
+    }
+
+    if ($this->slugPrefix) {
+      $where[] = qsprintf(
+        $conn,
+        'd.slug LIKE %>',
+        $this->slugPrefix);
+    }
+
+    if ($this->depths) {
+      $where[] = qsprintf(
+        $conn,
+        'd.depth IN (%Ld)',
+        $this->depths);
     }
 
     switch ($this->status) {
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn,
-          'status NOT IN (%Ld)',
+          'd.status NOT IN (%Ld)',
           array(
             PhrictionDocumentStatus::STATUS_DELETED,
             PhrictionDocumentStatus::STATUS_MOVED,
@@ -228,7 +262,7 @@ final class PhrictionDocumentQuery
       case self::STATUS_NONSTUB:
         $where[] = qsprintf(
           $conn,
-          'status NOT IN (%Ld)',
+          'd.status NOT IN (%Ld)',
           array(
             PhrictionDocumentStatus::STATUS_MOVED,
             PhrictionDocumentStatus::STATUS_STUB,
@@ -237,7 +271,7 @@ final class PhrictionDocumentQuery
       case self::STATUS_ANY:
         break;
       default:
-        throw new Exception("Unknown status '{$this->status}'!");
+        throw new Exception(pht("Unknown status '%s'!", $this->status));
     }
 
     $where[] = $this->buildPagingClause($conn);
@@ -245,27 +279,58 @@ final class PhrictionDocumentQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    switch ($this->order) {
-      case self::ORDER_CREATED:
-        return 'id';
-      case self::ORDER_UPDATED:
-        return 'contentID';
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'depth' => array(
+        'table' => 'd',
+        'column' => 'depth',
+        'reverse' => true,
+        'type' => 'int',
+      ),
+      'title' => array(
+        'table' => 'c',
+        'column' => 'title',
+        'reverse' => true,
+        'type' => 'string',
+      ),
+      'updated' => array(
+        'table' => 'd',
+        'column' => 'contentID',
+        'type' => 'int',
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $document = $this->loadCursorObject($cursor);
+
+    $map = array(
+      'id' => $document->getID(),
+      'depth' => $document->getDepth(),
+      'updated' => $document->getContentID(),
+    );
+
+    foreach ($keys as $key) {
+      switch ($key) {
+        case 'title':
+          $map[$key] = $document->getContent()->getTitle();
+          break;
+      }
+    }
+
+    return $map;
+  }
+
+  protected function willExecuteCursorQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+    $vector = $this->getOrderVector();
+
+    if ($vector->containsKey('title')) {
+      $query->needContent(true);
     }
   }
 
-  protected function getPagingValue($result) {
-    switch ($this->order) {
-      case self::ORDER_CREATED:
-        return $result->getID();
-      case self::ORDER_UPDATED:
-        return $result->getContentID();
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
-  }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPhrictionApplication';

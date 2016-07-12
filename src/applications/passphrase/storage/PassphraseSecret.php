@@ -4,7 +4,7 @@ final class PassphraseSecret extends PassphraseDAO {
 
   protected $secretData;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_BINARY => array(

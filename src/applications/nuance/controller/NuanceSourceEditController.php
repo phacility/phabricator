@@ -1,66 +1,76 @@
 <?php
 
-final class NuanceSourceEditController extends NuanceController {
+final class NuanceSourceEditController
+  extends NuanceSourceController {
 
-  private $sourceID;
+  public function handleRequest(AphrontRequest $request) {
+    $engine = id(new NuanceSourceEditEngine())
+      ->setController($this);
 
-  public function setSourceID($source_id) {
-    $this->sourceID = $source_id;
-    return $this;
+    $id = $request->getURIData('id');
+    if (!$id) {
+      $this->requireApplicationCapability(
+        NuanceSourceManageCapability::CAPABILITY);
+
+      $cancel_uri = $this->getApplicationURI('source/');
+      $map = NuanceSourceDefinition::getAllDefinitions();
+      $source_type = $request->getStr('sourceType');
+      if (!isset($map[$source_type])) {
+        return $this->buildSourceTypeResponse($cancel_uri);
+      }
+
+      $engine
+        ->setSourceDefinition($map[$source_type])
+        ->addContextParameter('sourceType', $source_type);
+    }
+
+    return $engine->buildResponse();
   }
-  public function getSourceID() {
-    return $this->sourceID;
-  }
 
-  public function willProcessRequest(array $data) {
-    $this->setSourceID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
-    $can_edit = $this->requireApplicationCapability(
-      NuanceSourceManageCapability::CAPABILITY);
-
+  private function buildSourceTypeResponse($cancel_uri) {
+    $viewer = $this->getViewer();
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $map = NuanceSourceDefinition::getAllDefinitions();
 
-    $source_id = $this->getSourceID();
-    $is_new = !$source_id;
-
-    if ($is_new) {
-      $source = NuanceSource::initializeNewSource($user);
-    } else {
-      $source = id(new NuanceSourceQuery())
-        ->setViewer($user)
-        ->withIDs(array($source_id))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
+    $errors = array();
+    $e_source = null;
+    if ($request->isFormPost()) {
+      $errors[] = pht('You must choose a source type.');
+      $e_source = pht('Required');
     }
 
-    if (!$source) {
-      return new Aphront404Response();
+    $source_types = id(new AphrontFormRadioButtonControl())
+      ->setName('sourceType')
+      ->setLabel(pht('Source Type'));
+
+    foreach ($map as $type => $definition) {
+      $source_types->addButton(
+        $type,
+        $definition->getName(),
+        $definition->getSourceDescription());
     }
 
-    $definition = NuanceSourceDefinition::getDefinitionForSource($source);
-    $definition->setActor($user);
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendChild($source_types)
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue(pht('Continue'))
+          ->addCancelButton($cancel_uri));
 
-    $response = $definition->buildEditLayout($request);
-    if ($response instanceof AphrontResponse) {
-      return $response;
-    }
-    $layout = $response;
+    $box = id(new PHUIObjectBoxView())
+      ->setFormErrors($errors)
+      ->setHeaderText(pht('Choose Source Type'))
+      ->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $layout,
-      ),
-      array(
-        'title' => $definition->getEditTitle(),
-      ));
+    $crumbs->addTextCrumb(pht('Sources'), $cancel_uri);
+    $crumbs->addTextCrumb(pht('New'));
+
+    return $this->newPage()
+      ->setTitle(pht('Choose Source Type'))
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
   }
+
 }

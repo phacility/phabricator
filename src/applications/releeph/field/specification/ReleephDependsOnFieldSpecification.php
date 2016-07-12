@@ -2,6 +2,7 @@
 
 final class ReleephDependsOnFieldSpecification
   extends ReleephFieldSpecification {
+
   public function getFieldKey() {
     return 'dependsOn';
   }
@@ -28,6 +29,6 @@ final class ReleephDependsOnFieldSpecification
 
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $revision->getPHID(),
-      PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV);
+      DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST);
   }
 }

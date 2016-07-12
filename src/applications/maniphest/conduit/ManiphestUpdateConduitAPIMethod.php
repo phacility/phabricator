@@ -7,22 +7,22 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Update an existing Maniphest task.';
+    return pht('Update an existing Maniphest task.');
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-TASK'          => 'No such maniphest task exists.',
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
-      'ERR-NO-EFFECT'         => 'Update has no effect.',
+      'ERR-BAD-TASK'          => pht('No such Maniphest task exists.'),
+      'ERR-INVALID-PARAMETER' => pht('Missing or malformed parameter.'),
+      'ERR-NO-EFFECT'         => pht('Update has no effect.'),
     );
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return $this->getTaskFields($is_new = false);
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
@@ -31,20 +31,23 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
     $phid = $request->getValue('phid');
 
     if (($id && $phid) || (!$id && !$phid)) {
-      throw new Exception("Specify exactly one of 'id' and 'phid'.");
+      throw new Exception(
+        pht(
+          "Specify exactly one of '%s' and '%s'.",
+          'id',
+          'phid'));
     }
 
+    $query = id(new ManiphestTaskQuery())
+      ->setViewer($request->getUser())
+      ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true);
     if ($id) {
-      $task = id(new ManiphestTaskQuery())
-        ->setViewer($request->getUser())
-        ->withIDs(array($id))
-        ->executeOne();
+      $query->withIDs(array($id));
     } else {
-      $task = id(new ManiphestTaskQuery())
-        ->setViewer($request->getUser())
-        ->withPHIDs(array($phid))
-        ->executeOne();
+      $query->withPHIDs(array($phid));
     }
+    $task = $query->executeOne();
 
     $params = $request->getAllParameters();
     unset($params['id']);
@@ -58,7 +61,7 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
       throw new ConduitException('ERR-BAD-TASK');
     }
 
-    $this->applyRequest($task, $request, $is_new = false);
+    $task = $this->applyRequest($task, $request, $is_new = false);
 
     return $this->buildTaskInfoDictionary($task);
   }

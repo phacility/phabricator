@@ -22,29 +22,23 @@ final class DrydockLeaseListView extends AphrontView {
         ->setHeader($lease->getLeaseName())
         ->setHref('/drydock/lease/'.$lease->getID().'/');
 
-      if ($lease->hasAttachedResource()) {
-        $resource = $lease->getResource();
-
-        $resource_href = '/drydock/resource/'.$resource->getID().'/';
-        $resource_name = $resource->getName();
-
+      $resource_phid = $lease->getResourcePHID();
+      if ($resource_phid) {
         $item->addAttribute(
-          phutil_tag(
-            'a',
-            array(
-              'href' => $resource_href,
-            ),
-            $resource_name));
+          $viewer->renderHandle($resource_phid));
       }
 
       $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());
       $item->addAttribute($status);
       $item->setEpoch($lease->getDateCreated());
 
-      if ($lease->isActive()) {
-        $item->setBarColor('green');
+      // TODO: Tailor this for clarity.
+      if ($lease->isActivating()) {
+        $item->setStatusIcon('fa-dot-circle-o yellow');
+      } else if ($lease->isActive()) {
+        $item->setStatusIcon('fa-dot-circle-o green');
       } else {
-        $item->setBarColor('red');
+        $item->setStatusIcon('fa-dot-circle-o red');
       }
 
       $view->addItem($item);

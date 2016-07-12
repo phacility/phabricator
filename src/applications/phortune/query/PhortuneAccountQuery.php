@@ -7,7 +7,7 @@ final class PhortuneAccountQuery
   private $phids;
   private $memberPHIDs;
 
-  public static function loadActiveAccountForUser(
+  public static function loadAccountsForUser(
     PhabricatorUser $user,
     PhabricatorContentSource $content_source) {
 
@@ -17,12 +17,14 @@ final class PhortuneAccountQuery
       ->execute();
 
     if (!$accounts) {
-      return PhortuneAccount::createNewAccount($user, $content_source);
-    } else if (count($accounts) == 1) {
-      return head($accounts);
-    } else {
-      throw new Exception('TODO: No account selection yet.');
+      $accounts = array(
+        PhortuneAccount::createNewAccount($user, $content_source),
+      );
     }
+
+    $accounts = mpull($accounts, null, 'getPHID');
+
+    return $accounts;
   }
 
   public function withIDs(array $ids) {
@@ -59,18 +61,19 @@ final class PhortuneAccountQuery
   protected function willFilterPage(array $accounts) {
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($accounts, 'getPHID'))
-      ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER));
+      ->withEdgeTypes(array(PhortuneAccountHasMemberEdgeType::EDGECONST));
     $query->execute();
 
     foreach ($accounts as $account) {
       $member_phids = $query->getDestinationPHIDs(array($account->getPHID()));
+      $member_phids = array_reverse($member_phids);
       $account->attachMemberPHIDs($member_phids);
     }
 
     return $accounts;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn);
@@ -99,7 +102,7 @@ final class PhortuneAccountQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $joins = array();
 
     if ($this->memberPHIDs) {
@@ -107,7 +110,7 @@ final class PhortuneAccountQuery
         $conn,
         'LEFT JOIN %T m ON a.phid = m.src AND m.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER);
+        PhortuneAccountHasMemberEdgeType::EDGECONST);
     }
 
     return implode(' ', $joins);

@@ -2,30 +2,32 @@
 
 final class PhortuneProductListController extends PhabricatorController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
 
     $query = id(new PhortuneProductQuery())
-      ->setViewer($user);
+      ->setViewer($viewer);
 
     $products = $query->executeWithCursorPager($pager);
 
     $title = pht('Product List');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb('Products', $this->getApplicationURI('product/'));
+    $crumbs->addTextCrumb(
+      pht('Products'),
+      $this->getApplicationURI('product/'));
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('Create Product'))
         ->setHref($this->getApplicationURI('product/edit/'))
         ->setIcon('fa-plus-square'));
+    $crumbs->setBorder(true);
 
     $product_list = id(new PHUIObjectItemListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setNoDataString(pht('No products.'));
 
     foreach ($products as $product) {
@@ -38,20 +40,33 @@ final class PhortuneProductListController extends PhabricatorController {
         ->setObjectName($product->getID())
         ->setHeader($product->getProductName())
         ->setHref($view_uri)
-        ->addAttribute($price->formatForDisplay());
+        ->addAttribute($price->formatForDisplay())
+        ->setIcon('fa-gift');
 
       $product_list->addItem($item);
     }
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $product_list,
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Products'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($product_list);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Products'))
+      ->setHeaderIcon('fa-gift');
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $box,
         $pager,
-      ),
-      array(
-        'title' => $title,
       ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
   }
 
 }

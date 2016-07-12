@@ -3,44 +3,64 @@
 final class PhabricatorFileComposeController
   extends PhabricatorFileController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
-    $colors = array(
-      'red' => pht('Verbillion'),
-      'orange' => pht('Navel Orange'),
-      'yellow' => pht('Prim Goldenrod'),
-      'green' => pht('Lustrous Verdant'),
-      'blue' => pht('Tropical Deep'),
-      'sky' => pht('Wide Open Sky'),
-      'indigo' => pht('Pleated Khaki'),
-      'violet' => pht('Aged Merlot'),
-      'charcoal' => pht('Gemstone'),
-      'backdrop' => pht('Driven Snow'),
-    );
-
-    $manifest = PHUIIconView::getSheetManifest(PHUIIconView::SPRITE_PROJECTS);
+    $color_map = PhabricatorFilesComposeIconBuiltinFile::getAllColors();
+    $icon_map = $this->getIconMap();
 
     if ($request->isFormPost()) {
+      $project_phid = $request->getStr('projectPHID');
+      if ($project_phid) {
+        $project = id(new PhabricatorProjectQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($project_phid))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->executeOne();
+        if (!$project) {
+          return new Aphront404Response();
+        }
+      }
+
       $icon = $request->getStr('icon');
       $color = $request->getStr('color');
 
-      if (isset($colors[$color]) && isset($manifest['projects-'.$icon])) {
-        $root = dirname(phutil_get_library_root('phabricator'));
-        $icon_file = $root.'/resources/sprite/projects_1x/'.$icon.'.png';
-        $icon_data = Filesystem::readFile($icon_file);
+      $composer = id(new PhabricatorFilesComposeIconBuiltinFile())
+        ->setIcon($icon)
+        ->setColor($color);
 
+      $data = $composer->loadBuiltinFileData();
 
-        $data = $this->composeImage($color, $icon_data);
+      $file = PhabricatorFile::buildFromFileDataOrHash(
+        $data,
+        array(
+          'name' => $composer->getBuiltinDisplayName(),
+          'profile' => true,
+          'canCDN' => true,
+        ));
 
-        $file = PhabricatorFile::buildFromFileDataOrHash(
-          $data,
-          array(
-            'name' => 'project.png',
-            'canCDN' => true,
-          ));
+      if ($project_phid) {
+        $edit_uri = '/project/manage/'.$project->getID().'/';
 
+        $xactions = array();
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_IMAGE)
+          ->setNewValue($file->getPHID());
+
+        $editor = id(new PhabricatorProjectTransactionEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($project, $xactions);
+
+        return id(new AphrontRedirectResponse())->setURI($edit_uri);
+      } else {
         $content = array(
           'phid' => $file->getPHID(),
         );
@@ -49,14 +69,15 @@ final class PhabricatorFileComposeController
       }
     }
 
-    $value_color = head_key($colors);
-    $value_icon = head_key($manifest);
-    $value_icon = substr($value_icon, strlen('projects-'));
+    $value_color = head_key($color_map);
+    $value_icon = head_key($icon_map);
 
     require_celerity_resource('people-profile-css');
 
     $buttons = array();
-    foreach ($colors as $color => $name) {
+    foreach ($color_map as $color => $info) {
+      $quip = idx($info, 'quip');
+
       $buttons[] = javelin_tag(
         'button',
         array(
@@ -65,76 +86,17 @@ final class PhabricatorFileComposeController
           'style' => 'margin: 0 8px 8px 0',
           'meta' => array(
             'color' => $color,
-            'tip' => $name,
+            'tip' => $quip,
           ),
         ),
         id(new PHUIIconView())
           ->addClass('compose-background-'.$color));
     }
 
+
     $icons = array();
-
-    $icon_quips = array(
-      '8ball' => pht('Take a Risk'),
-      'alien' => pht('Foreign Interface'),
-      'announce' => pht('Louder is Better'),
-      'art' => pht('Unique Snowflake'),
-      'award' => pht('Shooting Star'),
-      'bacon' => pht('Healthy Vegetables'),
-      'bandaid' => pht('Durable Infrastructure'),
-      'beer' => pht('Healthy Vegetable Juice'),
-      'bomb' => pht('Imminent Success'),
-      'briefcase' => pht('Adventure Pack'),
-      'bug' => pht('Costumed Egg'),
-      'calendar' => pht('Everyone Loves Meetings'),
-      'cloud' => pht('Water Cycle'),
-      'coffee' => pht('Half-Whip Nonfat Soy Latte'),
-      'creditcard' => pht('Expense It'),
-      'death' => pht('Calcium Promotes Bone Health'),
-      'desktop' => pht('Magical Portal'),
-      'dropbox' => pht('Cardboard Box'),
-      'education' => pht('Debt'),
-      'experimental' => pht('CAUTION: Dangerous Chemicals'),
-      'facebook' => pht('Popular Social Network'),
-      'facility' => pht('Pollution Solves Problems'),
-      'film' => pht('Actual Physical Film'),
-      'forked' => pht('You Can\'t Eat Soup'),
-      'games' => pht('Serious Business'),
-      'ghost' => pht('Haunted'),
-      'gift' => pht('Surprise!'),
-      'globe' => pht('Scanner Sweep'),
-      'golf' => pht('Business Meeting'),
-      'heart' => pht('Undergoing a Major Surgery'),
-      'intergalactic' => pht('Jupiter'),
-      'lock' => pht('Extremely Secret'),
-      'mail' => pht('Oragami'),
-      'martini' => pht('Healthy Olive Drink'),
-      'medical' => pht('Medic!'),
-      'mobile' => pht('Cellular Telephone'),
-      'music' => pht("\xE2\x99\xAB"),
-      'news' => pht('Actual Physical Newspaper'),
-      'orgchart' => pht('It\'s Good to be King'),
-      'peoples' => pht('Angel and Devil'),
-      'piechart' => pht('Actual Physical Pie'),
-      'poison' => pht('Healthy Bone Juice'),
-      'putabirdonit' => pht('Put a Bird On It'),
-      'radiate' => pht('Radiant Beauty'),
-      'savings' => pht('Oink Oink'),
-      'search' => pht('Sleuthing'),
-      'shield' => pht('Royal Crest'),
-      'speed' => pht('Slow and Steady'),
-      'sprint' => pht('Fire Exit'),
-      'star' => pht('The More You Know'),
-      'storage' => pht('Stack of Pancakes'),
-      'tablet' => pht('Cellular Telephone For Giants'),
-      'travel' => pht('Pretty Clearly an Airplane'),
-      'twitter' => pht('Bird Stencil'),
-      'warning' => pht('No Caution Required, Everything Looks Safe'),
-      'whale' => pht('Friendly Walrus'),
-    );
-
-    foreach ($manifest as $icon => $spec) {
-      $icon = substr($icon, strlen('projects-'));
+    foreach ($icon_map as $icon => $spec) {
+      $quip = idx($spec, 'quip');
 
       $icons[] = javelin_tag(
         'button',
@@ -144,24 +106,24 @@ final class PhabricatorFileComposeController
           'style' => 'margin: 0 8px 8px 0',
           'meta' => array(
             'icon' => $icon,
-            'tip' => idx($icon_quips, $icon, $icon),
+            'tip' => $quip,
           ),
         ),
         id(new PHUIIconView())
-          ->setSpriteIcon($icon)
-          ->setSpriteSheet(PHUIIconView::SPRITE_PROJECTS));
+          ->setIcon($icon)
+          ->addClass('compose-icon-bg'));
     }
 
     $dialog_id = celerity_generate_unique_node_id();
-    $color_input_id = celerity_generate_unique_node_id();;
+    $color_input_id = celerity_generate_unique_node_id();
     $icon_input_id = celerity_generate_unique_node_id();
     $preview_id = celerity_generate_unique_node_id();
 
     $preview = id(new PHUIIconView())
       ->setID($preview_id)
       ->addClass('compose-background-'.$value_color)
-      ->setSpriteIcon($value_icon)
-      ->setSpriteSheet(PHUIIconView::SPRITE_PROJECTS);
+      ->setIcon($value_icon)
+      ->addClass('compose-icon-bg');
 
     $color_input = javelin_tag(
       'input',
@@ -193,8 +155,7 @@ final class PhabricatorFileComposeController
         'defaultIcon' => $value_icon,
       ));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer)
+    return $this->newDialog()
       ->setFormID($dialog_id)
       ->setClass('compose-dialog')
       ->setTitle(pht('Compose Image'))
@@ -226,25 +187,33 @@ final class PhabricatorFileComposeController
       ->appendChild($icon_input)
       ->addCancelButton('/')
       ->addSubmitButton(pht('Save Image'));
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
-  private function composeImage($color, $icon_data) {
-    $icon_img = imagecreatefromstring($icon_data);
+  private function getIconMap() {
+    $icon_map = PhabricatorFilesComposeIconBuiltinFile::getAllIcons();
 
-    $map = CelerityResourceTransformer::getCSSVariableMap();
-    $color_string = idx($map, $color, '#ff00ff');
-    $color_const = hexdec(trim($color_string, '#'));
+    $first = array(
+      'fa-briefcase',
+      'fa-tags',
+      'fa-folder',
+      'fa-group',
+      'fa-bug',
+      'fa-trash-o',
+      'fa-calendar',
+      'fa-flag-checkered',
+      'fa-envelope',
+      'fa-truck',
+      'fa-lock',
+      'fa-umbrella',
+      'fa-cloud',
+      'fa-building',
+      'fa-credit-card',
+      'fa-flask',
+    );
 
-    $canvas = imagecreatetruecolor(50, 50);
-    imagefill($canvas, 0, 0, $color_const);
+    $icon_map = array_select_keys($icon_map, $first) + $icon_map;
 
-    imagecopy($canvas, $icon_img, 0, 0, 0, 0, 50, 50);
-
-    return PhabricatorImageTransformer::saveImageDataInAnyFormat(
-      $canvas,
-      'image/png');
+    return $icon_map;
   }
 
 }

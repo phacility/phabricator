@@ -10,19 +10,24 @@ JX.behavior('choose-control', function() {
 
   JX.Stratcom.listen(
     'click',
-    'aphront-form-choose-button',
+    'phui-form-iconset-button',
     function(e) {
       e.kill();
 
-      var data = e.getNodeData('aphront-form-choose');
+      var data = e.getNodeData('phui-form-iconset');
+      var input = JX.$(data.inputID);
+
+      if (input.disabled) {
+        return;
+      }
 
       var params = {
-        value: JX.$(data.inputID).value
+        icon: input.value
       };
 
       new JX.Workflow(data.uri, params)
         .setHandler(function(r) {
-          JX.$(data.inputID).value = r.value;
+          input.value = r.value;
           JX.DOM.setContent(JX.$(data.displayID), JX.$H(r.display));
         })
         .start();

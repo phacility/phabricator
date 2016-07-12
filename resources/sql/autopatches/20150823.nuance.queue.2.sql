@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_nuance.nuance_item
+  ADD queuePHID VARBINARY(64) NOT NULL;

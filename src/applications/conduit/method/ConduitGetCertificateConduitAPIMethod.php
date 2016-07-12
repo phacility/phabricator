@@ -16,26 +16,26 @@ final class ConduitGetCertificateConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve certificate information for a user.';
+    return pht('Retrieve certificate information for a user.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'token' => 'required string',
       'host'  => 'required string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, any>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-TOKEN' => 'Token does not exist or has expired.',
-      'ERR-RATE-LIMIT' =>
+      'ERR-BAD-TOKEN' => pht('Token does not exist or has expired.'),
+      'ERR-RATE-LIMIT' => pht(
         'You have made too many invalid token requests recently. Wait before '.
-        'making more.',
+        'making more.'),
     );
   }
 
@@ -69,7 +69,7 @@ final class ConduitGetCertificateConduitAPIMethod extends ConduitAPIMethod {
       'phid = %s',
       $info->getUserPHID());
     if (!$user) {
-      throw new Exception('Certificate token points to an invalid user!');
+      throw new Exception(pht('Certificate token points to an invalid user!'));
     }
 
     return array(

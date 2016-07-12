@@ -11,6 +11,14 @@ final class PhabricatorPHPMailerConfigOptions
     return pht('Configure PHPMailer.');
   }
 
+  public function getIcon() {
+    return 'fa-send-o';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('phpmailer.mailer', 'string', 'smtp')
@@ -35,16 +43,19 @@ final class PhabricatorPHPMailerConfigOptions
         ->setSummary(pht('Configure TLS or SSL for SMTP.'))
         ->setDescription(
           pht(
-            "Using PHPMailer with SMTP, you can set this to one of 'tls' or ".
-            "'ssl' to use TLS or SSL, respectively. Leave it blank for ".
-            "vanilla SMTP. If you're sending via Gmail, set it to 'ssl'.")),
+            "Using PHPMailer with SMTP, you can set this to one of '%s' or ".
+            "'%s' to use TLS or SSL, respectively. Leave it blank for ".
+            "vanilla SMTP. If you're sending via Gmail, set it to '%s'.",
+            'tls',
+            'ssl',
+            'ssl')),
       $this->newOption('phpmailer.smtp-user', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Username for SMTP.')),
       $this->newOption('phpmailer.smtp-password', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Password for SMTP.')),
-      $this->newOption('phpmailer.smtp-encoding', 'string', '8bit')
+      $this->newOption('phpmailer.smtp-encoding', 'string', 'base64')
         ->setSummary(pht('Configure how mail is encoded.'))
         ->setDescription(
           pht(
@@ -53,14 +64,8 @@ final class PhabricatorPHPMailerConfigOptions
             "encoding. If you're having trouble with mail being mangled or ".
             "arriving with too many or too few newlines, you may try ".
             "adjusting this setting.\n\n".
-            "Supported values are `8bit` (default), `quoted-printable`, ".
-            "`7bit`, `binary` and `base64`.\n\n".
-            "The settings in the table below may work well.\n\n".
-            "| MTA | Setting | Notes\n".
-            "|-----|---------|------\n".
-            "| SendGrid via SMTP | `quoted-printable` | Double newlines under ".
-            "`8bit`.\n".
-            "| All Other MTAs | `8bit` | Default setting.")),
+            "Supported values are `8bit`, `quoted-printable`, ".
+            "`7bit`, `binary` and `base64`.")),
     );
   }
 

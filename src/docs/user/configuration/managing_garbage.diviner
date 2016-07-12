@@ -1,0 +1,68 @@
+@title Managing Garbage Collection
+@group config
+
+Understanding and configuring garbage collection.
+
+Overview
+========
+
+Phabricator generates various logs and caches during normal operation. Some of
+these logs and caches are usually of very little use after some time has
+passed, so they are deleted automatically (often after a month or two) in a
+process called "garbage collection".
+
+Garbage collection is performed automatically by the daemons. You can review
+all of the installed garbage collectors by browsing to {nav Config > Garbage
+Collectors}.
+
+
+Configuring Retention Policies
+==============================
+
+You can reconfigure the data retention policies for most collectors.
+
+The default retention polcies should be suitable for most installs. However,
+you might want to **decrease** retention to reduce the amount of disk space
+used by some high-volume log that you don't find particularly interesting, or
+to adhere to an organizational data retention policy.
+
+Alternatively, you might want to **increase** retention if you want to retain
+some logs for a longer period of time, perhaps for auditing or analytic
+purposes.
+
+You can review the current retention policies in
+{nav Config > Garbage Collectors}. To change a policy, use
+`bin/garbage set-policy` to select a new policy:
+
+```
+phabricator/ $ ./bin/garbage set-policy --collector cache.markup --days 7
+```
+
+You can use `--days` to select how long data is retained for. You can also use
+`--indefinite` to set an indefinite retention policy. This will stop the
+garbage collector from cleaning up any data. Finally, you can use `--default`
+to restore the default policy.
+
+Your changes should be reflected in the web UI immediately, and will take
+effect in the actual collector **the next time the daemons are restarted**.
+
+
+Troubleshooting
+===============
+
+You can manually run a collector with `bin/garbage collect`.
+
+```
+phabricator/ $ ./bin/garbage collect --collector cache.general
+```
+
+By using the `--trace` flag, you can inspect the operation of the collector
+in detail.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - exploring other daemon topics with @{article:Managing Daemons with phd}.

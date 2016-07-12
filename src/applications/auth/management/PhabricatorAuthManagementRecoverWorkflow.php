@@ -8,8 +8,9 @@ final class PhabricatorAuthManagementRecoverWorkflow
       ->setName('recover')
       ->setExamples('**recover** __username__')
       ->setSynopsis(
-        'Recover access to an administrative account if you have locked '.
-        'yourself out of Phabricator.')
+        pht(
+          'Recover access to an administrative account if you have locked '.
+          'yourself out of Phabricator.'))
       ->setArguments(
         array(
           'username' => array(
@@ -29,8 +30,9 @@ final class PhabricatorAuthManagementRecoverWorkflow
       throw new PhutilArgumentUsageException(
         pht(
           'This Phabricator installation has no recoverable administrator '.
-          'accounts. You can use `bin/accountadmin` to create a new '.
-          'administrator account or make an existing user an administrator.'));
+          'accounts. You can use `%s` to create a new administrator '.
+          'account or make an existing user an administrator.',
+          'bin/accountadmin'));
     }
     $can_recover = mpull($can_recover, 'getUsername');
     sort($can_recover);
@@ -69,6 +71,16 @@ final class PhabricatorAuthManagementRecoverWorkflow
           $can_recover));
     }
 
+    if (!$user->canEstablishWebSessions()) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'This account ("%s") can not establish web sessions, so it is '.
+          'not possible to generate a functional recovery link. Special '.
+          'accounts like daemons and mailing lists can not log in via the '.
+          'web UI.',
+          $username));
+    }
+
     $engine = new PhabricatorAuthSessionEngine();
     $onetime_uri = $engine->getOneTimeLoginURI(
       $user,
@@ -85,10 +97,11 @@ final class PhabricatorAuthManagementRecoverWorkflow
     $console->writeOut('    %s', $onetime_uri);
     $console->writeOut("\n\n");
     $console->writeOut(
+      "%s\n",
       pht(
         'After logging in, you can use the "Auth" application to add or '.
         'restore authentication providers and allow normal logins to '.
-        'succeed.')."\n");
+        'succeed.'));
 
     return 0;
   }

@@ -6,6 +6,7 @@ final class PhabricatorDashboardPanelQuery
   private $ids;
   private $phids;
   private $archived;
+  private $panelTypes;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -22,48 +23,59 @@ final class PhabricatorDashboardPanelQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new PhabricatorDashboardPanel();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function withPanelTypes(array $types) {
+    $this->panelTypes = $types;
+    return $this;
   }
 
-  protected function buildWhereClause($conn_r) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  public function newResultObject() {
+    // TODO: If we don't do this, SearchEngine explodes when trying to
+    // enumerate custom fields. For now, just give the panel a default panel
+    // type so custom fields work. In the long run, we may want to find a
+    // cleaner or more general approach for this.
+    $text_type = id(new PhabricatorDashboardTextPanelType())
+      ->getPanelTypeKey();
+
+    return id(new PhabricatorDashboardPanel())
+      ->setPanelType($text_type);
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->archived !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'isArchived = %d',
         (int)$this->archived);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    if ($this->panelTypes !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'panelType IN (%Ls)',
+        $this->panelTypes);
+    }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   public function getQueryApplicationClass() {

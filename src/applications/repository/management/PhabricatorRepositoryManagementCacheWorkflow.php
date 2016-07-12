@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementCacheWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('cache')
       ->setExamples(
@@ -29,14 +29,18 @@ final class PhabricatorRepositoryManagementCacheWorkflow
     $commit_name = $args->getArg('commit');
     if ($commit_name === null) {
       throw new PhutilArgumentUsageException(
-        pht('Specify a commit to look up with `--commit`.'));
+        pht(
+          'Specify a commit to look up with `%s`.',
+          '--commit'));
     }
     $commit = $this->loadNamedCommit($commit_name);
 
     $path_name = $args->getArg('path');
     if ($path_name === null) {
       throw new PhutilArgumentUsageException(
-        pht('Specify a path to look up with `--path`.'));
+        pht(
+          'Specify a path to look up with `%s`.',
+          '--path'));
     }
 
     $path_map = id(new DiffusionPathIDQuery(array($path_name)))
@@ -62,9 +66,7 @@ final class PhabricatorRepositoryManagementCacheWorkflow
       pht('Query took %s ms.', new PhutilNumber(1000 * ($t_end - $t_start))));
 
     if ($cache_result === false) {
-      $console->writeOut(
-        "%s\n",
-        pht('Not found in graph cache.'));
+      $console->writeOut("%s\n", pht('Not found in graph cache.'));
     } else if ($cache_result === null) {
       $console->writeOut(
         "%s\n",

@@ -2,13 +2,13 @@
 
 final class DoorkeeperTagsController extends PhabricatorController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $tags = $request->getStr('tags');
-    $tags = json_decode($tags, true);
-    if (!is_array($tags)) {
+    try {
+      $tags = phutil_json_decode($tags);
+    } catch (PhutilJSONParserException $ex) {
       $tags = array();
     }
 

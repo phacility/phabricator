@@ -6,7 +6,7 @@ final class PhabricatorRepositoryBranch extends PhabricatorRepositoryDAO {
   protected $name;
   protected $lintCommit;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',

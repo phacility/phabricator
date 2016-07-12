@@ -2,27 +2,21 @@
 
 final class PhabricatorTokenGiveController extends PhabricatorTokenController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+ public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $phid = $request->getURIData('phid');
 
     $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs(array($this->phid))
+      ->setViewer($viewer)
+      ->withPHIDs(array($phid))
       ->executeOne();
     if (!$handle->isComplete()) {
       return new Aphront404Response();
     }
 
     $current = id(new PhabricatorTokenGivenQuery())
-      ->setViewer($user)
-      ->withAuthorPHIDs(array($user->getPHID()))
+      ->setViewer($viewer)
+      ->withAuthorPHIDs(array($viewer->getPHID()))
       ->withObjectPHIDs(array($handle->getPHID()))
       ->execute();
 
@@ -39,7 +33,7 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
       $content_source = PhabricatorContentSource::newFromRequest($request);
 
       $editor = id(new PhabricatorTokenGivenEditor())
-        ->setActor($user)
+        ->setActor($viewer)
         ->setContentSource($content_source);
       if ($is_give) {
         $token_phid = $request->getStr('tokenPHID');
@@ -57,17 +51,17 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
       $dialog = $this->buildRescindTokenDialog(head($current));
     }
 
-    $dialog->setUser($user);
+    $dialog->setUser($viewer);
     $dialog->addCancelButton($done_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
   private function buildGiveTokenDialog() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $tokens = id(new PhabricatorTokenQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->execute();
 
     $buttons = array();
@@ -96,7 +90,7 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
           $aural,
           $token->renderIcon(),
         ));
-      if ((++$ii % 4) == 0) {
+      if ((++$ii % 6) == 0) {
         $buttons[] = phutil_tag('br');
       }
     }

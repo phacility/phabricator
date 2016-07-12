@@ -1,24 +1,47 @@
 <?php
 
-final class PhabricatorRepositoryType {
+final class PhabricatorRepositoryType extends Phobject {
 
   const REPOSITORY_TYPE_GIT         = 'git';
   const REPOSITORY_TYPE_SVN         = 'svn';
   const REPOSITORY_TYPE_MERCURIAL   = 'hg';
-  const REPOSITORY_TYPE_PERFORCE    = 'p4';
 
   public static function getAllRepositoryTypes() {
-    static $map = array(
-      self::REPOSITORY_TYPE_GIT       => 'Git',
-      self::REPOSITORY_TYPE_SVN       => 'Subversion',
-      self::REPOSITORY_TYPE_MERCURIAL => 'Mercurial',
-    );
-    return $map;
+    $map = self::getRepositoryTypeMap();
+    return ipull($map, 'name');
   }
 
   public static function getNameForRepositoryType($type) {
-    $map = self::getAllRepositoryTypes();
-    return idx($map, $type, 'Unknown');
+    $spec = self::getRepositoryTypeSpec($type);
+    return idx($spec, 'name', pht('Unknown ("%s")', $type));
+  }
+
+  public static function getRepositoryTypeSpec($type) {
+    $map = self::getRepositoryTypeMap();
+    return idx($map, $type, array());
+  }
+
+  public static function getRepositoryTypeMap() {
+    return array(
+      self::REPOSITORY_TYPE_GIT => array(
+        'name' => pht('Git'),
+        'icon' => 'fa-git',
+        'create.header' => pht('Create Git Repository'),
+        'create.subheader' => pht('Create a new Git repository.'),
+      ),
+      self::REPOSITORY_TYPE_MERCURIAL => array(
+        'name' => pht('Mercurial'),
+        'icon' => 'fa-code-fork',
+        'create.header' => pht('Create Mercurial Repository'),
+        'create.subheader' => pht('Create a new Mercurial repository.'),
+      ),
+      self::REPOSITORY_TYPE_SVN => array(
+        'name' => pht('Subversion'),
+        'icon' => 'fa-database',
+        'create.header' => pht('Create Subversion Repository'),
+        'create.subheader' => pht('Create a new Subversion repository.'),
+      ),
+    );
   }
 
 }

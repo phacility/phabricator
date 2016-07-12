@@ -8,22 +8,17 @@ final class ManiphestGetTaskTransactionsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve Maniphest Task Transactions.';
+    return pht('Retrieve Maniphest task transactions.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'required list<int>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict<string, wild>>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -64,6 +59,8 @@ final class ManiphestGetTaskTransactionsConduitAPIMethod
 
       $results[$task_id][] = array(
         'taskID'  => $task_id,
+        'transactionID' => $transaction->getID(),
+        'transactionPHID' => $transaction->getPHID(),
         'transactionType'  => $transaction->getTransactionType(),
         'oldValue'  => $transaction->getOldValue(),
         'newValue'  => $transaction->getNewValue(),

@@ -14,6 +14,10 @@ final class PhabricatorNotificationsApplication extends PhabricatorApplication {
     return pht('Real-Time Updates and Alerts');
   }
 
+  public function getIcon() {
+    return 'fa-bell';
+  }
+
   public function getRoutes() {
     return array(
       '/notification/' => array(
@@ -21,7 +25,6 @@ final class PhabricatorNotificationsApplication extends PhabricatorApplication {
           => 'PhabricatorNotificationListController',
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
-        'status/' => 'PhabricatorNotificationStatusController',
         'clear/' => 'PhabricatorNotificationClearController',
         'test/' => 'PhabricatorNotificationTestController',
       ),

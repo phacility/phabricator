@@ -3,25 +3,18 @@
 final class PhabricatorAuthLinkController
   extends PhabricatorAuthController {
 
-  private $action;
-  private $providerKey;
-
-  public function willProcessRequest(array $data) {
-    $this->providerKey = $data['pkey'];
-    $this->action = $data['action'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $action = $request->getURIData('action');
+    $provider_key = $request->getURIData('pkey');
 
     $provider = PhabricatorAuthProvider::getEnabledProviderByKey(
-      $this->providerKey);
+      $provider_key);
     if (!$provider) {
       return new Aphront404Response();
     }
 
-    switch ($this->action) {
+    switch ($action) {
       case 'link':
         if (!$provider->shouldAllowAccountLink()) {
           return $this->renderErrorPage(
@@ -50,7 +43,7 @@ final class PhabricatorAuthLinkController
       $provider->getProviderDomain(),
       $viewer->getPHID());
 
-    switch ($this->action) {
+    switch ($action) {
       case 'link':
         if ($account) {
           return $this->renderErrorPage(
@@ -81,7 +74,7 @@ final class PhabricatorAuthLinkController
 
     PhabricatorCookies::setClientIDCookie($request);
 
-    switch ($this->action) {
+    switch ($action) {
       case 'link':
         id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
           $viewer,
@@ -107,7 +100,7 @@ final class PhabricatorAuthLinkController
         $form);
     }
 
-    switch ($this->action) {
+    switch ($action) {
       case 'link':
         $name = pht('Link Account');
         $title = pht('Link %s Account', $provider->getProviderName());
@@ -123,15 +116,12 @@ final class PhabricatorAuthLinkController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Link Account'), $panel_uri);
     $crumbs->addTextCrumb($provider->getProviderName($name));
+    $crumbs->setBorder(true);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form,
-      ),
-      array(
-        'title' => $title,
-      ));
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($form);
   }
 
 }

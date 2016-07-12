@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementParentsWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('parents')
       ->setExamples('**parents** [options] [__repository__] ...')
@@ -91,7 +91,7 @@ final class PhabricatorRepositoryManagementParentsWorkflow
       "%s\n",
       pht(
         'Found %s total commit(s); updating...',
-        new PhutilNumber(count($graph))));
+        phutil_count($graph)));
 
     $commit_table = id(new PhabricatorRepositoryCommit());
     $commit_table_name = $commit_table->getTableName();

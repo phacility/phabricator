@@ -22,8 +22,8 @@ final class PHUIStatusItemView extends AphrontTagView {
   const ICON_MINUS = 'fa-minus-circle';
   const ICON_OPEN = 'fa-circle-o';
   const ICON_CLOCK = 'fa-clock-o';
+  const ICON_STAR = 'fa-star';
 
-  /* render_textarea */
   public function setIcon($icon, $color = null, $label = null) {
     $this->icon = $icon;
     $this->iconLabel = $label;
@@ -70,7 +70,7 @@ final class PHUIStatusItemView extends AphrontTagView {
     $icon = null;
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->setIconFont($this->icon.' '.$this->iconColor);
+        ->setIcon($this->icon.' '.$this->iconColor);
 
       if ($this->iconLabel) {
         Javelin::initBehavior('phabricator-tooltips');
@@ -83,17 +83,15 @@ final class PHUIStatusItemView extends AphrontTagView {
       }
     }
 
-    $icon_cell = phutil_tag(
-      'td',
-      array(),
-      $icon);
-
     $target_cell = phutil_tag(
       'td',
       array(
         'class' => 'phui-status-item-target',
       ),
-      $this->target);
+      array(
+        $icon,
+        $this->target,
+      ));
 
     $note_cell = phutil_tag(
       'td',
@@ -103,7 +101,6 @@ final class PHUIStatusItemView extends AphrontTagView {
       $this->note);
 
     return array(
-      $icon_cell,
       $target_cell,
       $note_cell,
     );

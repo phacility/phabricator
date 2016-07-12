@@ -8,7 +8,20 @@ final class AphrontCalendarEventView extends AphrontView {
   private $epochEnd;
   private $description;
   private $eventID;
-  private $color;
+  private $viewerIsInvited;
+  private $uri;
+  private $isAllDay;
+  private $icon;
+  private $canEdit;
+
+  public function setURI($uri) {
+    $this->uri = $uri;
+    return $this;
+  }
+
+  public function getURI() {
+    return $this->uri;
+  }
 
   public function setEventID($event_id) {
     $this->eventID = $event_id;
@@ -16,6 +29,14 @@ final class AphrontCalendarEventView extends AphrontView {
   }
   public function getEventID() {
     return $this->eventID;
+  }
+
+  public function setViewerIsInvited($viewer_is_invited) {
+    $this->viewerIsInvited = $viewer_is_invited;
+    return $this;
+  }
+  public function getViewerIsInvited() {
+    return $this->viewerIsInvited;
   }
 
   public function setUserPHID($user_phid) {
@@ -59,24 +80,31 @@ final class AphrontCalendarEventView extends AphrontView {
     return $this->description;
   }
 
-  public function setColor($color) {
-    $this->color = $color;
+  public function setIsAllDay($is_all_day) {
+    $this->isAllDay = $is_all_day;
     return $this;
   }
-  public function getColor() {
-    if ($this->color) {
-      return $this->color;
-    } else {
-      return CalendarColors::COLOR_SKY;
-    }
+
+  public function getIsAllDay() {
+    return $this->isAllDay;
   }
 
-  public function getAllDay() {
-    $time = (60 * 60 * 22);
-    if (($this->getEpochEnd() - $this->getEpochStart()) >= $time) {
-      return true;
-    }
-    return false;
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  public function getIcon() {
+    return $this->icon;
+  }
+
+  public function setCanEdit($can_edit) {
+    $this->canEdit = $can_edit;
+    return $this;
+  }
+
+  public function getCanEdit() {
+    return $this->canEdit;
   }
 
   public function getMultiDay() {
@@ -88,7 +116,7 @@ final class AphrontCalendarEventView extends AphrontView {
   }
 
   public function render() {
-    throw new Exception('Events are only rendered indirectly.');
+    throw new Exception(pht('Events are only rendered indirectly.'));
   }
 
 }

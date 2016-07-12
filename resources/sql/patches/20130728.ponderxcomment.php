@@ -6,13 +6,13 @@ $atable = new PonderAnswerTransaction();
 $conn_w = $qtable->establishConnection('w');
 $conn_w->openTransaction();
 
-echo "Migrating Ponder comments to ApplicationTransactions...\n";
+echo pht('Migrating Ponder comments to %s...', 'ApplicationTransactions')."\n";
 
 $rows = new LiskRawMigrationIterator($conn_w, 'ponder_comment');
 foreach ($rows as $row) {
 
   $id = $row['id'];
-  echo "Migrating {$id}...\n";
+  echo pht('Migrating %d...', $id)."\n";
 
   $type = phid_get_type($row['targetPHID']);
   switch ($type) {
@@ -49,8 +49,7 @@ foreach ($rows as $row) {
     1,
     $row['content'],
     PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LEGACY,
-      array())->serialize(),
+      PhabricatorOldWorldContentSource::SOURCECONST)->serialize(),
     0,
     $row['dateCreated'],
     $row['dateModified']);
@@ -73,8 +72,7 @@ foreach ($rows as $row) {
     'null',
     'null',
     PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LEGACY,
-      array())->serialize(),
+      PhabricatorOldWorldContentSource::SOURCECONST)->serialize(),
     '[]',
     $row['dateCreated'],
     $row['dateModified']);
@@ -83,4 +81,4 @@ foreach ($rows as $row) {
 
 $conn_w->saveTransaction();
 
-echo "Done.\n";
+echo pht('Done.')."\n";

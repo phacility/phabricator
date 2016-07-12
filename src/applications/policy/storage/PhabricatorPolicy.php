@@ -2,7 +2,9 @@
 
 final class PhabricatorPolicy
   extends PhabricatorPolicyDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   const ACTION_ALLOW = 'allow';
   const ACTION_DENY = 'deny';
@@ -19,7 +21,7 @@ final class PhabricatorPolicy
 
   private $ruleObjects = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -52,19 +54,28 @@ final class PhabricatorPolicy
       return PhabricatorPolicyQuery::getGlobalPolicy($policy_identifier);
     }
 
+    $policy = PhabricatorPolicyQuery::getObjectPolicy($policy_identifier);
+    if ($policy) {
+      return $policy;
+    }
+
     if (!$handle) {
       throw new Exception(
-        "Policy identifier is an object PHID ('{$policy_identifier}'), but no ".
-        "object handle was provided. A handle must be provided for object ".
-        "policies.");
+        pht(
+          "Policy identifier is an object PHID ('%s'), but no object handle ".
+          "was provided. A handle must be provided for object policies.",
+          $policy_identifier));
     }
 
     $handle_phid = $handle->getPHID();
     if ($policy_identifier != $handle_phid) {
       throw new Exception(
-        "Policy identifier is an object PHID ('{$policy_identifier}'), but ".
-        "the provided handle has a different PHID ('{$handle_phid}'). The ".
-        "handle must correspond to the policy identifier.");
+        pht(
+          "Policy identifier is an object PHID ('%s'), but the provided ".
+          "handle has a different PHID ('%s'). The handle must correspond ".
+          "to the policy identifier.",
+          $policy_identifier,
+          $handle_phid));
     }
 
     $policy = id(new PhabricatorPolicy())
@@ -152,7 +163,16 @@ final class PhabricatorPolicy
     return $this->workflow;
   }
 
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
   public function getIcon() {
+    if ($this->icon) {
+      return $this->icon;
+    }
+
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_GLOBAL:
         static $map = array(
@@ -197,6 +217,11 @@ final class PhabricatorPolicy
   public static function getPolicyExplanation(
     PhabricatorUser $viewer,
     $policy) {
+
+    $rule = PhabricatorPolicyQuery::getObjectPolicyRule($policy);
+    if ($rule) {
+      return $rule->getPolicyExplanation();
+    }
 
     switch ($policy) {
       case PhabricatorPolicies::POLICY_PUBLIC:
@@ -249,7 +274,7 @@ final class PhabricatorPolicy
     $img = null;
     if ($icon) {
       $img = id(new PHUIIconView())
-        ->setIconFont($this->getIcon());
+        ->setIcon($this->getIcon());
     }
 
     if ($this->getHref()) {
@@ -296,6 +321,12 @@ final class PhabricatorPolicy
     $classes = array();
 
     foreach ($this->getRules() as $rule) {
+      if (!is_array($rule)) {
+        // This rule is invalid. We'll reject it later, but don't need to
+        // extract anything from it for now.
+        continue;
+      }
+
       $class = idx($rule, 'rule');
       try {
         if (class_exists($class)) {
@@ -337,6 +368,60 @@ final class PhabricatorPolicy
   }
 
 
+  /**
+   * Return `true` if this policy is stronger (more restrictive) than some
+   * other policy.
+   *
+   * Because policies are complicated, determining which policies are
+   * "stronger" is not trivial. This method uses a very coarse working
+   * definition of policy strength which is cheap to compute, unambiguous,
+   * and intuitive in the common cases.
+   *
+   * This method returns `true` if the //class// of this policy is stronger
+   * than the other policy, even if the policies are (or might be) the same in
+   * practice. For example, "Members of Project X" is considered a stronger
+   * policy than "All Users", even though "Project X" might (in some rare
+   * cases) contain every user.
+   *
+   * Generally, the ordering here is:
+   *
+   *   - Public
+   *   - All Users
+   *   - (Everything Else)
+   *   - No One
+   *
+   * In the "everything else" bucket, we can't make any broad claims about
+   * which policy is stronger (and we especially can't make those claims
+   * cheaply).
+   *
+   * Even if we fully evaluated each policy, the two policies might be
+   * "Members of X" and "Members of Y", each of which permits access to some
+   * set of unique users. In this case, neither is strictly stronger than
+   * the other.
+   *
+   * @param PhabricatorPolicy Other policy.
+   * @return bool `true` if this policy is more restrictive than the other
+   *  policy.
+   */
+  public function isStrongerThan(PhabricatorPolicy $other) {
+    $this_policy = $this->getPHID();
+    $other_policy = $other->getPHID();
+
+    $strengths = array(
+      PhabricatorPolicies::POLICY_PUBLIC => -2,
+      PhabricatorPolicies::POLICY_USER => -1,
+      // (Default policies have strength 0.)
+      PhabricatorPolicies::POLICY_NOONE => 1,
+    );
+
+    $this_strength = idx($strengths, $this->getPHID(), 0);
+    $other_strength = idx($strengths, $other->getPHID(), 0);
+
+    return ($this_strength > $other_strength);
+  }
+
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -360,5 +445,16 @@ final class PhabricatorPolicy
   public function describeAutomaticCapability($capability) {
     return null;
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->delete();
+  }
+
 
 }

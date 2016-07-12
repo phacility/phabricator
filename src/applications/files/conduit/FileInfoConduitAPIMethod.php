@@ -7,23 +7,23 @@ final class FileInfoConduitAPIMethod extends FileConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Get information about a file.';
+    return pht('Get information about a file.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'phid' => 'optional phid',
       'id'   => 'optional id',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
-      'ERR-NOT-FOUND'     => 'No such file exists.',
+      'ERR-NOT-FOUND' => pht('No such file exists.'),
     );
   }
 
@@ -45,7 +45,7 @@ final class FileInfoConduitAPIMethod extends FileConduitAPIMethod {
       throw new ConduitException('ERR-NOT-FOUND');
     }
 
-    $uri = $file->getBestURI();
+    $uri = $file->getInfoURI();
 
     return array(
       'id'            => $file->getID(),

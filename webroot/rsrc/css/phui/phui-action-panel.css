@@ -1,0 +1,226 @@
+/**
+ * @provides phui-action-panel-css
+ */
+
+.phui-action-panel {
+  position: relative;
+  background-color: #fff;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  margin: 0 8px;
+  min-height: 108px;
+  overflow: hidden;
+}
+
+.device .phui-action-panel {
+  margin: 0;
+}
+
+.phui-action-panel-hitarea {
+  display: block;
+}
+
+.device-desktop .phui-action-panel-hitarea:hover {
+  text-decoration: none;
+  background-color: rgba({$alphawhite},.25);
+}
+
+.device-desktop .phui-action-panel-hitarea:hover .phui-icon-view {
+  margin-top: -4px;
+  transition-duration: .2s;
+}
+
+.phui-action-panel-table {
+  display: table;
+  height: 80px;
+  width: 100%;
+}
+
+.phui-action-panel-row {
+  display: table-row;
+}
+
+.phui-action-panel-icon {
+  width: 64px;
+  text-align: center;
+  vertical-align: middle;
+  display: table-cell;
+}
+
+.phui-action-panel-icon a {
+  display: block;
+}
+
+.phui-action-panel-icon a:hover .phui-icon-view,
+.phui-action-panel-icon a:hover .phui-action-panel-bigtext {
+  color: {$blue};
+}
+
+.phui-action-panel-icon a:hover {
+  text-decoration: none;
+}
+
+.phui-action-panel-icon .phui-icon-view {
+  font-size: 36px;
+  color: {$lightbluetext};
+}
+
+.phui-action-panel-header {
+  padding: 8px;
+  border-bottom: 1px solid {$thinblueborder};
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  color: {$darkbluetext};
+  display: block;
+}
+
+.phui-action-panel-bigtext .phui-action-panel-subheader {
+  font-size: 28px;
+  color: {$darkbluetext};
+  text-align: center;
+  padding: 0 8px;
+}
+
+.phui-action-panel-subheader {
+  display: table-cell;
+  vertical-align: middle;
+  color: {$darkbluetext};
+  padding: 8px 8px 8px 0;
+}
+
+.phui-action-panel-subheader a {
+  text-decoraction: none;
+}
+
+.phui-action-panel-status {
+  padding: 8px 12px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.phui-action-panel-status:hover {
+  text-decoration: none;
+}
+
+/* - Red -------------------------------------------------------------------- */
+
+.phui-action-panel-red {
+  background-color: {$sh-redbackground};
+  border-color: {$sh-redborder};
+}
+
+.phui-action-panel-red .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-redicon};
+}
+
+.phui-action-panel-red .phui-action-panel-header {
+  border-color: {$sh-lightredborder};
+}
+
+/* - Orange ----------------------------------------------------------------- */
+
+.phui-action-panel-orange {
+  background-color: {$sh-orangebackground};
+  border-color: {$sh-orangeborder};
+}
+
+.phui-action-panel-orange .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-orangeicon};
+}
+
+.phui-action-panel-orange .phui-action-panel-header {
+  border-color: {$sh-lightorangeborder};
+}
+
+/* - Yellow ----------------------------------------------------------------- */
+
+.phui-action-panel-yellow {
+  background-color: {$sh-yellowbackground};
+  border-color: {$sh-yellowborder};
+}
+
+.phui-action-panel-yellow .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-yellowicon};
+}
+
+.phui-action-panel-yellow .phui-action-panel-header {
+  border-color: {$sh-lightyellowborder};
+}
+
+/* - Green ------------------------------------------------------------------ */
+
+.phui-action-panel-green {
+  background-color: {$sh-greenbackground};
+  border-color: {$sh-greenborder};
+}
+
+.phui-action-panel-green .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-greenicon};
+}
+
+.phui-action-panel-green .phui-action-panel-header {
+  border-color: {$sh-lightgreenborder};
+}
+
+/* - Blue ------------------------------------------------------------------- */
+
+.phui-action-panel-blue {
+  background-color: {$sh-bluebackground};
+  border-color: {$sh-blueborder};
+}
+
+.phui-action-panel-blue .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-blueicon};
+}
+
+.phui-action-panel-blue .phui-action-panel-header {
+  border-color: {$sh-lightblueborder};
+}
+
+/* - Indigo ----------------------------------------------------------------- */
+
+.phui-action-panel-indigo {
+  background-color: {$sh-indigobackground};
+  border-color: {$sh-indigoborder};
+}
+
+.phui-action-panel-indigo .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-indigoicon};
+}
+
+.phui-action-panel-indigo .phui-action-panel-header {
+  border-color: {$sh-lightindigoborder};
+}
+
+/* - Violet ----------------------------------------------------------------- */
+
+.phui-action-panel-violet {
+  background-color: {$sh-violetbackground};
+  border-color: {$sh-violetborder};
+}
+
+.phui-action-panel-violet .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-violeticon};
+}
+
+.phui-action-panel-violet .phui-action-panel-header {
+  border-color: {$sh-lightvioletborder};
+}
+
+/* - Pink ------------------------------------------------------------------- */
+
+.phui-action-panel-pink {
+  background-color: {$sh-pinkbackground};
+  border-color: {$sh-violetborder};
+}
+
+.phui-action-panel-pink .phui-action-panel-icon .phui-icon-view {
+  color: {$sh-pinkicon};
+}
+
+.phui-action-panel-pink .phui-action-panel-header {
+  border-color: {$sh-lightpinkborder};
+}

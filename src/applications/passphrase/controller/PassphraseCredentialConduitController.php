@@ -3,19 +3,13 @@
 final class PassphraseCredentialConduitController
   extends PassphraseController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
     $credential = id(new PassphraseCredentialQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -39,8 +33,22 @@ final class PassphraseCredentialConduitController
       throw new Exception(pht('Credential has invalid type "%s"!', $type));
     }
 
+    $is_locked = $credential->getIsLocked();
+
+    if ($is_locked) {
+      return $this->newDialog()
+        ->setUser($viewer)
+        ->setTitle(pht('Credential Locked'))
+        ->appendChild(
+          pht(
+            'This credential can not be made available via Conduit because '.
+            'it is locked.'))
+        ->addCancelButton($view_uri);
+    }
+
     if ($request->isFormPost()) {
       $xactions = array();
+
       $xactions[] = id(new PassphraseCredentialTransaction())
         ->setTransactionType(PassphraseCredentialTransaction::TYPE_CONDUIT)
         ->setNewValue(!$credential->getAllowConduit());
@@ -60,8 +68,8 @@ final class PassphraseCredentialConduitController
         ->appendChild(
           pht(
             'This credential and its secret will no longer be able '.
-            'to be retrieved using the `passphrase.query` method '.
-            'in Conduit.'))
+            'to be retrieved using the `%s` method in Conduit.',
+            'passphrase.query'))
         ->addSubmitButton(pht('Prevent Conduit Access'))
         ->addCancelButton($view_uri);
     } else {
@@ -70,7 +78,7 @@ final class PassphraseCredentialConduitController
         ->appendChild(
           pht(
             'This credential will be able to be retrieved via the Conduit '.
-            'API by users who have access to this credential.  You should '.
+            'API by users who have access to this credential. You should '.
             'only enable this for credentials which need to be accessed '.
             'programmatically (such as from build agents).'))
         ->addSubmitButton(pht('Allow Conduit Access'))

@@ -7,10 +7,10 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Update a Phriction document.';
+    return pht('Update a Phriction document.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'slug'          => 'required string',
       'title'         => 'optional string',
@@ -19,13 +19,8 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -34,6 +29,7 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
     $doc = id(new PhrictionDocumentQuery())
       ->setViewer($request->getUser())
       ->withSlugs(array(PhabricatorSlug::normalize($slug)))
+      ->needContent(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -44,14 +40,28 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
       throw new Exception(pht('No such document.'));
     }
 
-    $editor = id(PhrictionDocumentEditor::newForSlug($slug))
-      ->setActor($request->getUser())
-      ->setTitle($request->getValue('title'))
-      ->setContent($request->getValue('content'))
-      ->setDescription($request->getvalue('description'))
-      ->save();
+    $xactions = array();
+    $xactions[] = id(new PhrictionTransaction())
+      ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+      ->setNewValue($request->getValue('title'));
+    $xactions[] = id(new PhrictionTransaction())
+      ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+      ->setNewValue($request->getValue('content'));
 
-    return $this->buildDocumentInfoDictionary($editor->getDocument());
+    $editor = id(new PhrictionTransactionEditor())
+      ->setActor($request->getUser())
+      ->setContentSource($request->newContentSource())
+      ->setContinueOnNoEffect(true)
+      ->setDescription($request->getValue('description'));
+
+    try {
+      $editor->applyTransactions($doc, $xactions);
+    } catch (PhabricatorApplicationTransactionValidationException $ex) {
+      // TODO - some magical hotness via T5873
+      throw $ex;
+    }
+
+    return $this->buildDocumentInfoDictionary($doc);
   }
 
 }

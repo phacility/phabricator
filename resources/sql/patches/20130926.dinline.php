@@ -7,11 +7,10 @@ $conn_w->openTransaction();
 $src_table = 'differential_inlinecomment';
 $dst_table = 'differential_transaction_comment';
 
-echo "Migrating Differential inline comments to new format...\n";
+echo pht('Migrating Differential inline comments to new format...')."\n";
 
 $content_source = PhabricatorContentSource::newForSource(
-  PhabricatorContentSource::SOURCE_LEGACY,
-  array())->serialize();
+  PhabricatorOldWorldContentSource::SOURCECONST)->serialize();
 
 $rows = new LiskRawMigrationIterator($conn_w, $src_table);
 foreach ($rows as $row) {
@@ -19,7 +18,7 @@ foreach ($rows as $row) {
 
   $revision_id = $row['revisionID'];
 
-  echo "Migrating inline #{$id} (D{$revision_id})...\n";
+  echo pht('Migrating inline #%d (%s)...', $id, "D{$revision_id}")."\n";
 
   $revision_row = queryfx_one(
     $conn_w,
@@ -87,4 +86,4 @@ foreach ($rows as $row) {
 }
 
 $conn_w->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

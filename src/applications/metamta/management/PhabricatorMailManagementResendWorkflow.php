@@ -6,7 +6,7 @@ final class PhabricatorMailManagementResendWorkflow
   protected function didConstruct() {
     $this
       ->setName('resend')
-      ->setSynopsis('Send mail again.')
+      ->setSynopsis(pht('Send mail again.'))
       ->setExamples(
         '**resend** --id 1 --id 2')
       ->setArguments(
@@ -14,7 +14,7 @@ final class PhabricatorMailManagementResendWorkflow
           array(
             'name'    => 'id',
             'param'   => 'id',
-            'help'    => 'Send mail with a given ID again.',
+            'help'    => pht('Send mail with a given ID again.'),
             'repeat'  => true,
           ),
         ));
@@ -26,7 +26,9 @@ final class PhabricatorMailManagementResendWorkflow
     $ids = $args->getArg('id');
     if (!$ids) {
       throw new PhutilArgumentUsageException(
-        "Use the '--id' flag to specify one or more messages to resend.");
+        pht(
+          "Use the '%s' flag to specify one or more messages to resend.",
+          '--id'));
     }
 
     $messages = id(new PhabricatorMetaMTAMail())->loadAllWhere(
@@ -38,23 +40,28 @@ final class PhabricatorMailManagementResendWorkflow
       $missing = array_diff_key($ids, $messages);
       if ($missing) {
         throw new PhutilArgumentUsageException(
-          'Some specified messages do not exist: '.
-          implode(', ', array_keys($missing)));
+          pht(
+            'Some specified messages do not exist: %s',
+            implode(', ', array_keys($missing))));
       }
     }
 
     foreach ($messages as $message) {
-      $message->setStatus(PhabricatorMetaMTAMail::STATUS_QUEUE);
+      $message->setStatus(PhabricatorMailOutboundStatus::STATUS_QUEUE);
       $message->save();
 
       $mailer_task = PhabricatorWorker::scheduleTask(
         'PhabricatorMetaMTAWorker',
         $message->getID(),
-        PhabricatorWorker::PRIORITY_ALERTS);
+        array(
+          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+        ));
 
       $console->writeOut(
-        "Queued message #%d for resend.\n",
-        $message->getID());
+        "%s\n",
+        pht(
+          'Queued message #%d for resend.',
+          $message->getID()));
     }
   }
 

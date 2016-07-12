@@ -17,16 +17,7 @@ final class DiffusionGitRequest extends DiffusionRequest {
     if ($this->repository) {
       return $this->repository->getDefaultBranch();
     }
-    throw new Exception('Unable to determine branch!');
-  }
-
-  protected function getResolvableBranchName($branch) {
-    if ($this->repository->isWorkingCopyBare()) {
-      return $branch;
-    } else {
-      $remote = DiffusionGitBranch::DEFAULT_GIT_REMOTE;
-      return $remote.'/'.$branch;
-    }
+    throw new Exception(pht('Unable to determine branch!'));
   }
 
 }

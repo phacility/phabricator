@@ -2,9 +2,8 @@
 
 final class PhabricatorFactChartController extends PhabricatorFactController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $table = new PhabricatorFactRaw();
     $conn_r = $table->establishConnection('r');
@@ -31,7 +30,6 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     }
 
     if (!$points) {
-      // NOTE: Raphael crashes Safari if you hand it series with no points.
       throw new Exception('No data to show!');
     }
 
@@ -57,16 +55,12 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'div',
       array(
         'id' => $id,
-        'style' => 'border: 1px solid #6f6f6f; '.
-                   'margin: 1em 2em; '.
-                   'background: #ffffff; '.
-                   'height: 400px; ',
+        'style' => 'background: #ffffff; '.
+                   'height: 480px; ',
       ),
       '');
 
-    require_celerity_resource('raphael-core');
-    require_celerity_resource('raphael-g');
-    require_celerity_resource('raphael-g-line');
+    require_celerity_resource('d3');
 
     Javelin::initBehavior('line-chart', array(
       'hardpoint' => $id,
@@ -76,22 +70,20 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'colors' => array('#0000ff'),
     ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Count of '.$spec->getName());
-    $panel->appendChild($chart);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Count of %s', $spec->getName()))
+      ->appendChild($chart);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Chart'));
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $panel,
-      ),
-      array(
-        'title' => 'Chart',
-        'device' => false,
-      ));
+    $title = pht('Chart');
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($box);
+
   }
 
 }

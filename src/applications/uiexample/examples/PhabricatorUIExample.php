@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorUIExample {
+abstract class PhabricatorUIExample extends Phobject {
 
   private $request;
 
@@ -29,10 +29,11 @@ abstract class PhabricatorUIExample {
     if ($fullname) {
       $handle->setFullName($fullname);
     } else {
-      $handle->setFullName(sprintf('%s%d: %s',
-        substr($type, 0, 1),
-        $id,
-        $name));
+      $handle->setFullName(
+        sprintf('%s%d: %s',
+          substr($type, 0, 1),
+          $id,
+          $name));
     }
 
     if ($uri) {

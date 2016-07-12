@@ -1,33 +1,32 @@
 <?php
 
 final class DiffusionRepositoryEditDangerousController
-  extends DiffusionRepositoryEditController {
+  extends DiffusionRepositoryManageController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-    $drequest = $this->diffusionRequest;
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContextForEdit();
+    if ($response) {
+      return $response;
+    }
+
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
 
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->withIDs(array($repository->getID()))
-      ->executeOne();
-
-    if (!$repository) {
-      return new Aphront404Response();
-    }
+    $panel_uri = id(new DiffusionRepositoryBasicsManagementPanel())
+      ->setRepository($repository)
+      ->getPanelURI();
 
     if (!$repository->canAllowDangerousChanges()) {
-      return new Aphront400Response();
+      return $this->newDialog()
+        ->setTitle(pht('Unprotectable Repository'))
+        ->appendParagraph(
+          pht(
+            'This repository can not be protected from dangerous changes '.
+            'because Phabricator does not control what users are allowed '.
+            'to push to it.'))
+        ->addCancelButton($panel_uri);
     }
-
-    $edit_uri = $this->getRepositoryControllerURI($repository, 'edit/');
 
     if ($request->isFormPost()) {
       $xaction = id(new PhabricatorRepositoryTransaction())
@@ -40,39 +39,49 @@ final class DiffusionRepositoryEditDangerousController
         ->setActor($viewer)
         ->applyTransactions($repository, array($xaction));
 
-      return id(new AphrontReloadResponse())->setURI($edit_uri);
+      return id(new AphrontReloadResponse())->setURI($panel_uri);
     }
-
-    $dialog = id(new AphrontDialogView())
-      ->setUser($viewer);
 
     $force = phutil_tag('tt', array(), '--force');
 
     if ($repository->shouldAllowDangerousChanges()) {
-      $dialog
-        ->setTitle(pht('Prevent Dangerous changes?'))
-        ->appendChild(
-          pht(
-            'It will no longer be possible to delete branches from this '.
-            'repository, or %s push to this repository.',
-            $force))
-        ->addSubmitButton(pht('Prevent Dangerous Changes'))
-        ->addCancelButton($edit_uri);
+      $title = pht('Prevent Dangerous Changes');
+
+      if ($repository->isSVN()) {
+        $body = pht(
+          'It will no longer be possible to edit revprops in this '.
+          'repository.');
+      } else {
+        $body = pht(
+          'It will no longer be possible to delete branches from this '.
+          'repository, or %s push to this repository.',
+          $force);
+      }
+
+      $submit = pht('Prevent Dangerous Changes');
     } else {
-      $dialog
-        ->setTitle(pht('Allow Dangerous Changes?'))
-        ->appendChild(
-          pht(
-            'If you allow dangerous changes, it will be possible to delete '.
-            'branches and %s push this repository. These operations can '.
-            'alter a repository in a way that is difficult to recover from.',
-            $force))
-        ->addSubmitButton(pht('Allow Dangerous Changes'))
-        ->addCancelButton($edit_uri);
+      $title = pht('Allow Dangerous Changes');
+      if ($repository->isSVN()) {
+        $body = pht(
+          'If you allow dangerous changes, it will be possible to edit '.
+          'reprops in this repository, including arbitrarily rewriting '.
+          'commit messages. These operations can alter a repository in a '.
+          'way that is difficult to recover from.');
+      } else {
+        $body = pht(
+          'If you allow dangerous changes, it will be possible to delete '.
+          'branches and %s push this repository. These operations can '.
+          'alter a repository in a way that is difficult to recover from.',
+          $force);
+      }
+      $submit = pht('Allow Dangerous Changes');
     }
 
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialog);
+    return $this->newDialog()
+      ->setTitle($title)
+      ->appendParagraph($body)
+      ->addSubmitButton($submit)
+      ->addCancelButton($panel_uri);
   }
 
 }

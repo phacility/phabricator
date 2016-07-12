@@ -31,7 +31,6 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
     $application = $this->application;
 
     require_celerity_resource('phabricator-application-launch-view-css');
-    require_celerity_resource('sprite-apps-large-css');
 
     $content = array();
     $icon = null;
@@ -73,7 +72,7 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
           array(
             'class' => 'phabricator-application-attention-count',
           ),
-          $count);
+          $this->formatStatusItemCount($count));
         }
 
 
@@ -83,8 +82,9 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
           array(
             'class' => 'phabricator-application-warning-count',
           ),
-          $counts[$warning]);
+          $this->formatStatusItemCount($counts[$warning]));
         }
+
         if (nonempty($count1) && nonempty($count2)) {
           $numbers = array($count1, ' / ', $count2);
         } else {
@@ -98,7 +98,8 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
             'sigil' => 'has-tooltip',
             'meta' => array(
               'tip' => implode("\n", $text),
-              'size' => 240,
+              'size' => 300,
+              'align' => 'E',
             ),
             'class' => 'phabricator-application-launch-attention',
           ),
@@ -112,9 +113,9 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
       if ($application->getIconURI()) {
         $styles[] = 'background-image: url('.$application->getIconURI().')';
       } else {
-        $icon = $application->getIconName();
-        $classes[] = 'sprite-apps-large';
-        $classes[] = 'apps-'.$icon.'-dark-large';
+        $classes[] = $application->getIcon();
+        $classes[] = 'phui-icon-view';
+        $classes[] = 'phui-font-fa';
       }
 
       $icon = phutil_tag(
@@ -130,6 +131,15 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
       $icon,
       $content,
     );
+  }
+
+  private function formatStatusItemCount($count) {
+    $limit = PhabricatorApplication::MAX_STATUS_ITEMS;
+    if ($count >= $limit) {
+      return pht('%s+', new PhutilNumber($limit - 1));
+    } else {
+      return pht('%s', new PhutilNumber($count));
+    }
   }
 
 }

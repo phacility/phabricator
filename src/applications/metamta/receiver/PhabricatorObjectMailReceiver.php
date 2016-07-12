@@ -39,10 +39,26 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
     return $this;
   }
 
-  abstract protected function processReceivedObjectMail(
+  protected function processReceivedObjectMail(
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorLiskDAO $object,
-    PhabricatorUser $sender);
+    PhabricatorUser $sender) {
+
+    $handler = $this->getTransactionReplyHandler();
+    if ($handler) {
+      return $handler
+        ->setMailReceiver($object)
+        ->setActor($sender)
+        ->setExcludeMailRecipientPHIDs($mail->loadAllRecipientPHIDs())
+        ->processEmail($mail);
+    }
+
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function getTransactionReplyHandler() {
+    return null;
+  }
 
   public function loadMailReceiverObject($pattern, PhabricatorUser $viewer) {
     return $this->loadObject($pattern, $viewer);
@@ -110,7 +126,7 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
 
     $expect_hash = self::computeMailHash($object->getMailKey(), $check_phid);
 
-    if ($expect_hash != $parts['hash']) {
+    if (!phutil_hashes_are_identical($expect_hash, $parts['hash'])) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_HASH_MISMATCH,
         pht(

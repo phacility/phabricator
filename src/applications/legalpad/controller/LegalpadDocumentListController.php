@@ -2,27 +2,22 @@
 
 final class LegalpadDocumentListController extends LegalpadController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $querykey = $request->getURIData('queryKey');
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->queryKey)
+    $controller = id(new PhabricatorApplicationSearchController())
+      ->setQueryKey($querykey)
       ->setSearchEngine(new LegalpadDocumentSearchEngine())
       ->setNavigation($this->buildSideNav());
 
     return $this->delegateToController($controller);
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(

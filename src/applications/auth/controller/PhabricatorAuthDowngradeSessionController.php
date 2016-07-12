@@ -3,9 +3,8 @@
 final class PhabricatorAuthDowngradeSessionController
   extends PhabricatorAuthController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $panel_uri = '/settings/panel/sessions/';
 
@@ -42,7 +41,7 @@ final class PhabricatorAuthDowngradeSessionController
           'On the plus side, that purple notification bubble will '.
           'disappear.'))
       ->addSubmitButton(pht('Leave High Security'))
-      ->addCancelButton($panel_uri, pht('Stay in High Security'));
+      ->addCancelButton($panel_uri, pht('Stay'));
   }
 
 

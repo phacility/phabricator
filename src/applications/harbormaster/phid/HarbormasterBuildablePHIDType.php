@@ -12,13 +12,16 @@ final class HarbormasterBuildablePHIDType extends PhabricatorPHIDType {
     return new HarbormasterBuildable();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorHarbormasterApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
     return id(new HarbormasterBuildableQuery())
-      ->withPHIDs($phids)
-      ->needBuildableHandles(true);
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(
@@ -26,15 +29,30 @@ final class HarbormasterBuildablePHIDType extends PhabricatorPHIDType {
     array $handles,
     array $objects) {
 
+    $viewer = $query->getViewer();
+
+    $target_phids = array();
+    foreach ($objects as $phid => $object) {
+      $target_phids[] = $object->getBuildablePHID();
+    }
+    $target_handles = $viewer->loadHandles($target_phids);
+
     foreach ($handles as $phid => $handle) {
       $buildable = $objects[$phid];
 
       $id = $buildable->getID();
-      $target = $buildable->getBuildableHandle()->getFullName();
+      $buildable_phid = $buildable->getBuildablePHID();
 
-      $handle->setURI("/B{$id}");
-      $handle->setName("B{$id}");
-      $handle->setFullName("B{$id}: ".$target);
+      $target = $target_handles[$buildable_phid];
+      $target_name = $target->getFullName();
+
+      $uri = $buildable->getURI();
+      $monogram = $buildable->getMonogram();
+
+      $handle
+        ->setURI($uri)
+        ->setName($monogram)
+        ->setFullName("{$monogram}: {$target_name}");
     }
   }
 

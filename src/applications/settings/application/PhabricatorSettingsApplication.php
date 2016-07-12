@@ -14,8 +14,8 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
     return pht('User Preferences');
   }
 
-  public function getIconName() {
-    return 'settings';
+  public function getIcon() {
+    return 'fa-wrench';
   }
 
   public function canUninstall() {
@@ -27,39 +27,26 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
   }
 
   public function getRoutes() {
+    $panel_pattern = '(?:page/(?P<pageKey>[^/]+)/(?:(?P<formSaved>saved)/)?)?';
+
     return array(
       '/settings/' => array(
-        '(?:(?P<id>\d+)/)?(?:panel/(?P<key>[^/]+)/)?'
+        $this->getQueryRoutePattern() => 'PhabricatorSettingsListController',
+        'user/(?P<username>[^/]+)/'.$panel_pattern
+          => 'PhabricatorSettingsMainController',
+        'builtin/(?P<builtin>global)/'.$panel_pattern
+          => 'PhabricatorSettingsMainController',
+        'panel/(?P<panel>[^/]+)/'
           => 'PhabricatorSettingsMainController',
         'adjust/' => 'PhabricatorSettingsAdjustController',
+        'timezone/(?P<offset>[^/]+)/'
+          => 'PhabricatorSettingsTimezoneController',
       ),
     );
   }
 
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
-  }
-
-  public function buildMainMenuItems(
-    PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-
-    $items = array();
-
-    if ($user->isLoggedIn() && $user->isUserActivated()) {
-      $selected = ($controller instanceof PhabricatorSettingsMainController);
-      $item = id(new PHUIListItemView())
-        ->setName(pht('Settings'))
-        ->setIcon('settings-sm')
-        ->addClass('core-menu-item')
-        ->setSelected($selected)
-        ->setHref('/settings/')
-        ->setAural(pht('Settings'))
-        ->setOrder(400);
-      $items[] = $item;
-    }
-
-    return $items;
   }
 
 }

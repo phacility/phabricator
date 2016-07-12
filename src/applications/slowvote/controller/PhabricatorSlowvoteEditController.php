@@ -3,21 +3,14 @@
 final class PhabricatorSlowvoteEditController
   extends PhabricatorSlowvoteController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($this->id) {
+    if ($id) {
       $poll = id(new PhabricatorSlowvoteQuery())
-        ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->setViewer($viewer)
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -29,7 +22,7 @@ final class PhabricatorSlowvoteEditController
       }
       $is_new = false;
     } else {
-      $poll = PhabricatorSlowvotePoll::initializeNewPoll($user);
+      $poll = PhabricatorSlowvotePoll::initializeNewPoll($viewer);
       $is_new = true;
     }
 
@@ -50,6 +43,7 @@ final class PhabricatorSlowvoteEditController
     $v_description = $poll->getDescription();
     $v_responses = $poll->getResponseVisibility();
     $v_shuffle = $poll->getShuffle();
+    $v_space = $poll->getSpacePHID();
 
     $responses = $request->getArr('response');
     if ($request->isFormPost()) {
@@ -59,6 +53,8 @@ final class PhabricatorSlowvoteEditController
       $v_shuffle = (int)$request->getBool('shuffle');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_projects = $request->getArr('projects');
+
+      $v_space = $request->getStr('spacePHID');
 
       if ($is_new) {
         $poll->setMethod($request->getInt('method'));
@@ -104,6 +100,10 @@ final class PhabricatorSlowvoteEditController
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
         ->setNewValue($v_view_policy);
 
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
+        ->setNewValue($v_space);
+
       if (empty($errors)) {
         $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PhabricatorSlowvoteTransaction())
@@ -112,7 +112,7 @@ final class PhabricatorSlowvoteEditController
           ->setNewValue(array('=' => array_fuse($v_projects)));
 
         $editor = id(new PhabricatorSlowvoteEditor())
-          ->setActor($user)
+          ->setActor($viewer)
           ->setContinueOnNoEffect(true)
           ->setContentSourceFromRequest($request);
 
@@ -136,41 +136,25 @@ final class PhabricatorSlowvoteEditController
       }
     }
 
-    $instructions =
-      phutil_tag(
-        'p',
-        array(
-          'class' => 'aphront-form-instructions',
-        ),
-        pht('Resolve issues and build consensus through '.
-          'protracted deliberation.'));
-
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
     $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild($instructions)
+      ->setUser($viewer)
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
+        id(new AphrontFormTextControl())
           ->setLabel(pht('Question'))
           ->setName('question')
           ->setValue($v_question)
           ->setError($e_question))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setLabel(pht('Description'))
           ->setName('description')
           ->setValue($v_description))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Projects'))
+          ->setLabel(pht('Tags'))
           ->setName('projects')
-          ->setValue($project_handles)
+          ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()));
 
     if ($is_new) {
@@ -223,14 +207,16 @@ final class PhabricatorSlowvoteEditController
       $title = pht('Create Slowvote');
       $button = pht('Create');
       $cancel_uri = $this->getApplicationURI();
+      $header_icon = 'fa-plus-square';
     } else {
-      $title = pht('Edit %s', 'V'.$poll->getID());
+      $title = pht('Edit Poll: %s', $poll->getQuestion());
       $button = pht('Save Changes');
       $cancel_uri = '/V'.$poll->getID();
+      $header_icon = 'fa-pencil';
     }
 
     $policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->setObject($poll)
       ->execute();
 
@@ -251,31 +237,41 @@ final class PhabricatorSlowvoteEditController
             $v_shuffle))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setName('viewPolicy')
           ->setPolicyObject($poll)
           ->setPolicies($policies)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setSpacePHID($v_space))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($button)
           ->addCancelButton($cancel_uri));
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
+    $crumbs->setBorder(true);
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeaderText(pht('Poll'))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $form_box,
-      ),
-      array(
-        'title' => $title,
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setHeaderIcon($header_icon);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($form_box);
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild(
+        array(
+          $view,
       ));
   }
 

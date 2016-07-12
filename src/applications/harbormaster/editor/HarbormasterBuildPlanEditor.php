@@ -11,11 +11,16 @@ final class HarbormasterBuildPlanEditor
     return pht('Harbormaster Build Plans');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
     $types[] = HarbormasterBuildPlanTransaction::TYPE_NAME;
     $types[] = HarbormasterBuildPlanTransaction::TYPE_STATUS;
-    $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     return $types;
   }
 
@@ -89,7 +94,7 @@ final class HarbormasterBuildPlanEditor
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),
-            pht('Plan name is required.'),
+            pht('You must choose a name for your build plan.'),
             last($xactions));
 
           $error->setIsMissingFieldError(true);

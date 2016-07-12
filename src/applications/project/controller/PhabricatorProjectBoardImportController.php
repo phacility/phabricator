@@ -3,15 +3,9 @@
 final class PhabricatorProjectBoardImportController
   extends PhabricatorProjectBoardController {
 
-  private $projectID;
-
-  public function willProcessRequest(array $data) {
-    $this->projectID = $data['projectID'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $project_id = $request->getURIData('projectID');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -20,7 +14,7 @@ final class PhabricatorProjectBoardImportController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->projectID))
+      ->withIDs(array($project_id))
       ->executeOne();
     if (!$project) {
       return new Aphront404Response();
@@ -56,6 +50,10 @@ final class PhabricatorProjectBoardImportController
         if ($import_column->isHidden()) {
           continue;
         }
+        if ($import_column->getProxy()) {
+          continue;
+        }
+
         $new_column = PhabricatorProjectColumn::initializeNewColumn($viewer)
           ->setSequence($import_column->getSequence())
           ->setProjectPHID($project->getPHID())
@@ -63,6 +61,9 @@ final class PhabricatorProjectBoardImportController
           ->setProperties($import_column->getProperties())
           ->save();
       }
+
+      $project->setHasWorkboard(1)->save();
+
       $table->saveTransaction();
 
       return id(new AphrontRedirectResponse())->setURI($board_uri);
@@ -74,6 +75,7 @@ final class PhabricatorProjectBoardImportController
       ->setDatasource(id(new PhabricatorProjectDatasource())
         ->setParameters(array('mustHaveColumns' => true))
       ->setLimit(1));
+
     return $this->newDialog()
       ->setTitle(pht('Import Columns'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)

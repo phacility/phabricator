@@ -42,7 +42,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $namespace = self::getDefaultStorageNamespace();
     }
     if (!strlen($namespace)) {
-      throw new Exception('No storage namespace configured!');
+      throw new Exception(pht('No storage namespace configured!'));
     }
     return $namespace;
   }
@@ -50,9 +50,41 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   /**
    * @task config
    */
-  public function establishLiveConnection($mode) {
+  protected function establishLiveConnection($mode) {
     $namespace = self::getStorageNamespace();
+    $database = $namespace.'_'.$this->getApplicationName();
 
+    $is_readonly = PhabricatorEnv::isReadOnly();
+
+    if ($is_readonly && ($mode != 'r')) {
+      $this->raiseImproperWrite($database);
+    }
+
+    $is_cluster = (bool)PhabricatorEnv::getEnvConfig('cluster.databases');
+    if ($is_cluster) {
+      $connection = $this->newClusterConnection($database, $mode);
+    } else {
+      $connection = $this->newBasicConnection($database, $mode, $namespace);
+    }
+
+    // TODO: This should be testing if the mode is "r", but that would proably
+    // break a lot of things. Perform a more narrow test for readonly mode
+    // until we have greater certainty that this works correctly most of the
+    // time.
+    if ($is_readonly) {
+      $connection->setReadOnly(true);
+    }
+
+    // Unless this is a script running from the CLI, prevent any query from
+    // running for more than 30 seconds. See T10849 for discussion.
+    if (php_sapi_name() != 'cli') {
+      $connection->setQueryTimeout(30);
+    }
+
+    return $connection;
+  }
+
+  private function newBasicConnection($database, $mode, $namespace) {
     $conf = PhabricatorEnv::newObjectFromConfig(
       'mysql.configuration-provider',
       array($this, $mode, $namespace));
@@ -65,11 +97,71 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
           'pass'      => $conf->getPassword(),
           'host'      => $conf->getHost(),
           'port'      => $conf->getPort(),
-          'database'  => $conf->getDatabase(),
+          'database'  => $database,
           'retries'   => 3,
+          'timeout' => 10,
         ),
       ));
   }
+
+  private function newClusterConnection($database, $mode) {
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
+
+    if ($master && !$master->isSevered()) {
+      $connection = $master->newApplicationConnection($database);
+      if ($master->isReachable($connection)) {
+        return $connection;
+      } else {
+        if ($mode == 'w') {
+          $this->raiseImpossibleWrite($database);
+        }
+        PhabricatorEnv::setReadOnly(
+          true,
+          PhabricatorEnv::READONLY_UNREACHABLE);
+      }
+    }
+
+    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRef();
+    if (!$replica) {
+      throw new Exception(
+        pht('No valid databases are configured!'));
+    }
+
+    $connection = $replica->newApplicationConnection($database);
+    $connection->setReadOnly(true);
+    if ($replica->isReachable($connection)) {
+      return $connection;
+    }
+
+    $this->raiseUnreachable($database);
+  }
+
+  private function raiseImproperWrite($database) {
+    throw new PhabricatorClusterImproperWriteException(
+      pht(
+        'Unable to establish a write-mode connection (to application '.
+        'database "%s") because Phabricator is in read-only mode. Whatever '.
+        'you are trying to do does not function correctly in read-only mode.',
+        $database));
+  }
+
+  private function raiseImpossibleWrite($database) {
+    throw new PhabricatorClusterImpossibleWriteException(
+      pht(
+        'Unable to connect to master database ("%s"). This is a severe '.
+        'failure; your request did not complete.',
+        $database));
+  }
+
+  private function raiseUnreachable($database) {
+    throw new PhabricatorClusterStrandedException(
+      pht(
+        'Unable to establish a connection to ANY database host '.
+        '(while trying "%s"). All masters and replicas are completely '.
+        'unreachable.',
+        $database));
+  }
+
 
   /**
    * @task config

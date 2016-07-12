@@ -11,6 +11,7 @@ final class PhortuneCharge extends PhortuneDAO
 
   const STATUS_CHARGING   = 'charge:charging';
   const STATUS_CHARGED    = 'charge:charged';
+  const STATUS_HOLD       = 'charge:hold';
   const STATUS_FAILED     = 'charge:failed';
 
   protected $accountPHID;
@@ -20,6 +21,9 @@ final class PhortuneCharge extends PhortuneDAO
   protected $merchantPHID;
   protected $paymentMethodPHID;
   protected $amountAsCurrency;
+  protected $amountRefundedAsCurrency;
+  protected $refundedChargePHID;
+  protected $refundingPHID;
   protected $status;
   protected $metadata = array();
 
@@ -28,10 +32,11 @@ final class PhortuneCharge extends PhortuneDAO
 
   public static function initializeNewCharge() {
     return id(new PhortuneCharge())
-      ->setStatus(self::STATUS_CHARGING);
+      ->setStatus(self::STATUS_CHARGING)
+      ->setAmountRefundedAsCurrency(PhortuneCurrency::newEmptyCurrency());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -39,11 +44,14 @@ final class PhortuneCharge extends PhortuneDAO
       ),
       self::CONFIG_APPLICATION_SERIALIZERS => array(
         'amountAsCurrency' => new PhortuneCurrencySerializer(),
+        'amountRefundedAsCurrency' => new PhortuneCurrencySerializer(),
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'paymentProviderKey' => 'text128',
         'paymentMethodPHID' => 'phid?',
+        'refundedChargePHID' => 'phid?',
+        'refundingPHID' => 'phid?',
         'amountAsCurrency' => 'text64',
+        'amountRefundedAsCurrency' => 'text64',
         'status' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -67,12 +75,37 @@ final class PhortuneCharge extends PhortuneDAO
     return array(
       self::STATUS_CHARGING => pht('Charging'),
       self::STATUS_CHARGED => pht('Charged'),
+      self::STATUS_HOLD => pht('Hold'),
       self::STATUS_FAILED => pht('Failed'),
     );
   }
 
   public static function getNameForStatus($status) {
     return idx(self::getStatusNameMap(), $status, pht('Unknown'));
+  }
+
+  public function isRefund() {
+    return $this->getAmountAsCurrency()->negate()->isPositive();
+  }
+
+  public function getStatusForDisplay() {
+    if ($this->getStatus() == self::STATUS_CHARGED) {
+      if ($this->getRefundedChargePHID()) {
+        return pht('Refund');
+      }
+
+      $refunded = $this->getAmountRefundedAsCurrency();
+
+      if ($refunded->isPositive()) {
+        if ($refunded->isEqualTo($this->getAmountAsCurrency())) {
+          return pht('Fully Refunded');
+        } else {
+          return pht('%s Refunded', $refunded->formatForDisplay());
+        }
+      }
+    }
+
+    return self::getNameForStatus($this->getStatus());
   }
 
   public function generatePHID() {
@@ -105,6 +138,21 @@ final class PhortuneCharge extends PhortuneDAO
   public function attachCart(PhortuneCart $cart = null) {
     $this->cart = $cart;
     return $this;
+  }
+
+  public function getAmountRefundableAsCurrency() {
+    $amount = $this->getAmountAsCurrency();
+    $refunded = $this->getAmountRefundedAsCurrency();
+
+    // We can't refund negative amounts of money, since it does not make
+    // sense and is not possible in the various payment APIs.
+
+    $refundable = $amount->subtract($refunded);
+    if ($refundable->isPositive()) {
+      return $refundable;
+    } else {
+      return PhortuneCurrency::newEmptyCurrency();
+    }
   }
 
 

@@ -1,7 +1,9 @@
 <?php
 
 final class ReleephProject extends ReleephDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   const DEFAULT_BRANCH_NAMESPACE = 'releeph-releases';
   const SYSTEM_AGENT_USERNAME_PREFIX = 'releeph-agent-';
@@ -16,14 +18,12 @@ final class ReleephProject extends ReleephDAO
   protected $repositoryPHID;
   protected $isActive;
   protected $createdByUserPHID;
-  protected $arcanistProjectID;
 
   protected $details = array();
 
   private $repository = self::ATTACHABLE;
-  private $arcanistProject = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -62,16 +62,6 @@ final class ReleephProject extends ReleephDAO
 
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
-    return $this;
-  }
-
-  public function getArcanistProject() {
-    return $this->assertAttached($this->arcanistProject);
-  }
-
-  public function attachArcanistProject(
-    PhabricatorRepositoryArcanistProject $arcanist_project = null) {
-    $this->arcanistProject = $arcanist_project;
     return $this;
   }
 
@@ -121,7 +111,32 @@ final class ReleephProject extends ReleephDAO
     return false;
   }
 
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new ReleephProductEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ReleephProductTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(

@@ -2,15 +2,16 @@
 
 final class HarbormasterBuildCommand extends HarbormasterDAO {
 
-  const COMMAND_STOP = 'stop';
+  const COMMAND_PAUSE = 'pause';
   const COMMAND_RESUME = 'resume';
   const COMMAND_RESTART = 'restart';
+  const COMMAND_ABORT = 'abort';
 
   protected $authorPHID;
   protected $targetPHID;
   protected $command;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'command' => 'text128',

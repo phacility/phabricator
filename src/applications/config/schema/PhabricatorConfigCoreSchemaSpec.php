@@ -9,9 +9,9 @@ final class PhabricatorConfigCoreSchemaSpec
   public function buildSchemata() {
     // Build all Lisk table schemata.
 
-    $lisk_objects = id(new PhutilSymbolLoader())
+    $lisk_objects = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorLiskDAO')
-      ->loadObjects();
+      ->execute();
 
     $counters = array();
     foreach ($lisk_objects as $object) {

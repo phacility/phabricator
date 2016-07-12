@@ -56,6 +56,16 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     return;
   }
 
+  protected function executeRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+    return;
+  }
+
+  public function updateCharge(PhortuneCharge $charge) {
+    return;
+  }
+
   public function getAllConfigurableProperties() {
     return array();
   }
@@ -134,6 +144,8 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     array $errors) {
 
     $ccform = id(new PhortuneCreditCardForm())
+      ->setSecurityAssurance(
+        pht('This is a test payment provider.'))
       ->setUser($request->getUser())
       ->setErrors($errors);
 

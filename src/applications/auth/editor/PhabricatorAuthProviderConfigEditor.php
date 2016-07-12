@@ -15,10 +15,12 @@ final class PhabricatorAuthProviderConfigEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE;
+    $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_LINK;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS;
+    $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_AUTO_LOGIN;
     $types[] = PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY;
 
     return $types;
@@ -35,14 +37,18 @@ final class PhabricatorAuthProviderConfigEditor
         } else {
           return (int)$object->getIsEnabled();
         }
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
+        return (int)$object->getShouldAllowLogin();
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
         return (int)$object->getShouldAllowRegistration();
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
         return (int)$object->getShouldAllowLink();
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
         return (int)$object->getShouldAllowUnlink();
-      case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS:
         return (int)$object->getShouldTrustEmails();
+      case PhabricatorAuthProviderConfigTransaction::TYPE_AUTO_LOGIN:
+        return (int)$object->getShouldAutoLogin();
       case PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue(
           PhabricatorAuthProviderConfigTransaction::PROPERTY_KEY);
@@ -56,10 +62,12 @@ final class PhabricatorAuthProviderConfigEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
       case PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_AUTO_LOGIN:
       case PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY:
         return $xaction->getNewValue();
     }
@@ -72,6 +80,8 @@ final class PhabricatorAuthProviderConfigEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:
         return $object->setIsEnabled($v);
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
+        return $object->setShouldAllowLogin($v);
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
         return $object->setShouldAllowRegistration($v);
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
@@ -80,6 +90,8 @@ final class PhabricatorAuthProviderConfigEditor
         return $object->setShouldAllowUnlink($v);
       case PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS:
         return $object->setShouldTrustEmails($v);
+      case PhabricatorAuthProviderConfigTransaction::TYPE_AUTO_LOGIN:
+        return $object->setShouldAutoLogin($v);
       case PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue(
           PhabricatorAuthProviderConfigTransaction::PROPERTY_KEY);
@@ -100,10 +112,12 @@ final class PhabricatorAuthProviderConfigEditor
     $type = $u->getTransactionType();
     switch ($type) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_LOGIN:
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
       case PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_AUTO_LOGIN:
         // For these types, last transaction wins.
         return $v;
     }

@@ -2,18 +2,12 @@
 
 final class PholioInlineController extends PholioController {
 
-  private $id;
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $id = $request->getURIData('id');
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    if ($this->id) {
-      $inline = id(new PholioTransactionComment())->load($this->id);
+    if ($id) {
+      $inline = id(new PholioTransactionComment())->load($id);
 
       if (!$inline) {
         return new Aphront404Response();
@@ -70,7 +64,7 @@ final class PholioInlineController extends PholioController {
 
       $file = $image->getFile();
       if (!$file->isViewableImage()) {
-        throw new Exception('File is not viewable.');
+        throw new Exception(pht('File is not viewable.'));
       }
 
       $image_uri = $file->getBestURI();
@@ -92,16 +86,13 @@ final class PholioInlineController extends PholioController {
         ),
         $author_handle->renderLink());
 
+      $inline_content = new PHUIRemarkupView($viewer, $inline->getContent());
       $comment_body = phutil_tag(
         'div',
         array(
           'class' => 'pholio-inline-comment-body',
         ),
-        PhabricatorMarkupEngine::renderOneObject(
-            id(new PhabricatorMarkupOneOff())
-              ->setContent($inline->getContent()),
-            'default',
-            $viewer));
+        $inline_content);
 
       return $this->newDialog()
         ->setTitle(pht('Inline Comment'))
@@ -157,6 +148,7 @@ final class PholioInlineController extends PholioController {
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setName('content')
           ->setLabel(pht('Comment'))
           ->setValue($v_content));

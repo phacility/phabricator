@@ -13,7 +13,7 @@ abstract class DiffusionQueryConduitAPIMethod
 
   public function getMethodStatusDescription() {
     return pht(
-      'See T2784 - migrating diffusion working copy calls to conduit methods. '.
+      'See T2784 - migrating Diffusion working copy calls to conduit methods. '.
       'Until that task is completed (and possibly after) these methods are '.
       'unstable.');
   }
@@ -34,11 +34,11 @@ abstract class DiffusionQueryConduitAPIMethod
     return $this->getDiffusionRequest()->getRepository();
   }
 
-  final public function defineErrorTypes() {
+  final protected function defineErrorTypes() {
     return $this->defineCustomErrorTypes() +
       array(
         'ERR-UNKNOWN-REPOSITORY' =>
-          pht('There is no repository with that callsign.'),
+          pht('There is no matching repository.'),
         'ERR-UNKNOWN-VCS-TYPE' =>
           pht('Unknown repository VCS type.'),
         'ERR-UNSUPPORTED-VCS' =>
@@ -53,10 +53,11 @@ abstract class DiffusionQueryConduitAPIMethod
     return array();
   }
 
-  final public function defineParamTypes() {
+  final protected function defineParamTypes() {
     return $this->defineCustomParamTypes() +
       array(
-        'callsign' => 'required string',
+        'callsign' => 'optional string (deprecated)',
+        'repository' => 'optional string',
         'branch' => 'optional string',
       );
   }
@@ -95,19 +96,67 @@ abstract class DiffusionQueryConduitAPIMethod
    * should occur after @{method:getResult}, like formatting a timestamp.
    */
   final protected function execute(ConduitAPIRequest $request) {
+    $identifier = $request->getValue('repository');
+    if ($identifier === null) {
+      $identifier = $request->getValue('callsign');
+    }
+
     $drequest = DiffusionRequest::newFromDictionary(
       array(
         'user' => $request->getUser(),
-        'callsign' => $request->getValue('callsign'),
+        'repository' => $identifier,
         'branch' => $request->getValue('branch'),
         'path' => $request->getValue('path'),
         'commit' => $request->getValue('commit'),
-        'initFromConduit' => false,
       ));
 
-    $this->setDiffusionRequest($drequest);
+    if (!$drequest) {
+      throw new Exception(
+        pht(
+          'Repository "%s" is not a valid repository.',
+          $identifier));
+    }
 
-    return $this->getResult($request);
+    // Figure out whether we're going to handle this request on this device,
+    // or proxy it to another node in the cluster.
+
+    // If this is a cluster request and we need to proxy, we'll explode here
+    // to prevent infinite recursion.
+
+    $is_cluster_request = $request->getIsClusterRequest();
+    $viewer = $request->getUser();
+
+    $repository = $drequest->getRepository();
+    $client = $repository->newConduitClient(
+      $viewer,
+      $is_cluster_request);
+    if ($client) {
+      // We're proxying, so just make an intracluster call.
+      return $client->callMethodSynchronous(
+        $this->getAPIMethodName(),
+        $request->getAllParameters());
+    } else {
+
+      // We pass this flag on to prevent proxying of any other Conduit calls
+      // which we need to make in order to respond to this one. Although we
+      // could safely proxy them, we take a big performance hit in the common
+      // case, and doing more proxying wouldn't exercise any additional code so
+      // we wouldn't gain a testability/predictability benefit.
+      $drequest->setIsClusterRequest($is_cluster_request);
+
+      $this->setDiffusionRequest($drequest);
+
+      // TODO: Allow web UI queries opt out of this if they don't care about
+      // fetching the most up-to-date data? Synchronization can be slow, and a
+      // lot of web reads are probably fine if they're a few seconds out of
+      // date.
+      id(new DiffusionRepositoryClusterEngine())
+        ->setViewer($viewer)
+        ->setRepository($repository)
+        ->synchronizeWorkingCopyBeforeRead();
+
+      return $this->getResult($request);
+    }
   }
 
   protected function getResult(ConduitAPIRequest $request) {

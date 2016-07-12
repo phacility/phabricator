@@ -3,10 +3,9 @@
 final class PhabricatorNotificationClearController
   extends PhabricatorNotificationController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
     $chrono_key = $request->getStr('chronoKey');
-    $user = $request->getUser();
 
     if ($request->isDialogFormPost()) {
       $table = new PhabricatorFeedStoryNotification();
@@ -16,18 +15,22 @@ final class PhabricatorNotificationClearController
         'UPDATE %T SET hasViewed = 1 '.
         'WHERE userPHID = %s AND hasViewed = 0 and chronologicalKey <= %s',
         $table->getTableName(),
-        $user->getPHID(),
+        $viewer->getPHID(),
         $chrono_key);
+
+      PhabricatorUserCache::clearCache(
+        PhabricatorUserNotificationCountCacheType::KEY_COUNT,
+        $viewer->getPHID());
 
       return id(new AphrontReloadResponse())
         ->setURI('/notification/');
     }
 
     $dialog = new AphrontDialogView();
-    $dialog->setUser($user);
+    $dialog->setUser($viewer);
     $dialog->addCancelButton('/notification/');
     if ($chrono_key) {
-      $dialog->setTitle('Really mark all notifications as read?');
+      $dialog->setTitle(pht('Really mark all notifications as read?'));
       $dialog->addHiddenInput('chronoKey', $chrono_key);
 
       $is_serious =
@@ -45,9 +48,8 @@ final class PhabricatorNotificationClearController
 
       $dialog->addSubmitButton(pht('Mark All Read'));
     } else {
-      $dialog->setTitle('No notifications to mark as read.');
-      $dialog->appendChild(pht(
-        'You have no unread notifications.'));
+      $dialog->setTitle(pht('No notifications to mark as read.'));
+      $dialog->appendChild(pht('You have no unread notifications.'));
     }
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

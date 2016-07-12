@@ -11,55 +11,55 @@ final class PhabricatorDashboardPanelSearchEngine
     return 'PhabricatorDashboardApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-    $saved->setParameter('status', $request->getStr('status'));
-    return $saved;
+  public function newQuery() {
+    return new PhabricatorDashboardPanelQuery();
   }
 
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorDashboardPanelQuery());
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
+    if ($map['status']) {
+      switch ($map['status']) {
+        case 'active':
+          $query->withArchived(false);
+          break;
+        case 'archived':
+          $query->withArchived(true);
+          break;
+        default:
+          break;
+      }
+    }
 
-    $status = $saved->getParameter('status');
-    switch ($status) {
-      case 'active':
-        $query->withArchived(false);
-        break;
-      case 'archived':
-        $query->withArchived(true);
-        break;
-      default:
-        break;
+    if ($map['paneltype']) {
+      $query->withPanelTypes(array($map['paneltype']));
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
+  protected function buildCustomSearchFields() {
 
-    $status = $saved_query->getParameter('status', '');
-
-    $form
-      ->appendChild(
-        id(new AphrontFormSelectControl())
+    return array(
+        id(new PhabricatorSearchSelectField())
+          ->setKey('status')
           ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setValue($status)
           ->setOptions(
-            array(
-              '' => pht('(All Panels)'),
-              'active' => pht('Active Panels'),
-              'archived' => pht('Archived Panels'),
-            )));
+            id(new PhabricatorDashboardPanel())
+              ->getStatuses()),
+        id(new PhabricatorSearchSelectField())
+          ->setKey('paneltype')
+          ->setLabel(pht('Panel Type'))
+          ->setOptions(
+            id(new PhabricatorDashboardPanel())
+              ->getPanelTypes()),
+    );
   }
 
   protected function getURI($path) {
     return '/dashboard/panel/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active Panels'),
       'all'    => pht('All Panels'),
@@ -99,13 +99,14 @@ final class PhabricatorDashboardPanelSearchEngine
       $impl = $panel->getImplementation();
       if ($impl) {
         $type_text = $impl->getPanelTypeName();
-        $type_icon = 'none';
       } else {
         $type_text = nonempty($panel->getPanelType(), pht('Unknown Type'));
-        $type_icon = 'fa-question';
       }
+      $item->addAttribute($type_text);
 
-      $item->addIcon($type_icon, $type_text);
+      $properties = $panel->getProperties();
+      $class = idx($properties, 'class');
+      $item->addAttribute($class);
 
       if ($panel->getIsArchived()) {
         $item->setDisabled(true);
@@ -114,7 +115,11 @@ final class PhabricatorDashboardPanelSearchEngine
       $list->addItem($item);
     }
 
-    return $list;
+    $result = new PhabricatorApplicationSearchResultView();
+    $result->setObjectList($list);
+    $result->setNoDataString(pht('No panels found.'));
+
+    return $result;
   }
 
 }

@@ -2,7 +2,7 @@
 
 final class LiskFixtureTestCase extends PhabricatorTestCase {
 
-  public function getPhabricatorTestCaseConfiguration() {
+  protected function getPhabricatorTestCaseConfiguration() {
     return array(
       self::PHABRICATOR_TESTCONFIG_BUILD_STORAGE_FIXTURES => true,
     );
@@ -67,7 +67,7 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
 
       $this->assertTrue(
         ($loaded !== null),
-        'Reads inside transactions should have transaction visibility.');
+        pht('Reads inside transactions should have transaction visibility.'));
 
       LiskDAO::beginIsolateAllLiskEffectsToTransactions();
     } catch (Exception $ex) {
@@ -99,14 +99,21 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     $conn_w = $obj->establishConnection('w');
 
     // Test that the counter bascially behaves as expected.
-    $this->assertEqual(1, LiskDAO::loadNextCounterID($conn_w, 'a'));
-    $this->assertEqual(2, LiskDAO::loadNextCounterID($conn_w, 'a'));
-    $this->assertEqual(3, LiskDAO::loadNextCounterID($conn_w, 'a'));
+    $this->assertEqual(1, LiskDAO::loadNextCounterValue($conn_w, 'a'));
+    $this->assertEqual(2, LiskDAO::loadNextCounterValue($conn_w, 'a'));
+    $this->assertEqual(3, LiskDAO::loadNextCounterValue($conn_w, 'a'));
 
     // This first insert is primarily a test that the previous LAST_INSERT_ID()
     // value does not bleed into the creation of a new counter.
-    $this->assertEqual(1, LiskDAO::loadNextCounterID($conn_w, 'b'));
-    $this->assertEqual(2, LiskDAO::loadNextCounterID($conn_w, 'b'));
+    $this->assertEqual(1, LiskDAO::loadNextCounterValue($conn_w, 'b'));
+    $this->assertEqual(2, LiskDAO::loadNextCounterValue($conn_w, 'b'));
+
+    // Test alternate access/overwrite methods.
+    $this->assertEqual(3, LiskDAO::loadCurrentCounterValue($conn_w, 'a'));
+
+    LiskDAO::overwriteCounterValue($conn_w, 'a', 42);
+    $this->assertEqual(42, LiskDAO::loadCurrentCounterValue($conn_w, 'a'));
+    $this->assertEqual(43, LiskDAO::loadNextCounterValue($conn_w, 'a'));
 
     // These inserts alternate database connections. Since unit tests are
     // transactional by default, we need to break out of them or we'll deadlock
@@ -117,11 +124,11 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
       $conn_1 = $obj->establishConnection('w', $force_new = true);
       $conn_2 = $obj->establishConnection('w', $force_new = true);
 
-      $this->assertEqual(1, LiskDAO::loadNextCounterID($conn_1, 'z'));
-      $this->assertEqual(2, LiskDAO::loadNextCounterID($conn_2, 'z'));
-      $this->assertEqual(3, LiskDAO::loadNextCounterID($conn_1, 'z'));
-      $this->assertEqual(4, LiskDAO::loadNextCounterID($conn_2, 'z'));
-      $this->assertEqual(5, LiskDAO::loadNextCounterID($conn_1, 'z'));
+      $this->assertEqual(1, LiskDAO::loadNextCounterValue($conn_1, 'z'));
+      $this->assertEqual(2, LiskDAO::loadNextCounterValue($conn_2, 'z'));
+      $this->assertEqual(3, LiskDAO::loadNextCounterValue($conn_1, 'z'));
+      $this->assertEqual(4, LiskDAO::loadNextCounterValue($conn_2, 'z'));
+      $this->assertEqual(5, LiskDAO::loadNextCounterValue($conn_1, 'z'));
 
       LiskDAO::beginIsolateAllLiskEffectsToTransactions();
     } catch (Exception $ex) {
@@ -129,5 +136,31 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
       throw $ex;
     }
   }
+
+  public function testNonmutableColumns() {
+    $object = id(new HarbormasterScratchTable())
+      ->setData('val1')
+      ->setNonmutableData('val1')
+      ->save();
+
+    $object->reload();
+
+    $this->assertEqual('val1', $object->getData());
+    $this->assertEqual('val1', $object->getNonmutableData());
+
+    $object
+      ->setData('val2')
+      ->setNonmutableData('val2')
+      ->save();
+
+    $object->reload();
+
+    $this->assertEqual('val2', $object->getData());
+
+    // NOTE: This is the important test: the nonmutable column should not have
+    // been affected by the update.
+    $this->assertEqual('val1', $object->getNonmutableData());
+  }
+
 
 }

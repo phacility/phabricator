@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldRuleTranscript {
+final class HeraldRuleTranscript extends Phobject {
 
   protected $ruleID;
   protected $result;

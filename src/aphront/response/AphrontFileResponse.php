@@ -3,6 +3,9 @@
 final class AphrontFileResponse extends AphrontResponse {
 
   private $content;
+  private $contentIterator;
+  private $contentLength;
+
   private $mimeType;
   private $download;
   private $rangeMin;
@@ -15,9 +18,8 @@ final class AphrontFileResponse extends AphrontResponse {
   }
 
   public function setDownload($download) {
-    $download = preg_replace('/[^A-Za-z0-9_.-]/', '_', $download);
     if (!strlen($download)) {
-      $download = 'untitled_document.txt';
+      $download = 'untitled';
     }
     $this->download = $download;
     return $this;
@@ -37,17 +39,34 @@ final class AphrontFileResponse extends AphrontResponse {
   }
 
   public function setContent($content) {
+    $this->setContentLength(strlen($content));
     $this->content = $content;
     return $this;
   }
 
+  public function setContentIterator($iterator) {
+    $this->contentIterator = $iterator;
+    return $this;
+  }
+
   public function buildResponseString() {
-    if ($this->rangeMin || $this->rangeMax) {
-      $length = ($this->rangeMax - $this->rangeMin) + 1;
-      return substr($this->content, $this->rangeMin, $length);
-    } else {
-      return $this->content;
+    return $this->content;
+  }
+
+  public function getContentIterator() {
+    if ($this->contentIterator) {
+      return $this->contentIterator;
     }
+    return parent::getContentIterator();
+  }
+
+  public function setContentLength($length) {
+    $this->contentLength = $length;
+    return $this;
+  }
+
+  public function getContentLength() {
+    return $this->contentLength;
   }
 
   public function setRange($min, $max) {
@@ -59,23 +78,32 @@ final class AphrontFileResponse extends AphrontResponse {
   public function getHeaders() {
     $headers = array(
       array('Content-Type', $this->getMimeType()),
-      array('Content-Length', strlen($this->buildResponseString())),
+      // This tells clients that we can support requests with a "Range" header,
+      // which allows downloads to be resumed, in some browsers, some of the
+      // time, if the stars align.
+      array('Accept-Ranges', 'bytes'),
     );
 
     if ($this->rangeMin || $this->rangeMax) {
-      $len = strlen($this->content);
+      $len = $this->getContentLength();
       $min = $this->rangeMin;
       $max = $this->rangeMax;
       $headers[] = array('Content-Range', "bytes {$min}-{$max}/{$len}");
+      $content_len = ($max - $min) + 1;
+    } else {
+      $content_len = $this->getContentLength();
     }
+
+    $headers[] = array('Content-Length', $this->getContentLength());
 
     if (strlen($this->getDownload())) {
       $headers[] = array('X-Download-Options', 'noopen');
 
       $filename = $this->getDownload();
+      $filename = addcslashes($filename, '"\\');
       $headers[] = array(
         'Content-Disposition',
-        'attachment; filename='.$filename,
+        'attachment; filename="'.$filename.'"',
       );
     }
 

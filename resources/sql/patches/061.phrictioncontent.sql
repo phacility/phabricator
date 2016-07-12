@@ -15,7 +15,7 @@ CREATE TABLE {$NAMESPACE}_phriction.phriction_content (
   KEY (authorPHID),
   title VARCHAR(512) NOT NULL,
   slug VARCHAR(512) NOT NULL,
-  KEY (slug),
+  KEY (slug(128)),
   content LONGBLOB NOT NULL,
   dateCreated INT UNSIGNED NOT NULL,
   dateModified INT UNSIGNED NOT NULL

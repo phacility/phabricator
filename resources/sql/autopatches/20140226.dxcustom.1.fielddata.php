@@ -3,12 +3,12 @@
 $conn_w = id(new DifferentialRevision())->establishConnection('w');
 $rows = new LiskRawMigrationIterator($conn_w, 'differential_auxiliaryfield');
 
-echo "Modernizing Differential auxiliary field storage...\n";
+echo pht('Modernizing Differential auxiliary field storage...')."\n";
 
 $table_name = id(new DifferentialCustomFieldStorage())->getTableName();
 foreach ($rows as $row) {
   $id = $row['id'];
-  echo "Migrating row {$id}...\n";
+  echo pht('Migrating row %d...', $id)."\n";
   queryfx(
     $conn_w,
     'INSERT IGNORE INTO %T (objectPHID, fieldIndex, fieldValue)
@@ -19,4 +19,4 @@ foreach ($rows as $row) {
     $row['value']);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

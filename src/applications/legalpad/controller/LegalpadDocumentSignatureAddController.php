@@ -2,13 +2,7 @@
 
 final class LegalpadDocumentSignatureAddController extends LegalpadController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
@@ -20,7 +14,7 @@ final class LegalpadDocumentSignatureAddController extends LegalpadController {
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
     if (!$document) {
       return new Aphront404Response();
@@ -123,15 +117,14 @@ final class LegalpadDocumentSignatureAddController extends LegalpadController {
       ->setUser($viewer);
 
     if ($is_individual) {
-      $user_handles = $this->loadViewerHandles($v_users);
       $form
-        ->appendChild(
+        ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setLabel(pht('Exempt User'))
             ->setName('users')
             ->setLimit(1)
             ->setDatasource(new PhabricatorPeopleDatasource())
-            ->setValue($user_handles)
+            ->setValue($v_users)
             ->setError($e_user));
     } else {
       $form

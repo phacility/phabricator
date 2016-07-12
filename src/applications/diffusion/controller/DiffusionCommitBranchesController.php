@@ -6,35 +6,33 @@ final class DiffusionCommitBranchesController extends DiffusionController {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $data['user'] = $this->getRequest()->getUser();
-    $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
-  }
-
-  public function processRequest() {
-    $request = $this->getDiffusionRequest();
-
-    $branches = array();
-    try {
-      $branches = $this->callConduitWithDiffusionRequest(
-        'diffusion.branchquery',
-        array(
-          'contains' => $request->getCommit(),
-        ));
-    } catch (ConduitException $ex) {
-      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
-        throw $ex;
-      }
+  public function handleRequest(AphrontRequest $request) {
+    $response = $this->loadDiffusionContext();
+    if ($response) {
+      return $response;
     }
 
-    $branches = DiffusionRepositoryRef::loadAllFromDictionaries($branches);
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $branch_limit = 10;
+    $branches = DiffusionRepositoryRef::loadAllFromDictionaries(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.branchquery',
+        array(
+          'contains' => $drequest->getCommit(),
+          'limit' => $branch_limit + 1,
+        )));
+
+    $has_more_branches = (count($branches) > $branch_limit);
+    $branches = array_slice($branches, 0, $branch_limit);
 
     $branch_links = array();
     foreach ($branches as $branch) {
       $branch_links[] = phutil_tag(
         'a',
         array(
-          'href' => $request->generateURI(
+          'href' => $drequest->generateURI(
             array(
               'action'  => 'browse',
               'branch'  => $branch->getShortName(),
@@ -43,7 +41,19 @@ final class DiffusionCommitBranchesController extends DiffusionController {
         $branch->getShortName());
     }
 
+    if ($has_more_branches) {
+      $branch_links[] = phutil_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action'  => 'branches',
+            )),
+        ),
+        pht("More Branches\xE2\x80\xA6"));
+    }
+
     return id(new AphrontAjaxResponse())
-      ->setContent($branch_links ? implode(', ', $branch_links) : 'None');
+      ->setContent($branch_links ? implode(', ', $branch_links) : pht('None'));
   }
 }

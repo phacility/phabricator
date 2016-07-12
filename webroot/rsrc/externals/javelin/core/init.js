@@ -46,7 +46,7 @@
   makeHoldingQueue('behavior');
   makeHoldingQueue('install-init');
 
-  window['__DEV__'] = window['__DEV__'] || 0;
+  window.__DEV__ = window.__DEV__ || 0;
 
   var loaded = false;
   var onload = [];
@@ -132,7 +132,6 @@
     'mousedown',
     'mouseover',
     'mouseout',
-    'mouseup',
     'keyup',
     'keydown',
     'input',
@@ -144,7 +143,8 @@
     'touchstart',
     'touchmove',
     'touchend',
-    'touchcancel'
+    'touchcancel',
+    'load'
   ];
 
   //  Simulate focus and blur in old versions of IE using focusin and focusout
@@ -172,8 +172,8 @@
     JX.enableDispatch(root, document_events[ii]);
   }
 
-  //  In particular, we're interested in capturing window focus/blur here so
-  //  long polls can abort when the window is not focused.
+  // In particular, we're interested in capturing window focus/blur here so
+  // long polls can abort when the window is not focused.
   var window_events = [
     ('onpagehide' in window) ? 'pagehide' : 'unload',
     'resize',
@@ -181,9 +181,17 @@
     'focus',
     'blur',
     'popstate',
-    'hashchange'
+    'hashchange',
+
+    // In Firefox, if the user clicks in the window then drags the cursor
+    // outside of the window and releases the mouse button, we don't get this
+    // event unless we listen for it as a window event.
+    'mouseup'
   ];
 
+  if (window.localStorage) {
+    window_events.push('storage');
+  }
 
   for (ii = 0; ii < window_events.length; ++ii) {
     JX.enableDispatch(window, window_events[ii]);
@@ -205,9 +213,9 @@
     }, true);
   } else {
     var ready =
-      "if (this.readyState == 'complete') {" +
-        "JX.__rawEventQueue({type: 'domready'});" +
-      "}";
+      'if (this.readyState == "complete") {' +
+        'JX.__rawEventQueue({type: "domready"});' +
+      '}';
 
     // NOTE: Don't write a 'src' attribute, because "javascript:void(0)" causes
     // a mixed content warning in IE8 if the page is served over SSL.

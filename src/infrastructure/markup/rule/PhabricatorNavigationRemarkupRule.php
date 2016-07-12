@@ -13,7 +13,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupNavigation($matches) {
+  public function markupNavigation(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }
@@ -46,7 +46,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
 
     static $icon_names;
     if (!$icon_names) {
-      $icon_names = array_fuse(PHUIIconView::getFontIcons());
+      $icon_names = array_fuse(PHUIIconView::getIcons());
     }
 
     $out = array();
@@ -71,7 +71,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       }
 
       if ($item['href'] !== null) {
-        if (PhabricatorEnv::isValidWebResource($item['href'])) {
+        if (PhabricatorEnv::isValidRemoteURIForLink($item['href'])) {
           $tag->setHref($item['href']);
           $tag->setExternal(true);
         }
@@ -80,20 +80,30 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       $out[] = $tag;
     }
 
+    if ($this->getEngine()->isHTMLMailMode()) {
+      $arrow_attr = array(
+        'style' => 'color: #92969D;',
+      );
+      $nav_attr = array();
+    } else {
+      $arrow_attr = array(
+        'class' => 'remarkup-nav-sequence-arrow',
+      );
+      $nav_attr = array(
+        'class' => 'remarkup-nav-sequence',
+      );
+    }
+
     $joiner = phutil_tag(
       'span',
-      array(
-        'class' => 'remarkup-nav-sequence-arrow',
-      ),
+      $arrow_attr,
       " \xE2\x86\x92 ");
 
     $out = phutil_implode_html($joiner, $out);
 
     $out = phutil_tag(
       'span',
-      array(
-        'class' => 'remarkup-nav-sequence',
-      ),
+      $nav_attr,
       $out);
 
     return $this->getEngine()->storeText($out);

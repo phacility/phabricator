@@ -32,6 +32,18 @@ JX.install('KeyboardShortcutManager', {
       down: 1
     },
 
+    /**
+     * Some keys require Alt to be pressed in order to type them on certain
+     * keyboard layouts.
+     */
+    _altkeys: {
+      // "Alt+L" on German layouts.
+      '@': 1,
+
+      // "Alt+Shift+7" on German layouts.
+      '\\': 1
+    },
+
     getInstance : function() {
       if (!JX.KeyboardShortcutManager._instance) {
         JX.KeyboardShortcutManager._instance = new JX.KeyboardShortcutManager();
@@ -66,7 +78,9 @@ JX.install('KeyboardShortcutManager', {
      * Scroll an element into view.
      */
     scrollTo : function(node) {
-      window.scrollTo(0, JX.$V(node).y - 60);
+      var scroll_distance = JX.Vector.getAggregateScrollForNode(node);
+      var node_position = JX.$V(node);
+      JX.DOM.scrollToPosition(0, node_position.y + scroll_distance.y - 60);
     },
 
     /**
@@ -91,8 +105,10 @@ JX.install('KeyboardShortcutManager', {
 
       // Outset the reticle some pixels away from the element, so there's some
       // space between the focused element and the outline.
-      var p  = JX.Vector.getPos(node);
-      p.add(-4, -4).setPos(r);
+      var p = JX.Vector.getPos(node);
+      var s = JX.Vector.getAggregateScrollForNode(node);
+
+      p.add(s).add(-4, -4).setPos(r);
       // Compute the size we need to extend to the full extent of the focused
       // nodes.
       JX.Vector.getPos(extended_node)
@@ -100,7 +116,7 @@ JX.install('KeyboardShortcutManager', {
         .add(JX.Vector.getDim(extended_node))
         .add(8, 8)
         .setDim(r);
-      document.body.appendChild(r);
+      JX.DOM.getContentFrame().appendChild(r);
 
       this._focusReticle = r;
     },
@@ -115,11 +131,21 @@ JX.install('KeyboardShortcutManager', {
       }
     },
     _onkeyhit : function(e) {
+      var self = JX.KeyboardShortcutManager;
+
       var raw = e.getRawEvent();
 
-      if (raw.altKey || raw.ctrlKey || raw.metaKey) {
+      if (raw.ctrlKey || raw.metaKey) {
         // Never activate keyboard shortcuts if modifier keys are also
         // depressed.
+        return;
+      }
+
+      // For most keystrokes, don't activate keyboard shortcuts if the Alt
+      // key is depressed. However, we continue if the character requires the
+      // use of Alt to type it on some keyboard layouts.
+      var key = this._getKey(e);
+      if (raw.altKey && !(key in self._altkeys)) {
         return;
       }
 

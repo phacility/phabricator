@@ -57,7 +57,7 @@ final class DoorkeeperBridgeJIRA extends DoorkeeperBridge {
 
     $results = array();
     $failed = array();
-    foreach (Futures($futures) as $key => $future) {
+    foreach (new FutureIterator($futures) as $key => $future) {
       try {
         $results[$key] = $future->resolveJSON();
       } catch (Exception $ex) {

@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('manage hunks');
+$args->setTagline(pht('manage hunks'));
 $args->setSynopsis(<<<EOSYNOPSIS
 **hunks** __command__ [__options__]
     Manage Differential hunk storage.
@@ -14,8 +14,8 @@ EOSYNOPSIS
   );
 $args->parseStandardArguments();
 
-$workflows = id(new PhutilSymbolLoader())
+$workflows = id(new PhutilClassMapQuery())
   ->setAncestorClass('PhabricatorHunksManagementWorkflow')
-  ->loadObjects();
+  ->execute();
 $workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);

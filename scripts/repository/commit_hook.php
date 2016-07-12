@@ -1,18 +1,45 @@
 #!/usr/bin/env php
 <?php
 
+// NOTE: This script will sometimes emit a warning like this on startup:
+//
+//   No entry for terminal type "unknown";
+//   using dumb terminal settings.
+//
+// This can be fixed by adding "TERM=dumb" to the shebang line, but doing so
+// causes some systems to hang mysteriously. See T7119.
+
+// Commit hooks execute in an unusual context where the environment may be
+// unavailable, particularly in SVN. The first parameter to this script is
+// either a bare repository identifier ("X"), or a repository identifier
+// followed by an instance identifier ("X:instance"). If we have an instance
+// identifier, unpack it into the environment before we start up. This allows
+// subclasses of PhabricatorConfigSiteSource to read it and build an instance
+// environment.
+
+if ($argc > 1) {
+  $context = $argv[1];
+  $context = explode(':', $context, 2);
+  $argv[1] = $context[0];
+
+  if (count($context) > 1) {
+    $_ENV['PHABRICATOR_INSTANCE'] = $context[1];
+    putenv('PHABRICATOR_INSTANCE='.$context[1]);
+  }
+}
+
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 if ($argc < 2) {
-  throw new Exception(pht('usage: commit-hook <callsign>'));
+  throw new Exception(pht('usage: commit-hook <repository>'));
 }
 
 $engine = new DiffusionCommitHookEngine();
 
 $repository = id(new PhabricatorRepositoryQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
-  ->withCallsigns(array($argv[1]))
+  ->withIdentifiers(array($argv[1]))
   ->needProjectPHIDs(true)
   ->executeOne();
 
@@ -27,14 +54,69 @@ if (!$repository->isHosted()) {
 
 $engine->setRepository($repository);
 
+$args = new PhutilArgumentParser($argv);
+$args->parsePartial(
+  array(
+    array(
+      'name' => 'hook-mode',
+      'param' => 'mode',
+      'help' => pht('Hook execution mode.'),
+    ),
+  ));
+
+$argv = array_merge(
+  array($argv[0]),
+  $args->getUnconsumedArgumentVector());
 
 // Figure out which user is writing the commit.
+$hook_mode = $args->getArg('hook-mode');
+if ($hook_mode !== null) {
+  $known_modes = array(
+    'svn-revprop' => true,
+  );
 
-if ($repository->isGit() || $repository->isHg()) {
+  if (empty($known_modes[$hook_mode])) {
+    throw new Exception(
+      pht(
+        'Invalid Hook Mode: This hook was invoked in "%s" mode, but this '.
+        'is not a recognized hook mode. Valid modes are: %s.',
+        $hook_mode,
+        implode(', ', array_keys($known_modes))));
+  }
+}
+
+$is_svnrevprop = ($hook_mode == 'svn-revprop');
+
+if ($is_svnrevprop) {
+  // For now, we let these through if the repository allows dangerous changes
+  // and prevent them if it doesn't. See T11208 for discussion.
+
+  $revprop_key = $argv[5];
+
+  if ($repository->shouldAllowDangerousChanges()) {
+    $err = 0;
+  } else {
+    $err = 1;
+
+    $console = PhutilConsole::getConsole();
+    $console->writeErr(
+      pht(
+        "DANGEROUS CHANGE: Dangerous change protection is enabled for this ".
+        "repository, so you can not change revision properties (you are ".
+        "attempting to edit \"%s\").\n".
+        "Edit the repository configuration before making dangerous changes.",
+        $revprop_key));
+  }
+
+  exit($err);
+} else if ($repository->isGit() || $repository->isHg()) {
   $username = getenv(DiffusionCommitHookEngine::ENV_USER);
   if (!strlen($username)) {
     throw new Exception(
-      pht('usage: %s should be defined!', DiffusionCommitHookEngine::ENV_USER));
+      pht(
+        'No Direct Pushes: You are pushing directly to a repository hosted '.
+        'by Phabricator. This will not work. See "No Direct Pushes" in the '.
+        'documentation for more information.'));
   }
 
   if ($repository->isHg()) {
@@ -48,7 +130,7 @@ if ($repository->isGit() || $repository->isHg()) {
   // specify the correct user; read this user out of the commit log.
 
   if ($argc < 4) {
-    throw new Exception(pht('usage: commit-hook <callsign> <repo> <txn>'));
+    throw new Exception(pht('usage: commit-hook <repository> <repo> <txn>'));
   }
 
   $svn_repo = $argv[2];

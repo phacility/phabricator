@@ -1,0 +1,171 @@
+@title Cluster: Notifications
+@group cluster
+
+Configuring Phabricator to use multiple notification servers.
+
+Overview
+========
+
+You can run multiple notification servers. The advantages of doing this
+are:
+
+  - you can completely survive the loss of any subset so long as one
+    remains standing; and
+  - performance and capacity may improve.
+
+This configuration is relatively simple, but has a small impact on availability
+and does nothing to increase resitance to data loss.
+
+
+Clustering Design Goals
+=======================
+
+Notification clustering aims to restore service automatically after the loss
+of some nodes. It does **not** attempt to guarantee that every message is
+delivered.
+
+Notification messages provide timely information about events, but they are
+never authoritative and never the only way for users to learn about events.
+For example, if a notification about a task update is not delivered, the next
+page you load will still show the notification in your notification menu.
+
+Generally, Phabricator works fine without notifications configured at all, so
+clustering assumes that losing some messages during a disruption is acceptable.
+
+
+How Clustering Works
+====================
+
+Notification clustering is very simple: notification servers relay every
+message they receive to a list of peers.
+
+When you configure clustering, you'll run multiple servers and tell them that
+the other servers exist. When any server receives a message, it retransmits it
+to all the severs it knows about.
+
+When a server is lost, clients will automatically reconnect after a brief
+delay. They may lose some notifications while their client is reconnecting,
+but normally this should only last for a few seconds.
+
+
+Configuring Aphlict
+===================
+
+To configure clustering on the server side, add a `cluster` key to your
+Aphlict configuration file. For more details about configuring Aphlict,
+see @{article:Notifications User Guide: Setup and Configuration}.
+
+The `cluster` key should contain a list of `"admin"` server locations. Every
+message the server receives will be retransmitted to all nodes in the list.
+
+The server is smart enough to avoid sending messages in a cycle, and to avoid
+sending messages to itself. You can safely list every server you run in the
+configuration file, including the current server.
+
+You do not need to configure servers in an acyclic graph or only list //other//
+servers: just list everything on every server and Aphlict will figure things
+out from there.
+
+A simple example with two servers might look like this:
+
+```lang=json, name="aphlict.json (Cluster)"
+{
+  ...
+  "cluster": [
+    {
+      "host": "notify001.mycompany.com",
+      "port": 22281,
+      "protocol": "http"
+    },
+    {
+      "host": "notify002.mycompany.com",
+      "port": 22281,
+      "protocol": "http"
+    }
+  ]
+  ...
+}
+```
+
+
+Configuring Phabricator
+=======================
+
+To configure clustering on the client side, add every service you run to
+`notification.servers`. Generally, this will be twice as many entries as
+you run actual servers, since each server runs a `"client"` service and an
+`"admin"` service.
+
+A simple example with the two servers above (providing four total services)
+might look like this:
+
+```lang=json, name="notification.servers (Cluster)"
+[
+  {
+    "type": "client",
+    "host": "notify001.mycompany.com",
+    "port": 22280,
+    "protocol": "https"
+  },
+  {
+    "type": "client",
+    "host": "notify002.mycompany.com",
+    "port": 22280,
+    "protocol": "https"
+  },
+  {
+    "type": "admin",
+    "host": "notify001.mycompany.com",
+    "port": 22281,
+    "protocol": "http"
+  },
+  {
+    "type": "admin",
+    "host": "notify002.mycompany.com",
+    "port": 22281,
+    "protocol": "http"
+  }
+]
+```
+
+If you put all of the `"client"` servers behind a load balancer, you would
+just list the load balancer and let it handle pulling nodes in and out of
+service.
+
+```lang=json, name="notification.servers (Cluster + Load Balancer)"
+[
+  {
+    "type": "client",
+    "host": "notify-lb.mycompany.com",
+    "port": 22280,
+    "protocol": "https"
+  },
+  {
+    "type": "admin",
+    "host": "notify001.mycompany.com",
+    "port": 22281,
+    "protocol": "http"
+  },
+  {
+    "type": "admin",
+    "host": "notify002.mycompany.com",
+    "port": 22281,
+    "protocol": "http"
+  }
+]
+```
+
+Notification hosts do not need to run any additional services, although they
+are free to do so. The notification server generally consumes few resources
+and is resistant to most other loads on the machine, so it's reasonable to
+overlay these on top of other services wherever it is convenient.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - reviewing notification configuration with
+    @{article:Notifications User Guide: Setup and Configuration}; or
+  - returning to @{article:Clustering Introduction}.
