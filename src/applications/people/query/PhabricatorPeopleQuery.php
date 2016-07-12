@@ -410,6 +410,11 @@ final class PhabricatorPeopleQuery
       }
     }
 
+    // We need to load these users' timezone settings to figure out their
+    // availability if they're attending all-day events.
+    $this->needUserSettings(true);
+    $this->fillUserCaches($rebuild);
+
     foreach ($rebuild as $phid => $user) {
       $events = idx($map, $phid, array());
 
