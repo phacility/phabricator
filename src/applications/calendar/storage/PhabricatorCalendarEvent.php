@@ -70,6 +70,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $is_recurring = true;
     }
 
+    $start = new DateTime('@'.PhabricatorTime::getNow());
+    $start->setTimeZone($actor->getTimeZone());
+
+    $start->setTime($start->format('H'), 0, 0);
+    $start->modify('+1 hour');
+    $end = id(clone $start)->modify('+1 hour');
+
+    $epoch_min = $start->format('U');
+    $epoch_max = $end->format('U');
+
     return id(new PhabricatorCalendarEvent())
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
@@ -81,6 +91,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEditPolicy($actor->getPHID())
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
+      ->setDateFrom($epoch_min)
+      ->setDateTo($epoch_max)
       ->applyViewerTimezone($actor);
   }
 

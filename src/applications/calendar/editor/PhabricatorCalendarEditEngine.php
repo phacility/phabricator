@@ -68,6 +68,13 @@ final class PhabricatorCalendarEditEngine
       $invitee_phids = $object->getInviteePHIDsForEdit();
     }
 
+    $frequency_options = array(
+      PhabricatorCalendarEvent::FREQUENCY_DAILY => pht('Daily'),
+      PhabricatorCalendarEvent::FREQUENCY_WEEKLY => pht('Weekly'),
+      PhabricatorCalendarEvent::FREQUENCY_MONTHLY => pht('Monthly'),
+      PhabricatorCalendarEvent::FREQUENCY_YEARLY => pht('Yearly'),
+    );
+
     $fields = array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -109,7 +116,76 @@ final class PhabricatorCalendarEditEngine
         ->setConduitTypeDescription(pht('New event invitees.'))
         ->setValue($invitee_phids)
         ->setCommentActionLabel(pht('Change Invitees')),
-      id(new PhabricatorIconSetEditField())
+    );
+
+    if ($this->getIsCreate()) {
+      $fields[] = id(new PhabricatorBoolEditField())
+        ->setKey('isRecurring')
+        ->setLabel(pht('Recurring'))
+        ->setOptions(pht('One-Time Event'), pht('Recurring Event'))
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_RECURRING)
+        ->setDescription(pht('One time or recurring event.'))
+        ->setConduitDescription(pht('Make the event recurring.'))
+        ->setConduitTypeDescription(pht('Mark the event as a recurring event.'))
+        ->setValue($object->getIsRecurring());
+
+      $fields[] = id(new PhabricatorSelectEditField())
+        ->setKey('frequency')
+        ->setLabel(pht('Frequency'))
+        ->setOptions($frequency_options)
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
+        ->setDescription(pht('Recurring event frequency.'))
+        ->setConduitDescription(pht('Change the event frequency.'))
+        ->setConduitTypeDescription(pht('New event frequency.'))
+        ->setValue($object->getFrequencyUnit());
+    }
+
+    if ($this->getIsCreate() || $object->getIsRecurring()) {
+      $fields[] = id(new PhabricatorEpochEditField())
+        ->setAllowNull(true)
+        ->setKey('until')
+        ->setLabel(pht('Repeat Until'))
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
+        ->setDescription(pht('Last instance of the event.'))
+        ->setConduitDescription(pht('Change when the event repeats until.'))
+        ->setConduitTypeDescription(pht('New final event time.'))
+        ->setValue($object->getRecurrenceEndDate());
+    }
+
+    $fields[] = id(new PhabricatorBoolEditField())
+        ->setKey('isAllDay')
+        ->setLabel(pht('All Day'))
+        ->setOptions(pht('Normal Event'), pht('All Day Event'))
+        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)
+        ->setDescription(pht('Marks this as an all day event.'))
+        ->setConduitDescription(pht('Make the event an all day event.'))
+        ->setConduitTypeDescription(pht('Mark the event as an all day event.'))
+        ->setValue($object->getIsAllDay());
+
+    $fields[] = id(new PhabricatorEpochEditField())
+        ->setKey('start')
+        ->setLabel(pht('Start'))
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_START_DATE)
+        ->setDescription(pht('Start time of the event.'))
+        ->setConduitDescription(pht('Change the start time of the event.'))
+        ->setConduitTypeDescription(pht('New event start time.'))
+        ->setValue($object->getViewerDateFrom());
+
+    $fields[] = id(new PhabricatorEpochEditField())
+        ->setKey('end')
+        ->setLabel(pht('End'))
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_END_DATE)
+        ->setDescription(pht('End time of the event.'))
+        ->setConduitDescription(pht('Change the end time of the event.'))
+        ->setConduitTypeDescription(pht('New event end time.'))
+        ->setValue($object->getViewerDateTo());
+
+    $fields[] = id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
         ->setIconSet(new PhabricatorCalendarIconSet())
@@ -117,8 +193,7 @@ final class PhabricatorCalendarEditEngine
         ->setDescription(pht('Event icon.'))
         ->setConduitDescription(pht('Change the event icon.'))
         ->setConduitTypeDescription(pht('New event icon.'))
-        ->setValue($object->getIcon()),
-    );
+        ->setValue($object->getIcon());
 
     return $fields;
   }
