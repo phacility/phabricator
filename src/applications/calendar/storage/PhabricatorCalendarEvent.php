@@ -329,6 +329,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
+  public function getInviteePHIDsForEdit() {
+    $invitees = array();
+
+    foreach ($this->getInvitees() as $invitee) {
+      if ($invitee->isUninvited()) {
+        continue;
+      }
+      $invitees[] = $invitee->getInviteePHID();
+    }
+
+    return $invitees;
+  }
+
   public function getUserInviteStatus($phid) {
     $invitees = $this->getInvitees();
     $invitees = mpull($invitees, null, 'getInviteePHID');

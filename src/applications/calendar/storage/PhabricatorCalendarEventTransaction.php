@@ -18,7 +18,6 @@ final class PhabricatorCalendarEventTransaction
   const TYPE_FREQUENCY = 'calendar.frequency';
   const TYPE_RECURRENCE_END_DATE = 'calendar.recurrenceenddate';
 
-
   const MAILTAG_RESCHEDULE = 'calendar-reschedule';
   const MAILTAG_CONTENT = 'calendar-content';
   const MAILTAG_OTHER = 'calendar-other';
@@ -176,6 +175,11 @@ final class PhabricatorCalendarEventTransaction
           $this->renderHandleLink($author_phid));
       case self::TYPE_INVITE:
         $text = null;
+
+        // Fill in any new invitees as "uninvited" in the old data, to make
+        // some of the rendering logic a little easier.
+        $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+        $old = $old + array_fill_keys(array_keys($new), $status_uninvited);
 
         if (count($old) === 1
           && count($new) === 1
@@ -386,6 +390,9 @@ final class PhabricatorCalendarEventTransaction
           $this->renderHandleLink($object_phid));
       case self::TYPE_INVITE:
         $text = null;
+
+        $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+        $old = $old + array_fill_keys(array_keys($new), $status_uninvited);
 
         if (count($old) === 1
           && count($new) === 1

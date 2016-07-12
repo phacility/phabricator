@@ -109,20 +109,8 @@ final class PhabricatorCalendarEventEditor
         $actor_phid = $this->getActingAsPHID();
         return $object->getUserInviteStatus($actor_phid);
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
-        $map = $xaction->getNewValue();
-        $phids = array_keys($map);
-        $invitees = mpull($object->getInvitees(), null, 'getInviteePHID');
-
-        $old = array();
-        foreach ($phids as $phid) {
-          $invitee = idx($invitees, $phid);
-          if ($invitee) {
-            $old[$phid] = $invitee->getStatus();
-          } else {
-            $old[$phid] = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
-          }
-        }
-        return $old;
+        $invitees = $object->getInvitees();
+        return mpull($invitees, 'getStatus', 'getInviteePHID');
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -137,7 +125,6 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
-      case PhabricatorCalendarEventTransaction::TYPE_INVITE:
       case PhabricatorCalendarEventTransaction::TYPE_ICON:
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_ACCEPT:
@@ -150,6 +137,45 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         return $xaction->getNewValue();
+      case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+        $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+        $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+        $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+
+        $invitees = $object->getInvitees();
+        foreach ($invitees as $key => $invitee) {
+          if ($invitee->getStatus() == $status_uninvited) {
+            unset($invitees[$key]);
+          }
+        }
+        $invitees = mpull($invitees, null, 'getInviteePHID');
+
+        $new = $xaction->getNewValue();
+        $new = array_fuse($new);
+
+        $all = array_keys($invitees + $new);
+        $map = array();
+        foreach ($all as $phid) {
+          $is_old = isset($invitees[$phid]);
+          $is_new = isset($new[$phid]);
+
+          if ($is_old && !$is_new) {
+            $map[$phid] = $status_uninvited;
+          } else if (!$is_old && $is_new) {
+            $map[$phid] = $status_invited;
+          }
+        }
+
+        // If we're creating this event and the actor is inviting themselves,
+        // mark them as attending.
+        if ($this->getIsNewObject()) {
+          $acting_phid = $this->getActingAsPHID();
+          if (isset($map[$acting_phid])) {
+            $map[$acting_phid] = $status_attending;
+          }
+        }
+
+        return $map;
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -398,6 +424,40 @@ final class PhabricatorCalendarEventEditor
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+        break;
+      case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+        $old = $object->getInvitees();
+        $old = mpull($old, null, 'getInviteePHID');
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+          $new = array_fuse($new);
+          $add = array_diff_key($new, $old);
+          if (!$add) {
+            continue;
+          }
+
+          // In the UI, we only allow you to invite mailable objects, but there
+          // is no definitive marker for "invitable object" today. Just allow
+          // any valid object to be invited.
+          $objects = id(new PhabricatorObjectQuery())
+            ->setViewer($this->getActor())
+            ->withPHIDs($add)
+            ->execute();
+          $objects = mpull($objects, null, 'getPHID');
+          foreach ($add as $phid) {
+            if (isset($objects[$phid])) {
+              continue;
+            }
+
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'Invitee "%s" identifies an object that does not exist or '.
+                'which you do not have permission to view.',
+                $phid));
+          }
         }
         break;
     }

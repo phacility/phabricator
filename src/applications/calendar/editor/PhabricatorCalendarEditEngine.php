@@ -60,6 +60,14 @@ final class PhabricatorCalendarEditEngine
   }
 
   protected function buildCustomEditFields($object) {
+    $viewer = $this->getViewer();
+
+    if ($this->getIsCreate()) {
+      $invitee_phids = array($viewer->getPHID());
+    } else {
+      $invitee_phids = $object->getInviteePHIDsForEdit();
+    }
+
     $fields = array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -90,6 +98,17 @@ final class PhabricatorCalendarEditEngine
         ->setConduitDescription(pht('Cancel or restore the event.'))
         ->setConduitTypeDescription(pht('True to cancel the event.'))
         ->setValue($object->getIsCancelled()),
+      id(new PhabricatorDatasourceEditField())
+        ->setKey('inviteePHIDs')
+        ->setAliases(array('invite', 'invitee', 'invitees', 'inviteePHID'))
+        ->setLabel(pht('Invitees'))
+        ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
+        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_INVITE)
+        ->setDescription(pht('Users invited to the event.'))
+        ->setConduitDescription(pht('Change invited users.'))
+        ->setConduitTypeDescription(pht('New event invitees.'))
+        ->setValue($invitee_phids)
+        ->setCommentActionLabel(pht('Change Invitees')),
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))

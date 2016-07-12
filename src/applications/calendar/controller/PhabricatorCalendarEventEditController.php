@@ -105,15 +105,7 @@ final class PhabricatorCalendarEventEditController
       $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $event->getPHID());
 
-      $invitees = array();
-      foreach ($event->getInvitees() as $invitee) {
-        if ($invitee->isUninvited()) {
-          continue;
-        } else {
-          $invitees[] = $invitee->getInviteePHID();
-        }
-      }
-
+      $invitees = $event->getInviteePHIDsForEdit();
       $cancel_uri = $event->getURI();
     }
 
@@ -172,14 +164,6 @@ final class PhabricatorCalendarEventEditController
       $icon = $request->getStr('icon');
 
       $invitees = $request->getArr('invitees');
-      $new_invitees = $this->getNewInviteeList($invitees, $event);
-      $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
-      if ($this->isCreate()) {
-        $status = idx($new_invitees, $viewer->getPHID());
-        if ($status) {
-          $new_invitees[$viewer->getPHID()] = $status_attending;
-        }
-      }
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -236,7 +220,7 @@ final class PhabricatorCalendarEventEditController
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
           PhabricatorCalendarEventTransaction::TYPE_INVITE)
-        ->setNewValue($new_invitees);
+        ->setNewValue($invitees);
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -487,7 +471,6 @@ final class PhabricatorCalendarEventEditController
       ->setUser($viewer)
       ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
 
-
     $icon = id(new PHUIFormIconSetControl())
       ->setLabel(pht('Icon'))
       ->setName('icon')
@@ -573,32 +556,6 @@ final class PhabricatorCalendarEventEditController
       ->appendChild($view);
   }
 
-
-  public function getNewInviteeList(array $phids, $event) {
-    $invitees = $event->getInvitees();
-    $invitees = mpull($invitees, null, 'getInviteePHID');
-    $invited_status = PhabricatorCalendarEventInvitee::STATUS_INVITED;
-    $uninvited_status = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
-    $phids = array_fuse($phids);
-
-    $new = array();
-    foreach ($phids as $phid) {
-      $old_status = $event->getUserInviteStatus($phid);
-      if ($old_status != $uninvited_status) {
-        continue;
-      }
-      $new[$phid] = $invited_status;
-    }
-
-    foreach ($invitees as $invitee) {
-      $deleted_invitee = !idx($phids, $invitee->getInviteePHID());
-      if ($deleted_invitee) {
-        $new[$invitee->getInviteePHID()] = $uninvited_status;
-      }
-    }
-
-    return $new;
-  }
 
   private function getDefaultTimeValues($viewer) {
     $start = new DateTime('@'.time());
