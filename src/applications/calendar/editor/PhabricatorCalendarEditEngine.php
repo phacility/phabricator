@@ -81,7 +81,8 @@ final class PhabricatorCalendarEditEngine
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the event.'))
         ->setIsRequired(true)
-        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_NAME)
+        ->setTransactionType(
+          PhabricatorCalendarEventNameTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(pht('Rename the event.'))
         ->setConduitTypeDescription(pht('New event name.'))
         ->setValue($object->getName()),
@@ -90,7 +91,7 @@ final class PhabricatorCalendarEditEngine
         ->setLabel(pht('Description'))
         ->setDescription(pht('Description of the event.'))
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
+          PhabricatorCalendarEventDescriptionTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(pht('Update the event description.'))
         ->setConduitTypeDescription(pht('New event description.'))
         ->setValue($object->getDescription()),
@@ -100,7 +101,7 @@ final class PhabricatorCalendarEditEngine
         ->setLabel(pht('Cancelled'))
         ->setDescription(pht('Cancel the event.'))
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_CANCEL)
+          PhabricatorCalendarEventCancelTransaction::TRANSACTIONTYPE)
         ->setIsConduitOnly(true)
         ->setConduitDescription(pht('Cancel or restore the event.'))
         ->setConduitTypeDescription(pht('True to cancel the event.'))
@@ -110,7 +111,8 @@ final class PhabricatorCalendarEditEngine
         ->setAliases(array('invite', 'invitee', 'invitees', 'inviteePHID'))
         ->setLabel(pht('Invitees'))
         ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
-        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_INVITE)
+        ->setTransactionType(
+          PhabricatorCalendarEventInviteTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Users invited to the event.'))
         ->setConduitDescription(pht('Change invited users.'))
         ->setConduitTypeDescription(pht('New event invitees.'))
@@ -124,7 +126,7 @@ final class PhabricatorCalendarEditEngine
         ->setLabel(pht('Recurring'))
         ->setOptions(pht('One-Time Event'), pht('Recurring Event'))
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_RECURRING)
+          PhabricatorCalendarEventRecurringTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('One time or recurring event.'))
         ->setConduitDescription(pht('Make the event recurring.'))
         ->setConduitTypeDescription(pht('Mark the event as a recurring event.'))
@@ -135,7 +137,7 @@ final class PhabricatorCalendarEditEngine
         ->setLabel(pht('Frequency'))
         ->setOptions($frequency_options)
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
+          PhabricatorCalendarEventFrequencyTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Recurring event frequency.'))
         ->setConduitDescription(pht('Change the event frequency.'))
         ->setConduitTypeDescription(pht('New event frequency.'))
@@ -148,7 +150,7 @@ final class PhabricatorCalendarEditEngine
         ->setKey('until')
         ->setLabel(pht('Repeat Until'))
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
+          PhabricatorCalendarEventUntilDateTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Last instance of the event.'))
         ->setConduitDescription(pht('Change when the event repeats until.'))
         ->setConduitTypeDescription(pht('New final event time.'))
@@ -159,7 +161,8 @@ final class PhabricatorCalendarEditEngine
         ->setKey('isAllDay')
         ->setLabel(pht('All Day'))
         ->setOptions(pht('Normal Event'), pht('All Day Event'))
-        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)
+        ->setTransactionType(
+          PhabricatorCalendarEventAllDayTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Marks this as an all day event.'))
         ->setConduitDescription(pht('Make the event an all day event.'))
         ->setConduitTypeDescription(pht('Mark the event as an all day event.'))
@@ -169,7 +172,7 @@ final class PhabricatorCalendarEditEngine
         ->setKey('start')
         ->setLabel(pht('Start'))
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_START_DATE)
+          PhabricatorCalendarEventStartDateTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Start time of the event.'))
         ->setConduitDescription(pht('Change the start time of the event.'))
         ->setConduitTypeDescription(pht('New event start time.'))
@@ -179,7 +182,7 @@ final class PhabricatorCalendarEditEngine
         ->setKey('end')
         ->setLabel(pht('End'))
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_END_DATE)
+          PhabricatorCalendarEventEndDateTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('End time of the event.'))
         ->setConduitDescription(pht('Change the end time of the event.'))
         ->setConduitTypeDescription(pht('New event end time.'))
@@ -189,7 +192,8 @@ final class PhabricatorCalendarEditEngine
         ->setKey('icon')
         ->setLabel(pht('Icon'))
         ->setIconSet(new PhabricatorCalendarIconSet())
-        ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_ICON)
+        ->setTransactionType(
+          PhabricatorCalendarEventIconTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Event icon.'))
         ->setConduitDescription(pht('Change the event icon.'))
         ->setConduitTypeDescription(pht('New event icon.'))

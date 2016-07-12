@@ -33,9 +33,11 @@ final class PhabricatorCalendarEventJoinController
     $validation_exception = null;
     if ($request->isFormPost()) {
       if ($is_join) {
-        $xaction_type = PhabricatorCalendarEventTransaction::TYPE_ACCEPT;
+        $xaction_type =
+          PhabricatorCalendarEventAcceptTransaction::TRANSACTIONTYPE;
       } else {
-        $xaction_type = PhabricatorCalendarEventTransaction::TYPE_DECLINE;
+        $xaction_type =
+          PhabricatorCalendarEventDeclineTransaction::TRANSACTIONTYPE;
       }
 
       $xaction = id(new PhabricatorCalendarEventTransaction())

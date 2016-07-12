@@ -86,6 +86,14 @@ abstract class PhabricatorModularTransactionType
     return $this->viewer;
   }
 
+  final public function getActor() {
+    return $this->getEditor()->getActor();
+  }
+
+  final public function getActingAsPHID() {
+    return $this->getEditor()->getActingAsPHID();
+  }
+
   final public function setEditor(
     PhabricatorApplicationTransactionEditor $editor) {
     $this->editor = $editor;
@@ -141,6 +149,19 @@ abstract class PhabricatorModularTransactionType
     return $display;
   }
 
+  final protected function renderHandleList(array $phids) {
+    $viewer = $this->getViewer();
+    $display = $viewer->renderHandleList($phids)
+      ->setAsInline(true);
+
+    $rendering_target = $this->getStorage()->getRenderingTarget();
+    if ($rendering_target == PhabricatorApplicationTransaction::TARGET_TEXT) {
+      $display->setAsText(true);
+    }
+
+    return $display;
+  }
+
   final protected function renderValue($value) {
     $rendering_target = $this->getStorage()->getRenderingTarget();
     if ($rendering_target == PhabricatorApplicationTransaction::TARGET_TEXT) {
@@ -155,6 +176,32 @@ abstract class PhabricatorModularTransactionType
       $value);
   }
 
+  final protected function renderOldValue() {
+    return $this->renderValue($this->getOldValue());
+  }
+
+  final protected function renderNewValue() {
+    return $this->renderValue($this->getNewValue());
+  }
+
+  final protected function renderDate($epoch) {
+    $viewer = $this->getViewer();
+
+    $display = phabricator_datetime($epoch, $viewer);
+
+    // TODO: When rendering for email, include the UTC offset. See T10633.
+
+    return $this->renderValue($display);
+  }
+
+  final protected function renderOldDate() {
+    return $this->renderDate($this->getOldValue());
+  }
+
+  final protected function renderNewDate() {
+    return $this->renderDate($this->getNewValue());
+  }
+
   final protected function newError($title, $message, $xaction = null) {
     return new PhabricatorApplicationTransactionValidationError(
       $this->getTransactionTypeConstant(),
@@ -162,5 +209,27 @@ abstract class PhabricatorModularTransactionType
       $message,
       $xaction);
   }
+
+  final protected function newRequiredError($message, $xaction = null) {
+    return $this->newError(pht('Required'), $message, $xaction)
+      ->setIsMissingFieldError(true);
+  }
+
+  final protected function newInvalidError($message, $xaction = null) {
+    return $this->newError(pht('Invalid'), $message, $xaction);
+  }
+
+  final protected function isNewObject() {
+    return $this->getEditor()->getIsNewObject();
+  }
+
+  final protected function isEmptyTextTransaction($value, array $xactions) {
+    foreach ($xactions as $xaction) {
+      $value = $xaction->getNewValue();
+    }
+
+    return !strlen($value);
+  }
+
 
 }

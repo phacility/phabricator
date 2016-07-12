@@ -1560,6 +1560,24 @@ final class PhabricatorUSEnglishTranslation
           ),
         ),
       ),
+
+      '%s invited %s attendee(s): %s.' =>
+        '%s invited: %3$s.',
+
+      '%s uninvited %s attendee(s): %s.' =>
+        '%s uninvited: %3$s.',
+
+      '%s invited %s attendee(s): %s; uninvinted %s attendee(s): %s.' =>
+        '%s invited: %3$s; uninvited: %5$s.',
+
+      '%s invited %s attendee(s) to %s: %s.' =>
+        '%s added invites for %3$s: %4$s.',
+
+      '%s uninvited %s attendee(s) to %s: %s.' =>
+        '%s removed invites for %3$s: %4$s.',
+
+      '%s updated the invite list for %s, invited %s: %s; uninvinted %s: %s.' =>
+        '%s updated the invite list for %s, invited: %4$s; uninvited: %6$s.',
     );
   }
 

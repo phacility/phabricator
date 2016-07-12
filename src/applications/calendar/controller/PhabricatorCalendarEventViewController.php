@@ -120,7 +120,7 @@ final class PhabricatorCalendarEventViewController
     if ($event->isChildEvent()) {
       $edit_label = pht('Edit This Instance');
     } else {
-      $edit_label = pht('Edit');
+      $edit_label = pht('Edit Event');
     }
 
     $curtain = $this->newCurtainView($event);

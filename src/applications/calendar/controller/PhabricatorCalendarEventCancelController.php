@@ -38,7 +38,7 @@ final class PhabricatorCalendarEventCancelController
 
       $xaction = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_CANCEL)
+          PhabricatorCalendarEventCancelTransaction::TRANSACTIONTYPE)
         ->setNewValue(!$is_cancelled);
 
       $editor = id(new PhabricatorCalendarEventEditor())
