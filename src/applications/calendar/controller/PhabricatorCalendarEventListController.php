@@ -27,7 +27,7 @@ final class PhabricatorCalendarEventListController
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    id(new PhabricatorCalendarEditEngine())
+    id(new PhabricatorCalendarEventEditEngine())
       ->setViewer($this->getViewer())
       ->addActionToCrumbs($crumbs);
 

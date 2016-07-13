@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCalendarEditEngine
+final class PhabricatorCalendarEventEditEngine
   extends PhabricatorEditEngine {
 
   const ENGINECONST = 'calendar.event';

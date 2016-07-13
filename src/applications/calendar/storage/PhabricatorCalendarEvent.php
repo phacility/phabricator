@@ -1,17 +1,19 @@
 <?php
 
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
-  implements PhabricatorPolicyInterface,
-  PhabricatorProjectInterface,
-  PhabricatorMarkupInterface,
-  PhabricatorApplicationTransactionInterface,
-  PhabricatorSubscribableInterface,
-  PhabricatorTokenReceiverInterface,
-  PhabricatorDestructibleInterface,
-  PhabricatorMentionableInterface,
-  PhabricatorFlaggableInterface,
-  PhabricatorSpacesInterface,
-  PhabricatorFulltextInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorProjectInterface,
+    PhabricatorMarkupInterface,
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorMentionableInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorSpacesInterface,
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
   protected $userPHID;
@@ -630,6 +632,34 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newFulltextEngine() {
     return new PhabricatorCalendarEventFulltextEngine();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the event.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('string')
+        ->setDescription(pht('The event description.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'description' => $this->getDescription(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }

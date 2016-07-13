@@ -38,7 +38,7 @@ final class PhabricatorCalendarEventViewController
     $details = $this->buildPropertySection($event);
     $description = $this->buildDescriptionView($event);
 
-    $comment_view = id(new PhabricatorCalendarEditEngine())
+    $comment_view = id(new PhabricatorCalendarEventEditEngine())
       ->setViewer($viewer)
       ->buildEditEngineCommentView($event);
 
