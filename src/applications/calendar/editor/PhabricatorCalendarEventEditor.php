@@ -65,6 +65,29 @@ final class PhabricatorCalendarEventEditor
     return $types;
   }
 
+  protected function adjustObjectForPolicyChecks(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $copy = parent::adjustObjectForPolicyChecks($object, $xactions);
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorCalendarEventHostTransaction::TRANSACTIONTYPE:
+          $copy->setHostPHID($xaction->getNewValue());
+          break;
+        case PhabricatorCalendarEventInviteTransaction::TRANSACTIONTYPE:
+          PhabricatorPolicyRule::passTransactionHintToRule(
+            $copy,
+            new PhabricatorCalendarEventInviteesPolicyRule(),
+            array_fuse($xaction->getNewValue()));
+          break;
+      }
+    }
+
+    return $copy;
+  }
+
+
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {

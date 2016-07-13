@@ -57,7 +57,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->withClasses(array('PhabricatorCalendarApplication'))
       ->executeOne();
 
-    $view_policy = PhabricatorPolicies::getMostOpenPolicy();
+    $view_default = PhabricatorCalendarEventDefaultViewCapability::CAPABILITY;
+    $edit_default = PhabricatorCalendarEventDefaultEditCapability::CAPABILITY;
+    $view_policy = $app->getPolicy($view_default);
+    $edit_policy = $app->getPolicy($edit_default);
 
     $start = new DateTime('@'.PhabricatorTime::getNow());
     $start->setTimeZone($actor->getTimeZone());
@@ -83,7 +86,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ))
       ->setIcon($default_icon)
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($actor->getPHID())
+      ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
       ->setDateFrom($epoch_min)

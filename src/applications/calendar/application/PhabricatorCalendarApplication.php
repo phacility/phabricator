@@ -83,4 +83,19 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorCalendarEventDefaultViewCapability::CAPABILITY => array(
+        'caption' => pht('Default view policy for newly created events.'),
+        'template' => PhabricatorCalendarEventPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      PhabricatorCalendarEventDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht('Default edit policy for newly created events.'),
+        'template' => PhabricatorCalendarEventPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
+      ),
+    );
+  }
+
 }
