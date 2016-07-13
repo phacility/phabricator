@@ -2036,6 +2036,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEventEndDateTransaction' => 'applications/calendar/xaction/PhabricatorCalendarEventEndDateTransaction.php',
     'PhabricatorCalendarEventFrequencyTransaction' => 'applications/calendar/xaction/PhabricatorCalendarEventFrequencyTransaction.php',
     'PhabricatorCalendarEventFulltextEngine' => 'applications/calendar/search/PhabricatorCalendarEventFulltextEngine.php',
+    'PhabricatorCalendarEventHostTransaction' => 'applications/calendar/xaction/PhabricatorCalendarEventHostTransaction.php',
     'PhabricatorCalendarEventIconTransaction' => 'applications/calendar/xaction/PhabricatorCalendarEventIconTransaction.php',
     'PhabricatorCalendarEventInviteTransaction' => 'applications/calendar/xaction/PhabricatorCalendarEventInviteTransaction.php',
     'PhabricatorCalendarEventInvitee' => 'applications/calendar/storage/PhabricatorCalendarEventInvitee.php',
@@ -6663,6 +6664,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEventEndDateTransaction' => 'PhabricatorCalendarEventDateTransaction',
     'PhabricatorCalendarEventFrequencyTransaction' => 'PhabricatorCalendarEventTransactionType',
     'PhabricatorCalendarEventFulltextEngine' => 'PhabricatorFulltextEngine',
+    'PhabricatorCalendarEventHostTransaction' => 'PhabricatorCalendarEventTransactionType',
     'PhabricatorCalendarEventIconTransaction' => 'PhabricatorCalendarEventTransactionType',
     'PhabricatorCalendarEventInviteTransaction' => 'PhabricatorCalendarEventTransactionType',
     'PhabricatorCalendarEventInvitee' => array(

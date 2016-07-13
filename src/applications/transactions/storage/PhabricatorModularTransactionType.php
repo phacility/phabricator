@@ -148,6 +148,14 @@ abstract class PhabricatorModularTransactionType
     return $display;
   }
 
+  final protected function renderOldHandle() {
+    return $this->renderHandle($this->getOldValue());
+  }
+
+  final protected function renderNewHandle() {
+    return $this->renderHandle($this->getNewValue());
+  }
+
   final protected function renderHandleList(array $phids) {
     $viewer = $this->getViewer();
     $display = $viewer->renderHandleList($phids)

@@ -23,8 +23,7 @@ final class PhabricatorCalendarEventEditEngine
 
   protected function newEditableObject() {
     return PhabricatorCalendarEvent::initializeNewCalendarEvent(
-      $this->getViewer(),
-      $mode = null);
+      $this->getViewer());
   }
 
   protected function newObjectQuery() {
@@ -106,6 +105,17 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitDescription(pht('Cancel or restore the event.'))
         ->setConduitTypeDescription(pht('True to cancel the event.'))
         ->setValue($object->getIsCancelled()),
+      id(new PhabricatorUsersEditField())
+        ->setKey('hostPHID')
+        ->setAliases(array('host'))
+        ->setLabel(pht('Host'))
+        ->setDescription(pht('Host of the event.'))
+        ->setTransactionType(
+          PhabricatorCalendarEventHostTransaction::TRANSACTIONTYPE)
+        ->setIsConduitOnly($this->getIsCreate())
+        ->setConduitDescription(pht('Change the host of the event.'))
+        ->setConduitTypeDescription(pht('New event host.'))
+        ->setSingleValue($object->getHostPHID()),
       id(new PhabricatorDatasourceEditField())
         ->setKey('inviteePHIDs')
         ->setAliases(array('invite', 'invitee', 'invitees', 'inviteePHID'))
@@ -141,7 +151,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('Recurring event frequency.'))
         ->setConduitDescription(pht('Change the event frequency.'))
         ->setConduitTypeDescription(pht('New event frequency.'))
-        ->setValue($object->getFrequencyUnit());
+        ->setValue($object->getFrequencyRule());
     }
 
     if ($this->getIsCreate() || $object->getIsRecurring()) {

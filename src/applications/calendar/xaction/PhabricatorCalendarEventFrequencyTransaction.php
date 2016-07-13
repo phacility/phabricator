@@ -6,7 +6,7 @@ final class PhabricatorCalendarEventFrequencyTransaction
   const TRANSACTIONTYPE = 'calendar.frequency';
 
   public function generateOldValue($object) {
-    return $object->getFrequencyUnit();
+    return $object->getFrequencyRule();
   }
 
   public function applyInternalEffects($object, $value) {
@@ -17,7 +17,7 @@ final class PhabricatorCalendarEventFrequencyTransaction
   }
 
   public function getTitle() {
-    $frequency = $this->getFrequencyUnit($this->getNewValue());
+    $frequency = $this->getFrequencyRule($this->getNewValue());
     switch ($frequency) {
       case PhabricatorCalendarEvent::FREQUENCY_DAILY:
         return pht(
@@ -39,7 +39,7 @@ final class PhabricatorCalendarEventFrequencyTransaction
   }
 
   public function getTitleForFeed() {
-    $frequency = $this->getFrequencyUnit($this->getNewValue());
+    $frequency = $this->getFrequencyRule($this->getNewValue());
     switch ($frequency) {
       case PhabricatorCalendarEvent::FREQUENCY_DAILY:
         return pht(
@@ -64,7 +64,7 @@ final class PhabricatorCalendarEventFrequencyTransaction
     }
   }
 
-  private function getFrequencyUnit($value) {
+  private function getFrequencyRule($value) {
     if (is_array($value)) {
       $value = idx($value, 'rule');
     } else {

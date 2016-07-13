@@ -39,8 +39,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $spacePHID;
 
-  const DEFAULT_ICON = 'fa-calendar';
-
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
 
@@ -53,24 +51,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   const FREQUENCY_MONTHLY = 'monthly';
   const FREQUENCY_YEARLY = 'yearly';
 
-  public static function initializeNewCalendarEvent(
-    PhabricatorUser $actor,
-    $mode) {
+  public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
       ->withClasses(array('PhabricatorCalendarApplication'))
       ->executeOne();
 
-    $view_policy = null;
-    $is_recurring = 0;
-
-    if ($mode == 'public') {
-      $view_policy = PhabricatorPolicies::getMostOpenPolicy();
-    }
-
-    if ($mode == 'recurring') {
-      $is_recurring = true;
-    }
+    $view_policy = PhabricatorPolicies::getMostOpenPolicy();
 
     $start = new DateTime('@'.PhabricatorTime::getNow());
     $start->setTimeZone($actor->getTimeZone());
@@ -82,13 +69,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $epoch_min = $start->format('U');
     $epoch_max = $end->format('U');
 
+    $default_icon = 'fa-calendar';
+
     return id(new PhabricatorCalendarEvent())
       ->setHostPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
       ->setIsStub(0)
-      ->setIsRecurring($is_recurring)
-      ->setIcon(self::DEFAULT_ICON)
+      ->setIsRecurring(0)
+      ->setRecurrenceFrequency(
+        array(
+          'rule' => self::FREQUENCY_WEEKLY,
+        ))
+      ->setIcon($default_icon)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($actor->getPHID())
       ->setSpacePHID($actor->getDefaultSpacePHID())
@@ -396,8 +389,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
+  public function getFrequencyRule() {
+    return idx($this->recurrenceFrequency, 'rule');
+  }
+
   public function getFrequencyUnit() {
-    $frequency = idx($this->recurrenceFrequency, 'rule');
+    $frequency = $this->getFrequencyRule();
 
     switch ($frequency) {
       case 'daily':
