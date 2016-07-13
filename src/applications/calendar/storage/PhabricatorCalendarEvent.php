@@ -16,7 +16,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     PhabricatorConduitResultInterface {
 
   protected $name;
-  protected $userPHID;
+  protected $hostPHID;
   protected $dateFrom;
   protected $dateTo;
   protected $description;
@@ -83,7 +83,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $epoch_max = $end->format('U');
 
     return id(new PhabricatorCalendarEvent())
-      ->setUserPHID($actor->getPHID())
+      ->setHostPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
       ->setIsStub(0)
@@ -120,7 +120,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected function readField($field) {
     static $inherit = array(
-      'userPHID' => true,
+      'hostPHID' => true,
       'isAllDay' => true,
       'icon' => true,
       'spacePHID' => true,
@@ -156,7 +156,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $parent = $this->getParentEvent();
 
     $this
-      ->setUserPHID($parent->getUserPHID())
+      ->setHostPHID($parent->getHostPHID())
       ->setIsAllDay($parent->getIsAllDay())
       ->setIcon($parent->getIcon())
       ->setSpacePHID($parent->getSpacePHID())
@@ -311,8 +311,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'isStub' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'userPHID_dateFrom' => array(
-          'columns' => array('userPHID', 'dateTo'),
+        'key_date' => array(
+          'columns' => array('dateFrom', 'dateTo'),
         ),
         'key_instance' => array(
           'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
@@ -545,8 +545,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    // The owner of a task can always view and edit it.
-    $user_phid = $this->getUserPHID();
+    // The host of an event can always view and edit it.
+    $user_phid = $this->getHostPHID();
     if ($user_phid) {
       $viewer_phid = $viewer->getPHID();
       if ($viewer_phid == $user_phid) {
@@ -567,10 +567,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('The owner of an event can always view and edit it,
-      and invitees can always view it, except if the event is an
-      instance of a recurring event.');
+    return pht(
+      'The host of an event can always view and edit it. Users who are '.
+      'invited to an event can always view it.');
   }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -598,14 +599,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
 
   public function isAutomaticallySubscribed($phid) {
-    return ($phid == $this->getUserPHID());
+    return ($phid == $this->getHostPHID());
   }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
 
   public function getUsersToNotifyOfTokenGiven() {
-    return array($this->getUserPHID());
+    return array($this->getHostPHID());
   }
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */

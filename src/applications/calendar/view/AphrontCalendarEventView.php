@@ -2,7 +2,7 @@
 
 final class AphrontCalendarEventView extends AphrontView {
 
-  private $userPHID;
+  private $hostPHID;
   private $name;
   private $epochStart;
   private $epochEnd;
@@ -39,13 +39,13 @@ final class AphrontCalendarEventView extends AphrontView {
     return $this->viewerIsInvited;
   }
 
-  public function setUserPHID($user_phid) {
-    $this->userPHID = $user_phid;
+  public function setHostPHID($host_phid) {
+    $this->hostPHID = $host_phid;
     return $this;
   }
 
-  public function getUserPHID() {
-    return $this->userPHID;
+  public function getHostPHID() {
+    return $this->hostPHID;
   }
 
   public function setName($name) {

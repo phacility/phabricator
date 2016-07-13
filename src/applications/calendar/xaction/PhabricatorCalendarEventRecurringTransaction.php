@@ -22,7 +22,7 @@ final class PhabricatorCalendarEventRecurringTransaction
 
     $old = $object->getIsRecurring();
     foreach ($xactions as $xaction) {
-      if ($this->getIsNewObject()) {
+      if ($this->isNewObject()) {
         continue;
       }
 

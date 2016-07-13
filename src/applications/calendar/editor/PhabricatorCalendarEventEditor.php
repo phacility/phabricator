@@ -197,8 +197,8 @@ final class PhabricatorCalendarEventEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
 
-    if ($object->getUserPHID()) {
-      $phids[] = $object->getUserPHID();
+    if ($object->getHostPHID()) {
+      $phids[] = $object->getHostPHID();
     }
     $phids[] = $this->getActingAsPHID();
 

@@ -46,7 +46,7 @@ final class DifferentialInlineCommentEditController
       throw new Exception(
         pht(
           'Changeset ID "%s" is part of diff ID "%s", but that diff '.
-          'is attached to reivsion "%s", not revision "%s".',
+          'is attached to revision "%s", not revision "%s".',
           $changeset_id,
           $diff->getID(),
           $diff->getRevisionID(),

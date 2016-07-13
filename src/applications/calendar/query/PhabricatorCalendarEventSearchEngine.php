@@ -248,16 +248,6 @@ final class PhabricatorCalendarEventSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $objects,
-    PhabricatorSavedQuery $query) {
-    $phids = array();
-    foreach ($objects as $event) {
-      $phids[$event->getUserPHID()] = 1;
-    }
-    return array_keys($phids);
-  }
-
   protected function renderResultList(
     array $events,
     PhabricatorSavedQuery $query,
@@ -275,7 +265,6 @@ final class PhabricatorCalendarEventSearchEngine
 
     foreach ($events as $event) {
       $event_date_info = $this->getEventDateLabel($event);
-      $creator_handle = $handles[$event->getUserPHID()];
       $attendees = array();
 
       foreach ($event->getInvitees() as $invitee) {
@@ -364,7 +353,8 @@ final class PhabricatorCalendarEventSearchEngine
 
     $month_view->setUser($viewer);
 
-    $phids = mpull($statuses, 'getUserPHID');
+    $phids = mpull($statuses, 'getHostPHID');
+    $handles = $viewer->loadHandles($phids);
 
     foreach ($statuses as $status) {
       $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
@@ -376,9 +366,9 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setIsAllDay($status->getIsAllDay());
       $event->setIcon($status->getIcon());
 
-      $name_text = $handles[$status->getUserPHID()]->getName();
+      $name_text = $handles[$status->getHostPHID()]->getName();
       $status_text = $status->getName();
-      $event->setUserPHID($status->getUserPHID());
+      $event->setHostPHID($status->getHostPHID());
       $event->setDescription(pht('%s (%s)', $name_text, $status_text));
       $event->setName($status_text);
       $event->setURI($status->getURI());
@@ -419,7 +409,7 @@ final class PhabricatorCalendarEventSearchEngine
 
     $day_view->setUser($viewer);
 
-    $phids = mpull($statuses, 'getUserPHID');
+    $phids = mpull($statuses, 'getHostPHID');
 
     foreach ($statuses as $status) {
       if ($status->getIsCancelled()) {
