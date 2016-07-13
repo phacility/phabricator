@@ -192,10 +192,11 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     if ($upcoming) {
+      $now = PhabricatorTime::getNow();
       if ($min_range) {
-        $min_range = max(time(), $min_range);
+        $min_range = max($now, $min_range);
       } else {
-        $min_range = time();
+        $min_range = $now;
       }
     }
 

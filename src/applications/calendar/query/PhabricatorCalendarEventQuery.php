@@ -75,6 +75,15 @@ final class PhabricatorCalendarEventQuery
     return array('start', 'id');
   }
 
+  public function getBuiltinOrders() {
+    return array(
+      'start' => array(
+        'vector' => array('start', 'id'),
+        'name' => pht('Event Start'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
   public function getOrderableColumns() {
     return array(
       'start' => array(
@@ -95,6 +104,17 @@ final class PhabricatorCalendarEventQuery
     );
   }
 
+  protected function shouldLimitResults() {
+    // When generating ghosts, we can't rely on database ordering because
+    // MySQL can't predict the ghost start times. We'll just load all matching
+    // events, then generate results from there.
+    if ($this->generateGhosts) {
+      return false;
+    }
+
+    return true;
+  }
+
   protected function loadPage() {
     $events = $this->loadStandardPage($this->newResultObject());
 
@@ -107,7 +127,6 @@ final class PhabricatorCalendarEventQuery
       return $events;
     }
 
-    $enforced_end = null;
     $raw_limit = $this->getRawResultLimit();
 
     if (!$raw_limit && !$this->rangeEnd) {
@@ -121,7 +140,6 @@ final class PhabricatorCalendarEventQuery
     foreach ($events as $key => $event) {
       $sequence_start = 0;
       $sequence_end = null;
-      $duration = $event->getDuration();
       $end = null;
 
       $instance_of = $event->getInstanceOfEventPHID();
@@ -132,78 +150,97 @@ final class PhabricatorCalendarEventQuery
           continue;
         }
       }
+    }
 
-      if ($event->getIsRecurring() && $instance_of == null) {
-        $frequency = $event->getFrequencyUnit();
-        $modify_key = '+1 '.$frequency;
+    // Pull out all of the parents first. We may discard them as we begin
+    // generating ghost events, but we still want to process all of them.
+    $parents = array();
+    foreach ($events as $key => $event) {
+      if ($event->isParentEvent()) {
+        $parents[$key] = $event;
+      }
+    }
 
-        if (($this->rangeBegin !== null) &&
-            ($this->rangeBegin > $event->getViewerDateFrom())) {
-          $max_date = $this->rangeBegin - $duration;
-          $date = $event->getViewerDateFrom();
-          $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+    // Now that we've picked out all the parent events, we can immediately
+    // discard anything outside of the time window.
+    $events = $this->getEventsInRange($events);
 
-          while ($date < $max_date) {
-            // TODO: optimize this to not loop through all off-screen events
-            $sequence_start++;
-            $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
-            $date = $datetime->modify($modify_key)->format('U');
-          }
+    $enforced_end = null;
+    foreach ($parents as $key => $event) {
+      $sequence_start = 0;
+      $sequence_end = null;
+      $start = null;
 
-          $start = $this->rangeBegin;
-        } else {
-          $start = $event->getViewerDateFrom() - $duration;
-        }
+      $duration = $event->getDuration();
 
-        $date = $start;
+      $frequency = $event->getFrequencyUnit();
+      $modify_key = '+1 '.$frequency;
+
+      if (($this->rangeBegin !== null) &&
+          ($this->rangeBegin > $event->getViewerDateFrom())) {
+        $max_date = $this->rangeBegin - $duration;
+        $date = $event->getViewerDateFrom();
         $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
 
-        if (($this->rangeEnd && $event->getRecurrenceEndDate()) &&
-          $this->rangeEnd < $event->getRecurrenceEndDate()) {
-          $end = $this->rangeEnd;
-        } else if ($event->getRecurrenceEndDate()) {
-          $end = $event->getRecurrenceEndDate();
-        } else if ($this->rangeEnd) {
-          $end = $this->rangeEnd;
-        } else if ($enforced_end) {
-          if ($end) {
-            $end = min($end, $enforced_end);
-          } else {
-            $end = $enforced_end;
-          }
+        while ($date < $max_date) {
+          // TODO: optimize this to not loop through all off-screen events
+          $sequence_start++;
+          $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+          $date = $datetime->modify($modify_key)->format('U');
         }
 
-        if ($end) {
-          $sequence_end = $sequence_start;
-          while ($date < $end) {
-            $sequence_end++;
-            $datetime->modify($modify_key);
-            $date = $datetime->format('U');
-            if ($sequence_end > $raw_limit + $sequence_start) {
-              break;
-            }
+        $start = $this->rangeBegin;
+      } else {
+        $start = $event->getViewerDateFrom() - $duration;
+      }
+
+      $date = $start;
+      $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+
+      // Select the minimum end time we need to generate events until.
+      $end_times = array();
+      if ($this->rangeEnd) {
+        $end_times[] = $this->rangeEnd;
+      }
+
+      if ($event->getRecurrenceEndDate()) {
+        $end_times[] = $event->getRecurrenceEndDate();
+      }
+
+      if ($enforced_end) {
+        $end_times[] = $enforced_end;
+      }
+
+      if ($end_times) {
+        $end = min($end_times);
+        $sequence_end = $sequence_start;
+        while ($date < $end) {
+          $sequence_end++;
+          $datetime->modify($modify_key);
+          $date = $datetime->format('U');
+          if ($sequence_end > $raw_limit + $sequence_start) {
+            break;
           }
-        } else {
-          $sequence_end = $raw_limit + $sequence_start;
         }
+      } else {
+        $sequence_end = $raw_limit + $sequence_start;
+      }
 
-        $sequence_start = max(1, $sequence_start);
+      $sequence_start = max(1, $sequence_start);
+      for ($index = $sequence_start; $index < $sequence_end; $index++) {
+        $events[] = $event->newGhost($viewer, $index);
+      }
 
-        for ($index = $sequence_start; $index < $sequence_end; $index++) {
-          $events[] = $event->newGhost($viewer, $index);
-        }
+      // NOTE: We're slicing results every time because this makes it cheaper
+      // to generate future ghosts. If we already have 100 events that occur
+      // before July 1, we know we never need to generate ghosts after that
+      // because they couldn't possibly ever appear in the result set.
 
-        // NOTE: We're slicing results every time because this makes it cheaper
-        // to generate future ghosts. If we already have 100 events that occur
-        // before July 1, we know we never need to generate ghosts after that
-        // because they couldn't possibly ever appear in the result set.
-
-        if ($raw_limit) {
-          if (count($events) >= $raw_limit) {
-            $events = msort($events, 'getViewerDateFrom');
-            $events = array_slice($events, 0, $raw_limit, true);
-            $enforced_end = last($events)->getViewerDateFrom();
-          }
+      if ($raw_limit) {
+        if (count($events) > $raw_limit) {
+          $events = msort($events, 'getViewerDateFrom');
+          $events = array_slice($events, 0, $raw_limit, true);
+          $enforced_end = last($events)->getViewerDateFrom();
         }
       }
     }
@@ -271,11 +308,14 @@ final class PhabricatorCalendarEventQuery
       }
     }
 
+    $events = msort($events, 'getViewerDateFrom');
+
     return $events;
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {
     $parts = parent::buildJoinClauseParts($conn_r);
+
     if ($this->inviteePHIDs !== null) {
       $parts[] = qsprintf(
         $conn_r,
@@ -284,6 +324,7 @@ final class PhabricatorCalendarEventQuery
         id(new PhabricatorCalendarEventInvitee())->getTableName(),
         PhabricatorCalendarEventInvitee::STATUS_UNINVITED);
     }
+
     return $parts;
   }
 
@@ -397,23 +438,11 @@ final class PhabricatorCalendarEventQuery
 
 
   protected function willFilterPage(array $events) {
-    $range_start = $this->rangeBegin;
-    $range_end = $this->rangeEnd;
     $instance_of_event_phids = array();
     $recurring_events = array();
     $viewer = $this->getViewer();
 
-    foreach ($events as $key => $event) {
-      $event_start = $event->getViewerDateFrom();
-      $event_end = $event->getViewerDateTo();
-
-      if ($range_start && $event_end < $range_start) {
-        unset($events[$key]);
-      }
-      if ($range_end && $event_start > $range_end) {
-        unset($events[$key]);
-      }
-    }
+    $events = $this->getEventsInRange($events);
 
     $phids = array();
 
@@ -472,6 +501,26 @@ final class PhabricatorCalendarEventQuery
     }
 
     $events = msort($events, 'getViewerDateFrom');
+
+    return $events;
+  }
+
+  private function getEventsInRange(array $events) {
+    $range_start = $this->rangeBegin;
+    $range_end = $this->rangeEnd;
+
+    foreach ($events as $key => $event) {
+      $event_start = $event->getViewerDateFrom();
+      $event_end = $event->getViewerDateTo();
+
+      if ($range_start && $event_end < $range_start) {
+        unset($events[$key]);
+      }
+
+      if ($range_end && $event_start > $range_end) {
+        unset($events[$key]);
+      }
+    }
 
     return $events;
   }
