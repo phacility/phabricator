@@ -169,13 +169,13 @@ JX.behavior('day-view', function(config) {
       var cell_time = JX.$N(
         'td',
         {className: 'phui-calendar-day-hour'},
-        hours[i]['hour_meridian']);
+        hours[i].displayTime);
 
       var cell_event = JX.$N(
         'td',
         {
           meta: {
-            time: hours[i]['hour_meridian']
+            time: hours[i].displayTime
           },
           className: 'phui-calendar-day-events',
           sigil: 'phui-calendar-day-event-cell'
