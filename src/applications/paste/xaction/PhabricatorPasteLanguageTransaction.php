@@ -17,8 +17,8 @@ final class PhabricatorPasteLanguageTransaction
     return pht(
       "%s updated the paste's language from %s to %s.",
       $this->renderAuthor(),
-      $this->renderValue($this->getOldValue()),
-      $this->renderValue($this->getNewValue()));
+      $this->renderOldValue(),
+      $this->renderNewValue());
   }
 
   public function getTitleForFeed() {
@@ -26,8 +26,8 @@ final class PhabricatorPasteLanguageTransaction
       '%s updated the language for %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
-      $this->renderValue($this->getOldValue()),
-      $this->renderValue($this->getNewValue()));
+      $this->renderOldValue(),
+      $this->renderNewValue());
   }
 
 }
