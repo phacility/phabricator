@@ -275,19 +275,18 @@ final class PhabricatorCalendarEventSearchEngine
       }
 
       if ($event->getIsGhostEvent()) {
-        $title_text = $event->getMonogram()
-          .' ('
-          .$event->getSequenceIndex()
-          .'): '
-          .$event->getName();
+        $monogram = $event->getParentEvent()->getMonogram();
+        $index = $event->getSequenceIndex();
+        $monogram = "{$monogram}/{$index}";
       } else {
-        $title_text = $event->getMonogram().': '.$event->getName();
+        $monogram = $event->getMonogram();
       }
 
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($event)
-        ->setHeader($title_text)
+        ->setObjectName($monogram)
+        ->setHeader($event->getName())
         ->setHref($event->getURI())
         ->addAttribute($event_date_info);
 
