@@ -8,7 +8,7 @@ final class PhabricatorCalendarEventQuery
   private $rangeBegin;
   private $rangeEnd;
   private $inviteePHIDs;
-  private $creatorPHIDs;
+  private $hostPHIDs;
   private $isCancelled;
   private $eventsWithNoParent;
   private $instanceSequencePairs;
@@ -46,8 +46,8 @@ final class PhabricatorCalendarEventQuery
     return $this;
   }
 
-  public function withCreatorPHIDs(array $phids) {
-    $this->creatorPHIDs = $phids;
+  public function withHostPHIDs(array $phids) {
+    $this->hostPHIDs = $phids;
     return $this;
   }
 
@@ -370,11 +370,11 @@ final class PhabricatorCalendarEventQuery
         $this->inviteePHIDs);
     }
 
-    if ($this->creatorPHIDs) {
+    if ($this->hostPHIDs) {
       $where[] = qsprintf(
         $conn,
-        'event.userPHID IN (%Ls)',
-        $this->creatorPHIDs);
+        'event.hostPHID IN (%Ls)',
+        $this->hostPHIDs);
     }
 
     if ($this->isCancelled !== null) {

@@ -26,8 +26,9 @@ final class PhabricatorCalendarEventSearchEngine
   protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchDatasourceField())
-        ->setLabel(pht('Created By'))
-        ->setKey('creatorPHIDs')
+        ->setLabel(pht('Hosts'))
+        ->setKey('hostPHIDs')
+        ->setAliases(array('host', 'hostPHID', 'hosts'))
         ->setDatasource(new PhabricatorPeopleUserFunctionDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Invited'))
@@ -78,8 +79,8 @@ final class PhabricatorCalendarEventSearchEngine
     $query = $this->newQuery();
     $viewer = $this->requireViewer();
 
-    if ($map['creatorPHIDs']) {
-      $query->withCreatorPHIDs($map['creatorPHIDs']);
+    if ($map['hostPHIDs']) {
+      $query->withHostPHIDs($map['hostPHIDs']);
     }
 
     if ($map['invitedPHIDs']) {
