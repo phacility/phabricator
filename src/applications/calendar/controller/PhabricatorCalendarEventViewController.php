@@ -68,10 +68,15 @@ final class PhabricatorCalendarEventViewController
     $viewer = $this->getViewer();
     $id = $event->getID();
 
-    $is_cancelled = $event->getIsCancelled();
-    $icon = $is_cancelled ? ('fa-ban') : ('fa-check');
-    $color = $is_cancelled ? ('red') : ('bluegrey');
-    $status = $is_cancelled ? pht('Cancelled') : pht('Active');
+    if ($event->isCancelledEvent()) {
+      $icon = 'fa-ban';
+      $color = 'red';
+      $status = pht('Cancelled');
+    } else {
+      $icon = 'fa-check';
+      $color = 'bluegrey';
+      $status = pht('Active');
+    }
 
     $invite_status = $event->getUserInviteStatus($viewer->getPHID());
     $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
@@ -82,7 +87,7 @@ final class PhabricatorCalendarEventViewController
       ->setHeader($event->getName())
       ->setStatus($icon, $color, $status)
       ->setPolicyObject($event)
-      ->setHeaderIcon('fa-calendar');
+      ->setHeaderIcon($event->getIcon());
 
     if ($is_invite_pending) {
       $decline_button = id(new PHUIButtonView())
@@ -108,7 +113,6 @@ final class PhabricatorCalendarEventViewController
   private function buildCurtain(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
     $id = $event->getID();
-    $is_cancelled = $event->isCancelledEvent();
     $is_attending = $event->getIsUserAttending($viewer->getPHID());
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -169,7 +173,7 @@ final class PhabricatorCalendarEventViewController
       $reinstate_label = pht('Reinstate Event');
     }
 
-    if ($is_cancelled) {
+    if ($event->isCancelledEvent()) {
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($reinstate_label)
@@ -301,11 +305,6 @@ final class PhabricatorCalendarEventViewController
       $invitee_list);
 
     $properties->invokeWillRenderEvent();
-
-    $properties->addProperty(
-      pht('Icon'),
-      id(new PhabricatorCalendarIconSet())
-        ->getIconLabel($event->getIcon()));
 
     return $properties;
   }
