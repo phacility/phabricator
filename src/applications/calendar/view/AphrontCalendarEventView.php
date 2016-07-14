@@ -12,7 +12,27 @@ final class AphrontCalendarEventView extends AphrontView {
   private $uri;
   private $isAllDay;
   private $icon;
+  private $iconColor;
   private $canEdit;
+  private $isCancelled;
+
+  public function setIconColor($icon_color) {
+    $this->iconColor = $icon_color;
+    return $this;
+  }
+
+  public function getIconColor() {
+    return $this->iconColor;
+  }
+
+  public function setIsCancelled($is_cancelled) {
+    $this->isCancelled = $is_cancelled;
+    return $this;
+  }
+
+  public function getIsCancelled() {
+    return $this->isCancelled;
+  }
 
   public function setURI($uri) {
     $this->uri = $uri;

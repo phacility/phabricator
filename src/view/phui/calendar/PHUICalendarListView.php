@@ -53,14 +53,11 @@ final class PHUICalendarListView extends AphrontTagView {
           $this->getUser());
       }
 
-      if ($event->getViewerIsInvited()) {
-        $icon_color = 'green';
-      } else {
-        $icon_color = null;
-      }
+      $icon_icon = $event->getIcon();
+      $icon_color = $event->getIconColor();
 
       $dot = id(new PHUIIconView())
-        ->setIcon($event->getIcon(), $icon_color)
+        ->setIcon($icon_icon, $icon_color)
         ->addClass('phui-calendar-list-item-icon');
 
       $title = phutil_tag(
@@ -76,12 +73,14 @@ final class PHUICalendarListView extends AphrontTagView {
         ),
         $timelabel);
 
-      $class = 'phui-calendar-list-item';
-      if ($event->getViewerIsInvited()) {
-        $class = $class.' phui-calendar-viewer-invited';
-      }
+      $event_classes = array();
+      $event_classes[] = 'phui-calendar-list-item';
       if ($event->getIsAllDay()) {
-        $class = $class.' all-day';
+        $event_classes[] = 'all-day';
+      }
+
+      if ($event->getIsCancelled()) {
+        $event_classes[] = 'event-cancelled';
       }
 
       $tip = $this->getEventTooltip($event);
@@ -92,6 +91,7 @@ final class PHUICalendarListView extends AphrontTagView {
       } else {
         $tip_align = 'W';
       }
+
       $content = javelin_tag(
         'a',
         array(
@@ -112,7 +112,7 @@ final class PHUICalendarListView extends AphrontTagView {
       $singletons[] = phutil_tag(
         'li',
         array(
-          'class' => $class,
+          'class' => implode(' ', $event_classes),
         ),
         $content);
     }

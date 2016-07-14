@@ -531,6 +531,66 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
 
+  public function getDisplayIcon(PhabricatorUser $viewer) {
+    if ($this->isCancelledEvent()) {
+      return 'fa-times';
+    }
+
+    if ($viewer->isLoggedIn()) {
+      $status = $this->getUserInviteStatus($viewer->getPHID());
+      switch ($status) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          return 'fa-check-circle';
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+          return 'fa-user-plus';
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          return 'fa-times';
+      }
+    }
+
+    return $this->getIcon();
+  }
+
+  public function getDisplayIconColor(PhabricatorUser $viewer) {
+    if ($this->isCancelledEvent()) {
+      return 'red';
+    }
+
+    if ($viewer->isLoggedIn()) {
+      $status = $this->getUserInviteStatus($viewer->getPHID());
+      switch ($status) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          return 'green';
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+          return 'green';
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          return 'grey';
+      }
+    }
+
+    return 'bluegrey';
+  }
+
+  public function getDisplayIconLabel(PhabricatorUser $viewer) {
+    if ($this->isCancelledEvent()) {
+      return pht('Cancelled');
+    }
+
+    if ($viewer->isLoggedIn()) {
+      $status = $this->getUserInviteStatus($viewer->getPHID());
+      switch ($status) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          return pht('Attending');
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+          return pht('Invited');
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          return pht('Declined');
+      }
+    }
+
+    return null;
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 

@@ -255,7 +255,7 @@ final class PhabricatorCalendarEventSearchEngine
     array $handles) {
 
     if ($this->isMonthView($query)) {
-      return $this->buildCalendarView($events, $query, $handles);
+      return $this->buildCalendarView($events, $query);
     } else if ($this->isDayView($query)) {
       return $this->buildCalendarDayView($events, $query, $handles);
     }
@@ -283,32 +283,14 @@ final class PhabricatorCalendarEventSearchEngine
       $item->addAttribute($event->renderEventDate($viewer, false));
 
       if ($event->isCancelledEvent()) {
-        $status_icon = 'fa-times red';
-        $status_label = pht('Cancelled');
         $item->setDisabled(true);
-      } else if ($viewer->isLoggedIn()) {
-        $status = $event->getUserInviteStatus($viewer->getPHID());
-        switch ($status) {
-          case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
-            $status_icon = 'fa-check-circle green';
-            $status_label = pht('Attending');
-            break;
-          case PhabricatorCalendarEventInvitee::STATUS_INVITED:
-            $status_icon = 'fa-user-plus green';
-            $status_label = pht('Invited');
-            break;
-          case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
-            $status_icon = 'fa-times grey';
-            $status_label = pht('Declined');
-            break;
-          default:
-            $status_icon = $event->getIcon().' grey';
-            $status_label = null;
-            break;
-        }
       }
 
-      $item->setStatusIcon($status_icon, $status_label);
+      $status_icon = $event->getDisplayIcon($viewer);
+      $status_color = $event->getDisplayIconColor($viewer);
+      $status_label = $event->getDisplayIconLabel($viewer);
+
+      $item->setStatusIcon("{$status_icon} {$status_color}", $status_label);
 
       $host = pht(
         'Hosted by %s',
@@ -326,12 +308,12 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   private function buildCalendarView(
-    array $statuses,
-    PhabricatorSavedQuery $query,
-    array $handles) {
+    array $events,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($events, 'PhabricatorCalendarEvent');
 
     $viewer = $this->requireViewer();
-    $now = time();
+    $now = PhabricatorTime::getNow();
 
     list($start_year, $start_month) =
       $this->getDisplayYearAndMonthAndDay(
@@ -339,9 +321,9 @@ final class PhabricatorCalendarEventSearchEngine
         $this->getQueryDateTo($query)->getEpoch(),
         $query->getParameter('display'));
 
-    $now_year  = phabricator_format_local_time($now, $viewer, 'Y');
+    $now_year = phabricator_format_local_time($now, $viewer, 'Y');
     $now_month = phabricator_format_local_time($now, $viewer, 'm');
-    $now_day   = phabricator_format_local_time($now, $viewer, 'j');
+    $now_day = phabricator_format_local_time($now, $viewer, 'j');
 
     if ($start_month == $now_month && $start_year == $now_year) {
       $month_view = new PHUICalendarMonthView(
@@ -360,27 +342,21 @@ final class PhabricatorCalendarEventSearchEngine
 
     $month_view->setUser($viewer);
 
-    $phids = mpull($statuses, 'getHostPHID');
-    $handles = $viewer->loadHandles($phids);
+    foreach ($events as $event) {
+      $epoch_min = $event->getViewerDateFrom();
+      $epoch_max = $event->getViewerDateTo();
 
-    foreach ($statuses as $status) {
-      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+      $event_view = id(new AphrontCalendarEventView())
+        ->setHostPHID($event->getHostPHID())
+        ->setEpochRange($epoch_min, $epoch_max)
+        ->setIsCancelled($event->isCancelledEvent())
+        ->setName($event->getName())
+        ->setURI($event->getURI())
+        ->setIsAllDay($event->getIsAllDay())
+        ->setIcon($event->getDisplayIcon($viewer))
+        ->setIconColor($event->getDisplayIconColor($viewer));
 
-      $event = new AphrontCalendarEventView();
-      $event->setEpochRange(
-        $status->getViewerDateFrom(),
-        $status->getViewerDateTo());
-      $event->setIsAllDay($status->getIsAllDay());
-      $event->setIcon($status->getIcon());
-
-      $name_text = $handles[$status->getHostPHID()]->getName();
-      $status_text = $status->getName();
-      $event->setHostPHID($status->getHostPHID());
-      $event->setDescription(pht('%s (%s)', $name_text, $status_text));
-      $event->setName($status_text);
-      $event->setURI($status->getURI());
-      $event->setViewerIsInvited($viewer_is_invited);
-      $month_view->addEvent($event);
+      $month_view->addEvent($event_view);
     }
 
     $month_view->setBrowseURI(
