@@ -264,15 +264,6 @@ final class PhabricatorCalendarEventSearchEngine
     $list = new PHUIObjectItemListView();
 
     foreach ($events as $event) {
-      $attendees = array();
-
-      foreach ($event->getInvitees() as $invitee) {
-        $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
-        if ($invitee->getStatus() === $status_attending) {
-          $attendees[] = $invitee->getInviteePHID();
-        }
-      }
-
       if ($event->getIsGhostEvent()) {
         $monogram = $event->getParentEvent()->getMonogram();
         $index = $event->getSequenceIndex();
@@ -286,18 +277,42 @@ final class PhabricatorCalendarEventSearchEngine
         ->setObject($event)
         ->setObjectName($monogram)
         ->setHeader($event->getName())
-        ->setHref($event->getURI())
-        ->addAttribute($event->renderEventDate($viewer, false));
+        ->setHref($event->getURI());
 
-      if ($attendees) {
-        $attending = pht(
-          'Attending: %s',
-          $viewer->renderHandleList($attendees)
-            ->setAsInline(1)
-            ->render());
+      $item->addAttribute($event->renderEventDate($viewer, false));
 
-        $item->addAttribute($attending);
+      if ($event->isCancelledEvent()) {
+        $status_icon = 'fa-times red';
+        $status_label = pht('Cancelled');
+        $item->setDisabled(true);
+      } else if ($viewer->isLoggedIn()) {
+        $status = $event->getUserInviteStatus($viewer->getPHID());
+        switch ($status) {
+          case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+            $status_icon = 'fa-check-circle green';
+            $status_label = pht('Attending');
+            break;
+          case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+            $status_icon = 'fa-user-plus green';
+            $status_label = pht('Invited');
+            break;
+          case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+            $status_icon = 'fa-times grey';
+            $status_label = pht('Declined');
+            break;
+          default:
+            $status_icon = $event->getIcon().' grey';
+            $status_label = null;
+            break;
+        }
       }
+
+      $item->setStatusIcon($status_icon, $status_label);
+
+      $host = pht(
+        'Hosted by %s',
+        $viewer->renderHandle($event->getHostPHID()));
+      $item->addByline($host);
 
       $list->addItem($item);
     }
