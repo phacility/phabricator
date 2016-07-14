@@ -454,28 +454,58 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return false;
   }
 
-  public function getDisplayDuration() {
-    $seconds = $this->getDuration();
-    $minutes = round($seconds / 60, 1);
-    $hours = round($minutes / 60, 3);
-    $days = round($hours / 24, 2);
+  public function renderEventDate(
+    PhabricatorUser $viewer,
+    $show_end) {
 
-    $duration = '';
+    if ($show_end) {
+      $min_date = PhabricatorTime::getDateTimeFromEpoch(
+        $this->getViewerDateFrom(),
+        $viewer);
 
-    if ($days >= 1) {
+      $max_date = PhabricatorTime::getDateTimeFromEpoch(
+        $this->getViewerDateTo(),
+        $viewer);
+
+      $min_day = $min_date->format('Y m d');
+      $max_day = $max_date->format('Y m d');
+
+      $show_end_date = ($min_day != $max_day);
+    } else {
+      $show_end_date = false;
+    }
+
+    $min_epoch = $this->getViewerDateFrom();
+    $max_epoch = $this->getViewerDateTo();
+
+    if ($this->getIsAllDay()) {
+      if ($show_end_date) {
+        return pht(
+          '%s - %s, All Day',
+          phabricator_date($min_epoch, $viewer),
+          phabricator_date($max_epoch, $viewer));
+      } else {
+        return pht(
+          '%s, All Day',
+          phabricator_date($min_epoch, $viewer));
+      }
+    } else if ($show_end_date) {
       return pht(
-        '%s day(s)',
-        round($days, 1));
-    } else if ($hours >= 1) {
+        '%s - %s',
+        phabricator_datetime($min_epoch, $viewer),
+        phabricator_datetime($max_epoch, $viewer));
+    } else if ($show_end) {
       return pht(
-        '%s hour(s)',
-        round($hours, 1));
-    } else if ($minutes >= 1) {
+        '%s - %s',
+        phabricator_datetime($min_epoch, $viewer),
+        phabricator_time($max_epoch, $viewer));
+    } else {
       return pht(
-        '%s minute(s)',
-        round($minutes, 0));
+        '%s',
+        phabricator_datetime($min_epoch, $viewer));
     }
   }
+
 
 
 /* -(  Markup Interface  )--------------------------------------------------- */

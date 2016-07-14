@@ -34,6 +34,7 @@ final class PhabricatorCalendarEventViewController
       new PhabricatorCalendarEventTransactionQuery());
 
     $header = $this->buildHeaderView($event);
+    $subheader = $this->buildSubheaderView($event);
     $curtain = $this->buildCurtain($event);
     $details = $this->buildPropertySection($event);
     $description = $this->buildDescriptionView($event);
@@ -47,6 +48,7 @@ final class PhabricatorCalendarEventViewController
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->setSubheader($subheader)
       ->setMainColumn(
         array(
           $timeline,
@@ -201,32 +203,6 @@ final class PhabricatorCalendarEventViewController
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    if ($event->getIsAllDay()) {
-      $date_start = phabricator_date($event->getViewerDateFrom(), $viewer);
-      $date_end = phabricator_date($event->getViewerDateTo(), $viewer);
-
-      if ($date_start == $date_end) {
-        $properties->addProperty(
-          pht('Time'),
-          phabricator_date($event->getViewerDateFrom(), $viewer));
-      } else {
-        $properties->addProperty(
-          pht('Starts'),
-          phabricator_date($event->getViewerDateFrom(), $viewer));
-        $properties->addProperty(
-          pht('Ends'),
-          phabricator_date($event->getViewerDateTo(), $viewer));
-      }
-    } else {
-      $properties->addProperty(
-        pht('Starts'),
-        phabricator_datetime($event->getViewerDateFrom(), $viewer));
-
-      $properties->addProperty(
-        pht('Ends'),
-        phabricator_datetime($event->getViewerDateTo(), $viewer));
-    }
-
     if ($event->getIsRecurring()) {
       $properties->addProperty(
         pht('Recurs'),
@@ -246,10 +222,6 @@ final class PhabricatorCalendarEventViewController
             $viewer->renderHandle($event->getInstanceOfEventPHID())->render()));
       }
     }
-
-    $properties->addProperty(
-      pht('Host'),
-      $viewer->renderHandle($event->getHostPHID()));
 
     $invitees = $event->getInvitees();
     foreach ($invitees as $key => $invitee) {
@@ -388,5 +360,30 @@ final class PhabricatorCalendarEventViewController
 
     return $instance;
   }
+
+  private function buildSubheaderView(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    $host_phid = $event->getHostPHID();
+
+    $handles = $viewer->loadHandles(array($host_phid));
+    $handle = $handles[$host_phid];
+
+    $host = $viewer->renderHandle($host_phid);
+    $host = phutil_tag('strong', array(), $host);
+
+    $image_uri = $handles[$host_phid]->getImageURI();
+    $image_href = $handles[$host_phid]->getURI();
+
+    $date = $event->renderEventDate($viewer, true);
+
+    $content = pht('Hosted by %s on %s.', $host, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
+  }
+
 
 }

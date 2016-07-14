@@ -264,7 +264,6 @@ final class PhabricatorCalendarEventSearchEngine
     $list = new PHUIObjectItemListView();
 
     foreach ($events as $event) {
-      $event_date_info = $this->getEventDateLabel($event);
       $attendees = array();
 
       foreach ($event->getInvitees() as $invitee) {
@@ -288,7 +287,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setObjectName($monogram)
         ->setHeader($event->getName())
         ->setHref($event->getURI())
-        ->addAttribute($event_date_info);
+        ->addAttribute($event->renderEventDate($viewer, false));
 
       if ($attendees) {
         $attending = pht(
@@ -298,13 +297,6 @@ final class PhabricatorCalendarEventSearchEngine
             ->render());
 
         $item->addAttribute($attending);
-      }
-
-      if ($event->getDuration()) {
-        $duration = pht(
-          'Duration: %s',
-          $event->getDisplayDuration());
-        $item->addIcon('none', $duration);
       }
 
       $list->addItem($item);
@@ -542,40 +534,4 @@ final class PhabricatorCalendarEventSearchEngine
     return false;
   }
 
-  private function getEventDateLabel($event) {
-    $viewer = $this->requireViewer();
-
-    $from_datetime = PhabricatorTime::getDateTimeFromEpoch(
-      $event->getViewerDateFrom(),
-      $viewer);
-    $to_datetime = PhabricatorTime::getDateTimeFromEpoch(
-      $event->getViewerDateTo(),
-      $viewer);
-
-    $from_date_formatted = $from_datetime->format('Y m d');
-    $to_date_formatted = $to_datetime->format('Y m d');
-
-    if ($event->getIsAllDay()) {
-      if ($from_date_formatted == $to_date_formatted) {
-        return pht(
-          '%s, All Day',
-          phabricator_date($event->getViewerDateFrom(), $viewer));
-      } else {
-        return pht(
-          '%s - %s, All Day',
-          phabricator_date($event->getViewerDateFrom(), $viewer),
-          phabricator_date($event->getViewerDateTo(), $viewer));
-      }
-    } else if ($from_date_formatted == $to_date_formatted) {
-      return pht(
-        '%s - %s',
-        phabricator_datetime($event->getViewerDateFrom(), $viewer),
-        phabricator_time($event->getViewerDateTo(), $viewer));
-    } else {
-      return pht(
-        '%s - %s',
-        phabricator_datetime($event->getViewerDateFrom(), $viewer),
-        phabricator_datetime($event->getViewerDateTo(), $viewer));
-    }
-  }
 }
