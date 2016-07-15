@@ -234,11 +234,13 @@ final class PhabricatorPeopleProfileViewController
       ->setHeader(pht('Calendar'))
       ->setHref(
         urisprintf(
-          '/calendar/?invitedPHIDs=%s#R',
-          $user->getPHID()));
+          '/calendar/?invited=%s#R',
+          $user->getUsername()));
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($day_view)
+      ->addClass('calendar-profile-box')
       ->setBackground(PHUIObjectBoxView::GREY);
 
     return $box;

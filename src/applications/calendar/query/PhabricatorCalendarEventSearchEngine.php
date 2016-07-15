@@ -257,7 +257,7 @@ final class PhabricatorCalendarEventSearchEngine
     if ($this->isMonthView($query)) {
       return $this->buildCalendarView($events, $query);
     } else if ($this->isDayView($query)) {
-      return $this->buildCalendarDayView($events, $query, $handles);
+      return $this->buildCalendarDayView($events, $query);
     }
 
     assert_instances_of($events, 'PhabricatorCalendarEvent');
@@ -370,9 +370,8 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   private function buildCalendarDayView(
-    array $statuses,
-    PhabricatorSavedQuery $query,
-    array $handles) {
+    array $events,
+    PhabricatorSavedQuery $query) {
 
     $viewer = $this->requireViewer();
 
@@ -392,33 +391,32 @@ final class PhabricatorCalendarEventSearchEngine
 
     $day_view->setUser($viewer);
 
-    $phids = mpull($statuses, 'getHostPHID');
+    $phids = mpull($events, 'getHostPHID');
 
-    foreach ($statuses as $status) {
-      if ($status->getIsCancelled()) {
-        continue;
-      }
-
-      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
-
+    foreach ($events as $event) {
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
-        $status,
+        $event,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $event = new AphrontCalendarEventView();
-      $event->setCanEdit($can_edit);
-      $event->setEventID($status->getID());
-      $event->setEpochRange(
-        $status->getViewerDateFrom(),
-        $status->getViewerDateTo());
-      $event->setIsAllDay($status->getIsAllDay());
-      $event->setIcon($status->getIcon());
-      $event->setViewerIsInvited($viewer_is_invited);
+      $epoch_min = $event->getViewerDateFrom();
+      $epoch_max = $event->getViewerDateTo();
 
-      $event->setName($status->getName());
-      $event->setURI($status->getURI());
-      $day_view->addEvent($event);
+      $status_icon = $event->getDisplayIcon($viewer);
+      $status_color = $event->getDisplayIconColor($viewer);
+
+      $event_view = id(new AphrontCalendarEventView())
+        ->setCanEdit($can_edit)
+        ->setEventID($event->getID())
+        ->setEpochRange($epoch_min, $epoch_max)
+        ->setIsAllDay($event->getIsAllDay())
+        ->setIcon($status_icon)
+        ->setIconColor($status_color)
+        ->setName($event->getName())
+        ->setURI($event->getURI())
+        ->setIsCancelled($event->isCancelledEvent());
+
+      $day_view->addEvent($event_view);
     }
 
     $day_view->setBrowseURI(
