@@ -10,7 +10,17 @@ final class PhabricatorCalendarEventStartDateTransaction
   }
 
   public function applyInternalEffects($object, $value) {
+    $actor = $this->getActor();
+
     $object->setDateFrom($value);
+
+    $object->setAllDayDateFrom(
+      $object->getDateEpochForTimezone(
+        $value,
+        $actor->getTimeZone(),
+        'Y-m-d',
+        null,
+        new DateTimeZone('UTC')));
   }
 
   public function getTitle() {

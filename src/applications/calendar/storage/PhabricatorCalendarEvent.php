@@ -19,6 +19,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $hostPHID;
   protected $dateFrom;
   protected $dateTo;
+  protected $allDayDateFrom;
+  protected $allDayDateTo;
   protected $description;
   protected $isCancelled;
   protected $isAllDay;
@@ -62,7 +64,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $view_policy = $app->getPolicy($view_default);
     $edit_policy = $app->getPolicy($edit_default);
 
-    $start = new DateTime('@'.PhabricatorTime::getNow());
+    $now = PhabricatorTime::getNow();
+
+    $start = new DateTime('@'.$now);
     $start->setTimeZone($actor->getTimeZone());
 
     $start->setTime($start->format('H'), 0, 0);
@@ -71,6 +75,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $epoch_min = $start->format('U');
     $epoch_max = $end->format('U');
+
+    $now_date = new DateTime('@'.$now);
+    $now_min = id(clone $now_date)->setTime(0, 0)->format('U');
+    $now_max = id(clone $now_date)->setTime(23, 59)->format('U');
 
     $default_icon = 'fa-calendar';
 
@@ -91,6 +99,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->attachInvitees(array())
       ->setDateFrom($epoch_min)
       ->setDateTo($epoch_max)
+      ->setAllDayDateFrom($now_min)
+      ->setAllDayDateTo($now_max)
       ->applyViewerTimezone($actor);
   }
 
@@ -171,9 +181,21 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $duration = $this->getDuration();
 
+    $utc = new DateTimeZone('UTC');
+
+    $allday_from = $parent->getAllDayDateFrom();
+    $allday_date = new DateTime('@'.$allday_from, $utc);
+    $allday_date->setTimeZone($utc);
+    $allday_date->modify($modify_key);
+
+    $allday_min = $allday_date->format('U');
+    $allday_duration = ($parent->getAllDayDateTo() - $allday_from);
+
     $this
       ->setDateFrom($date)
-      ->setDateTo($date + $duration);
+      ->setDateTo($date + $duration)
+      ->setAllDayDateFrom($allday_min)
+      ->setAllDayDateTo($allday_min + $allday_duration);
 
     return $this;
   }
@@ -227,15 +249,15 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     } else {
       $zone = $viewer->getTimeZone();
 
-      $this->viewerDateFrom = $this->getDateEpochForTimeZone(
-        $this->getDateFrom(),
+      $this->viewerDateFrom = $this->getDateEpochForTimezone(
+        $this->getAllDayDateFrom(),
         new DateTimeZone('UTC'),
         'Y-m-d',
         null,
         $zone);
 
-      $this->viewerDateTo = $this->getDateEpochForTimeZone(
-        $this->getDateTo(),
+      $this->viewerDateTo = $this->getDateEpochForTimezone(
+        $this->getAllDayDateTo(),
         new DateTimeZone('UTC'),
         'Y-m-d 23:59:00',
         null,
@@ -249,7 +271,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->getDateTo() - $this->getDateFrom();
   }
 
-  private function getDateEpochForTimeZone(
+  public function getDateEpochForTimezone(
     $epoch,
     $src_zone,
     $format,
@@ -295,6 +317,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'name' => 'text',
         'dateFrom' => 'epoch',
         'dateTo' => 'epoch',
+        'allDayDateFrom' => 'epoch',
+        'allDayDateTo' => 'epoch',
         'description' => 'text',
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
