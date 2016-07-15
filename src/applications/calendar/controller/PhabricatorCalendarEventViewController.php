@@ -26,6 +26,18 @@ final class PhabricatorCalendarEventViewController
     $monogram = $event->getMonogram();
     $page_title = $monogram.' '.$event->getName();
     $crumbs = $this->buildApplicationCrumbs();
+
+    $start = new DateTime('@'.$event->getViewerDateFrom());
+    $start->setTimeZone($viewer->getTimeZone());
+
+    $crumbs->addTextCrumb(
+      $start->format('F Y'),
+      '/calendar/query/month/'.$start->format('Y/m/'));
+
+    $crumbs->addTextCrumb(
+      $start->format('D jS'),
+      '/calendar/query/month/'.$start->format('Y/m/d/'));
+
     $crumbs->addTextCrumb($monogram);
     $crumbs->setBorder(true);
 
