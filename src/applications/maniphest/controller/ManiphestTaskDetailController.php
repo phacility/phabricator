@@ -87,12 +87,25 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->addPropertySection(pht('Description'), $description)
       ->addPropertySection(pht('Details'), $details);
 
+    $graph_limit = 100;
     $task_graph = id(new ManiphestTaskGraph())
       ->setViewer($viewer)
       ->setSeedPHID($task->getPHID())
+      ->setLimit($graph_limit)
       ->loadGraph();
     if (!$task_graph->isEmpty()) {
-      $graph_table = $task_graph->newGraphTable();
+      if ($task_graph->isOverLimit()) {
+        $message = pht(
+          'Task graph too large to display (this task is connected to '.
+          'more than %s other tasks).',
+          $graph_limit);
+        $message = phutil_tag('em', array(), $message);
+        $graph_table = id(new PHUIPropertyListView())
+          ->addTextContent($message);
+      } else {
+        $graph_table = $task_graph->newGraphTable();
+      }
+
       $view->addPropertySection(pht('Task Graph'), $graph_table);
     }
 

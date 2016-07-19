@@ -9,6 +9,7 @@ abstract class PhabricatorObjectGraph
   private $seedPHID;
   private $objects;
   private $loadEntireGraph = false;
+  private $limit;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -21,6 +22,15 @@ abstract class PhabricatorObjectGraph
     }
 
     return $this->viewer;
+  }
+
+  public function setLimit($limit) {
+    $this->limit = $limit;
+    return $this;
+  }
+
+  public function getLimit() {
+    return $this->limit;
   }
 
   abstract protected function getEdgeTypes();
@@ -42,6 +52,16 @@ abstract class PhabricatorObjectGraph
 
   final public function isEmpty() {
     return (count($this->getNodes()) <= 2);
+  }
+
+  final public function isOverLimit() {
+    $limit = $this->getLimit();
+
+    if (!$limit) {
+      return false;
+    }
+
+    return (count($this->edgeReach) > $limit);
   }
 
   final public function getEdges($type) {
@@ -72,6 +92,10 @@ abstract class PhabricatorObjectGraph
   }
 
   final protected function loadEdges(array $nodes) {
+    if ($this->isOverLimit()) {
+      return array_fill_keys($nodes, array());
+    }
+
     $edge_types = $this->getEdgeTypes();
 
     $query = id(new PhabricatorEdgeQuery())

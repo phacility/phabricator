@@ -2,9 +2,13 @@
  * @provides phui-calendar-css
  */
 
- .phui-calendar-list a {
-  color: {$lightgreytext};
- }
+.phui-calendar-list a {
+  color: {$greytext};
+}
+
+.phui-calendar-list .event-cancelled .phui-calendar-list-title {
+  text-decoration: line-through;
+}
 
 .phui-calendar-viewer-invited a {
   color: {$green};

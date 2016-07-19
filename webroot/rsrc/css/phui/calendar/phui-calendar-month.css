@@ -133,12 +133,17 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
   right: 0px;
 }
 
-.phui-calendar-today-slot.phui-calendar-this-week {
-  background-color: {$blueborder};
+.phui-calendar-this-week .phui-calendar-today-slot {
+  background-color: {$blue};
 }
 
-.phui-calendar-today-slot.phui-calendar-today {
-  background-color: {$lightblueborder};
+.phui-calendar-today .phui-calendar-today-slot,
+.phui-calendar-today .phui-calendar-date-number {
+  background-color: {$sky};
+}
+
+table.phui-calendar-view .phui-calendar-today a.phui-calendar-date-number {
+  color: #ffffff;
 }
 
 .phui-calendar-event-empty {
@@ -159,7 +164,7 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 
 .phui-calendar-view .phui-calendar-list li.phui-calendar-list-item.all-day {
   height: 20px;
-  background-color: {$darkgreybackground};
+  background-color: {$bluebackground};
   display: block;
   float: none;
 }
@@ -194,7 +199,7 @@ li.phui-calendar-viewer-invited.all-day {
 .phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-title {
   width: auto;
   position: absolute;
-  left: 20px;
+  left: 16px;
   right: 60px;
   text-overflow: ellipsis;
   overflow: hidden;

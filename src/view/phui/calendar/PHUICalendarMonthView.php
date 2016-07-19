@@ -236,16 +236,7 @@ final class PHUICalendarMonthView extends AphrontView {
       $cell_day = null;
     }
 
-    if ($date && $date->format('j') == $this->day &&
-      $date->format('m') == $this->month) {
-      $today_class = 'phui-calendar-today-slot phui-calendar-today';
-    } else {
-      $today_class = 'phui-calendar-today-slot';
-    }
-
-    if ($this->isDateInCurrentWeek($date)) {
-      $today_class .= ' phui-calendar-this-week';
-    }
+    $today_class = 'phui-calendar-today-slot';
 
     $last_week_day = 6;
     if ($date->format('w') == $last_week_day) {
@@ -271,10 +262,25 @@ final class PHUICalendarMonthView extends AphrontView {
         $today_slot,
       ));
 
+    $classes = array();
+    $classes[] = 'phui-calendar-date-number-container';
+
+    if ($date) {
+      if ($this->isDateInCurrentWeek($date)) {
+        $classes[] = 'phui-calendar-this-week';
+      }
+
+      if ($date->format('j') == $this->day) {
+        if ($date->format('m') == $this->month) {
+          $classes[] = 'phui-calendar-today';
+        }
+      }
+    }
+
     return phutil_tag(
       'td',
       array(
-        'class' => 'phui-calendar-date-number-container '.$class,
+        'class' => implode(' ', $classes),
       ),
       $cell_div);
   }

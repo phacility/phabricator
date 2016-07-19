@@ -17,7 +17,7 @@ foreach ($iterator as $event) {
     // later patch. See T8209.
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array($event->getUserPHID()))
+      ->withPHIDs(array($event->getHostPHID()))
       ->executeOne();
 
     if ($user) {

@@ -189,41 +189,44 @@ final class PhabricatorPeopleProfileViewController
     $range_start = $midnight->format('U');
     $range_end = $week_end->format('U');
 
-    $query = id(new PhabricatorCalendarEventQuery())
+    $events = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
       ->withDateRange($range_start, $range_end)
       ->withInvitedPHIDs(array($user->getPHID()))
-      ->withIsCancelled(false);
+      ->withIsCancelled(false)
+      ->execute();
 
-    $statuses = $query->execute();
-    $phids = mpull($statuses, 'getUserPHID');
-    $events = array();
-
-    foreach ($statuses as $status) {
-      $viewer_is_invited = $status->getIsUserInvited($user->getPHID());
+    $event_views = array();
+    foreach ($events as $event) {
+      $viewer_is_invited = $event->getIsUserInvited($viewer->getPHID());
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
-        $status,
+        $event,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $event = id(new AphrontCalendarEventView())
+      $epoch_min = $event->getViewerDateFrom();
+      $epoch_max = $event->getViewerDateTo();
+
+      $event_view = id(new AphrontCalendarEventView())
         ->setCanEdit($can_edit)
-        ->setEventID($status->getID())
-        ->setEpochRange($status->getDateFrom(), $status->getDateTo())
-        ->setIsAllDay($status->getIsAllDay())
-        ->setIcon($status->getIcon())
+        ->setEventID($event->getID())
+        ->setEpochRange($epoch_min, $epoch_max)
+        ->setIsAllDay($event->getIsAllDay())
+        ->setIcon($event->getIcon())
         ->setViewerIsInvited($viewer_is_invited)
-        ->setName($status->getName())
-        ->setURI($status->getURI());
-      $events[] = $event;
+        ->setName($event->getName())
+        ->setURI($event->getURI());
+
+      $event_views[] = $event_view;
     }
 
-    $events = msort($events, 'getEpochStart');
+    $event_views = msort($event_views, 'getEpochStart');
+
     $day_view = id(new PHUICalendarWeekView())
       ->setViewer($viewer)
       ->setView('week')
-      ->setEvents($events)
+      ->setEvents($event_views)
       ->setWeekLength(3)
       ->render();
 
@@ -231,11 +234,13 @@ final class PhabricatorPeopleProfileViewController
       ->setHeader(pht('Calendar'))
       ->setHref(
         urisprintf(
-          '/calendar/?invitedPHIDs=%s#R',
-          $user->getPHID()));
+          '/calendar/?invited=%s#R',
+          $user->getUsername()));
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($day_view)
+      ->addClass('calendar-profile-box')
       ->setBackground(PHUIObjectBoxView::GREY);
 
     return $box;

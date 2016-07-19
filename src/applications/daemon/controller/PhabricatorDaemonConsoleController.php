@@ -190,6 +190,7 @@ final class PhabricatorDaemonConsoleController
     $triggers = id(new PhabricatorWorkerTriggerQuery())
       ->setViewer($viewer)
       ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)
+      ->withNextEventBetween(0, null)
       ->needEvents(true)
       ->setLimit(10)
       ->execute();

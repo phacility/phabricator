@@ -15,8 +15,12 @@ final class PhabricatorWorkerTaskDetailController
       $task = reset($tasks);
     }
 
+    $header = new PHUIHeaderView();
+
     if (!$task) {
       $title = pht('Task Does Not Exist');
+
+      $header->setHeader(pht('Task %d Missing', $id));
 
       $error_view = new PHUIInfoView();
       $error_view->setTitle(pht('No Such Task'));
@@ -30,11 +34,11 @@ final class PhabricatorWorkerTaskDetailController
     } else {
       $title = pht('Task %d', $task->getID());
 
-      $header = id(new PHUIHeaderView())
-        ->setHeader(pht('Task %d: %s',
+      $header->setHeader(
+        pht(
+          'Task %d: %s',
           $task->getID(),
-          $task->getTaskClass()))
-        ->setHeaderIcon('fa-sort');
+          $task->getTaskClass()));
 
       $properties = $this->buildPropertyListView($task);
 
@@ -58,6 +62,8 @@ final class PhabricatorWorkerTaskDetailController
         $retry_box,
       );
     }
+
+    $header->setHeaderIcon('fa-sort');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);

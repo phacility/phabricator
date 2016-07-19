@@ -342,18 +342,16 @@ final class DifferentialChangesetListView extends AphrontView {
     }
 
     $meta['containerID'] = $detail->getID();
-    $caret = phutil_tag('span', array('class' => 'caret'), '');
 
-    return javelin_tag(
-      'a',
-      array(
-        'class'   => 'button grey dropdown',
-        'meta'    => $meta,
-        'href'    => idx($meta, 'detailURI', '#'),
-        'target'  => '_blank',
-        'sigil'   => 'differential-view-options',
-      ),
-      array(pht('View Options'), $caret));
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View Options'))
+      ->setIcon('fa-bars')
+      ->setColor(PHUIButtonView::GREY)
+      ->setHref(idx($meta, 'detailURI', '#'))
+      ->setMetadata($meta)
+      ->addSigil('differential-view-options');
+
   }
 
 }

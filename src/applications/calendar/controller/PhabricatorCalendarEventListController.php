@@ -19,24 +19,19 @@ final class PhabricatorCalendarEventListController
 
     $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($request->getURIData('queryKey'))
-      ->setSearchEngine($engine)
-      ->setNavigation($this->buildSideNav());
+      ->setSearchEngine($engine);
+
     return $this->delegateToController($controller);
   }
 
-  public function buildSideNav() {
-    $user = $this->getRequest()->getUser();
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+    id(new PhabricatorCalendarEventEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs);
 
-    id(new PhabricatorCalendarEventSearchEngine())
-      ->setViewer($user)
-      ->addNavigationItems($nav->getMenu());
-
-    $nav->selectFilter(null);
-
-    return $nav;
+    return $crumbs;
   }
 
 }

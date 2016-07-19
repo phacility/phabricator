@@ -97,6 +97,8 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
       JX.Router.getInstance().queue(routable);
     });
 
+  JX.Stratcom.listen('hashchange', null, check_hash);
+
   check_hash();
 
   new JX.KeyboardShortcut(['@'], 'Show all older changes in the timeline.')

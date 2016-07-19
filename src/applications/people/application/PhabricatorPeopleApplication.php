@@ -69,7 +69,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         '' => 'PhabricatorPeopleProfileViewController',
         'panel/'
           => $this->getPanelRouting('PhabricatorPeopleProfilePanelController'),
-        'calendar/' => 'PhabricatorPeopleCalendarController',
       ),
     );
   }

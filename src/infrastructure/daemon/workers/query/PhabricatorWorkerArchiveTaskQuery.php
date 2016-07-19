@@ -7,6 +7,7 @@ final class PhabricatorWorkerArchiveTaskQuery
   private $dateModifiedSince;
   private $dateCreatedBefore;
   private $objectPHIDs;
+  private $classNames;
   private $limit;
 
   public function withIDs(array $ids) {
@@ -26,6 +27,11 @@ final class PhabricatorWorkerArchiveTaskQuery
 
   public function withObjectPHIDs(array $phids) {
     $this->objectPHIDs = $phids;
+    return $this;
+  }
+
+  public function withClassNames(array $names) {
+    $this->classNames = $names;
     return $this;
   }
 
@@ -67,18 +73,25 @@ final class PhabricatorWorkerArchiveTaskQuery
         $this->objectPHIDs);
     }
 
-    if ($this->dateModifiedSince) {
+    if ($this->dateModifiedSince !== null) {
       $where[] = qsprintf(
         $conn_r,
         'dateModified > %d',
         $this->dateModifiedSince);
     }
 
-    if ($this->dateCreatedBefore) {
+    if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
         $conn_r,
         'dateCreated < %d',
         $this->dateCreatedBefore);
+    }
+
+    if ($this->classNames !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'taskClass IN (%Ls)',
+        $this->classNames);
     }
 
     return $this->formatWhereClause($where);
