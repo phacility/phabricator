@@ -1,13 +1,13 @@
 <?php
 
-final class PhabricatorPackagesPackageQuery
+final class PhabricatorPackagesVersionQuery
   extends PhabricatorPackagesQuery {
 
   private $ids;
   private $phids;
-  private $publisherPHIDs;
-  private $packageKeys;
+  private $packagePHIDs;
   private $fullKeys;
+  private $names;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,13 +19,8 @@ final class PhabricatorPackagesPackageQuery
     return $this;
   }
 
-  public function withPublisherPHIDs(array $phids) {
-    $this->publisherPHIDs = $phids;
-    return $this;
-  }
-
-  public function withPackageKeys(array $keys) {
-    $this->packageKeys = $keys;
+  public function withPackagePHIDs(array $phids) {
+    $this->packagePHIDs = $phids;
     return $this;
   }
 
@@ -34,8 +29,13 @@ final class PhabricatorPackagesPackageQuery
     return $this;
   }
 
+  public function withNames(array $names) {
+    $this->names = $names;
+    return $this;
+  }
+
   public function newResultObject() {
-    return new PhabricatorPackagesPackage();
+    return new PhabricatorPackagesVersion();
   }
 
   protected function loadPage() {
@@ -48,29 +48,29 @@ final class PhabricatorPackagesPackageQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'p.id IN (%Ld)',
+        'v.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'p.phid IN (%Ls)',
+        'v.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->publisherPHIDs !== null) {
+    if ($this->packagePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'p.phid IN (%Ls)',
-        $this->publisherPHIDs);
+        'v.packagePHID IN (%Ls)',
+        $this->packagePHIDs);
     }
 
-    if ($this->packageKeys !== null) {
+    if ($this->names !== null) {
       $where[] = qsprintf(
         $conn,
-        'p.packageKey IN (%Ls)',
-        $this->packageKeys);
+        'v.name IN (%Ls)',
+        $this->names);
     }
 
     if ($this->fullKeys !== null) {
@@ -85,6 +85,17 @@ final class PhabricatorPackagesPackageQuery
     $joins = parent::buildJoinClauseParts($conn);
 
     $join_publisher = ($this->fullKeys !== null);
+    $join_package = ($this->fullKeys !== null) || $join_publisher;
+
+    if ($join_package) {
+      $package_table = new PhabricatorPackagesPackage();
+
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T p ON v.packagePHID = p.phid',
+        $package_table->getTableName());
+    }
+
     if ($join_publisher) {
       $publisher_table = new PhabricatorPackagesPublisher();
 
@@ -97,33 +108,34 @@ final class PhabricatorPackagesPackageQuery
     return $joins;
   }
 
-  protected function willFilterPage(array $packages) {
-    $publisher_phids = mpull($packages, 'getPublisherPHID');
+  protected function willFilterPage(array $versions) {
+    $package_phids = mpull($versions, 'getPackagePHID');
 
-    $publishers = id(new PhabricatorPackagesPublisherQuery())
+    $packages = id(new PhabricatorPackagesPackageQuery())
       ->setViewer($this->getViewer())
       ->setParentQuery($this)
-      ->withPHIDs($publisher_phids)
+      ->withPHIDs($package_phids)
       ->execute();
-    $publishers = mpull($publishers, null, 'getPHID');
+    $packages = mpull($packages, null, 'getPHID');
 
-    foreach ($packages as $key => $package) {
-      $publisher = idx($publishers, $package->getPublisherPHID());
+    foreach ($versions as $key => $version) {
+      $package = idx($packages, $version->getPackagePHID());
 
-      if (!$publisher) {
-        unset($packages[$key]);
-        $this->didRejectResult($package);
+      if (!$package) {
+        unset($versions[$key]);
+        $this->didRejectResult($version);
         continue;
       }
 
-      $package->attachPublisher($publisher);
+      $version->attachPackage($package);
     }
 
-    return $packages;
+    return $versions;
   }
 
   protected function getPrimaryTableAlias() {
-    return 'p';
+    return 'v';
   }
+
 
 }

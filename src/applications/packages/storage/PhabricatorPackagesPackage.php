@@ -154,7 +154,21 @@ final class PhabricatorPackagesPackage
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
-    $this->delete();
+    $viewer = $engine->getViewer();
+
+    $this->openTransaction();
+
+      $versions = id(new PhabricatorPackagesVersionQuery())
+        ->setViewer($viewer)
+        ->withPackagePHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($versions as $version) {
+        $engine->destroyObject($version);
+      }
+
+      $this->delete();
+
+    $this->saveTransaction();
   }
 
 

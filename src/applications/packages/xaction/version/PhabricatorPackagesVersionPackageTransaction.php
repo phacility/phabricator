@@ -1,44 +1,43 @@
 <?php
 
-final class PhabricatorPackagesPackagePublisherTransaction
-  extends PhabricatorPackagesPackageTransactionType {
+final class PhabricatorPackagesVersionPackageTransaction
+  extends PhabricatorPackagesVersionTransactionType {
 
-  const TRANSACTIONTYPE = 'packages.package.publisher';
+  const TRANSACTIONTYPE = 'packages.version.package';
 
   public function generateOldValue($object) {
-    return $object->getPublisherPHID();
+    return $object->getPackagePHID();
   }
 
   public function applyInternalEffects($object, $value) {
-    $object->setPublisherPHID($value);
+    $object->setPackagePHID($value);
   }
 
   public function validateTransactions($object, array $xactions) {
     $errors = array();
 
-    $current_value = $object->getPublisherPHID();
-    if ($this->isEmptyTextTransaction($current_value, $xactions)) {
+    if ($this->isEmptyTextTransaction($object->getPackagePHID(), $xactions)) {
       $errors[] = $this->newRequiredError(
         pht(
-          'You must select a publisher when creating a package.'));
+          'You must select a package when creating a version'));
       return $errors;
     }
 
     if (!$this->isNewObject()) {
       foreach ($xactions as $xaction) {
         $errors[] = $this->newInvalidError(
-          pht('Once a package is created, its publisher can not be changed.'),
+          pht('Once a version is created, its package can not be changed.'),
           $xaction);
       }
     }
 
     $viewer = $this->getActor();
     foreach ($xactions as $xaction) {
-      $publisher_phid = $xaction->getNewValue();
+      $package_phid = $xaction->getNewValue();
 
-      $publisher = id(new PhabricatorPackagesPublisherQuery())
+      $package = id(new PhabricatorPackagesPackageQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($publisher_phid))
+        ->withPHIDs(array($package_phid))
         ->setRaisePolicyExceptions(false)
         ->requireCapabilities(
           array(
@@ -47,18 +46,18 @@ final class PhabricatorPackagesPackagePublisherTransaction
           ))
         ->executeOne();
 
-      if (!$publisher) {
+      if (!$package) {
         $errors[] = $this->newInvalidError(
           pht(
-            'Publisher "%s" is invalid: the publisher must exist and you '.
+            'Package "%s" is invalid: the package must exist and you '.
             'must have permission to edit it in order to create a new '.
             'package.',
-            $publisher_phid),
+            $package_phid),
           $xaction);
         continue;
       }
 
-      $object->attachPublisher($publisher);
+      $object->attachPackage($package);
     }
 
     return $errors;
