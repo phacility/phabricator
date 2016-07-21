@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorPackagesPublisherQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+  extends PhabricatorPackagesQuery {
 
   private $ids;
   private $phids;
@@ -55,10 +55,6 @@ final class PhabricatorPackagesPublisherQuery
     }
 
     return $where;
-  }
-
-  public function getQueryApplicationClass() {
-    return 'PhabricatorPackagesApplication';
   }
 
 }

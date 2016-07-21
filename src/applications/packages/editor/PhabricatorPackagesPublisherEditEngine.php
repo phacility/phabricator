@@ -76,13 +76,13 @@ final class PhabricatorPackagesPublisherEditEngine
 
     if ($this->getIsCreate()) {
       $fields[] = id(new PhabricatorTextEditField())
-      ->setKey('publisherKey')
-      ->setLabel(pht('Publisher Key'))
-      ->setDescription(pht('Unique key to identify the publisher.'))
-      ->setTransactionType(
-        PhabricatorPackagesPublisherKeyTransaction::TRANSACTIONTYPE)
-      ->setIsRequired(true)
-      ->setValue($object->getPublisherKey());
+        ->setKey('publisherKey')
+        ->setLabel(pht('Publisher Key'))
+        ->setDescription(pht('Unique key to identify the publisher.'))
+        ->setTransactionType(
+          PhabricatorPackagesPublisherKeyTransaction::TRANSACTIONTYPE)
+        ->setIsRequired(true)
+        ->setValue($object->getPublisherKey());
     }
 
     return $fields;

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPackagesPublisher
+final class PhabricatorPackagesPackage
   extends PhabricatorPackagesDAO
   implements
     PhabricatorPolicyInterface,
@@ -11,10 +11,14 @@ final class PhabricatorPackagesPublisher
     PhabricatorConduitResultInterface {
 
   protected $name;
-  protected $publisherKey;
+  protected $publisherPHID;
+  protected $packageKey;
+  protected $viewPolicy;
   protected $editPolicy;
 
-  public static function initializeNewPublisher(PhabricatorUser $actor) {
+  private $publisher = self::ATTACHABLE;
+
+  public static function initializeNewPackage(PhabricatorUser $actor) {
     return id(new self());
   }
 
@@ -23,11 +27,11 @@ final class PhabricatorPackagesPublisher
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text64',
-        'publisherKey' => 'sort64',
+        'packageKey' => 'sort64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_publisher' => array(
-          'columns' => array('publisherKey'),
+        'key_package' => array(
+          'columns' => array('publisherPHID', 'packageKey'),
           'unique' => true,
         ),
       ),
@@ -36,20 +40,36 @@ final class PhabricatorPackagesPublisher
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPackagesPublisherPHIDType::TYPECONST);
+      PhabricatorPackagesPackagePHIDType::TYPECONST);
   }
 
   public function getURI() {
-    $publisher_key = $this->getPublisherKey();
-    return "/package/{$publisher_key}/";
+    $full_key = $this->getFullKey();
+    return "/package/{$full_key}/";
   }
 
-  public static function assertValidPublisherName($value) {
+  public function getFullKey() {
+    $publisher = $this->getPublisher();
+    $publisher_key = $publisher->getPublisherKey();
+    $package_key = $this->getPackageKey();
+    return "{$publisher_key}/{$package_key}";
+  }
+
+  public function attachPublisher(PhabricatorPackagesPublisher $publisher) {
+    $this->publisher = $publisher;
+    return $this;
+  }
+
+  public function getPublisher() {
+    return $this->assertAttached($this->publisher);
+  }
+
+  public static function assertValidPackageName($value) {
     $length = phutil_utf8_strlen($value);
     if (!$length) {
       throw new Exception(
         pht(
-          'Publisher name "%s" is not valid: publisher names are required.',
+          'Package name "%s" is not valid: package names are required.',
           $value));
     }
 
@@ -57,19 +77,19 @@ final class PhabricatorPackagesPublisher
     if ($length > $max_length) {
       throw new Exception(
         pht(
-          'Publisher name "%s" is not valid: publisher names must not be '.
+          'Package name "%s" is not valid: package names must not be '.
           'more than %s characters long.',
           $value,
           new PhutilNumber($max_length)));
     }
   }
 
-  public static function assertValidPublisherKey($value) {
+  public static function assertValidPackageKey($value) {
     $length = phutil_utf8_strlen($value);
     if (!$length) {
       throw new Exception(
         pht(
-          'Publisher key "%s" is not valid: publisher keys are required.',
+          'Package key "%s" is not valid: package keys are required.',
           $value));
     }
 
@@ -77,7 +97,7 @@ final class PhabricatorPackagesPublisher
     if ($length > $max_length) {
       throw new Exception(
         pht(
-          'Publisher key "%s" is not valid: publisher keys must not be '.
+          'Package key "%s" is not valid: package keys must not be '.
           'more than %s characters long.',
           $value,
           new PhutilNumber($max_length)));
@@ -86,7 +106,7 @@ final class PhabricatorPackagesPublisher
     if (!preg_match('/^[a-z]+\z/', $value)) {
       throw new Exception(
         pht(
-          'Publisher key "%s" is not valid: publisher keys may only contain '.
+          'Package key "%s" is not valid: package keys may only contain '.
           'lowercase latin letters.',
           $value));
     }
@@ -114,7 +134,7 @@ final class PhabricatorPackagesPublisher
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return PhabricatorPolicies::getMostOpenPolicy();
+        return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
     }
@@ -134,21 +154,7 @@ final class PhabricatorPackagesPublisher
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {
-    $viewer = $engine->getViewer();
-
-    $this->openTransaction();
-
-      $packages = id(new PhabricatorPackagesPackageQuery())
-        ->setViewer($viewer)
-        ->withPublisherPHIDs(array($this->getPHID()))
-        ->execute();
-      foreach ($packages as $package) {
-        $engine->destroyObject($package);
-      }
-
-      $this->delete();
-
-    $this->saveTransaction();
+    $this->delete();
   }
 
 
@@ -156,7 +162,7 @@ final class PhabricatorPackagesPublisher
 
 
   public function getApplicationTransactionEditor() {
-    return new PhabricatorPackagesPublisherEditor();
+    return new PhabricatorPackagesPackageEditor();
   }
 
   public function getApplicationTransactionObject() {
@@ -164,7 +170,7 @@ final class PhabricatorPackagesPublisher
   }
 
   public function getApplicationTransactionTemplate() {
-    return new PhabricatorPackagesPublisherTransaction();
+    return new PhabricatorPackagesPackageTransaction();
   }
 
   public function willRenderTimeline(
@@ -182,18 +188,29 @@ final class PhabricatorPackagesPublisher
       id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('name')
         ->setType('string')
-        ->setDescription(pht('The name of the publisher.')),
+        ->setDescription(pht('The name of the package.')),
       id(new PhabricatorConduitSearchFieldSpecification())
-        ->setKey('publisherKey')
+        ->setKey('packageKey')
         ->setType('string')
-        ->setDescription(pht('The unique key of the publisher.')),
+        ->setDescription(pht('The unique key of the package.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $publisher = $this->getPublisher();
+
+    $publisher_map = array(
+      'id' => (int)$publisher->getID(),
+      'phid' => $publisher->getPHID(),
+      'name' => $publisher->getName(),
+      'publisherKey' => $publisher->getPublisherKey(),
+    );
+
     return array(
       'name' => $this->getName(),
-      'publisherKey' => $this->getPublisherKey(),
+      'packageKey' => $this->getPackageKey(),
+      'fullKey' => $this->getFullKey(),
+      'publisher' => $publisher_map,
     );
   }
 

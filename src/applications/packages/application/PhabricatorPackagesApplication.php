@@ -31,6 +31,9 @@ final class PhabricatorPackagesApplication extends PhabricatorApplication {
       '/package/' => array(
         '(?P<publisherKey>[^/]+)/' => array(
           '' => 'PhabricatorPackagesPublisherViewController',
+          '(?P<packageKey>[^/]+)/' => array(
+            '' => 'PhabricatorPackagesPackageViewController',
+          ),
         ),
       ),
       '/packages/' => array(
@@ -39,6 +42,12 @@ final class PhabricatorPackagesApplication extends PhabricatorApplication {
             'PhabricatorPackagesPublisherListController',
           $this->getEditRoutePattern('edit/') =>
             'PhabricatorPackagesPublisherEditController',
+        ),
+        'package/' => array(
+          $this->getQueryRoutePattern() =>
+            'PhabricatorPackagesPackageListController',
+          $this->getEditRoutePattern('edit/') =>
+            'PhabricatorPackagesPackageEditController',
         ),
       ),
     );
