@@ -15,31 +15,25 @@ final class PhabricatorCalendarEventInviteTransaction
       }
     }
 
-    return mpull($invitees, 'getStatus', 'getInviteePHID');
+    return array_values(mpull($invitees, 'getInviteePHID'));
   }
 
-  public function generateNewValue($object, $value) {
+  private function generateChangeMap($object, $new_value) {
     $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
     $status_uninvited = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
     $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
 
-    $invitees = $this->generateOldValue($object);
+    $old = $this->generateOldValue($object);
 
-    $new = array_fuse($value);
+    $add = array_diff($new_value, $old);
+    $rem = array_diff($old, $new_value);
 
-    $all = array_keys($invitees + $new);
     $map = array();
-    foreach ($all as $phid) {
-      $is_old = isset($invitees[$phid]);
-      $is_new = isset($new[$phid]);
-
-      if ($is_old && !$is_new) {
-        $map[$phid] = $status_uninvited;
-      } else if (!$is_old && $is_new) {
+    foreach ($add as $phid) {
         $map[$phid] = $status_invited;
-      } else {
-        $map[$phid] = $invitees[$phid];
-      }
+    }
+    foreach ($rem as $phid) {
+        $map[$phid] = $status_uninvited;
     }
 
     // If we're creating this event and the actor is inviting themselves,
@@ -55,11 +49,12 @@ final class PhabricatorCalendarEventInviteTransaction
   }
 
   public function applyExternalEffects($object, $value) {
-    $phids = array_keys($value);
+    $map = $this->generateChangeMap($object, $value);
+
     $invitees = $object->getInvitees();
     $invitees = mpull($invitees, null, 'getInviteePHID');
 
-    foreach ($phids as $phid) {
+    foreach ($map as $phid => $status) {
       $invitee = idx($invitees, $phid);
       if (!$invitee) {
         $invitee = id(new PhabricatorCalendarEventInvitee())
@@ -68,7 +63,7 @@ final class PhabricatorCalendarEventInviteTransaction
           ->setInviterPHID($this->getActingAsPHID());
         $invitees[] = $invitee;
       }
-      $invitee->setStatus($value[$phid])
+      $invitee->setStatus($status)
         ->save();
     }
 
@@ -179,11 +174,8 @@ final class PhabricatorCalendarEventInviteTransaction
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
-    $add = array_diff_key($new, $old);
-    $rem = array_diff_key($old, $new);
-
-    $add = array_keys($add);
-    $rem = array_keys($rem);
+    $add = array_diff($new, $old);
+    $rem = array_diff($old, $new);
 
     return array(array_fuse($add), array_fuse($rem));
   }
