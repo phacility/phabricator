@@ -15,7 +15,16 @@ final class PhabricatorPackagesPublisher
   protected $editPolicy;
 
   public static function initializeNewPublisher(PhabricatorUser $actor) {
-    return id(new self());
+    $packages_application = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorPackagesApplication'))
+      ->executeOne();
+
+    $edit_policy = $packages_application->getPolicy(
+      PhabricatorPackagesPublisherDefaultEditCapability::CAPABILITY);
+
+    return id(new self())
+      ->setEditPolicy($edit_policy);
   }
 
   protected function getConfiguration() {

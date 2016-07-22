@@ -19,7 +19,20 @@ final class PhabricatorPackagesPackage
   private $publisher = self::ATTACHABLE;
 
   public static function initializeNewPackage(PhabricatorUser $actor) {
-    return id(new self());
+    $packages_application = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorPackagesApplication'))
+      ->executeOne();
+
+    $view_policy = $packages_application->getPolicy(
+      PhabricatorPackagesPackageDefaultViewCapability::CAPABILITY);
+
+    $edit_policy = $packages_application->getPolicy(
+      PhabricatorPackagesPackageDefaultEditCapability::CAPABILITY);
+
+    return id(new self())
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
   }
 
   protected function getConfiguration() {

@@ -26,6 +26,27 @@ final class PhabricatorPackagesApplication extends PhabricatorApplication {
     return true;
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorPackagesCreatePublisherCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      PhabricatorPackagesPublisherDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht('Default edit policy for newly created publishers.'),
+        'template' => PhabricatorPackagesPublisherPHIDType::TYPECONST,
+        'default' => PhabricatorPolicies::POLICY_NOONE,
+      ),
+      PhabricatorPackagesPackageDefaultViewCapability::CAPABILITY => array(
+        'caption' => pht('Default edit policy for newly created packages.'),
+        'template' => PhabricatorPackagesPackagePHIDType::TYPECONST,
+      ),
+      PhabricatorPackagesPackageDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht('Default view policy for newly created packages.'),
+        'template' => PhabricatorPackagesPackagePHIDType::TYPECONST,
+        'default' => PhabricatorPolicies::POLICY_NOONE,
+      ),
+    );
+  }
   public function getRoutes() {
     return array(
       '/package/' => array(

@@ -62,6 +62,11 @@ final class PhabricatorPackagesPublisherEditEngine
     return $object->getURI();
   }
 
+  protected function getCreateNewObjectPolicy() {
+    return $this->getApplication()->getPolicy(
+      PhabricatorPackagesCreatePublisherCapability::CAPABILITY);
+  }
+
   protected function buildCustomEditFields($object) {
     $fields = array();
 
