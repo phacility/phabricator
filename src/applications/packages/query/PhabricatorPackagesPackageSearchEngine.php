@@ -74,19 +74,12 @@ final class PhabricatorPackagesPackageSearchEngine
     array $handles) {
 
     assert_instances_of($packages, 'PhabricatorPackagesPackage');
-
     $viewer = $this->requireViewer();
 
-    $list = id(new PHUIObjectItemListView())
-      ->setViewer($viewer);
-    foreach ($packages as $package) {
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName($package->getFullKey())
-        ->setHeader($package->getName())
-        ->setHref($package->getURI());
-
-      $list->addItem($item);
-    }
+    $list = id(new PhabricatorPackagesPackageListView())
+      ->setViewer($viewer)
+      ->setPackages($packages)
+      ->newListView();
 
     return id(new PhabricatorApplicationSearchResultView())
       ->setObjectList($list)

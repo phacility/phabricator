@@ -39,6 +39,7 @@ final class PhabricatorPackagesVersionViewController
     $timeline = $this->buildTransactionTimeline(
       $version,
       new PhabricatorPackagesVersionTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $version_view = id(new PHUITwoColumnView())
       ->setHeader($header)

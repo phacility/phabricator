@@ -32,14 +32,21 @@ final class PhabricatorPackagesPackageViewController
     $header = $this->buildHeaderView($package);
     $curtain = $this->buildCurtain($package);
 
+    $versions_view = $this->buildVersionsView($package);
+
     $timeline = $this->buildTransactionTimeline(
       $package,
       new PhabricatorPackagesPackageTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $package_view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn($timeline);
+      ->setMainColumn(
+        array(
+          $versions_view,
+          $timeline,
+        ));
 
     return $this->newPage()
       ->setCrumbs($crumbs)
@@ -84,4 +91,39 @@ final class PhabricatorPackagesPackageViewController
     return $curtain;
   }
 
+  private function buildVersionsView(PhabricatorPackagesPackage $package) {
+    $viewer = $this->getViewer();
+
+    $versions = id(new PhabricatorPackagesVersionQuery())
+      ->setViewer($viewer)
+      ->withPackagePHIDs(array($package->getPHID()))
+      ->setLimit(25)
+      ->execute();
+
+    $versions_list = id(new PhabricatorPackagesVersionListView())
+      ->setViewer($viewer)
+      ->setVersions($versions);
+
+    $all_href = urisprintf(
+      'version/?package=%s#R',
+      $package->getPHID());
+    $all_href = $this->getApplicationURI($all_href);
+
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-search')
+      ->setText(pht('View All'))
+      ->setHref($all_href);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Versions'))
+      ->addActionLink($view_all);
+
+    $versions_view = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($versions_list);
+
+    return $versions_view;
+  }
 }

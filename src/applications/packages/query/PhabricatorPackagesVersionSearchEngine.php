@@ -73,18 +73,12 @@ final class PhabricatorPackagesVersionSearchEngine
     array $handles) {
 
     assert_instances_of($versions, 'PhabricatorPackagesVersion');
-
     $viewer = $this->requireViewer();
 
-    $list = id(new PHUIObjectItemListView())
-      ->setViewer($viewer);
-    foreach ($versions as $version) {
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($version->getName())
-        ->setHref($version->getURI());
-
-      $list->addItem($item);
-    }
+    $list = id(new PhabricatorPackagesVersionListView())
+      ->setViewer($viewer)
+      ->setVersions($versions)
+      ->newListView();
 
     return id(new PhabricatorApplicationSearchResultView())
       ->setObjectList($list)

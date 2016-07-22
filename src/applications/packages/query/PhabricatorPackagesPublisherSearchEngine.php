@@ -67,16 +67,10 @@ final class PhabricatorPackagesPublisherSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $list = id(new PHUIObjectItemListView())
-      ->setViewer($viewer);
-    foreach ($publishers as $publisher) {
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName($publisher->getPublisherKey())
-        ->setHeader($publisher->getName())
-        ->setHref($publisher->getURI());
-
-      $list->addItem($item);
-    }
+    $list = id(new PhabricatorPackagesPublisherListView())
+      ->setViewer($viewer)
+      ->setPublishers($publishers)
+      ->newListView();
 
     return id(new PhabricatorApplicationSearchResultView())
       ->setObjectList($list)

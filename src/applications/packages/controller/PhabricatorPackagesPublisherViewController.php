@@ -29,14 +29,21 @@ final class PhabricatorPackagesPublisherViewController
     $header = $this->buildHeaderView($publisher);
     $curtain = $this->buildCurtain($publisher);
 
+    $packages_view = $this->buildPackagesView($publisher);
+
     $timeline = $this->buildTransactionTimeline(
       $publisher,
       new PhabricatorPackagesPublisherTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $publisher_view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn($timeline);
+      ->setMainColumn(
+        array(
+          $packages_view,
+          $timeline,
+        ));
 
     return $this->newPage()
       ->setCrumbs($crumbs)
@@ -79,6 +86,42 @@ final class PhabricatorPackagesPublisherViewController
         ->setHref($edit_uri));
 
     return $curtain;
+  }
+
+  private function buildPackagesView(PhabricatorPackagesPublisher $publisher) {
+    $viewer = $this->getViewer();
+
+    $packages = id(new PhabricatorPackagesPackageQuery())
+      ->setViewer($viewer)
+      ->withPublisherPHIDs(array($publisher->getPHID()))
+      ->setLimit(25)
+      ->execute();
+
+    $packages_list = id(new PhabricatorPackagesPackageListView())
+      ->setViewer($viewer)
+      ->setPackages($packages);
+
+    $all_href = urisprintf(
+      'package/?publisher=%s#R',
+      $publisher->getPHID());
+    $all_href = $this->getApplicationURI($all_href);
+
+    $view_all = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-search')
+      ->setText(pht('View All'))
+      ->setHref($all_href);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Packages'))
+      ->addActionLink($view_all);
+
+    $packages_view = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($packages_list);
+
+    return $packages_view;
   }
 
 }
