@@ -34,6 +34,12 @@ final class PhabricatorPackagesPackageQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new PhabricatorPackagesPackageNameNgrams(),
+      $ngrams);
+  }
+
   public function newResultObject() {
     return new PhabricatorPackagesPackage();
   }
@@ -62,7 +68,7 @@ final class PhabricatorPackagesPackageQuery
     if ($this->publisherPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'p.phid IN (%Ls)',
+        'p.publisherPHID IN (%Ls)',
         $this->publisherPHIDs);
     }
 

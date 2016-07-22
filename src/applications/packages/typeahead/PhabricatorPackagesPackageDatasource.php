@@ -4,7 +4,7 @@ final class PhabricatorPackagesPackageDatasource
   extends PhabricatorTypeaheadDatasource {
 
   public function getBrowseTitle() {
-    return pht('Browse Packagess');
+    return pht('Browse Packages');
   }
 
   public function getPlaceholderText() {

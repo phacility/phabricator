@@ -7,4 +7,14 @@ abstract class PhabricatorPackagesEditor
     return 'PhabricatorPasteApplication';
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
 }

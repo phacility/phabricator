@@ -15,12 +15,6 @@ final class PhabricatorPackagesVersionEditor
     return pht('%s created %s.', $author, $object);
   }
 
-  protected function shouldPublishFeedStory(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return true;
-  }
-
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array();
   }

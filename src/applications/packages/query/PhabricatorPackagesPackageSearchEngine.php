@@ -18,11 +18,30 @@ final class PhabricatorPackagesPackageSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
+
+    if ($map['publisherPHIDs']) {
+      $query->withPublisherPHIDs($map['publisherPHIDs']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for packages by name substring.')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Publishers'))
+        ->setKey('publisherPHIDs')
+        ->setAliases(array('publisherPHID', 'publisher', 'publishers'))
+        ->setDatasource(new PhabricatorPackagesPublisherDatasource())
+        ->setDescription(pht('Search for packages by publisher.')),
+    );
   }
 
   protected function getURI($path) {

@@ -8,7 +8,8 @@ final class PhabricatorPackagesPackage
     PhabricatorDestructibleInterface,
     PhabricatorSubscribableInterface,
     PhabricatorProjectInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $publisherPHID;
@@ -39,7 +40,7 @@ final class PhabricatorPackagesPackage
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text64',
+        'name' => 'sort64',
         'packageKey' => 'sort64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -204,6 +205,17 @@ final class PhabricatorPackagesPackage
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorPackagesPackageNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 

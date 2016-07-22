@@ -22,6 +22,12 @@ final class PhabricatorPackagesPublisherQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new PhabricatorPackagesPublisherNameNgrams(),
+      $ngrams);
+  }
+
   public function newResultObject() {
     return new PhabricatorPackagesPublisher();
   }
@@ -36,25 +42,29 @@ final class PhabricatorPackagesPublisherQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'u.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'u.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->publisherKeys !== null) {
       $where[] = qsprintf(
         $conn,
-        'publisherKey IN (%Ls)',
+        'u.publisherKey IN (%Ls)',
         $this->publisherKeys);
     }
 
     return $where;
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'u';
   }
 
 }

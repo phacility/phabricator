@@ -18,13 +18,31 @@ final class PhabricatorPackagesVersionSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['match'] !== null) {
+      $query->withNameNgrams($map['match']);
+    }
+
+    if ($map['packagePHIDs']) {
+      $query->withPackagePHIDs($map['packagePHIDs']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('match')
+        ->setDescription(pht('Search for versions by name substring.')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Packages'))
+        ->setKey('packagePHIDs')
+        ->setAliases(array('packagePHID', 'package', 'packages'))
+        ->setDatasource(new PhabricatorPackagesPackageDatasource())
+        ->setDescription(pht('Search for versions by package.')),
+    );
   }
-
   protected function getURI($path) {
     return '/packages/version/'.$path;
   }

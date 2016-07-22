@@ -34,6 +34,12 @@ final class PhabricatorPackagesVersionQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      new PhabricatorPackagesVersionNameNgrams(),
+      $ngrams);
+  }
+
   public function newResultObject() {
     return new PhabricatorPackagesVersion();
   }

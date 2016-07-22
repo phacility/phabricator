@@ -24,12 +24,6 @@ final class PhabricatorPackagesPackageEditor
     return $types;
   }
 
-  protected function shouldPublishFeedStory(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return true;
-  }
-
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array();
   }

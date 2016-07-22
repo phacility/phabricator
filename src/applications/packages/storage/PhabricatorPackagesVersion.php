@@ -9,7 +9,8 @@ final class PhabricatorPackagesVersion
     PhabricatorDestructibleInterface,
     PhabricatorSubscribableInterface,
     PhabricatorProjectInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $packagePHID;
@@ -171,6 +172,17 @@ final class PhabricatorPackagesVersion
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+
+/* -(  PhabricatorNgramsInterface  )----------------------------------------- */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorPackagesVersionNameNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 
