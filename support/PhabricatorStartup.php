@@ -374,7 +374,7 @@ final class PhabricatorStartup {
       $http_error = 500);
 
     error_log($log_message);
-    echo $message;
+    echo $message."\n";
 
     exit(1);
   }
@@ -528,6 +528,13 @@ final class PhabricatorStartup {
           "cause Phabricator to fatal unrecoverably with nonsense errors). ".
           "Downgrade to version 3.1.13.");
       }
+    }
+
+    if (isset($_SERVER['HTTP_PROXY'])) {
+      self::didFatal(
+        'This HTTP request included a "Proxy:" header, poisoning the '.
+        'environment (CVE-2016-5385 / httpoxy). Declining to process this '.
+        'request. For details, see: https://phurl.io/u/httpoxy');
     }
   }
 
