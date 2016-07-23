@@ -132,7 +132,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
         'the authenticator correctly:'));
 
     $form->appendChild(
-      id(new AphrontFormTextControl())
+      id(new PHUIFormNumberControl())
         ->setLabel(pht('TOTP Code'))
         ->setName('totpcode')
         ->setValue($code)
