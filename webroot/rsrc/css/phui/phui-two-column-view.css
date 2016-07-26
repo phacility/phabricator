@@ -214,6 +214,11 @@
     margin: 16px;
 }
 
+.device .phui-two-column-view .phui-box-blue-property
+  .phui-header-shell + .phui-info-view {
+    margin: 8px;
+}
+
 /* Navigation */
 
 .phui-two-column-view .side-has-nav .phabricator-nav-local {
