@@ -4,6 +4,7 @@ final class PhabricatorEpochEditField
   extends PhabricatorEditField {
 
   private $allowNull;
+  private $hideTime;
 
   public function setAllowNull($allow_null) {
     $this->allowNull = $allow_null;
@@ -14,9 +15,19 @@ final class PhabricatorEpochEditField
     return $this->allowNull;
   }
 
+  public function setHideTime($hide_time) {
+    $this->hideTime = $hide_time;
+    return $this;
+  }
+
+  public function getHideTime() {
+    return $this->hideTime;
+  }
+
   protected function newControl() {
     return id(new AphrontFormDateControl())
       ->setAllowNull($this->getAllowNull())
+      ->setIsTimeDisabled($this->getHideTime())
       ->setViewer($this->getViewer());
   }
 
@@ -26,9 +37,7 @@ final class PhabricatorEpochEditField
   }
 
   protected function newConduitParameterType() {
-    // TODO: This isn't correct, but we don't have any methods which use this
-    // yet.
-    return new ConduitIntParameterType();
+    return new ConduitEpochParameterType();
   }
 
 }

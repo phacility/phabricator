@@ -212,4 +212,45 @@ final class PhabricatorCalendarEventEditEngine
     return $fields;
   }
 
+  protected function willBuildEditForm($object, array $fields) {
+    $all_day_field = idx($fields, 'isAllDay');
+    $start_field = idx($fields, 'start');
+    $end_field = idx($fields, 'end');
+
+    if ($all_day_field) {
+      $is_all_day = $all_day_field->getValueForTransaction();
+
+      $control_ids = array();
+      if ($start_field) {
+        $control_ids[] = $start_field->getControlID();
+      }
+      if ($end_field) {
+        $control_ids[] = $end_field->getControlID();
+      }
+
+      Javelin::initBehavior(
+        'event-all-day',
+        array(
+          'allDayID' => $all_day_field->getControlID(),
+          'controlIDs' => $control_ids,
+        ));
+
+    } else {
+      $is_all_day = $object->getIsAllDay();
+    }
+
+    if ($is_all_day) {
+      if ($start_field) {
+        $start_field->setHideTime(true);
+      }
+
+      if ($end_field) {
+        $end_field->setHideTime(true);
+      }
+    }
+
+
+
+    return $fields;
+  }
 }
