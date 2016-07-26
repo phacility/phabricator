@@ -35,6 +35,14 @@ final class PhabricatorSearchDateField
       return null;
     }
 
+    // If this appears to be an epoch timestamp, just return it unmodified.
+    // This assumes values like "2016" or "20160101" are "Ymd".
+    if (is_int($value) || ctype_digit($value)) {
+      if ((int)$value > 30000000) {
+        return (int)$value;
+      }
+    }
+
     return PhabricatorTime::parseLocalTime($value, $this->getViewer());
   }
 
