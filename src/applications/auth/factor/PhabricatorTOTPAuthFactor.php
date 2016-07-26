@@ -151,7 +151,7 @@ final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
     }
 
     $form->appendChild(
-      id(new AphrontFormTextControl())
+      id(new PHUIFormNumberControl())
         ->setName($this->getParameterName($config, 'totpcode'))
         ->setLabel(pht('App Code'))
         ->setCaption(pht('Factor Name: %s', $config->getFactorName()))
