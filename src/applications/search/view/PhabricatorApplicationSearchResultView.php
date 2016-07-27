@@ -14,6 +14,8 @@ final class PhabricatorApplicationSearchResultView extends Phobject {
   private $actions = array();
   private $collapsed = null;
   private $noDataString;
+  private $crumbs = array();
+  private $header;
 
   public function setObjectList(PHUIObjectItemListView $list) {
     $this->objectList = $list;
@@ -81,5 +83,27 @@ final class PhabricatorApplicationSearchResultView extends Phobject {
     $this->noDataString = $nodata;
     return $this;
   }
+
+  public function setCrumbs(array $crumbs) {
+    assert_instances_of($crumbs, 'PHUICrumbView');
+
+    $this->crumbs = $crumbs;
+    return $this;
+  }
+
+  public function getCrumbs() {
+    return $this->crumbs;
+  }
+
+  public function setHeader(PHUIHeaderView $header) {
+    $this->header = $header;
+    return $this;
+  }
+
+  public function getHeader() {
+    return $this->header;
+  }
+
+
 
 }

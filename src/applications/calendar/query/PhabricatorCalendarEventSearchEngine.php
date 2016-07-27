@@ -362,7 +362,18 @@ final class PhabricatorCalendarEventSearchEngine
     $month_view->setBrowseURI(
       $this->getURI('query/'.$query->getQueryKey().'/'));
 
+    $from = $this->getQueryDateFrom($query)->getDateTime();
+
+    $crumbs = array();
+    $crumbs[] = id(new PHUICrumbView())
+      ->setName($from->format('F Y'));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($from->format('F Y'));
+
     return id(new PhabricatorApplicationSearchResultView())
+      ->setCrumbs($crumbs)
+      ->setHeader($header)
       ->setContent($month_view)
       ->setCollapsed(true);
   }
@@ -380,8 +391,8 @@ final class PhabricatorCalendarEventSearchEngine
         $query->getParameter('display'));
 
     $day_view = id(new PHUICalendarDayView(
-      $this->getQueryDateFrom($query)->getEpoch(),
-      $this->getQueryDateTo($query)->getEpoch(),
+      $this->getQueryDateFrom($query),
+      $this->getQueryDateTo($query),
       $start_year,
       $start_month,
       $start_day))
@@ -417,10 +428,26 @@ final class PhabricatorCalendarEventSearchEngine
       $day_view->addEvent($event_view);
     }
 
-    $day_view->setBrowseURI(
-      $this->getURI('query/'.$query->getQueryKey().'/'));
+    $browse_uri = $this->getURI('query/'.$query->getQueryKey().'/');
+    $day_view->setBrowseURI($browse_uri);
+
+    $from = $this->getQueryDateFrom($query)->getDateTime();
+    $month_uri = $browse_uri.$from->format('Y/m/');
+
+    $crumbs = array(
+      id(new PHUICrumbView())
+        ->setName($from->format('F Y'))
+        ->setHref($month_uri),
+      id(new PHUICrumbView())
+        ->setName($from->format('D jS')),
+    );
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($from->format('D, F jS'));
 
     return id(new PhabricatorApplicationSearchResultView())
+      ->setCrumbs($crumbs)
+      ->setHeader($header)
       ->setContent($day_view)
       ->setCollapsed(true);
   }
@@ -466,6 +493,20 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   private function getQueryDateFrom(PhabricatorSavedQuery $saved) {
+    if ($this->calendarYear && $this->calendarMonth) {
+      $viewer = $this->requireViewer();
+
+      $start_year = $this->calendarYear;
+      $start_month = $this->calendarMonth;
+      $start_day = $this->calendarDay ? $this->calendarDay : 1;
+
+      return AphrontFormDateControlValue::newFromDictionary(
+        $viewer,
+        array(
+          'd' => "{$start_year}-{$start_month}-{$start_day}",
+        ));
+    }
+
     return $this->getQueryDate($saved, 'rangeStart');
   }
 

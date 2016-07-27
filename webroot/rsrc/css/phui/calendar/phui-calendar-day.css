@@ -92,7 +92,6 @@ div.phui-calendar-day-event.all-day {
   background-color: {$bluebackground};
   color: {$greytext};
   text-decoration: none;
-  text-decoration: none;
 }
 
 .day-view-all-day {

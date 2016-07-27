@@ -445,8 +445,7 @@ final class PHUICalendarMonthView extends AphrontView {
 
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($date->format('F Y'));
+    $header = id(new PHUIHeaderView());
 
     if ($button_bar) {
       $header->setButtonBar($button_bar);
