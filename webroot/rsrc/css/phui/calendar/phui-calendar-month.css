@@ -50,12 +50,6 @@ table.phui-calendar-view td {
   min-height: 32px;
 }
 
-a.phui-calendar-month-secret-link {
-  position: absolute;
-  left: 0;
-  right: 0;
-}
-
 table.phui-calendar-view tr td:first-child {
   border-left-width: 0px;
 }
@@ -113,7 +107,7 @@ table.phui-calendar-view a.phui-calendar-date-number {
   width: 12px;
 }
 
-table.phui-calendar-view td.phui-calendar-date-number-container {
+table.phui-calendar-view td.phui-calendar-month-number {
   font-weight: normal;
   color: {$lightgreytext};
   border-width: 0 1px 0 1px;
@@ -214,4 +208,14 @@ li.phui-calendar-viewer-invited.all-day {
   width: 60px;
   color: {$lightgreytext};
   text-align: right;
+}
+
+td.phui-calendar-month-day,
+td.phui-calendar-month-number {
+  cursor: pointer;
+}
+
+.device-desktop td.phui-calendar-month-day.calendar-hover,
+.device-desktop td.phui-calendar-month-number.calendar-hover {
+  background: {$lightblue};
 }

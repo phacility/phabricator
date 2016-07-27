@@ -32,7 +32,11 @@ final class PHUICalendarListView extends AphrontTagView {
   protected function getTagAttributes() {
     require_celerity_resource('phui-calendar-css');
     require_celerity_resource('phui-calendar-list-css');
-    return array('class' => 'phui-calendar-event-list');
+
+    return array(
+      'sigil' => 'calendar-event-list',
+      'class' => 'phui-calendar-event-list',
+    );
   }
 
   protected function getTagContent() {
