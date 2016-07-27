@@ -34,8 +34,16 @@ tr.phui-calendar-day-of-week-header th .short-weekday-name {
 
 table.phui-calendar-view td {
   border: solid #dfdfdf;
-  border-width: 1px 1px 0 1px;
+  border-width: 1px 0 0;
   width: 14.2857%; /* This is one seventh, approximately. */
+}
+
+table.phui-calendar-view td + td {
+  border-left-width: 1px;
+}
+
+table.phui-calendar-view td.phui-calendar-month-number {
+  border-top-width: 0;
 }
 
 .phui-calendar-month-cell-div {
@@ -48,10 +56,6 @@ table.phui-calendar-view td {
 
 .device .phui-calendar-month-event-list .phui-calendar-month-cell-div {
   min-height: 32px;
-}
-
-table.phui-calendar-view tr td:first-child {
-  border-left-width: 0px;
 }
 
 .device table.phui-calendar-view .phui-calendar-event-list {
@@ -110,7 +114,6 @@ table.phui-calendar-view a.phui-calendar-date-number {
 table.phui-calendar-view td.phui-calendar-month-number {
   font-weight: normal;
   color: {$lightgreytext};
-  border-width: 0 1px 0 1px;
   text-align: right;
 }
 

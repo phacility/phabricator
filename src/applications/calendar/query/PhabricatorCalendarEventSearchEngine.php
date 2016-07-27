@@ -255,7 +255,7 @@ final class PhabricatorCalendarEventSearchEngine
     array $handles) {
 
     if ($this->isMonthView($query)) {
-      return $this->buildCalendarView($events, $query);
+      return $this->buildCalendarMonthView($events, $query);
     } else if ($this->isDayView($query)) {
       return $this->buildCalendarDayView($events, $query);
     }
@@ -307,7 +307,7 @@ final class PhabricatorCalendarEventSearchEngine
     return $result;
   }
 
-  private function buildCalendarView(
+  private function buildCalendarMonthView(
     array $events,
     PhabricatorSavedQuery $query) {
     assert_instances_of($events, 'PhabricatorCalendarEvent');
@@ -362,11 +362,9 @@ final class PhabricatorCalendarEventSearchEngine
     $month_view->setBrowseURI(
       $this->getURI('query/'.$query->getQueryKey().'/'));
 
-    // TODO redesign-2015 : Move buttons out of PHUICalendarView?
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setContent($month_view);
-
-    return $result;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($month_view)
+      ->setCollapsed(true);
   }
 
   private function buildCalendarDayView(
@@ -422,10 +420,9 @@ final class PhabricatorCalendarEventSearchEngine
     $day_view->setBrowseURI(
       $this->getURI('query/'.$query->getQueryKey().'/'));
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setContent($day_view);
-
-    return $result;
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($day_view)
+      ->setCollapsed(true);
   }
 
   private function getDisplayYearAndMonthAndDay(

@@ -1,13 +1,11 @@
 <?php
 
-final class PhabricatorApplicationSearchResultView extends Phobject {
-
 /**
  * Holds bits and pieces of UI information for Search Engine
  * and Dashboard Panel rendering, describing the results and
  * controls for presentation.
- *
  */
+final class PhabricatorApplicationSearchResultView extends Phobject {
 
   private $objectList = null;
   private $table = null;
