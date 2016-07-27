@@ -65,7 +65,6 @@ final class PHUICalendarMonthView extends AphrontView {
     foreach ($days as $day) {
       $day_number = $day->format('j');
 
-      $class = 'phui-calendar-month-day';
       $weekday = $day->format('w');
 
       $day->setTime(0, 0, 0);
@@ -115,13 +114,20 @@ final class PHUICalendarMonthView extends AphrontView {
 
       $day_id = $day->format('Ymd');
 
+
+      $classes = array();
+      if ($day->format('m') != $this->month) {
+        $classes[] = 'phui-calendar-month-adjacent';
+      }
+      $classes = implode(' ', $classes);
+
       $cell_lists[$day_id] = array(
         'dayID' => $day_id,
         'list' => $list,
         'date' => $day,
         'dayURI' => $uri,
         'count' => count($all_day_events) + count($list_events),
-        'class' => $class,
+        'class' => $classes,
       );
     }
 
@@ -219,6 +225,7 @@ final class PHUICalendarMonthView extends AphrontView {
 
     $classes = array();
     $classes[] = 'phui-calendar-month-event-list';
+    $classes[] = 'phui-calendar-month-day';
     $classes[] = $event_list['class'];
     $classes = implode(' ', $classes);
 
@@ -285,6 +292,7 @@ final class PHUICalendarMonthView extends AphrontView {
 
     $classes = array();
     $classes[] = 'phui-calendar-month-number';
+    $classes[] = $event_list['class'];
 
     if ($date) {
       if ($this->isDateInCurrentWeek($date)) {

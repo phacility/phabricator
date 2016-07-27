@@ -222,3 +222,7 @@ td.phui-calendar-month-number {
 .device-desktop td.phui-calendar-month-number.calendar-hover {
   background: {$lightblue};
 }
+
+.phui-calendar-month-adjacent {
+  background: {$greybackground};
+}
