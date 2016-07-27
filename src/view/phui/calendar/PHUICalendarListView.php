@@ -5,6 +5,16 @@ final class PHUICalendarListView extends AphrontTagView {
   private $events = array();
   private $blankState;
   private $view;
+  private $moreLink;
+
+  public function setMoreLink($more_link) {
+    $this->moreLink = $more_link;
+    return $this;
+  }
+
+  public function getMoreLink() {
+    return $this->moreLink;
+  }
 
   private function getView() {
     return $this->view;
@@ -60,7 +70,7 @@ final class PHUICalendarListView extends AphrontTagView {
       $icon_icon = $event->getIcon();
       $icon_color = $event->getIconColor();
 
-      $dot = id(new PHUIIconView())
+      $icon = id(new PHUIIconView())
         ->setIcon($icon_icon, $icon_color)
         ->addClass('phui-calendar-list-item-icon');
 
@@ -108,7 +118,7 @@ final class PHUICalendarListView extends AphrontTagView {
           ),
         ),
         array(
-          $dot,
+          $icon,
           $time,
           $title,
         ));
@@ -119,6 +129,29 @@ final class PHUICalendarListView extends AphrontTagView {
           'class' => implode(' ', $event_classes),
         ),
         $content);
+    }
+
+    if ($this->moreLink) {
+      $singletons[] = phutil_tag(
+        'li',
+        array(
+          'class' => 'phui-calendar-list-item',
+        ),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $this->moreLink,
+            'class' => 'phui-calendar-list-more',
+          ),
+          array(
+            id(new PHUIIconView())->setIcon('fa-ellipsis-h grey'),
+            phutil_tag(
+              'span',
+              array(
+                'class' => 'phui-calendar-list-title',
+              ),
+              pht('View More...')),
+          )));
     }
 
     if (empty($singletons)) {
