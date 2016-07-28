@@ -50,6 +50,10 @@ abstract class PhabricatorObjectGraph
       ));
   }
 
+  final public function getSeedPHID() {
+    return $this->seedPHID;
+  }
+
   final public function isEmpty() {
     return (count($this->getNodes()) <= 2);
   }

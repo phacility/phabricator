@@ -3,6 +3,8 @@
 final class ManiphestTaskGraph
   extends PhabricatorObjectGraph {
 
+  private $seedMaps = array();
+
   protected function getEdgeTypes() {
     return array(
       ManiphestTaskDependedOnByTaskEdgeType::EDGECONST,
@@ -57,7 +59,12 @@ final class ManiphestTaskGraph
         $object->getTitle());
 
       $link = array(
-        $object->getMonogram(),
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'object-name',
+          ),
+          $object->getMonogram()),
         ' ',
         $link,
       );
@@ -67,9 +74,33 @@ final class ManiphestTaskGraph
       $link = $viewer->renderHandle($phid);
     }
 
+
+
+    if ($this->isParentTask($object)) {
+      $marker = 'fa-chevron-circle-up bluegrey';
+      $marker_tip = pht('Direct Parent');
+    } else if ($this->isChildTask($object)) {
+      $marker = 'fa-chevron-circle-down bluegrey';
+      $marker_tip = pht('Direct Subtask');
+    } else {
+      $marker = null;
+    }
+
+    if ($marker) {
+      $marker = id(new PHUIIconView())
+        ->setIcon($marker)
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $marker_tip,
+            'align' => 'E',
+          ));
+    }
+
     $link = AphrontTableView::renderSingleDisplayLine($link);
 
     return array(
+      $marker,
       $trace,
       $status,
       $assigned,
@@ -82,12 +113,14 @@ final class ManiphestTaskGraph
       ->setHeaders(
         array(
           null,
+          null,
           pht('Status'),
           pht('Assigned'),
           pht('Task'),
         ))
       ->setColumnClasses(
         array(
+          'nudgeright',
           'threads',
           'graph-status',
           null,
@@ -95,4 +128,24 @@ final class ManiphestTaskGraph
         ));
   }
 
+  private function isParentTask(ManiphestTask $task) {
+    $map = $this->getSeedMap(ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
+    return isset($map[$task->getPHID()]);
+  }
+
+  private function isChildTask(ManiphestTask $task) {
+    $map = $this->getSeedMap(ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+    return isset($map[$task->getPHID()]);
+  }
+
+  private function getSeedMap($type) {
+    if (!isset($this->seedMaps[$type])) {
+      $maps = $this->getEdges($type);
+      $phids = idx($maps, $this->getSeedPHID(), array());
+      $phids = array_fuse($phids);
+      $this->seedMaps[$type] = $phids;
+    }
+
+    return $this->seedMaps[$type];
+  }
 }
