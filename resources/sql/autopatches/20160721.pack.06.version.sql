@@ -1,0 +1,10 @@
+CREATE TABLE {$NAMESPACE}_packages.packages_version (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  name VARCHAR(64) NOT NULL COLLATE {$COLLATE_SORT},
+  packagePHID VARBINARY(64) NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (phid),
+  UNIQUE KEY `key_package` (packagePHID, name)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

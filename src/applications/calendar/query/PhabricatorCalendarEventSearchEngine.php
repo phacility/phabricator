@@ -255,7 +255,7 @@ final class PhabricatorCalendarEventSearchEngine
     array $handles) {
 
     if ($this->isMonthView($query)) {
-      return $this->buildCalendarView($events, $query);
+      return $this->buildCalendarMonthView($events, $query);
     } else if ($this->isDayView($query)) {
       return $this->buildCalendarDayView($events, $query);
     }
@@ -307,7 +307,7 @@ final class PhabricatorCalendarEventSearchEngine
     return $result;
   }
 
-  private function buildCalendarView(
+  private function buildCalendarMonthView(
     array $events,
     PhabricatorSavedQuery $query) {
     assert_instances_of($events, 'PhabricatorCalendarEvent');
@@ -362,11 +362,20 @@ final class PhabricatorCalendarEventSearchEngine
     $month_view->setBrowseURI(
       $this->getURI('query/'.$query->getQueryKey().'/'));
 
-    // TODO redesign-2015 : Move buttons out of PHUICalendarView?
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setContent($month_view);
+    $from = $this->getQueryDateFrom($query)->getDateTime();
 
-    return $result;
+    $crumbs = array();
+    $crumbs[] = id(new PHUICrumbView())
+      ->setName($from->format('F Y'));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($from->format('F Y'));
+
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setCrumbs($crumbs)
+      ->setHeader($header)
+      ->setContent($month_view)
+      ->setCollapsed(true);
   }
 
   private function buildCalendarDayView(
@@ -382,8 +391,8 @@ final class PhabricatorCalendarEventSearchEngine
         $query->getParameter('display'));
 
     $day_view = id(new PHUICalendarDayView(
-      $this->getQueryDateFrom($query)->getEpoch(),
-      $this->getQueryDateTo($query)->getEpoch(),
+      $this->getQueryDateFrom($query),
+      $this->getQueryDateTo($query),
       $start_year,
       $start_month,
       $start_day))
@@ -419,13 +428,28 @@ final class PhabricatorCalendarEventSearchEngine
       $day_view->addEvent($event_view);
     }
 
-    $day_view->setBrowseURI(
-      $this->getURI('query/'.$query->getQueryKey().'/'));
+    $browse_uri = $this->getURI('query/'.$query->getQueryKey().'/');
+    $day_view->setBrowseURI($browse_uri);
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setContent($day_view);
+    $from = $this->getQueryDateFrom($query)->getDateTime();
+    $month_uri = $browse_uri.$from->format('Y/m/');
 
-    return $result;
+    $crumbs = array(
+      id(new PHUICrumbView())
+        ->setName($from->format('F Y'))
+        ->setHref($month_uri),
+      id(new PHUICrumbView())
+        ->setName($from->format('D jS')),
+    );
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($from->format('D, F jS'));
+
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setCrumbs($crumbs)
+      ->setHeader($header)
+      ->setContent($day_view)
+      ->setCollapsed(true);
   }
 
   private function getDisplayYearAndMonthAndDay(
@@ -469,6 +493,20 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   private function getQueryDateFrom(PhabricatorSavedQuery $saved) {
+    if ($this->calendarYear && $this->calendarMonth) {
+      $viewer = $this->requireViewer();
+
+      $start_year = $this->calendarYear;
+      $start_month = $this->calendarMonth;
+      $start_day = $this->calendarDay ? $this->calendarDay : 1;
+
+      return AphrontFormDateControlValue::newFromDictionary(
+        $viewer,
+        array(
+          'd' => "{$start_year}-{$start_month}-{$start_day}",
+        ));
+    }
+
     return $this->getQueryDate($saved, 'rangeStart');
   }
 
