@@ -77,19 +77,21 @@ final class ManiphestTaskSearchEngine
         ->setLabel(pht('Contains Words'))
         ->setKey('fulltext'),
       id(new PhabricatorSearchThreeStateField())
-        ->setLabel(pht('Blocking'))
-        ->setKey('blocking')
+        ->setLabel(pht('Open Parents'))
+        ->setKey('hasParents')
+        ->setAliases(array('blocking'))
         ->setOptions(
           pht('(Show All)'),
-          pht('Show Only Tasks Blocking Other Tasks'),
-          pht('Hide Tasks Blocking Other Tasks')),
+          pht('Show Only Tasks With Open Parents'),
+          pht('Show Only Tasks Without Open Parents')),
       id(new PhabricatorSearchThreeStateField())
-        ->setLabel(pht('Blocked'))
-        ->setKey('blocked')
+        ->setLabel(pht('Open Subtasks'))
+        ->setKey('hasSubtasks')
+        ->setAliases(array('blocked'))
         ->setOptions(
           pht('(Show All)'),
-          pht('Show Only Task Blocked By Other Tasks'),
-          pht('Hide Tasks Blocked By Other Tasks')),
+          pht('Show Only Tasks With Open Subtasks'),
+          pht('Show Only Tasks Without Open Subtasks')),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Group By'))
         ->setKey('group')
@@ -121,8 +123,8 @@ final class ManiphestTaskSearchEngine
       'statuses',
       'priorities',
       'fulltext',
-      'blocking',
-      'blocked',
+      'hasParents',
+      'hasSubtasks',
       'group',
       'order',
       'ids',
@@ -182,12 +184,12 @@ final class ManiphestTaskSearchEngine
       $query->withDateModifiedBefore($map['modifiedEnd']);
     }
 
-    if ($map['blocking'] !== null) {
-      $query->withBlockingTasks($map['blocking']);
+    if ($map['hasParents'] !== null) {
+      $query->withOpenParents($map['hasParents']);
     }
 
-    if ($map['blocked'] !== null) {
-      $query->withBlockedTasks($map['blocked']);
+    if ($map['hasSubtasks'] !== null) {
+      $query->withOpenSubtasks($map['hasSubtasks']);
     }
 
     if (strlen($map['fulltext'])) {
