@@ -106,7 +106,51 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $graph_table = $task_graph->newGraphTable();
       }
 
-      $view->addPropertySection(pht('Task Graph'), $graph_table);
+      $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+      $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+
+      $parent_map = $task_graph->getEdges($parent_type);
+      $subtask_map = $task_graph->getEdges($subtask_type);
+
+      $has_parents = (bool)idx($parent_map, $task->getPHID());
+      $has_subtasks = (bool)idx($subtask_map, $task->getPHID());
+
+      $parents_uri = urisprintf(
+        '/?subtaskIDs=%d#R',
+        $task->getID());
+      $parents_uri = $this->getApplicationURI($parents_uri);
+
+      $subtasks_uri = urisprintf(
+        '/?parentIDs=%d#R',
+        $task->getID());
+      $subtasks_uri = $this->getApplicationURI($subtasks_uri);
+
+      $dropdown_menu = id(new PhabricatorActionListView())
+        ->setViewer($viewer)
+        ->addAction(
+          id(new PhabricatorActionView())
+            ->setHref($parents_uri)
+            ->setName(pht('Search Parent Tasks'))
+            ->setDisabled(!$has_parents)
+            ->setIcon('fa-chevron-circle-up'))
+        ->addAction(
+          id(new PhabricatorActionView())
+            ->setHref($subtasks_uri)
+            ->setName(pht('Search Subtasks'))
+            ->setDisabled(!$has_subtasks)
+            ->setIcon('fa-chevron-circle-down'));
+
+      $graph_menu = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-search')
+        ->setText(pht('Search...'))
+        ->setDropdownMenu($dropdown_menu);
+
+      $graph_header = id(new PHUIHeaderView())
+        ->setHeader(pht('Task Graph'))
+        ->addActionLink($graph_menu);
+
+      $view->addPropertySection($graph_header, $graph_table);
     }
 
     return $this->newPage()
