@@ -148,4 +148,16 @@ final class ManiphestTaskGraph
 
     return $this->seedMaps[$type];
   }
+
+  protected function newEllipsisRow() {
+    return array(
+      null,
+      null,
+      null,
+      null,
+      pht("\xC2\xB7 \xC2\xB7 \xC2\xB7"),
+    );
+  }
+
+
 }

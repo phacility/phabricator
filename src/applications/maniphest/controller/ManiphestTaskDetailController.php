@@ -94,26 +94,39 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setLimit($graph_limit)
       ->loadGraph();
     if (!$task_graph->isEmpty()) {
-      if ($task_graph->isOverLimit()) {
+      $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+      $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+      $parent_map = $task_graph->getEdges($parent_type);
+      $subtask_map = $task_graph->getEdges($subtask_type);
+      $parent_list = idx($parent_map, $task->getPHID(), array());
+      $subtask_list = idx($subtask_map, $task->getPHID(), array());
+      $has_parents = (bool)$parent_list;
+      $has_subtasks = (bool)$subtask_list;
+
+      $search_text = pht('Search...');
+
+      // First, get a count of direct parent tasks and subtasks. If there
+      // are too many of these, we just don't draw anything. You can use
+      // the search button to browse tasks with the search UI instead.
+      $direct_count = count($parent_list) + count($subtask_list);
+
+      if ($direct_count > $graph_limit) {
         $message = pht(
-          'Task graph too large to display (this task is connected to '.
-          'more than %s other tasks).',
-          $graph_limit);
+          'Task graph too large to display (this task is directly connected '.
+          'to more than %s other tasks). Use %s to explore connected tasks.',
+          $graph_limit,
+          phutil_tag('strong', array(), $search_text));
         $message = phutil_tag('em', array(), $message);
         $graph_table = id(new PHUIPropertyListView())
           ->addTextContent($message);
       } else {
+        // If there aren't too many direct tasks, but there are too many total
+        // tasks, we'll only render directly connected tasks.
+        if ($task_graph->isOverLimit()) {
+          $task_graph->setRenderOnlyAdjacentNodes(true);
+        }
         $graph_table = $task_graph->newGraphTable();
       }
-
-      $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
-      $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-
-      $parent_map = $task_graph->getEdges($parent_type);
-      $subtask_map = $task_graph->getEdges($subtask_type);
-
-      $has_parents = (bool)idx($parent_map, $task->getPHID());
-      $has_subtasks = (bool)idx($subtask_map, $task->getPHID());
 
       $parents_uri = urisprintf(
         '/?subtaskIDs=%d#R',
@@ -143,7 +156,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $graph_menu = id(new PHUIButtonView())
         ->setTag('a')
         ->setIcon('fa-search')
-        ->setText(pht('Search...'))
+        ->setText($search_text)
         ->setDropdownMenu($dropdown_menu);
 
       $graph_header = id(new PHUIHeaderView())
