@@ -22,6 +22,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $bridgedObjectPHIDs;
   private $hasOpenParents;
   private $hasOpenSubtasks;
+  private $parentTaskIDs;
+  private $subtaskIDs;
 
   private $fullTextSearch   = '';
 
@@ -158,6 +160,16 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withOpenParents($value) {
     $this->hasOpenParents = $value;
+    return $this;
+  }
+
+  public function withParentTaskIDs(array $ids) {
+    $this->parentTaskIDs = $ids;
+    return $this;
+  }
+
+  public function withSubtaskIDs(array $ids) {
+    $this->subtaskIDs = $ids;
     return $this;
   }
 
@@ -512,10 +524,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
     $task_table = $this->newResultObject()->getTableName();
 
+    $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+    $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+
     $joins = array();
     if ($this->hasOpenParents !== null) {
-      $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
-
       if ($this->hasOpenParents) {
         $join_type = 'JOIN';
       } else {
@@ -539,8 +552,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     if ($this->hasOpenSubtasks !== null) {
-      $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-
       if ($this->hasOpenSubtasks) {
         $join_type = 'JOIN';
       } else {
@@ -602,6 +613,36 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         break;
     }
 
+    if ($this->parentTaskIDs !== null) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T e_has_parent
+          ON e_has_parent.src = task.phid
+          AND e_has_parent.type = %d
+         JOIN %T has_parent
+           ON e_has_parent.dst = has_parent.phid
+           AND has_parent.id IN (%Ld)',
+        $edge_table,
+        $parent_type,
+        $task_table,
+        $this->parentTaskIDs);
+    }
+
+    if ($this->subtaskIDs !== null) {
+      $joins[] = qsprintf(
+        $conn,
+        'JOIN %T e_has_subtask
+          ON e_has_subtask.src = task.phid
+          AND e_has_subtask.type = %d
+         JOIN %T has_subtask
+           ON e_has_subtask.dst = has_subtask.phid
+           AND has_subtask.id IN (%Ld)',
+        $edge_table,
+        $subtask_type,
+        $task_table,
+        $this->subtaskIDs);
+    }
+
     $joins[] = parent::buildJoinClauseParts($conn);
 
     return $joins;
@@ -611,6 +652,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $joined_multiple_rows =
       ($this->hasOpenParents !== null) ||
       ($this->hasOpenSubtasks !== null) ||
+      ($this->parentTaskIDs !== null) ||
+      ($this->subtaskIDs !== null) ||
       $this->shouldGroupQueryResultRows();
 
     $joined_project_name = ($this->groupBy == self::GROUP_PROJECT);

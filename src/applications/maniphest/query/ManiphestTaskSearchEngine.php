@@ -92,6 +92,14 @@ final class ManiphestTaskSearchEngine
           pht('(Show All)'),
           pht('Show Only Tasks With Open Subtasks'),
           pht('Show Only Tasks Without Open Subtasks')),
+      id(new PhabricatorIDsSearchField())
+        ->setLabel(pht('Parent IDs'))
+        ->setKey('parentIDs')
+        ->setAliases(array('parentID')),
+      id(new PhabricatorIDsSearchField())
+        ->setLabel(pht('Subtask IDs'))
+        ->setKey('subtaskIDs')
+        ->setAliases(array('subtaskID')),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Group By'))
         ->setKey('group')
@@ -125,6 +133,8 @@ final class ManiphestTaskSearchEngine
       'fulltext',
       'hasParents',
       'hasSubtasks',
+      'parentIDs',
+      'subtaskIDs',
       'group',
       'order',
       'ids',
@@ -194,6 +204,14 @@ final class ManiphestTaskSearchEngine
 
     if (strlen($map['fulltext'])) {
       $query->withFullTextSearch($map['fulltext']);
+    }
+
+    if ($map['parentIDs']) {
+      $query->withParentTaskIDs($map['parentIDs']);
+    }
+
+    if ($map['subtaskIDs']) {
+      $query->withSubtaskIDs($map['subtaskIDs']);
     }
 
     $group = idx($map, 'group');
