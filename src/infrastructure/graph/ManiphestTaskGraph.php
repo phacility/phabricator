@@ -74,12 +74,10 @@ final class ManiphestTaskGraph
       $link = $viewer->renderHandle($phid);
     }
 
-
-
-    if ($this->isParentTask($object)) {
+    if ($this->isParentTask($phid)) {
       $marker = 'fa-chevron-circle-up bluegrey';
       $marker_tip = pht('Direct Parent');
-    } else if ($this->isChildTask($object)) {
+    } else if ($this->isChildTask($phid)) {
       $marker = 'fa-chevron-circle-down bluegrey';
       $marker_tip = pht('Direct Subtask');
     } else {
@@ -128,14 +126,14 @@ final class ManiphestTaskGraph
         ));
   }
 
-  private function isParentTask(ManiphestTask $task) {
+  private function isParentTask($task_phid) {
     $map = $this->getSeedMap(ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
-    return isset($map[$task->getPHID()]);
+    return isset($map[$task_phid]);
   }
 
-  private function isChildTask(ManiphestTask $task) {
+  private function isChildTask($task_phid) {
     $map = $this->getSeedMap(ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
-    return isset($map[$task->getPHID()]);
+    return isset($map[$task_phid]);
   }
 
   private function getSeedMap($type) {
