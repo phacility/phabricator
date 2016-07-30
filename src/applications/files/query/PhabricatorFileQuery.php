@@ -16,6 +16,7 @@ final class PhabricatorFileQuery
   private $names;
   private $isPartial;
   private $needTransforms;
+  private $builtinKeys;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -44,6 +45,11 @@ final class PhabricatorFileQuery
 
   public function withContentHashes(array $content_hashes) {
     $this->contentHashes = $content_hashes;
+    return $this;
+  }
+
+  public function withBuiltinKeys(array $keys) {
+    $this->builtinKeys = $keys;
     return $this;
   }
 
@@ -382,6 +388,13 @@ final class PhabricatorFileQuery
         $conn,
         'isPartial = %d',
         (int)$this->isPartial);
+    }
+
+    if ($this->builtinKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'builtinKey IN (%Ls)',
+        $this->builtinKeys);
     }
 
     return $where;

@@ -160,6 +160,33 @@ final class PhameBlogEditor
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
         }
+
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+          if (phutil_utf8_strlen($new) > 64) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'The selected blog title is too long. The maximum length '.
+                'of a blog title is 64 characters.'),
+              $xaction);
+          }
+        }
+        break;
+      case PhameBlogTransaction::TYPE_SUBTITLE:
+        foreach ($xactions as $xaction) {
+          $new = $xaction->getNewValue();
+          if (phutil_utf8_strlen($new) > 64) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht(
+                'The selected blog subtitle is too long. The maximum length '.
+                'of a blog subtitle is 64 characters.'),
+              $xaction);
+          }
+        }
         break;
       case PhameBlogTransaction::TYPE_PARENTDOMAIN:
         if (!$xactions) {

@@ -1176,6 +1176,8 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
+    $fields = $this->willBuildEditForm($object, $fields);
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('editEngine', 'true');
@@ -1208,6 +1210,10 @@ abstract class PhabricatorEditEngine
     }
 
     return $form;
+  }
+
+  protected function willBuildEditForm($object, array $fields) {
+    return $fields;
   }
 
   private function buildEditFormActionButton($object) {

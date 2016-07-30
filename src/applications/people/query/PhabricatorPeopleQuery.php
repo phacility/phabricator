@@ -410,8 +410,20 @@ final class PhabricatorPeopleQuery
       }
     }
 
+    // We need to load these users' timezone settings to figure out their
+    // availability if they're attending all-day events.
+    $this->needUserSettings(true);
+    $this->fillUserCaches($rebuild);
+
     foreach ($rebuild as $phid => $user) {
       $events = idx($map, $phid, array());
+
+      // We loaded events with the omnipotent user, but want to shift them
+      // into the user's timezone before building the cache because they will
+      // be unavailable during their own local day.
+      foreach ($events as $event) {
+        $event->applyViewerTimezone($user);
+      }
 
       $cursor = $min_range;
       if ($events) {
@@ -420,7 +432,7 @@ final class PhabricatorPeopleQuery
         while (true) {
           foreach ($events as $event) {
             $from = $event->getDateFromForCache();
-            $to = $event->getDateTo();
+            $to = $event->getViewerDateTo();
             if (($from <= $cursor) && ($to > $cursor)) {
               $cursor = $to;
               continue 2;

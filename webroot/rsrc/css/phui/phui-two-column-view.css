@@ -203,6 +203,11 @@
   padding: 16px;
 }
 
+.device .phui-two-column-view .phui-info-view {
+  margin: 0 0 20px 0;
+  padding: 12px;
+}
+
 .phui-two-column-view .phui-side-column .phui-object-item-empty
   .phui-info-view {
    margin-bottom: 0;
@@ -212,6 +217,11 @@
 .phui-two-column-view .phui-box-blue-property
   .phui-header-shell + .phui-info-view {
     margin: 16px;
+}
+
+.device .phui-two-column-view .phui-box-blue-property
+  .phui-header-shell + .phui-info-view {
+    margin: 8px;
 }
 
 /* Navigation */

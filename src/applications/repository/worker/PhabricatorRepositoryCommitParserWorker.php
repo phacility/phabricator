@@ -29,8 +29,11 @@ abstract class PhabricatorRepositoryCommitParserWorker
     if ($commit->isUnreachable()) {
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
-          'Commit "%s" has been deleted: it is no longer reachable from '.
-          'any ref.',
+          'Commit "%s" (with internal ID "%s") is no longer reachable from '.
+          'any branch, tag, or ref in this repository, so it will not be '.
+          'imported. This usually means that the branch the commit was on '.
+          'was deleted or overwritten.',
+          $commit->getMonogram(),
           $commit_id));
     }
 

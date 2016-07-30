@@ -31,7 +31,7 @@ final class PhabricatorStorageManagementShellWorkflow
     }
 
     return phutil_passthru(
-      'mysql --default-character-set=utf8 '.
+      'mysql --protocol=TCP --default-character-set=utf8 '.
       '-u %s %C -h %s %C',
       $api->getUser(),
       $flag_password,

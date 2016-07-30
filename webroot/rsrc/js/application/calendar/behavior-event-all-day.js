@@ -2,15 +2,16 @@
  * @provides javelin-behavior-event-all-day
  */
 
-
 JX.behavior('event-all-day', function(config) {
-  var checkbox = JX.$(config.allDayID);
-  JX.DOM.listen(checkbox, 'change', null, function() {
-    var start = JX.$(config.startDateID);
-    var end = JX.$(config.endDateID);
+  var all_day = JX.$(config.allDayID);
 
-    JX.DOM.alterClass(start, 'no-time', checkbox.checked);
-    JX.DOM.alterClass(end, 'no-time', checkbox.checked);
+  JX.DOM.listen(all_day, 'change', null, function() {
+    var is_all_day = !!parseInt(all_day.value, 10);
+
+    for (var ii = 0; ii < config.controlIDs.length; ii++) {
+      var control = JX.$(config.controlIDs[ii]);
+      JX.DOM.alterClass(control, 'no-time', is_all_day);
+    }
   });
 
 });

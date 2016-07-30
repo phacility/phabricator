@@ -42,6 +42,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $contentHash;
   protected $metadata = array();
   protected $mailKey;
+  protected $builtinKey;
 
   protected $storageEngine;
   protected $storageFormat;
@@ -94,6 +95,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'isExplicitUpload' => 'bool?',
         'mailKey' => 'bytes20',
         'isPartial' => 'bool',
+        'builtinKey' => 'text64?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -115,6 +117,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
         ),
         'key_partial' => array(
           'columns' => array('authorPHID', 'isPartial'),
+        ),
+        'key_builtin' => array(
+          'columns' => array('builtinKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
@@ -1070,19 +1076,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public static function loadBuiltins(PhabricatorUser $user, array $builtins) {
     $builtins = mpull($builtins, null, 'getBuiltinFileKey');
 
-    $specs = array();
-    foreach ($builtins as $key => $buitin) {
-      $specs[] = array(
-        'originalPHID' => PhabricatorPHIDConstants::PHID_VOID,
-        'transform'    => $key,
-      );
-    }
-
     // NOTE: Anyone is allowed to access builtin files.
 
     $files = id(new PhabricatorFileQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withTransforms($specs)
+      ->withBuiltinKeys(array_keys($builtins))
       ->execute();
 
     $results = array();
@@ -1109,12 +1107,21 @@ final class PhabricatorFile extends PhabricatorFileDAO
       );
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $file = self::newFromFileData($data, $params);
-        $xform = id(new PhabricatorTransformedFile())
-          ->setOriginalPHID(PhabricatorPHIDConstants::PHID_VOID)
-          ->setTransform($key)
-          ->setTransformedPHID($file->getPHID())
-          ->save();
+        try {
+          $file = self::newFromFileData($data, $params);
+        } catch (AphrontDuplicateKeyQueryException $ex) {
+          $file = id(new PhabricatorFileQuery())
+            ->setViewer(PhabricatorUser::getOmnipotentUser())
+            ->withBuiltinKeys(array($key))
+            ->executeOne();
+          if (!$file) {
+            throw new Exception(
+              pht(
+                'Collided mid-air when generating builtin file "%s", but '.
+                'then failed to load the object we collided with.',
+                $key));
+          }
+        }
       unset($unguarded);
 
       $file->attachObjectPHIDs(array());
@@ -1289,6 +1296,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $builtin = idx($params, 'builtin');
     if ($builtin) {
       $this->setBuiltinName($builtin);
+      $this->setBuiltinKey($builtin);
     }
 
     $profile = idx($params, 'profile');

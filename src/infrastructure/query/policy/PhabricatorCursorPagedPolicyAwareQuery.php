@@ -142,11 +142,18 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   final protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {
-    if ($this->getRawResultLimit()) {
-      return qsprintf($conn_r, 'LIMIT %d', $this->getRawResultLimit());
-    } else {
-      return '';
+    if ($this->shouldLimitResults()) {
+      $limit = $this->getRawResultLimit();
+      if ($limit) {
+        return qsprintf($conn_r, 'LIMIT %d', $limit);
+      }
     }
+
+    return '';
+  }
+
+  protected function shouldLimitResults() {
+    return true;
   }
 
   final protected function didLoadResults(array $results) {

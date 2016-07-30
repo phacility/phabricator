@@ -1,27 +1,32 @@
 <?php
 
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
-  implements PhabricatorPolicyInterface,
-  PhabricatorProjectInterface,
-  PhabricatorMarkupInterface,
-  PhabricatorApplicationTransactionInterface,
-  PhabricatorSubscribableInterface,
-  PhabricatorTokenReceiverInterface,
-  PhabricatorDestructibleInterface,
-  PhabricatorMentionableInterface,
-  PhabricatorFlaggableInterface,
-  PhabricatorSpacesInterface,
-  PhabricatorFulltextInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorProjectInterface,
+    PhabricatorMarkupInterface,
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorMentionableInterface,
+    PhabricatorFlaggableInterface,
+    PhabricatorSpacesInterface,
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   protected $name;
-  protected $userPHID;
+  protected $hostPHID;
   protected $dateFrom;
   protected $dateTo;
+  protected $allDayDateFrom;
+  protected $allDayDateTo;
   protected $description;
   protected $isCancelled;
   protected $isAllDay;
   protected $icon;
   protected $mailKey;
+  protected $isStub;
 
   protected $isRecurring = 0;
   protected $recurrenceFrequency = array();
@@ -36,11 +41,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $spacePHID;
 
-  const DEFAULT_ICON = 'fa-calendar';
-
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
-  private $appliedViewer;
+
+  private $viewerDateFrom;
+  private $viewerDateTo;
 
   // Frequency Constants
   const FREQUENCY_DAILY = 'daily';
@@ -48,109 +53,225 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   const FREQUENCY_MONTHLY = 'monthly';
   const FREQUENCY_YEARLY = 'yearly';
 
-  public static function initializeNewCalendarEvent(
-    PhabricatorUser $actor,
-    $mode) {
+  public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
       ->withClasses(array('PhabricatorCalendarApplication'))
       ->executeOne();
 
-    $view_policy = null;
-    $is_recurring = 0;
+    $view_default = PhabricatorCalendarEventDefaultViewCapability::CAPABILITY;
+    $edit_default = PhabricatorCalendarEventDefaultEditCapability::CAPABILITY;
+    $view_policy = $app->getPolicy($view_default);
+    $edit_policy = $app->getPolicy($edit_default);
 
-    if ($mode == 'public') {
-      $view_policy = PhabricatorPolicies::getMostOpenPolicy();
-    }
+    $now = PhabricatorTime::getNow();
 
-    if ($mode == 'recurring') {
-      $is_recurring = true;
-    }
+    $start = new DateTime('@'.$now);
+    $start->setTimeZone($actor->getTimeZone());
+
+    $start->setTime($start->format('H'), 0, 0);
+    $start->modify('+1 hour');
+    $end = id(clone $start)->modify('+1 hour');
+
+    $epoch_min = $start->format('U');
+    $epoch_max = $end->format('U');
+
+    $now_date = new DateTime('@'.$now);
+    $now_min = id(clone $now_date)->setTime(0, 0)->format('U');
+    $now_max = id(clone $now_date)->setTime(23, 59)->format('U');
+
+    $default_icon = 'fa-calendar';
 
     return id(new PhabricatorCalendarEvent())
-      ->setUserPHID($actor->getPHID())
+      ->setHostPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
-      ->setIsRecurring($is_recurring)
-      ->setIcon(self::DEFAULT_ICON)
+      ->setIsStub(0)
+      ->setIsRecurring(0)
+      ->setRecurrenceFrequency(
+        array(
+          'rule' => self::FREQUENCY_WEEKLY,
+        ))
+      ->setIcon($default_icon)
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($actor->getPHID())
+      ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
+      ->setDateFrom($epoch_min)
+      ->setDateTo($epoch_max)
+      ->setAllDayDateFrom($now_min)
+      ->setAllDayDateTo($now_max)
       ->applyViewerTimezone($actor);
   }
 
+  private function newChild(PhabricatorUser $actor, $sequence) {
+    if (!$this->isParentEvent()) {
+      throw new Exception(
+        pht(
+          'Unable to generate a new child event for an event which is not '.
+          'a recurring parent event!'));
+    }
+
+    $child = id(new self())
+      ->setIsCancelled(0)
+      ->setIsStub(0)
+      ->setInstanceOfEventPHID($this->getPHID())
+      ->setSequenceIndex($sequence)
+      ->setIsRecurring(true)
+      ->setRecurrenceFrequency($this->getRecurrenceFrequency())
+      ->attachParentEvent($this);
+
+    return $child->copyFromParent($actor);
+  }
+
+  protected function readField($field) {
+    static $inherit = array(
+      'hostPHID' => true,
+      'isAllDay' => true,
+      'icon' => true,
+      'spacePHID' => true,
+      'viewPolicy' => true,
+      'editPolicy' => true,
+      'name' => true,
+      'description' => true,
+    );
+
+    // Read these fields from the parent event instead of this event. For
+    // example, we want any changes to the parent event's name to
+    if (isset($inherit[$field])) {
+      if ($this->getIsStub()) {
+        // TODO: This should be unconditional, but the execution order of
+        // CalendarEventQuery and applyViewerTimezone() are currently odd.
+        if ($this->parentEvent !== self::ATTACHABLE) {
+          return $this->getParentEvent()->readField($field);
+        }
+      }
+    }
+
+    return parent::readField($field);
+  }
+
+
+  public function copyFromParent(PhabricatorUser $actor) {
+    if (!$this->isChildEvent()) {
+      throw new Exception(
+        pht(
+          'Unable to copy from parent event: this is not a child event.'));
+    }
+
+    $parent = $this->getParentEvent();
+
+    $this
+      ->setHostPHID($parent->getHostPHID())
+      ->setIsAllDay($parent->getIsAllDay())
+      ->setIcon($parent->getIcon())
+      ->setSpacePHID($parent->getSpacePHID())
+      ->setViewPolicy($parent->getViewPolicy())
+      ->setEditPolicy($parent->getEditPolicy())
+      ->setName($parent->getName())
+      ->setDescription($parent->getDescription());
+
+    $frequency = $parent->getFrequencyUnit();
+    $modify_key = '+'.$this->getSequenceIndex().' '.$frequency;
+
+    $date = $parent->getDateFrom();
+    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
+    $date_time->modify($modify_key);
+    $date = $date_time->format('U');
+
+    $duration = $this->getDuration();
+
+    $utc = new DateTimeZone('UTC');
+
+    $allday_from = $parent->getAllDayDateFrom();
+    $allday_date = new DateTime('@'.$allday_from, $utc);
+    $allday_date->setTimeZone($utc);
+    $allday_date->modify($modify_key);
+
+    $allday_min = $allday_date->format('U');
+    $allday_duration = ($parent->getAllDayDateTo() - $allday_from);
+
+    $this
+      ->setDateFrom($date)
+      ->setDateTo($date + $duration)
+      ->setAllDayDateFrom($allday_min)
+      ->setAllDayDateTo($allday_min + $allday_duration);
+
+    return $this;
+  }
+
+  public function newStub(PhabricatorUser $actor, $sequence) {
+    $stub = $this->newChild($actor, $sequence);
+
+    $stub->setIsStub(1);
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $stub->save();
+    unset($unguarded);
+
+    $stub->applyViewerTimezone($actor);
+
+    return $stub;
+  }
+
+  public function newGhost(PhabricatorUser $actor, $sequence) {
+    $ghost = $this->newChild($actor, $sequence);
+
+    $ghost
+      ->setIsGhostEvent(true)
+      ->makeEphemeral();
+
+    $ghost->applyViewerTimezone($actor);
+
+    return $ghost;
+  }
+
+  public function getViewerDateFrom() {
+    if ($this->viewerDateFrom === null) {
+      throw new PhutilInvalidStateException('applyViewerTimezone');
+    }
+
+    return $this->viewerDateFrom;
+  }
+
+  public function getViewerDateTo() {
+    if ($this->viewerDateTo === null) {
+      throw new PhutilInvalidStateException('applyViewerTimezone');
+    }
+
+    return $this->viewerDateTo;
+  }
+
   public function applyViewerTimezone(PhabricatorUser $viewer) {
-    if ($this->appliedViewer) {
-      throw new Exception(pht('Viewer timezone is already applied!'));
-    }
-
-    $this->appliedViewer = $viewer;
-
     if (!$this->getIsAllDay()) {
-      return $this;
-    }
+      $this->viewerDateFrom = $this->getDateFrom();
+      $this->viewerDateTo = $this->getDateTo();
+    } else {
+      $zone = $viewer->getTimeZone();
 
-    $zone = $viewer->getTimeZone();
-
-
-    $this->setDateFrom(
-      $this->getDateEpochForTimeZone(
-        $this->getDateFrom(),
-        new DateTimeZone('Pacific/Kiritimati'),
+      $this->viewerDateFrom = $this->getDateEpochForTimezone(
+        $this->getAllDayDateFrom(),
+        new DateTimeZone('UTC'),
         'Y-m-d',
         null,
-        $zone));
+        $zone);
 
-    $this->setDateTo(
-      $this->getDateEpochForTimeZone(
-        $this->getDateTo(),
-        new DateTimeZone('Pacific/Midway'),
+      $this->viewerDateTo = $this->getDateEpochForTimezone(
+        $this->getAllDayDateTo(),
+        new DateTimeZone('UTC'),
         'Y-m-d 23:59:00',
-        '-1 day',
-        $zone));
-
-    return $this;
-  }
-
-
-  public function removeViewerTimezone(PhabricatorUser $viewer) {
-    if (!$this->appliedViewer) {
-      throw new Exception(pht('Viewer timezone is not applied!'));
-    }
-
-    if ($viewer->getPHID() != $this->appliedViewer->getPHID()) {
-      throw new Exception(pht('Removed viewer must match applied viewer!'));
-    }
-
-    $this->appliedViewer = null;
-
-    if (!$this->getIsAllDay()) {
-      return $this;
-    }
-
-    $zone = $viewer->getTimeZone();
-
-    $this->setDateFrom(
-      $this->getDateEpochForTimeZone(
-        $this->getDateFrom(),
-        $zone,
-        'Y-m-d',
         null,
-        new DateTimeZone('Pacific/Kiritimati')));
-
-    $this->setDateTo(
-      $this->getDateEpochForTimeZone(
-        $this->getDateTo(),
-        $zone,
-        'Y-m-d',
-        '+1 day',
-        new DateTimeZone('Pacific/Midway')));
+        $zone);
+    }
 
     return $this;
   }
 
-  private function getDateEpochForTimeZone(
+  public function getDuration() {
+    return $this->getDateTo() - $this->getDateFrom();
+  }
+
+  public function getDateEpochForTimezone(
     $epoch,
     $src_zone,
     $format,
@@ -169,12 +290,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function save() {
-    if ($this->appliedViewer) {
-      throw new Exception(
-        pht(
-          'Can not save event with viewer timezone still applied!'));
-    }
-
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
@@ -186,13 +301,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
    * Get the event start epoch for evaluating invitee availability.
    *
    * When assessing availability, we pretend events start earlier than they
-   * really. This allows us to mark users away for the entire duration of a
+   * really do. This allows us to mark users away for the entire duration of a
    * series of back-to-back meetings, even if they don't strictly overlap.
    *
    * @return int Event start date for availability caches.
    */
   public function getDateFromForCache() {
-    return ($this->getDateFrom() - phutil_units('15 minutes in seconds'));
+    return ($this->getViewerDateFrom() - phutil_units('15 minutes in seconds'));
   }
 
   protected function getConfiguration() {
@@ -202,6 +317,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'name' => 'text',
         'dateFrom' => 'epoch',
         'dateTo' => 'epoch',
+        'allDayDateFrom' => 'epoch',
+        'allDayDateTo' => 'epoch',
         'description' => 'text',
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
@@ -211,10 +328,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'recurrenceEndDate' => 'epoch?',
         'instanceOfEventPHID' => 'phid?',
         'sequenceIndex' => 'uint32?',
+        'isStub' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'userPHID_dateFrom' => array(
-          'columns' => array('userPHID', 'dateTo'),
+        'key_date' => array(
+          'columns' => array('dateFrom', 'dateTo'),
         ),
         'key_instance' => array(
           'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
@@ -243,6 +361,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   public function attachInvitees(array $invitees) {
     $this->invitees = $invitees;
     return $this;
+  }
+
+  public function getInviteePHIDsForEdit() {
+    $invitees = array();
+
+    foreach ($this->getInvitees() as $invitee) {
+      if ($invitee->isUninvited()) {
+        continue;
+      }
+      $invitees[] = $invitee->getInviteePHID();
+    }
+
+    return $invitees;
   }
 
   public function getUserInviteStatus($phid) {
@@ -285,40 +416,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
-  public function generateNthGhost(
-    $sequence_index,
-    PhabricatorUser $actor) {
-
-    $frequency = $this->getFrequencyUnit();
-    $modify_key = '+'.$sequence_index.' '.$frequency;
-
-    $instance_of = ($this->getPHID()) ?
-      $this->getPHID() : $this->instanceOfEventPHID;
-
-    $date = $this->dateFrom;
-    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
-    $date_time->modify($modify_key);
-    $date = $date_time->format('U');
-
-    $duration = $this->dateTo - $this->dateFrom;
-
-    $edit_policy = PhabricatorPolicies::POLICY_NOONE;
-
-    $ghost_event = id(clone $this)
-      ->setIsGhostEvent(true)
-      ->setDateFrom($date)
-      ->setDateTo($date + $duration)
-      ->setIsRecurring(true)
-      ->setRecurrenceFrequency($this->recurrenceFrequency)
-      ->setInstanceOfEventPHID($instance_of)
-      ->setSequenceIndex($sequence_index)
-      ->setEditPolicy($edit_policy);
-
-    return $ghost_event;
+  public function getFrequencyRule() {
+    return idx($this->recurrenceFrequency, 'rule');
   }
 
   public function getFrequencyUnit() {
-    $frequency = idx($this->recurrenceFrequency, 'rule');
+    $frequency = $this->getFrequencyRule();
 
     switch ($frequency) {
       case 'daily':
@@ -335,11 +438,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getURI() {
-    $uri = '/'.$this->getMonogram();
-    if ($this->isGhostEvent) {
-      $uri = $uri.'/'.$this->sequenceIndex;
+    if ($this->getIsGhostEvent()) {
+      $base = $this->getParentEvent()->getURI();
+      $sequence = $this->getSequenceIndex();
+      return "{$base}/{$sequence}/";
     }
-    return $uri;
+
+    return '/'.$this->getMonogram();
   }
 
   public function getParentEvent() {
@@ -351,62 +456,141 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
-  public function getIsCancelled() {
-    $instance_of = $this->instanceOfEventPHID;
-    if ($instance_of != null && $this->getIsParentCancelled()) {
-      return true;
-    }
-    return $this->isCancelled;
+  public function isParentEvent() {
+    return ($this->getIsRecurring() && !$this->getInstanceOfEventPHID());
   }
 
-  public function getIsRecurrenceParent() {
-    if ($this->isRecurring && !$this->instanceOfEventPHID) {
+  public function isChildEvent() {
+    return ($this->instanceOfEventPHID !== null);
+  }
+
+  public function isCancelledEvent() {
+    if ($this->getIsCancelled()) {
       return true;
     }
+
+    if ($this->isChildEvent()) {
+      if ($this->getParentEvent()->getIsCancelled()) {
+        return true;
+      }
+    }
+
     return false;
   }
 
-  public function getIsRecurrenceException() {
-    if ($this->instanceOfEventPHID && !$this->isGhostEvent) {
-      return true;
+  public function renderEventDate(
+    PhabricatorUser $viewer,
+    $show_end) {
+
+    if ($show_end) {
+      $min_date = PhabricatorTime::getDateTimeFromEpoch(
+        $this->getViewerDateFrom(),
+        $viewer);
+
+      $max_date = PhabricatorTime::getDateTimeFromEpoch(
+        $this->getViewerDateTo(),
+        $viewer);
+
+      $min_day = $min_date->format('Y m d');
+      $max_day = $max_date->format('Y m d');
+
+      $show_end_date = ($min_day != $max_day);
+    } else {
+      $show_end_date = false;
     }
-    return false;
+
+    $min_epoch = $this->getViewerDateFrom();
+    $max_epoch = $this->getViewerDateTo();
+
+    if ($this->getIsAllDay()) {
+      if ($show_end_date) {
+        return pht(
+          '%s - %s, All Day',
+          phabricator_date($min_epoch, $viewer),
+          phabricator_date($max_epoch, $viewer));
+      } else {
+        return pht(
+          '%s, All Day',
+          phabricator_date($min_epoch, $viewer));
+      }
+    } else if ($show_end_date) {
+      return pht(
+        '%s - %s',
+        phabricator_datetime($min_epoch, $viewer),
+        phabricator_datetime($max_epoch, $viewer));
+    } else if ($show_end) {
+      return pht(
+        '%s - %s',
+        phabricator_datetime($min_epoch, $viewer),
+        phabricator_time($max_epoch, $viewer));
+    } else {
+      return pht(
+        '%s',
+        phabricator_datetime($min_epoch, $viewer));
+    }
   }
 
-  public function getIsParentCancelled() {
-    if ($this->instanceOfEventPHID == null) {
-      return false;
+
+  public function getDisplayIcon(PhabricatorUser $viewer) {
+    if ($this->isCancelledEvent()) {
+      return 'fa-times';
     }
 
-    $recurring_event = $this->getParentEvent();
-    if ($recurring_event->getIsCancelled()) {
-      return true;
+    if ($viewer->isLoggedIn()) {
+      $status = $this->getUserInviteStatus($viewer->getPHID());
+      switch ($status) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          return 'fa-check-circle';
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+          return 'fa-user-plus';
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          return 'fa-times';
+      }
     }
-    return false;
+
+    return $this->getIcon();
   }
 
-  public function getDuration() {
-    $seconds = $this->dateTo - $this->dateFrom;
-    $minutes = round($seconds / 60, 1);
-    $hours = round($minutes / 60, 3);
-    $days = round($hours / 24, 2);
-
-    $duration = '';
-
-    if ($days >= 1) {
-      return pht(
-        '%s day(s)',
-        round($days, 1));
-    } else if ($hours >= 1) {
-      return pht(
-          '%s hour(s)',
-          round($hours, 1));
-    } else if ($minutes >= 1) {
-      return pht(
-          '%s minute(s)',
-          round($minutes, 0));
+  public function getDisplayIconColor(PhabricatorUser $viewer) {
+    if ($this->isCancelledEvent()) {
+      return 'red';
     }
+
+    if ($viewer->isLoggedIn()) {
+      $status = $this->getUserInviteStatus($viewer->getPHID());
+      switch ($status) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          return 'green';
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+          return 'green';
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          return 'grey';
+      }
+    }
+
+    return 'bluegrey';
   }
+
+  public function getDisplayIconLabel(PhabricatorUser $viewer) {
+    if ($this->isCancelledEvent()) {
+      return pht('Cancelled');
+    }
+
+    if ($viewer->isLoggedIn()) {
+      $status = $this->getUserInviteStatus($viewer->getPHID());
+      switch ($status) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          return pht('Attending');
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+          return pht('Invited');
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          return pht('Declined');
+      }
+    }
+
+    return null;
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 
@@ -475,8 +659,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    // The owner of a task can always view and edit it.
-    $user_phid = $this->getUserPHID();
+    // The host of an event can always view and edit it.
+    $user_phid = $this->getHostPHID();
     if ($user_phid) {
       $viewer_phid = $viewer->getPHID();
       if ($viewer_phid == $user_phid) {
@@ -497,10 +681,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('The owner of an event can always view and edit it,
-      and invitees can always view it, except if the event is an
-      instance of a recurring event.');
+    return pht(
+      'The host of an event can always view and edit it. Users who are '.
+      'invited to an event can always view it.');
   }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -528,14 +713,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
 
   public function isAutomaticallySubscribed($phid) {
-    return ($phid == $this->getUserPHID());
+    return ($phid == $this->getHostPHID());
   }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 
 
   public function getUsersToNotifyOfTokenGiven() {
-    return array($this->getUserPHID());
+    return array($this->getHostPHID());
   }
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
@@ -562,6 +747,34 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newFulltextEngine() {
     return new PhabricatorCalendarEventFulltextEngine();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of the event.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('description')
+        ->setType('string')
+        ->setDescription(pht('The event description.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getName(),
+      'description' => $this->getDescription(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }

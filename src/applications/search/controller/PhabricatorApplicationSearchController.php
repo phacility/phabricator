@@ -210,7 +210,7 @@ final class PhabricatorApplicationSearchController
     }
 
     $body[] = $box;
-
+    $more_crumbs = null;
 
     if ($run_query) {
       $exec_errors = array();
@@ -272,6 +272,13 @@ final class PhabricatorApplicationSearchController
             $box->setCollapsed(true);
           }
 
+          $result_header = $list->getHeader();
+          if ($result_header) {
+            $box->setHeader($result_header);
+          }
+
+          $more_crumbs = $list->getCrumbs();
+
           if ($pager->willShowPagingControls()) {
             $pager_box = id(new PHUIBoxView())
               ->addPadding(PHUI::PADDING_MEDIUM)
@@ -301,8 +308,18 @@ final class PhabricatorApplicationSearchController
     }
 
     $crumbs = $parent
-      ->buildApplicationCrumbs()
-      ->addTextCrumb($title);
+      ->buildApplicationCrumbs();
+
+    if ($more_crumbs) {
+      $query_uri = $engine->getQueryResultsPageURI($saved_query->getQueryKey());
+      $crumbs->addTextCrumb($title, $query_uri);
+
+      foreach ($more_crumbs as $crumb) {
+        $crumbs->addCrumb($crumb);
+      }
+    } else {
+      $crumbs->addTextCrumb($title);
+    }
 
     return $this->newPage()
       ->setApplicationMenu($this->buildApplicationMenu())
