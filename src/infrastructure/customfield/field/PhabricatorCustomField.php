@@ -112,12 +112,6 @@ abstract class PhabricatorCustomField extends Phobject {
     $object,
     array $options = array()) {
 
-    PhutilTypeSpec::checkMap(
-      $options,
-      array(
-        'withDisabled' => 'optional bool',
-      ));
-
     $field_objects = id(new PhutilSymbolLoader())
       ->setAncestorClass($base_class)
       ->loadObjects();
