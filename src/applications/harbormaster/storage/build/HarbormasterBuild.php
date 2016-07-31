@@ -169,16 +169,9 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function isComplete() {
-    switch ($this->getBuildStatus()) {
-      case HarbormasterBuildStatus::STATUS_PASSED:
-      case HarbormasterBuildStatus::STATUS_FAILED:
-      case HarbormasterBuildStatus::STATUS_ABORTED:
-      case HarbormasterBuildStatus::STATUS_ERROR:
-      case HarbormasterBuildStatus::STATUS_PAUSED:
-        return true;
-    }
-
-    return false;
+    return in_array(
+      $this->getBuildStatus(),
+      HarbormasterBuildStatus::getCompletedStatusConstants());
   }
 
   public function isPaused() {

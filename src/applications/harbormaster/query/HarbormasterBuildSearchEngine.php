@@ -55,6 +55,9 @@ final class HarbormasterBuildSearchEngine
   protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Builds'),
+      'waiting' => pht('Waiting'),
+      'active' => pht('Active'),
+      'completed' => pht('Completed'),
     );
   }
 
@@ -65,6 +68,21 @@ final class HarbormasterBuildSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'waiting':
+        return $query
+          ->setParameter(
+            'statuses',
+            HarbormasterBuildStatus::getWaitingStatusConstants());
+      case 'active':
+        return $query
+          ->setParameter(
+            'statuses',
+            HarbormasterBuildStatus::getActiveStatusConstants());
+      case 'completed':
+        return $query
+          ->setParameter(
+            'statuses',
+            HarbormasterBuildStatus::getCompletedStatusConstants());
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);

@@ -118,4 +118,28 @@ final class HarbormasterBuildStatus extends Phobject {
     }
   }
 
+  public static function getWaitingStatusConstants() {
+    return array(
+      self::STATUS_INACTIVE,
+      self::STATUS_PENDING,
+    );
+  }
+
+  public static function getActiveStatusConstants() {
+    return array(
+      self::STATUS_BUILDING,
+      self::STATUS_PAUSED,
+    );
+  }
+
+  public static function getCompletedStatusConstants() {
+    return array(
+      self::STATUS_PASSED,
+      self::STATUS_FAILED,
+      self::STATUS_ABORTED,
+      self::STATUS_ERROR,
+      self::STATUS_DEADLOCKED,
+    );
+  }
+
 }
