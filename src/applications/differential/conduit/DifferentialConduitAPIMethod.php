@@ -150,21 +150,38 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
     array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
 
-    $results = array();
+    $field_lists = array();
     foreach ($revisions as $revision) {
-      // TODO: This is inefficient and issues a query for each object.
+      $revision_phid = $revision->getPHID();
+
       $field_list = PhabricatorCustomField::getObjectFields(
         $revision,
         PhabricatorCustomField::ROLE_CONDUIT);
 
       $field_list
         ->setViewer($viewer)
-        ->readFieldsFromStorage($revision);
+        ->readFieldsFromObject($revision);
 
+      $field_lists[$revision_phid] = $field_list;
+    }
+
+    $all_fields = array();
+    foreach ($field_lists as $field_list) {
+      foreach ($field_list->getFields() as $field) {
+        $all_fields[] = $field;
+      }
+    }
+
+    id(new PhabricatorCustomFieldStorageQuery())
+      ->addFields($all_fields)
+      ->execute();
+
+    $results = array();
+    foreach ($field_lists as $revision_phid => $field_list) {
       foreach ($field_list->getFields() as $field) {
         $field_key = $field->getFieldKeyForConduit();
         $value = $field->getConduitDictionaryValue();
-        $results[$revision->getPHID()][$field_key] = $value;
+        $results[$revision_phid][$field_key] = $value;
       }
     }
 

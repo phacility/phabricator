@@ -80,17 +80,42 @@ final class PhabricatorCustomFieldSearchEngineExtension
     return $map;
   }
 
+  public function loadExtensionConduitData(array $objects) {
+    $viewer = $this->getViewer();
+
+    $field_map = array();
+    foreach ($objects as $object) {
+      $object_phid = $object->getPHID();
+
+      $fields = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_CONDUIT);
+
+      $fields
+        ->setViewer($viewer)
+        ->readFieldsFromObject($object);
+
+      $field_map[$object_phid] = $fields;
+    }
+
+    $all_fields = array();
+    foreach ($field_map as $field_list) {
+      foreach ($field_list->getFields() as $field) {
+        $all_fields[] = $field;
+      }
+    }
+
+    id(new PhabricatorCustomFieldStorageQuery())
+      ->addFields($all_fields)
+      ->execute();
+
+    return array(
+      'fields' => $field_map,
+    );
+  }
+
   public function getFieldValuesForConduit($object, $data) {
-    // TODO: This is currently very inefficient. We should bulk-load these
-    // field values instead.
-
-    $fields = PhabricatorCustomField::getObjectFields(
-      $object,
-      PhabricatorCustomField::ROLE_CONDUIT);
-
-    $fields
-      ->setViewer($this->getViewer())
-      ->readFieldsFromStorage($object);
+    $fields = $data['fields'][$object->getPHID()];
 
     $map = array();
     foreach ($fields->getFields() as $field) {
