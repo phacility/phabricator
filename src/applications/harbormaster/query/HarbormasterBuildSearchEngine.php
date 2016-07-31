@@ -31,6 +31,14 @@ final class HarbormasterBuildSearchEngine
         ->setDescription(
           pht('Search for builds with given statuses.'))
         ->setDatasource(new HarbormasterBuildStatusDatasource()),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Initiators'))
+        ->setKey('initiators')
+        ->setAliases(array('initiator'))
+        ->setDescription(
+          pht(
+            'Search for builds started by someone or something in particular.'))
+        ->setDatasource(new HarbormasterBuildInitiatorDatasource()),
     );
   }
 
@@ -45,6 +53,10 @@ final class HarbormasterBuildSearchEngine
       $query->withBuildStatuses($map['statuses']);
     }
 
+    if ($map['initiators']) {
+      $query->withInitiatorPHIDs($map['initiators']);
+    }
+
     return $query;
   }
 
@@ -54,6 +66,7 @@ final class HarbormasterBuildSearchEngine
 
   protected function getBuiltinQueryNames() {
     return array(
+      'initiated' => pht('My Builds'),
       'all' => pht('All Builds'),
       'waiting' => pht('Waiting'),
       'active' => pht('Active'),
@@ -66,6 +79,9 @@ final class HarbormasterBuildSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'initiated':
+        $viewer = $this->requireViewer();
+        return $query->setParameter('initiators', array($viewer->getPHID()));
       case 'all':
         return $query;
       case 'waiting':

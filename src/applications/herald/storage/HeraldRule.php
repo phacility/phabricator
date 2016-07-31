@@ -34,7 +34,7 @@ final class HeraldRule extends HeraldDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'sort255',
         'contentType' => 'text255',
         'mustMatchAll' => 'bool',
         'configVersion' => 'uint32',
@@ -47,6 +47,9 @@ final class HeraldRule extends HeraldDAO
         'repetitionPolicy' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
+        'key_name' => array(
+          'columns' => array('name(128)'),
+        ),
         'key_author' => array(
           'columns' => array('authorPHID'),
         ),

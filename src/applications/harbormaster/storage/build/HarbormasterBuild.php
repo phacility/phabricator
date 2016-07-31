@@ -59,6 +59,9 @@ final class HarbormasterBuild extends HarbormasterDAO
           'columns' => array('buildablePHID', 'planAutoKey'),
           'unique' => true,
         ),
+        'key_initiator' => array(
+          'columns' => array('initiatorPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
