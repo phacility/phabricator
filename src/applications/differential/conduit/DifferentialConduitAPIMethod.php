@@ -150,6 +150,10 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
     array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
 
+    if (!$revisions) {
+      return array();
+    }
+
     $field_lists = array();
     foreach ($revisions as $revision) {
       $revision_phid = $revision->getPHID();
