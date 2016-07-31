@@ -27,11 +27,11 @@ final class HarbormasterBuildStatusDatasource
   private function buildResults() {
     $results = array();
 
-    $status_map = HarbormasterBuild::getBuildStatusMap();
+    $status_map = HarbormasterBuildStatus::getBuildStatusMap();
     foreach ($status_map as $value => $name) {
       $result = id(new PhabricatorTypeaheadResult())
-        ->setIcon(HarbormasterBuild::getBuildStatusIcon($value))
-        ->setColor(HarbormasterBuild::getBuildStatusColor($value))
+        ->setIcon(HarbormasterBuildStatus::getBuildStatusIcon($value))
+        ->setColor(HarbormasterBuildStatus::getBuildStatusColor($value))
         ->setPHID($value)
         ->setName($name)
         ->addAttribute(pht('Status'));

@@ -107,9 +107,9 @@ final class HarbormasterBuildSearchEngine
 
       $status = $build->getBuildStatus();
 
-      $status_icon = HarbormasterBuild::getBuildStatusIcon($status);
-      $status_color = HarbormasterBuild::getBuildStatusColor($status);
-      $status_label = HarbormasterBuild::getBuildStatusName($status);
+      $status_icon = HarbormasterBuildStatus::getBuildStatusIcon($status);
+      $status_color = HarbormasterBuildStatus::getBuildStatusColor($status);
+      $status_label = HarbormasterBuildStatus::getBuildStatusName($status);
 
       $item->setStatusIcon("{$status_icon} {$status_color}", $status_label);
 

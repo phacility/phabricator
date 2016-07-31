@@ -66,6 +66,7 @@ final class HarbormasterQueryBuildsConduitAPIMethod
       $id = $build->getID();
       $uri = '/harbormaster/build/'.$id.'/';
       $status = $build->getBuildStatus();
+      $status_name = HarbormasterBuildStatus::getBuildStatusName($status);
 
       $data[] = array(
         'id' => $id,
@@ -75,7 +76,7 @@ final class HarbormasterQueryBuildsConduitAPIMethod
         'buildablePHID' => $build->getBuildablePHID(),
         'buildPlanPHID' => $build->getBuildPlanPHID(),
         'buildStatus' => $status,
-        'buildStatusName' => HarbormasterBuild::getBuildStatusName($status),
+        'buildStatusName' => $status_name,
       );
     }
 

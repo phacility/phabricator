@@ -1131,6 +1131,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildQuery' => 'applications/harbormaster/query/HarbormasterBuildQuery.php',
     'HarbormasterBuildRequest' => 'applications/harbormaster/engine/HarbormasterBuildRequest.php',
     'HarbormasterBuildSearchEngine' => 'applications/harbormaster/query/HarbormasterBuildSearchEngine.php',
+    'HarbormasterBuildStatus' => 'applications/harbormaster/constants/HarbormasterBuildStatus.php',
     'HarbormasterBuildStatusDatasource' => 'applications/harbormaster/typeahead/HarbormasterBuildStatusDatasource.php',
     'HarbormasterBuildStep' => 'applications/harbormaster/storage/configuration/HarbormasterBuildStep.php',
     'HarbormasterBuildStepCoreCustomField' => 'applications/harbormaster/customfield/HarbormasterBuildStepCoreCustomField.php',
@@ -5687,6 +5688,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildRequest' => 'Phobject',
     'HarbormasterBuildSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'HarbormasterBuildStatus' => 'Phobject',
     'HarbormasterBuildStatusDatasource' => 'PhabricatorTypeaheadDatasource',
     'HarbormasterBuildStep' => array(
       'HarbormasterDAO',

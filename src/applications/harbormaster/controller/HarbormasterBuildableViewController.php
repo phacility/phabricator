@@ -196,11 +196,10 @@ final class HarbormasterBuildableViewController
         ->setHref($view_uri);
 
       $status = $build->getBuildStatus();
-      $item->setStatusIcon(
-        'fa-dot-circle-o '.HarbormasterBuild::getBuildStatusColor($status),
-        HarbormasterBuild::getBuildStatusName($status));
-
-      $item->addAttribute(HarbormasterBuild::getBuildStatusName($status));
+      $status_color = HarbormasterBuildStatus::getBuildStatusColor($status);
+      $status_name = HarbormasterBuildStatus::getBuildStatusName($status);
+      $item->setStatusIcon('fa-dot-circle-o '.$status_color, $status_name);
+      $item->addAttribute($status_name);
 
       if ($build->isRestarting()) {
         $item->addIcon('fa-repeat', pht('Restarting'));
