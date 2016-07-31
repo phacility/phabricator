@@ -44,7 +44,7 @@ final class PhabricatorLiskSearchEngineExtension
     );
   }
 
-  public function getFieldValuesForConduit($object) {
+  public function getFieldValuesForConduit($object, $data) {
     return array(
       'dateCreated' => (int)$object->getDateCreated(),
       'dateModified' => (int)$object->getDateModified(),

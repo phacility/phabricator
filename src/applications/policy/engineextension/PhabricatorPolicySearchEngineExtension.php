@@ -30,7 +30,7 @@ final class PhabricatorPolicySearchEngineExtension
     );
   }
 
-  public function getFieldValuesForConduit($object) {
+  public function getFieldValuesForConduit($object, $data) {
     $capabilities = $object->getCapabilities();
 
     $map = array();

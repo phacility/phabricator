@@ -80,7 +80,7 @@ final class PhabricatorCustomFieldSearchEngineExtension
     return $map;
   }
 
-  public function getFieldValuesForConduit($object) {
+  public function getFieldValuesForConduit($object, $data) {
     // TODO: This is currently very inefficient. We should bulk-load these
     // field values instead.
 
