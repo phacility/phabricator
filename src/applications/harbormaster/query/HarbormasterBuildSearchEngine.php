@@ -24,6 +24,12 @@ final class HarbormasterBuildSearchEngine
         ->setDescription(
           pht('Search for builds running a given build plan.'))
         ->setDatasource(new HarbormasterBuildPlanDatasource()),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Buildables'))
+        ->setKey('buildables')
+        ->setAliases(array('buildable'))
+        ->setDescription(
+          pht('Search for builds running against particular buildables.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Statuses'))
         ->setKey('statuses')
@@ -39,6 +45,12 @@ final class HarbormasterBuildSearchEngine
           pht(
             'Search for builds started by someone or something in particular.'))
         ->setDatasource(new HarbormasterBuildInitiatorDatasource()),
+    );
+  }
+
+  protected function getHiddenFields() {
+    return array(
+      'buildables',
     );
   }
 

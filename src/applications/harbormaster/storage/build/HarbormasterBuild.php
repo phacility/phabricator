@@ -3,7 +3,8 @@
 final class HarbormasterBuild extends HarbormasterDAO
   implements
     PhabricatorApplicationTransactionInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorConduitResultInterface {
 
   protected $buildablePHID;
   protected $buildPlanPHID;
@@ -395,6 +396,51 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('A build inherits policies from its buildable.');
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildablePHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the object this build is building.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildPlanPHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the build plan being run.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildStatus')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('The current status of this build.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('initiatorPHID')
+        ->setType('phid')
+        ->setDescription(pht('The person (or thing) that started this build.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $status = $this->getBuildStatus();
+    return array(
+      'buildablePHID' => $this->getBuildablePHID(),
+      'buildPlanPHID' => $this->getBuildPlanPHID(),
+      'buildStatus' => array(
+        'value' => $status,
+        'name' => HarbormasterBuildStatus::getBuildStatusName($status),
+      ),
+      'initiatorPHID' => nonempty($this->getInitiatorPHID(), null),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new HarbormasterQueryBuildsSearchEngineAttachment())
+        ->setAttachmentKey('querybuilds'),
+    );
   }
 
 }
