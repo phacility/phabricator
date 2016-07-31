@@ -1107,6 +1107,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildFailureException' => 'applications/harbormaster/exception/HarbormasterBuildFailureException.php',
     'HarbormasterBuildGraph' => 'applications/harbormaster/engine/HarbormasterBuildGraph.php',
     'HarbormasterBuildLintMessage' => 'applications/harbormaster/storage/build/HarbormasterBuildLintMessage.php',
+    'HarbormasterBuildListController' => 'applications/harbormaster/controller/HarbormasterBuildListController.php',
     'HarbormasterBuildLog' => 'applications/harbormaster/storage/build/HarbormasterBuildLog.php',
     'HarbormasterBuildLogChunk' => 'applications/harbormaster/storage/build/HarbormasterBuildLogChunk.php',
     'HarbormasterBuildLogChunkIterator' => 'applications/harbormaster/storage/build/HarbormasterBuildLogChunkIterator.php',
@@ -1129,6 +1130,8 @@ phutil_register_library_map(array(
     'HarbormasterBuildPlanTransactionQuery' => 'applications/harbormaster/query/HarbormasterBuildPlanTransactionQuery.php',
     'HarbormasterBuildQuery' => 'applications/harbormaster/query/HarbormasterBuildQuery.php',
     'HarbormasterBuildRequest' => 'applications/harbormaster/engine/HarbormasterBuildRequest.php',
+    'HarbormasterBuildSearchEngine' => 'applications/harbormaster/query/HarbormasterBuildSearchEngine.php',
+    'HarbormasterBuildStatusDatasource' => 'applications/harbormaster/typeahead/HarbormasterBuildStatusDatasource.php',
     'HarbormasterBuildStep' => 'applications/harbormaster/storage/configuration/HarbormasterBuildStep.php',
     'HarbormasterBuildStepCoreCustomField' => 'applications/harbormaster/customfield/HarbormasterBuildStepCoreCustomField.php',
     'HarbormasterBuildStepCustomField' => 'applications/harbormaster/customfield/HarbormasterBuildStepCustomField.php',
@@ -5647,6 +5650,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildFailureException' => 'Exception',
     'HarbormasterBuildGraph' => 'AbstractDirectedGraph',
     'HarbormasterBuildLintMessage' => 'HarbormasterDAO',
+    'HarbormasterBuildListController' => 'HarbormasterController',
     'HarbormasterBuildLog' => array(
       'HarbormasterDAO',
       'PhabricatorPolicyInterface',
@@ -5682,6 +5686,8 @@ phutil_register_library_map(array(
     'HarbormasterBuildPlanTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'HarbormasterBuildQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildRequest' => 'Phobject',
+    'HarbormasterBuildSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'HarbormasterBuildStatusDatasource' => 'PhabricatorTypeaheadDatasource',
     'HarbormasterBuildStep' => array(
       'HarbormasterDAO',
       'PhabricatorApplicationTransactionInterface',

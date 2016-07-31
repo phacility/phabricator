@@ -71,28 +71,22 @@ final class HarbormasterBuild extends HarbormasterDAO
    * @return string Human-readable name.
    */
   public static function getBuildStatusName($status) {
-    switch ($status) {
-      case self::STATUS_INACTIVE:
-        return pht('Inactive');
-      case self::STATUS_PENDING:
-        return pht('Pending');
-      case self::STATUS_BUILDING:
-        return pht('Building');
-      case self::STATUS_PASSED:
-        return pht('Passed');
-      case self::STATUS_FAILED:
-        return pht('Failed');
-      case self::STATUS_ABORTED:
-        return pht('Aborted');
-      case self::STATUS_ERROR:
-        return pht('Unexpected Error');
-      case self::STATUS_PAUSED:
-        return pht('Paused');
-      case self::STATUS_DEADLOCKED:
-        return pht('Deadlocked');
-      default:
-        return pht('Unknown');
-    }
+    $map = self::getBuildStatusMap();
+    return idx($map, $status, pht('Unknown ("%s")', $status));
+  }
+
+  public static function getBuildStatusMap() {
+    return array(
+      self::STATUS_INACTIVE => pht('Inactive'),
+      self::STATUS_PENDING => pht('Pending'),
+      self::STATUS_BUILDING => pht('Building'),
+      self::STATUS_PASSED => pht('Passed'),
+      self::STATUS_FAILED => pht('Failed'),
+      self::STATUS_ABORTED => pht('Aborted'),
+      self::STATUS_ERROR => pht('Unexpected Error'),
+      self::STATUS_PAUSED => pht('Paused'),
+      self::STATUS_DEADLOCKED => pht('Deadlocked'),
+    );
   }
 
   public static function getBuildStatusIcon($status) {
