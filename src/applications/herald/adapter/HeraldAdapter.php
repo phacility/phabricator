@@ -189,7 +189,6 @@ abstract class HeraldAdapter extends Phobject {
   abstract public function getAdapterApplicationClass();
   abstract public function getObject();
 
-
   /**
    * Return a new characteristic object for this adapter.
    *
@@ -215,6 +214,23 @@ abstract class HeraldAdapter extends Phobject {
 
   public function canTriggerOnObject($object) {
     return false;
+  }
+
+  public function isTestAdapterForObject($object) {
+    return false;
+  }
+
+  public function canCreateTestAdapterForObject($object) {
+    return $this->isTestAdapterForObject($object);
+  }
+
+  public function newTestAdapter($object) {
+    return id(clone $this)
+      ->setObject($object);
+  }
+
+  public function getAdapterTestDescription() {
+    return null;
   }
 
   public function explainValidTriggerObjects() {

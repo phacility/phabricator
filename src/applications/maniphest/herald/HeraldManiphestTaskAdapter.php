@@ -16,6 +16,15 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     return pht('React to tasks being created or updated.');
   }
 
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof ManiphestTask);
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Test rules which run when a task is created or updated.');
+  }
+
   protected function initializeNewAdapter() {
     $this->task = $this->newObject();
   }
@@ -46,8 +55,14 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
     $this->task = $task;
     return $this;
   }
+
   public function getTask() {
     return $this->task;
+  }
+
+  public function setObject($object) {
+    $this->task = $object;
+    return $this;
   }
 
   public function getObject() {
