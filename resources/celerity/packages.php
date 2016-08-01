@@ -113,7 +113,7 @@ return array(
     'phui-header-view-css',
     'phabricator-filetree-view-css',
     'phabricator-nav-view-css',
-    'phabricator-side-menu-view-css',
+    'phui-basic-nav-view-css',
     'phui-crumbs-view-css',
     'phui-object-item-list-view-css',
     'global-drag-and-drop-css',

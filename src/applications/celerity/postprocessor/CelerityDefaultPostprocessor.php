@@ -194,6 +194,7 @@ final class CelerityDefaultPostprocessor
 
       // Background color for "most" themes.
       'page.background' => '#f8f8fb',
+      'page.sidenav' => '#f0f0f2',
 
       'menu.profile.text' => 'rgba(255,255,255,.8)',
       'menu.profile.text.selected' => 'rgba(255,255,255,1)',

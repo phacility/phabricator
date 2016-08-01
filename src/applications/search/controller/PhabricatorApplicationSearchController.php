@@ -193,10 +193,12 @@ final class PhabricatorApplicationSearchController
     }
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->setProfileHeader(true);
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($header);
+      ->setHeader($header)
+      ->addClass('application-search-results');
 
     if ($run_query || $named_query) {
       $box->setShowHide(
@@ -281,9 +283,8 @@ final class PhabricatorApplicationSearchController
 
           if ($pager->willShowPagingControls()) {
             $pager_box = id(new PHUIBoxView())
-              ->addPadding(PHUI::PADDING_MEDIUM)
-              ->addMargin(PHUI::MARGIN_LARGE)
-              ->setBorder(true)
+              ->setColor(PHUIBoxView::GREY)
+              ->addClass('application-search-pager')
               ->appendChild($pager);
             $body[] = $pager_box;
           }
@@ -308,7 +309,8 @@ final class PhabricatorApplicationSearchController
     }
 
     $crumbs = $parent
-      ->buildApplicationCrumbs();
+      ->buildApplicationCrumbs()
+      ->setBorder(true);
 
     if ($more_crumbs) {
       $query_uri = $engine->getQueryResultsPageURI($saved_query->getQueryKey());
@@ -321,12 +323,15 @@ final class PhabricatorApplicationSearchController
       $crumbs->addTextCrumb($title);
     }
 
+    require_celerity_resource('application-search-view-css');
+
     return $this->newPage()
       ->setApplicationMenu($this->buildApplicationMenu())
       ->setTitle(pht('Query: %s', $title))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
-      ->appendChild($body);
+      ->appendChild($body)
+      ->addClass('application-search-view');
   }
 
   private function processEditRequest() {
@@ -403,19 +408,28 @@ final class PhabricatorApplicationSearchController
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Saved Queries'), $engine->getQueryManagementURI());
+      ->addTextCrumb(pht('Saved Queries'), $engine->getQueryManagementURI())
+      ->setBorder(true);
 
     $nav->selectFilter('query/edit');
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Saved Queries'))
+      ->setProfileHeader(true);
+
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Saved Queries'))
-      ->setObjectList($list);
+      ->setHeader($header)
+      ->setObjectList($list)
+      ->addClass('application-search-results');
+
+    require_celerity_resource('application-search-view-css');
 
     return $this->newPage()
       ->setApplicationMenu($this->buildApplicationMenu())
       ->setTitle(pht('Saved Queries'))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
+      ->addClass('application-search-view')
       ->appendChild($box);
   }
 

@@ -8,6 +8,13 @@
   background: rgba(255, 255, 255, 0.75);
 }
 
+.application-search-view div.phui-calendar-box {
+  border-left: 1px solid {$thinblueborder};
+  border-right: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$lightblueborder};
+  border-radius: 0;
+}
+
 .phui-calendar-list a {
   color: {$greytext};
 }

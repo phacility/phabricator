@@ -183,7 +183,8 @@ final class PHUICalendarMonthView extends AphrontView {
     $box = id(new PHUIObjectBoxView())
       ->setHeader($this->renderCalendarHeader($this->getDateTime()))
       ->appendChild($table)
-      ->setFormErrors($warnings);
+      ->setFormErrors($warnings)
+      ->addClass('phui-calendar-box');
     if ($this->error) {
       $box->setInfoView($this->error);
 

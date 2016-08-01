@@ -2,26 +2,6 @@
  * @provides phui-profile-menu-css
  */
 
-.device-desktop .phui-navigation-shell.phui-profile-menu {
-  display: table;
-  width: 100%;
-  height: calc(100vh - {$menu.main.height});
-}
-
-.device-desktop .phui-profile-menu .phabricator-nav {
-  display: table-row;
-}
-
-.device-desktop .phui-profile-menu .phabricator-nav-local {
-  display: table-cell;
-  position: relative;
-  vertical-align: top;
-  width: {$menu.profile.width};
-  max-width: {$menu.profile.width};
-  margin-top: 0;
-  overflow: hidden;
-}
-
 .device-desktop .phui-profile-menu-collapsed .phabricator-nav-local {
   width: {$menu.profile.width.collapsed};
   max-width: {$menu.profile.width.collapsed};
@@ -32,9 +12,12 @@
   margin-left: 0;
 }
 
+.phui-profile-menu .phui-basic-nav {
+  width: 205px;
+}
+
 .phui-profile-menu .phabricator-side-menu {
   background: #525867;
-  box-shadow: inset -2px 0 2px rgba({$alphablack}, 0.150);
   width: 240px;
 }
 
