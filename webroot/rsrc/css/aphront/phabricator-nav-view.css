@@ -6,8 +6,8 @@
   cursor: col-resize;
 }
 
-.phabricator-nav-local,
-.phabricator-nav-drag {
+.device-desktop .has-closed-nav div.phabricator-nav-local,
+.device-desktop .has-closed-nav div.phabricator-nav-drag {
   display: none;
 }
 

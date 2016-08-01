@@ -254,6 +254,8 @@ final class AphrontSideNavFilterView extends AphrontView {
     if ($this->flexible) {
       if (!$this->collapsed) {
         $nav_classes[] = 'has-drag-nav';
+      } else {
+        $nav_classes[] = 'has-closed-nav';
       }
 
       Javelin::initBehavior(
