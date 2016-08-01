@@ -56,10 +56,13 @@ final class HarbormasterQueryBuildsConduitAPIMethod
     $subsumption = $call->setUser($viewer)
       ->execute();
 
-    $data = [];
+    $data = array();
     foreach ($subsumption['data'] as $build_data) {
-      $querybuilds = idxv($build_data, array('attachments', 'querybuilds'), []);
-      $fields = idx($build_data, 'fields', []);
+      $querybuilds = idxv(
+        $build_data,
+        array('attachments', 'querybuilds'),
+        array());
+      $fields = idx($build_data, 'fields', array());
       unset($build_data['fields']);
       unset($build_data['attachments']);
       $data[] = array_mergev(array($build_data, $querybuilds, $fields));
