@@ -128,6 +128,7 @@ final class ProjectBoardTaskCard extends Phobject {
     }
 
     if ($project_handles) {
+      $project_handles = array_reverse($project_handles);
       $tag_list = id(new PHUIHandleTagListView())
         ->setSlim(true)
         ->setHandles($project_handles);
