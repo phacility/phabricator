@@ -768,7 +768,10 @@ abstract class HeraldAdapter extends Phobject {
     );
   }
 
-  abstract protected function initializeNewAdapter();
+  protected function initializeNewAdapter() {
+    $this->setObject($this->newObject());
+    return $this;
+  }
 
   /**
    * Does this adapter's event fire only once?
