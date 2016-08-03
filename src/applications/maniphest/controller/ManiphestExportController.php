@@ -31,7 +31,9 @@ final class ManiphestExportController extends ManiphestController {
         '<p>%s</p>'.
         '<br />'.
         '<p>'.
-          '<a href="http://www.phpexcel.net/">http://www.phpexcel.net/</a>'.
+          '<a href="https://github.com/PHPOffice/PHPExcel">'.
+            'https://github.com/PHPOffice/PHPExcel'.
+          '</a>'.
         '</p>'.
         '<br />'.
         '<p>%s</p>',
