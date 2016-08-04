@@ -2,17 +2,20 @@
  * @provides phui-basic-nav-view-css
  */
 
-.device-desktop .phui-navigation-shell {
+.device-desktop .phui-navigation-shell,
+.phabricator-home.device .phui-navigation-shell {
   display: table;
   width: 100%;
   height: calc(100vh - {$menu.main.height});
 }
 
-.device-desktop .phui-navigation-shell .phabricator-nav {
+.device-desktop .phui-navigation-shell .phabricator-nav,
+.phabricator-home.device .phui-navigation-shell .phabricator-nav {
   display: table-row;
 }
 
-.device-desktop .phui-navigation-shell .phabricator-nav-local {
+.device-desktop .phui-navigation-shell .phabricator-nav-local,
+.phabricator-home.device .phui-navigation-shell .phabricator-nav-local {
   display: table-cell;
   position: relative;
   vertical-align: top;

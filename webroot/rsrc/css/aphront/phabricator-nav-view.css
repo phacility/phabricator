@@ -7,7 +7,9 @@
 }
 
 .device-desktop .has-closed-nav div.phabricator-nav-local,
-.device-desktop .has-closed-nav div.phabricator-nav-drag {
+.device-desktop .has-closed-nav div.phabricator-nav-drag,
+.device .phui-navigation-shell div.phabricator-nav-local,
+.device .phui-navigation-shell div.phabricator-nav-drag {
   display: none;
 }
 
@@ -16,7 +18,7 @@
   display: block;
 }
 
-.device .phabricator-side-menu-home .phabricator-nav-local {
+.device-phone .phabricator-side-menu-home .phabricator-nav-local {
   display: block;
 }
 

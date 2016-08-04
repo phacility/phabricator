@@ -53,6 +53,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     return $this->newPage()
       ->setTitle('Phabricator')
+      ->addClass('phabricator-home')
       ->appendChild($content);
 
   }
