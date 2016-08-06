@@ -37,7 +37,7 @@
 }
 
 .device-phone .phui-document-view.phui-document-view-pro {
-  padding: 0 8px;
+  padding: 0 12px;
   margin: 0 auto;
 }
 
@@ -131,6 +131,11 @@ a.button.phui-document-toc {
   line-height: 30px;
   color: #000;
 }
+
+.device-phone .phui-document-view.phui-document-view-pro .phui-header-tall
+  .phui-header-header {
+    font-size: 18px;
+  }
 
 .device-phone .phui-document-view-pro .phui-header-subheader {
   display: block;

@@ -8,6 +8,7 @@ final class HarbormasterBuildQuery
   private $buildStatuses;
   private $buildablePHIDs;
   private $buildPlanPHIDs;
+  private $initiatorPHIDs;
   private $needBuildTargets;
 
   public function withIDs(array $ids) {
@@ -32,6 +33,11 @@ final class HarbormasterBuildQuery
 
   public function withBuildPlanPHIDs(array $build_plan_phids) {
     $this->buildPlanPHIDs = $build_plan_phids;
+    return $this;
+  }
+
+  public function withInitiatorPHIDs(array $initiator_phids) {
+    $this->initiatorPHIDs = $initiator_phids;
     return $this;
   }
 
@@ -165,6 +171,13 @@ final class HarbormasterBuildQuery
         $conn,
         'buildPlanPHID IN (%Ls)',
         $this->buildPlanPHIDs);
+    }
+
+    if ($this->initiatorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'initiatorPHID IN (%Ls)',
+        $this->initiatorPHIDs);
     }
 
     return $where;

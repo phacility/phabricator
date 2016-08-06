@@ -27,8 +27,22 @@ final class HeraldCommitAdapter
     return new PhabricatorRepositoryCommit();
   }
 
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof PhabricatorRepositoryCommit);
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Test rules which run after a commit is discovered and imported.');
+  }
+
   protected function initializeNewAdapter() {
     $this->commit = $this->newObject();
+  }
+
+  public function setObject($object) {
+    $this->commit = $object;
+    return $this;
   }
 
   public function getObject() {

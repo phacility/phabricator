@@ -14,7 +14,7 @@ For an introduction to Conduit, see @{article:Conduit API Overview}.
 
 In general, you'll use these API methods:
 
-  - `diffusion.repository.edit`: Create and edit repositorie.
+  - `diffusion.repository.edit`: Create and edit repositories.
   - `diffusion.uri.edit`: Create and edit repository URIs to configure
     observation, mirroring, and cloning.
 

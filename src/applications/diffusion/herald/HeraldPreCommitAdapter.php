@@ -25,6 +25,20 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
     return 'PhabricatorDiffusionApplication';
   }
 
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof PhabricatorRepositoryCommit);
+  }
+
+  public function canCreateTestAdapterForObject($object) {
+    return false;
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Commit hook events depend on repository state which is only available '.
+      'at push time, and can not be run in test mode.');
+  }
+
   protected function initializeNewAdapter() {
     $this->log = new PhabricatorRepositoryPushLog();
   }

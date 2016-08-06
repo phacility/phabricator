@@ -112,20 +112,13 @@ abstract class PhabricatorCustomField extends Phobject {
     $object,
     array $options = array()) {
 
-    PhutilTypeSpec::checkMap(
-      $options,
-      array(
-        'withDisabled' => 'optional bool',
-      ));
-
-    $field_objects = id(new PhutilSymbolLoader())
+    $field_objects = id(new PhutilClassMapQuery())
       ->setAncestorClass($base_class)
-      ->loadObjects();
+      ->execute();
 
     $fields = array();
-    $from_map = array();
     foreach ($field_objects as $field_object) {
-      $current_class = get_class($field_object);
+      $field_object = clone $field_object;
       foreach ($field_object->createFields($object) as $field) {
         $key = $field->getFieldKey();
         if (isset($fields[$key])) {
@@ -133,11 +126,10 @@ abstract class PhabricatorCustomField extends Phobject {
             pht(
               "Both '%s' and '%s' define a custom field with ".
               "field key '%s'. Field keys must be unique.",
-              $from_map[$key],
-              $current_class,
+              get_class($fields[$key]),
+              get_class($field),
               $key));
         }
-        $from_map[$key] = $current_class;
         $fields[$key] = $field;
       }
     }
@@ -152,11 +144,13 @@ abstract class PhabricatorCustomField extends Phobject {
 
     if (empty($options['withDisabled'])) {
       foreach ($fields as $key => $field) {
-        $config = idx($spec, $key, array()) + array(
-          'disabled' => $field->shouldDisableByDefault(),
-        );
+        if (isset($spec[$key]['disabled'])) {
+          $is_disabled = $spec[$key]['disabled'];
+        } else {
+          $is_disabled = $field->shouldDisableByDefault();
+        }
 
-        if (!empty($config['disabled'])) {
+        if ($is_disabled) {
           if ($field->canDisableField()) {
             unset($fields[$key]);
           }

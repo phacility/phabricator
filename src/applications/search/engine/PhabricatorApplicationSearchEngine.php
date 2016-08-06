@@ -1138,6 +1138,11 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     if ($objects) {
       $field_extensions = $this->getConduitFieldExtensions();
 
+      $extension_data = array();
+      foreach ($field_extensions as $key => $extension) {
+        $extension_data[$key] = $extension->loadExtensionConduitData($objects);
+      }
+
       $attachment_data = array();
       foreach ($attachments as $key => $attachment) {
         $attachment_data[$key] = $attachment->loadAttachmentData(
@@ -1148,7 +1153,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       foreach ($objects as $object) {
         $field_map = $this->getObjectWireFieldsForConduit(
           $object,
-          $field_extensions);
+          $field_extensions,
+          $extension_data);
 
         $attachment_map = array();
         foreach ($attachments as $key => $attachment) {
@@ -1312,11 +1318,13 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
 
   protected function getObjectWireFieldsForConduit(
     $object,
-    array $field_extensions) {
+    array $field_extensions,
+    array $extension_data) {
 
     $fields = array();
-    foreach ($field_extensions as $extension) {
-      $fields += $extension->getFieldValuesForConduit($object);
+    foreach ($field_extensions as $key => $extension) {
+      $data = idx($extension_data, $key, array());
+      $fields += $extension->getFieldValuesForConduit($object, $data);
     }
 
     return $fields;

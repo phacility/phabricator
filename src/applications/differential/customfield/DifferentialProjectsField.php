@@ -91,7 +91,10 @@ final class DifferentialProjectsField
   }
 
   public function shouldAppearInConduitDictionary() {
-    return true;
+    // To improve performance, we exclude this field from Conduit results.
+    // See T11404 for discussion. In modern "differential.revision.search",
+    // this information is available efficiently as an attachment.
+    return false;
   }
 
   public function getApplicationTransactionMetadata() {
