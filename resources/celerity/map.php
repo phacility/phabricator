@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '90c46327',
+    'core.pkg.css' => 'f12c7d47',
     'core.pkg.js' => 'b562c3db',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3fb7f532',
@@ -32,7 +32,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => 'd4f16145',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '0877ed6e',
-    'rsrc/css/application/base/main-menu-view.css' => 'b623169f',
+    'rsrc/css/application/base/main-menu-view.css' => 'a79b6e52',
     'rsrc/css/application/base/notification-menu.css' => 'f31c0bde',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '95351601',
     'rsrc/css/application/base/phui-theme.css' => '027ba77e',
@@ -163,7 +163,6 @@ return array(
     'rsrc/css/phui/workboards/phui-workcard.css' => '0c62d7c5',
     'rsrc/css/phui/workboards/phui-workpanel.css' => '92197373',
     'rsrc/css/sprite-login.css' => '60e8560e',
-    'rsrc/css/sprite-menu.css' => '9dd65b92',
     'rsrc/css/sprite-tokens.css' => '9cdfd599',
     'rsrc/css/syntax/syntax-default.css' => '9923583c',
     'rsrc/externals/d3/d3.min.js' => 'a11a5ff2',
@@ -320,6 +319,7 @@ return array(
     'rsrc/image/icon/tango/upload.png' => '7bbb7984',
     'rsrc/image/icon/unsubscribe.png' => '25725013',
     'rsrc/image/lightblue-header.png' => '5c168b6d',
+    'rsrc/image/logo/light-eye.png' => 'fcd66408',
     'rsrc/image/main_texture.png' => '29a2c5ad',
     'rsrc/image/menu_texture.png' => '5a17580d',
     'rsrc/image/people/harding.png' => '45aa614e',
@@ -343,8 +343,6 @@ return array(
     'rsrc/image/resize.png' => 'fd476de4',
     'rsrc/image/sprite-login-X2.png' => 'e3991e37',
     'rsrc/image/sprite-login.png' => '03d5af29',
-    'rsrc/image/sprite-menu-X2.png' => 'cfd8fca5',
-    'rsrc/image/sprite-menu.png' => 'd7a99faa',
     'rsrc/image/sprite-tokens-X2.png' => '804a5232',
     'rsrc/image/sprite-tokens.png' => 'b41d03da',
     'rsrc/image/texture/card-gradient.png' => '815f26e8',
@@ -785,7 +783,7 @@ return array(
     'phabricator-flag-css' => '5337623f',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => '4a021c10',
-    'phabricator-main-menu-view' => 'b623169f',
+    'phabricator-main-menu-view' => 'a79b6e52',
     'phabricator-nav-view-css' => '09f3d0db',
     'phabricator-notification' => 'ccf1cbf8',
     'phabricator-notification-css' => '3f6c89c9',
@@ -891,7 +889,6 @@ return array(
     'releeph-request-typeahead-css' => '667a48ae',
     'setup-issue-css' => 'db7e9c40',
     'sprite-login-css' => '60e8560e',
-    'sprite-menu-css' => '9dd65b92',
     'sprite-tokens-css' => '9cdfd599',
     'syntax-default-css' => '9923583c',
     'syntax-highlighting-css' => '769d3498',
@@ -1724,6 +1721,9 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
     ),
+    'a79b6e52' => array(
+      'phui-theme-css',
+    ),
     'a80d0378' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1843,9 +1843,6 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'javelin-util',
-    ),
-    'b623169f' => array(
-      'phui-theme-css',
     ),
     'b6993408' => array(
       'javelin-behavior',
@@ -2246,7 +2243,6 @@ return array(
       'aphront-tooltip-css',
       'phabricator-flag-css',
       'phui-info-view-css',
-      'sprite-menu-css',
       'phabricator-main-menu-view',
       'phabricator-notification-css',
       'phabricator-notification-menu-css',

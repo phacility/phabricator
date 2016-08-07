@@ -69,6 +69,14 @@ EOJSON;
             "    omit this if you just want a piece of text, like a copyright ".
             "    notice."))
         ->addExample($example, pht('Basic Example')),
+      $this->newOption('ui.custom-wordmark', 'string', array())
+        ->setSummary(
+          pht(
+            'Customize the text next to the logo.'))
+        ->setDescription(
+          pht(
+            "Allows you to change the text (Phabricator by default) ".
+            "next to the Phabricator logo.\n\n")),
       $this->newOption(
         'ui.custom-header',
         'custom:PhabricatorCustomHeaderConfigType',
@@ -80,7 +88,7 @@ EOJSON;
               'phid for a viewable image you have uploaded to Phabricator '.
               'via the [[ /file/ | Files application]]. This image should '.
               'be:'."\n".
-              ' - 192px X 80px; while not enforced, images with these '.
+              ' - 80px X 80px; while not enforced, images with these '.
               'dimensions will look best across devices.'."\n".
               ' - have view policy public if [[ '.
               '/config/edit/policy.allow-public | `policy.allow-public`]] '.

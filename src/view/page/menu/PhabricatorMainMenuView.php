@@ -298,7 +298,9 @@ final class PhabricatorMainMenuView extends AphrontView {
 
   private function renderPhabricatorLogo() {
     $style_logo = null;
+    $logo = null;
     $custom_header = PhabricatorEnv::getEnvConfig('ui.custom-header');
+    $custom_wordmark = PhabricatorEnv::getEnvConfig('ui.custom-wordmark');
     if ($custom_header) {
       $cache = PhabricatorCaches::getImmutableCache();
       $cache_key_logo = 'ui.custom-header.logo-phid.v1.'.$custom_header;
@@ -315,17 +317,27 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
       if ($logo_uri) {
         $style_logo =
-          'background-size: 96px 40px; '.
+          'background-size: 40px 40px; '.
           'background-position: 0px 0px; '.
           'background-image: url('.$logo_uri.');';
       }
+
+      $logo = phutil_tag(
+        'span',
+        array(
+          'class' => 'phabricator-main-menu-logo',
+          'style' => $style_logo,
+        ),
+        '');
     }
 
-    $color = PhabricatorEnv::getEnvConfig('ui.header-color');
-    if ($color == 'light') {
-      $color = 'dark';
-    } else {
-      $color = 'light';
+    if (!$logo) {
+      $logo = phutil_tag(
+        'span',
+        array(
+          'class' => 'phabricator-wordmark',
+        ),
+        (($custom_wordmark) ? $custom_wordmark : pht('Phabricator')));
     }
 
     return phutil_tag(
@@ -344,16 +356,10 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu phabricator-main-menu-eye '.$color.'-eye',
+            'class' => 'phabricator-main-menu-eye',
           ),
           ''),
-          phutil_tag(
-          'span',
-          array(
-            'class' => 'sprite-menu phabricator-main-menu-logo '.$color.'-logo',
-            'style' => $style_logo,
-          ),
-          ''),
+          $logo,
       ));
   }
 
