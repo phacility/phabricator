@@ -328,6 +328,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'metamta.re-prefix' => $global_settings_reason,
       'metamta.vary-subjects' => $global_settings_reason,
+
+      'ui.custom-header' => pht(
+        'This option has been replaced with `ui.logo`, which provides more '.
+        'flexible configuration options.'),
     );
 
     return $ancient_config;

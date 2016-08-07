@@ -297,13 +297,13 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderPhabricatorLogo() {
-    $style_logo = null;
-    $logo = null;
-    $custom_header = PhabricatorEnv::getEnvConfig('ui.custom-header');
-    $custom_wordmark = PhabricatorEnv::getEnvConfig('ui.custom-wordmark');
+    $custom_header = PhabricatorCustomLogoConfigType::getLogoImagePHID();
+
+    $logo_style = array();
     if ($custom_header) {
       $cache = PhabricatorCaches::getImmutableCache();
-      $cache_key_logo = 'ui.custom-header.logo-phid.v1.'.$custom_header;
+      $cache_key_logo = 'ui.custom-header.logo-phid.v3.'.$custom_header;
+
       $logo_uri = $cache->getKey($cache_key_logo);
       if (!$logo_uri) {
         $file = id(new PhabricatorFileQuery())
@@ -315,30 +315,31 @@ final class PhabricatorMainMenuView extends AphrontView {
           $cache->setKey($cache_key_logo, $logo_uri);
         }
       }
-      if ($logo_uri) {
-        $style_logo =
-          'background-size: 40px 40px; '.
-          'background-position: 0px 0px; '.
-          'background-image: url('.$logo_uri.');';
-      }
 
-      $logo = phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-main-menu-logo',
-          'style' => $style_logo,
-        ),
-        '');
+      $logo_style[] = 'background-size: 40px 40px;';
+      $logo_style[] = 'background-position: 0 0;';
+      $logo_style[] = 'background-image: url('.$logo_uri.')';
     }
 
-    if (!$logo) {
-      $logo = phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-wordmark',
-        ),
-        (($custom_wordmark) ? $custom_wordmark : pht('Phabricator')));
+    $logo_node = phutil_tag(
+      'span',
+      array(
+        'class' => 'phabricator-main-menu-eye',
+        'style' => implode(' ', $logo_style),
+      ));
+
+
+    $wordmark_text = PhabricatorCustomLogoConfigType::getLogoWordmark();
+    if (!strlen($wordmark_text)) {
+      $wordmark_text = pht('Phabricator');
     }
+
+    $wordmark_node = phutil_tag(
+      'span',
+      array(
+        'class' => 'phabricator-wordmark',
+      ),
+      $wordmark_text);
 
     return phutil_tag(
       'a',
@@ -353,13 +354,8 @@ final class PhabricatorMainMenuView extends AphrontView {
             'aural' => true,
           ),
           pht('Home')),
-        phutil_tag(
-          'span',
-          array(
-            'class' => 'phabricator-main-menu-eye',
-          ),
-          ''),
-          $logo,
+        $logo_node,
+        $wordmark_node,
       ));
   }
 
