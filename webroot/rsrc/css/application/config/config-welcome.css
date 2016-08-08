@@ -19,5 +19,10 @@
   width: 32px;
   float: left;
   text-align: center;
-  margin-left: 16px;
 }
+
+.phui-document-view-pro .phui-document-content .config-welcome-box
+  .phabricator-remarkup {
+    margin: 0;
+    padding: 0;
+  }
