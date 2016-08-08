@@ -74,6 +74,7 @@
   padding-right: 8px;
   max-width: 175px;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 /* - Expand/Collapse Button ----------------------------------------------------
