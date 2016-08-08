@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '153cb9a1',
+    'core.pkg.css' => 'a012d3c0',
     'core.pkg.js' => 'b562c3db',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3fb7f532',
@@ -32,7 +32,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => 'd4f16145',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '0877ed6e',
-    'rsrc/css/application/base/main-menu-view.css' => '44a1871b',
+    'rsrc/css/application/base/main-menu-view.css' => '3b0d39f7',
     'rsrc/css/application/base/notification-menu.css' => 'f31c0bde',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '95351601',
     'rsrc/css/application/base/phui-theme.css' => '027ba77e',
@@ -319,7 +319,7 @@ return array(
     'rsrc/image/icon/tango/upload.png' => '7bbb7984',
     'rsrc/image/icon/unsubscribe.png' => '25725013',
     'rsrc/image/lightblue-header.png' => '5c168b6d',
-    'rsrc/image/logo/light-eye.png' => 'fcd66408',
+    'rsrc/image/logo/light-eye.png' => '1a576ddd',
     'rsrc/image/main_texture.png' => '29a2c5ad',
     'rsrc/image/menu_texture.png' => '5a17580d',
     'rsrc/image/people/harding.png' => '45aa614e',
@@ -783,7 +783,7 @@ return array(
     'phabricator-flag-css' => '5337623f',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => '4a021c10',
-    'phabricator-main-menu-view' => '44a1871b',
+    'phabricator-main-menu-view' => '3b0d39f7',
     'phabricator-nav-view-css' => '09f3d0db',
     'phabricator-notification' => 'ccf1cbf8',
     'phabricator-notification-css' => '3f6c89c9',
@@ -1162,6 +1162,9 @@ return array(
       'javelin-dom',
       'javelin-magical-init',
     ),
+    '3b0d39f7' => array(
+      'phui-theme-css',
+    ),
     '3cb0b2fc' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1195,9 +1198,6 @@ return array(
       'javelin-util',
       'javelin-uri',
       'javelin-install',
-    ),
-    '44a1871b' => array(
-      'phui-theme-css',
     ),
     '453c5375' => array(
       'javelin-behavior',
