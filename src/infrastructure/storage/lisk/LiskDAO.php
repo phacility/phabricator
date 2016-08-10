@@ -1831,7 +1831,6 @@ abstract class LiskDAO extends Phobject {
     return $this->getConfigOption(self::CONFIG_BINARY);
   }
 
-
   public function getSchemaColumns() {
     $custom_map = $this->getConfigOption(self::CONFIG_COLUMN_SCHEMA);
     if (!$custom_map) {
@@ -1951,6 +1950,23 @@ abstract class LiskDAO extends Phobject {
     }
 
     return $custom_map + $default_map;
+  }
+
+  public function getColumnMaximumByteLength($column) {
+    $map = $this->getSchemaColumns();
+
+    if (!isset($map[$column])) {
+      throw new Exception(
+        pht(
+          'Object (of class "%s") does not have a column "%s".',
+          get_class($this),
+          $column));
+    }
+
+    $data_type = $map[$column];
+
+    return id(new PhabricatorStorageSchemaSpec())
+      ->getMaximumByteLengthForDataType($data_type);
   }
 
 }
