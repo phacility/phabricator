@@ -11,7 +11,7 @@ abstract class PhabricatorDaemon extends PhutilDaemon {
   }
 
   protected function willSleep($duration) {
-    LiskDAO::closeAllConnections();
+    LiskDAO::closeInactiveConnections(60);
     return;
   }
 
