@@ -68,6 +68,12 @@
   margin-left: 212px;
 }
 
+.has-drag-nav ul.phui-list-view {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .device-desktop .phui-navigation-shell .has-drag-nav .phabricator-nav-local {
   width: 205px;
   padding: 0;
