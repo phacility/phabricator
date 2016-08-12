@@ -18,6 +18,10 @@ final class PhabricatorFeedApplication extends PhabricatorApplication {
     return 'fa-newspaper-o';
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function canUninstall() {
     return false;
   }

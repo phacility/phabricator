@@ -34,6 +34,10 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function supportsEmailIntegration() {
     return true;
   }

@@ -26,6 +26,10 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
     return true;
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRemarkupRules() {
     return array(
       new PhabricatorPhurlRemarkupRule(),
