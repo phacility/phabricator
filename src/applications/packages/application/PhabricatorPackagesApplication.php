@@ -22,6 +22,10 @@ final class PhabricatorPackagesApplication extends PhabricatorApplication {
     return 'fa-gift';
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function isPrototype() {
     return true;
   }

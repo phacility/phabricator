@@ -3,96 +3,138 @@
 
 Use Herald to get notified of changes you care about.
 
-= Overview =
+Overview
+========
 
-Herald allows you to write processing rules that take effect when objects (such
-as Differential revisions and commits) are created or updated. For instance, you
-might want to get notified every time someone sends out a revision that affects
-some file you're interested in, even if they didn't add you as a reviewer.
+Herald allows you to write rules which run automatically when objects (like
+tasks or commits) are created or updated. For instance, you might want to get
+notified every time someone sends out a revision that affects some file you're
+interested in, even if they didn't add you as a reviewer.
 
-Herald is less useful for small organizations (where everyone will generally
-know most of what's going on) but the usefulness of the application increases
-as an organization scales. Once there is too much activity to keep track of it
-all, Herald allows you to filter it down so you're only notified of things you
-are interested in.
-
-= Global and Personal Rules =
-
-You can create two kinds of Herald rules, //global// and //personal//:
-
-  - **Personal Rules** are rules you own, but they can only affect you. Only
-    you can edit or delete personal rules, but their actions are limited to
-    adding you to CC, subscribing you, etc.
-  - **Global Rules** are rules everyone owns, and they can affect anything.
-    Anyone can edit or delete a global rule, and they can take any action,
-    including affecting projects and mailing lists.
-
-The general idea is to prevent individuals from controlling rules that affect
-shared resources, so if a rule needs to be updated it's not a big deal if the
-person who created it is on vacation.
-
-= Rules, Conditions and Actions =
-
-The best way to think of Herald is as a system similar to the mail rules you can
-set up in most email clients, to organize mail based on "To", "Subject", etc.
+One way to think about Herald is that it is a lot like the mail rules you can
+set up in most email clients to organize mail based on "To", "Subject", etc.
 Herald works very similarly, but operates on Phabricator objects (like revisions
 and commits) instead of emails.
 
-Every time an object is created or updated, Herald rules are run on it and
-the actions for any matching rules are taken.
+For example, you can write a personal rule like this which triggers on tasks:
 
-To create a new Herald rule, choose which type of event you want to act on
-(e.g., changes to Differential Revisions, or Commits), and then set a list of
-conditions. For example, you might add the condition `Author is alincoln
-(Abraham Lincoln)` to keep track of everything alincoln does. Finally, set
-a list of actions to take when the conditions match, like adding yourself to the
-CC list.
+> When [ all of ] these conditions are met:
+> [ Title ][ contains ][ quasar ]
+> Take these actions [ every time ] this rule matches:
+> [ Add me as a subscriber ]
 
-Now you'll automatically be added to CC any time alincoln creates a revision,
-and can keep an eye on what he's up to.
+This rule will automatically subscribe you to any newly created or updated
+tasks that contain "quasar" in the title.
 
-= Available Actions =
+Herald rules are often used to: notify users, add reviewers, initiate audits,
+classify objects, block commits, enforce CLAs, and run builds.
 
-Herald rules can take a number of actions. Note that some actions are only
-available from Global rules, and others only from Personal rules. Additionally,
-not every action is available for every object type (for instance, you can not
-trigger an audit based on a Differential revision).
 
-  - **Add CC**: Add a user or mailing list to the CC list for the object. For
-    personal rules, you can only add yourself.
-  - **Remove CC**: Remove a user or mailing list from the CC list for the
-    object. For personal rules, you can only remove yourself.
-  - **Send an Email to**: Send one email, but don't subscribe to other updates.
-    For personal rules, you can only email yourself.
-  - **Trigger an Audit**: For commits, trigger an audit request for a project
-    or user. For personal rules, you can only trigger an audit request to
-    yourself.
-  - **Mark with flag**: Flag the object for later review. This action is only
-    available on personal rules. If an object already has a flag, this action
-    will not add another flag.
-  - **Do Nothing**: Don't do anything. This can be used to disable a rule
-    temporarily, or to create a rule for an "Another Herald rule" condition.
+Working with Rules
+==================
 
-= Testing Rules =
+To create new Herald rules, navigate to the {nav Herald} application and select
+{nav Create Herald Rule}.
 
-When you've created a rule, use the "Test Console" to test it out. Enter a
-revision or commit and Herald will do a dry run against that object, showing
-you which rules //would// match had it actually been updated. Dry runs executed
-via the test console don't take any actions.
+Next, you'll choose an event that you want to write a rule for: for example,
+a rule for when commits are discovered or a rule for when tasks are created or
+updated.
 
-= Advanced Herald =
+After selecting an event, choose the type of rule to create. See "Rule Types"
+below for a more detailed discussion.
 
-A few features in Herald are particularly complicated:
+Name the rule and provide conditions and actions. When events occur, the rule
+will be evaluated automatically. If the conditions pass, the actions will be
+taken.
 
-  - **matches regexp pair**: for Differential revisions, you can set a condition
-  like "Any changed file content matches regexp pair...". This allows you to
-  specify two regexes in JSON format. The first will be used to match the
-  filename of the changed file; the second will be used to match the content.
-  For example, if you want to match revisions which add or remove calls to
-  a "muffinize" function, //but only in JS files//, you can set the value
-  to `["/\\.js$/", "/muffinize/"]` or similar.
-  - **Another Herald rule**: you can create Herald rules which depend on other
-  rules. This can be useful if you need to express a more complicated predicate
-  than "all" vs "any" allows, or have a common set of conditions which you want
-  to share between several rules. If a rule is only being used as a group of
-  conditions, you can set the action to "Do Nothing".
+To test rules, use {nav Herald > Test Console}. See "Testing Rules" below
+for greater detail.
+
+To review which rules did or did not trigger for a particular event (and why),
+see {nav Herald > Transcripts}.
+
+
+Rule Types
+==========
+
+You can create three kinds of Herald rules: personal rules, object rules, and
+global rules.
+
+  - **Personal Rules** are rules owned by an individual. They're often used
+    to keep people informed about changes they're interested in.
+  - **Object Rules** are rules associated with an object (like a repository
+    or project). These are similar to global rules.
+  - **Global Rules** are apply to all objects. They're often used to block
+    commits or run builds.
+
+
+Rule Policies
+=============
+
+All Herald rules are always visible to all users.
+
+The edit policy for a rule depends on what type of rule it is:
+
+  - Personal rules are owned by a particular user, and can only be created or
+    edited by that user.
+  - Object rules are associated with a particular object (like a repository),
+    and can only be created or edited by users who can edit that object. That
+    is, if you can edit a repository, you can also create object rules for it
+    and edit existing object rules.
+  - Global rules are administrative and can only be created or edited by users
+    with the **Can Manage Global Rules** Herald application permission.
+
+When rules are about to evaluate, they may first perform some policy tests.
+
+  - Personal rules check if the owning user can see the object which the rule
+    is about to run on. If the user can not see the object, the rule does not
+    run. This prevents individuals from writing rules which give them access
+    to information they don't have permission to see.
+  - Object and global rules **bypass policies** and always execute. This makes
+    them very powerful, and is why the **Can Manage Global Rules** policy is
+    restricted by default.
+
+
+Testing Rules
+=============
+
+When you've created a rule, use the {nav Herald > Test Console} to test it out.
+
+Enter an object name (like `D123`, `rXYZabcdef`, or `T456`) and Herald will
+execute a dry run against that object, showing you which rules //would// match
+had it actually been updated. Dry runs executed via the test console don't take
+any actions.
+
+
+Advanced Herald
+===============
+
+A few features in Herald are particularly complicated or unintuitive.
+
+Condition **matches regexp pair**: Some conditions allow you to select the
+operator "matches regexp pair". For example, you can write a rule against
+revisions like this one:
+
+> When [ all of ] these conditions are met:
+> [ Changed file content ][ matches regexp pair ][ ... ]
+
+This condition allows you to specify two regexes in JSON format. The first will
+be used to match the filename of the changed file; the second will be used to
+match the content. You can use these together to express conditions like
+"content in Javascript files".
+
+For example, if you want to match revisions which add or remove calls to a
+"muffinize" function, //but only in JS files//, you can set the value to
+`["/\\.js$/", "/muffinize/"]` or similar. This condition is satisfied only
+when the filename matches the first expression and the conent matches the
+second expression.
+
+**Another Herald rule**: you can create Herald rules which depend on other
+rules.
+
+This can be useful if you need to express a more complicated condition
+than "all" vs "any" allows, or have a common set of conditions which you want
+to share between several rules.
+
+If a rule is only being used as a group of conditions, you can set the action
+to "Do Nothing".

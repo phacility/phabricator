@@ -288,39 +288,40 @@ final class HeraldRule extends HeraldDAO
   }
 
   public function getPolicy($capability) {
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      return PhabricatorPolicies::getMostOpenPolicy();
+    }
+
     if ($this->isGlobalRule()) {
-      switch ($capability) {
-        case PhabricatorPolicyCapability::CAN_VIEW:
-          return PhabricatorPolicies::POLICY_USER;
-        case PhabricatorPolicyCapability::CAN_EDIT:
-          $app = 'PhabricatorHeraldApplication';
-          $herald = PhabricatorApplication::getByClass($app);
-          $global = HeraldManageGlobalRulesCapability::CAPABILITY;
-          return $herald->getPolicy($global);
-      }
+      $app = 'PhabricatorHeraldApplication';
+      $herald = PhabricatorApplication::getByClass($app);
+      $global = HeraldManageGlobalRulesCapability::CAPABILITY;
+      return $herald->getPolicy($global);
     } else if ($this->isObjectRule()) {
       return $this->getTriggerObject()->getPolicy($capability);
     } else {
-      return PhabricatorPolicies::POLICY_NOONE;
+      return $this->getAuthorPHID();
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->isPersonalRule()) {
-      return ($viewer->getPHID() == $this->getAuthorPHID());
-    } else {
-      return false;
-    }
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($this->isPersonalRule()) {
-      return pht("A personal rule's owner can always view and edit it.");
-    } else if ($this->isObjectRule()) {
-      return pht('Object rules inherit the policies of their objects.');
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      return null;
     }
 
-    return null;
+    if ($this->isGlobalRule()) {
+      return pht(
+        'Global Herald rules can be edited by users with the "Can Manage '.
+        'Global Rules" Herald application permission.');
+    } else if ($this->isObjectRule()) {
+      return pht('Object rules inherit the edit policies of their objects.');
+    } else {
+      return pht('A personal rule can only be edited by its owner.');
+    }
   }
 
 

@@ -104,7 +104,6 @@ return array(
     'aphront-tooltip-css',
     'phabricator-flag-css',
     'phui-info-view-css',
-    'sprite-menu-css',
 
     'phabricator-main-menu-view',
     'phabricator-notification-css',

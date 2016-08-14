@@ -598,7 +598,7 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
       ->setArgv($argv)
       ->setSudoAsDaemon(true)
       ->setCredentialPHID($repository->getCredentialPHID())
-      ->setURI($repository->getRemoteURI())
+      ->setURI($repository->getRemoteURIObject())
       ->newFuture();
 
     $future->setCWD($local_path);

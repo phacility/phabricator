@@ -41,32 +41,40 @@
 }
 
 .phabricator-main-menu-brand {
-  display: inline-block;
-  width: 148px;
   height: 44px;
   float: left;
-  margin-right: 4px;
+  margin-right: 6px;
   padding-left: 6px;
 }
 
-.phabricator-main-menu-logo {
-  position: absolute;
-  width: 96px;
-  height: 40px;
-  left: 52px;
-  top: 2px;
-}
-
 .phabricator-main-menu-eye {
-  position: absolute;
+  margin: 2px 0;
   width: 40px;
   height: 40px;
-  top: 2px;
+  float: left;
+  display: block;
+  background-image: url(/rsrc/image/logo/light-eye.png);
+  background-size: 40px 40px;
 }
 
 .device-desktop .phabricator-main-menu-brand:hover {
   background-color: rgba({$alphagrey},.2);
   cursor: hand;
+}
+
+.device-phone .phabricator-wordmark {
+  max-width: 112px; /* iPhone 5 limitation */
+}
+
+.phabricator-wordmark {
+  float: left;
+  color: #fff;
+  font-size: 18px;
+  margin: 9px 4px 9px 6px;
+  padding-right: 8px;
+  max-width: 175px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* - Expand/Collapse Button ----------------------------------------------------

@@ -98,7 +98,8 @@ final class PhabricatorConfigEditController
       }
     }
 
-    $form = new AphrontFormView();
+    $form = id(new AphrontFormView())
+      ->setEncType('multipart/form-data');
 
     $error_view = null;
     if ($errors) {
@@ -144,9 +145,9 @@ final class PhabricatorConfigEditController
     }
 
     if ($option->getHidden() || $option->getLocked()) {
-      $control = null;
+      $controls = array();
     } else {
-      $control = $this->renderControl(
+      $controls = $this->renderControls(
         $option,
         $display_value,
         $e_value);
@@ -201,9 +202,9 @@ final class PhabricatorConfigEditController
       }
     }
 
-    $form
-      ->appendChild($control);
-
+    foreach ($controls as $control) {
+      $form->appendControl($control);
+    }
 
     if (!$option->getLocked()) {
       $form->appendChild(
@@ -279,23 +280,23 @@ final class PhabricatorConfigEditController
     $e_value = null;
     $errors = array();
 
-    $value = $request->getStr('value');
-    if (!strlen($value)) {
-      $value = null;
-
-      $xaction->setNewValue(
-        array(
-          'deleted' => true,
-          'value'   => null,
-        ));
-
-      return array($e_value, $errors, $value, $xaction);
-    }
-
     if ($option->isCustomType()) {
       $info = $option->getCustomObject()->readRequest($option, $request);
       list($e_value, $errors, $set_value, $value) = $info;
     } else {
+      $value = $request->getStr('value');
+      if (!strlen($value)) {
+        $value = null;
+
+        $xaction->setNewValue(
+          array(
+            'deleted' => true,
+            'value'   => null,
+          ));
+
+        return array($e_value, $errors, $value, $xaction);
+      }
+
       $type = $option->getType();
       $set_value = null;
 
@@ -415,13 +416,13 @@ final class PhabricatorConfigEditController
     }
   }
 
-  private function renderControl(
+  private function renderControls(
     PhabricatorConfigOption $option,
     $display_value,
     $e_value) {
 
     if ($option->isCustomType()) {
-      $control = $option->getCustomObject()->renderControl(
+      $controls = $option->getCustomObject()->renderControls(
         $option,
         $display_value,
         $e_value);
@@ -487,9 +488,11 @@ final class PhabricatorConfigEditController
         ->setError($e_value)
         ->setValue($display_value)
         ->setName('value');
+
+      $controls = array($control);
     }
 
-    return $control;
+    return $controls;
   }
 
   private function renderExamples(PhabricatorConfigOption $option) {
