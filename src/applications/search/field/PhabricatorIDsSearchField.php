@@ -24,7 +24,8 @@ final class PhabricatorIDsSearchField
   }
 
   protected function newConduitParameterType() {
-    return new ConduitIntListParameterType();
+    return id(new ConduitIntListParameterType())
+      ->setAllowEmptyList(false);
   }
 
 }

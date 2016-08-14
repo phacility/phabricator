@@ -61,7 +61,11 @@ abstract class ConduitParameterType extends Phobject {
   protected function raiseValidationException(array $request, $key, $message) {
     // TODO: Specialize this so we can give users more tailored messages from
     // Conduit.
-    throw new Exception($message);
+    throw new Exception(
+      pht(
+        'Error while reading "%s": %s',
+        $key,
+        $message));
   }
 
 
