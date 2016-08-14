@@ -61,6 +61,10 @@ final class HarbormasterBuildSearchEngine
       $query->withBuildPlanPHIDs($map['plans']);
     }
 
+    if ($map['buildables']) {
+      $query->withBuildablePHIDs($map['buildables']);
+    }
+
     if ($map['statuses']) {
       $query->withBuildStatuses($map['statuses']);
     }
