@@ -59,6 +59,24 @@ not necessarily that the repository is still importing.
   - //Field Not Present// This commit was processed before we implemented
     this diagnostic feature, and no information is available.
 
+
+Manually Closing Revisions
+==========================
+
+If autoclose didn't activate for some reason and you want to manually close
+revisions, you can do so in several ways:
+
+**Close Revision**: The revision author can use the "Close Revision" action
+from the web UI, located in the action dropdown on the revision page (where
+reviewers would "Accept Revision" or "Request Changes").
+
+`differential.always-allow-close`: If you set this option in {nav Config},
+any user can take the "Close Revision" action in the web UI.
+
+`arc close-revision`: You can close revisions from the command line by using
+`arc close-revision`.
+
+
 Next Steps
 ==========
 
