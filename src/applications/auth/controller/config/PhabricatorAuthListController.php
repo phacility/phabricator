@@ -53,7 +53,7 @@ final class PhabricatorAuthListController
       }
 
       if ($config->getIsEnabled()) {
-        $item->setState(PHUIObjectItemView::STATE_SUCCESS);
+        $item->setStatusIcon('fa-check-circle green');
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-times')
@@ -61,8 +61,8 @@ final class PhabricatorAuthListController
             ->setDisabled(!$can_manage)
             ->addSigil('workflow'));
       } else {
-        $item->setState(PHUIObjectItemView::STATE_FAIL);
-        $item->addIcon('fa-times grey', pht('Disabled'));
+        $item->setStatusIcon('fa-ban red');
+        $item->addIcon('fa-ban grey', pht('Disabled'));
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-plus')
