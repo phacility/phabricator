@@ -167,6 +167,11 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
+  public function setIcon($icon) {
+    // TODO: Remove this in favor of setStatusIcon()?
+    return $this->setStatusIcon($icon);
+  }
+
   public function setStatusIcon($icon, $label = null) {
     $this->statusIcon = array(
       'icon' => $icon,
