@@ -65,8 +65,8 @@ final class PhabricatorUserPreferencesSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setHeader($setting->getDisplayName())
         ->setHref($setting->getEditURI())
-        ->setImageURI(PhabricatorUser::getDefaultProfileImageURI())
-        ->setIcon('fa-globe')
+        // TODO: Replace this with NUX Style bg / white icon when built
+        ->setImageIcon('fa-globe')
         ->addAttribute(pht('Edit global default settings for all users.'));
 
       $list->addItem($item);

@@ -131,6 +131,10 @@ final class PHUIObjectItemView extends AphrontTagView {
   }
 
   public function setImageIcon($image_icon) {
+    if (!$image_icon instanceof PHUIIconView) {
+      $image_icon = id(new PHUIIconView())
+        ->setIcon($image_icon);
+    }
     $this->imageIcon = $image_icon;
     return $this;
   }
@@ -165,11 +169,6 @@ final class PHUIObjectItemView extends AphrontTagView {
       'attributes' => $attributes,
     );
     return $this;
-  }
-
-  public function setIcon($icon) {
-    // TODO: Remove this in favor of setStatusIcon()?
-    return $this->setStatusIcon($icon);
   }
 
   public function setStatusIcon($icon, $label = null) {
