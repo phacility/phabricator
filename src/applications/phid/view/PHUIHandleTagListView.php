@@ -61,15 +61,21 @@ final class PHUIHandleTagListView extends AphrontTagView {
       }
     }
 
-    if ($this->limit && (count($handles) > $this->limit)) {
-      if (!is_array($handles)) {
-        $handles = iterator_to_array($handles);
-      }
-      $handles = array_slice($handles, 0, $this->limit);
+    // We may be passed a PhabricatorHandleList; if we are, convert it into
+    // a normal array.
+    if (!is_array($handles)) {
+      $handles = iterator_to_array($handles);
+    }
+
+    $over_limit = $this->limit && (count($handles) > $this->limit);
+    if ($over_limit) {
+      $visible = array_slice($handles, 0, $this->limit);
+    } else {
+      $visible = $handles;
     }
 
     $list = array();
-    foreach ($handles as $handle) {
+    foreach ($visible as $handle) {
       $tag = $handle->renderTag();
       if ($this->showHovercards) {
         $tag->setPHID($handle->getPHID());
@@ -84,21 +90,21 @@ final class PHUIHandleTagListView extends AphrontTagView {
         ));
     }
 
-    if ($this->limit) {
-      if (count($this->handles) > $this->limit) {
-        $tip_text = implode(', ', mpull($this->handles, 'getName'));
+    if ($over_limit) {
+      $tip_text = implode(', ', mpull($handles, 'getName'));
 
-        $more = $this->newPlaceholderTag()
-          ->setName("\xE2\x80\xA6")
-          ->addSigil('has-tooltip')
-          ->setMetadata(
-            array(
-              'tip' => $tip_text,
-              'size' => 200,
-            ));
+      Javelin::initBehavior('phabricator-tooltips');
 
-        $list[] = $this->newItem($more);
-      }
+      $more = $this->newPlaceholderTag()
+        ->setName("\xE2\x80\xA6")
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $tip_text,
+            'size' => 200,
+          ));
+
+      $list[] = $this->newItem($more);
     }
 
     return $list;
