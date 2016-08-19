@@ -104,6 +104,8 @@ final class PhabricatorWorkerArchiveTaskQuery
 
     if ($this->dateCreatedBefore) {
       return qsprintf($conn_r, 'ORDER BY dateCreated DESC, id DESC');
+    } else if ($this->dateModifiedSince) {
+      return qsprintf($conn_r, 'ORDER BY dateModified DESC, id DESC');
     } else {
       return qsprintf($conn_r, 'ORDER BY id DESC');
     }
