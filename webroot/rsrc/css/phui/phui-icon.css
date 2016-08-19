@@ -80,3 +80,20 @@ a.phui-icon-circle:hover {
 a.phui-icon-circle:hover .phui-icon-view {
   color: {$sky};
 }
+
+/* - Icon in a Square ------------------------------------------------------- */
+
+.phui-icon-view.phui-icon-square {
+  height: 40px;
+  width: 40px;
+  color: #fff;
+  font-size: 26px;
+  text-align: center;
+  line-height: 38px;
+  border-radius: 3px;
+}
+
+a.phui-icon-view.phui-icon-square:hover {
+  text-decoration: none;
+  color: #fff;
+}
