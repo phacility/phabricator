@@ -8,6 +8,7 @@ final class PhabricatorGuideWelcomeController
   }
 
   public function handleRequest(AphrontRequest $request) {
+    require_celerity_resource('guides-app-css');
     $viewer = $request->getViewer();
 
     $title = pht('Welcome to Phabricator');
@@ -22,7 +23,8 @@ final class PhabricatorGuideWelcomeController
     $crumbs = $this->buildApplicationCrumbs()
       ->addTextCrumb(pht('Welcome'));
 
-    $content = null;
+    $content = id(new PHUIDocumentViewPro())
+      ->appendChild($this->getGuideContent($viewer));
 
     $view = id(new PHUICMSView())
       ->setCrumbs($crumbs)
@@ -37,10 +39,15 @@ final class PhabricatorGuideWelcomeController
 
   }
 
-  private function getGuideContent() {
+  private function getGuideContent($viewer) {
 
-    $guide = null;
+    $content = pht(
+      'You have successfully installed Phabricator. These next guides will '.
+      'take you through configuration and new user orientation. '.
+      'These steps are optional, and you can go through them in any order. '.
+      'If you want to get back to this guide later on, you can find it in '.
+      'the **Config** application under **Welcome Guide**.');
 
-    return $guide;
+    return new PHUIRemarkupView($viewer, $content);
   }
 }

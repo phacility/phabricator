@@ -35,13 +35,14 @@
   border: none;
 }
 
-.phui-cms-view .phui-profile-header {
+.phui-cms-view .phui-cms-page-content .phui-profile-header {
   padding: 32px 20px;
   border-bottom: 1px solid {$thinblueborder};
 }
 
 .phui-cms-view .phui-document-view.phui-document-view-pro {
   width: auto;
-  padding: 32px 20px;
+  max-width: inherit;
+  padding: 0 20px;
   margin: 0;
 }
