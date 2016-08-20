@@ -1,0 +1,34 @@
+/**
+ * @provides guides-app-css
+ */
+
+.guides-app ul.phui-object-item-list-view  {
+  margin: 0;
+  padding: 20px;
+}
+
+.guides-app .phui-object-item-no-bar .phui-object-item-frame {
+  border: 0;
+}
+
+.guides-app .phui-object-item-image-icon {
+  margin: 8px 2px 12px;
+}
+
+.guides-app a.phui-object-item-link {
+  color: #000;
+  font-size: {$biggestfontsize};
+}
+
+.guides-app .phui-object-item-name {
+  padding-top: 6px;
+}
+
+.guides-app .phui-object-item-launch-button a.button {
+  font-size: {$normalfontsize};
+  padding: 3px 12px 4px;
+}
+
+.device-desktop .guides-app .phui-object-item {
+  margin-bottom: 8px;
+}

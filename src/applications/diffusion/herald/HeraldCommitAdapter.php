@@ -7,7 +7,6 @@ final class HeraldCommitAdapter
   protected $diff;
   protected $revision;
 
-  protected $repository;
   protected $commit;
   protected $commitData;
   private $commitDiff;
@@ -42,6 +41,7 @@ final class HeraldCommitAdapter
 
   public function setObject($object) {
     $this->commit = $object;
+
     return $this;
   }
 
@@ -86,32 +86,18 @@ final class HeraldCommitAdapter
   }
 
   public function getTriggerObjectPHIDs() {
+    $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+
     return array_merge(
       array(
-        $this->repository->getPHID(),
+        $this->getRepository()->getPHID(),
         $this->getPHID(),
       ),
-      $this->repository->getProjectPHIDs());
+      $this->loadEdgePHIDs($project_type));
   }
 
   public function explainValidTriggerObjects() {
     return pht('This rule can trigger for **repositories** and **projects**.');
-  }
-
-  public static function newLegacyAdapter(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $commit_data) {
-
-    $object = new HeraldCommitAdapter();
-
-    $commit->attachRepository($repository);
-
-    $object->repository = $repository;
-    $object->commit = $commit;
-    $object->commitData = $commit_data;
-
-    return $object;
   }
 
   public function setCommit(PhabricatorRepositoryCommit $commit) {
@@ -120,7 +106,6 @@ final class HeraldCommitAdapter
     $repository = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
       ->withIDs(array($commit->getRepositoryID()))
-      ->needProjectPHIDs(true)
       ->executeOne();
     if (!$repository) {
       throw new Exception(pht('Unable to load repository!'));
@@ -137,7 +122,6 @@ final class HeraldCommitAdapter
     $this->commit->attachRepository($repository);
     $this->commit->attachCommitData($data);
 
-    $this->repository = $repository;
     $this->commitData = $data;
 
     return $this;
@@ -150,7 +134,7 @@ final class HeraldCommitAdapter
   public function loadAffectedPaths() {
     if ($this->affectedPaths === null) {
       $result = PhabricatorOwnerPathQuery::loadAffectedPaths(
-        $this->repository,
+        $this->getRepository(),
         $this->commit,
         PhabricatorUser::getOmnipotentUser());
       $this->affectedPaths = $result;
@@ -161,7 +145,7 @@ final class HeraldCommitAdapter
   public function loadAffectedPackages() {
     if ($this->affectedPackages === null) {
       $packages = PhabricatorOwnersPackage::loadAffectedPackages(
-        $this->repository,
+        $this->getRepository(),
         $this->loadAffectedPaths());
       $this->affectedPackages = $packages;
     }
@@ -314,7 +298,7 @@ final class HeraldCommitAdapter
     $drequest = DiffusionRequest::newFromDictionary(
       array(
         'user' => $viewer,
-        'repository' => $this->repository,
+        'repository' => $this->getRepository(),
         'commit' => $this->commit->getCommitIdentifier(),
       ));
 
@@ -323,6 +307,10 @@ final class HeraldCommitAdapter
       $drequest,
       $method,
       $params);
+  }
+
+  private function getRepository() {
+    return $this->getObject()->getRepository();
   }
 
 /* -(  HarbormasterBuildableAdapterInterface  )------------------------------ */

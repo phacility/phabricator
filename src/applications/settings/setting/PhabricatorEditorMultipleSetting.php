@@ -9,7 +9,7 @@ final class PhabricatorEditorMultipleSetting
   const VALUE_SINGLE = 'disable';
 
   public function getSettingName() {
-    return pht('Edit Mulitple Files');
+    return pht('Edit Multiple Files');
   }
 
   public function getSettingPanelKey() {
