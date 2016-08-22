@@ -63,7 +63,7 @@ final class PhabricatorSpacesSearchEngineExtension
     );
   }
 
-  public function getFieldValuesForConduit($object) {
+  public function getFieldValuesForConduit($object, $data) {
     return array(
       'spacePHID' => $object->getSpacePHID(),
     );

@@ -28,8 +28,18 @@ final class PhabricatorDefaultRequestExceptionHandler
 
     $viewer = $this->getViewer($request);
 
-    // Always log the unhandled exception.
-    phlog($ex);
+    // Some types of uninteresting request exceptions don't get logged, usually
+    // because they are caused by the background radiation of bot traffic on
+    // the internet. These include requests with bad CSRF tokens and
+    // questionable "Host" headers.
+    $should_log = true;
+    if ($ex instanceof AphrontMalformedRequestException) {
+      $should_log = !$ex->getIsUnlogged();
+    }
+
+    if ($should_log) {
+      phlog($ex);
+    }
 
     $class = get_class($ex);
     $message = $ex->getMessage();

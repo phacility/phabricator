@@ -96,7 +96,7 @@ final class ManiphestTaskListView extends ManiphestView {
 
       $project_handles = array_select_keys(
         $handles,
-        $task->getProjectPHIDs());
+        array_reverse($task->getProjectPHIDs()));
 
       $item->addAttribute(
         id(new PHUIHandleTagListView())

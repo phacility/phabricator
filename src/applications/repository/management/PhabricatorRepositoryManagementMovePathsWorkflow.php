@@ -19,6 +19,10 @@ final class PhabricatorRepositoryManagementMovePathsWorkflow
             'param' => 'prefix',
             'help' => pht('Replace matching prefixes with this string.'),
           ),
+          array(
+            'name' => 'force',
+            'help' => pht('Apply changes without prompting.'),
+          ),
         ));
   }
 
@@ -46,6 +50,8 @@ final class PhabricatorRepositoryManagementMovePathsWorkflow
         pht(
           'You must specify a path prefix to move to with --to.'));
     }
+
+    $is_force = $args->getArg('force');
 
     $rows = array();
 
@@ -118,7 +124,7 @@ final class PhabricatorRepositoryManagementMovePathsWorkflow
     }
 
     $prompt = pht('Apply these changes?');
-    if (!phutil_console_confirm($prompt)) {
+    if (!$is_force && !phutil_console_confirm($prompt)) {
       throw new Exception(pht('Declining to apply changes.'));
     }
 

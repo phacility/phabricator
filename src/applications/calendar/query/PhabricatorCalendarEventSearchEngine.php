@@ -369,13 +369,13 @@ final class PhabricatorCalendarEventSearchEngine
       ->setName($from->format('F Y'));
 
     $header = id(new PHUIHeaderView())
+      ->setProfileHeader(true)
       ->setHeader($from->format('F Y'));
 
     return id(new PhabricatorApplicationSearchResultView())
       ->setCrumbs($crumbs)
       ->setHeader($header)
-      ->setContent($month_view)
-      ->setCollapsed(true);
+      ->setContent($month_view);
   }
 
   private function buildCalendarDayView(
@@ -443,13 +443,13 @@ final class PhabricatorCalendarEventSearchEngine
     );
 
     $header = id(new PHUIHeaderView())
+      ->setProfileHeader(true)
       ->setHeader($from->format('D, F jS'));
 
     return id(new PhabricatorApplicationSearchResultView())
       ->setCrumbs($crumbs)
       ->setHeader($header)
-      ->setContent($day_view)
-      ->setCollapsed(true);
+      ->setContent($day_view);
   }
 
   private function getDisplayYearAndMonthAndDay(

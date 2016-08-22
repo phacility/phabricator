@@ -49,6 +49,7 @@ final class PhabricatorCalendarEventViewController
     $subheader = $this->buildSubheaderView($event);
     $curtain = $this->buildCurtain($event);
     $details = $this->buildPropertySection($event);
+    $recurring = $this->buildRecurringSection($event);
     $description = $this->buildDescriptionView($event);
 
     $comment_view = id(new PhabricatorCalendarEventEditEngine())
@@ -57,6 +58,10 @@ final class PhabricatorCalendarEventViewController
 
     $timeline->setQuoteRef($monogram);
     $comment_view->setTransactionTimeline($timeline);
+
+    $details_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Details'));
+    $recurring_header = $this->buildRecurringHeader($event);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -67,7 +72,8 @@ final class PhabricatorCalendarEventViewController
           $comment_view,
         ))
       ->setCurtain($curtain)
-      ->addPropertySection(pht('Details'), $details)
+      ->addPropertySection($details_header, $details)
+      ->addPropertySection($recurring_header, $recurring)
       ->addPropertySection(pht('Description'), $description);
 
     return $this->newPage()
@@ -92,10 +98,6 @@ final class PhabricatorCalendarEventViewController
       $status = pht('Active');
     }
 
-    $invite_status = $event->getUserInviteStatus($viewer->getPHID());
-    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
-    $is_invite_pending = ($invite_status == $status_invited);
-
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($event->getName())
@@ -103,24 +105,10 @@ final class PhabricatorCalendarEventViewController
       ->setPolicyObject($event)
       ->setHeaderIcon($event->getIcon());
 
-    if ($is_invite_pending) {
-      $decline_button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-times grey')
-        ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
-        ->setWorkflow(true)
-        ->setText(pht('Decline'));
-
-      $accept_button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-check green')
-        ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
-        ->setWorkflow(true)
-        ->setText(pht('Accept'));
-
-      $header->addActionLink($decline_button)
-        ->addActionLink($accept_button);
+    foreach ($this->buildRSVPActions($event) as $action) {
+      $header->addActionLink($action);
     }
+
     return $header;
   }
 
@@ -215,26 +203,6 @@ final class PhabricatorCalendarEventViewController
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer);
 
-    if ($event->getIsRecurring()) {
-      $properties->addProperty(
-        pht('Recurs'),
-        ucwords(idx($event->getRecurrenceFrequency(), 'rule')));
-
-      if ($event->getRecurrenceEndDate()) {
-        $properties->addProperty(
-          pht('Recurrence Ends'),
-          phabricator_datetime($event->getRecurrenceEndDate(), $viewer));
-      }
-
-      if ($event->getInstanceOfEventPHID()) {
-        $properties->addProperty(
-          pht('Recurrence of Event'),
-          pht('%s of %s',
-            $event->getSequenceIndex(),
-            $viewer->renderHandle($event->getInstanceOfEventPHID())->render()));
-      }
-    }
-
     $invitees = $event->getInvitees();
     foreach ($invitees as $key => $invitee) {
       if ($invitee->isUninvited()) {
@@ -293,6 +261,121 @@ final class PhabricatorCalendarEventViewController
     return $properties;
   }
 
+  private function buildRecurringHeader(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    if (!$event->getIsRecurring()) {
+      return null;
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recurring Event'));
+
+    $sequence = $event->getSequenceIndex();
+    if ($event->isParentEvent()) {
+      $parent = $event;
+    } else {
+      $parent = $event->getParentEvent();
+    }
+
+    $next_uri = $parent->getURI().'/'.($sequence + 1);
+    if ($sequence) {
+      if ($sequence > 1) {
+        $previous_uri = $parent->getURI().'/'.($sequence - 1);
+      } else {
+        $previous_uri = $parent->getURI();
+      }
+      $has_previous = true;
+    } else {
+      $has_previous = false;
+      $previous_uri = null;
+    }
+
+    $prev_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-chevron-left')
+      ->setHref($previous_uri)
+      ->setDisabled(!$has_previous)
+      ->setText(pht('Previous'));
+
+    $next_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-chevron-right')
+      ->setHref($next_uri)
+      ->setText(pht('Next'));
+
+    $header
+      ->addActionLink($next_button)
+      ->addActionLink($prev_button);
+
+    return $header;
+  }
+
+  private function buildRecurringSection(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    if (!$event->getIsRecurring()) {
+      return null;
+    }
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $is_parent = $event->isParentEvent();
+    if ($is_parent) {
+      $parent_link = null;
+    } else {
+      $parent = $event->getParentEvent();
+      $parent_link = $viewer
+        ->renderHandle($parent->getPHID())
+        ->render();
+    }
+
+    $rule = $event->getFrequencyRule();
+    switch ($rule) {
+      case PhabricatorCalendarEvent::FREQUENCY_DAILY:
+        if ($is_parent) {
+          $message = pht('This event repeats every day.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every day.',
+            $parent_link);
+        }
+        break;
+      case PhabricatorCalendarEvent::FREQUENCY_WEEKLY:
+        if ($is_parent) {
+          $message = pht('This event repeats every week.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every week.',
+            $parent_link);
+        }
+        break;
+      case PhabricatorCalendarEvent::FREQUENCY_MONTHLY:
+        if ($is_parent) {
+          $message = pht('This event repeats every month.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every month.',
+            $parent_link);
+        }
+        break;
+      case PhabricatorCalendarEvent::FREQUENCY_YEARLY:
+        if ($is_parent) {
+          $message = pht('This event repeats every year.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every year.',
+            $parent_link);
+        }
+        break;
+    }
+
+    $properties->addProperty(pht('Event Series'), $message);
+
+    return $properties;
+  }
+
   private function buildDescriptionView(
     PhabricatorCalendarEvent $event) {
     $viewer = $this->getViewer();
@@ -308,7 +391,6 @@ final class PhabricatorCalendarEventViewController
 
     return null;
   }
-
 
   private function loadEvent() {
     $request = $this->getRequest();
@@ -397,5 +479,33 @@ final class PhabricatorCalendarEventViewController
       ->setContent($content);
   }
 
+
+  private function buildRSVPActions(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+    $id = $event->getID();
+
+    $invite_status = $event->getUserInviteStatus($viewer->getPHID());
+    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+    $is_invite_pending = ($invite_status == $status_invited);
+    if (!$is_invite_pending) {
+      return array();
+    }
+
+    $decline_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-times grey')
+      ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
+      ->setWorkflow(true)
+      ->setText(pht('Decline'));
+
+    $accept_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-check green')
+      ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
+      ->setWorkflow(true)
+      ->setText(pht('Accept'));
+
+    return array($decline_button, $accept_button);
+  }
 
 }

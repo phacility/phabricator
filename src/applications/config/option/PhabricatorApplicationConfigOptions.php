@@ -234,7 +234,7 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
         if (isset($options[$key])) {
           throw new Exception(
             pht(
-              "Mulitple %s subclasses contain an option named '%s'!",
+              "Multiple %s subclasses contain an option named '%s'!",
               __CLASS__,
               $key));
         }

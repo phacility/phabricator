@@ -20,6 +20,20 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     return new PhrictionDocument();
   }
 
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof PhrictionDocument);
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Test rules which run when a wiki document is created or updated.');
+  }
+
+  public function setObject($object) {
+    $this->document = $object;
+    return $this;
+  }
+
   public function getObject() {
     return $this->document;
   }

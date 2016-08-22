@@ -122,15 +122,16 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     }
 
     $replica = PhabricatorDatabaseRef::getReplicaDatabaseRef();
-    if (!$replica) {
-      throw new Exception(
-        pht('No valid databases are configured!'));
+    if ($replica) {
+      $connection = $replica->newApplicationConnection($database);
+      $connection->setReadOnly(true);
+      if ($replica->isReachable($connection)) {
+        return $connection;
+      }
     }
 
-    $connection = $replica->newApplicationConnection($database);
-    $connection->setReadOnly(true);
-    if ($replica->isReachable($connection)) {
-      return $connection;
+    if (!$master && !$replica) {
+      $this->raiseUnconfigured($database);
     }
 
     $this->raiseUnreachable($database);
@@ -153,10 +154,18 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
         $database));
   }
 
+  private function raiseUnconfigured($database) {
+    throw new Exception(
+      pht(
+        'Unable to establish a connection to any database host '.
+        '(while trying "%s"). No masters or replicas are configured.',
+        $database));
+  }
+
   private function raiseUnreachable($database) {
     throw new PhabricatorClusterStrandedException(
       pht(
-        'Unable to establish a connection to ANY database host '.
+        'Unable to establish a connection to any database host '.
         '(while trying "%s"). All masters and replicas are completely '.
         'unreachable.',
         $database));

@@ -204,7 +204,7 @@ final class PHUIPagerView extends AphrontView {
       $rendered_links[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setHref($link)
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setColor(PHUIButtonView::GREY)
         ->addClass('mml')
         ->addClass($class)
         ->setText($label);

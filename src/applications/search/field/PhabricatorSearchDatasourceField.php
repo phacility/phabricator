@@ -22,7 +22,8 @@ final class PhabricatorSearchDatasourceField
 
   protected function newConduitParameterType() {
     if (!$this->conduitParameterType) {
-      return new ConduitStringListParameterType();
+      return id(new ConduitStringListParameterType())
+        ->setAllowEmptyList(false);
     }
 
     return $this->conduitParameterType;

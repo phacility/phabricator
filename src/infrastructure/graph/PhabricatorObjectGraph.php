@@ -10,6 +10,7 @@ abstract class PhabricatorObjectGraph
   private $objects;
   private $loadEntireGraph = false;
   private $limit;
+  private $adjacent;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -33,12 +34,27 @@ abstract class PhabricatorObjectGraph
     return $this->limit;
   }
 
+  final public function setRenderOnlyAdjacentNodes($adjacent) {
+    $this->adjacent = $adjacent;
+    return $this;
+  }
+
+  final public function getRenderOnlyAdjacentNodes() {
+    return $this->adjacent;
+  }
+
   abstract protected function getEdgeTypes();
   abstract protected function getParentEdgeType();
   abstract protected function newQuery();
   abstract protected function newTableRow($phid, $object, $trace);
   abstract protected function newTable(AphrontTableView $table);
   abstract protected function isClosed($object);
+
+  protected function newEllipsisRow() {
+    return array(
+      '...',
+    );
+  }
 
   final public function setSeedPHID($phid) {
     $this->seedPHID = $phid;
@@ -48,6 +64,10 @@ abstract class PhabricatorObjectGraph
       array(
         '<seed>' => array($phid),
       ));
+  }
+
+  final public function getSeedPHID() {
+    return $this->seedPHID;
   }
 
   final public function isEmpty() {
@@ -135,6 +155,32 @@ abstract class PhabricatorObjectGraph
 
     $ancestry = $this->getEdges($this->getParentEdgeType());
 
+    $only_adjacent = $this->getRenderOnlyAdjacentNodes();
+    if ($only_adjacent) {
+      $adjacent = array(
+        $this->getSeedPHID() => $this->getSeedPHID(),
+      );
+
+      foreach ($this->getEdgeTypes() as $edge_type) {
+        $map = $this->getEdges($edge_type);
+        $direct = idx($map, $this->getSeedPHID(), array());
+        $adjacent += array_fuse($direct);
+      }
+
+      foreach ($ancestry as $key => $list) {
+        if (!isset($adjacent[$key])) {
+          unset($ancestry[$key]);
+          continue;
+        }
+
+        foreach ($list as $list_key => $item) {
+          if (!isset($adjacent[$item])) {
+            unset($ancestry[$key][$list_key]);
+          }
+        }
+      }
+    }
+
     $objects = $this->newQuery()
       ->setViewer($viewer)
       ->withPHIDs(array_keys($ancestry))
@@ -153,6 +199,12 @@ abstract class PhabricatorObjectGraph
     $ii = 0;
     $rows = array();
     $rowc = array();
+
+    if ($only_adjacent) {
+      $rows[] = $this->newEllipsisRow();
+      $rowc[] = 'more';
+    }
+
     foreach ($ancestry as $phid => $ignored) {
       $object = idx($objects, $phid);
       $rows[] = $this->newTableRow($phid, $object, $traces[$ii++]);
@@ -175,6 +227,11 @@ abstract class PhabricatorObjectGraph
       }
 
       $rowc[] = $classes;
+    }
+
+    if ($only_adjacent) {
+      $rows[] = $this->newEllipsisRow();
+      $rowc[] = 'more';
     }
 
     $table = id(new AphrontTableView($rows))

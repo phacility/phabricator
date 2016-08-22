@@ -51,6 +51,7 @@
   overflow: auto;
   padding: 12px;
   border-radius: 3px;
+  white-space: pre-wrap;
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {

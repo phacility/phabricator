@@ -150,21 +150,69 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
     array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
 
-    $results = array();
+    if (!$revisions) {
+      return array();
+    }
+
+    $field_lists = array();
     foreach ($revisions as $revision) {
-      // TODO: This is inefficient and issues a query for each object.
+      $revision_phid = $revision->getPHID();
+
       $field_list = PhabricatorCustomField::getObjectFields(
         $revision,
         PhabricatorCustomField::ROLE_CONDUIT);
 
       $field_list
         ->setViewer($viewer)
-        ->readFieldsFromStorage($revision);
+        ->readFieldsFromObject($revision);
 
+      $field_lists[$revision_phid] = $field_list;
+    }
+
+    $all_fields = array();
+    foreach ($field_lists as $field_list) {
+      foreach ($field_list->getFields() as $field) {
+        $all_fields[] = $field;
+      }
+    }
+
+    id(new PhabricatorCustomFieldStorageQuery())
+      ->addFields($all_fields)
+      ->execute();
+
+    $results = array();
+    foreach ($field_lists as $revision_phid => $field_list) {
+      $results[$revision_phid] = array();
       foreach ($field_list->getFields() as $field) {
         $field_key = $field->getFieldKeyForConduit();
         $value = $field->getConduitDictionaryValue();
-        $results[$revision->getPHID()][$field_key] = $value;
+        $results[$revision_phid][$field_key] = $value;
+      }
+    }
+
+    // For compatibility, fill in these "custom fields" by querying for them
+    // efficiently. See T11404 for discussion.
+
+    $legacy_edge_map = array(
+      'phabricator:projects' =>
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+      'phabricator:depends-on' =>
+        DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST,
+    );
+
+    $query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array_keys($results))
+      ->withEdgeTypes($legacy_edge_map);
+
+    $query->execute();
+
+    foreach ($results as $revision_phid => $dict) {
+      foreach ($legacy_edge_map as $edge_key => $edge_type) {
+        $phid_list = $query->getDestinationPHIDs(
+          array($revision_phid),
+          array($edge_type));
+
+        $results[$revision_phid][$edge_key] = $phid_list;
       }
     }
 

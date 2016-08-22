@@ -1,0 +1,48 @@
+/**
+ * @provides phui-cms-css
+ */
+
+
+.phui-cms-body {
+  background-color: #f0f0f2;
+}
+
+.phui-cms-view .phui-crumbs-view {
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-cms-page {
+  max-width: 1140px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$lightblueborder};
+  margin-bottom: 20px;
+}
+
+.phui-cms-view .phui-basic-nav.phui-navigation-shell .phabricator-nav-local {
+  background-color: {$page.background};
+  width: 240px;
+  border-right: 1px solid {$thinblueborder};
+}
+
+.phui-cms-view .phabricator-nav-content {
+  padding: 0;
+}
+
+.phui-cms-view .phui-document-container {
+  border: none;
+}
+
+.phui-cms-view .phui-cms-page-content .phui-profile-header {
+  padding: 32px 20px;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-cms-view .phui-document-view.phui-document-view-pro {
+  width: auto;
+  max-width: inherit;
+  padding: 0 20px;
+  margin: 0;
+}

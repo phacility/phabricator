@@ -367,7 +367,7 @@ produce a consistent message about a common error state in a convenient way.
 
 There are a handful of error strings in the codebase which may be used before
 the translation framework is loaded, or may be used during handling other
-errors, possibly rasised from within the translation framework. This handful
+errors, possibly raised from within the translation framework. This handful
 of special cases are left untranslated to prevent fatals and cycles in the
 error handler.
 

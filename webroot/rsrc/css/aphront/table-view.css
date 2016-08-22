@@ -228,8 +228,8 @@ span.single-display-line-content {
   position: static;
 }
 
-.aphront-table-view tr.closed td.object-link,
-.aphront-table-view tr.alt-closed td.object-link {
+.aphront-table-view tr.closed td.object-link .object-name,
+.aphront-table-view tr.alt-closed td.object-link .object-name {
   text-decoration: line-through;
   color: rgba({$alphablack}, 0.5);
 }

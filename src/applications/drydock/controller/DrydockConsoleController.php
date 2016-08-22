@@ -31,7 +31,7 @@ final class DrydockConsoleController extends DrydockController {
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Blueprints'))
-        ->setIcon('fa-map-o')
+        ->setImageIcon('fa-map-o')
         ->setHref($this->getApplicationURI('blueprint/'))
         ->addAttribute(
           pht(
@@ -41,7 +41,7 @@ final class DrydockConsoleController extends DrydockController {
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Resources'))
-        ->setIcon('fa-map')
+        ->setImageIcon('fa-map')
         ->setHref($this->getApplicationURI('resource/'))
         ->addAttribute(
           pht('View and manage resources Drydock has built, like hosts.')));
@@ -49,14 +49,14 @@ final class DrydockConsoleController extends DrydockController {
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Leases'))
-        ->setIcon('fa-link')
+        ->setImageIcon('fa-link')
         ->setHref($this->getApplicationURI('lease/'))
         ->addAttribute(pht('Manage leases on resources.')));
 
     $menu->addItem(
       id(new PHUIObjectItemView())
         ->setHeader(pht('Repository Operations'))
-        ->setIcon('fa-fighter-jet')
+        ->setImageIcon('fa-fighter-jet')
         ->setHref($this->getApplicationURI('operation/'))
         ->addAttribute(pht('Review the repository operation queue.')));
 

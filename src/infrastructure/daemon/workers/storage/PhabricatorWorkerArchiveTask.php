@@ -31,6 +31,9 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
       'leaseOwner' => array(
         'columns' => array('leaseOwner', 'priority', 'id'),
       ),
+      'key_modified' => array(
+        'columns' => array('dateModified'),
+      ),
     ) + $parent[self::CONFIG_KEY_SCHEMA];
 
     return $config;

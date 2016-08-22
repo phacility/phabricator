@@ -1,5 +1,6 @@
 {
   "phabricator.uri" : "https://phabricator.khanacademy.org/",
   "unit.engine" : "PhutilUnitTestEngine",
-  "load" : ["src/"]
+  "load" : ["src/"],
+  "history.immutable": false
 }

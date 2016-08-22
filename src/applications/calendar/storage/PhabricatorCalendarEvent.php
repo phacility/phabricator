@@ -457,7 +457,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function isParentEvent() {
-    return ($this->isRecurring && !$this->instanceOfEventPHID);
+    return ($this->getIsRecurring() && !$this->getInstanceOfEventPHID());
   }
 
   public function isChildEvent() {

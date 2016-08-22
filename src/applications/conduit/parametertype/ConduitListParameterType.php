@@ -3,6 +3,17 @@
 abstract class ConduitListParameterType
   extends ConduitParameterType {
 
+  private $allowEmptyList = true;
+
+  public function setAllowEmptyList($allow_empty_list) {
+    $this->allowEmptyList = $allow_empty_list;
+    return $this;
+  }
+
+  public function getAllowEmptyList() {
+    return $this->allowEmptyList;
+  }
+
   protected function getParameterValue(array $request, $key) {
     $value = parent::getParameterValue($request, $key);
 
@@ -25,6 +36,13 @@ abstract class ConduitListParameterType
         $request,
         $key,
         pht('Expected a list, but value is an object.'));
+    }
+
+    if (!$value && !$this->getAllowEmptyList()) {
+      $this->raiseValidationException(
+        $request,
+        $key,
+        pht('Expected a nonempty list, but value is an empty list.'));
     }
 
     return $value;

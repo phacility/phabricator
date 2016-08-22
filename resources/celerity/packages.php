@@ -104,7 +104,6 @@ return array(
     'aphront-tooltip-css',
     'phabricator-flag-css',
     'phui-info-view-css',
-    'sprite-menu-css',
 
     'phabricator-main-menu-view',
     'phabricator-notification-css',
@@ -113,7 +112,7 @@ return array(
     'phui-header-view-css',
     'phabricator-filetree-view-css',
     'phabricator-nav-view-css',
-    'phabricator-side-menu-view-css',
+    'phui-basic-nav-view-css',
     'phui-crumbs-view-css',
     'phui-object-item-list-view-css',
     'global-drag-and-drop-css',

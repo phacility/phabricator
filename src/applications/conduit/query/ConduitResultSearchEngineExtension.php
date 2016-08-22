@@ -25,7 +25,7 @@ final class ConduitResultSearchEngineExtension
     return $object->getFieldSpecificationsForConduit();
   }
 
-  public function getFieldValuesForConduit($object) {
+  public function getFieldValuesForConduit($object, $data) {
     return $object->getFieldValuesForConduit();
   }
 

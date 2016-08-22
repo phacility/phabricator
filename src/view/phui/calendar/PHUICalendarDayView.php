@@ -191,6 +191,10 @@ final class PHUICalendarDayView extends AphrontView {
       ->addColumn($table_box, 'thirds phui-day-view-column')
       ->setFluidLayout(true);
 
+    $layout = id(new PHUIBoxView())
+      ->appendChild($layout)
+      ->addClass('phui-calendar-box');
+
     return $layout;
   }
 

@@ -1533,7 +1533,7 @@ final class DifferentialTransactionEditor
 
     foreach ($packages as $key => $package) {
       $package_phid = $package->getPHID();
-      if ($authority[$package_phid]) {
+      if (isset($authority[$package_phid])) {
         unset($packages[$key]);
         continue;
       }

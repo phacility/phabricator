@@ -20,6 +20,21 @@ final class HeraldPonderQuestionAdapter extends HeraldAdapter {
     $this->question = $this->newObject();
   }
 
+
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof PonderQuestion);
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Test rules which run when a question is created or updated.');
+  }
+
+  public function setObject($object) {
+    $this->question = $object;
+    return $this;
+  }
+
   public function supportsApplicationEmail() {
     return true;
   }

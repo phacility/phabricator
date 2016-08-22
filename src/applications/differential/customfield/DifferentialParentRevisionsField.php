@@ -7,10 +7,6 @@ final class DifferentialParentRevisionsField
     return 'differential:depends-on';
   }
 
-  public function getFieldKeyForConduit() {
-    return 'phabricator:depends-on';
-  }
-
   public function getFieldName() {
     return pht('Parent Revisions');
   }
@@ -33,7 +29,10 @@ final class DifferentialParentRevisionsField
   }
 
   public function shouldAppearInConduitDictionary() {
-    return true;
+    // To improve performance, we exclude this field from Conduit results.
+    // See T11404 for discussion. In modern "differential.revision.search",
+    // this information is available efficiently as an attachment.
+    return false;
   }
 
   public function getConduitDictionaryValue() {

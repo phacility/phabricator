@@ -48,7 +48,10 @@ final class PHUITwoColumnView extends AphrontTagView {
   }
 
   public function addPropertySection($title, $section) {
-    $this->propertySection[] = array($title, $section);
+    $this->propertySection[] = array(
+      'header' => $title,
+      'content' => $section,
+    );
     return $this;
   }
 
@@ -146,13 +149,25 @@ final class PHUITwoColumnView extends AphrontTagView {
     $sections = $this->propertySection;
 
     if ($sections) {
-      foreach ($sections as $content) {
-        if ($content[1]) {
-          $view[] = id(new PHUIObjectBoxView())
-            ->setHeaderText($content[0])
-            ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-            ->appendChild($content[1]);
+      foreach ($sections as $section) {
+        $section_header = $section['header'];
+
+        $section_content = $section['content'];
+        if ($section_content === null) {
+          continue;
         }
+
+        if ($section_header instanceof PHUIHeaderView) {
+          $header = $section_header;
+        } else {
+          $header = id(new PHUIHeaderView())
+            ->setHeader($section_header);
+        }
+
+        $view[] = id(new PHUIObjectBoxView())
+          ->setHeader($header)
+          ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+          ->appendChild($section_content);
       }
     }
 

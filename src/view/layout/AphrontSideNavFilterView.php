@@ -193,23 +193,17 @@ final class AphrontSideNavFilterView extends AphrontView {
       }
     }
 
-    require_celerity_resource('phabricator-side-menu-view-css');
+    require_celerity_resource('phui-basic-nav-view-css');
 
     return $this->renderFlexNav();
   }
 
   private function renderFlexNav() {
     require_celerity_resource('phabricator-nav-view-css');
+    require_celerity_resource('phui-profile-menu-css');
 
     $nav_classes = array();
     $nav_classes[] = 'phabricator-nav';
-
-    if ($this->getIsProfileMenu()) {
-      require_celerity_resource('phui-profile-menu-css');
-      // No class, we're going to put it on the shell instead.
-    } else {
-      $nav_classes[] = 'phabricator-basic-nav';
-    }
 
     $nav_id = null;
     $drag_id = null;
@@ -260,6 +254,8 @@ final class AphrontSideNavFilterView extends AphrontView {
     if ($this->flexible) {
       if (!$this->collapsed) {
         $nav_classes[] = 'has-drag-nav';
+      } else {
+        $nav_classes[] = 'has-closed-nav';
       }
 
       Javelin::initBehavior(
@@ -284,16 +280,6 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     $nav_classes = array_merge($nav_classes, $this->classes);
 
-    $footer = $this->footer;
-
-    if ($this->getIsProfileMenu()) {
-      $internal_footer = $footer;
-      $external_footer = null;
-    } else {
-      $internal_footer = null;
-      $external_footer = $footer;
-    }
-
     $menu = phutil_tag(
       'div',
       array(
@@ -312,25 +298,27 @@ final class AphrontSideNavFilterView extends AphrontView {
           array(
             $crumbs,
             $this->renderChildren(),
-            $internal_footer,
+            $this->footer,
           )),
       ));
 
+    $classes = array();
+    $classes[] = 'phui-navigation-shell';
+
     if ($this->getIsProfileMenu()) {
-      $shell = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-navigation-shell phui-profile-menu',
-        ),
-        array(
-          $menu,
-        ));
+      $classes[] = 'phui-profile-menu';
     } else {
-      $shell = array(
-        $menu,
-        $external_footer,
-      );
+      $classes[] = 'phui-basic-nav';
     }
+
+    $shell = phutil_tag(
+      'div',
+      array(
+        'class' => implode(' ', $classes),
+      ),
+      array(
+        $menu,
+      ));
 
     return $shell;
   }
