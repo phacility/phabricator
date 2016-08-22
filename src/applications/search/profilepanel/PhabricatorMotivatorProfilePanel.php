@@ -143,7 +143,8 @@ final class PhabricatorMotivatorProfilePanel
       pht(
         'Cats will often bring you their prey because they feel sorry '.
         'for your inability to hunt.'),
-     );
+      pht('Cats spend most of their time plotting to kill their owner.'),
+    );
   }
 
   private function selectFact(array $facts) {
