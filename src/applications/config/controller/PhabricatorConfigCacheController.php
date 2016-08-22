@@ -51,6 +51,7 @@ final class PhabricatorConfigCacheController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
   }
 
@@ -102,6 +103,7 @@ final class PhabricatorConfigCacheController
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Data Cache'))
       ->addPropertyList($properties)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

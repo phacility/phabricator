@@ -38,6 +38,7 @@ final class PhabricatorDestructionEngineExtensionModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('DestructionEngine Extensions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

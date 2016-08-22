@@ -49,6 +49,7 @@ final class PhabricatorSearchEngineExtensionModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('SearchEngine Extensions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

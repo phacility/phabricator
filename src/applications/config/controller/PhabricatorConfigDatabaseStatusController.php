@@ -165,10 +165,12 @@ final class PhabricatorConfigDatabaseStatusController
 
     $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Databases'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     return $this->buildResponse($title, array($prop_box, $table_box));
@@ -263,10 +265,12 @@ final class PhabricatorConfigDatabaseStatusController
 
     $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Database Status'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     return $this->buildResponse($title, array($prop_box, $table_box));
@@ -476,14 +480,17 @@ final class PhabricatorConfigDatabaseStatusController
 
     $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Database'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table_view);
 
     $key_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Keys'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($keys_view);
 
     return $this->buildResponse($title, array($prop_box, $table_box, $key_box));
@@ -620,6 +627,7 @@ final class PhabricatorConfigDatabaseStatusController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     return $this->buildResponse($title, $box);
@@ -713,6 +721,7 @@ final class PhabricatorConfigDatabaseStatusController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($properties);
 
     return $this->buildResponse($title, $box);

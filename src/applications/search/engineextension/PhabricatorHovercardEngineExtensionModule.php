@@ -49,6 +49,7 @@ final class PhabricatorHovercardEngineExtensionModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('HovercardEngine Extensions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

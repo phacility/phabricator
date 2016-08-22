@@ -17,6 +17,7 @@ final class PhabricatorConfigGroupController
     $list = $this->buildOptionList($options->getOptions());
 
     $box = id(new PHUIObjectBoxView())
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
     $crumbs = $this

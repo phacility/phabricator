@@ -38,6 +38,7 @@ final class PhabricatorFulltextEngineExtensionModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('FulltextEngine Extensions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 
