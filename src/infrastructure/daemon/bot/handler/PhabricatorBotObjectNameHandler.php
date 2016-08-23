@@ -50,8 +50,14 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
           '(?:\b|$)'.
           '@';
 
+        $regex = trim(
+          PhabricatorEnv::getEnvConfig('remarkup.ignored-object-names'));
+
         if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
           foreach ($matches as $match) {
+            if ($regex && preg_match($regex, $match[0])) {
+              continue;
+            }
             switch ($match[1]) {
               case 'P':
                 $paste_ids[] = $match[2];
