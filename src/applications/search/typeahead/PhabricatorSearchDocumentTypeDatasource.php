@@ -25,8 +25,10 @@ final class PhabricatorSearchDocumentTypeDatasource
   }
 
   private function buildResults() {
+    $viewer = $this->getViewer();
     $types =
-      PhabricatorSearchApplicationSearchEngine::getIndexableDocumentTypes();
+      PhabricatorSearchApplicationSearchEngine::getIndexableDocumentTypes(
+        $viewer);
 
     $icons = mpull(
       PhabricatorPHIDType::getAllTypes(),
