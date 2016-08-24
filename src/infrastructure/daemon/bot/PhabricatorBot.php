@@ -159,11 +159,10 @@ final class PhabricatorBot extends PhabricatorDaemon {
     if (empty($this->conduit)) {
       throw new Exception(
         pht(
-          "This bot is not configured with a Conduit uplink. Set '%s', ".
-          "'%s' and '%s' in the configuration to connect.",
+          "This bot is not configured with a Conduit uplink. Set '%s' and ".
+          "'%s' in the configuration to connect.",
           'conduit.uri',
-          'conduit.user',
-          'conduit.cert'));
+          'conduit.token'));
     }
     return $this->conduit;
   }
