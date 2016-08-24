@@ -105,6 +105,10 @@ final class PhabricatorRepositoryCommitHint
     return ($this->getHintType() == self::HINT_UNREADABLE);
   }
 
+  public function isRewritten() {
+    return ($this->getHintType() == self::HINT_REWRITTEN);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
