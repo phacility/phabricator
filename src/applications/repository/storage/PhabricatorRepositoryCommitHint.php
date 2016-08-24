@@ -101,6 +101,11 @@ final class PhabricatorRepositoryCommitHint
   }
 
 
+  public function isUnreadable() {
+    return ($this->getHintType() == self::HINT_UNREADABLE);
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

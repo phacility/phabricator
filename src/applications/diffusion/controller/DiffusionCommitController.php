@@ -167,23 +167,29 @@ final class DiffusionCommitController extends DiffusionController {
 
     $count = count($changes);
 
-    $bad_commit = null;
-    if ($count == 0) {
-      $bad_commit = queryfx_one(
-        id(new PhabricatorRepository())->establishConnection('r'),
-        'SELECT * FROM %T WHERE fullCommitName = %s',
-        PhabricatorRepository::TABLE_BADCOMMIT,
-        $commit->getMonogram());
+    $is_unreadable = false;
+    if (!$count) {
+      $hint = id(new DiffusionCommitHintQuery())
+        ->setViewer($viewer)
+        ->withRepositoryPHIDs(array($repository->getPHID()))
+        ->withOldCommitIdentifiers(array($commit->getCommitIdentifier()))
+        ->executeOne();
+      if ($hint) {
+        $is_unreadable = $hint->isUnreadable();
+      }
     }
 
     $show_changesets = false;
     $info_panel = null;
     $change_list = null;
     $change_table = null;
-    if ($bad_commit) {
+    if ($is_unreadable) {
       $info_panel = $this->renderStatusMessage(
-        pht('Bad Commit'),
-        $bad_commit['description']);
+        pht('Unreadable Commit'),
+        pht(
+          'This commit has been marked as unreadable by an administrator. '.
+          'It may have been corrupted or created improperly by an external '.
+          'tool.'));
     } else if ($is_foreign) {
       // Don't render anything else.
     } else if (!$commit->isImported()) {

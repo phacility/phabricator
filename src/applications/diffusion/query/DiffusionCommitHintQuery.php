@@ -43,7 +43,7 @@ final class DiffusionCommitHintQuery
     if ($this->repositoryPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'reositoryPHID IN (%Ls)',
+        'repositoryPHID IN (%Ls)',
         $this->repositoryPHIDs);
     }
 
