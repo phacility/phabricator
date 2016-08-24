@@ -7,6 +7,9 @@ final class DiffusionCommitHintQuery
   private $repositoryPHIDs;
   private $oldCommitIdentifiers;
 
+  private $commits;
+  private $commitMap;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -22,8 +25,35 @@ final class DiffusionCommitHintQuery
     return $this;
   }
 
+  public function withCommits(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
+
+    $repository_phids = array();
+    foreach ($commits as $commit) {
+      $repository_phids[] = $commit->getRepository()->getPHID();
+    }
+
+    $this->repositoryPHIDs = $repository_phids;
+    $this->oldCommitIdentifiers = mpull($commits, 'getCommitIdentifier');
+    $this->commits = $commits;
+
+    return $this;
+  }
+
+  public function getCommitMap() {
+    if ($this->commitMap === null) {
+      throw new PhutilInvalidStateException('execute');
+    }
+
+    return $this->commitMap;
+  }
+
   public function newResultObject() {
     return new PhabricatorRepositoryCommitHint();
+  }
+
+  protected function willExecute() {
+    $this->commitMap = array();
   }
 
   protected function loadPage() {
@@ -55,6 +85,28 @@ final class DiffusionCommitHintQuery
     }
 
     return $where;
+  }
+
+  protected function didFilterPage(array $hints) {
+    if ($this->commits) {
+      $map = array();
+      foreach ($this->commits as $commit) {
+        $repository_phid = $commit->getRepository()->getPHID();
+        $identifier = $commit->getCommitIdentifier();
+        $map[$repository_phid][$identifier] = $commit->getPHID();
+      }
+
+      foreach ($hints as $hint) {
+        $repository_phid = $hint->getRepositoryPHID();
+        $identifier = $hint->getOldCommitIdentifier();
+        if (isset($map[$repository_phid][$identifier])) {
+          $commit_phid = $map[$repository_phid][$identifier];
+          $this->commitMap[$commit_phid] = $hint;
+        }
+      }
+    }
+
+    return $hints;
   }
 
   public function getQueryApplicationClass() {
