@@ -30,17 +30,25 @@ final class PhabricatorSearchDocumentTypeDatasource
       PhabricatorSearchApplicationSearchEngine::getIndexableDocumentTypes(
         $viewer);
 
-    $icons = mpull(
-      PhabricatorPHIDType::getAllTypes(),
-      'getTypeIcon',
+    $phid_types = mpull(PhabricatorPHIDType::getAllTypes(),
+      null,
       'getTypeConstant');
 
     $results = array();
     foreach ($types as $type => $name) {
+      $type_object = idx($phid_types, $type);
+      if (!$type_object) {
+        continue;
+      }
+      $application_class = $type_object->getPHIDTypeApplicationClass();
+      $application = PhabricatorApplication::getByClass($application_class);
+      $application_name = $application->getName();
+
       $results[$type] = id(new PhabricatorTypeaheadResult())
         ->setPHID($type)
         ->setName($name)
-        ->setIcon(idx($icons, $type));
+        ->addAttribute($application_name)
+        ->setIcon($type_object->getTypeIcon());
     }
 
     return $results;
