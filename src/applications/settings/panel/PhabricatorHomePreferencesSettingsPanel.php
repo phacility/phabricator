@@ -152,20 +152,12 @@ final class PhabricatorHomePreferencesSettingsPanel
 
       $icon = $application->getIcon();
       if (!$icon) {
-        $icon = 'application';
+        $icon = 'fa-globe';
       }
-
-      $icon_view = javelin_tag(
-        'span',
-        array(
-          'class' => 'phui-icon-view phui-font-fa '.$icon,
-          'aural' => false,
-        ),
-        '');
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($application->getName())
-        ->setImageIcon($icon_view)
+        ->setImageIcon($icon)
         ->addAttribute($application->getShortDescription())
         ->setGrippable(true);
 
