@@ -224,5 +224,26 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
         ->setSummary($summary)
         ->setMessage($message);
     }
+
+    $raw_post_data = (int)ini_get('always_populate_raw_post_data');
+    if ($raw_post_data != -1) {
+      $summary = pht(
+        'PHP setting "%s" should be set to "-1" to avoid deprecation '.
+        'warnings.',
+        'always_populate_raw_post_data');
+
+      $message = pht(
+        'The "%s" key is set to some value other than "-1" in your PHP '.
+        'configuration. This can cause PHP to raise deprecation warnings '.
+        'during process startup. Set this option to "-1" to prevent these '.
+        'warnings from appearing.',
+        'always_populate_raw_post_data');
+
+      $this->newIssue('php.always_populate_raw_post_data')
+        ->setName(pht('Disable PHP %s', 'always_populate_raw_post_data'))
+        ->setSummary($summary)
+        ->setMessage($message)
+        ->addPHPConfig('always_populate_raw_post_data');
+    }
   }
 }
