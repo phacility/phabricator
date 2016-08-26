@@ -16,9 +16,4 @@ final class DiffusionMercurialFileContentQuery
       $path);
   }
 
-  protected function resolveFileContentFuture(Future $future) {
-    list($corpus) = $future->resolvex();
-    return $corpus;
-  }
-
 }

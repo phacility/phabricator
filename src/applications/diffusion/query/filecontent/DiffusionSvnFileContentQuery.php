@@ -14,9 +14,4 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
       $repository->getSubversionPathURI($path, $commit));
   }
 
-  protected function resolveFileContentFuture(Future $future) {
-    list($corpus) = $future->resolvex();
-    return $corpus;
-  }
-
 }

@@ -15,9 +15,4 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
       $path);
   }
 
-  protected function resolveFileContentFuture(Future $future) {
-    list($corpus) = $future->resolvex();
-    return $corpus;
-  }
-
 }
