@@ -162,7 +162,7 @@ abstract class AphrontResponse extends Phobject {
       $object,
       array(__CLASS__, 'processValueForJSONEncoding'));
 
-    $response = json_encode($object);
+    $response = phutil_json_encode($object);
 
     // Prevent content sniffing attacks by encoding "<" and ">", so browsers
     // won't try to execute the document as HTML even if they ignore
