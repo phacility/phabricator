@@ -406,9 +406,17 @@ final class PhabricatorRepositoryDiscoveryEngine
 
     $refs = array();
     foreach ($commits as $commit) {
+      $epoch = $stream->getCommitDate($commit);
+
+      // If the epoch doesn't fit into a uint32, treat it as though it stores
+      // the current time. For discussion, see T11537.
+      if ($epoch > 0xFFFFFFFF) {
+        $epoch = PhabricatorTime::getNow();
+      }
+
       $refs[] = id(new PhabricatorRepositoryCommitRef())
         ->setIdentifier($commit)
-        ->setEpoch($stream->getCommitDate($commit))
+        ->setEpoch($epoch)
         ->setCanCloseImmediately($close_immediately)
         ->setParents($stream->getParents($commit));
     }
