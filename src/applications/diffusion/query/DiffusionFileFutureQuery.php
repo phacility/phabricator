@@ -42,7 +42,7 @@ abstract class DiffusionFileFutureQuery
     return $this->didHitTimeLimit;
   }
 
-  abstract protected function getFileContentFuture();
+  abstract protected function newQueryFuture();
 
   final public function respondToConduitRequest(ConduitAPIRequest $request) {
     $drequest = $this->getRequest();
@@ -82,13 +82,13 @@ abstract class DiffusionFileFutureQuery
   }
 
   final public function executeInline() {
-    $future = $this->getFileContentFuture();
+    $future = $this->newConfiguredQueryFuture();
     list($stdout) = $future->resolvex();
-    return $future;
+    return $stdout;
   }
 
   final protected function executeQuery() {
-    $future = $this->newConfiguredFileContentFuture();
+    $future = $this->newQueryFuture();
 
     $drequest = $this->getRequest();
 
@@ -134,8 +134,8 @@ abstract class DiffusionFileFutureQuery
     return $file;
   }
 
-  private function newConfiguredFileContentFuture() {
-    $future = $this->getFileContentFuture();
+  private function newConfiguredQueryFuture() {
+    $future = $this->newQueryFuture();
 
     if ($this->getTimeout()) {
       $future->setTimeout($this->getTimeout());
@@ -148,6 +148,5 @@ abstract class DiffusionFileFutureQuery
 
     return $future;
   }
-
 
 }

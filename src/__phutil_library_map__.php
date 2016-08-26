@@ -5260,7 +5260,7 @@ phutil_register_library_map(array(
     'DiffusionQueryCommitsConduitAPIMethod' => 'DiffusionConduitAPIMethod',
     'DiffusionQueryConduitAPIMethod' => 'DiffusionConduitAPIMethod',
     'DiffusionQueryPathsConduitAPIMethod' => 'DiffusionQueryConduitAPIMethod',
-    'DiffusionRawDiffQuery' => 'DiffusionQuery',
+    'DiffusionRawDiffQuery' => 'DiffusionFileFutureQuery',
     'DiffusionRawDiffQueryConduitAPIMethod' => 'DiffusionQueryConduitAPIMethod',
     'DiffusionReadmeView' => 'DiffusionView',
     'DiffusionRefDatasource' => 'PhabricatorTypeaheadDatasource',

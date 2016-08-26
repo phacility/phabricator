@@ -1527,19 +1527,36 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function getBeforeLineNumber($target_commit) {
     $drequest = $this->getDiffusionRequest();
+    $viewer = $this->getViewer();
 
     $line = $drequest->getLine();
     if (!$line) {
       return null;
     }
 
-    $raw_diff = $this->callConduitWithDiffusionRequest(
+    $diff_info = $this->callConduitWithDiffusionRequest(
       'diffusion.rawdiffquery',
       array(
         'commit' => $drequest->getCommit(),
         'path' => $drequest->getPath(),
         'againstCommit' => $target_commit,
       ));
+
+    $file_phid = $diff_info['filePHID'];
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to load file ("%s") returned by "%s".',
+          $file_phid,
+          'diffusion.rawdiffquery.'));
+    }
+
+    $raw_diff = $file->loadFileData();
+
     $old_line = 0;
     $new_line = 0;
 
