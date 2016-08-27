@@ -7,7 +7,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions;
   private $handles;
-  private $highlightAge;
   private $header;
   private $noDataString;
   private $noBox;
@@ -36,11 +35,6 @@ final class DifferentialRevisionListView extends AphrontView {
   public function setRevisions(array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
     $this->revisions = $revisions;
-    return $this;
-  }
-
-  public function setHighlightAge($bool) {
-    $this->highlightAge = $bool;
     return $this;
   }
 

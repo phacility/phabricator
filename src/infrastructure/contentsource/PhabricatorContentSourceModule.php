@@ -45,6 +45,7 @@ final class PhabricatorContentSourceModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Content Sources'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

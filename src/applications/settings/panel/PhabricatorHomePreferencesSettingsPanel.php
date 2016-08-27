@@ -67,7 +67,19 @@ final class PhabricatorHomePreferencesSettingsPanel
       unset($options['PhabricatorApplicationsApplication']);
 
       if ($request->isFormPost()) {
-        $pin = $request->getStr('pin');
+        $pins = $request->getArr('pin');
+        $phid = head($pins);
+        $app = id(new PhabricatorApplicationQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($phid))
+          ->executeOne();
+        if ($app) {
+          $pin = get_class($app);
+        } else {
+          // This likely means the user submitted an empty form
+          // which will cause nothing to happen.
+          $pin = '';
+        }
         if (isset($options[$pin]) && !in_array($pin, $pinned)) {
           $pinned[] = $pin;
 
@@ -78,18 +90,18 @@ final class PhabricatorHomePreferencesSettingsPanel
         }
       }
 
-      $options_control = id(new AphrontFormSelectControl())
+      $options_control = id(new AphrontFormTokenizerControl())
         ->setName('pin')
         ->setLabel(pht('Application'))
-        ->setOptions($options)
-        ->setDisabledOptions(array_keys($app_list));
+        ->setDatasource(new PhabricatorApplicationDatasource())
+        ->setLimit(1);
 
       $form = id(new AphrontFormView())
         ->setViewer($viewer)
         ->addHiddenInput('add', 'true')
         ->appendRemarkupInstructions(
           pht('Choose an application to pin to your home page.'))
-        ->appendChild($options_control);
+        ->appendControl($options_control);
 
       return $this->newDialog()
         ->setWidth(AphrontDialogView::WIDTH_FORM)
@@ -152,20 +164,12 @@ final class PhabricatorHomePreferencesSettingsPanel
 
       $icon = $application->getIcon();
       if (!$icon) {
-        $icon = 'application';
+        $icon = 'fa-globe';
       }
-
-      $icon_view = javelin_tag(
-        'span',
-        array(
-          'class' => 'phui-icon-view phui-font-fa '.$icon,
-          'aural' => false,
-        ),
-        '');
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($application->getName())
-        ->setImageIcon($icon_view)
+        ->setImageIcon($icon)
         ->addAttribute($application->getShortDescription())
         ->setGrippable(true);
 

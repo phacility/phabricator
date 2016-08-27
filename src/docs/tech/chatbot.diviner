@@ -32,7 +32,7 @@ These are the configuration values it reads:
   - `join` Array, list of channels to join.
   - `handlers` Array, list of handlers to run. These are like plugins for the
     bot.
-  - `conduit.uri`, `conduit.user`, `conduit.cert` Conduit configuration,
+  - `conduit.uri`, `conduit.token` Conduit configuration,
     see below.
   - `notification.channels` Notification configuration, see below.
 
@@ -72,10 +72,8 @@ with. To do this, login to Phabricator as an administrator and go to
 
   - `conduit.uri` The URI for your Phabricator install, like
     `http://phabricator.example.com/`
-  - `conduit.user` The username your bot should login to Phabricator with --
-    whatever you selected above, like `phabot`.
-  - `conduit.cert` The user's certificate, from the "Conduit Certificate" tab
-    in the user's administrative view.
+  - `conduit.token` The user's conduit API token, from the "Conduit API Tokens"
+    tab in the user's administrative view.
 
 Now the bot should be able to connect to Phabricator via Conduit.
 

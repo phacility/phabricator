@@ -22,8 +22,13 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     PhabricatorRepositoryCommit $commit) {
 
     $this->log("%s\n", pht('Parsing "%s"...', $commit->getMonogram()));
-    if ($this->isBadCommit($commit)) {
-      $this->log(pht('This commit is marked bad!'));
+
+    $hint = $this->loadCommitHint($commit);
+    if ($hint && $hint->isUnreadable()) {
+      $this->log(
+        pht(
+          'This commit is marked as unreadable, so changes will not be '.
+          'parsed.'));
       return;
     }
 

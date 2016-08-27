@@ -52,11 +52,13 @@ final class PhabricatorConfigAllController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Configuration'), $this->getApplicationURI())
       ->addTextCrumb($title);
 
-    $panel = new PHUIObjectBoxView();
-    $panel->setHeaderText(pht('Current Settings'));
-    $panel->setTable($table);
+    $panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Current Settings'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($table);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('all/');

@@ -890,7 +890,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     } else {
       $content = $this->render();
       $response = id(new AphrontWebpageResponse())
-        ->setContent($content);
+        ->setContent($content)
+        ->setFrameable($this->getFrameable());
     }
 
     return $response;

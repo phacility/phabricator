@@ -38,7 +38,9 @@ final class PhabricatorApplicationDatasource
         ->setDisplayType($application->getShortDescription())
         ->setImageuRI($application->getIconURI())
         ->setPriorityType('apps')
-        ->setImageSprite('phabricator-search-icon '.$img);
+        ->setImageSprite('phabricator-search-icon '.$img)
+        ->setIcon($application->getIcon())
+        ->addAttribute($application->getShortDescription());
     }
 
     return $this->filterResultsAgainstTokens($results);

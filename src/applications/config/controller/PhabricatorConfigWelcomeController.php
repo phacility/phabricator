@@ -9,11 +9,11 @@ final class PhabricatorConfigWelcomeController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('welcome/');
 
-    $title = pht('Welcome');
+    $title = pht('Installation Guide');
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Welcome'));
+      ->addTextCrumb($title);
 
     $view = id(new PHUITwoColumnView())
       ->setNavigation($nav)

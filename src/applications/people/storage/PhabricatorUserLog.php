@@ -108,7 +108,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
     $log->setUserPHID((string)$object_phid);
     $log->setAction($action);
 
-    $log->remoteAddr = idx($_SERVER, 'REMOTE_ADDR', '');
+    $log->remoteAddr = (string)idx($_SERVER, 'REMOTE_ADDR', '');
 
     return $log;
   }

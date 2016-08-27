@@ -3,20 +3,12 @@
 final class PhabricatorPeopleApproveController
   extends PhabricatorPeopleController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $admin = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $user = id(new PhabricatorPeopleQuery())
-      ->setViewer($admin)
-      ->withIDs(array($this->id))
+      ->setViewer($viewer)
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();
@@ -26,7 +18,7 @@ final class PhabricatorPeopleApproveController
 
     if ($request->isFormPost()) {
       id(new PhabricatorUserEditor())
-        ->setActor($admin)
+        ->setActor($viewer)
         ->approveUser($user, true);
 
       $title = pht(
@@ -39,12 +31,12 @@ final class PhabricatorPeopleApproveController
           'Your Phabricator account (%s) has been approved by %s. You can '.
           'login here:',
           $user->getUsername(),
-          $admin->getUsername()),
+          $viewer->getUsername()),
         PhabricatorEnv::getProductionURI('/'));
 
       $mail = id(new PhabricatorMetaMTAMail())
         ->addTos(array($user->getPHID()))
-        ->addCCs(array($admin->getPHID()))
+        ->addCCs(array($viewer->getPHID()))
         ->setSubject('[Phabricator] '.$title)
         ->setForceDelivery(true)
         ->setBody($body)

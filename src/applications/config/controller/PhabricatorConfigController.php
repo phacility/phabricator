@@ -12,11 +12,14 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
     $nav->addLabel(pht('Configuration'));
-    $nav->addFilter('/', pht('Browse Settings'));
-    $nav->addFilter('all/', pht('All Settings'));
+    $nav->addFilter('/', pht('Core Settings'));
+    $nav->addFilter('application/', pht('Application Settings'));
     $nav->addFilter('history/', pht('Settings History'));
+    $nav->addFilter('version/', pht('Version Information'));
+    $nav->addFilter('all/', pht('All Settings'));
     $nav->addLabel(pht('Setup'));
     $nav->addFilter('issue/', pht('Setup Issues'));
+    $nav->addFilter('welcome/', pht('Installation Guide'));
     $nav->addLabel(pht('Database'));
     $nav->addFilter('database/', pht('Database Status'));
     $nav->addFilter('dbissue/', pht('Database Issues'));
@@ -26,8 +29,6 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $nav->addFilter('cluster/databases/', pht('Database Servers'));
     $nav->addFilter('cluster/notifications/', pht('Notification Servers'));
     $nav->addFilter('cluster/repositories/', pht('Repository Servers'));
-    $nav->addLabel(pht('Welcome'));
-    $nav->addFilter('welcome/', pht('Welcome Screen'));
     $nav->addLabel(pht('Modules'));
 
     $modules = PhabricatorConfigModule::getAllModules();

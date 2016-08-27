@@ -43,6 +43,7 @@ final class PhabricatorAuthSessionEngineExtensionModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('SessionEngine Extensions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 
