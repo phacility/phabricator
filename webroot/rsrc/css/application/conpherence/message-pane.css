@@ -65,10 +65,6 @@
   bottom: 42px;
 }
 
-.page-has-warning .conpherence-message-pane .conpherence-messages {
-  top: 110px;
-}
-
 .conpherence-messages.jx-scrollbar-frame {
   overflow-y: hidden;
 }

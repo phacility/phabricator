@@ -26,10 +26,16 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
   var request = null;
   var dirty = config.local ? false : true;
 
-  JX.Title.setCount(config.countType, config.countNumber);
+  if (config.countType) {
+    JX.Title.setCount(config.countType, config.countNumber);
+  }
 
   function _updateCount(number) {
-    JX.Title.setCount(config.countType, number);
+    if (config.countType) {
+      JX.Title.setCount(config.countType, number);
+    } else {
+      return;
+    }
 
     JX.DOM.setContent(count, number);
     if (number === 0) {

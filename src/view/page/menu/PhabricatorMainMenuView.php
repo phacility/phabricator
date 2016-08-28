@@ -531,15 +531,100 @@ final class PhabricatorMainMenuView extends AphrontView {
         '');
     }
 
+    // Admin Level Urgent Notification Channel
+    $setup_tag = '';
+    $setup_notification_dropdown = '';
+    if ($viewer && $viewer->getIsAdmin()) {
+      $open = PhabricatorSetupCheck::getOpenSetupIssueKeys();
+      if ($open) {
+        $setup_id = celerity_generate_unique_node_id();
+        $setup_count_id = celerity_generate_unique_node_id();
+        $setup_dropdown_id = celerity_generate_unique_node_id();
+
+        $setup_count_number = count($open);
+
+        if ($setup_count_number) {
+          $aural[] = phutil_tag(
+            'a',
+            array(
+              'href' => '/config/issue/',
+            ),
+            pht(
+              '%s unresolved issues.',
+              new PhutilNumber($setup_count_number)));
+        } else {
+          $aural[] = pht('No issues.');
+        }
+
+        $setup_count_tag = phutil_tag(
+          'span',
+          array(
+            'id'    => $setup_count_id,
+            'class' => 'phabricator-main-menu-setup-count',
+          ),
+          $setup_count_number);
+
+        $setup_icon_tag = javelin_tag(
+          'span',
+          array(
+            'class' => 'phabricator-main-menu-setup-icon phui-icon-view '.
+                       'phui-font-fa fa-exclamation-circle',
+            'sigil' => 'menu-icon',
+          ),
+          '');
+
+        if ($setup_count_number) {
+          $container_classes[] = 'setup-unread';
+        }
+
+        $setup_tag = phutil_tag(
+          'a',
+          array(
+            'href'  => '/config/issue/',
+            'class' => implode(' ', $container_classes),
+            'id'    => $setup_id,
+          ),
+          array(
+            $setup_icon_tag,
+            $setup_count_tag,
+          ));
+
+        Javelin::initBehavior(
+          'aphlict-dropdown',
+          array(
+            'bubbleID'    => $setup_id,
+            'countID'     => $setup_count_id,
+            'dropdownID'  => $setup_dropdown_id,
+            'loadingText' => pht('Loading...'),
+            'uri'         => '/config/issue/panel/',
+            'countType'   => null,
+            'countNumber' => null,
+            'unreadClass' => 'setup-unread',
+          ));
+
+        $setup_notification_dropdown = javelin_tag(
+          'div',
+          array(
+            'id'    => $setup_dropdown_id,
+            'class' => 'phabricator-notification-menu',
+            'sigil' => 'phabricator-notification-menu',
+            'style' => 'display: none;',
+          ),
+          '');
+      }
+    }
+
     $dropdowns = array(
       $notification_dropdown,
       $message_notification_dropdown,
+      $setup_notification_dropdown,
     );
 
     return array(
       array(
         $bubble_tag,
         $message_tag,
+        $setup_tag,
       ),
       $dropdowns,
       $aural,

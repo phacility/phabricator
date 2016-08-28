@@ -538,11 +538,6 @@ final class PhabricatorUSEnglishTranslation
         'PHP also loaded these configuration files:',
       ),
 
-      'You have %d unresolved setup issue(s)...' => array(
-        'You have an unresolved setup issue...',
-        'You have %d unresolved setup issues...',
-      ),
-
       '%s added %d inline comment(s).' => array(
         array(
           '%s added an inline comment.',
