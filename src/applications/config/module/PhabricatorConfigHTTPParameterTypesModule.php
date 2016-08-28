@@ -21,6 +21,7 @@ final class PhabricatorConfigHTTPParameterTypesModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('HTTP Parameter Types'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

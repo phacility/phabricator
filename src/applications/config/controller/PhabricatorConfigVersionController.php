@@ -1,19 +1,37 @@
 <?php
 
-final class PhabricatorConfigVersionsModule
-  extends PhabricatorConfigModule {
+final class PhabricatorConfigVersionController
+  extends PhabricatorConfigController {
 
-  public function getModuleKey() {
-    return 'versions';
-  }
-
-  public function getModuleName() {
-    return pht('Versions');
-  }
-
-  public function renderModuleStatus(AphrontRequest $request) {
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
+    $title = pht('Version Information');
+
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addTextCrumb(pht('Configuration'), $this->getApplicationURI())
+      ->addTextCrumb($title);
+
+    $versions = $this->renderModuleStatus($viewer);
+
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('version/');
+
+    $view = id(new PHUITwoColumnView())
+      ->setNavigation($nav)
+      ->setMainColumn(array(
+        $versions,
+      ));
+
+    return $this->newPage()
+      ->setTitle($title)
+      ->setCrumbs($crumbs)
+      ->appendChild($view);
+
+  }
+
+  public function renderModuleStatus($viewer) {
     $versions = $this->loadVersions($viewer);
 
     $version_property_list = id(new PHUIPropertyListView());
@@ -22,7 +40,8 @@ final class PhabricatorConfigVersionsModule
     }
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Current Versions'))
+      ->setHeaderText(pht('Version Information'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addPropertyList($version_property_list);
 
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));

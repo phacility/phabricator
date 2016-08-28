@@ -207,7 +207,7 @@ final class DiffusionDiffQueryConduitAPIMethod
     $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
       ->setAnchorCommit($effective_commit);
 
-    $raw_diff = $raw_query->loadRawDiff();
+    $raw_diff = $raw_query->executeInline();
     if (!$raw_diff) {
       return $this->getEmptyResult(2);
     }

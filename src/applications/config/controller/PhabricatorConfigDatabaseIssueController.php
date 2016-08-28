@@ -149,6 +149,7 @@ final class PhabricatorConfigDatabaseIssueController
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->setFormErrors($errors)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
 
     $nav = $this->buildSideNavView();

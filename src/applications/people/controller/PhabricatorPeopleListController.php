@@ -3,8 +3,6 @@
 final class PhabricatorPeopleListController
   extends PhabricatorPeopleController {
 
-  private $key;
-
   public function shouldAllowPublic() {
     return true;
   }
@@ -13,16 +11,12 @@ final class PhabricatorPeopleListController
     return false;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->key = idx($data, 'key');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $this->requireApplicationCapability(
       PeopleBrowseUserDirectoryCapability::CAPABILITY);
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->key)
+      ->setQueryKey($request->getURIData('key'))
       ->setSearchEngine(new PhabricatorPeopleSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

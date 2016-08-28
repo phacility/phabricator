@@ -41,6 +41,7 @@ final class PhabricatorConfigRequestExceptionHandlerModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Exception Handlers'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

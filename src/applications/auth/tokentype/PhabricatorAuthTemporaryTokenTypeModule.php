@@ -41,6 +41,7 @@ final class PhabricatorAuthTemporaryTokenTypeModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Temporary Token Types'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

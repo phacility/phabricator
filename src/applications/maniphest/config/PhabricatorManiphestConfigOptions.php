@@ -356,28 +356,6 @@ EOTEXT
         'string',
         '[Maniphest]')
         ->setDescription(pht('Subject prefix for Maniphest mail.')),
-      $this->newOption(
-        'maniphest.priorities.unbreak-now',
-        'int',
-        100)
-        ->setSummary(pht('Priority used to populate "Unbreak Now" on home.'))
-        ->setDescription(
-          pht(
-            'Temporary setting. If set, this priority is used to populate the '.
-            '"Unbreak Now" panel on the home page. You should adjust this if '.
-            'you adjust priorities using `%s`.',
-            'maniphest.priorities')),
-      $this->newOption(
-        'maniphest.priorities.needs-triage',
-        'int',
-        90)
-        ->setSummary(pht('Priority used to populate "Needs Triage" on home.'))
-        ->setDescription(
-          pht(
-            'Temporary setting. If set, this priority is used to populate the '.
-            '"Needs Triage" panel on the home page. You should adjust this if '.
-            'you adjust priorities using `%s`.',
-            'maniphest.priorities')),
       $this->newOption('maniphest.points', $points_type, array())
         ->setSummary(pht('Configure point values for tasks.'))
         ->setDescription($points_description)

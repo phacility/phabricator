@@ -105,40 +105,64 @@ final class PhabricatorRepositoryCommitHeraldWorker
   private function loadRawPatchText(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $identifier = $commit->getCommitIdentifier();
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'user' => PhabricatorUser::getOmnipotentUser(),
+        'user' => $viewer,
         'repository' => $repository,
-        'commit' => $commit->getCommitIdentifier(),
       ));
-
-    $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
-    $raw_query->setLinesOfContext(3);
 
     $time_key = 'metamta.diffusion.time-limit';
     $byte_key = 'metamta.diffusion.byte-limit';
     $time_limit = PhabricatorEnv::getEnvConfig($time_key);
     $byte_limit = PhabricatorEnv::getEnvConfig($byte_key);
 
-    if ($time_limit) {
-      $raw_query->setTimeout($time_limit);
+    $diff_info = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      $drequest,
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $identifier,
+        'linesOfContext' => 3,
+        'timeout' => $time_limit,
+        'byteLimit' => $byte_limit,
+      ));
+
+    if ($diff_info['tooSlow']) {
+      throw new Exception(
+        pht(
+          'Patch generation took longer than configured limit ("%s") of '.
+          '%s second(s).',
+          $time_key,
+          new PhutilNumber($time_limit)));
     }
 
-    $raw_diff = $raw_query->loadRawDiff();
-
-    $size = strlen($raw_diff);
-    if ($byte_limit && $size > $byte_limit) {
-      $pretty_size = phutil_format_bytes($size);
+    if ($diff_info['tooHuge']) {
       $pretty_limit = phutil_format_bytes($byte_limit);
-      throw new Exception(pht(
-        'Patch size of %s exceeds configured byte size limit (%s) of %s.',
-        $pretty_size,
-        $byte_key,
-        $pretty_limit));
+      throw new Exception(
+        pht(
+          'Patch size exceeds configured byte size limit ("%s") of %s.',
+          $byte_key,
+          $pretty_limit));
     }
 
-    return $raw_diff;
+    $file_phid = $diff_info['filePHID'];
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to load file ("%s") returned by "%s".',
+          $file_phid,
+          'diffusion.rawdiffquery'));
+    }
+
+    return $file->loadFileData();
   }
 
 }

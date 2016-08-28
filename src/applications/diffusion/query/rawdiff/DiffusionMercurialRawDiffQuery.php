@@ -2,11 +2,7 @@
 
 final class DiffusionMercurialRawDiffQuery extends DiffusionRawDiffQuery {
 
-  protected function executeQuery() {
-    return $this->executeRawDiffCommand();
-  }
-
-  protected function executeRawDiffCommand() {
+  protected function newQueryFuture() {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
@@ -30,11 +26,7 @@ final class DiffusionMercurialRawDiffQuery extends DiffusionRawDiffQuery {
       $commit,
       $path);
 
-    $this->configureFuture($future);
-
-    list($raw_diff) = $future->resolvex();
-
-    return $raw_diff;
+    return $future;
   }
 
 }

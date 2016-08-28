@@ -232,11 +232,8 @@ EOFILE;
 
     list($description, $metadata) = $parser->parse($matches[0]);
 
-    $provides = preg_split('/\s+/', trim(idx($metadata, 'provides')));
-    $requires = preg_split('/\s+/', trim(idx($metadata, 'requires')));
-    $provides = array_filter($provides);
-    $requires = array_filter($requires);
-
+    $provides = $this->parseResourceSymbolList(idx($metadata, 'provides'));
+    $requires = $this->parseResourceSymbolList(idx($metadata, 'requires'));
     if (!$provides) {
       // Tests and documentation-only JS is permitted to @provide no targets.
       return array(null, null);
@@ -362,6 +359,39 @@ EOFILE;
       }
     }
     return $result;
+  }
+
+  private function parseResourceSymbolList($list) {
+    if (!$list) {
+      return array();
+    }
+
+    // This is valid:
+    //
+    //   @requires x y
+    //
+    // But so is this:
+    //
+    //   @requires x
+    //   @requires y
+    //
+    // Accept either form and produce a list of symbols.
+
+    $list = (array)$list;
+
+    // We can get `true` values if there was a bare `@requires` in the input.
+    foreach ($list as $key => $item) {
+      if ($item === true) {
+        unset($list[$key]);
+      }
+    }
+
+    $list = implode(' ', $list);
+    $list = trim($list);
+    $list = preg_split('/\s+/', $list);
+    $list = array_filter($list);
+
+    return $list;
   }
 
 }

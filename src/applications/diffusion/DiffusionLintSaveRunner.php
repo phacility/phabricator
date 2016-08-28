@@ -262,7 +262,7 @@ final class DiffusionLintSaveRunner extends Phobject {
 
       $query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest);
       $queries[$path] = $query;
-      $futures[$path] = $query->getFileContentFuture();
+      $futures[$path] = new ImmediateFuture($query->executeInline());
     }
 
     $authors = array();

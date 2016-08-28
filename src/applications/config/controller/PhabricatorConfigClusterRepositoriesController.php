@@ -253,6 +253,7 @@ final class PhabricatorConfigClusterRepositoriesController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

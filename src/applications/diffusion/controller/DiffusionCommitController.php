@@ -73,6 +73,38 @@ final class DiffusionCommitController extends DiffusionController {
     $commit_data = $commit->getCommitData();
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
     $error_panel = null;
+
+    $hard_limit = 1000;
+
+    if ($commit->isImported()) {
+      $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
+        $drequest);
+      $change_query->setLimit($hard_limit + 1);
+      $changes = $change_query->loadChanges();
+    } else {
+      $changes = array();
+    }
+
+    $was_limited = (count($changes) > $hard_limit);
+    if ($was_limited) {
+      $changes = array_slice($changes, 0, $hard_limit);
+    }
+
+    $count = count($changes);
+
+    $is_unreadable = false;
+    $hint = null;
+    if (!$count || $commit->isUnreachable()) {
+      $hint = id(new DiffusionCommitHintQuery())
+        ->setViewer($viewer)
+        ->withRepositoryPHIDs(array($repository->getPHID()))
+        ->withOldCommitIdentifiers(array($commit->getCommitIdentifier()))
+        ->executeOne();
+      if ($hint) {
+        $is_unreadable = $hint->isUnreadable();
+      }
+    }
+
     if ($is_foreign) {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
 
@@ -130,9 +162,41 @@ final class DiffusionCommitController extends DiffusionController {
           $message));
 
       if ($commit->isUnreachable()) {
-        $this->commitErrors[] = pht(
-          'This commit has been deleted in the repository: it is no longer '.
-          'reachable from any branch, tag, or ref.');
+        $did_rewrite = false;
+        if ($hint) {
+          if ($hint->isRewritten()) {
+            $rewritten = id(new DiffusionCommitQuery())
+              ->setViewer($viewer)
+              ->withRepository($repository)
+              ->withIdentifiers(array($hint->getNewCommitIdentifier()))
+              ->executeOne();
+            if ($rewritten) {
+              $did_rewrite = true;
+              $rewritten_uri = $rewritten->getURI();
+              $rewritten_name = $rewritten->getLocalName();
+
+              $rewritten_link = phutil_tag(
+                'a',
+                array(
+                  'href' => $rewritten_uri,
+                ),
+                $rewritten_name);
+
+              $this->commitErrors[] = pht(
+                'This commit was rewritten after it was published, which '.
+                'changed the commit hash. This old version of the commit is '.
+                'no longer reachable from any branch, tag or ref. The new '.
+                'version of this commit is %s.',
+                $rewritten_link);
+            }
+          }
+        }
+
+        if (!$did_rewrite) {
+          $this->commitErrors[] = pht(
+            'This commit has been deleted in the repository: it is no longer '.
+            'reachable from any branch, tag, or ref.');
+        }
       }
 
       if ($this->getCommitErrors()) {
@@ -143,47 +207,23 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $timeline = $this->buildComments($commit);
-    $hard_limit = 1000;
-
-    if ($commit->isImported()) {
-      $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
-        $drequest);
-      $change_query->setLimit($hard_limit + 1);
-      $changes = $change_query->loadChanges();
-    } else {
-      $changes = array();
-    }
-
-    $was_limited = (count($changes) > $hard_limit);
-    if ($was_limited) {
-      $changes = array_slice($changes, 0, $hard_limit);
-    }
-
     $merge_table = $this->buildMergesTable($commit);
 
     $highlighted_audits = $commit->getAuthorityAudits(
       $viewer,
       $this->auditAuthorityPHIDs);
 
-    $count = count($changes);
-
-    $bad_commit = null;
-    if ($count == 0) {
-      $bad_commit = queryfx_one(
-        id(new PhabricatorRepository())->establishConnection('r'),
-        'SELECT * FROM %T WHERE fullCommitName = %s',
-        PhabricatorRepository::TABLE_BADCOMMIT,
-        $commit->getMonogram());
-    }
-
     $show_changesets = false;
     $info_panel = null;
     $change_list = null;
     $change_table = null;
-    if ($bad_commit) {
+    if ($is_unreadable) {
       $info_panel = $this->renderStatusMessage(
-        pht('Bad Commit'),
-        $bad_commit['description']);
+        pht('Unreadable Commit'),
+        pht(
+          'This commit has been marked as unreadable by an administrator. '.
+          'It may have been corrupted or created improperly by an external '.
+          'tool.'));
     } else if ($is_foreign) {
       // Don't render anything else.
     } else if (!$commit->isImported()) {
@@ -987,24 +1027,26 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
-    $raw_diff = $this->callConduitWithDiffusionRequest(
+    $diff_info = $this->callConduitWithDiffusionRequest(
       'diffusion.rawdiffquery',
       array(
         'commit' => $drequest->getCommit(),
         'path' => $drequest->getPath(),
       ));
 
-    $file = PhabricatorFile::buildFromFileDataOrHash(
-      $raw_diff,
-      array(
-        'name' => $drequest->getCommit().'.diff',
-        'ttl' => (60 * 60 * 24),
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-      ));
+    $file_phid = $diff_info['filePHID'];
 
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject($drequest->getRepository()->getPHID());
-    unset($unguarded);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to load file ("%s") returned by "%s".',
+          $file_phid,
+          'diffusion.rawdiffquery'));
+    }
 
     return $file->getRedirectResponse();
   }

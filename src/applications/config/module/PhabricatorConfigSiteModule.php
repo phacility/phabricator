@@ -40,6 +40,7 @@ final class PhabricatorConfigSiteModule extends PhabricatorConfigModule {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Sites'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

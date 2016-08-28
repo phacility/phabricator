@@ -46,6 +46,7 @@ final class PhabricatorEditEngineExtensionModule
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('EditEngine Extensions'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($table);
   }
 

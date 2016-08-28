@@ -1,33 +1,33 @@
 <?php
 
-final class PhabricatorConfigListController
+final class PhabricatorConfigApplicationController
   extends PhabricatorConfigController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
     $nav = $this->buildSideNavView();
-    $nav->selectFilter('/');
+    $nav->selectFilter('application/');
 
     $groups = PhabricatorApplicationConfigOptions::loadAll();
-    $core_list = $this->buildConfigOptionsList($groups, 'core');
+    $apps_list = $this->buildConfigOptionsList($groups, 'apps');
 
-    $title = pht('Core Configuration');
+    $title = pht('Application Configuration');
 
-    $core = id(new PHUIObjectBoxView())
+    $apps = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setObjectList($core_list);
+      ->setObjectList($apps_list);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Configuration'), $this->getApplicationURI())
-      ->addTextCrumb($title);
+      ->addTextCrumb(pht('Applications'));
 
     $view = id(new PHUITwoColumnView())
       ->setNavigation($nav)
       ->setMainColumn(array(
-        $core,
+        $apps,
       ));
 
     return $this->newPage()
