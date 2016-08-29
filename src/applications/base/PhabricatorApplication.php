@@ -151,10 +151,6 @@ abstract class PhabricatorApplication
     return $this->getBaseURI().ltrim($path, '/');
   }
 
-  public function getIconURI() {
-    return null;
-  }
-
   public function getIcon() {
     return 'fa-puzzle-piece';
   }

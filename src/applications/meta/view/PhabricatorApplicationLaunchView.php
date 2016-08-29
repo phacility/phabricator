@@ -109,14 +109,9 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
       $classes = array();
       $classes[] = 'phabricator-application-launch-icon';
       $styles = array();
-
-      if ($application->getIconURI()) {
-        $styles[] = 'background-image: url('.$application->getIconURI().')';
-      } else {
-        $classes[] = $application->getIcon();
-        $classes[] = 'phui-icon-view';
-        $classes[] = 'phui-font-fa';
-      }
+      $classes[] = $application->getIcon();
+      $classes[] = 'phui-icon-view';
+      $classes[] = 'phui-font-fa';
 
       $icon = phutil_tag(
         'span',
