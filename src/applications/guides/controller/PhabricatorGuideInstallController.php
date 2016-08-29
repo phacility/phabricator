@@ -8,7 +8,6 @@ final class PhabricatorGuideInstallController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    require_celerity_resource('guides-app-css');
     $viewer = $request->getViewer();
 
     $title = pht('Installation Guide');

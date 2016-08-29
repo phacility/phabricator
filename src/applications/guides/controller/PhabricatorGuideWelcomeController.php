@@ -8,7 +8,6 @@ final class PhabricatorGuideWelcomeController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    require_celerity_resource('guides-app-css');
     $viewer = $request->getViewer();
 
     $title = pht('Welcome to Phabricator');

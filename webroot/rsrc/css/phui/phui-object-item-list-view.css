@@ -738,3 +738,36 @@ ul.phui-object-item-list-view .phui-object-item-selected
   bottom: 2px;
   right: 2px;
 }
+
+/* - Big List---------------------------------------------------------------- */
+
+.phui-object-list-big ul.phui-object-item-list-view  {
+  margin: 0;
+  padding: 20px;
+}
+
+.phui-object-list-big .phui-object-item-no-bar .phui-object-item-frame {
+  border: 0;
+}
+
+.phui-object-list-big .phui-object-item-image-icon {
+  margin: 8px 2px 12px;
+}
+
+.phui-object-list-big a.phui-object-item-link {
+  color: #000;
+  font-size: {$biggestfontsize};
+}
+
+.phui-object-list-big .phui-object-item-name {
+  padding-top: 6px;
+}
+
+.phui-object-list-big .phui-object-item-launch-button a.button {
+  font-size: {$normalfontsize};
+  padding: 3px 12px 4px;
+}
+
+.device-desktop .phui-object-list-big .phui-object-item {
+  margin-bottom: 8px;
+}

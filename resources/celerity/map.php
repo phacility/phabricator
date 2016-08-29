@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'ed7ae7bb',
+    'core.pkg.css' => '25e4069a',
     'core.pkg.js' => 'b562c3db',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3fb7f532',
@@ -70,7 +70,6 @@ return array(
     'rsrc/css/application/feed/feed.css' => 'ecd4ec57',
     'rsrc/css/application/files/global-drag-and-drop.css' => '5c1b47c2',
     'rsrc/css/application/flag/flag.css' => '5337623f',
-    'rsrc/css/application/guides/guides.css' => '1d5414e5',
     'rsrc/css/application/harbormaster/harbormaster.css' => 'f491c9f4',
     'rsrc/css/application/herald/herald-test.css' => 'a52e323e',
     'rsrc/css/application/herald/herald.css' => 'dc31f6e9',
@@ -148,7 +147,7 @@ return array(
     'rsrc/css/phui/phui-info-view.css' => '28efab79',
     'rsrc/css/phui/phui-list.css' => '9da2aa00',
     'rsrc/css/phui/phui-object-box.css' => '6b487c57',
-    'rsrc/css/phui/phui-object-item-list-view.css' => '40010767',
+    'rsrc/css/phui/phui-object-item-list-view.css' => '985e9d54',
     'rsrc/css/phui/phui-pager.css' => 'bea33d23',
     'rsrc/css/phui/phui-pinboard-view.css' => '2495140e',
     'rsrc/css/phui/phui-profile-menu.css' => '8a3fc181',
@@ -574,7 +573,6 @@ return array(
     'font-fontawesome' => '2b7ebbcc',
     'font-lato' => 'c7ccd872',
     'global-drag-and-drop-css' => '5c1b47c2',
-    'guides-app-css' => '1d5414e5',
     'harbormaster-css' => 'f491c9f4',
     'herald-css' => 'dc31f6e9',
     'herald-rule-editor' => 'd6a7e717',
@@ -858,7 +856,7 @@ return array(
     'phui-inline-comment-view-css' => '5953c28e',
     'phui-list-view-css' => '9da2aa00',
     'phui-object-box-css' => '6b487c57',
-    'phui-object-item-list-view-css' => '40010767',
+    'phui-object-item-list-view-css' => '985e9d54',
     'phui-pager-css' => 'bea33d23',
     'phui-pinboard-view-css' => '2495140e',
     'phui-profile-menu-css' => '8a3fc181',
