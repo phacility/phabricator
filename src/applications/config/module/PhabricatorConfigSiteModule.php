@@ -24,7 +24,7 @@ final class PhabricatorConfigSiteModule extends PhabricatorConfigModule {
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Priority'),
@@ -37,11 +37,6 @@ final class PhabricatorConfigSiteModule extends PhabricatorConfigModule {
           'pri',
           'wide',
         ));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Sites'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
   }
 
 }

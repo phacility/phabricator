@@ -10,24 +10,28 @@ final class PhabricatorConfigVersionController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Configuration'), $this->getApplicationURI())
-      ->addTextCrumb($title);
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
     $versions = $this->renderModuleStatus($viewer);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('version/');
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn(array(
-        $versions,
-      ));
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true);
+
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($versions);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
 
   }
 
@@ -39,11 +43,6 @@ final class PhabricatorConfigVersionController
       $version_property_list->addProperty($name, $version);
     }
 
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Version Information'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($version_property_list);
-
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
     $version_path = $phabricator_root.'/conf/local/VERSION';
     if (Filesystem::pathExists($version_path)) {
@@ -53,7 +52,7 @@ final class PhabricatorConfigVersionController
         $version_from_file);
     }
 
-    return $object_box;
+    return $version_property_list;
   }
 
   private function loadVersions(PhabricatorUser $viewer) {

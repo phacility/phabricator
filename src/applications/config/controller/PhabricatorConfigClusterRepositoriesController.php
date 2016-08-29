@@ -7,22 +7,37 @@ final class PhabricatorConfigClusterRepositoriesController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('cluster/repositories/');
 
-    $title = pht('Repository Servers');
+    $title = pht('Cluster Repository Status');
+
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true)
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setIcon('fa-book')
+          ->setHref($doc_href)
+          ->setTag('a')
+          ->setText(pht('Documentation')));
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
-      ->addTextCrumb(pht('Repository Servers'));
+      ->addTextCrumb(pht('Repository Servers'))
+      ->setBorder(true);
 
     $repository_status = $this->buildClusterRepositoryStatus();
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn($repository_status);
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($repository_status);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildClusterRepositoryStatus() {
@@ -217,8 +232,7 @@ final class PhabricatorConfigClusterRepositoriesController
       );
     }
 
-
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setNoDataString(
         pht('No repository cluster services are configured.'))
       ->setHeaders(
@@ -239,22 +253,6 @@ final class PhabricatorConfigClusterRepositoriesController
           null,
           'wide',
         ));
-
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Cluster Repository Status'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
   }
 
   private function getDevices(

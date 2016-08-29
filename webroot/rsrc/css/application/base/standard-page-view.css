@@ -17,6 +17,10 @@
   clear: both;
 }
 
+body.white-background {
+  background: #fff;
+}
+
 .phabricator-standard-page-footer {
   text-align: right;
   margin: 44px 16px 16px;

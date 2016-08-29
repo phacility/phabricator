@@ -13,31 +13,37 @@ final class PhabricatorConfigGroupController
       return new Aphront404Response();
     }
 
+    $group_uri = PhabricatorConfigGroupConstants::getGroupURI(
+      $options->getGroup());
+    $group_name = PhabricatorConfigGroupConstants::getGroupShortName(
+      $options->getGroup());
+
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter($group_uri);
+
     $title = pht('%s Configuration', $options->getName());
     $list = $this->buildOptionList($options->getOptions());
 
-    $box = id(new PHUIObjectBoxView())
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setObjectList($list);
-
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Config'), $this->getApplicationURI())
-      ->addTextCrumb($options->getName(), $this->getApplicationURI())
+      ->addTextCrumb($group_name, $this->getApplicationURI($group_uri))
+      ->addTextCrumb($options->getName())
       ->setBorder(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->setHeaderIcon('fa-sliders');
+      ->setProfileHeader(true);
 
-    $view = id(new PHUITwoColumnView())
+    $content = id(new PhabricatorConfigPageView())
       ->setHeader($header)
-      ->setFooter($box);
+      ->setContent($list);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildOptionList(array $options) {
@@ -62,6 +68,7 @@ final class PhabricatorConfigGroupController
     $engine->process();
 
     $list = new PHUIObjectItemListView();
+    $list->setBig(true);
     foreach ($options as $option) {
       $summary = $engine->getOutput($option, 'summary');
 
@@ -89,13 +96,13 @@ final class PhabricatorConfigGroupController
 
       $db_value = idx($db_values, $option->getKey());
       if ($db_value && !$db_value->getIsDeleted()) {
-        $item->addIcon('edit', pht('Customized'));
+        $item->addIcon('fa-edit', pht('Customized'));
       }
 
       if ($option->getHidden()) {
-        $item->addIcon('unpublish', pht('Hidden'));
+        $item->addIcon('fa-eye-slash', pht('Hidden'));
       } else if ($option->getLocked()) {
-        $item->addIcon('lock', pht('Locked'));
+        $item->addIcon('fa-lock', pht('Locked'));
       }
 
       $list->addItem($item);
