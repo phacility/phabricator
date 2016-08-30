@@ -77,6 +77,24 @@ final class PhabricatorConfigGroupController
         ->setHref('/config/edit/'.$option->getKey().'/')
         ->addAttribute($summary);
 
+      $label = pht('Current Value:');
+      $color = null;
+      $db_value = idx($db_values, $option->getKey());
+      if ($db_value && !$db_value->getIsDeleted()) {
+        $item->setEffect('visited');
+        $color = 'violet';
+        $label = pht('Customized Value:');
+      }
+
+      if ($option->getHidden()) {
+        $item->setStatusIcon('fa-eye-slash grey', pht('Hidden'));
+        $item->setDisabled(true);
+      } else if ($option->getLocked()) {
+        $item->setStatusIcon('fa-lock '.$color, pht('Locked'));
+      } else {
+        $item->setStatusIcon('fa-pencil-square-o '.$color, pht('Editable'));
+      }
+
       if (!$option->getHidden()) {
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
         $current_value = PhabricatorConfigJSON::prettyPrintJSON(
@@ -87,22 +105,11 @@ final class PhabricatorConfigGroupController
             'class' => 'config-options-current-value',
           ),
           array(
-            phutil_tag('span', array(), pht('Current Value:')),
+            phutil_tag('span', array(), $label),
             ' '.$current_value,
           ));
 
         $item->appendChild($current_value);
-      }
-
-      $db_value = idx($db_values, $option->getKey());
-      if ($db_value && !$db_value->getIsDeleted()) {
-        $item->addIcon('fa-edit', pht('Customized'));
-      }
-
-      if ($option->getHidden()) {
-        $item->addIcon('fa-eye-slash', pht('Hidden'));
-      } else if ($option->getLocked()) {
-        $item->addIcon('fa-lock', pht('Locked'));
       }
 
       $list->addItem($item);

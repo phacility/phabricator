@@ -772,6 +772,19 @@ ul.phui-object-item-list-view .phui-object-item-selected
   margin-bottom: 8px;
 }
 
+.phui-object-list-big .phui-object-item-col0 {
+  vertical-align: top;
+  padding: 0;
+}
+
+.phui-object-list-big .phui-object-item-status-icon {
+  padding: 5px;
+}
+
+.phui-object-list-big .phui-object-item-visited a.phui-object-item-link {
+  color: {$violet};
+}
+
 .device-desktop .phui-object-list-big .phui-object-item-frame:hover {
 
 }

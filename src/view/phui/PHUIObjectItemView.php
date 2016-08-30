@@ -254,6 +254,9 @@ final class PHUIObjectItemView extends AphrontTagView {
       case 'selected':
         $item_classes[] = 'phui-object-item-selected';
         break;
+      case 'visited':
+        $item_classes[] = 'phui-object-item-visited';
+        break;
       case null:
         break;
       default:
