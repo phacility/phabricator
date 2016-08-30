@@ -27,10 +27,15 @@ final class PhabricatorConfigClusterRepositoriesController
       ->setBorder(true);
 
     $repository_status = $this->buildClusterRepositoryStatus();
+    $repository_errors = $this->buildClusterRepositoryErrors();
 
     $content = id(new PhabricatorConfigPageView())
       ->setHeader($header)
-      ->setContent($repository_status);
+      ->setContent(
+        array(
+          $repository_status,
+          $repository_errors,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
@@ -337,5 +342,71 @@ final class PhabricatorConfigClusterRepositoriesController
     return $result;
   }
 
+
+  private function buildClusterRepositoryErrors() {
+    $viewer = $this->getViewer();
+
+    $messages = id(new PhabricatorRepositoryStatusMessage())->loadAllWhere(
+      'statusCode IN (%Ls)',
+      array(
+        PhabricatorRepositoryStatusMessage::CODE_ERROR,
+      ));
+
+    $repository_ids = mpull($messages, 'getRepositoryID');
+    if ($repository_ids) {
+      // NOTE: We're bypassing policies when loading repositories because we
+      // want to show errors exist even if the viewer can't see the repository.
+      // We use handles to describe the repository below, so the viewer won't
+      // actually be able to see any particulars if they can't see the
+      // repository.
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withIDs($repository_ids)
+        ->execute();
+      $repositories = mpull($repositories, null, 'getID');
+    }
+
+    $rows = array();
+    foreach ($messages as $message) {
+      $repository = idx($repositories, $message->getRepositoryID());
+      if (!$repository) {
+        continue;
+      }
+
+      if (!$repository->isTracked()) {
+        continue;
+      }
+
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-exclamation-triangle red');
+
+      $rows[] = array(
+        $icon,
+        $viewer->renderHandle($repository->getPHID()),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $repository->getPathURI('manage/status/'),
+          ),
+          $message->getStatusTypeName()),
+      );
+    }
+
+    return id(new AphrontTableView($rows))
+      ->setNoDataString(
+        pht('No active repositories have outstanding errors.'))
+      ->setHeaders(
+        array(
+          null,
+          pht('Repository'),
+          pht('Error'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'pri',
+          'wide',
+        ));
+  }
 
 }
