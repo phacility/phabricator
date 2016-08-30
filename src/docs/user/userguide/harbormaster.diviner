@@ -88,7 +88,7 @@ with {nav Add Build Step}.
 
 Currently, the only useful type of build step is "Make HTTP Request", which you
 can use to make a call to an external build system like Jenkins. Today, most
-plans should therefor look something like this:
+plans should therefore look something like this:
 
   - Use a "Make HTTP Request" step to tell Jenkins or some other similar
     external build system about the code.
