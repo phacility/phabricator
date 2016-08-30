@@ -9219,6 +9219,7 @@ phutil_register_library_map(array(
     'PhortunePaymentProviderConfig' => array(
       'PhortuneDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorApplicationTransactionInterface',
     ),
     'PhortunePaymentProviderConfigEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhortunePaymentProviderConfigQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
