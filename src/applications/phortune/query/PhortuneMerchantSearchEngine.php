@@ -74,7 +74,7 @@ final class PhortuneMerchantSearchEngine
         ->setHeader($merchant->getName())
         ->setHref('/phortune/merchant/'.$merchant->getID().'/')
         ->setObject($merchant)
-        ->setIcon('fa-bank');
+        ->setImageIcon('fa-bank');
 
       $list->addItem($item);
     }
