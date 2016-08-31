@@ -317,7 +317,7 @@ final class PhabricatorConfigWelcomeController
         $pholio_all_uri));
 
 
-    $diffusion_uri = PhabricatorEnv::getURI('/diffusion/');
+    $diffusion_uri = PhabricatorEnv::getURI('/diffusion/edit/');
     $diffusion_create_uri = PhabricatorEnv::getURI('/diffusion/create/');
     $diffusion_all_uri = PhabricatorEnv::getURI('/diffusion/query/all/');
 
