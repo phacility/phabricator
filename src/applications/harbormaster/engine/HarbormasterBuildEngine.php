@@ -446,11 +446,14 @@ final class HarbormasterBuildEngine extends Phobject {
       if ($build->getBuildStatus() != HarbormasterBuildStatus::STATUS_PASSED) {
         $all_pass = false;
       }
-      $any_fail = in_array($build->getBuildStatus(), array(
+      if (in_array($build->getBuildStatus(), array(
           HarbormasterBuildStatus::STATUS_FAILED,
           HarbormasterBuildStatus::STATUS_ERROR,
           HarbormasterBuildStatus::STATUS_DEADLOCKED,
-        ));
+        ))) {
+
+        $any_fail = true;
+      }
     }
 
     if ($any_fail) {
