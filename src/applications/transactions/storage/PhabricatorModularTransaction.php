@@ -149,4 +149,8 @@ abstract class PhabricatorModularTransaction
     return parent::renderChangeDetails($viewer);
   }
 
+  final protected function newRemarkupChanges() {
+    return $this->getTransactionImplementation()->newRemarkupChanges();
+  }
+
 }
