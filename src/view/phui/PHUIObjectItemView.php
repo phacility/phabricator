@@ -171,6 +171,18 @@ final class PHUIObjectItemView extends AphrontTagView {
     return $this;
   }
 
+  /**
+   * This method has been deprecated, use @{method:setImageIcon} instead.
+   *
+   * @deprecated
+   */
+  public function setIcon($icon) {
+    phlog(
+      pht('Deprecated call to setIcon(), use setImageIcon() instead.'));
+
+    return $this->setImageIcon($icon);
+  }
+
   public function setStatusIcon($icon, $label = null) {
     $this->statusIcon = array(
       'icon' => $icon,
