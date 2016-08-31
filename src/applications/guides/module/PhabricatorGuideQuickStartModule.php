@@ -1,43 +1,22 @@
 <?php
 
-final class PhabricatorGuideQuickStartController
-  extends PhabricatorGuideController {
+final class PhabricatorGuideQuickStartModule extends PhabricatorGuideModule {
 
-  public function shouldAllowPublic() {
-    return false;
+  public function getModuleKey() {
+    return 'quickstart';
   }
 
-  public function handleRequest(AphrontRequest $request) {
+  public function getModuleName() {
+    return pht('Quick Start');
+  }
+
+  public function getModulePosition() {
+    return 30;
+  }
+
+  public function renderModuleStatus(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $title = pht('Quick Start Guide');
-
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('quickstart/');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
-
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Quick Start'));
-
-    $content = $this->getGuideContent($viewer);
-
-    $view = id(new PHUICMSView())
-      ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->setHeader($header)
-      ->setContent($content);
-
-    return $this->newPage()
-      ->setTitle($title)
-      ->addClass('phui-cms-body')
-      ->appendChild($view);
-
-  }
-
-  private function getGuideContent($viewer) {
     $guide_items = new PhabricatorGuideListView();
 
     $title = pht('Configure Applications');
@@ -205,5 +184,7 @@ final class PhabricatorGuideQuickStartController
     $guide_items->addItem($item);
 
     return $guide_items;
+
   }
+
 }
