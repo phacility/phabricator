@@ -231,7 +231,7 @@ final class PhabricatorEnv extends Phobject {
       $stack->pushSource(
         id(new PhabricatorConfigDatabaseSource('default'))
           ->setName(pht('Database')));
-    } catch (AphrontQueryException $exception) {
+    } catch (AphrontSchemaQueryException $exception) {
       // If the database is not available, just skip this configuration
       // source. This happens during `bin/storage upgrade`, `bin/conf` before
       // schema setup, etc.
