@@ -141,7 +141,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
 
     $docs = idx($metadata, 'param');
     if ($docs) {
-      $docs = explode("\n", $docs);
+      $docs = (array)$docs;
       $docs = array_filter($docs);
     } else {
       $docs = array();
@@ -282,6 +282,15 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
             '@return'));
       }
     }
+
+    $return = (array)$return;
+    if (count($return) > 1) {
+        $atom->addWarning(
+          pht(
+            'Documentation specifies `%s` multiple times.',
+            '@return'));
+    }
+    $return = head($return);
 
     if ($atom->getName() == '__construct' && $atom->getType() == 'method') {
       $return_spec = array(
