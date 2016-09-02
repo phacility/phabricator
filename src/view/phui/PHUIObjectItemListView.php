@@ -8,6 +8,7 @@ final class PHUIObjectItemListView extends AphrontTagView {
   private $noDataString;
   private $flush;
   private $simple;
+  private $big;
   private $allowEmptyList;
   private $itemClass = 'phui-object-item-standard';
 
@@ -40,6 +41,11 @@ final class PHUIObjectItemListView extends AphrontTagView {
     return $this;
   }
 
+  public function setBig($big) {
+    $this->big = $big;
+    return $this;
+  }
+
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
     return $this;
@@ -68,6 +74,9 @@ final class PHUIObjectItemListView extends AphrontTagView {
     }
     if ($this->simple) {
       $classes[] = 'phui-object-list-simple';
+    }
+    if ($this->big) {
+      $classes[] = 'phui-object-list-big';
     }
 
     return array(

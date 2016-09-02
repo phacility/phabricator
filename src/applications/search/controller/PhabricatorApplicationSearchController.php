@@ -270,9 +270,6 @@ final class PhabricatorApplicationSearchController
           if ($list->getContent()) {
             $box->appendChild($list->getContent());
           }
-          if ($list->getCollapsed()) {
-            $box->setCollapsed(true);
-          }
 
           $result_header = $list->getHeader();
           if ($result_header) {

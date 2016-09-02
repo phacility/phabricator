@@ -39,4 +39,15 @@ final class PhabricatorCalendarEventDescriptionTransaction
       ->setNewText($this->getNewValue());
   }
 
+  public function newRemarkupChanges() {
+    $changes = array();
+
+    $changes[] = $this->newRemarkupChange()
+      ->setOldValue($this->getOldValue())
+      ->setNewValue($this->getNewValue());
+
+    return $changes;
+  }
+
+
 }

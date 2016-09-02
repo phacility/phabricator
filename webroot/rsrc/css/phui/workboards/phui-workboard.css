@@ -22,10 +22,6 @@
   background-color: #fff;
 }
 
-.device-desktop .page-has-warning .phui-workboard-view-shadow {
-  top: 113px;
-}
-
 .device-desktop.with-durable-column .phui-workboard-view-shadow {
   right: 300px;
 }

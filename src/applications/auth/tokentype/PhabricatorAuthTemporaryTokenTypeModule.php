@@ -8,7 +8,7 @@ final class PhabricatorAuthTemporaryTokenTypeModule
   }
 
   public function getModuleName() {
-    return pht('Temporary Tokens');
+    return pht('Temporary Token Types');
   }
 
   public function renderModuleStatus(AphrontRequest $request) {
@@ -25,7 +25,7 @@ final class PhabricatorAuthTemporaryTokenTypeModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Class'),
@@ -39,10 +39,6 @@ final class PhabricatorAuthTemporaryTokenTypeModule
           'wide pri',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Temporary Token Types'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
   }
 
 }

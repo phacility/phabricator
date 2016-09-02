@@ -17,6 +17,10 @@
   clear: both;
 }
 
+body.white-background {
+  background: #fff;
+}
+
 .phabricator-standard-page-footer {
   text-align: right;
   margin: 44px 16px 16px;
@@ -103,17 +107,6 @@ a.handle-availability-disabled {
   color: white;
   text-align: center;
   font-size: {$smallerfontsize};
-}
-
-.setup-warning-callout {
-  padding: 8px 16px;
-  background: {$lightred};
-  border-bottom: 1px solid {$sh-redborder};
-  position: relative;
-}
-
-.setup-warning-callout a {
-  color: {$red};
 }
 
 .phui-handle .phui-icon-view {

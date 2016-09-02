@@ -1,44 +1,22 @@
 <?php
 
-final class PhabricatorGuideInstallController
-  extends PhabricatorGuideController {
+final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
 
-  public function shouldAllowPublic() {
-    return false;
+  public function getModuleKey() {
+    return 'install';
   }
 
-  public function handleRequest(AphrontRequest $request) {
-    require_celerity_resource('guides-app-css');
+  public function getModuleName() {
+    return pht('Install Phabricator');
+  }
+
+  public function getModulePosition() {
+    return 20;
+  }
+
+  public function renderModuleStatus(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $title = pht('Installation Guide');
-
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('install/');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setProfileHeader(true);
-
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Installation'));
-
-    $content = $this->getGuideContent($viewer);
-
-    $view = id(new PHUICMSView())
-      ->setCrumbs($crumbs)
-      ->setNavigation($nav)
-      ->setHeader($header)
-      ->setContent($content);
-
-    return $this->newPage()
-      ->setTitle($title)
-      ->addClass('phui-cms-body')
-      ->appendChild($view);
-
-  }
-
-  private function getGuideContent($viewer) {
     $guide_items = new PhabricatorGuideListView();
 
     $title = pht('Resolve Setup Issues');
@@ -192,5 +170,7 @@ final class PhabricatorGuideInstallController
     $guide_items->addItem($item);
 
     return $guide_items;
+
   }
+
 }

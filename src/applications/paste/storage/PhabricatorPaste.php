@@ -42,7 +42,6 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
     return id(new PhabricatorPaste())
       ->setTitle('')
-      ->setLanguage('')
       ->setStatus(self::STATUS_ACTIVE)
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
@@ -72,7 +71,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'status' => 'text32',
         'title' => 'text255',
-        'language' => 'text64',
+        'language' => 'text64?',
         'mailKey' => 'bytes20',
         'parentPHID' => 'phid?',
 

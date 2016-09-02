@@ -37,7 +37,6 @@
   top: 42px !important;
   left: 3% !important;
   position: absolute;
-
 }
 
 .phabricator-notification-list.pm {
@@ -76,6 +75,10 @@
 .phabricator-notification-list .phabricator-notification-unread,
 .phabricator-notification-menu .phabricator-notification-unread {
   background: {$hoverblue};
+}
+
+.phabricator-notification-read {
+  color: {$lightgreytext};
 }
 
 .phabricator-notification-header {

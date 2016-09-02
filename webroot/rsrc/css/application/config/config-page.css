@@ -1,0 +1,59 @@
+/**
+ * @provides config-page-css
+ */
+
+.config-page-header {
+  margin: 28px 24px 0;
+  padding-bottom: 28px;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.config-page-header .phui-profile-header {
+  padding: 0;
+}
+
+.config-page-header .phui-profile-header.phui-header-shell .phui-header-header {
+  font-size: 20px;
+}
+
+
+.config-page-content {
+  margin: 0 24px;
+}
+
+.device-desktop .config-page-content .phui-object-item-list-view {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.device-desktop .config-page-content .phui-document-fluid .phui-document-view {
+  padding: 16px 0;
+  margin: 0;
+}
+
+.config-page-content .aphront-table-view {
+  border: none;
+}
+
+.config-page-property {
+  padding-top: 4px;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.config-page-content .aphront-table-notice {
+  padding: 0;
+}
+
+.config-page-content .aphront-table-notice .phui-info-view {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.config-page-content .aphront-table-wrap + .aphront-table-wrap {
+  margin-top: 20px;
+  border-top: 1px solid {$thinblueborder};
+}
+
+.config-page-content .phui-box.phui-box-blue-property {
+  margin-top: 16px;
+}

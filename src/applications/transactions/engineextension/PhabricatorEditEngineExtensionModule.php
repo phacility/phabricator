@@ -28,7 +28,7 @@ final class PhabricatorEditEngineExtensionModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Priority'),
@@ -44,10 +44,6 @@ final class PhabricatorEditEngineExtensionModule
           null,
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('EditEngine Extensions'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
   }
 
 }
