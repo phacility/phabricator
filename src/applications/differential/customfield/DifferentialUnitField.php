@@ -61,7 +61,8 @@ final class DifferentialUnitField
     );
     $icon_color = idx($colors, $diff->getUnitStatus(), 'grey');
 
-    $message = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
+    $message = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage(
+      $diff->getUnitStatus());
 
     $status = id(new PHUIStatusListView())
       ->addItem(
