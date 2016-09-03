@@ -95,9 +95,9 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->menu;
   }
 
-  public function addFilter($key, $name, $uri = null) {
+  public function addFilter($key, $name, $uri = null, $icon = null) {
     return $this->addThing(
-      $key, $name, $uri, PHUIListItemView::TYPE_LINK);
+      $key, $name, $uri, PHUIListItemView::TYPE_LINK, $icon);
   }
 
   public function addButton($key, $name, $uri = null) {
@@ -105,10 +105,14 @@ final class AphrontSideNavFilterView extends AphrontView {
       $key, $name, $uri, PHUIListItemView::TYPE_BUTTON);
   }
 
-  private function addThing($key, $name, $uri, $type) {
+  private function addThing($key, $name, $uri, $type, $icon) {
     $item = id(new PHUIListItemView())
       ->setName($name)
       ->setType($type);
+
+    if (strlen($icon)) {
+      $item->setIcon($icon);
+    }
 
 
     if (strlen($key)) {
