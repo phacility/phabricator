@@ -2,7 +2,7 @@
 
 final class DiffusionSvnRawDiffQuery extends DiffusionRawDiffQuery {
 
-  protected function executeQuery() {
+  protected function newQueryFuture() {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
@@ -22,10 +22,7 @@ final class DiffusionSvnRawDiffQuery extends DiffusionRawDiffQuery {
       $commit,
       $repository->getSubversionPathURI($drequest->getPath()));
 
-    $this->configureFuture($future);
-
-    list($raw_diff) = $future->resolvex();
-    return $raw_diff;
+    return $future;
   }
 
 }

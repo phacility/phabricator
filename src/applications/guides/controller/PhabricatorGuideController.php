@@ -7,9 +7,11 @@ abstract class PhabricatorGuideController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
     $nav->addLabel(pht('Guides'));
-    $nav->addFilter('/', pht('Welcome'));
-    $nav->addFilter('install/', pht('Installation Guide'));
-    $nav->addFilter('quickstart/', pht('Quick Start Guide'));
+
+    $modules = PhabricatorGuideModule::getAllModules();
+    foreach ($modules as $key => $module) {
+      $nav->addFilter($key.'/', $module->getModuleName());
+    }
 
     return $nav;
   }

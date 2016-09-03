@@ -159,6 +159,9 @@
 .phui-icon-view.bg-bluegrey {
   background-color: {$bluetext};
 }
+.phui-icon-view.bg-grey {
+  background-color: {$lightgreytext};
+}
 .phui-icon-view.bg-red  {
   background-color: {$red};
 }

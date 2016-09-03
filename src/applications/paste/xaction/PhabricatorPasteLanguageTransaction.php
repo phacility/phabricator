@@ -13,12 +13,20 @@ final class PhabricatorPasteLanguageTransaction
     $object->setLanguage($value);
   }
 
+  private function renderLanguageValue($value) {
+    if (!strlen($value)) {
+      return $this->renderValue(pht('autodetect'));
+    } else {
+      return $this->renderValue($value);
+    }
+  }
+
   public function getTitle() {
     return pht(
       "%s updated the paste's language from %s to %s.",
       $this->renderAuthor(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+      $this->renderLanguageValue($this->getOldValue()),
+      $this->renderLanguageValue($this->getNewValue()));
   }
 
   public function getTitleForFeed() {
@@ -26,8 +34,8 @@ final class PhabricatorPasteLanguageTransaction
       '%s updated the language for %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+      $this->renderLanguageValue($this->getOldValue()),
+      $this->renderLanguageValue($this->getNewValue()));
   }
 
 }

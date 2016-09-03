@@ -202,6 +202,35 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
     $pager->setPageSize(40);
     $results = $engine->executeQuery($query, $pager);
     $view = $engine->renderResults($results, $saved);
+    // Low tech NUX.
+    if (!$results && ($viewer->getIsAdmin() == 1)) {
+      $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+      if (!$instance) {
+        $content = pht(<<<EOT
+Welcome to Phabricator, here are some links to get you started:
+- [[ /config/ | Configure Phabricator ]]
+- [[ /config/welcome/ | Quick Start Guide ]]
+- [[ /diffusion/ | Create a Repository ]]
+- [[ /people/invite/send/ | Invite People ]]
+- [[ https://twitter.com/phabricator/ | Follow us on Twitter ]]
+EOT
+);
+      } else {
+        $content = pht(<<<EOT
+Welcome to Phabricator, here are some links to get you started:
+- [[ /config/welcome/ | Quick Start Guide ]]
+- [[ /diffusion/ | Create a Repository ]]
+- [[ https://twitter.com/phabricator/ | Follow us on Twitter ]]
+EOT
+);
+      }
+      $welcome = new PHUIRemarkupView($viewer, $content);
+
+      $list = new PHUIObjectItemListView();
+      $view = new PhabricatorApplicationSearchResultView();
+      $view->setObjectList($list);
+      $view->setNoDataString($welcome);
+    }
 
     $title = pht('Recent Activity');
     $href = '/feed/';

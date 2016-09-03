@@ -1,38 +1,15 @@
 <?php
 
-abstract class DiffusionRawDiffQuery extends DiffusionQuery {
+abstract class DiffusionRawDiffQuery
+  extends DiffusionFileFutureQuery {
 
-  private $timeout;
   private $linesOfContext = 65535;
   private $anchorCommit;
   private $againstCommit;
-  private $byteLimit;
 
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
     return parent::newQueryObject(__CLASS__, $request);
-  }
-
-  final public function loadRawDiff() {
-    return $this->executeQuery();
-  }
-
-  final public function setTimeout($timeout) {
-    $this->timeout = $timeout;
-    return $this;
-  }
-
-  final public function getTimeout() {
-    return $this->timeout;
-  }
-
-  public function setByteLimit($byte_limit) {
-    $this->byteLimit = $byte_limit;
-    return $this;
-  }
-
-  public function getByteLimit() {
-    return $this->byteLimit;
   }
 
   final public function setLinesOfContext($lines_of_context) {
@@ -64,17 +41,6 @@ abstract class DiffusionRawDiffQuery extends DiffusionQuery {
     }
 
     return $this->getRequest()->getStableCommit();
-  }
-
-  protected function configureFuture(ExecFuture $future) {
-    if ($this->getTimeout()) {
-      $future->setTimeout($this->getTimeout());
-    }
-
-    if ($this->getByteLimit()) {
-      $future->setStdoutSizeLimit($this->getByteLimit());
-      $future->setStderrSizeLimit($this->getByteLimit());
-    }
   }
 
 }

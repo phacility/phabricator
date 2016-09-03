@@ -11,20 +11,25 @@ final class PhabricatorConfigWelcomeController
 
     $title = pht('Installation Guide');
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true);
+
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb($title);
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn(array(
-        $this->buildWelcomeScreen($request),
-      ));
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($this->buildWelcomeScreen($request));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   public function buildWelcomeScreen(AphrontRequest $request) {
@@ -312,7 +317,7 @@ final class PhabricatorConfigWelcomeController
         $pholio_all_uri));
 
 
-    $diffusion_uri = PhabricatorEnv::getURI('/diffusion/');
+    $diffusion_uri = PhabricatorEnv::getURI('/diffusion/edit/');
     $diffusion_create_uri = PhabricatorEnv::getURI('/diffusion/create/');
     $diffusion_all_uri = PhabricatorEnv::getURI('/diffusion/query/all/');
 
@@ -346,9 +351,6 @@ final class PhabricatorConfigWelcomeController
         $diffusion_user_guide,
         $diffusion_setup_guide));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Welcome to Phabricator'));
-
     $setup_header = new PHUIRemarkupView(
       $viewer, pht('=Setup and Configuration'));
 
@@ -359,7 +361,6 @@ final class PhabricatorConfigWelcomeController
       $viewer, pht('=Quick Start Guide'));
 
     $document = id(new PHUIDocumentViewPro())
-      ->setHeader($header)
       ->setFluid(true)
       ->appendChild($setup_header)
       ->appendChild($setup)
@@ -369,9 +370,7 @@ final class PhabricatorConfigWelcomeController
       ->appendChild($quick);
 
     return id(new PHUIBoxView())
-      ->setBorder(true)
-      ->appendChild($document)
-      ->addClass('mlb');
+      ->appendChild($document);
   }
 
   private function newItem(AphrontRequest $request, $icon, $content) {

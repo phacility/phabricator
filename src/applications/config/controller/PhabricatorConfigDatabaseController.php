@@ -60,18 +60,4 @@ abstract class PhabricatorConfigDatabaseController
     }
   }
 
-  protected function buildHeaderWithDocumentationLink($title) {
-
-    $doc_link = PhabricatorEnv::getDoclink('Managing Storage Adjustments');
-
-    return id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setIcon('fa-book')
-          ->setHref($doc_link)
-          ->setText(pht('Learn More')));
-  }
-
 }

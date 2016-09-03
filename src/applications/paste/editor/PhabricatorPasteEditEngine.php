@@ -63,10 +63,6 @@ final class PhabricatorPasteEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    $langs = array(
-      '' => pht('(Detect From Filename in Title)'),
-    ) + PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
-
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('title')
@@ -76,14 +72,14 @@ final class PhabricatorPasteEditEngine
         ->setConduitDescription(pht('Retitle the paste.'))
         ->setConduitTypeDescription(pht('New paste title.'))
         ->setValue($object->getTitle()),
-      id(new PhabricatorSelectEditField())
+      id(new PhabricatorDatasourceEditField())
         ->setKey('language')
         ->setLabel(pht('Language'))
         ->setTransactionType(
           PhabricatorPasteLanguageTransaction::TRANSACTIONTYPE)
         ->setAliases(array('lang'))
         ->setIsCopyable(true)
-        ->setOptions($langs)
+        ->setDatasource(new PasteLanguageSelectDatasource())
         ->setDescription(
           pht(
             'Language used for syntax highlighting. By default, inferred '.
@@ -91,7 +87,7 @@ final class PhabricatorPasteEditEngine
         ->setConduitDescription(
           pht('Change language used for syntax highlighting.'))
         ->setConduitTypeDescription(pht('New highlighting language.'))
-        ->setValue($object->getLanguage()),
+        ->setSingleValue($object->getLanguage()),
       id(new PhabricatorTextAreaEditField())
         ->setKey('text')
         ->setLabel(pht('Text'))

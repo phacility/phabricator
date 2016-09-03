@@ -29,11 +29,8 @@ final class PhabricatorGuideApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/guides/' => array(
-       '' => 'PhabricatorGuideWelcomeController',
-       'install/'
-          => 'PhabricatorGuideInstallController',
-       'quickstart/'
-          => 'PhabricatorGuideQuickStartController',
+        '' => 'PhabricatorGuideModuleController',
+        '(?P<module>[^/]+)/' => 'PhabricatorGuideModuleController',
        ),
     );
   }

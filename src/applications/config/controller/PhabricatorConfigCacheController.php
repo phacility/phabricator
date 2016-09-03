@@ -11,24 +11,33 @@ final class PhabricatorConfigCacheController
 
     $title = pht('Cache Status');
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true);
+
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Cache Status'));
+      ->addTextCrumb(pht('Cache Status'))
+      ->setBorder(true);
 
     $code_box = $this->renderCodeBox();
     $data_box = $this->renderDataBox();
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn(array(
-        $code_box,
-        $data_box,
-    ));
+    $page = array(
+      $code_box,
+      $data_box,
+    );
+
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($page);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function renderCodeBox() {

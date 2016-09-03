@@ -538,11 +538,6 @@ final class PhabricatorUSEnglishTranslation
         'PHP also loaded these configuration files:',
       ),
 
-      'You have %d unresolved setup issue(s)...' => array(
-        'You have an unresolved setup issue...',
-        'You have %d unresolved setup issues...',
-      ),
-
       '%s added %d inline comment(s).' => array(
         array(
           '%s added an inline comment.',
@@ -1578,6 +1573,11 @@ final class PhabricatorUSEnglishTranslation
 
       '%s updated the invite list for %s, invited %s: %s; uninvinted %s: %s.' =>
         '%s updated the invite list for %s, invited: %4$s; uninvited: %6$s.',
+
+      'Restart %s build(s)?' => array(
+        'Restart %s build?',
+        'Restart %s builds?',
+      ),
     );
   }
 

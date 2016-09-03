@@ -1095,7 +1095,7 @@ final class DiffusionCommitHookEngine extends Phobject {
           ->setTimeout($time_limit)
           ->setByteLimit($byte_limit)
           ->setLinesOfContext(0)
-          ->loadRawDiff();
+          ->executeInline();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // TODO: This diff has 3 lines of context, which produces slightly

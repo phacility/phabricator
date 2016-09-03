@@ -1027,24 +1027,26 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
-    $raw_diff = $this->callConduitWithDiffusionRequest(
+    $diff_info = $this->callConduitWithDiffusionRequest(
       'diffusion.rawdiffquery',
       array(
         'commit' => $drequest->getCommit(),
         'path' => $drequest->getPath(),
       ));
 
-    $file = PhabricatorFile::buildFromFileDataOrHash(
-      $raw_diff,
-      array(
-        'name' => $drequest->getCommit().'.diff',
-        'ttl' => (60 * 60 * 24),
-        'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
-      ));
+    $file_phid = $diff_info['filePHID'];
 
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject($drequest->getRepository()->getPHID());
-    unset($unguarded);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to load file ("%s") returned by "%s".',
+          $file_phid,
+          'diffusion.rawdiffquery'));
+    }
 
     return $file->getRedirectResponse();
   }

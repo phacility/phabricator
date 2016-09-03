@@ -67,6 +67,10 @@ abstract class PhabricatorModularTransactionType
     throw new PhutilMethodNotImplementedException();
   }
 
+  public function newRemarkupChanges() {
+    return array();
+  }
+
   final public function setStorage(
     PhabricatorApplicationTransaction $xaction) {
     $this->storage = $xaction;
@@ -251,6 +255,11 @@ abstract class PhabricatorModularTransactionType
   private function isTextMode() {
     $target = $this->getStorage()->getRenderingTarget();
     return ($target == PhabricatorApplicationTransaction::TARGET_TEXT);
+  }
+
+  final protected function newRemarkupChange() {
+    return id(new PhabricatorTransactionRemarkupChange())
+      ->setTransaction($this->getStorage());
   }
 
 }

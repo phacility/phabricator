@@ -173,6 +173,7 @@ final class PhabricatorPasteQuery
         'P'.$paste->getID(),
         $paste->getFilePHID(),
         $paste->getLanguage(),
+        PhabricatorHash::digestForIndex($paste->getTitle()),
       ));
   }
 
@@ -184,6 +185,7 @@ final class PhabricatorPasteQuery
         $paste->getFilePHID(),
         $paste->getLanguage(),
         'snippet',
+        PhabricatorHash::digestForIndex($paste->getTitle()),
       ));
   }
 

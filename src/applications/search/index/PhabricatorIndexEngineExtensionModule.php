@@ -24,7 +24,7 @@ final class PhabricatorIndexEngineExtensionModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Class'),
@@ -36,10 +36,6 @@ final class PhabricatorIndexEngineExtensionModule
           'wide pri',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('IndexEngine Extensions'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
   }
 
 }

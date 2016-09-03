@@ -34,11 +34,9 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
     if ($max_allowed_packet < $recommended_minimum) {
       $message = pht(
         "MySQL is configured with a small '%s' (%d), ".
-        "which may cause some large writes to fail. Strongly consider raising ".
-        "this to at least %d in your MySQL configuration.",
+        "which may cause some large writes to fail.",
         'max_allowed_packet',
-        $max_allowed_packet,
-        $recommended_minimum);
+        $max_allowed_packet);
 
       $this->newIssue('mysql.max_allowed_packet')
         ->setName(pht('Small MySQL "%s"', 'max_allowed_packet'))

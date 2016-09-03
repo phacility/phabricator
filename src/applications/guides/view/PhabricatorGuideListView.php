@@ -10,10 +10,8 @@ final class PhabricatorGuideListView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('guides-app-css');
-
     $list = id(new PHUIObjectItemListView())
-      ->addClass('guides-app');
+      ->setBig(true);
 
     foreach ($this->items as $item) {
       $icon = id(new PHUIIconView())

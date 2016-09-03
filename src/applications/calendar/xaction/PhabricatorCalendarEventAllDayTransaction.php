@@ -24,7 +24,7 @@ final class PhabricatorCalendarEventAllDayTransaction
         $this->renderAuthor());
     } else {
       return pht(
-        '%s conveted this from an all day event.',
+        '%s converted this from an all day event.',
         $this->renderAuthor());
     }
   }

@@ -12,42 +12,45 @@ final class PhabricatorConfigApplicationController
     $groups = PhabricatorApplicationConfigOptions::loadAll();
     $apps_list = $this->buildConfigOptionsList($groups, 'apps');
 
-    $title = pht('Application Configuration');
+    $title = pht('Application Settings');
 
-    $apps = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setObjectList($apps_list);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Configuration'), $this->getApplicationURI())
-      ->addTextCrumb(pht('Applications'));
+      ->addTextCrumb(pht('Applications'))
+      ->setBorder(true);
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn(array(
-        $apps,
-      ));
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($apps_list);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildConfigOptionsList(array $groups, $type) {
     assert_instances_of($groups, 'PhabricatorApplicationConfigOptions');
 
     $list = new PHUIObjectItemListView();
+    $list->setBig(true);
     $groups = msort($groups, 'getName');
     foreach ($groups as $group) {
       if ($group->getGroup() == $type) {
+        $icon = id(new PHUIIconView())
+          ->setIcon($group->getIcon())
+          ->setBackground('bg-violet');
         $item = id(new PHUIObjectItemView())
           ->setHeader($group->getName())
           ->setHref('/config/group/'.$group->getKey().'/')
           ->addAttribute($group->getDescription())
-          ->setImageIcon($group->getIcon());
+          ->setImageIcon($icon);
         $list->addItem($item);
       }
     }

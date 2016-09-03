@@ -204,24 +204,49 @@ final class HeraldCommitAdapter
   }
 
   private function loadCommitDiff() {
-    $byte_limit = self::getEnormousByteLimit();
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
-    $raw = $this->callConduit(
+    $byte_limit = self::getEnormousByteLimit();
+    $time_limit = self::getEnormousTimeLimit();
+
+    $diff_info = $this->callConduit(
       'diffusion.rawdiffquery',
       array(
         'commit' => $this->commit->getCommitIdentifier(),
-        'timeout' => self::getEnormousTimeLimit(),
+        'timeout' => $time_limit,
         'byteLimit' => $byte_limit,
         'linesOfContext' => 0,
       ));
 
-    if (strlen($raw) >= $byte_limit) {
+    if ($diff_info['tooHuge']) {
       throw new Exception(
         pht(
-          'The raw text of this change is enormous (larger than %d bytes). '.
+          'The raw text of this change is enormous (larger than %s byte(s)). '.
           'Herald can not process it.',
-          $byte_limit));
+          new PhutilNumber($byte_limit)));
     }
+
+    if ($diff_info['tooSlow']) {
+      throw new Exception(
+        pht(
+          'The raw text of this change took too long to process (longer '.
+          'than %s second(s)). Herald can not process it.',
+          new PhutilNumber($time_limit)));
+    }
+
+    $file_phid = $diff_info['filePHID'];
+    $diff_file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$diff_file) {
+      throw new Exception(
+        pht(
+          'Failed to load diff ("%s") for this change.',
+          $file_phid));
+    }
+
+    $raw = $diff_file->loadFileData();
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw);
