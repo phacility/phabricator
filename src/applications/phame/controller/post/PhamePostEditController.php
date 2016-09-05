@@ -21,40 +21,35 @@ final class PhamePostEditController extends PhamePostController {
       $post = id(new PhamePostQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
         ->executeOne();
       if (!$post) {
         return new Aphront404Response();
       }
-      $blog_id = $post->getBlog()->getID();
+      $blog = $post->getBlog();
     } else {
       $blog_id = head($request->getArr('blog'));
       if (!$blog_id) {
         $blog_id = $request->getStr('blog');
       }
-    }
 
-    $query = id(new PhameBlogQuery())
-      ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ));
+      $query = id(new PhameBlogQuery())
+        ->setViewer($viewer)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ));
 
-    if (ctype_digit($blog_id)) {
-      $query->withIDs(array($blog_id));
-    } else {
-      $query->withPHIDs(array($blog_id));
-    }
+      if (ctype_digit($blog_id)) {
+        $query->withIDs(array($blog_id));
+      } else {
+        $query->withPHIDs(array($blog_id));
+      }
 
-    $blog = $query->executeOne();
-    if (!$blog) {
-      return new Aphront404Response();
+      $blog = $query->executeOne();
+      if (!$blog) {
+        return new Aphront404Response();
+      }
     }
 
     $this->setBlog($blog);
