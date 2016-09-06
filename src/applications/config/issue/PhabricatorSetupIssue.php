@@ -20,6 +20,26 @@ final class PhabricatorSetupIssue extends Phobject {
   private $originalPHPConfigValues = array();
   private $links;
 
+  public static function newDatabaseConnectionIssue(
+    AphrontQueryException $ex) {
+
+    $message = pht(
+      "Unable to connect to MySQL!\n\n".
+      "%s\n\n".
+      "Make sure Phabricator and MySQL are correctly configured.",
+      $ex->getMessage());
+
+    return id(new self())
+      ->setIssueKey('mysql.connect')
+      ->setName(pht('Can Not Connect to MySQL'))
+      ->setMessage($message)
+      ->setIsFatal(true)
+      ->addRelatedPhabricatorConfig('mysql.host')
+      ->addRelatedPhabricatorConfig('mysql.port')
+      ->addRelatedPhabricatorConfig('mysql.user')
+      ->addRelatedPhabricatorConfig('mysql.pass');
+  }
+
   public function addCommand($command) {
     $this->commands[] = $command;
     return $this;
