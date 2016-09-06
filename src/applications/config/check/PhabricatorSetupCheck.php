@@ -12,7 +12,25 @@ abstract class PhabricatorSetupCheck extends Phobject {
   const GROUP_IMPORTANT   = 'important';
 
   public function getExecutionOrder() {
-    return 1;
+    if ($this->isPreflightCheck()) {
+      return 0;
+    } else {
+      return 1000;
+    }
+  }
+
+  /**
+   * Should this check execute before we load configuration?
+   *
+   * The majority of checks (particularly, those checks which examine
+   * configuration) should run in the normal setup phase, after configuration
+   * loads. However, a small set of critical checks (mostly, tests for PHP
+   * setup and extensions) need to run before we can load configuration.
+   *
+   * @return bool True to execute before configuration is loaded.
+   */
+  public function isPreflightCheck() {
+    return false;
   }
 
   final protected function newIssue($key) {

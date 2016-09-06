@@ -8,7 +8,7 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
   public function getExecutionOrder() {
     // This must run after basic PHP checks, but before most other checks.
-    return 0.5;
+    return 500;
   }
 
   protected function executeChecks() {

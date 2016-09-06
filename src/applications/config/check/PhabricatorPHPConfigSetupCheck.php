@@ -6,8 +6,8 @@ final class PhabricatorPHPConfigSetupCheck extends PhabricatorSetupCheck {
     return self::GROUP_PHP;
   }
 
-  public function getExecutionOrder() {
-    return 0;
+  public function isPreflightCheck() {
+    return true;
   }
 
   protected function executeChecks() {
