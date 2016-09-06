@@ -422,7 +422,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return self::buildFromFileData($data, $params);
   }
 
-  public function migrateToEngine(PhabricatorFileStorageEngine $engine) {
+  public function migrateToEngine(
+    PhabricatorFileStorageEngine $engine,
+    $make_copy) {
+
     if (!$this->getID() || !$this->getStorageHandle()) {
       throw new Exception(
         pht("You can not migrate a file which hasn't yet been saved."));
@@ -446,10 +449,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $this->setStorageHandle($new_handle);
     $this->save();
 
-    $this->deleteFileDataIfUnused(
-      $old_engine,
-      $old_identifier,
-      $old_handle);
+    if (!$make_copy) {
+      $this->deleteFileDataIfUnused(
+        $old_engine,
+        $old_identifier,
+        $old_handle);
+    }
 
     return $this;
   }
