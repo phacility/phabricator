@@ -147,7 +147,7 @@ abstract class PhabricatorSetupCheck extends Phobject {
     return null;
   }
 
-  private static function newIssueResponse(PhabricatorSetupIssue $issue) {
+  public static function newIssueResponse(PhabricatorSetupIssue $issue) {
     $view = id(new PhabricatorSetupIssueView())
       ->setIssue($issue);
 
