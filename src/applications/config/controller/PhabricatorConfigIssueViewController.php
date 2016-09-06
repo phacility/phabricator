@@ -7,7 +7,7 @@ final class PhabricatorConfigIssueViewController
     $viewer = $request->getViewer();
     $issue_key = $request->getURIData('key');
 
-    $issues = PhabricatorSetupCheck::runAllChecks();
+    $issues = PhabricatorSetupCheck::runNormalChecks();
     PhabricatorSetupCheck::setOpenSetupIssueKeys(
       PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
       $update_database = true);

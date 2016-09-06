@@ -9,7 +9,7 @@ final class PhabricatorConfigIssueListController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('issue/');
 
-    $issues = PhabricatorSetupCheck::runAllChecks();
+    $issues = PhabricatorSetupCheck::runNormalChecks();
     PhabricatorSetupCheck::setOpenSetupIssueKeys(
       PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
       $update_database = true);

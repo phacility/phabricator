@@ -129,16 +129,39 @@ abstract class PhabricatorSetupCheck extends Phobject {
       ));
   }
 
+  final public static function willPreflightRequest() {
+    $checks = self::loadAllChecks();
+
+    foreach ($checks as $check) {
+      if (!$check->isPreflightCheck()) {
+        continue;
+      }
+
+      $check->runSetupChecks();
+
+      foreach ($check->getIssues() as $key => $issue) {
+        return self::newIssueResponse($issue);
+      }
+    }
+
+    return null;
+  }
+
+  private static function newIssueResponse(PhabricatorSetupIssue $issue) {
+    $view = id(new PhabricatorSetupIssueView())
+      ->setIssue($issue);
+
+    return id(new PhabricatorConfigResponse())
+      ->setView($view);
+  }
+
   final public static function willProcessRequest() {
     $issue_keys = self::getOpenSetupIssueKeys();
     if ($issue_keys === null) {
-      $issues = self::runAllChecks();
+      $issues = self::runNormalChecks();
       foreach ($issues as $issue) {
         if ($issue->getIsFatal()) {
-          $view = id(new PhabricatorSetupIssueView())
-            ->setIssue($issue);
-          return id(new PhabricatorConfigResponse())
-            ->setView($view);
+          return self::newIssueResponse($issue);
         }
       }
       $issue_keys = self::getUnignoredIssueKeys($issues);
@@ -176,8 +199,14 @@ abstract class PhabricatorSetupCheck extends Phobject {
       ->execute();
   }
 
-  final public static function runAllChecks() {
+  final public static function runNormalChecks() {
     $checks = self::loadAllChecks();
+
+    foreach ($checks as $key => $check) {
+      if ($check->isPreflightCheck()) {
+        unset($checks[$key]);
+      }
+    }
 
     $issues = array();
     foreach ($checks as $check) {

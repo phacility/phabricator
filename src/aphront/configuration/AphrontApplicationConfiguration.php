@@ -69,6 +69,15 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     // request object first.
     $write_guard = new AphrontWriteGuard('id');
 
+    PhabricatorStartup::beginStartupPhase('preflight');
+
+    $response = PhabricatorSetupCheck::willPreflightRequest();
+    if ($response) {
+      PhabricatorStartup::endOutputCapture();
+      $sink->writeResponse($response);
+      return;
+    }
+
     PhabricatorStartup::beginStartupPhase('env.init');
     PhabricatorEnv::initializeWebEnvironment();
 
