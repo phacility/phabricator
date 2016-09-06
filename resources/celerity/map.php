@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'aee99781',
+    'core.pkg.css' => 'ee3f9253',
     'core.pkg.js' => '1d376fa9',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3fb7f532',
@@ -163,7 +163,7 @@ return array(
     'rsrc/css/phui/workboards/phui-workboard.css' => 'bda3ef58',
     'rsrc/css/phui/workboards/phui-workcard.css' => '0c62d7c5',
     'rsrc/css/phui/workboards/phui-workpanel.css' => '92197373',
-    'rsrc/css/sprite-login.css' => '60e8560e',
+    'rsrc/css/sprite-login.css' => '6dbbbd97',
     'rsrc/css/sprite-tokens.css' => '9cdfd599',
     'rsrc/css/syntax/syntax-default.css' => '9923583c',
     'rsrc/externals/d3/d3.min.js' => 'a11a5ff2',
@@ -342,8 +342,8 @@ return array(
     'rsrc/image/phrequent_active.png' => 'a466a8ed',
     'rsrc/image/phrequent_inactive.png' => 'bfc15a69',
     'rsrc/image/resize.png' => 'fd476de4',
-    'rsrc/image/sprite-login-X2.png' => 'e3991e37',
-    'rsrc/image/sprite-login.png' => '03d5af29',
+    'rsrc/image/sprite-login-X2.png' => '4abee916',
+    'rsrc/image/sprite-login.png' => '2b9663fd',
     'rsrc/image/sprite-tokens-X2.png' => '804a5232',
     'rsrc/image/sprite-tokens.png' => 'b41d03da',
     'rsrc/image/texture/card-gradient.png' => '815f26e8',
@@ -890,7 +890,7 @@ return array(
     'releeph-request-differential-create-dialog' => '8d8b92cd',
     'releeph-request-typeahead-css' => '667a48ae',
     'setup-issue-css' => 'f794cfc3',
-    'sprite-login-css' => '60e8560e',
+    'sprite-login-css' => '6dbbbd97',
     'sprite-tokens-css' => '9cdfd599',
     'syntax-default-css' => '9923583c',
     'syntax-highlighting-css' => '769d3498',
