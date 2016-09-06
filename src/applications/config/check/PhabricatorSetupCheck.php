@@ -192,6 +192,21 @@ abstract class PhabricatorSetupCheck extends Phobject {
     }
   }
 
+  /**
+   * Test if we've survived through setup on at least one normal request
+   * without fataling.
+   *
+   * If we've made it through setup without hitting any fatals, we switch
+   * to render a more friendly error page when encountering issues like
+   * database connection failures. This gives users a smoother experience in
+   * the face of intermittent failures.
+   *
+   * @return bool True if we've made it through setup since the last restart.
+   */
+  final public static function isInFlight() {
+    return (self::getOpenSetupIssueKeys() !== null);
+  }
+
   final public static function loadAllChecks() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)

@@ -25,11 +25,21 @@ final class PhabricatorConfigResponse extends AphrontStandaloneHTMLResponse {
   }
 
   protected function getResponseBodyClass() {
-    return 'setup-fatal';
+    if (PhabricatorSetupCheck::isInFlight()) {
+      return 'setup-fatal in-flight';
+    } else {
+      return 'setup-fatal';
+    }
   }
 
   protected function getResponseBody() {
-    return $this->view->render();
+    $view = $this->view;
+
+    if (PhabricatorSetupCheck::isInFlight()) {
+      return $view->renderInFlight();
+    } else {
+      return $view->render();
+    }
   }
 
   protected function buildPlainTextResponseString() {
