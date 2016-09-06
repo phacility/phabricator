@@ -68,11 +68,11 @@ final class PhabricatorEnv extends Phobject {
    * @phutil-external-symbol class PhabricatorStartup
    */
   public static function initializeWebEnvironment() {
-    self::initializeCommonEnvironment();
+    self::initializeCommonEnvironment(false);
   }
 
-  public static function initializeScriptEnvironment() {
-    self::initializeCommonEnvironment();
+  public static function initializeScriptEnvironment($config_optional) {
+    self::initializeCommonEnvironment($config_optional);
 
     // NOTE: This is dangerous in general, but we know we're in a script context
     // and are not vulnerable to CSRF.
@@ -88,11 +88,11 @@ final class PhabricatorEnv extends Phobject {
   }
 
 
-  private static function initializeCommonEnvironment() {
+  private static function initializeCommonEnvironment($config_optional) {
     PhutilErrorHandler::initialize();
 
     self::resetUmask();
-    self::buildConfigurationSourceStack();
+    self::buildConfigurationSourceStack($config_optional);
 
     // Force a valid timezone. If both PHP and Phabricator configuration are
     // invalid, use UTC.
@@ -174,7 +174,7 @@ final class PhabricatorEnv extends Phobject {
     }
   }
 
-  private static function buildConfigurationSourceStack() {
+  private static function buildConfigurationSourceStack($config_optional) {
     self::dropConfigCache();
 
     $stack = new PhabricatorConfigStackSource();
@@ -235,6 +235,14 @@ final class PhabricatorEnv extends Phobject {
       // If the database is not available, just skip this configuration
       // source. This happens during `bin/storage upgrade`, `bin/conf` before
       // schema setup, etc.
+    } catch (AphrontConnectionQueryException $ex) {
+      if (!$config_optional) {
+        throw $ex;
+      }
+    } catch (AphrontInvalidCredentialsQueryException $ex) {
+      if (!$config_optional) {
+        throw $ex;
+      }
     }
   }
 
