@@ -315,6 +315,14 @@ final class PhabricatorEnv extends Phobject {
       return self::$cache[$key];
     }
 
+    if (!self::$sourceStack) {
+      throw new Exception(
+        pht(
+          'Trying to read configuration "%s" before configuration has been '.
+          'initialized.',
+          $key));
+    }
+
     $result = self::$sourceStack->getKeys(array($key));
     if (array_key_exists($key, $result)) {
       self::$cache[$key] = $result[$key];
@@ -326,7 +334,6 @@ final class PhabricatorEnv extends Phobject {
           $key));
     }
   }
-
 
   /**
    * Get the current configuration setting for a given key. If the key
