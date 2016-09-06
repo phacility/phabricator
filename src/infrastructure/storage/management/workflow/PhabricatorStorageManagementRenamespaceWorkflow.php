@@ -138,9 +138,11 @@ final class PhabricatorStorageManagementRenamespaceWorkflow
           $output_name));
     }
 
+    $name_pattern = preg_quote($from, '@');
+
     $patterns = array(
-      'use' => '@^(USE `)([^_]+)(_.*)$@',
-      'create' => '@^(CREATE DATABASE /\*.*?\*/ `)([^_]+)(_.*)$@',
+      'use' => '@^(USE `)('.$name_pattern.')(_.*)$@',
+      'create' => '@^(CREATE DATABASE /\*.*?\*/ `)('.$name_pattern.')(_.*)$@',
     );
 
     $found = array_fill_keys(array_keys($patterns), 0);
@@ -151,16 +153,6 @@ final class PhabricatorStorageManagementRenamespaceWorkflow
 
         foreach ($patterns as $key => $pattern) {
           if (preg_match($pattern, $line, $matches)) {
-            $namespace = $matches[2];
-            if ($namespace != $from) {
-              throw new Exception(
-                pht(
-                  'Expected namespace "%s", found "%s": %s.',
-                  $from,
-                  $namespace,
-                  $line));
-            }
-
             $line = $matches[1].$to.$matches[3];
             $found[$key]++;
           }
