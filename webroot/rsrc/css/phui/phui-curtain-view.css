@@ -13,7 +13,7 @@
 }
 
 .device-desktop .phui-curtain-panel {
-  border-top: 1px solid rgba({$alphablue}, .1);
+  border-top: 1px solid {$greybackground};
 }
 
 .phui-curtain-panel-header {
