@@ -70,6 +70,11 @@
   border: 1px solid {$lightgreyborder};
 }
 
+.phabricator-remarkup .kbd-join {
+  padding: 0 4px;
+  color: {$lightgreytext};
+}
+
 .phabricator-remarkup pre.remarkup-counterexample {
   background-color: {$sh-redbackground};
 }

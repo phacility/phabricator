@@ -688,6 +688,32 @@ In general:
   - The `type` option can be set to `instructions` to indicate that an element
     is asking the user to make a choice or follow specific instructions.
 
+Keystrokes
+==========
+
+You can use `{key ...}` to render a stylized keystroke. For example, this:
+
+```
+Press {key M} to view the starmap.
+```
+
+...renders this:
+
+> Press {key M} to view the starmap.
+
+You can also render sequences with modifier keys. This:
+
+```
+Use {key command option shift 3} to take a screenshot.
+Press {key down down-right right LP} to activate the hadoken technique.
+```
+
+...renders this:
+
+> Use {key command option shift 3} to take a screenshot.
+> Press {key down down-right right LP} to activate the hadoken technique.
+
+
 = Fullscreen Mode =
 
 Remarkup editors provide a fullscreen composition mode. This can make it easier
