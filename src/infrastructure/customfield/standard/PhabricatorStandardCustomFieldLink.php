@@ -47,7 +47,12 @@ final class PhabricatorStandardCustomFieldLink
     PhabricatorCursorPagedPolicyAwareQuery $query,
     $value) {
 
-    if (strlen($value)) {
+    if (is_string($value) && !strlen($value)) {
+      return;
+    }
+
+    $value = (array)$value;
+    if ($value) {
       $query->withApplicationSearchContainsConstraint(
         $this->newStringIndex(null),
         $value);
