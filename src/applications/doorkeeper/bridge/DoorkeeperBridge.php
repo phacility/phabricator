@@ -48,4 +48,32 @@ abstract class DoorkeeperBridge extends Phobject {
     return null;
   }
 
+  final protected function saveExternalObject(
+    DoorkeeperObjectRef $ref,
+    DoorkeeperExternalObject $obj) {
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      try {
+        $obj->save();
+      } catch (AphrontDuplicateKeyQueryException $ex) {
+
+        // In various cases, we may race another process importing the same
+        // data. If we do, we'll collide on the object key. Load the object
+        // the other process created and use that.
+        $obj = id(new DoorkeeperExternalObjectQuery())
+          ->setViewer($this->getViewer())
+          ->withObjectKeys(array($ref->getObjectKey()))
+          ->executeOne();
+        if (!$obj) {
+          throw new PhutilProxyException(
+            pht('Failed to load external object after collision.'),
+            $ex);
+        }
+
+        $ref->attachExternalObject($obj);
+      }
+    unset($unguarded);
+  }
+
+
 }
