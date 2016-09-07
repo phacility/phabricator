@@ -8,6 +8,8 @@ abstract class PhabricatorStorageManagementWorkflow
   private $force;
   private $patches;
 
+  private $didInitialize;
+
   final public function getAPI() {
     return $this->api;
   }
@@ -176,12 +178,16 @@ abstract class PhabricatorStorageManagementWorkflow
         "%s\n",
         pht('DRYRUN: Would apply adjustments.'));
       return 0;
+    } else if ($this->didInitialize) {
+      // If we just initialized the database, continue without prompting. This
+      // is nicer for first-time setup and there's no reasonable reason any
+      // user would ever answer "no" to the prompt against an empty schema.
     } else if (!$this->force) {
       $console->writeOut(
         "\n%s\n",
         pht(
-          "Found %s issues(s) with schemata, detailed above.\n\n".
-          "You can review issues in more detail from the web interface, ".
+          "Found %s adjustment(s) to apply, detailed above.\n\n".
+          "You can review adjustments in more detail from the web interface, ".
           "in Config > Database Status. To better understand the adjustment ".
           "workflow, see \"Managing Storage Adjustments\" in the ".
           "documentation.\n\n".
@@ -189,7 +195,7 @@ abstract class PhabricatorStorageManagementWorkflow
           "migrations may take some time.",
           phutil_count($adjustments)));
 
-      $prompt = pht('Fix these schema issues?');
+      $prompt = pht('Apply these schema adjustments?');
       if (!phutil_console_confirm($prompt, $default_no = true)) {
         return 1;
       }
@@ -197,7 +203,7 @@ abstract class PhabricatorStorageManagementWorkflow
 
     $console->writeOut(
       "%s\n",
-      pht('Fixing schema issues...'));
+      pht('Applying schema adjustments...'));
 
     $conn = $api->getConn(null);
 
@@ -368,7 +374,7 @@ abstract class PhabricatorStorageManagementWorkflow
     if (!$failed) {
       $console->writeOut(
         "%s\n",
-        pht('Completed fixing all schema issues.'));
+        pht('Completed applying all schema adjustments.'));
 
       $err = 0;
     } else {
@@ -799,6 +805,11 @@ abstract class PhabricatorStorageManagementWorkflow
             'storage before selectively applying patches.'));
         return 1;
       }
+
+      // If we're initializing storage for the first time, track it so that
+      // we can give the user a nicer experience during the subsequent
+      // adjustment phase.
+      $this->didInitialize = true;
 
       $legacy = $api->getLegacyPatches($this->patches);
       if ($legacy || $no_quickstart || $init_only) {
