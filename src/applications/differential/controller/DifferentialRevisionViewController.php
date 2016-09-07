@@ -292,9 +292,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
         '/differential/comment/inline/edit/'.$revision->getID().'/');
     }
 
+    $broken_diffs = $this->loadHistoryDiffStatus($diffs);
+
     $history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($viewer)
       ->setDiffs($diffs)
+      ->setDiffUnitStatuses($broken_diffs)
       ->setSelectedVersusDiffID($diff_vs)
       ->setSelectedDiffID($target->getID())
       ->setSelectedWhitespace($whitespace)
@@ -774,6 +777,45 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     return $actions_dict;
+  }
+
+  private function loadHistoryDiffStatus(array $diffs) {
+    assert_instances_of($diffs, 'DifferentialDiff');
+
+    $diff_phids = mpull($diffs, 'getPHID');
+    $bad_unit_status = array(
+      ArcanistUnitTestResult::RESULT_FAIL,
+      ArcanistUnitTestResult::RESULT_BROKEN,
+    );
+
+    $message = new HarbormasterBuildUnitMessage();
+    $target = new HarbormasterBuildTarget();
+    $build = new HarbormasterBuild();
+    $buildable = new HarbormasterBuildable();
+
+    $broken_diffs = queryfx_all(
+      $message->establishConnection('r'),
+      'SELECT distinct a.buildablePHID
+        FROM %T m
+          JOIN %T t ON m.buildTargetPHID = t.phid
+          JOIN %T b ON t.buildPHID = b.phid
+          JOIN %T a ON b.buildablePHID = a.phid
+        WHERE a.buildablePHID IN (%Ls)
+          AND m.result in (%Ls)',
+      $message->getTableName(),
+      $target->getTableName(),
+      $build->getTableName(),
+      $buildable->getTableName(),
+      $diff_phids,
+      $bad_unit_status);
+
+    $unit_status = array();
+    foreach ($broken_diffs as $broken) {
+      $phid = $broken['buildablePHID'];
+      $unit_status[$phid] = DifferentialUnitStatus::UNIT_FAIL;
+    }
+
+    return $unit_status;
   }
 
   private function loadChangesetsAndVsMap(

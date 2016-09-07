@@ -14,6 +14,13 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
     return 20;
   }
 
+  public function getIsModuleEnabled() {
+    if (PhabricatorEnv::getEnvConfig('cluster.instance')) {
+      return false;
+    }
+    return true;
+  }
+
   public function renderModuleStatus(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
@@ -25,13 +32,11 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
     if ($issues_resolved) {
       $icon = 'fa-check';
       $icon_bg = 'bg-green';
-      $skip = null;
       $description = pht(
         "You've resolved (or ignored) all outstanding setup issues.");
     } else {
       $icon = 'fa-warning';
       $icon_bg = 'bg-red';
-      $skip = '#';
       $description =
         pht('You have some unresolved setup issues to take care of.');
     }
@@ -41,7 +46,6 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       ->setHref($href)
       ->setIcon($icon)
       ->setIconBackground($icon_bg)
-      ->setSkipHref($skip)
       ->setDescription($description);
     $guide_items->addItem($item);
 
@@ -55,13 +59,11 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
     if ($have_auth) {
       $icon = 'fa-check';
       $icon_bg = 'bg-green';
-      $skip = null;
       $description = pht(
         "You've configured at least one authentication provider.");
     } else {
       $icon = 'fa-key';
       $icon_bg = 'bg-sky';
-      $skip = '#';
       $description = pht(
         'Authentication providers allow users to register accounts and '.
         'log in to Phabricator.');
@@ -72,7 +74,6 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       ->setHref($href)
       ->setIcon($icon)
       ->setIconBackground($icon_bg)
-      ->setSkipHref($skip)
       ->setDescription($description);
     $guide_items->addItem($item);
 
@@ -88,13 +89,11 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
     if ($have_config) {
       $icon = 'fa-check';
       $icon_bg = 'bg-green';
-      $skip = null;
       $description = pht(
         "You've configured at least one setting from the web interface.");
     } else {
       $icon = 'fa-sliders';
       $icon_bg = 'bg-sky';
-      $skip = '#';
       $description = pht(
         'Learn how to configure mail and other options in Phabricator.');
     }
@@ -104,7 +103,6 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       ->setHref($href)
       ->setIcon($icon)
       ->setIconBackground($icon_bg)
-      ->setSkipHref($skip)
       ->setDescription($description);
     $guide_items->addItem($item);
 
@@ -120,13 +118,11 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
     if ($have_settings) {
       $icon = 'fa-check';
       $icon_bg = 'bg-green';
-      $skip = null;
       $description = pht(
         "You've adjusted at least one setting on your account.");
     } else {
       $icon = 'fa-wrench';
       $icon_bg = 'bg-sky';
-      $skip = '#';
       $description = pht(
         'Configure account settings for all users, or just yourself');
     }
@@ -136,25 +132,21 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       ->setHref($href)
       ->setIcon($icon)
       ->setIconBackground($icon_bg)
-      ->setSkipHref($skip)
       ->setDescription($description);
     $guide_items->addItem($item);
 
 
     $title = pht('Notification Server');
-    $href = PhabricatorEnv::getURI('/config/notifications/');
-    // TODO: Wire up a notifications check
-    $have_notifications = false;
+    $href = PhabricatorEnv::getURI('/config/edit/notification.servers/');
+    $have_notifications = PhabricatorEnv::getEnvConfig('notification.servers');
     if ($have_notifications) {
       $icon = 'fa-check';
       $icon_bg = 'bg-green';
-      $skip = null;
       $description = pht(
         "You've set up a real-time notification server.");
     } else {
       $icon = 'fa-bell';
       $icon_bg = 'bg-sky';
-      $skip = '#';
       $description = pht(
         'Phabricator can deliver notifications in real-time with WebSockets.');
     }
@@ -164,12 +156,23 @@ final class PhabricatorGuideInstallModule extends PhabricatorGuideModule {
       ->setHref($href)
       ->setIcon($icon)
       ->setIconBackground($icon_bg)
-      ->setSkipHref($skip)
       ->setDescription($description);
 
     $guide_items->addItem($item);
 
-    return $guide_items;
+    $intro = pht(
+      'Phabricator has been successfully installed. These next guides will '.
+      'take you through configuration and new user orientation. '.
+      'These steps are optional, and you can go through them in any order. '.
+      'If you want to get back to this guide later on, you can find it in '.
+      '{icon globe} **Applications** under {icon map-o} **Guides**.');
+
+    $intro = new PHUIRemarkupView($viewer, $intro);
+
+    $intro = id(new PHUIDocumentViewPro())
+      ->appendChild($intro);
+
+    return array($intro, $guide_items);
 
   }
 

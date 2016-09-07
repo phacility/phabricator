@@ -405,6 +405,12 @@ final class PhabricatorDatabaseRef
     try {
       $connection->openConnection();
       $reachable = true;
+    } catch (AphrontSchemaQueryException $ex) {
+      // We get one of these if the database we're trying to select does not
+      // exist. In this case, just re-throw the exception. This is expected
+      // during first-time setup, when databases like "config" will not exist
+      // yet.
+      throw $ex;
     } catch (Exception $ex) {
       $reachable = false;
     }

@@ -67,7 +67,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $connection = $this->newBasicConnection($database, $mode, $namespace);
     }
 
-    // TODO: This should be testing if the mode is "r", but that would proably
+    // TODO: This should be testing if the mode is "r", but that would probably
     // break a lot of things. Perform a more narrow test for readonly mode
     // until we have greater certainty that this works correctly most of the
     // time.

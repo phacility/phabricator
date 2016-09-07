@@ -38,6 +38,9 @@ abstract class ConduitParameterType extends Phobject {
     return $this->getParameterValue($request, $key);
   }
 
+  final public function getKeys($key) {
+    return $this->getParameterKeys($key);
+  }
 
   final public function getDefaultValue() {
     return $this->getParameterDefault();
@@ -84,6 +87,10 @@ abstract class ConduitParameterType extends Phobject {
 
   protected function getParameterValue(array $request, $key) {
     return $request[$key];
+  }
+
+  protected function getParameterKeys($key) {
+    return array($key);
   }
 
   abstract protected function getParameterTypeName();

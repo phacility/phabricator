@@ -6,7 +6,7 @@ final class PhabricatorConfigIssuePanelController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $open_items = PhabricatorSetupCheck::getOpenSetupIssueKeys();
-    $issues = PhabricatorSetupCheck::runAllChecks();
+    $issues = PhabricatorSetupCheck::runNormalChecks();
     PhabricatorSetupCheck::setOpenSetupIssueKeys(
       PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
       $update_database = true);

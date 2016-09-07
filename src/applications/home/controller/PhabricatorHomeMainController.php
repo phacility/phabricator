@@ -209,7 +209,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
         $content = pht(<<<EOT
 Welcome to Phabricator, here are some links to get you started:
 - [[ /config/ | Configure Phabricator ]]
-- [[ /config/welcome/ | Quick Start Guide ]]
+- [[ /guides/ | Quick Start Guide ]]
 - [[ /diffusion/ | Create a Repository ]]
 - [[ /people/invite/send/ | Invite People ]]
 - [[ https://twitter.com/phabricator/ | Follow us on Twitter ]]
@@ -218,7 +218,7 @@ EOT
       } else {
         $content = pht(<<<EOT
 Welcome to Phabricator, here are some links to get you started:
-- [[ /config/welcome/ | Quick Start Guide ]]
+- [[ /guides/ | Quick Start Guide ]]
 - [[ /diffusion/ | Create a Repository ]]
 - [[ https://twitter.com/phabricator/ | Follow us on Twitter ]]
 EOT

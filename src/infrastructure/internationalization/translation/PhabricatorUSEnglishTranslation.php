@@ -1573,6 +1573,11 @@ final class PhabricatorUSEnglishTranslation
 
       '%s updated the invite list for %s, invited %s: %s; uninvinted %s: %s.' =>
         '%s updated the invite list for %s, invited: %4$s; uninvited: %6$s.',
+
+      'Restart %s build(s)?' => array(
+        'Restart %s build?',
+        'Restart %s builds?',
+      ),
     );
   }
 
