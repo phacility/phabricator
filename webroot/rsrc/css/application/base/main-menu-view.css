@@ -598,6 +598,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .phabricator-main-menu-dropdown.phui-list-sidenav .phui-list-item-has-icon
   .phui-list-item-href {
     padding: 4px 40px 4px 12px;
+    white-space: nowrap;
 }
 
 .phabricator-main-menu-dropdown.phui-list-sidenav .phui-list-item-type-label

@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'f03b9892',
+    'core.pkg.css' => '85a1b79a',
     'core.pkg.js' => '1d376fa9',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3fb7f532',
@@ -32,7 +32,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => 'd4f16145',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '0877ed6e',
-    'rsrc/css/application/base/main-menu-view.css' => 'e862571a',
+    'rsrc/css/application/base/main-menu-view.css' => 'f03e17be',
     'rsrc/css/application/base/notification-menu.css' => 'b3ab500d',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '95351601',
     'rsrc/css/application/base/phui-theme.css' => '027ba77e',
@@ -784,7 +784,7 @@ return array(
     'phabricator-flag-css' => '5337623f',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => '4a021c10',
-    'phabricator-main-menu-view' => 'e862571a',
+    'phabricator-main-menu-view' => 'f03e17be',
     'phabricator-nav-view-css' => 'b29426e9',
     'phabricator-notification' => 'ccf1cbf8',
     'phabricator-notification-css' => '3f6c89c9',
@@ -2094,9 +2094,6 @@ return array(
     'e6e25838' => array(
       'javelin-install',
     ),
-    'e862571a' => array(
-      'phui-theme-css',
-    ),
     'e9581f08' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -2131,6 +2128,9 @@ return array(
       'javelin-util',
       'javelin-workflow',
       'javelin-json',
+    ),
+    'f03e17be' => array(
+      'phui-theme-css',
     ),
     'f411b6ae' => array(
       'javelin-behavior',
