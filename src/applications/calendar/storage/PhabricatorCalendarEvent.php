@@ -137,7 +137,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     );
 
     // Read these fields from the parent event instead of this event. For
-    // example, we want any changes to the parent event's name to
+    // example, we want any changes to the parent event's name to apply to
+    // the child.
     if (isset($inherit[$field])) {
       if ($this->getIsStub()) {
         // TODO: This should be unconditional, but the execution order of
@@ -171,33 +172,66 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setName($parent->getName())
       ->setDescription($parent->getDescription());
 
-    $frequency = $parent->getFrequencyUnit();
-    $modify_key = '+'.$this->getSequenceIndex().' '.$frequency;
+    $sequence = $this->getSequenceIndex();
+    $duration = $this->getDuration();
+    $epochs = $parent->getSequenceIndexEpochs($actor, $sequence, $duration);
 
-    $date = $parent->getDateFrom();
-    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
+    $this
+      ->setDateFrom($epochs['dateFrom'])
+      ->setDateTo($epochs['dateTo'])
+      ->setAllDayDateFrom($epochs['allDayDateFrom'])
+      ->setAllDayDateTo($epochs['allDayDateTo']);
+
+    return $this;
+  }
+
+  public function isValidSequenceIndex(PhabricatorUser $viewer, $sequence) {
+    try {
+      $this->getSequenceIndexEpochs($viewer, $sequence, $this->getDuration());
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+  private function getSequenceIndexEpochs(
+    PhabricatorUser $viewer,
+    $sequence,
+    $duration) {
+
+    $frequency = $this->getFrequencyUnit();
+    $modify_key = '+'.$sequence.' '.$frequency;
+
+    $date = $this->getDateFrom();
+    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
     $date_time->modify($modify_key);
     $date = $date_time->format('U');
 
-    $duration = $this->getDuration();
+    $end_date = $this->getRecurrenceEndDate();
+    if ($end_date && $date > $end_date) {
+      throw new Exception(
+        pht(
+          'Sequence "%s" is invalid for this event: it would occur after '.
+          'the event stops repeating.',
+          $sequence));
+    }
 
     $utc = new DateTimeZone('UTC');
 
-    $allday_from = $parent->getAllDayDateFrom();
+    $allday_from = $this->getAllDayDateFrom();
     $allday_date = new DateTime('@'.$allday_from, $utc);
     $allday_date->setTimeZone($utc);
     $allday_date->modify($modify_key);
 
     $allday_min = $allday_date->format('U');
-    $allday_duration = ($parent->getAllDayDateTo() - $allday_from);
+    $allday_duration = ($this->getAllDayDateTo() - $allday_from);
 
-    $this
-      ->setDateFrom($date)
-      ->setDateTo($date + $duration)
-      ->setAllDayDateFrom($allday_min)
-      ->setAllDayDateTo($allday_min + $allday_duration);
-
-    return $this;
+    return array(
+      'dateFrom' => $date,
+      'dateTo' => $date + $duration,
+      'allDayDateFrom' => $allday_min,
+      'allDayDateTo' => $allday_min + $allday_duration,
+    );
   }
 
   public function newStub(PhabricatorUser $actor, $sequence) {
