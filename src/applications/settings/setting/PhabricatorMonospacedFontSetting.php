@@ -34,15 +34,15 @@ final class PhabricatorMonospacedFontSetting
       throw new Exception(
         pht(
           'Monospaced font value "%s" is unsafe. You may only enter '.
-          'letters, numbers, spaces, commas, periods, forward slashes '.
-          'and double quotes.',
+          'letters, numbers, spaces, commas, periods, hyphens, '.
+          'forward slashes, and double quotes',
           $value));
     }
   }
 
   public static function filterMonospacedCSSRule($monospaced) {
     // Prevent the user from doing dangerous things.
-    return preg_replace('([^a-z0-9 ,"./]+)i', '', $monospaced);
+    return preg_replace('([^a-z0-9 ,"./-]+)i', '', $monospaced);
   }
 
 }
