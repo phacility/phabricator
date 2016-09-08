@@ -80,13 +80,14 @@ final class PhrictionTransactionEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhrictionTransaction::TYPE_TITLE;
     $types[] = PhrictionTransaction::TYPE_CONTENT;
     $types[] = PhrictionTransaction::TYPE_DELETE;
     $types[] = PhrictionTransaction::TYPE_MOVE_TO;
     $types[] = PhrictionTransaction::TYPE_MOVE_AWAY;
 
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 

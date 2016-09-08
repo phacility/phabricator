@@ -7,8 +7,9 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorApplicationTransactionInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorProjectInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $slug;
   protected $depth;
