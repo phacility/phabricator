@@ -142,7 +142,9 @@ final class HeraldTestConsoleController extends HeraldController {
 
     if ($request->isFormPost() && $adapter_key) {
       if (isset($can_select[$adapter_key])) {
-        $adapter = $can_select[$adapter_key]->newTestAdapter($object);
+        $adapter = $can_select[$adapter_key]->newTestAdapter(
+          $viewer,
+          $object);
         $this->setTestAdapter($adapter);
         return null;
       }

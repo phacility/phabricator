@@ -8,7 +8,6 @@ final class HeraldCommitAdapter
   protected $revision;
 
   protected $commit;
-  protected $commitData;
   private $commitDiff;
 
   protected $affectedPaths;
@@ -33,6 +32,23 @@ final class HeraldCommitAdapter
   public function getAdapterTestDescription() {
     return pht(
       'Test rules which run after a commit is discovered and imported.');
+  }
+
+  public function newTestAdapter(PhabricatorUser $viewer, $object) {
+    $object = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($object->getPHID()))
+      ->needCommitData(true)
+      ->executeOne();
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'Failed to reload commit ("%s") to fetch commit data.',
+          $object->getPHID()));
+    }
+
+    return id(clone $this)
+      ->setObject($object);
   }
 
   protected function initializeNewAdapter() {
@@ -100,33 +116,6 @@ final class HeraldCommitAdapter
     return pht('This rule can trigger for **repositories** and **projects**.');
   }
 
-  public function setCommit(PhabricatorRepositoryCommit $commit) {
-    $viewer = PhabricatorUser::getOmnipotentUser();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($commit->getRepositoryID()))
-      ->executeOne();
-    if (!$repository) {
-      throw new Exception(pht('Unable to load repository!'));
-    }
-
-    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-      'commitID = %d',
-      $commit->getID());
-    if (!$data) {
-      throw new Exception(pht('Unable to load commit data!'));
-    }
-
-    $this->commit = clone $commit;
-    $this->commit->attachRepository($repository);
-    $this->commit->attachCommitData($data);
-
-    $this->commitData = $data;
-
-    return $this;
-  }
-
   public function getHeraldName() {
     return $this->commit->getMonogram();
   }
@@ -171,7 +160,10 @@ final class HeraldCommitAdapter
   public function loadDifferentialRevision() {
     if ($this->affectedRevision === null) {
       $this->affectedRevision = false;
-      $data = $this->commitData;
+
+      $commit = $this->getObject();
+      $data = $commit->getCommitData();
+
       $revision_id = $data->getCommitDetail('differential.revisionID');
       if ($revision_id) {
         // NOTE: The Herald rule owner might not actually have access to
