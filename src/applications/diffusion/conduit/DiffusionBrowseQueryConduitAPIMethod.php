@@ -105,7 +105,11 @@ final class DiffusionBrowseQueryConduitAPIMethod
 
     $count = 0;
     $results = array();
-    foreach (explode("\0", rtrim($stdout)) as $line) {
+    $lines = empty($stdout)
+           ? array()
+           : explode("\0", rtrim($stdout));
+
+    foreach ($lines as $line) {
       // NOTE: Limit to 5 components so we parse filenames with spaces in them
       // correctly.
       // NOTE: The output uses a mixture of tabs and one-or-more spaces to
