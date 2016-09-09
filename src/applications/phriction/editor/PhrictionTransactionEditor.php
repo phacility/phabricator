@@ -429,6 +429,13 @@ final class PhrictionTransactionEditor
         PhabricatorEnv::getProductionURI($this->contentDiffURI));
     }
 
+    $description = $object->getContent()->getDescription();
+    if (strlen($description)) {
+      $body->addTextSection(
+        pht('EDIT NOTES'),
+        $description);
+    }
+
     $body->addLinkSection(
       pht('DOCUMENT DETAIL'),
       PhabricatorEnv::getProductionURI(
