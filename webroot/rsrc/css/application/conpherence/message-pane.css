@@ -281,7 +281,7 @@
 }
 
 .conpherence-message-pane .conpherence-transaction-info {
-  display: none;
+  margin: 0 8px;
 }
 
 .conpherence-message-pane .conpherence-transaction-info,
