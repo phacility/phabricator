@@ -7,8 +7,8 @@
 .loading .messages-loading-icon,
 .conpherence-layout .conpherence-no-threads {
   position: fixed;
-  left: 241px;
-  right: 241px;
+  left: 240px;
+  right: 240px;
   top: 76px;
   bottom: 0px;
   min-width: 300px;
@@ -52,8 +52,8 @@
 
 .conpherence-message-pane .conpherence-messages {
   position: fixed;
-  left: 241px;
-  right: 241px;
+  left: 240px;
+  right: 240px;
   top: 78px;
   bottom: 172px;
   overflow-x: hidden;
@@ -109,7 +109,7 @@
   position: fixed;
   bottom: 0;
   border-top: 1px solid {$thinblueborder};
-  left: 241px;
+  left: 240px;
   right: 241px;
 }
 

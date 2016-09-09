@@ -148,6 +148,13 @@ final class ConpherenceLayoutView extends AphrontView {
                 javelin_tag(
                   'a',
                   array(
+                    'href' => '/conpherence/search/',
+                    'class' => 'button grey mlr',
+                  ),
+                  pht('Join a Room')),
+                javelin_tag(
+                  'a',
+                  array(
                     'href' => '/conpherence/new/',
                     'class' => 'button grey',
                     'sigil' => 'workflow',

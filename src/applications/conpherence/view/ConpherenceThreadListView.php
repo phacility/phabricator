@@ -31,6 +31,9 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $this->addRoomsToMenu($menu, $this->threads, $policy_objects);
 
+    $menu = phutil_tag_div('phabricator-side-menu', $menu);
+    $menu = phutil_tag_div('phui-basic-nav', $menu);
+
     return $menu;
   }
 
@@ -99,11 +102,6 @@ final class ConpherenceThreadListView extends AphrontView {
     $header = $this->renderMenuItemHeader(
       pht('Rooms'),
       'conpherence-room-list-header');
-    $header->appendChild(
-      id(new PHUIIconView())
-      ->setIcon('fa-search')
-      ->setHref('/conpherence/search/')
-      ->setText(pht('Search')));
     $menu->addMenuItem($header);
 
     if (empty($rooms)) {

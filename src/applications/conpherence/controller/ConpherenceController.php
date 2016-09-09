@@ -36,6 +36,13 @@ abstract class ConpherenceController extends PhabricatorController {
 
   protected function buildConpherenceApplicationCrumbs($is_rooms = false) {
     $crumbs = parent::buildApplicationCrumbs();
+    $crumbs->setBorder(true);
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+      ->setName(pht('Search'))
+      ->setHref($this->getApplicationURI('search/'))
+      ->setIcon('fa-search'));
 
     if ($is_rooms) {
       $crumbs

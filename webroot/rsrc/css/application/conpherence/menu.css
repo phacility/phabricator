@@ -15,7 +15,7 @@
   text-align: center;
   position: fixed;
   left: 240px;
-  right: 241px;
+  right: 240px;
   top: 76px;
   bottom: 0px;
   min-width: 300px;
@@ -39,9 +39,13 @@
   overflow-y: auto;
   top: 0;
   bottom: 0;
-  background: #f7f7f7;
-  border-right: 1px solid {$lightblueborder}
+  background-color: {$page.sidenav};
 }
+
+.conpherence-menu-pane .phui-basic-nav .phabricator-side-menu
+  .phui-list-item-href {
+    padding: 4px 0 4px 8px;
+  }
 
 .conpherence-menu-pane .phui-list-item-view.hidden {
   display: none;
@@ -69,7 +73,8 @@
 }
 
 .device-desktop .conpherence-layout .conpherence-menu-pane {
-  width: 240px;
+  width: 232px;
+  padding-right: 8px;
 }
 
 .device .conpherence-menu-pane {
@@ -89,7 +94,7 @@
 }
 
 .device-desktop .conpherence-content-pane {
-  margin-left: 241px;
+  margin-left: 240px;
 }
 
 .conpherence-content-pane {
