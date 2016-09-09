@@ -306,12 +306,23 @@ final class PhrictionDocumentController
           ->setWorkflow(true));
     }
 
-    return
-      $action_view->addAction(
-        id(new PhabricatorActionView())
-        ->setName(pht('View History'))
-        ->setIcon('fa-list')
-        ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+      ->setName(pht('View History'))
+      ->setIcon('fa-list')
+      ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
+
+    $print_uri = PhrictionDocument::getSlugURI($slug).'?__print__=1';
+
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+      ->setName(pht('Printable Page'))
+      ->setIcon('fa-print')
+      ->setOpenInNewWindow(true)
+      ->setHref($print_uri));
+
+    return $action_view;
+
   }
 
   private function renderDocumentChildren($slug) {
