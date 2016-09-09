@@ -6,7 +6,7 @@
 .loading .widgets-loading-mask {
   position: fixed;
   right: 0px;
-  top: 76px;
+  top: 79px;
   bottom: 0;
   width: 240px;
   border-width: 0 0 0 1px;
@@ -81,7 +81,7 @@
 }
 
 .device-desktop .conpherence-widget-pane .widgets-body {
-  top: 111px;
+  top: 115px;
   width: 240px;
 }
 
