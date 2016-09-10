@@ -74,8 +74,7 @@
   padding-top: 20px;
 }
 
-.conpherence-messages > .jx-scrollbar-content .conpherence-edited:last-child,
-.conpherence-messages > .conpherence-edited:last-child {
+.conpherence-messages .jx-scrollbar-content .conpherence-edited:last-child {
   padding-bottom: 20px;
 }
 
