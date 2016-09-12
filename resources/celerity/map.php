@@ -7,7 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'e7d1e589',
+    'conpherence.pkg.css' => 'f0fcbfd2',
+    'core.pkg.css' => '1ca373de',
     'core.pkg.js' => '1d376fa9',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3fb7f532',
@@ -2291,6 +2292,15 @@ return array(
     ),
   ),
   'packages' => array(
+    'conpherence.pkg.css' => array(
+      'conpherence-durable-column-view',
+      'conpherence-menu-css',
+      'conpherence-message-pane-css',
+      'conpherence-notification-css',
+      'conpherence-transaction-css',
+      'conpherence-update-css',
+      'conpherence-widget-pane-css',
+    ),
     'core.pkg.css' => array(
       'phabricator-core-css',
       'phabricator-zindex-css',
@@ -2350,7 +2360,6 @@ return array(
       'phabricator-feed-css',
       'phabricator-dashboard-css',
       'aphront-multi-column-view-css',
-      'conpherence-durable-column-view',
     ),
     'core.pkg.js' => array(
       'javelin-util',

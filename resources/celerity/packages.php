@@ -150,7 +150,15 @@ return array(
     'phabricator-feed-css',
     'phabricator-dashboard-css',
     'aphront-multi-column-view-css',
+  ),
+  'conpherence.pkg.css' => array(
     'conpherence-durable-column-view',
+    'conpherence-menu-css',
+    'conpherence-message-pane-css',
+    'conpherence-notification-css',
+    'conpherence-transaction-css',
+    'conpherence-update-css',
+    'conpherence-widget-pane-css',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
