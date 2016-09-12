@@ -80,6 +80,27 @@ abstract class ConpherenceController extends PhabricatorController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 
+    $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
+    $widget_view = (bool)$viewer->getUserSetting($widget_key, false);
+
+    $divider = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_DIVIDER)
+      ->addClass('conpherence-header-desktop-item');
+    $crumbs->addAction($divider);
+
+    Javelin::initBehavior(
+      'toggle-widget',
+      array(
+        'show' => (int)$widget_view,
+        'settingsURI' => '/settings/adjust/?key='.$widget_key,
+      ));
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+      ->addSigil('conpherence-widget-toggle')
+      ->setIcon('fa-columns')
+      ->addClass('conpherence-header-desktop-item'));
+
     return hsprintf(
       '%s',
       array(

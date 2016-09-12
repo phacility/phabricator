@@ -315,7 +315,8 @@
 }
 
 .conpherence-message-pane .remarkup-assist-textarea:focus {
-  border-color: {$lightblueborder};
+  border: 2px solid {$lightgreyborder};
+  border-top: 1px solid {$thinblueborder};
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
@@ -348,4 +349,12 @@
 
 .conpherence-message .phabricator-remarkup .remarkup-code-block pre {
   max-height: 200px;
+}
+
+.device .conpherence-header-desktop-item {
+  display: none;
+}
+
+.device .conpherence-header-pane .phui-crumb-action-divider {
+  display: none;
 }

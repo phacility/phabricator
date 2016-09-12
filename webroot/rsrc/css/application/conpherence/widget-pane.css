@@ -190,3 +190,18 @@
   width: 60px;
   margin: 0 auto 0 auto;
 }
+
+/****** Hide Widgets **********************************************************/
+
+.device-desktop .hide-widgets .conpherence-widget-pane {
+  display: none;
+}
+
+.device-desktop .hide-widgets .conpherence-message-pane,
+.device-desktop .hide-widgets .loading .messages-loading-mask,
+.device-desktop .hide-widgets .loading .messages-loading-icon,
+.device-desktop .hide-widgets .conpherence-no-threads,
+.device-desktop .hide-widgets .conpherence-message-pane .conpherence-messages,
+.device-desktop .hide-widgets .conpherence-message-pane .phui-form-view {
+  right: 0;
+}
