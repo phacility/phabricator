@@ -36,12 +36,6 @@ final class ConpherenceWidgetConfigConstants extends ConpherenceConstants {
         'deviceOnly' => false,
         'hasCreate' => false,
       ),
-      'widgets-edit' => array(
-        'name' => pht('Edit Room'),
-        'icon' => 'fa-pencil',
-        'deviceOnly' => false,
-        'hasCreate' => false,
-      ),
     );
   }
 

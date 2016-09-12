@@ -51,8 +51,24 @@
   display: none;
 }
 
-.conpherence-menu-pane.phabricator-side-menu .phui-list-item-type-label {
+.conpherence-menu-pane.phabricator-side-menu .room-list-href {
   padding: 10px 0 9px 8px;
+  display: inline-block;
+  text-transform: uppercase;
+  color: {$darkgreytext};
+  font-weight: bold;
+  font-size: {$smallerfontsize};
+}
+
+.conpherence-menu-pane.phabricator-side-menu .room-list-icons {
+  display: inline-block;
+  float: right;
+  padding: 8px 0 5px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header {
+  clear: both;
+  overflow: hidden;
 }
 
 .conpherence-menu-pane .conpherence-room-list-header
@@ -60,7 +76,7 @@
   font-weight: bold;
   float: right;
   text-transform: none;
-  margin: 0px 8px 0px 0px;
+  padding: 4px;
 }
 
 .conpherence-menu-pane .conpherence-room-list-header

@@ -82,13 +82,6 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'style' => 'display: none',
       ),
       $this->renderSettingsWidgetPaneContent());
-    $widgets[] = phutil_tag(
-      'div',
-      array(
-        'class' => 'widgets-body',
-        'id' => 'widgets-edit',
-        'style' => 'display: none',
-      ));
 
     // without this implosion we get "," between each element in our widgets
     // array
