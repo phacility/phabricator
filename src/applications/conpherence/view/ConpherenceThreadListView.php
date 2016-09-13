@@ -228,7 +228,7 @@ final class ConpherenceThreadListView extends AphrontView {
       ->setHref('/conpherence/new/')
       ->setWorkflow(true);
 
-    $custom = array($rooms, $icons);
+    $custom = phutil_tag_div('grouped', array($rooms, $icons));
 
     $item = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_CUSTOM)

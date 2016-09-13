@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'conpherence.pkg.css' => 'afbb036b',
+    'conpherence.pkg.css' => 'fdc05791',
     'core.pkg.css' => '1ca373de',
     'core.pkg.js' => '1d376fa9',
     'darkconsole.pkg.js' => 'e7393ebb',
@@ -46,7 +46,7 @@ return array(
     'rsrc/css/application/config/setup-issue.css' => 'f794cfc3',
     'rsrc/css/application/config/unhandled-exception.css' => '4c96257a',
     'rsrc/css/application/conpherence/durable-column.css' => '194ac487',
-    'rsrc/css/application/conpherence/menu.css' => '67235d90',
+    'rsrc/css/application/conpherence/menu.css' => '8344d122',
     'rsrc/css/application/conpherence/message-pane.css' => 'ee0e27be',
     'rsrc/css/application/conpherence/notification.css' => '6cdcc253',
     'rsrc/css/application/conpherence/transaction.css' => '2c71247c',
@@ -617,7 +617,7 @@ return array(
     'config-options-css' => '0ede4c9b',
     'config-page-css' => '8798e14f',
     'conpherence-durable-column-view' => '194ac487',
-    'conpherence-menu-css' => '67235d90',
+    'conpherence-menu-css' => '8344d122',
     'conpherence-message-pane-css' => 'ee0e27be',
     'conpherence-notification-css' => '6cdcc253',
     'conpherence-thread-manager' => '01774ab2',

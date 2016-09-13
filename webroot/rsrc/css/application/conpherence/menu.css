@@ -58,6 +58,7 @@
   color: {$darkgreytext};
   font-weight: bold;
   font-size: {$smallerfontsize};
+  float: left;
 }
 
 .conpherence-menu-pane.phabricator-side-menu .room-list-icons {
