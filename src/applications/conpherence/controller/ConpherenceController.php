@@ -59,47 +59,49 @@ abstract class ConpherenceController extends PhabricatorController {
     $viewer = $this->getViewer();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $data = $conpherence->getDisplayData($this->getViewer());
-    $crumbs->addCrumb(
-      id(new PHUICrumbView())
-      ->setName($data['title'])
-      ->setHref('/'.$conpherence->getMonogram()));
 
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $conpherence,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    if ($conpherence->getID()) {
+      $data = $conpherence->getDisplayData($this->getViewer());
+      $crumbs->addCrumb(
+        id(new PHUICrumbView())
+        ->setName($data['title'])
+        ->setHref('/'.$conpherence->getMonogram()));
+        $can_edit = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          $conpherence,
+          PhabricatorPolicyCapability::CAN_EDIT);
 
-    $crumbs
-      ->addAction(
+      $crumbs
+        ->addAction(
+          id(new PHUIListItemView())
+          ->setName(pht('Edit Room'))
+          ->setHref(
+            $this->getApplicationURI('update/'.$conpherence->getID()).'/')
+          ->setIcon('fa-pencil')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+
+      $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
+      $widget_view = (bool)$viewer->getUserSetting($widget_key, false);
+
+      $divider = id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_DIVIDER)
+        ->addClass('conpherence-header-desktop-item');
+      $crumbs->addAction($divider);
+
+      Javelin::initBehavior(
+        'toggle-widget',
+        array(
+          'show' => (int)$widget_view,
+          'settingsURI' => '/settings/adjust/?key='.$widget_key,
+        ));
+
+      $crumbs->addAction(
         id(new PHUIListItemView())
-        ->setName(pht('Edit Room'))
-        ->setHref(
-          $this->getApplicationURI('update/'.$conpherence->getID()).'/')
-        ->setIcon('fa-pencil')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
-    $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
-    $widget_view = (bool)$viewer->getUserSetting($widget_key, false);
-
-    $divider = id(new PHUIListItemView())
-      ->setType(PHUIListItemView::TYPE_DIVIDER)
-      ->addClass('conpherence-header-desktop-item');
-    $crumbs->addAction($divider);
-
-    Javelin::initBehavior(
-      'toggle-widget',
-      array(
-        'show' => (int)$widget_view,
-        'settingsURI' => '/settings/adjust/?key='.$widget_key,
-      ));
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-      ->addSigil('conpherence-widget-toggle')
-      ->setIcon('fa-columns')
-      ->addClass('conpherence-header-desktop-item'));
+        ->addSigil('conpherence-widget-toggle')
+        ->setIcon('fa-columns')
+        ->addClass('conpherence-header-desktop-item'));
+    }
 
     return hsprintf(
       '%s',
