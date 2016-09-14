@@ -14,6 +14,7 @@ final class PhabricatorConfigDatabaseIssueController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Database Issues'));
+    $crumbs->setBorder(true);
 
     // Collect all open issues.
     $issues = array();
@@ -111,6 +112,8 @@ final class PhabricatorConfigDatabaseIssueController
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setNoDataString(
+        pht('No databases have any issues.'))
       ->setHeaders(
         array(
           null,
@@ -146,24 +149,23 @@ final class PhabricatorConfigDatabaseIssueController
 
     $title = pht('Database Issues');
 
-    $table_box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->setFormErrors($errors)
-      ->setTable($table);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('dbissue/');
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn(array(
-        $table_box,
-    ));
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($table);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
 }

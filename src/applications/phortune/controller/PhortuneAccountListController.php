@@ -39,7 +39,7 @@ final class PhortuneAccountListController extends PhortuneController {
         ->setHeader($account->getName())
         ->setHref($this->getApplicationURI($account->getID().'/'))
         ->setObject($account)
-        ->setIcon('fa-credit-card');
+        ->setImageIcon('fa-credit-card');
 
       $payment_list->addItem($item);
     }
@@ -71,7 +71,7 @@ final class PhortuneAccountListController extends PhortuneController {
         ->setHeader($merchant->getName())
         ->setHref($this->getApplicationURI('/merchant/'.$merchant->getID().'/'))
         ->setObject($merchant)
-        ->setIcon('fa-bank');
+        ->setImageIcon('fa-bank');
 
       $merchant_list->addItem($item);
     }

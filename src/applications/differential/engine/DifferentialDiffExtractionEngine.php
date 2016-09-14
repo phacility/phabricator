@@ -36,13 +36,28 @@ final class DifferentialDiffExtractionEngine extends Phobject {
         'repository' => $repository,
       ));
 
-    $raw_diff = DiffusionQuery::callConduitWithDiffusionRequest(
+    $diff_info = DiffusionQuery::callConduitWithDiffusionRequest(
       $viewer,
       $drequest,
       'diffusion.rawdiffquery',
       array(
         'commit' => $identifier,
       ));
+
+    $file_phid = $diff_info['filePHID'];
+    $diff_file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$diff_file) {
+      throw new Exception(
+        pht(
+          'Failed to load file ("%s") returned by "%s".',
+          $file_phid,
+          'diffusion.rawdiffquery'));
+    }
+
+    $raw_diff = $diff_file->loadFileData();
 
     // TODO: Support adds, deletes and moves under SVN.
     if (strlen($raw_diff)) {

@@ -5,11 +5,16 @@
 .phui-crumbs-view {
   overflow: hidden;
   vertical-align: top;
-  padding: 0 20px 0 28px;
+  padding: 0 12px 0 20px;
   /* TODO: Position this over the slider for Differential's file tree view.
      Remove this once that gets sorted out. */
   position: relative;
   -webkit-font-smoothing: antialiased;
+  background-color: {$page.background};
+}
+
+.printable .phui-crumbs-view {
+  display: none;
 }
 
 .phui-crumbs-view,
@@ -24,7 +29,7 @@
 .device-phone .phui-crumbs-view,
 .project-board-nav .phui-crumbs-view {
   padding-left: 8px;
-  padding-right: 0;
+  padding-right: 8px;
 }
 
 .phui-crumbs-view a.phui-crumbs-action-disabled,

@@ -40,4 +40,15 @@ final class PhabricatorRepositoryStatusMessage
     return idx($this->parameters, $key, $default);
   }
 
+  public function getStatusTypeName() {
+    $names = array(
+      self::TYPE_INIT => pht('Error While Initializing Repository'),
+      self::TYPE_FETCH => pht('Error While Fetching Changes'),
+      self::TYPE_NEEDS_UPDATE => pht('Repository Needs Update'),
+    );
+
+    $type = $this->getStatusType();
+    return idx($names, $type, $type);
+  }
+
 }

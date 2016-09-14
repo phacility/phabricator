@@ -132,9 +132,9 @@ final class HarbormasterUIEventListener
       }
 
       $status = $build->getBuildStatus();
-      $status_name = HarbormasterBuild::getBuildStatusName($status);
-      $icon = HarbormasterBuild::getBuildStatusIcon($status);
-      $color = HarbormasterBuild::getBuildStatusColor($status);
+      $status_name = HarbormasterBuildStatus::getBuildStatusName($status);
+      $icon = HarbormasterBuildStatus::getBuildStatusIcon($status);
+      $color = HarbormasterBuildStatus::getBuildStatusColor($status);
 
       $item->setIcon($icon, $color, $status_name);
 

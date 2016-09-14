@@ -7,22 +7,36 @@ final class PhabricatorConfigClusterDatabasesController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('cluster/databases/');
 
-    $title = pht('Database Servers');
+    $title = pht('Cluster Database Status');
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Databases');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true)
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setIcon('fa-book')
+          ->setHref($doc_href)
+          ->setTag('a')
+          ->setText(pht('Documentation')));
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
-      ->addTextCrumb(pht('Database Servers'));
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
     $database_status = $this->buildClusterDatabaseStatus();
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn($database_status);
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($database_status);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildClusterDatabaseStatus() {
@@ -194,20 +208,7 @@ final class PhabricatorConfigClusterDatabasesController
           'wide',
         ));
 
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Databases');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Cluster Database Status'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setTable($table);
+    return $table;
   }
 
 }

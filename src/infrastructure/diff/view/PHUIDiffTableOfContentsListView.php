@@ -7,6 +7,7 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
   private $header;
   private $infoView;
   private $background;
+  private $bare;
 
   public function addItem(PHUIDiffTableOfContentsItemView $item) {
     $this->items[] = $item;
@@ -36,6 +37,15 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
   public function setInfoView(PHUIInfoView $infoview) {
     $this->infoView = $infoview;
     return $this;
+  }
+
+  public function setBare($bare) {
+    $this->bare = $bare;
+    return $this;
+  }
+
+  public function getBare() {
+    return $this->bare;
   }
 
   public function render() {
@@ -159,6 +169,10 @@ final class PHUIDiffTableOfContentsListView extends AphrontView {
     $anchor = id(new PhabricatorAnchorView())
       ->setAnchorName('toc')
       ->setNavigationMarker(true);
+
+    if ($this->bare) {
+      return $table;
+    }
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Table of Contents'));

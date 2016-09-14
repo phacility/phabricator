@@ -447,16 +447,16 @@ ul.phui-object-item-icons {
 */
 
 
-.phui-object-item-disabled .phui-object-item-link,
-.phui-object-item-disabled .phui-object-item-link a {
+.phui-object-item.phui-object-item-disabled .phui-object-item-link,
+.phui-object-item.phui-object-item-disabled .phui-object-item-link a {
   color: {$lightgreytext};
 }
 
-.phui-object-item-disabled .phui-object-item-frame {
+.phui-object-item.phui-object-item-disabled .phui-object-item-frame {
   border-color: #d7d7d7;
 }
 
-.phui-object-item-disabled .phui-object-item-objname {
+.phui-object-item.phui-object-item-disabled .phui-object-item-objname {
   color: {$greytext};
   text-decoration: line-through;
 }
@@ -484,46 +484,6 @@ ul.phui-object-item-list-view .phui-object-item-highlighted
 ul.phui-object-item-list-view .phui-object-item-selected
   .phui-object-item-frame {
   border-color: {$sh-blueborder};
-}
-
-
-/* - Foot Icons ----------------------------------------------------------------
-
-  Object counts shown in the footer.
-
-*/
-
-.phui-object-item-foot-icons {
-  margin-left: 10px;
-  bottom: 0;
-  position: absolute;
-}
-
-.phui-object-item-with-foot-icons .phui-object-item-content,
-.device-phone .phui-object-item-with-foot-icons .phui-object-item-col2  {
-  padding-bottom: 24px;
-}
-
-.device-phone .phui-object-item-with-foot-icons .phui-object-item-content {
-  padding-bottom: 0;
-}
-
-.phui-object-item-foot-icon {
-  display: inline-block;
-  background: {$lightgreyborder};
-  color: #ffffff;
-  font-weight: bold;
-  margin-right: 3px;
-  padding: 3px 6px 0;
-  height: 17px;
-  vertical-align: middle;
-  position: relative;
-  font-size: 12px;
-  -webkit-font-smoothing: antialiased;
-}
-
-.phui-object-item-foot-icon .phui-icon-view {
-  margin-right: 4px;
 }
 
 
@@ -621,35 +581,6 @@ ul.phui-object-item-list-view .phui-object-item-selected
   list-style: none;
 }
 
-
-/* - State ---------------------------------------------------------------------
-
-  Provides a list of object status or states, success or fail, etc
-
-*/
-
-.phui-object-item-ficon {
-  width: 48px;
-  height: 26px;
-  margin-top: 12px;
-  position: absolute;
-  text-align: center;
-  font-size: 24px;
-}
-
-.phui-object-item-with-ficon .phui-object-item-content-box {
-  margin-left: 38px;
-}
-
-.phui-object-box .phui-object-list-states {
-  padding: 0;
-}
-
-.phui-object-list-states .phui-info-view {
-  margin: 0;
-  border: none;
-}
-
 /* - Badges ---------------------------------------------------------------- */
 
 .phui-object-item-col0.phui-object-item-badge {
@@ -720,37 +651,19 @@ ul.phui-object-item-list-view .phui-object-item-selected
 
 .phui-object-item-image-icon {
   background: none;
-  width: 30px;
-  height: 30px;
-  margin: 4px 0;
+  width: 40px;
+  height: 40px;
+  margin: 8px 6px;
   position: absolute;
 }
 
 .phui-object-item-image-icon .phui-icon-view {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  left: 6px;
-  top: 10px;
-  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  font-size: 26px;
   text-align: center;
-  vertical-align: bottom;
-}
-
-.phui-object-item-with-image-icon .phui-object-item-frame {
-  min-height: 48px;
-}
-
-.phui-object-item-with-image-icon .phui-object-item-content-box {
-  margin-left: 36px;
-}
-
-.device-desktop .phui-object-item-launcher-list .phui-object-item-content {
-  margin-right: 0;
-}
-
-.device-desktop .phui-object-item-launcher-list .phui-object-icon-pane {
-  width: auto;
+  line-height: 36px;
 }
 
 .phui-object-item-image {
@@ -762,10 +675,12 @@ ul.phui-object-item-list-view .phui-object-item-selected
   position: absolute;
 }
 
+.phui-object-item-with-image-icon .phui-object-item-frame,
 .phui-object-item-with-image .phui-object-item-frame {
   min-height: 52px;
 }
 
+.phui-object-item-with-image-icon .phui-object-item-content-box,
 .phui-object-item-with-image .phui-object-item-content-box {
   margin-left: 46px;
 }
@@ -822,4 +737,54 @@ ul.phui-object-item-list-view .phui-object-item-selected
   top: 2px;
   bottom: 2px;
   right: 2px;
+}
+
+/* - Big List---------------------------------------------------------------- */
+
+.phui-object-list-big ul.phui-object-item-list-view  {
+  margin: 0;
+  padding: 20px;
+}
+
+.phui-object-list-big .phui-object-item-no-bar .phui-object-item-frame {
+  border: 0;
+}
+
+.phui-object-list-big .phui-object-item-image-icon {
+  margin: 8px 2px 12px;
+}
+
+.phui-object-list-big a.phui-object-item-link {
+  color: #000;
+  font-size: {$biggestfontsize};
+}
+
+.phui-object-list-big .phui-object-item-name {
+  padding-top: 6px;
+}
+
+.phui-object-list-big .phui-object-item-launch-button a.button {
+  font-size: {$normalfontsize};
+  padding: 3px 12px 4px;
+}
+
+.device-desktop .phui-object-list-big .phui-object-item {
+  margin-bottom: 8px;
+}
+
+.phui-object-list-big .phui-object-item-col0 {
+  vertical-align: top;
+  padding: 0;
+}
+
+.phui-object-list-big .phui-object-item-status-icon {
+  padding: 5px;
+}
+
+.phui-object-list-big .phui-object-item-visited a.phui-object-item-link {
+  color: {$violet};
+}
+
+.device-desktop .phui-object-list-big .phui-object-item-frame:hover {
+
 }

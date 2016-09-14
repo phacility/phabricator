@@ -95,6 +95,9 @@ final class HarbormasterBuildViewController
         ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
         ->setHeader($header);
 
+      $tab_group = new PHUITabGroupView();
+      $target_box->addTabGroup($tab_group);
+
       $property_list = new PHUIPropertyListView();
 
       $target_artifacts = idx($artifacts, $build_target->getPHID(), array());
@@ -178,7 +181,11 @@ final class HarbormasterBuildViewController
 
       $property_list->addProperty(pht('Status'), $status_view);
 
-      $target_box->addPropertyList($property_list, pht('Overview'));
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Overview'))
+          ->setKey('overview')
+          ->appendChild($property_list));
 
       $step = $build_target->getBuildStep();
 
@@ -204,22 +211,34 @@ final class HarbormasterBuildViewController
       foreach ($details as $key => $value) {
         $property_list->addProperty($key, $value);
       }
-      $target_box->addPropertyList($property_list, pht('Configuration'));
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Configuration'))
+          ->setKey('configuration')
+          ->appendChild($property_list));
 
       $variables = $build_target->getVariables();
-      $property_list = new PHUIPropertyListView();
-      $property_list->addRawContent($this->buildProperties($variables));
-      $target_box->addPropertyList($property_list, pht('Variables'));
+      $variables_tab = $this->buildProperties($variables);
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Variables'))
+          ->setKey('variables')
+          ->appendChild($variables_tab));
 
       $artifacts_tab = $this->buildArtifacts($build_target, $target_artifacts);
-      $property_list = new PHUIPropertyListView();
-      $property_list->addRawContent($artifacts_tab);
-      $target_box->addPropertyList($property_list, pht('Artifacts'));
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Artifacts'))
+          ->setKey('artifacts')
+          ->appendChild($artifacts_tab));
 
       $build_messages = idx($messages, $build_target->getPHID(), array());
-      $property_list = new PHUIPropertyListView();
-      $property_list->addRawContent($this->buildMessages($build_messages));
-      $target_box->addPropertyList($property_list, pht('Messages'));
+      $messages_tab = $this->buildMessages($build_messages);
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Messages'))
+          ->setKey('messages')
+          ->appendChild($messages_tab));
 
       $property_list = new PHUIPropertyListView();
       $property_list->addProperty(
@@ -228,7 +247,12 @@ final class HarbormasterBuildViewController
       $property_list->addProperty(
         pht('Build Target PHID'),
         $build_target->getPHID());
-      $target_box->addPropertyList($property_list, pht('Metadata'));
+
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Metadata'))
+          ->setKey('metadata')
+          ->appendChild($property_list));
 
       $targets[] = $target_box;
 
@@ -557,9 +581,9 @@ final class HarbormasterBuildViewController
     } else {
       $status = $build->getBuildStatus();
       $status_name =
-        HarbormasterBuild::getBuildStatusName($status);
-      $icon = HarbormasterBuild::getBuildStatusIcon($status);
-      $color = HarbormasterBuild::getBuildStatusColor($status);
+        HarbormasterBuildStatus::getBuildStatusName($status);
+      $icon = HarbormasterBuildStatus::getBuildStatusIcon($status);
+      $color = HarbormasterBuildStatus::getBuildStatusColor($status);
     }
 
     $item->setTarget($status_name);

@@ -60,13 +60,28 @@ abstract class PhabricatorConduitController extends PhabricatorController {
       ->setErrors($messages)
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
 
+    $tab_group = id(new PHUITabGroupView())
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('arc call-conduit'))
+          ->setKey('arc')
+          ->appendChild($arc_example))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('cURL'))
+          ->setKey('curl')
+          ->appendChild($curl_example))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('PHP'))
+          ->setKey('php')
+          ->appendChild($php_example));
+
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Examples'))
       ->setInfoView($info_view)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($arc_example, pht('arc call-conduit'))
-      ->addPropertyList($curl_example, pht('cURL'))
-      ->addPropertyList($php_example, pht('PHP'));
+      ->addTabGroup($tab_group);
   }
 
   private function renderExample(

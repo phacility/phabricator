@@ -15,19 +15,19 @@ final class PhabricatorPasteTitleTransaction
 
   public function getTitle() {
     return pht(
-      '%s updated the paste\'s title from "%s" to "%s".',
+      '%s changed the title of this paste from %s to %s.',
       $this->renderAuthor(),
-      $this->getOldValue(),
-      $this->getNewValue());
+      $this->renderOldValue(),
+      $this->renderNewValue());
   }
 
   public function getTitleForFeed() {
     return pht(
-      '%s updated the title for %s from "%s" to "%s".',
+      '%s updated the title for %s from %s to %s.',
       $this->renderAuthor(),
       $this->renderObject(),
-      $this->getOldValue(),
-      $this->getNewValue());
+      $this->renderOldValue(),
+      $this->renderNewValue());
   }
 
 }

@@ -17,13 +17,6 @@ final class ManiphestTaskHasCommitRelationship
     return 'fa-code';
   }
 
-  public function shouldAppearInActionMenu() {
-    // TODO: For now, the default search for commits is not very good, so
-    // it is hard to find objects to link to. Until that works better, just
-    // hide this item.
-    return false;
-  }
-
   public function canRelateObjects($src, $dst) {
     return ($dst instanceof PhabricatorRepositoryCommit);
   }
@@ -38,6 +31,10 @@ final class ManiphestTaskHasCommitRelationship
 
   public function getDialogButtonText() {
     return pht('Save Related Commits');
+  }
+
+  protected function newRelationshipSource() {
+    return new DiffusionCommitRelationshipSource();
   }
 
 }

@@ -7,7 +7,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions;
   private $handles;
-  private $highlightAge;
   private $header;
   private $noDataString;
   private $noBox;
@@ -36,11 +35,6 @@ final class DifferentialRevisionListView extends AphrontView {
   public function setRevisions(array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
     $this->revisions = $revisions;
-    return $this;
-  }
-
-  public function setHighlightAge($bool) {
-    $this->highlightAge = $bool;
     return $this;
   }
 
@@ -104,10 +98,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
       $modified = $revision->getDateModified();
 
-      $status = $revision->getStatus();
-      $status_name =
-        ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
-
       if (isset($icons['flag'])) {
         $item->addHeadIcon($icons['flag']);
       }
@@ -155,28 +145,13 @@ final class DifferentialRevisionListView extends AphrontView {
       $item->addAttribute(pht('Reviewers: %s', $reviewers));
       $item->setEpoch($revision->getDateModified());
 
-      switch ($status) {
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-          $item->setStatusIcon('fa-code grey', pht('Needs Review'));
-          break;
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-          $item->setStatusIcon('fa-refresh red', pht('Needs Revision'));
-          break;
-        case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
-          $item->setStatusIcon('fa-headphones red', pht('Changes Planned'));
-          break;
-        case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          $item->setStatusIcon('fa-check green', pht('Accepted'));
-          break;
-        case ArcanistDifferentialRevisionStatus::CLOSED:
-          $item->setDisabled(true);
-          $item->setStatusIcon('fa-check-square-o black', pht('Closed'));
-          break;
-        case ArcanistDifferentialRevisionStatus::ABANDONED:
-          $item->setDisabled(true);
-          $item->setStatusIcon('fa-plane black', pht('Abandoned'));
-          break;
+      if ($revision->isClosed()) {
+        $item->setDisabled(true);
       }
+
+      $item->setStatusIcon(
+        $revision->getStatusIcon(),
+        $revision->getStatusDisplayName());
 
       $list->addItem($item);
     }

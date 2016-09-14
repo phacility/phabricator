@@ -179,6 +179,10 @@ final class ManiphestTask extends ManiphestDAO
     return 'T'.$this->getID();
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function attachGroupByProjectPHID($phid) {
     $this->groupByProjectPHID = $phid;
     return $this;

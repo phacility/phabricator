@@ -63,9 +63,11 @@ final class ConpherenceMenuItemView extends AphrontTagView {
   }
 
   protected function getTagAttributes() {
-    $classes = array('conpherence-menu-item-view');
+    $classes = array();
+    $classes[] = 'conpherence-menu-item-view';
+    $classes[] = 'phui-list-item-href';
     return array(
-      'class' => $classes,
+      'class' => implode(' ', $classes),
       'href' => $this->href,
     );
   }

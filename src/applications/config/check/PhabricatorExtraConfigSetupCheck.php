@@ -143,6 +143,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'phabricator.auth-permanent',
       'phabricator.application-id',
       'phabricator.application-secret',
+      'maniphest.priorities.unbreak-now',
+      'maniphest.priorities.needs-triage',
+      'welcome.html',
     );
 
     $ancient_config = array_fill_keys($auth_config, $reason_auth);
@@ -328,6 +331,23 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'metamta.re-prefix' => $global_settings_reason,
       'metamta.vary-subjects' => $global_settings_reason,
+
+      'ui.custom-header' => pht(
+        'This option has been replaced with `ui.logo`, which provides more '.
+        'flexible configuration options.'),
+
+      'welcome.html' => pht(
+        'This option has been removed, you can use Dashboards to provide '.
+        'homepage customization. See T11533 for more details.'),
+
+      'maniphest.priorities.unbreak-now' => pht(
+        'This option has been removed, you can use Dashboards to provide '.
+        'homepage customization. See T11533 for more details.'),
+
+      'maniphest.priorities.needs-triage' => pht(
+        'This option has been removed, you can use Dashboards to provide '.
+        'homepage customization. See T11533 for more details.'),
+
     );
 
     return $ancient_config;

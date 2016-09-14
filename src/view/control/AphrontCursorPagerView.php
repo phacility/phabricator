@@ -148,7 +148,7 @@ final class AphrontCursorPagerView extends AphrontView {
         ->setHref($first_uri)
         ->setIcon($icon)
         ->addClass('mml')
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setColor(PHUIButtonView::GREY)
         ->setText(pht('First'));
     }
 
@@ -161,7 +161,7 @@ final class AphrontCursorPagerView extends AphrontView {
         ->setHref($prev_uri)
         ->setIcon($icon)
         ->addClass('mml')
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setColor(PHUIButtonView::GREY)
         ->setText(pht('Prev'));
     }
 
@@ -174,7 +174,7 @@ final class AphrontCursorPagerView extends AphrontView {
         ->setHref($next_uri)
         ->setIcon($icon, false)
         ->addClass('mml')
-        ->setColor(PHUIButtonView::SIMPLE)
+        ->setColor(PHUIButtonView::GREY)
         ->setText(pht('Next'));
     }
 

@@ -8,6 +8,7 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $ruleTypes;
   private $contentTypes;
   private $disabled;
+  private $datasourceQuery;
   private $triggerObjectPHIDs;
 
   private $needConditionsAndActions;
@@ -46,6 +47,11 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withDisabled($disabled) {
     $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -217,6 +223,13 @@ final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn_r,
         'rule.isDisabled = %d',
         (int)$this->disabled);
+    }
+
+    if ($this->datasourceQuery) {
+      $where[] = qsprintf(
+        $conn_r,
+        'rule.name LIKE %>',
+        $this->datasourceQuery);
     }
 
     if ($this->triggerObjectPHIDs) {

@@ -125,10 +125,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
     $headers[] = pht('Date');
     $table->setHeaders($headers);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Local Commits'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+    return $table;
   }
 
   private static function formatCommit($commit) {

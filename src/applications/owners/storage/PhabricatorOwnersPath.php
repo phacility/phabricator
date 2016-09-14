@@ -88,7 +88,7 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
     $self_count = count($self_fragments);
     $path_count = count($path_fragments);
     if ($self_count > $path_count) {
-      // If this path is longer (and therefor more specific) than the target
+      // If this path is longer (and therefore more specific) than the target
       // path, we don't match it at all.
       return 0;
     }

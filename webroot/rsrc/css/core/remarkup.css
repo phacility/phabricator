@@ -51,6 +51,28 @@
   overflow: auto;
   padding: 12px;
   border-radius: 3px;
+  white-space: pre-wrap;
+}
+
+.phabricator-remarkup kbd {
+  display: inline-block;
+  min-width: 1em;
+  padding: 4px 5px 5px;
+  font-weight: normal;
+  font-size: 0.8rem;
+  text-align: center;
+  text-decoration: none;
+  line-height: 0.6rem;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 rgba({$alphablue},0.08);
+  user-select: none;
+  background: #f7f7f7;
+  border: 1px solid {$lightgreyborder};
+}
+
+.phabricator-remarkup .kbd-join {
+  padding: 0 4px;
+  color: {$lightgreytext};
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {

@@ -51,6 +51,10 @@ final class PhamePost extends PhameDAO
     return $this->assertAttached($this->blog);
   }
 
+  public function getMonogram() {
+    return 'J'.$this->getID();
+  }
+
   public function getLiveURI() {
     $blog = $this->getBlog();
     $is_draft = $this->isDraft();
@@ -84,6 +88,18 @@ final class PhamePost extends PhameDAO
     $id = $this->getID();
     $slug = $this->getSlug();
     return "/phame/post/view/{$id}/{$slug}/";
+  }
+
+  public function getBestURI($is_live, $is_external) {
+    if ($is_live) {
+      if ($is_external) {
+        return $this->getExternalLiveURI();
+      } else {
+        return $this->getInternalLiveURI();
+      }
+    } else {
+      return $this->getViewURI();
+    }
   }
 
   public function getEditURI() {

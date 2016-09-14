@@ -29,6 +29,19 @@ final class PhabricatorCustomFieldList extends Phobject {
     return $this;
   }
 
+  public function readFieldsFromObject(
+    PhabricatorCustomFieldInterface $object) {
+
+    $fields = $this->getFields();
+
+    foreach ($fields as $field) {
+      $field
+        ->setObject($object)
+        ->readValueFromObject($object);
+    }
+
+    return $this;
+  }
 
   /**
    * Read stored values for all fields which support storage.
@@ -39,48 +52,12 @@ final class PhabricatorCustomFieldList extends Phobject {
   public function readFieldsFromStorage(
     PhabricatorCustomFieldInterface $object) {
 
-    foreach ($this->fields as $field) {
-      $field->setObject($object);
-      $field->readValueFromObject($object);
-    }
+    $this->readFieldsFromObject($object);
 
-    $keys = array();
-    foreach ($this->fields as $field) {
-      if ($field->shouldEnableForRole(PhabricatorCustomField::ROLE_STORAGE)) {
-        $keys[$field->getFieldIndex()] = $field;
-      }
-    }
-
-    if (!$keys) {
-      return $this;
-    }
-
-    // NOTE: We assume all fields share the same storage. This isn't guaranteed
-    // to be true, but always is for now.
-
-    $table = head($keys)->newStorageObject();
-
-    $objects = array();
-    if ($object->getPHID()) {
-      $objects = $table->loadAllWhere(
-        'objectPHID = %s AND fieldIndex IN (%Ls)',
-        $object->getPHID(),
-        array_keys($keys));
-      $objects = mpull($objects, null, 'getFieldIndex');
-    }
-
-    foreach ($keys as $key => $field) {
-      $storage = idx($objects, $key);
-      if ($storage) {
-        $field->setValueFromStorage($storage->getFieldValue());
-        $field->didSetValueFromStorage();
-      } else if ($object->getPHID()) {
-        // NOTE: We set this only if the object exists. Otherwise, we allow the
-        // field to retain any default value it may have.
-        $field->setValueFromStorage(null);
-        $field->didSetValueFromStorage();
-      }
-    }
+    $fields = $this->getFields();
+    id(new PhabricatorCustomFieldStorageQuery())
+      ->addFields($fields)
+      ->execute();
 
     return $this;
   }

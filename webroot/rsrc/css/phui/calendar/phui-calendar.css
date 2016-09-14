@@ -2,9 +2,26 @@
  * @provides phui-calendar-css
  */
 
- .phui-calendar-list a {
-  color: {$lightgreytext};
- }
+.phui-calendar-list {
+  /* When hovering over a day, this allows the hover color to peek through
+     the event name, but for event names to mostly remain readable. */
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.application-search-view div.phui-calendar-box {
+  border-left: 1px solid {$thinblueborder};
+  border-right: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$lightblueborder};
+  border-radius: 0;
+}
+
+.phui-calendar-list a {
+  color: {$greytext};
+}
+
+.phui-calendar-list .event-cancelled .phui-calendar-list-title {
+  text-decoration: line-through;
+}
 
 .phui-calendar-viewer-invited a {
   color: {$green};

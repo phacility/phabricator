@@ -459,24 +459,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
           'or the error log.'));
     }
 
-    // Render the "you have unresolved setup issues..." warning.
-    $setup_warning = null;
-    if ($user && $user->getIsAdmin()) {
-      $open = PhabricatorSetupCheck::getOpenSetupIssueKeys();
-      if ($open) {
-        $classes[] = 'page-has-warning';
-        $setup_warning = phutil_tag_div(
-          'setup-warning-callout',
-          phutil_tag(
-            'a',
-            array(
-              'href' => '/config/issue/',
-              'title' => implode(', ', $open),
-            ),
-            pht('You have %d unresolved setup issue(s)...', count($open))));
-      }
-    }
-
     $main_page = phutil_tag(
       'div',
       array(
@@ -486,7 +468,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       array(
         $developer_warning,
         $header_chrome,
-        $setup_warning,
         phutil_tag(
           'div',
           array(
@@ -890,7 +871,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     } else {
       $content = $this->render();
       $response = id(new AphrontWebpageResponse())
-        ->setContent($content);
+        ->setContent($content)
+        ->setFrameable($this->getFrameable());
     }
 
     return $response;

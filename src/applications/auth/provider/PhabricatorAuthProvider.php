@@ -464,12 +464,14 @@ abstract class PhabricatorAuthProvider extends Phobject {
   public function getAuthCSRFCode(AphrontRequest $request) {
     $phcid = $request->getCookie(PhabricatorCookies::COOKIE_CLIENTID);
     if (!strlen($phcid)) {
-      throw new Exception(
+      throw new AphrontMalformedRequestException(
+        pht('Missing Client ID Cookie'),
         pht(
           'Your browser did not submit a "%s" cookie with client state '.
           'information in the request. Check that cookies are enabled. '.
           'If this problem persists, you may need to clear your cookies.',
-          PhabricatorCookies::COOKIE_CLIENTID));
+          PhabricatorCookies::COOKIE_CLIENTID),
+        true);
     }
 
     return PhabricatorHash::digest($phcid);

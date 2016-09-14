@@ -35,7 +35,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_PATHCHANGE = 'repository_pathchange';
   const TABLE_FILESYSTEM = 'repository_filesystem';
   const TABLE_SUMMARY = 'repository_summary';
-  const TABLE_BADCOMMIT = 'repository_badcommit';
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
   const TABLE_PARENTS = 'repository_parents';
   const TABLE_COVERAGE = 'repository_coverage';
@@ -2400,6 +2399,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         ->setKey('status')
         ->setType('string')
         ->setDescription(pht('Active or inactive status.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isImporting')
+        ->setType('bool')
+        ->setDescription(
+          pht(
+            'True if the repository is importing initial commits.')),
     );
   }
 
@@ -2410,6 +2415,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'callsign' => $this->getCallsign(),
       'shortName' => $this->getRepositorySlug(),
       'status' => $this->getStatus(),
+      'isImporting' => (bool)$this->isImporting(),
     );
   }
 

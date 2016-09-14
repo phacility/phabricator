@@ -21,6 +21,17 @@ final class PhabricatorMailOutboundMailHeraldAdapter
     return new PhabricatorMetaMTAMail();
   }
 
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof PhabricatorMetaMTAMail);
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Test rules which run when outbound mail is being prepared for '.
+      'delivery.');
+  }
+
+
   public function getObject() {
     return $this->mail;
   }

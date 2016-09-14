@@ -41,7 +41,8 @@ final class ManiphestTaskResultListView extends ManiphestView {
     // If we didn't match anything, just pick up the default empty state.
     if (!$tasks) {
       return id(new PHUIObjectItemListView())
-        ->setUser($viewer);
+        ->setUser($viewer)
+        ->setNoDataString(pht('No tasks found.'));
     }
 
     $group_parameter = nonempty($query->getParameter('group'), 'priority');

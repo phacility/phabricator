@@ -151,6 +151,48 @@
   color: rgba({$alphagrey},0.3);
 }
 
+/* Backgrounds */
+
+.phui-icon-view.bg-dark {
+  background-color: {$darkgreytext};
+}
+.phui-icon-view.bg-bluegrey {
+  background-color: {$bluetext};
+}
+.phui-icon-view.bg-grey {
+  background-color: {$lightgreytext};
+}
+.phui-icon-view.bg-red  {
+  background-color: {$red};
+}
+.phui-icon-view.bg-orange {
+  background-color: {$orange};
+}
+.phui-icon-view.bg-yellow {
+  background-color: {$yellow};
+}
+.phui-icon-view.bg-green {
+  background-color: {$green}
+}
+.phui-icon-view.bg-blue {
+  background-color: {$blue};
+}
+.phui-icon-view.bg-sky {
+  background-color: {$sky};
+}
+.phui-icon-view.bg-indigo {
+  background-color: {$indigo};
+}
+.phui-icon-view.bg-pink {
+  background-color: {$pink};
+}
+.phui-icon-view.bg-fire {
+  background-color: {$fire};
+}
+.phui-icon-view.bg-violet {
+  background-color: {$violet};
+}
+
 /* Hovers */
 
 .device-desktop a.phui-icon-view.lightgreytext:hover,

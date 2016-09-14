@@ -173,7 +173,7 @@ final class DiffusionHistoryQueryConduitAPIMethod
     }
 
     $hash_list = array_reverse($hash_list);
-    $this->parents = $parent_map;
+    $this->parents = array_reverse($parent_map, true);
 
     return DiffusionQuery::loadHistoryForCommitIdentifiers(
       $hash_list,

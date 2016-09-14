@@ -14,6 +14,7 @@ final class PHUIHandleView
   private $handleList;
   private $handlePHID;
   private $asTag;
+  private $asText;
   private $useShortName;
   private $showHovercard;
 
@@ -29,6 +30,11 @@ final class PHUIHandleView
 
   public function setAsTag($tag) {
     $this->asTag = $tag;
+    return $this;
+  }
+
+  public function setAsText($as_text) {
+    $this->asText = $as_text;
     return $this;
   }
 
@@ -53,6 +59,10 @@ final class PHUIHandleView
       }
 
       return $tag;
+    }
+
+    if ($this->asText) {
+      return $handle->getLinkName();
     }
 
     if ($this->useShortName) {

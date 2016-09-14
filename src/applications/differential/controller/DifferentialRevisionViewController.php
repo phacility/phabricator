@@ -292,15 +292,18 @@ final class DifferentialRevisionViewController extends DifferentialController {
         '/differential/comment/inline/edit/'.$revision->getID().'/');
     }
 
-    $diff_history = id(new DifferentialRevisionUpdateHistoryView())
+    $broken_diffs = $this->loadHistoryDiffStatus($diffs);
+
+    $history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($viewer)
       ->setDiffs($diffs)
+      ->setDiffUnitStatuses($broken_diffs)
       ->setSelectedVersusDiffID($diff_vs)
       ->setSelectedDiffID($target->getID())
       ->setSelectedWhitespace($whitespace)
       ->setCommitsForLinks($commits_for_links);
 
-    $local_view = id(new DifferentialLocalCommitsView())
+    $local_table = id(new DifferentialLocalCommitsView())
       ->setUser($viewer)
       ->setLocalCommits(idx($props, 'local:commits'))
       ->setCommitsForLinks($commits_for_links);
@@ -323,6 +326,69 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $changesets,
       $visible_changesets,
       $target->loadCoverageMap($viewer));
+
+    $tab_group = id(new PHUITabGroupView())
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Files'))
+          ->setKey('files')
+          ->appendChild($toc_view))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('History'))
+          ->setKey('history')
+          ->appendChild($history))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Commits'))
+          ->setKey('commits')
+          ->appendChild($local_table));
+
+    $stack_graph = id(new DifferentialRevisionGraph())
+      ->setViewer($viewer)
+      ->setSeedPHID($revision->getPHID())
+      ->setLoadEntireGraph(true)
+      ->loadGraph();
+    if (!$stack_graph->isEmpty()) {
+      $stack_table = $stack_graph->newGraphTable();
+
+      $parent_type = DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST;
+      $reachable = $stack_graph->getReachableObjects($parent_type);
+
+      foreach ($reachable as $key => $reachable_revision) {
+        if ($reachable_revision->isClosed()) {
+          unset($reachable[$key]);
+        }
+      }
+
+      if ($reachable) {
+        $stack_name = pht('Stack (%s Open)', phutil_count($reachable));
+        $stack_color = PHUIListItemView::STATUS_FAIL;
+      } else {
+        $stack_name = pht('Stack');
+        $stack_color = null;
+      }
+
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName($stack_name)
+          ->setKey('stack')
+          ->setColor($stack_color)
+          ->appendChild($stack_table));
+    }
+
+    if ($other_view) {
+      $tab_group->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Similar'))
+          ->setKey('similar')
+          ->appendChild($other_view));
+    }
+
+    $tab_view = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Revision Contents'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->addTabGroup($tab_group);
 
     $comment_form = null;
     if (!$viewer_is_anonymous) {
@@ -348,15 +414,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
             'The content of this revision is hidden until the author has '.
             'signed all of the required legal agreements.'));
     } else {
-      $footer[] =
-        array(
-          $diff_history,
-          $warning,
-          $local_view,
-          $toc_view,
-          $other_view,
-          $changeset_view,
-        );
+      $anchor = id(new PhabricatorAnchorView())
+        ->setAnchorName('toc')
+        ->setNavigationMarker(true);
+
+      $footer[] = array(
+        $anchor,
+        $warning,
+        $tab_view,
+        $changeset_view,
+      );
     }
 
     if ($comment_form) {
@@ -516,34 +583,32 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $this->requireResource('phabricator-object-selector-css');
-    $this->requireResource('javelin-behavior-phabricator-object-selector');
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('fa-link')
-        ->setName(pht('Edit Dependencies'))
-        ->setHref("/search/attach/{$revision_phid}/DREV/dependencies/")
-        ->setWorkflow(true)
-        ->setDisabled(!$can_edit));
-
-    $maniphest = 'PhabricatorManiphestApplication';
-    if (PhabricatorApplication::isClassInstalled($maniphest)) {
-      $curtain->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-anchor')
-          ->setName(pht('Edit Maniphest Tasks'))
-          ->setHref("/search/attach/{$revision_phid}/TASK/")
-          ->setWorkflow(true)
-          ->setDisabled(!$can_edit));
-    }
-
     $request_uri = $this->getRequest()->getRequestURI();
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-download')
         ->setName(pht('Download Raw Diff'))
         ->setHref($request_uri->alter('download', 'true')));
+
+    $relationship_list = PhabricatorObjectRelationshipList::newForObject(
+      $viewer,
+      $revision);
+
+    $revision_actions = array(
+      DifferentialRevisionHasParentRelationship::RELATIONSHIPKEY,
+      DifferentialRevisionHasChildRelationship::RELATIONSHIPKEY,
+    );
+
+    $revision_submenu = $relationship_list->newActionSubmenu($revision_actions)
+      ->setName(pht('Edit Related Revisions...'))
+      ->setIcon('fa-cog');
+
+    $curtain->addAction($revision_submenu);
+
+    $relationship_submenu = $relationship_list->newActionMenu();
+    if ($relationship_submenu) {
+      $curtain->addAction($relationship_submenu);
+    }
 
     return $curtain;
   }
@@ -714,6 +779,45 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return $actions_dict;
   }
 
+  private function loadHistoryDiffStatus(array $diffs) {
+    assert_instances_of($diffs, 'DifferentialDiff');
+
+    $diff_phids = mpull($diffs, 'getPHID');
+    $bad_unit_status = array(
+      ArcanistUnitTestResult::RESULT_FAIL,
+      ArcanistUnitTestResult::RESULT_BROKEN,
+    );
+
+    $message = new HarbormasterBuildUnitMessage();
+    $target = new HarbormasterBuildTarget();
+    $build = new HarbormasterBuild();
+    $buildable = new HarbormasterBuildable();
+
+    $broken_diffs = queryfx_all(
+      $message->establishConnection('r'),
+      'SELECT distinct a.buildablePHID
+        FROM %T m
+          JOIN %T t ON m.buildTargetPHID = t.phid
+          JOIN %T b ON t.buildPHID = b.phid
+          JOIN %T a ON b.buildablePHID = a.phid
+        WHERE a.buildablePHID IN (%Ls)
+          AND m.result in (%Ls)',
+      $message->getTableName(),
+      $target->getTableName(),
+      $build->getTableName(),
+      $buildable->getTableName(),
+      $diff_phids,
+      $bad_unit_status);
+
+    $unit_status = array();
+    foreach ($broken_diffs as $broken) {
+      $phid = $broken['buildablePHID'];
+      $unit_status[$phid] = DifferentialUnitStatus::UNIT_FAIL;
+    }
+
+    return $unit_status;
+  }
+
   private function loadChangesetsAndVsMap(
     DifferentialDiff $target,
     DifferentialDiff $diff_vs = null,
@@ -872,9 +976,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setHeader(pht('Recent Similar Revisions'));
 
     $view = id(new DifferentialRevisionListView())
-      ->setHeader($header)
       ->setRevisions($revisions)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setNoBox(true)
       ->setUser($viewer);
 
     $phids = $view->getRequiredHandlePHIDs();
@@ -1033,28 +1137,26 @@ final class DifferentialRevisionViewController extends DifferentialController {
       );
     }
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Diff Detail'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setUser($viewer);
+    $tab_group = id(new PHUITabGroupView())
+      ->setHideSingleTab(true);
 
-    $last_tab = null;
     foreach ($property_lists as $key => $property_list) {
       list($tab_name, $list_view) = $property_list;
 
-      $tab = id(new PHUIListItemView())
+      $tab = id(new PHUITabView())
         ->setKey($key)
-        ->setName($tab_name);
+        ->setName($tab_name)
+        ->appendChild($list_view);
 
-      $box->addPropertyList($list_view, $tab);
-      $last_tab = $tab;
+      $tab_group->addTab($tab);
+      $tab_group->selectTab($key);
     }
 
-    if ($last_tab) {
-      $last_tab->setSelected(true);
-    }
-
-    return $box;
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Diff Detail'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setUser($viewer)
+      ->addTabGroup($tab_group);
   }
 
   private function buildDiffPropertyList(
@@ -1169,6 +1271,5 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setLimit(5)
       ->setShowViewAll(true);
   }
-
 
 }

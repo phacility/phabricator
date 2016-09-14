@@ -29,8 +29,11 @@ abstract class PhabricatorRepositoryCommitParserWorker
     if ($commit->isUnreachable()) {
       throw new PhabricatorWorkerPermanentFailureException(
         pht(
-          'Commit "%s" has been deleted: it is no longer reachable from '.
-          'any ref.',
+          'Commit "%s" (with internal ID "%s") is no longer reachable from '.
+          'any branch, tag, or ref in this repository, so it will not be '.
+          'imported. This usually means that the branch the commit was on '.
+          'was deleted or overwritten.',
+          $commit->getMonogram(),
           $commit_id));
     }
 
@@ -92,16 +95,16 @@ abstract class PhabricatorRepositoryCommitParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit);
 
-  protected function isBadCommit(PhabricatorRepositoryCommit $commit) {
-    $repository = new PhabricatorRepository();
+  protected function loadCommitHint(PhabricatorRepositoryCommit $commit) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
-    $bad_commit = queryfx_one(
-      $repository->establishConnection('w'),
-      'SELECT * FROM %T WHERE fullCommitName = %s',
-      PhabricatorRepository::TABLE_BADCOMMIT,
-      $commit->getMonogram());
+    $repository = $commit->getRepository();
 
-    return (bool)$bad_commit;
+    return id(new DiffusionCommitHintQuery())
+      ->setViewer($viewer)
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->withOldCommitIdentifiers(array($commit->getCommitIdentifier()))
+      ->executeOne();
   }
 
   public function renderForDisplay(PhabricatorUser $viewer) {

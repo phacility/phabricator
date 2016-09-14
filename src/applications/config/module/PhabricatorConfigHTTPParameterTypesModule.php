@@ -16,12 +16,8 @@ final class PhabricatorConfigHTTPParameterTypesModule
 
     $types = AphrontHTTPParameterType::getAllTypes();
 
-    $table = id(new PhabricatorHTTPParameterTypeTableView())
+    return id(new PhabricatorHTTPParameterTypeTableView())
       ->setHTTPParameterTypes($types);
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('HTTP Parameter Types'))
-      ->setTable($table);
   }
 
 }

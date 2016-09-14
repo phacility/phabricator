@@ -45,12 +45,27 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $locks = $this->buildLocksTab($lease->getPHID());
     $commands = $this->buildCommandsTab($lease->getPHID());
 
+    $tab_group = id(new PHUITabGroupView())
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Properties'))
+          ->setKey('properties')
+          ->appendChild($properties))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Slot Locks'))
+          ->setKey('locks')
+          ->appendChild($locks))
+      ->addTab(
+        id(new PHUITabView())
+          ->setName(pht('Commands'))
+          ->setKey('commands')
+          ->appendChild($commands));
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Properties'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->addPropertyList($properties, pht('Properties'))
-      ->addPropertyList($locks, pht('Slot Locks'))
-      ->addPropertyList($commands, pht('Commands'));
+      ->addTabGroup($tab_group);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

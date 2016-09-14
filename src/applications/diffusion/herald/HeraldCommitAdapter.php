@@ -7,9 +7,7 @@ final class HeraldCommitAdapter
   protected $diff;
   protected $revision;
 
-  protected $repository;
   protected $commit;
-  protected $commitData;
   private $commitDiff;
 
   protected $affectedPaths;
@@ -27,8 +25,40 @@ final class HeraldCommitAdapter
     return new PhabricatorRepositoryCommit();
   }
 
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof PhabricatorRepositoryCommit);
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Test rules which run after a commit is discovered and imported.');
+  }
+
+  public function newTestAdapter(PhabricatorUser $viewer, $object) {
+    $object = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($object->getPHID()))
+      ->needCommitData(true)
+      ->executeOne();
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'Failed to reload commit ("%s") to fetch commit data.',
+          $object->getPHID()));
+    }
+
+    return id(clone $this)
+      ->setObject($object);
+  }
+
   protected function initializeNewAdapter() {
     $this->commit = $this->newObject();
+  }
+
+  public function setObject($object) {
+    $this->commit = $object;
+
+    return $this;
   }
 
   public function getObject() {
@@ -72,61 +102,18 @@ final class HeraldCommitAdapter
   }
 
   public function getTriggerObjectPHIDs() {
+    $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+
     return array_merge(
       array(
-        $this->repository->getPHID(),
+        $this->getRepository()->getPHID(),
         $this->getPHID(),
       ),
-      $this->repository->getProjectPHIDs());
+      $this->loadEdgePHIDs($project_type));
   }
 
   public function explainValidTriggerObjects() {
     return pht('This rule can trigger for **repositories** and **projects**.');
-  }
-
-  public static function newLegacyAdapter(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $commit_data) {
-
-    $object = new HeraldCommitAdapter();
-
-    $commit->attachRepository($repository);
-
-    $object->repository = $repository;
-    $object->commit = $commit;
-    $object->commitData = $commit_data;
-
-    return $object;
-  }
-
-  public function setCommit(PhabricatorRepositoryCommit $commit) {
-    $viewer = PhabricatorUser::getOmnipotentUser();
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($commit->getRepositoryID()))
-      ->needProjectPHIDs(true)
-      ->executeOne();
-    if (!$repository) {
-      throw new Exception(pht('Unable to load repository!'));
-    }
-
-    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-      'commitID = %d',
-      $commit->getID());
-    if (!$data) {
-      throw new Exception(pht('Unable to load commit data!'));
-    }
-
-    $this->commit = clone $commit;
-    $this->commit->attachRepository($repository);
-    $this->commit->attachCommitData($data);
-
-    $this->repository = $repository;
-    $this->commitData = $data;
-
-    return $this;
   }
 
   public function getHeraldName() {
@@ -136,7 +123,7 @@ final class HeraldCommitAdapter
   public function loadAffectedPaths() {
     if ($this->affectedPaths === null) {
       $result = PhabricatorOwnerPathQuery::loadAffectedPaths(
-        $this->repository,
+        $this->getRepository(),
         $this->commit,
         PhabricatorUser::getOmnipotentUser());
       $this->affectedPaths = $result;
@@ -147,7 +134,7 @@ final class HeraldCommitAdapter
   public function loadAffectedPackages() {
     if ($this->affectedPackages === null) {
       $packages = PhabricatorOwnersPackage::loadAffectedPackages(
-        $this->repository,
+        $this->getRepository(),
         $this->loadAffectedPaths());
       $this->affectedPackages = $packages;
     }
@@ -173,7 +160,10 @@ final class HeraldCommitAdapter
   public function loadDifferentialRevision() {
     if ($this->affectedRevision === null) {
       $this->affectedRevision = false;
-      $data = $this->commitData;
+
+      $commit = $this->getObject();
+      $data = $commit->getCommitData();
+
       $revision_id = $data->getCommitDetail('differential.revisionID');
       if ($revision_id) {
         // NOTE: The Herald rule owner might not actually have access to
@@ -206,24 +196,49 @@ final class HeraldCommitAdapter
   }
 
   private function loadCommitDiff() {
-    $byte_limit = self::getEnormousByteLimit();
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
-    $raw = $this->callConduit(
+    $byte_limit = self::getEnormousByteLimit();
+    $time_limit = self::getEnormousTimeLimit();
+
+    $diff_info = $this->callConduit(
       'diffusion.rawdiffquery',
       array(
         'commit' => $this->commit->getCommitIdentifier(),
-        'timeout' => self::getEnormousTimeLimit(),
+        'timeout' => $time_limit,
         'byteLimit' => $byte_limit,
         'linesOfContext' => 0,
       ));
 
-    if (strlen($raw) >= $byte_limit) {
+    if ($diff_info['tooHuge']) {
       throw new Exception(
         pht(
-          'The raw text of this change is enormous (larger than %d bytes). '.
+          'The raw text of this change is enormous (larger than %s byte(s)). '.
           'Herald can not process it.',
-          $byte_limit));
+          new PhutilNumber($byte_limit)));
     }
+
+    if ($diff_info['tooSlow']) {
+      throw new Exception(
+        pht(
+          'The raw text of this change took too long to process (longer '.
+          'than %s second(s)). Herald can not process it.',
+          new PhutilNumber($time_limit)));
+    }
+
+    $file_phid = $diff_info['filePHID'];
+    $diff_file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($file_phid))
+      ->executeOne();
+    if (!$diff_file) {
+      throw new Exception(
+        pht(
+          'Failed to load diff ("%s") for this change.',
+          $file_phid));
+    }
+
+    $raw = $diff_file->loadFileData();
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw);
@@ -300,7 +315,7 @@ final class HeraldCommitAdapter
     $drequest = DiffusionRequest::newFromDictionary(
       array(
         'user' => $viewer,
-        'repository' => $this->repository,
+        'repository' => $this->getRepository(),
         'commit' => $this->commit->getCommitIdentifier(),
       ));
 
@@ -309,6 +324,10 @@ final class HeraldCommitAdapter
       $drequest,
       $method,
       $params);
+  }
+
+  private function getRepository() {
+    return $this->getObject()->getRepository();
   }
 
 /* -(  HarbormasterBuildableAdapterInterface  )------------------------------ */

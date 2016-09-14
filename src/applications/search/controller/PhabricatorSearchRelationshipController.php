@@ -6,26 +6,12 @@ final class PhabricatorSearchRelationshipController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $phid = $request->getURIData('sourcePHID');
-    $object = id(new PhabricatorObjectQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($phid))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
+    $object = $this->loadRelationshipObject();
     if (!$object) {
       return new Aphront404Response();
     }
 
-    $list = PhabricatorObjectRelationshipList::newForObject(
-      $viewer,
-      $object);
-
-    $relationship_key = $request->getURIData('relationshipKey');
-    $relationship = $list->getRelationship($relationship_key);
+    $relationship = $this->loadRelationship($object);
     if (!$relationship) {
       return new Aphront404Response();
     }
@@ -33,9 +19,16 @@ final class PhabricatorSearchRelationshipController
     $src_phid = $object->getPHID();
     $edge_type = $relationship->getEdgeConstant();
 
-    $dst_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $src_phid,
-      $edge_type);
+    // If this is a normal relationship, users can remove related objects. If
+    // it's a special relationship like a merge, we can't undo it, so we won't
+    // prefill the current related objects.
+    if ($relationship->canUndoRelationship()) {
+      $dst_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $src_phid,
+        $edge_type);
+    } else {
+      $dst_phids = array();
+    }
 
     $all_phids = $dst_phids;
     $all_phids[] = $src_phid;
@@ -46,10 +39,22 @@ final class PhabricatorSearchRelationshipController
     $done_uri = $src_handle->getURI();
     $initial_phids = $dst_phids;
 
+    $maximum = $relationship->getMaximumSelectionSize();
+
     if ($request->isFormPost()) {
       $phids = explode(';', $request->getStr('phids'));
       $phids = array_filter($phids);
       $phids = array_values($phids);
+
+      // The UI normally enforces this with Javascript, so this is just a
+      // sanity check and does not need to be particularly user-friendly.
+      if ($maximum && (count($phids) > $maximum)) {
+        throw new Exception(
+          pht(
+            'Too many relationships (%s, of type "%s").',
+            phutil_count($phids),
+            $relationship->getRelationshipConstant()));
+      }
 
       $initial_phids = $request->getStrList('initialPHIDs');
 
@@ -58,12 +63,16 @@ final class PhabricatorSearchRelationshipController
       // relationships at the same time don't race and overwrite one another.
       $add_phids = array_diff($phids, $initial_phids);
       $rem_phids = array_diff($initial_phids, $phids);
+      $all_phids = array_merge($add_phids, $rem_phids);
 
-      if ($add_phids) {
+      $capabilities = $relationship->getRequiredRelationshipCapabilities();
+
+      if ($all_phids) {
         $dst_objects = id(new PhabricatorObjectQuery())
           ->setViewer($viewer)
-          ->withPHIDs($phids)
+          ->withPHIDs($all_phids)
           ->setRaisePolicyExceptions(true)
+          ->requireCapabilities($capabilities)
           ->execute();
         $dst_objects = mpull($dst_objects, null, 'getPHID');
       } else {
@@ -81,6 +90,14 @@ final class PhabricatorSearchRelationshipController
                 $add_phid));
           }
 
+          if ($add_phid == $src_phid) {
+            throw new Exception(
+              pht(
+                'You can not create a relationship to object "%s" because '.
+                'objects can not be related to themselves.',
+                $add_phid));
+          }
+
           if (!$relationship->canRelateObjects($object, $dst_object)) {
             throw new Exception(
               pht(
@@ -95,9 +112,12 @@ final class PhabricatorSearchRelationshipController
         return $this->newUnrelatableObjectResponse($ex, $done_uri);
       }
 
+      $content_source = PhabricatorContentSource::newFromRequest($request);
+      $relationship->setContentSource($content_source);
+
       $editor = $object->getApplicationTransactionEditor()
         ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
+        ->setContentSource($content_source)
         ->setContinueOnMissingFields(true)
         ->setContinueOnNoEffect(true);
 
@@ -110,8 +130,28 @@ final class PhabricatorSearchRelationshipController
           '-' => array_fuse($rem_phids),
         ));
 
+      $add_objects = array_select_keys($dst_objects, $add_phids);
+      $rem_objects = array_select_keys($dst_objects, $rem_phids);
+
+      if ($add_objects || $rem_objects) {
+        $more_xactions = $relationship->willUpdateRelationships(
+          $object,
+          $add_objects,
+          $rem_objects);
+        foreach ($more_xactions as $xaction) {
+          $xactions[] = $xaction;
+        }
+      }
+
       try {
         $editor->applyTransactions($object, $xactions);
+
+        if ($add_objects || $rem_objects) {
+          $relationship->didUpdateRelationships(
+            $object,
+            $add_objects,
+            $rem_objects);
+        }
 
         return id(new AphrontRedirectResponse())->setURI($done_uri);
       } catch (PhabricatorEdgeCycleException $ex) {
@@ -122,48 +162,32 @@ final class PhabricatorSearchRelationshipController
     $handles = iterator_to_array($handles);
     $handles = array_select_keys($handles, $dst_phids);
 
-    // TODO: These are hard-coded for now.
-    $filters = array(
-      'assigned' => pht('Assigned to Me'),
-      'created' => pht('Created By Me'),
-      'open' => pht('All Open Objects'),
-      'all' => pht('All Objects'),
-    );
-
     $dialog_title = $relationship->getDialogTitleText();
     $dialog_header = $relationship->getDialogHeaderText();
     $dialog_button = $relationship->getDialogButtonText();
     $dialog_instructions = $relationship->getDialogInstructionsText();
 
-    // TODO: Remove this, this is just legacy support.
-    $legacy_kinds = array(
-      ManiphestTaskHasCommitEdgeType::EDGECONST => 'CMIT',
-      ManiphestTaskHasMockEdgeType::EDGECONST => 'MOCK',
-      ManiphestTaskHasRevisionEdgeType::EDGECONST => 'DREV',
-      ManiphestTaskDependsOnTaskEdgeType::EDGECONST => 'TASK',
-      ManiphestTaskDependedOnByTaskEdgeType::EDGECONST => 'TASK',
-    );
+    $source_uri = $relationship->getSourceURI($object);
 
-    $edge_type = $relationship->getEdgeConstant();
-    $legacy_kind = idx($legacy_kinds, $edge_type);
-    if (!$legacy_kind) {
-      throw new Exception(
-        pht('Only specific legacy relationships are supported!'));
-    }
+    $source = $relationship->newSource();
+
+    $filters = $source->getFilters();
+    $selected_filter = $source->getSelectedFilter();
 
     return id(new PhabricatorObjectSelectorDialog())
       ->setUser($viewer)
       ->setInitialPHIDs($initial_phids)
       ->setHandles($handles)
       ->setFilters($filters)
-      ->setSelectedFilter('created')
-      ->setExcluded($phid)
+      ->setSelectedFilter($selected_filter)
+      ->setExcluded($src_phid)
       ->setCancelURI($done_uri)
-      ->setSearchURI("/search/select/{$legacy_kind}/edge/")
+      ->setSearchURI($source_uri)
       ->setTitle($dialog_title)
       ->setHeader($dialog_header)
       ->setButtonText($dialog_button)
       ->setInstructions($dialog_instructions)
+      ->setMaximumSelectionSize($maximum)
       ->buildDialog();
   }
 

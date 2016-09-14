@@ -11,7 +11,6 @@ abstract class AphrontFormControl extends AphrontView {
   private $id;
   private $controlID;
   private $controlStyle;
-  private $formPage;
   private $required;
   private $hidden;
   private $classes;
@@ -130,21 +129,6 @@ abstract class AphrontFormControl extends AphrontView {
   public function readValueFromDictionary(array $dictionary) {
     $this->setValue(idx($dictionary, $this->getName()));
     return $this;
-  }
-
-  public function setFormPage(PHUIFormPageView $page) {
-    if ($this->formPage) {
-      throw new Exception(pht('This control is already a member of a page!'));
-    }
-    $this->formPage = $page;
-    return $this;
-  }
-
-  public function getFormPage() {
-    if ($this->formPage === null) {
-      throw new Exception(pht('This control does not have a page!'));
-    }
-    return $this->formPage;
   }
 
   public function setDisabled($disabled) {

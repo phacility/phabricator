@@ -111,6 +111,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.spaces' => array(),
       'db.phurl' => array(),
       'db.badges' => array(),
+      'db.packages' => array(),
       '0000.legacy.sql' => array(
         'legacy' => 0,
       ),

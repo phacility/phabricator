@@ -36,7 +36,8 @@ final class PhameBlogManageController extends PhameBlogController {
       ->setTag('a')
       ->setText(pht('View Live'))
       ->setIcon('fa-external-link')
-      ->setHref($blog->getLiveURI());
+      ->setHref($blog->getLiveURI())
+      ->setDisabled($blog->isArchived());
 
     $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName())
@@ -45,6 +46,16 @@ final class PhameBlogManageController extends PhameBlogController {
       ->setImage($picture)
       ->setStatus($header_icon, $header_color, $header_name)
       ->addActionLink($view);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $blog,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    if ($can_edit) {
+      $header->setImageEditURL(
+        $this->getApplicationURI('blog/picture/'.$blog->getID().'/'));
+    }
 
     $curtain = $this->buildCurtain($blog);
     $properties = $this->buildPropertyView($blog);

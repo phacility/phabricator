@@ -9,6 +9,10 @@ final class PhabricatorDashboardPanelCoreCustomField
   }
 
   public function createFields($object) {
+    if (!$object->getPanelType()) {
+      return array();
+    }
+
     $impl = $object->requireImplementation();
     $specs = $impl->getFieldSpecifications();
     return PhabricatorStandardCustomField::buildStandardFields($this, $specs);

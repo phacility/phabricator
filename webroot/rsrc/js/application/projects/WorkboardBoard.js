@@ -216,8 +216,18 @@ JX.install('WorkboardBoard', {
       }
 
       var column_maps = response.columnMaps;
+      var natural_column;
       for (var natural_phid in column_maps) {
-        this.getColumn(natural_phid).setNaturalOrder(column_maps[natural_phid]);
+        natural_column = this.getColumn(natural_phid);
+        if (!natural_column) {
+          // Our view of the board may be out of date, so we might get back
+          // information about columns that aren't visible. Just ignore the
+          // position information for any columns we aren't displaying on the
+          // client.
+          continue;
+        }
+
+        natural_column.setNaturalOrder(column_maps[natural_phid]);
       }
 
       var property_maps = response.propertyMaps;

@@ -53,6 +53,8 @@ final class PHUICalendarMonthView extends AphrontView {
   public function render() {
     $viewer = $this->getViewer();
 
+    Javelin::initBehavior('calendar-month-view');
+
     $events = msort($this->events, 'getEpochStart');
     $days = $this->getDatesInMonth();
 
@@ -63,7 +65,6 @@ final class PHUICalendarMonthView extends AphrontView {
     foreach ($days as $day) {
       $day_number = $day->format('j');
 
-      $class = 'phui-calendar-month-day';
       $weekday = $day->format('w');
 
       $day->setTime(0, 0, 0);
@@ -94,13 +95,13 @@ final class PHUICalendarMonthView extends AphrontView {
         ->setViewer($viewer)
         ->setView('month');
       foreach ($all_day_events as $item) {
-        if ($counter <= $max_daily) {
+        if ($counter < $max_daily) {
           $list->addEvent($item);
         }
         $counter++;
       }
       foreach ($list_events as $item) {
-        if ($counter <= $max_daily) {
+        if ($counter < $max_daily) {
           $list->addEvent($item);
         }
         $counter++;
@@ -111,32 +112,60 @@ final class PHUICalendarMonthView extends AphrontView {
         $day->format('m').'/'.
         $day->format('d').'/';
 
-      $cell_lists[] = array(
+      if ($counter > $max_daily) {
+        $list->setMoreLink($uri);
+      }
+
+      $day_id = $day->format('Ymd');
+
+      $classes = array();
+      if ($day->format('m') != $this->month) {
+        $classes[] = 'phui-calendar-month-adjacent';
+      }
+      $classes = implode(' ', $classes);
+
+      $cell_lists[$day_id] = array(
+        'dayID' => $day_id,
         'list' => $list,
         'date' => $day,
-        'uri' => $uri,
+        'dayURI' => $uri,
         'count' => count($all_day_events) + count($list_events),
-        'class' => $class,
-        );
+        'class' => $classes,
+      );
     }
 
     $rows = array();
-    $cell_lists_by_week = array_chunk($cell_lists, 7);
-
+    $cell_lists_by_week = array_chunk($cell_lists, 7, true);
     foreach ($cell_lists_by_week as $week_of_cell_lists) {
       $cells = array();
-      $max_count = $this->getMaxDailyEventsForWeek($week_of_cell_lists);
+      $action_map = array();
+      foreach ($week_of_cell_lists as $day_id => $cell_list) {
+        $cells[] = $this->getEventListCell($cell_list);
 
-      foreach ($week_of_cell_lists as $cell_list) {
-        $cells[] = $this->getEventListCell($cell_list, $max_count);
+        $action_map[$day_id] = array(
+          'dayURI' => $cell_list['dayURI'],
+        );
       }
-      $rows[] = phutil_tag('tr', array(), $cells);
+      $rows[] = javelin_tag(
+        'tr',
+        array(
+          'sigil' => 'calendar-week calendar-week-body',
+          'meta' => array(
+            'actionMap' => $action_map,
+          ),
+        ),
+        $cells);
 
       $cells = array();
-      foreach ($week_of_cell_lists as $cell_list) {
+      foreach ($week_of_cell_lists as $day_id => $cell_list) {
         $cells[] = $this->getDayNumberCell($cell_list);
       }
-      $rows[] = phutil_tag('tr', array(), $cells);
+      $rows[] = javelin_tag(
+        'tr',
+        array(
+          'sigil' => 'calendar-week calendar-week-foot',
+        ),
+        $cells);
     }
 
     $header = $this->getDayNamesHeader();
@@ -154,7 +183,8 @@ final class PHUICalendarMonthView extends AphrontView {
     $box = id(new PHUIObjectBoxView())
       ->setHeader($this->renderCalendarHeader($this->getDateTime()))
       ->appendChild($table)
-      ->setFormErrors($warnings);
+      ->setFormErrors($warnings)
+      ->addClass('phui-calendar-box');
     if ($this->error) {
       $box->setInfoView($this->error);
 
@@ -175,51 +205,54 @@ final class PHUICalendarMonthView extends AphrontView {
     return $max_count;
   }
 
-  private function getEventListCell($event_list, $max_count = 0) {
+  private function getEventListCell($event_list) {
     $list = $event_list['list'];
     $class = $event_list['class'];
-    $uri = $event_list['uri'];
     $count = $event_list['count'];
 
     $viewer_is_invited = $list->getIsViewerInvitedOnList();
-
     $event_count_badge = $this->getEventCountBadge($count, $viewer_is_invited);
-    $cell_day_secret_link = $this->getHiddenDayLink($uri, $max_count, 125);
 
-    $cell_data_div = phutil_tag(
+    $cell_content = phutil_tag(
       'div',
       array(
         'class' => 'phui-calendar-month-cell-div',
       ),
       array(
-        $cell_day_secret_link,
         $event_count_badge,
         $list,
       ));
 
-    return phutil_tag(
+    $cell_meta = array(
+      'dayID' => $event_list['dayID'],
+    );
+
+    $classes = array();
+    $classes[] = 'phui-calendar-month-event-list';
+    $classes[] = 'phui-calendar-month-day';
+    $classes[] = $event_list['class'];
+    $classes = implode(' ', $classes);
+
+    return javelin_tag(
       'td',
       array(
-        'class' => 'phui-calendar-month-event-list '.$class,
+        'class' => $classes,
+        'meta' => $cell_meta,
       ),
-      $cell_data_div);
+      $cell_content);
   }
 
   private function getDayNumberCell($event_list) {
     $class = $event_list['class'];
     $date = $event_list['date'];
-    $cell_day_secret_link = null;
     $week_number = null;
 
     if ($date) {
-      $uri = $event_list['uri'];
-      $cell_day_secret_link = $this->getHiddenDayLink($uri, 0, 25);
-
       $cell_day = phutil_tag(
         'a',
         array(
           'class' => 'phui-calendar-date-number',
-          'href' => $uri,
+          'href' => $event_list['dayURI'],
         ),
         $date->format('j'));
 
@@ -228,7 +261,7 @@ final class PHUICalendarMonthView extends AphrontView {
           'a',
           array(
             'class' => 'phui-calendar-week-number',
-            'href' => $uri,
+            'href' => $event_list['dayURI'],
           ),
           $date->format('W'));
       }
@@ -236,16 +269,7 @@ final class PHUICalendarMonthView extends AphrontView {
       $cell_day = null;
     }
 
-    if ($date && $date->format('j') == $this->day &&
-      $date->format('m') == $this->month) {
-      $today_class = 'phui-calendar-today-slot phui-calendar-today';
-    } else {
-      $today_class = 'phui-calendar-today-slot';
-    }
-
-    if ($this->isDateInCurrentWeek($date)) {
-      $today_class .= ' phui-calendar-this-week';
-    }
+    $today_class = 'phui-calendar-today-slot';
 
     $last_week_day = 6;
     if ($date->format('w') == $last_week_day) {
@@ -265,16 +289,36 @@ final class PHUICalendarMonthView extends AphrontView {
         'class' => 'phui-calendar-month-cell-div',
       ),
       array(
-        $cell_day_secret_link,
         $week_number,
         $cell_day,
         $today_slot,
       ));
 
-    return phutil_tag(
+    $classes = array();
+    $classes[] = 'phui-calendar-month-number';
+    $classes[] = $event_list['class'];
+
+    if ($date) {
+      if ($this->isDateInCurrentWeek($date)) {
+        $classes[] = 'phui-calendar-this-week';
+      }
+
+      if ($date->format('j') == $this->day) {
+        if ($date->format('m') == $this->month) {
+          $classes[] = 'phui-calendar-today';
+        }
+      }
+    }
+
+    $cell_meta = array(
+      'dayID' => $event_list['dayID'],
+    );
+
+    return javelin_tag(
       'td',
       array(
-        'class' => 'phui-calendar-date-number-container '.$class,
+        'class' => implode(' ', $classes),
+        'meta' => $cell_meta,
       ),
       $cell_div);
   }
@@ -312,21 +356,6 @@ final class PHUICalendarMonthView extends AphrontView {
         'class' => 'phui-calendar-month-event-count',
       ),
       $event_count);
-  }
-
-  private function getHiddenDayLink($uri, $count, $max_height) {
-    // approximately the height of the tallest cell
-    $height = 18 * $count + 5;
-    $height = ($height > $max_height) ? $height : $max_height;
-    $height_style = 'height: '.$height.'px';
-    return phutil_tag(
-      'a',
-      array(
-        'class' => 'phui-calendar-month-secret-link',
-        'style' => $height_style,
-        'href' => $uri,
-      ),
-      null);
   }
 
   private function getDayNamesHeader() {
@@ -417,8 +446,7 @@ final class PHUICalendarMonthView extends AphrontView {
 
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader($date->format('F Y'));
+    $header = id(new PHUIHeaderView());
 
     if ($button_bar) {
       $header->setButtonBar($button_bar);

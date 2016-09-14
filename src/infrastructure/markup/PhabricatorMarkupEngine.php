@@ -505,6 +505,7 @@ final class PhabricatorMarkupEngine extends Phobject {
 
     $rules[] = new PhutilRemarkupDocumentLinkRule();
     $rules[] = new PhabricatorNavigationRemarkupRule();
+    $rules[] = new PhabricatorKeyboardRemarkupRule();
 
     if ($options['youtube']) {
       $rules[] = new PhabricatorYoutubeRemarkupRule();

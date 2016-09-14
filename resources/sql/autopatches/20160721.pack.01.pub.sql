@@ -1,0 +1,11 @@
+CREATE TABLE {$NAMESPACE}_packages.packages_publisher (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  name VARCHAR(64) NOT NULL COLLATE {$COLLATE_TEXT},
+  publisherKey VARCHAR(64) NOT NULL COLLATE {$COLLATE_SORT},
+  editPolicy VARBINARY(64) NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (phid),
+  UNIQUE KEY `key_publisher` (publisherKey)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

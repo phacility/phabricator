@@ -32,6 +32,18 @@ JX.install('KeyboardShortcutManager', {
       down: 1
     },
 
+    /**
+     * Some keys require Alt to be pressed in order to type them on certain
+     * keyboard layouts.
+     */
+    _altkeys: {
+      // "Alt+L" on German layouts.
+      '@': 1,
+
+      // "Alt+Shift+7" on German layouts.
+      '\\': 1
+    },
+
     getInstance : function() {
       if (!JX.KeyboardShortcutManager._instance) {
         JX.KeyboardShortcutManager._instance = new JX.KeyboardShortcutManager();
@@ -119,11 +131,21 @@ JX.install('KeyboardShortcutManager', {
       }
     },
     _onkeyhit : function(e) {
+      var self = JX.KeyboardShortcutManager;
+
       var raw = e.getRawEvent();
 
-      if (raw.altKey || raw.ctrlKey || raw.metaKey) {
+      if (raw.ctrlKey || raw.metaKey) {
         // Never activate keyboard shortcuts if modifier keys are also
         // depressed.
+        return;
+      }
+
+      // For most keystrokes, don't activate keyboard shortcuts if the Alt
+      // key is depressed. However, we continue if the character requires the
+      // use of Alt to type it on some keyboard layouts.
+      var key = this._getKey(e);
+      if (raw.altKey && !(key in self._altkeys)) {
         return;
       }
 

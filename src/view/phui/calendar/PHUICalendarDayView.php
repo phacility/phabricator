@@ -61,7 +61,7 @@ final class PHUICalendarDayView extends AphrontView {
     foreach ($hours as $hour) {
       $js_hours[] = array(
         'hour' => $hour->format('G'),
-        'hour_meridian' => $hour->format('g A'),
+        'displayTime' => phabricator_time($hour->format('U'), $viewer),
       );
     }
 
@@ -85,6 +85,8 @@ final class PHUICalendarDayView extends AphrontView {
           'id' => $all_day_event->getEventID(),
           'viewerIsInvited' => $all_day_event->getViewerIsInvited(),
           'uri' => $all_day_event->getURI(),
+          'displayIcon' => $all_day_event->getIcon(),
+          'displayIconColor' => $all_day_event->getIconColor(),
         );
       }
     }
@@ -140,6 +142,8 @@ final class PHUICalendarDayView extends AphrontView {
           'top' => $top.'px',
           'height' => $height.'px',
           'canEdit' => $event->getCanEdit(),
+          'displayIcon' => $event->getIcon(),
+          'displayIconColor' => $event->getIconColor(),
         );
       }
     }
@@ -183,17 +187,15 @@ final class PHUICalendarDayView extends AphrontView {
       ->setFlush(true);
 
     $layout = id(new AphrontMultiColumnView())
-      ->addColumn($sidebar, 'third')
+      ->addColumn($sidebar, 'third phui-day-view-upcoming')
       ->addColumn($table_box, 'thirds phui-day-view-column')
-      ->setFluidLayout(true)
-      ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
+      ->setFluidLayout(true);
 
-    return phutil_tag(
-      'div',
-        array(
-          'class' => 'ml',
-        ),
-        $layout);
+    $layout = id(new PHUIBoxView())
+      ->appendChild($layout)
+      ->addClass('phui-calendar-box');
+
+    return $layout;
   }
 
   private function getAllDayEvents() {

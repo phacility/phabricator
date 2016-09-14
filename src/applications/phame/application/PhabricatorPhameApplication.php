@@ -31,13 +31,10 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     );
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getRoutes() {
     return array(
-     '/phame/' => array(
+      '/J(?P<id>[1-9]\d*)' => 'PhamePostViewController',
+      '/phame/' => array(
         '' => 'PhameHomeController',
 
         // NOTE: The live routes include an initial "/", so leave it off
@@ -46,17 +43,16 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
         'post/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhamePostListController',
           'blogger/(?P<bloggername>[\w\.-_]+)/' => 'PhamePostListController',
-          'edit/(?:(?P<id>[^/]+)/)?' => 'PhamePostEditController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhamePostEditController',
           'history/(?P<id>\d+)/' => 'PhamePostHistoryController',
           'view/(?P<id>\d+)/(?:(?P<slug>[^/]+)/)?' => 'PhamePostViewController',
           '(?P<action>publish|unpublish)/(?P<id>\d+)/'
             => 'PhamePostPublishController',
           'preview/(?P<id>\d+)/' => 'PhamePostPreviewController',
           'preview/' => 'PhabricatorMarkupPreviewController',
-          'framed/(?P<id>\d+)/' => 'PhamePostFramedController',
           'move/(?P<id>\d+)/' => 'PhamePostMoveController',
           'archive/(?P<id>\d+)/' => 'PhamePostArchiveController',
-          'comment/(?P<id>[1-9]\d*)/' => 'PhamePostCommentController',
         ),
         'blog/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhameBlogListController',
@@ -106,6 +102,13 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
       '/phame/live/.*',
     );
   }
+
+  public function getRemarkupRules() {
+    return array(
+      new PhamePostRemarkupRule(),
+    );
+  }
+
 
   protected function getCustomCapabilities() {
     return array(

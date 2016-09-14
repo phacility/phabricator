@@ -28,7 +28,6 @@ final class PhamePostFulltextEngine
       $post->getPHID(),
       PhabricatorPhamePostPHIDType::TYPECONST,
       PhabricatorTime::getNow());
-
   }
 
 }

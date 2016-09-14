@@ -109,7 +109,8 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.aphront-form-input input {
+.aphront-form-input input[type="text"],
+.aphront-form-input input[type="password"] {
   width: 100%;
 }
 
@@ -126,6 +127,10 @@
 
 .aphront-form-control {
   padding: 4px;
+}
+
+.device-phone .aphront-form-control {
+  padding: 4px 8px 8px;
 }
 
 .phui-form-full-width .aphront-form-control {
@@ -176,13 +181,15 @@
 .aphront-form-instructions {
   width: 60%;
   margin-left: 20%;
-  padding: 10px 4px;
+  padding: 12px 4px;
+  color: {$darkbluetext};
 }
 
 .device .aphront-form-instructions,
 .phui-form-full-width .aphront-form-instructions {
-  width: 100%;
+  width: auto;
   margin: 0;
+  padding: 12px 8px 8px;
 }
 
 .aphront-form-important {

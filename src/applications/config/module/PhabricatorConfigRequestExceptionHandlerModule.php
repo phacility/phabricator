@@ -25,7 +25,7 @@ final class PhabricatorConfigRequestExceptionHandlerModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Priority'),
@@ -38,10 +38,6 @@ final class PhabricatorConfigRequestExceptionHandlerModule
           'pri',
           'wide',
         ));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Exception Handlers'))
-      ->setTable($table);
   }
 
 }

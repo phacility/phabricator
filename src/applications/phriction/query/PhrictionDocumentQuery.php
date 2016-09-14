@@ -17,8 +17,6 @@ final class PhrictionDocumentQuery
   const STATUS_OPEN     = 'status-open';
   const STATUS_NONSTUB  = 'status-nonstub';
 
-  const ORDER_CREATED   = 'order-created';
-  const ORDER_UPDATED   = 'order-updated';
   const ORDER_HIERARCHY = 'order-hierarchy';
 
   public function withIDs(array $ids) {
@@ -61,38 +59,15 @@ final class PhrictionDocumentQuery
     return $this;
   }
 
-  public function setOrder($order) {
-    switch ($order) {
-      case self::ORDER_CREATED:
-        $this->setOrderVector(array('id'));
-        break;
-      case self::ORDER_UPDATED:
-        $this->setOrderVector(array('updated'));
-        break;
-      case self::ORDER_HIERARCHY:
-        $this->setOrderVector(array('depth', 'title', 'updated'));
-        break;
-      default:
-        throw new Exception(pht('Unknown order "%s".', $order));
-    }
-
-    return $this;
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
   }
 
-  protected function loadPage() {
-    $table = new PhrictionDocument();
-    $conn_r = $table->establishConnection('r');
+  public function newResultObject() {
+    return new PhrictionDocument();
+  }
 
-    $rows = queryfx_all(
-      $conn_r,
-      'SELECT d.* FROM %T d %Q %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildJoinClause($conn_r),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    $documents = $table->loadAllFromArray($rows);
+  protected function willFilterPage(array $documents) {
 
     if ($documents) {
       $ancestor_slugs = array();
@@ -104,6 +79,8 @@ final class PhrictionDocumentQuery
       }
 
       if ($ancestor_slugs) {
+        $table = new PhrictionDocument();
+        $conn_r = $table->establishConnection('r');
         $ancestors = queryfx_all(
           $conn_r,
           'SELECT * FROM %T WHERE slug IN (%Ls)',
@@ -122,11 +99,6 @@ final class PhrictionDocumentQuery
         }
       }
     }
-
-    return $documents;
-  }
-
-  protected function willFilterPage(array $documents) {
     // To view a Phriction document, you must also be able to view all of the
     // ancestor documents. Filter out documents which have ancestors that are
     // not visible.
@@ -190,58 +162,59 @@ final class PhrictionDocumentQuery
     return $documents;
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $join = '';
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = array();
 
     if ($this->getOrderVector()->containsKey('updated')) {
       $content_dao = new PhrictionContent();
-      $join = qsprintf(
+      $joins[] = qsprintf(
         $conn,
         'JOIN %T c ON d.contentID = c.id',
         $content_dao->getTableName());
     }
 
-    return $join;
+    return $joins;
   }
-  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    $where = array();
 
-    if ($this->ids) {
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
+
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'd.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'd.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->slugs) {
+    if ($this->slugs !== null) {
       $where[] = qsprintf(
         $conn,
         'd.slug IN (%Ls)',
         $this->slugs);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn,
         'd.status IN (%Ld)',
         $this->statuses);
     }
 
-    if ($this->slugPrefix) {
+    if ($this->slugPrefix !== null) {
       $where[] = qsprintf(
         $conn,
         'd.slug LIKE %>',
         $this->slugPrefix);
     }
 
-    if ($this->depths) {
+    if ($this->depths !== null) {
       $where[] = qsprintf(
         $conn,
         'd.depth IN (%Ld)',
@@ -274,9 +247,16 @@ final class PhrictionDocumentQuery
         throw new Exception(pht("Unknown status '%s'!", $this->status));
     }
 
-    $where[] = $this->buildPagingClause($conn);
+    return $where;
+  }
 
-    return $this->formatWhereClause($where);
+  public function getBuiltinOrders() {
+    return array(
+      self::ORDER_HIERARCHY => array(
+        'vector' => array('depth', 'title', 'updated'),
+        'name' => pht('Hierarchy'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
   public function getOrderableColumns() {
@@ -331,6 +311,9 @@ final class PhrictionDocumentQuery
     }
   }
 
+  protected function getPrimaryTableAlias() {
+    return 'd';
+  }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPhrictionApplication';

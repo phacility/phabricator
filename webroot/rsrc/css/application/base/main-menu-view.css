@@ -41,32 +41,40 @@
 }
 
 .phabricator-main-menu-brand {
-  display: inline-block;
-  width: 148px;
   height: 44px;
   float: left;
-  margin-right: 4px;
+  margin-right: 6px;
   padding-left: 6px;
 }
 
-.phabricator-main-menu-logo {
-  position: absolute;
-  width: 96px;
-  height: 40px;
-  left: 52px;
-  top: 2px;
-}
-
 .phabricator-main-menu-eye {
-  position: absolute;
+  margin: 2px 0;
   width: 40px;
   height: 40px;
-  top: 2px;
+  float: left;
+  display: block;
+  background-image: url(/rsrc/image/logo/light-eye.png);
+  background-size: 40px 40px;
 }
 
 .device-desktop .phabricator-main-menu-brand:hover {
   background-color: rgba({$alphagrey},.2);
   cursor: hand;
+}
+
+.device-phone .phabricator-wordmark {
+  max-width: 112px; /* iPhone 5 limitation */
+}
+
+.phabricator-wordmark {
+  float: left;
+  color: #fff;
+  font-size: 18px;
+  margin: 9px 4px 9px 6px;
+  padding-right: 8px;
+  max-width: 175px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* - Expand/Collapse Button ----------------------------------------------------
@@ -368,7 +376,8 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .phabricator-main-menu-alert-icon,
-.phabricator-main-menu-message-icon {
+.phabricator-main-menu-message-icon,
+.phabricator-main-menu-setup-icon {
   width: 18px;
   height: 18px;
   float: left;
@@ -388,8 +397,25 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   margin-top: 2px;
 }
 
+.setup-unread .phui-icon-view.phabricator-main-menu-setup-icon {
+  color: #ecf36c;
+  font-size: 16px;
+  margin-top: 2px;
+  width: 15px;
+}
+
+.setup-unread .phabricator-main-menu-setup-count {
+  color: #ecf36c;
+  margin-top: 10px;
+}
+
+.device-desktop .alert-notifications.setup-unread:hover .phui-icon-view {
+  color: #ecf36c;
+}
+
 .phabricator-main-menu-alert-count,
-.phabricator-main-menu-message-count {
+.phabricator-main-menu-message-count,
+.phabricator-main-menu-setup-count {
   color: #fff;
   text-align: center;
   display: none;
@@ -399,17 +425,20 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .device-phone .alert-unread .phabricator-main-menu-alert-count,
-.device-phone .message-unread .phabricator-main-menu-message-count {
+.device-phone .message-unread .phabricator-main-menu-message-count,
+.device-phone .setup-unread .phabricator-main-menu-setup-count {
   display: none;
 }
 
 .alert-unread .phabricator-main-menu-alert-icon,
-.message-unread .phabricator-main-menu-message-icon  {
+.message-unread .phabricator-main-menu-message-icon,
+.setup-unread .phabricator-main-menu-setup-icon {
   color: #fff;
 }
 
 .alert-unread .phabricator-main-menu-alert-count,
-.message-unread .phabricator-main-menu-message-count  {
+.message-unread .phabricator-main-menu-message-count,
+.setup-unread .phabricator-main-menu-setup-count {
   display: block;
 }
 
@@ -569,6 +598,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .phabricator-main-menu-dropdown.phui-list-sidenav .phui-list-item-has-icon
   .phui-list-item-href {
     padding: 4px 40px 4px 12px;
+    white-space: nowrap;
 }
 
 .phabricator-main-menu-dropdown.phui-list-sidenav .phui-list-item-type-label

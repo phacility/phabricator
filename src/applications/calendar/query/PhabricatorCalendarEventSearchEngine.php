@@ -26,8 +26,9 @@ final class PhabricatorCalendarEventSearchEngine
   protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchDatasourceField())
-        ->setLabel(pht('Created By'))
-        ->setKey('creatorPHIDs')
+        ->setLabel(pht('Hosts'))
+        ->setKey('hostPHIDs')
+        ->setAliases(array('host', 'hostPHID', 'hosts'))
         ->setDatasource(new PhabricatorPeopleUserFunctionDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Invited'))
@@ -78,8 +79,8 @@ final class PhabricatorCalendarEventSearchEngine
     $query = $this->newQuery();
     $viewer = $this->requireViewer();
 
-    if ($map['creatorPHIDs']) {
-      $query->withCreatorPHIDs($map['creatorPHIDs']);
+    if ($map['hostPHIDs']) {
+      $query->withHostPHIDs($map['hostPHIDs']);
     }
 
     if ($map['invitedPHIDs']) {
@@ -113,7 +114,15 @@ final class PhabricatorCalendarEventSearchEngine
         break;
     }
 
-    return $query->setGenerateGhosts(true);
+    // Generate ghosts (and ignore stub events) if we aren't querying for
+    // specific events.
+    if (!$map['ids'] && !$map['phids']) {
+      $query
+        ->withIsStub(false)
+        ->setGenerateGhosts(true);
+    }
+
+    return $query;
   }
 
   private function getQueryDateRange(
@@ -184,10 +193,11 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     if ($upcoming) {
+      $now = PhabricatorTime::getNow();
       if ($min_range) {
-        $min_range = max(time(), $min_range);
+        $min_range = max($now, $min_range);
       } else {
-        $min_range = time();
+        $min_range = $now;
       }
     }
 
@@ -239,25 +249,15 @@ final class PhabricatorCalendarEventSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  protected function getRequiredHandlePHIDsForResultList(
-    array $objects,
-    PhabricatorSavedQuery $query) {
-    $phids = array();
-    foreach ($objects as $event) {
-      $phids[$event->getUserPHID()] = 1;
-    }
-    return array_keys($phids);
-  }
-
   protected function renderResultList(
     array $events,
     PhabricatorSavedQuery $query,
     array $handles) {
 
     if ($this->isMonthView($query)) {
-      return $this->buildCalendarView($events, $query, $handles);
+      return $this->buildCalendarMonthView($events, $query);
     } else if ($this->isDayView($query)) {
-      return $this->buildCalendarDayView($events, $query, $handles);
+      return $this->buildCalendarDayView($events, $query);
     }
 
     assert_instances_of($events, 'PhabricatorCalendarEvent');
@@ -265,51 +265,37 @@ final class PhabricatorCalendarEventSearchEngine
     $list = new PHUIObjectItemListView();
 
     foreach ($events as $event) {
-      $event_date_info = $this->getEventDateLabel($event);
-      $creator_handle = $handles[$event->getUserPHID()];
-      $attendees = array();
-
-      foreach ($event->getInvitees() as $invitee) {
-        $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
-        if ($invitee->getStatus() === $status_attending) {
-          $attendees[] = $invitee->getInviteePHID();
-        }
-      }
-
       if ($event->getIsGhostEvent()) {
-        $title_text = $event->getMonogram()
-          .' ('
-          .$event->getSequenceIndex()
-          .'): '
-          .$event->getName();
+        $monogram = $event->getParentEvent()->getMonogram();
+        $index = $event->getSequenceIndex();
+        $monogram = "{$monogram}/{$index}";
       } else {
-        $title_text = $event->getMonogram().': '.$event->getName();
+        $monogram = $event->getMonogram();
       }
 
       $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setObject($event)
-        ->setHeader($title_text)
-        ->setHref($event->getURI())
-        ->addAttribute($event_date_info);
+        ->setObjectName($monogram)
+        ->setHeader($event->getName())
+        ->setHref($event->getURI());
 
-      if ($attendees) {
-        $attending = pht(
-          'Attending: %s',
-          $viewer->renderHandleList($attendees)
-            ->setAsInline(1)
-            ->render());
+      $item->addAttribute($event->renderEventDate($viewer, false));
 
-        $item->addAttribute($attending);
+      if ($event->isCancelledEvent()) {
+        $item->setDisabled(true);
       }
 
-      if (strlen($event->getDuration()) > 0) {
-        $duration = pht(
-          'Duration: %s',
-          $event->getDuration());
+      $status_icon = $event->getDisplayIcon($viewer);
+      $status_color = $event->getDisplayIconColor($viewer);
+      $status_label = $event->getDisplayIconLabel($viewer);
 
-        $item->addIcon('none', $duration);
-      }
+      $item->setStatusIcon("{$status_icon} {$status_color}", $status_label);
+
+      $host = pht(
+        'Hosted by %s',
+        $viewer->renderHandle($event->getHostPHID()));
+      $item->addByline($host);
 
       $list->addItem($item);
     }
@@ -321,13 +307,13 @@ final class PhabricatorCalendarEventSearchEngine
     return $result;
   }
 
-  private function buildCalendarView(
-    array $statuses,
-    PhabricatorSavedQuery $query,
-    array $handles) {
+  private function buildCalendarMonthView(
+    array $events,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($events, 'PhabricatorCalendarEvent');
 
     $viewer = $this->requireViewer();
-    $now = time();
+    $now = PhabricatorTime::getNow();
 
     list($start_year, $start_month) =
       $this->getDisplayYearAndMonthAndDay(
@@ -335,9 +321,9 @@ final class PhabricatorCalendarEventSearchEngine
         $this->getQueryDateTo($query)->getEpoch(),
         $query->getParameter('display'));
 
-    $now_year  = phabricator_format_local_time($now, $viewer, 'Y');
+    $now_year = phabricator_format_local_time($now, $viewer, 'Y');
     $now_month = phabricator_format_local_time($now, $viewer, 'm');
-    $now_day   = phabricator_format_local_time($now, $viewer, 'j');
+    $now_day = phabricator_format_local_time($now, $viewer, 'j');
 
     if ($start_month == $now_month && $start_year == $now_year) {
       $month_view = new PHUICalendarMonthView(
@@ -356,40 +342,45 @@ final class PhabricatorCalendarEventSearchEngine
 
     $month_view->setUser($viewer);
 
-    $phids = mpull($statuses, 'getUserPHID');
+    foreach ($events as $event) {
+      $epoch_min = $event->getViewerDateFrom();
+      $epoch_max = $event->getViewerDateTo();
 
-    foreach ($statuses as $status) {
-      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+      $event_view = id(new AphrontCalendarEventView())
+        ->setHostPHID($event->getHostPHID())
+        ->setEpochRange($epoch_min, $epoch_max)
+        ->setIsCancelled($event->isCancelledEvent())
+        ->setName($event->getName())
+        ->setURI($event->getURI())
+        ->setIsAllDay($event->getIsAllDay())
+        ->setIcon($event->getDisplayIcon($viewer))
+        ->setIconColor($event->getDisplayIconColor($viewer));
 
-      $event = new AphrontCalendarEventView();
-      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
-      $event->setIsAllDay($status->getIsAllDay());
-      $event->setIcon($status->getIcon());
-
-      $name_text = $handles[$status->getUserPHID()]->getName();
-      $status_text = $status->getName();
-      $event->setUserPHID($status->getUserPHID());
-      $event->setDescription(pht('%s (%s)', $name_text, $status_text));
-      $event->setName($status_text);
-      $event->setURI($status->getURI());
-      $event->setViewerIsInvited($viewer_is_invited);
-      $month_view->addEvent($event);
+      $month_view->addEvent($event_view);
     }
 
     $month_view->setBrowseURI(
       $this->getURI('query/'.$query->getQueryKey().'/'));
 
-    // TODO redesign-2015 : Move buttons out of PHUICalendarView?
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setContent($month_view);
+    $from = $this->getQueryDateFrom($query)->getDateTime();
 
-    return $result;
+    $crumbs = array();
+    $crumbs[] = id(new PHUICrumbView())
+      ->setName($from->format('F Y'));
+
+    $header = id(new PHUIHeaderView())
+      ->setProfileHeader(true)
+      ->setHeader($from->format('F Y'));
+
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setCrumbs($crumbs)
+      ->setHeader($header)
+      ->setContent($month_view);
   }
 
   private function buildCalendarDayView(
-    array $statuses,
-    PhabricatorSavedQuery $query,
-    array $handles) {
+    array $events,
+    PhabricatorSavedQuery $query) {
 
     $viewer = $this->requireViewer();
 
@@ -400,8 +391,8 @@ final class PhabricatorCalendarEventSearchEngine
         $query->getParameter('display'));
 
     $day_view = id(new PHUICalendarDayView(
-      $this->getQueryDateFrom($query)->getEpoch(),
-      $this->getQueryDateTo($query)->getEpoch(),
+      $this->getQueryDateFrom($query),
+      $this->getQueryDateTo($query),
       $start_year,
       $start_month,
       $start_day))
@@ -409,40 +400,56 @@ final class PhabricatorCalendarEventSearchEngine
 
     $day_view->setUser($viewer);
 
-    $phids = mpull($statuses, 'getUserPHID');
+    $phids = mpull($events, 'getHostPHID');
 
-    foreach ($statuses as $status) {
-      if ($status->getIsCancelled()) {
-        continue;
-      }
-
-      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
-
+    foreach ($events as $event) {
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
-        $status,
+        $event,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $event = new AphrontCalendarEventView();
-      $event->setCanEdit($can_edit);
-      $event->setEventID($status->getID());
-      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
-      $event->setIsAllDay($status->getIsAllDay());
-      $event->setIcon($status->getIcon());
-      $event->setViewerIsInvited($viewer_is_invited);
+      $epoch_min = $event->getViewerDateFrom();
+      $epoch_max = $event->getViewerDateTo();
 
-      $event->setName($status->getName());
-      $event->setURI($status->getURI());
-      $day_view->addEvent($event);
+      $status_icon = $event->getDisplayIcon($viewer);
+      $status_color = $event->getDisplayIconColor($viewer);
+
+      $event_view = id(new AphrontCalendarEventView())
+        ->setCanEdit($can_edit)
+        ->setEventID($event->getID())
+        ->setEpochRange($epoch_min, $epoch_max)
+        ->setIsAllDay($event->getIsAllDay())
+        ->setIcon($status_icon)
+        ->setIconColor($status_color)
+        ->setName($event->getName())
+        ->setURI($event->getURI())
+        ->setIsCancelled($event->isCancelledEvent());
+
+      $day_view->addEvent($event_view);
     }
 
-    $day_view->setBrowseURI(
-      $this->getURI('query/'.$query->getQueryKey().'/'));
+    $browse_uri = $this->getURI('query/'.$query->getQueryKey().'/');
+    $day_view->setBrowseURI($browse_uri);
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setContent($day_view);
+    $from = $this->getQueryDateFrom($query)->getDateTime();
+    $month_uri = $browse_uri.$from->format('Y/m/');
 
-    return $result;
+    $crumbs = array(
+      id(new PHUICrumbView())
+        ->setName($from->format('F Y'))
+        ->setHref($month_uri),
+      id(new PHUICrumbView())
+        ->setName($from->format('D jS')),
+    );
+
+    $header = id(new PHUIHeaderView())
+      ->setProfileHeader(true)
+      ->setHeader($from->format('D, F jS'));
+
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setCrumbs($crumbs)
+      ->setHeader($header)
+      ->setContent($day_view);
   }
 
   private function getDisplayYearAndMonthAndDay(
@@ -486,6 +493,20 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   private function getQueryDateFrom(PhabricatorSavedQuery $saved) {
+    if ($this->calendarYear && $this->calendarMonth) {
+      $viewer = $this->requireViewer();
+
+      $start_year = $this->calendarYear;
+      $start_month = $this->calendarMonth;
+      $start_day = $this->calendarDay ? $this->calendarDay : 1;
+
+      return AphrontFormDateControlValue::newFromDictionary(
+        $viewer,
+        array(
+          'd' => "{$start_year}-{$start_month}-{$start_day}",
+        ));
+    }
+
     return $this->getQueryDate($saved, 'rangeStart');
   }
 
@@ -541,40 +562,4 @@ final class PhabricatorCalendarEventSearchEngine
     return false;
   }
 
-  private function getEventDateLabel($event) {
-    $viewer = $this->requireViewer();
-
-    $from_datetime = PhabricatorTime::getDateTimeFromEpoch(
-      $event->getDateFrom(),
-      $viewer);
-    $to_datetime = PhabricatorTime::getDateTimeFromEpoch(
-      $event->getDateTo(),
-      $viewer);
-
-    $from_date_formatted = $from_datetime->format('Y m d');
-    $to_date_formatted = $to_datetime->format('Y m d');
-
-    if ($event->getIsAllDay()) {
-      if ($from_date_formatted == $to_date_formatted) {
-        return pht(
-          '%s, All Day',
-          phabricator_date($event->getDateFrom(), $viewer));
-      } else {
-        return pht(
-          '%s - %s, All Day',
-          phabricator_date($event->getDateFrom(), $viewer),
-          phabricator_date($event->getDateTo(), $viewer));
-      }
-    } else if ($from_date_formatted == $to_date_formatted) {
-      return pht(
-        '%s - %s',
-        phabricator_datetime($event->getDateFrom(), $viewer),
-        phabricator_time($event->getDateTo(), $viewer));
-    } else {
-      return pht(
-        '%s - %s',
-        phabricator_datetime($event->getDateFrom(), $viewer),
-        phabricator_datetime($event->getDateTo(), $viewer));
-    }
-  }
 }

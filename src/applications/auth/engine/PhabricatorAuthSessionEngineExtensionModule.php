@@ -25,7 +25,7 @@ final class PhabricatorAuthSessionEngineExtensionModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setNoDataString(
         pht('There are no registered session engine extensions.'))
       ->setHeaders(
@@ -41,9 +41,6 @@ final class PhabricatorAuthSessionEngineExtensionModule
           'wide pri',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('SessionEngine Extensions'))
-      ->setTable($table);
   }
 
 }

@@ -8,21 +8,35 @@ final class PhabricatorConfigClusterNotificationsController
     $nav->selectFilter('cluster/notifications/');
 
     $title = pht('Cluster Notifications');
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Notifications');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true)
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setIcon('fa-book')
+          ->setHref($doc_href)
+          ->setTag('a')
+          ->setText(pht('Documentation')));
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
-      ->addTextCrumb(pht('Cluster Notifications'));
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
     $notification_status = $this->buildClusterNotificationStatus();
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn($notification_status);
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($notification_status);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildClusterNotificationStatus() {
@@ -144,20 +158,7 @@ final class PhabricatorConfigClusterNotificationsController
           'wide',
         ));
 
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Notifications');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Cluster Notification Status'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setTable($table);
+    return $table;
   }
 
 }

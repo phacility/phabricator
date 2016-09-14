@@ -35,7 +35,7 @@ final class PhabricatorFileComposeController
 
       $data = $composer->loadBuiltinFileData();
 
-      $file = PhabricatorFile::buildFromFileDataOrHash(
+      $file = PhabricatorFile::newFromFileData(
         $data,
         array(
           'name' => $composer->getBuiltinDisplayName(),

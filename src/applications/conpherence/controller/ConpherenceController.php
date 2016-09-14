@@ -36,23 +36,10 @@ abstract class ConpherenceController extends PhabricatorController {
 
   protected function buildConpherenceApplicationCrumbs($is_rooms = false) {
     $crumbs = parent::buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
-    if ($is_rooms) {
+    if (!$is_rooms) {
       $crumbs
-        ->addAction(
-          id(new PHUIListItemView())
-          ->setName(pht('New Room'))
-          ->setHref($this->getApplicationURI('new/'))
-          ->setIcon('fa-plus-square')
-          ->setWorkflow(true));
-    } else {
-      $crumbs
-        ->addAction(
-          id(new PHUIListItemView())
-          ->setName(pht('New Room'))
-          ->setHref($this->getApplicationURI('new/'))
-          ->setIcon('fa-plus-square')
-          ->setWorkflow(true))
         ->addAction(
           id(new PHUIListItemView())
           ->setName(pht('Room'))
@@ -69,13 +56,52 @@ abstract class ConpherenceController extends PhabricatorController {
     ConpherenceThread $conpherence,
     array $policy_objects) {
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
+    $viewer = $this->getViewer();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $data = $conpherence->getDisplayData($this->getViewer());
-    $crumbs->addCrumb(
-      id(new PHUICrumbView())
-      ->setName($data['title'])
-      ->setHref('/'.$conpherence->getMonogram()));
+
+    if ($conpherence->getID()) {
+      $data = $conpherence->getDisplayData($this->getViewer());
+      $crumbs->addCrumb(
+        id(new PHUICrumbView())
+        ->setName($data['title'])
+        ->setHref('/'.$conpherence->getMonogram()));
+        $can_edit = PhabricatorPolicyFilter::hasCapability(
+          $viewer,
+          $conpherence,
+          PhabricatorPolicyCapability::CAN_EDIT);
+
+      $crumbs
+        ->addAction(
+          id(new PHUIListItemView())
+          ->setName(pht('Edit Room'))
+          ->setHref(
+            $this->getApplicationURI('update/'.$conpherence->getID()).'/')
+          ->setIcon('fa-pencil')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+
+      $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
+      $widget_view = (bool)$viewer->getUserSetting($widget_key, false);
+
+      $divider = id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_DIVIDER)
+        ->addClass('conpherence-header-desktop-item');
+      $crumbs->addAction($divider);
+
+      Javelin::initBehavior(
+        'toggle-widget',
+        array(
+          'show' => (int)$widget_view,
+          'settingsURI' => '/settings/adjust/?key='.$widget_key,
+        ));
+
+      $crumbs->addAction(
+        id(new PHUIListItemView())
+        ->addSigil('conpherence-widget-toggle')
+        ->setIcon('fa-columns')
+        ->addClass('conpherence-header-desktop-item'));
+    }
 
     return hsprintf(
       '%s',

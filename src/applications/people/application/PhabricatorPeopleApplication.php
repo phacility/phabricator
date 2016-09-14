@@ -30,6 +30,10 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     return pht('Sort of a social utility.');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function canUninstall() {
     return false;
   }
@@ -69,7 +73,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         '' => 'PhabricatorPeopleProfileViewController',
         'panel/'
           => $this->getPanelRouting('PhabricatorPeopleProfilePanelController'),
-        'calendar/' => 'PhabricatorPeopleCalendarController',
       ),
     );
   }

@@ -44,32 +44,24 @@ final class PhabricatorCalendarEventRSVPEmailCommand
     PhabricatorMetaMTAReceivedMail $mail,
     $command,
     array $argv) {
-    $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
-    $status_declined = PhabricatorCalendarEventInvitee::STATUS_DECLINED;
-    $xactions = array();
 
     $target = phutil_utf8_strtolower(implode(' ', $argv));
-    $rsvp = null;
 
     $yes_values = $this->getYesValues();
     $no_values = $this->getNoValues();
 
     if (in_array($target, $yes_values)) {
-      $rsvp = $status_attending;
+      $rsvp = PhabricatorCalendarEventAcceptTransaction::TRANSACTIONTYPE;
     } else if (in_array($target, $no_values)) {
-      $rsvp = $status_declined;
+      $rsvp = PhabricatorCalendarEventDeclineTransaction::TRANSACTIONTYPE;
     } else {
-      $rsvp = null;
-    }
-
-    if ($rsvp === null) {
       return array();
     }
 
+    $xactions = array();
     $xactions[] = $object->getApplicationTransactionTemplate()
-      ->setTransactionType(PhabricatorCalendarEventTransaction::TYPE_INVITE)
-      ->setNewValue(array($viewer->getPHID() => $rsvp));
-
+      ->setTransactionType($rsvp)
+      ->setNewValue(true);
     return $xactions;
   }
 

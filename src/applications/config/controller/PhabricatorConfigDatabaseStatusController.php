@@ -62,7 +62,12 @@ final class PhabricatorConfigDatabaseStatusController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('database/');
 
+    if (!$title) {
+      $title = pht('Database Status');
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     if ($this->database) {
       $crumbs->addTextCrumb(
         pht('Database Status'),
@@ -91,16 +96,28 @@ final class PhabricatorConfigDatabaseStatusController
       $crumbs->addTextCrumb(pht('Database Status'));
     }
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn(array(
-        $body,
-    ));
+    $doc_link = PhabricatorEnv::getDoclink('Managing Storage Adjustments');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true)
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setIcon('fa-book')
+          ->setHref($doc_link)
+          ->setText(pht('Learn More')));
+
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($body);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
 
@@ -163,15 +180,7 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $comp->getIssues());
 
-    $prop_box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties);
-
-    $table_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Databases'))
-      ->setTable($table);
-
-    return $this->buildResponse($title, array($prop_box, $table_box));
+    return $this->buildResponse($title, array($properties, $table));
   }
 
   private function renderDatabase(
@@ -261,15 +270,7 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $database->getIssues());
 
-    $prop_box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties);
-
-    $table_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Database Status'))
-      ->setTable($table);
-
-    return $this->buildResponse($title, array($prop_box, $table_box));
+    return $this->buildResponse($title, array($properties, $table));
   }
 
   private function renderTable(
@@ -474,19 +475,8 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $table->getIssues());
 
-    $prop_box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties);
-
-    $table_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Database'))
-      ->setTable($table_view);
-
-    $key_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Keys'))
-      ->setTable($keys_view);
-
-    return $this->buildResponse($title, array($prop_box, $table_box, $key_box));
+    return $this->buildResponse(
+      $title, array($properties, $table_view, $keys_view));
   }
 
   private function renderColumn(
@@ -618,11 +608,7 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $column->getIssues());
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties);
-
-    return $this->buildResponse($title, $box);
+    return $this->buildResponse($title, $properties);
   }
 
   private function renderKey(
@@ -711,11 +697,7 @@ final class PhabricatorConfigDatabaseStatusController
       ),
       $key->getIssues());
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($this->buildHeaderWithDocumentationLink($title))
-      ->addPropertyList($properties);
-
-    return $this->buildResponse($title, $box);
+    return $this->buildResponse($title, $properties);
   }
 
   private function buildProperties(array $properties, array $issues) {
@@ -760,7 +742,7 @@ final class PhabricatorConfigDatabaseStatusController
     }
     $view->addProperty(pht('Schema Status'), $status_view);
 
-    return $view;
+    return phutil_tag_div('config-page-property', $view);
   }
 
 }

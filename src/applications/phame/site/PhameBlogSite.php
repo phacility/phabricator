@@ -18,9 +18,10 @@ final class PhameBlogSite extends PhameSite {
   }
 
   public function shouldRequireHTTPS() {
-    // TODO: We should probably provide options here eventually, but for now
-    // just never require HTTPS for external-domain blogs.
-    return false;
+    $full_uri = $this->getBlog()->getDomainFullURI();
+    $full_uri = new PhutilURI($full_uri);
+
+    return ($full_uri->getProtocol() == 'https');
   }
 
   public function getPriority() {

@@ -29,7 +29,7 @@ final class PhabricatorHovercardEngineExtensionModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Order'),
@@ -46,10 +46,6 @@ final class PhabricatorHovercardEngineExtensionModule
           'wide pri',
           null,
         ));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('HovercardEngine Extensions'))
-      ->setTable($table);
   }
 
 }

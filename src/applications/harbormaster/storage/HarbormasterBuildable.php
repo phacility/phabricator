@@ -170,7 +170,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
       ->setBuildablePHID($this->getPHID())
       ->setBuildPlanPHID($plan->getPHID())
       ->setBuildParameters($parameters)
-      ->setBuildStatus(HarbormasterBuild::STATUS_PENDING);
+      ->setBuildStatus(HarbormasterBuildStatus::STATUS_PENDING);
     if ($initiator_phid) {
       $build->setInitiatorPHID($initiator_phid);
     }

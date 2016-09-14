@@ -25,7 +25,7 @@ final class PhabricatorConfigEdgeModule extends PhabricatorConfigModule {
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Constant'),
@@ -38,10 +38,6 @@ final class PhabricatorConfigEdgeModule extends PhabricatorConfigModule {
           null,
           'pri wide',
         ));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Edge Types'))
-      ->setTable($table);
   }
 
 }

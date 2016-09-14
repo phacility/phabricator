@@ -1,0 +1,134 @@
+@title Repository Hints and Rewriting Commits
+@group fieldmanual
+
+Dealing with rewrites of published repositories and other unusual problems.
+
+Overview
+========
+
+Some repositories have unusual commits. You can provide "hints" to Phabricator
+about these commits to improve behavior.
+
+Supported hints are:
+
+  - **Rewritten Commits**: If you have rewritten the history of a published
+    repository, you can provide hints about the mapping from old commits to
+    new commits so it can redirect users who visit old pages to the proper
+    new pages.
+  - **Unreadable Commits**: If some commits are not readable (which is rare,
+    but can happen in some cases if they are generated with an external tool)
+    you can provide hints so that Phabricator doesn't try to read them.
+
+The remainder of this document explains how to create and remove hints, and how
+to specify each type of hint.
+
+Creating Hints
+==============
+
+To create hints, pipe a JSON list of hints to `bin/repository hint`:
+
+```
+phabricator/ $ cat hints.json | ./bin/repository hint
+```
+
+The hints should be a list of objects like this:
+
+```lang=json
+[
+  ...
+  {
+    "repository": "XYZ",
+    "hint": "...",
+    "old": "abcdef1234abcdef1234abcdef1234abcdef1234",
+    "new": "..."
+  }
+  ...
+]
+```
+
+Each hint may have these keys:
+
+  - `repository`: A repository identifier (ID, PHID, callsign or short name).
+  - `hint`: The hint type, see below.
+  - `old`: The full identifier or commit hash of the commit you want to
+    provide a hint for.
+  - `new`: For hints which specify a new commit, the full identifier or commit
+    hash of the new commit.
+
+See below for exactly how to specify each type of hint.
+
+
+Removing Hints
+==============
+
+To remove a hint, create a hint of type `"none"`. This will remove any existing
+hint.
+
+For example, use a hint specification like this:
+
+```lang=json
+[
+  {
+    "repository": "XYZ",
+    "hint": "none",
+    "old": "abcdef1234abcdef1234abcdef1234abcdef1234"
+  }
+]
+```
+
+Phabricator won't treat commits without any hint specially.
+
+
+Hint: Rewritten Commits
+=======================
+
+The `"rewritten"` hint allows you to redirect old commits to new commits after
+a rewrite of published history. You should normally avoid rewriting published
+commits, but sometimes this is necessary: for example, if a repository has
+become unwieldy because it contains large binaries, you may strip them from
+history.
+
+To provide this kind of hint, pass the `"old"` commit hash (from before the
+rewrite) and the `"new"` commit hash (from after the rewrite).
+
+For example, a hint might look like this:
+
+```lang=json
+[
+  {
+    "repository": "XYZ",
+    "hint": "rewritten",
+    "old": "abcdef1234abcdef1234abcdef1234abcdef1234",
+    "new": "098765ffaabbccdd4680098765ffaabbccdd4680"
+  }
+]
+```
+
+Phabricator will show users that the commit was rewritten in the web UI.
+
+
+Hint: Unreadable Commits
+========================
+
+The `"unreadable"` hint allows you to tell Phabricator that it should not
+bother trying to read the changes associated with a particular commit. In
+some rare cases, repositories can contain commits which aren't readable
+(for example, if they were created by external tools during an import or
+merge process).
+
+To provide this kind of hint, pass the `"old"` commit which is affected.
+
+For example, a hint might look like this:
+
+```lang=json
+[
+  {
+    "repository": "XYZ",
+    "hint": "unreadable",
+    "old": "abcdef1234abcdef1234abcdef1234abcdef1234"
+  }
+]
+```
+
+Phabricator won't try to read, parse, import, or display the changes associated
+with this commit.

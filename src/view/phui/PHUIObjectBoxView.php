@@ -5,6 +5,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $headerText;
   private $color;
   private $background;
+  private $tabGroups = array();
   private $formErrors = null;
   private $formSaved = false;
   private $infoView;
@@ -24,11 +25,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
   private $showHideContent;
   private $showHideOpen;
 
-  private $tabs = array();
-  private $tabMap = null;
-  private $tabLists = array();
   private $propertyLists = array();
-  private $propertyList = null;
 
   const COLOR_RED = 'red';
   const COLOR_BLUE = 'blue';
@@ -39,48 +36,8 @@ final class PHUIObjectBoxView extends AphrontTagView {
   const BLUE_PROPERTY = 'phui-box-blue-property';
   const GREY = 'phui-box-grey';
 
-  public function addPropertyList(
-    PHUIPropertyListView $property_list,
-    $tab = null) {
-
-    if (!($tab instanceof PHUIListItemView) &&
-        ($tab !== null)) {
-      assert_stringlike($tab);
-      $tab = id(new PHUIListItemView())->setName($tab);
-    }
-
-    if ($tab) {
-      if ($tab->getKey()) {
-        $key = $tab->getKey();
-      } else {
-        $key = 'tab.default.'.spl_object_hash($tab);
-        $tab->setKey($key);
-      }
-    } else {
-      $key = 'tab.default';
-    }
-
-    if ($tab) {
-      if (empty($this->tabs[$key])) {
-        $tab->addSigil('phui-object-box-tab');
-        $tab->setMetadata(
-          array(
-            'tabKey' => $key,
-          ));
-
-        if (!$tab->getHref()) {
-          $tab->setHref('#');
-        }
-
-        if (!$tab->getType()) {
-          $tab->setType(PHUIListItemView::TYPE_LINK);
-        }
-
-        $this->tabs[$key] = $tab;
-      }
-    }
-
-    $this->propertyLists[$key][] = $property_list;
+  public function addPropertyList(PHUIPropertyListView $property_list) {
+    $this->propertyLists[] = $property_list;
 
     $action_list = $property_list->getActionList();
     if ($action_list) {
@@ -125,6 +82,11 @@ final class PHUIObjectBoxView extends AphrontTagView {
         ->appendChild($text);
       $this->formSaved = $save;
     }
+    return $this;
+  }
+
+  public function addTabGroup(PHUITabGroupView $view) {
+    $this->tabGroups[] = $view;
     return $this;
   }
 
@@ -184,68 +146,6 @@ final class PHUIObjectBoxView extends AphrontTagView {
     return $this;
   }
 
-  public function willRender() {
-    $tab_lists = array();
-    $property_lists = array();
-    $tab_map = array();
-
-    $default_key = 'tab.default';
-
-    // Find the selected tab, or select the first tab if none are selected.
-    if ($this->tabs) {
-      $selected_tab = null;
-      foreach ($this->tabs as $key => $tab) {
-        if ($tab->getSelected()) {
-          $selected_tab = $key;
-          break;
-        }
-      }
-      if ($selected_tab === null) {
-        head($this->tabs)->setSelected(true);
-        $selected_tab = head_key($this->tabs);
-      }
-    }
-
-    foreach ($this->propertyLists as $key => $list) {
-      $group = new PHUIPropertyGroupView();
-      $i = 0;
-      foreach ($list as $item) {
-        $group->addPropertyList($item);
-        if ($i > 0) {
-          $item->addClass('phui-property-list-section-noninitial');
-        }
-        $i++;
-      }
-
-      if ($this->tabs && $key != $default_key) {
-        $tab_id = celerity_generate_unique_node_id();
-        $tab_map[$key] = $tab_id;
-
-        if ($key === $selected_tab) {
-          $style = null;
-        } else {
-          $style = 'display: none';
-        }
-
-        $tab_lists[] = phutil_tag(
-          'div',
-          array(
-            'style' => $style,
-            'id' => $tab_id,
-          ),
-          $group);
-      } else {
-        if ($this->tabs) {
-          $group->addClass('phui-property-group-noninitial');
-        }
-        $property_lists[] = $group;
-      }
-      $this->propertyList = $property_lists;
-      $this->tabMap = $tab_map;
-      $this->tabLists = $tab_lists;
-    }
-  }
-
   protected function getTagAttributes() {
     $classes = array();
     $classes[] = 'phui-box';
@@ -269,19 +169,8 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $classes[] = $this->background;
     }
 
-    $sigil = null;
-    $metadata = null;
-    if ($this->tabs) {
-      $sigil = 'phui-object-box';
-      $metadata = array(
-        'tabMap' => $this->tabMap,
-      );
-    }
-
     return array(
       'class' => implode(' ', $classes),
-      'sigil' => $sigil,
-      'meta' => $metadata,
     );
   }
 
@@ -315,6 +204,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
         ->addSigil('reveal-content')
         ->setID($hide_action_id)
         ->setStyle($hide_style)
+        ->setIcon('fa-search')
         ->setHref($this->showHideHref)
         ->setMetaData(
           array(
@@ -327,6 +217,7 @@ final class PHUIObjectBoxView extends AphrontTagView {
         ->setTag('a')
         ->addSigil('reveal-content')
         ->setStyle($show_style)
+        ->setIcon('fa-search')
         ->setHref('#')
         ->setID($show_action_id)
         ->setMetaData(
@@ -387,15 +278,22 @@ final class PHUIObjectBoxView extends AphrontTagView {
       }
     }
 
-    $tabs = null;
-    if ($this->tabs) {
-      $tabs = id(new PHUIListView())
-        ->setType(PHUIListView::NAVBAR_LIST);
-      foreach ($this->tabs as $tab) {
-        $tabs->addMenuItem($tab);
+    if ($this->propertyLists) {
+      $lists = new PHUIPropertyGroupView();
+
+      $ii = 0;
+      foreach ($this->propertyLists as $list) {
+        if ($ii > 0 || $this->tabGroups) {
+          $list->addClass('phui-property-list-section-noninitial');
+        }
+
+        $lists->addPropertyList($list);
+        $ii++;
       }
-      Javelin::initBehavior('phui-object-box-tabs');
+    } else {
+      $lists = null;
     }
+
 
     $content = array(
       ($this->showHideOpen == false ? $this->anchor : null),
@@ -405,11 +303,10 @@ final class PHUIObjectBoxView extends AphrontTagView {
       $this->formSaved,
       $exception_errors,
       $this->form,
-      $tabs,
-      $this->tabLists,
+      $this->tabGroups,
       $showhide,
       ($this->showHideOpen == true ? $this->anchor : null),
-      $this->propertyList,
+      $lists,
       $this->table,
       $this->renderChildren(),
     );

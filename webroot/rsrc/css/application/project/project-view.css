@@ -36,10 +36,6 @@
     padding: 12px 0;
   }
 
-.device-phone .phui-box.project-view-properties {
-  margin: 0 12px 0 12px;
-}
-
 .project-view-properties .phui-property-list-container +
   .phui-property-list-text-content {
   border-color: rgba({$alphagrey},.2);
@@ -90,8 +86,4 @@
 
 .profile-no-badges {
   padding: 24px 0;
-}
-
-.project-view-home .phabricator-remarkup .remarkup-code-block pre {
-  white-space: pre-wrap;
 }

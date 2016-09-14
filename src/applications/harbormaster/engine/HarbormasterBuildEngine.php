@@ -63,7 +63,7 @@ final class HarbormasterBuildEngine extends Phobject {
       // If any exception is raised, the build is marked as a failure and the
       // exception is re-thrown (this ensures we don't leave builds in an
       // inconsistent state).
-      $build->setBuildStatus(HarbormasterBuild::STATUS_ERROR);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_ERROR);
       $build->save();
 
       $lock->unlock();
@@ -106,30 +106,30 @@ final class HarbormasterBuildEngine extends Phobject {
   private function updateBuild(HarbormasterBuild $build) {
     if ($build->isAborting()) {
       $this->releaseAllArtifacts($build);
-      $build->setBuildStatus(HarbormasterBuild::STATUS_ABORTED);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_ABORTED);
       $build->save();
     }
 
-    if (($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) ||
+    if (($build->getBuildStatus() == HarbormasterBuildStatus::STATUS_PENDING) ||
         ($build->isRestarting())) {
       $this->restartBuild($build);
-      $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
       $build->save();
     }
 
     if ($build->isResuming()) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_BUILDING);
       $build->save();
     }
 
     if ($build->isPausing() && !$build->isComplete()) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_PAUSED);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_PAUSED);
       $build->save();
     }
 
     $build->deleteUnprocessedCommands();
 
-    if ($build->getBuildStatus() == HarbormasterBuild::STATUS_BUILDING) {
+    if ($build->getBuildStatus() == HarbormasterBuildStatus::STATUS_BUILDING) {
       $this->updateBuildSteps($build);
     }
   }
@@ -243,7 +243,7 @@ final class HarbormasterBuildEngine extends Phobject {
 
     // If any step failed, fail the whole build, then bail.
     if (count($failed)) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_FAILED);
       $build->save();
       return;
     }
@@ -251,7 +251,7 @@ final class HarbormasterBuildEngine extends Phobject {
     // If every step is complete, we're done with this build. Mark it passed
     // and bail.
     if (count($complete) == count($steps)) {
-      $build->setBuildStatus(HarbormasterBuild::STATUS_PASSED);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_PASSED);
       $build->save();
       return;
     }
@@ -287,7 +287,7 @@ final class HarbormasterBuildEngine extends Phobject {
     if (!$runnable && !$waiting && !$underway) {
       // This means the build is deadlocked, and the user has configured
       // circular dependencies.
-      $build->setBuildStatus(HarbormasterBuild::STATUS_DEADLOCKED);
+      $build->setBuildStatus(HarbormasterBuildStatus::STATUS_DEADLOCKED);
       $build->save();
       return;
     }
@@ -443,12 +443,15 @@ final class HarbormasterBuildEngine extends Phobject {
     $all_pass = true;
     $any_fail = false;
     foreach ($buildable->getBuilds() as $build) {
-      if ($build->getBuildStatus() != HarbormasterBuild::STATUS_PASSED) {
+      if ($build->getBuildStatus() != HarbormasterBuildStatus::STATUS_PASSED) {
         $all_pass = false;
       }
-      if ($build->getBuildStatus() == HarbormasterBuild::STATUS_FAILED ||
-          $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR ||
-          $build->getBuildStatus() == HarbormasterBuild::STATUS_DEADLOCKED) {
+      if (in_array($build->getBuildStatus(), array(
+          HarbormasterBuildStatus::STATUS_FAILED,
+          HarbormasterBuildStatus::STATUS_ERROR,
+          HarbormasterBuildStatus::STATUS_DEADLOCKED,
+        ))) {
+
         $any_fail = true;
       }
     }

@@ -8,7 +8,7 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
   public function getExecutionOrder() {
     // This must run after basic PHP checks, but before most other checks.
-    return 0.5;
+    return 500;
   }
 
   protected function executeChecks() {
@@ -23,21 +23,17 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
     try {
       queryfx($conn_raw, 'SELECT 1');
+      $database_exception = null;
+    } catch (AphrontInvalidCredentialsQueryException $ex) {
+      $database_exception = $ex;
     } catch (AphrontConnectionQueryException $ex) {
-      $message = pht(
-        "Unable to connect to MySQL!\n\n".
-        "%s\n\n".
-        "Make sure Phabricator and MySQL are correctly configured.",
-        $ex->getMessage());
+      $database_exception = $ex;
+    }
 
-      $this->newIssue('mysql.connect')
-        ->setName(pht('Can Not Connect to MySQL'))
-        ->setMessage($message)
-        ->setIsFatal(true)
-        ->addRelatedPhabricatorConfig('mysql.host')
-        ->addRelatedPhabricatorConfig('mysql.port')
-        ->addRelatedPhabricatorConfig('mysql.user')
-        ->addRelatedPhabricatorConfig('mysql.pass');
+    if ($database_exception) {
+      $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
+        $database_exception);
+      $this->addIssue($issue);
       return;
     }
 

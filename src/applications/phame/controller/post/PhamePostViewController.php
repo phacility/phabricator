@@ -118,23 +118,26 @@ final class PhamePostViewController
         array(
           $user_icon,
           ' ',
-          $blogger_profile->getTitle(),
+          $blogger_profile->getDisplayTitle(),
         ))
       ->setImage($blogger->getProfileImageURI())
       ->setImageHref($author_uri);
 
+    $monogram = $post->getMonogram();
     $timeline = $this->buildTransactionTimeline(
       $post,
       id(new PhamePostTransactionQuery())
       ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
-    $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
+    $timeline->setQuoteRef($monogram);
 
     if ($is_external) {
       $add_comment = null;
     } else {
-      $add_comment = $this->buildCommentForm($post);
-      $add_comment = phutil_tag_div('mlb mlt', $add_comment);
+      $add_comment = $this->buildCommentForm($post, $timeline);
+      $add_comment = phutil_tag_div('mlb mlt phame-comment-view', $add_comment);
     }
+
+    $timeline = phutil_tag_div('phui-document-view-pro-box', $timeline);
 
     list($prev, $next) = $this->loadAdjacentPosts($post);
 
@@ -142,12 +145,16 @@ final class PhamePostViewController
       ->setUser($viewer)
       ->setObject($post);
 
+    $is_live = $this->getIsLive();
+    $is_external = $this->getIsExternal();
     $next_view = new PhameNextPostView();
     if ($next) {
-      $next_view->setNext($next->getTitle(), $next->getLiveURI());
+      $next_view->setNext($next->getTitle(),
+        $next->getBestURI($is_live, $is_external));
     }
     if ($prev) {
-      $next_view->setPrevious($prev->getTitle(), $prev->getLiveURI());
+      $next_view->setPrevious($prev->getTitle(),
+        $prev->getBestURI($is_live, $is_external));
     }
 
     $document->setFoot($next_view);
@@ -269,19 +276,13 @@ final class PhamePostViewController
     return $actions;
   }
 
-  private function buildCommentForm(PhamePost $post) {
+  private function buildCommentForm(PhamePost $post, $timeline) {
     $viewer = $this->getViewer();
 
-    $draft = PhabricatorDraft::newFromUserAndKey(
-      $viewer, $post->getPHID());
-
-    $box = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($post->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText(pht('Add Comment'))
-      ->setAction($this->getApplicationURI('post/comment/'.$post->getID().'/'))
-      ->setSubmitButtonName(pht('Add Comment'));
+    $box = id(new PhamePostEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($post)
+      ->setTransactionTimeline($timeline);
 
     return phutil_tag_div('phui-document-view-pro-box', $box);
   }

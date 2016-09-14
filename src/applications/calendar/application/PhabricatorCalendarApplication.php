@@ -28,6 +28,10 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     return "\xE2\x8C\xA8";
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function isPrototype() {
     return true;
   }
@@ -40,25 +44,21 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/E(?P<id>[1-9]\d*)(?:/(?P<sequence>\d+))?'
+      '/E(?P<id>[1-9]\d*)(?:/(?P<sequence>\d+)/)?'
         => 'PhabricatorCalendarEventViewController',
       '/calendar/' => array(
         '(?:query/(?P<queryKey>[^/]+)/(?:(?P<year>\d+)/'.
           '(?P<month>\d+)/)?(?:(?P<day>\d+)/)?)?'
           => 'PhabricatorCalendarEventListController',
         'event/' => array(
-          'create/'
-            => 'PhabricatorCalendarEventEditController',
-          'edit/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
+          $this->getEditRoutePattern('edit/')
             => 'PhabricatorCalendarEventEditController',
           'drag/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventDragController',
-          'cancel/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
+          'cancel/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventCancelController',
           '(?P<action>join|decline|accept)/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventJoinController',
-          'comment/(?P<id>[1-9]\d*)/(?:(?P<sequence>\d+)/)?'
-            => 'PhabricatorCalendarEventCommentController',
         ),
       ),
     );
@@ -83,6 +83,21 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
           'This page documents the commands you can use to interact with '.
           'events in Calendar. These commands work when creating new tasks '.
           'via email and when replying to existing tasks.'),
+      ),
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorCalendarEventDefaultViewCapability::CAPABILITY => array(
+        'caption' => pht('Default view policy for newly created events.'),
+        'template' => PhabricatorCalendarEventPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_VIEW,
+      ),
+      PhabricatorCalendarEventDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht('Default edit policy for newly created events.'),
+        'template' => PhabricatorCalendarEventPHIDType::TYPECONST,
+        'capability' => PhabricatorPolicyCapability::CAN_EDIT,
       ),
     );
   }

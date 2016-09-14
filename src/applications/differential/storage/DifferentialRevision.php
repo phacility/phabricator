@@ -136,6 +136,10 @@ final class DifferentialRevision extends DifferentialDAO
     return "D{$id}";
   }
 
+  public function getURI() {
+    return '/'.$this->getMonogram();
+  }
+
   public function setTitle($title) {
     $this->title = $title;
     if (!$this->getID()) {
@@ -424,6 +428,31 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function isClosed() {
     return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
+  }
+
+  public function getStatusIcon() {
+    $map = array(
+      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW
+        => 'fa-code grey',
+      ArcanistDifferentialRevisionStatus::NEEDS_REVISION
+        => 'fa-refresh red',
+      ArcanistDifferentialRevisionStatus::CHANGES_PLANNED
+        => 'fa-headphones red',
+      ArcanistDifferentialRevisionStatus::ACCEPTED
+        => 'fa-check green',
+      ArcanistDifferentialRevisionStatus::CLOSED
+        => 'fa-check-square-o black',
+      ArcanistDifferentialRevisionStatus::ABANDONED
+        => 'fa-plane black',
+    );
+
+    return idx($map, $this->getStatus());
+  }
+
+  public function getStatusDisplayName() {
+    $status = $this->getStatus();
+    return ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
+      $status);
   }
 
   public function getFlag(PhabricatorUser $viewer) {

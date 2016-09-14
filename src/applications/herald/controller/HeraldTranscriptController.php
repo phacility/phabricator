@@ -249,9 +249,13 @@ final class HeraldTranscriptController extends HeraldController {
     foreach ($rule_xscripts as $rule_xscript) {
       $rule_id = $rule_xscript->getRuleID();
 
+      $rule_monogram = pht('H%d', $rule_id);
+      $rule_uri = '/'.$rule_monogram;
+
       $rule_item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('H%d', $rule_id))
-        ->setHeader($rule_xscript->getRuleName());
+        ->setObjectName($rule_monogram)
+        ->setHeader($rule_xscript->getRuleName())
+        ->setHref($rule_uri);
 
       if (!$rule_xscript->getResult()) {
         $rule_item->setDisabled(true);

@@ -156,7 +156,7 @@ $ ./bin/repository clusterize <repository> --service <service>
 To migrate a repository back off a service, use this command:
 
 ```
-$ ./bin/repoistory clusterize <repository> --remove-service
+$ ./bin/repository clusterize <repository> --remove-service
 ```
 
 This command only changes how Phabricator connects to the repository; it does

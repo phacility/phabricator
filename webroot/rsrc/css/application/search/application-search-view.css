@@ -1,0 +1,55 @@
+/**
+ * @provides application-search-view-css
+ */
+
+.application-search-view {
+  background-color: #fff;
+}
+
+.application-search-view .application-search-results.phui-object-box {
+  margin: 0;
+  padding: 0 16px 24px;
+}
+
+.application-search-view .application-search-results .phui-profile-header {
+  padding: 16px 8px;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.application-search-view .phui-object-box.phui-object-box-collapsed
+  .phui-header-shell {
+  padding: 20px 8px;
+}
+
+.application-search-results
+  .phui-profile-header.phui-header-shell .phui-header-header {
+  font-size: 20px;
+}
+
+.device-phone.application-search-view .application-search-results
+  .phui-profile-header {
+    padding: 12px 0;
+}
+
+.device-phone .application-search-results
+  .phui-profile-header.phui-header-shell .phui-header-header {
+  font-size: 16px;
+}
+
+.device-phone.application-search-view
+  .application-search-results.phui-object-box {
+    padding: 0 12px;
+  }
+
+.application-search-view .phui-box-border {
+  border: none;
+}
+
+.application-search-pager {
+  margin: 0 16px 16px 16px;
+  padding: 8px;
+}
+
+.device-phone .application-search-pager {
+  margin: 12px;
+}

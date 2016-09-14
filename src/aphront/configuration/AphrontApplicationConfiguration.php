@@ -69,8 +69,30 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     // request object first.
     $write_guard = new AphrontWriteGuard('id');
 
+    PhabricatorStartup::beginStartupPhase('preflight');
+
+    $response = PhabricatorSetupCheck::willPreflightRequest();
+    if ($response) {
+      return self::writeResponse($sink, $response);
+    }
+
     PhabricatorStartup::beginStartupPhase('env.init');
-    PhabricatorEnv::initializeWebEnvironment();
+
+    try {
+      PhabricatorEnv::initializeWebEnvironment();
+      $database_exception = null;
+    } catch (AphrontInvalidCredentialsQueryException $ex) {
+      $database_exception = $ex;
+    } catch (AphrontConnectionQueryException $ex) {
+      $database_exception = $ex;
+    }
+
+    if ($database_exception) {
+      $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
+        $database_exception);
+      $response = PhabricatorSetupCheck::newIssueResponse($issue);
+      return self::writeResponse($sink, $response);
+    }
 
     $multimeter->setSampleRate(
       PhabricatorEnv::getEnvConfig('debug.sample-rate'));
@@ -102,9 +124,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
     $response = PhabricatorSetupCheck::willProcessRequest();
     if ($response) {
-      PhabricatorStartup::endOutputCapture();
-      $sink->writeResponse($response);
-      return;
+      return self::writeResponse($sink, $response);
     }
 
     $host = AphrontRequest::getHTTPHeader('Host');
@@ -247,31 +267,7 @@ abstract class AphrontApplicationConfiguration extends Phobject {
       $response = $controller->willSendResponse($response);
       $response->setRequest($request);
 
-      $unexpected_output = PhabricatorStartup::endOutputCapture();
-      if ($unexpected_output) {
-        $unexpected_output = pht(
-          "Unexpected output:\n\n%s",
-          $unexpected_output);
-
-        phlog($unexpected_output);
-
-        if ($response instanceof AphrontWebpageResponse) {
-          echo phutil_tag(
-            'div',
-            array(
-              'style' =>
-                'background: #eeddff;'.
-                'white-space: pre-wrap;'.
-                'z-index: 200000;'.
-                'position: relative;'.
-                'padding: 8px;'.
-                'font-family: monospace',
-            ),
-            $unexpected_output);
-        }
-      }
-
-      $sink->writeResponse($response);
+      self::writeResponse($sink, $response);
     } catch (Exception $ex) {
       if ($original_exception) {
         throw $original_exception;
@@ -280,6 +276,37 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     }
 
     return $response;
+  }
+
+  private static function writeResponse(
+    AphrontHTTPSink $sink,
+    AphrontResponse $response) {
+
+    $unexpected_output = PhabricatorStartup::endOutputCapture();
+    if ($unexpected_output) {
+      $unexpected_output = pht(
+        "Unexpected output:\n\n%s",
+        $unexpected_output);
+
+      phlog($unexpected_output);
+
+      if ($response instanceof AphrontWebpageResponse) {
+        echo phutil_tag(
+          'div',
+          array(
+            'style' =>
+              'background: #eeddff;'.
+              'white-space: pre-wrap;'.
+              'z-index: 200000;'.
+              'position: relative;'.
+              'padding: 8px;'.
+              'font-family: monospace',
+          ),
+          $unexpected_output);
+      }
+    }
+
+    $sink->writeResponse($response);
   }
 
 

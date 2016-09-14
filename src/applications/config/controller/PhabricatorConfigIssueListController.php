@@ -9,48 +9,31 @@ final class PhabricatorConfigIssueListController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('issue/');
 
-    $issues = PhabricatorSetupCheck::runAllChecks();
+    $issues = PhabricatorSetupCheck::runNormalChecks();
     PhabricatorSetupCheck::setOpenSetupIssueKeys(
       PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
       $update_database = true);
 
     $important = $this->buildIssueList(
-      $issues, PhabricatorSetupCheck::GROUP_IMPORTANT);
+      $issues,
+      PhabricatorSetupCheck::GROUP_IMPORTANT,
+      'fa-warning');
     $php = $this->buildIssueList(
-      $issues, PhabricatorSetupCheck::GROUP_PHP);
+      $issues,
+      PhabricatorSetupCheck::GROUP_PHP,
+      'fa-code');
     $mysql = $this->buildIssueList(
-      $issues, PhabricatorSetupCheck::GROUP_MYSQL);
+      $issues,
+      PhabricatorSetupCheck::GROUP_MYSQL,
+      'fa-database');
     $other = $this->buildIssueList(
-      $issues, PhabricatorSetupCheck::GROUP_OTHER);
+      $issues,
+      PhabricatorSetupCheck::GROUP_OTHER,
+      'fa-question-circle');
 
-    $setup_issues = array();
-    if ($important) {
-      $setup_issues[] = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Important Setup Issues'))
-        ->setColor(PHUIObjectBoxView::COLOR_RED)
-        ->setObjectList($important);
-    }
-
-    if ($php) {
-      $setup_issues[] = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('PHP Setup Issues'))
-        ->setObjectList($php);
-    }
-
-    if ($mysql) {
-      $setup_issues[] = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('MySQL Setup Issues'))
-        ->setObjectList($mysql);
-    }
-
-    if ($other) {
-      $setup_issues[] = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Other Setup Issues'))
-        ->setObjectList($other);
-    }
-
-    if (empty($setup_issues)) {
-      $setup_issues[] = id(new PHUIInfoView())
+    $no_issues = null;
+    if (empty($issues)) {
+      $no_issues = id(new PHUIInfoView())
         ->setTitle(pht('No Issues'))
         ->appendChild(
           pht('Your install has no current setup issues to resolve.'))
@@ -59,25 +42,39 @@ final class PhabricatorConfigIssueListController
 
     $title = pht('Setup Issues');
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true);
+
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
-      ->addTextCrumb(pht('Setup'), $this->getApplicationURI('issue/'));
+      ->addTextCrumb(pht('Setup Issues'))
+      ->setBorder(true);
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn(array(
-        $setup_issues,
-    ));
+    $page = array(
+      $no_issues,
+      $important,
+      $php,
+      $mysql,
+      $other,
+    );
+
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($page);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
-  private function buildIssueList(array $issues, $group) {
+  private function buildIssueList(array $issues, $group, $fonticon) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PHUIObjectItemListView();
+    $list->setBig(true);
     $ignored_items = array();
     $items = 0;
 
@@ -90,12 +87,17 @@ final class PhabricatorConfigIssueListController
           ->setHref($href)
           ->addAttribute($issue->getSummary());
         if (!$issue->getIsIgnored()) {
-          $item->setStatusIcon('fa-warning yellow');
+          $icon = id(new PHUIIconView())
+            ->setIcon($fonticon)
+            ->setBackground('bg-sky');
+          $item->setImageIcon($icon);
           $list->addItem($item);
         } else {
-          $item->addIcon('fa-eye-slash', pht('Ignored'));
+          $icon = id(new PHUIIconView())
+            ->setIcon('fa-eye-slash')
+            ->setBackground('bg-grey');
           $item->setDisabled(true);
-          $item->setStatusIcon('fa-warning grey');
+          $item->setImageIcon($icon);
           $ignored_items[] = $item;
         }
       }

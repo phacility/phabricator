@@ -27,7 +27,7 @@ final class PhabricatorContentSourceModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Key'),
@@ -43,9 +43,6 @@ final class PhabricatorContentSourceModule
           'wide',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Content Sources'))
-      ->setTable($table);
   }
 
 }

@@ -133,16 +133,6 @@ final class ConpherenceTransactionView extends AphrontView {
     $transaction = $this->getConpherenceTransaction();
     $info = array();
 
-    if ($this->getFullDisplay() && $transaction->getContentSource()) {
-      $content_source = id(new PhabricatorContentSourceView())
-        ->setContentSource($transaction->getContentSource())
-        ->setUser($viewer)
-        ->render();
-      if ($content_source) {
-        $info[] = $content_source;
-      }
-    }
-
     Javelin::initBehavior('phabricator-tooltips');
     $tip = phabricator_datetime($transaction->getDateCreated(), $viewer);
     $label = phabricator_time($transaction->getDateCreated(), $viewer);
@@ -183,8 +173,6 @@ final class ConpherenceTransactionView extends AphrontView {
         ),
         $label);
     }
-
-    $info = phutil_implode_html(" \xC2\xB7 ", $info);
 
     return phutil_tag(
       'span',

@@ -87,7 +87,7 @@ abstract class PhameLiveController extends PhameController {
     $this->isExternal = $is_external;
     $this->isLive = $is_live;
 
-    if ($post_id) {
+    if (strlen($post_id)) {
       $post_query = id(new PhamePostQuery())
         ->setViewer($viewer)
         ->withIDs(array($post_id));
@@ -104,6 +104,8 @@ abstract class PhameLiveController extends PhameController {
 
       $post = $post_query->executeOne();
       if (!$post) {
+        // Not a valid Post
+        $this->blog = $blog;
         return new Aphront404Response();
       }
 
@@ -193,7 +195,9 @@ abstract class PhameLiveController extends PhameController {
     }
 
     if ($post) {
-      $crumbs->addTextCrumb($post->getTitle());
+      if (!$is_external) {
+        $crumbs->addTextCrumb('J'.$post->getID());
+      }
     }
 
     return $crumbs;

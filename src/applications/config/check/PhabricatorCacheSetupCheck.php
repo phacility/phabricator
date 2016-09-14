@@ -3,7 +3,7 @@
 final class PhabricatorCacheSetupCheck extends PhabricatorSetupCheck {
 
   public function getDefaultGroup() {
-    return self::GROUP_OTHER;
+    return self::GROUP_PHP;
   }
 
   protected function executeChecks() {

@@ -108,6 +108,7 @@ JX.behavior('phabricator-nav', function(config) {
     collapsed = !collapsed;
     JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
     JX.DOM.alterClass(main, 'has-drag-nav', !collapsed);
+    JX.DOM.alterClass(main, 'has-closed-nav', collapsed);
     resetdrag();
     new JX.Request('/settings/adjust/', JX.bag)
       .setData({ key : 'nav-collapsed', value : (collapsed ? 1 : 0) })

@@ -29,8 +29,18 @@ final class PHUIListItemView extends AphrontTagView {
   private $indented;
   private $hideInApplicationMenu;
   private $icons = array();
+  private $openInNewWindow = false;
 
-  public function setHideInApplicationMenu($hide) {
+  public function setOpenInNewWindow($open_in_new_window) {
+    $this->openInNewWindow = $open_in_new_window;
+    return $this;
+  }
+
+  public function getOpenInNewWindow() {
+    return $this->openInNewWindow;
+  }
+
+    public function setHideInApplicationMenu($hide) {
     $this->hideInApplicationMenu = $hide;
     return $this;
   }
@@ -294,6 +304,7 @@ final class PHUIListItemView extends AphrontTagView {
         'class' => implode(' ', $classes),
         'meta' => $meta,
         'sigil' => $sigil,
+        'target' => $this->getOpenInNewWindow() ? '_blank' : null,
       ),
       array(
         $aural,

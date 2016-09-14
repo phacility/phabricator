@@ -27,6 +27,12 @@ final class PhabricatorApplicationDatasource
       if (!$uri) {
         continue;
       }
+      $is_installed = PhabricatorApplication::isClassInstalledForViewer(
+        get_class($application),
+        $viewer);
+      if (!$is_installed) {
+        continue;
+      }
       $name = $application->getName().' '.$application->getShortDescription();
       $img = 'phui-font-fa phui-icon-view '.$application->getIcon();
       $results[] = id(new PhabricatorTypeaheadResult())
@@ -36,9 +42,10 @@ final class PhabricatorApplicationDatasource
         ->setPriorityString($application->getName())
         ->setDisplayName($application->getName())
         ->setDisplayType($application->getShortDescription())
-        ->setImageuRI($application->getIconURI())
         ->setPriorityType('apps')
-        ->setImageSprite('phabricator-search-icon '.$img);
+        ->setImageSprite('phabricator-search-icon '.$img)
+        ->setIcon($application->getIcon())
+        ->addAttribute($application->getShortDescription());
     }
 
     return $this->filterResultsAgainstTokens($results);

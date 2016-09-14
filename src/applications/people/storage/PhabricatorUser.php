@@ -832,6 +832,14 @@ final class PhabricatorUser
     return $offset;
   }
 
+  public function getTimeZoneOffsetInHours() {
+    $offset = $this->getTimeZoneOffset();
+    $offset = (int)round($offset / 60);
+    $offset = -$offset;
+
+    return $offset;
+  }
+
   public function formatShortDateTime($when, $now = null) {
     if ($now === null) {
       $now = PhabricatorTime::getNow();

@@ -29,7 +29,7 @@ final class PhabricatorSearchEngineExtensionModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Order'),
@@ -46,10 +46,6 @@ final class PhabricatorSearchEngineExtensionModule
           'wide pri',
           null,
         ));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('SearchEngine Extensions'))
-      ->setTable($table);
   }
 
 }

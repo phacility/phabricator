@@ -7,22 +7,42 @@ final class PhabricatorConfigClusterRepositoriesController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('cluster/repositories/');
 
-    $title = pht('Repository Servers');
+    $title = pht('Cluster Repository Status');
+
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true)
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setIcon('fa-book')
+          ->setHref($doc_href)
+          ->setTag('a')
+          ->setText(pht('Documentation')));
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
-      ->addTextCrumb(pht('Repository Servers'));
+      ->addTextCrumb(pht('Repository Servers'))
+      ->setBorder(true);
 
     $repository_status = $this->buildClusterRepositoryStatus();
+    $repository_errors = $this->buildClusterRepositoryErrors();
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn($repository_status);
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent(
+        array(
+          $repository_status,
+          $repository_errors,
+        ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildClusterRepositoryStatus() {
@@ -43,7 +63,6 @@ final class PhabricatorConfigClusterRepositoriesController
 
     $all_repositories = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
-      ->withHosted(PhabricatorRepositoryQuery::HOSTED_PHABRICATOR)
       ->withTypes(
         array(
           PhabricatorRepositoryType::REPOSITORY_TYPE_GIT,
@@ -134,6 +153,14 @@ final class PhabricatorConfigClusterRepositoriesController
 
         $versions = idx($repository_versions, $repository_phid, array());
 
+        // Filter out any versions for devices which are no longer active.
+        foreach ($versions as $key => $version) {
+          $version_device_phid = $version->getDevicePHID();
+          if (empty($active_devices[$version_device_phid])) {
+            unset($versions[$key]);
+          }
+        }
+
         $leaders = 0;
         foreach ($versions as $version) {
           if ($version->getRepositoryVersion() == $leader_version) {
@@ -218,8 +245,7 @@ final class PhabricatorConfigClusterRepositoriesController
       );
     }
 
-
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setNoDataString(
         pht('No repository cluster services are configured.'))
       ->setHeaders(
@@ -240,21 +266,6 @@ final class PhabricatorConfigClusterRepositoriesController
           null,
           'wide',
         ));
-
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Repositories');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Cluster Repository Status'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setTable($table);
   }
 
   private function getDevices(
@@ -339,5 +350,71 @@ final class PhabricatorConfigClusterRepositoriesController
     return $result;
   }
 
+
+  private function buildClusterRepositoryErrors() {
+    $viewer = $this->getViewer();
+
+    $messages = id(new PhabricatorRepositoryStatusMessage())->loadAllWhere(
+      'statusCode IN (%Ls)',
+      array(
+        PhabricatorRepositoryStatusMessage::CODE_ERROR,
+      ));
+
+    $repository_ids = mpull($messages, 'getRepositoryID');
+    if ($repository_ids) {
+      // NOTE: We're bypassing policies when loading repositories because we
+      // want to show errors exist even if the viewer can't see the repository.
+      // We use handles to describe the repository below, so the viewer won't
+      // actually be able to see any particulars if they can't see the
+      // repository.
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withIDs($repository_ids)
+        ->execute();
+      $repositories = mpull($repositories, null, 'getID');
+    }
+
+    $rows = array();
+    foreach ($messages as $message) {
+      $repository = idx($repositories, $message->getRepositoryID());
+      if (!$repository) {
+        continue;
+      }
+
+      if (!$repository->isTracked()) {
+        continue;
+      }
+
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-exclamation-triangle red');
+
+      $rows[] = array(
+        $icon,
+        $viewer->renderHandle($repository->getPHID()),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $repository->getPathURI('manage/status/'),
+          ),
+          $message->getStatusTypeName()),
+      );
+    }
+
+    return id(new AphrontTableView($rows))
+      ->setNoDataString(
+        pht('No active repositories have outstanding errors.'))
+      ->setHeaders(
+        array(
+          null,
+          pht('Repository'),
+          pht('Error'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'pri',
+          'wide',
+        ));
+  }
 
 }

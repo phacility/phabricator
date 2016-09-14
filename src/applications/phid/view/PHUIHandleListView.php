@@ -12,6 +12,7 @@ final class PHUIHandleListView
 
   private $handleList;
   private $asInline;
+  private $asText;
 
   public function setHandleList(PhabricatorHandleList $list) {
     $this->handleList = $list;
@@ -27,6 +28,15 @@ final class PHUIHandleListView
     return $this->asInline;
   }
 
+  public function setAsText($as_text) {
+    $this->asText = $as_text;
+    return $this;
+  }
+
+  public function getAsText() {
+    return $this->asText;
+  }
+
   protected function getTagName() {
     // TODO: It would be nice to render this with a proper <ul />, at least in
     // block mode, but don't stir the waters up too much for now.
@@ -37,9 +47,9 @@ final class PHUIHandleListView
     $list = $this->handleList;
     $items = array();
     foreach ($list as $handle) {
-      $view = $list->renderHandle($handle->getPHID());
-
-      $view->setShowHovercard(true);
+      $view = $list->renderHandle($handle->getPHID())
+        ->setShowHovercard(true)
+        ->setAsText($this->getAsText());
 
       $items[] = $view;
     }

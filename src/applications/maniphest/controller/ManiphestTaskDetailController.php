@@ -31,8 +31,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setTargetObject($task);
 
     $e_commit = ManiphestTaskHasCommitEdgeType::EDGECONST;
-    $e_dep_on = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-    $e_dep_by = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
     $e_rev    = ManiphestTaskHasRevisionEdgeType::EDGECONST;
     $e_mock   = ManiphestTaskHasMockEdgeType::EDGECONST;
 
@@ -43,8 +41,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->withEdgeTypes(
         array(
           $e_commit,
-          $e_dep_on,
-          $e_dep_by,
           $e_rev,
           $e_mock,
         ));
@@ -90,6 +86,85 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ))
       ->addPropertySection(pht('Description'), $description)
       ->addPropertySection(pht('Details'), $details);
+
+    $graph_limit = 100;
+    $task_graph = id(new ManiphestTaskGraph())
+      ->setViewer($viewer)
+      ->setSeedPHID($task->getPHID())
+      ->setLimit($graph_limit)
+      ->loadGraph();
+    if (!$task_graph->isEmpty()) {
+      $parent_type = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
+      $subtask_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+      $parent_map = $task_graph->getEdges($parent_type);
+      $subtask_map = $task_graph->getEdges($subtask_type);
+      $parent_list = idx($parent_map, $task->getPHID(), array());
+      $subtask_list = idx($subtask_map, $task->getPHID(), array());
+      $has_parents = (bool)$parent_list;
+      $has_subtasks = (bool)$subtask_list;
+
+      $search_text = pht('Search...');
+
+      // First, get a count of direct parent tasks and subtasks. If there
+      // are too many of these, we just don't draw anything. You can use
+      // the search button to browse tasks with the search UI instead.
+      $direct_count = count($parent_list) + count($subtask_list);
+
+      if ($direct_count > $graph_limit) {
+        $message = pht(
+          'Task graph too large to display (this task is directly connected '.
+          'to more than %s other tasks). Use %s to explore connected tasks.',
+          $graph_limit,
+          phutil_tag('strong', array(), $search_text));
+        $message = phutil_tag('em', array(), $message);
+        $graph_table = id(new PHUIPropertyListView())
+          ->addTextContent($message);
+      } else {
+        // If there aren't too many direct tasks, but there are too many total
+        // tasks, we'll only render directly connected tasks.
+        if ($task_graph->isOverLimit()) {
+          $task_graph->setRenderOnlyAdjacentNodes(true);
+        }
+        $graph_table = $task_graph->newGraphTable();
+      }
+
+      $parents_uri = urisprintf(
+        '/?subtaskIDs=%d#R',
+        $task->getID());
+      $parents_uri = $this->getApplicationURI($parents_uri);
+
+      $subtasks_uri = urisprintf(
+        '/?parentIDs=%d#R',
+        $task->getID());
+      $subtasks_uri = $this->getApplicationURI($subtasks_uri);
+
+      $dropdown_menu = id(new PhabricatorActionListView())
+        ->setViewer($viewer)
+        ->addAction(
+          id(new PhabricatorActionView())
+            ->setHref($parents_uri)
+            ->setName(pht('Search Parent Tasks'))
+            ->setDisabled(!$has_parents)
+            ->setIcon('fa-chevron-circle-up'))
+        ->addAction(
+          id(new PhabricatorActionView())
+            ->setHref($subtasks_uri)
+            ->setName(pht('Search Subtasks'))
+            ->setDisabled(!$has_subtasks)
+            ->setIcon('fa-chevron-circle-down'));
+
+      $graph_menu = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-search')
+        ->setText($search_text)
+        ->setDropdownMenu($dropdown_menu);
+
+      $graph_header = id(new PHUIHeaderView())
+        ->setHeader(pht('Task Graph'))
+        ->addActionLink($graph_menu);
+
+      $view->addPropertySection($graph_header, $graph_table);
+    }
 
     return $this->newPage()
       ->setTitle($title)
@@ -186,9 +261,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $edit_uri = $this->getApplicationURI($edit_uri);
     }
 
-    $task_submenu = array();
-
-    $task_submenu[] = id(new PhabricatorActionView())
+    $subtask_item = id(new PhabricatorActionView())
       ->setName(pht('Create Subtask'))
       ->setHref($edit_uri)
       ->setIcon('fa-level-down')
@@ -199,27 +272,19 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $viewer,
       $task);
 
-    $parent_key = ManiphestTaskHasParentRelationship::RELATIONSHIPKEY;
-    $subtask_key = ManiphestTaskHasSubtaskRelationship::RELATIONSHIPKEY;
+    $submenu_actions = array(
+      $subtask_item,
+      ManiphestTaskHasParentRelationship::RELATIONSHIPKEY,
+      ManiphestTaskHasSubtaskRelationship::RELATIONSHIPKEY,
+      ManiphestTaskMergeInRelationship::RELATIONSHIPKEY,
+      ManiphestTaskCloseAsDuplicateRelationship::RELATIONSHIPKEY,
+    );
 
-    $task_submenu[] = $relationship_list->getRelationship($parent_key)
-      ->newAction($task);
+    $task_submenu = $relationship_list->newActionSubmenu($submenu_actions)
+      ->setName(pht('Edit Related Tasks...'))
+      ->setIcon('fa-anchor');
 
-    $task_submenu[] = $relationship_list->getRelationship($subtask_key)
-      ->newAction($task);
-
-    $task_submenu[] = id(new PhabricatorActionView())
-      ->setName(pht('Merge Duplicates In'))
-      ->setHref("/search/attach/{$phid}/TASK/merge/")
-      ->setIcon('fa-compress')
-      ->setDisabled(!$can_edit)
-      ->setWorkflow(true);
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Related Tasks...'))
-        ->setIcon('fa-anchor')
-        ->setSubmenu($task_submenu));
+    $curtain->addAction($task_submenu);
 
     $relationship_submenu = $relationship_list->newActionMenu();
     if ($relationship_submenu) {
@@ -289,10 +354,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $edge_types = array(
-      ManiphestTaskDependedOnByTaskEdgeType::EDGECONST
-        => pht('Parent Tasks'),
-      ManiphestTaskDependsOnTaskEdgeType::EDGECONST
-        => pht('Subtasks'),
       ManiphestTaskHasRevisionEdgeType::EDGECONST
         => pht('Differential Revisions'),
       ManiphestTaskHasMockEdgeType::EDGECONST

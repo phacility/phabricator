@@ -7,6 +7,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   private $selectedDiffID;
   private $selectedWhitespace;
   private $commitsForLinks = array();
+  private $unitStatus = array();
 
   public function setDiffs(array $diffs) {
     assert_instances_of($diffs, 'DifferentialDiff');
@@ -32,6 +33,11 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   public function setCommitsForLinks(array $commits) {
     assert_instances_of($commits, 'PhabricatorRepositoryCommit');
     $this->commitsForLinks = $commits;
+    return $this;
+  }
+
+  public function setDiffUnitStatuses(array $unit_status) {
+    $this->unitStatus = $unit_status;
     return $this;
   }
 
@@ -139,6 +145,11 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
 
       if ($diff) {
+        $unit_status = idx(
+          $this->unitStatus,
+          $diff->getPHID(),
+          $diff->getUnitStatus());
+
         $lint = self::renderDiffLintStar($row['obj']);
         $lint = phutil_tag(
           'div',
@@ -148,12 +159,12 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           ),
           $lint);
 
-        $unit = self::renderDiffUnitStar($row['obj']);
+        $unit = self::renderDiffUnitStar($unit_status);
         $unit = phutil_tag(
           'div',
           array(
             'class' => 'lintunit-star',
-            'title' => self::getDiffUnitMessage($diff),
+            'title' => self::getDiffUnitMessage($unit_status),
           ),
           $unit);
 
@@ -303,10 +314,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $show_diff,
       ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Revision Update History'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($content);
+    return $content;
   }
 
   const STAR_NONE = 'none';
@@ -315,7 +323,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   const STAR_FAIL = 'fail';
   const STAR_SKIP = 'skip';
 
-  public static function renderDiffLintStar(DifferentialDiff $diff) {
+  private static function renderDiffLintStar(DifferentialDiff $diff) {
     static $map = array(
       DifferentialLintStatus::LINT_NONE => self::STAR_NONE,
       DifferentialLintStatus::LINT_OKAY => self::STAR_OKAY,
@@ -330,7 +338,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     return self::renderDiffStar($star);
   }
 
-  public static function renderDiffUnitStar(DifferentialDiff $diff) {
+  private static function renderDiffUnitStar($unit_status) {
     static $map = array(
       DifferentialUnitStatus::UNIT_NONE => self::STAR_NONE,
       DifferentialUnitStatus::UNIT_OKAY => self::STAR_OKAY,
@@ -339,8 +347,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialUnitStatus::UNIT_SKIP => self::STAR_SKIP,
       DifferentialUnitStatus::UNIT_AUTO_SKIP => self::STAR_SKIP,
     );
-
-    $star = idx($map, $diff->getUnitStatus(), self::STAR_FAIL);
+    $star = idx($map, $unit_status, self::STAR_FAIL);
 
     return self::renderDiffStar($star);
   }
@@ -363,8 +370,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     return pht('Unknown');
   }
 
-  public static function getDiffUnitMessage(DifferentialDiff $diff) {
-    switch ($diff->getUnitStatus()) {
+  public static function getDiffUnitMessage($unit_status) {
+    switch ($unit_status) {
       case DifferentialUnitStatus::UNIT_NONE:
         return pht('No Unit Test Coverage');
       case DifferentialUnitStatus::UNIT_OKAY:

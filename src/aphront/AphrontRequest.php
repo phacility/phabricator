@@ -261,25 +261,30 @@ final class AphrontRequest extends Phobject {
       // Add some diagnostic details so we can figure out if some CSRF issues
       // are JS problems or people accessing Ajax URIs directly with their
       // browsers.
-      $more_info = array();
+      $info = array();
+
+      $info[] = pht(
+        'You are trying to save some data to Phabricator, but the request '.
+        'your browser made included an incorrect token. Reload the page '.
+        'and try again. You may need to clear your cookies.');
 
       if ($this->isAjax()) {
-        $more_info[] = pht('This was an Ajax request.');
+        $info[] = pht('This was an Ajax request.');
       } else {
-        $more_info[] = pht('This was a Web request.');
+        $info[] = pht('This was a Web request.');
       }
 
       if ($token) {
-        $more_info[] = pht('This request had an invalid CSRF token.');
+        $info[] = pht('This request had an invalid CSRF token.');
       } else {
-        $more_info[] = pht('This request had no CSRF token.');
+        $info[] = pht('This request had no CSRF token.');
       }
 
       // Give a more detailed explanation of how to avoid the exception
       // in developer mode.
       if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
         // TODO: Clean this up, see T1921.
-        $more_info[] = pht(
+        $info[] = pht(
           "To avoid this error, use %s to construct forms. If you are already ".
           "using %s, make sure the form 'action' uses a relative URI (i.e., ".
           "begins with a '%s'). Forms using absolute URIs do not include CSRF ".
@@ -299,16 +304,16 @@ final class AphrontRequest extends Phobject {
           'setRenderAsForm(true)');
       }
 
+      $message = implode("\n", $info);
+
       // This should only be able to happen if you load a form, pull your
       // internet for 6 hours, and then reconnect and immediately submit,
       // but give the user some indication of what happened since the workflow
       // is incredibly confusing otherwise.
-      throw new AphrontCSRFException(
-        pht(
-          'You are trying to save some data to Phabricator, but the request '.
-          'your browser made included an incorrect token. Reload the page '.
-          'and try again. You may need to clear your cookies.')."\n\n".
-          implode("\n", $more_info));
+      throw new AphrontMalformedRequestException(
+        pht('Invalid Request (CSRF)'),
+        $message,
+        true);
     }
 
     return true;
@@ -480,7 +485,8 @@ final class AphrontRequest extends Phobject {
       $configured_as = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
       $accessed_as = $this->getHost();
 
-      throw new Exception(
+      throw new AphrontMalformedRequestException(
+        pht('Bad Host Header'),
         pht(
           'This Phabricator install is configured as "%s", but you are '.
           'using the domain name "%s" to access a page which is trying to '.
@@ -488,7 +494,8 @@ final class AphrontRequest extends Phobject {
           'domain or a configured alternate domain. Phabricator will not '.
           'set cookies on other domains for security reasons.',
           $configured_as,
-          $accessed_as));
+          $accessed_as),
+        true);
     }
 
     $base_domain = $base_domain_uri->getDomain();

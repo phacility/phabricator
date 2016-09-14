@@ -91,6 +91,11 @@
       "rule": ".login-Phabricator",
       "hash": "d0f830803593bbcc025d7d5a29ee3ecd"
     },
+    "login-Slack": {
+      "name": "login-Slack",
+      "rule": ".login-Slack",
+      "hash": "fe0df2df040032b949aa05948b6bd986"
+    },
     "login-Stripe": {
       "name": "login-Stripe",
       "rule": ".login-Stripe",

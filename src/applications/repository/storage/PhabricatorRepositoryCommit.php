@@ -108,7 +108,7 @@ final class PhabricatorRepositoryCommit
         'mailKey' => 'bytes20',
         'authorPHID' => 'phid?',
         'auditStatus' => 'uint32',
-        'summary' => 'text80',
+        'summary' => 'text255',
         'importStatus' => 'uint32',
       ),
       self::CONFIG_KEY_SCHEMA => array(

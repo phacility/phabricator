@@ -348,12 +348,9 @@ td.cov-I {
   margin-right: 12px;
 }
 
-.device-phone .differential-changeset-buttons {
-  float: none;
-  margin: 0 0 8px 4px;
-}
-
-.differential-changeset-buttons a.button {
+.device-phone .differential-changeset-buttons .button .phui-button-text {
+  visibility: hidden;
+  width: 0;
   margin-left: 8px;
 }
 

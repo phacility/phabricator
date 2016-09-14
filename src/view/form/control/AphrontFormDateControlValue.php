@@ -59,27 +59,6 @@ final class AphrontFormDateControlValue extends Phobject {
     return $this->viewer;
   }
 
-  public static function newFromParts(
-    PhabricatorUser $viewer,
-    $year,
-    $month,
-    $day,
-    $time = null,
-    $enabled = true) {
-
-    $value = new AphrontFormDateControlValue();
-    $value->viewer = $viewer;
-    list($value->valueDate, $value->valueTime) =
-      $value->getFormattedDateFromParts(
-        $year,
-        $month,
-        $day,
-        coalesce($time, '12:00 AM'));
-    $value->valueEnabled = $enabled;
-
-    return $value;
-  }
-
   public static function newFromRequest(AphrontRequest $request, $key) {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $request->getViewer();

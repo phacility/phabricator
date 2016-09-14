@@ -3,7 +3,7 @@
 final class DiffusionMercurialFileContentQuery
   extends DiffusionFileContentQuery {
 
-  protected function getFileContentFuture() {
+  protected function newQueryFuture() {
     $drequest = $this->getRequest();
 
     $repository = $drequest->getRepository();
@@ -14,11 +14,6 @@ final class DiffusionMercurialFileContentQuery
       'cat --rev %s -- %s',
       $commit,
       $path);
-  }
-
-  protected function resolveFileContentFuture(Future $future) {
-    list($corpus) = $future->resolvex();
-    return $corpus;
   }
 
 }

@@ -329,6 +329,11 @@ abstract class PhabricatorSearchField extends Phobject {
       $this->getConduitKey());
   }
 
+  public function getValidConstraintKeys() {
+    return $this->getConduitParameterType()->getKeys(
+      $this->getConduitKey());
+  }
+
 
 /* -(  Utility Methods )----------------------------------------------------- */
 

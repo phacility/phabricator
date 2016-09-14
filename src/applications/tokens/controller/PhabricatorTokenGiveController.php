@@ -90,7 +90,7 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
           $aural,
           $token->renderIcon(),
         ));
-      if ((++$ii % 4) == 0) {
+      if ((++$ii % 6) == 0) {
         $buttons[] = phutil_tag('br');
       }
     }

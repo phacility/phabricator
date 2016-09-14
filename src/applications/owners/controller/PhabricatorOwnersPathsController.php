@@ -82,7 +82,13 @@ final class PhabricatorOwnersPathsController
       }
     }
 
-    $repos = mpull($repos, 'getDisplayName', 'getPHID');
+
+    $repo_map = array();
+    foreach ($repos as $key => $repo) {
+      $monogram = $repo->getMonogram();
+      $name = $repo->getName();
+      $repo_map[$repo->getPHID()] = "{$monogram} {$name}";
+    }
     asort($repos);
 
     $template = new AphrontTypeaheadTemplateView();
@@ -94,7 +100,7 @@ final class PhabricatorOwnersPathsController
         'root'                => 'path-editor',
         'table'               => 'paths',
         'add_button'          => 'addpath',
-        'repositories'        => $repos,
+        'repositories'        => $repo_map,
         'input_template'      => $template,
         'pathRefs'            => $path_refs,
 

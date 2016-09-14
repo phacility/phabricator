@@ -53,12 +53,25 @@ final class PhameBlogHeaderPictureController
 
       if (!$errors) {
         if ($delete_header) {
-          $blog->setHeaderImagePHID(null);
+          $new_value = null;
         } else {
-          $blog->setHeaderImagePHID($file->getPHID());
           $file->attachToObject($blog->getPHID());
+          $new_value = $file->getPHID();
         }
-        $blog->save();
+
+        $xactions = array();
+        $xactions[] = id(new PhameBlogTransaction())
+          ->setTransactionType(PhameBlogTransaction::TYPE_HEADERIMAGE)
+          ->setNewValue($new_value);
+
+        $editor = id(new PhameBlogEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($blog, $xactions);
+
         return id(new AphrontRedirectResponse())->setURI($blog_uri);
       }
     }

@@ -6,8 +6,10 @@
   cursor: col-resize;
 }
 
-.phabricator-nav-local,
-.phabricator-nav-drag {
+.device-desktop .has-closed-nav div.phabricator-nav-local,
+.device-desktop .has-closed-nav div.phabricator-nav-drag,
+.device .phui-navigation-shell div.phabricator-nav-local,
+.device .phui-navigation-shell div.phabricator-nav-drag {
   display: none;
 }
 
@@ -16,27 +18,25 @@
   display: block;
 }
 
-.device .phabricator-side-menu-home .phabricator-nav-local {
+.device-phone .phabricator-side-menu-home .phabricator-nav-local {
   display: block;
 }
 
-.device-desktop .phabricator-side-menu-home .phabricator-nav-content,
-.device-tablet .phabricator-side-menu-home .phabricator-nav-content {
-  margin-left: 205px;
+/* Home Sidenav */
+.phui-basic-nav.phui-navigation-shell
+  .phabricator-side-menu-home .phabricator-nav-local {
+    padding-top: 16px;
+    padding-right: 0;
+    background-color: transparent;
+    width: 205px;
 }
 
-.phabricator-nav-local {
-  width: 205px;
-  position: absolute;
-  left: 0;
-  white-space: nowrap;
-  overflow-x: hidden;
-  overflow-y: auto;
-  margin-top: 8px;
-}
-
-.phabricator-side-menu-home .phabricator-nav-local {
-  margin-top: 16px;
+.device-phone .phui-basic-nav.phui-navigation-shell
+  .phabricator-side-menu-home .phabricator-nav-local {
+    padding-top: 0;
+    padding-right: 0;
+    background-color: transparent;
+    width: auto;
 }
 
 .phabricator-nav-drag {
@@ -68,8 +68,16 @@
   margin-left: 212px;
 }
 
-.device-desktop .has-local-nav .phabricator-nav-content {
-  margin-left: 205px;
+.has-drag-nav ul.phui-list-view {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.device-desktop .phui-navigation-shell .has-drag-nav .phabricator-nav-local {
+  width: 205px;
+  padding: 0;
+  background: transparent;
 }
 
 .device-phone .phabricator-side-menu-home .phabricator-nav-content {

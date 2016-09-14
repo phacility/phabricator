@@ -11,3 +11,27 @@ body {
   text-align: left;
   -webkit-text-size-adjust: none;
 }
+
+body.in-flight {
+  background: #41506e;
+  color: #e0e0e0;
+}
+
+.in-flight-error-detail {
+  max-width: 760px;
+  margin: 72px auto;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  padding: 8px 16px;
+}
+
+.in-flight-error-title {
+   padding: 12px 8px;
+   font-size: 24px;
+   font-weight: 500;
+   margin: 0;
+}
+
+.in-flight-error-body {
+   padding: 4px 12px 12px;
+}

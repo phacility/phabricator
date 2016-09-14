@@ -17,6 +17,7 @@ final class PHUIIconView extends AphrontTagView {
   private $spriteSheet;
   private $iconFont;
   private $iconColor;
+  private $iconBackground;
 
   public function setHref($href) {
     $this->href = $href;
@@ -54,6 +55,11 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
+  public function setBackground($color) {
+    $this->iconBackground = $color;
+    return $this;
+  }
+
   protected function getTagName() {
     $tag = 'span';
     if ($this->href) {
@@ -78,6 +84,10 @@ final class PHUIIconView extends AphrontTagView {
       $classes[] = $this->iconFont;
       if ($this->iconColor) {
         $classes[] = $this->iconColor;
+      }
+      if ($this->iconBackground) {
+        $classes[] = 'phui-icon-square';
+        $classes[] = $this->iconBackground;
       }
     } else {
       if ($this->headSize) {
