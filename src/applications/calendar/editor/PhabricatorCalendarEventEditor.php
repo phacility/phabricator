@@ -285,6 +285,8 @@ final class PhabricatorCalendarEventEditor
       pht('EVENT DETAIL'),
       PhabricatorEnv::getProductionURI('/E'.$object->getID()));
 
+    $ics_attachment = $this->newICSAttachment($object);
+    $body->addAttachment($ics_attachment);
 
     return $body;
   }
@@ -303,5 +305,27 @@ final class PhabricatorCalendarEventEditor
       ->setObject($object);
   }
 
+  private function newICSAttachment(
+    PhabricatorCalendarEvent $event) {
+    $actor = $this->getActor();
+
+    $event_node = $event->newIntermediateEventNode($actor);
+
+    $document_node = id(new PhutilCalendarDocumentNode())
+      ->appendChild($event_node);
+
+    $root_node = id(new PhutilCalendarRootNode())
+      ->appendChild($document_node);
+
+    $ics_data = id(new PhutilICSWriter())
+      ->writeICSDocument($root_node);
+
+    $ics_attachment = new PhabricatorMetaMTAAttachment(
+      $ics_data,
+      $event->getICSFilename(),
+      'text/calendar');
+
+    return $ics_attachment;
+  }
 
 }

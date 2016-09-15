@@ -19,36 +19,22 @@ final class PhabricatorCalendarEventExportController
       return new Aphront404Response();
     }
 
-    if ($request->isFormPost()) {
-      $file_name = $event->getMonogram().'.ics';
+    $file_name = $event->getICSFilename();
+    $event_node = $event->newIntermediateEventNode($viewer);
 
-      $event_node = $event->newIntermediateEventNode($viewer);
+    $document_node = id(new PhutilCalendarDocumentNode())
+      ->appendChild($event_node);
 
-      $document_node = id(new PhutilCalendarDocumentNode())
-        ->appendChild($event_node);
+    $root_node = id(new PhutilCalendarRootNode())
+      ->appendChild($document_node);
 
-      $root_node = id(new PhutilCalendarRootNode())
-        ->appendChild($document_node);
+    $ics_data = id(new PhutilICSWriter())
+      ->writeICSDocument($root_node);
 
-      $ics_data = id(new PhutilICSWriter())
-        ->writeICSDocument($root_node);
-
-      return id(new AphrontFileResponse())
-        ->setDownload($file_name)
-        ->setMimeType('text/calendar')
-        ->setContent($ics_data);
-    }
-
-    return $this->newDialog()
-      ->setDisableWorkflowOnSubmit(true)
-      ->setTitle(pht('Export as .ics'))
-      ->appendParagraph(
-        pht(
-          'WARNING: This feature is a prototype and only supports a limited '.
-          'set of features. Keep your expectations low!'))
-      ->addSubmitButton(pht('Download .ics'))
-      ->addCancelButton($event->getURI(), pht('Close'));
-
+    return id(new AphrontFileResponse())
+      ->setDownload($file_name)
+      ->setMimeType('text/calendar')
+      ->setContent($ics_data);
   }
 
 }

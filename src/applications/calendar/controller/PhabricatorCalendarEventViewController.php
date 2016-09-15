@@ -193,14 +193,14 @@ final class PhabricatorCalendarEventViewController
           ->setWorkflow(true));
     }
 
-    $export_uri = $this->getApplicationURI("event/export/{$id}/");
+    $ics_name = $event->getICSFilename();
+    $export_uri = $this->getApplicationURI("event/export/{$id}/{$ics_name}");
 
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Export as .ics'))
         ->setIcon('fa-download')
-        ->setHref($export_uri)
-        ->setWorkflow(true));
+        ->setHref($export_uri));
 
     return $curtain;
   }

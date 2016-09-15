@@ -625,6 +625,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return null;
   }
 
+  public function getICSFilename() {
+    return $this->getMonogram().'.ics';
+  }
 
   public function newIntermediateEventNode(PhabricatorUser $viewer) {
     $base_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
