@@ -45,7 +45,9 @@ final class PHUIIconCircleView extends AphrontTagView {
     $classes[] = 'phui-icon-circle';
 
     if ($this->color) {
-      $classes[] = 'phui-icon-circle-'.$this->color;
+      $classes[] = 'hover-'.$this->color;
+    } else {
+      $classes[] = 'hover-sky';
     }
 
     if ($this->size) {
@@ -60,8 +62,7 @@ final class PHUIIconCircleView extends AphrontTagView {
 
   protected function getTagContent() {
     return id(new PHUIIconView())
-      ->setIcon($this->icon)
-      ->addClass($this->color);
+      ->setIcon($this->icon);
   }
 
 }

@@ -72,6 +72,7 @@ abstract class ConpherenceController extends PhabricatorController {
             $this->getApplicationURI('update/'.$conpherence->getID()).'/')
           ->setIcon('fa-pencil')
           ->addClass('hide-on-device')
+          ->setColor('violet')
           ->setWorkflow(true));
 
       $header->addActionItem(
@@ -81,6 +82,7 @@ abstract class ConpherenceController extends PhabricatorController {
             '?action='.ConpherenceUpdateActions::NOTIFICATIONS)
           ->setIcon('fa-gear')
           ->addClass('hide-on-device')
+          ->setColor('pink')
           ->setWorkflow(true));
 
       $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
