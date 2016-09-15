@@ -27,6 +27,9 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
         ->setNewValue($request->getStr('title'));
       $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
+        ->setNewValue($request->getStr('topic'));
+      $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
         ->setNewValue($request->getStr('viewPolicy'));
       $xactions[] = id(new ConpherenceTransaction())
@@ -93,6 +96,11 @@ final class ConpherenceNewRoomController extends ConpherenceController {
         ->setLabel(pht('Name'))
         ->setName('title')
         ->setValue($request->getStr('title')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Topic'))
+        ->setName('topic')
+        ->setValue($request->getStr('topic')))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
         ->setName('participants')

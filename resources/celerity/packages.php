@@ -159,6 +159,7 @@ return array(
     'conpherence-transaction-css',
     'conpherence-update-css',
     'conpherence-widget-pane-css',
+    'conpherence-header-pane-css',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',

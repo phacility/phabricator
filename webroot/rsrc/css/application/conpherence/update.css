@@ -2,10 +2,6 @@
  * @provides conpherence-update-css
  */
 
-.phabricator-standard-page-body .aphront-dialog-view {
-  margin: 20px auto 0px auto;
-}
-
 .aphront-dialog-view .conpherence-dialogue-drag-photo {
   border: 1px dashed #bfbfbf;
   padding: 10px 0px 10px 10px;

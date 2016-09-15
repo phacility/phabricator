@@ -46,6 +46,10 @@
   border: none;
 }
 
+.device-phone .aphront-dialog-body {
+  padding: 8px;
+}
+
 .aphront-dialog-tail {
   border: none;
   position: relative;

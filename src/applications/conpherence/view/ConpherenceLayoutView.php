@@ -105,9 +105,7 @@ final class ConpherenceLayoutView extends AphrontView {
       $classes[] = 'hide-widgets';
     }
 
-    $this->initBehavior(
-      'conpherence-widget-pane',
-      ConpherenceWidgetConfigConstants::getWidgetPaneBehaviorConfig());
+    $this->initBehavior('conpherence-participants-pane');
 
     return javelin_tag(
       'div',

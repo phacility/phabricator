@@ -241,7 +241,7 @@ JX.behavior('conpherence-menu', function(config) {
     if (!data.widget) {
       data.widget = getDefaultWidget();
     }
-    var widget_uri = config.baseURI + 'widget/' + data.threadID + '/';
+    var widget_uri = config.baseURI + 'participant/' + data.threadID + '/';
     new JX.Workflow(widget_uri, {})
       .setHandler(JX.bind(null, onWidgetResponse, data.threadID, data.widget))
       .start();

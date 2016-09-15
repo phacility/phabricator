@@ -13,8 +13,9 @@ final class ConpherenceCreateThreadConduitAPIMethod
 
   protected function defineParamTypes() {
     return array(
-      'title' => 'optional string',
-      'message' => 'required string',
+      'title' => 'required string',
+      'topic' => 'optional string',
+      'message' => 'optional string',
       'participantPHIDs' => 'required list<phids>',
     );
   }
@@ -27,8 +28,8 @@ final class ConpherenceCreateThreadConduitAPIMethod
     return array(
       'ERR_EMPTY_PARTICIPANT_PHIDS' => pht(
         'You must specify participant phids.'),
-      'ERR_EMPTY_MESSAGE' => pht(
-        'You must specify a message.'),
+      'ERR_EMPTY_TITLE' => pht(
+        'You must specify a title.'),
     );
   }
 
@@ -36,19 +37,21 @@ final class ConpherenceCreateThreadConduitAPIMethod
     $participant_phids = $request->getValue('participantPHIDs', array());
     $message = $request->getValue('message');
     $title = $request->getValue('title');
+    $topic = $request->getValue('topic');
 
     list($errors, $conpherence) = ConpherenceEditor::createThread(
       $request->getUser(),
       $participant_phids,
       $title,
       $message,
-      $request->newContentSource());
+      $request->newContentSource(),
+      $topic);
 
     if ($errors) {
       foreach ($errors as $error_code) {
         switch ($error_code) {
-          case ConpherenceEditor::ERROR_EMPTY_MESSAGE:
-            throw new ConduitException('ERR_EMPTY_MESSAGE');
+          case ConpherenceEditor::ERROR_EMPTY_TITLE:
+            throw new ConduitException('ERR_EMPTY_TITLE');
             break;
           case ConpherenceEditor::ERROR_EMPTY_PARTICIPANTS:
             throw new ConduitException('ERR_EMPTY_PARTICIPANT_PHIDS');

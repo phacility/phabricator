@@ -4,6 +4,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
   const TYPE_FILES           = 'files';
   const TYPE_TITLE           = 'title';
+  const TYPE_TOPIC           = 'topic';
   const TYPE_PARTICIPANTS    = 'participants';
   const TYPE_DATE_MARKER     = 'date-marker';
   const TYPE_PICTURE         = 'picture';
@@ -39,6 +40,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_PARTICIPANTS:
         return ($old === null);
       case self::TYPE_TITLE:
+      case self::TYPE_TOPIC:
       case self::TYPE_PICTURE:
       case self::TYPE_DATE_MARKER:
         return false;
@@ -59,6 +61,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
+      case self::TYPE_TOPIC:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
@@ -144,6 +147,20 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
             '%s named this room "%s".',
             $this->renderHandleLink($author_phid),
             $new);
+        }
+        return $title;
+        break;
+      case self::TYPE_TOPIC:
+        if ($new) {
+          $title = pht(
+            '%s set the topic of this room to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else if ($old) {
+          $title = pht(
+            '%s deleted the room topic "%s"',
+            $this->renderHandleLink($author_phid),
+            $old);
         }
         return $title;
         break;

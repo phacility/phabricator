@@ -2,11 +2,10 @@
  * @provides conpherence-widget-pane-css
  */
 
-.conpherence-widget-pane,
-.loading .widgets-loading-mask {
+.conpherence-widget-pane {
   position: fixed;
   right: 0px;
-  top: 79px;
+  top: 103px;
   bottom: 0;
   width: 240px;
   border-width: 0 0 0 1px;
@@ -15,20 +14,9 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-.device .conpherence-widget-pane,
-.device .loading .widgets-loading-mask {
-  top: 44px;
-  width: 100%;
-}
 
-.conpherence-widget-pane .widgets-loading-mask {
-  opacity: .6;
-  background: #fff;
-  display: none;
-}
-
-.loading .widgets-loading-mask {
-  display: block;
+.device .conpherence-widget-pane {
+  background-color: {$page.background};
 }
 
 .conpherence-widget-pane .aphront-form-input {
@@ -48,84 +36,20 @@
   font-size: {$biggerfontsize};
 }
 
-.device .conpherence-widget-pane .widgets-header {
-  display: none;
-}
-
-.conpherence-widget-pane .widgets-header .caret {
-  float: none;
-  height: 0px;
-  width: 0px;
-  margin: 10px 0 0 4px;
-  border-top-color: #000;
-}
-
 .conpherence-widget-pane .widgets-header .phui-icon-view.disabled {
   color: {$lightgreytext};
-}
-
-.device-desktop .conpherence-layout .device-widgets-selector {
-  display: none;
 }
 
 .conpherence-widget-pane .widgets-body {
   position: fixed;
   overflow-y: auto;
   bottom: 0;
-  top: 76px;
-  width: 100%;
-}
-
-#widgets-settings {
-  padding: 3px 6px;
-}
-
-.device-desktop .conpherence-widget-pane .widgets-body {
-  top: 115px;
+  top: 144px;
   width: 240px;
 }
 
-.conpherence-widget-pane .widget-icon {
-  display: block;
-  height: 14px;
-  width: 14px;
-}
-
-.conpherence-widget-pane .phabricator-remarkup-embed-layout-link {
-  padding-bottom: 1px;
-}
-
-/* people widget */
-.conpherence-widget-pane .people-widget-header .add-people-widget {
-  padding: 10px 0 5px 0;
-  overflow: hidden;
-}
-
-.conpherence-widget-pane .people-widget-header .add-people-widget
-.aphront-form-control-tokenizer {
-  float: left;
-  width: 150px;
-  padding: 0px 0px 0px 10px
-}
-
-.device .conpherence-widget-pane .people-widget-header .add-people-widget
-.aphront-form-control-tokenizer {
-  width: 70%;
-}
-
-.conpherence-widget-pane .people-widget-header .add-people-widget
-.people-add-button {
-  float: right;
-  margin: 2px 8px 0px 0px;
-  padding: 3px 16px 4px 16px;
-}
-
-#widgets-people {
-  margin-top: 4px;
-}
-
 .conpherence-widget-pane .person-entry {
-  padding: 4px 8px;
+  padding: 4px 4px 4px 8px;
 }
 
 .conpherence-widget-pane .person-entry:hover {
@@ -173,35 +97,17 @@
   color: #000;
 }
 
-/* settings widget */
-.conpherence-widget-pane .title-update,
-.conpherence-widget-pane .notifications-update {
-  margin: 3px 0px 0px 4px;
-}
-
-.conpherence-widget-pane .no-settings {
-  width: 200px;
-  padding: 20px;
-  text-align: center;
-  color: {$greytext};
-}
-
-.device .conpherence-widget-pane .no-settings {
-  width: 60px;
-  margin: 0 auto 0 auto;
-}
-
 /****** Hide Widgets **********************************************************/
 
-.device-desktop .hide-widgets .conpherence-widget-pane {
+.hide-widgets .conpherence-widget-pane {
   display: none;
 }
 
-.device-desktop .hide-widgets .conpherence-message-pane,
-.device-desktop .hide-widgets .loading .messages-loading-mask,
-.device-desktop .hide-widgets .loading .messages-loading-icon,
-.device-desktop .hide-widgets .conpherence-no-threads,
-.device-desktop .hide-widgets .conpherence-message-pane .conpherence-messages,
-.device-desktop .hide-widgets .conpherence-message-pane .phui-form-view {
+.hide-widgets .conpherence-message-pane,
+.hide-widgets .loading .messages-loading-mask,
+.hide-widgets .loading .messages-loading-icon,
+.hide-widgets .conpherence-no-threads,
+.hide-widgets .conpherence-message-pane .conpherence-messages,
+.hide-widgets .conpherence-message-pane .phui-form-view {
   right: 0;
 }

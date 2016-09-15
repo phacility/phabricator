@@ -1,6 +1,25 @@
 <?php
 
-final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
+final class ConpherenceParticipantView extends AphrontView {
+
+  private $conpherence;
+  private $updateURI;
+
+  public function setUpdateURI($update_uri) {
+    $this->updateURI = $update_uri;
+    return $this;
+  }
+  public function getUpdateURI() {
+    return $this->updateURI;
+  }
+
+  public function setConpherence(ConpherenceThread $conpherence) {
+    $this->conpherence = $conpherence;
+    return $this;
+  }
+  public function getConpherence() {
+    return $this->conpherence;
+  }
 
   public function render() {
     $conpherence = $this->getConpherence();
@@ -14,6 +33,7 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
     natcasesort($handle_list);
     $handles = mpull($handles, null, 'getName');
     $handles = array_select_keys($handles, $handle_list);
+
     $head_handles = mpull($head_handles, null, 'getName');
     $handles = $head_handles + $handles;
 
@@ -28,7 +48,8 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
 
       if (($user_phid == $viewer->getPHID()) || $can_edit) {
         $icon = id(new PHUIIconView())
-          ->setIcon('fa-times lightbluetext');
+          ->setIcon('fa-times')
+          ->addClass('lightbluetext');
         $remove_html = javelin_tag(
           'a',
           array(

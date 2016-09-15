@@ -9,7 +9,7 @@
   position: fixed;
   left: 240px;
   right: 240px;
-  top: 76px;
+  top: 102px;
   bottom: 0px;
   min-width: 300px;
   width: auto;
@@ -32,11 +32,6 @@
   margin: 16px 0px 16px 0px;
 }
 
-.conpherence-layout .phui-crumbs-view {
-  padding: 0 0 0 8px;
-  background: #f7f7f7;
-}
-
 .conpherence-show-more-messages {
   display: block;
   background: #e0e3ec;
@@ -54,7 +49,7 @@
   position: fixed;
   left: 240px;
   right: 240px;
-  top: 78px;
+  top: 103px;
   bottom: 148px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -103,11 +98,15 @@
 .conpherence-message-pane .phui-form-view {
   border-width: 0;
   height: 140px;
-  padding: 0 8px 8px;
+  padding: 0 20px 12px;
   position: fixed;
   bottom: 0;
   left: 240px;
   right: 241px;
+}
+
+.device .conpherence-message-pane .phui-form-view {
+  padding: 8px 8px;
 }
 
 .conpherence-message-pane .phui-form-view.login-to-participate {
@@ -121,6 +120,11 @@
 .conpherence-message-pane .aphront-form-control-submit button,
 .conpherence-message-pane .aphront-form-control-submit a.button {
   margin-top: 6px;
+}
+
+.device .conpherence-message-pane .aphront-form-control-submit button,
+.device .conpherence-message-pane .aphront-form-control-submit a.button {
+  margin-top: 13px;
 }
 
 /**
@@ -162,7 +166,7 @@
 
 .conpherence-message-pane .conpherence-transaction-view {
   padding: 2px 0px;
-  margin: 4px 12px;
+  margin: 4px 20px;
   background-size: 100%;
   min-height: auto;
 }
@@ -182,7 +186,9 @@
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-image {
-  display: none;
+  height: 25px;
+  width: 25px;
+  background-size: 25px;
 }
 
 .conpherence-message-pane .conpherence-comment.anchor-target,
@@ -206,12 +212,12 @@
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-detail {
-  margin: 0;
+  margin-left: 32px;
 }
 
 .conpherence-message-pane .conpherence-transaction-view.date-marker {
   padding: 0;
-  margin: 20px 12px 4px;
+  margin: 20px 20px 4px;
   min-height: auto;
 }
 
@@ -234,7 +240,6 @@
 
 .device .conpherence-message-pane .conpherence-transaction-view.date-marker
   .date {
-    color: {$lightbluetext};
     left: 4px;
 }
 
@@ -351,10 +356,3 @@
   max-height: 200px;
 }
 
-.device .conpherence-header-desktop-item {
-  display: none;
-}
-
-.device .conpherence-header-pane .phui-crumb-action-divider {
-  display: none;
-}

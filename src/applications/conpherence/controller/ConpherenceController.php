@@ -14,42 +14,37 @@ abstract class ConpherenceController extends PhabricatorController {
 
   public function buildApplicationMenu() {
     $nav = new PHUIListView();
+    $conpherence = $this->conpherence;
 
+    // Local Links
+    if ($conpherence) {
+      $nav->addMenuItem(
+        id(new PHUIListItemView())
+        ->setName(pht('Edit Room'))
+        ->setType(PHUIListItemView::TYPE_LINK)
+        ->setHref(
+          $this->getApplicationURI('update/'.$conpherence->getID()).'/')
+        ->setWorkflow(true));
+
+      $nav->addMenuItem(
+        id(new PHUIListItemView())
+        ->setName(pht('Add Participants'))
+        ->setType(PHUIListItemView::TYPE_LINK)
+        ->setHref('#')
+        ->addSigil('conpherence-widget-adder')
+        ->setMetadata(array('widget' => 'widgets-people')));
+    }
+
+    // Global Links
+    $nav->newLabel(pht('Conpherence'));
     $nav->newLink(
       pht('New Room'),
       $this->getApplicationURI('new/'));
-
-    $nav->addMenuItem(
-      id(new PHUIListItemView())
-      ->setName(pht('Add Participants'))
-      ->setType(PHUIListItemView::TYPE_LINK)
-      ->setHref('#')
-      ->addSigil('conpherence-widget-adder')
-      ->setMetadata(array('widget' => 'widgets-people')));
+    $nav->newLink(
+      pht('Search Rooms'),
+      $this->getApplicationURI('search/'));
 
     return $nav;
-  }
-
-  protected function buildApplicationCrumbs() {
-    return $this->buildConpherenceApplicationCrumbs();
-  }
-
-  protected function buildConpherenceApplicationCrumbs($is_rooms = false) {
-    $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->setBorder(true);
-
-    if (!$is_rooms) {
-      $crumbs
-        ->addAction(
-          id(new PHUIListItemView())
-          ->setName(pht('Room'))
-          ->setHref('#')
-          ->setIcon('fa-bars')
-          ->setStyle('display: none;')
-          ->addClass('device-widgets-selector')
-          ->addSigil('device-widgets-selector'));
-    }
-    return $crumbs;
   }
 
   protected function buildHeaderPaneContent(
@@ -57,37 +52,39 @@ abstract class ConpherenceController extends PhabricatorController {
     array $policy_objects) {
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
     $viewer = $this->getViewer();
-
-    $crumbs = $this->buildApplicationCrumbs();
+    $header = null;
 
     if ($conpherence->getID()) {
       $data = $conpherence->getDisplayData($this->getViewer());
-      $crumbs->addCrumb(
-        id(new PHUICrumbView())
-        ->setName($data['title'])
-        ->setHref('/'.$conpherence->getMonogram()));
-        $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $header = id(new PHUIHeaderView())
+        ->setHeader($data['title'])
+        ->setSubheader($data['topic'])
+        ->addClass((!$data['topic']) ? 'conpherence-no-topic' : null);
+
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
           $viewer,
           $conpherence,
           PhabricatorPolicyCapability::CAN_EDIT);
 
-      $crumbs
-        ->addAction(
-          id(new PHUIListItemView())
-          ->setName(pht('Edit Room'))
+      $header->addActionItem(
+        id(new PHUIIconCircleView())
           ->setHref(
             $this->getApplicationURI('update/'.$conpherence->getID()).'/')
           ->setIcon('fa-pencil')
-          ->setDisabled(!$can_edit)
+          ->addClass('hide-on-device')
+          ->setWorkflow(true));
+
+      $header->addActionItem(
+        id(new PHUIIconCircleView())
+          ->setHref(
+            $this->getApplicationURI('update/'.$conpherence->getID()).'/'.
+            '?action='.ConpherenceUpdateActions::NOTIFICATIONS)
+          ->setIcon('fa-gear')
+          ->addClass('hide-on-device')
           ->setWorkflow(true));
 
       $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
       $widget_view = (bool)$viewer->getUserSetting($widget_key, false);
-
-      $divider = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_DIVIDER)
-        ->addClass('conpherence-header-desktop-item');
-      $crumbs->addAction($divider);
 
       Javelin::initBehavior(
         'toggle-widget',
@@ -96,24 +93,15 @@ abstract class ConpherenceController extends PhabricatorController {
           'settingsURI' => '/settings/adjust/?key='.$widget_key,
         ));
 
-      $crumbs->addAction(
-        id(new PHUIListItemView())
-        ->addSigil('conpherence-widget-toggle')
-        ->setIcon('fa-columns')
-        ->addClass('conpherence-header-desktop-item'));
+      $header->addActionItem(
+        id(new PHUIIconCircleView())
+          ->addSigil('conpherence-widget-toggle')
+          ->setIcon('fa-group')
+          ->setHref('#')
+          ->addClass('conpherence-participant-toggle'));
     }
 
-    return hsprintf(
-      '%s',
-      array(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'header-loading-mask',
-          ),
-          ''),
-        $crumbs,
-      ));
+    return $header;
   }
 
 }
