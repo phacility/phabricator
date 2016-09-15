@@ -22,7 +22,7 @@ final class PhabricatorCalendarEventExportController
     if ($request->isFormPost()) {
       $file_name = $event->getMonogram().'.ics';
 
-      $event_node = $event->newIntermediateEventNode();
+      $event_node = $event->newIntermediateEventNode($viewer);
 
       $document_node = id(new PhutilCalendarDocumentNode())
         ->appendChild($event_node);

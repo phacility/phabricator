@@ -626,7 +626,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
 
-  public function newIntermediateEventNode() {
+  public function newIntermediateEventNode(PhabricatorUser $viewer) {
     $base_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
     $domain = $base_uri->getDomain();
 
@@ -649,6 +649,59 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $date_end->setIsAllDay(true);
     }
 
+    $host_phid = $this->getHostPHID();
+
+    $invitees = $this->getInvitees();
+    foreach ($invitees as $key => $invitee) {
+      if ($invitee->isUninvited()) {
+        unset($invitees[$key]);
+      }
+    }
+
+    $phids = array();
+    $phids[] = $host_phid;
+    foreach ($invitees as $invitee) {
+      $phids[] = $invitee->getInviteePHID();
+    }
+
+    $handles = $viewer->loadHandles($phids);
+
+    $host_handle = $handles[$host_phid];
+    $host_name = $host_handle->getFullName();
+    $host_uri = $host_handle->getURI();
+    $host_uri = PhabricatorEnv::getURI($host_uri);
+
+    $organizer = id(new PhutilCalendarUserNode())
+      ->setName($host_name)
+      ->setURI($host_uri);
+
+    $attendees = array();
+    foreach ($invitees as $invitee) {
+      $invitee_phid = $invitee->getInviteePHID();
+      $invitee_handle = $handles[$invitee_phid];
+      $invitee_name = $invitee_handle->getFullName();
+      $invitee_uri = $invitee_handle->getURI();
+      $invitee_uri = PhabricatorEnv::getURI($invitee_uri);
+
+      switch ($invitee->getStatus()) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          $status = PhutilCalendarUserNode::STATUS_ACCEPTED;
+          break;
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          $status = PhutilCalendarUserNode::STATUS_DECLINED;
+          break;
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+        default:
+          $status = PhutilCalendarUserNode::STATUS_INVITED;
+          break;
+      }
+
+      $attendees[] = id(new PhutilCalendarUserNode())
+        ->setName($invitee_name)
+        ->setURI($invitee_uri)
+        ->setStatus($status);
+    }
+
     $node = id(new PhutilCalendarEventNode())
       ->setUID($uid)
       ->setName($this->getName())
@@ -656,7 +709,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setCreatedDateTime($created)
       ->setModifiedDateTime($modified)
       ->setStartDateTime($date_start)
-      ->setEndDateTime($date_end);
+      ->setEndDateTime($date_end)
+      ->setOrganizer($organizer)
+      ->setAttendees($attendees);
 
     return $node;
   }
