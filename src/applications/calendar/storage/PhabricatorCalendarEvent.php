@@ -626,6 +626,43 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
 
+  public function newIntermediateEventNode() {
+    $base_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
+    $domain = $base_uri->getDomain();
+
+    $uid = $this->getPHID().'@'.$domain;
+
+    $created = $this->getDateCreated();
+    $created = PhutilCalendarAbsoluteDateTime::newFromEpoch($created);
+
+    $modified = $this->getDateModified();
+    $modified = PhutilCalendarAbsoluteDateTime::newFromEpoch($modified);
+
+    $date_start = $this->getDateFrom();
+    $date_start = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_start);
+
+    $date_end = $this->getDateTo();
+    $date_end = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_end);
+
+    if ($this->getIsAllDay()) {
+      $date_start->setIsAllDay(true);
+      $date_end->setIsAllDay(true);
+    }
+
+    $node = id(new PhutilCalendarEventNode())
+      ->setUID($uid)
+      ->setName($this->getName())
+      ->setDescription($this->getDescription())
+      ->setCreatedDateTime($created)
+      ->setModifiedDateTime($modified)
+      ->setStartDateTime($date_start)
+      ->setEndDateTime($date_end);
+
+    return $node;
+  }
+
+
+
 /* -(  Markup Interface  )--------------------------------------------------- */
 
 
