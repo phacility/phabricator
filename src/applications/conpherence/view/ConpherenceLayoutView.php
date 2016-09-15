@@ -64,7 +64,7 @@ final class ConpherenceLayoutView extends AphrontView {
   public function render() {
     require_celerity_resource('conpherence-menu-css');
     require_celerity_resource('conpherence-message-pane-css');
-    require_celerity_resource('conpherence-widget-pane-css');
+    require_celerity_resource('conpherence-participant-pane-css');
 
     $layout_id = 'conpherence-main-layout';
 
@@ -105,7 +105,7 @@ final class ConpherenceLayoutView extends AphrontView {
       $classes[] = 'hide-widgets';
     }
 
-    $this->initBehavior('conpherence-participants-pane');
+    $this->initBehavior('conpherence-participant-pane');
 
     return javelin_tag(
       'div',
@@ -172,9 +172,9 @@ final class ConpherenceLayoutView extends AphrontView {
             javelin_tag(
               'div',
               array(
-                'class' => 'conpherence-widget-pane',
-                'id' => 'conpherence-widget-pane',
-                'sigil' => 'conpherence-widget-pane',
+                'class' => 'conpherence-participant-pane',
+                'id' => 'conpherence-participant-pane',
+                'sigil' => 'conpherence-participant-pane',
               ),
               array(
                 phutil_tag(

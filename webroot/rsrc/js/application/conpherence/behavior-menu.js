@@ -231,7 +231,7 @@ JX.behavior('conpherence-menu', function(config) {
 
   function markWidgetLoading(loading) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var widgets_root = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+    var widgets_root = JX.DOM.find(root, 'div', 'conpherence-participant-pane');
 
     JX.DOM.alterClass(widgets_root, 'loading', loading);
   }

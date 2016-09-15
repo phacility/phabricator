@@ -5,29 +5,24 @@ final class ConpherenceParticipantView extends AphrontView {
   private $conpherence;
   private $updateURI;
 
-  public function setUpdateURI($update_uri) {
-    $this->updateURI = $update_uri;
-    return $this;
-  }
-  public function getUpdateURI() {
-    return $this->updateURI;
-  }
-
   public function setConpherence(ConpherenceThread $conpherence) {
     $this->conpherence = $conpherence;
     return $this;
   }
-  public function getConpherence() {
-    return $this->conpherence;
+
+  public function setUpdateURI($uri) {
+    $this->updateURI = $uri;
+    return $this;
   }
 
   public function render() {
-    $conpherence = $this->getConpherence();
-    $widget_data = $conpherence->getWidgetData();
-    $viewer = $this->getUser();
+    $conpherence = $this->conpherence;
+    $viewer = $this->getViewer();
 
     $participants = $conpherence->getParticipants();
+    $count = new PhutilNumber(count($participants));
     $handles = $conpherence->getHandles();
+    $handles = array_intersect_key($handles, $participants);
     $head_handles = array_select_keys($handles, array($viewer->getPHID()));
     $handle_list = mpull($handles, 'getName');
     natcasesort($handle_list);
@@ -88,7 +83,30 @@ final class ConpherenceParticipantView extends AphrontView {
         ));
     }
 
-    return $body;
+    $new_icon = id(new PHUIIconView())
+      ->setIcon('fa-plus-square')
+      ->setHref($this->updateURI)
+      ->setMetadata(array('widget' => null))
+      ->addSigil('conpherence-widget-adder');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Participants (%d)', $count))
+      ->addClass('widgets-header')
+      ->addActionItem($new_icon);
+
+    $content = javelin_tag(
+      'div',
+      array(
+        'class' => 'widgets-body',
+        'id' => 'widgets-people',
+        'sigil' => 'widgets-people',
+      ),
+      array(
+        $header,
+        $body,
+      ));
+
+    return $content;
   }
 
 }

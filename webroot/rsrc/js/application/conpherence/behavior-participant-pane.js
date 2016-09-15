@@ -6,10 +6,10 @@
  *           javelin-util
  *           phabricator-notification
  *           conpherence-thread-manager
- * @provides javelin-behavior-conpherence-participants-pane
+ * @provides javelin-behavior-conpherence-participant-pane
  */
 
-JX.behavior('conpherence-participants-pane', function() {
+JX.behavior('conpherence-participant-pane', function() {
 
   /**
    * Generified adding new stuff to widgets technology!
