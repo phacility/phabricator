@@ -8,6 +8,7 @@
 return array(
   'names' => array(
     'conpherence.pkg.css' => '7bddd31a',
+    'conpherence.pkg.js' => 'c858e1ba',
     'core.pkg.css' => 'dc6d08e3',
     'core.pkg.js' => '1d376fa9',
     'darkconsole.pkg.js' => 'e7393ebb',
@@ -2310,6 +2311,16 @@ return array(
       'conpherence-update-css',
       'conpherence-widget-pane-css',
       'conpherence-header-pane-css',
+    ),
+    'conpherence.pkg.js' => array(
+      'javelin-behavior-conpherence-drag-and-drop-photo',
+      'javelin-behavior-durable-column',
+      'javelin-behavior-conpherence-menu',
+      'javelin-behavior-conpherence-participants-pane',
+      'javelin-behavior-conpherence-pontificate',
+      'javelin-behavior-quicksand-blacklist',
+      'javelin-behavior-toggle-widget',
+      'conpherence-thread-manager',
     ),
     'core.pkg.css' => array(
       'phabricator-core-css',

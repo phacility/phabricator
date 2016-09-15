@@ -161,6 +161,16 @@ return array(
     'conpherence-widget-pane-css',
     'conpherence-header-pane-css',
   ),
+  'conpherence.pkg.js' => array(
+    'javelin-behavior-conpherence-drag-and-drop-photo',
+    'javelin-behavior-durable-column',
+    'javelin-behavior-conpherence-menu',
+    'javelin-behavior-conpherence-participants-pane',
+    'javelin-behavior-conpherence-pontificate',
+    'javelin-behavior-quicksand-blacklist',
+    'javelin-behavior-toggle-widget',
+    'conpherence-thread-manager',
+  ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
     'differential-changeset-view-css',
