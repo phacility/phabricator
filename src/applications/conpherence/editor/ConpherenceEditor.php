@@ -623,6 +623,17 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ConpherenceTransaction::TYPE_TITLE:
+        case ConpherenceTransaction::TYPE_TOPIC:
+        case ConpherenceTransaction::TYPE_PICTURE:
+          return true;
+        default:
+          return false;
+      }
+    }
     return false;
   }
 

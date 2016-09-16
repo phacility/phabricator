@@ -123,6 +123,55 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitle();
   }
 
+  public function getTitleForFeed() {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case self::TYPE_TITLE:
+        if (strlen($old) && strlen($new)) {
+          return pht(
+            '%s renamed %s from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old,
+            $new);
+        } else {
+          return pht(
+            '%s created the room %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+        break;
+      break;
+      case self::TYPE_TOPIC:
+        if (strlen($new)) {
+          return pht(
+            '%s set the topic of %s to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $new);
+        } else if (strlen($old)) {
+          return pht(
+            '%s deleted the topic in %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
+      case self::TYPE_PICTURE:
+        return pht(
+          '%s updated the room image for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
+    }
+    return parent::getTitleForFeed();
+  }
+
   private function getRoomTitle() {
     $author_phid = $this->getAuthorPHID();
 
