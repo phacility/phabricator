@@ -113,89 +113,27 @@ final class PhabricatorPHPPreflightSetupCheck extends PhabricatorSetupCheck {
     }
 
     $open_basedir = ini_get('open_basedir');
-    if ($open_basedir) {
+    if (strlen($open_basedir)) {
+      // If `open_basedir` is set, just fatal. It's technically possible for
+      // us to run with certain values of `open_basedir`, but: we can only
+      // raise fatal errors from preflight steps, so we'd have to do this check
+      // in two parts to support fatal and advisory versions; it's much simpler
+      // to just fatal instead of trying to test all the different things we
+      // may need to access in the filesystem; and use of this option seems
+      // rare (particularly in supported environments).
 
-      // 'open_basedir' restricts which files we're allowed to access with
-      // file operations. This might be okay -- we don't need to write to
-      // arbitrary places in the filesystem -- but we need to access certain
-      // resources. This setting is unlikely to be providing any real measure
-      // of security so warn even if things look OK.
-
-      $failures = array();
-
-      try {
-        $open_libphutil = class_exists('Future');
-      } catch (Exception $ex) {
-        $failures[] = $ex->getMessage();
-      }
-
-      try {
-        $open_arcanist = class_exists('ArcanistDiffParser');
-      } catch (Exception $ex) {
-        $failures[] = $ex->getMessage();
-      }
-
-      $open_urandom = false;
-      try {
-        Filesystem::readRandomBytes(1);
-        $open_urandom = true;
-      } catch (FilesystemException $ex) {
-        $failures[] = $ex->getMessage();
-      }
-
-      try {
-        $tmp = new TempFile();
-        file_put_contents($tmp, '.');
-        $open_tmp = @fopen((string)$tmp, 'r');
-        if (!$open_tmp) {
-          $failures[] = pht(
-            "Unable to read temporary file '%s'.",
-            (string)$tmp);
-        }
-      } catch (Exception $ex) {
-        $message = $ex->getMessage();
-        $dir = sys_get_temp_dir();
-        $failures[] = pht(
-          "Unable to open temp files from '%s': %s",
-          $dir,
-          $message);
-      }
+      $message = pht(
+        "Your server is configured with '%s', which prevents Phabricator ".
+        "from opening files it requires access to.\n\n".
+        "Disable this setting to continue.",
+        'open_basedir');
 
       $issue = $this->newIssue('php.open_basedir')
         ->setName(pht('Disable PHP %s', 'open_basedir'))
-        ->addPHPConfig('open_basedir');
-
-      if ($failures) {
-        $message = pht(
-          "Your server is configured with '%s', which prevents Phabricator ".
-          "from opening files it requires access to.\n\n".
-          "Disable this setting to continue.\n\nFailures:\n\n%s",
-          'open_basedir',
-          implode("\n\n", $failures));
-
-        $issue
-          ->setIsFatal(true)
-          ->setMessage($message);
-
-        return;
-      } else {
-        $summary = pht(
-          "You have '%s' configured in your PHP settings, which ".
-          "may cause some features to fail.",
-          'open_basedir');
-
-        $message = pht(
-          "You have '%s' configured in your PHP settings. Although this ".
-          "setting appears permissive enough that Phabricator will work ".
-          "properly, you may still run into problems because of it.\n\n".
-          "Consider disabling '%s'.",
-          'open_basedir',
-          'open_basedir');
-
-        $issue
-          ->setSummary($summary)
-          ->setMessage($message);
-      }
+        ->addPHPConfig('open_basedir')
+        ->setIsFatal(true)
+        ->setMessage($message);
     }
+
   }
 }

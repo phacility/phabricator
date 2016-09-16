@@ -20,6 +20,7 @@ final class CelerityHighContrastPostprocessor
       'thinblueborder' => '#BFCFDA',
       'lightblueborder' => '#8C98B8',
       'blueborder' => '#626E82',
+      'timeline' => '#8C98B8',
 
       'lightgreyborder' => '#555',
       'greyborder' => '#333',

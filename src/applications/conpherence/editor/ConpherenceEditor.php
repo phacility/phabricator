@@ -18,7 +18,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     array $participant_phids,
     $title,
     $message,
-    PhabricatorContentSource $source) {
+    PhabricatorContentSource $source,
+    $topic) {
 
     $conpherence = ConpherenceThread::initializeNewRoom($creator);
     $files = array();
@@ -58,6 +59,11 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         $xactions[] = id(new ConpherenceTransaction())
           ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
           ->setNewValue($title);
+      }
+      if (strlen($topic)) {
+        $xactions[] = id(new ConpherenceTransaction())
+          ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
+          ->setNewValue($topic);
       }
 
       $xactions[] = id(new ConpherenceTransaction())
@@ -118,6 +124,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     $types[] = ConpherenceTransaction::TYPE_TITLE;
+    $types[] = ConpherenceTransaction::TYPE_TOPIC;
     $types[] = ConpherenceTransaction::TYPE_PARTICIPANTS;
     $types[] = ConpherenceTransaction::TYPE_FILES;
     $types[] = ConpherenceTransaction::TYPE_PICTURE;
@@ -136,6 +143,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransaction::TYPE_TITLE:
         return $object->getTitle();
+      case ConpherenceTransaction::TYPE_TOPIC:
+        return $object->getTopic();
       case ConpherenceTransaction::TYPE_PICTURE:
         return $object->getImagePHID(ConpherenceImageData::SIZE_ORIG);
       case ConpherenceTransaction::TYPE_PICTURE_CROP:
@@ -156,6 +165,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransaction::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_TOPIC:
       case ConpherenceTransaction::TYPE_PICTURE_CROP:
         return $xaction->getNewValue();
       case ConpherenceTransaction::TYPE_PICTURE:
@@ -249,6 +259,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransaction::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
+        break;
+      case ConpherenceTransaction::TYPE_TOPIC:
+        $object->setTopic($xaction->getNewValue());
         break;
       case ConpherenceTransaction::TYPE_PICTURE:
         $object->setImagePHID(
@@ -484,6 +497,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           PhabricatorPolicyCapability::CAN_VIEW);
         break;
       case ConpherenceTransaction::TYPE_TITLE:
+      case ConpherenceTransaction::TYPE_TOPIC:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
           $object,

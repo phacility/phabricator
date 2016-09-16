@@ -1,0 +1,12 @@
+/**
+ * @provides phui-invisible-character-view-css
+ */
+
+.invisible-special {
+  font-family: monospace;
+  color: #000;
+  background: rgba({$alphablue},0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+  white-space: pre-wrap;
+}

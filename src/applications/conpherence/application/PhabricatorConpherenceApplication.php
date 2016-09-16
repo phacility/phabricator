@@ -42,7 +42,7 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
         'search/(?:query/(?P<queryKey>[^/]+)/)?'
            => 'ConpherenceRoomListController',
         'panel/'                   => 'ConpherenceNotificationPanelController',
-        'widget/(?P<id>[1-9]\d*)/' => 'ConpherenceWidgetController',
+        'participant/(?P<id>[1-9]\d*)/' => 'ConpherenceParticipantController',
         'update/(?P<id>[1-9]\d*)/' => 'ConpherenceUpdateController',
       ),
     );

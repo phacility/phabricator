@@ -1,0 +1,118 @@
+/**
+ * @provides conpherence-participant-pane-css
+ */
+
+.conpherence-participant-pane {
+  position: fixed;
+  right: 0px;
+  top: 103px;
+  bottom: 0;
+  width: 240px;
+  border-width: 0 0 0 1px;
+  border-color: {$thinblueborder};
+  border-style: solid;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.device .conpherence-participant-pane {
+  background-color: {$page.background};
+}
+
+.conpherence-participant-pane .aphront-form-input {
+  margin: 0;
+  width: 100%;
+}
+
+.conpherence-participant-pane .aphront-form-inset {
+  border: 0;
+}
+
+.conpherence-participant-pane .widgets-header.phui-header-shell {
+  padding: 8px 12px 6px;
+  border: none;
+}
+
+.conpherence-participant-pane .widgets-header .phui-header-header {
+  font-size: {$biggerfontsize};
+}
+
+.conpherence-participant-pane .widgets-header .phui-icon-view.disabled {
+  color: {$lightgreytext};
+}
+
+.conpherence-participant-pane .widgets-body {
+  position: fixed;
+  overflow-y: auto;
+  bottom: 0;
+  top: 102px;
+  width: 240px;
+}
+
+.conpherence-participant-pane .person-entry {
+  padding: 4px 8px 4px 12px;
+}
+
+.conpherence-participant-pane .person-entry:hover {
+  background-color: {$lightgreybackground};
+}
+
+.conpherence-participant-pane .person-entry a {
+  float: left;
+  line-height: 22px;
+  color: {$bluetext};
+  font-weight: bold;
+}
+
+.conpherence-participant-pane .person-entry:hover a {
+  color: #000;
+}
+
+.conpherence-participant-pane .person-entry a img {
+  height: 24px;
+  width: 24px;
+  border-radius: 3px;
+}
+
+.conpherence-participant-pane .person-entry .pic {
+  float: left;
+  width: 30px;
+}
+
+.conpherence-participant-pane .person-entry .remove {
+  float: right;
+  width: 20px;
+  height: 20px;
+  font-size: 18px;
+}
+
+.person-entry .remove:hover .phui-icon-view {
+  color: {$red};
+}
+
+.conpherence-participant-pane .person-entry .remove:hover {
+  text-decoration: none;
+}
+
+.conpherence-participant-pane .person-entry .remove .close-icon {
+  color: #bfbfbf;
+}
+
+.conpherence-participant-pane .person-entry .remove:hover .close-icon {
+  color: #000;
+}
+
+/****** Hide Widgets **********************************************************/
+
+.hide-widgets .conpherence-participant-pane {
+  display: none;
+}
+
+.hide-widgets .conpherence-message-pane,
+.hide-widgets .loading .messages-loading-mask,
+.hide-widgets .loading .messages-loading-icon,
+.hide-widgets .conpherence-no-threads,
+.hide-widgets .conpherence-message-pane .conpherence-messages,
+.hide-widgets .conpherence-message-pane .phui-form-view {
+  right: 0;
+}

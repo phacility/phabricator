@@ -55,12 +55,18 @@ final class ConpherenceLayoutView extends AphrontView {
     return $this;
   }
 
+  public function getWidgetColumnVisible() {
+    $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
+    $user = $this->getUser();
+    return (bool)$user->getUserSetting($widget_key, false);
+  }
+
   public function render() {
     require_celerity_resource('conpherence-menu-css');
     require_celerity_resource('conpherence-message-pane-css');
-    require_celerity_resource('conpherence-widget-pane-css');
+    require_celerity_resource('conpherence-participant-pane-css');
 
-    $layout_id = celerity_generate_unique_node_id();
+    $layout_id = 'conpherence-main-layout';
 
     $selected_id = null;
     $selected_thread_id = null;
@@ -90,14 +96,16 @@ final class ConpherenceLayoutView extends AphrontView {
         'hasWidgets' => false,
       ));
 
-    $class = null;
+    $classes = array();
     if (!$this->getUser()->isLoggedIn()) {
-      $class = 'conpherence-logged-out';
+      $classes[] = 'conpherence-logged-out';
     }
 
-    $this->initBehavior(
-      'conpherence-widget-pane',
-      ConpherenceWidgetConfigConstants::getWidgetPaneBehaviorConfig());
+    if (!$this->getWidgetColumnVisible()) {
+      $classes[] = 'hide-widgets';
+    }
+
+    $this->initBehavior('conpherence-participant-pane');
 
     return javelin_tag(
       'div',
@@ -105,7 +113,7 @@ final class ConpherenceLayoutView extends AphrontView {
         'id'    => $layout_id,
         'sigil' => 'conpherence-layout',
         'class' => 'conpherence-layout '.
-                    $class.
+                    implode(' ', $classes).
                     ' conpherence-role-'.$this->role,
       ),
       array(
@@ -148,6 +156,13 @@ final class ConpherenceLayoutView extends AphrontView {
                 javelin_tag(
                   'a',
                   array(
+                    'href' => '/conpherence/search/',
+                    'class' => 'button grey mlr',
+                  ),
+                  pht('Join a Room')),
+                javelin_tag(
+                  'a',
+                  array(
                     'href' => '/conpherence/new/',
                     'class' => 'button grey',
                     'sigil' => 'workflow',
@@ -157,9 +172,9 @@ final class ConpherenceLayoutView extends AphrontView {
             javelin_tag(
               'div',
               array(
-                'class' => 'conpherence-widget-pane',
-                'id' => 'conpherence-widget-pane',
-                'sigil' => 'conpherence-widget-pane',
+                'class' => 'conpherence-participant-pane',
+                'id' => 'conpherence-participant-pane',
+                'sigil' => 'conpherence-participant-pane',
               ),
               array(
                 phutil_tag(

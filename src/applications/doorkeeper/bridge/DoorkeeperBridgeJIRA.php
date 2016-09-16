@@ -104,10 +104,7 @@ final class DoorkeeperBridgeJIRA extends DoorkeeperBridge {
       }
 
       $this->fillObjectFromData($obj, $result);
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $obj->save();
-      unset($unguarded);
+      $this->saveExternalObject($ref, $obj);
     }
   }
 

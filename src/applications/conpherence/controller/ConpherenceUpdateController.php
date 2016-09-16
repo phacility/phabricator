@@ -107,7 +107,7 @@ final class ConpherenceUpdateController
           break;
         case ConpherenceUpdateActions::REMOVE_PERSON:
           if (!$request->isContinueRequest()) {
-            // do nothing; we'll display a confirmation dialogue instead
+            // do nothing; we'll display a confirmation dialog instead
             break;
           }
           $person_phid = $request->getStr('remove_person');
@@ -127,22 +127,16 @@ final class ConpherenceUpdateController
           }
           $participant->setSettings(array('notifications' => $notifications));
           $participant->save();
+          return id(new AphrontRedirectResponse())
+            ->setURI('/'.$conpherence->getMonogram());
 
-          $label = PhabricatorConpherenceNotificationsSetting::getSettingLabel(
-            $notifications);
-
-          $result = pht(
-            'Updated notification settings to "%s".',
-            $label);
-
-          return id(new AphrontAjaxResponse())
-            ->setContent($result);
           break;
         case ConpherenceUpdateActions::METADATA:
           $top = $request->getInt('image_y');
           $left = $request->getInt('image_x');
           $file_id = $request->getInt('file_id');
           $title = $request->getStr('title');
+          $topic = $request->getStr('topic');
           if ($file_id) {
             $orig_file = id(new PhabricatorFileQuery())
               ->setViewer($user)
@@ -190,9 +184,13 @@ final class ConpherenceUpdateController
               ->setNewValue($image_phid);
           }
           $title = $request->getStr('title');
+          $topic = $request->getStr('topic');
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
             ->setNewValue($title);
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
+            ->setNewValue($topic);
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
             ->setNewValue($request->getStr('viewPolicy'));
@@ -269,29 +267,97 @@ final class ConpherenceUpdateController
     }
 
     switch ($action) {
+      case ConpherenceUpdateActions::NOTIFICATIONS:
+        $dialog = $this->renderPreferencesDialog($conpherence);
+        break;
       case ConpherenceUpdateActions::ADD_PERSON:
-        $dialogue = $this->renderAddPersonDialogue($conpherence);
+        $dialog = $this->renderAddPersonDialog($conpherence);
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
-        $dialogue = $this->renderRemovePersonDialogue($conpherence);
+        $dialog = $this->renderRemovePersonDialog($conpherence);
         break;
       case ConpherenceUpdateActions::METADATA:
       default:
-        $dialogue = $this->renderMetadataDialogue($conpherence, $error_view);
+        $dialog = $this->renderMetadataDialog($conpherence, $error_view);
         break;
     }
 
-    return id(new AphrontDialogResponse())
-      ->setDialog($dialogue
+    return
+      $dialog
         ->setUser($user)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setSubmitURI($this->getApplicationURI('update/'.$conpherence_id.'/'))
         ->addSubmitButton()
-        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')));
+        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/'));
 
   }
 
-  private function renderAddPersonDialogue(
+  private function renderPreferencesDialog(
+    ConpherenceThread $conpherence) {
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $participant = $conpherence->getParticipantIfExists($user->getPHID());
+    if (!$participant) {
+      $can_join = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_JOIN);
+      if ($can_join) {
+        $text = pht(
+          'Notification settings are available after joining the room.');
+      } else if ($user->isLoggedIn()) {
+        $text = pht(
+          'Notification settings not applicable to rooms you can not join.');
+      } else {
+        $text = pht(
+          'Notification settings are available after logging in and joining '.
+          'the room.');
+      }
+      return id(new AphrontDialogView())
+        ->setTitle(pht('Room Preferences'))
+        ->appendParagraph($text);
+    }
+
+    $notification_key = PhabricatorConpherenceNotificationsSetting::SETTINGKEY;
+    $notification_default = $user->getUserSetting($notification_key);
+
+    $settings = $participant->getSettings();
+    $notifications = idx(
+      $settings,
+      'notifications',
+      $notification_default);
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->setFullWidth(true)
+      ->appendControl(
+      id(new AphrontFormRadioButtonControl())
+        ->addButton(
+          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL,
+          PhabricatorConpherenceNotificationsSetting::getSettingLabel(
+          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_EMAIL),
+          '')
+        ->addButton(
+          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY,
+          PhabricatorConpherenceNotificationsSetting::getSettingLabel(
+          PhabricatorConpherenceNotificationsSetting::VALUE_CONPHERENCE_NOTIFY),
+          '')
+        ->setName('notifications')
+        ->setValue($notifications));
+
+    return id(new AphrontDialogView())
+      ->setTitle(pht('Room Preferences'))
+      ->addHiddenInput('action', 'notifications')
+      ->addHiddenInput(
+        'latest_transaction_id',
+        $request->getInt('latest_transaction_id'))
+      ->appendForm($form);
+
+  }
+
+  private function renderAddPersonDialog(
     ConpherenceThread $conpherence) {
 
     $request = $this->getRequest();
@@ -322,7 +388,7 @@ final class ConpherenceUpdateController
     return $view;
   }
 
-  private function renderRemovePersonDialogue(
+  private function renderRemovePersonDialog(
     ConpherenceThread $conpherence) {
 
     $request = $this->getRequest();
@@ -405,7 +471,7 @@ final class ConpherenceUpdateController
     return $dialog;
   }
 
-  private function renderMetadataDialogue(
+  private function renderMetadataDialog(
     ConpherenceThread $conpherence,
     $error_view) {
 
@@ -419,7 +485,12 @@ final class ConpherenceUpdateController
         id(new AphrontFormTextControl())
         ->setLabel(pht('Title'))
         ->setName('title')
-        ->setValue($conpherence->getTitle()));
+        ->setValue($conpherence->getTitle()))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel(pht('Topic'))
+        ->setName('topic')
+        ->setValue($conpherence->getTopic()));
 
     $nopic = $this->getRequest()->getExists('nopic');
     $image = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
@@ -548,11 +619,10 @@ final class ConpherenceUpdateController
     $rendered_transactions = idx($data, 'transactions');
     $new_latest_transaction_id = idx($data, 'latest_transaction_id');
 
-    $widget_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+    $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
     $nav_item = null;
     $header = null;
     $people_widget = null;
-    $file_widget = null;
     if (!$minimal_display) {
       switch ($action) {
         case ConpherenceUpdateActions::METADATA:
@@ -571,10 +641,10 @@ final class ConpherenceUpdateController
           $nav_item = hsprintf('%s', $nav_item);
           break;
         case ConpherenceUpdateActions::ADD_PERSON:
-          $people_widget = id(new ConpherencePeopleWidgetView())
+          $people_widget = id(new ConpherenceParticipantView())
             ->setUser($user)
             ->setConpherence($conpherence)
-            ->setUpdateURI($widget_uri);
+            ->setUpdateURI($update_uri);
           $people_widget = hsprintf('%s', $people_widget->render());
           break;
         case ConpherenceUpdateActions::REMOVE_PERSON:
@@ -595,7 +665,6 @@ final class ConpherenceUpdateController
       'nav_item' => $nav_item,
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => $header,
-      'file_widget' => $file_widget,
       'people_widget' => $people_widget,
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),

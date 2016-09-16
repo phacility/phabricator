@@ -182,6 +182,35 @@ final class PhabricatorKeyboardRemarkupRule extends PhutilRemarkupRule {
     }
 
     $is_text = $this->getEngine()->isTextMode();
+    $is_html_mail = $this->getEngine()->isHTMLMailMode();
+
+    if ($is_html_mail) {
+      $key_style = array(
+        'display: inline-block;',
+        'min-width: 1em;',
+        'padding: 4px 5px 5px;',
+        'font-weight: normal;',
+        'font-size: 0.8rem;',
+        'text-align: center;',
+        'text-decoration: none;',
+        'line-height: 0.6rem;',
+        'border-radius: 3px;',
+        'box-shadow: inset 0 -1px 0 rgba(71, 87, 120, 0.08);',
+        'user-select: none;',
+        'background: #f7f7f7;',
+        'border: 1px solid #C7CCD9;',
+      );
+      $key_style = implode(' ', $key_style);
+
+      $join_style = array(
+        'padding: 0 4px;',
+        'color: #92969D;',
+      );
+      $join_style = implode(' ', $join_style);
+    } else {
+      $key_style = null;
+      $join_style = null;
+    }
 
     $parts = array();
     foreach ($keys as $k => $v) {
@@ -202,6 +231,7 @@ final class PhabricatorKeyboardRemarkupRule extends PhutilRemarkupRule {
           'kbd',
           array(
             'title' => $spec['name'],
+            'style' => $key_style,
           ),
           $spec['symbol']);
       }
@@ -214,6 +244,7 @@ final class PhabricatorKeyboardRemarkupRule extends PhutilRemarkupRule {
         'span',
         array(
           'class' => 'kbd-join',
+          'style' => $join_style,
         ),
         '+');
       $parts = phutil_implode_html($glue, $parts);

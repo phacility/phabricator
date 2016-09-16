@@ -11,52 +11,29 @@ final class PhrictionSearchEngine
     return 'PhabricatorPhrictionApplication';
   }
 
-  public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    $saved->setParameter('status', $request->getStr('status'));
-    $saved->setParameter('order', $request->getStr('order'));
-
-    return $saved;
-  }
-
-  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhrictionDocumentQuery())
+  public function newQuery() {
+    return id(new PhrictionDocumentQuery())
       ->needContent(true)
       ->withStatus(PhrictionDocumentQuery::STATUS_NONSTUB);
+  }
 
-    $status = $saved->getParameter('status');
-    $status = idx($this->getStatusValues(), $status);
-    if ($status) {
-      $query->withStatus($status);
-    }
+  protected function buildQueryFromParameters(array $map) {
+    $query = $this->newQuery();
 
-    $order = $saved->getParameter('order');
-    $order = idx($this->getOrderValues(), $order);
-    if ($order) {
-      $query->setOrder($order);
+    if ($map['status']) {
+      $query->withStatus($map['status']);
     }
 
     return $query;
   }
 
-  public function buildSearchForm(
-    AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
-
-    $form
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Status'))
-          ->setName('status')
-          ->setOptions($this->getStatusOptions())
-          ->setValue($saved_query->getParameter('status')))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Order'))
-          ->setName('order')
-          ->setOptions($this->getOrderOptions())
-          ->setValue($saved_query->getParameter('order')));
+  protected function buildCustomSearchFields() {
+    return array(
+      id(new PhabricatorSearchSelectField())
+        ->setKey('status')
+        ->setLabel(pht('Status'))
+        ->setOptions($this->getStatusOptions()),
+    );
   }
 
   protected function getURI($path) {
@@ -66,7 +43,6 @@ final class PhrictionSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array(
       'active' => pht('Active'),
-      'updated' => pht('Updated'),
       'all' => pht('All'),
     );
 
@@ -79,12 +55,11 @@ final class PhrictionSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
-      case 'active':
-        return $query->setParameter('status', 'active');
       case 'all':
         return $query;
-      case 'updated':
-        return $query->setParameter('order', 'updated');
+      case 'active':
+        return $query->setParameter(
+          'status', PhrictionDocumentQuery::STATUS_OPEN);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -92,29 +67,8 @@ final class PhrictionSearchEngine
 
   private function getStatusOptions() {
     return array(
-      'active' => pht('Show Active Documents'),
-      'all' => pht('Show All Documents'),
-    );
-  }
-
-  private function getStatusValues() {
-    return array(
-      'active' => PhrictionDocumentQuery::STATUS_OPEN,
-      'all' => PhrictionDocumentQuery::STATUS_NONSTUB,
-    );
-  }
-
-  private function getOrderOptions() {
-    return array(
-      'created' => pht('Date Created'),
-      'updated' => pht('Date Updated'),
-    );
-  }
-
-  private function getOrderValues() {
-    return array(
-      'created' => PhrictionDocumentQuery::ORDER_CREATED,
-      'updated' => PhrictionDocumentQuery::ORDER_UPDATED,
+      PhrictionDocumentQuery::STATUS_OPEN => pht('Show Active Documents'),
+      PhrictionDocumentQuery::STATUS_NONSTUB => pht('Show All Documents'),
     );
   }
 

@@ -71,14 +71,34 @@ a.phui-icon-view:hover {
   line-height: 36px;
 }
 
-a.phui-icon-circle:hover {
+a.phui-icon-circle.hover-sky:hover {
   text-decoration: none;
   border-color: {$sky};
   cursor: pointer;
 }
 
-a.phui-icon-circle:hover .phui-icon-view {
+a.phui-icon-circle.hover-sky:hover .phui-icon-view {
   color: {$sky};
+}
+
+a.phui-icon-circle.hover-violet:hover {
+  text-decoration: none;
+  border-color: {$violet};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-violet:hover .phui-icon-view {
+  color: {$violet};
+}
+
+a.phui-icon-circle.hover-pink:hover {
+  text-decoration: none;
+  border-color: {$pink};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-pink:hover .phui-icon-view {
+  color: {$pink};
 }
 
 /* - Icon in a Square ------------------------------------------------------- */

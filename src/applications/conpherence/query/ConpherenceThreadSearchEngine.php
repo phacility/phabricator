@@ -58,11 +58,11 @@ final class ConpherenceThreadSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array();
 
+    $names['all'] = pht('All Rooms');
+
     if ($this->requireViewer()->isLoggedIn()) {
       $names['participant'] = pht('Joined Rooms');
     }
-
-    $names['all'] = pht('All Rooms');
 
     return $names;
   }

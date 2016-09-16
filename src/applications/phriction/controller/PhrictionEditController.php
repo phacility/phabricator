@@ -9,6 +9,7 @@ final class PhrictionEditController
 
     $current_version = null;
     if ($id) {
+      $is_new = false;
       $document = id(new PhrictionDocumentQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
@@ -54,9 +55,11 @@ final class PhrictionEditController
       if ($document) {
         $content = $document->getContent();
         $current_version = $content->getVersion();
+        $is_new = false;
       } else {
         $document = PhrictionDocument::initializeNewDocument($viewer, $slug);
         $content = $document->getContent();
+        $is_new = true;
       }
     }
 
@@ -91,11 +94,7 @@ final class PhrictionEditController
       $draft_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $draft_note->setTitle(pht('Recovered Draft'));
       $draft_note->appendChild(
-        hsprintf(
-          '<p>%s</p>',
-          pht(
-            'Showing a saved draft of your edits, you can %s.',
-            $discard)));
+        pht('Showing a saved draft of your edits, you can %s.', $discard));
     } else {
       $content_text = $content->getContent();
       $draft_note = null;
@@ -112,6 +111,15 @@ final class PhrictionEditController
     $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $document->getPHID());
 
+    if ($is_new) {
+      $v_projects = array();
+    } else {
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $document->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $v_projects = array_reverse($v_projects);
+    }
+
     if ($request->isFormPost()) {
 
       $title = $request->getStr('title');
@@ -120,7 +128,8 @@ final class PhrictionEditController
       $current_version = $request->getInt('contentVersion');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
-      $v_cc   = $request->getArr('cc');
+      $v_cc = $request->getArr('cc');
+      $v_projects = $request->getArr('projects');
 
       $xactions = array();
       $xactions[] = id(new PhrictionTransaction())
@@ -138,6 +147,12 @@ final class PhrictionEditController
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
         ->setNewValue(array('=' => $v_cc));
+
+      $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $proj_edge_type)
+        ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new PhrictionTransactionEditor())
         ->setActor($viewer)
@@ -230,6 +245,12 @@ final class PhrictionEditController
           ->setName('content')
           ->setID('document-textarea')
           ->setUser($viewer))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Tags'))
+          ->setName('projects')
+          ->setValue($v_projects)
+          ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Subscribers'))

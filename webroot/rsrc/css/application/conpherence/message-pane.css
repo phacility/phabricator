@@ -7,9 +7,9 @@
 .loading .messages-loading-icon,
 .conpherence-layout .conpherence-no-threads {
   position: fixed;
-  left: 241px;
-  right: 241px;
-  top: 76px;
+  left: 240px;
+  right: 240px;
+  top: 102px;
   bottom: 0px;
   min-width: 300px;
   width: auto;
@@ -32,11 +32,6 @@
   margin: 16px 0px 16px 0px;
 }
 
-.conpherence-layout .phui-crumbs-view {
-  padding: 0 0 0 8px;
-  background: #f7f7f7;
-}
-
 .conpherence-show-more-messages {
   display: block;
   background: #e0e3ec;
@@ -52,10 +47,10 @@
 
 .conpherence-message-pane .conpherence-messages {
   position: fixed;
-  left: 241px;
-  right: 241px;
-  top: 78px;
-  bottom: 172px;
+  left: 240px;
+  right: 240px;
+  top: 103px;
+  bottom: 148px;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -74,8 +69,7 @@
   padding-top: 20px;
 }
 
-.conpherence-messages > .jx-scrollbar-content .conpherence-edited:last-child,
-.conpherence-messages > .conpherence-edited:last-child {
+.conpherence-messages .jx-scrollbar-content .conpherence-edited:last-child {
   padding-bottom: 20px;
 }
 
@@ -86,7 +80,7 @@
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;
-  bottom: 52px;
+  bottom: 44px;
   width: 100%;
   box-shadow: none;
 }
@@ -103,14 +97,16 @@
 
 .conpherence-message-pane .phui-form-view {
   border-width: 0;
-  background-color: {$lightgreybackground};
-  height: 156px;
-  padding: 8px;
+  height: 140px;
+  padding: 0 20px 12px;
   position: fixed;
   bottom: 0;
-  border-top: 1px solid {$thinblueborder};
-  left: 241px;
+  left: 240px;
   right: 241px;
+}
+
+.device .conpherence-message-pane .phui-form-view {
+  padding: 8px 8px;
 }
 
 .conpherence-message-pane .phui-form-view.login-to-participate {
@@ -126,6 +122,11 @@
   margin-top: 6px;
 }
 
+.device .conpherence-message-pane .aphront-form-control-submit button,
+.device .conpherence-message-pane .aphront-form-control-submit a.button {
+  margin-top: 13px;
+}
+
 /**
  * When entering "Fullscreen Mode" in the remarkup control, we need to drop
  * all of the "position: fixed" on parent elements or Chrome doesn't put the
@@ -139,7 +140,11 @@
 }
 
 .conpherence-message-pane .remarkup-assist-bar {
-  border-color: {$lightblueborder};
+  border: 2px solid {$lightgreyborder};
+  border-bottom: none;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  background-color: #f7f7f7;
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {
@@ -161,7 +166,7 @@
 
 .conpherence-message-pane .conpherence-transaction-view {
   padding: 2px 0px;
-  margin: 4px 12px;
+  margin: 4px 20px;
   background-size: 100%;
   min-height: auto;
 }
@@ -178,11 +183,12 @@
   background-size: 35px;
   position: absolute;
   top: 5px;
-  box-shadow: {$borderinset};
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-image {
-  display: none;
+  height: 25px;
+  width: 25px;
+  background-size: 25px;
 }
 
 .conpherence-message-pane .conpherence-comment.anchor-target,
@@ -206,12 +212,12 @@
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-detail {
-  margin: 0;
+  margin-left: 32px;
 }
 
 .conpherence-message-pane .conpherence-transaction-view.date-marker {
   padding: 0;
-  margin: 20px 12px 4px;
+  margin: 20px 20px 4px;
   min-height: auto;
 }
 
@@ -234,7 +240,6 @@
 
 .device .conpherence-message-pane .conpherence-transaction-view.date-marker
   .date {
-    color: {$lightbluetext};
     left: 4px;
 }
 
@@ -246,10 +251,12 @@
 
 .conpherence-message-pane .conpherence-edited .conpherence-transaction-content {
   color: {$lightgreytext};
-  font-size: {$normalfontsize};
+  font-size: {$biggerfontsize};
+  font-style: italic;
   margin: 0;
   padding: 0;
   float: left;
+  line-height: 20px;
 }
 
 .conpherence-message-pane .conpherence-edited {
@@ -277,8 +284,8 @@
   color: {$darkbluetext};
 }
 
-.device-phone .conpherence-message-pane .conpherence-transaction-info {
-  display: none;
+.conpherence-message-pane .conpherence-transaction-info {
+  margin: 0 8px;
 }
 
 .conpherence-message-pane .conpherence-transaction-info,
@@ -287,18 +294,6 @@
   color: {$lightgreytext};
   line-height: 16px;
   font-size: {$smallerfontsize};
-}
-
-.conpherence-message-pane .conpherence-transaction-info {
-  float: right;
-}
-
-.conpherence-message-pane .conpherence-transaction-header,
-.conpherence-message-pane .conpherence-transaction-info,
-.conpherence-message-pane .anchor-link,
-.conpherence-message-pane .conpherence-transaction-content {
-  background: none;
-  padding: 0;
 }
 
 .conpherence-message-pane .conpherence-transaction-content {
@@ -310,14 +305,23 @@
 }
 
 .conpherence-message-pane .remarkup-assist-textarea {
-  height: 100px;
-  padding: 6px;
-  border-color: {$lightblueborder};
-  border-top-color: {$thinblueborder};
+  height: 80px;
+  padding: 8px;
+  border: 2px solid {$lightgreyborder};
+  border-top: 1px solid {$thinblueborder};
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   resize: none;
+  outline: none;
+  box-shadow: none;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.conpherence-message-pane .remarkup-assist-textarea:focus {
+  border: 2px solid {$lightgreyborder};
+  border-top: 1px solid {$thinblueborder};
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
@@ -326,6 +330,9 @@
   width: 100%;
   height: 34px;
   resize: none;
+  border-top: 2px solid {$lightgreyborder};
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .conpherence-message-pane .remarkup-assist-textarea:focus {
@@ -335,8 +342,8 @@
 .device .conpherence-message-pane .aphront-form-control-submit {
   padding: 0;
   position: absolute;
-  top: 7px;
-  right: 13px;
+  top: -2px;
+  right: 12px;
 }
 
 .device .conpherence-message-pane .aphront-form-control-textarea {
@@ -348,3 +355,4 @@
 .conpherence-message .phabricator-remarkup .remarkup-code-block pre {
   max-height: 200px;
 }
+

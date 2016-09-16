@@ -150,7 +150,23 @@ return array(
     'phabricator-feed-css',
     'phabricator-dashboard-css',
     'aphront-multi-column-view-css',
+  ),
+  'conpherence.pkg.css' => array(
     'conpherence-durable-column-view',
+    'conpherence-menu-css',
+    'conpherence-message-pane-css',
+    'conpherence-notification-css',
+    'conpherence-transaction-css',
+    'conpherence-update-css',
+    'conpherence-participant-pane-css',
+    'conpherence-header-pane-css',
+  ),
+  'conpherence.pkg.js' => array(
+    'javelin-behavior-conpherence-drag-and-drop-photo',
+    'javelin-behavior-conpherence-menu',
+    'javelin-behavior-conpherence-participant-pane',
+    'javelin-behavior-conpherence-pontificate',
+    'javelin-behavior-toggle-widget',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',

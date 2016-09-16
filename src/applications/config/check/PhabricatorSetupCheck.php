@@ -74,6 +74,9 @@ abstract class PhabricatorSetupCheck extends Phobject {
     $cache = PhabricatorCaches::getSetupCache();
     $cache->setKey('phabricator.setup.issue-keys', $keys);
 
+    $server_cache = PhabricatorCaches::getServerStateCache();
+    $server_cache->setKey('phabricator.in-flight', 1);
+
     if ($update_database) {
       $db_cache = new PhabricatorKeyValueDatabaseCache();
       try {
@@ -204,7 +207,8 @@ abstract class PhabricatorSetupCheck extends Phobject {
    * @return bool True if we've made it through setup since the last restart.
    */
   final public static function isInFlight() {
-    return (self::getOpenSetupIssueKeys() !== null);
+    $cache = PhabricatorCaches::getServerStateCache();
+    return (bool)$cache->getKey('phabricator.in-flight');
   }
 
   final public static function loadAllChecks() {
