@@ -597,7 +597,7 @@ final class ConpherenceUpdateController
       ->setAfterTransactionID($latest_transaction_id)
       ->needCropPics(true)
       ->needParticipantCache($need_participant_cache)
-      ->needWidgetData($need_widget_data)
+      ->needParticipants(true)
       ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))
       ->executeOne();

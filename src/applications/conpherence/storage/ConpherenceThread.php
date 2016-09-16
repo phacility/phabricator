@@ -21,7 +21,6 @@ final class ConpherenceThread extends ConpherenceDAO
   private $transactions = self::ATTACHABLE;
   private $handles = self::ATTACHABLE;
   private $filePHIDs = self::ATTACHABLE;
-  private $widgetData = self::ATTACHABLE;
   private $images = self::ATTACHABLE;
 
   public static function initializeNewRoom(PhabricatorUser $sender) {
@@ -165,14 +164,6 @@ final class ConpherenceThread extends ConpherenceDAO
   }
   public function getFilePHIDs() {
     return $this->assertAttached($this->filePHIDs);
-  }
-
-  public function attachWidgetData(array $widget_data) {
-    $this->widgetData = $widget_data;
-    return $this;
-  }
-  public function getWidgetData() {
-    return $this->assertAttached($this->widgetData);
   }
 
   public function loadImageURI($size) {

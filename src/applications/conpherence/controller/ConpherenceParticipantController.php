@@ -17,7 +17,7 @@ final class ConpherenceParticipantController extends ConpherenceController {
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($viewer)
       ->withIDs(array($conpherence_id))
-      ->needWidgetData(true)
+      ->needParticipants(true)
       ->executeOne();
 
     if (!$conpherence) {
