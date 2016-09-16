@@ -11,27 +11,6 @@
   background: #fff;
 }
 
-.conpherence-layout .conpherence-no-threads {
-  text-align: center;
-  position: fixed;
-  left: 240px;
-  right: 240px;
-  top: 76px;
-  bottom: 0px;
-  min-width: 300px;
-  width: auto;
-}
-
-.device .conpherence-layout .conpherence-no-threads {
-  left: 0;
-  right: 0;
-  width: 100%;
-}
-
-.conpherence-layout .conpherence-no-threads .text {
-  margin: 0px 0px 16px 0px;
-}
-
 .conpherence-menu-pane {
   width: 100%;
   position: absolute;

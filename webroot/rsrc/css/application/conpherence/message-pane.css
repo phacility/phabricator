@@ -24,12 +24,20 @@
   width: 100%;
 }
 
-.conpherence-layout .conpherence-no-threads {
-  text-align: center;
+.conpherence-layout .conpherence-content-pane .conpherence-no-threads {
+  top: 44px;
+  right: 0;
+  background: #fff;
+  z-index: 26;
 }
 
-.conpherence-layout .conpherence-no-threads .text {
-  margin: 16px 0px 16px 0px;
+.conpherence-layout .phui-big-info-view {
+  margin: 16px;
+}
+
+.conpherence-layout .conpherence-no-threads .phui-box-border {
+  border: none;
+  margin: 0;
 }
 
 .conpherence-show-more-messages {
