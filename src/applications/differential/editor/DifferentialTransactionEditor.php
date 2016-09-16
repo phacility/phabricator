@@ -1511,13 +1511,6 @@ final class DifferentialTransactionEditor
     $packages = PhabricatorOwnersPackage::loadAffectedPackages(
       $repository,
       $this->affectedPaths);
-
-    foreach ($packages as $key => $package) {
-      if ($package->isArchived()) {
-        unset($packages[$key]);
-      }
-    }
-
     if (!$packages) {
       return array();
     }
