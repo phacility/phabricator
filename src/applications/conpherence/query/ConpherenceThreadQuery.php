@@ -13,16 +13,10 @@ final class ConpherenceThreadQuery
   private $needOrigPics;
   private $needTransactions;
   private $needParticipantCache;
-  private $needFilePHIDs;
   private $afterTransactionID;
   private $beforeTransactionID;
   private $transactionLimit;
   private $fulltext;
-
-  public function needFilePHIDs($need_file_phids) {
-    $this->needFilePHIDs = $need_file_phids;
-    return $this;
-  }
 
   public function needParticipantCache($participant_cache) {
     $this->needParticipantCache = $participant_cache;
@@ -115,9 +109,6 @@ final class ConpherenceThreadQuery
       }
       if ($this->needTransactions) {
         $this->loadTransactionsAndHandles($conpherences);
-      }
-      if ($this->needFilePHIDs) {
-        $this->loadFilePHIDs($conpherences);
       }
       if ($this->needOrigPics || $this->needCropPics) {
         $this->initImages($conpherences);
@@ -271,19 +262,6 @@ final class ConpherenceThreadQuery
       }
       $conpherence->attachHandles($conpherence->getHandles() + $handles);
       $conpherence->attachTransactions($current_transactions);
-    }
-    return $this;
-  }
-
-  private function loadFilePHIDs(array $conpherences) {
-    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
-    $file_edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs(array_keys($conpherences))
-      ->withEdgeTypes(array($edge_type))
-      ->execute();
-    foreach ($file_edges as $conpherence_phid => $data) {
-      $conpherence = $conpherences[$conpherence_phid];
-      $conpherence->attachFilePHIDs(array_keys($data[$edge_type]));
     }
     return $this;
   }

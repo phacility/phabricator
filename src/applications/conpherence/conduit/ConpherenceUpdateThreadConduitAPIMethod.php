@@ -44,8 +44,7 @@ final class ConpherenceUpdateThreadConduitAPIMethod
     $id = $request->getValue('id');
     $phid = $request->getValue('phid');
     $query = id(new ConpherenceThreadQuery())
-      ->setViewer($user)
-      ->needFilePHIDs(true);
+      ->setViewer($user);
     if ($id) {
       $query->withIDs(array($id));
     } else if ($phid) {

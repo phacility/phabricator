@@ -20,7 +20,6 @@ final class ConpherenceThread extends ConpherenceDAO
   private $participants = self::ATTACHABLE;
   private $transactions = self::ATTACHABLE;
   private $handles = self::ATTACHABLE;
-  private $filePHIDs = self::ATTACHABLE;
   private $images = self::ATTACHABLE;
 
   public static function initializeNewRoom(PhabricatorUser $sender) {
@@ -31,7 +30,6 @@ final class ConpherenceThread extends ConpherenceDAO
       ->setTitle('')
       ->setTopic('')
       ->attachParticipants(array())
-      ->attachFilePHIDs(array())
       ->attachImages(array())
       ->setViewPolicy($default_policy)
       ->setEditPolicy($default_policy)
@@ -156,14 +154,6 @@ final class ConpherenceThread extends ConpherenceDAO
       $this->getTransactions(),
       $length - $begin - $amount,
       $amount);
-  }
-
-  public function attachFilePHIDs(array $file_phids) {
-    $this->filePHIDs = $file_phids;
-    return $this;
-  }
-  public function getFilePHIDs() {
-    return $this->assertAttached($this->filePHIDs);
   }
 
   public function loadImageURI($size) {

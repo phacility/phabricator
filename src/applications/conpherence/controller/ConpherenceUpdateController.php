@@ -36,7 +36,6 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
-      ->needFilePHIDs(true)
       ->needOrigPics(true)
       ->needCropPics(true)
       ->needParticipants($need_participants)

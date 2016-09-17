@@ -227,9 +227,6 @@ final class ConpherenceTransactionView extends AphrontView {
     $content = null;
     $handles = $this->getHandles();
     switch ($transaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_FILES:
-        $content = $transaction->getTitle();
-        break;
       case ConpherenceTransaction::TYPE_TITLE:
       case ConpherenceTransaction::TYPE_TOPIC:
       case ConpherenceTransaction::TYPE_PICTURE:
