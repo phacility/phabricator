@@ -13,6 +13,10 @@
   background-color: {$page.background};
 }
 
+.printable .phui-crumbs-view {
+  display: none;
+}
+
 .phui-crumbs-view,
 .phui-crumbs-view a.phui-crumb-view,
 .phui-crumbs-view a.phui-crumbs-action {

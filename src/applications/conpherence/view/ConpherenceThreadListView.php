@@ -31,6 +31,9 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $this->addRoomsToMenu($menu, $this->threads, $policy_objects);
 
+    $menu = phutil_tag_div('phabricator-side-menu', $menu);
+    $menu = phutil_tag_div('phui-basic-nav', $menu);
+
     return $menu;
   }
 
@@ -96,14 +99,7 @@ final class ConpherenceThreadListView extends AphrontView {
     array $rooms,
     array $policy_objects) {
 
-    $header = $this->renderMenuItemHeader(
-      pht('Rooms'),
-      'conpherence-room-list-header');
-    $header->appendChild(
-      id(new PHUIIconView())
-      ->setIcon('fa-search')
-      ->setHref('/conpherence/search/')
-      ->setText(pht('Search')));
+    $header = $this->renderMenuItemHeader();
     $menu->addMenuItem($header);
 
     if (empty($rooms)) {
@@ -191,11 +187,53 @@ final class ConpherenceThreadListView extends AphrontView {
     return $menu;
   }
 
-  private function renderMenuItemHeader($title, $class = null) {
+  private function renderMenuItemHeader() {
+    $rooms = phutil_tag(
+      'a',
+      array(
+        'class' => 'room-list-href',
+        'href' => '/conpherence/search/',
+      ),
+      pht('Rooms'));
+
+    $new_icon = id(new PHUIIconView())
+      ->setIcon('fa-plus-square')
+      ->addSigil('has-tooltip')
+      ->setHref('/conpherence/new/')
+      ->setWorkflow(true)
+      ->setMetaData(array(
+        'tip' => pht('New Room'),
+      ));
+
+    $search_icon = id(new PHUIIconView())
+      ->setIcon('fa-search')
+      ->addSigil('has-tooltip')
+      ->setHref('/conpherence/search/')
+      ->setMetaData(array(
+        'tip' => pht('Search Rooms'),
+      ));
+
+    $icons = phutil_tag(
+      'span',
+      array(
+        'class' => 'room-list-icons',
+      ),
+      array(
+        $new_icon,
+        $search_icon,
+      ));
+
+    $new_icon = id(new PHUIIconView())
+      ->setIcon('fa-plus-square')
+      ->setHref('/conpherence/new/')
+      ->setWorkflow(true);
+
+    $custom = phutil_tag_div('grouped', array($rooms, $icons));
+
     $item = id(new PHUIListItemView())
-      ->setType(PHUIListItemView::TYPE_LABEL)
-      ->setName($title)
-      ->addClass($class);
+      ->setType(PHUIListItemView::TYPE_CUSTOM)
+      ->setName($custom)
+      ->addClass('conpherence-room-list-header');
     return $item;
   }
 

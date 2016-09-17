@@ -155,10 +155,6 @@
     display: none;
 }
 
-.phui-two-column-properties.phui-object-box {
-  border: 1px solid rgba({$alphablue}, .2);
-}
-
 .device .phui-two-column-content .phui-two-column-properties.phui-object-box {
   padding: 0 12px;
 }

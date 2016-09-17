@@ -9,12 +9,6 @@ final class ConpherenceViewController extends
     return true;
   }
 
-  protected function buildApplicationCrumbs() {
-    $crumbs = $this->buildConpherenceApplicationCrumbs();
-    $crumbs->setBorder(true);
-    return $crumbs;
-  }
-
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
@@ -160,7 +154,7 @@ final class ConpherenceViewController extends
       $button_text = pht('Send');
     } else if ($user->isLoggedIn()) {
       $action = ConpherenceUpdateActions::JOIN_ROOM;
-      $button_text = pht('Join');
+      $button_text = pht('Join Room');
     } else {
       // user not logged in so give them a login button.
       $login_href = id(new PhutilURI('/auth/start/'))

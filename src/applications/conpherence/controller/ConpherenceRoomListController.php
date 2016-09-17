@@ -18,10 +18,6 @@ final class ConpherenceRoomListController extends ConpherenceController {
     return $this->delegateToController($controller);
   }
 
-  protected function buildApplicationCrumbs() {
-    return $this->buildConpherenceApplicationCrumbs($is_rooms = true);
-  }
-
   public function buildApplicationMenu() {
     return $this->buildRoomsSideNavView(true)->getMenu();
   }

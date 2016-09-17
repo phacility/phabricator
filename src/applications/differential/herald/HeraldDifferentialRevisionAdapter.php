@@ -29,7 +29,7 @@ final class HeraldDifferentialRevisionAdapter
       'Test rules which run when a revision is created or updated.');
   }
 
-  public function newTestAdapter($object) {
+  public function newTestAdapter(PhabricatorUser $viewer, $object) {
     return self::newLegacyAdapter(
       $object,
       $object->loadActiveDiff());

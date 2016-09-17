@@ -7,10 +7,11 @@ final class PhabricatorGuideModuleController
     $viewer = $this->getViewer();
     $key = $request->getURIData('module');
 
+    $all_modules = PhabricatorGuideModule::getEnabledModules();
+
     if (!$key) {
-      $key = 'welcome';
+      $key = key($all_modules);
     }
-    $all_modules = PhabricatorGuideModule::getAllModules();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter($key.'/');

@@ -224,7 +224,7 @@ abstract class HeraldAdapter extends Phobject {
     return $this->isTestAdapterForObject($object);
   }
 
-  public function newTestAdapter($object) {
+  public function newTestAdapter(PhabricatorUser $viewer, $object) {
     return id(clone $this)
       ->setObject($object);
   }

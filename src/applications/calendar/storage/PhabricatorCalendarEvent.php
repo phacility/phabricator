@@ -137,7 +137,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     );
 
     // Read these fields from the parent event instead of this event. For
-    // example, we want any changes to the parent event's name to
+    // example, we want any changes to the parent event's name to apply to
+    // the child.
     if (isset($inherit[$field])) {
       if ($this->getIsStub()) {
         // TODO: This should be unconditional, but the execution order of
@@ -171,33 +172,66 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setName($parent->getName())
       ->setDescription($parent->getDescription());
 
-    $frequency = $parent->getFrequencyUnit();
-    $modify_key = '+'.$this->getSequenceIndex().' '.$frequency;
+    $sequence = $this->getSequenceIndex();
+    $duration = $this->getDuration();
+    $epochs = $parent->getSequenceIndexEpochs($actor, $sequence, $duration);
 
-    $date = $parent->getDateFrom();
-    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $actor);
+    $this
+      ->setDateFrom($epochs['dateFrom'])
+      ->setDateTo($epochs['dateTo'])
+      ->setAllDayDateFrom($epochs['allDayDateFrom'])
+      ->setAllDayDateTo($epochs['allDayDateTo']);
+
+    return $this;
+  }
+
+  public function isValidSequenceIndex(PhabricatorUser $viewer, $sequence) {
+    try {
+      $this->getSequenceIndexEpochs($viewer, $sequence, $this->getDuration());
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+  private function getSequenceIndexEpochs(
+    PhabricatorUser $viewer,
+    $sequence,
+    $duration) {
+
+    $frequency = $this->getFrequencyUnit();
+    $modify_key = '+'.$sequence.' '.$frequency;
+
+    $date = $this->getDateFrom();
+    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
     $date_time->modify($modify_key);
     $date = $date_time->format('U');
 
-    $duration = $this->getDuration();
+    $end_date = $this->getRecurrenceEndDate();
+    if ($end_date && $date > $end_date) {
+      throw new Exception(
+        pht(
+          'Sequence "%s" is invalid for this event: it would occur after '.
+          'the event stops repeating.',
+          $sequence));
+    }
 
     $utc = new DateTimeZone('UTC');
 
-    $allday_from = $parent->getAllDayDateFrom();
+    $allday_from = $this->getAllDayDateFrom();
     $allday_date = new DateTime('@'.$allday_from, $utc);
     $allday_date->setTimeZone($utc);
     $allday_date->modify($modify_key);
 
     $allday_min = $allday_date->format('U');
-    $allday_duration = ($parent->getAllDayDateTo() - $allday_from);
+    $allday_duration = ($this->getAllDayDateTo() - $allday_from);
 
-    $this
-      ->setDateFrom($date)
-      ->setDateTo($date + $duration)
-      ->setAllDayDateFrom($allday_min)
-      ->setAllDayDateTo($allday_min + $allday_duration);
-
-    return $this;
+    return array(
+      'dateFrom' => $date,
+      'dateTo' => $date + $duration,
+      'allDayDateFrom' => $allday_min,
+      'allDayDateTo' => $allday_min + $allday_duration,
+    );
   }
 
   public function newStub(PhabricatorUser $actor, $sequence) {
@@ -590,6 +624,101 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     return null;
   }
+
+  public function getICSFilename() {
+    return $this->getMonogram().'.ics';
+  }
+
+  public function newIntermediateEventNode(PhabricatorUser $viewer) {
+    $base_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
+    $domain = $base_uri->getDomain();
+
+    $uid = $this->getPHID().'@'.$domain;
+
+    $created = $this->getDateCreated();
+    $created = PhutilCalendarAbsoluteDateTime::newFromEpoch($created);
+
+    $modified = $this->getDateModified();
+    $modified = PhutilCalendarAbsoluteDateTime::newFromEpoch($modified);
+
+    $date_start = $this->getDateFrom();
+    $date_start = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_start);
+
+    $date_end = $this->getDateTo();
+    $date_end = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_end);
+
+    if ($this->getIsAllDay()) {
+      $date_start->setIsAllDay(true);
+      $date_end->setIsAllDay(true);
+    }
+
+    $host_phid = $this->getHostPHID();
+
+    $invitees = $this->getInvitees();
+    foreach ($invitees as $key => $invitee) {
+      if ($invitee->isUninvited()) {
+        unset($invitees[$key]);
+      }
+    }
+
+    $phids = array();
+    $phids[] = $host_phid;
+    foreach ($invitees as $invitee) {
+      $phids[] = $invitee->getInviteePHID();
+    }
+
+    $handles = $viewer->loadHandles($phids);
+
+    $host_handle = $handles[$host_phid];
+    $host_name = $host_handle->getFullName();
+    $host_uri = $host_handle->getURI();
+    $host_uri = PhabricatorEnv::getURI($host_uri);
+
+    $organizer = id(new PhutilCalendarUserNode())
+      ->setName($host_name)
+      ->setURI($host_uri);
+
+    $attendees = array();
+    foreach ($invitees as $invitee) {
+      $invitee_phid = $invitee->getInviteePHID();
+      $invitee_handle = $handles[$invitee_phid];
+      $invitee_name = $invitee_handle->getFullName();
+      $invitee_uri = $invitee_handle->getURI();
+      $invitee_uri = PhabricatorEnv::getURI($invitee_uri);
+
+      switch ($invitee->getStatus()) {
+        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+          $status = PhutilCalendarUserNode::STATUS_ACCEPTED;
+          break;
+        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+          $status = PhutilCalendarUserNode::STATUS_DECLINED;
+          break;
+        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+        default:
+          $status = PhutilCalendarUserNode::STATUS_INVITED;
+          break;
+      }
+
+      $attendees[] = id(new PhutilCalendarUserNode())
+        ->setName($invitee_name)
+        ->setURI($invitee_uri)
+        ->setStatus($status);
+    }
+
+    $node = id(new PhutilCalendarEventNode())
+      ->setUID($uid)
+      ->setName($this->getName())
+      ->setDescription($this->getDescription())
+      ->setCreatedDateTime($created)
+      ->setModifiedDateTime($modified)
+      ->setStartDateTime($date_start)
+      ->setEndDateTime($date_end)
+      ->setOrganizer($organizer)
+      ->setAttendees($attendees);
+
+    return $node;
+  }
+
 
 
 /* -(  Markup Interface  )--------------------------------------------------- */

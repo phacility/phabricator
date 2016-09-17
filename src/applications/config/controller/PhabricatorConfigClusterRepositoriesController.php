@@ -153,6 +153,14 @@ final class PhabricatorConfigClusterRepositoriesController
 
         $versions = idx($repository_versions, $repository_phid, array());
 
+        // Filter out any versions for devices which are no longer active.
+        foreach ($versions as $key => $version) {
+          $version_device_phid = $version->getDevicePHID();
+          if (empty($active_devices[$version_device_phid])) {
+            unset($versions[$key]);
+          }
+        }
+
         $leaders = 0;
         foreach ($versions as $version) {
           if ($version->getRepositoryVersion() == $leader_version) {

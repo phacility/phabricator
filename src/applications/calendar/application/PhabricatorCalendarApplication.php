@@ -59,6 +59,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarEventCancelController',
           '(?P<action>join|decline|accept)/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventJoinController',
+          'export/(?P<id>[1-9]\d*)/(?P<filename>[^/]*)'
+            => 'PhabricatorCalendarEventExportController',
         ),
       ),
     );

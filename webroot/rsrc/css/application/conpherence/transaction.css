@@ -12,16 +12,19 @@
 
 .conpherence-transaction-header .phui-link-person {
   font-weight: bold;
+  font-size: {$biggerfontsize};
+  color: #000;
 }
 
 .conpherence-transaction-view.date-marker {
-  border-top: 1px solid {$thinblueborder};
+  border-top: 1px solid {$sh-violetborder};
 }
+
 .conpherence-transaction-view.date-marker .date {
   position: relative;
   top: -11px;
   background-color: #fff;
-  color: #000;
+  color: {$sh-violettext};
   font-weight: bold;
 }
 

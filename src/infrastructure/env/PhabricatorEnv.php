@@ -315,6 +315,14 @@ final class PhabricatorEnv extends Phobject {
    * @task read
    */
   public static function getEnvConfig($key) {
+    if (!self::$sourceStack) {
+      throw new Exception(
+        pht(
+          'Trying to read configuration "%s" before configuration has been '.
+          'initialized.',
+          $key));
+    }
+
     if (isset(self::$cache[$key])) {
       return self::$cache[$key];
     }

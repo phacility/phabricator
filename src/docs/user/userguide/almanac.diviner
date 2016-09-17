@@ -143,7 +143,7 @@ Almanac namespaces allow you to control who can create services and devices
 with certain names.
 
 If you keep a list of cattle as devices with names like
-`cow001.herd.myranch.com`, `cow002.herd.myranch.moo`, you might have some
+`cow001.herd.myranch.moo`, `cow002.herd.myranch.moo`, you might have some
 applications which query for all devices in `*.herd.myranch.moo`, and thus
 want to limit who can create devices there in order to prevent mistakes.
 

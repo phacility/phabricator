@@ -1094,6 +1094,22 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
       }
     }
 
+    $valid_constraints = array();
+    foreach ($fields as $field) {
+      foreach ($field->getValidConstraintKeys() as $key) {
+        $valid_constraints[$key] = true;
+      }
+    }
+
+    foreach ($constraints as $key => $constraint) {
+      if (empty($valid_constraints[$key])) {
+        throw new Exception(
+          pht(
+            'Constraint "%s" is not a valid constraint for this query.',
+            $key));
+      }
+    }
+
     foreach ($fields as $field) {
       if (!$field->getValueExistsInConduitRequest($constraints)) {
         continue;

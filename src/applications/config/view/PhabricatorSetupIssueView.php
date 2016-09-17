@@ -13,6 +13,14 @@ final class PhabricatorSetupIssueView extends AphrontView {
     return $this->issue;
   }
 
+  public function renderInFlight() {
+    $issue = $this->getIssue();
+
+    return id(new PhabricatorInFlightErrorView())
+      ->setMessage($issue->getName())
+      ->render();
+  }
+
   public function render() {
     $issue = $this->getIssue();
 

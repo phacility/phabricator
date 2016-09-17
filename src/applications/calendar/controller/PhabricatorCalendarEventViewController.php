@@ -193,6 +193,15 @@ final class PhabricatorCalendarEventViewController
           ->setWorkflow(true));
     }
 
+    $ics_name = $event->getICSFilename();
+    $export_uri = $this->getApplicationURI("event/export/{$id}/{$ics_name}");
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Export as .ics'))
+        ->setIcon('fa-download')
+        ->setHref($export_uri));
+
     return $curtain;
   }
 
@@ -278,7 +287,14 @@ final class PhabricatorCalendarEventViewController
       $parent = $event->getParentEvent();
     }
 
-    $next_uri = $parent->getURI().'/'.($sequence + 1);
+    if ($parent->isValidSequenceIndex($viewer, $sequence + 1)) {
+      $next_uri = $parent->getURI().'/'.($sequence + 1);
+      $has_next = true;
+    } else {
+      $next_uri = null;
+      $has_next = false;
+    }
+
     if ($sequence) {
       if ($sequence > 1) {
         $previous_uri = $parent->getURI().'/'.($sequence - 1);
@@ -302,6 +318,7 @@ final class PhabricatorCalendarEventViewController
       ->setTag('a')
       ->setIcon('fa-chevron-right')
       ->setHref($next_uri)
+      ->setDisabled(!$has_next)
       ->setText(pht('Next'));
 
     $header
@@ -450,9 +467,11 @@ final class PhabricatorCalendarEventViewController
           'it.'));
     }
 
-    $instance = $event->newStub($viewer, $sequence);
+    if (!$event->isValidSequenceIndex($viewer, $sequence)) {
+      return null;
+    }
 
-    return $instance;
+    return $event->newStub($viewer, $sequence);
   }
 
   private function buildSubheaderView(PhabricatorCalendarEvent $event) {

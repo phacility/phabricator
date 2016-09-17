@@ -18,10 +18,6 @@ final class PhabricatorGuideApplication extends PhabricatorApplication {
     return 'fa-map-o';
   }
 
-  public function isPrototype() {
-    return true;
-  }
-
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
   }

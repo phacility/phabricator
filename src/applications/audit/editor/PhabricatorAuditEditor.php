@@ -886,9 +886,8 @@ final class PhabricatorAuditEditor
   protected function buildHeraldAdapter(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
     return id(new HeraldCommitAdapter())
-      ->setCommit($object);
+      ->setObject($object);
   }
 
   protected function didApplyHeraldRules(

@@ -231,7 +231,7 @@ JX.behavior('conpherence-menu', function(config) {
 
   function markWidgetLoading(loading) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var widgets_root = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+    var widgets_root = JX.DOM.find(root, 'div', 'conpherence-participant-pane');
 
     JX.DOM.alterClass(widgets_root, 'loading', loading);
   }
@@ -241,7 +241,7 @@ JX.behavior('conpherence-menu', function(config) {
     if (!data.widget) {
       data.widget = getDefaultWidget();
     }
-    var widget_uri = config.baseURI + 'widget/' + data.threadID + '/';
+    var widget_uri = config.baseURI + 'participant/' + data.threadID + '/';
     new JX.Workflow(widget_uri, {})
       .setHandler(JX.bind(null, onWidgetResponse, data.threadID, data.widget))
       .start();

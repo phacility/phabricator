@@ -150,6 +150,10 @@ div.jx-typeahead-results {
   z-index: 21;
 }
 
+.conpherence-participant-pane {
+  z-index: 25;
+}
+
 .phuix-dropdown-menu {
   z-index: 32;
 }

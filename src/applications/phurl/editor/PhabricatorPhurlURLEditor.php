@@ -123,18 +123,23 @@ final class PhabricatorPhurlURLEditor
         foreach ($xactions as $xaction) {
           if ($xaction->getOldValue() != $xaction->getNewValue()) {
             $new_alias = $xaction->getNewValue();
+            $debug_alias = new PHUIInvisibleCharacterView($new_alias);
             if (!preg_match('/[a-zA-Z]/', $new_alias)) {
               $errors[] = new PhabricatorApplicationTransactionValidationError(
                 $type,
                 pht('Invalid Alias'),
-                pht('The alias must contain at least one letter.'),
+                pht('The alias you provided (%s) must contain at least one '.
+                  'letter.',
+                  $debug_alias),
                 $xaction);
             }
             if (preg_match('/[^a-z0-9]/i', $new_alias)) {
               $errors[] = new PhabricatorApplicationTransactionValidationError(
                 $type,
                 pht('Invalid Alias'),
-                pht('The alias may only contain letters and numbers.'),
+                pht('The alias you provided (%s) may only contain letters and '.
+                  'numbers.',
+                  $debug_alias),
                 $xaction);
             }
           }

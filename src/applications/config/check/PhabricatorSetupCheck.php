@@ -74,6 +74,9 @@ abstract class PhabricatorSetupCheck extends Phobject {
     $cache = PhabricatorCaches::getSetupCache();
     $cache->setKey('phabricator.setup.issue-keys', $keys);
 
+    $server_cache = PhabricatorCaches::getServerStateCache();
+    $server_cache->setKey('phabricator.in-flight', 1);
+
     if ($update_database) {
       $db_cache = new PhabricatorKeyValueDatabaseCache();
       try {
@@ -190,6 +193,22 @@ abstract class PhabricatorSetupCheck extends Phobject {
       $needs_repair = self::repairConfig();
       self::setConfigNeedsRepair($needs_repair);
     }
+  }
+
+  /**
+   * Test if we've survived through setup on at least one normal request
+   * without fataling.
+   *
+   * If we've made it through setup without hitting any fatals, we switch
+   * to render a more friendly error page when encountering issues like
+   * database connection failures. This gives users a smoother experience in
+   * the face of intermittent failures.
+   *
+   * @return bool True if we've made it through setup since the last restart.
+   */
+  final public static function isInFlight() {
+    $cache = PhabricatorCaches::getServerStateCache();
+    return (bool)$cache->getKey('phabricator.in-flight');
   }
 
   final public static function loadAllChecks() {

@@ -8,7 +8,7 @@ abstract class PhabricatorGuideController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
     $nav->addLabel(pht('Guides'));
 
-    $modules = PhabricatorGuideModule::getAllModules();
+    $modules = PhabricatorGuideModule::getEnabledModules();
     foreach ($modules as $key => $module) {
       $nav->addFilter($key.'/', $module->getModuleName());
     }

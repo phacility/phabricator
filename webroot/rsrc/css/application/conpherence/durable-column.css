@@ -251,7 +251,6 @@
 .conpherence-durable-column-transactions .conpherence-transaction-detail
 .conpherence-transaction-header .conpherence-transaction-info {
   color: {$lightbluetext};
-  float: none;
   font-size: {$smallerfontsize};
 }
 
@@ -266,7 +265,7 @@
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
 .conpherence-transaction-content .phui-link-person {
-  color: {$darkbluetext};
+  color: #000;
 }
 
 .conpherence-durable-column-transactions
