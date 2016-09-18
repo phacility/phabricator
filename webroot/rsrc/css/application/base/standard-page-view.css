@@ -56,14 +56,6 @@ body.white-background {
   color: {$greytext};
 }
 
-.keyboard-shortcut-help kbd {
-  background: #222222;
-  padding: 6px;
-  color: #ffffff;
-  font-weight: bold;
-  border: 1px solid #555555;
-}
-
 .keyboard-focus-focus-reticle {
   background: #ffffd3;
   position: absolute;
