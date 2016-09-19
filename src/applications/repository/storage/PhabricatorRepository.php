@@ -1783,7 +1783,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $smart_wait = $minimum;
     }
 
-    return $smart_wait;
+    return (int)$smart_wait;
   }
 
 
