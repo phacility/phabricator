@@ -1649,21 +1649,33 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $this->getID(),
         $status_type);
     } else {
+      // If the existing message has the same code (e.g., we just hit an
+      // error and also previously hit an error) we increment the message
+      // count by 1. This allows us to determine how many times in a row
+      // we've run into an error.
+
       queryfx(
         $conn_w,
         'INSERT INTO %T
-          (repositoryID, statusType, statusCode, parameters, epoch)
-          VALUES (%d, %s, %s, %s, %d)
+          (repositoryID, statusType, statusCode, parameters, epoch,
+            messageCount)
+          VALUES (%d, %s, %s, %s, %d, %d)
           ON DUPLICATE KEY UPDATE
             statusCode = VALUES(statusCode),
             parameters = VALUES(parameters),
-            epoch = VALUES(epoch)',
+            epoch = VALUES(epoch),
+            messageCount =
+              IF(
+                statusCode = VALUES(statusCode),
+                messageCount + 1,
+                VALUES(messageCount))',
         $table_name,
         $this->getID(),
         $status_type,
         $status_code,
         json_encode($parameters),
-        time());
+        time(),
+        1);
     }
 
     return $this;
@@ -1738,6 +1750,33 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @return  int   Repository update interval, in seconds.
    */
   public function loadUpdateInterval($minimum = 15) {
+    // First, check if we've hit errors recently. If we have, wait one period
+    // for each consecutive error. Normally, this corresponds to a backoff of
+    // 15s, 30s, 45s, etc.
+
+    $message_table = new PhabricatorRepositoryStatusMessage();
+    $conn = $message_table->establishConnection('r');
+    $error_count = queryfx_one(
+      $conn,
+      'SELECT MAX(messageCount) error_count FROM %T
+        WHERE repositoryID = %d
+        AND statusType IN (%Ls)
+        AND statusCode IN (%Ls)',
+      $message_table->getTableName(),
+      $this->getID(),
+      array(
+        PhabricatorRepositoryStatusMessage::TYPE_INIT,
+        PhabricatorRepositoryStatusMessage::TYPE_FETCH,
+      ),
+      array(
+        PhabricatorRepositoryStatusMessage::CODE_ERROR,
+      ));
+
+    $error_count = (int)$error_count['error_count'];
+    if ($error_count > 0) {
+      return (int)($minimum * $error_count);
+    }
+
     // If a repository is still importing, always pull it as frequently as
     // possible. This prevents us from hanging for a long time at 99.9% when
     // importing an inactive repository.
@@ -1758,30 +1797,33 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $window_start);
     if ($last_commit) {
       $time_since_commit = ($window_start - $last_commit['epoch']);
-
-      $last_few_days = phutil_units('3 days in seconds');
-
-      if ($time_since_commit <= $last_few_days) {
-        // For repositories with activity in the recent past, we wait one
-        // extra second for every 10 minutes since the last commit. This
-        // shorter backoff is intended to handle weekends and other short
-        // breaks from development.
-        $smart_wait = ($time_since_commit / 600);
-      } else {
-        // For repositories without recent activity, we wait one extra second
-        // for every 4 minutes since the last commit. This longer backoff
-        // handles rarely used repositories, up to the maximum.
-        $smart_wait = ($time_since_commit / 240);
-      }
-
-      // We'll never wait more than 6 hours to pull a repository.
-      $longest_wait = phutil_units('6 hours in seconds');
-      $smart_wait = min($smart_wait, $longest_wait);
-
-      $smart_wait = max($minimum, $smart_wait);
     } else {
-      $smart_wait = $minimum;
+      // If the repository has no commits, treat the creation date as
+      // though it were the date of the last commit. This makes empty
+      // repositories update quickly at first but slow down over time
+      // if they don't see any activity.
+      $time_since_commit = ($window_start - $this->getDateCreated());
     }
+
+    $last_few_days = phutil_units('3 days in seconds');
+
+    if ($time_since_commit <= $last_few_days) {
+      // For repositories with activity in the recent past, we wait one
+      // extra second for every 10 minutes since the last commit. This
+      // shorter backoff is intended to handle weekends and other short
+      // breaks from development.
+      $smart_wait = ($time_since_commit / 600);
+    } else {
+      // For repositories without recent activity, we wait one extra second
+      // for every 4 minutes since the last commit. This longer backoff
+      // handles rarely used repositories, up to the maximum.
+      $smart_wait = ($time_since_commit / 240);
+    }
+
+    // We'll never wait more than 6 hours to pull a repository.
+    $longest_wait = phutil_units('6 hours in seconds');
+    $smart_wait = min($smart_wait, $longest_wait);
+    $smart_wait = max($minimum, $smart_wait);
 
     return (int)$smart_wait;
   }

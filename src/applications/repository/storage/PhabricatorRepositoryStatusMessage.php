@@ -8,7 +8,6 @@ final class PhabricatorRepositoryStatusMessage
   const TYPE_NEEDS_UPDATE = 'needs-update';
 
   const CODE_ERROR = 'error';
-  const CODE_WORKING = 'working';
   const CODE_OKAY = 'okay';
 
   protected $repositoryID;
@@ -16,6 +15,7 @@ final class PhabricatorRepositoryStatusMessage
   protected $statusCode;
   protected $parameters = array();
   protected $epoch;
+  protected $messageCount;
 
   protected function getConfiguration() {
     return array(
@@ -26,6 +26,7 @@ final class PhabricatorRepositoryStatusMessage
       self::CONFIG_COLUMN_SCHEMA => array(
         'statusType' => 'text32',
         'statusCode' => 'text32',
+        'messageCount' => 'uint32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'repositoryID' => array(

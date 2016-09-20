@@ -359,19 +359,12 @@ final class DiffusionRepositoryStatusManagementPanel
                 return $view;
               }
             break;
-          case PhabricatorRepositoryStatusMessage::CODE_WORKING:
+          default:
             $view->addItem(
               id(new PHUIStatusItemView())
                 ->setIcon(PHUIStatusItemView::ICON_CLOCK, 'green')
                 ->setTarget(pht('Initializing Working Copy'))
                 ->setNote(pht('Daemons are initializing the working copy.')));
-            return $view;
-          default:
-            $view->addItem(
-              id(new PHUIStatusItemView())
-                ->setIcon(PHUIStatusItemView::ICON_WARNING, 'red')
-                ->setTarget(pht('Unknown Init Status'))
-                ->setNote($message->getStatusCode()));
             return $view;
         }
       } else {
