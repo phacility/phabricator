@@ -51,12 +51,19 @@ final class ManiphestTaskGraph
         $assigned = phutil_tag('em', array(), pht('None'));
       }
 
+      $full_title = $object->getTitle();
+
+      $title = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(80)
+        ->truncateString($full_title);
+
       $link = phutil_tag(
         'a',
         array(
           'href' => $object->getURI(),
+          'title' => $full_title,
         ),
-        $object->getTitle());
+        $title);
 
       $link = array(
         phutil_tag(
@@ -94,8 +101,6 @@ final class ManiphestTaskGraph
             'align' => 'E',
           ));
     }
-
-    $link = AphrontTableView::renderSingleDisplayLine($link);
 
     return array(
       $marker,
