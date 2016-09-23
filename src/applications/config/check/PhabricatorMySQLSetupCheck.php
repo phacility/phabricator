@@ -44,40 +44,6 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->addMySQLConfig('max_allowed_packet');
     }
 
-    $max_connections = self::loadRawConfigValue('max_connections');
-
-    // A common default is 150, but we're fairly liberal about the number of
-    // connections we open and it's easy for us to run far over this limit.
-
-    $warning_threshold = 256;
-    if ($max_connections < $warning_threshold) {
-      $message = pht(
-        'MySQL is configured with a small "%s" (%d) limit, which may cause '.
-        'connection failures long before any resources near exhaustion. '.
-        'There is normally very little benefit to enforcing a connection '.
-        'limit, and most installs should increase it substantially.'.
-        "\n\n".
-        'You can compute a specific connection limit for your install by '.
-        'doing a lot of math with MySQL buffer sizes and RAM available on '.
-        'the machine, or just set it to a huge number. In nearly every case, '.
-        'setting it to a huge number is entirely reasonable.'.
-        "\n\n".
-        'You can raise this limit by adding this to your %s file (in the %s '.
-        'section) and then restarting %s:'.
-        "\n\n%s",
-        'max_connections',
-        $max_connections,
-        phutil_tag('tt', array(), 'my.cnf'),
-        phutil_tag('tt', array(), '[mysqld]'),
-        phutil_tag('tt', array(), 'mysqld'),
-        phutil_tag('pre', array(), 'max_connections=100000'));
-
-      $this->newIssue('mysql.max_connections')
-        ->setName(pht('Small MySQL "%s"', 'max_connections'))
-        ->setMessage($message)
-        ->addMySQLConfig('max_connections');
-    }
-
     $modes = self::loadRawConfigValue('sql_mode');
     $modes = explode(',', $modes);
 
