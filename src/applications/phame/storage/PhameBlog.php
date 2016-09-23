@@ -361,7 +361,7 @@ final class PhameBlog extends PhameDAO
 
 
   public function isAutomaticallySubscribed($phid) {
-    return ($this->creatorPHID == $phid);
+    return false;
   }
 
 
