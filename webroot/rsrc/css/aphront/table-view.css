@@ -228,6 +228,10 @@ span.single-display-line-content {
   position: static;
 }
 
+.aphront-table-view td.object-link {
+  white-space: nowrap;
+}
+
 .aphront-table-view tr.closed td.object-link .object-name,
 .aphront-table-view tr.alt-closed td.object-link .object-name {
   text-decoration: line-through;

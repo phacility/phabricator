@@ -99,10 +99,13 @@ final class PhabricatorPhurlURLSearchEngine
   }
 
   protected function getNewUserBody() {
+    $create_uri = id(new PhabricatorPhurlURLEditEngine())
+      ->getEditURI();
+
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Shorten a URL'))
-      ->setHref('/phurl/url/create/')
+      ->setHref($create_uri)
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getIcon();

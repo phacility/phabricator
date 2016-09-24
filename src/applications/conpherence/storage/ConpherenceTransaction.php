@@ -2,7 +2,6 @@
 
 final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
-  const TYPE_FILES           = 'files';
   const TYPE_TITLE           = 'title';
   const TYPE_TOPIC           = 'topic';
   const TYPE_PARTICIPANTS    = 'participants';
@@ -44,8 +43,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_PICTURE:
       case self::TYPE_DATE_MARKER:
         return false;
-      case self::TYPE_FILES:
-        return true;
       case self::TYPE_PICTURE_CROP:
         return true;
     }
@@ -67,29 +64,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case self::TYPE_PICTURE:
         return $this->getRoomTitle();
-        break;
-      case self::TYPE_FILES:
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        if ($add && $rem) {
-          $title = pht(
-            '%s edited files(s), added %d and removed %d.',
-            $this->renderHandleLink($author_phid),
-            count($add),
-            count($rem));
-        } else if ($add) {
-          $title = pht(
-            '%s added %s files(s).',
-            $this->renderHandleLink($author_phid),
-            phutil_count($add));
-        } else {
-          $title = pht(
-            '%s removed %s file(s).',
-            $this->renderHandleLink($author_phid),
-            phutil_count($rem));
-        }
-        return $title;
         break;
       case self::TYPE_PARTICIPANTS:
         $add = array_diff($new, $old);
@@ -252,7 +226,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
       case self::TYPE_PICTURE:
-      case self::TYPE_FILES:
       case self::TYPE_DATE_MARKER:
         break;
       case self::TYPE_PARTICIPANTS:
