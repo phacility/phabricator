@@ -99,7 +99,7 @@ final class PhabricatorFileImageProxyController
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withPHIDs(array($request->getFilePHID()))
         ->executeOne();
-      if (!file) {
+      if (!$file) {
         throw new Exception(pht(
           'The underlying file does not exist, but the cached request was '.
           'successful. This likely means the file record was manually deleted '.
