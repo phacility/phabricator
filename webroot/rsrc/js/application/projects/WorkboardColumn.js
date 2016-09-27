@@ -222,6 +222,7 @@ JX.install('WorkboardColumn', {
 
       var points = {};
       var count = 0;
+      var decimal_places = 0;
       for (var phid in cards) {
         var card = cards[phid];
 
@@ -238,6 +239,15 @@ JX.install('WorkboardColumn', {
             points[status] = 0;
           }
           points[status] += card_points;
+
+          // Count the number of decimal places in the point value with the
+          // most decimal digits. We'll use the same precision when rendering
+          // the point sum. This avoids rounding errors and makes the display
+          // a little more consistent.
+          var parts = card_points.toString().split('.');
+          if (parts[1]) {
+            decimal_places = Math.max(decimal_places, parts[1].length);
+          }
         }
 
         count++;
@@ -247,6 +257,7 @@ JX.install('WorkboardColumn', {
       for (var k in points) {
         total_points += points[k];
       }
+      total_points = total_points.toFixed(decimal_places);
 
       var limit = this.getPointLimit();
 

@@ -495,7 +495,7 @@ return array(
     'rsrc/js/application/policy/behavior-policy-rule-editor.js' => '5e9f347c',
     'rsrc/js/application/projects/WorkboardBoard.js' => 'fe7cb52a',
     'rsrc/js/application/projects/WorkboardCard.js' => 'c587b80f',
-    'rsrc/js/application/projects/WorkboardColumn.js' => 'bae58312',
+    'rsrc/js/application/projects/WorkboardColumn.js' => '21df4ff5',
     'rsrc/js/application/projects/WorkboardController.js' => '55baf5ed',
     'rsrc/js/application/projects/behavior-project-boards.js' => '14a1faae',
     'rsrc/js/application/projects/behavior-project-create.js' => '065227cc',
@@ -825,7 +825,7 @@ return array(
     'javelin-websocket' => 'e292eaf4',
     'javelin-workboard-board' => 'fe7cb52a',
     'javelin-workboard-card' => 'c587b80f',
-    'javelin-workboard-column' => 'bae58312',
+    'javelin-workboard-column' => '21df4ff5',
     'javelin-workboard-controller' => '55baf5ed',
     'javelin-workflow' => '1e911d0f',
     'lightbox-attachment-css' => '7acac05d',
@@ -1161,6 +1161,10 @@ return array(
       'javelin-workflow',
       'javelin-stratcom',
       'conpherence-thread-manager',
+    ),
+    '21df4ff5' => array(
+      'javelin-install',
+      'javelin-workboard-card',
     ),
     '2290aeef' => array(
       'javelin-install',
@@ -1921,10 +1925,6 @@ return array(
       'javelin-behavior',
       'javelin-uri',
       'phabricator-notification',
-    ),
-    'bae58312' => array(
-      'javelin-install',
-      'javelin-workboard-card',
     ),
     'bb1dd507' => array(
       'javelin-behavior',
