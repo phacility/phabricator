@@ -29,6 +29,12 @@ final class PhabricatorPhurlURLQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new PhabricatorPhurlURLNameNgrams()),
+      $ngrams);
+  }
+
   public function withLongURLs(array $long_urls) {
     $this->longURLs = $long_urls;
     return $this;
