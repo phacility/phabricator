@@ -1651,8 +1651,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     } else {
       // If the existing message has the same code (e.g., we just hit an
       // error and also previously hit an error) we increment the message
-      // count by 1. This allows us to determine how many times in a row
-      // we've run into an error.
+      // count. This allows us to determine how many times in a row we've
+      // run into an error.
+
+      // NOTE: The assignments in "ON DUPLICATE KEY UPDATE" are evaluated
+      // in order, so the "messageCount" assignment must occur before the
+      // "statusCode" assignment. See T11705.
 
       queryfx(
         $conn_w,
@@ -1661,14 +1665,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
             messageCount)
           VALUES (%d, %s, %s, %s, %d, %d)
           ON DUPLICATE KEY UPDATE
-            statusCode = VALUES(statusCode),
-            parameters = VALUES(parameters),
-            epoch = VALUES(epoch),
             messageCount =
               IF(
                 statusCode = VALUES(statusCode),
-                messageCount + 1,
-                VALUES(messageCount))',
+                messageCount + VALUES(messageCount),
+                VALUES(messageCount)),
+            statusCode = VALUES(statusCode),
+            parameters = VALUES(parameters),
+            epoch = VALUES(epoch)',
         $table_name,
         $this->getID(),
         $status_type,
