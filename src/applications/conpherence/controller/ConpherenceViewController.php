@@ -166,7 +166,7 @@ final class ConpherenceViewController extends
       $this->initBehavior('conpherence-pontificate');
       if ($participating) {
         $action = ConpherenceUpdateActions::MESSAGE;
-        $status = pht('I\'ll find something to put here.');
+        $status = new PhabricatorNotificationStatusView();
       } else {
         $action = ConpherenceUpdateActions::JOIN_ROOM;
         $status = pht('Sending a message will also join the room.');
