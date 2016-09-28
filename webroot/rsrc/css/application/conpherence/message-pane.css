@@ -108,6 +108,10 @@
   left: 24px;
 }
 
+.device .conpherence-room-status {
+  display: none;
+}
+
 .conpherence-no-pontificate .conpherence-message-pane .phui-form-view {
   border-top: 1px solid {$thinblueborder};
   text-align: center;
