@@ -4769,7 +4769,7 @@ phutil_register_library_map(array(
     'ConpherenceFulltextQuery' => 'PhabricatorOffsetPagedQuery',
     'ConpherenceImageData' => 'ConpherenceConstants',
     'ConpherenceIndex' => 'ConpherenceDAO',
-    'ConpherenceLayoutView' => 'AphrontView',
+    'ConpherenceLayoutView' => 'AphrontTagView',
     'ConpherenceListController' => 'ConpherenceController',
     'ConpherenceMenuItemView' => 'AphrontTagView',
     'ConpherenceNewRoomController' => 'ConpherenceController',
