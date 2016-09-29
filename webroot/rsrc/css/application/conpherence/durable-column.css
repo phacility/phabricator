@@ -9,15 +9,25 @@
 .conpherence-durable-column {
   position: fixed;
   bottom: 0;
-  right: 12px;
-  width: 300px;
-  height: 380px;
+  right: 16px;
+  width: 400px;
+  height: 360px;
   background: #fff;
   box-shadow: 0px 1px 8px rgba(55,55,55, .3);
 }
 
 .device .conpherence-durable-column {
   display: none;
+}
+
+.conpherence-durable-column .conpherence-transaction-image {
+  float: left;
+  border-radius: 3px;
+  height: 24px;
+  width: 24px;
+  background-size: 24px;
+  position: absolute;
+  top: 5px;
 }
 
 .device-desktop .conpherence-durable-column.loading .loading-mask {
@@ -81,7 +91,7 @@
   float: left;
   padding: 8px 0 8px 10px;
   color: #fff;
-  width: 230px;
+  width: 260px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -100,35 +110,34 @@
 }
 
 .conpherence-durable-column-icon-bar {
-  height: 32px;
-  padding: 4px;
+  width: 36px;
   background-color: {$lightgreybackground};
+  border-right: 1px solid {$thinblueborder};
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
 }
 
 .conpherence-durable-column-icon-bar .conpherence-durable-column-thread-icon {
-  float: left;
-  display: block;
   height: 28px;
   width: 28px;
-  border: 2px solid transparent;
-  border-radius: 3px;
-  margin: 0 2px 0 0;
+  padding: 4px;
+  display: block;
 }
 
 .conpherence-durable-column-icon-bar
 .conpherence-durable-column-thread-icon.selected {
-  border-color: {$sky};
+  background-color: rgba({$alphablue},.1);
 }
 
 .conpherence-durable-column-icon-bar
 .conpherence-durable-column-thread-icon span {
-  position: relative;
   display: block;
-  width: 24px;
-  height: 24px;
-  top: 2px;
-  left: 2px;
-  background-size: 24px 24px;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  background-size: 28px 28px;
 }
 
 .conpherence-durable-column-body {
@@ -141,12 +150,11 @@
 
 .conpherence-durable-column-main {
   position: absolute;
-  top: 40px;
+  top: 0;
   bottom: 36px;
-  left: 0;
+  left: 34px;
   right: 0;
   overflow-x: hidden;
-  border-top: 1px solid {$thinblueborder};
 }
 
 .conpherence-durable-column-transactions {
@@ -156,9 +164,9 @@
 .conpherence-durable-column-transactions
   .conpherence-transaction-view.conpherence-edited {
     color: {$lightgreytext};
-    font-size: {$smallerfontsize};
     margin: 0;
     padding: 0;
+    font-style: italic;
 }
 
 .conpherence-durable-column-transactions .conpherence-edited
@@ -180,7 +188,7 @@
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail {
   border: 0;
-  margin: 0;
+  margin: 0 0 0 32px;
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
@@ -191,13 +199,13 @@
 
 .conpherence-durable-column-transactions
 .conpherence-transaction-view.date-marker {
-  margin: 20px 0px 8px;
+  margin: 12px 0 0;
 }
 
 .conpherence-durable-column-transactions
 .conpherence-transaction-view.date-marker .date {
   left: 0;
-  font-size: {$smallerfontsize};
+  font-size: {$normalfontsize};
   top: -14px;
   padding: 0 6px 0 0;
 }

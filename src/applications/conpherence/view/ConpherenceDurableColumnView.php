@@ -229,7 +229,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
               'threadID' => $conpherence->getID(),
               'threadTitle' => hsprintf('%s', $thread_title),
               'tip' => $data['title'],
-              'align' => 'S',
+              'align' => 'W',
             ),
           ),
           phutil_tag(
