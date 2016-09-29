@@ -390,3 +390,13 @@
   max-height: 200px;
 }
 
+.conpherence-transaction-collapsed .conpherence-transaction-image,
+.conpherence-transaction-collapsed .conpherence-transaction-header {
+  display: none;
+}
+
+.conpherence-message-pane
+  .conpherence-transaction-collapsed.conpherence-transaction-view {
+    margin-top: 0;
+    margin-bottom: 0;
+}
