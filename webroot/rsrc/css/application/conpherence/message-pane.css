@@ -168,7 +168,21 @@
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: {$bluebackground};
+  border-radius: 3px;
+  border: none;
+}
+
+.device .remarkup-assist-button,
+.device .remarkup-assist-separator {
   display: none;
+}
+
+.device .remarkup-assist-button.remarkup-assist-upload {
+  display: block;
 }
 
 .device .conpherence-message-pane .phui-form-view {
@@ -346,7 +360,7 @@
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
   margin: 0;
-  padding: 8px 68px 8px 8px;
+  padding: 7px 8px 6px 30px;
   width: 100%;
   height: 34px;
   resize: none;
