@@ -125,14 +125,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $classes = array();
     $classes[] = 'conpherence-durable-column-header';
-    $classes[] = 'phabricator-main-menu-background';
-
-    $loading_mask = phutil_tag(
-      'div',
-      array(
-        'class' => 'loading-mask',
-      ),
-      '');
+    $classes[] = 'grouped';
 
     $header = phutil_tag(
       'div',
@@ -175,23 +168,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $input = $this->buildTextInput();
 
-    $footer = phutil_tag(
-      'div',
-      array(
-        'class' => 'conpherence-durable-column-footer',
-      ),
-      array(
-        $this->buildSendButton(),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'conpherence-durable-column-status',
-          ),
-          $this->buildStatusText()),
-      ));
-
     return array(
-      $loading_mask,
       $header,
       javelin_tag(
         'div',
@@ -203,7 +180,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           $icon_bar,
           $content,
           $input,
-          $footer,
         )),
     );
   }
@@ -263,24 +239,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             ),
             ''));
     }
-    $icons[] = $this->buildSearchButton();
 
     return $icons;
-  }
-
-  private function buildSearchButton() {
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'conpherence-durable-column-search-button',
-      ),
-      id(new PHUIButtonBarView())
-      ->addButton(
-        id(new PHUIButtonView())
-        ->setTag('a')
-        ->setHref('/conpherence/search/')
-        ->setColor(PHUIButtonView::GREY)
-        ->setIcon('fa-search')));
   }
 
   private function buildHeader() {
@@ -354,7 +314,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       phutil_tag(
         'div',
         array(
-          'class' => 'conpherence-durable-column-header',
+          'class' => 'conpherence-durable-column-header-inner',
         ),
         array(
           javelin_tag(
@@ -401,7 +361,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     }
 
     $actions[] = array(
-      'name' => pht('Hide Column'),
+      'name' => pht('Hide Window'),
       'disabled' => false,
       'href' => '#',
       'icon' => 'fa-times',

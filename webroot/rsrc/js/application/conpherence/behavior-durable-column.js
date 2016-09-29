@@ -31,10 +31,6 @@ JX.behavior('durable-column', function(config, statics) {
 
   var margin = JX.Scrollbar.getScrollbarControlMargin();
 
-  var columnWidth = (300 + margin);
-  // This is the smallest window size where we'll enable the column.
-  var minimumViewportWidth = (920 - margin);
-
   var quick = JX.$('phabricator-standard-page-body');
 
   function _getColumnNode() {
@@ -46,17 +42,8 @@ JX.behavior('durable-column', function(config, statics) {
     return JX.DOM.find(column, 'div', 'conpherence-durable-column-main');
   }
 
-  function _isViewportWideEnoughForColumn() {
-    var viewport = JX.Vector.getViewport();
-    if (viewport.x < minimumViewportWidth) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
   function _updateColumnVisibility() {
-    var new_value = (userVisible && _isViewportWideEnoughForColumn());
+    var new_value = (userVisible);
     if (new_value !== show) {
       show = new_value;
       _drawColumn(show);
@@ -77,10 +64,6 @@ JX.behavior('durable-column', function(config, statics) {
       document.body,
       'with-durable-column',
       visible);
-    JX.DOM.alterClass(
-      document.body,
-      'with-durable-margin',
-      visible && !!margin);
 
     var column = _getColumnNode();
     if (visible) {
@@ -90,16 +73,6 @@ JX.behavior('durable-column', function(config, statics) {
       JX.DOM.hide(column);
     }
     JX.Quicksand.setFrame(visible ? quick : null);
-
-    // When we activate the column, adjust the tablet breakpoint so that we
-    // convert the left side of the screen to tablet mode on narrow displays.
-    var breakpoint;
-    if (visible) {
-      breakpoint = minimumViewportWidth + columnWidth;
-    } else {
-      breakpoint = minimumViewportWidth;
-    }
-    JX.Device.setTabletBreakpoint(breakpoint);
 
     JX.Stratcom.invoke('resize');
   }

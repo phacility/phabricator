@@ -2,63 +2,22 @@
  * @provides conpherence-durable-column-view
  */
 
-.with-durable-column .phabricator-standard-page-body {
-  margin-right: 300px;
-}
-
-.with-durable-margin .phabricator-standard-page-body {
-  margin-right: 312px;
-}
-
-.with-durable-column .phabricator-main-menu {
-  padding-right: 304px;
-}
-
-.with-durable-margin .phabricator-main-menu {
-  padding-right: 316px;
-}
-
-.with-durable-column
-.phabricator-global-upload-instructions {
-  font-size: 28px;
-  width: 50%;
-}
-
 .global-upload-mask {
   pointer-events: none;
 }
 
-.with-durable-column .global-upload-mask {
-  right: 300px;
-}
-
-.with-durable-margin .global-upload-mask {
-  right: 312px;
-}
-
 .conpherence-durable-column {
   position: fixed;
-  top: 0;
   bottom: 0;
-  right: 0;
+  right: 12px;
   width: 300px;
+  height: 380px;
   background: #fff;
+  box-shadow: 0px 1px 8px rgba(55,55,55, .3);
 }
 
-.with-durable-margin .conpherence-durable-column {
-  border-right: 12px solid {$lightgreybackground};
-}
-
-.conpherence-durable-column .loading-mask {
-  position: absolute;
-  top: 90px;
-  bottom: 0;
-  right: 1px;
-  width: 298px;
-  background: #fff;
+.device .conpherence-durable-column {
   display: none;
-  opacity: .6;
-  z-index: 2;
 }
 
 .device-desktop .conpherence-durable-column.loading .loading-mask {
@@ -75,60 +34,73 @@
   padding-right: 4px;
   width: 36px;
 }
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-view.core-menu-item {
-  display: block;
+
+.conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-view.core-menu-item {
+    display: block;
 }
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-name {
-  display: none;
+
+.conpherence-durable-column-header  .phabricator-application-menu
+  .phui-list-item-name {
+    display: none;
 }
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-view {
-  float: left;
-  position: relative;
-  width: 36px;
-  height: 36px;
-  margin-top: 4px;
+
+.conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-view {
+    float: left;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    margin-top: 2px;
 }
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-href {
-  background: transparent;
-  border: none;
-  padding: 0;
+
+.conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-href {
+    background: transparent;
+    border: none;
+    padding: 0;
 }
-.conpherence-durable-column-header
-.phabricator-dark-menu .phui-list-item-type-link {
-  background: transparent;
-}
-.conpherence-durable-column-header
-.phabricator-application-menu
-.phui-list-item-view.core-menu-item {
-  display: block;
+
+.conpherence-durable-column-header  .phabricator-application-menu
+  .phui-list-item-view.core-menu-item {
+    display: block;
 }
 
 .conpherence-durable-column-header {
-  border-left: 1px solid rgba({$alphablack},.1);
-  border-right: 1px solid rgba({$alphablack},.1);
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  background-color: #525867;
+}
+
+.conpherence-durable-column-header
+  .phabricator-main-menu-dropdown.phui-list-sidenav {
+    top: 30px;
 }
 
 .conpherence-durable-column-header-text {
   float: left;
-  padding: 13px 0 12px 12px;
-  font-size: 15px;
-  color: {$hoverwhite};
+  padding: 8px 0 8px 10px;
+  color: #fff;
   width: 230px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.6);
+}
+
+.conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa {
+    font-size: 14px;
+    margin: 8px 10px;
 }
 
 .conpherence-durable-column-header-text .phui-icon-view {
-  color: {$hoverwhite};
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.6);
 }
 
 .conpherence-durable-column-icon-bar {
-  height: 38px;
+  height: 32px;
   padding: 4px;
   background-color: {$lightgreybackground};
 }
@@ -136,23 +108,11 @@
 .conpherence-durable-column-icon-bar .conpherence-durable-column-thread-icon {
   float: left;
   display: block;
-  height: 34px;
-  width: 34px;
+  height: 28px;
+  width: 28px;
   border: 2px solid transparent;
   border-radius: 3px;
-  margin: 0 4px 0 0;
-}
-
-.conpherence-durable-column-icon-bar .conpherence-durable-column-search-button {
-  margin: 4px 0px 0px 0px;
-}
-.conpherence-durable-column-icon-bar .phui-button-bar {
-}
-.conpherence-durable-column-icon-bar .phui-button-bar a.button.has-icon {
-  height: 21px;
-}
-.conpherence-durable-column-icon-bar .phui-button-bar .button .phui-icon-view {
-  top: 8px;
+  margin: 0 2px 0 0;
 }
 
 .conpherence-durable-column-icon-bar
@@ -164,30 +124,25 @@
 .conpherence-durable-column-thread-icon span {
   position: relative;
   display: block;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   top: 2px;
   left: 2px;
-  background-size: 30px 30px;
+  background-size: 24px 24px;
 }
 
 .conpherence-durable-column-body {
   position: absolute;
-  top: 44px;
+  top: 34px;
   bottom: 0;
   right: 0;
   left: 0;
-  border-left: 1px solid {$lightblueborder};
-}
-
-.with-durable-margin .conpherence-durable-column-body {
-  border-right: 1px solid {$lightblueborder};
 }
 
 .conpherence-durable-column-main {
   position: absolute;
-  top: 46px;
-  bottom: 134px;
+  top: 40px;
+  bottom: 36px;
   left: 0;
   right: 0;
   overflow-x: hidden;
@@ -218,10 +173,9 @@
   min-height: 0;
 }
 
-.conpherence-durable-column-transactions
-  .conpherence-transaction-view
+.conpherence-durable-column-transactions .conpherence-transaction-view
   .conpherence-message {
-  word-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail {
@@ -230,9 +184,9 @@
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-header {
-  background: none;
-  padding: 0 0 2px 0;
+  .conpherence-transaction-header {
+    background: none;
+    padding: 0 0 2px 0;
 }
 
 .conpherence-durable-column-transactions
@@ -295,42 +249,23 @@ img {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 34px;
-  height: 100px;
+  bottom: 0;
+  height: 36px;
   margin: 0;
-  border-width: 1px 0;
+  border-width: 1px 0 0 0;
   border-style: solid;
   border-top-color: {$thinblueborder};
-  border-bottom-color: {$thinblueborder};
-  padding: 8px 12px;
+  padding: 8px;
   width: 100%;
   resize: none;
 }
 
 .conpherence-durable-column-textarea:focus {
   outline: 0;
-  border-top-color: {$sky};
-  border-bottom-color: {$sky};
+  border-top-color: {$lightblueborder};
   box-shadow: none;
 }
 
 .conpherence-durable-column-footer {
-  position: absolute;
-  height: 26px;
-  padding: 4px 8px 4px 12px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: {$lightgreybackground};
-}
-
-.conpherence-durable-column-footer button {
-  float: right;
-}
-
-.conpherence-durable-column-status {
-  vertical-align: middle;
-  line-height: 24px;
-  font-size: {$smallerfontsize};
-  color: {$lightbluetext};
+  display: none;
 }
