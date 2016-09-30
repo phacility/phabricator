@@ -7,6 +7,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private $selectedConpherence;
   private $transactions;
   private $visible;
+  private $minimize;
   private $initialLoad = false;
   private $policyObjects;
   private $quicksandConfig = array();
@@ -59,6 +60,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->visible;
   }
 
+  public function setMinimize($minimize) {
+    $this->minimize = $minimize;
+    return $this;
+  }
+
+  public function getMinimize() {
+    return $this->minimize;
+  }
+
   public function setInitialLoad($bool) {
     $this->initialLoad = $bool;
     return $this;
@@ -109,12 +119,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   protected function getTagContent() {
     $column_key = PhabricatorConpherenceColumnVisibleSetting::SETTINGKEY;
+    $minimize_key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
 
     Javelin::initBehavior(
       'durable-column',
       array(
         'visible' => $this->getVisible(),
-        'settingsURI' => '/settings/adjust/?key='.$column_key,
+        'minimize' => $this->getMinimize(),
+        'visibleURI' => '/settings/adjust/?key='.$column_key,
+        'minimizeURI' => '/settings/adjust/?key='.$minimize_key,
         'quicksandConfig' => $this->getQuicksandConfig(),
       ));
 
@@ -131,6 +144,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       'div',
       array(
         'class' => implode(' ', $classes),
+        'data-sigil' => 'conpherence-minimize-window',
       ),
       $this->buildHeader());
 
@@ -284,18 +298,30 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'containerDivID' => 'conpherence-durable-column',
       ));
 
-    $item = id(new PHUIListItemView())
+    $bars = id(new PHUIListItemView())
       ->setName(pht('Room Actions'))
-      ->setIcon('fa-bars')
+      ->setIcon('fa-gear')
       ->addClass('core-menu-item')
+      ->addClass('conpherence-settings-icon')
       ->addSigil('conpherence-settings-menu')
       ->setID($bubble_id)
       ->setHref('#')
       ->setAural(pht('Room Actions'))
+      ->setOrder(400);
+
+    $minimize = id(new PHUIListItemView())
+      ->setName(pht('Minimize Window'))
+      ->setIcon('fa-toggle-down')
+      ->addClass('core-menu-item')
+      ->addClass('conpherence-minimize-icon')
+      ->addSigil('conpherence-minimize-window')
+      ->setHref('#')
+      ->setAural(pht('Minimize Window'))
       ->setOrder(300);
+
     $settings_button = id(new PHUIListView())
-      ->addMenuItem($item)
-      ->addClass('phabricator-dark-menu')
+      ->addMenuItem($bars)
+      ->addMenuItem($minimize)
       ->addClass('phabricator-application-menu');
 
     $header = null;

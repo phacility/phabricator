@@ -25,6 +25,7 @@ JX.behavior('durable-column', function(config, statics) {
   }
 
   var userVisible = config.visible;
+  var userMinimize = config.minimize;
   var show = null;
   var loadThreadID = null;
   var scrollbar = null;
@@ -54,8 +55,19 @@ JX.behavior('durable-column', function(config, statics) {
     userVisible = !userVisible;
     _updateColumnVisibility();
 
-    new JX.Request(config.settingsURI)
+    new JX.Request(config.visibleURI)
       .setData({value: (show ? 1 : 0)})
+      .send();
+  }
+
+  function _minimizeColumn(e) {
+    e.kill();
+    userMinimize = !userMinimize;
+    JX.DOM.alterClass(document.body, 'minimize-column', userMinimize);
+    JX.Stratcom.invoke('resize');
+
+    new JX.Request(config.minimizeURI)
+      .setData({value: (userMinimize ? 1 : 0)})
       .send();
   }
 
@@ -80,6 +92,11 @@ JX.behavior('durable-column', function(config, statics) {
   new JX.KeyboardShortcut('\\', 'Toggle Conpherence Column')
     .setHandler(_toggleColumn)
     .register();
+
+  JX.Stratcom.listen(
+    'click',
+    'conpherence-minimize-window',
+    _minimizeColumn);
 
   scrollbar = new JX.Scrollbar(_getColumnScrollNode());
 

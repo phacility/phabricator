@@ -13,6 +13,8 @@
   width: 400px;
   height: 360px;
   background: #fff;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
   box-shadow: 0px 1px 8px rgba(55,55,55, .3);
 }
 
@@ -38,18 +40,6 @@
   z-index: 1;
 }
 
-.conpherence-durable-column-header .phabricator-application-menu {
-  display: block;
-  float: right;
-  padding-right: 4px;
-  width: 36px;
-}
-
-.conpherence-durable-column-header .phabricator-application-menu
-  .phui-list-item-view.core-menu-item {
-    display: block;
-}
-
 .conpherence-durable-column-header  .phabricator-application-menu
   .phui-list-item-name {
     display: none;
@@ -57,11 +47,10 @@
 
 .conpherence-durable-column-header .phabricator-application-menu
   .phui-list-item-view {
-    float: left;
-    position: relative;
-    width: 30px;
-    height: 30px;
-    margin-top: 2px;
+    margin: 0;
+    width: 28px;
+    height: 34px;
+    min-width: 28px;
 }
 
 .conpherence-durable-column-header .phabricator-application-menu
@@ -71,15 +60,19 @@
     padding: 0;
 }
 
-.conpherence-durable-column-header  .phabricator-application-menu
-  .phui-list-item-view.core-menu-item {
-    display: block;
-}
-
 .conpherence-durable-column-header {
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
   background-color: #525867;
+}
+
+.conpherence-durable-column-header:hover {
+  cursor: pointer;
+  background-color: #5f6572;
+}
+
+.conpherence-durable-column-header .phabricator-application-menu {
+  margin-right: 8px;
 }
 
 .conpherence-durable-column-header
@@ -100,8 +93,11 @@
 
 .conpherence-durable-column-header .phabricator-application-menu
   .phui-list-item-icon.phui-font-fa {
-    font-size: 14px;
-    margin: 8px 10px;
+    font-size: 15px;
+    margin: 0;
+    height: 15px;
+    width: 15px;
+    padding: 10px 8px 10px 8px;
 }
 
 .conpherence-durable-column-header-text .phui-icon-view {
@@ -274,6 +270,61 @@ img {
   box-shadow: none;
 }
 
-.conpherence-durable-column-footer {
+
+/* Minimized Column */
+
+.minimize-column .conpherence-durable-column {
+  height: 32px;
+  width: 240px;
+  box-shadow: none;
+}
+
+.minimize-column .conpherence-durable-column .conpherence-durable-column-body {
   display: none;
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header {
+    background-color: rgba({$alphablue},.15);
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header:hover {
+    background-color: rgba({$alphablue},.2);
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header-text {
+    width: 100px;
+    color: {$darkbluetext};
+    text-shadow: none;
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header-text .phui-icon-view {
+    color: {$darkbluetext};
+    text-shadow: none;
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa {
+    color: {$bluetext};
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa:hover {
+    color: {$darkbluetext};
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa:before {
+    content: "\f151";
+}
+
+.minimize-column .conpherence-durable-column .phabricator-application-menu
+  .conpherence-settings-icon {
+    display: none;
 }
