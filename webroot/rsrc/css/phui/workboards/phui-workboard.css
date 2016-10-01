@@ -14,11 +14,12 @@
   overflow-x: auto;
   overflow-y: hidden;
   position: absolute;
-  top: 32px;
+  top: 79px;
   bottom: 0;
   left: 0;
   right: 0;
   padding: 16px;
+  background-color: #fff;
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
@@ -74,13 +75,9 @@
   display: none;
 }
 
-.device-desktop .phui-workboard-fullscreen .main-page-background {
-  top: 0;
-}
-
 .device-desktop .phui-workboard-fullscreen .phui-profile-menu
   .phui-workboard-view-shadow {
-    top: 32px;
+    top: 35px;
     left: 0;
 }
 

@@ -46,7 +46,7 @@ final class PhabricatorConfigIssueViewController
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
       ->appendChild($content)
-      ->addFrameClass('white-background');
+      ->addClass('white-background');
   }
 
   private function renderIssue(PhabricatorSetupIssue $issue) {

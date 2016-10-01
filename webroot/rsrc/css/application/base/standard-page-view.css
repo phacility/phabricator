@@ -17,18 +17,7 @@
   clear: both;
 }
 
-.main-page-background {
-  position: absolute;
-  top: 44px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow: scroll;
-  z-index: -1;
-  background: {$page.background};
-}
-
-.main-page-background.white-background {
+body.white-background {
   background: #fff;
 }
 

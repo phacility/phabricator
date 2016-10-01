@@ -42,17 +42,12 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
 }
 
-html{
-  min-height: 100%;
-  position: relative;
-}
-
 body {
   font: {$basefont};
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
-  height: 100%;
+  background: {$page.background};
 
   /* By default, the iPhone zooms all text on the page by some percentage when
      you rotate from portrait mode to landscape mode. Disable this, since it

@@ -50,7 +50,7 @@ final class PhabricatorConfigHistoryController
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
       ->appendChild($content)
-      ->addFrameClass('white-background');
+      ->addClass('white-background');
   }
 
 }

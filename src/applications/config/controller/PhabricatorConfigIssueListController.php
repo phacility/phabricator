@@ -68,7 +68,7 @@ final class PhabricatorConfigIssueListController
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
       ->appendChild($content)
-      ->addFrameClass('white-background');
+      ->addClass('white-background');
   }
 
   private function buildIssueList(array $issues, $group, $fonticon) {

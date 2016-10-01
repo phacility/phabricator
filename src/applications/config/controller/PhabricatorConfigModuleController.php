@@ -36,7 +36,7 @@ final class PhabricatorConfigModuleController
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
       ->appendChild($content)
-      ->addFrameClass('white-background');
+      ->addClass('white-background');
   }
 
 }
