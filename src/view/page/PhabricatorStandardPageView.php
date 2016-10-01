@@ -13,6 +13,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
   private $menuContent;
   private $showChrome = true;
   private $classes = array();
+  private $frameClasses = array();
   private $disableConsole;
   private $pageObjects = array();
   private $applicationMenu;
@@ -77,6 +78,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
   public function addClass($class) {
     $this->classes[] = $class;
+    return $this;
+  }
+
+  public function addFrameClass($class) {
+    $this->frameClasses[] = $class;
     return $this;
   }
 
@@ -528,7 +534,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       }
       $nav->appendChild($body);
       $nav->appendFooter($footer);
-      $content = phutil_implode_html('', array($nav->render()));
+      $content = $nav;
     } else {
       $content = array();
 
@@ -539,9 +545,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
       $content[] = $body;
       $content[] = $footer;
-
-      $content = phutil_implode_html('', $content);
     }
+
+    $frame_classes = $this->frameClasses;
+    $frame_classes[] = 'main-page-background';
+
+    $content = phutil_tag(
+      'div',
+      array(
+        'class' => implode(' ', $frame_classes),
+      ),
+      $content);
 
     return array(
       ($console ? hsprintf('<darkconsole />') : null),

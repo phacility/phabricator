@@ -320,7 +320,6 @@ final class PhabricatorApplicationSearchController
       $crumbs->addTextCrumb($title);
     }
 
-    $nav->addClass('application-search-view');
     require_celerity_resource('application-search-view-css');
 
     return $this->newPage()
@@ -328,6 +327,7 @@ final class PhabricatorApplicationSearchController
       ->setTitle(pht('Query: %s', $title))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
+      ->addFrameClass('application-search-view')
       ->appendChild($body);
   }
 
@@ -419,7 +419,6 @@ final class PhabricatorApplicationSearchController
       ->setObjectList($list)
       ->addClass('application-search-results');
 
-    $nav->addClass('application-search-view');
     require_celerity_resource('application-search-view-css');
 
     return $this->newPage()
@@ -427,6 +426,7 @@ final class PhabricatorApplicationSearchController
       ->setTitle(pht('Saved Queries'))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
+      ->addFrameClass('application-search-view')
       ->appendChild($box);
   }
 

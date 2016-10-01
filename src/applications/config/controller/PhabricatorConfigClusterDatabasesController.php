@@ -36,7 +36,7 @@ final class PhabricatorConfigClusterDatabasesController
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
       ->appendChild($content)
-      ->addClass('white-background');
+      ->addFrameClass('white-background');
   }
 
   private function buildClusterDatabaseStatus() {

@@ -11,6 +11,11 @@
   padding: 0 16px 24px;
 }
 
+.device-phone .application-search-view
+  .application-search-results.phui-object-box {
+    padding: 0 8px 24px;
+}
+
 .application-search-view .application-search-results .phui-profile-header {
   padding: 16px 8px;
   border-bottom: 1px solid {$thinblueborder};
@@ -52,4 +57,9 @@
 
 .device-phone .application-search-pager {
   margin: 12px;
+}
+
+.device-phone .application-search-view .application-search-results
+  .phui-profile-header {
+    padding-top: 12px;
 }

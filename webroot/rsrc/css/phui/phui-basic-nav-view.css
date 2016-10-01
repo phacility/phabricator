@@ -3,19 +3,19 @@
  */
 
 .device-desktop .phui-navigation-shell,
-.phabricator-home.device .phui-navigation-shell {
+.device .phabricator-home .phui-navigation-shell {
   display: table;
   width: 100%;
   height: calc(100vh - {$menu.main.height});
 }
 
 .device-desktop .phui-navigation-shell .phabricator-nav,
-.phabricator-home.device .phui-navigation-shell .phabricator-nav {
+.device .phabricator-home .phui-navigation-shell .phabricator-nav {
   display: table-row;
 }
 
 .device-desktop .phui-navigation-shell .phabricator-nav-local,
-.phabricator-home.device .phui-navigation-shell .phabricator-nav-local {
+.device .phabricator-home .phui-navigation-shell .phabricator-nav-local {
   display: table-cell;
   position: relative;
   vertical-align: top;
