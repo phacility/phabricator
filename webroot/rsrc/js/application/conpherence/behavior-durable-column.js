@@ -347,6 +347,11 @@ JX.behavior('durable-column', function(config, statics) {
     null,
     function (e) {
       var new_data = e.getData().newResponse;
+      var new_classes = new_data.bodyClasses;
+      if (userMinimize) {
+        new_classes = new_classes + ' minimize-column';
+      }
+      document.body.className = new_classes;
       JX.Title.setTitle(new_data.title);
     });
 
