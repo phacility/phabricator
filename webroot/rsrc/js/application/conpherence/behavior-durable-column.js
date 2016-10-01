@@ -89,9 +89,10 @@ JX.behavior('durable-column', function(config, statics) {
     JX.Stratcom.invoke('resize');
   }
 
-  new JX.KeyboardShortcut('\\', 'Toggle Conpherence Column')
-    .setHandler(_toggleColumn)
-    .register();
+  JX.Stratcom.listen(
+    'click',
+    'conpherence-persist-column',
+    _toggleColumn);
 
   JX.Stratcom.listen(
     'click',
