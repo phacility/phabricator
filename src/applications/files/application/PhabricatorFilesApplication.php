@@ -37,6 +37,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
   public function getRemarkupRules() {
     return array(
       new PhabricatorEmbedFileRemarkupRule(),
+      new PhabricatorImageRemarkupRule(),
     );
   }
 

@@ -98,6 +98,7 @@ return array(
     'aphront-tokenizer-control-css',
     'aphront-typeahead-control-css',
     'aphront-list-filter-view-css',
+    'application-search-view-css',
 
     'phabricator-remarkup-css',
     'syntax-highlighting-css',
@@ -112,7 +113,6 @@ return array(
     'phabricator-notification-menu-css',
     'lightbox-attachment-css',
     'phui-header-view-css',
-    'phabricator-filetree-view-css',
     'phabricator-nav-view-css',
     'phui-basic-nav-view-css',
     'phui-crumbs-view-css',
@@ -180,6 +180,7 @@ return array(
     'phabricator-content-source-view-css',
     'inline-comment-summary-css',
     'phui-inline-comment-view-css',
+    'phabricator-filetree-view-css',
   ),
   'differential.pkg.js' => array(
     'phabricator-drag-and-drop-file-upload',

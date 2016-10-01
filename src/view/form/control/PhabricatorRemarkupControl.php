@@ -203,6 +203,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         $classes[] = 'remarkup-assist-button';
       }
 
+      if ($action == 'fa-cloud-upload') {
+        $classes[] = 'remarkup-assist-upload';
+      }
+
       $href = idx($spec, 'href', '#');
       if ($href == '#') {
         $meta = array('action' => $action);

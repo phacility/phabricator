@@ -21,11 +21,6 @@ final class PhabricatorConduitMethodQuery
     return $this;
   }
 
-  public function withApplicationNames(array $application_names) {
-    $this->applicationNames = $application_names;
-    return $this;
-  }
-
   public function withIsStable($is_stable) {
     $this->isStable = $is_stable;
     return $this;
@@ -81,17 +76,6 @@ final class PhabricatorConduitMethodQuery
       foreach ($methods as $key => $method) {
         $keep = idx($status, $method->getMethodStatus());
         if (!$keep) {
-          unset($methods[$key]);
-        }
-      }
-    }
-
-    if ($this->applicationNames) {
-      $map = array_fuse($this->applicationNames);
-      foreach ($methods as $key => $method) {
-        $needle = $method->getApplicationName();
-        $needle = phutil_utf8_strtolower($needle);
-        if (empty($map[$needle])) {
           unset($methods[$key]);
         }
       }

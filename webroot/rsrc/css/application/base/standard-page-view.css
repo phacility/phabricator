@@ -29,6 +29,10 @@ body.white-background {
   color: {$greytext};
 }
 
+.with-durable-column .phabricator-standard-page-footer {
+  margin: 36px 16px 28px;
+}
+
 .device .phabricator-standard-page-footer {
   margin: 24px 8px 16px;
 }

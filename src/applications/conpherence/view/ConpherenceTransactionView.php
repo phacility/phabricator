@@ -201,21 +201,19 @@ final class ConpherenceTransactionView extends AphrontView {
 
   private function renderTransactionImage() {
     $image = null;
-    if ($this->getFullDisplay()) {
-      $transaction = $this->getConpherenceTransaction();
-      switch ($transaction->getTransactionType()) {
-        case PhabricatorTransactions::TYPE_COMMENT:
-          $handles = $this->getHandles();
-          $author = $handles[$transaction->getAuthorPHID()];
-          $image_uri = $author->getImageURI();
-          $image = phutil_tag(
-            'span',
-            array(
-              'class' => 'conpherence-transaction-image',
-              'style' => 'background-image: url('.$image_uri.');',
-            ));
-          break;
-      }
+    $transaction = $this->getConpherenceTransaction();
+    switch ($transaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $handles = $this->getHandles();
+        $author = $handles[$transaction->getAuthorPHID()];
+        $image_uri = $author->getImageURI();
+        $image = phutil_tag(
+          'span',
+          array(
+            'class' => 'conpherence-transaction-image',
+            'style' => 'background-image: url('.$image_uri.');',
+          ));
+        break;
     }
     return $image;
   }

@@ -182,39 +182,3 @@
     margin: 0 0 16px;
   }
 }
-
-/* Make Dashboards with Durable reasonably display on homepage narrow widths */
-@media (max-width: 1300px) {
-  .device-desktop.with-durable-column .dashboard-view
-    .aphront-multi-column-inner {
-      display: block;
-      width: auto;
-  }
-  .device-desktop.with-durable-column .dashboard-view
-    .aphront-multi-column-column-outer {
-      display: block;
-      border: none;
-  }
-  .device-desktop.with-durable-column .dashboard-view
-    .aphront-multi-column-column.mlr {
-      margin: 0;
-  }
-  .device-desktop.with-durable-column .dashboard-view
-    .aphront-multi-column-fluid .aphront-multi-column-2-up
-    .aphront-multi-column-column-outer.half {
-      width: auto;
-      margin: 0 0 16px;
-  }
-  .device-desktop.with-durable-column .dashboard-view
-    .aphront-multi-column-fluid .aphront-multi-column-2-up
-    .aphront-multi-column-column-outer.thirds {
-      width: auto;
-      margin: 0 0 16px;
-  }
-  .device-desktop.with-durable-column .dashboard-view
-    .aphront-multi-column-fluid .aphront-multi-column-2-up
-    .aphront-multi-column-column-outer.third {
-      width: auto;
-      margin: 0 0 16px;
-  }
-}

@@ -1,6 +1,6 @@
 <?php
 
-final class ConpherenceLayoutView extends AphrontView {
+final class ConpherenceLayoutView extends AphrontTagView {
 
   private $thread;
   private $baseURI;
@@ -61,12 +61,26 @@ final class ConpherenceLayoutView extends AphrontView {
     return (bool)$user->getUserSetting($widget_key, false);
   }
 
-  public function render() {
+  protected function getTagAttributes() {
+    $classes = array();
+    if (!$this->getWidgetColumnVisible()) {
+      $classes[] = 'hide-widgets';
+    }
+
+    return array(
+        'id'    => 'conpherence-main-layout',
+        'sigil' => 'conpherence-layout',
+        'class' => 'conpherence-layout '.
+                    implode(' ', $classes).
+                    ' conpherence-role-'.$this->role,
+      );
+
+  }
+
+  protected function getTagContent() {
     require_celerity_resource('conpherence-menu-css');
     require_celerity_resource('conpherence-message-pane-css');
     require_celerity_resource('conpherence-participant-pane-css');
-
-    $layout_id = 'conpherence-main-layout';
 
     $selected_id = null;
     $selected_thread_id = null;
@@ -87,7 +101,7 @@ final class ConpherenceLayoutView extends AphrontView {
     $this->initBehavior('conpherence-menu',
       array(
         'baseURI' => $this->baseURI,
-        'layoutID' => $layout_id,
+        'layoutID' => 'conpherence-main-layout',
         'selectedID' => $selected_id,
         'selectedThreadID' => $selected_thread_id,
         'selectedThreadPHID' => $selected_thread_phid,
@@ -99,26 +113,9 @@ final class ConpherenceLayoutView extends AphrontView {
         'hasWidgets' => false,
       ));
 
-    $classes = array();
-    if (!$this->getUser()->isLoggedIn()) {
-      $classes[] = 'conpherence-logged-out';
-    }
-
-    if (!$this->getWidgetColumnVisible()) {
-      $classes[] = 'hide-widgets';
-    }
-
     $this->initBehavior('conpherence-participant-pane');
 
-    return javelin_tag(
-      'div',
-      array(
-        'id'    => $layout_id,
-        'sigil' => 'conpherence-layout',
-        'class' => 'conpherence-layout '.
-                    implode(' ', $classes).
-                    ' conpherence-role-'.$this->role,
-      ),
+    return
       array(
         javelin_tag(
           'div',
@@ -202,7 +199,7 @@ final class ConpherenceLayoutView extends AphrontView {
                   nonempty($this->replyForm, '')),
               )),
           )),
-      ));
+      );
   }
 
   private function buildNUXView() {

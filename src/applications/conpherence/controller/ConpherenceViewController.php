@@ -118,6 +118,11 @@ final class ConpherenceViewController extends
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 
+    $can_join = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_JOIN);
+
     $layout = id(new ConpherenceLayoutView())
       ->setUser($user)
       ->setBaseURI($this->getApplicationURI())
@@ -127,6 +132,12 @@ final class ConpherenceViewController extends
       ->setReplyForm($form)
       ->setLatestTransactionID($data['latest_transaction_id'])
       ->setRole('thread');
+
+    $participating = $conpherence->getParticipantIfExists($user->getPHID());
+
+    if (!$user->isLoggedIn()) {
+      $layout->addClass('conpherence-no-pontificate');
+    }
 
     return $this->newPage()
       ->setTitle($title)
@@ -149,46 +160,56 @@ final class ConpherenceViewController extends
     $draft = PhabricatorDraft::newFromUserAndKey(
       $user,
       $conpherence->getPHID());
-    if ($participating) {
-      $action = ConpherenceUpdateActions::MESSAGE;
-      $button_text = pht('Send');
-    } else if ($user->isLoggedIn()) {
-      $action = ConpherenceUpdateActions::JOIN_ROOM;
-      $button_text = pht('Join Room');
+    $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+
+    if ($user->isLoggedIn()) {
+      $this->initBehavior('conpherence-pontificate');
+      if ($participating) {
+        $action = ConpherenceUpdateActions::MESSAGE;
+        $status = new PhabricatorNotificationStatusView();
+      } else {
+        $action = ConpherenceUpdateActions::JOIN_ROOM;
+        $status = pht('Sending a message will also join the room.');
+      }
+
+      $form = id(new AphrontFormView())
+        ->setUser($user)
+        ->setAction($update_uri)
+        ->addSigil('conpherence-pontificate')
+        ->setWorkflow(true)
+        ->addHiddenInput('action', $action)
+        ->appendChild(
+          id(new PhabricatorRemarkupControl())
+          ->setUser($user)
+          ->setName('text')
+          ->setValue($draft->getDraft()));
+
+      $status_view = phutil_tag(
+        'div',
+        array(
+          'class' => 'conpherence-room-status',
+          'id' => 'conpherence-room-status',
+        ),
+        $status);
+
+      $view = phutil_tag_div(
+        'pontificate-container', array($form, $status_view));
+
+      return $view;
+
     } else {
       // user not logged in so give them a login button.
       $login_href = id(new PhutilURI('/auth/start/'))
         ->setQueryParam('next', '/'.$conpherence->getMonogram());
       return id(new PHUIFormLayoutView())
         ->addClass('login-to-participate')
+        ->appendInstructions(pht('Log in to join this room and participate.'))
         ->appendChild(
           id(new PHUIButtonView())
           ->setTag('a')
           ->setText(pht('Login to Participate'))
           ->setHref((string)$login_href));
     }
-    $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-
-    $this->initBehavior('conpherence-pontificate');
-
-    $form =
-      id(new AphrontFormView())
-      ->setUser($user)
-      ->setAction($update_uri)
-      ->addSigil('conpherence-pontificate')
-      ->setWorkflow(true)
-      ->addHiddenInput('action', $action)
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-        ->setUser($user)
-        ->setName('text')
-        ->setValue($draft->getDraft()))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-        ->setValue($button_text))
-      ->render();
-
-    return $form;
   }
 
   private function getNeededTransactions(

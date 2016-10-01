@@ -14,12 +14,6 @@
   padding: 0;
 }
 
-/* only used in transaction comments */
-.phui-form-shaded .phui-form-view {
-  border-bottom: 1px solid #D4DAE0;
-  background: #F4F5F8;
-}
-
 .phui-form-view label.aphront-form-label {
   padding-top: 5px;
   width: 19%;

@@ -58,14 +58,10 @@
   left: 240px;
   right: 240px;
   top: 103px;
-  bottom: 148px;
+  bottom: 122px;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-}
-
-.conpherence-logged-out .conpherence-message-pane .conpherence-messages {
-  bottom: 42px;
 }
 
 .conpherence-messages.jx-scrollbar-frame {
@@ -77,7 +73,7 @@
   padding-top: 20px;
 }
 
-.conpherence-messages .jx-scrollbar-content .conpherence-edited:last-child {
+.conpherence-messages .conpherence-edited:last-child {
   padding-bottom: 20px;
 }
 
@@ -93,19 +89,9 @@
   box-shadow: none;
 }
 
-.conpherence-message-pane .messages-loading-mask {
-  opacity: .6;
-  background: #fff;
-  display: none;
-}
-
-.loading .messages-loading-mask {
-  display: block;
-}
-
 .conpherence-message-pane .phui-form-view {
   border-width: 0;
-  height: 140px;
+  height: 110px;
   padding: 0 20px 12px;
   position: fixed;
   bottom: 0;
@@ -113,16 +99,42 @@
   right: 241px;
 }
 
+.conpherence-room-status {
+  font-size: {$smallerfontsize};
+  color: {$lightgreytext};
+  font-style: italic;
+  position: absolute;
+  bottom: 6px;
+  left: 24px;
+}
+
+.device .conpherence-room-status {
+  display: none;
+}
+
+.conpherence-no-pontificate .conpherence-message-pane .phui-form-view {
+  border-top: 1px solid {$thinblueborder};
+  text-align: center;
+}
+
+.conpherence-no-pontificate .conpherence-message-pane
+  .aphront-form-control-submit button,
+.conpherence-no-pontificate .conpherence-message-pane
+  .aphront-form-control-submit a.button {
+  margin: 4px 0 0 0;
+  float: none;
+}
+
+.conpherence-no-pontificate .phui-form-view .aphront-form-instructions {
+  margin: 24px 0 16px;
+  width: 100%;
+  padding: 0;
+  color: {$bluetext};
+  font-size: {$biggestfontsize};
+}
+
 .device .conpherence-message-pane .phui-form-view {
   padding: 8px 8px;
-}
-
-.conpherence-message-pane .phui-form-view.login-to-participate {
-  height: 26px;
-}
-
-.conpherence-message-pane .login-to-participate a.button {
-  float: right;
 }
 
 .conpherence-message-pane .aphront-form-control-submit button,
@@ -152,11 +164,25 @@
   border-bottom: none;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-  background-color: #f7f7f7;
+  background-color: {$lightgreybackground};
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: {$bluebackground};
+  border-radius: 3px;
+  border: none;
+}
+
+.device .remarkup-assist-button,
+.device .remarkup-assist-separator {
   display: none;
+}
+
+.device .remarkup-assist-button.remarkup-assist-upload {
+  display: block;
 }
 
 .device .conpherence-message-pane .phui-form-view {
@@ -313,7 +339,7 @@
 }
 
 .conpherence-message-pane .remarkup-assist-textarea {
-  height: 80px;
+  height: 68px;
   padding: 8px;
   border: 2px solid {$lightgreyborder};
   border-top: 1px solid {$thinblueborder};
@@ -334,7 +360,7 @@
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
   margin: 0;
-  padding: 8px 68px 8px 8px;
+  padding: 7px 8px 6px 30px;
   width: 100%;
   height: 34px;
   resize: none;
@@ -364,3 +390,13 @@
   max-height: 200px;
 }
 
+.conpherence-transaction-collapsed .conpherence-transaction-image,
+.conpherence-transaction-collapsed .conpherence-transaction-header {
+  display: none;
+}
+
+.conpherence-message-pane
+  .conpherence-transaction-collapsed.conpherence-transaction-view {
+    margin-top: 0;
+    margin-bottom: 0;
+}

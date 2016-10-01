@@ -78,6 +78,7 @@ final class ConpherenceTransactionRenderer extends Phobject {
       ->setFullDisplay($full_display);
 
     foreach ($transactions as $transaction) {
+      $collapsed = false;
       if ($previous_transaction) {
         $previous_day = phabricator_format_local_time(
           $previous_transaction->getDateCreated(),
@@ -87,6 +88,22 @@ final class ConpherenceTransactionRenderer extends Phobject {
           $transaction->getDateCreated(),
           $user,
           'Ymd');
+
+        // See if same user / time
+        $previous_author = $previous_transaction->getAuthorPHID();
+        $current_author = $transaction->getAuthorPHID();
+        $previous_time = $previous_transaction->getDateCreated();
+        $current_time = $transaction->getDateCreated();
+        $previous_type = $previous_transaction->getTransactionType();
+        $current_type = $transaction->getTransactionType();
+        if (($previous_author == $current_author) &&
+          ($previous_type == $current_type)) {
+            // Group messages within the last x seconds
+            if (($current_time - $previous_time) < 120) {
+              $collapsed = true;
+            }
+        }
+
         // date marker transaction time!
         if ($previous_day != $current_day) {
           $date_marker_transaction->setDateCreated(
@@ -97,6 +114,9 @@ final class ConpherenceTransactionRenderer extends Phobject {
       }
       $transaction_view = id(clone $transaction_view_template)
         ->setConpherenceTransaction($transaction);
+      if ($collapsed) {
+        $transaction_view->addClass('conpherence-transaction-collapsed');
+      }
 
       $rendered_transactions[] = $transaction_view->render();
       $previous_transaction = $transaction;

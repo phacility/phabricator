@@ -7,6 +7,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private $selectedConpherence;
   private $transactions;
   private $visible;
+  private $minimize;
   private $initialLoad = false;
   private $policyObjects;
   private $quicksandConfig = array();
@@ -59,6 +60,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->visible;
   }
 
+  public function setMinimize($minimize) {
+    $this->minimize = $minimize;
+    return $this;
+  }
+
+  public function getMinimize() {
+    return $this->minimize;
+  }
+
   public function setInitialLoad($bool) {
     $this->initialLoad = $bool;
     return $this;
@@ -109,12 +119,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   protected function getTagContent() {
     $column_key = PhabricatorConpherenceColumnVisibleSetting::SETTINGKEY;
+    $minimize_key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
 
     Javelin::initBehavior(
       'durable-column',
       array(
         'visible' => $this->getVisible(),
-        'settingsURI' => '/settings/adjust/?key='.$column_key,
+        'minimize' => $this->getMinimize(),
+        'visibleURI' => '/settings/adjust/?key='.$column_key,
+        'minimizeURI' => '/settings/adjust/?key='.$minimize_key,
         'quicksandConfig' => $this->getQuicksandConfig(),
       ));
 
@@ -125,19 +138,13 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $classes = array();
     $classes[] = 'conpherence-durable-column-header';
-    $classes[] = 'phabricator-main-menu-background';
-
-    $loading_mask = phutil_tag(
-      'div',
-      array(
-        'class' => 'loading-mask',
-      ),
-      '');
+    $classes[] = 'grouped';
 
     $header = phutil_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
+        'data-sigil' => 'conpherence-minimize-window',
       ),
       $this->buildHeader());
 
@@ -175,23 +182,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $input = $this->buildTextInput();
 
-    $footer = phutil_tag(
-      'div',
-      array(
-        'class' => 'conpherence-durable-column-footer',
-      ),
-      array(
-        $this->buildSendButton(),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'conpherence-durable-column-status',
-          ),
-          $this->buildStatusText()),
-      ));
-
     return array(
-      $loading_mask,
       $header,
       javelin_tag(
         'div',
@@ -203,7 +194,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           $icon_bar,
           $content,
           $input,
-          $footer,
         )),
     );
   }
@@ -253,7 +243,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
               'threadID' => $conpherence->getID(),
               'threadTitle' => hsprintf('%s', $thread_title),
               'tip' => $data['title'],
-              'align' => 'S',
+              'align' => 'W',
             ),
           ),
           phutil_tag(
@@ -263,24 +253,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             ),
             ''));
     }
-    $icons[] = $this->buildSearchButton();
 
     return $icons;
-  }
-
-  private function buildSearchButton() {
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'conpherence-durable-column-search-button',
-      ),
-      id(new PHUIButtonBarView())
-      ->addButton(
-        id(new PHUIButtonView())
-        ->setTag('a')
-        ->setHref('/conpherence/search/')
-        ->setColor(PHUIButtonView::GREY)
-        ->setIcon('fa-search')));
   }
 
   private function buildHeader() {
@@ -324,18 +298,30 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'containerDivID' => 'conpherence-durable-column',
       ));
 
-    $item = id(new PHUIListItemView())
+    $bars = id(new PHUIListItemView())
       ->setName(pht('Room Actions'))
-      ->setIcon('fa-bars')
+      ->setIcon('fa-gear')
       ->addClass('core-menu-item')
+      ->addClass('conpherence-settings-icon')
       ->addSigil('conpherence-settings-menu')
       ->setID($bubble_id)
       ->setHref('#')
       ->setAural(pht('Room Actions'))
+      ->setOrder(400);
+
+    $minimize = id(new PHUIListItemView())
+      ->setName(pht('Minimize Window'))
+      ->setIcon('fa-toggle-down')
+      ->addClass('core-menu-item')
+      ->addClass('conpherence-minimize-icon')
+      ->addSigil('conpherence-minimize-window')
+      ->setHref('#')
+      ->setAural(pht('Minimize Window'))
       ->setOrder(300);
+
     $settings_button = id(new PHUIListView())
-      ->addMenuItem($item)
-      ->addClass('phabricator-dark-menu')
+      ->addMenuItem($bars)
+      ->addMenuItem($minimize)
       ->addClass('phabricator-application-menu');
 
     $header = null;
@@ -354,7 +340,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       phutil_tag(
         'div',
         array(
-          'class' => 'conpherence-durable-column-header',
+          'class' => 'conpherence-durable-column-header-inner',
         ),
         array(
           javelin_tag(
@@ -401,7 +387,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     }
 
     $actions[] = array(
-      'name' => pht('Hide Column'),
+      'name' => pht('Hide Window'),
       'disabled' => false,
       'href' => '#',
       'icon' => 'fa-times',

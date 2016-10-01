@@ -23,4 +23,13 @@ final class PhabricatorNotificationStatusView extends AphrontTagView {
     );
   }
 
+  protected function getTagContent() {
+    $have = PhabricatorEnv::getEnvConfig('notification.servers');
+    if ($have) {
+      return pht('Connecting...');
+    } else {
+      return pht('Notification server not enabled');
+    }
+  }
+
 }
