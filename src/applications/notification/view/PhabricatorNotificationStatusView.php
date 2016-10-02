@@ -16,6 +16,20 @@ final class PhabricatorNotificationStatusView extends AphrontTagView {
           'open' => pht('Connected'),
           'closed' => pht('Disconnected'),
         ),
+        'icon' => array(
+          'open' => array(
+            'icon' => 'fa-circle',
+            'color' => 'green',
+          ),
+          'setup' => array(
+            'icon' => 'fa-circle',
+            'color' => 'yellow',
+          ),
+          'closed' => array(
+            'icon' => 'fa-circle',
+            'color' => 'red',
+          ),
+        ),
       ));
 
     return array(
@@ -26,9 +40,33 @@ final class PhabricatorNotificationStatusView extends AphrontTagView {
   protected function getTagContent() {
     $have = PhabricatorEnv::getEnvConfig('notification.servers');
     if ($have) {
-      return pht('Connecting...');
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-circle-o yellow');
+      $text = pht('Connecting...');
+      return phutil_tag(
+        'span',
+        array(
+          'class' => 'connection-status-text '.
+            'aphlict-connection-status-connecting',
+        ),
+        array(
+          $icon,
+          $text,
+        ));
     } else {
-      return pht('Notification server not enabled');
+      $text = pht('Notification server not enabled');
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-circle-o grey');
+      return phutil_tag(
+        'span',
+        array(
+          'class' => 'connection-status-text '.
+            'aphlict-connection-status-notenabled',
+        ),
+        array(
+          $icon,
+          $text,
+        ));
     }
   }
 

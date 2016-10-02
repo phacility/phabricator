@@ -45,6 +45,24 @@
     display: none;
 }
 
+.conpherence-durable-column-header .aphlict-connection-status {
+  width: 6px;
+  float: left;
+  height: 18px;
+  margin-left: 10px;
+  margin-top: 8px;
+}
+
+.conpherence-durable-column-header .aphlict-connection-status
+  .connection-status-text {
+    display: none;
+}
+
+.conpherence-durable-column-header .aphlict-connection-status
+  .phui-icon-view {
+    font-size: 10px;
+}
+
 .conpherence-durable-column-header .phabricator-application-menu
   .phui-list-item-view {
     margin: 0;

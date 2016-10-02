@@ -336,6 +336,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         ));
       }
 
+    $status = new PhabricatorNotificationStatusView();
+
     return
       phutil_tag(
         'div',
@@ -343,6 +345,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           'class' => 'conpherence-durable-column-header-inner',
         ),
         array(
+          $status,
           javelin_tag(
             'div',
             array(
