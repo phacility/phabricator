@@ -6,6 +6,7 @@ final class ConpherenceNotificationPanelController
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $conpherences = array();
+    require_celerity_resource('conpherence-notification-css');
     $unread_status = ConpherenceParticipationStatus::BEHIND;
 
     $participant_data = id(new ConpherenceParticipantQuery())
@@ -25,7 +26,6 @@ final class ConpherenceNotificationPanelController
     }
 
     if ($conpherences) {
-      require_celerity_resource('conpherence-notification-css');
       // re-order the conpherences based on participation data
       $conpherences = array_select_keys(
         $conpherences, array_keys($participant_data));

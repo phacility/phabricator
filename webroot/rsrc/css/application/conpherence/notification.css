@@ -2,8 +2,7 @@
  * @provides conpherence-notification-css
  */
 
-/* kill styles on phabricator-notification */
-.conpherence-notification {
+.phabricator-notification.conpherence-notification {
   padding: 0;
 }
 
