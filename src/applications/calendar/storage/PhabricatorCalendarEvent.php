@@ -176,15 +176,15 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setDescription($parent->getDescription());
 
     $sequence = $this->getSequenceIndex();
-    $duration = $parent->getDuration();
-    $epochs = $parent->getSequenceIndexEpochs($actor, $sequence, $duration);
+    $start_datetime = $parent->newSequenceIndexDateTime($sequence);
 
-    $start_datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
-      $epochs['dateFrom'],
-      $parent->newStartDateTime()->getTimezone());
-    $end_datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
-      $epochs['dateTo'],
-      $parent->newEndDateTime()->getTimezone());
+    if (!$start_datetime) {
+      throw new Exception(
+        "Sequence {$sequence} does not exist for event!");
+    }
+
+    $duration = $parent->newDuration();
+    $end_datetime = $start_datetime->newRelativeDateTime($duration);
 
     $this
       ->setStartDateTime($start_datetime)
@@ -194,42 +194,21 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function isValidSequenceIndex(PhabricatorUser $viewer, $sequence) {
-    try {
-      $this->getSequenceIndexEpochs($viewer, $sequence, $this->getDuration());
-      return true;
-    } catch (Exception $ex) {
-      return false;
-    }
+    return (bool)$this->newSequenceIndexDateTime($sequence);
   }
 
-  private function getSequenceIndexEpochs(
-    PhabricatorUser $viewer,
-    $sequence,
-    $duration) {
-
-    $frequency = $this->getFrequencyUnit();
-    $modify_key = '+'.$sequence.' '.$frequency;
-
-    $date_time = $this->newStartDateTime()
-      ->setViewerTimezone($viewer->getTimezoneIdentifier())
-      ->newPHPDateTime();
-
-    $date_time->modify($modify_key);
-    $date = $date_time->format('U');
-
-    $end_date = $this->getUntilDateTimeEpoch();
-    if ($end_date && $date > $end_date) {
-      throw new Exception(
-        pht(
-          'Sequence "%s" is invalid for this event: it would occur after '.
-          'the event stops repeating.',
-          $sequence));
+  public function newSequenceIndexDateTime($sequence) {
+    $set = $this->newRecurrenceSet();
+    if (!$set) {
+      return null;
     }
 
-    return array(
-      'dateFrom' => $date,
-      'dateTo' => $date + $duration,
-    );
+    $instances = $set->getEventsBetween(
+      null,
+      $this->newUntilDateTime(),
+      $sequence + 1);
+
+    return idx($instances, $sequence, null);
   }
 
   public function newStub(PhabricatorUser $actor, $sequence) {
@@ -785,13 +764,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return null;
     }
 
-    $epochs = $this->getParentEvent()->getSequenceIndexEpochs(
-      new PhabricatorUser(),
-      $this->getSequenceIndex(),
-      $this->getDuration());
+    $index = $this->getSequenceIndex();
+    if (!$index) {
+      return null;
+    }
 
-    $epoch = $epochs['dateFrom'];
-    return $this->newDateTimeFromEpoch($epoch);
+    return $this->newSequenceIndexDateTime($index);
   }
 
   private function newDateTimeFromEpoch($epoch) {
@@ -843,6 +821,40 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->setParameter(
       'untilDateTime',
       $datetime->newAbsoluteDateTime()->toDictionary());
+  }
+
+
+  public function newRecurrenceRule() {
+    if ($this->isChildEvent()) {
+      return $this->getParentEvent()->newRecurrenceRule();
+    }
+
+    // TODO: This is a little fragile since it relies on the convenient
+    // definition of FREQUENCY constants here and in RecurrenceRule, but
+    // should be gone soon.
+    $map = array(
+      'FREQ' => phutil_utf8_strtoupper($this->getFrequencyRule()),
+    );
+
+    $rrule = PhutilCalendarRecurrenceRule::newFromDictionary($map);
+
+    $start = $this->newStartDateTime();
+    $rrule->setStartDateTime($start);
+
+    return $rrule;
+  }
+
+  public function newRecurrenceSet() {
+    if ($this->isChildEvent()) {
+      return $this->getParentEvent()->newRecurrenceSet();
+    }
+
+    $set = new PhutilCalendarRecurrenceSet();
+
+    $rrule = $this->newRecurrenceRule();
+    $set->addSource($rrule);
+
+    return $set;
   }
 
 /* -(  Markup Interface  )--------------------------------------------------- */

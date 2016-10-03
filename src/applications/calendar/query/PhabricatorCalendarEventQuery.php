@@ -203,8 +203,8 @@ final class PhabricatorCalendarEventQuery
         $end_times[] = $this->rangeEnd;
       }
 
-      if ($event->getRecurrenceEndDate()) {
-        $end_times[] = $event->getRecurrenceEndDate();
+      if ($event->getUntilDateTimeEpoch()) {
+        $end_times[] = $event->getUntilDateTimeEpoch();
       }
 
       if ($enforced_end) {
