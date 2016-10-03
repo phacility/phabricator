@@ -66,6 +66,11 @@ JX.behavior('durable-column', function(config, statics) {
     JX.DOM.alterClass(document.body, 'minimize-column', userMinimize);
     JX.Stratcom.invoke('resize');
 
+    if (!userMinimize) {
+      var messages = _getColumnMessagesNode();
+      scrollbar.scrollTo(messages.scrollHeight);
+    }
+
     new JX.Request(config.minimizeURI)
       .setData({value: (userMinimize ? 1 : 0)})
       .send();
