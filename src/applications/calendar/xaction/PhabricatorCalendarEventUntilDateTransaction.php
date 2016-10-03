@@ -10,7 +10,16 @@ final class PhabricatorCalendarEventUntilDateTransaction
   }
 
   public function applyInternalEffects($object, $value) {
+    $actor = $this->getActor();
+
+    // TODO: DEPRECATED.
     $object->setRecurrenceEndDate($value);
+
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $value,
+      $actor->getTimezoneIdentifier());
+    $datetime->setIsAllDay($object->getIsAllDay());
+    $object->setUntilDateTime($datetime);
   }
 
   public function getTitle() {

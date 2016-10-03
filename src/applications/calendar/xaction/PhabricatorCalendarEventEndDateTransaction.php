@@ -12,8 +12,8 @@ final class PhabricatorCalendarEventEndDateTransaction
   public function applyInternalEffects($object, $value) {
     $actor = $this->getActor();
 
+    // TODO: DEPRECATED.
     $object->setDateTo($value);
-
     $object->setAllDayDateTo(
       $object->getDateEpochForTimezone(
         $value,
@@ -21,6 +21,12 @@ final class PhabricatorCalendarEventEndDateTransaction
         'Y-m-d 23:59:00',
         null,
         new DateTimeZone('UTC')));
+
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $value,
+      $actor->getTimezoneIdentifier());
+    $datetime->setIsAllDay($object->getIsAllDay());
+    $object->setEndDateTime($datetime);
   }
 
   public function getTitle() {

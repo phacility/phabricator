@@ -44,6 +44,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $utcInitialEpoch;
   protected $utcUntilEpoch;
   protected $utcInstanceEpoch;
+  protected $parameters = array();
 
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
@@ -87,6 +88,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $default_icon = 'fa-calendar';
 
+    $datetime_start = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $now,
+      $actor->getTimezoneIdentifier());
+    $datetime_end = $datetime_start->newRelativeDateTime('PT1H');
+
     return id(new PhabricatorCalendarEvent())
       ->setHostPHID($actor->getPHID())
       ->setIsCancelled(0)
@@ -106,6 +112,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setDateTo($epoch_max)
       ->setAllDayDateFrom($now_min)
       ->setAllDayDateTo($now_max)
+      ->setStartDateTime($datetime_start)
+      ->setEndDateTime($datetime_end)
       ->applyViewerTimezone($actor);
   }
 
@@ -443,6 +451,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ),
       self::CONFIG_SERIALIZATION => array(
         'recurrenceFrequency' => self::SERIALIZATION_JSON,
+        'parameters' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }
@@ -785,16 +794,31 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function newStartDateTime() {
+    $datetime = $this->getParameter('startDateTime');
+    if ($datetime) {
+      return $this->newDateTimeFromDictionary($datetime);
+    }
+
     $epoch = $this->getDateFrom();
     return $this->newDateTimeFromEpoch($epoch);
   }
 
   public function newEndDateTime() {
+    $datetime = $this->getParameter('endDateTime');
+    if ($datetime) {
+      return $this->newDateTimeFromDictionary($datetime);
+    }
+
     $epoch = $this->getDateTo();
     return $this->newDateTimeFromEpoch($epoch);
   }
 
   public function newUntilDateTime() {
+    $datetime = $this->getParameter('untilDateTime');
+    if ($datetime) {
+      return $this->newDateTimeFromDictionary($datetime);
+    }
+
     $epoch = $this->getRecurrenceEndDate();
     if (!$epoch) {
       return null;
@@ -824,18 +848,53 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   private function newDateTimeFromEpoch($epoch) {
     $datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch($epoch);
 
+    if ($this->getIsAllDay()) {
+      $datetime->setIsAllDay(true);
+    }
+
+    return $this->newDateTimeFromDateTime($datetime);
+  }
+
+  private function newDateTimeFromDictionary(array $dict) {
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromDictionary($dict);
+    return $this->newDateTimeFromDateTime($datetime);
+  }
+
+  private function newDateTimeFromDateTime(PhutilCalendarDateTime $datetime) {
     $viewer_timezone = $this->viewerTimezone;
     if ($viewer_timezone) {
       $datetime->setViewerTimezone($viewer_timezone);
     }
 
-    if ($this->getIsAllDay()) {
-      $datetime->setIsAllDay(true);
-    }
-
     return $datetime;
   }
 
+  public function getParameter($key, $default = null) {
+    return idx($this->parameters, $key, $default);
+  }
+
+  public function setParameter($key, $value) {
+    $this->parameters[$key] = $value;
+    return $this;
+  }
+
+  public function setStartDateTime(PhutilCalendarDateTime $datetime) {
+    return $this->setParameter(
+      'startDateTime',
+      $datetime->newAbsoluteDateTime()->toDictionary());
+  }
+
+  public function setEndDateTime(PhutilCalendarDateTime $datetime) {
+    return $this->setParameter(
+      'endDateTime',
+      $datetime->newAbsoluteDateTime()->toDictionary());
+  }
+
+  public function setUntilDateTime(PhutilCalendarDateTime $datetime) {
+    return $this->setParameter(
+      'untilDateTime',
+      $datetime->newAbsoluteDateTime()->toDictionary());
+  }
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 
