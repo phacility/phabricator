@@ -118,11 +118,6 @@
     padding: 10px 8px 10px 8px;
 }
 
-.conpherence-durable-column-header-text .phui-icon-view {
-  color: #fff;
-  text-shadow: 1px 1px 0 rgba(0,0,0,.6);
-}
-
 .conpherence-durable-column-icon-bar {
   width: 36px;
   background-color: {$lightgreybackground};
@@ -169,6 +164,16 @@
   left: 34px;
   right: 0;
   overflow-x: hidden;
+}
+
+.conpherence-durable-column .column-no-rooms {
+  padding: 12px 8px;
+}
+
+.conpherence-durable-column .column-no-rooms-text {
+  color: {$greytext};
+  font-style: italic;
+  margin-bottom: 16px;
 }
 
 .conpherence-durable-column-transactions {
@@ -314,12 +319,6 @@ img {
 .minimize-column .conpherence-durable-column
   .conpherence-durable-column-header-text {
     width: 100px;
-    color: {$darkbluetext};
-    text-shadow: none;
-}
-
-.minimize-column .conpherence-durable-column
-  .conpherence-durable-column-header-text .phui-icon-view {
     color: {$darkbluetext};
     text-shadow: none;
 }
