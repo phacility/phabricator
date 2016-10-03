@@ -41,11 +41,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $spacePHID;
 
+  protected $utcInitialEpoch;
+  protected $utcUntilEpoch;
+  protected $utcInstanceEpoch;
+
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
 
   private $viewerDateFrom;
   private $viewerDateTo;
+  private $viewerTimezone;
 
   // Frequency Constants
   const FREQUENCY_DAILY = 'daily';
@@ -298,6 +303,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         $zone);
     }
 
+    $this->viewerTimezone = $viewer->getTimezoneIdentifier();
+
     return $this;
   }
 
@@ -323,10 +330,61 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $dst->format('U');
   }
 
+  public function updateUTCEpochs() {
+    // The "intitial" epoch is the start time of the event, in UTC.
+    $start_date = $this->newStartDateTime()
+      ->setViewerTimezone('UTC');
+    $start_epoch = $start_date->getEpoch();
+    $this->setUTCInitialEpoch($start_epoch);
+
+    // The "until" epoch is the last UTC epoch on which any instance of this
+    // event occurs. For infinitely recurring events, it is `null`.
+
+    if (!$this->getIsRecurring()) {
+      $end_date = $this->newEndDateTime()
+        ->setViewerTimezone('UTC');
+      $until_epoch = $end_date->getEpoch();
+    } else {
+      $until_epoch = null;
+      $until_date = $this->newUntilDateTime()
+        ->setViewerTimezone('UTC');
+      if ($until_date) {
+        $duration = $this->newDuration();
+        $until_epoch = id(new PhutilCalendarRelativeDateTime())
+          ->setOrigin($until_date)
+          ->setDuration($duration)
+          ->getEpoch();
+      }
+    }
+    $this->setUTCUntilEpoch($until_epoch);
+
+    // The "instance" epoch is a property of instances of recurring events.
+    // It's the original UTC epoch on which the instance started. Usually that
+    // is the same as the start date, but they may be different if the instance
+    // has been edited.
+
+    // The ICS format uses this value (original start time) to identify event
+    // instances, and must do so because it allows additional arbitrary
+    // instances to be added (with "RDATE").
+
+    $instance_epoch = null;
+    $instance_date = $this->newInstanceDateTime();
+    if ($instance_date) {
+      $instance_epoch = $instance_date
+        ->setViewerTimezone('UTC')
+        ->getEpoch();
+    }
+    $this->setUTCInstanceEpoch($instance_epoch);
+
+    return $this;
+  }
+
   public function save() {
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
+
+    $this->updateUTCEpochs();
 
     return parent::save();
   }
@@ -363,6 +421,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'instanceOfEventPHID' => 'phid?',
         'sequenceIndex' => 'uint32?',
         'isStub' => 'bool',
+        'utcInitialEpoch' => 'epoch',
+        'utcUntilEpoch' => 'epoch?',
+        'utcInstanceEpoch' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_date' => array(
@@ -370,6 +431,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ),
         'key_instance' => array(
           'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
+          'unique' => true,
+        ),
+        'key_epoch' => array(
+          'columns' => array('utcInitialEpoch', 'utcUntilEpoch'),
+        ),
+        'key_rdate' => array(
+          'columns' => array('instanceOfEventPHID', 'utcInstanceEpoch'),
           'unique' => true,
         ),
       ),
@@ -641,11 +709,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $modified = $this->getDateModified();
     $modified = PhutilCalendarAbsoluteDateTime::newFromEpoch($modified);
 
-    $date_start = $this->getDateFrom();
-    $date_start = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_start);
-
-    $date_end = $this->getDateTo();
-    $date_end = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_end);
+    $date_start = $this->newStartDateTime();
+    $date_end = $this->newEndDateTime();
 
     if ($this->getIsAllDay()) {
       $date_start->setIsAllDay(true);
@@ -719,6 +784,57 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $node;
   }
 
+  public function newStartDateTime() {
+    $epoch = $this->getDateFrom();
+    return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function newEndDateTime() {
+    $epoch = $this->getDateTo();
+    return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function newUntilDateTime() {
+    $epoch = $this->getRecurrenceEndDate();
+    if (!$epoch) {
+      return null;
+    }
+    return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function newDuration() {
+    return id(new PhutilCalendarDuration())
+      ->setSeconds($this->getDuration());
+  }
+
+  public function newInstanceDateTime() {
+    if (!$this->getIsRecurring()) {
+      return null;
+    }
+
+    $epochs = $this->getParent()->getSequenceIndexEpochs(
+      new PhabricatorUser(),
+      $this->getSequenceIndex(),
+      $this->getDuration());
+
+    $epoch = $epochs['dateFrom'];
+    return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  private function newDateTimeFromEpoch($epoch) {
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch($epoch);
+
+    $viewer_timezone = $this->viewerTimezone;
+    if ($viewer_timezone) {
+      $datetime->setViewerTimezone($viewer_timezone);
+    }
+
+    if ($this->getIsAllDay()) {
+      $datetime->setIsAllDay(true);
+    }
+
+    return $datetime;
+  }
 
 
 /* -(  Markup Interface  )--------------------------------------------------- */
