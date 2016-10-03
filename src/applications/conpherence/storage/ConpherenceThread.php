@@ -284,11 +284,18 @@ final class ConpherenceThread extends ConpherenceDAO
     $message_title = null;
     if ($subtitle_mode == 'message') {
       $message_transaction = null;
+      $action_transaction = null;
       foreach ($transactions as $transaction) {
         switch ($transaction->getTransactionType()) {
           case PhabricatorTransactions::TYPE_COMMENT:
             $message_transaction = $transaction;
-            break 2;
+            break;
+          case ConpherenceTransaction::TYPE_TITLE:
+          case ConpherenceTransaction::TYPE_TOPIC:
+          case ConpherenceTransaction::TYPE_PICTURE:
+          case ConpherenceTransaction::TYPE_PARTICIPANTS:
+            $action_transaction = $transaction;
+            break;
           default:
             break;
         }
@@ -302,6 +309,11 @@ final class ConpherenceThread extends ConpherenceDAO
             ->setMaximumGlyphs(60)
             ->truncateString(
               $message_transaction->getComment()->getContent()));
+      }
+      if ($action_transaction) {
+        $message_title = id(clone $action_transaction)
+          ->setRenderingTarget(PhabricatorApplicationTransaction::TARGET_TEXT)
+          ->getTitle();
       }
     }
     switch ($subtitle_mode) {
