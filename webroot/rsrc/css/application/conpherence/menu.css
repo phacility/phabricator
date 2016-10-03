@@ -26,8 +26,12 @@
     padding: 4px 0 4px 8px;
   }
 
-.conpherence-menu-pane .phui-list-item-view.hidden {
+.conpherence-menu-pane.phabricator-side-menu .phui-list-item-view.hidden {
   display: none;
+}
+
+.phui-list-view.conpherence-menu {
+  margin-bottom: 20px;
 }
 
 .conpherence-menu-pane.phabricator-side-menu .room-list-href {
