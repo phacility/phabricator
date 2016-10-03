@@ -103,7 +103,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->applyViewerTimezone($actor);
   }
 
-  private function newChild(PhabricatorUser $actor, $sequence) {
+  private function newChild(
+    PhabricatorUser $actor,
+    $sequence,
+    PhutilCalendarDateTime $start = null) {
     if (!$this->isParentEvent()) {
       throw new Exception(
         pht(
@@ -124,7 +127,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setDateFrom(0)
       ->setDateTo(0);
 
-    return $child->copyFromParent($actor);
+    return $child->copyFromParent($actor, $start);
   }
 
   protected function readField($field) {
@@ -156,7 +159,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
 
-  public function copyFromParent(PhabricatorUser $actor) {
+  public function copyFromParent(
+    PhabricatorUser $actor,
+    PhutilCalendarDateTime $start = null) {
+
     if (!$this->isChildEvent()) {
       throw new Exception(
         pht(
@@ -176,11 +182,18 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setDescription($parent->getDescription());
 
     $sequence = $this->getSequenceIndex();
-    $start_datetime = $parent->newSequenceIndexDateTime($sequence);
 
-    if (!$start_datetime) {
-      throw new Exception(
-        "Sequence {$sequence} does not exist for event!");
+    if ($start) {
+      $start_datetime = $start;
+    } else {
+      $start_datetime = $parent->newSequenceIndexDateTime($sequence);
+
+      if (!$start_datetime) {
+        throw new Exception(
+          pht(
+            'Sequence "%s" is not valid for event!',
+            $sequence));
+      }
     }
 
     $duration = $parent->newDuration();
@@ -225,8 +238,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $stub;
   }
 
-  public function newGhost(PhabricatorUser $actor, $sequence) {
-    $ghost = $this->newChild($actor, $sequence);
+  public function newGhost(
+    PhabricatorUser $actor,
+    $sequence,
+    PhutilCalendarDateTime $start = null) {
+
+    $ghost = $this->newChild($actor, $sequence, $start);
 
     $ghost
       ->setIsGhostEvent(true)
