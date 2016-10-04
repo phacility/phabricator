@@ -59,7 +59,7 @@ abstract class ConpherenceController extends PhabricatorController {
       $header = id(new PHUIHeaderView())
         ->setHeader($data['title'])
         ->setSubheader($data['topic'])
-        ->addClass((!$data['topic']) ? 'conpherence-no-topic' : null);
+        ->setImage($data['image']);
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
