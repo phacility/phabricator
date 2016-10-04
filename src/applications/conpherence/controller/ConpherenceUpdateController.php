@@ -507,10 +507,6 @@ final class ConpherenceUpdateController
               'src' => $crop_uri,
               ))))
         ->appendChild(
-          id(new ConpherencePicCropControl())
-          ->setLabel(pht('Crop Image'))
-          ->setValue($image))
-        ->appendChild(
           id(new ConpherenceFormDragAndDropUploadControl())
           ->setLabel(pht('Change Image')));
     } else {

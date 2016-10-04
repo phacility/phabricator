@@ -547,7 +547,6 @@ return array(
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
     'rsrc/js/core/behavior-badge-view.js' => '8ff5e24c',
     'rsrc/js/core/behavior-choose-control.js' => '327a00d1',
-    'rsrc/js/core/behavior-crop.js' => 'fa0f4fc2',
     'rsrc/js/core/behavior-dark-console.js' => 'f411b6ae',
     'rsrc/js/core/behavior-detect-timezone.js' => '4c193c96',
     'rsrc/js/core/behavior-device.js' => 'bb1dd507',
@@ -655,7 +654,6 @@ return array(
     'javelin-behavior-aphlict-listen' => 'fb20ac8d',
     'javelin-behavior-aphlict-status' => '5e2634b9',
     'javelin-behavior-aphront-basic-tokenizer' => 'b3a4b884',
-    'javelin-behavior-aphront-crop' => 'fa0f4fc2',
     'javelin-behavior-aphront-drag-and-drop-textarea' => '484a6e22',
     'javelin-behavior-aphront-form-disable-on-submit' => '5c54cbf3',
     'javelin-behavior-aphront-more' => 'a80d0378',
@@ -2242,12 +2240,6 @@ return array(
       'javelin-mask',
       'javelin-util',
       'phabricator-busy',
-    ),
-    'fa0f4fc2' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-vector',
-      'javelin-magical-init',
     ),
     'fb20ac8d' => array(
       'javelin-behavior',
