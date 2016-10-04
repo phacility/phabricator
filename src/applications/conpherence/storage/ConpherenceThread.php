@@ -286,6 +286,9 @@ final class ConpherenceThread extends ConpherenceDAO
       $message_transaction = null;
       $action_transaction = null;
       foreach ($transactions as $transaction) {
+        if ($message_transaction || $action_transaction) {
+          break;
+        }
         switch ($transaction->getTransactionType()) {
           case PhabricatorTransactions::TYPE_COMMENT:
             $message_transaction = $transaction;
