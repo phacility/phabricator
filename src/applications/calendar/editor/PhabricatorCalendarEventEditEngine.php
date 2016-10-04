@@ -155,13 +155,6 @@ final class PhabricatorCalendarEventEditEngine
     }
 
     if ($this->getIsCreate() || $object->getIsRecurring()) {
-      $until_datetime = $object->newUntilDateTime();
-      if ($until_datetime) {
-        $until_epoch = $until_datetime->getEpoch();
-      } else {
-        $until_epoch = null;
-      }
-
       $fields[] = id(new PhabricatorEpochEditField())
         ->setAllowNull(true)
         ->setKey('until')
@@ -171,7 +164,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('Last instance of the event.'))
         ->setConduitDescription(pht('Change when the event repeats until.'))
         ->setConduitTypeDescription(pht('New final event time.'))
-        ->setValue($until_epoch);
+        ->setValue($object->getUntilDateTimeEpoch());
     }
 
     $fields[] = id(new PhabricatorBoolEditField())

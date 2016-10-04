@@ -6,7 +6,8 @@ final class PhabricatorCalendarEventUntilDateTransaction
   const TRANSACTIONTYPE = 'calendar.recurrenceenddate';
 
   public function generateOldValue($object) {
-    return $object->getRecurrenceEndDate();
+    // TODO: Upgrade this.
+    return $object->getUntilDateTimeEpoch();
   }
 
   public function applyInternalEffects($object, $value) {

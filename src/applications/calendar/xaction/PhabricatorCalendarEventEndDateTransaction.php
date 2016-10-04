@@ -6,7 +6,8 @@ final class PhabricatorCalendarEventEndDateTransaction
   const TRANSACTIONTYPE = 'calendar.enddate';
 
   public function generateOldValue($object) {
-    return $object->getDateTo();
+    // TODO: Upgrade this.
+    return $object->getEndDateTimeEpoch();
   }
 
   public function applyInternalEffects($object, $value) {

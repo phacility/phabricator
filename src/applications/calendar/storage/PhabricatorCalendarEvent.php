@@ -184,7 +184,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setDescription($parent->getDescription());
 
     $sequence = $this->getSequenceIndex();
-    $duration = $this->getDuration();
+    $duration = $parent->getDuration();
     $epochs = $parent->getSequenceIndexEpochs($actor, $sequence, $duration);
 
     $this
@@ -277,7 +277,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getDuration() {
-    return $this->getDateTo() - $this->getDateFrom();
+    return ($this->getEndDateTimeEpoch() - $this->getStartDateTimeEpoch());
   }
 
   public function getDateEpochForTimezone(
@@ -366,7 +366,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
    *
    * @return int Event start date for availability caches.
    */
-  public function getDateFromForCache() {
+  public function getStartDateTimeEpochForCache() {
     $epoch = $this->getStartDateTimeEpoch();
     $window = phutil_units('15 minutes in seconds');
     return ($epoch - $window);
@@ -792,6 +792,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return null;
     }
     return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function getUntilDateTimeEpoch() {
+    $datetime = $this->newUntilDateTime();
+
+    if (!$datetime) {
+      return null;
+    }
+
+    return $datetime->getEpoch();
   }
 
   public function newDuration() {

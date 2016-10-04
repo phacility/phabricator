@@ -6,7 +6,8 @@ final class PhabricatorCalendarEventStartDateTransaction
   const TRANSACTIONTYPE = 'calendar.startdate';
 
   public function generateOldValue($object) {
-    return $object->getDateFrom();
+    // TODO: Upgrade this.
+    return $object->getStartDateTimeEpoch();
   }
 
   public function applyInternalEffects($object, $value) {
