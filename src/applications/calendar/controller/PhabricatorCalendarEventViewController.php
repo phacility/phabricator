@@ -27,8 +27,8 @@ final class PhabricatorCalendarEventViewController
     $page_title = $monogram.' '.$event->getName();
     $crumbs = $this->buildApplicationCrumbs();
 
-    $start = new DateTime('@'.$event->getViewerDateFrom());
-    $start->setTimeZone($viewer->getTimeZone());
+    $start = $event->newStartDateTime()
+      ->newPHPDateTime();
 
     $crumbs->addTextCrumb(
       $start->format('F Y'),

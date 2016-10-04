@@ -343,8 +343,8 @@ final class PhabricatorCalendarEventSearchEngine
     $month_view->setUser($viewer);
 
     foreach ($events as $event) {
-      $epoch_min = $event->getViewerDateFrom();
-      $epoch_max = $event->getViewerDateTo();
+      $epoch_min = $event->getStartDateTimeEpoch();
+      $epoch_max = $event->getEndDateTimeEpoch();
 
       $event_view = id(new AphrontCalendarEventView())
         ->setHostPHID($event->getHostPHID())
@@ -408,8 +408,8 @@ final class PhabricatorCalendarEventSearchEngine
         $event,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $epoch_min = $event->getViewerDateFrom();
-      $epoch_max = $event->getViewerDateTo();
+      $epoch_min = $event->getStartDateTimeEpoch();
+      $epoch_max = $event->getEndDateTimeEpoch();
 
       $status_icon = $event->getDisplayIcon($viewer);
       $status_color = $event->getDisplayIconColor($viewer);

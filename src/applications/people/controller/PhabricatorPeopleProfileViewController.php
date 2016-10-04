@@ -205,8 +205,8 @@ final class PhabricatorPeopleProfileViewController
         $event,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $epoch_min = $event->getViewerDateFrom();
-      $epoch_max = $event->getViewerDateTo();
+      $epoch_min = $event->getStartDateTimeEpoch();
+      $epoch_max = $event->getEndDateTimeEpoch();
 
       $event_view = id(new AphrontCalendarEventView())
         ->setCanEdit($can_edit)

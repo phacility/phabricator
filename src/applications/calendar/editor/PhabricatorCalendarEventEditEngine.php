@@ -155,6 +155,13 @@ final class PhabricatorCalendarEventEditEngine
     }
 
     if ($this->getIsCreate() || $object->getIsRecurring()) {
+      $until_datetime = $object->newUntilDateTime();
+      if ($until_datetime) {
+        $until_epoch = $until_datetime->getEpoch();
+      } else {
+        $until_epoch = null;
+      }
+
       $fields[] = id(new PhabricatorEpochEditField())
         ->setAllowNull(true)
         ->setKey('until')
@@ -164,50 +171,50 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('Last instance of the event.'))
         ->setConduitDescription(pht('Change when the event repeats until.'))
         ->setConduitTypeDescription(pht('New final event time.'))
-        ->setValue($object->getRecurrenceEndDate());
+        ->setValue($until_epoch);
     }
 
     $fields[] = id(new PhabricatorBoolEditField())
-        ->setKey('isAllDay')
-        ->setLabel(pht('All Day'))
-        ->setOptions(pht('Normal Event'), pht('All Day Event'))
-        ->setTransactionType(
-          PhabricatorCalendarEventAllDayTransaction::TRANSACTIONTYPE)
-        ->setDescription(pht('Marks this as an all day event.'))
-        ->setConduitDescription(pht('Make the event an all day event.'))
-        ->setConduitTypeDescription(pht('Mark the event as an all day event.'))
-        ->setValue($object->getIsAllDay());
+      ->setKey('isAllDay')
+      ->setLabel(pht('All Day'))
+      ->setOptions(pht('Normal Event'), pht('All Day Event'))
+      ->setTransactionType(
+        PhabricatorCalendarEventAllDayTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('Marks this as an all day event.'))
+      ->setConduitDescription(pht('Make the event an all day event.'))
+      ->setConduitTypeDescription(pht('Mark the event as an all day event.'))
+      ->setValue($object->getIsAllDay());
 
     $fields[] = id(new PhabricatorEpochEditField())
-        ->setKey('start')
-        ->setLabel(pht('Start'))
-        ->setTransactionType(
-          PhabricatorCalendarEventStartDateTransaction::TRANSACTIONTYPE)
-        ->setDescription(pht('Start time of the event.'))
-        ->setConduitDescription(pht('Change the start time of the event.'))
-        ->setConduitTypeDescription(pht('New event start time.'))
-        ->setValue($object->getViewerDateFrom());
+      ->setKey('start')
+      ->setLabel(pht('Start'))
+      ->setTransactionType(
+        PhabricatorCalendarEventStartDateTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('Start time of the event.'))
+      ->setConduitDescription(pht('Change the start time of the event.'))
+      ->setConduitTypeDescription(pht('New event start time.'))
+      ->setValue($object->getStartDateTimeEpoch());
 
     $fields[] = id(new PhabricatorEpochEditField())
-        ->setKey('end')
-        ->setLabel(pht('End'))
-        ->setTransactionType(
-          PhabricatorCalendarEventEndDateTransaction::TRANSACTIONTYPE)
-        ->setDescription(pht('End time of the event.'))
-        ->setConduitDescription(pht('Change the end time of the event.'))
-        ->setConduitTypeDescription(pht('New event end time.'))
-        ->setValue($object->getViewerDateTo());
+      ->setKey('end')
+      ->setLabel(pht('End'))
+      ->setTransactionType(
+        PhabricatorCalendarEventEndDateTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('End time of the event.'))
+      ->setConduitDescription(pht('Change the end time of the event.'))
+      ->setConduitTypeDescription(pht('New event end time.'))
+      ->setValue($object->getEndDateTimeEpoch());
 
     $fields[] = id(new PhabricatorIconSetEditField())
-        ->setKey('icon')
-        ->setLabel(pht('Icon'))
-        ->setIconSet(new PhabricatorCalendarIconSet())
-        ->setTransactionType(
-          PhabricatorCalendarEventIconTransaction::TRANSACTIONTYPE)
-        ->setDescription(pht('Event icon.'))
-        ->setConduitDescription(pht('Change the event icon.'))
-        ->setConduitTypeDescription(pht('New event icon.'))
-        ->setValue($object->getIcon());
+      ->setKey('icon')
+      ->setLabel(pht('Icon'))
+      ->setIconSet(new PhabricatorCalendarIconSet())
+      ->setTransactionType(
+        PhabricatorCalendarEventIconTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('Event icon.'))
+      ->setConduitDescription(pht('Change the event icon.'))
+      ->setConduitTypeDescription(pht('New event icon.'))
+      ->setValue($object->getIcon());
 
     return $fields;
   }

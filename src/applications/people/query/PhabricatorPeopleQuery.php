@@ -432,7 +432,7 @@ final class PhabricatorPeopleQuery
         while (true) {
           foreach ($events as $event) {
             $from = $event->getDateFromForCache();
-            $to = $event->getViewerDateTo();
+            $to = $event->getEndDateTimeEpoch();
             if (($from <= $cursor) && ($to > $cursor)) {
               $cursor = $to;
               continue 2;

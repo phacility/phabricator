@@ -99,7 +99,7 @@ final class PhabricatorCalendarEventQuery
   protected function getPagingValueMap($cursor, array $keys) {
     $event = $this->loadCursorObject($cursor);
     return array(
-      'start' => $event->getViewerDateFrom(),
+      'start' => $event->getStartDateTimeEpoch(),
       'id' => $event->getID(),
     );
   }
@@ -177,9 +177,9 @@ final class PhabricatorCalendarEventQuery
       $modify_key = '+1 '.$frequency;
 
       if (($this->rangeBegin !== null) &&
-          ($this->rangeBegin > $event->getViewerDateFrom())) {
+          ($this->rangeBegin > $event->getStartDateTimeEpoch())) {
         $max_date = $this->rangeBegin - $duration;
-        $date = $event->getViewerDateFrom();
+        $date = $event->getStartDateTimeEpoch();
         $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
 
         while ($date < $max_date) {
@@ -191,7 +191,7 @@ final class PhabricatorCalendarEventQuery
 
         $start = $this->rangeBegin;
       } else {
-        $start = $event->getViewerDateFrom() - $duration;
+        $start = $event->getStartDateTimeEpoch() - $duration;
       }
 
       $date = $start;
@@ -238,9 +238,9 @@ final class PhabricatorCalendarEventQuery
 
       if ($raw_limit) {
         if (count($events) > $raw_limit) {
-          $events = msort($events, 'getViewerDateFrom');
+          $events = msort($events, 'getStartDateTimeEpoch');
           $events = array_slice($events, 0, $raw_limit, true);
-          $enforced_end = last($events)->getViewerDateFrom();
+          $enforced_end = last($events)->getStartDateTimeEpoch();
         }
       }
     }
@@ -308,7 +308,7 @@ final class PhabricatorCalendarEventQuery
       }
     }
 
-    $events = msort($events, 'getViewerDateFrom');
+    $events = msort($events, 'getStartDateTimeEpoch');
 
     return $events;
   }
@@ -500,7 +500,7 @@ final class PhabricatorCalendarEventQuery
       }
     }
 
-    $events = msort($events, 'getViewerDateFrom');
+    $events = msort($events, 'getStartDateTimeEpoch');
 
     return $events;
   }
@@ -510,8 +510,8 @@ final class PhabricatorCalendarEventQuery
     $range_end = $this->rangeEnd;
 
     foreach ($events as $key => $event) {
-      $event_start = $event->getViewerDateFrom();
-      $event_end = $event->getViewerDateTo();
+      $event_start = $event->getStartDateTimeEpoch();
+      $event_end = $event->getEndDateTimeEpoch();
 
       if ($range_start && $event_end < $range_start) {
         unset($events[$key]);

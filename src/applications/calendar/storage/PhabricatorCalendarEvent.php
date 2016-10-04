@@ -49,8 +49,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
 
-  private $viewerDateFrom;
-  private $viewerDateTo;
   private $viewerTimezone;
 
   // Frequency Constants
@@ -273,46 +271,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $ghost;
   }
 
-  public function getViewerDateFrom() {
-    if ($this->viewerDateFrom === null) {
-      throw new PhutilInvalidStateException('applyViewerTimezone');
-    }
-
-    return $this->viewerDateFrom;
-  }
-
-  public function getViewerDateTo() {
-    if ($this->viewerDateTo === null) {
-      throw new PhutilInvalidStateException('applyViewerTimezone');
-    }
-
-    return $this->viewerDateTo;
-  }
-
   public function applyViewerTimezone(PhabricatorUser $viewer) {
-    if (!$this->getIsAllDay()) {
-      $this->viewerDateFrom = $this->getDateFrom();
-      $this->viewerDateTo = $this->getDateTo();
-    } else {
-      $zone = $viewer->getTimeZone();
-
-      $this->viewerDateFrom = $this->getDateEpochForTimezone(
-        $this->getAllDayDateFrom(),
-        new DateTimeZone('UTC'),
-        'Y-m-d',
-        null,
-        $zone);
-
-      $this->viewerDateTo = $this->getDateEpochForTimezone(
-        $this->getAllDayDateTo(),
-        new DateTimeZone('UTC'),
-        'Y-m-d 23:59:00',
-        null,
-        $zone);
-    }
-
     $this->viewerTimezone = $viewer->getTimezoneIdentifier();
-
     return $this;
   }
 
@@ -407,7 +367,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
    * @return int Event start date for availability caches.
    */
   public function getDateFromForCache() {
-    return ($this->getViewerDateFrom() - phutil_units('15 minutes in seconds'));
+    $epoch = $this->getStartDateTimeEpoch();
+    $window = phutil_units('15 minutes in seconds');
+    return ($epoch - $window);
   }
 
   protected function getConfiguration() {
@@ -593,14 +555,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     PhabricatorUser $viewer,
     $show_end) {
 
-    if ($show_end) {
-      $min_date = PhabricatorTime::getDateTimeFromEpoch(
-        $this->getViewerDateFrom(),
-        $viewer);
+    $start = $this->newStartDateTime();
+    $end = $this->newEndDateTime();
 
-      $max_date = PhabricatorTime::getDateTimeFromEpoch(
-        $this->getViewerDateTo(),
-        $viewer);
+    if ($show_end) {
+      $min_date = $start->newPHPDateTime();
+      $max_date = $end->newPHPDateTime();
 
       $min_day = $min_date->format('Y m d');
       $max_day = $max_date->format('Y m d');
@@ -610,8 +570,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $show_end_date = false;
     }
 
-    $min_epoch = $this->getViewerDateFrom();
-    $max_epoch = $this->getViewerDateTo();
+    $min_epoch = $start->getEpoch();
+    $max_epoch = $end->getEpoch();
 
     if ($this->getIsAllDay()) {
       if ($show_end_date) {
@@ -803,6 +763,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->newDateTimeFromEpoch($epoch);
   }
 
+  public function getStartDateTimeEpoch() {
+    return $this->newStartDateTime()->getEpoch();
+  }
+
   public function newEndDateTime() {
     $datetime = $this->getParameter('endDateTime');
     if ($datetime) {
@@ -811,6 +775,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $epoch = $this->getDateTo();
     return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function getEndDateTimeEpoch() {
+    return $this->newEndDateTime()->getEpoch();
   }
 
   public function newUntilDateTime() {
