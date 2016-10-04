@@ -17,10 +17,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $name;
   protected $hostPHID;
-  protected $dateFrom;
-  protected $dateTo;
-  protected $allDayDateFrom;
-  protected $allDayDateTo;
   protected $description;
   protected $isCancelled;
   protected $isAllDay;
@@ -30,7 +26,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $isRecurring = 0;
   protected $recurrenceFrequency = array();
-  protected $recurrenceEndDate;
 
   private $isGhostEvent = false;
   protected $instanceOfEventPHID;
@@ -51,6 +46,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   private $viewerTimezone;
 
+  // TODO: DEPRECATED. Remove once we're sure the migrations worked.
+  protected $allDayDateFrom;
+  protected $allDayDateTo;
+  protected $dateFrom;
+  protected $dateTo;
+  protected $recurrenceEndDate;
+
   // Frequency Constants
   const FREQUENCY_DAILY = 'daily';
   const FREQUENCY_WEEKLY = 'weekly';
@@ -69,20 +71,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $edit_policy = $app->getPolicy($edit_default);
 
     $now = PhabricatorTime::getNow();
-
-    $start = new DateTime('@'.$now);
-    $start->setTimeZone($actor->getTimeZone());
-
-    $start->setTime($start->format('H'), 0, 0);
-    $start->modify('+1 hour');
-    $end = id(clone $start)->modify('+1 hour');
-
-    $epoch_min = $start->format('U');
-    $epoch_max = $end->format('U');
-
-    $now_date = new DateTime('@'.$now);
-    $now_min = id(clone $now_date)->setTime(0, 0)->format('U');
-    $now_max = id(clone $now_date)->setTime(23, 59)->format('U');
 
     $default_icon = 'fa-calendar';
 
@@ -106,10 +94,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
-      ->setDateFrom($epoch_min)
-      ->setDateTo($epoch_max)
-      ->setAllDayDateFrom($now_min)
-      ->setAllDayDateTo($now_max)
+      ->setDateFrom(0)
+      ->setDateTo(0)
+      ->setAllDayDateFrom(0)
+      ->setAllDayDateTo(0)
       ->setStartDateTime($datetime_start)
       ->setEndDateTime($datetime_end)
       ->applyViewerTimezone($actor);
@@ -130,7 +118,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
       ->setRecurrenceFrequency($this->getRecurrenceFrequency())
-      ->attachParentEvent($this);
+      ->attachParentEvent($this)
+      ->setAllDayDateFrom(0)
+      ->setAllDayDateTo(0)
+      ->setDateFrom(0)
+      ->setDateTo(0);
 
     return $child->copyFromParent($actor);
   }
@@ -187,11 +179,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $duration = $parent->getDuration();
     $epochs = $parent->getSequenceIndexEpochs($actor, $sequence, $duration);
 
+    $start_datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $epochs['dateFrom'],
+      $parent->newStartDateTime()->getTimezone());
+    $end_datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $epochs['dateTo'],
+      $parent->newEndDateTime()->getTimezone());
+
     $this
-      ->setDateFrom($epochs['dateFrom'])
-      ->setDateTo($epochs['dateTo'])
-      ->setAllDayDateFrom($epochs['allDayDateFrom'])
-      ->setAllDayDateTo($epochs['allDayDateTo']);
+      ->setStartDateTime($start_datetime)
+      ->setEndDateTime($end_datetime);
 
     return $this;
   }
@@ -213,12 +210,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $frequency = $this->getFrequencyUnit();
     $modify_key = '+'.$sequence.' '.$frequency;
 
-    $date = $this->getDateFrom();
-    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+    $date_time = $this->newStartDateTime()
+      ->setViewerTimezone($viewer->getTimezoneIdentifier())
+      ->newPHPDateTime();
+
     $date_time->modify($modify_key);
     $date = $date_time->format('U');
 
-    $end_date = $this->getRecurrenceEndDate();
+    $end_date = $this->getUntilDateTimeEpoch();
     if ($end_date && $date > $end_date) {
       throw new Exception(
         pht(
@@ -227,21 +226,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
           $sequence));
     }
 
-    $utc = new DateTimeZone('UTC');
-
-    $allday_from = $this->getAllDayDateFrom();
-    $allday_date = new DateTime('@'.$allday_from, $utc);
-    $allday_date->setTimeZone($utc);
-    $allday_date->modify($modify_key);
-
-    $allday_min = $allday_date->format('U');
-    $allday_duration = ($this->getAllDayDateTo() - $allday_from);
-
     return array(
       'dateFrom' => $date,
       'dateTo' => $date + $duration,
-      'allDayDateFrom' => $allday_min,
-      'allDayDateTo' => $allday_min + $allday_duration,
     );
   }
 
@@ -280,24 +267,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return ($this->getEndDateTimeEpoch() - $this->getStartDateTimeEpoch());
   }
 
-  public function getDateEpochForTimezone(
-    $epoch,
-    $src_zone,
-    $format,
-    $adjust,
-    $dst_zone) {
-
-    $src = new DateTime('@'.$epoch);
-    $src->setTimeZone($src_zone);
-
-    if (strlen($adjust)) {
-      $adjust = ' '.$adjust;
-    }
-
-    $dst = new DateTime($src->format($format).$adjust, $dst_zone);
-    return $dst->format('U');
-  }
-
   public function updateUTCEpochs() {
     // The "intitial" epoch is the start time of the event, in UTC.
     $start_date = $this->newStartDateTime()
@@ -314,9 +283,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $until_epoch = $end_date->getEpoch();
     } else {
       $until_epoch = null;
-      $until_date = $this->newUntilDateTime()
-        ->setViewerTimezone('UTC');
+      $until_date = $this->newUntilDateTime();
       if ($until_date) {
+        $until_date->setViewerTimezone('UTC');
         $duration = $this->newDuration();
         $until_epoch = id(new PhutilCalendarRelativeDateTime())
           ->setOrigin($until_date)
@@ -377,23 +346,25 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text',
-        'dateFrom' => 'epoch',
-        'dateTo' => 'epoch',
-        'allDayDateFrom' => 'epoch',
-        'allDayDateTo' => 'epoch',
         'description' => 'text',
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
         'icon' => 'text32',
         'mailKey' => 'bytes20',
         'isRecurring' => 'bool',
-        'recurrenceEndDate' => 'epoch?',
         'instanceOfEventPHID' => 'phid?',
         'sequenceIndex' => 'uint32?',
         'isStub' => 'bool',
         'utcInitialEpoch' => 'epoch',
         'utcUntilEpoch' => 'epoch?',
         'utcInstanceEpoch' => 'epoch?',
+
+        // TODO: DEPRECATED.
+        'allDayDateFrom' => 'epoch',
+        'allDayDateTo' => 'epoch',
+        'dateFrom' => 'epoch',
+        'dateTo' => 'epoch',
+        'recurrenceEndDate' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_date' => array(
@@ -814,7 +785,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return null;
     }
 
-    $epochs = $this->getParent()->getSequenceIndexEpochs(
+    $epochs = $this->getParentEvent()->getSequenceIndexEpochs(
       new PhabricatorUser(),
       $this->getSequenceIndex(),
       $this->getDuration());

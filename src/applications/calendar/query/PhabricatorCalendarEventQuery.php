@@ -352,14 +352,14 @@ final class PhabricatorCalendarEventQuery
     if ($this->rangeBegin) {
       $where[] = qsprintf(
         $conn,
-        'event.dateTo >= %d OR event.isRecurring = 1',
+        '(event.utcUntilEpoch >= %d) OR (event.utcUntilEpoch IS NULL)',
         $this->rangeBegin - phutil_units('16 hours in seconds'));
     }
 
     if ($this->rangeEnd) {
       $where[] = qsprintf(
         $conn,
-        'event.dateFrom <= %d',
+        'event.utcInitialEpoch <= %d',
         $this->rangeEnd + phutil_units('16 hours in seconds'));
     }
 
