@@ -9,7 +9,8 @@ final class ConpherenceThread extends ConpherenceDAO
 
   protected $title;
   protected $topic;
-  protected $imagePHIDs = array();
+  protected $imagePHIDs = array();  // TODO; nuke after migrations
+  protected $profileImagePHID;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
   protected $mailKey;
@@ -19,8 +20,8 @@ final class ConpherenceThread extends ConpherenceDAO
 
   private $participants = self::ATTACHABLE;
   private $transactions = self::ATTACHABLE;
+  private $profileImageFile = self::ATTACHABLE;
   private $handles = self::ATTACHABLE;
-  private $images = self::ATTACHABLE;
 
   public static function initializeNewRoom(PhabricatorUser $sender) {
     $default_policy = id(new ConpherenceThreadMembersPolicyRule())
@@ -30,7 +31,6 @@ final class ConpherenceThread extends ConpherenceDAO
       ->setTitle('')
       ->setTopic('')
       ->attachParticipants(array())
-      ->attachImages(array())
       ->setViewPolicy($default_policy)
       ->setEditPolicy($default_policy)
       ->setJoinPolicy($default_policy);
@@ -49,6 +49,7 @@ final class ConpherenceThread extends ConpherenceDAO
         'messageCount' => 'uint64',
         'mailKey' => 'text20',
         'joinPolicy' => 'policy',
+        'profileImagePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -76,46 +77,21 @@ final class ConpherenceThread extends ConpherenceDAO
     return 'Z'.$this->getID();
   }
 
-  public function getImagePHID($size) {
-    $image_phids = $this->getImagePHIDs();
-    return idx($image_phids, $size);
-  }
-  public function setImagePHID($phid, $size) {
-    $image_phids = $this->getImagePHIDs();
-    $image_phids[$size] = $phid;
-    return $this->setImagePHIDs($image_phids);
-  }
-
-  public function getImage($size) {
-    $images = $this->getImages();
-    return idx($images, $size);
-  }
-  public function setImage(PhabricatorFile $file, $size) {
-    $files = $this->getImages();
-    $files[$size] = $file;
-    return $this->attachImages($files);
-  }
-  public function attachImages(array $files) {
-    assert_instances_of($files, 'PhabricatorFile');
-    $this->images = $files;
-    return $this;
-  }
-  private function getImages() {
-    return $this->assertAttached($this->images);
-  }
-
   public function attachParticipants(array $participants) {
     assert_instances_of($participants, 'ConpherenceParticipant');
     $this->participants = $participants;
     return $this;
   }
+
   public function getParticipants() {
     return $this->assertAttached($this->participants);
   }
+
   public function getParticipant($phid) {
     $participants = $this->getParticipants();
     return $participants[$phid];
   }
+
   public function getParticipantIfExists($phid, $default = null) {
     $participants = $this->getParticipants();
     return idx($participants, $phid, $default);
@@ -131,6 +107,7 @@ final class ConpherenceThread extends ConpherenceDAO
     $this->handles = $handles;
     return $this;
   }
+
   public function getHandles() {
     return $this->assertAttached($this->handles);
   }
@@ -140,9 +117,11 @@ final class ConpherenceThread extends ConpherenceDAO
     $this->transactions = $transactions;
     return $this;
   }
+
   public function getTransactions($assert_attached = true) {
     return $this->assertAttached($this->transactions);
   }
+
   public function hasAttachedTransactions() {
     return $this->transactions !== self::ATTACHABLE;
   }
@@ -156,14 +135,17 @@ final class ConpherenceThread extends ConpherenceDAO
       $amount);
   }
 
-  public function loadImageURI($size) {
-    $file = $this->getImage($size);
+  public function getProfileImageURI() {
+    return $this->getProfileImageFile()->getBestURI();
+  }
 
-    if ($file) {
-      return $file->getBestURI();
-    }
+  public function attachProfileImageFile(PhabricatorFile $file) {
+    $this->profileImageFile = $file;
+    return $this;
+  }
 
-    return PhabricatorUser::getDefaultProfileImageURI();
+  public function getProfileImageFile() {
+    return $this->assertAttached($this->profileImageFile);
   }
 
   /**
@@ -273,13 +255,7 @@ final class ConpherenceThread extends ConpherenceDAO
       $lucky_handle = reset($handles);
     }
 
-    $img_src = null;
-    $size = ConpherenceImageData::SIZE_CROP;
-    if ($this->getImagePHID($size)) {
-      $img_src = $this->getImage($size)->getBestURI();
-    } else if ($lucky_handle) {
-      $img_src = $lucky_handle->getImageURI();
-    }
+    $img_src = $this->getProfileImageURI();
 
     $message_title = null;
     if ($subtitle_mode == 'message') {

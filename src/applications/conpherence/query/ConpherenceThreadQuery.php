@@ -9,14 +9,13 @@ final class ConpherenceThreadQuery
   private $ids;
   private $participantPHIDs;
   private $needParticipants;
-  private $needCropPics;
-  private $needOrigPics;
   private $needTransactions;
   private $needParticipantCache;
   private $afterTransactionID;
   private $beforeTransactionID;
   private $transactionLimit;
   private $fulltext;
+  private $needProfileImage;
 
   public function needParticipantCache($participant_cache) {
     $this->needParticipantCache = $participant_cache;
@@ -28,13 +27,8 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
-  public function needCropPics($need) {
-    $this->needCropPics = $need;
-    return $this;
-  }
-
-  public function needOrigPics($need_widget_data) {
-    $this->needOrigPics = $need_widget_data;
+  public function needProfileImage($need) {
+    $this->needProfileImage = $need;
     return $this;
   }
 
@@ -110,14 +104,33 @@ final class ConpherenceThreadQuery
       if ($this->needTransactions) {
         $this->loadTransactionsAndHandles($conpherences);
       }
-      if ($this->needOrigPics || $this->needCropPics) {
-        $this->initImages($conpherences);
-      }
-      if ($this->needOrigPics) {
-        $this->loadOrigPics($conpherences);
-      }
-      if ($this->needCropPics) {
-        $this->loadCropPics($conpherences);
+      if ($this->needProfileImage) {
+        $default = null;
+        $file_phids = mpull($conpherences, 'getProfileImagePHID');
+        $file_phids = array_filter($file_phids);
+        if ($file_phids) {
+          $files = id(new PhabricatorFileQuery())
+            ->setParentQuery($this)
+            ->setViewer($this->getViewer())
+            ->withPHIDs($file_phids)
+            ->execute();
+          $files = mpull($files, null, 'getPHID');
+        } else {
+          $files = array();
+        }
+
+        foreach ($conpherences as $conpherence) {
+          $file = idx($files, $conpherence->getProfileImagePHID());
+          if (!$file) {
+            if (!$default) {
+              $default = PhabricatorFile::loadBuiltin(
+                $this->getViewer(),
+                'conpherence.png');
+            }
+            $file = $default;
+          }
+          $conpherence->attachProfileImageFile($file);
+        }
       }
     }
 
@@ -263,50 +276,6 @@ final class ConpherenceThreadQuery
       $conpherence->attachHandles($conpherence->getHandles() + $handles);
       $conpherence->attachTransactions($current_transactions);
     }
-    return $this;
-  }
-
-  private function loadOrigPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_ORIG);
-  }
-
-  private function loadCropPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_CROP);
-  }
-
-  private function initImages($conpherences) {
-    foreach ($conpherences as $conpherence) {
-      $conpherence->attachImages(array());
-    }
-  }
-
-  private function loadPics(array $conpherences, $size) {
-    $conpherence_pic_phids = array();
-    foreach ($conpherences as $conpherence) {
-      $phid = $conpherence->getImagePHID($size);
-      if ($phid) {
-        $conpherence_pic_phids[$conpherence->getPHID()] = $phid;
-      }
-    }
-
-    if (!$conpherence_pic_phids) {
-      return $this;
-    }
-
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($conpherence_pic_phids)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
-
-    foreach ($conpherence_pic_phids as $conpherence_phid => $pic_phid) {
-      $conpherences[$conpherence_phid]->setImage($files[$pic_phid], $size);
-    }
-
     return $this;
   }
 

@@ -66,6 +66,11 @@ abstract class ConpherenceController extends PhabricatorController {
         $conpherence,
         PhabricatorPolicyCapability::CAN_EDIT);
 
+      if ($can_edit) {
+        $header->setImageURL(
+          $this->getApplicationURI('picture/'.$conpherence->getID().'/'));
+      }
+
       $participating = $conpherence->getParticipantIfExists($viewer->getPHID());
       $can_join = PhabricatorPolicyFilter::hasCapability(
         $viewer,

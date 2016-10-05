@@ -34,6 +34,10 @@
   left: 0;
 }
 
+.conpherence-header-pane .phui-header-image-href {
+  position: inherit;
+}
+
 .conpherence-header-pane .phui-header-col2 {
   height: 40px;
 }
