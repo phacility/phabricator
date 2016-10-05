@@ -25,7 +25,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $isStub;
 
   protected $isRecurring = 0;
-  protected $recurrenceFrequency = array();
 
   private $isGhostEvent = false;
   protected $instanceOfEventPHID;
@@ -52,12 +51,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $dateFrom;
   protected $dateTo;
   protected $recurrenceEndDate;
-
-  // Frequency Constants
-  const FREQUENCY_DAILY = 'daily';
-  const FREQUENCY_WEEKLY = 'weekly';
-  const FREQUENCY_MONTHLY = 'monthly';
-  const FREQUENCY_YEARLY = 'yearly';
+  protected $recurrenceFrequency = array();
 
   public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -85,10 +79,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setIsAllDay(0)
       ->setIsStub(0)
       ->setIsRecurring(0)
-      ->setRecurrenceFrequency(
-        array(
-          'rule' => self::FREQUENCY_WEEKLY,
-        ))
       ->setIcon($default_icon)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
@@ -120,7 +110,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setInstanceOfEventPHID($this->getPHID())
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
-      ->setRecurrenceFrequency($this->getRecurrenceFrequency())
       ->attachParentEvent($this)
       ->setAllDayDateFrom(0)
       ->setAllDayDateTo(0)
@@ -454,27 +443,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   public function setIsGhostEvent($is_ghost_event) {
     $this->isGhostEvent = $is_ghost_event;
     return $this;
-  }
-
-  public function getFrequencyRule() {
-    return idx($this->recurrenceFrequency, 'rule');
-  }
-
-  public function getFrequencyUnit() {
-    $frequency = $this->getFrequencyRule();
-
-    switch ($frequency) {
-      case 'daily':
-        return 'day';
-      case 'weekly':
-        return 'week';
-      case 'monthly':
-        return 'month';
-      case 'yearly':
-        return 'year';
-      default:
-        return 'day';
-    }
   }
 
   public function getURI() {
@@ -840,20 +808,27 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $datetime->newAbsoluteDateTime()->toDictionary());
   }
 
+  public function setRecurrenceRule(PhutilCalendarRecurrenceRule $rrule) {
+    return $this->setParameter(
+      'recurrenceRule',
+      $rrule->toDictionary());
+  }
 
   public function newRecurrenceRule() {
     if ($this->isChildEvent()) {
       return $this->getParentEvent()->newRecurrenceRule();
     }
 
-    // TODO: This is a little fragile since it relies on the convenient
-    // definition of FREQUENCY constants here and in RecurrenceRule, but
-    // should be gone soon.
-    $map = array(
-      'FREQ' => phutil_utf8_strtoupper($this->getFrequencyRule()),
-    );
+    if (!$this->getIsRecurring()) {
+      return null;
+    }
 
-    $rrule = PhutilCalendarRecurrenceRule::newFromDictionary($map);
+    $dict = $this->getParameter('recurrenceRule');
+    if (!$dict) {
+      return null;
+    }
+
+    $rrule = PhutilCalendarRecurrenceRule::newFromDictionary($dict);
 
     $start = $this->newStartDateTime();
     $rrule->setStartDateTime($start);
@@ -869,6 +844,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $set = new PhutilCalendarRecurrenceSet();
 
     $rrule = $this->newRecurrenceRule();
+    if (!$rrule) {
+      return null;
+    }
+
     $set->addSource($rrule);
 
     return $set;

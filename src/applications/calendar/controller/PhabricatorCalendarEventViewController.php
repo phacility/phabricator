@@ -348,9 +348,16 @@ final class PhabricatorCalendarEventViewController
         ->render();
     }
 
-    $rule = $event->getFrequencyRule();
-    switch ($rule) {
-      case PhabricatorCalendarEvent::FREQUENCY_DAILY:
+    $rrule = $event->newRecurrenceRule();
+
+    if ($rrule) {
+      $frequency = $rrule->getFrequency();
+    } else {
+      $frequency = null;
+    }
+
+    switch ($frequency) {
+      case PhutilCalendarRecurrenceRule::FREQUENCY_DAILY:
         if ($is_parent) {
           $message = pht('This event repeats every day.');
         } else {
@@ -359,7 +366,7 @@ final class PhabricatorCalendarEventViewController
             $parent_link);
         }
         break;
-      case PhabricatorCalendarEvent::FREQUENCY_WEEKLY:
+      case PhutilCalendarRecurrenceRule::FREQUENCY_WEEKLY:
         if ($is_parent) {
           $message = pht('This event repeats every week.');
         } else {
@@ -368,7 +375,7 @@ final class PhabricatorCalendarEventViewController
             $parent_link);
         }
         break;
-      case PhabricatorCalendarEvent::FREQUENCY_MONTHLY:
+      case PhutilCalendarRecurrenceRule::FREQUENCY_MONTHLY:
         if ($is_parent) {
           $message = pht('This event repeats every month.');
         } else {
@@ -377,7 +384,7 @@ final class PhabricatorCalendarEventViewController
             $parent_link);
         }
         break;
-      case PhabricatorCalendarEvent::FREQUENCY_YEARLY:
+      case PhutilCalendarRecurrenceRule::FREQUENCY_YEARLY:
         if ($is_parent) {
           $message = pht('This event repeats every year.');
         } else {

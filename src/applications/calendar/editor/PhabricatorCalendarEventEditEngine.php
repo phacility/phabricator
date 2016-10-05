@@ -68,10 +68,10 @@ final class PhabricatorCalendarEventEditEngine
     }
 
     $frequency_options = array(
-      PhabricatorCalendarEvent::FREQUENCY_DAILY => pht('Daily'),
-      PhabricatorCalendarEvent::FREQUENCY_WEEKLY => pht('Weekly'),
-      PhabricatorCalendarEvent::FREQUENCY_MONTHLY => pht('Monthly'),
-      PhabricatorCalendarEvent::FREQUENCY_YEARLY => pht('Yearly'),
+      PhutilCalendarRecurrenceRule::FREQUENCY_DAILY => pht('Daily'),
+      PhutilCalendarRecurrenceRule::FREQUENCY_WEEKLY => pht('Weekly'),
+      PhutilCalendarRecurrenceRule::FREQUENCY_MONTHLY => pht('Monthly'),
+      PhutilCalendarRecurrenceRule::FREQUENCY_YEARLY => pht('Yearly'),
     );
 
     $fields = array(
@@ -142,6 +142,14 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitTypeDescription(pht('Mark the event as a recurring event.'))
         ->setValue($object->getIsRecurring());
 
+
+      $rrule = $object->newRecurrenceRule();
+      if ($rrule) {
+        $frequency = $rrule->getFrequency();
+      } else {
+        $frequency = null;
+      }
+
       $fields[] = id(new PhabricatorSelectEditField())
         ->setKey('frequency')
         ->setLabel(pht('Frequency'))
@@ -151,7 +159,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('Recurring event frequency.'))
         ->setConduitDescription(pht('Change the event frequency.'))
         ->setConduitTypeDescription(pht('New event frequency.'))
-        ->setValue($object->getFrequencyRule());
+        ->setValue($frequency);
     }
 
     if ($this->getIsCreate() || $object->getIsRecurring()) {
