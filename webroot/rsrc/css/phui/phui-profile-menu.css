@@ -17,8 +17,12 @@
 }
 
 .phui-profile-menu .phabricator-side-menu {
-  background: rgba({$alphablue}, 0.15);
+  background: #dee0e7;
   width: 240px;
+}
+
+.phabricator-side-menu .phui-profile-menu-footer-1 {
+  background: #dee0e7;
 }
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-view {
