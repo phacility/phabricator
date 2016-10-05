@@ -72,9 +72,9 @@ final class PhabricatorCalendarEventViewController
           $comment_view,
         ))
       ->setCurtain($curtain)
-      ->addPropertySection($details_header, $details)
+      ->addPropertySection(pht('Description'), $description)
       ->addPropertySection($recurring_header, $recurring)
-      ->addPropertySection(pht('Description'), $description);
+      ->addPropertySection($details_header, $details);
 
     return $this->newPage()
       ->setTitle($page_title)
