@@ -10,7 +10,7 @@ foreach (new LiskRawMigrationIterator($conn, $table_name) as $row) {
 
   $images = phutil_json_decode($row['imagePHIDs']);
   if (!$images) {
-    return;
+    continue;
   }
 
   $file_phid = idx($images, 'original');
