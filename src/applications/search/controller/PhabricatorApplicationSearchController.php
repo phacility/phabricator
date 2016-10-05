@@ -252,12 +252,6 @@ final class PhabricatorApplicationSearchController
                 get_class($engine)));
           }
 
-          if ($list->getActions()) {
-            foreach ($list->getActions() as $action) {
-              $header->addActionLink($action);
-            }
-          }
-
           if ($list->getObjectList()) {
             $box->setObjectList($list->getObjectList());
           }
@@ -274,6 +268,21 @@ final class PhabricatorApplicationSearchController
           $result_header = $list->getHeader();
           if ($result_header) {
             $box->setHeader($result_header);
+            $header = $result_header;
+          }
+
+          if ($list->getActions()) {
+            foreach ($list->getActions() as $action) {
+              $header->addActionLink($action);
+            }
+          }
+
+          $use_actions = $engine->newUseResultsActions($saved_query);
+          if ($use_actions) {
+            $use_dropdown = $this->newUseResultsDropdown(
+              $saved_query,
+              $use_actions);
+            $header->addActionLink($use_dropdown);
           }
 
           $more_crumbs = $list->getCrumbs();
@@ -496,5 +505,24 @@ final class PhabricatorApplicationSearchController
     return $nux_view;
   }
 
+  private function newUseResultsDropdown(
+    PhabricatorSavedQuery $query,
+    array $dropdown_items) {
+
+    $viewer = $this->getViewer();
+
+    $action_list = id(new PhabricatorActionListView())
+      ->setViewer($viewer);
+    foreach ($dropdown_items as $dropdown_item) {
+      $action_list->addAction($dropdown_item);
+    }
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setHref('#')
+      ->setText(pht('Use Results...'))
+      ->setIcon('fa-road')
+      ->setDropdownMenu($action_list);
+  }
 
 }

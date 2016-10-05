@@ -64,12 +64,22 @@ final class PhabricatorCalendarExportSearchEngine
     foreach ($exports as $export) {
       $item = id(new PHUIObjectItemView())
         ->setViewer($viewer)
+        ->setObjectName(pht('Export %d', $export->getID()))
         ->setHeader($export->getName())
         ->setHref($export->getURI());
 
       if ($export->getIsDisabled()) {
         $item->setDisabled(true);
       }
+
+      $mode = $export->getPolicyMode();
+      $policy_icon = PhabricatorCalendarExport::getPolicyModeIcon($mode);
+      $policy_name = PhabricatorCalendarExport::getPolicyModeName($mode);
+      $policy_color = PhabricatorCalendarExport::getPolicyModeColor($mode);
+
+      $item->addIcon(
+        "{$policy_icon} {$policy_color}",
+        $policy_name);
 
       $list->addItem($item);
     }

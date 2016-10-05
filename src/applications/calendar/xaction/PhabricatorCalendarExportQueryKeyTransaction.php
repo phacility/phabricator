@@ -20,16 +20,26 @@ final class PhabricatorCalendarExportQueryKeyTransaction
   }
 
   public function validateTransactions($object, array $xactions) {
+    $actor = $this->getActor();
+
     $errors = array();
 
     foreach ($xactions as $xaction) {
       $value = $xaction->getNewValue();
 
       $query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($actor)
         ->withEngineClassNames(array('PhabricatorCalendarEventSearchEngine'))
         ->withQueryKeys(array($value))
         ->executeOne();
       if ($query) {
+        continue;
+      }
+
+      $builtin = id(new PhabricatorCalendarEventSearchEngine())
+        ->setViewer($actor)
+        ->getBuiltinQueries($actor);
+      if (isset($builtin[$value])) {
         continue;
       }
 

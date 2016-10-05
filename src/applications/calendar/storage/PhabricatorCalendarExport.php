@@ -14,12 +14,12 @@ final class PhabricatorCalendarExport extends PhabricatorCalendarDAO
   protected $isDisabled = 0;
 
   const MODE_PUBLIC = 'public';
-  const MODE_PRIVATE = 'private';
+  const MODE_PRIVILEGED = 'privileged';
 
   public static function initializeNewCalendarExport(PhabricatorUser $actor) {
     return id(new self())
       ->setAuthorPHID($actor->getPHID())
-      ->setPolicyMode(self::MODE_PRIVATE)
+      ->setPolicyMode(self::MODE_PRIVILEGED)
       ->setIsDisabled(0);
   }
 
@@ -65,10 +65,23 @@ final class PhabricatorCalendarExport extends PhabricatorCalendarDAO
   private static function getPolicyModeMap() {
     return array(
       self::MODE_PUBLIC => array(
+        'icon' => 'fa-globe',
         'name' => pht('Public'),
+        'color' => 'bluegrey',
+        'summary' => pht(
+          'Export only public data.'),
+        'description' => pht(
+          'Only publicly available data is exported.'),
       ),
-      self::MODE_PRIVATE => array(
-        'name' => pht('Private'),
+      self::MODE_PRIVILEGED => array(
+        'icon' => 'fa-unlock-alt',
+        'name' => pht('Privileged'),
+        'color' => 'red',
+        'summary' => pht(
+          'Export private data.'),
+        'description' => pht(
+          'Anyone who knows the URI for this export can view all event '.
+          'details as though they were logged in with your account.'),
       ),
     );
   }
@@ -78,14 +91,55 @@ final class PhabricatorCalendarExport extends PhabricatorCalendarDAO
   }
 
   public static function getPolicyModeName($const) {
-    $map = self::getPolicyModeSpec($const);
-    return idx($map, 'name', $const);
+    $spec = self::getPolicyModeSpec($const);
+    return idx($spec, 'name', $const);
+  }
+
+  public static function getPolicyModeIcon($const) {
+    $spec = self::getPolicyModeSpec($const);
+    return idx($spec, 'icon', $const);
+  }
+
+  public static function getPolicyModeColor($const) {
+    $spec = self::getPolicyModeSpec($const);
+    return idx($spec, 'color', $const);
+  }
+
+  public static function getPolicyModeSummary($const) {
+    $spec = self::getPolicyModeSpec($const);
+    return idx($spec, 'summary', $const);
+  }
+
+  public static function getPolicyModeDescription($const) {
+    $spec = self::getPolicyModeSpec($const);
+    return idx($spec, 'description', $const);
   }
 
   public static function getPolicyModes() {
     return array_keys(self::getPolicyModeMap());
   }
 
+  public static function getAvailablePolicyModes() {
+    $modes = array();
+
+    if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
+      $modes[] = self::MODE_PUBLIC;
+    }
+
+    $modes[] = self::MODE_PRIVILEGED;
+
+    return $modes;
+  }
+
+  public function getICSFilename() {
+    return PhabricatorSlug::normalizeProjectSlug($this->getName()).'.ics';
+  }
+
+  public function getICSURI() {
+    $secret_key = $this->getSecretKey();
+    $ics_name = $this->getICSFilename();
+    return "/calendar/export/ics/{$secret_key}/{$ics_name}";
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

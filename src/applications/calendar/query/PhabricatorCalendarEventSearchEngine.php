@@ -255,10 +255,19 @@ final class PhabricatorCalendarEventSearchEngine
     array $handles) {
 
     if ($this->isMonthView($query)) {
-      return $this->buildCalendarMonthView($events, $query);
+      $result = $this->buildCalendarMonthView($events, $query);
     } else if ($this->isDayView($query)) {
-      return $this->buildCalendarDayView($events, $query);
+      $result = $this->buildCalendarDayView($events, $query);
+    } else {
+      $result = $this->buildCalendarListView($events, $query);
     }
+
+    return $result;
+  }
+
+  private function buildCalendarListView(
+    array $events,
+    PhabricatorSavedQuery $query) {
 
     assert_instances_of($events, 'PhabricatorCalendarEvent');
     $viewer = $this->requireViewer();
@@ -560,6 +569,19 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     return false;
+  }
+
+  public function newUseResultsActions(PhabricatorSavedQuery $saved) {
+    $viewer = $this->requireViewer();
+    $can_export = $viewer->isLoggedIn();
+
+    return array(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-download')
+        ->setName(pht('Export Query as .ics'))
+        ->setDisabled(!$can_export)
+        ->setHref('/calendar/export/edit/?queryKey='.$saved->getQueryKey()),
+    );
   }
 
 }
