@@ -24,6 +24,10 @@ final class PhabricatorCalendarExportICSController
       return new Aphront404Response();
     }
 
+    if ($export->getIsDisabled()) {
+      return new Aphront404Response();
+    }
+
     $author = id(new PhabricatorPeopleQuery())
       ->setViewer($omnipotent)
       ->withPHIDs(array($export->getAuthorPHID()))

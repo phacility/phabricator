@@ -71,6 +71,9 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarExportViewController',
           'ics/(?P<secretKey>[^/]+)/(?P<filename>[^/]*)'
             => 'PhabricatorCalendarExportICSController',
+          'disable/(?P<id>[1-9]\d*)/'
+            => 'PhabricatorCalendarExportDisableController',
+
         ),
       ),
     );

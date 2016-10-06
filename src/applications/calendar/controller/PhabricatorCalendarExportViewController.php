@@ -55,7 +55,7 @@ final class PhabricatorCalendarExportViewController
 
     if ($export->getIsDisabled()) {
       $icon = 'fa-ban';
-      $color = 'grey';
+      $color = 'red';
       $status = pht('Disabled');
     } else {
       $icon = 'fa-check';
@@ -102,6 +102,24 @@ final class PhabricatorCalendarExportViewController
         ->setIcon('fa-download')
         ->setHref($ics_uri));
 
+    $disable_uri = "export/disable/{$id}/";
+    $disable_uri = $this->getApplicationURI($disable_uri);
+    if ($export->getIsDisabled()) {
+      $disable_name = pht('Enable Export');
+      $disable_icon = 'fa-check';
+    } else {
+      $disable_name = pht('Disable Export');
+      $disable_icon = 'fa-ban';
+    }
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName($disable_name)
+        ->setIcon($disable_icon)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true)
+        ->setHref($disable_uri));
+
     return $curtain;
   }
 
@@ -140,14 +158,18 @@ final class PhabricatorCalendarExportViewController
     $ics_uri = $export->getICSURI();
     $ics_uri = PhabricatorEnv::getURI($ics_uri);
 
-    $properties->addProperty(
-      pht('ICS URI'),
-      phutil_tag(
+    if ($export->getIsDisabled()) {
+      $ics_href = phutil_tag('em', array(), $ics_uri);
+    } else {
+      $ics_href = phutil_tag(
         'a',
         array(
           'href' => $ics_uri,
         ),
-        $ics_uri));
+        $ics_uri);
+    }
+
+    $properties->addProperty(pht('ICS URI'), $ics_href);
 
     return $properties;
   }
