@@ -6,6 +6,7 @@ final class ConpherenceNotificationPanelController
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $conpherences = array();
+    require_celerity_resource('conpherence-notification-css');
     $unread_status = ConpherenceParticipationStatus::BEHIND;
 
     $participant_data = id(new ConpherenceParticipantQuery())
@@ -17,7 +18,7 @@ final class ConpherenceNotificationPanelController
       $conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs(array_keys($participant_data))
-        ->needCropPics(true)
+        ->needProfileImage(true)
         ->needTransactions(true)
         ->setTransactionLimit(3 * 5)
         ->needParticipantCache(true)
@@ -25,7 +26,6 @@ final class ConpherenceNotificationPanelController
     }
 
     if ($conpherences) {
-      require_celerity_resource('conpherence-notification-css');
       // re-order the conpherences based on participation data
       $conpherences = array_select_keys(
         $conpherences, array_keys($participant_data));
@@ -70,13 +70,20 @@ final class ConpherenceNotificationPanelController
       }
       $content = $view->render();
     } else {
+      $rooms_uri = phutil_tag(
+        'a',
+        array(
+          'href' => '/conpherence/',
+          'class' => 'no-room-notification',
+        ),
+        pht('You have joined no rooms.'));
+
       $content = phutil_tag_div(
-        'phabricator-notification no-notifications',
-        pht('You have no messages.'));
+        'phabricator-notification no-notifications', $rooms_uri);
     }
 
     $content = hsprintf(
-      '<div class="phabricator-notification-header">%s</div>'.
+      '<div class="phabricator-notification-header grouped">%s%s</div>'.
       '%s',
       phutil_tag(
         'a',
@@ -84,6 +91,7 @@ final class ConpherenceNotificationPanelController
           'href' => '/conpherence/',
         ),
         pht('Rooms')),
+      $this->renderPersistentOption(),
       $content);
 
     $unread = id(new ConpherenceParticipantCountQuery())
@@ -98,6 +106,34 @@ final class ConpherenceNotificationPanelController
     );
 
     return id(new AphrontAjaxResponse())->setContent($json);
+  }
+
+  private function renderPersistentOption() {
+    $viewer = $this->getViewer();
+    $column_key = PhabricatorConpherenceColumnVisibleSetting::SETTINGKEY;
+    $show = (bool)$viewer->getUserSetting($column_key, false);
+
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => 'persistent-option',
+      ),
+      array(
+        javelin_tag(
+          'input',
+          array(
+            'type' => 'checkbox',
+            'checked' => ($show) ? 'checked' : null,
+            'value' => !$show,
+            'sigil' => 'conpherence-persist-column',
+          )),
+        phutil_tag(
+          'span',
+          array(),
+          pht('Persistent Chat')),
+    ));
+
+    return $view;
   }
 
 }

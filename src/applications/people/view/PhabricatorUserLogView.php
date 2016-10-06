@@ -33,7 +33,6 @@ final class PhabricatorUserLogView extends AphrontView {
 
     $rows = array();
     foreach ($logs as $log) {
-
       $ip = $log->getRemoteAddr();
       $session = substr($log->getSession(), 0, 6);
 
@@ -62,7 +61,7 @@ final class PhabricatorUserLogView extends AphrontView {
         $log->getActorPHID()
           ? $handles[$log->getActorPHID()]->getName()
           : null,
-        $handles[$log->getUserPHID()]->getName(),
+        $username = $handles[$log->getUserPHID()]->renderLink(),
         $ip,
         $session,
       );

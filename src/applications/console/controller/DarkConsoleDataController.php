@@ -2,8 +2,6 @@
 
 final class DarkConsoleDataController extends PhabricatorController {
 
-  private $key;
-
   public function shouldRequireLogin() {
     return !PhabricatorEnv::getEnvConfig('darkconsole.always-on');
   }
@@ -16,19 +14,15 @@ final class DarkConsoleDataController extends PhabricatorController {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->key = $data['key'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $request->getViewer();
+    $key = $request->getURIData('key');
 
     $cache = new PhabricatorKeyValueDatabaseCache();
     $cache = new PhutilKeyValueCacheProfiler($cache);
     $cache->setProfiler(PhutilServiceProfiler::getInstance());
 
-    $result = $cache->getKey('darkconsole:'.$this->key);
+    $result = $cache->getKey('darkconsole:'.$key);
     if (!$result) {
       return new Aphront400Response();
     }
@@ -43,7 +37,7 @@ final class DarkConsoleDataController extends PhabricatorController {
       return new Aphront400Response();
     }
 
-    if ($result['user'] != $user->getPHID()) {
+    if ($result['user'] != $viewer->getPHID()) {
       return new Aphront400Response();
     }
 

@@ -2,63 +2,34 @@
  * @provides conpherence-durable-column-view
  */
 
-.with-durable-column .phabricator-standard-page-body {
-  margin-right: 300px;
-}
-
-.with-durable-margin .phabricator-standard-page-body {
-  margin-right: 312px;
-}
-
-.with-durable-column .phabricator-main-menu {
-  padding-right: 304px;
-}
-
-.with-durable-margin .phabricator-main-menu {
-  padding-right: 316px;
-}
-
-.with-durable-column
-.phabricator-global-upload-instructions {
-  font-size: 28px;
-  width: 50%;
-}
-
 .global-upload-mask {
   pointer-events: none;
 }
 
-.with-durable-column .global-upload-mask {
-  right: 300px;
-}
-
-.with-durable-margin .global-upload-mask {
-  right: 312px;
-}
-
 .conpherence-durable-column {
   position: fixed;
-  top: 0;
   bottom: 0;
-  right: 0;
-  width: 300px;
+  right: 16px;
+  width: 400px;
+  height: 360px;
   background: #fff;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  box-shadow: 0px 1px 8px rgba(55,55,55, .3);
 }
 
-.with-durable-margin .conpherence-durable-column {
-  border-right: 12px solid {$lightgreybackground};
-}
-
-.conpherence-durable-column .loading-mask {
-  position: absolute;
-  top: 90px;
-  bottom: 0;
-  right: 1px;
-  width: 298px;
-  background: #fff;
+.device .conpherence-durable-column {
   display: none;
-  opacity: .6;
-  z-index: 2;
+}
+
+.conpherence-durable-column .conpherence-transaction-image {
+  float: left;
+  border-radius: 3px;
+  height: 24px;
+  width: 24px;
+  background-size: 24px;
+  position: absolute;
+  top: 5px;
 }
 
 .device-desktop .conpherence-durable-column.loading .loading-mask {
@@ -69,129 +40,140 @@
   z-index: 1;
 }
 
-.conpherence-durable-column-header .phabricator-application-menu {
-  display: block;
-  float: right;
-  padding-right: 4px;
-  width: 36px;
+.conpherence-durable-column-header  .phabricator-application-menu
+  .phui-list-item-name {
+    display: none;
 }
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-view.core-menu-item {
-  display: block;
-}
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-name {
-  display: none;
-}
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-view {
+
+.conpherence-durable-column-header .aphlict-connection-status {
+  width: 6px;
   float: left;
-  position: relative;
-  width: 36px;
-  height: 36px;
-  margin-top: 4px;
+  height: 18px;
+  margin-left: 10px;
+  margin-top: 8px;
 }
-.conpherence-durable-column-header
-.phabricator-application-menu .phui-list-item-href {
-  background: transparent;
-  border: none;
-  padding: 0;
+
+.conpherence-durable-column-header .aphlict-connection-status
+  .connection-status-text {
+    display: none;
 }
-.conpherence-durable-column-header
-.phabricator-dark-menu .phui-list-item-type-link {
-  background: transparent;
+
+.conpherence-durable-column-header .aphlict-connection-status
+  .phui-icon-view {
+    font-size: 10px;
 }
-.conpherence-durable-column-header
-.phabricator-application-menu
-.phui-list-item-view.core-menu-item {
-  display: block;
+
+.conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-view {
+    margin: 0;
+    width: 28px;
+    height: 34px;
+    min-width: 28px;
+}
+
+.conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-href {
+    background: transparent;
+    border: none;
+    padding: 0;
 }
 
 .conpherence-durable-column-header {
-  border-left: 1px solid rgba({$alphablack},.1);
-  border-right: 1px solid rgba({$alphablack},.1);
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  background-color: #525867;
+}
+
+.conpherence-durable-column-header:hover {
+  cursor: pointer;
+  background-color: #5f6572;
+}
+
+.conpherence-durable-column-header .phabricator-application-menu {
+  margin-right: 8px;
+}
+
+.conpherence-durable-column-header
+  .phabricator-main-menu-dropdown.phui-list-sidenav {
+    top: 30px;
 }
 
 .conpherence-durable-column-header-text {
   float: left;
-  padding: 13px 0 12px 12px;
-  font-size: 15px;
-  color: {$hoverwhite};
-  width: 230px;
+  padding: 8px 0 8px 10px;
+  color: #fff;
+  width: 260px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.6);
 }
 
-.conpherence-durable-column-header-text .phui-icon-view {
-  color: {$hoverwhite};
+.conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa {
+    font-size: 15px;
+    margin: 0;
+    height: 15px;
+    width: 15px;
+    padding: 10px 8px 10px 8px;
 }
 
 .conpherence-durable-column-icon-bar {
-  height: 38px;
-  padding: 4px;
+  width: 36px;
   background-color: {$lightgreybackground};
+  border-right: 1px solid {$thinblueborder};
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
 }
 
 .conpherence-durable-column-icon-bar .conpherence-durable-column-thread-icon {
-  float: left;
+  height: 28px;
+  width: 28px;
+  padding: 4px;
   display: block;
-  height: 34px;
-  width: 34px;
-  border: 2px solid transparent;
-  border-radius: 3px;
-  margin: 0 4px 0 0;
-}
-
-.conpherence-durable-column-icon-bar .conpherence-durable-column-search-button {
-  margin: 4px 0px 0px 0px;
-}
-.conpherence-durable-column-icon-bar .phui-button-bar {
-}
-.conpherence-durable-column-icon-bar .phui-button-bar a.button.has-icon {
-  height: 21px;
-}
-.conpherence-durable-column-icon-bar .phui-button-bar .button .phui-icon-view {
-  top: 8px;
 }
 
 .conpherence-durable-column-icon-bar
 .conpherence-durable-column-thread-icon.selected {
-  border-color: {$sky};
+  background-color: rgba({$alphablue},.1);
 }
 
 .conpherence-durable-column-icon-bar
 .conpherence-durable-column-thread-icon span {
-  position: relative;
   display: block;
-  width: 30px;
-  height: 30px;
-  top: 2px;
-  left: 2px;
-  background-size: 30px 30px;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  background-size: 28px 28px;
 }
 
 .conpherence-durable-column-body {
   position: absolute;
-  top: 44px;
+  top: 34px;
   bottom: 0;
   right: 0;
   left: 0;
-  border-left: 1px solid {$lightblueborder};
-}
-
-.with-durable-margin .conpherence-durable-column-body {
-  border-right: 1px solid {$lightblueborder};
 }
 
 .conpherence-durable-column-main {
   position: absolute;
-  top: 46px;
-  bottom: 134px;
-  left: 0;
+  top: 0;
+  bottom: 36px;
+  left: 34px;
   right: 0;
   overflow-x: hidden;
-  border-top: 1px solid {$thinblueborder};
+}
+
+.conpherence-durable-column .column-no-rooms {
+  padding: 12px 8px;
+}
+
+.conpherence-durable-column .column-no-rooms-text {
+  color: {$greytext};
+  font-style: italic;
+  margin-bottom: 16px;
 }
 
 .conpherence-durable-column-transactions {
@@ -201,9 +183,9 @@
 .conpherence-durable-column-transactions
   .conpherence-transaction-view.conpherence-edited {
     color: {$lightgreytext};
-    font-size: {$smallerfontsize};
     margin: 0;
     padding: 0;
+    font-style: italic;
 }
 
 .conpherence-durable-column-transactions .conpherence-edited
@@ -218,32 +200,31 @@
   min-height: 0;
 }
 
-.conpherence-durable-column-transactions
-  .conpherence-transaction-view
+.conpherence-durable-column-transactions .conpherence-transaction-view
   .conpherence-message {
-  word-wrap: break-word;
+    word-wrap: break-word;
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail {
   border: 0;
-  margin: 0;
+  margin: 0 0 0 32px;
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-header {
-  background: none;
-  padding: 0 0 2px 0;
+  .conpherence-transaction-header {
+    background: none;
+    padding: 0 0 2px 0;
 }
 
 .conpherence-durable-column-transactions
 .conpherence-transaction-view.date-marker {
-  margin: 20px 0px 8px;
+  margin: 12px 0 0;
 }
 
 .conpherence-durable-column-transactions
 .conpherence-transaction-view.date-marker .date {
   left: 0;
-  font-size: {$smallerfontsize};
+  font-size: {$normalfontsize};
   top: -14px;
   padding: 0 6px 0 0;
 }
@@ -295,42 +276,72 @@ img {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 34px;
-  height: 100px;
+  bottom: 0;
+  height: 36px;
   margin: 0;
-  border-width: 1px 0;
+  border-width: 1px 0 0 0;
   border-style: solid;
   border-top-color: {$thinblueborder};
-  border-bottom-color: {$thinblueborder};
-  padding: 8px 12px;
+  padding: 8px;
   width: 100%;
   resize: none;
 }
 
 .conpherence-durable-column-textarea:focus {
   outline: 0;
-  border-top-color: {$sky};
-  border-bottom-color: {$sky};
+  border-top-color: {$lightblueborder};
   box-shadow: none;
 }
 
-.conpherence-durable-column-footer {
-  position: absolute;
-  height: 26px;
-  padding: 4px 8px 4px 12px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: {$lightgreybackground};
+
+/* Minimized Column */
+
+.minimize-column .conpherence-durable-column {
+  height: 32px;
+  width: 240px;
+  box-shadow: none;
 }
 
-.conpherence-durable-column-footer button {
-  float: right;
+.minimize-column .conpherence-durable-column .conpherence-durable-column-body {
+  display: none;
 }
 
-.conpherence-durable-column-status {
-  vertical-align: middle;
-  line-height: 24px;
-  font-size: {$smallerfontsize};
-  color: {$lightbluetext};
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header {
+    background-color: rgba({$alphablue},.15);
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header:hover {
+    background-color: rgba({$alphablue},.2);
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header-text {
+    width: 100px;
+    color: {$darkbluetext};
+    text-shadow: none;
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa {
+    color: {$bluetext};
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa:hover {
+    color: {$darkbluetext};
+}
+
+.minimize-column .conpherence-durable-column
+  .conpherence-durable-column-header .phabricator-application-menu
+  .phui-list-item-icon.phui-font-fa:before {
+    content: "\f151";
+}
+
+.minimize-column .conpherence-durable-column .phabricator-application-menu
+  .conpherence-settings-icon {
+    display: none;
 }

@@ -25,6 +25,19 @@ final class PhabricatorPhurlURLSearchEngine
         ->setLabel(pht('Created By'))
         ->setKey('authorPHIDs')
         ->setDatasource(new PhabricatorPeopleUserFunctionDatasource()),
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name')
+        ->setDescription(pht('Search for Phurl URLs by name substring.')),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Aliases'))
+        ->setKey('aliases')
+        ->setDescription(pht('Search for Phurl URLs by alias.')),
+      id(new PhabricatorSearchStringListField())
+        ->setLabel(pht('Long URLs'))
+        ->setKey('longurls')
+        ->setDescription(
+          pht('Search for Phurl URLs by the non-shortened URL.')),
     );
   }
 
@@ -33,6 +46,18 @@ final class PhabricatorPhurlURLSearchEngine
 
     if ($map['authorPHIDs']) {
       $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    if ($map['name'] !== null) {
+      $query->withNameNgrams($map['name']);
+    }
+
+    if ($map['aliases']) {
+      $query->withAliases($map['aliases']);
+    }
+
+    if ($map['longurls']) {
+      $query->withLongURLs($map['longurls']);
     }
 
     return $query;
@@ -99,10 +124,13 @@ final class PhabricatorPhurlURLSearchEngine
   }
 
   protected function getNewUserBody() {
+    $create_uri = id(new PhabricatorPhurlURLEditEngine())
+      ->getEditURI();
+
     $create_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('Shorten a URL'))
-      ->setHref('/phurl/url/create/')
+      ->setHref($create_uri)
       ->setColor(PHUIButtonView::GREEN);
 
     $icon = $this->getApplication()->getIcon();

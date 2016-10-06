@@ -112,25 +112,6 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
     }
   }
 
-  public function testAddMessageWithFileAttachments() {
-    $creator = $this->generateNewTestUser();
-    $friend_1 = $this->generateNewTestUser();
-
-    $participant_map = array(
-      $creator->getPHID() => $creator,
-      $friend_1->getPHID() => $friend_1,
-    );
-
-    $conpherence = $this->createRoom(
-      $creator,
-      array_keys($participant_map));
-
-    foreach ($participant_map as $phid => $user) {
-      $xactions = $this->addMessageWithFile($user, $conpherence);
-      $this->assertEqual(2, count($xactions));
-    }
-  }
-
   private function createRoom(
     PhabricatorUser $creator,
     array $participant_phids) {

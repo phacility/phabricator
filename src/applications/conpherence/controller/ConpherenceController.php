@@ -59,12 +59,23 @@ abstract class ConpherenceController extends PhabricatorController {
       $header = id(new PHUIHeaderView())
         ->setHeader($data['title'])
         ->setSubheader($data['topic'])
-        ->addClass((!$data['topic']) ? 'conpherence-no-topic' : null);
+        ->setImage($data['image']);
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
-          $viewer,
-          $conpherence,
-          PhabricatorPolicyCapability::CAN_EDIT);
+        $viewer,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      if ($can_edit) {
+        $header->setImageURL(
+          $this->getApplicationURI('picture/'.$conpherence->getID().'/'));
+      }
+
+      $participating = $conpherence->getParticipantIfExists($viewer->getPHID());
+      $can_join = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_JOIN);
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
@@ -101,6 +112,38 @@ abstract class ConpherenceController extends PhabricatorController {
           ->setIcon('fa-group')
           ->setHref('#')
           ->addClass('conpherence-participant-toggle'));
+
+      if ($can_join && !$participating) {
+        $action = ConpherenceUpdateActions::JOIN_ROOM;
+        $uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+        $button = phutil_tag(
+          'button',
+          array(
+            'type' => 'SUBMIT',
+            'class' => 'button green mlr',
+          ),
+          pht('Join Room'));
+
+        $hidden = phutil_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'action',
+            'value' => ConpherenceUpdateActions::JOIN_ROOM,
+          ));
+
+        $form = phabricator_form(
+          $viewer,
+          array(
+            'method' => 'POST',
+            'action' => (string)$uri,
+          ),
+          array(
+            $hidden,
+            $button,
+          ));
+        $header->addActionItem($form);
+      }
     }
 
     return $header;

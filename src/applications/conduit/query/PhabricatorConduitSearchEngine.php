@@ -21,11 +21,6 @@ final class PhabricatorConduitSearchEngine
     $saved->setParameter('isStable', $request->getStr('isStable'));
     $saved->setParameter('isUnstable', $request->getStr('isUnstable'));
     $saved->setParameter('isDeprecated', $request->getStr('isDeprecated'));
-
-    $saved->setParameter(
-      'applicationNames',
-      $request->getStrList('applicationNames'));
-
     $saved->setParameter('nameContains', $request->getStr('nameContains'));
 
     return $saved;
@@ -38,11 +33,6 @@ final class PhabricatorConduitSearchEngine
     $query->withIsUnstable($saved->getParameter('isUnstable'));
     $query->withIsDeprecated($saved->getParameter('isDeprecated'));
     $query->withIsInternal(false);
-
-    $names = $saved->getParameter('applicationNames', array());
-    if ($names) {
-      $query->withApplicationNames($names);
-    }
 
     $contains = $saved->getParameter('nameContains');
     if (strlen($contains)) {
@@ -62,18 +52,6 @@ final class PhabricatorConduitSearchEngine
           ->setLabel(pht('Name Contains'))
           ->setName('nameContains')
           ->setValue($saved->getParameter('nameContains')));
-
-    $names = $saved->getParameter('applicationNames', array());
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Applications'))
-          ->setName('applicationNames')
-          ->setValue(implode(', ', $names))
-          ->setCaption(
-            pht(
-              'Example: %s',
-              phutil_tag('tt', array(), 'differential, paste'))));
 
     $is_stable = $saved->getParameter('isStable');
     $is_unstable = $saved->getParameter('isUnstable');

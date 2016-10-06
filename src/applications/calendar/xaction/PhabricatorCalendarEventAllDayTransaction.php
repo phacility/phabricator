@@ -15,6 +15,25 @@ final class PhabricatorCalendarEventAllDayTransaction
 
   public function applyInternalEffects($object, $value) {
     $object->setIsAllDay($value);
+
+    // Adjust the flags on any other dates the event has.
+    $keys = array(
+      'startDateTime',
+      'endDateTime',
+      'untilDateTime',
+    );
+
+    foreach ($keys as $key) {
+      $dict = $object->getParameter($key);
+      if (!$dict) {
+        continue;
+      }
+
+      $datetime = PhutilCalendarAbsoluteDateTime::newFromDictionary($dict);
+      $datetime->setIsAllDay($value);
+
+      $object->setParameter($key, $datetime->toDictionary());
+    }
   }
 
   public function getTitle() {

@@ -124,10 +124,16 @@
   color: {$lightgreytext};
 }
 
-.aphlict-connection-status .aphlict-connection-status-connected {
-  color: {$green};
+.aphlict-connection-status {
+  position: relative;
 }
 
-.aphlict-connection-status .aphlict-connection-status-error {
-  color: {$red};
+.aphlict-connection-status .phui-icon-view {
+  font-size: 9px;
+  position: absolute;
+  top: 4px;
+}
+
+.aphlict-connection-status .connection-status-text {
+  margin-left: 12px;
 }

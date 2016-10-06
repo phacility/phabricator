@@ -211,10 +211,13 @@ final class PhabricatorOwnersPackage
         $conn,
         'SELECT pkg.id, pkg.dominion, p.excluded, p.path
           FROM %T pkg JOIN %T p ON p.packageID = pkg.id
-          WHERE p.path IN (%Ls) %Q',
+          WHERE p.path IN (%Ls) AND pkg.status IN (%Ls) %Q',
         $package->getTableName(),
         $path->getTableName(),
         $chunk,
+        array(
+          self::STATUS_ACTIVE,
+        ),
         $repository_clause);
     }
     $rows = array_mergev($rows);

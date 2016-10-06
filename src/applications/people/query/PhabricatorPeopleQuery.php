@@ -431,8 +431,8 @@ final class PhabricatorPeopleQuery
         // because of an event, we check again for events after that one ends.
         while (true) {
           foreach ($events as $event) {
-            $from = $event->getDateFromForCache();
-            $to = $event->getViewerDateTo();
+            $from = $event->getStartDateTimeEpochForCache();
+            $to = $event->getEndDateTimeEpoch();
             if (($from <= $cursor) && ($to > $cursor)) {
               $cursor = $to;
               continue 2;

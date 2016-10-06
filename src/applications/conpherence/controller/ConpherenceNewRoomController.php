@@ -16,16 +16,16 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       $editor = new ConpherenceEditor();
       $xactions = array();
 
+      $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
+        ->setNewValue($request->getStr('title'));
+
       $participants = $request->getArr('participants');
       $participants[] = $user->getPHID();
       $participants = array_unique($participants);
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(ConpherenceTransaction::TYPE_PARTICIPANTS)
         ->setNewValue(array('+' => $participants));
-
-      $xactions[] = id(new ConpherenceTransaction())
-        ->setTransactionType(ConpherenceTransaction::TYPE_TITLE)
-        ->setNewValue($request->getStr('title'));
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(ConpherenceTransaction::TYPE_TOPIC)
         ->setNewValue($request->getStr('topic'));

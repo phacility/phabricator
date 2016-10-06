@@ -37,6 +37,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
   public function getRemarkupRules() {
     return array(
       new PhabricatorEmbedFileRemarkupRule(),
+      new PhabricatorImageRemarkupRule(),
     );
   }
 
@@ -78,7 +79,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorFileEditController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
-        'proxy/' => 'PhabricatorFileProxyController',
+        'imageproxy/' => 'PhabricatorFileImageProxyController',
         'transforms/(?P<id>[1-9]\d*)/' =>
           'PhabricatorFileTransformListController',
         'uploaddialog/(?P<single>single/)?'

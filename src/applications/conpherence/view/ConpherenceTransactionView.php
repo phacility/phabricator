@@ -201,21 +201,19 @@ final class ConpherenceTransactionView extends AphrontView {
 
   private function renderTransactionImage() {
     $image = null;
-    if ($this->getFullDisplay()) {
-      $transaction = $this->getConpherenceTransaction();
-      switch ($transaction->getTransactionType()) {
-        case PhabricatorTransactions::TYPE_COMMENT:
-          $handles = $this->getHandles();
-          $author = $handles[$transaction->getAuthorPHID()];
-          $image_uri = $author->getImageURI();
-          $image = phutil_tag(
-            'span',
-            array(
-              'class' => 'conpherence-transaction-image',
-              'style' => 'background-image: url('.$image_uri.');',
-            ));
-          break;
-      }
+    $transaction = $this->getConpherenceTransaction();
+    switch ($transaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $handles = $this->getHandles();
+        $author = $handles[$transaction->getAuthorPHID()];
+        $image_uri = $author->getImageURI();
+        $image = phutil_tag(
+          'span',
+          array(
+            'class' => 'conpherence-transaction-image',
+            'style' => 'background-image: url('.$image_uri.');',
+          ));
+        break;
     }
     return $image;
   }
@@ -227,13 +225,9 @@ final class ConpherenceTransactionView extends AphrontView {
     $content = null;
     $handles = $this->getHandles();
     switch ($transaction->getTransactionType()) {
-      case ConpherenceTransaction::TYPE_FILES:
-        $content = $transaction->getTitle();
-        break;
       case ConpherenceTransaction::TYPE_TITLE:
       case ConpherenceTransaction::TYPE_TOPIC:
       case ConpherenceTransaction::TYPE_PICTURE:
-      case ConpherenceTransaction::TYPE_PICTURE_CROP:
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:

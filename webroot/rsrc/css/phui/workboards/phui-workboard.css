@@ -22,14 +22,6 @@
   background-color: #fff;
 }
 
-.device-desktop.with-durable-column .phui-workboard-view-shadow {
-  right: 300px;
-}
-
-.device-desktop.with-durable-margin .phui-workboard-view-shadow {
-  right: 312px;
-}
-
 .phui-workboard-view-shadow::-webkit-scrollbar {
   height: 8px;
   width: 8px;

@@ -285,12 +285,17 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       pht('Engine'),
       $file->getStorageEngine());
 
-    $format_key = $file->getStorageFormat();
-    $format = PhabricatorFileStorageFormat::getFormat($format_key);
-    if ($format) {
-      $format_name = $format->getStorageFormatName();
+    $engine = $this->loadStorageEngine($file);
+    if ($engine && $engine->isChunkEngine()) {
+      $format_name = pht('Chunks');
     } else {
-      $format_name = pht('Unknown ("%s")', $format_key);
+      $format_key = $file->getStorageFormat();
+      $format = PhabricatorFileStorageFormat::getFormat($format_key);
+      if ($format) {
+        $format_name = $format->getStorageFormatName();
+      } else {
+        $format_name = pht('Unknown ("%s")', $format_key);
+      }
     }
     $storage_properties->addProperty(pht('Format'), $format_name);
 
@@ -369,13 +374,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       $box->addPropertyList($media);
     }
 
-    $engine = null;
-    try {
-      $engine = $file->instantiateStorageEngine();
-    } catch (Exception $ex) {
-      // Don't bother raising this anywhere for now.
-    }
-
+    $engine = $this->loadStorageEngine($file);
     if ($engine) {
       if ($engine->isChunkEngine()) {
         $chunkinfo = new PHUIPropertyListView();
@@ -435,5 +434,18 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     }
 
   }
+
+  private function loadStorageEngine(PhabricatorFile $file) {
+    $engine = null;
+
+    try {
+      $engine = $file->instantiateStorageEngine();
+    } catch (Exception $ex) {
+      // Don't bother raising this anywhere for now.
+    }
+
+    return $engine;
+  }
+
 
 }

@@ -29,6 +29,10 @@ body.white-background {
   color: {$greytext};
 }
 
+.with-durable-column .phabricator-standard-page-footer {
+  margin: 36px 16px 28px;
+}
+
 .device .phabricator-standard-page-footer {
   margin: 24px 8px 16px;
 }
@@ -54,14 +58,6 @@ body.white-background {
 .keyboard-shortcut-help th {
   white-space: nowrap;
   color: {$greytext};
-}
-
-.keyboard-shortcut-help kbd {
-  background: #222222;
-  padding: 6px;
-  color: #ffffff;
-  font-weight: bold;
-  border: 1px solid #555555;
 }
 
 .keyboard-focus-focus-reticle {

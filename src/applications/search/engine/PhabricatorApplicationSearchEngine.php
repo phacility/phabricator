@@ -1390,4 +1390,8 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return null;
   }
 
+  public function newUseResultsActions(PhabricatorSavedQuery $saved) {
+    return array();
+  }
+
 }

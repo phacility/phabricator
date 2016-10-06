@@ -111,13 +111,13 @@ class MimeMailParser {
 	 * @param $data String
 	 */
 	public function setText($data) {
-    // NOTE: This has been modified for Phabricator. If the input data does not
-    // end in a newline, Mailparse fails to include the last line in the mail
-    // body. This happens somewhere deep, deep inside the mailparse extension,
-    // so adding a newline here seems like the most straightforward fix.
-    if (!preg_match('/\n\z/', $data)) {
-      $data = $data."\n";
-    }
+	// NOTE: This has been modified for Phabricator. If the input data does not
+	// end in a newline, Mailparse fails to include the last line in the mail
+	// body. This happens somewhere deep, deep inside the mailparse extension,
+	// so adding a newline here seems like the most straightforward fix.
+	if (!preg_match('/\n\z/', $data)) {
+	  $data = $data."\n";
+	}
 
 		$this->resource = mailparse_msg_create();
 		// does not parse incrementally, fast memory hog might explode
@@ -203,23 +203,23 @@ class MimeMailParser {
 		);
 		if (in_array($type, array_keys($mime_types))) {
 			foreach($this->parts as $part) {
-  			$disposition = $this->getPartContentDisposition($part);
-  			if ($disposition == 'attachment') {
-  			  // text/plain parts with "Content-Disposition: attachment" are
-  			  // attachments, not part of the text body.
-  			  continue;
-  			}
+			$disposition = $this->getPartContentDisposition($part);
+			if ($disposition == 'attachment') {
+			  // text/plain parts with "Content-Disposition: attachment" are
+			  // attachments, not part of the text body.
+			  continue;
+			}
 				if ($this->getPartContentType($part) == $mime_types[$type]) {
-          $headers = $this->getPartHeaders($part);
-          // Concatenate all the matching parts into the body text. For example,
-          // if a user sends a message with some text, then an image, and then
-          // some more text, the text body of the email gets split over several
-          // attachments.
+		  $headers = $this->getPartHeaders($part);
+		  // Concatenate all the matching parts into the body text. For example,
+		  // if a user sends a message with some text, then an image, and then
+		  // some more text, the text body of the email gets split over several
+		  // attachments.
 					$body .= $this->decode(
 					  $this->getPartBody($part),
 					  array_key_exists('content-transfer-encoding', $headers)
-					    ? $headers['content-transfer-encoding']
-					    : '');
+						? $headers['content-transfer-encoding']
+						: '');
 				}
 			}
 		} else {
@@ -251,20 +251,42 @@ class MimeMailParser {
 		return $headers;
 	}
 
-
 	/**
 	 * Returns the attachments contents in order of appearance
 	 * @return Array
 	 * @param $type Object[optional]
 	 */
 	public function getAttachments() {
+    // NOTE: This has been modified for Phabricator. Some mail clients do not
+    // send attachments with "Content-Disposition" headers.
 		$attachments = array();
 		$dispositions = array("attachment","inline");
-		foreach($this->parts as $part) {
+		$non_attachment_types = array("text/plain", "text/html");
+		$nonameIter = 0;
+		foreach ($this->parts as $part) {
 			$disposition = $this->getPartContentDisposition($part);
-			if (in_array($disposition, $dispositions)) {
+			$filename = 'noname';
+			if (isset($part['disposition-filename'])) {
+				$filename = $part['disposition-filename'];
+			} elseif (isset($part['content-name'])) {
+				// if we have no disposition but we have a content-name, it's a valid attachment.
+				// we simulate the presence of an attachment disposition with a disposition filename
+				$filename = $part['content-name'];
+				$disposition = 'attachment';
+			} elseif (!in_array($part['content-type'], $non_attachment_types, true)
+				&& substr($part['content-type'], 0, 10) !== 'multipart/'
+				) {
+				// if we cannot get it with getMessageBody, we assume it is an attachment
+				$disposition = 'attachment';
+			}
+
+			if (in_array($disposition, $dispositions) && isset($filename) === true) {
+				if ($filename == 'noname') {
+					$nonameIter++;
+					$filename = 'noname'.$nonameIter;
+				}
 				$attachments[] = new MimeMailParser_attachment(
-					$part['disposition-filename'],
+					$filename,
 					$this->getPartContentType($part),
 					$this->getAttachmentStream($part),
 					$disposition,
@@ -413,7 +435,7 @@ class MimeMailParser {
 	private function getAttachmentStream(&$part) {
 		$temp_fp = tmpfile();
 
-        array_key_exists('content-transfer-encoding', $part['headers']) ? $encoding = $part['headers']['content-transfer-encoding'] : $encoding = '';
+		array_key_exists('content-transfer-encoding', $part['headers']) ? $encoding = $part['headers']['content-transfer-encoding'] : $encoding = '';
 
 		if ($temp_fp) {
 			if ($this->stream) {
@@ -445,21 +467,21 @@ class MimeMailParser {
 	}
 
 
-    /**
-     * Decode the string depending on encoding type.
-     * @return String the decoded string.
-     * @param $encodedString    The string in its original encoded state.
-     * @param $encodingType     The encoding type from the Content-Transfer-Encoding header of the part.
-     */
-    private function decode($encodedString, $encodingType) {
-        if (strtolower($encodingType) == 'base64') {
-        	return base64_decode($encodedString);
-        } else if (strtolower($encodingType) == 'quoted-printable') {
-        	 return quoted_printable_decode($encodedString);
-        } else {
-        	return $encodedString;
-        }
-    }
+	/**
+	 * Decode the string depending on encoding type.
+	 * @return String the decoded string.
+	 * @param $encodedString	The string in its original encoded state.
+	 * @param $encodingType		The encoding type from the Content-Transfer-Encoding header of the part.
+	 */
+	private function decode($encodedString, $encodingType) {
+		if (strtolower($encodingType) == 'base64') {
+			return base64_decode($encodedString);
+		} else if (strtolower($encodingType) == 'quoted-printable') {
+			 return quoted_printable_decode($encodedString);
+		} else {
+			return $encodedString;
+		}
+	}
 
 }
 

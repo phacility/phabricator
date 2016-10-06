@@ -6,21 +6,18 @@ final class PhabricatorCalendarEventEndDateTransaction
   const TRANSACTIONTYPE = 'calendar.enddate';
 
   public function generateOldValue($object) {
-    return $object->getDateTo();
+    // TODO: Upgrade this.
+    return $object->getEndDateTimeEpoch();
   }
 
   public function applyInternalEffects($object, $value) {
     $actor = $this->getActor();
 
-    $object->setDateTo($value);
-
-    $object->setAllDayDateTo(
-      $object->getDateEpochForTimezone(
-        $value,
-        $actor->getTimeZone(),
-        'Y-m-d 23:59:00',
-        null,
-        new DateTimeZone('UTC')));
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $value,
+      $actor->getTimezoneIdentifier());
+    $datetime->setIsAllDay($object->getIsAllDay());
+    $object->setEndDateTime($datetime);
   }
 
   public function getTitle() {
