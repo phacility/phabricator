@@ -115,8 +115,12 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     // Generate ghosts (and ignore stub events) if we aren't querying for
-    // specific events.
-    if (!$map['ids'] && !$map['phids']) {
+    // specific events or exporting.
+    if (!empty($map['export'])) {
+      // This is a specific mode enabled by event exports.
+      $query
+        ->withIsStub(false);
+    } else if (!$map['ids'] && !$map['phids']) {
       $query
         ->withIsStub(false)
         ->setGenerateGhosts(true);

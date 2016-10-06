@@ -6,6 +6,7 @@ final class PhabricatorCalendarExportQuery
   private $ids;
   private $phids;
   private $authorPHIDs;
+  private $secretKeys;
   private $isDisabled;
 
   public function withIDs(array $ids) {
@@ -25,6 +26,11 @@ final class PhabricatorCalendarExportQuery
 
   public function withIsDisabled($is_disabled) {
     $this->isDisabled = $is_disabled;
+    return $this;
+  }
+
+  public function withSecretKeys(array $keys) {
+    $this->secretKeys = $keys;
     return $this;
   }
 
@@ -65,6 +71,13 @@ final class PhabricatorCalendarExportQuery
         $conn,
         'export.isDisabled = %d',
         (int)$this->isDisabled);
+    }
+
+    if ($this->secretKeys !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'export.secretKey IN (%Ls)',
+        $this->secretKeys);
     }
 
     return $where;

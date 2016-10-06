@@ -601,11 +601,28 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->getMonogram().'.ics';
   }
 
-  public function newIntermediateEventNode(PhabricatorUser $viewer) {
+  public function newIntermediateEventNode(
+    PhabricatorUser $viewer,
+    array $children) {
+
     $base_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
     $domain = $base_uri->getDomain();
 
-    $uid = $this->getPHID().'@'.$domain;
+    // NOTE: For recurring events, all of the events in the series have the
+    // same UID (the UID of the parent). The child event instances are
+    // differentiated by the "RECURRENCE-ID" field.
+    if ($this->isChildEvent()) {
+      $parent = $this->getParentEvent();
+      $instance_datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+        $this->getUTCInstanceEpoch());
+      $recurrence_id = $instance_datetime->getISO8601();
+      $rrule = null;
+    } else {
+      $parent = $this;
+      $recurrence_id = null;
+      $rrule = $this->newRecurrenceRule();
+    }
+    $uid = $parent->getPHID().'@'.$domain;
 
     $created = $this->getDateCreated();
     $created = PhutilCalendarAbsoluteDateTime::newFromEpoch($created);
@@ -674,6 +691,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ->setStatus($status);
     }
 
+    // TODO: Use $children to generate EXDATE/RDATE information.
+
     $node = id(new PhutilCalendarEventNode())
       ->setUID($uid)
       ->setName($this->getName())
@@ -684,6 +703,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEndDateTime($date_end)
       ->setOrganizer($organizer)
       ->setAttendees($attendees);
+
+    if ($rrule) {
+      $node->setRecurrenceRule($rrule);
+    }
+
+    if ($recurrence_id) {
+      $node->setRecurrenceID($recurrence_id);
+    }
 
     return $node;
   }
@@ -832,6 +859,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $start = $this->newStartDateTime();
     $rrule->setStartDateTime($start);
+
+    $until = $this->newUntilDateTime();
+    if ($until) {
+      $rrule->setUntil($until);
+    }
 
     return $rrule;
   }
