@@ -19,8 +19,7 @@ final class PhabricatorCalendarEventFrequencyTransaction
     $rrule = id(new PhutilCalendarRecurrenceRule())
       ->setFrequency($value);
 
-    $dict = $rrule->toDictionary();
-    $object->setRecurrenceRule($dict);
+    $object->setRecurrenceRule($rrule);
   }
 
   public function validateTransactions($object, array $xactions) {
