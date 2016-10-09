@@ -11,17 +11,19 @@ final class PhabricatorCalendarEventListController
     $year = $request->getURIData('year');
     $month = $request->getURIData('month');
     $day = $request->getURIData('day');
+
     $engine = new PhabricatorCalendarEventSearchEngine();
 
     if ($month && $year) {
       $engine->setCalendarYearAndMonthAndDay($year, $month, $day);
     }
 
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($request->getURIData('queryKey'))
-      ->setSearchEngine($engine);
+    $nav_items = $this->buildNavigationItems();
 
-    return $this->delegateToController($controller);
+    return $engine
+      ->setNavigationItems($nav_items)
+      ->setController($this)
+      ->buildResponse();
   }
 
   protected function buildApplicationCrumbs() {
@@ -32,6 +34,20 @@ final class PhabricatorCalendarEventListController
       ->addActionToCrumbs($crumbs);
 
     return $crumbs;
+  }
+
+  protected function buildNavigationItems() {
+    $items = array();
+
+    $items[] = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LABEL)
+      ->setName(pht('Import/Export'));
+
+    $items[] = id(new PHUIListItemView())
+      ->setName('Exports')
+      ->setHref('/calendar/export/');
+
+    return $items;
   }
 
 }

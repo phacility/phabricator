@@ -7,7 +7,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
   const TYPE_PARTICIPANTS    = 'participants';
   const TYPE_DATE_MARKER     = 'date-marker';
   const TYPE_PICTURE         = 'picture';
-  const TYPE_PICTURE_CROP    = 'picture-crop';
+  const TYPE_PICTURE_CROP    = 'picture-crop'; // TODO: Nuke these from DB.
 
   public function getApplicationName() {
     return 'conpherence';

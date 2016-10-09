@@ -805,6 +805,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     return array(
       'title' => $this->getTitle(),
+      'bodyClasses' => $this->getBodyClasses(),
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),

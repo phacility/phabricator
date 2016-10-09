@@ -1339,11 +1339,12 @@ abstract class LiskDAO extends Phobject {
    * @task   hook
    */
   public function generatePHID() {
-    throw new Exception(
-      pht(
-        'To use %s, you need to overload %s to perform PHID generation.',
-        'CONFIG_AUX_PHID',
-        'generatePHID()'));
+    $type = $this->getPHIDType();
+    return PhabricatorPHID::generateNewPHID($type);
+  }
+
+  public function getPHIDType() {
+    throw new PhutilMethodNotImplementedException();
   }
 
 

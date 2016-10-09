@@ -139,7 +139,7 @@ final class PhabricatorCalendarEventEditor
           WHERE phid IN (%Ls) AND availabilityCacheTTL >= %d',
         $user->getTableName(),
         $phids,
-        $object->getDateFromForCache());
+        $object->getStartDateTimeEpochForCache());
     }
 
     return $xactions;
@@ -159,9 +159,9 @@ final class PhabricatorCalendarEventEditor
     $recurrence_end_xaction =
       PhabricatorCalendarEventUntilDateTransaction::TRANSACTIONTYPE;
 
-    $start_date = $object->getDateFrom();
-    $end_date = $object->getDateTo();
-    $recurrence_end = $object->getRecurrenceEndDate();
+    $start_date = $object->getStartDateTimeEpoch();
+    $end_date = $object->getEndDateTimeEpoch();
+    $recurrence_end = $object->getUntilDateTimeEpoch();
     $is_recurring = $object->getIsRecurring();
 
     $errors = array();
@@ -309,16 +309,10 @@ final class PhabricatorCalendarEventEditor
     PhabricatorCalendarEvent $event) {
     $actor = $this->getActor();
 
-    $event_node = $event->newIntermediateEventNode($actor);
-
-    $document_node = id(new PhutilCalendarDocumentNode())
-      ->appendChild($event_node);
-
-    $root_node = id(new PhutilCalendarRootNode())
-      ->appendChild($document_node);
-
-    $ics_data = id(new PhutilICSWriter())
-      ->writeICSDocument($root_node);
+    $ics_data = id(new PhabricatorCalendarICSWriter())
+      ->setViewer($actor)
+      ->setEvents(array($event))
+      ->writeICSDocument();
 
     $ics_attachment = new PhabricatorMetaMTAAttachment(
       $ics_data,

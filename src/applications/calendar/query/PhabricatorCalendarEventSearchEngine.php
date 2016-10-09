@@ -115,8 +115,12 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     // Generate ghosts (and ignore stub events) if we aren't querying for
-    // specific events.
-    if (!$map['ids'] && !$map['phids']) {
+    // specific events or exporting.
+    if (!empty($map['export'])) {
+      // This is a specific mode enabled by event exports.
+      $query
+        ->withIsStub(false);
+    } else if (!$map['ids'] && !$map['phids']) {
       $query
         ->withIsStub(false)
         ->setGenerateGhosts(true);
@@ -255,10 +259,19 @@ final class PhabricatorCalendarEventSearchEngine
     array $handles) {
 
     if ($this->isMonthView($query)) {
-      return $this->buildCalendarMonthView($events, $query);
+      $result = $this->buildCalendarMonthView($events, $query);
     } else if ($this->isDayView($query)) {
-      return $this->buildCalendarDayView($events, $query);
+      $result = $this->buildCalendarDayView($events, $query);
+    } else {
+      $result = $this->buildCalendarListView($events, $query);
     }
+
+    return $result;
+  }
+
+  private function buildCalendarListView(
+    array $events,
+    PhabricatorSavedQuery $query) {
 
     assert_instances_of($events, 'PhabricatorCalendarEvent');
     $viewer = $this->requireViewer();
@@ -343,8 +356,8 @@ final class PhabricatorCalendarEventSearchEngine
     $month_view->setUser($viewer);
 
     foreach ($events as $event) {
-      $epoch_min = $event->getViewerDateFrom();
-      $epoch_max = $event->getViewerDateTo();
+      $epoch_min = $event->getStartDateTimeEpoch();
+      $epoch_max = $event->getEndDateTimeEpoch();
 
       $event_view = id(new AphrontCalendarEventView())
         ->setHostPHID($event->getHostPHID())
@@ -408,8 +421,8 @@ final class PhabricatorCalendarEventSearchEngine
         $event,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $epoch_min = $event->getViewerDateFrom();
-      $epoch_max = $event->getViewerDateTo();
+      $epoch_min = $event->getStartDateTimeEpoch();
+      $epoch_max = $event->getEndDateTimeEpoch();
 
       $status_icon = $event->getDisplayIcon($viewer);
       $status_color = $event->getDisplayIconColor($viewer);
@@ -560,6 +573,19 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     return false;
+  }
+
+  public function newUseResultsActions(PhabricatorSavedQuery $saved) {
+    $viewer = $this->requireViewer();
+    $can_export = $viewer->isLoggedIn();
+
+    return array(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-download')
+        ->setName(pht('Export Query as .ics'))
+        ->setDisabled(!$can_export)
+        ->setHref('/calendar/export/edit/?queryKey='.$saved->getQueryKey()),
+    );
   }
 
 }

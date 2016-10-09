@@ -228,7 +228,6 @@ final class ConpherenceTransactionView extends AphrontView {
       case ConpherenceTransaction::TYPE_TITLE:
       case ConpherenceTransaction::TYPE_TOPIC:
       case ConpherenceTransaction::TYPE_PICTURE:
-      case ConpherenceTransaction::TYPE_PICTURE_CROP:
       case ConpherenceTransaction::TYPE_PARTICIPANTS:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:

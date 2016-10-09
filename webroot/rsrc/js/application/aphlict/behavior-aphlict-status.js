@@ -24,14 +24,22 @@ JX.behavior('aphlict-status', function(config) {
     }
 
     var status = client.getStatus();
+    var icon = config.icon[status];
     var status_node = JX.$N(
       'span',
       {
-        className: 'aphlict-connection-status-' + status
+        className: 'connection-status-text aphlict-connection-status-' + status
       },
       pht(status));
 
-    JX.DOM.setContent(node, status_node);
+    var icon_node = new JX.PHUIXIconView()
+      .setIcon(icon['icon'])
+      .setColor(icon['color'])
+      .getNode();
+
+    var content = [icon_node, ' ', status_node];
+
+    JX.DOM.setContent(node, content);
   }
 
   JX.Aphlict.listen('didChangeStatus', update);

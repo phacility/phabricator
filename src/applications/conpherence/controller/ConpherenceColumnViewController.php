@@ -16,7 +16,7 @@ final class ConpherenceColumnViewController extends
       $latest_conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
-        ->needCropPics(true)
+        ->needProfileImage(true)
         ->needParticipantCache(true)
         ->execute();
       $latest_conpherences = mpull($latest_conpherences, null, 'getPHID');
@@ -31,7 +31,7 @@ final class ConpherenceColumnViewController extends
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withIDs(array($request->getInt('id')))
-        ->needCropPics(true)
+        ->needProfileImage(true)
         ->needTransactions(true)
         ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT)
         ->executeOne();
@@ -41,7 +41,7 @@ final class ConpherenceColumnViewController extends
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs(array($participant->getConpherencePHID()))
-        ->needCropPics(true)
+        ->needProfileImage(true)
         ->needTransactions(true)
         ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT)
         ->executeOne();

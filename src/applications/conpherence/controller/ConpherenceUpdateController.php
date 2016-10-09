@@ -36,8 +36,6 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
-      ->needOrigPics(true)
-      ->needCropPics(true)
       ->needParticipants($need_participants)
       ->requireCapabilities($needed_capabilities)
       ->executeOne();
@@ -131,57 +129,14 @@ final class ConpherenceUpdateController
 
           break;
         case ConpherenceUpdateActions::METADATA:
-          $top = $request->getInt('image_y');
-          $left = $request->getInt('image_x');
-          $file_id = $request->getInt('file_id');
           $title = $request->getStr('title');
           $topic = $request->getStr('topic');
-          if ($file_id) {
-            $orig_file = id(new PhabricatorFileQuery())
-              ->setViewer($user)
-              ->withIDs(array($file_id))
-              ->executeOne();
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(ConpherenceTransaction::TYPE_PICTURE)
-              ->setNewValue($orig_file);
-            $okay = $orig_file->isTransformableImage();
-            if ($okay) {
-              $xformer = new PhabricatorImageTransformer();
-              $crop_file = $xformer->executeConpherenceTransform(
-                $orig_file,
-                0,
-                0,
-                ConpherenceImageData::CROP_WIDTH,
-                ConpherenceImageData::CROP_HEIGHT);
-              $xactions[] = id(new ConpherenceTransaction())
-                ->setTransactionType(
-                  ConpherenceTransaction::TYPE_PICTURE_CROP)
-                ->setNewValue($crop_file->getPHID());
-            }
-            $response_mode = 'redirect';
-          }
 
           // all other metadata updates are continue requests
           if (!$request->isContinueRequest()) {
             break;
           }
 
-          if ($top !== null || $left !== null) {
-            $file = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
-            $xformer = new PhabricatorImageTransformer();
-            $xformed = $xformer->executeConpherenceTransform(
-              $file,
-              $top,
-              $left,
-              ConpherenceImageData::CROP_WIDTH,
-              ConpherenceImageData::CROP_HEIGHT);
-            $image_phid = $xformed->getPHID();
-
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(
-                ConpherenceTransaction::TYPE_PICTURE_CROP)
-              ->setNewValue($image_phid);
-          }
           $title = $request->getStr('title');
           $topic = $request->getStr('topic');
           $xactions[] = id(new ConpherenceTransaction())
@@ -491,35 +446,6 @@ final class ConpherenceUpdateController
         ->setName('topic')
         ->setValue($conpherence->getTopic()));
 
-    $nopic = $this->getRequest()->getExists('nopic');
-    $image = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
-    if ($nopic) {
-      // do not render any pic related controls
-    } else if ($image) {
-      $crop_uri = $conpherence->loadImageURI(ConpherenceImageData::SIZE_CROP);
-      $form
-        ->appendChild(
-          id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Image'))
-          ->setValue(phutil_tag(
-            'img',
-            array(
-              'src' => $crop_uri,
-              ))))
-        ->appendChild(
-          id(new ConpherencePicCropControl())
-          ->setLabel(pht('Crop Image'))
-          ->setValue($image))
-        ->appendChild(
-          id(new ConpherenceFormDragAndDropUploadControl())
-          ->setLabel(pht('Change Image')));
-    } else {
-      $form
-        ->appendChild(
-          id(new ConpherenceFormDragAndDropUploadControl())
-          ->setLabel(pht('Image')));
-    }
-
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($user)
       ->setObject($conpherence)
@@ -571,7 +497,6 @@ final class ConpherenceUpdateController
     $latest_transaction_id) {
 
     $minimal_display = $this->getRequest()->getExists('minimal_display');
-    $need_widget_data = false;
     $need_transactions = false;
     $need_participant_cache = true;
     switch ($action) {
@@ -582,7 +507,6 @@ final class ConpherenceUpdateController
       case ConpherenceUpdateActions::MESSAGE:
       case ConpherenceUpdateActions::ADD_PERSON:
         $need_transactions = true;
-        $need_widget_data = !$minimal_display;
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
       case ConpherenceUpdateActions::NOTIFICATIONS:
@@ -594,7 +518,7 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->setAfterTransactionID($latest_transaction_id)
-      ->needCropPics(true)
+      ->needProfileImage(true)
       ->needParticipantCache($need_participant_cache)
       ->needParticipants(true)
       ->needTransactions($need_transactions)
@@ -607,8 +531,13 @@ final class ConpherenceUpdateController
         $user,
         $conpherence,
         !$minimal_display);
-      $participant_obj = $conpherence->getParticipant($user->getPHID());
-      $participant_obj->markUpToDate($conpherence, $data['latest_transaction']);
+      $key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
+      $minimized = $user->getUserSetting($key);
+      if (!$minimized) {
+        $participant_obj = $conpherence->getParticipant($user->getPHID());
+        $participant_obj
+          ->markUpToDate($conpherence, $data['latest_transaction']);
+      }
     } else if ($need_transactions) {
       $non_update = true;
       $data = array();

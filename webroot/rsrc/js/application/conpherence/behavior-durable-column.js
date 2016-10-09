@@ -66,6 +66,11 @@ JX.behavior('durable-column', function(config, statics) {
     JX.DOM.alterClass(document.body, 'minimize-column', userMinimize);
     JX.Stratcom.invoke('resize');
 
+    if (!userMinimize) {
+      var messages = _getColumnMessagesNode();
+      scrollbar.scrollTo(messages.scrollHeight);
+    }
+
     new JX.Request(config.minimizeURI)
       .setData({value: (userMinimize ? 1 : 0)})
       .send();
@@ -89,9 +94,10 @@ JX.behavior('durable-column', function(config, statics) {
     JX.Stratcom.invoke('resize');
   }
 
-  new JX.KeyboardShortcut('\\', 'Toggle Conpherence Column')
-    .setHandler(_toggleColumn)
-    .register();
+  JX.Stratcom.listen(
+    'click',
+    'conpherence-persist-column',
+    _toggleColumn);
 
   JX.Stratcom.listen(
     'click',
@@ -346,6 +352,11 @@ JX.behavior('durable-column', function(config, statics) {
     null,
     function (e) {
       var new_data = e.getData().newResponse;
+      var new_classes = new_data.bodyClasses;
+      if (userMinimize) {
+        new_classes = new_classes + ' minimize-column';
+      }
+      document.body.className = new_classes;
       JX.Title.setTitle(new_data.title);
     });
 

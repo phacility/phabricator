@@ -150,13 +150,14 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $icon_bar = null;
     if ($this->conpherences) {
-      $icon_bar = phutil_tag(
-        'div',
-        array(
-          'class' => 'conpherence-durable-column-icon-bar',
-        ),
-        $this->buildIconBar());
+      $icon_bar = $this->buildIconBar();
     }
+    $icon_bar = phutil_tag(
+      'div',
+      array(
+        'class' => 'conpherence-durable-column-icon-bar',
+      ),
+      $icon_bar);
 
     $transactions = $this->buildTransactions();
 
@@ -198,19 +199,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     );
   }
 
-  private function getPolicyIcon(
-    ConpherenceThread $conpherence,
-    array $policy_objects) {
-
-    assert_instances_of($policy_objects, 'PhabricatorPolicy');
-
-    $icon = $conpherence->getPolicyIconName($policy_objects);
-    $icon = id(new PHUIIconView())
-      ->addClass('mmr')
-      ->setIcon($icon);
-    return $icon;
-  }
-
   private function buildIconBar() {
     $icons = array();
     $selected_conpherence = $this->getSelectedConpherence();
@@ -222,12 +210,10 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         $classes[] = 'selected';
       }
       $data = $conpherence->getDisplayData($this->getUser());
-      $icon = $this->getPolicyIcon($conpherence, $this->getPolicyObjects());
       $thread_title = phutil_tag(
         'span',
         array(),
         array(
-          $icon,
           $data['title'],
         ));
       $image = $data['image'];
@@ -324,17 +310,20 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       ->addMenuItem($minimize)
       ->addClass('phabricator-application-menu');
 
-    $header = null;
     if ($conpherence) {
       $data = $conpherence->getDisplayData($this->getUser());
       $header = phutil_tag(
         'span',
         array(),
-        array(
-          $this->getPolicyIcon($conpherence, $this->getPolicyObjects()),
-          $data['title'],
-        ));
-      }
+        $data['title']);
+    } else {
+      $header = phutil_tag(
+        'span',
+        array(),
+        pht('Conpherence'));
+    }
+
+    $status = new PhabricatorNotificationStatusView();
 
     return
       phutil_tag(
@@ -343,6 +332,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           'class' => 'conpherence-durable-column-header-inner',
         ),
         array(
+          $status,
           javelin_tag(
             'div',
             array(
@@ -403,22 +393,22 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       if (!$this->getVisible() || $this->getInitialLoad()) {
         return pht('Loading...');
       }
-      return array(
+      $view = array(
         phutil_tag(
           'div',
           array(
-            'class' => 'mmb',
+            'class' => 'column-no-rooms-text',
           ),
-          pht('You are not in any rooms yet.')),
+          pht('You have not joined any rooms yet.')),
         javelin_tag(
           'a',
           array(
-            'href' => '/conpherence/new/',
+            'href' => '/conpherence/search/',
             'class' => 'button grey',
-            'sigil' => 'workflow',
           ),
-          pht('Create a Room')),
+          pht('Find Rooms')),
       );
+      return phutil_tag_div('column-no-rooms', $view);
     }
 
     $data = ConpherenceTransactionRenderer::renderTransactions(

@@ -421,7 +421,7 @@ final class ManiphestTaskSearchEngine
             'you need to get done. Tasks assigned to you will appear here.'))
       ->addAction($create_button);
 
-      return $view;
+    return $view;
   }
 
 }

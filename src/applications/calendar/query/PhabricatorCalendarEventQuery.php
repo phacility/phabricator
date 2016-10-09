@@ -13,6 +13,7 @@ final class PhabricatorCalendarEventQuery
   private $eventsWithNoParent;
   private $instanceSequencePairs;
   private $isStub;
+  private $parentEventPHIDs;
 
   private $generateGhosts = false;
 
@@ -71,6 +72,11 @@ final class PhabricatorCalendarEventQuery
     return $this;
   }
 
+  public function withParentEventPHIDs(array $parent_phids) {
+    $this->parentEventPHIDs = $parent_phids;
+    return $this;
+  }
+
   protected function getDefaultOrderVector() {
     return array('start', 'id');
   }
@@ -99,7 +105,7 @@ final class PhabricatorCalendarEventQuery
   protected function getPagingValueMap($cursor, array $keys) {
     $event = $this->loadCursorObject($cursor);
     return array(
-      'start' => $event->getViewerDateFrom(),
+      'start' => $event->getStartDateTimeEpoch(),
       'id' => $event->getID(),
     );
   }
@@ -165,70 +171,54 @@ final class PhabricatorCalendarEventQuery
     // discard anything outside of the time window.
     $events = $this->getEventsInRange($events);
 
-    $enforced_end = null;
+    $generate_from = $this->rangeBegin;
+    $generate_until = $this->rangeEnd;
     foreach ($parents as $key => $event) {
-      $sequence_start = 0;
-      $sequence_end = null;
-      $start = null;
-
       $duration = $event->getDuration();
 
-      $frequency = $event->getFrequencyUnit();
-      $modify_key = '+1 '.$frequency;
+      $start_date = $this->getRecurrenceWindowStart(
+        $event,
+        $generate_from - $duration);
 
-      if (($this->rangeBegin !== null) &&
-          ($this->rangeBegin > $event->getViewerDateFrom())) {
-        $max_date = $this->rangeBegin - $duration;
-        $date = $event->getViewerDateFrom();
-        $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
+      $end_date = $this->getRecurrenceWindowEnd(
+        $event,
+        $generate_until);
 
-        while ($date < $max_date) {
-          // TODO: optimize this to not loop through all off-screen events
-          $sequence_start++;
-          $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
-          $date = $datetime->modify($modify_key)->format('U');
+      $limit = $this->getRecurrenceLimit($event, $raw_limit);
+
+      $set = $event->newRecurrenceSet();
+
+      $recurrences = $set->getEventsBetween(
+        null,
+        $end_date,
+        $limit + 1);
+
+      // We're generating events from the beginning and then filtering them
+      // here (instead of only generating events starting at the start date)
+      // because we need to know the proper sequence indexes to generate ghost
+      // events. This may change after RDATE support.
+      if ($start_date) {
+        $start_epoch = $start_date->getEpoch();
+      } else {
+        $start_epoch = null;
+      }
+
+      foreach ($recurrences as $sequence_index => $sequence_datetime) {
+        if (!$sequence_index) {
+          // This is the parent event, which we already have.
+          continue;
         }
 
-        $start = $this->rangeBegin;
-      } else {
-        $start = $event->getViewerDateFrom() - $duration;
-      }
-
-      $date = $start;
-      $datetime = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
-
-      // Select the minimum end time we need to generate events until.
-      $end_times = array();
-      if ($this->rangeEnd) {
-        $end_times[] = $this->rangeEnd;
-      }
-
-      if ($event->getRecurrenceEndDate()) {
-        $end_times[] = $event->getRecurrenceEndDate();
-      }
-
-      if ($enforced_end) {
-        $end_times[] = $enforced_end;
-      }
-
-      if ($end_times) {
-        $end = min($end_times);
-        $sequence_end = $sequence_start;
-        while ($date < $end) {
-          $sequence_end++;
-          $datetime->modify($modify_key);
-          $date = $datetime->format('U');
-          if ($sequence_end > $raw_limit + $sequence_start) {
-            break;
+        if ($start_epoch) {
+          if ($sequence_datetime->getEpoch() < $start_epoch) {
+            continue;
           }
         }
-      } else {
-        $sequence_end = $raw_limit + $sequence_start;
-      }
 
-      $sequence_start = max(1, $sequence_start);
-      for ($index = $sequence_start; $index < $sequence_end; $index++) {
-        $events[] = $event->newGhost($viewer, $index);
+        $events[] = $event->newGhost(
+          $viewer,
+          $sequence_index,
+          $sequence_datetime);
       }
 
       // NOTE: We're slicing results every time because this makes it cheaper
@@ -238,9 +228,9 @@ final class PhabricatorCalendarEventQuery
 
       if ($raw_limit) {
         if (count($events) > $raw_limit) {
-          $events = msort($events, 'getViewerDateFrom');
+          $events = msort($events, 'getStartDateTimeEpoch');
           $events = array_slice($events, 0, $raw_limit, true);
-          $enforced_end = last($events)->getViewerDateFrom();
+          $generate_until = last($events)->getEndDateTimeEpoch();
         }
       }
     }
@@ -308,7 +298,7 @@ final class PhabricatorCalendarEventQuery
       }
     }
 
-    $events = msort($events, 'getViewerDateFrom');
+    $events = msort($events, 'getStartDateTimeEpoch');
 
     return $events;
   }
@@ -331,14 +321,14 @@ final class PhabricatorCalendarEventQuery
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
     $where = parent::buildWhereClauseParts($conn);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'event.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'event.phid IN (%Ls)',
@@ -352,14 +342,14 @@ final class PhabricatorCalendarEventQuery
     if ($this->rangeBegin) {
       $where[] = qsprintf(
         $conn,
-        'event.dateTo >= %d OR event.isRecurring = 1',
+        '(event.utcUntilEpoch >= %d) OR (event.utcUntilEpoch IS NULL)',
         $this->rangeBegin - phutil_units('16 hours in seconds'));
     }
 
     if ($this->rangeEnd) {
       $where[] = qsprintf(
         $conn,
-        'event.dateFrom <= %d',
+        'event.utcInitialEpoch <= %d',
         $this->rangeEnd + phutil_units('16 hours in seconds'));
     }
 
@@ -370,7 +360,7 @@ final class PhabricatorCalendarEventQuery
         $this->inviteePHIDs);
     }
 
-    if ($this->hostPHIDs) {
+    if ($this->hostPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'event.hostPHID IN (%Ls)',
@@ -412,6 +402,13 @@ final class PhabricatorCalendarEventQuery
         $conn,
         'event.isStub = %d',
         (int)$this->isStub);
+    }
+
+    if ($this->parentEventPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.instanceOfEventPHID IN (%Ls)',
+        $this->parentEventPHIDs);
     }
 
     return $where;
@@ -500,7 +497,7 @@ final class PhabricatorCalendarEventQuery
       }
     }
 
-    $events = msort($events, 'getViewerDateFrom');
+    $events = msort($events, 'getStartDateTimeEpoch');
 
     return $events;
   }
@@ -510,8 +507,8 @@ final class PhabricatorCalendarEventQuery
     $range_end = $this->rangeEnd;
 
     foreach ($events as $key => $event) {
-      $event_start = $event->getViewerDateFrom();
-      $event_end = $event->getViewerDateTo();
+      $event_start = $event->getStartDateTimeEpoch();
+      $event_end = $event->getEndDateTimeEpoch();
 
       if ($range_start && $event_end < $range_start) {
         unset($events[$key]);
@@ -524,5 +521,45 @@ final class PhabricatorCalendarEventQuery
 
     return $events;
   }
+
+  private function getRecurrenceWindowStart(
+    PhabricatorCalendarEvent $event,
+    $generate_from) {
+
+    if (!$generate_from) {
+      return null;
+    }
+
+    return PhutilCalendarAbsoluteDateTime::newFromEpoch($generate_from);
+  }
+
+  private function getRecurrenceWindowEnd(
+    PhabricatorCalendarEvent $event,
+    $generate_until) {
+
+    $end_epochs = array();
+    if ($generate_until) {
+      $end_epochs[] = $generate_until;
+    }
+
+    $until_epoch = $event->getUntilDateTimeEpoch();
+    if ($until_epoch) {
+      $end_epochs[] = $until_epoch;
+    }
+
+    if (!$end_epochs) {
+      return null;
+    }
+
+    return PhutilCalendarAbsoluteDateTime::newFromEpoch(min($end_epochs));
+  }
+
+  private function getRecurrenceLimit(
+    PhabricatorCalendarEvent $event,
+    $raw_limit) {
+
+    return $raw_limit;
+  }
+
 
 }

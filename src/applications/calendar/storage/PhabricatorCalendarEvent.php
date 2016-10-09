@@ -17,10 +17,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $name;
   protected $hostPHID;
-  protected $dateFrom;
-  protected $dateTo;
-  protected $allDayDateFrom;
-  protected $allDayDateTo;
   protected $description;
   protected $isCancelled;
   protected $isAllDay;
@@ -29,8 +25,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $isStub;
 
   protected $isRecurring = 0;
-  protected $recurrenceFrequency = array();
-  protected $recurrenceEndDate;
 
   private $isGhostEvent = false;
   protected $instanceOfEventPHID;
@@ -41,17 +35,23 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $spacePHID;
 
+  protected $utcInitialEpoch;
+  protected $utcUntilEpoch;
+  protected $utcInstanceEpoch;
+  protected $parameters = array();
+
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
 
-  private $viewerDateFrom;
-  private $viewerDateTo;
+  private $viewerTimezone;
 
-  // Frequency Constants
-  const FREQUENCY_DAILY = 'daily';
-  const FREQUENCY_WEEKLY = 'weekly';
-  const FREQUENCY_MONTHLY = 'monthly';
-  const FREQUENCY_YEARLY = 'yearly';
+  // TODO: DEPRECATED. Remove once we're sure the migrations worked.
+  protected $allDayDateFrom;
+  protected $allDayDateTo;
+  protected $dateFrom;
+  protected $dateTo;
+  protected $recurrenceEndDate;
+  protected $recurrenceFrequency = array();
 
   public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -66,21 +66,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $now = PhabricatorTime::getNow();
 
-    $start = new DateTime('@'.$now);
-    $start->setTimeZone($actor->getTimeZone());
-
-    $start->setTime($start->format('H'), 0, 0);
-    $start->modify('+1 hour');
-    $end = id(clone $start)->modify('+1 hour');
-
-    $epoch_min = $start->format('U');
-    $epoch_max = $end->format('U');
-
-    $now_date = new DateTime('@'.$now);
-    $now_min = id(clone $now_date)->setTime(0, 0)->format('U');
-    $now_max = id(clone $now_date)->setTime(23, 59)->format('U');
-
     $default_icon = 'fa-calendar';
+
+    $datetime_start = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $now,
+      $actor->getTimezoneIdentifier());
+    $datetime_end = $datetime_start->newRelativeDateTime('PT1H');
 
     return id(new PhabricatorCalendarEvent())
       ->setHostPHID($actor->getPHID())
@@ -88,23 +79,24 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setIsAllDay(0)
       ->setIsStub(0)
       ->setIsRecurring(0)
-      ->setRecurrenceFrequency(
-        array(
-          'rule' => self::FREQUENCY_WEEKLY,
-        ))
       ->setIcon($default_icon)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
-      ->setDateFrom($epoch_min)
-      ->setDateTo($epoch_max)
-      ->setAllDayDateFrom($now_min)
-      ->setAllDayDateTo($now_max)
+      ->setDateFrom(0)
+      ->setDateTo(0)
+      ->setAllDayDateFrom(0)
+      ->setAllDayDateTo(0)
+      ->setStartDateTime($datetime_start)
+      ->setEndDateTime($datetime_end)
       ->applyViewerTimezone($actor);
   }
 
-  private function newChild(PhabricatorUser $actor, $sequence) {
+  private function newChild(
+    PhabricatorUser $actor,
+    $sequence,
+    PhutilCalendarDateTime $start = null) {
     if (!$this->isParentEvent()) {
       throw new Exception(
         pht(
@@ -118,10 +110,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setInstanceOfEventPHID($this->getPHID())
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
-      ->setRecurrenceFrequency($this->getRecurrenceFrequency())
-      ->attachParentEvent($this);
+      ->attachParentEvent($this)
+      ->setAllDayDateFrom(0)
+      ->setAllDayDateTo(0)
+      ->setDateFrom(0)
+      ->setDateTo(0);
 
-    return $child->copyFromParent($actor);
+    return $child->copyFromParent($actor, $start);
   }
 
   protected function readField($field) {
@@ -153,7 +148,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
 
-  public function copyFromParent(PhabricatorUser $actor) {
+  public function copyFromParent(
+    PhabricatorUser $actor,
+    PhutilCalendarDateTime $start = null) {
+
     if (!$this->isChildEvent()) {
       throw new Exception(
         pht(
@@ -173,65 +171,46 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setDescription($parent->getDescription());
 
     $sequence = $this->getSequenceIndex();
-    $duration = $this->getDuration();
-    $epochs = $parent->getSequenceIndexEpochs($actor, $sequence, $duration);
+
+    if ($start) {
+      $start_datetime = $start;
+    } else {
+      $start_datetime = $parent->newSequenceIndexDateTime($sequence);
+
+      if (!$start_datetime) {
+        throw new Exception(
+          pht(
+            'Sequence "%s" is not valid for event!',
+            $sequence));
+      }
+    }
+
+    $duration = $parent->newDuration();
+    $end_datetime = $start_datetime->newRelativeDateTime($duration);
 
     $this
-      ->setDateFrom($epochs['dateFrom'])
-      ->setDateTo($epochs['dateTo'])
-      ->setAllDayDateFrom($epochs['allDayDateFrom'])
-      ->setAllDayDateTo($epochs['allDayDateTo']);
+      ->setStartDateTime($start_datetime)
+      ->setEndDateTime($end_datetime);
 
     return $this;
   }
 
   public function isValidSequenceIndex(PhabricatorUser $viewer, $sequence) {
-    try {
-      $this->getSequenceIndexEpochs($viewer, $sequence, $this->getDuration());
-      return true;
-    } catch (Exception $ex) {
-      return false;
-    }
+    return (bool)$this->newSequenceIndexDateTime($sequence);
   }
 
-  private function getSequenceIndexEpochs(
-    PhabricatorUser $viewer,
-    $sequence,
-    $duration) {
-
-    $frequency = $this->getFrequencyUnit();
-    $modify_key = '+'.$sequence.' '.$frequency;
-
-    $date = $this->getDateFrom();
-    $date_time = PhabricatorTime::getDateTimeFromEpoch($date, $viewer);
-    $date_time->modify($modify_key);
-    $date = $date_time->format('U');
-
-    $end_date = $this->getRecurrenceEndDate();
-    if ($end_date && $date > $end_date) {
-      throw new Exception(
-        pht(
-          'Sequence "%s" is invalid for this event: it would occur after '.
-          'the event stops repeating.',
-          $sequence));
+  public function newSequenceIndexDateTime($sequence) {
+    $set = $this->newRecurrenceSet();
+    if (!$set) {
+      return null;
     }
 
-    $utc = new DateTimeZone('UTC');
+    $instances = $set->getEventsBetween(
+      null,
+      $this->newUntilDateTime(),
+      $sequence + 1);
 
-    $allday_from = $this->getAllDayDateFrom();
-    $allday_date = new DateTime('@'.$allday_from, $utc);
-    $allday_date->setTimeZone($utc);
-    $allday_date->modify($modify_key);
-
-    $allday_min = $allday_date->format('U');
-    $allday_duration = ($this->getAllDayDateTo() - $allday_from);
-
-    return array(
-      'dateFrom' => $date,
-      'dateTo' => $date + $duration,
-      'allDayDateFrom' => $allday_min,
-      'allDayDateTo' => $allday_min + $allday_duration,
-    );
+    return idx($instances, $sequence, null);
   }
 
   public function newStub(PhabricatorUser $actor, $sequence) {
@@ -248,8 +227,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $stub;
   }
 
-  public function newGhost(PhabricatorUser $actor, $sequence) {
-    $ghost = $this->newChild($actor, $sequence);
+  public function newGhost(
+    PhabricatorUser $actor,
+    $sequence,
+    PhutilCalendarDateTime $start = null) {
+
+    $ghost = $this->newChild($actor, $sequence, $start);
 
     $ghost
       ->setIsGhostEvent(true)
@@ -260,73 +243,70 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $ghost;
   }
 
-  public function getViewerDateFrom() {
-    if ($this->viewerDateFrom === null) {
-      throw new PhutilInvalidStateException('applyViewerTimezone');
-    }
-
-    return $this->viewerDateFrom;
-  }
-
-  public function getViewerDateTo() {
-    if ($this->viewerDateTo === null) {
-      throw new PhutilInvalidStateException('applyViewerTimezone');
-    }
-
-    return $this->viewerDateTo;
-  }
-
   public function applyViewerTimezone(PhabricatorUser $viewer) {
-    if (!$this->getIsAllDay()) {
-      $this->viewerDateFrom = $this->getDateFrom();
-      $this->viewerDateTo = $this->getDateTo();
-    } else {
-      $zone = $viewer->getTimeZone();
-
-      $this->viewerDateFrom = $this->getDateEpochForTimezone(
-        $this->getAllDayDateFrom(),
-        new DateTimeZone('UTC'),
-        'Y-m-d',
-        null,
-        $zone);
-
-      $this->viewerDateTo = $this->getDateEpochForTimezone(
-        $this->getAllDayDateTo(),
-        new DateTimeZone('UTC'),
-        'Y-m-d 23:59:00',
-        null,
-        $zone);
-    }
-
+    $this->viewerTimezone = $viewer->getTimezoneIdentifier();
     return $this;
   }
 
   public function getDuration() {
-    return $this->getDateTo() - $this->getDateFrom();
+    return ($this->getEndDateTimeEpoch() - $this->getStartDateTimeEpoch());
   }
 
-  public function getDateEpochForTimezone(
-    $epoch,
-    $src_zone,
-    $format,
-    $adjust,
-    $dst_zone) {
+  public function updateUTCEpochs() {
+    // The "intitial" epoch is the start time of the event, in UTC.
+    $start_date = $this->newStartDateTime()
+      ->setViewerTimezone('UTC');
+    $start_epoch = $start_date->getEpoch();
+    $this->setUTCInitialEpoch($start_epoch);
 
-    $src = new DateTime('@'.$epoch);
-    $src->setTimeZone($src_zone);
+    // The "until" epoch is the last UTC epoch on which any instance of this
+    // event occurs. For infinitely recurring events, it is `null`.
 
-    if (strlen($adjust)) {
-      $adjust = ' '.$adjust;
+    if (!$this->getIsRecurring()) {
+      $end_date = $this->newEndDateTime()
+        ->setViewerTimezone('UTC');
+      $until_epoch = $end_date->getEpoch();
+    } else {
+      $until_epoch = null;
+      $until_date = $this->newUntilDateTime();
+      if ($until_date) {
+        $until_date->setViewerTimezone('UTC');
+        $duration = $this->newDuration();
+        $until_epoch = id(new PhutilCalendarRelativeDateTime())
+          ->setOrigin($until_date)
+          ->setDuration($duration)
+          ->getEpoch();
+      }
     }
+    $this->setUTCUntilEpoch($until_epoch);
 
-    $dst = new DateTime($src->format($format).$adjust, $dst_zone);
-    return $dst->format('U');
+    // The "instance" epoch is a property of instances of recurring events.
+    // It's the original UTC epoch on which the instance started. Usually that
+    // is the same as the start date, but they may be different if the instance
+    // has been edited.
+
+    // The ICS format uses this value (original start time) to identify event
+    // instances, and must do so because it allows additional arbitrary
+    // instances to be added (with "RDATE").
+
+    $instance_epoch = null;
+    $instance_date = $this->newInstanceDateTime();
+    if ($instance_date) {
+      $instance_epoch = $instance_date
+        ->setViewerTimezone('UTC')
+        ->getEpoch();
+    }
+    $this->setUTCInstanceEpoch($instance_epoch);
+
+    return $this;
   }
 
   public function save() {
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
+
+    $this->updateUTCEpochs();
 
     return parent::save();
   }
@@ -340,8 +320,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
    *
    * @return int Event start date for availability caches.
    */
-  public function getDateFromForCache() {
-    return ($this->getViewerDateFrom() - phutil_units('15 minutes in seconds'));
+  public function getStartDateTimeEpochForCache() {
+    $epoch = $this->getStartDateTimeEpoch();
+    $window = phutil_units('15 minutes in seconds');
+    return ($epoch - $window);
   }
 
   protected function getConfiguration() {
@@ -349,20 +331,25 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text',
-        'dateFrom' => 'epoch',
-        'dateTo' => 'epoch',
-        'allDayDateFrom' => 'epoch',
-        'allDayDateTo' => 'epoch',
         'description' => 'text',
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
         'icon' => 'text32',
         'mailKey' => 'bytes20',
         'isRecurring' => 'bool',
-        'recurrenceEndDate' => 'epoch?',
         'instanceOfEventPHID' => 'phid?',
         'sequenceIndex' => 'uint32?',
         'isStub' => 'bool',
+        'utcInitialEpoch' => 'epoch',
+        'utcUntilEpoch' => 'epoch?',
+        'utcInstanceEpoch' => 'epoch?',
+
+        // TODO: DEPRECATED.
+        'allDayDateFrom' => 'epoch',
+        'allDayDateTo' => 'epoch',
+        'dateFrom' => 'epoch',
+        'dateTo' => 'epoch',
+        'recurrenceEndDate' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_date' => array(
@@ -372,9 +359,17 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
           'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
           'unique' => true,
         ),
+        'key_epoch' => array(
+          'columns' => array('utcInitialEpoch', 'utcUntilEpoch'),
+        ),
+        'key_rdate' => array(
+          'columns' => array('instanceOfEventPHID', 'utcInstanceEpoch'),
+          'unique' => true,
+        ),
       ),
       self::CONFIG_SERIALIZATION => array(
         'recurrenceFrequency' => self::SERIALIZATION_JSON,
+        'parameters' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }
@@ -450,27 +445,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
-  public function getFrequencyRule() {
-    return idx($this->recurrenceFrequency, 'rule');
-  }
-
-  public function getFrequencyUnit() {
-    $frequency = $this->getFrequencyRule();
-
-    switch ($frequency) {
-      case 'daily':
-        return 'day';
-      case 'weekly':
-        return 'week';
-      case 'monthly':
-        return 'month';
-      case 'yearly':
-        return 'year';
-      default:
-        return 'day';
-    }
-  }
-
   public function getURI() {
     if ($this->getIsGhostEvent()) {
       $base = $this->getParentEvent()->getURI();
@@ -516,14 +490,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     PhabricatorUser $viewer,
     $show_end) {
 
-    if ($show_end) {
-      $min_date = PhabricatorTime::getDateTimeFromEpoch(
-        $this->getViewerDateFrom(),
-        $viewer);
+    $start = $this->newStartDateTime();
+    $end = $this->newEndDateTime();
 
-      $max_date = PhabricatorTime::getDateTimeFromEpoch(
-        $this->getViewerDateTo(),
-        $viewer);
+    if ($show_end) {
+      $min_date = $start->newPHPDateTime();
+      $max_date = $end->newPHPDateTime();
 
       $min_day = $min_date->format('Y m d');
       $max_day = $max_date->format('Y m d');
@@ -533,8 +505,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $show_end_date = false;
     }
 
-    $min_epoch = $this->getViewerDateFrom();
-    $max_epoch = $this->getViewerDateTo();
+    $min_epoch = $start->getEpoch();
+    $max_epoch = $end->getEpoch();
 
     if ($this->getIsAllDay()) {
       if ($show_end_date) {
@@ -629,11 +601,28 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->getMonogram().'.ics';
   }
 
-  public function newIntermediateEventNode(PhabricatorUser $viewer) {
+  public function newIntermediateEventNode(
+    PhabricatorUser $viewer,
+    array $children) {
+
     $base_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
     $domain = $base_uri->getDomain();
 
-    $uid = $this->getPHID().'@'.$domain;
+    // NOTE: For recurring events, all of the events in the series have the
+    // same UID (the UID of the parent). The child event instances are
+    // differentiated by the "RECURRENCE-ID" field.
+    if ($this->isChildEvent()) {
+      $parent = $this->getParentEvent();
+      $instance_datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+        $this->getUTCInstanceEpoch());
+      $recurrence_id = $instance_datetime->getISO8601();
+      $rrule = null;
+    } else {
+      $parent = $this;
+      $recurrence_id = null;
+      $rrule = $this->newRecurrenceRule();
+    }
+    $uid = $parent->getPHID().'@'.$domain;
 
     $created = $this->getDateCreated();
     $created = PhutilCalendarAbsoluteDateTime::newFromEpoch($created);
@@ -641,11 +630,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $modified = $this->getDateModified();
     $modified = PhutilCalendarAbsoluteDateTime::newFromEpoch($modified);
 
-    $date_start = $this->getDateFrom();
-    $date_start = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_start);
-
-    $date_end = $this->getDateTo();
-    $date_end = PhutilCalendarAbsoluteDateTime::newFromEpoch($date_end);
+    $date_start = $this->newStartDateTime();
+    $date_end = $this->newEndDateTime();
 
     if ($this->getIsAllDay()) {
       $date_start->setIsAllDay(true);
@@ -705,6 +691,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ->setStatus($status);
     }
 
+    // TODO: Use $children to generate EXDATE/RDATE information.
+
     $node = id(new PhutilCalendarEventNode())
       ->setUID($uid)
       ->setName($this->getName())
@@ -716,10 +704,186 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setOrganizer($organizer)
       ->setAttendees($attendees);
 
+    if ($rrule) {
+      $node->setRecurrenceRule($rrule);
+    }
+
+    if ($recurrence_id) {
+      $node->setRecurrenceID($recurrence_id);
+    }
+
     return $node;
   }
 
+  public function newStartDateTime() {
+    $datetime = $this->getParameter('startDateTime');
+    if ($datetime) {
+      return $this->newDateTimeFromDictionary($datetime);
+    }
 
+    $epoch = $this->getDateFrom();
+    return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function getStartDateTimeEpoch() {
+    return $this->newStartDateTime()->getEpoch();
+  }
+
+  public function newEndDateTime() {
+    $datetime = $this->getParameter('endDateTime');
+    if ($datetime) {
+      return $this->newDateTimeFromDictionary($datetime);
+    }
+
+    $epoch = $this->getDateTo();
+    return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function getEndDateTimeEpoch() {
+    return $this->newEndDateTime()->getEpoch();
+  }
+
+  public function newUntilDateTime() {
+    $datetime = $this->getParameter('untilDateTime');
+    if ($datetime) {
+      return $this->newDateTimeFromDictionary($datetime);
+    }
+
+    $epoch = $this->getRecurrenceEndDate();
+    if (!$epoch) {
+      return null;
+    }
+    return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function getUntilDateTimeEpoch() {
+    $datetime = $this->newUntilDateTime();
+
+    if (!$datetime) {
+      return null;
+    }
+
+    return $datetime->getEpoch();
+  }
+
+  public function newDuration() {
+    return id(new PhutilCalendarDuration())
+      ->setSeconds($this->getDuration());
+  }
+
+  public function newInstanceDateTime() {
+    if (!$this->getIsRecurring()) {
+      return null;
+    }
+
+    $index = $this->getSequenceIndex();
+    if (!$index) {
+      return null;
+    }
+
+    return $this->newSequenceIndexDateTime($index);
+  }
+
+  private function newDateTimeFromEpoch($epoch) {
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch($epoch);
+
+    if ($this->getIsAllDay()) {
+      $datetime->setIsAllDay(true);
+    }
+
+    return $this->newDateTimeFromDateTime($datetime);
+  }
+
+  private function newDateTimeFromDictionary(array $dict) {
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromDictionary($dict);
+    return $this->newDateTimeFromDateTime($datetime);
+  }
+
+  private function newDateTimeFromDateTime(PhutilCalendarDateTime $datetime) {
+    $viewer_timezone = $this->viewerTimezone;
+    if ($viewer_timezone) {
+      $datetime->setViewerTimezone($viewer_timezone);
+    }
+
+    return $datetime;
+  }
+
+  public function getParameter($key, $default = null) {
+    return idx($this->parameters, $key, $default);
+  }
+
+  public function setParameter($key, $value) {
+    $this->parameters[$key] = $value;
+    return $this;
+  }
+
+  public function setStartDateTime(PhutilCalendarDateTime $datetime) {
+    return $this->setParameter(
+      'startDateTime',
+      $datetime->newAbsoluteDateTime()->toDictionary());
+  }
+
+  public function setEndDateTime(PhutilCalendarDateTime $datetime) {
+    return $this->setParameter(
+      'endDateTime',
+      $datetime->newAbsoluteDateTime()->toDictionary());
+  }
+
+  public function setUntilDateTime(PhutilCalendarDateTime $datetime) {
+    return $this->setParameter(
+      'untilDateTime',
+      $datetime->newAbsoluteDateTime()->toDictionary());
+  }
+
+  public function setRecurrenceRule(PhutilCalendarRecurrenceRule $rrule) {
+    return $this->setParameter(
+      'recurrenceRule',
+      $rrule->toDictionary());
+  }
+
+  public function newRecurrenceRule() {
+    if ($this->isChildEvent()) {
+      return $this->getParentEvent()->newRecurrenceRule();
+    }
+
+    if (!$this->getIsRecurring()) {
+      return null;
+    }
+
+    $dict = $this->getParameter('recurrenceRule');
+    if (!$dict) {
+      return null;
+    }
+
+    $rrule = PhutilCalendarRecurrenceRule::newFromDictionary($dict);
+
+    $start = $this->newStartDateTime();
+    $rrule->setStartDateTime($start);
+
+    $until = $this->newUntilDateTime();
+    if ($until) {
+      $rrule->setUntil($until);
+    }
+
+    return $rrule;
+  }
+
+  public function newRecurrenceSet() {
+    if ($this->isChildEvent()) {
+      return $this->getParentEvent()->newRecurrenceSet();
+    }
+
+    $set = new PhutilCalendarRecurrenceSet();
+
+    $rrule = $this->newRecurrenceRule();
+    if (!$rrule) {
+      return null;
+    }
+
+    $set->addSource($rrule);
+
+    return $set;
+  }
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 

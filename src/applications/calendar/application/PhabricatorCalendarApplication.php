@@ -62,6 +62,19 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
           'export/(?P<id>[1-9]\d*)/(?P<filename>[^/]*)'
             => 'PhabricatorCalendarEventExportController',
         ),
+        'export/' => array(
+          $this->getQueryRoutePattern()
+            => 'PhabricatorCalendarExportListController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhabricatorCalendarExportEditController',
+          '(?P<id>[1-9]\d*)/'
+            => 'PhabricatorCalendarExportViewController',
+          'ics/(?P<secretKey>[^/]+)/(?P<filename>[^/]*)'
+            => 'PhabricatorCalendarExportICSController',
+          'disable/(?P<id>[1-9]\d*)/'
+            => 'PhabricatorCalendarExportDisableController',
+
+        ),
       ),
     );
   }
