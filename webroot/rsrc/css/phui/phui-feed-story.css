@@ -16,7 +16,6 @@
   float: left;
   margin-right: 8px;
   border-radius: 3px;
-  box-shadow: {$borderinset};
 }
 
 .phui-feed-story-head .phui-feed-story-actor-image {
