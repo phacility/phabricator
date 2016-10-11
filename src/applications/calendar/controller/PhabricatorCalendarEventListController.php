@@ -44,6 +44,10 @@ final class PhabricatorCalendarEventListController
       ->setName(pht('Import/Export'));
 
     $items[] = id(new PHUIListItemView())
+      ->setName('Imports')
+      ->setHref('/calendar/import/');
+
+    $items[] = id(new PHUIListItemView())
       ->setName('Exports')
       ->setHref('/calendar/export/');
 

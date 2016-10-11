@@ -3,6 +3,7 @@
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements
     PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
     PhabricatorProjectInterface,
     PhabricatorMarkupInterface,
     PhabricatorApplicationTransactionInterface,
@@ -40,8 +41,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $utcInstanceEpoch;
   protected $parameters = array();
 
+  protected $importAuthorPHID;
+  protected $importSourcePHID;
+  protected $importUIDIndex;
+  protected $importUID;
+
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
+  private $importSource = self::ATTACHABLE;
 
   private $viewerTimezone;
 
@@ -90,6 +97,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setAllDayDateTo(0)
       ->setStartDateTime($datetime_start)
       ->setEndDateTime($datetime_end)
+      ->attachImportSource(null)
       ->applyViewerTimezone($actor);
   }
 
@@ -306,6 +314,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
 
+    $import_uid = $this->getImportUID();
+    if ($import_uid !== null) {
+      $index = PhabricatorHash::digestForIndex($import_uid);
+    } else {
+      $index = null;
+    }
+    $this->setImportUIDIndex($index);
+
     $this->updateUTCEpochs();
 
     return parent::save();
@@ -343,6 +359,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'utcInitialEpoch' => 'epoch',
         'utcUntilEpoch' => 'epoch?',
         'utcInstanceEpoch' => 'epoch?',
+
+        'importAuthorPHID' => 'phid?',
+        'importSourcePHID' => 'phid?',
+        'importUIDIndex' => 'bytes12?',
+        'importUID' => 'text?',
 
         // TODO: DEPRECATED.
         'allDayDateFrom' => 'epoch',
@@ -885,6 +906,17 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $set;
   }
 
+  public function getImportSource() {
+    return $this->assertAttached($this->importSource);
+  }
+
+  public function attachImportSource(
+    PhabricatorCalendarImport $import = null) {
+    $this->importSource = $import;
+    return $this;
+  }
+
+
 /* -(  Markup Interface  )--------------------------------------------------- */
 
 
@@ -947,11 +979,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return $this->getEditPolicy();
+        if ($this->getImportSource()) {
+          return PhabricatorPolicy::POLICY_NOONE;
+        } else {
+          return $this->getEditPolicy();
+        }
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($this->getImportSource()) {
+      return false;
+    }
+
     // The host of an event can always view and edit it.
     $user_phid = $this->getHostPHID();
     if ($user_phid) {
@@ -974,9 +1014,37 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function describeAutomaticCapability($capability) {
+    if ($this->getImportSource()) {
+      return pht(
+        'Events imported from external sources can not be edited in '.
+        'Phabricator.');
+    }
+
     return pht(
       'The host of an event can always view and edit it. Users who are '.
       'invited to an event can always view it.');
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    $extended = array();
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $import_source = $this->getImportSource();
+        if ($import_source) {
+          $extended[] = array(
+            $import_source,
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
+        }
+        break;
+    }
+
+    return $extended;
   }
 
 
