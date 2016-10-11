@@ -1057,6 +1057,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ->setType('string')
         ->setDescription(pht('The event description.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isAllDay')
+        ->setType('bool')
+        ->setDescription(pht('True if the event is an all day event.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('startDateTime')
         ->setType('datetime')
         ->setDescription(pht('Start date and time of the event.')),
@@ -1074,7 +1078,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
-      'isAllDay' => $this->getIsAllDay(),
+      'isAllDay' => (bool)$this->getIsAllDay(),
       'startDateTime' => $this->getConduitDateTime($start_datetime),
       'endDateTime' => $this->getConduitDateTime($end_datetime),
     );
@@ -1097,7 +1101,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->overrideTimezoneIdentifier($this->viewerTimezone);
 
     return array(
-      'epoch' => $epoch,
+      'epoch' => (int)$epoch,
       'display' => array(
         'default' => phabricator_datetime($epoch, $viewer),
       ),
