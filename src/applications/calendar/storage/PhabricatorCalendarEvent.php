@@ -1056,18 +1056,54 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ->setKey('description')
         ->setType('string')
         ->setDescription(pht('The event description.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('startDateTime')
+        ->setType('datetime')
+        ->setDescription(pht('Start date and time of the event.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('endDateTime')
+        ->setType('datetime')
+        ->setDescription(pht('End date and time of the event.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $start_datetime = $this->newStartDateTime();
+    $end_datetime = $this->newEndDateTime();
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
+      'isAllDay' => $this->getIsAllDay(),
+      'startDateTime' => $this->getConduitDateTime($start_datetime),
+      'endDateTime' => $this->getConduitDateTime($end_datetime),
     );
   }
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+  private function getConduitDateTime($datetime) {
+    if (!$datetime) {
+      return null;
+    }
+
+    $epoch = $datetime->getEpoch();
+
+    // TODO: Possibly pass the actual viewer in from the Conduit stuff, or
+    // retain it when setting the viewer timezone?
+    $viewer = id(new PhabricatorUser())
+      ->overrideTimezoneIdentifier($this->viewerTimezone);
+
+    return array(
+      'epoch' => $epoch,
+      'display' => array(
+        'default' => phabricator_datetime($epoch, $viewer),
+      ),
+      'iso8601' => $datetime->getISO8601(),
+      'timezone' => $this->viewerTimezone,
+    );
   }
 
 }
