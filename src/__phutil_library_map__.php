@@ -919,6 +919,7 @@ phutil_register_library_map(array(
     'DrydockAuthorizationListView' => 'applications/drydock/view/DrydockAuthorizationListView.php',
     'DrydockAuthorizationPHIDType' => 'applications/drydock/phid/DrydockAuthorizationPHIDType.php',
     'DrydockAuthorizationQuery' => 'applications/drydock/query/DrydockAuthorizationQuery.php',
+    'DrydockAuthorizationSearchConduitAPIMethod' => 'applications/drydock/conduit/DrydockAuthorizationSearchConduitAPIMethod.php',
     'DrydockAuthorizationSearchEngine' => 'applications/drydock/query/DrydockAuthorizationSearchEngine.php',
     'DrydockAuthorizationViewController' => 'applications/drydock/controller/DrydockAuthorizationViewController.php',
     'DrydockBlueprint' => 'applications/drydock/storage/DrydockBlueprint.php',
@@ -5468,12 +5469,14 @@ phutil_register_library_map(array(
     'DrydockAuthorization' => array(
       'DrydockDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorConduitResultInterface',
     ),
     'DrydockAuthorizationAuthorizeController' => 'DrydockController',
     'DrydockAuthorizationListController' => 'DrydockController',
     'DrydockAuthorizationListView' => 'AphrontView',
     'DrydockAuthorizationPHIDType' => 'PhabricatorPHIDType',
     'DrydockAuthorizationQuery' => 'DrydockQuery',
+    'DrydockAuthorizationSearchConduitAPIMethod' => 'PhabricatorSearchEngineAPIMethod',
     'DrydockAuthorizationSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'DrydockAuthorizationViewController' => 'DrydockController',
     'DrydockBlueprint' => array(
