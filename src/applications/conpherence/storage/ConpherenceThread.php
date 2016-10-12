@@ -5,7 +5,8 @@ final class ConpherenceThread extends ConpherenceDAO
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorMentionableInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorNgramsInterface {
 
   protected $title;
   protected $topic;
@@ -425,6 +426,16 @@ final class ConpherenceThread extends ConpherenceDAO
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
     return $timeline;
+  }
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new ConpherenceThreadTitleNgrams())
+        ->setValue($this->getTitle()),
+      );
   }
 
 

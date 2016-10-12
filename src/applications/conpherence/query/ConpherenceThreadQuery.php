@@ -76,6 +76,12 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
+  public function withTitleNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new ConpherenceThreadTitleNgrams()),
+      $ngrams);
+  }
+
   protected function loadPage() {
     $table = new ConpherenceThread();
     $conn_r = $table->establishConnection('r');

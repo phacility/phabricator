@@ -22,8 +22,13 @@ final class ConpherenceThreadSearchEngine
         ->setLabel(pht('Participants'))
         ->setKey('participants')
         ->setAliases(array('participant')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Rooms'))
+        ->setKey('phids')
+        ->setDescription(pht('Search by room titles.'))
+        ->setDatasource(id(new ConpherenceThreadDatasource())),
       id(new PhabricatorSearchTextField())
-        ->setLabel(pht('Contains Words'))
+        ->setLabel(pht('Room Contains Words'))
         ->setKey('fulltext'),
     );
   }
@@ -47,7 +52,9 @@ final class ConpherenceThreadSearchEngine
     if ($map['fulltext']) {
       $query->withFulltext($map['fulltext']);
     }
-
+    if ($map['phids']) {
+      $query->withPHIDs($map['phids']);
+    }
     return $query;
   }
 
