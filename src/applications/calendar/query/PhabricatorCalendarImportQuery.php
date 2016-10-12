@@ -70,6 +70,24 @@ final class PhabricatorCalendarImportQuery
     return $where;
   }
 
+  protected function willFilterPage(array $page) {
+    $engines = PhabricatorCalendarImportEngine::getAllImportEngines();
+    foreach ($page as $key => $import) {
+      $engine_type = $import->getEngineType();
+      $engine = idx($engines, $engine_type);
+
+      if (!$engine) {
+        unset($page[$key]);
+        $this->didRejectResult($import);
+        continue;
+      }
+
+      $import->attachEngine(clone $engine);
+    }
+
+    return $page;
+  }
+
   protected function getPrimaryTableAlias() {
     return 'import';
   }

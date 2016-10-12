@@ -468,9 +468,9 @@ final class PhabricatorCalendarEventQuery
         ->setViewer($viewer)
         ->withPHIDs($import_phids)
         ->execute();
-      $sources = mpull($sources, null, 'getPHID');
+      $imports = mpull($imports, null, 'getPHID');
     } else {
-      $sources = array();
+      $imports = array();
     }
 
     foreach ($events as $key => $event) {

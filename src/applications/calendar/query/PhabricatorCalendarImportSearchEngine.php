@@ -62,7 +62,7 @@ final class PhabricatorCalendarImportSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setViewer($viewer)
         ->setObjectName(pht('Import %d', $import->getID()))
-        ->setHeader($import->getName())
+        ->setHeader($import->getDisplayName())
         ->setHref($import->getURI());
 
       if ($import->getIsDisabled()) {

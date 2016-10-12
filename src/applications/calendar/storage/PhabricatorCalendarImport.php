@@ -17,12 +17,16 @@ final class PhabricatorCalendarImport
 
   private $engine = self::ATTACHABLE;
 
-  public static function initializeNewCalendarImport(PhabricatorUser $actor) {
+  public static function initializeNewCalendarImport(
+    PhabricatorUser $actor,
+    PhabricatorCalendarImportEngine $engine) {
     return id(new self())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($actor->getPHID())
       ->setEditPolicy($actor->getPHID())
-      ->setIsDisabled(0);
+      ->setIsDisabled(0)
+      ->setEngineType($engine->getImportEngineType())
+      ->attachEngine($engine);
   }
 
   protected function getConfiguration() {
@@ -51,6 +55,33 @@ final class PhabricatorCalendarImport
   public function getURI() {
     $id = $this->getID();
     return "/calendar/import/{$id}/";
+  }
+
+  public function attachEngine(PhabricatorCalendarImportEngine $engine) {
+    $this->engine = $engine;
+    return $this;
+  }
+
+  public function getEngine() {
+    return $this->assertAttached($this->engine);
+  }
+
+  public function getParameter($key, $default = null) {
+    return idx($this->parameters, $key, $default);
+  }
+
+  public function setParameter($key, $value) {
+    $this->parameters[$key] = $value;
+    return $this;
+  }
+
+  public function getDisplayName() {
+    $name = $this->getName();
+    if (strlen($name)) {
+      return $name;
+    }
+
+    return $this->getEngine()->getDisplayName($this);
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
