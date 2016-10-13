@@ -309,16 +309,10 @@ final class PhabricatorCalendarEventEditor
     PhabricatorCalendarEvent $event) {
     $actor = $this->getActor();
 
-    $event_node = $event->newIntermediateEventNode($actor);
-
-    $document_node = id(new PhutilCalendarDocumentNode())
-      ->appendChild($event_node);
-
-    $root_node = id(new PhutilCalendarRootNode())
-      ->appendChild($document_node);
-
-    $ics_data = id(new PhutilICSWriter())
-      ->writeICSDocument($root_node);
+    $ics_data = id(new PhabricatorCalendarICSWriter())
+      ->setViewer($actor)
+      ->setEvents(array($event))
+      ->writeICSDocument();
 
     $ics_attachment = new PhabricatorMetaMTAAttachment(
       $ics_data,

@@ -1,12 +1,11 @@
 <?php
 
-final class PhabricatorCalendarExportQuery
+final class PhabricatorCalendarImportQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
   private $authorPHIDs;
-  private $secretKeys;
   private $isDisabled;
 
   public function withIDs(array $ids) {
@@ -29,13 +28,8 @@ final class PhabricatorCalendarExportQuery
     return $this;
   }
 
-  public function withSecretKeys(array $keys) {
-    $this->secretKeys = $keys;
-    return $this;
-  }
-
   public function newResultObject() {
-    return new PhabricatorCalendarExport();
+    return new PhabricatorCalendarImport();
   }
 
   protected function loadPage() {
@@ -48,43 +42,54 @@ final class PhabricatorCalendarExportQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'export.id IN (%Ld)',
+        'import.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'export.phid IN (%Ls)',
+        'import.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'export.authorPHID IN (%Ls)',
+        'import.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
     if ($this->isDisabled !== null) {
       $where[] = qsprintf(
         $conn,
-        'export.isDisabled = %d',
+        'import.isDisabled = %d',
         (int)$this->isDisabled);
-    }
-
-    if ($this->secretKeys !== null) {
-      $where[] = qsprintf(
-        $conn,
-        'export.secretKey IN (%Ls)',
-        $this->secretKeys);
     }
 
     return $where;
   }
 
+  protected function willFilterPage(array $page) {
+    $engines = PhabricatorCalendarImportEngine::getAllImportEngines();
+    foreach ($page as $key => $import) {
+      $engine_type = $import->getEngineType();
+      $engine = idx($engines, $engine_type);
+
+      if (!$engine) {
+        unset($page[$key]);
+        $this->didRejectResult($import);
+        continue;
+      }
+
+      $import->attachEngine(clone $engine);
+    }
+
+    return $page;
+  }
+
   protected function getPrimaryTableAlias() {
-    return 'export';
+    return 'import';
   }
 
   public function getQueryApplicationClass() {

@@ -329,7 +329,6 @@ final class PhabricatorApplicationSearchController
       $crumbs->addTextCrumb($title);
     }
 
-    $nav->addClass('application-search-view');
     require_celerity_resource('application-search-view-css');
 
     return $this->newPage()
@@ -337,6 +336,7 @@ final class PhabricatorApplicationSearchController
       ->setTitle(pht('Query: %s', $title))
       ->setCrumbs($crumbs)
       ->setNavigation($nav)
+      ->addClass('application-search-view')
       ->appendChild($body);
   }
 
