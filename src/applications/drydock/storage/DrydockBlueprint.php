@@ -10,7 +10,8 @@ final class DrydockBlueprint extends DrydockDAO
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorNgramsInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorConduitResultInterface {
 
   protected $className;
   protected $blueprintName;
@@ -357,6 +358,35 @@ final class DrydockBlueprint extends DrydockDAO
     return array(
       id(new DrydockBlueprintNameNgrams())
         ->setValue($this->getBlueprintName()),
+    );
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of this blueprint.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('type')
+        ->setType('string')
+        ->setDescription(pht('The type of resource this blueprint provides.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getBlueprintName(),
+      'type' => $this->getImplementation()->getType(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
     );
   }
 
