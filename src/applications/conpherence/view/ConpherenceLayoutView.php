@@ -7,6 +7,7 @@ final class ConpherenceLayoutView extends AphrontTagView {
   private $threadView;
   private $role;
   private $header;
+  private $search;
   private $messages;
   private $replyForm;
   private $latestTransactionID;
@@ -23,6 +24,11 @@ final class ConpherenceLayoutView extends AphrontTagView {
 
   public function setHeader($header) {
     $this->header = $header;
+    return $this;
+  }
+
+  public function setSearch($search) {
+    $this->search = $search;
     return $this;
   }
 
@@ -131,6 +137,12 @@ final class ConpherenceLayoutView extends AphrontTagView {
             'class' => 'conpherence-content-pane',
           ),
           array(
+            phutil_tag(
+              'div',
+              array(
+                'class' => 'conpherence-loading-mask',
+              ),
+              ''),
             javelin_tag(
               'div',
               array(
@@ -184,6 +196,14 @@ final class ConpherenceLayoutView extends AphrontTagView {
                     'sigil' => 'conpherence-messages',
                   ),
                   nonempty($this->messages, '')),
+                javelin_tag(
+                  'div',
+                  array(
+                    'class' => 'conpherence-search-main',
+                    'id' => 'conpherence-search-main',
+                    'sigil' => 'conpherence-search-main',
+                  ),
+                  nonempty($this->search, '')),
                 phutil_tag(
                   'div',
                   array(

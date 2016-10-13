@@ -157,7 +157,6 @@ return array(
     'conpherence-message-pane-css',
     'conpherence-notification-css',
     'conpherence-transaction-css',
-    'conpherence-update-css',
     'conpherence-participant-pane-css',
     'conpherence-header-pane-css',
   ),

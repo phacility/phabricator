@@ -89,9 +89,11 @@ final class ConpherenceViewController extends
         ->setObject($conpherence)
         ->execute();
       $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
+      $search = $this->buildSearchForm();
       $form = $this->renderFormContent();
       $content = array(
         'header' => $header,
+        'search' => $search,
         'transactions' => $messages,
         'form' => $form,
       );
@@ -128,6 +130,7 @@ final class ConpherenceViewController extends
       ->setBaseURI($this->getApplicationURI())
       ->setThread($conpherence)
       ->setHeader($header)
+      ->setSearch($search)
       ->setMessages($messages)
       ->setReplyForm($form)
       ->setLatestTransactionID($data['latest_transaction_id'])

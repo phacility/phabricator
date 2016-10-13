@@ -327,7 +327,6 @@ final class ConpherenceUpdateController
           ->setUser($user)
           ->setDatasource(new PhabricatorPeopleDatasource()));
 
-    require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
       ->setTitle(pht('Add Participants'))
       ->addHiddenInput('action', 'add_person')
@@ -407,8 +406,6 @@ final class ConpherenceUpdateController
       }
     }
 
-    require_celerity_resource('conpherence-update-css');
-
     $dialog = id(new AphrontDialogView())
       ->setTitle($title)
       ->addHiddenInput('action', 'remove_person')
@@ -471,7 +468,6 @@ final class ConpherenceUpdateController
         ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
         ->setPolicies($policies));
 
-    require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
       ->setTitle($title)
       ->addHiddenInput('action', 'metadata')

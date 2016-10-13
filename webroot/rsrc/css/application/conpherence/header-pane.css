@@ -66,7 +66,17 @@
 }
 
 .conpherence-participant-toggle.phui-icon-circle .phui-icon-view {
-    color: {$sky};
+  color: {$sky};
+}
+
+.show-searchbar .conpherence-search-toggle.phui-icon-circle {
+  text-decoration: none;
+  border-color: {$green};
+  cursor: pointer;
+}
+
+.show-searchbar .conpherence-search-toggle.phui-icon-circle .phui-icon-view {
+  color: {$green};
 }
 
 .hide-widgets .conpherence-participant-toggle.phui-icon-circle {
@@ -76,5 +86,5 @@
 }
 
 .hide-widgets .conpherence-participant-toggle.phui-icon-circle .phui-icon-view {
-    color: {$lightblueborder};
+  color: {$lightblueborder};
 }
