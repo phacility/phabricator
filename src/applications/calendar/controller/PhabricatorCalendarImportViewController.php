@@ -30,12 +30,14 @@ final class PhabricatorCalendarImportViewController
     $curtain = $this->buildCurtain($import);
     $details = $this->buildPropertySection($import);
 
+    $log_messages = $this->buildLogMessages($import);
     $imported_events = $this->buildImportedEvents($import);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setMainColumn(
         array(
+          $log_messages,
           $imported_events,
           $timeline,
         ))
@@ -134,8 +136,70 @@ final class PhabricatorCalendarImportViewController
     return $properties;
   }
 
-  private function buildImportedEvents(
-    PhabricatorCalendarImport $import) {
+  private function buildLogMessages(PhabricatorCalendarImport $import) {
+    $viewer = $this->getViewer();
+
+    $logs = id(new PhabricatorCalendarImportLogQuery())
+      ->setViewer($viewer)
+      ->withImportPHIDs(array($import->getPHID()))
+      ->setLimit(25)
+      ->execute();
+
+    $rows = array();
+    foreach ($logs as $log) {
+      $icon = $log->getDisplayIcon($viewer);
+      $color = $log->getDisplayColor($viewer);
+      $name = $log->getDisplayType($viewer);
+      $description = $log->getDisplayDescription($viewer);
+
+      $rows[] = array(
+        $log->getID(),
+        id(new PHUIIconView())->setIcon($icon, $color),
+        $name,
+        $description,
+        phabricator_datetime($log->getDateCreated(), $viewer),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('ID'),
+          null,
+          pht('Type'),
+          pht('Mesage'),
+          pht('Date'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          null,
+          'pri',
+          'wide',
+          null,
+        ));
+
+    $all_uri = $this->getApplicationURI('import/log/');
+    $all_uri = (string)id(new PhutilURI($all_uri))
+      ->setQueryParam('importSourcePHID', $import->getPHID());
+
+    $all_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View All'))
+      ->setIcon('fa-search')
+      ->setHref($all_uri);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Log Messages'))
+      ->addActionLink($all_button);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($table);
+  }
+
+  private function buildImportedEvents(PhabricatorCalendarImport $import) {
     $viewer = $this->getViewer();
 
     $engine = id(new PhabricatorCalendarEventSearchEngine())

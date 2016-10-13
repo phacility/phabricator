@@ -133,6 +133,17 @@ final class PhabricatorCalendarImport
     return $timeline;
   }
 
+  public function newLogMessage($type, array $parameters) {
+    $parameters = array(
+      'type' => $type,
+    ) + $parameters;
+
+    return id(new PhabricatorCalendarImportLog())
+      ->setImportPHID($this->getPHID())
+      ->setParameters($parameters)
+      ->save();
+  }
+
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
@@ -144,10 +155,19 @@ final class PhabricatorCalendarImport
     $this->openTransaction();
 
       $events = id(new PhabricatorCalendarEventQuery())
+        ->setViewer($viewer)
         ->withImportSourcePHIDs(array($this->getPHID()))
         ->execute();
       foreach ($events as $event) {
         $engine->destroyObject($event);
+      }
+
+      $logs = id(new PhabricatorCalendarImportLogQuery())
+        ->setViewer($viewer)
+        ->withImportPHIDs(array($this->getPHID()))
+        ->execute();
+      foreach ($logs as $log) {
+        $engine->destroyObject($log);
       }
 
       $this->delete();

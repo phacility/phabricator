@@ -907,6 +907,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $set;
   }
 
+  public function isImportedEvent() {
+    return (bool)$this->getImportSourcePHID();
+  }
+
   public function getImportSource() {
     return $this->assertAttached($this->importSource);
   }

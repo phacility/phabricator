@@ -49,8 +49,13 @@ abstract class PhabricatorCalendarImportEngine
     $nodes = array();
     foreach ($root->getChildren() as $document) {
       foreach ($document->getChildren() as $node) {
-        if ($node->getNodeType() != $event_type) {
-          // TODO: Warn that we ignored this.
+        $node_type = $node->getNodeType();
+        if ($node_type != $event_type) {
+          $import->newLogMessage(
+            PhabricatorCalendarImportIgnoredNodeLogType::LOGTYPE,
+            array(
+              'node.type' => $node_type,
+            ));
           continue;
         }
 
@@ -59,14 +64,60 @@ abstract class PhabricatorCalendarImportEngine
     }
 
     $node_map = array();
-    $parent_uids = array();
     foreach ($nodes as $node) {
       $full_uid = $this->getFullNodeUID($node);
       if (isset($node_map[$full_uid])) {
-        // TODO: Warn that we got a duplicate.
+        $import->newLogMessage(
+          PhabricatorCalendarImportDuplicateLogType::LOGTYPE,
+          array(
+            'uid.full' => $full_uid,
+          ));
         continue;
       }
       $node_map[$full_uid] = $node;
+    }
+
+    // If we already know about some of these events and they were created
+    // here, we're not going to import it again. This can happen if a user
+    // exports an event and then tries to import it again. This is probably
+    // not what they meant to do and this pathway generally leads to madness.
+    $likely_phids = array();
+    foreach ($node_map as $full_uid => $node) {
+      $uid = $node->getUID();
+      $matches = null;
+      if (preg_match('/^(PHID-.*)@(.*)\z/', $uid, $matches)) {
+        $likely_phids[$full_uid] = $matches[1];
+      }
+    }
+
+    if ($likely_phids) {
+      // NOTE: We're using the omnipotent viewer here because we don't want
+      // to collide with events that already exist, even if you can't see
+      // them.
+      $events = id(new PhabricatorCalendarEventQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($likely_phids)
+        ->execute();
+      $events = mpull($events, null, 'getPHID');
+      foreach ($node_map as $full_uid => $node) {
+        $phid = idx($likely_phids, $full_uid);
+        if (!$phid) {
+          continue;
+        }
+
+        $event = idx($events, $phid);
+        if (!$event) {
+          continue;
+        }
+
+        $import->newLogMessage(
+          PhabricatorCalendarImportOriginalLogType::LOGTYPE,
+          array(
+            'phid' => $event->getPHID(),
+          ));
+
+        unset($node_map[$full_uid]);
+      }
     }
 
     if ($node_map) {
@@ -114,7 +165,12 @@ abstract class PhabricatorCalendarImportEngine
         // does not exist or we're going to delete it anyway. We just drop
         // this node.
 
-        // TODO: Warn that we got rid of an event with no parent.
+        $import->newLogMessage(
+          PhabricatorCalendarImportOrphanLogType::LOGTYPE,
+          array(
+            'uid.full' => $full_uid,
+            'uid.parent' => $parent_uid,
+          ));
 
         continue;
       }
@@ -130,6 +186,10 @@ abstract class PhabricatorCalendarImportEngine
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorWebContentSource::SOURCECONST);
 
+    // NOTE: We're using the omnipotent user here because imported events are
+    // otherwise immutable.
+    $edit_actor = PhabricatorUser::getOmnipotentUser();
+
     $update_map = array_select_keys($update_map, $insert_order);
     foreach ($update_map as $full_uid => $event) {
       $parent_uid = $this->getParentNodeUID($node_map[$full_uid]);
@@ -144,13 +204,28 @@ abstract class PhabricatorCalendarImportEngine
       $event_xactions = $xactions[$full_uid];
 
       $editor = id(new PhabricatorCalendarEventEditor())
-        ->setActor($viewer)
+        ->setActor($edit_actor)
         ->setActingAsPHID($import->getPHID())
         ->setContentSource($content_source)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true);
 
+      $is_new = !$event->getID();
+
       $editor->applyTransactions($event, $event_xactions);
+
+      $import->newLogMessage(
+        PhabricatorCalendarImportUpdateLogType::LOGTYPE,
+        array(
+          'new' => $is_new,
+          'phid' => $event->getPHID(),
+        ));
+    }
+
+    if (!$update_map) {
+      $import->newLogMessage(
+        PhabricatorCalendarImportEmptyLogType::LOGTYPE,
+        array());
     }
 
     // TODO: When the source is a subscription-based ICS file or some other
