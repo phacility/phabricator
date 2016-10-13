@@ -21,6 +21,16 @@ abstract class PhabricatorCalendarImportEngine
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import);
 
+  abstract public function canDisable(
+    PhabricatorUser $viewer,
+    PhabricatorCalendarImport $import);
+
+  public function explainCanDisable(
+    PhabricatorUser $viewer,
+    PhabricatorCalendarImport $import) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
   final public static function getAllImportEngines() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)

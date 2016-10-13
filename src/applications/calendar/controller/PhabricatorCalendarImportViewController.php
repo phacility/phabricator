@@ -80,6 +80,7 @@ final class PhabricatorCalendarImportViewController
     $id = $import->getID();
 
     $curtain = $this->newCurtainView($import);
+    $engine = $import->getEngine();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -88,6 +89,8 @@ final class PhabricatorCalendarImportViewController
 
     $edit_uri = "import/edit/{$id}/";
     $edit_uri = $this->getApplicationURI($edit_uri);
+
+    $can_disable = ($can_edit && $engine->canDisable($viewer, $import));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -111,7 +114,7 @@ final class PhabricatorCalendarImportViewController
       id(new PhabricatorActionView())
         ->setName($disable_name)
         ->setIcon($disable_icon)
-        ->setDisabled(!$can_edit)
+        ->setDisabled(!$can_disable)
         ->setWorkflow(true)
         ->setHref($disable_uri));
 

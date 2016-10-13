@@ -70,5 +70,20 @@ final class PhabricatorCalendarICSImportEngine
   }
 
 
+  public function canDisable(
+    PhabricatorUser $viewer,
+    PhabricatorCalendarImport $import) {
+    return false;
+  }
+
+  public function explainCanDisable(
+    PhabricatorUser $viewer,
+    PhabricatorCalendarImport $import) {
+    return pht(
+      'You can not disable import of an ICS file because the entire import '.
+      'occurs immediately when you upload the file. There is no further '.
+      'activity to disable.');
+  }
+
 
 }
