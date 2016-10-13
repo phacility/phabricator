@@ -30,10 +30,13 @@ final class PhabricatorCalendarImportViewController
     $curtain = $this->buildCurtain($import);
     $details = $this->buildPropertySection($import);
 
+    $imported_events = $this->buildImportedEvents($import);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setMainColumn(
         array(
+          $imported_events,
           $timeline,
         ))
       ->setCurtain($curtain)
@@ -130,4 +133,46 @@ final class PhabricatorCalendarImportViewController
 
     return $properties;
   }
+
+  private function buildImportedEvents(
+    PhabricatorCalendarImport $import) {
+    $viewer = $this->getViewer();
+
+    $engine = id(new PhabricatorCalendarEventSearchEngine())
+      ->setViewer($viewer);
+
+    $saved = $engine->newSavedQuery()
+      ->setParameter('importSourcePHIDs', array($import->getPHID()));
+
+    $pager = $engine->newPagerForSavedQuery($saved);
+    $pager->setPageSize(25);
+
+    $query = $engine->buildQueryFromSavedQuery($saved);
+
+    $results = $engine->executeQuery($query, $pager);
+    $view = $engine->renderResults($results, $saved);
+    $list = $view->getObjectList();
+    $list->setNoDataString(pht('No imported events.'));
+
+    $all_uri = $this->getApplicationURI();
+    $all_uri = (string)id(new PhutilURI($all_uri))
+      ->setQueryParam('importSourcePHID', $import->getPHID())
+      ->setQueryParam('display', 'list');
+
+    $all_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View All'))
+      ->setIcon('fa-search')
+      ->setHref($all_uri);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Imported Events'))
+      ->addActionLink($all_button);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($list);
+  }
+
 }

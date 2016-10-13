@@ -51,6 +51,10 @@ final class PhabricatorCalendarEventSearchEngine
         ->setKey('isCancelled')
         ->setOptions($this->getCancelledOptions())
         ->setDefault('active'),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Import Sources'))
+        ->setKey('importSourcePHIDs')
+        ->setAliases(array('importSourcePHID')),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Display Options'))
         ->setKey('display')
@@ -112,6 +116,10 @@ final class PhabricatorCalendarEventSearchEngine
       case 'cancelled':
         $query->withIsCancelled(true);
         break;
+    }
+
+    if ($map['importSourcePHIDs']) {
+      $query->withImportSourcePHIDs($map['importSourcePHIDs']);
     }
 
     // Generate ghosts (and ignore stub events) if we aren't querying for
