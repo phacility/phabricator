@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'conpherence.pkg.css' => '4601645d',
-    'conpherence.pkg.js' => '11f3e07e',
+    'conpherence.pkg.js' => '44dd69f5',
     'core.pkg.css' => '7ca260a3',
     'core.pkg.js' => '30185d95',
     'darkconsole.pkg.js' => 'e7393ebb',
@@ -437,7 +437,6 @@ return array(
     'rsrc/js/application/calendar/behavior-recurring-edit.js' => '5f1c4d5f',
     'rsrc/js/application/config/behavior-reorder-fields.js' => 'b6993408',
     'rsrc/js/application/conpherence/ConpherenceThreadManager.js' => '01774ab2',
-    'rsrc/js/application/conpherence/behavior-drag-and-drop-photo.js' => 'cf86d16a',
     'rsrc/js/application/conpherence/behavior-durable-column.js' => 'c5238acb',
     'rsrc/js/application/conpherence/behavior-menu.js' => '9eb55204',
     'rsrc/js/application/conpherence/behavior-participant-pane.js' => '8604caa8',
@@ -665,7 +664,6 @@ return array(
     'javelin-behavior-choose-control' => '327a00d1',
     'javelin-behavior-comment-actions' => '0300eae6',
     'javelin-behavior-config-reorder-fields' => 'b6993408',
-    'javelin-behavior-conpherence-drag-and-drop-photo' => 'cf86d16a',
     'javelin-behavior-conpherence-menu' => '9eb55204',
     'javelin-behavior-conpherence-participant-pane' => '8604caa8',
     'javelin-behavior-conpherence-pontificate' => 'f2e58483',
@@ -2010,12 +2008,6 @@ return array(
       'javelin-util',
       'phabricator-notification-css',
     ),
-    'cf86d16a' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-workflow',
-      'phabricator-drag-and-drop-file-upload',
-    ),
     'cfd23f37' => array(
       'javelin-install',
       'javelin-util',
@@ -2305,7 +2297,6 @@ return array(
       'conpherence-header-pane-css',
     ),
     'conpherence.pkg.js' => array(
-      'javelin-behavior-conpherence-drag-and-drop-photo',
       'javelin-behavior-conpherence-menu',
       'javelin-behavior-conpherence-participant-pane',
       'javelin-behavior-conpherence-pontificate',
