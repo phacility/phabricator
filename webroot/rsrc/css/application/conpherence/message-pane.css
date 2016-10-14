@@ -439,6 +439,10 @@
   height: auto;
 }
 
+.conpherence-search-form-view {
+  display: none;
+}
+
 .show-searchbar .conpherence-search-form-view {
   display: block;
   height: 54px;
