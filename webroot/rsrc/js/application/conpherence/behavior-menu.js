@@ -32,7 +32,7 @@ JX.behavior('conpherence-menu', function(config) {
     return scrollbar.getContentNode();
   });
   threadManager.setWillLoadThreadCallback(function() {
-    markThreadLoading(true);
+    markThreadsLoading(true);
   });
   threadManager.setDidLoadThreadCallback(function(r) {
     var header = JX.$H(r.header);
@@ -48,7 +48,7 @@ JX.behavior('conpherence-menu', function(config) {
     JX.DOM.setContent(scrollbar.getContentNode(), messages);
     JX.DOM.setContent(form_root, form);
 
-    markThreadLoading(false);
+    markThreadsLoading(false);
 
     didRedrawThread(true);
   });
@@ -207,15 +207,11 @@ JX.behavior('conpherence-menu', function(config) {
   }
 
   function markThreadsLoading(loading) {
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var menu = JX.DOM.find(root, 'div', 'conpherence-menu-pane');
-    JX.DOM.alterClass(menu, 'loading', loading);
+    var root = JX.$('conpherence-main-layout');
+    JX.DOM.alterClass(root, 'loading', loading);
   }
 
   function markThreadLoading(loading) {
-    var root = JX.$('conpherence-main-layout');
-    JX.DOM.alterClass(root, 'loading', loading);
-
     try {
       var textarea = JX.DOM.find(form, 'textarea');
       textarea.disabled = loading;
