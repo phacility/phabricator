@@ -113,11 +113,7 @@ abstract class ConpherenceController extends PhabricatorController {
           ->setHref('#')
           ->addClass('conpherence-participant-toggle'));
 
-      Javelin::initBehavior(
-        'conpherence-search',
-        array(
-          'searchURI' => '/conpherence/threadsearch/'.$conpherence->getID().'/',
-        ));
+      Javelin::initBehavior('conpherence-search');
 
       $header->addActionItem(
         id(new PHUIIconCircleView())
@@ -187,6 +183,7 @@ abstract class ConpherenceController extends PhabricatorController {
         'action' => '/conpherence/threadsearch/'.$id.'/',
         'sigil' => 'conpherence-search-form',
         'class' => 'conpherence-search-form',
+        'id' => 'conpherence-search-form',
       ),
       array(
         $bar,

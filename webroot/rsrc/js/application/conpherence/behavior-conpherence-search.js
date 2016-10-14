@@ -7,7 +7,7 @@
  *           javelin-stratcom
  */
 
-JX.behavior('conpherence-search', function(config) {
+JX.behavior('conpherence-search', function() {
 
   var shown = true;
   var request = null;
@@ -24,13 +24,14 @@ JX.behavior('conpherence-search', function(config) {
   function _doSearch(e) {
     e.kill();
     var search_text = JX.$('conpherence-search-input').value;
+    var search_uri = JX.$('conpherence-search-form').action;
     var search_node = JX.$('conpherence-search-results');
 
     if (request || !search_text) {
       return;
     }
 
-    request = new JX.Request(config.searchURI, function(response) {
+    request = new JX.Request(search_uri, function(response) {
       JX.DOM.setContent(search_node, JX.$H(response));
       request = null;
     });
