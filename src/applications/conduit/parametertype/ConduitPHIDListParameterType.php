@@ -3,9 +3,9 @@
 final class ConduitPHIDListParameterType
   extends ConduitListParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $list = parent::getParameterValue($request, $key);
-    return $this->validateStringList($request, $key, $list);
+  protected function getParameterValue(array $request, $key, $strict) {
+    $list = parent::getParameterValue($request, $key, $strict);
+    return $this->parseStringList($request, $key, $list, $strict);
   }
 
   protected function getParameterTypeName() {

@@ -3,10 +3,10 @@
 final class ConduitColumnsParameterType
   extends ConduitParameterType {
 
-  protected function getParameterValue(array $request, $key) {
+  protected function getParameterValue(array $request, $key, $strict) {
     // We don't do any meaningful validation here because the transaction
     // itself validates everything and the input format is flexible.
-    return parent::getParameterValue($request, $key);
+    return parent::getParameterValue($request, $key, $strict);
   }
 
   protected function getParameterTypeName() {

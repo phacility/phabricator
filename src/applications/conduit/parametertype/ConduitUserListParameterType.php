@@ -3,9 +3,9 @@
 final class ConduitUserListParameterType
   extends ConduitListParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $list = parent::getParameterValue($request, $key);
-    $list = $this->validateStringList($request, $key, $list);
+  protected function getParameterValue(array $request, $key, $strict) {
+    $list = parent::getParameterValue($request, $key, $strict);
+    $list = $this->parseStringList($request, $key, $list, $strict);
     return id(new PhabricatorUserPHIDResolver())
       ->setViewer($this->getViewer())
       ->resolvePHIDs($list);

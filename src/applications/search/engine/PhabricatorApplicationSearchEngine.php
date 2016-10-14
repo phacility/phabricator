@@ -1115,7 +1115,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         continue;
       }
 
-      $value = $field->readValueFromConduitRequest($constraints);
+      $value = $field->readValueFromConduitRequest(
+        $constraints,
+        $request->getIsStrictlyTyped());
       $saved_query->setParameter($field->getKey(), $value);
     }
 

@@ -30,12 +30,12 @@ abstract class ConduitParameterType extends Phobject {
   }
 
 
-  final public function getValue(array $request, $key) {
+  final public function getValue(array $request, $key, $strict = true) {
     if (!$this->getExists($request, $key)) {
       return $this->getParameterDefault();
     }
 
-    return $this->getParameterValue($request, $key);
+    return $this->getParameterValue($request, $key, $strict);
   }
 
   final public function getKeys($key) {
@@ -85,12 +85,59 @@ abstract class ConduitParameterType extends Phobject {
     return array_key_exists($key, $request);
   }
 
-  protected function getParameterValue(array $request, $key) {
+  protected function getParameterValue(array $request, $key, $strict) {
     return $request[$key];
   }
 
   protected function getParameterKeys($key) {
     return array($key);
+  }
+
+  protected function parseStringValue(array $request, $key, $value, $strict) {
+    if (!is_string($value)) {
+      $this->raiseValidationException(
+        $request,
+        $key,
+        pht('Expected string, got something else.'));
+    }
+    return $value;
+  }
+
+  protected function parseIntValue(array $request, $key, $value, $strict) {
+    if (!$strict && is_string($value) && ctype_digit($value)) {
+      $value = $value + 0;
+      if (!is_int($value)) {
+        $this->raiseValidationException(
+          $request,
+          $key,
+          pht('Integer overflow.'));
+      }
+    } else if (!is_int($value)) {
+      $this->raiseValidationException(
+        $request,
+        $key,
+        pht('Expected integer, got something else.'));
+    }
+    return $value;
+  }
+
+  protected function parseBoolValue(array $request, $key, $value, $strict) {
+    $bool_strings = array(
+      '0' => false,
+      '1' => true,
+      'false' => false,
+      'true' => true,
+    );
+
+    if (!$strict && is_string($value) && isset($bool_strings[$value])) {
+      $value = $bool_strings[$value];
+    } else if (!is_bool($value)) {
+      $this->raiseValidationException(
+        $request,
+        $key,
+        pht('Expected boolean (true or false), got something else.'));
+    }
+    return $value;
   }
 
   abstract protected function getParameterTypeName();
