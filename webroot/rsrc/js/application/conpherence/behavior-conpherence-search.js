@@ -18,6 +18,13 @@ JX.behavior('conpherence-search', function() {
 
     shown = !shown;
     JX.DOM.alterClass(node, 'show-searchbar', !shown);
+    if (!shown) {
+      JX.$('conpherence-search-input').focus();
+    } else {
+      var form_root = JX.DOM.find(document, 'div', 'conpherence-form');
+      var textarea = JX.DOM.find(form_root, 'textarea');
+      textarea.focus();
+    }
     JX.Stratcom.invoke('resize');
   }
 

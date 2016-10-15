@@ -436,7 +436,7 @@ return array(
     'rsrc/js/application/calendar/behavior-recurring-edit.js' => '5f1c4d5f',
     'rsrc/js/application/config/behavior-reorder-fields.js' => 'b6993408',
     'rsrc/js/application/conpherence/ConpherenceThreadManager.js' => '01774ab2',
-    'rsrc/js/application/conpherence/behavior-conpherence-search.js' => 'dfa4e1ac',
+    'rsrc/js/application/conpherence/behavior-conpherence-search.js' => '3e137827',
     'rsrc/js/application/conpherence/behavior-durable-column.js' => 'c5238acb',
     'rsrc/js/application/conpherence/behavior-menu.js' => '07928ca3',
     'rsrc/js/application/conpherence/behavior-participant-pane.js' => '8604caa8',
@@ -666,7 +666,7 @@ return array(
     'javelin-behavior-conpherence-menu' => '07928ca3',
     'javelin-behavior-conpherence-participant-pane' => '8604caa8',
     'javelin-behavior-conpherence-pontificate' => 'f2e58483',
-    'javelin-behavior-conpherence-search' => 'dfa4e1ac',
+    'javelin-behavior-conpherence-search' => '3e137827',
     'javelin-behavior-countdown-timer' => 'e4cc26b3',
     'javelin-behavior-dark-console' => 'f411b6ae',
     'javelin-behavior-dashboard-async-panel' => '469c0d9e',
@@ -1226,6 +1226,13 @@ return array(
       'javelin-workflow',
       'javelin-util',
       'javelin-uri',
+    ),
+    '3e137827' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-util',
+      'javelin-workflow',
+      'javelin-stratcom',
     ),
     '3f5d6dbf' => array(
       'javelin-behavior',
@@ -2087,13 +2094,6 @@ return array(
     ),
     'df5e11d2' => array(
       'javelin-install',
-    ),
-    'dfa4e1ac' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-util',
-      'javelin-workflow',
-      'javelin-stratcom',
     ),
     'e0ec7f2f' => array(
       'javelin-behavior',
