@@ -28,10 +28,15 @@
   font-weight: bold;
 }
 
+/***** Thread Search **********************************************************/
+
 .conpherence-fulltext-results {
-  margin: 0 8px 8px;
-  background: {$lightgreybackground};
-  border: 1px solid {$lightgreyborder};
+  padding: 8px 0;
+}
+
+.conpherence-fulltext-results + .conpherence-fulltext-results {
+  border-top: 2px solid {$thinblueborder};
+  margin-top: -8px;
 }
 
 .conpherence-fulltext-result {
@@ -45,4 +50,20 @@
 
 .conpherence-fulltext-results .epoch-link {
   float: right;
+}
+
+.conpherence-message-pane .conpherence-fulltext-results
+  .conpherence-transaction-view.conpherence-fulltext-result {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.conpherence-message-pane .conpherence-search-room-results .phui-object-box {
+  border: none;
+  margin: 0;
+}
+
+.conpherence-message-pane .conpherence-search-room-results
+  .phui-object-box .phui-header-shell {
+    display: none;
 }

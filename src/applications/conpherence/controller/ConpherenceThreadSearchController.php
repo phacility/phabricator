@@ -36,6 +36,6 @@ final class ConpherenceThreadSearchController
     $view = $engine->renderResults($results, $saved);
 
     return id(new AphrontAjaxResponse())
-      ->setContent($view->getObjectList());
+      ->setContent($view->getContent());
   }
 }
