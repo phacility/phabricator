@@ -321,7 +321,7 @@
 }
 
 .conpherence-transaction-view .conpherence-transaction-info,
-.conpherence-transaction-view .anchor-link,
+.conpherence-transaction-view .transaction-date,
 .conpherence-transaction-view .phabricator-content-source-view {
   color: {$lightgreytext};
   line-height: 16px;

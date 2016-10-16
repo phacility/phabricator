@@ -73,7 +73,6 @@ final class ConpherenceViewController extends
     $data = ConpherenceTransactionRenderer::renderTransactions(
       $user,
       $conpherence,
-      $full_display = true,
       $marker_type);
     $messages = ConpherenceTransactionRenderer::renderMessagePaneContent(
       $data['transactions'],

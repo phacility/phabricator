@@ -44,7 +44,13 @@ JX.behavior('conpherence-search', function() {
     });
     request.setData({fulltext: search_text});
     request.send();
+  }
 
+  function _viewResult(e) {
+    e.kill();
+    var uri = e.getNode('tag:a');
+    _toggleSearch(e);
+    JX.$U(uri).go();
   }
 
   JX.Stratcom.listen(
@@ -62,6 +68,11 @@ JX.behavior('conpherence-search', function() {
       e.kill();
       _doSearch(e);
     });
+
+  JX.Stratcom.listen(
+    'click',
+    'conpherence-search-result-jump',
+    _viewResult);
 
   JX.Stratcom.listen(
     'click',

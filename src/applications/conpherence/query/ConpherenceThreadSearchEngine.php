@@ -199,7 +199,7 @@ final class ConpherenceThreadSearchEngine
                 ->setMarkupEngine($engines[$conpherence_phid])
                 ->setConpherenceThread($conpherence)
                 ->setConpherenceTransaction($xaction)
-                ->setFullDisplay(true)
+                ->setSearchResult(true)
                 ->addClass('conpherence-fulltext-result');
 
               if ($message['match']) {

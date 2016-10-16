@@ -114,7 +114,6 @@ JX.behavior('durable-column', function(config, statics) {
    */
 
   var threadManager = new JX.ConpherenceThreadManager();
-  threadManager.setMinimalDisplay(true);
   threadManager.setMessagesRootCallback(function() {
     return _getColumnMessagesNode();
   });
@@ -282,7 +281,7 @@ JX.behavior('durable-column', function(config, statics) {
   function _sendMessage(e) {
     e.kill();
     var form = _getColumnFormNode();
-    threadManager.sendMessage(form, { minimal_display: true });
+    threadManager.sendMessage(form, {});
   }
 
   JX.Stratcom.listen(
