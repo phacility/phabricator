@@ -7,7 +7,11 @@ final class ConduitIntListParameterType
     $list = parent::getParameterValue($request, $key, $strict);
 
     foreach ($list as $idx => $item) {
-      $list[$idx] = $this->parseIntValue($request, $key.'['.$idx.']', $item);
+      $list[$idx] = $this->parseIntValue(
+        $request,
+        $key.'['.$idx.']',
+        $item,
+        $strict);
     }
 
     return $list;
