@@ -63,6 +63,67 @@ abstract class PhabricatorCalendarImportEngine
       }
     }
 
+    // Reject events which have dates outside of the range of a signed
+    // 32-bit integer. We'll need to accommodate a wider range of events
+    // eventually, but have about 20 years until it's an issue and we'll
+    // all be dead by then.
+    foreach ($nodes as $key => $node) {
+      $dates = array();
+      $dates[] = $node->getStartDateTime();
+      $dates[] = $node->getEndDateTime();
+      $dates[] = $node->getCreatedDateTime();
+      $dates[] = $node->getModifiedDateTime();
+      $rrule = $node->getRecurrenceRule();
+      if ($rrule) {
+        $dates[] = $rrule->getUntil();
+      }
+
+      $bad_date = false;
+      foreach ($dates as $date) {
+        if ($date === null) {
+          continue;
+        }
+
+        $year = $date->getYear();
+        if ($year < 1970 || $year > 2037) {
+          $bad_date = true;
+          break;
+        }
+      }
+
+      if ($bad_date) {
+        $import->newLogMessage(
+          PhabricatorCalendarImportEpochLogType::LOGTYPE,
+          array());
+        unset($nodes[$key]);
+      }
+    }
+
+    // Reject events which occur too frequently. Users do not normally define
+    // these events and the UI and application make many assumptions which are
+    // incompatible with events recurring once per second.
+    foreach ($nodes as $key => $node) {
+      $rrule = $node->getRecurrenceRule();
+      if (!$rrule) {
+        // This is not a recurring event, so we don't need to check the
+        // frequency.
+        continue;
+      }
+      $scale = $rrule->getFrequencyScale();
+      if ($scale >= PhutilCalendarRecurrenceRule::SCALE_DAILY) {
+        // This is a daily, weekly, monthly, or yearly event. These are
+        // supported.
+      } else {
+        // This is an hourly, minutely, or secondly event.
+        $import->newLogMessage(
+          PhabricatorCalendarImportFrequencyLogType::LOGTYPE,
+          array(
+            'frequency' => $rrule->getFrequency(),
+          ));
+        unset($nodes[$key]);
+      }
+    }
+
     $node_map = array();
     foreach ($nodes as $node) {
       $full_uid = $this->getFullNodeUID($node);
