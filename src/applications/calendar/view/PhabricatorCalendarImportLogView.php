@@ -48,7 +48,7 @@ final class PhabricatorCalendarImportLogView extends AphrontView {
           : null),
         id(new PHUIIconView())->setIcon($icon, $color),
         $name,
-        $description,
+        phutil_escape_html_newlines($description),
         phabricator_datetime($log->getDateCreated(), $viewer),
       );
     }
@@ -70,12 +70,12 @@ final class PhabricatorCalendarImportLogView extends AphrontView {
         ))
       ->setColumnClasses(
         array(
-          null,
-          null,
-          null,
-          'pri',
-          'wide',
-          null,
+          'top',
+          'top',
+          'top',
+          'top pri',
+          'top wide',
+          'top',
         ));
 
     return $table;

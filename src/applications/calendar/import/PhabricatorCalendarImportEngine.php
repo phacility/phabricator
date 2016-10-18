@@ -42,24 +42,26 @@ abstract class PhabricatorCalendarImportEngine
   final protected function importEventDocument(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import,
-    PhutilCalendarRootNode $root) {
+    PhutilCalendarRootNode $root = null) {
 
     $event_type = PhutilCalendarEventNode::NODETYPE;
 
     $nodes = array();
-    foreach ($root->getChildren() as $document) {
-      foreach ($document->getChildren() as $node) {
-        $node_type = $node->getNodeType();
-        if ($node_type != $event_type) {
-          $import->newLogMessage(
-            PhabricatorCalendarImportIgnoredNodeLogType::LOGTYPE,
-            array(
-              'node.type' => $node_type,
-            ));
-          continue;
-        }
+    if ($root) {
+      foreach ($root->getChildren() as $document) {
+        foreach ($document->getChildren() as $node) {
+          $node_type = $node->getNodeType();
+          if ($node_type != $event_type) {
+            $import->newLogMessage(
+              PhabricatorCalendarImportIgnoredNodeLogType::LOGTYPE,
+              array(
+                'node.type' => $node_type,
+              ));
+            continue;
+          }
 
-        $nodes[] = $node;
+          $nodes[] = $node;
+        }
       }
     }
 
