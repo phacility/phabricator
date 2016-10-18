@@ -390,9 +390,9 @@ abstract class PhabricatorCalendarImportEngine
     if ($rrule) {
       $event->setRecurrenceRule($rrule);
 
-      $until_datetime = $rrule->getUntil()
-        ->setViewerTimezone($timezone);
+      $until_datetime = $rrule->getUntil();
       if ($until_datetime) {
+        $until_datetime->setViewerTimezone($timezone);
         $event->setUntilDateTime($until_datetime);
       }
     }

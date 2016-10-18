@@ -321,11 +321,9 @@ final class PhabricatorCalendarEventSearchEngine
       $list->addItem($item);
     }
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setObjectList($list);
-    $result->setNoDataString(pht('No events found.'));
-
-    return $result;
+    return $this->newResultView()
+      ->setObjectList($list)
+      ->setNoDataString(pht('No events found.'));
   }
 
   private function buildCalendarMonthView(
@@ -393,10 +391,9 @@ final class PhabricatorCalendarEventSearchEngine
       ->setProfileHeader(true)
       ->setHeader($from->format('F Y'));
 
-    return id(new PhabricatorApplicationSearchResultView())
+    return $this->newResultView($month_view)
       ->setCrumbs($crumbs)
-      ->setHeader($header)
-      ->setContent($month_view);
+      ->setHeader($header);
   }
 
   private function buildCalendarDayView(
@@ -467,10 +464,9 @@ final class PhabricatorCalendarEventSearchEngine
       ->setProfileHeader(true)
       ->setHeader($from->format('D, F jS'));
 
-    return id(new PhabricatorApplicationSearchResultView())
+    return $this->newResultView($day_view)
       ->setCrumbs($crumbs)
-      ->setHeader($header)
-      ->setContent($day_view);
+      ->setHeader($header);
   }
 
   private function getDisplayYearAndMonthAndDay(
@@ -594,6 +590,28 @@ final class PhabricatorCalendarEventSearchEngine
         ->setDisabled(!$can_export)
         ->setHref('/calendar/export/edit/?queryKey='.$saved->getQueryKey()),
     );
+  }
+
+
+  private function newResultView($content = null) {
+    // If we aren't rendering a dashboard panel, activate global drag-and-drop
+    // so you can import ".ics" files by dropping them directly onto the
+    // calendar.
+    if (!$this->isPanelContext()) {
+      $drop_upload = id(new PhabricatorGlobalUploadTargetView())
+        ->setViewer($this->requireViewer())
+        ->setHintText("\xE2\x87\xAA ".pht('Drop .ics Files to Import'))
+        ->setSubmitURI('/calendar/import/drop/')
+        ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE);
+
+      $content = array(
+        $drop_upload,
+        $content,
+      );
+    }
+
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($content);
   }
 
 }

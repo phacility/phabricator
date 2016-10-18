@@ -85,6 +85,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarImportDisableController',
           'delete/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarImportDeleteController',
+          'drop/'
+            => 'PhabricatorCalendarImportDropController',
           'log/' => array(
             $this->getQueryRoutePattern()
               => 'PhabricatorCalendarImportLogListController',

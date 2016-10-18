@@ -94,6 +94,4 @@ final class PhabricatorApplicationSearchResultView extends Phobject {
     return $this->header;
   }
 
-
-
 }

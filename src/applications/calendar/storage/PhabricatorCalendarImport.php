@@ -21,6 +21,7 @@ final class PhabricatorCalendarImport
     PhabricatorUser $actor,
     PhabricatorCalendarImportEngine $engine) {
     return id(new self())
+      ->setName('')
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($actor->getPHID())
       ->setEditPolicy($actor->getPHID())
