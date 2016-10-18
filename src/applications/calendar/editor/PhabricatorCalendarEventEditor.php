@@ -200,6 +200,11 @@ final class PhabricatorCalendarEventEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    if ($object->isImportedEvent()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -210,6 +215,11 @@ final class PhabricatorCalendarEventEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    if ($object->isImportedEvent()) {
+      return false;
+    }
+
     return true;
   }
 
