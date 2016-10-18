@@ -145,39 +145,9 @@ final class PhabricatorCalendarImportViewController
       ->setLimit(25)
       ->execute();
 
-    $rows = array();
-    foreach ($logs as $log) {
-      $icon = $log->getDisplayIcon($viewer);
-      $color = $log->getDisplayColor($viewer);
-      $name = $log->getDisplayType($viewer);
-      $description = $log->getDisplayDescription($viewer);
-
-      $rows[] = array(
-        $log->getID(),
-        id(new PHUIIconView())->setIcon($icon, $color),
-        $name,
-        $description,
-        phabricator_datetime($log->getDateCreated(), $viewer),
-      );
-    }
-
-    $table = id(new AphrontTableView($rows))
-      ->setHeaders(
-        array(
-          pht('ID'),
-          null,
-          pht('Type'),
-          pht('Mesage'),
-          pht('Date'),
-        ))
-      ->setColumnClasses(
-        array(
-          null,
-          null,
-          'pri',
-          'wide',
-          null,
-        ));
+    $logs_view = id(new PhabricatorCalendarImportLogView())
+      ->setViewer($viewer)
+      ->setLogs($logs);
 
     $all_uri = $this->getApplicationURI('import/log/');
     $all_uri = (string)id(new PhutilURI($all_uri))
@@ -196,7 +166,7 @@ final class PhabricatorCalendarImportViewController
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setTable($table);
+      ->setTable($logs_view);
   }
 
   private function buildImportedEvents(PhabricatorCalendarImport $import) {
