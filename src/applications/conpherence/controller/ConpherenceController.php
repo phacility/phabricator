@@ -20,6 +20,12 @@ abstract class ConpherenceController extends PhabricatorController {
     if ($conpherence) {
       $nav->addMenuItem(
         id(new PHUIListItemView())
+        ->setName(pht('Joined Rooms'))
+        ->setType(PHUIListItemView::TYPE_LINK)
+        ->setHref($this->getApplicationURI()));
+
+      $nav->addMenuItem(
+        id(new PHUIListItemView())
         ->setName(pht('Edit Room'))
         ->setType(PHUIListItemView::TYPE_LINK)
         ->setHref(
