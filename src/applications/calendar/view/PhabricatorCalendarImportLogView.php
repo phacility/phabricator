@@ -60,7 +60,7 @@ final class PhabricatorCalendarImportLogView extends AphrontView {
           pht('Source'),
           null,
           pht('Type'),
-          pht('Mesage'),
+          pht('Message'),
           pht('Date'),
         ))
       ->setColumnVisibility(

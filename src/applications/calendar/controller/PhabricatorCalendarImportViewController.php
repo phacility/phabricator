@@ -123,6 +123,24 @@ final class PhabricatorCalendarImportViewController
         ->setWorkflow(true)
         ->setHref($disable_uri));
 
+
+    if ($can_edit) {
+      $can_delete = $engine->canDeleteAnyEvents($viewer, $import);
+    } else {
+      $can_delete = false;
+    }
+
+    $delete_uri = "import/delete/{$id}/";
+    $delete_uri = $this->getApplicationURI($delete_uri);
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Delete Imported Events'))
+        ->setIcon('fa-times')
+        ->setDisabled(!$can_delete)
+        ->setWorkflow(true)
+        ->setHref($delete_uri));
+
     return $curtain;
   }
 

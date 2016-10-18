@@ -398,4 +398,17 @@ abstract class PhabricatorCalendarImportEngine
     return $event;
   }
 
+  public function canDeleteAnyEvents(
+    PhabricatorUser $viewer,
+    PhabricatorCalendarImport $import) {
+
+    $any_event = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withImportSourcePHIDs(array($import->getPHID()))
+      ->setLimit(1)
+      ->execute();
+
+    return (bool)$any_event;
+  }
+
 }
