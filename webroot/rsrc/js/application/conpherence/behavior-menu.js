@@ -191,16 +191,6 @@ JX.behavior('conpherence-menu', function(config) {
 
     if (_thread.visible !== null || !config.hasWidgets) {
       reloadWidget(data);
-    } else {
-     JX.Stratcom.invoke(
-      'conpherence-update-widgets',
-      null,
-      {
-        widget : getDefaultWidget(),
-        buildSelectors : false,
-        toggleWidget : true,
-        threadID : _thread.selected
-      });
     }
 
     _thread.visible = _thread.selected;
@@ -259,32 +249,10 @@ JX.behavior('conpherence-menu', function(config) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var widgets_root = JX.DOM.find(root, 'div', 'conpherence-widgets-holder');
     JX.DOM.setContent(widgets_root, JX.$H(response.widgets));
-
-    JX.Stratcom.invoke(
-      'conpherence-update-widgets',
-      null,
-      {
-        widget : widget,
-        buildSelectors : true,
-        toggleWidget : true,
-        threadID : _thread.selected
-      });
-
-    markWidgetLoading(false);
   }
 
   function getDefaultWidget() {
-    var device = JX.Device.getDevice();
-    var widget = 'conpherence-message-pane';
-    if (device == 'desktop') {
-      widget = 'widgets-people';
-      var uri = JX.$U(location.href);
-      var params = uri.getQueryParams();
-      if ('settings' in params) {
-        widget = 'widgets-settings';
-      }
-    }
-    return widget;
+    return 'widgets-people';
   }
 
   /**

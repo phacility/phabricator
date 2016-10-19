@@ -61,26 +61,17 @@ final class ConpherenceLayoutView extends AphrontTagView {
     return $this;
   }
 
-  public function getWidgetColumnVisible() {
-    $widget_key = PhabricatorConpherenceWidgetVisibleSetting::SETTINGKEY;
-    $user = $this->getUser();
-    return (bool)$user->getUserSetting($widget_key, false);
-  }
-
   protected function getTagAttributes() {
     $classes = array();
-    if (!$this->getWidgetColumnVisible()) {
-      $classes[] = 'hide-widgets';
-    }
+    $classes[] = 'conpherence-layout';
+    $classes[] = 'hide-widgets';
+    $classes[] = 'conpherence-role-'.$this->role;
 
     return array(
-        'id'    => 'conpherence-main-layout',
-        'sigil' => 'conpherence-layout',
-        'class' => 'conpherence-layout '.
-                    implode(' ', $classes).
-                    ' conpherence-role-'.$this->role,
-      );
-
+      'id'    => 'conpherence-main-layout',
+      'sigil' => 'conpherence-layout',
+      'class' => implode(' ', $classes),
+    );
   }
 
   protected function getTagContent() {
