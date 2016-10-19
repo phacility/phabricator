@@ -83,6 +83,12 @@
 
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
+  bottom: 44px;
+  box-shadow: none;
+}
+
+.device-phone .conpherence-message-pane .conpherence-messages {
+  left: 0;
   right: 0;
   bottom: 44px;
   width: 100%;
@@ -186,6 +192,12 @@
 }
 
 .device .conpherence-message-pane .phui-form-view {
+  left: 0;
+  height: 34px;
+  width: auto;
+}
+
+.device-phone .conpherence-message-pane .phui-form-view {
   left: 0;
   right: 0;
   height: 34px;
