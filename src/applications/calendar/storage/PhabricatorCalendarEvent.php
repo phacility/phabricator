@@ -179,11 +179,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setName($parent->getName())
       ->setDescription($parent->getDescription());
 
-    $sequence = $this->getSequenceIndex();
-
     if ($start) {
       $start_datetime = $start;
     } else {
+      $sequence = $this->getSequenceIndex();
       $start_datetime = $parent->newSequenceIndexDateTime($sequence);
 
       if (!$start_datetime) {
@@ -200,6 +199,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $this
       ->setStartDateTime($start_datetime)
       ->setEndDateTime($end_datetime);
+
+    if ($parent->isImportedEvent()) {
+      $full_uid = $parent->getImportUID().'/'.$start_datetime->getEpoch();
+
+      // NOTE: We don't attach the import source because this gets called
+      // from CalendarEventQuery while building ghosts, before we've loaded
+      // and attached sources. Possibly this sequence should be flipped.
+
+      $this
+        ->setImportAuthorPHID($parent->getImportAuthorPHID())
+        ->setImportSourcePHID($parent->getImportSourcePHID())
+        ->setImportUID($full_uid);
+    }
 
     return $this;
   }
