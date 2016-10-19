@@ -151,6 +151,17 @@ final class PhabricatorCalendarImportViewController
     $properties = id(new PHUIPropertyListView())
       ->setViewer($viewer);
 
+    $engine = $import->getEngine();
+
+    $properties->addProperty(
+      pht('Source Type'),
+      $engine->getImportEngineTypeName());
+
+    $engine->appendImportProperties(
+      $viewer,
+      $import,
+      $properties);
+
     return $properties;
   }
 

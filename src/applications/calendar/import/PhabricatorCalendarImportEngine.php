@@ -9,7 +9,15 @@ abstract class PhabricatorCalendarImportEngine
 
 
   abstract public function getImportEngineName();
+  abstract public function getImportEngineTypeName();
   abstract public function getImportEngineHint();
+
+  public function appendImportProperties(
+    PhabricatorUser $viewer,
+    PhabricatorCalendarImport $import,
+    PHUIPropertyListView $properties) {
+    return;
+  }
 
   abstract public function newEditEngineFields(
     PhabricatorEditEngine $engine,

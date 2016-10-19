@@ -9,8 +9,26 @@ final class PhabricatorCalendarICSImportEngine
     return pht('Import .ics File');
   }
 
+  public function getImportEngineTypeName() {
+    return pht('.ics File');
+  }
+
   public function getImportEngineHint() {
     return pht('Import an event in ".ics" (iCalendar) format.');
+  }
+
+
+  public function appendImportProperties(
+    PhabricatorUser $viewer,
+    PhabricatorCalendarImport $import,
+    PHUIPropertyListView $properties) {
+
+    $phid_key = PhabricatorCalendarImportICSFileTransaction::PARAMKEY_FILE;
+    $file_phid = $import->getParameter($phid_key);
+
+    $properties->addProperty(
+      pht('Source File'),
+      $viewer->renderHandle($file_phid));
   }
 
   public function newEditEngineFields(
