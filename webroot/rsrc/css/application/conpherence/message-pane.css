@@ -411,6 +411,11 @@
     margin-bottom: 0;
 }
 
+/* this causes scrolling issues on iDevices */
+.device .conpherence-layout + .phabricator-standard-page-footer {
+  display: none;
+}
+
 /***** Thread Loading *********************************************************/
 
 .conpherence-layout .conpherence-loading-mask {
