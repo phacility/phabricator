@@ -576,12 +576,20 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       }
     }
 
+    if ($this->isImportedEvent()) {
+      return 'fa-download';
+    }
+
     return $this->getIcon();
   }
 
   public function getDisplayIconColor(PhabricatorUser $viewer) {
     if ($this->isCancelledEvent()) {
       return 'red';
+    }
+
+    if ($this->isImportedEvent()) {
+      return 'orange';
     }
 
     if ($viewer->isLoggedIn()) {
