@@ -1,36 +1,33 @@
 <?php
 
-final class PhabricatorCalendarImportICSLogType
+final class PhabricatorCalendarImportFetchLogType
   extends PhabricatorCalendarImportLogType {
 
-  const LOGTYPE = 'ics';
+  const LOGTYPE = 'fetch';
 
   public function getDisplayType(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return pht('ICS Parse Error');
+    return pht('Fetched Calendar');
   }
 
   public function getDisplayDescription(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return pht(
-      'Failed to parse ICS data ("%s"): %s',
-      $log->getParameter('ics.code'),
-      $log->getParameter('ics.message'));
-  }
 
+    return $viewer->renderHandle($log->getParameter('file.phid'));
+  }
 
   public function getDisplayIcon(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return 'fa-file';
+    return 'fa-download';
   }
 
   public function getDisplayColor(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return 'red';
+    return 'green';
   }
 
 }
