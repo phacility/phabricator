@@ -238,6 +238,8 @@ final class PhabricatorApplicationSearchController
           $nux_view = null;
         }
 
+        $is_overheated = $query->getIsOverheated();
+
         if ($nux_view) {
           $box->appendChild($nux_view);
         } else {
@@ -263,6 +265,10 @@ final class PhabricatorApplicationSearchController
           }
           if ($list->getContent()) {
             $box->appendChild($list->getContent());
+          }
+
+          if ($is_overheated) {
+            $box->appendChild($this->newOverheatedView($objects));
           }
 
           $result_header = $list->getHeader();
@@ -523,6 +529,29 @@ final class PhabricatorApplicationSearchController
       ->setText(pht('Use Results...'))
       ->setIcon('fa-road')
       ->setDropdownMenu($action_list);
+  }
+
+  private function newOverheatedView(array $results) {
+    if ($results) {
+      $message = pht(
+        'Most objects matching your query are not visible to you, so '.
+        'filtering results is taking a long time. Only some results are '.
+        'shown. Refine your query to find results more quickly.');
+    } else {
+      $message = pht(
+        'Most objects matching your query are not visible to you, so '.
+        'filtering results is taking a long time. Refine your query to '.
+        'find results more quickly.');
+    }
+
+    return id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+      ->setFlush(true)
+      ->setTitle(pht('Query Overheated'))
+      ->setErrors(
+        array(
+          $message,
+        ));
   }
 
 }
