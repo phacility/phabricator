@@ -241,13 +241,7 @@ final class ConpherenceLayoutView extends AphrontTagView {
 
       $box = id(new PHUIObjectBoxView())
         ->setHeader($header)
-        ->setObjectList($view->getObjectList());
-      if ($viewer->isLoggedIn()) {
-        $info = id(new PHUIInfoView())
-          ->appendChild(pht('You have not joined any rooms yet.'))
-          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
-        $box->setInfoView($info);
-      }
+        ->setObjectList($view->getContent());
 
       return $box;
     } else {
