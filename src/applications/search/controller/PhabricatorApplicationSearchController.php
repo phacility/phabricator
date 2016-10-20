@@ -111,6 +111,7 @@ final class PhabricatorApplicationSearchController
           'before' => true,
           'after' => true,
           'nux' => true,
+          'overheated' => true,
         );
 
         foreach ($pt_data as $pt_key => $pt_value) {
@@ -238,7 +239,8 @@ final class PhabricatorApplicationSearchController
           $nux_view = null;
         }
 
-        $is_overheated = $query->getIsOverheated();
+        $force_overheated = $request->getBool('overheated');
+        $is_overheated = $query->getIsOverheated() || $force_overheated;
 
         if ($nux_view) {
           $box->appendChild($nux_view);
@@ -277,13 +279,23 @@ final class PhabricatorApplicationSearchController
             $header = $result_header;
           }
 
-          if ($list->getActions()) {
-            foreach ($list->getActions() as $action) {
+          $actions = $list->getActions();
+          if ($actions) {
+            foreach ($actions as $action) {
               $header->addActionLink($action);
             }
           }
 
           $use_actions = $engine->newUseResultsActions($saved_query);
+
+          // TODO: Eventually, modularize all this stuff.
+          $builtin_use_actions = $this->newBuiltinUseActions();
+          if ($builtin_use_actions) {
+            foreach ($builtin_use_actions as $builtin_use_action) {
+              $use_actions[] = $builtin_use_action;
+            }
+          }
+
           if ($use_actions) {
             $use_dropdown = $this->newUseResultsDropdown(
               $saved_query,
@@ -552,6 +564,36 @@ final class PhabricatorApplicationSearchController
         array(
           $message,
         ));
+  }
+
+  private function newBuiltinUseActions() {
+    $actions = array();
+
+    $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+
+    if ($is_dev) {
+      $engine = $this->getSearchEngine();
+      $nux_uri = $engine->getQueryBaseURI();
+      $nux_uri = id(new PhutilURI($nux_uri))
+        ->setQueryParam('nux', true);
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-bug')
+        ->setName(pht('Developer: Show New User State'))
+        ->setHref($nux_uri);
+    }
+
+    if ($is_dev) {
+      $overheated_uri = $this->getRequest()->getRequestURI()
+        ->setQueryParam('overheated', true);
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-bug')
+        ->setName(pht('Developer: Show Overheated State'))
+        ->setHref($overheated_uri);
+    }
+
+    return $actions;
   }
 
 }

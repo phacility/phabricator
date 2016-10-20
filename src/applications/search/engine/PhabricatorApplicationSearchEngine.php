@@ -406,6 +406,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $this->getURI('query/edit/');
   }
 
+  public function getQueryBaseURI() {
+    return $this->getURI('');
+  }
+
 
   /**
    * Return the URI to a path within the application. Used to construct default
