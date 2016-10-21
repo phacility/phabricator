@@ -15,7 +15,7 @@ final class ConduitCall extends Phobject {
   private $request;
   private $user;
 
-  public function __construct($method, array $params) {
+  public function __construct($method, array $params, $strictly_typed = true) {
     $this->method = $method;
     $this->handler = $this->buildMethodHandler($method);
 
@@ -41,7 +41,7 @@ final class ConduitCall extends Phobject {
           "'".implode("', '", array_keys($invalid_params))."'"));
     }
 
-    $this->request = new ConduitAPIRequest($params);
+    $this->request = new ConduitAPIRequest($params, $strictly_typed);
   }
 
   public function getAPIRequest() {

@@ -157,12 +157,10 @@ return array(
     'conpherence-message-pane-css',
     'conpherence-notification-css',
     'conpherence-transaction-css',
-    'conpherence-update-css',
     'conpherence-participant-pane-css',
     'conpherence-header-pane-css',
   ),
   'conpherence.pkg.js' => array(
-    'javelin-behavior-conpherence-drag-and-drop-photo',
     'javelin-behavior-conpherence-menu',
     'javelin-behavior-conpherence-participant-pane',
     'javelin-behavior-conpherence-pontificate',

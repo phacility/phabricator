@@ -14,6 +14,9 @@ final class PhabricatorCalendarEventQuery
   private $instanceSequencePairs;
   private $isStub;
   private $parentEventPHIDs;
+  private $importSourcePHIDs;
+  private $importAuthorPHIDs;
+  private $importUIDs;
 
   private $generateGhosts = false;
 
@@ -74,6 +77,21 @@ final class PhabricatorCalendarEventQuery
 
   public function withParentEventPHIDs(array $parent_phids) {
     $this->parentEventPHIDs = $parent_phids;
+    return $this;
+  }
+
+  public function withImportSourcePHIDs(array $import_phids) {
+    $this->importSourcePHIDs = $import_phids;
+    return $this;
+  }
+
+  public function withImportAuthorPHIDs(array $author_phids) {
+    $this->importAuthorPHIDs = $author_phids;
+    return $this;
+  }
+
+  public function withImportUIDs(array $uids) {
+    $this->importUIDs = $uids;
     return $this;
   }
 
@@ -411,6 +429,27 @@ final class PhabricatorCalendarEventQuery
         $this->parentEventPHIDs);
     }
 
+    if ($this->importSourcePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.importSourcePHID IN (%Ls)',
+        $this->importSourcePHIDs);
+    }
+
+    if ($this->importAuthorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.importAuthorPHID IN (%Ls)',
+        $this->importAuthorPHIDs);
+    }
+
+    if ($this->importUIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.importUID IN (%Ls)',
+        $this->importUIDs);
+    }
+
     return $where;
   }
 
@@ -440,6 +479,42 @@ final class PhabricatorCalendarEventQuery
     $viewer = $this->getViewer();
 
     $events = $this->getEventsInRange($events);
+
+    $import_phids = array();
+    foreach ($events as $event) {
+      $import_phid = $event->getImportSourcePHID();
+      if ($import_phid !== null) {
+        $import_phids[$import_phid] = $import_phid;
+      }
+    }
+
+    if ($import_phids) {
+      $imports = id(new PhabricatorCalendarImportQuery())
+        ->setParentQuery($this)
+        ->setViewer($viewer)
+        ->withPHIDs($import_phids)
+        ->execute();
+      $imports = mpull($imports, null, 'getPHID');
+    } else {
+      $imports = array();
+    }
+
+    foreach ($events as $key => $event) {
+      $import_phid = $event->getImportSourcePHID();
+      if ($import_phid === null) {
+        $event->attachImportSource(null);
+        continue;
+      }
+
+      $import = idx($imports, $import_phid);
+      if (!$import) {
+        unset($events[$key]);
+        $this->didRejectResult($event);
+        continue;
+      }
+
+      $event->attachImportSource($import);
+    }
 
     $phids = array();
 
@@ -560,6 +635,5 @@ final class PhabricatorCalendarEventQuery
 
     return $raw_limit;
   }
-
 
 }

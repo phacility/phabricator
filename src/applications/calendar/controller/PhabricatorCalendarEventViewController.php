@@ -63,6 +63,19 @@ final class PhabricatorCalendarEventViewController
       ->setHeader(pht('Details'));
     $recurring_header = $this->buildRecurringHeader($event);
 
+    // NOTE: This is a bit hacky: for imported events, we're just hiding the
+    // comment form without actually preventing comments. Users could still
+    // submit a request to add comments to these events. This isn't really a
+    // major problem since they can't do anything truly bad and there isn't an
+    // easy way to selectively disable this or some other similar behaviors
+    // today, but it would probably be nice to fully disable these
+    // "pseudo-edits" (like commenting and probably subscribing and awarding
+    // tokens) at some point.
+    if ($event->isImportedEvent()) {
+      $comment_view = null;
+      $timeline->setShouldTerminate(true);
+    }
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
@@ -105,6 +118,16 @@ final class PhabricatorCalendarEventViewController
       ->setPolicyObject($event)
       ->setHeaderIcon($event->getIcon());
 
+    if ($event->isImportedEvent()) {
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setName(pht('Imported'))
+          ->setIcon('fa-download')
+          ->setHref($event->getImportSource()->getURI())
+          ->setShade('orange'));
+    }
+
     foreach ($this->buildRSVPActions($event) as $action) {
       $header->addActionLink($action);
     }
@@ -141,12 +164,15 @@ final class PhabricatorCalendarEventViewController
           ->setWorkflow(!$can_edit));
     }
 
+    $can_attend = !$event->isImportedEvent();
+
     if ($is_attending) {
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Decline Event'))
           ->setIcon('fa-user-times')
           ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setDisabled(!$can_attend)
           ->setWorkflow(true));
     } else {
       $curtain->addAction(
@@ -154,6 +180,7 @@ final class PhabricatorCalendarEventViewController
           ->setName(pht('Join Event'))
           ->setIcon('fa-user-plus')
           ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setDisabled(!$can_attend)
           ->setWorkflow(true));
     }
 
@@ -259,6 +286,15 @@ final class PhabricatorCalendarEventViewController
         'em',
         array(),
         pht('None'));
+    }
+
+    if ($event->isImportedEvent()) {
+      $properties->addProperty(
+        pht('Imported By'),
+        pht(
+          '%s from %s',
+          $viewer->renderHandle($event->getImportAuthorPHID()),
+          $viewer->renderHandle($event->getImportSourcePHID())));
     }
 
     $properties->addProperty(

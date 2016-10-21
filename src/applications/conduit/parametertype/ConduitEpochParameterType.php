@@ -3,15 +3,9 @@
 final class ConduitEpochParameterType
   extends ConduitParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $value = parent::getParameterValue($request, $key);
-
-    if (!is_int($value)) {
-      $this->raiseValidationException(
-        $request,
-        $key,
-        pht('Expected epoch timestamp as integer, got something else.'));
-    }
+  protected function getParameterValue(array $request, $key, $strict) {
+    $value = parent::getParameterValue($request, $key, $strict);
+    $value = $this->parseIntValue($request, $key, $value, $strict);
 
     if ($value <= 0) {
       $this->raiseValidationException(

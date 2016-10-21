@@ -13,7 +13,8 @@ final class ConpherenceThreadSearchEngine
 
   public function newQuery() {
     return id(new ConpherenceThreadQuery())
-      ->needParticipantCache(true);
+      ->needParticipantCache(true)
+      ->needProfileImage(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -22,8 +23,13 @@ final class ConpherenceThreadSearchEngine
         ->setLabel(pht('Participants'))
         ->setKey('participants')
         ->setAliases(array('participant')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Rooms'))
+        ->setKey('phids')
+        ->setDescription(pht('Search by room titles.'))
+        ->setDatasource(id(new ConpherenceThreadDatasource())),
       id(new PhabricatorSearchTextField())
-        ->setLabel(pht('Contains Words'))
+        ->setLabel(pht('Room Contains Words'))
         ->setKey('fulltext'),
     );
   }
@@ -47,7 +53,9 @@ final class ConpherenceThreadSearchEngine
     if ($map['fulltext']) {
       $query->withFulltext($map['fulltext']);
     }
-
+    if ($map['phids']) {
+      $query->withPHIDs($map['phids']);
+    }
     return $query;
   }
 
@@ -140,6 +148,7 @@ final class ConpherenceThreadSearchEngine
       $context = array();
     }
 
+    $content = array();
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
     foreach ($conpherences as $conpherence_phid => $conpherence) {
@@ -150,63 +159,82 @@ final class ConpherenceThreadSearchEngine
       $icon_name = $conpherence->getPolicyIconName($policy_objects);
       $icon = id(new PHUIIconView())
         ->setIcon($icon_name);
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName($conpherence->getMonogram())
-        ->setHeader($title)
-        ->setHref('/'.$conpherence->getMonogram())
-        ->setObject($conpherence)
-        ->addIcon('none', $created)
-        ->addIcon(
-          'none',
-          pht('Messages: %d', $conpherence->getMessageCount()))
-        ->addAttribute(
-          array(
-            $icon,
-            ' ',
-            pht(
-              'Last updated %s',
-              phabricator_datetime($conpherence->getDateModified(), $viewer)),
-          ));
 
-      $messages = idx($context, $conpherence_phid);
-      if ($messages) {
-        foreach ($messages as $group) {
-          $rows = array();
-          foreach ($group as $message) {
-            $xaction = $message['xaction'];
-            if (!$xaction) {
-              continue;
+      if (!strlen($fulltext)) {
+        $item = id(new PHUIObjectItemView())
+          ->setObjectName($conpherence->getMonogram())
+          ->setHeader($title)
+          ->setHref('/'.$conpherence->getMonogram())
+          ->setObject($conpherence)
+          ->setImageURI($conpherence->getProfileImageURI())
+          ->addIcon('none', $created)
+          ->addIcon(
+            'none',
+            pht('Messages: %d', $conpherence->getMessageCount()))
+          ->addAttribute(
+            array(
+              $icon,
+              ' ',
+              pht(
+                'Last updated %s',
+                phabricator_datetime($conpherence->getDateModified(), $viewer)),
+            ));
+          $list->addItem($item);
+      } else {
+        $messages = idx($context, $conpherence_phid);
+        $box = array();
+        $list = null;
+        if ($messages) {
+          foreach ($messages as $group) {
+            $rows = array();
+            foreach ($group as $message) {
+              $xaction = $message['xaction'];
+              if (!$xaction) {
+                continue;
+              }
+
+              $view = id(new ConpherenceTransactionView())
+                ->setUser($viewer)
+                ->setHandles($handles)
+                ->setMarkupEngine($engines[$conpherence_phid])
+                ->setConpherenceThread($conpherence)
+                ->setConpherenceTransaction($xaction)
+                ->setSearchResult(true)
+                ->addClass('conpherence-fulltext-result');
+
+              if ($message['match']) {
+                $view->addClass('conpherence-fulltext-match');
+              }
+
+              $rows[] = $view;
             }
-
-            $view = id(new ConpherenceTransactionView())
-              ->setUser($viewer)
-              ->setHandles($handles)
-              ->setMarkupEngine($engines[$conpherence_phid])
-              ->setConpherenceThread($conpherence)
-              ->setConpherenceTransaction($xaction)
-              ->setFullDisplay(false)
-              ->addClass('conpherence-fulltext-result');
-
-            if ($message['match']) {
-              $view->addClass('conpherence-fulltext-match');
-            }
-
-            $rows[] = $view;
+            $box[] = id(new PHUIBoxView())
+              ->appendChild($rows)
+              ->addClass('conpherence-fulltext-results');
           }
-
-          $box = id(new PHUIBoxView())
-            ->appendChild($rows)
-            ->addClass('conpherence-fulltext-results');
-          $item->appendChild($box);
         }
-      }
+        $header = id(new PHUIHeaderView())
+          ->setHeader($title)
+          ->setHeaderIcon($icon_name)
+          ->setHref('/'.$monogram);
 
-      $list->addItem($item);
+        $content[] = id(new PHUIObjectBoxView())
+          ->setHeader($header)
+          ->appendChild($box);
+      }
+    }
+
+    if ($list) {
+      $content = $list;
+    } else {
+      $content = id(new PHUIBoxView())
+        ->addClass('conpherence-search-room-results')
+        ->appendChild($content);
     }
 
     $result = new PhabricatorApplicationSearchResultView();
-    $result->setObjectList($list);
-    $result->setNoDataString(pht('No threads found.'));
+    $result->setContent($content);
+    $result->setNoDataString(pht('No results found.'));
 
     return $result;
   }

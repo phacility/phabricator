@@ -20,6 +20,12 @@ abstract class ConpherenceController extends PhabricatorController {
     if ($conpherence) {
       $nav->addMenuItem(
         id(new PHUIListItemView())
+        ->setName(pht('Joined Rooms'))
+        ->setType(PHUIListItemView::TYPE_LINK)
+        ->setHref($this->getApplicationURI()));
+
+      $nav->addMenuItem(
+        id(new PHUIListItemView())
         ->setName(pht('Edit Room'))
         ->setType(PHUIListItemView::TYPE_LINK)
         ->setHref(
@@ -113,6 +119,16 @@ abstract class ConpherenceController extends PhabricatorController {
           ->setHref('#')
           ->addClass('conpherence-participant-toggle'));
 
+      Javelin::initBehavior('conpherence-search');
+
+      $header->addActionItem(
+        id(new PHUIIconCircleView())
+          ->addSigil('conpherence-search-toggle')
+          ->setIcon('fa-search')
+          ->setHref('#')
+          ->setColor('green')
+          ->addClass('conpherence-search-toggle'));
+
       if ($can_join && !$participating) {
         $action = ConpherenceUpdateActions::JOIN_ROOM;
         $uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
@@ -147,6 +163,63 @@ abstract class ConpherenceController extends PhabricatorController {
     }
 
     return $header;
+  }
+
+  public function buildSearchForm() {
+    $viewer = $this->getViewer();
+    $conpherence = $this->conpherence;
+    $name = $conpherence->getTitle();
+
+    $bar = javelin_tag(
+      'input',
+      array(
+        'type' => 'text',
+        'id' => 'conpherence-search-input',
+        'name' => 'fulltext',
+        'class' => 'conpherence-search-input',
+        'sigil' => 'conpherence-search-input',
+        'placeholder' => pht('Search %s...', $name),
+      ));
+
+    $id = $conpherence->getID();
+    $form = phabricator_form(
+      $viewer,
+      array(
+        'method' => 'POST',
+        'action' => '/conpherence/threadsearch/'.$id.'/',
+        'sigil' => 'conpherence-search-form',
+        'class' => 'conpherence-search-form',
+        'id' => 'conpherence-search-form',
+      ),
+      array(
+        $bar,
+      ));
+
+    $form_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'conpherence-search-form-view',
+      ),
+      $form);
+
+    $results = phutil_tag(
+      'div',
+      array(
+        'id' => 'conpherence-search-results',
+        'class' => 'conpherence-search-results',
+      ));
+
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => 'conpherence-search-window',
+      ),
+      array(
+        $form_view,
+        $results,
+      ));
+
+    return $view;
   }
 
 }

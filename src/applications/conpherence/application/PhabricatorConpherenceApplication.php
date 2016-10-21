@@ -37,6 +37,8 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
           => 'ConpherenceListController',
         'thread/(?P<id>[1-9]\d*)/'
           => 'ConpherenceListController',
+        'threadsearch/(?P<id>[1-9]\d*)/'
+          => 'ConpherenceThreadSearchController',
         '(?P<id>[1-9]\d*)/'
           => 'ConpherenceViewController',
         '(?P<id>[1-9]\d*)/(?P<messageID>[1-9]\d*)/'

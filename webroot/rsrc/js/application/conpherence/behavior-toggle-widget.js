@@ -9,6 +9,20 @@
 
 JX.behavior('toggle-widget', function(config) {
 
+  var device;
+
+  function init() {
+    device = JX.Device.getDevice();
+    if (device != 'phone') {
+      var node = JX.$('conpherence-main-layout');
+      JX.DOM.alterClass(node, 'hide-widgets', !config.show);
+      JX.Stratcom.invoke('resize');
+    } else {
+      config.show = 0;
+    }
+  }
+  init();
+
   function _toggleColumn(e) {
     e.kill();
     var node = JX.$('conpherence-main-layout');
@@ -16,9 +30,11 @@ JX.behavior('toggle-widget', function(config) {
     JX.DOM.alterClass(node, 'hide-widgets', !config.show);
     JX.Stratcom.invoke('resize');
 
-    new JX.Request(config.settingsURI)
-      .setData({value: (config.show ? 1 : 0)})
-      .send();
+    if (device != 'phone') {
+      new JX.Request(config.settingsURI)
+        .setData({value: (config.show ? 1 : 0)})
+        .send();
+    }
   }
 
   JX.Stratcom.listen(

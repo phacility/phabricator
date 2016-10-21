@@ -3,6 +3,7 @@
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements
     PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
     PhabricatorProjectInterface,
     PhabricatorMarkupInterface,
     PhabricatorApplicationTransactionInterface,
@@ -40,8 +41,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $utcInstanceEpoch;
   protected $parameters = array();
 
+  protected $importAuthorPHID;
+  protected $importSourcePHID;
+  protected $importUIDIndex;
+  protected $importUID;
+
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
+  private $importSource = self::ATTACHABLE;
 
   private $viewerTimezone;
 
@@ -74,6 +81,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $datetime_end = $datetime_start->newRelativeDateTime('PT1H');
 
     return id(new PhabricatorCalendarEvent())
+      ->setDescription('')
       ->setHostPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
@@ -90,6 +98,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setAllDayDateTo(0)
       ->setStartDateTime($datetime_start)
       ->setEndDateTime($datetime_end)
+      ->attachImportSource(null)
       ->applyViewerTimezone($actor);
   }
 
@@ -170,11 +179,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setName($parent->getName())
       ->setDescription($parent->getDescription());
 
-    $sequence = $this->getSequenceIndex();
-
     if ($start) {
       $start_datetime = $start;
     } else {
+      $sequence = $this->getSequenceIndex();
       $start_datetime = $parent->newSequenceIndexDateTime($sequence);
 
       if (!$start_datetime) {
@@ -191,6 +199,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $this
       ->setStartDateTime($start_datetime)
       ->setEndDateTime($end_datetime);
+
+    if ($parent->isImportedEvent()) {
+      $full_uid = $parent->getImportUID().'/'.$start_datetime->getEpoch();
+
+      // NOTE: We don't attach the import source because this gets called
+      // from CalendarEventQuery while building ghosts, before we've loaded
+      // and attached sources. Possibly this sequence should be flipped.
+
+      $this
+        ->setImportAuthorPHID($parent->getImportAuthorPHID())
+        ->setImportSourcePHID($parent->getImportSourcePHID())
+        ->setImportUID($full_uid);
+    }
 
     return $this;
   }
@@ -306,6 +327,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
 
+    $import_uid = $this->getImportUID();
+    if ($import_uid !== null) {
+      $index = PhabricatorHash::digestForIndex($import_uid);
+    } else {
+      $index = null;
+    }
+    $this->setImportUIDIndex($index);
+
     $this->updateUTCEpochs();
 
     return parent::save();
@@ -343,6 +372,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'utcInitialEpoch' => 'epoch',
         'utcUntilEpoch' => 'epoch?',
         'utcInstanceEpoch' => 'epoch?',
+
+        'importAuthorPHID' => 'phid?',
+        'importSourcePHID' => 'phid?',
+        'importUIDIndex' => 'bytes12?',
+        'importUID' => 'text?',
 
         // TODO: DEPRECATED.
         'allDayDateFrom' => 'epoch',
@@ -554,12 +588,20 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       }
     }
 
+    if ($this->isImportedEvent()) {
+      return 'fa-download';
+    }
+
     return $this->getIcon();
   }
 
   public function getDisplayIconColor(PhabricatorUser $viewer) {
     if ($this->isCancelledEvent()) {
       return 'red';
+    }
+
+    if ($this->isImportedEvent()) {
+      return 'orange';
     }
 
     if ($viewer->isLoggedIn()) {
@@ -885,6 +927,21 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $set;
   }
 
+  public function isImportedEvent() {
+    return (bool)$this->getImportSourcePHID();
+  }
+
+  public function getImportSource() {
+    return $this->assertAttached($this->importSource);
+  }
+
+  public function attachImportSource(
+    PhabricatorCalendarImport $import = null) {
+    $this->importSource = $import;
+    return $this;
+  }
+
+
 /* -(  Markup Interface  )--------------------------------------------------- */
 
 
@@ -947,11 +1004,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return $this->getEditPolicy();
+        if ($this->getImportSource()) {
+          return PhabricatorPolicies::POLICY_NOONE;
+        } else {
+          return $this->getEditPolicy();
+        }
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($this->getImportSource()) {
+      return false;
+    }
+
     // The host of an event can always view and edit it.
     $user_phid = $this->getHostPHID();
     if ($user_phid) {
@@ -974,9 +1039,37 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function describeAutomaticCapability($capability) {
+    if ($this->getImportSource()) {
+      return pht(
+        'Events imported from external sources can not be edited in '.
+        'Phabricator.');
+    }
+
     return pht(
       'The host of an event can always view and edit it. Users who are '.
       'invited to an event can always view it.');
+  }
+
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    $extended = array();
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        $import_source = $this->getImportSource();
+        if ($import_source) {
+          $extended[] = array(
+            $import_source,
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
+        }
+        break;
+    }
+
+    return $extended;
   }
 
 
@@ -1056,18 +1149,58 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ->setKey('description')
         ->setType('string')
         ->setDescription(pht('The event description.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('isAllDay')
+        ->setType('bool')
+        ->setDescription(pht('True if the event is an all day event.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('startDateTime')
+        ->setType('datetime')
+        ->setDescription(pht('Start date and time of the event.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('endDateTime')
+        ->setType('datetime')
+        ->setDescription(pht('End date and time of the event.')),
     );
   }
 
   public function getFieldValuesForConduit() {
+    $start_datetime = $this->newStartDateTime();
+    $end_datetime = $this->newEndDateTime();
+
     return array(
       'name' => $this->getName(),
       'description' => $this->getDescription(),
+      'isAllDay' => (bool)$this->getIsAllDay(),
+      'startDateTime' => $this->getConduitDateTime($start_datetime),
+      'endDateTime' => $this->getConduitDateTime($end_datetime),
     );
   }
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+  private function getConduitDateTime($datetime) {
+    if (!$datetime) {
+      return null;
+    }
+
+    $epoch = $datetime->getEpoch();
+
+    // TODO: Possibly pass the actual viewer in from the Conduit stuff, or
+    // retain it when setting the viewer timezone?
+    $viewer = id(new PhabricatorUser())
+      ->overrideTimezoneIdentifier($this->viewerTimezone);
+
+    return array(
+      'epoch' => (int)$epoch,
+      'display' => array(
+        'default' => phabricator_datetime($epoch, $viewer),
+      ),
+      'iso8601' => $datetime->getISO8601(),
+      'timezone' => $this->viewerTimezone,
+    );
   }
 
 }

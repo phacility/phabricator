@@ -76,6 +76,12 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
+  public function withTitleNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new ConpherenceThreadTitleNgrams()),
+      $ngrams);
+  }
+
   protected function loadPage() {
     $table = new ConpherenceThread();
     $conn_r = $table->establishConnection('r');
@@ -145,61 +151,100 @@ final class ConpherenceThreadQuery
     }
   }
 
-  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = parent::buildJoinClauseParts($conn);
 
     if ($this->participantPHIDs !== null) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T p ON p.conpherencePHID = thread.phid',
         id(new ConpherenceParticipant())->getTableName());
     }
 
     if (strlen($this->fulltext)) {
       $joins[] = qsprintf(
-        $conn_r,
+        $conn,
         'JOIN %T idx ON idx.threadPHID = thread.phid',
         id(new ConpherenceIndex())->getTableName());
     }
 
-    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
-    return implode(' ', $joins);
+    // See note in buildWhereClauseParts() about this optimization.
+    $viewer = $this->getViewer();
+    if (!$viewer->isOmnipotent() && $viewer->isLoggedIn()) {
+      $joins[] = qsprintf(
+        $conn,
+        'LEFT JOIN %T vp ON vp.conpherencePHID = thread.phid
+          AND vp.participantPHID = %s',
+        id(new ConpherenceParticipant())->getTableName(),
+        $viewer->getPHID());
+    }
+
+    return $joins;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
-    $where[] = $this->buildPagingClause($conn_r);
+    // Optimize policy filtering of private rooms. If we are not looking for
+    // particular rooms by ID or PHID, we can just skip over any rooms with
+    // "View Policy: Room Participants" if the viewer isn't a participant: we
+    // know they won't be able to see the room.
+    // This avoids overheating browse/search queries, since it's common for
+    // a large number of rooms to be private and have this view policy.
+    $viewer = $this->getViewer();
+
+    $can_optimize =
+      !$viewer->isOmnipotent() &&
+      ($this->ids === null) &&
+      ($this->phids === null);
+
+    if ($can_optimize) {
+      $members_policy = id(new ConpherenceThreadMembersPolicyRule())
+        ->getObjectPolicyFullKey();
+
+      if ($viewer->isLoggedIn()) {
+        $where[] = qsprintf(
+          $conn,
+          'thread.viewPolicy != %s OR vp.participantPHID = %s',
+          $members_policy,
+          $viewer->getPHID());
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'thread.viewPolicy != %s',
+          $members_policy);
+      }
+    }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'thread.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'thread.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->participantPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'p.participantPHID IN (%Ls)',
         $this->participantPHIDs);
     }
 
     if (strlen($this->fulltext)) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'MATCH(idx.corpus) AGAINST (%s IN BOOLEAN MODE)',
         $this->fulltext);
     }
 
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   private function loadParticipantsAndInitHandles(array $conpherences) {

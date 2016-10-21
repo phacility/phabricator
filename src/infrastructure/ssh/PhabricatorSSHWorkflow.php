@@ -83,4 +83,19 @@ abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
     return $this->originalArguments;
   }
 
+  public function getSSHRemoteAddress() {
+    $ssh_client = getenv('SSH_CLIENT');
+    if (!strlen($ssh_client)) {
+      return null;
+    }
+
+    // TODO: When commands are proxied, the original remote address should
+    // also be proxied.
+
+    // This has the format "<ip> <remote-port> <local-port>". Grab the IP.
+    $remote_address = head(explode(' ', $ssh_client));
+
+    return $remote_address;
+  }
+
 }

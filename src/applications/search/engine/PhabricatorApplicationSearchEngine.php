@@ -406,6 +406,10 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
     return $this->getURI('query/edit/');
   }
 
+  public function getQueryBaseURI() {
+    return $this->getURI('');
+  }
+
 
   /**
    * Return the URI to a path within the application. Used to construct default
@@ -1115,7 +1119,9 @@ abstract class PhabricatorApplicationSearchEngine extends Phobject {
         continue;
       }
 
-      $value = $field->readValueFromConduitRequest($constraints);
+      $value = $field->readValueFromConduitRequest(
+        $constraints,
+        $request->getIsStrictlyTyped());
       $saved_query->setParameter($field->getKey(), $value);
     }
 

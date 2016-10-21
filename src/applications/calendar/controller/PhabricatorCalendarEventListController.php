@@ -7,6 +7,10 @@ final class PhabricatorCalendarEventListController
     return true;
   }
 
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $year = $request->getURIData('year');
     $month = $request->getURIData('month');
@@ -42,6 +46,10 @@ final class PhabricatorCalendarEventListController
     $items[] = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_LABEL)
       ->setName(pht('Import/Export'));
+
+    $items[] = id(new PHUIListItemView())
+      ->setName('Imports')
+      ->setHref('/calendar/import/');
 
     $items[] = id(new PHUIListItemView())
       ->setName('Exports')

@@ -9,7 +9,7 @@ final class ConpherenceColumnViewController extends
     $latest_conpherences = array();
     $latest_participant = id(new ConpherenceParticipantQuery())
       ->withParticipantPHIDs(array($user->getPHID()))
-      ->setLimit(6)
+      ->setLimit(8)
       ->execute();
     if ($latest_participant) {
       $conpherence_phids = mpull($latest_participant, 'getConpherencePHID');
