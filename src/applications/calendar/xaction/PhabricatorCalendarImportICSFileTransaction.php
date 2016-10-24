@@ -34,7 +34,7 @@ final class PhabricatorCalendarImportICSFileTransaction
     $viewer = $this->getActor();
     $errors = array();
 
-    $ics_type = PhabricatorCalendarICSImportEngine::ENGINETYPE;
+    $ics_type = PhabricatorCalendarICSFileImportEngine::ENGINETYPE;
     $import_type = $object->getEngine()->getImportEngineType();
     if ($import_type != $ics_type) {
       if (!$xactions) {

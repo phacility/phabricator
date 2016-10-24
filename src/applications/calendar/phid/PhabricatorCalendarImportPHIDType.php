@@ -33,7 +33,7 @@ final class PhabricatorCalendarImportPHIDType extends PhabricatorPHIDType {
       $import = $objects[$phid];
 
       $id = $import->getID();
-      $name = $import->getName();
+      $name = $import->getDisplayName();
       $uri = $import->getURI();
 
       $handle

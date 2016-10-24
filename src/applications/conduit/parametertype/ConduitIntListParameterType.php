@@ -3,19 +3,15 @@
 final class ConduitIntListParameterType
   extends ConduitListParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $list = parent::getParameterValue($request, $key);
+  protected function getParameterValue(array $request, $key, $strict) {
+    $list = parent::getParameterValue($request, $key, $strict);
 
     foreach ($list as $idx => $item) {
-      if (!is_int($item)) {
-        $this->raiseValidationException(
-          $request,
-          $key,
-          pht(
-            'Expected a list of integers, but item with index "%s" is '.
-            'not an integer.',
-            $idx));
-      }
+      $list[$idx] = $this->parseIntValue(
+        $request,
+        $key.'['.$idx.']',
+        $item,
+        $strict);
     }
 
     return $list;

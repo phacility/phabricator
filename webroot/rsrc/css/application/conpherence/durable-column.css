@@ -180,19 +180,6 @@
   padding: 8px 12px 0;
 }
 
-.conpherence-durable-column-transactions
-  .conpherence-transaction-view.conpherence-edited {
-    color: {$lightgreytext};
-    margin: 0;
-    padding: 0;
-    font-style: italic;
-}
-
-.conpherence-durable-column-transactions .conpherence-edited
-  .conpherence-transaction-header {
-    display: none;
-}
-
 .conpherence-durable-column-transactions .conpherence-transaction-view {
   background: none;
   margin: 0;
@@ -205,48 +192,29 @@
     word-wrap: break-word;
 }
 
-.conpherence-durable-column-transactions .conpherence-transaction-detail {
-  border: 0;
-  margin: 0 0 0 32px;
+.conpherence-durable-column-transactions .conpherence-transaction-view
+  .conpherence-transaction-detail {
+    border: 0;
+    margin: 0 0 0 32px;
 }
 
-.conpherence-durable-column-transactions .conpherence-transaction-detail
-  .conpherence-transaction-header {
+.conpherence-durable-column-transactions .conpherence-transaction-view
+  .conpherence-transaction-detail .conpherence-transaction-header {
     background: none;
     padding: 0 0 2px 0;
 }
 
 .conpherence-durable-column-transactions
-.conpherence-transaction-view.date-marker {
-  margin: 12px 0 0;
+  .conpherence-transaction-view.date-marker {
+    margin: 12px 0 0;
 }
 
 .conpherence-durable-column-transactions
-.conpherence-transaction-view.date-marker .date {
-  left: 0;
-  font-size: {$normalfontsize};
-  top: -14px;
-  padding: 0 6px 0 0;
-}
-
-.conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-header .conpherence-transaction-info {
-  color: {$lightbluetext};
-  font-size: {$smallerfontsize};
-}
-
-.conpherence-transaction-header .epoch-link {
-  color: {$lightgreytext};
-}
-
-.conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-header .phui-link-person {
-  margin: 0 8px 0 0;
-}
-
-.conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-content .phui-link-person {
-  color: #000;
+  .conpherence-transaction-view.date-marker .date {
+    left: 0;
+    font-size: {$normalfontsize};
+    top: -10px;
+    padding: 0 6px 0 0;
 }
 
 .conpherence-durable-column-transactions
@@ -267,9 +235,8 @@ img {
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail
-.conpherence-transaction-content {
-  background: #fff;
-  padding: 0 0 8px 0;
+  .conpherence-transaction-content {
+    padding: 0 0 8px 0;
 }
 
 .conpherence-durable-column-textarea {

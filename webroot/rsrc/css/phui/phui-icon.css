@@ -101,6 +101,16 @@ a.phui-icon-circle.hover-pink:hover .phui-icon-view {
   color: {$pink};
 }
 
+a.phui-icon-circle.hover-green:hover {
+  text-decoration: none;
+  border-color: {$green};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-green:hover .phui-icon-view {
+  color: {$green};
+}
+
 /* - Icon in a Square ------------------------------------------------------- */
 
 .phui-icon-view.phui-icon-square {

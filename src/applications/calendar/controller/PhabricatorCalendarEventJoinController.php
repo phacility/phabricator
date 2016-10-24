@@ -15,6 +15,11 @@ final class PhabricatorCalendarEventJoinController
       return new Aphront404Response();
     }
 
+    $response = $this->newImportedEventResponse($event);
+    if ($response) {
+      return $response;
+    }
+
     $cancel_uri = $event->getURI();
 
     $action = $request->getURIData('action');

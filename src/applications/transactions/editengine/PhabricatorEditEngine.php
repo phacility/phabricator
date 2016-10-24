@@ -1903,7 +1903,10 @@ abstract class PhabricatorEditEngine
       $parameter_type->setViewer($viewer);
 
       try {
-        $xaction['value'] = $parameter_type->getValue($xaction, 'value');
+        $xaction['value'] = $parameter_type->getValue(
+          $xaction,
+          'value',
+          $request->getIsStrictlyTyped());
       } catch (Exception $ex) {
         throw new PhutilProxyException(
           pht(

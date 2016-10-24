@@ -83,6 +83,12 @@
 
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
+  bottom: 44px;
+  box-shadow: none;
+}
+
+.device-phone .conpherence-message-pane .conpherence-messages {
+  left: 0;
   right: 0;
   bottom: 44px;
   width: 100%;
@@ -187,6 +193,12 @@
 
 .device .conpherence-message-pane .phui-form-view {
   left: 0;
+  height: 34px;
+  width: auto;
+}
+
+.device-phone .conpherence-message-pane .phui-form-view {
+  left: 0;
   right: 0;
   height: 34px;
   width: auto;
@@ -198,18 +210,18 @@
   width: 100%;
 }
 
-.conpherence-message-pane .conpherence-transaction-view {
+.conpherence-transaction-view {
   padding: 2px 0px;
   margin: 4px 20px;
   background-size: 100%;
   min-height: auto;
 }
 
-.device-phone .conpherence-message-pane .conpherence-transaction-view {
+.device-phone .conpherence-transaction-view {
   margin: 0 8px;
 }
 
-.conpherence-message-pane .conpherence-transaction-image {
+.conpherence-transaction-image {
   float: left;
   border-radius: 3px;
   height: 35px;
@@ -219,88 +231,85 @@
   top: 5px;
 }
 
-.device-phone .conpherence-message-pane .conpherence-transaction-image {
+.device-phone .conpherence-transaction-image {
   height: 25px;
   width: 25px;
   background-size: 25px;
 }
 
-.conpherence-message-pane .conpherence-comment.anchor-target,
-.conpherence-message-pane .conpherence-edited.anchor-target {
+.conpherence-transaction-view.conpherence-comment.anchor-target,
+.conpherence-transaction-view.conpherence-edited.anchor-target {
   background: {$lightyellow};
 }
 
-.conpherence-message-pane .conpherence-comment.anchor-target {
+.cconpherence-transaction-view.conpherence-comment.anchor-target {
   margin: 4px 8px 4px 8px;
   padding: 2px 4px 2px 4px;
 }
 
-.conpherence-message-pane .conpherence-edited.anchor-target {
+.conpherence-transaction-view.conpherence-edited.anchor-target {
   margin: 0px 8px 0px 8px;
   padding: 0px 4px 0px 4px;
 }
 
-.conpherence-message-pane .conpherence-transaction-detail {
+.conpherence-transaction-view .conpherence-transaction-detail {
   border-width: 0;
   margin-left: 45px;
 }
 
-.device-phone .conpherence-message-pane .conpherence-transaction-detail {
+.device-phone .conpherence-transaction-view .conpherence-transaction-detail {
   margin-left: 32px;
 }
 
-.conpherence-message-pane .conpherence-transaction-view.date-marker {
+.conpherence-transaction-view.date-marker {
   padding: 0;
   margin: 20px 20px 4px;
   min-height: auto;
 }
 
-.device-phone .conpherence-message-pane
-.conpherence-transaction-view.date-marker {
+.device-phone .conpherence-transaction-view.date-marker {
   margin: 12px 0 4px;
 }
 
-.device-tablet .conpherence-message-pane
-  .conpherence-transaction-view.date-marker {
-    padding-left: 37px;
+.device-tablet .conpherence-transaction-view.date-marker {
+  padding-left: 37px;
 }
 
-.conpherence-message-pane .conpherence-transaction-view.date-marker
-  .date {
-    left: 40px;
-    font-size: {$normalfontsize};
-    padding: 0px 4px;
+.conpherence-transaction-view.date-marker .date {
+  left: 40px;
+  font-size: {$normalfontsize};
+  padding: 0px 4px;
 }
 
-.device .conpherence-message-pane .conpherence-transaction-view.date-marker
-  .date {
-    left: 4px;
+.device .conpherence-transaction-view.date-marker .date {
+  left: 4px;
 }
 
-.device-phone .conpherence-message-pane .conpherence-edited {
+.device-phone .conpherence-transaction-view.conpherence-edited {
   min-height: none;
   color: {$lightgreytext};
   margin: 0 8px;
 }
 
-.conpherence-message-pane .conpherence-edited .conpherence-transaction-content {
-  color: {$lightgreytext};
-  font-size: {$biggerfontsize};
-  font-style: italic;
-  margin: 0;
-  padding: 0;
-  float: left;
-  line-height: 20px;
+.conpherence-transaction-view.conpherence-edited
+  .conpherence-transaction-content {
+    color: {$lightgreytext};
+    font-size: {$biggerfontsize};
+    font-style: italic;
+    margin: 0;
+    padding: 0;
+    float: left;
+    line-height: 20px;
 }
 
-.conpherence-message-pane .conpherence-edited {
+.conpherence-transaction-view.conpherence-edited {
   padding: 0;
   margin-top: 0;
   margin-bottom: 0;
   min-height: inherit;
 }
 
-.conpherence-message-pane .conpherence-edited + .conpherence-comment {
+.conpherence-transaction-view.conpherence-edited + .conpherence-comment {
   margin-top: 16px;
 }
 
@@ -309,28 +318,29 @@
     margin-top: 24px;
 }
 
-.conpherence-message-pane .conpherence-edited .conpherence-transaction-header {
-  float: right;
+.conpherence-transaction-view.conpherence-edited
+  .conpherence-transaction-header {
+    float: right;
 }
 
-.conpherence-message-pane .conpherence-edited
+.conpherence-transaction-view.conpherence-edited
   .conpherence-transaction-content a {
   color: {$darkbluetext};
 }
 
-.conpherence-message-pane .conpherence-transaction-info {
+.conpherence-transaction-view .conpherence-transaction-info {
   margin: 0 8px;
 }
 
-.conpherence-message-pane .conpherence-transaction-info,
-.conpherence-message-pane .anchor-link,
-.conpherence-message-pane .phabricator-content-source-view {
+.conpherence-transaction-view .conpherence-transaction-info,
+.conpherence-transaction-view .transaction-date,
+.conpherence-transaction-view .phabricator-content-source-view {
   color: {$lightgreytext};
   line-height: 16px;
   font-size: {$smallerfontsize};
 }
 
-.conpherence-message-pane .conpherence-transaction-content {
+.conpherence-transaction-view .conpherence-transaction-content {
   padding: 2px 0 8px 0;
 }
 
@@ -399,4 +409,78 @@
   .conpherence-transaction-collapsed.conpherence-transaction-view {
     margin-top: 0;
     margin-bottom: 0;
+}
+
+/* this causes scrolling issues on iDevices */
+.device .conpherence-layout + .phabricator-standard-page-footer {
+  display: none;
+}
+
+/***** Thread Loading *********************************************************/
+
+.conpherence-layout .conpherence-loading-mask {
+  height: 0;
+  opacity: 0;
+  top: 0;
+  right: 0;
+  left: 240px;
+  bottom: 0;
+  transition: all 0.3s;
+  position: fixed;
+  background-color: #fff;
+}
+
+.conpherence-layout.loading .conpherence-loading-mask {
+  opacity: 1;
+  height: auto;
+}
+
+
+/***** Thread Search **********************************************************/
+
+.conpherence-search-main {
+  opacity: 0;
+  transition: all 0.2s;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+}
+
+.show-searchbar .conpherence-search-main {
+  opacity: 1;
+  height: auto;
+}
+
+.conpherence-search-form-view {
+  display: none;
+}
+
+.show-searchbar .conpherence-search-form-view {
+  display: block;
+  height: 54px;
+  background: {$lightbluebackground};
+  position: absolute;
+  top: 1px;
+  left: 0;
+  right: 0;
+}
+
+.conpherence-search-form-view input.conpherence-search-input {
+  padding-left: 8px;
+  width: calc(100% - 24px);
+  border-radius: 20px;
+  margin: 12px;
+}
+
+.conpherence-search-results {
+  position: absolute;
+  background: #fff;
+  top: 54px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
 }

@@ -1,7 +1,6 @@
 /**
- * @requires javelin-install
  * @provides phabricator-title
- * @javelin
+ * @requires javelin-install
  */
 
 /**
@@ -44,6 +43,7 @@ JX.install('Title', {
       }
 
       document.title = title;
+
     }
   }
 });

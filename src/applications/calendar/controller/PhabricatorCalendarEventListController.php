@@ -7,6 +7,10 @@ final class PhabricatorCalendarEventListController
     return true;
   }
 
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $year = $request->getURIData('year');
     $month = $request->getURIData('month');

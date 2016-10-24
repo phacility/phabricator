@@ -111,6 +111,7 @@ final class PhabricatorApplicationSearchController
           'before' => true,
           'after' => true,
           'nux' => true,
+          'overheated' => true,
         );
 
         foreach ($pt_data as $pt_key => $pt_value) {
@@ -238,6 +239,9 @@ final class PhabricatorApplicationSearchController
           $nux_view = null;
         }
 
+        $force_overheated = $request->getBool('overheated');
+        $is_overheated = $query->getIsOverheated() || $force_overheated;
+
         if ($nux_view) {
           $box->appendChild($nux_view);
         } else {
@@ -265,19 +269,33 @@ final class PhabricatorApplicationSearchController
             $box->appendChild($list->getContent());
           }
 
+          if ($is_overheated) {
+            $box->appendChild($this->newOverheatedView($objects));
+          }
+
           $result_header = $list->getHeader();
           if ($result_header) {
             $box->setHeader($result_header);
             $header = $result_header;
           }
 
-          if ($list->getActions()) {
-            foreach ($list->getActions() as $action) {
+          $actions = $list->getActions();
+          if ($actions) {
+            foreach ($actions as $action) {
               $header->addActionLink($action);
             }
           }
 
           $use_actions = $engine->newUseResultsActions($saved_query);
+
+          // TODO: Eventually, modularize all this stuff.
+          $builtin_use_actions = $this->newBuiltinUseActions();
+          if ($builtin_use_actions) {
+            foreach ($builtin_use_actions as $builtin_use_action) {
+              $use_actions[] = $builtin_use_action;
+            }
+          }
+
           if ($use_actions) {
             $use_dropdown = $this->newUseResultsDropdown(
               $saved_query,
@@ -523,6 +541,59 @@ final class PhabricatorApplicationSearchController
       ->setText(pht('Use Results...'))
       ->setIcon('fa-road')
       ->setDropdownMenu($action_list);
+  }
+
+  private function newOverheatedView(array $results) {
+    if ($results) {
+      $message = pht(
+        'Most objects matching your query are not visible to you, so '.
+        'filtering results is taking a long time. Only some results are '.
+        'shown. Refine your query to find results more quickly.');
+    } else {
+      $message = pht(
+        'Most objects matching your query are not visible to you, so '.
+        'filtering results is taking a long time. Refine your query to '.
+        'find results more quickly.');
+    }
+
+    return id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+      ->setFlush(true)
+      ->setTitle(pht('Query Overheated'))
+      ->setErrors(
+        array(
+          $message,
+        ));
+  }
+
+  private function newBuiltinUseActions() {
+    $actions = array();
+
+    $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+
+    if ($is_dev) {
+      $engine = $this->getSearchEngine();
+      $nux_uri = $engine->getQueryBaseURI();
+      $nux_uri = id(new PhutilURI($nux_uri))
+        ->setQueryParam('nux', true);
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-bug')
+        ->setName(pht('Developer: Show New User State'))
+        ->setHref($nux_uri);
+    }
+
+    if ($is_dev) {
+      $overheated_uri = $this->getRequest()->getRequestURI()
+        ->setQueryParam('overheated', true);
+
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-bug')
+        ->setName(pht('Developer: Show Overheated State'))
+        ->setHref($overheated_uri);
+    }
+
+    return $actions;
   }
 
 }

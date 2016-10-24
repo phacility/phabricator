@@ -145,6 +145,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       'eot' => 'font/eot',
       'ttf' => 'font/ttf',
       'mp3' => 'audio/mpeg',
+      'ico' => 'image/x-icon',
     );
   }
 

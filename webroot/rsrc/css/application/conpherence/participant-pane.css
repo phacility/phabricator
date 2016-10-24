@@ -15,7 +15,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.device .conpherence-participant-pane {
+.device-phone .conpherence-participant-pane {
   background-color: {$page.background};
 }
 

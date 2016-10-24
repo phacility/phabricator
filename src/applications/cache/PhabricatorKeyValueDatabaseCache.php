@@ -98,7 +98,7 @@ final class PhabricatorKeyValueDatabaseCache
         $this->establishConnection('w'),
         'DELETE FROM %T WHERE cacheKeyHash IN (%Ls)',
         $this->getTableName(),
-        $keys);
+        $map);
     }
 
     return $this;

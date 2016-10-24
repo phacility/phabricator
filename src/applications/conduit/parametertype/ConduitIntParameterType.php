@@ -3,17 +3,9 @@
 final class ConduitIntParameterType
   extends ConduitParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $value = parent::getParameterValue($request, $key);
-
-    if (!is_int($value)) {
-      $this->raiseValidationException(
-        $request,
-        $key,
-        pht('Expected integer, got something else.'));
-    }
-
-    return $value;
+  protected function getParameterValue(array $request, $key, $strict) {
+    $value = parent::getParameterValue($request, $key, $strict);
+    return $this->parseIntValue($request, $key, $value, $strict);
   }
 
   protected function getParameterTypeName() {

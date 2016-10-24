@@ -6,8 +6,8 @@ final class ConpherenceTransactionView extends AphrontView {
   private $conpherenceTransaction;
   private $handles;
   private $markupEngine;
-  private $fullDisplay;
   private $classes = array();
+  private $searchResult;
   private $timeOnly;
 
   public function setConpherenceThread(ConpherenceThread $t) {
@@ -47,17 +47,13 @@ final class ConpherenceTransactionView extends AphrontView {
     return $this->markupEngine;
   }
 
-  public function setFullDisplay($bool) {
-    $this->fullDisplay = $bool;
+  public function addClass($class) {
+    $this->classes[] = $class;
     return $this;
   }
 
-  private function getFullDisplay() {
-    return $this->fullDisplay;
-  }
-
-  public function addClass($class) {
-    $this->classes[] = $class;
+  public function setSearchResult($result) {
+    $this->searchResult = $result;
     return $this;
   }
 
@@ -100,11 +96,7 @@ final class ConpherenceTransactionView extends AphrontView {
     $image = $this->renderTransactionImage();
     $content = $this->renderTransactionContent();
     $classes = implode(' ', $this->classes);
-
-    $transaction_dom_id = null;
-    if ($this->getFullDisplay()) {
-      $transaction_dom_id = 'anchor-'.$transaction->getID();
-    }
+    $transaction_dom_id = 'anchor-'.$transaction->getID();
 
     $header = phutil_tag_div(
       'conpherence-transaction-header grouped',
@@ -137,12 +129,25 @@ final class ConpherenceTransactionView extends AphrontView {
     $tip = phabricator_datetime($transaction->getDateCreated(), $viewer);
     $label = phabricator_time($transaction->getDateCreated(), $viewer);
     $width = 360;
-    if ($this->getFullDisplay()) {
-      Javelin::initBehavior('phabricator-watch-anchor');
-      $anchor = id(new PhabricatorAnchorView())
-        ->setAnchorName($transaction->getID())
-        ->render();
 
+    Javelin::initBehavior('phabricator-watch-anchor');
+    $anchor = id(new PhabricatorAnchorView())
+      ->setAnchorName($transaction->getID())
+      ->render();
+
+    if ($this->searchResult) {
+      $uri = $thread->getMonogram();
+      $info[] = hsprintf(
+        '%s',
+        javelin_tag(
+          'a',
+          array(
+            'href'  => '/'.$uri.'#'.$transaction->getID(),
+            'class' => 'transaction-date',
+            'sigil' => 'conpherence-search-result-jump',
+          ),
+          $tip));
+    } else {
       $info[] = hsprintf(
         '%s%s',
         $anchor,
@@ -150,7 +155,7 @@ final class ConpherenceTransactionView extends AphrontView {
           'a',
           array(
             'href'  => '#'.$transaction->getID(),
-            'class' => 'anchor-link',
+            'class' => 'transaction-date anchor-link',
             'sigil' => 'has-tooltip',
             'meta' => array(
               'tip' => $tip,
@@ -158,20 +163,6 @@ final class ConpherenceTransactionView extends AphrontView {
             ),
           ),
           $label));
-    } else {
-      $href = '/'.$thread->getMonogram().'#'.$transaction->getID();
-      $info[] = javelin_tag(
-        'a',
-        array(
-          'href' => $href,
-          'class' => 'epoch-link',
-          'sigil' => 'has-tooltip',
-          'meta' => array(
-            'tip' => $tip,
-            'size' => $width,
-          ),
-        ),
-        $label);
     }
 
     return phutil_tag(
@@ -247,17 +238,14 @@ final class ConpherenceTransactionView extends AphrontView {
         break;
     }
 
-    $this->appendChild(
-      phutil_tag(
-        'div',
-        array(
-          'class' => $content_class,
-        ),
-        $content));
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => $content_class,
+      ),
+      $content);
 
-    return phutil_tag_div(
-      'conpherence-transaction-content',
-      $this->renderChildren());
+    return phutil_tag_div('conpherence-transaction-content', $view);
   }
 
 }

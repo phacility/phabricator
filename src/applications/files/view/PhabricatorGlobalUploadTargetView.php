@@ -14,6 +14,9 @@
 final class PhabricatorGlobalUploadTargetView extends AphrontView {
 
   private $showIfSupportedID;
+  private $hintText;
+  private $viewPolicy;
+  private $submitURI;
 
   public function setShowIfSupportedID($show_if_supported_id) {
     $this->showIfSupportedID = $show_if_supported_id;
@@ -24,8 +27,37 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
     return $this->showIfSupportedID;
   }
 
+  public function setHintText($hint_text) {
+    $this->hintText = $hint_text;
+    return $this;
+  }
+
+  public function getHintText() {
+    return $this->hintText;
+  }
+
+  public function setViewPolicy($view_policy) {
+    $this->viewPolicy = $view_policy;
+    return $this;
+  }
+
+  public function getViewPolicy() {
+    return $this->viewPolicy;
+  }
+
+  public function setSubmitURI($submit_uri) {
+    $this->submitURI = $submit_uri;
+    return $this;
+  }
+
+  public function getSubmitURI() {
+    return $this->submitURI;
+  }
+
+
+
   public function render() {
-    $viewer = $this->getUser();
+    $viewer = $this->getViewer();
     if (!$viewer->isLoggedIn()) {
       return null;
     }
@@ -34,18 +66,30 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
 
     require_celerity_resource('global-drag-and-drop-css');
 
+    $hint_text = $this->getHintText();
+    if (!strlen($hint_text)) {
+      $hint_text = "\xE2\x87\xAA ".pht('Drop Files to Upload');
+    }
+
     // Use the configured default view policy. Drag and drop uploads use
     // a more restrictive view policy if we don't specify a policy explicitly,
     // as the more restrictive policy is correct for most drop targets (like
     // Pholio uploads and Remarkup text areas).
 
-    $view_policy = PhabricatorFile::initializeNewFile()->getViewPolicy();
+    $view_policy = $this->getViewPolicy();
+    if ($view_policy === null) {
+      $view_policy = PhabricatorFile::initializeNewFile()->getViewPolicy();
+    }
+
+    $submit_uri = $this->getSubmitURI();
+    $done_uri = '/file/query/authored/';
 
     Javelin::initBehavior('global-drag-and-drop', array(
       'ifSupported' => $this->showIfSupportedID,
       'instructions' => $instructions_id,
       'uploadURI' => '/file/dropupload/',
-      'browseURI' => '/file/query/authored/',
+      'submitURI' => $submit_uri,
+      'browseURI' => $done_uri,
       'viewPolicy' => $view_policy,
       'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
     ));
@@ -57,6 +101,6 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
         'class' => 'phabricator-global-upload-instructions',
         'style' => 'display: none;',
       ),
-      "\xE2\x87\xAA ".pht('Drop Files to Upload'));
+      $hint_text);
   }
 }

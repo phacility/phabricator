@@ -588,6 +588,7 @@ final class PhrictionTransactionEditor
           // Prevent overwrites and no-op moves.
           $exists = PhrictionDocumentStatus::STATUS_EXISTS;
           if ($target_document) {
+            $message = null;
             if ($target_document->getSlug() == $source_document->getSlug()) {
               $message = pht(
                 'You can not move a document to its existing location. '.
@@ -598,13 +599,14 @@ final class PhrictionTransactionEditor
                 'overwrite an existing document which is already at that '.
                 'location. Move or delete the existing document first.');
             }
-
-            $error = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              $message,
-              $xaction);
-            $errors[] = $error;
+            if ($message !== null) {
+              $error = new PhabricatorApplicationTransactionValidationError(
+                $type,
+                pht('Invalid'),
+                $message,
+                $xaction);
+              $errors[] = $error;
+            }
           }
           break;
 

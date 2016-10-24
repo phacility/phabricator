@@ -31,8 +31,9 @@ final class PhabricatorOwnersArchiveController
 
       $xactions = array();
 
+      $type = PhabricatorOwnersPackageStatusTransaction::TRANSACTIONTYPE;
       $xactions[] = id(new PhabricatorOwnersPackageTransaction())
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_STATUS)
+        ->setTransactionType($type)
         ->setNewValue($new_status);
 
       id(new PhabricatorOwnersPackageTransactionEditor())

@@ -15,6 +15,8 @@ final class PhabricatorCalendarEventQuery
   private $isStub;
   private $parentEventPHIDs;
   private $importSourcePHIDs;
+  private $importAuthorPHIDs;
+  private $importUIDs;
 
   private $generateGhosts = false;
 
@@ -80,6 +82,16 @@ final class PhabricatorCalendarEventQuery
 
   public function withImportSourcePHIDs(array $import_phids) {
     $this->importSourcePHIDs = $import_phids;
+    return $this;
+  }
+
+  public function withImportAuthorPHIDs(array $author_phids) {
+    $this->importAuthorPHIDs = $author_phids;
+    return $this;
+  }
+
+  public function withImportUIDs(array $uids) {
+    $this->importUIDs = $uids;
     return $this;
   }
 
@@ -422,6 +434,20 @@ final class PhabricatorCalendarEventQuery
         $conn,
         'event.importSourcePHID IN (%Ls)',
         $this->importSourcePHIDs);
+    }
+
+    if ($this->importAuthorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.importAuthorPHID IN (%Ls)',
+        $this->importAuthorPHIDs);
+    }
+
+    if ($this->importUIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.importUID IN (%Ls)',
+        $this->importUIDs);
     }
 
     return $where;

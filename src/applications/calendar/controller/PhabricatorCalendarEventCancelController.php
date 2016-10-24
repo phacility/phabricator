@@ -7,18 +7,26 @@ final class PhabricatorCalendarEventCancelController
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
 
+    // Just check CAN_VIEW first. Then we'll check if this is an import so
+    // we can raise a better error.
     $event = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
       ->executeOne();
     if (!$event) {
       return new Aphront404Response();
     }
+
+    $response = $this->newImportedEventResponse($event);
+    if ($response) {
+      return $response;
+    }
+
+    // Now that we've done the import check, check for CAN_EDIT.
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $event,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $cancel_uri = $event->getURI();
 

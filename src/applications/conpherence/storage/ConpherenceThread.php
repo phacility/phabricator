@@ -10,7 +10,6 @@ final class ConpherenceThread extends ConpherenceDAO
 
   protected $title;
   protected $topic;
-  protected $imagePHIDs = array();  // TODO; nuke after migrations
   protected $profileImagePHID;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
@@ -42,7 +41,6 @@ final class ConpherenceThread extends ConpherenceDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'recentParticipantPHIDs' => self::SERIALIZATION_JSON,
-        'imagePHIDs' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255?',

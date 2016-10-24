@@ -102,66 +102,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->applyViewerTimezone($actor);
   }
 
-  public static function newFromDocumentNode(
-    PhabricatorUser $actor,
-    PhutilCalendarEventNode $node) {
-    $timezone = $actor->getTimezoneIdentifier();
-
-    $uid = $node->getUID();
-
-    $name = $node->getName();
-    if (!strlen($name)) {
-      if (strlen($uid)) {
-        $name = pht('Unnamed Event "%s"', $node->getUID());
-      } else {
-        $name = pht('Unnamed Imported Event');
-      }
-    }
-
-    $description = $node->getDescription();
-
-    $instance_iso = $node->getRecurrenceID();
-    if (strlen($instance_iso)) {
-      $instance_datetime = PhutilCalendarAbsoluteDateTime::newFromISO8601(
-        $instance_iso);
-      $instance_epoch = $instance_datetime->getEpoch();
-    } else {
-      $instance_epoch = null;
-    }
-    $full_uid = $uid.'/'.$instance_epoch;
-
-    $start_datetime = $node->getStartDateTime()
-      ->setViewerTimezone($timezone);
-    $end_datetime = $node->getEndDateTime()
-      ->setViewerTimezone($timezone);
-
-    $rrule = $node->getRecurrenceRule();
-
-    $event = self::initializeNewCalendarEvent($actor)
-      ->setName($name)
-      ->setStartDateTime($start_datetime)
-      ->setEndDateTime($end_datetime)
-      ->setImportUID($full_uid)
-      ->setUTCInstanceEpoch($instance_epoch);
-
-    if (strlen($description)) {
-      $event->setDescription($description);
-    }
-
-    if ($rrule) {
-      $event->setRecurrenceRule($rrule);
-      $event->setIsRecurring(1);
-
-      $until_datetime = $rrule->getUntil()
-        ->setViewerTimezone($timezone);
-      if ($until_datetime) {
-        $event->setUntilDateTime($until_datetime);
-      }
-    }
-
-    return $event;
-  }
-
   private function newChild(
     PhabricatorUser $actor,
     $sequence,
@@ -239,11 +179,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setName($parent->getName())
       ->setDescription($parent->getDescription());
 
-    $sequence = $this->getSequenceIndex();
-
     if ($start) {
       $start_datetime = $start;
     } else {
+      $sequence = $this->getSequenceIndex();
       $start_datetime = $parent->newSequenceIndexDateTime($sequence);
 
       if (!$start_datetime) {
@@ -260,6 +199,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $this
       ->setStartDateTime($start_datetime)
       ->setEndDateTime($end_datetime);
+
+    if ($parent->isImportedEvent()) {
+      $full_uid = $parent->getImportUID().'/'.$start_datetime->getEpoch();
+
+      // NOTE: We don't attach the import source because this gets called
+      // from CalendarEventQuery while building ghosts, before we've loaded
+      // and attached sources. Possibly this sequence should be flipped.
+
+      $this
+        ->setImportAuthorPHID($parent->getImportAuthorPHID())
+        ->setImportSourcePHID($parent->getImportSourcePHID())
+        ->setImportUID($full_uid);
+    }
 
     return $this;
   }
@@ -636,12 +588,20 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       }
     }
 
+    if ($this->isImportedEvent()) {
+      return 'fa-download';
+    }
+
     return $this->getIcon();
   }
 
   public function getDisplayIconColor(PhabricatorUser $viewer) {
     if ($this->isCancelledEvent()) {
       return 'red';
+    }
+
+    if ($this->isImportedEvent()) {
+      return 'orange';
     }
 
     if ($viewer->isLoggedIn()) {
@@ -965,6 +925,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $set->addSource($rrule);
 
     return $set;
+  }
+
+  public function isImportedEvent() {
+    return (bool)$this->getImportSourcePHID();
   }
 
   public function getImportSource() {

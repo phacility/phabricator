@@ -44,6 +44,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * and `null` (inherit from parent query, with no exceptions by default).
    */
   private $raisePolicyExceptions;
+  private $isOverheated;
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -215,6 +216,14 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
     $this->willExecute();
 
+    // If we examine and filter significantly more objects than the query
+    // limit, we stop early. This prevents us from looping through a huge
+    // number of records when the viewer can see few or none of them. See
+    // T11773 for some discussion.
+    $this->isOverheated = false;
+    $overheat_limit = $limit * 10;
+    $total_seen = 0;
+
     do {
       if ($need) {
         $this->rawResultLimit = min($need - $count, 1024);
@@ -231,6 +240,8 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       } else {
         $page = array();
       }
+
+      $total_seen += count($page);
 
       if ($page) {
         $maybe_visible = $this->willFilterPage($page);
@@ -302,6 +313,11 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       }
 
       $this->nextPage($page);
+
+      if ($overheat_limit && ($total_seen >= $overheat_limit)) {
+        $this->isOverheated = true;
+        break;
+      }
     } while (true);
 
     $results = $this->didLoadResults($results);
@@ -368,6 +384,15 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     }
     return $this;
   }
+
+
+  public function getIsOverheated() {
+    if ($this->isOverheated === null) {
+      throw new PhutilInvalidStateException('execute');
+    }
+    return $this->isOverheated;
+  }
+
 
   /**
    * Return a map of all object PHIDs which were loaded in the query but

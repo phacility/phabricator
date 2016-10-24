@@ -3,17 +3,9 @@
 final class ConduitBoolParameterType
   extends ConduitParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $value = parent::getParameterValue($request, $key);
-
-    if (!is_bool($value)) {
-      $this->raiseValidationException(
-        $request,
-        $key,
-        pht('Expected boolean (true or false), got something else.'));
-    }
-
-    return $value;
+  protected function getParameterValue(array $request, $key, $strict) {
+    $value = parent::getParameterValue($request, $key, $strict);
+    return $this->parseBoolValue($request, $key, $value, $strict);
   }
 
   protected function getParameterTypeName() {

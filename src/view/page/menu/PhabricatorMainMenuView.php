@@ -23,6 +23,17 @@ final class PhabricatorMainMenuView extends AphrontView {
     return $this->controller;
   }
 
+  private function getFaviconURI($type = null) {
+    switch ($type) {
+      case 'message':
+        return celerity_get_resource_uri('/rsrc/favicons/favicon-message.ico');
+      case 'mention':
+        return celerity_get_resource_uri('/rsrc/favicons/favicon-mention.ico');
+      default:
+        return celerity_get_resource_uri('/rsrc/favicons/favicon.ico');
+    }
+  }
+
   public function render() {
     $viewer = $this->getViewer();
 
@@ -440,6 +451,9 @@ final class PhabricatorMainMenuView extends AphrontView {
           'countType'   => $conpherence_data['countType'],
           'countNumber' => $message_count_number,
           'unreadClass' => 'message-unread',
+          'favicon'     => $this->getFaviconURI('default'),
+          'message_favicon' => $this->getFaviconURI('message'),
+          'mention_favicon' => $this->getFaviconURI('mention'),
         ));
 
       $message_notification_dropdown = javelin_tag(
@@ -518,6 +532,9 @@ final class PhabricatorMainMenuView extends AphrontView {
           'countType'   => $notification_data['countType'],
           'countNumber' => $count_number,
           'unreadClass' => 'alert-unread',
+          'favicon'     => $this->getFaviconURI('default'),
+          'message_favicon' => $this->getFaviconURI('message'),
+          'mention_favicon' => $this->getFaviconURI('mention'),
         ));
 
       $notification_dropdown = javelin_tag(
@@ -600,6 +617,9 @@ final class PhabricatorMainMenuView extends AphrontView {
             'countType'   => null,
             'countNumber' => null,
             'unreadClass' => 'setup-unread',
+            'favicon'     => $this->getFaviconURI('default'),
+            'message_favicon' => $this->getFaviconURI('message'),
+            'mention_favicon' => $this->getFaviconURI('mention'),
           ));
 
         $setup_notification_dropdown = javelin_tag(

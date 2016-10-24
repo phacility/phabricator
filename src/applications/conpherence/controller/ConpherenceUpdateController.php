@@ -327,7 +327,6 @@ final class ConpherenceUpdateController
           ->setUser($user)
           ->setDatasource(new PhabricatorPeopleDatasource()));
 
-    require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
       ->setTitle(pht('Add Participants'))
       ->addHiddenInput('action', 'add_person')
@@ -336,9 +335,6 @@ final class ConpherenceUpdateController
         $request->getInt('latest_transaction_id'))
       ->appendForm($form);
 
-    if ($request->getExists('minimal_display')) {
-      $view->addHiddenInput('minimal_display', true);
-    }
     return $view;
   }
 
@@ -407,8 +403,6 @@ final class ConpherenceUpdateController
       }
     }
 
-    require_celerity_resource('conpherence-update-css');
-
     $dialog = id(new AphrontDialogView())
       ->setTitle($title)
       ->addHiddenInput('action', 'remove_person')
@@ -471,7 +465,6 @@ final class ConpherenceUpdateController
         ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
         ->setPolicies($policies));
 
-    require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
       ->setTitle($title)
       ->addHiddenInput('action', 'metadata')
@@ -481,9 +474,6 @@ final class ConpherenceUpdateController
       ->addHiddenInput('__continue__', true)
       ->appendChild($form);
 
-    if ($request->getExists('minimal_display')) {
-      $view->addHiddenInput('minimal_display', true);
-    }
     if ($request->getExists('force_ajax')) {
       $view->addHiddenInput('force_ajax', true);
     }
@@ -496,7 +486,6 @@ final class ConpherenceUpdateController
     $conpherence_id,
     $latest_transaction_id) {
 
-    $minimal_display = $this->getRequest()->getExists('minimal_display');
     $need_transactions = false;
     $need_participant_cache = true;
     switch ($action) {
@@ -529,8 +518,7 @@ final class ConpherenceUpdateController
     if ($need_transactions && $conpherence->getTransactions()) {
       $data = ConpherenceTransactionRenderer::renderTransactions(
         $user,
-        $conpherence,
-        !$minimal_display);
+        $conpherence);
       $key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
       $minimized = $user->getUserSetting($key);
       if (!$minimized) {
@@ -551,35 +539,33 @@ final class ConpherenceUpdateController
     $nav_item = null;
     $header = null;
     $people_widget = null;
-    if (!$minimal_display) {
-      switch ($action) {
-        case ConpherenceUpdateActions::METADATA:
-          $policy_objects = id(new PhabricatorPolicyQuery())
-            ->setViewer($user)
-            ->setObject($conpherence)
-            ->execute();
-          $header = $this->buildHeaderPaneContent(
-            $conpherence,
-            $policy_objects);
-          $header = hsprintf('%s', $header);
-          $nav_item = id(new ConpherenceThreadListView())
-            ->setUser($user)
-            ->setBaseURI($this->getApplicationURI())
-            ->renderSingleThread($conpherence, $policy_objects);
-          $nav_item = hsprintf('%s', $nav_item);
-          break;
-        case ConpherenceUpdateActions::ADD_PERSON:
-          $people_widget = id(new ConpherenceParticipantView())
-            ->setUser($user)
-            ->setConpherence($conpherence)
-            ->setUpdateURI($update_uri);
-          $people_widget = hsprintf('%s', $people_widget->render());
-          break;
-        case ConpherenceUpdateActions::REMOVE_PERSON:
-        case ConpherenceUpdateActions::NOTIFICATIONS:
-        default:
-          break;
-      }
+    switch ($action) {
+      case ConpherenceUpdateActions::METADATA:
+        $policy_objects = id(new PhabricatorPolicyQuery())
+          ->setViewer($user)
+          ->setObject($conpherence)
+          ->execute();
+        $header = $this->buildHeaderPaneContent(
+          $conpherence,
+          $policy_objects);
+        $header = hsprintf('%s', $header);
+        $nav_item = id(new ConpherenceThreadListView())
+          ->setUser($user)
+          ->setBaseURI($this->getApplicationURI())
+          ->renderSingleThread($conpherence, $policy_objects);
+        $nav_item = hsprintf('%s', $nav_item);
+        break;
+      case ConpherenceUpdateActions::ADD_PERSON:
+        $people_widget = id(new ConpherenceParticipantView())
+          ->setUser($user)
+          ->setConpherence($conpherence)
+          ->setUpdateURI($update_uri);
+        $people_widget = hsprintf('%s', $people_widget->render());
+        break;
+      case ConpherenceUpdateActions::REMOVE_PERSON:
+      case ConpherenceUpdateActions::NOTIFICATIONS:
+      default:
+        break;
     }
     $data = $conpherence->getDisplayData($user);
     $dropdown_query = id(new AphlictDropdownDataQuery())

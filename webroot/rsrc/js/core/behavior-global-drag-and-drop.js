@@ -70,7 +70,14 @@ JX.behavior('global-drag-and-drop', function(config, statics) {
         // If whatever the user dropped in has finished uploading, send them to
         // their uploads.
         var uri;
-        uri = JX.$U(config.browseURI);
+        var is_submit = !!config.submitURI;
+
+        if (is_submit) {
+          uri = JX.$U(config.submitURI);
+        } else {
+          uri = JX.$U(config.browseURI);
+        }
+
         var ids = [];
         for (var ii = 0; ii < statics.files.length; ii++) {
           ids.push(statics.files[ii].getID());
@@ -79,7 +86,12 @@ JX.behavior('global-drag-and-drop', function(config, statics) {
 
         statics.files = [];
 
-        uri.go();
+        if (is_submit) {
+          new JX.Workflow(uri)
+            .start();
+        } else {
+          uri.go();
+        }
       }
     });
 

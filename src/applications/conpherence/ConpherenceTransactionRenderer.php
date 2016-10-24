@@ -5,7 +5,6 @@ final class ConpherenceTransactionRenderer extends Phobject {
   public static function renderTransactions(
     PhabricatorUser $user,
     ConpherenceThread $conpherence,
-    $full_display = true,
     $marker_type = 'older') {
 
     $transactions = $conpherence->getTransactions();
@@ -74,8 +73,7 @@ final class ConpherenceTransactionRenderer extends Phobject {
       ->setUser($user)
       ->setConpherenceThread($conpherence)
       ->setHandles($handles)
-      ->setMarkupEngine($engine)
-      ->setFullDisplay($full_display);
+      ->setMarkupEngine($engine);
 
     foreach ($transactions as $transaction) {
       $collapsed = false;

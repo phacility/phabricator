@@ -99,6 +99,23 @@ final class PhabricatorCaches extends Phobject {
     return $caches;
   }
 
+  public static function getMutableCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildMutableCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildMutableCaches() {
+    $caches = array();
+
+    $caches[] = new PhabricatorKeyValueDatabaseCache();
+
+    return $caches;
+  }
+
 
 /* -(  Repository Graph Cache  )--------------------------------------------- */
 

@@ -30,10 +30,15 @@ final class PhabricatorCalendarImportViewController
     $curtain = $this->buildCurtain($import);
     $details = $this->buildPropertySection($import);
 
+    $log_messages = $this->buildLogMessages($import);
+    $imported_events = $this->buildImportedEvents($import);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setMainColumn(
         array(
+          $log_messages,
+          $imported_events,
           $timeline,
         ))
       ->setCurtain($curtain)
@@ -80,6 +85,7 @@ final class PhabricatorCalendarImportViewController
     $id = $import->getID();
 
     $curtain = $this->newCurtainView($import);
+    $engine = $import->getEngine();
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -88,6 +94,8 @@ final class PhabricatorCalendarImportViewController
 
     $edit_uri = "import/edit/{$id}/";
     $edit_uri = $this->getApplicationURI($edit_uri);
+
+    $can_disable = ($can_edit && $engine->canDisable($viewer, $import));
 
     $curtain->addAction(
       id(new PhabricatorActionView())
@@ -111,9 +119,27 @@ final class PhabricatorCalendarImportViewController
       id(new PhabricatorActionView())
         ->setName($disable_name)
         ->setIcon($disable_icon)
-        ->setDisabled(!$can_edit)
+        ->setDisabled(!$can_disable)
         ->setWorkflow(true)
         ->setHref($disable_uri));
+
+
+    if ($can_edit) {
+      $can_delete = $engine->canDeleteAnyEvents($viewer, $import);
+    } else {
+      $can_delete = false;
+    }
+
+    $delete_uri = "import/delete/{$id}/";
+    $delete_uri = $this->getApplicationURI($delete_uri);
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Delete Imported Events'))
+        ->setIcon('fa-times')
+        ->setDisabled(!$can_delete)
+        ->setWorkflow(true)
+        ->setHref($delete_uri));
 
     return $curtain;
   }
@@ -125,6 +151,91 @@ final class PhabricatorCalendarImportViewController
     $properties = id(new PHUIPropertyListView())
       ->setViewer($viewer);
 
+    $engine = $import->getEngine();
+
+    $properties->addProperty(
+      pht('Source Type'),
+      $engine->getImportEngineTypeName());
+
+    $engine->appendImportProperties(
+      $viewer,
+      $import,
+      $properties);
+
     return $properties;
   }
+
+  private function buildLogMessages(PhabricatorCalendarImport $import) {
+    $viewer = $this->getViewer();
+
+    $logs = id(new PhabricatorCalendarImportLogQuery())
+      ->setViewer($viewer)
+      ->withImportPHIDs(array($import->getPHID()))
+      ->setLimit(25)
+      ->execute();
+
+    $logs_view = id(new PhabricatorCalendarImportLogView())
+      ->setViewer($viewer)
+      ->setLogs($logs);
+
+    $all_uri = $this->getApplicationURI('import/log/');
+    $all_uri = (string)id(new PhutilURI($all_uri))
+      ->setQueryParam('importSourcePHID', $import->getPHID());
+
+    $all_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View All'))
+      ->setIcon('fa-search')
+      ->setHref($all_uri);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Log Messages'))
+      ->addActionLink($all_button);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($logs_view);
+  }
+
+  private function buildImportedEvents(PhabricatorCalendarImport $import) {
+    $viewer = $this->getViewer();
+
+    $engine = id(new PhabricatorCalendarEventSearchEngine())
+      ->setViewer($viewer);
+
+    $saved = $engine->newSavedQuery()
+      ->setParameter('importSourcePHIDs', array($import->getPHID()));
+
+    $pager = $engine->newPagerForSavedQuery($saved);
+    $pager->setPageSize(25);
+
+    $query = $engine->buildQueryFromSavedQuery($saved);
+
+    $results = $engine->executeQuery($query, $pager);
+    $view = $engine->renderResults($results, $saved);
+    $list = $view->getObjectList();
+    $list->setNoDataString(pht('No imported events.'));
+
+    $all_uri = $this->getApplicationURI();
+    $all_uri = (string)id(new PhutilURI($all_uri))
+      ->setQueryParam('importSourcePHID', $import->getPHID())
+      ->setQueryParam('display', 'list');
+
+    $all_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('View All'))
+      ->setIcon('fa-search')
+      ->setHref($all_uri);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Imported Events'))
+      ->addActionLink($all_button);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setObjectList($list);
+  }
+
 }
