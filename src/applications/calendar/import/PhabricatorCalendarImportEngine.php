@@ -25,7 +25,7 @@ abstract class PhabricatorCalendarImportEngine
 
   abstract public function getDisplayName(PhabricatorCalendarImport $import);
 
-  abstract public function didCreateImport(
+  abstract public function importEventsFromSource(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import);
 

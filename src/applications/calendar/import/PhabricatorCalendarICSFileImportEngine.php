@@ -59,7 +59,7 @@ final class PhabricatorCalendarICSFileImportEngine
     }
   }
 
-  public function didCreateImport(
+  public function importEventsFromSource(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import) {
 

@@ -71,7 +71,7 @@ final class PhabricatorCalendarICSURIImportEngine
     return pht('ICS URI');
   }
 
-  public function didCreateImport(
+  public function importEventsFromSource(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import) {
 

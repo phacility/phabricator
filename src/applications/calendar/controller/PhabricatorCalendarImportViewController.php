@@ -105,6 +105,17 @@ final class PhabricatorCalendarImportViewController
         ->setWorkflow(!$can_edit)
         ->setHref($edit_uri));
 
+    $reload_uri = "import/reload/{$id}/";
+    $reload_uri = $this->getApplicationURI($reload_uri);
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Reload Import'))
+        ->setIcon('fa-refresh')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true)
+        ->setHref($reload_uri));
+
     $disable_uri = "import/disable/{$id}/";
     $disable_uri = $this->getApplicationURI($disable_uri);
     if ($import->getIsDisabled()) {
@@ -122,7 +133,6 @@ final class PhabricatorCalendarImportViewController
         ->setDisabled(!$can_disable)
         ->setWorkflow(true)
         ->setHref($disable_uri));
-
 
     if ($can_edit) {
       $can_delete = $engine->canDeleteAnyEvents($viewer, $import);

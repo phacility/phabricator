@@ -28,11 +28,23 @@ final class PhabricatorCalendarImportEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    if ($this->getIsNewObject()) {
+    $type_reload = PhabricatorCalendarImportReloadTransaction::TRANSACTIONTYPE;
+
+    // We import events when you create a source, or if you later reload it
+    // explicitly.
+    $should_reload = $this->getIsNewObject();
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $type_reload) {
+        $should_reload = true;
+        break;
+      }
+    }
+
+    if ($should_reload) {
       $actor = $this->getActor();
 
       $import_engine = $object->getEngine();
-      $import_engine->didCreateImport($actor, $object);
+      $import_engine->importEventsFromSource($actor, $object);
     }
 
     return $xactions;
