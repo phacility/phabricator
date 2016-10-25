@@ -403,6 +403,9 @@ abstract class PhabricatorCalendarImportEngine
         $until_datetime->setViewerTimezone($timezone);
         $event->setUntilDateTime($until_datetime);
       }
+
+      $count = $rrule->getCount();
+      $event->setParameter('recurrenceCount', $count);
     }
 
     return $event;

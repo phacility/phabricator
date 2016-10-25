@@ -226,10 +226,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return null;
     }
 
+    $limit = $sequence + 1;
+    $count = $this->getRecurrenceCount();
+    if ($count && ($count < $limit)) {
+      return null;
+    }
+
     $instances = $set->getEventsBetween(
       null,
       $this->newUntilDateTime(),
-      $sequence + 1);
+      $limit);
 
     return idx($instances, $sequence, null);
   }
@@ -907,7 +913,22 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $rrule->setUntil($until);
     }
 
+    $count = $this->getRecurrenceCount();
+    if ($count) {
+      $rrule->setCount($count);
+    }
+
     return $rrule;
+  }
+
+  public function getRecurrenceCount() {
+    $count = (int)$this->getParameter('recurrenceCount');
+
+    if (!$count) {
+      return null;
+    }
+
+    return $count;
   }
 
   public function newRecurrenceSet() {
