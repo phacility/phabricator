@@ -5,6 +5,7 @@ final class PhortuneMerchantTransaction
 
   const TYPE_NAME = 'merchant:name';
   const TYPE_DESCRIPTION = 'merchant:description';
+  const TYPE_CONTACTINFO = 'merchant:contactinfo';
 
   public function getApplicationName() {
     return 'phortune';
@@ -42,6 +43,10 @@ final class PhortuneMerchantTransaction
         return pht(
           '%s updated the description for this merchant.',
             $this->renderHandleLink($author_phid));
+      case self::TYPE_CONTACTINFO:
+        return pht(
+          '%s updated the contact information for this merchant.',
+            $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
@@ -51,6 +56,7 @@ final class PhortuneMerchantTransaction
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
+      case self::TYPE_CONTACTINFO:
         return ($old === null);
     }
     return parent::shouldHide();
@@ -59,6 +65,8 @@ final class PhortuneMerchantTransaction
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
+        return ($this->getOldValue() !== null);
+      case self::TYPE_CONTACTINFO:
         return ($this->getOldValue() !== null);
     }
 

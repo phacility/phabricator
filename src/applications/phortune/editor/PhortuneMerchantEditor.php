@@ -16,6 +16,7 @@ final class PhortuneMerchantEditor
 
     $types[] = PhortuneMerchantTransaction::TYPE_NAME;
     $types[] = PhortuneMerchantTransaction::TYPE_DESCRIPTION;
+    $types[] = PhortuneMerchantTransaction::TYPE_CONTACTINFO;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
 
@@ -30,6 +31,8 @@ final class PhortuneMerchantEditor
         return $object->getName();
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
+      case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
+        return $object->getContactInfo();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -42,6 +45,7 @@ final class PhortuneMerchantEditor
     switch ($xaction->getTransactionType()) {
       case PhortuneMerchantTransaction::TYPE_NAME:
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
+      case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
         return $xaction->getNewValue();
     }
 
@@ -59,6 +63,9 @@ final class PhortuneMerchantEditor
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         return;
+      case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
+        $object->setContactInfo($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -71,6 +78,7 @@ final class PhortuneMerchantEditor
     switch ($xaction->getTransactionType()) {
       case PhortuneMerchantTransaction::TYPE_NAME:
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
+      case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
         return;
     }
 

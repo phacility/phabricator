@@ -47,6 +47,7 @@ final class PhortuneMerchantEditController
     $e_name = true;
     $v_name = $merchant->getName();
     $v_desc = $merchant->getDescription();
+    $v_cont = $merchant->getContactInfo();
     $v_members = $merchant->getMemberPHIDs();
     $e_members = null;
 
@@ -54,12 +55,14 @@ final class PhortuneMerchantEditController
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('desc');
+      $v_cont = $request->getStr('cont');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
       $v_members = $request->getArr('memberPHIDs');
 
       $type_name = PhortuneMerchantTransaction::TYPE_NAME;
       $type_desc = PhortuneMerchantTransaction::TYPE_DESCRIPTION;
+      $type_cont = PhortuneMerchantTransaction::TYPE_CONTACTINFO;
       $type_edge = PhabricatorTransactions::TYPE_EDGE;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
 
@@ -74,6 +77,10 @@ final class PhortuneMerchantEditController
       $xactions[] = id(new PhortuneMerchantTransaction())
         ->setTransactionType($type_desc)
         ->setNewValue($v_desc);
+
+      $xactions[] = id(new PhortuneMerchantTransaction())
+        ->setTransactionType($type_cont)
+        ->setNewValue($v_cont);
 
       $xactions[] = id(new PhortuneMerchantTransaction())
         ->setTransactionType($type_view)
@@ -127,6 +134,12 @@ final class PhortuneMerchantEditController
           ->setName('desc')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
+          ->setName('cont')
+          ->setLabel(pht('Contact Info'))
+          ->setValue($v_cont))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())

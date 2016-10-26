@@ -8,6 +8,7 @@ final class PhortuneMerchant extends PhortuneDAO
   protected $name;
   protected $viewPolicy;
   protected $description;
+  protected $contactInfo;
 
   private $memberPHIDs = self::ATTACHABLE;
 
@@ -23,6 +24,7 @@ final class PhortuneMerchant extends PhortuneDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
         'description' => 'text',
+        'contactInfo' => 'text',
       ),
     ) + parent::getConfiguration();
   }
