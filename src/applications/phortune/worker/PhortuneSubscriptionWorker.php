@@ -36,17 +36,32 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
       ->setSubscription($subscription);
 
     // TODO: This isn't really ideal. It would be better to use an application
-    // actor than the original author of the subscription. In particular, if
-    // someone initiates a subscription, adds some other account managers, and
-    // later leaves the company, they'll continue "acting" here indefinitely.
+    // actor than a fairly arbitrary account member.
+
     // However, for now, some of the stuff later in the pipeline requires a
     // valid actor with a real PHID. The subscription should eventually be
     // able to create these invoices "as" the application it is acting on
     // behalf of.
-    $actor = id(new PhabricatorPeopleQuery())
+
+    $members = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
-      ->withPHIDs(array($subscription->getAuthorPHID()))
-      ->executeOne();
+      ->withPHIDs($account->getMemberPHIDs())
+      ->execute();
+    $actor = null;
+    foreach ($members as $member) {
+
+      // Don't act as a disabled user. If all of the users on the account are
+      // disabled this means we won't charge the subscription, but that's
+      // probably correct since it means no one can cancel or pay it anyway.
+      if ($member->getIsDisabled()) {
+        continue;
+      }
+
+      // For now, just pick the first valid user we encounter as the actor.
+      $actor = $member;
+      break;
+    }
+
     if (!$actor) {
       throw new Exception(pht('Failed to load actor to bill subscription!'));
     }
