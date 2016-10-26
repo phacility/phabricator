@@ -39,6 +39,9 @@ abstract class PhabricatorCalendarImportEngine
     throw new PhutilMethodNotImplementedException();
   }
 
+  abstract public function supportsTriggers(
+    PhabricatorCalendarImport $import);
+
   final public static function getAllImportEngines() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)

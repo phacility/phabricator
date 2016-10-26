@@ -33,7 +33,7 @@ final class PhabricatorCalendarImportDropController
         ->addCancelButton($cancel_uri, pht('Done'));
     }
 
-    $engine = new PhabricatorCalendarICSImportEngine();
+    $engine = new PhabricatorCalendarICSFileImportEngine();
     $imports = array();
     foreach ($files as $file) {
       $import = PhabricatorCalendarImport::initializeNewCalendarImport(
