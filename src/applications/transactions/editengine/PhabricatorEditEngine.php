@@ -1349,7 +1349,9 @@ abstract class PhabricatorEditEngine
   }
 
 
-  final public function addActionToCrumbs(PHUICrumbsView $crumbs) {
+  final public function addActionToCrumbs(
+    PHUICrumbsView $crumbs,
+    array $parameters = array()) {
     $viewer = $this->getViewer();
 
     $can_create = $this->hasCreateCapability();
@@ -1385,6 +1387,11 @@ abstract class PhabricatorEditEngine
       $form_key = $config->getIdentifier();
       $create_uri = $this->getEditURI(null, "form/{$form_key}/");
 
+      if ($parameters) {
+        $create_uri = (string)id(new PhutilURI($create_uri))
+          ->setQueryParams($parameters);
+      }
+
       if (count($configs) > 1) {
         $menu_icon = 'fa-caret-square-o-down';
 
@@ -1394,6 +1401,11 @@ abstract class PhabricatorEditEngine
         foreach ($configs as $config) {
           $form_key = $config->getIdentifier();
           $config_uri = $this->getEditURI(null, "form/{$form_key}/");
+
+          if ($parameters) {
+            $config_uri = (string)id(new PhutilURI($config_uri))
+              ->setQueryParams($parameters);
+          }
 
           $item_icon = 'fa-plus';
 

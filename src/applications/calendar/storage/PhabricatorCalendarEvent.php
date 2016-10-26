@@ -75,10 +75,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $default_icon = 'fa-calendar';
 
-    $datetime_start = PhutilCalendarAbsoluteDateTime::newFromEpoch(
-      $now,
-      $actor->getTimezoneIdentifier());
-    $datetime_end = $datetime_start->newRelativeDateTime('PT1H');
+    $datetime_defaults = self::newDefaultEventDateTimes(
+      $actor,
+      $now);
+    list($datetime_start, $datetime_end) = $datetime_defaults;
 
     return id(new PhabricatorCalendarEvent())
       ->setDescription('')
@@ -100,6 +100,31 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEndDateTime($datetime_end)
       ->attachImportSource(null)
       ->applyViewerTimezone($actor);
+  }
+
+  public static function newDefaultEventDateTimes(
+    PhabricatorUser $viewer,
+    $now) {
+
+    $datetime_start = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $now,
+      $viewer->getTimezoneIdentifier());
+
+    // Advance the time by an hour, then round downwards to the nearest hour.
+    // For example, if it is currently 3:25 PM, we suggest a default start time
+    // of 4 PM.
+    $datetime_start = $datetime_start
+      ->newRelativeDateTime('PT1H')
+      ->newAbsoluteDateTime();
+    $datetime_start->setMinute(0);
+    $datetime_start->setSecond(0);
+
+    // Default the end time to an hour after the start time.
+    $datetime_end = $datetime_start
+      ->newRelativeDateTime('PT1H')
+      ->newAbsoluteDateTime();
+
+    return array($datetime_start, $datetime_end);
   }
 
   private function newChild(
