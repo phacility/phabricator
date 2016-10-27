@@ -30,10 +30,11 @@ final class PhabricatorCalendarEventInviteTransaction
 
     $map = array();
     foreach ($add as $phid) {
-        $map[$phid] = $status_invited;
+      $map[$phid] = $status_invited;
     }
+
     foreach ($rem as $phid) {
-        $map[$phid] = $status_uninvited;
+      $map[$phid] = $status_uninvited;
     }
 
     // If we're creating this event and the actor is inviting themselves,

@@ -207,6 +207,8 @@ abstract class PhabricatorCalendarImportEngine
 
     $xactions = array();
     $update_map = array();
+    $invitee_map = array();
+    $attendee_map = array();
     foreach ($node_map as $full_uid => $node) {
       $event = idx($events, $full_uid);
       if (!$event) {
@@ -222,6 +224,66 @@ abstract class PhabricatorCalendarImportEngine
       $this->updateEventFromNode($viewer, $event, $node);
       $xactions[$full_uid] = $this->newUpdateTransactions($event, $node);
       $update_map[$full_uid] = $event;
+
+      $attendees = $node->getAttendees();
+      $private_index = 1;
+      foreach ($attendees as $attendee) {
+        // Generate a "name" for this attendee which is not an email address.
+        // We avoid disclosing email addresses to be consistent with the rest
+        // of the product.
+        $name = $attendee->getName();
+        if (preg_match('/@/', $name)) {
+          $name = new PhutilEmailAddress($name);
+          $name = $name->getDisplayName();
+        }
+
+        // If we don't have a name or the name still looks like it's an
+        // email address, give them a dummy placeholder name.
+        if (!strlen($name) || preg_match('/@/', $name)) {
+          $name = pht('Private User %d', $private_index);
+          $private_index++;
+        }
+
+        $attendee_map[$full_uid][$name] = $attendee;
+      }
+    }
+
+    $attendee_names = array();
+    foreach ($attendee_map as $full_uid => $event_attendees) {
+      foreach ($event_attendees as $name => $attendee) {
+        $attendee_names[$name] = $attendee;
+      }
+    }
+
+    if ($attendee_names) {
+      $external_invitees = id(new PhabricatorCalendarExternalInviteeQuery())
+        ->setViewer($viewer)
+        ->withNames($attendee_names)
+        ->execute();
+      $external_invitees = mpull($external_invitees, null, 'getName');
+
+      foreach ($attendee_names as $name => $attendee) {
+        if (isset($external_invitees[$name])) {
+          continue;
+        }
+
+        $external_invitee = id(new PhabricatorCalendarExternalInvitee())
+          ->setName($name)
+          ->setURI($attendee->getURI())
+          ->setSourcePHID($import->getPHID());
+
+        try {
+          $external_invitee->save();
+        } catch (AphrontDuplicateKeyQueryException $ex) {
+          $external_invitee =
+            id(new PhabricatorCalendarExternalInviteeQuery())
+              ->setViewer($viewer)
+              ->withNames(array($name))
+              ->executeOne();
+        }
+
+        $external_invitees[$name] = $external_invitee;
+      }
     }
 
     // Reorder events so we create parents first. This allows us to populate
@@ -287,6 +349,51 @@ abstract class PhabricatorCalendarImportEngine
       $is_new = !$event->getID();
 
       $editor->applyTransactions($event, $event_xactions);
+
+      // We're just forcing attendees to the correct values here because
+      // transactions intentionally don't let you RSVP for other users. This
+      // might need to be turned into a special type of transaction eventually.
+      $attendees = $attendee_map[$full_uid];
+      $old_map = $event->getInvitees();
+      $old_map = mpull($old_map, null, 'getInviteePHID');
+
+      $new_map = array();
+      foreach ($attendees as $name => $attendee) {
+        $phid = $external_invitees[$name]->getPHID();
+
+        $invitee = idx($old_map, $phid);
+        if (!$invitee) {
+          $invitee = id(new PhabricatorCalendarEventInvitee())
+            ->setEventPHID($event->getPHID())
+            ->setInviteePHID($phid)
+            ->setInviterPHID($import->getPHID());
+        }
+
+        switch ($attendee->getStatus()) {
+          case PhutilCalendarUserNode::STATUS_ACCEPTED:
+            $status = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+            break;
+          case PhutilCalendarUserNode::STATUS_DECLINED:
+            $status = PhabricatorCalendarEventInvitee::STATUS_DECLINED;
+            break;
+          case PhutilCalendarUserNode::STATUS_INVITED:
+          default:
+            $status = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+            break;
+        }
+        $invitee->setStatus($status);
+        $invitee->save();
+
+        $new_map[$phid] = $invitee;
+      }
+
+      foreach ($old_map as $phid => $invitee) {
+        if (empty($new_map[$phid])) {
+          $invitee->delete();
+        }
+      }
+
+      $event->attachInvitees($new_map);
 
       $import->newLogMessage(
         PhabricatorCalendarImportUpdateLogType::LOGTYPE,
