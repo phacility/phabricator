@@ -27,7 +27,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $isRecurring = 0;
 
-  private $isGhostEvent = false;
   protected $instanceOfEventPHID;
   protected $sequenceIndex;
 
@@ -59,6 +58,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $dateTo;
   protected $recurrenceEndDate;
   protected $recurrenceFrequency = array();
+
+  private $isGhostEvent = false;
+  private $stubInvitees;
 
   public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -449,7 +451,32 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getInvitees() {
+    if ($this->getIsGhostEvent() || $this->getIsStub()) {
+      if ($this->stubInvitees === null) {
+        $this->stubInvitees = $this->newStubInvitees();
+      }
+      return $this->stubInvitees;
+    }
+
     return $this->assertAttached($this->invitees);
+  }
+
+  private function newStubInvitees() {
+    $parent = $this->getParentEvent();
+
+    $parent_invitees = $parent->getInvitees();
+    $stub_invitees = array();
+
+    foreach ($parent_invitees as $invitee) {
+      $stub_invitee = id(new PhabricatorCalendarEventInvitee())
+        ->setInviteePHID($invitee->getInviteePHID())
+        ->setInviterPHID($invitee->getInviterPHID())
+        ->setStatus(PhabricatorCalendarEventInvitee::STATUS_INVITED);
+
+      $stub_invitees[] = $stub_invitee;
+    }
+
+    return $stub_invitees;
   }
 
   public function attachInvitees(array $invitees) {
@@ -478,6 +505,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     if (!$invited) {
       return PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
     }
+
     $invited = $invited->getStatus();
     return $invited;
   }
