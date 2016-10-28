@@ -63,7 +63,6 @@ final class PhortuneMerchant extends PhortuneDAO
     return $this->assertAttached($this->profileImageFile);
   }
 
-
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 
