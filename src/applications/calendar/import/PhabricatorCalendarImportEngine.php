@@ -409,10 +409,28 @@ abstract class PhabricatorCalendarImportEngine
         array());
     }
 
-    // TODO: When the source is a subscription-based ICS file or some other
-    // similar source, we should load all events from the source here and
-    // destroy the ones we didn't update. These are events that have been
-    // deleted.
+    // Delete any events which are no longer present in the source.
+    $updated_events = mpull($update_map, null, 'getPHID');
+    $source_events = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withImportSourcePHIDs(array($import->getPHID()))
+      ->execute();
+
+    $engine = new PhabricatorDestructionEngine();
+    foreach ($source_events as $source_event) {
+      if (isset($updated_events[$source_event->getPHID()])) {
+        // We imported and updated this event, so keep it around.
+        continue;
+      }
+
+      $import->newLogMessage(
+        PhabricatorCalendarImportDeleteLogType::LOGTYPE,
+        array(
+          'name' => $source_event->getName(),
+        ));
+
+      $engine->destroyObject($source_event);
+    }
   }
 
   private function getFullNodeUID(PhutilCalendarEventNode $node) {
