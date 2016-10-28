@@ -401,8 +401,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function setValue($value) {
     $this->hasValue = true;
-    $this->initialValue = $value;
     $this->value = $value;
+
+    // If we don't have an initial value set yet, use the value as the
+    // initial value.
+    $initial_value = $this->getInitialValue();
+    if ($initial_value === null) {
+      $this->initialValue = $value;
+    }
+
     return $this;
   }
 

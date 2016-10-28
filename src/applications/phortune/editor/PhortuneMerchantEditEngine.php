@@ -112,6 +112,7 @@ final class PhortuneMerchantEditEngine
         ->setDescription(pht('Initial merchant members.'))
         ->setConduitDescription(pht('Set merchant members.'))
         ->setConduitTypeDescription(pht('New list of members.'))
+        ->setInitialValue($object->getMemberPHIDs())
         ->setValue($member_phids),
 
     );
