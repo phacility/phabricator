@@ -10,6 +10,7 @@ final class PhortuneMerchantViewController
     $merchant = id(new PhortuneMerchantQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needProfileImage(true)
       ->executeOne();
     if (!$merchant) {
       return new Aphront404Response();
@@ -28,7 +29,7 @@ final class PhortuneMerchantViewController
       ->setHeader($merchant->getName())
       ->setUser($viewer)
       ->setPolicyObject($merchant)
-      ->setHeaderIcon('fa-bank');
+      ->setImage($merchant->getProfileImageURI());
 
     $providers = id(new PhortunePaymentProviderConfigQuery())
       ->setViewer($viewer)
@@ -170,6 +171,14 @@ final class PhortuneMerchantViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
         ->setHref($this->getApplicationURI("merchant/edit/{$id}/")));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Logo'))
+        ->setIcon('fa-camera')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit)
+        ->setHref($this->getApplicationURI("merchant/picture/{$id}/")));
 
     $curtain->addAction(
       id(new PhabricatorActionView())

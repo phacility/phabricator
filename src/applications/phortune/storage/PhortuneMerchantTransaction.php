@@ -6,6 +6,7 @@ final class PhortuneMerchantTransaction
   const TYPE_NAME = 'merchant:name';
   const TYPE_DESCRIPTION = 'merchant:description';
   const TYPE_CONTACTINFO = 'merchant:contactinfo';
+  const TYPE_PICTURE = 'merchant:picture';
 
   public function getApplicationName() {
     return 'phortune';
