@@ -80,6 +80,9 @@ final class PhabricatorCalendarImportEditEngine
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
 
+    $engine = $object->getEngine();
+    $can_trigger = $engine->supportsTriggers($object);
+
     $fields = array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -89,6 +92,7 @@ final class PhabricatorCalendarImportEditEngine
           PhabricatorCalendarImportNameTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(pht('Rename the import.'))
         ->setConduitTypeDescription(pht('New import name.'))
+        ->setPlaceholder($object->getDisplayName())
         ->setValue($object->getName()),
       id(new PhabricatorBoolEditField())
         ->setKey('disabled')
@@ -101,7 +105,43 @@ final class PhabricatorCalendarImportEditEngine
         ->setConduitDescription(pht('Disable or restore the import.'))
         ->setConduitTypeDescription(pht('True to cancel the import.'))
         ->setValue($object->getIsDisabled()),
+      id(new PhabricatorBoolEditField())
+        ->setKey('delete')
+        ->setLabel(pht('Delete Imported Events'))
+        ->setDescription(pht('Delete all events from this source.'))
+        ->setTransactionType(
+          PhabricatorCalendarImportDisableTransaction::TRANSACTIONTYPE)
+        ->setIsConduitOnly(true)
+        ->setConduitDescription(pht('Disable or restore the import.'))
+        ->setConduitTypeDescription(pht('True to delete imported events.'))
+        ->setValue(false),
+      id(new PhabricatorBoolEditField())
+        ->setKey('reload')
+        ->setLabel(pht('Reload Import'))
+        ->setDescription(pht('Reload events imported from this source.'))
+        ->setTransactionType(
+          PhabricatorCalendarImportDisableTransaction::TRANSACTIONTYPE)
+        ->setIsConduitOnly(true)
+        ->setConduitDescription(pht('Disable or restore the import.'))
+        ->setConduitTypeDescription(pht('True to reload the import.'))
+        ->setValue(false),
     );
+
+    if ($can_trigger) {
+      $frequency_map = PhabricatorCalendarImport::getTriggerFrequencyMap();
+      $frequency_options = ipull($frequency_map, 'name');
+
+      $fields[] = id(new PhabricatorSelectEditField())
+        ->setKey('frequency')
+        ->setLabel(pht('Update Automatically'))
+        ->setDescription(pht('Configure an automatic update frequncy.'))
+        ->setTransactionType(
+          PhabricatorCalendarImportFrequencyTransaction::TRANSACTIONTYPE)
+        ->setConduitDescription(pht('Set the automatic update frequency.'))
+        ->setConduitTypeDescription(pht('Update frequency constant.'))
+        ->setValue($object->getTriggerFrequency())
+        ->setOptions($frequency_options);
+    }
 
     $import_engine = $object->getEngine();
     foreach ($import_engine->newEditEngineFields($this, $object) as $field) {

@@ -633,6 +633,11 @@ final class PhabricatorCalendarEventQuery
     PhabricatorCalendarEvent $event,
     $raw_limit) {
 
+    $count = $event->getRecurrenceCount();
+    if ($count && ($count <= $raw_limit)) {
+      return ($count - 1);
+    }
+
     return $raw_limit;
   }
 

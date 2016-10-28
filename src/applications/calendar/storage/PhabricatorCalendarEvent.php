@@ -27,7 +27,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $isRecurring = 0;
 
-  private $isGhostEvent = false;
   protected $instanceOfEventPHID;
   protected $sequenceIndex;
 
@@ -60,6 +59,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $recurrenceEndDate;
   protected $recurrenceFrequency = array();
 
+  private $isGhostEvent = false;
+  private $stubInvitees;
+
   public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
@@ -75,10 +77,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $default_icon = 'fa-calendar';
 
-    $datetime_start = PhutilCalendarAbsoluteDateTime::newFromEpoch(
-      $now,
-      $actor->getTimezoneIdentifier());
-    $datetime_end = $datetime_start->newRelativeDateTime('PT1H');
+    $datetime_defaults = self::newDefaultEventDateTimes(
+      $actor,
+      $now);
+    list($datetime_start, $datetime_end) = $datetime_defaults;
 
     return id(new PhabricatorCalendarEvent())
       ->setDescription('')
@@ -100,6 +102,31 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEndDateTime($datetime_end)
       ->attachImportSource(null)
       ->applyViewerTimezone($actor);
+  }
+
+  public static function newDefaultEventDateTimes(
+    PhabricatorUser $viewer,
+    $now) {
+
+    $datetime_start = PhutilCalendarAbsoluteDateTime::newFromEpoch(
+      $now,
+      $viewer->getTimezoneIdentifier());
+
+    // Advance the time by an hour, then round downwards to the nearest hour.
+    // For example, if it is currently 3:25 PM, we suggest a default start time
+    // of 4 PM.
+    $datetime_start = $datetime_start
+      ->newRelativeDateTime('PT1H')
+      ->newAbsoluteDateTime();
+    $datetime_start->setMinute(0);
+    $datetime_start->setSecond(0);
+
+    // Default the end time to an hour after the start time.
+    $datetime_end = $datetime_start
+      ->newRelativeDateTime('PT1H')
+      ->newAbsoluteDateTime();
+
+    return array($datetime_start, $datetime_end);
   }
 
   private function newChild(
@@ -226,10 +253,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return null;
     }
 
+    $limit = $sequence + 1;
+    $count = $this->getRecurrenceCount();
+    if ($count && ($count < $limit)) {
+      return null;
+    }
+
     $instances = $set->getEventsBetween(
       null,
       $this->newUntilDateTime(),
-      $sequence + 1);
+      $limit);
 
     return idx($instances, $sequence, null);
   }
@@ -418,7 +451,32 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getInvitees() {
+    if ($this->getIsGhostEvent() || $this->getIsStub()) {
+      if ($this->stubInvitees === null) {
+        $this->stubInvitees = $this->newStubInvitees();
+      }
+      return $this->stubInvitees;
+    }
+
     return $this->assertAttached($this->invitees);
+  }
+
+  private function newStubInvitees() {
+    $parent = $this->getParentEvent();
+
+    $parent_invitees = $parent->getInvitees();
+    $stub_invitees = array();
+
+    foreach ($parent_invitees as $invitee) {
+      $stub_invitee = id(new PhabricatorCalendarEventInvitee())
+        ->setInviteePHID($invitee->getInviteePHID())
+        ->setInviterPHID($invitee->getInviterPHID())
+        ->setStatus(PhabricatorCalendarEventInvitee::STATUS_INVITED);
+
+      $stub_invitees[] = $stub_invitee;
+    }
+
+    return $stub_invitees;
   }
 
   public function attachInvitees(array $invitees) {
@@ -447,6 +505,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     if (!$invited) {
       return PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
     }
+
     $invited = $invited->getStatus();
     return $invited;
   }
@@ -907,7 +966,22 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $rrule->setUntil($until);
     }
 
+    $count = $this->getRecurrenceCount();
+    if ($count) {
+      $rrule->setCount($count);
+    }
+
     return $rrule;
+  }
+
+  public function getRecurrenceCount() {
+    $count = (int)$this->getParameter('recurrenceCount');
+
+    if (!$count) {
+      return null;
+    }
+
+    return $count;
   }
 
   public function newRecurrenceSet() {

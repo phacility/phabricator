@@ -36,7 +36,6 @@ final class PhortuneMerchantViewController
       ->execute();
 
     $details = $this->buildDetailsView($merchant, $providers);
-    $description = $this->buildDescriptionView($merchant);
     $curtain = $this->buildCurtainView($merchant);
 
     $provider_list = $this->buildProviderList(
@@ -53,7 +52,6 @@ final class PhortuneMerchantViewController
       ->setCurtain($curtain)
       ->setMainColumn(array(
         $details,
-        $description,
         $provider_list,
         $timeline,
       ));
@@ -130,28 +128,28 @@ final class PhortuneMerchantViewController
 
     $view->addProperty(pht('Status'), $status_view);
 
+    $description = $merchant->getDescription();
+    if (strlen($description)) {
+      $description = new PHUIRemarkupView($viewer, $description);
+      $view->addSectionHeader(
+        pht('Description'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent($description);
+    }
+
+    $contact_info = $merchant->getContactInfo();
+    if (strlen($contact_info)) {
+      $contact_info = new PHUIRemarkupView($viewer, $contact_info);
+      $view->addSectionHeader(
+        pht('Contact Info'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent($contact_info);
+    }
+
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Details'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->appendChild($view);
-  }
-
-  private function buildDescriptionView(PhortuneMerchant $merchant) {
-    $viewer = $this->getViewer();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer);
-
-    $description = $merchant->getDescription();
-    if (strlen($description)) {
-      $description = new PHUIRemarkupView($viewer, $description);
-      $view->addTextContent($description);
-      return id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Description'))
-        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-        ->appendChild($view);
-    }
-
-    return null;
   }
 
   private function buildCurtainView(PhortuneMerchant $merchant) {

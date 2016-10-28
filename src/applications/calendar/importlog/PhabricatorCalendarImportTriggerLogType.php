@@ -1,38 +1,32 @@
 <?php
 
-final class PhabricatorCalendarImportUpdateLogType
+final class PhabricatorCalendarImportTriggerLogType
   extends PhabricatorCalendarImportLogType {
 
-  const LOGTYPE = 'update';
+  const LOGTYPE = 'trigger';
 
   public function getDisplayType(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    $is_new = $log->getParameter('new');
-    if ($is_new) {
-      return pht('Imported Event');
-    } else {
-      return pht('Updated Event');
-    }
+    return pht('Import Triggered');
   }
 
   public function getDisplayDescription(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    $event_phid = $log->getParameter('phid');
-    return $viewer->renderHandle($event_phid);
+    return pht('Triggered a periodic update.');
   }
 
   public function getDisplayIcon(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return 'fa-calendar';
+    return 'fa-clock-o';
   }
 
   public function getDisplayColor(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return 'green';
+    return 'blue';
   }
 
 }

@@ -34,25 +34,22 @@ final class PhabricatorCalendarEventEditor
     }
 
     $actor = $this->getActor();
+
+    $invitees = $event->getInvitees();
+
     $event->copyFromParent($actor);
     $event->setIsStub(0);
 
-    $invitees = $event->getParentEvent()->getInvitees();
+    $event->openTransaction();
+      $event->save();
+      foreach ($invitees as $invitee) {
+        $invitee
+          ->setEventPHID($event->getPHID())
+          ->save();
+      }
+    $event->saveTransaction();
 
-    $new_invitees = array();
-    foreach ($invitees as $invitee) {
-      $invitee = id(new PhabricatorCalendarEventInvitee())
-        ->setEventPHID($event->getPHID())
-        ->setInviteePHID($invitee->getInviteePHID())
-        ->setInviterPHID($invitee->getInviterPHID())
-        ->setStatus($invitee->getStatus())
-        ->save();
-
-      $new_invitees[] = $invitee;
-    }
-
-    $event->save();
-    $event->attachInvitees($new_invitees);
+    $event->attachInvitees($invitees);
   }
 
   public function getTransactionTypes() {

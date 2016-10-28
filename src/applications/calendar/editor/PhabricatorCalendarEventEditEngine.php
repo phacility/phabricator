@@ -164,6 +164,8 @@ final class PhabricatorCalendarEventEditEngine
 
     if ($this->getIsCreate() || $object->getIsRecurring()) {
       $fields[] = id(new PhabricatorEpochEditField())
+        ->setIsLockable(false)
+        ->setIsDefaultable(false)
         ->setAllowNull(true)
         ->setKey('until')
         ->setLabel(pht('Repeat Until'))
@@ -189,6 +191,8 @@ final class PhabricatorCalendarEventEditEngine
     $fields[] = id(new PhabricatorEpochEditField())
       ->setKey('start')
       ->setLabel(pht('Start'))
+      ->setIsLockable(false)
+      ->setIsDefaultable(false)
       ->setTransactionType(
         PhabricatorCalendarEventStartDateTransaction::TRANSACTIONTYPE)
       ->setDescription(pht('Start time of the event.'))
@@ -199,6 +203,8 @@ final class PhabricatorCalendarEventEditEngine
     $fields[] = id(new PhabricatorEpochEditField())
       ->setKey('end')
       ->setLabel(pht('End'))
+      ->setIsLockable(false)
+      ->setIsDefaultable(false)
       ->setTransactionType(
         PhabricatorCalendarEventEndDateTransaction::TRANSACTIONTYPE)
       ->setDescription(pht('End time of the event.'))

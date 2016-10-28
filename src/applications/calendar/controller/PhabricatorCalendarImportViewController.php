@@ -105,6 +105,17 @@ final class PhabricatorCalendarImportViewController
         ->setWorkflow(!$can_edit)
         ->setHref($edit_uri));
 
+    $reload_uri = "import/reload/{$id}/";
+    $reload_uri = $this->getApplicationURI($reload_uri);
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Reload Import'))
+        ->setIcon('fa-refresh')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true)
+        ->setHref($reload_uri));
+
     $disable_uri = "import/disable/{$id}/";
     $disable_uri = $this->getApplicationURI($disable_uri);
     if ($import->getIsDisabled()) {
@@ -122,7 +133,6 @@ final class PhabricatorCalendarImportViewController
         ->setDisabled(!$can_disable)
         ->setWorkflow(true)
         ->setHref($disable_uri));
-
 
     if ($can_edit) {
       $can_delete = $engine->canDeleteAnyEvents($viewer, $import);
@@ -156,6 +166,50 @@ final class PhabricatorCalendarImportViewController
     $properties->addProperty(
       pht('Source Type'),
       $engine->getImportEngineTypeName());
+
+    if ($import->getIsDisabled()) {
+      $auto_updates = phutil_tag('em', array(), pht('Import Disabled'));
+      $has_trigger = false;
+    } else {
+      $frequency = $import->getTriggerFrequency();
+      $frequency_map = PhabricatorCalendarImport::getTriggerFrequencyMap();
+      $frequency_names = ipull($frequency_map, 'name');
+      $auto_updates = idx($frequency_names, $frequency, $frequency);
+
+      if ($frequency == PhabricatorCalendarImport::FREQUENCY_ONCE) {
+        $has_trigger = false;
+        $auto_updates = phutil_tag('em', array(), $auto_updates);
+      } else {
+        $has_trigger = true;
+      }
+    }
+
+    $properties->addProperty(
+      pht('Automatic Updates'),
+      $auto_updates);
+
+    if ($has_trigger) {
+      $trigger = id(new PhabricatorWorkerTriggerQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($import->getTriggerPHID()))
+        ->needEvents(true)
+        ->executeOne();
+
+      if (!$trigger) {
+        $next_trigger = phutil_tag('em', array(), pht('Invalid Trigger'));
+      } else {
+        $now = PhabricatorTime::getNow();
+        $next_epoch = $trigger->getNextEventPrediction();
+        $next_trigger = pht(
+          '%s (%s)',
+          phabricator_datetime($next_epoch, $viewer),
+          phutil_format_relative_time($next_epoch - $now));
+      }
+
+      $properties->addProperty(
+        pht('Next Update'),
+        $next_trigger);
+    }
 
     $engine->appendImportProperties(
       $viewer,

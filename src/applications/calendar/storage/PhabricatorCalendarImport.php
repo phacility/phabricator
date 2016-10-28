@@ -14,6 +14,12 @@ final class PhabricatorCalendarImport
   protected $engineType;
   protected $parameters = array();
   protected $isDisabled = 0;
+  protected $triggerPHID;
+  protected $triggerFrequency;
+
+  const FREQUENCY_ONCE = 'once';
+  const FREQUENCY_HOURLY = 'hourly';
+  const FREQUENCY_DAILY = 'daily';
 
   private $engine = self::ATTACHABLE;
 
@@ -27,7 +33,8 @@ final class PhabricatorCalendarImport
       ->setEditPolicy($actor->getPHID())
       ->setIsDisabled(0)
       ->setEngineType($engine->getImportEngineType())
-      ->attachEngine($engine);
+      ->attachEngine($engine)
+      ->setTriggerFrequency(self::FREQUENCY_ONCE);
   }
 
   protected function getConfiguration() {
@@ -40,6 +47,8 @@ final class PhabricatorCalendarImport
         'name' => 'text',
         'engineType' => 'text64',
         'isDisabled' => 'bool',
+        'triggerPHID' => 'phid?',
+        'triggerFrequency' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_author' => array(
@@ -84,6 +93,21 @@ final class PhabricatorCalendarImport
 
     return $this->getEngine()->getDisplayName($this);
   }
+
+  public static function getTriggerFrequencyMap() {
+    return array(
+      self::FREQUENCY_ONCE => array(
+        'name' => pht('No Automatic Updates'),
+      ),
+      self::FREQUENCY_HOURLY => array(
+        'name' => pht('Update Hourly'),
+      ),
+      self::FREQUENCY_DAILY => array(
+        'name' => pht('Update Daily'),
+      ),
+    );
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -154,6 +178,17 @@ final class PhabricatorCalendarImport
     $viewer = $engine->getViewer();
 
     $this->openTransaction();
+
+      $trigger_phid = $this->getTriggerPHID();
+      if ($trigger_phid) {
+        $trigger = id(new PhabricatorWorkerTriggerQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($trigger_phid))
+          ->executeOne();
+        if ($trigger) {
+          $engine->destroyObject($trigger);
+        }
+      }
 
       $events = id(new PhabricatorCalendarEventQuery())
         ->setViewer($viewer)
