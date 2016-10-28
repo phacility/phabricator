@@ -104,6 +104,16 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
         'name' => pht('Calendar User Guide'),
         'href' => PhabricatorEnv::getDoclink('Calendar User Guide'),
       ),
+      array(
+        'name' => pht('Importing Events'),
+        'href' => PhabricatorEnv::getDoclink(
+          'Calendar User Guide: Importing Events'),
+      ),
+      array(
+        'name' => pht('Exporting Events'),
+        'href' => PhabricatorEnv::getDoclink(
+          'Calendar User Guide: Exporting Events'),
+      ),
     );
   }
 
