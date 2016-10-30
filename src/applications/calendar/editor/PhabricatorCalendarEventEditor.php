@@ -11,6 +11,15 @@ final class PhabricatorCalendarEventEditor
     return pht('Calendar');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this event.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
+
   protected function shouldApplyInitialEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {

@@ -471,6 +471,12 @@ abstract class PhabricatorCalendarImportEngine
     $xactions = array();
     $uid = $node->getUID();
 
+    if (!$event->getID()) {
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_CREATE)
+        ->setNewValue(true);
+    }
+
     $name = $node->getName();
     if (!strlen($name)) {
       if (strlen($uid)) {
