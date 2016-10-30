@@ -6,6 +6,8 @@ final class PhortuneMerchantTransaction
   const TYPE_NAME = 'merchant:name';
   const TYPE_DESCRIPTION = 'merchant:description';
   const TYPE_CONTACTINFO = 'merchant:contactinfo';
+  const TYPE_INVOICEEMAIL = 'merchant:invoiceemail';
+  const TYPE_INVOICEFOOTER = 'merchant:invoicefooter';
   const TYPE_PICTURE = 'merchant:picture';
 
   public function getApplicationName() {
@@ -48,6 +50,14 @@ final class PhortuneMerchantTransaction
         return pht(
           '%s updated the contact information for this merchant.',
             $this->renderHandleLink($author_phid));
+      case self::TYPE_INVOICEEMAIL:
+        return pht(
+          '%s updated the invoice email for this merchant.',
+            $this->renderHandleLink($author_phid));
+      case self::TYPE_INVOICEFOOTER:
+        return pht(
+          '%s updated the invoice footer for this merchant.',
+            $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
@@ -58,6 +68,8 @@ final class PhortuneMerchantTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
       case self::TYPE_CONTACTINFO:
+      case self::TYPE_INVOICEEMAIL:
+      case self::TYPE_INVOICEFOOTER:
         return ($old === null);
     }
     return parent::shouldHide();
@@ -68,6 +80,10 @@ final class PhortuneMerchantTransaction
       case self::TYPE_DESCRIPTION:
         return ($this->getOldValue() !== null);
       case self::TYPE_CONTACTINFO:
+        return ($this->getOldValue() !== null);
+      case self::TYPE_INVOICEEMAIL:
+        return ($this->getOldValue() !== null);
+      case self::TYPE_INVOICEFOOTER:
         return ($this->getOldValue() !== null);
     }
 

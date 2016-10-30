@@ -9,6 +9,8 @@ final class PhortuneMerchant extends PhortuneDAO
   protected $viewPolicy;
   protected $description;
   protected $contactInfo;
+  protected $invoiceEmail;
+  protected $invoiceFooter;
   protected $profileImagePHID;
 
   private $memberPHIDs = self::ATTACHABLE;
@@ -27,6 +29,8 @@ final class PhortuneMerchant extends PhortuneDAO
         'name' => 'text255',
         'description' => 'text',
         'contactInfo' => 'text',
+        'invoiceEmail' => 'text255',
+        'invoiceFooter' => 'text',
         'profileImagePHID' => 'phid?',
       ),
     ) + parent::getConfiguration();

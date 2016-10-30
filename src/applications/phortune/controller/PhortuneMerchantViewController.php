@@ -129,6 +129,13 @@ final class PhortuneMerchantViewController
 
     $view->addProperty(pht('Status'), $status_view);
 
+    $invoice_from = $merchant->getInvoiceEmail();
+    if (!$invoice_from) {
+      $invoice_from = pht('No email address set');
+      $invoice_from = phutil_tag('em', array(), $invoice_from);
+    }
+    $view->addProperty(pht('Invoice From'), $invoice_from);
+
     $description = $merchant->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
@@ -145,6 +152,15 @@ final class PhortuneMerchantViewController
         pht('Contact Info'),
         PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($contact_info);
+    }
+
+    $footer_info = $merchant->getInvoiceFooter();
+    if (strlen($footer_info)) {
+      $footer_info = new PHUIRemarkupView($viewer, $footer_info);
+      $view->addSectionHeader(
+        pht('Invoice Footer'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent($footer_info);
     }
 
     return id(new PHUIObjectBoxView())

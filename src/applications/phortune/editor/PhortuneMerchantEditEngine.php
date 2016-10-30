@@ -84,6 +84,21 @@ final class PhortuneMerchantEditEngine
         ->setTransactionType(PhortuneMerchantTransaction::TYPE_NAME)
         ->setValue($object->getName()),
 
+      id(new PhabricatorUsersEditField())
+        ->setKey('members')
+        ->setAliases(array('memberPHIDs'))
+        ->setLabel(pht('Members'))
+        ->setUseEdgeTransactions(true)
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue(
+          'edge:type',
+          PhortuneMerchantHasMemberEdgeType::EDGECONST)
+        ->setDescription(pht('Initial merchant members.'))
+        ->setConduitDescription(pht('Set merchant members.'))
+        ->setConduitTypeDescription(pht('New list of members.'))
+        ->setInitialValue($object->getMemberPHIDs())
+        ->setValue($member_phids),
+
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))
@@ -100,20 +115,22 @@ final class PhortuneMerchantEditEngine
         ->setTransactionType(PhortuneMerchantTransaction::TYPE_CONTACTINFO)
         ->setValue($object->getContactInfo()),
 
-      id(new PhabricatorUsersEditField())
-        ->setKey('members')
-        ->setAliases(array('memberPHIDs'))
-        ->setLabel(pht('Members'))
-        ->setUseEdgeTransactions(true)
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue(
-          'edge:type',
-          PhortuneMerchantHasMemberEdgeType::EDGECONST)
-        ->setDescription(pht('Initial merchant members.'))
-        ->setConduitDescription(pht('Set merchant members.'))
-        ->setConduitTypeDescription(pht('New list of members.'))
-        ->setInitialValue($object->getMemberPHIDs())
-        ->setValue($member_phids),
+      id(new PhabricatorTextEditField())
+        ->setKey('invoiceEmail')
+        ->setLabel(pht('Invoice From Email'))
+        ->setDescription(pht('Email address invoices are sent from.'))
+        ->setConduitTypeDescription(
+          pht('Email address invoices are sent from.'))
+        ->setTransactionType(PhortuneMerchantTransaction::TYPE_INVOICEEMAIL)
+        ->setValue($object->getInvoiceEmail()),
+
+      id(new PhabricatorRemarkupEditField())
+        ->setKey('invoiceFooter')
+        ->setLabel(pht('Invoice Footer'))
+        ->setDescription(pht('Footer on invoice forms.'))
+        ->setConduitTypeDescription(pht('Footer on invoice forms.'))
+        ->setTransactionType(PhortuneMerchantTransaction::TYPE_INVOICEFOOTER)
+        ->setValue($object->getInvoiceFooter()),
 
     );
   }

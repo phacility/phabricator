@@ -18,6 +18,8 @@ final class PhortuneMerchantEditor
     $types[] = PhortuneMerchantTransaction::TYPE_DESCRIPTION;
     $types[] = PhortuneMerchantTransaction::TYPE_CONTACTINFO;
     $types[] = PhortuneMerchantTransaction::TYPE_PICTURE;
+    $types[] = PhortuneMerchantTransaction::TYPE_INVOICEEMAIL;
+    $types[] = PhortuneMerchantTransaction::TYPE_INVOICEFOOTER;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
 
@@ -34,6 +36,10 @@ final class PhortuneMerchantEditor
         return $object->getDescription();
       case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
         return $object->getContactInfo();
+      case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:
+        return $object->getInvoiceEmail();
+      case PhortuneMerchantTransaction::TYPE_INVOICEFOOTER:
+        return $object->getInvoiceFooter();
       case PhortuneMerchantTransaction::TYPE_PICTURE:
         return $object->getProfileImagePHID();
     }
@@ -49,6 +55,8 @@ final class PhortuneMerchantEditor
       case PhortuneMerchantTransaction::TYPE_NAME:
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
       case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
+      case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:
+      case PhortuneMerchantTransaction::TYPE_INVOICEFOOTER:
       case PhortuneMerchantTransaction::TYPE_PICTURE:
         return $xaction->getNewValue();
     }
@@ -70,6 +78,12 @@ final class PhortuneMerchantEditor
       case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
         $object->setContactInfo($xaction->getNewValue());
         return;
+      case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:
+        $object->setInvoiceEmail($xaction->getNewValue());
+        return;
+      case PhortuneMerchantTransaction::TYPE_INVOICEFOOTER:
+        $object->setInvoiceFooter($xaction->getNewValue());
+        return;
       case PhortuneMerchantTransaction::TYPE_PICTURE:
         $object->setProfileImagePHID($xaction->getNewValue());
         return;
@@ -86,6 +100,8 @@ final class PhortuneMerchantEditor
       case PhortuneMerchantTransaction::TYPE_NAME:
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
       case PhortuneMerchantTransaction::TYPE_CONTACTINFO:
+      case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:
+      case PhortuneMerchantTransaction::TYPE_INVOICEFOOTER:
       case PhortuneMerchantTransaction::TYPE_PICTURE:
         return;
     }
@@ -115,6 +131,29 @@ final class PhortuneMerchantEditor
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+       break;
+      case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:
+        foreach ($xactions as $xaction) {
+          switch ($xaction->getTransactionType()) {
+            case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:
+              $new_email = $xaction->getNewValue();
+              break;
+          }
+        }
+        if (strlen($new_email)) {
+          $email = new PhutilEmailAddress($new_email);
+          $domain = $email->getDomainName();
+
+          if (!$domain) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('%s is not a valid email.', $new_email),
+              nonempty(last($xactions), null));
+
+            $errors[] = $error;
+          }
         }
         break;
     }
