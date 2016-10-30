@@ -758,8 +758,18 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $host_handle = $handles[$host_phid];
     $host_name = $host_handle->getFullName();
-    $host_uri = $host_handle->getURI();
-    $host_uri = PhabricatorEnv::getURI($host_uri);
+
+    // NOTE: Gmail shows "Who: Unknown Organizer*" if the organizer URI does
+    // not look like an email address. Use a synthetic address so it shows
+    // the host name instead.
+    $install_uri = PhabricatorEnv::getProductionURI('/');
+    $install_uri = new PhutilURI($install_uri);
+
+    // This should possibly use "metamta.reply-handler-domain" instead, but
+    // we do not currently accept mail for users anyway, and that option may
+    // not be configured.
+    $mail_domain = $install_uri->getDomain();
+    $host_uri = "mailto:{$host_phid}@{$mail_domain}";
 
     $organizer = id(new PhutilCalendarUserNode())
       ->setName($host_name)
