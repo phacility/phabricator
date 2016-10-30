@@ -520,6 +520,8 @@ abstract class PhabricatorCalendarImportEngine
       ->setStartDateTime($start_datetime)
       ->setEndDateTime($end_datetime);
 
+    $event->setIsAllDay($start_datetime->getIsAllDay());
+
     // TODO: This should be transactional, but the transaction only accepts
     // simple frequency rules right now.
     $rrule = $node->getRecurrenceRule();
