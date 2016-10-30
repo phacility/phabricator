@@ -182,7 +182,7 @@ final class AphrontFormDateControlValue extends Phobject {
       return null;
     }
 
-    return $datetime->format('U');
+    return (int)$datetime->format('U');
   }
 
   private function getTimeFormat() {
