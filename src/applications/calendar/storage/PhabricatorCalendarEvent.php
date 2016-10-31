@@ -27,6 +27,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $isRecurring = 0;
 
+  protected $seriesParentPHID;
   protected $instanceOfEventPHID;
   protected $sequenceIndex;
 
@@ -140,10 +141,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
           'a recurring parent event!'));
     }
 
+    $series_phid = $this->getSeriesParentPHID();
+    if (!$series_phid) {
+      $series_phid = $this->getPHID();
+    }
+
     $child = id(new self())
       ->setIsCancelled(0)
       ->setIsStub(0)
       ->setInstanceOfEventPHID($this->getPHID())
+      ->setSeriesParentPHID($series_phid)
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
       ->attachParentEvent($this)
@@ -401,6 +408,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'icon' => 'text32',
         'mailKey' => 'bytes20',
         'isRecurring' => 'bool',
+        'seriesParentPHID' => 'phid?',
         'instanceOfEventPHID' => 'phid?',
         'sequenceIndex' => 'uint32?',
         'isStub' => 'bool',
@@ -434,6 +442,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'key_rdate' => array(
           'columns' => array('instanceOfEventPHID', 'utcInstanceEpoch'),
           'unique' => true,
+        ),
+        'key_series' => array(
+          'columns' => array('seriesParentPHID', 'utcInitialEpoch'),
         ),
       ),
       self::CONFIG_SERIALIZATION => array(

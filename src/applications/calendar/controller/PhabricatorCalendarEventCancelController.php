@@ -84,6 +84,13 @@ final class PhabricatorCalendarEventCancelController
           // NOTE: If you can't edit some of the future events, we just
           // don't try to update them. This seems like it's probably what
           // users are likely to expect.
+
+          // NOTE: This only affects events that are currently in the same
+          // series, not all events that were ever in the original series.
+          // We could use series PHIDs instead of parent PHIDs to affect more
+          // events if this turns out to be counterintuitive. Other
+          // applications differ in their behavior.
+
           $future = id(new PhabricatorCalendarEventQuery())
             ->setViewer($viewer)
             ->withParentEventPHIDs(array($event->getPHID()))
