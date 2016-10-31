@@ -101,7 +101,7 @@ final class PhabricatorCalendarEventViewController
     $viewer = $this->getViewer();
     $id = $event->getID();
 
-    if ($event->isCancelledEvent()) {
+    if ($event->getIsCancelled()) {
       $icon = 'fa-ban';
       $color = 'red';
       $status = pht('Cancelled');
@@ -209,7 +209,7 @@ final class PhabricatorCalendarEventViewController
     $cancel_label = pht('Cancel Event');
     $reinstate_label = pht('Reinstate Event');
 
-    if ($event->isCancelledEvent()) {
+    if ($event->getIsCancelled()) {
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($reinstate_label)

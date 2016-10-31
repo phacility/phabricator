@@ -584,11 +584,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return ($this->instanceOfEventPHID !== null);
   }
 
-  public function isCancelledEvent() {
-    // TODO: Remove this wrapper.
-    return $this->getIsCancelled();
-  }
-
   public function renderEventDate(
     PhabricatorUser $viewer,
     $show_end) {
@@ -641,7 +636,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
 
   public function getDisplayIcon(PhabricatorUser $viewer) {
-    if ($this->isCancelledEvent()) {
+    if ($this->getIsCancelled()) {
       return 'fa-times';
     }
 
@@ -665,7 +660,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getDisplayIconColor(PhabricatorUser $viewer) {
-    if ($this->isCancelledEvent()) {
+    if ($this->getIsCancelled()) {
       return 'red';
     }
 
@@ -689,7 +684,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getDisplayIconLabel(PhabricatorUser $viewer) {
-    if ($this->isCancelledEvent()) {
+    if ($this->getIsCancelled()) {
       return pht('Cancelled');
     }
 
