@@ -857,7 +857,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->newStartDateTime()->getEpoch();
   }
 
-  public function newEndDateTime() {
+  public function newEndDateTimeForEdit() {
     $datetime = $this->getParameter('endDateTime');
     if ($datetime) {
       return $this->newDateTimeFromDictionary($datetime);
@@ -865,6 +865,25 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $epoch = $this->getDateTo();
     return $this->newDateTimeFromEpoch($epoch);
+  }
+
+  public function newEndDateTime() {
+    $datetime = $this->newEndDateTimeForEdit();
+
+    // If this is an all day event, we move the end date time forward to the
+    // first second of the following day. This is consistent with what users
+    // expect: an all day event from "Nov 1" to "Nov 1" lasts the entire day.
+    if ($this->getIsAllDay()) {
+      $datetime = $datetime
+        ->newAbsoluteDateTime()
+        ->setHour(0)
+        ->setMinute(0)
+        ->setSecond(0)
+        ->newRelativeDateTime('P1D')
+        ->newAbsoluteDateTime();
+    }
+
+    return $datetime;
   }
 
   public function getEndDateTimeEpoch() {

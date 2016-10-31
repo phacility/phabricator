@@ -119,7 +119,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('End time of the event.'))
         ->setConduitDescription(pht('Change the end time of the event.'))
         ->setConduitTypeDescription(pht('New event end time.'))
-        ->setValue($object->getEndDateTimeEpoch()),
+        ->setValue($object->newEndDateTimeForEdit()->getEpoch()),
       id(new PhabricatorBoolEditField())
         ->setKey('cancelled')
         ->setOptions(pht('Active'), pht('Cancelled'))

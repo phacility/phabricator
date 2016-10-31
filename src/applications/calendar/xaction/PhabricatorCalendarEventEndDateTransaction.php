@@ -7,7 +7,7 @@ final class PhabricatorCalendarEventEndDateTransaction
 
   public function generateOldValue($object) {
     // TODO: Upgrade this.
-    return $object->getEndDateTimeEpoch();
+    return $object->newEndDateTimeForEdit()->getEpoch();
   }
 
   public function applyInternalEffects($object, $value) {
