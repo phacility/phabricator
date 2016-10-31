@@ -146,6 +146,8 @@ final class PhabricatorCalendarEventViewController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $edit_uri = "event/edit/{$id}/";
+    $edit_uri = $this->getApplicationURI($edit_uri);
+
     if ($event->isChildEvent()) {
       $edit_label = pht('Edit This Instance');
     } else {
@@ -159,10 +161,27 @@ final class PhabricatorCalendarEventViewController
         id(new PhabricatorActionView())
           ->setName($edit_label)
           ->setIcon('fa-pencil')
-          ->setHref($this->getApplicationURI($edit_uri))
+          ->setHref($edit_uri)
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
     }
+
+    $recurring_uri = "{$edit_uri}page/recurring/";
+    $can_recurring = $can_edit && !$event->isChildEvent();
+
+    if ($event->getIsRecurring()) {
+      $recurring_label = pht('Edit Recurrence');
+    } else {
+      $recurring_label = pht('Make Recurring');
+    }
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName($recurring_label)
+        ->setIcon('fa-repeat')
+        ->setHref($recurring_uri)
+        ->setDisabled(!$can_recurring)
+        ->setWorkflow(true));
 
     $can_attend = !$event->isImportedEvent();
 

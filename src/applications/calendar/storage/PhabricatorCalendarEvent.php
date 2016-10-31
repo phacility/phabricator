@@ -461,6 +461,23 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->assertAttached($this->invitees);
   }
 
+  public static function getFrequencyMap() {
+    return array(
+      PhutilCalendarRecurrenceRule::FREQUENCY_DAILY => array(
+        'label' => pht('Daily'),
+      ),
+      PhutilCalendarRecurrenceRule::FREQUENCY_WEEKLY => array(
+        'label' => pht('Weekly'),
+      ),
+      PhutilCalendarRecurrenceRule::FREQUENCY_MONTHLY => array(
+        'label' => pht('Monthly'),
+      ),
+      PhutilCalendarRecurrenceRule::FREQUENCY_YEARLY => array(
+        'label' => pht('Yearly'),
+      ),
+    );
+  }
+
   private function newStubInvitees() {
     $parent = $this->getParentEvent();
 

@@ -30,11 +30,14 @@ final class PhabricatorCalendarEventRecurringTransaction
         continue;
       }
 
+      if ($xaction->getNewValue()) {
+        continue;
+      }
+
       $errors[] = $this->newInvalidError(
         pht(
-          'An event can only be made recurring when it is created. '.
-          'You can not convert an existing event into a recurring '.
-          'event or vice versa.'),
+          'An event can not be stopped from recurring once it has been '.
+          'made recurring. You can cancel the event.'),
         $xaction);
     }
 
