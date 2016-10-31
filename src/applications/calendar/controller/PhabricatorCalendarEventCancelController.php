@@ -39,7 +39,7 @@ final class PhabricatorCalendarEventCancelController
     $validation_exception = null;
     if ($request->isFormPost()) {
 
-      $targets = array();
+      $targets = array($event);
       if ($is_recurring) {
         $mode = $request->getStr('mode');
         $is_future = ($mode == 'future');
@@ -51,6 +51,38 @@ final class PhabricatorCalendarEventCancelController
 
         if ($must_fork) {
           if ($is_child) {
+            $fork_target = $event;
+          } else {
+            if ($event->isValidSequenceIndex($viewer, 1)) {
+              $next_event = id(new PhabricatorCalendarEventQuery())
+                ->setViewer($viewer)
+                ->withInstanceSequencePairs(
+                  array(
+                    array($event->getPHID(), 1),
+                  ))
+                ->requireCapabilities(
+                  array(
+                    PhabricatorPolicyCapability::CAN_VIEW,
+                    PhabricatorPolicyCapability::CAN_EDIT,
+                  ))
+                ->executeOne();
+
+              if (!$next_event) {
+                $next_event = $event->newStub($viewer, 1);
+              }
+
+              $fork_target = $next_event;
+            } else {
+              // This appears to be a "recurring" event with no valid
+              // instances: for example, its "until" date is before the second
+              // instance would occur. This can happen if we already forked the
+              // event or if users entered silly stuff. Just edit the event
+              // directly without forking anything.
+              $fork_target = null;
+            }
+          }
+
+          if ($fork_target) {
             $xactions = array();
 
             $xaction = id(new PhabricatorCalendarEventTransaction())
@@ -64,20 +96,8 @@ final class PhabricatorCalendarEventCancelController
               ->setContinueOnNoEffect(true)
               ->setContinueOnMissingFields(true);
 
-            $editor->applyTransactions($event, array($xaction));
-
-            $targets[] = $event;
-          } else {
-            // TODO: This is a huge mess; we need to load or generate the
-            // first child, then fork that, then apply the event to the
-            // parent. Just bail for now.
-            throw new Exception(
-              pht(
-                'Individual edits to parent events are not yet supported '.
-                'because they are real tricky to implement.'));
+            $editor->applyTransactions($fork_target, array($xaction));
           }
-        } else {
-          $targets[] = $event;
         }
 
         if ($is_future) {
@@ -105,8 +125,6 @@ final class PhabricatorCalendarEventCancelController
             $targets[] = $future_event;
           }
         }
-      } else {
-        $targets = array($event);
       }
 
       foreach ($targets as $target) {
