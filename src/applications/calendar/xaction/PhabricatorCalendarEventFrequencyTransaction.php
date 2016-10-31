@@ -19,6 +19,33 @@ final class PhabricatorCalendarEventFrequencyTransaction
     $rrule = id(new PhutilCalendarRecurrenceRule())
       ->setFrequency($value);
 
+    // If the user creates a monthly event on the 29th, 30th or 31st of a
+    // month, it means "the 30th of every month" as far as the RRULE is
+    // concerned. Such an event will not occur on months with fewer days.
+
+    // This is surprising, and proably not what the user wants. Instead,
+    // schedule these events relative to the end of the month: on the "-1st",
+    // "-2nd" or "-3rd" day of the month. For example, a monthly event on
+    // the 31st of a 31-day month translates to "every month, on the last
+    // day of the month".
+    if ($value == PhutilCalendarRecurrenceRule::FREQUENCY_MONTHLY) {
+      $start_datetime = $object->newStartDateTime();
+
+      $y = $start_datetime->getYear();
+      $m = $start_datetime->getMonth();
+      $d = $start_datetime->getDay();
+      if ($d >= 29) {
+        $year_map = PhutilCalendarRecurrenceRule::getYearMap(
+          $y,
+          PhutilCalendarRecurrenceRule::WEEKDAY_MONDAY);
+
+        $month_days = $year_map['monthDays'][$m];
+        $schedule_on = -(($month_days + 1) - $d);
+
+        $rrule->setByMonthDay(array($schedule_on));
+      }
+    }
+
     $object->setRecurrenceRule($rrule);
   }
 
