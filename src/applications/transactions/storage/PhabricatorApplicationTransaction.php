@@ -553,8 +553,16 @@ abstract class PhabricatorApplicationTransaction
             return true;
           }
 
-          if (!is_array($old) && !strlen($old)) {
-            return true;
+          if (!is_array($old)) {
+            if (!strlen($old)) {
+              return true;
+            }
+
+            // The integer 0 is also uninteresting by default; this is often
+            // an "off" flag for something like "All Day Event".
+            if ($old === 0) {
+              return true;
+            }
           }
 
           break;

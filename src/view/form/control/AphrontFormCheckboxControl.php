@@ -3,6 +3,16 @@
 final class AphrontFormCheckboxControl extends AphrontFormControl {
 
   private $boxes = array();
+  private $checkboxKey;
+
+  public function setCheckboxKey($checkbox_key) {
+    $this->checkboxKey = $checkbox_key;
+    return $this;
+  }
+
+  public function getCheckboxKey() {
+    return $this->checkboxKey;
+  }
 
   public function addCheckbox(
     $name,
@@ -52,6 +62,23 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
         phutil_tag('th', array(), $label),
       ));
     }
+
+    // When a user submits a form with a checkbox unchecked, the browser
+    // doesn't submit anything to the server. This hidden key lets the server
+    // know that the checkboxes were present on the client, the user just did
+    // not select any of them.
+
+    $checkbox_key = $this->getCheckboxKey();
+    if ($checkbox_key) {
+      $rows[] = phutil_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => $checkbox_key,
+          'value' => 1,
+        ));
+    }
+
     return phutil_tag(
       'table',
       array('class' => 'aphront-form-control-checkbox-layout'),

@@ -39,7 +39,7 @@ final class PhabricatorCalendarEventAllDayTransaction
   public function getTitle() {
     if ($this->getNewValue()) {
       return pht(
-        '%s changed this as an all day event.',
+        '%s changed this to an all day event.',
         $this->renderAuthor());
     } else {
       return pht(

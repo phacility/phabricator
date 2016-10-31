@@ -90,8 +90,8 @@ final class PhabricatorCalendarEventEditEngine
         ->setValue($object->getName()),
       id(new PhabricatorBoolEditField())
         ->setKey('isAllDay')
-        ->setLabel(pht('All Day'))
         ->setOptions(pht('Normal Event'), pht('All Day Event'))
+        ->setAsCheckbox(true)
         ->setTransactionType(
           PhabricatorCalendarEventAllDayTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('Marks this as an all day event.'))
