@@ -48,40 +48,8 @@ final class PhabricatorCalendarEventCancelController
         // are cancelling a child and all future events.
         $must_fork = ($is_child && $is_future) ||
                      ($is_parent && !$is_future);
-
         if ($must_fork) {
-          if ($is_child) {
-            $fork_target = $event;
-          } else {
-            if ($event->isValidSequenceIndex($viewer, 1)) {
-              $next_event = id(new PhabricatorCalendarEventQuery())
-                ->setViewer($viewer)
-                ->withInstanceSequencePairs(
-                  array(
-                    array($event->getPHID(), 1),
-                  ))
-                ->requireCapabilities(
-                  array(
-                    PhabricatorPolicyCapability::CAN_VIEW,
-                    PhabricatorPolicyCapability::CAN_EDIT,
-                  ))
-                ->executeOne();
-
-              if (!$next_event) {
-                $next_event = $event->newStub($viewer, 1);
-              }
-
-              $fork_target = $next_event;
-            } else {
-              // This appears to be a "recurring" event with no valid
-              // instances: for example, its "until" date is before the second
-              // instance would occur. This can happen if we already forked the
-              // event or if users entered silly stuff. Just edit the event
-              // directly without forking anything.
-              $fork_target = null;
-            }
-          }
-
+          $fork_target = $event->loadForkTarget($viewer);
           if ($fork_target) {
             $xactions = array();
 
@@ -101,26 +69,7 @@ final class PhabricatorCalendarEventCancelController
         }
 
         if ($is_future) {
-          // NOTE: If you can't edit some of the future events, we just
-          // don't try to update them. This seems like it's probably what
-          // users are likely to expect.
-
-          // NOTE: This only affects events that are currently in the same
-          // series, not all events that were ever in the original series.
-          // We could use series PHIDs instead of parent PHIDs to affect more
-          // events if this turns out to be counterintuitive. Other
-          // applications differ in their behavior.
-
-          $future = id(new PhabricatorCalendarEventQuery())
-            ->setViewer($viewer)
-            ->withParentEventPHIDs(array($event->getPHID()))
-            ->withUTCInitialEpochBetween($event->getUTCInitialEpoch(), null)
-            ->requireCapabilities(
-              array(
-                PhabricatorPolicyCapability::CAN_VIEW,
-                PhabricatorPolicyCapability::CAN_EDIT,
-              ))
-            ->execute();
+          $future = $event->loadFutureEvents($viewer);
           foreach ($future as $future_event) {
             $targets[] = $future_event;
           }

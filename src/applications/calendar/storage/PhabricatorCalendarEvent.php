@@ -154,6 +154,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
       ->attachParentEvent($this)
+      ->attachImportSource(null)
       ->setAllDayDateFrom(0)
       ->setAllDayDateTo(0)
       ->setDateFrom(0)
@@ -1058,6 +1059,69 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     PhabricatorCalendarImport $import = null) {
     $this->importSource = $import;
     return $this;
+  }
+
+  public function loadForkTarget(PhabricatorUser $viewer) {
+    if (!$this->getIsRecurring()) {
+      // Can't fork an event which isn't recurring.
+      return null;
+    }
+
+    if ($this->isChildEvent()) {
+      // If this is a child event, this is the fork target.
+      return $this;
+    }
+
+    if (!$this->isValidSequenceIndex($viewer, 1)) {
+      // This appears to be a "recurring" event with no valid instances: for
+      // example, its "until" date is before the second instance would occur.
+      // This can happen if we already forked the event or if users entered
+      // silly stuff. Just edit the event directly without forking anything.
+      return null;
+    }
+
+
+    $next_event = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withInstanceSequencePairs(
+        array(
+          array($this->getPHID(), 1),
+        ))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+
+    if (!$next_event) {
+      $next_event = $this->newStub($viewer, 1);
+    }
+
+    return $next_event;
+  }
+
+  public function loadFutureEvents(PhabricatorUser $viewer) {
+    // NOTE: If you can't edit some of the future events, we just
+    // don't try to update them. This seems like it's probably what
+    // users are likely to expect.
+
+    // NOTE: This only affects events that are currently in the same
+    // series, not all events that were ever in the original series.
+    // We could use series PHIDs instead of parent PHIDs to affect more
+    // events if this turns out to be counterintuitive. Other
+    // applications differ in their behavior.
+
+    return id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withParentEventPHIDs(array($this->getPHID()))
+      ->withUTCInitialEpochBetween($this->getUTCInitialEpoch(), null)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->execute();
   }
 
 

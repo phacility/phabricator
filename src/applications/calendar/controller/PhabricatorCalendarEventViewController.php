@@ -147,12 +147,8 @@ final class PhabricatorCalendarEventViewController
 
     $edit_uri = "event/edit/{$id}/";
     $edit_uri = $this->getApplicationURI($edit_uri);
-
-    if ($event->isChildEvent()) {
-      $edit_label = pht('Edit This Instance');
-    } else {
-      $edit_label = pht('Edit Event');
-    }
+    $is_recurring = $event->getIsRecurring();
+    $edit_label = pht('Edit Event');
 
     $curtain = $this->newCurtainView($event);
 
@@ -163,7 +159,7 @@ final class PhabricatorCalendarEventViewController
           ->setIcon('fa-pencil')
           ->setHref($edit_uri)
           ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit));
+          ->setWorkflow(!$can_edit || $is_recurring));
     }
 
     $recurring_uri = "{$edit_uri}page/recurring/";

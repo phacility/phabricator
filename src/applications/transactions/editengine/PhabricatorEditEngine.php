@@ -996,8 +996,11 @@ abstract class PhabricatorEditEngine
         ->setContinueOnNoEffect(true);
 
       try {
+        $xactions = $this->willApplyTransactions($object, $xactions);
 
         $editor->applyTransactions($object, $xactions);
+
+        $this->didApplyTransactions($object, $xactions);
 
         return $this->newEditResponse($request, $object, $xactions);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
@@ -2174,6 +2177,14 @@ abstract class PhabricatorEditEngine
 
     $selected_key = $page->getKey();
     return $page_map[$selected_key];
+  }
+
+  protected function willApplyTransactions($object, array $xactions) {
+    return $xactions;
+  }
+
+  protected function didApplyTransactions($object, array $xactions) {
+    return;
   }
 
 

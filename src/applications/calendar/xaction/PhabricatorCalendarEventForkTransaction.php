@@ -33,7 +33,14 @@ final class PhabricatorCalendarEventForkTransaction
     $object->setSequenceIndex(0);
 
     // Stop the parent event from recurring after the start date of this event.
-    $parent->setUntilDateTime($object->newStartDateTime());
+    // Since the "until" time is inclusive, rewind it by one second. We could
+    // figure out the previous instance's time instead or use a COUNT, but this
+    // seems simpler as long as it doesn't cause any issues.
+    $until_cutoff = $object->newStartDateTime()
+      ->newRelativeDateTime('-PT1S')
+      ->newAbsoluteDateTime();
+
+    $parent->setUntilDateTime($until_cutoff);
     $parent->save();
 
     // NOTE: If we implement "COUNT" on editable events, we need to adjust

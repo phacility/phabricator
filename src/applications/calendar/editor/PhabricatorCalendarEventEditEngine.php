@@ -5,6 +5,21 @@ final class PhabricatorCalendarEventEditEngine
 
   const ENGINECONST = 'calendar.event';
 
+  private $rawTransactions;
+  private $seriesEditMode = self::MODE_THIS;
+
+  const MODE_THIS = 'this';
+  const MODE_FUTURE = 'future';
+
+  public function setSeriesEditMode($series_edit_mode) {
+    $this->seriesEditMode = $series_edit_mode;
+    return $this;
+  }
+
+  public function getSeriesEditMode() {
+    return $this->seriesEditMode;
+  }
+
   public function getEngineName() {
     return pht('Calendar Events');
   }
@@ -77,6 +92,10 @@ final class PhabricatorCalendarEventEditEngine
       $frequency = null;
     }
 
+    // At least for now, just hide "Invitees" when editing all future events.
+    // This may eventually deserve a more nuanced approach.
+    $hide_invitees = ($this->getSeriesEditMode() == self::MODE_FUTURE);
+
     $fields = array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -143,6 +162,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitTypeDescription(pht('New event host.'))
         ->setSingleValue($object->getHostPHID()),
       id(new PhabricatorDatasourceEditField())
+        ->setIsHidden($hide_invitees)
         ->setKey('inviteePHIDs')
         ->setAliases(array('invite', 'invitee', 'invitees', 'inviteePHID'))
         ->setLabel(pht('Invitees'))
@@ -271,6 +291,79 @@ final class PhabricatorCalendarEventEditEngine
             'until',
           )),
     );
+  }
+
+  protected function willApplyTransactions($object, array $xactions) {
+    $viewer = $this->getViewer();
+    $this->rawTransactions = $xactions;
+
+    $is_parent = $object->isParentEvent();
+    $is_child = $object->isChildEvent();
+    $is_future = ($this->getSeriesEditMode() === self::MODE_FUTURE);
+
+    $must_fork = ($is_child && $is_future) ||
+                 ($is_parent && !$is_future);
+
+    if ($must_fork) {
+      $fork_target = $object->loadForkTarget($viewer);
+      if ($fork_target) {
+        $fork_xaction = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventForkTransaction::TRANSACTIONTYPE)
+          ->setNewValue(true);
+
+        if ($fork_target->getPHID() == $object->getPHID()) {
+          // We're forking the object itself, so just slip it into the
+          // transactions we're going to apply.
+          array_unshift($xactions, $fork_xaction);
+        } else {
+          // Otherwise, we're forking a different object, so we have to
+          // apply that separately.
+          $this->applyTransactions($fork_target, array($fork_xaction));
+        }
+      }
+    }
+
+    return $xactions;
+  }
+
+  protected function didApplyTransactions($object, array $xactions) {
+    $viewer = $this->getViewer();
+
+    if ($this->getSeriesEditMode() !== self::MODE_FUTURE) {
+      return;
+    }
+
+    $targets = $object->loadFutureEvents($viewer);
+    if (!$targets) {
+      return;
+    }
+
+    foreach ($targets as $target) {
+      $apply = clone $this->rawTransactions;
+      $this->applyTransactions($target, $apply);
+    }
+  }
+
+  private function applyTransactions($target, array $xactions) {
+    $viewer = $this->getViewer();
+
+    // TODO: This isn't the most accurate source we could use, but this mode
+    // is web-only for now.
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorWebContentSource::SOURCECONST);
+
+    $editor = id(new PhabricatorCalendarEventEditor())
+      ->setActor($viewer)
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true);
+
+    try {
+      $editor->applyTransactions($target, $xactions);
+    } catch (PhabricatorApplicationTransactionValidationException $ex) {
+      // Just ignore any issues we run into.
+    }
   }
 
 }
