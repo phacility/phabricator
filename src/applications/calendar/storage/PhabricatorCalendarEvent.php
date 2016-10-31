@@ -165,6 +165,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       'editPolicy' => true,
       'name' => true,
       'description' => true,
+      'isCancelled' => true,
     );
 
     // Read these fields from the parent event instead of this event. For
@@ -204,7 +205,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setViewPolicy($parent->getViewPolicy())
       ->setEditPolicy($parent->getEditPolicy())
       ->setName($parent->getName())
-      ->setDescription($parent->getDescription());
+      ->setDescription($parent->getDescription())
+      ->setIsCancelled($parent->getIsCancelled());
 
     if ($start) {
       $start_datetime = $start;
@@ -569,7 +571,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->assertAttached($this->parentEvent);
   }
 
-  public function attachParentEvent($event) {
+  public function attachParentEvent(PhabricatorCalendarEvent $event = null) {
     $this->parentEvent = $event;
     return $this;
   }
@@ -583,17 +585,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function isCancelledEvent() {
-    if ($this->getIsCancelled()) {
-      return true;
-    }
-
-    if ($this->isChildEvent()) {
-      if ($this->getParentEvent()->getIsCancelled()) {
-        return true;
-      }
-    }
-
-    return false;
+    // TODO: Remove this wrapper.
+    return $this->getIsCancelled();
   }
 
   public function renderEventDate(

@@ -206,20 +206,8 @@ final class PhabricatorCalendarEventViewController
     $cancel_uri = $this->getApplicationURI("event/cancel/{$id}/");
     $cancel_disabled = !$can_edit;
 
-    if ($event->isChildEvent()) {
-      $cancel_label = pht('Cancel This Instance');
-      $reinstate_label = pht('Reinstate This Instance');
-
-      if ($event->getParentEvent()->getIsCancelled()) {
-        $cancel_disabled = true;
-      }
-    } else if ($event->isParentEvent()) {
-      $cancel_label = pht('Cancel All');
-      $reinstate_label = pht('Reinstate All');
-    } else {
-      $cancel_label = pht('Cancel Event');
-      $reinstate_label = pht('Reinstate Event');
-    }
+    $cancel_label = pht('Cancel Event');
+    $reinstate_label = pht('Reinstate Event');
 
     if ($event->isCancelledEvent()) {
       $curtain->addAction(

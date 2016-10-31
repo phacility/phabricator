@@ -17,6 +17,8 @@ final class PhabricatorCalendarEventQuery
   private $importSourcePHIDs;
   private $importAuthorPHIDs;
   private $importUIDs;
+  private $utcInitialEpochMin;
+  private $utcInitialEpochMax;
 
   private $generateGhosts = false;
 
@@ -42,6 +44,12 @@ final class PhabricatorCalendarEventQuery
   public function withDateRange($begin, $end) {
     $this->rangeBegin = $begin;
     $this->rangeEnd = $end;
+    return $this;
+  }
+
+  public function withUTCInitialEpochBetween($min, $max) {
+    $this->utcInitialEpochMin = $min;
+    $this->utcInitialEpochMax = $max;
     return $this;
   }
 
@@ -369,6 +377,20 @@ final class PhabricatorCalendarEventQuery
         $conn,
         'event.utcInitialEpoch <= %d',
         $this->rangeEnd + phutil_units('16 hours in seconds'));
+    }
+
+    if ($this->utcInitialEpochMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.utcInitialEpoch >= %d',
+        $this->utcInitialEpochMin);
+    }
+
+    if ($this->utcInitialEpochMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.utcInitialEpoch <= %d',
+        $this->utcInitialEpochMax);
     }
 
     if ($this->inviteePHIDs !== null) {
