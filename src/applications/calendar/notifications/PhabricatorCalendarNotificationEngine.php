@@ -4,17 +4,73 @@ final class PhabricatorCalendarNotificationEngine
   extends Phobject {
 
   private $cursor;
+  private $notifyWindow;
 
   public function getCursor() {
     if (!$this->cursor) {
       $now = PhabricatorTime::getNow();
-      $this->cursor = $now - phutil_units('5 minutes in seconds');
+      $this->cursor = $now - phutil_units('10 minutes in seconds');
     }
 
     return $this->cursor;
   }
 
+  public function setCursor($cursor) {
+    $this->cursor = $cursor;
+    return $this;
+  }
+
+  public function setNotifyWindow($notify_window) {
+    $this->notifyWindow = $notify_window;
+    return $this;
+  }
+
+  public function getNotifyWindow() {
+    if (!$this->notifyWindow) {
+      return phutil_units('15 minutes in seconds');
+    }
+
+    return $this->notifyWindow;
+  }
+
   public function publishNotifications() {
+    $cursor = $this->getCursor();
+
+    $now = PhabricatorTime::getNow();
+    if ($cursor > $now) {
+      return;
+    }
+
+    $calendar_class = 'PhabricatorCalendarApplication';
+    if (!PhabricatorApplication::isClassInstalled($calendar_class)) {
+      return;
+    }
+
+    try {
+      $lock = PhabricatorGlobalLock::newLock('calendar.notify')
+        ->lock(5);
+    } catch (PhutilLockException $ex) {
+      return;
+    }
+
+    $caught = null;
+    try {
+      $this->sendNotifications();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $lock->unlock();
+
+    // Wait a little while before checking for new notifications to send.
+    $this->setCursor($cursor + phutil_units('1 minute in seconds'));
+
+    if ($caught) {
+      throw $caught;
+    }
+  }
+
+  private function sendNotifications() {
     $cursor = $this->getCursor();
 
     $window_min = $cursor - phutil_units('16 hours in seconds');
@@ -100,7 +156,7 @@ final class PhabricatorCalendarNotificationEngine
     }
 
     $notify_min = $cursor;
-    $notify_max = $cursor + phutil_units('15 minutes in seconds');
+    $notify_max = $cursor + $this->getNotifyWindow();
     $notify_map = array();
     foreach ($events as $key => $event) {
       $initial_epoch = $event->getUTCInitialEpoch();
@@ -136,11 +192,13 @@ final class PhabricatorCalendarNotificationEngine
           continue;
         }
 
-        $notify_map[$user_phid][] = array(
-          'event' => $event,
-          'datetime' => $user_datetime,
-          'epoch' => $user_epoch,
-        );
+        $view = id(new PhabricatorCalendarEventNotificationView())
+          ->setViewer($user)
+          ->setEvent($event)
+          ->setDateTime($user_datetime)
+          ->setEpoch($user_epoch);
+
+        $notify_map[$user_phid][] = $view;
       }
     }
 
@@ -149,24 +207,23 @@ final class PhabricatorCalendarNotificationEngine
     $now = PhabricatorTime::getNow();
     foreach ($notify_map as $user_phid => $events) {
       $user = $user_map[$user_phid];
-      $events = isort($events, 'epoch');
 
-      // TODO: This is just a proof-of-concept that gets dumped to the console;
-      // it will be replaced with a nice fancy email and notification.
-
-      $body = array();
-      $body[] = pht('%s, these events start soon:', $user->getUsername());
-      $body[] = null;
-      foreach ($events as $spec) {
-        $event = $spec['event'];
-        $body[] = $event->getName();
+      $locale = PhabricatorEnv::beginScopedLocale($user->getTranslation());
+      $caught = null;
+      try {
+        $mail_list[] = $this->newMailMessage($user, $events);
+      } catch (Exception $ex) {
+        $caught = $ex;
       }
-      $body = implode("\n", $body);
 
-      $mail_list[] = $body;
+      unset($locale);
 
-      foreach ($events as $spec) {
-        $event = $spec['event'];
+      if ($caught) {
+        throw $ex;
+      }
+
+      foreach ($events as $view) {
+        $event = $view->getEvent();
         foreach ($event->getNotificationPHIDs() as $phid) {
           $mark_list[] = qsprintf(
             $conn,
@@ -192,9 +249,55 @@ final class PhabricatorCalendarNotificationEngine
     }
 
     foreach ($mail_list as $mail) {
-      echo $mail;
-      echo "\n\n";
+      $mail->saveAndSend();
     }
+  }
+
+
+  private function newMailMessage(PhabricatorUser $viewer, array $events) {
+    $events = msort($events, 'getEpoch');
+
+    $next_event = head($events);
+
+    $body = new PhabricatorMetaMTAMailBody();
+    foreach ($events as $event) {
+      $body->addTextSection(
+        null,
+        pht(
+          '%s is starting in %s minute(s), at %s.',
+          $event->getEvent()->getName(),
+          $event->getDisplayMinutes(),
+          $event->getDisplayTime()));
+
+      $body->addLinkSection(
+        pht('EVENT DETAIL'),
+        PhabricatorEnv::getProductionURI($event->getEvent()->getURI()));
+    }
+
+    $next_event = head($events)->getEvent();
+    $subject = $next_event->getName();
+    if (count($events) > 1) {
+      $more = pht(
+        '(+%s more...)',
+        new PhutilNumber(count($events) - 1));
+      $subject = "{$subject} {$more}";
+    }
+
+    $calendar_phid = id(new PhabricatorCalendarApplication())
+      ->getPHID();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject($subject)
+      ->addTos(array($viewer->getPHID()))
+      ->setSensitiveContent(false)
+      ->setFrom($calendar_phid)
+      ->setIsBulk(true)
+      ->setSubjectPrefix(pht('[Calendar]'))
+      ->setVarySubjectPrefix(pht('[Reminder]'))
+      ->setThreadID($next_event->getPHID(), false)
+      ->setRelatedPHID($next_event->getPHID())
+      ->setBody($body->render())
+      ->setHTMLBody($body->renderHTML());
   }
 
 }
