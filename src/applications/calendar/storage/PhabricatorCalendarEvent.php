@@ -52,14 +52,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   private $viewerTimezone;
 
-  // TODO: DEPRECATED. Remove once we're sure the migrations worked.
-  protected $allDayDateFrom;
-  protected $allDayDateTo;
-  protected $dateFrom;
-  protected $dateTo;
-  protected $recurrenceEndDate;
-  protected $recurrenceFrequency = array();
-
   private $isGhostEvent = false;
   private $stubInvitees;
 
@@ -95,10 +87,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
-      ->setDateFrom(0)
-      ->setDateTo(0)
-      ->setAllDayDateFrom(0)
-      ->setAllDayDateTo(0)
       ->setStartDateTime($datetime_start)
       ->setEndDateTime($datetime_end)
       ->attachImportSource(null)
@@ -154,11 +142,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
       ->attachParentEvent($this)
-      ->attachImportSource(null)
-      ->setAllDayDateFrom(0)
-      ->setAllDayDateTo(0)
-      ->setDateFrom(0)
-      ->setDateTo(0);
+      ->attachImportSource(null);
 
     return $child->copyFromParent($actor, $start);
   }
@@ -421,18 +405,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'importSourcePHID' => 'phid?',
         'importUIDIndex' => 'bytes12?',
         'importUID' => 'text?',
-
-        // TODO: DEPRECATED.
-        'allDayDateFrom' => 'epoch',
-        'allDayDateTo' => 'epoch',
-        'dateFrom' => 'epoch',
-        'dateTo' => 'epoch',
-        'recurrenceEndDate' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_date' => array(
-          'columns' => array('dateFrom', 'dateTo'),
-        ),
         'key_instance' => array(
           'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
           'unique' => true,
@@ -449,7 +423,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ),
       ),
       self::CONFIG_SERIALIZATION => array(
-        'recurrenceFrequency' => self::SERIALIZATION_JSON,
         'parameters' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
@@ -845,12 +818,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newStartDateTime() {
     $datetime = $this->getParameter('startDateTime');
-    if ($datetime) {
-      return $this->newDateTimeFromDictionary($datetime);
-    }
-
-    $epoch = $this->getDateFrom();
-    return $this->newDateTimeFromEpoch($epoch);
+    return $this->newDateTimeFromDictionary($datetime);
   }
 
   public function getStartDateTimeEpoch() {
@@ -859,12 +827,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newEndDateTimeForEdit() {
     $datetime = $this->getParameter('endDateTime');
-    if ($datetime) {
-      return $this->newDateTimeFromDictionary($datetime);
-    }
-
-    $epoch = $this->getDateTo();
-    return $this->newDateTimeFromEpoch($epoch);
+    return $this->newDateTimeFromDictionary($datetime);
   }
 
   public function newEndDateTime() {
@@ -896,11 +859,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return $this->newDateTimeFromDictionary($datetime);
     }
 
-    $epoch = $this->getRecurrenceEndDate();
-    if (!$epoch) {
-      return null;
-    }
-    return $this->newDateTimeFromEpoch($epoch);
+    return null;
   }
 
   public function getUntilDateTimeEpoch() {

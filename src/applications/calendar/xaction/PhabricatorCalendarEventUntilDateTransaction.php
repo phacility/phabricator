@@ -18,9 +18,6 @@ final class PhabricatorCalendarEventUntilDateTransaction
     $actor = $this->getActor();
     $editor = $this->getEditor();
 
-    // TODO: DEPRECATED.
-    $object->setRecurrenceEndDate($value);
-
     $datetime = PhutilCalendarAbsoluteDateTime::newFromDictionary($value);
     $datetime->setIsAllDay($editor->getNewIsAllDay());
 
