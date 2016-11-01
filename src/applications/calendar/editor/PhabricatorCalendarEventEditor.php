@@ -3,6 +3,9 @@
 final class PhabricatorCalendarEventEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $oldIsAllDay;
+  private $newIsAllDay;
+
   public function getEditorApplicationClass() {
     return 'PhabricatorCalendarApplication';
   }
@@ -19,11 +22,18 @@ final class PhabricatorCalendarEventEditor
     return pht('%s created %s.', $author, $object);
   }
 
-
   protected function shouldApplyInitialEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
     return true;
+  }
+
+  public function getOldIsAllDay() {
+    return $this->oldIsAllDay;
+  }
+
+  public function getNewIsAllDay() {
+    return $this->newIsAllDay;
   }
 
   protected function applyInitialEffects(
@@ -34,6 +44,22 @@ final class PhabricatorCalendarEventEditor
     if ($object->getIsStub()) {
       $this->materializeStub($object);
     }
+
+    // Before doing anything, figure out if the event will be an all day event
+    // or not after the edit. This affects how we store datetime values, and
+    // whether we render times or not.
+    $old_allday = $object->getIsAllDay();
+    $new_allday = $old_allday;
+    $type_allday = PhabricatorCalendarEventAllDayTransaction::TRANSACTIONTYPE;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() != $type_allday) {
+        continue;
+      }
+      $target_alllday = (bool)$xaction->getNewValue();
+    }
+
+    $this->oldIsAllDay = $old_allday;
+    $this->newIsAllDay = $new_allday;
   }
 
   private function materializeStub(PhabricatorCalendarEvent $event) {
