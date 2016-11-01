@@ -126,7 +126,7 @@ final class PhabricatorCalendarEventQuery
     return array(
       'start' => array(
         'table' => $this->getPrimaryTableAlias(),
-        'column' => 'dateFrom',
+        'column' => 'utcInitialEpoch',
         'reverse' => true,
         'type' => 'int',
         'unique' => false,

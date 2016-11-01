@@ -225,6 +225,7 @@ abstract class PhabricatorCalendarImportEngine
       $xactions[$full_uid] = $this->newUpdateTransactions($event, $node);
       $update_map[$full_uid] = $event;
 
+      $attendee_map[$full_uid] = array();
       $attendees = $node->getAttendees();
       $private_index = 1;
       foreach ($attendees as $attendee) {
@@ -526,7 +527,7 @@ abstract class PhabricatorCalendarImportEngine
       ->setStartDateTime($start_datetime)
       ->setEndDateTime($end_datetime);
 
-    $event->setIsAllDay($start_datetime->getIsAllDay());
+    $event->setIsAllDay((int)$start_datetime->getIsAllDay());
 
     // TODO: This should be transactional, but the transaction only accepts
     // simple frequency rules right now.
@@ -551,11 +552,18 @@ abstract class PhabricatorCalendarImportEngine
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import) {
 
-    $any_event = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($viewer)
-      ->withImportSourcePHIDs(array($import->getPHID()))
-      ->setLimit(1)
-      ->execute();
+    $table = new PhabricatorCalendarEvent();
+    $conn = $table->establishConnection('r');
+
+    // Using a CalendarEventQuery here was failing oddly in a way that was
+    // difficult to reproduce locally (see T11808). Just check the table
+    // directly; this is significantly more efficient anyway.
+
+    $any_event = queryfx_all(
+      $conn,
+      'SELECT phid FROM %T WHERE importSourcePHID = %s LIMIT 1',
+      $table->getTableName(),
+      $import->getPHID());
 
     return (bool)$any_event;
   }

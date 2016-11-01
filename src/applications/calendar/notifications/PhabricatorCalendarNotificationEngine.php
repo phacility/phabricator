@@ -155,8 +155,9 @@ final class PhabricatorCalendarNotificationEngine
       $sent_map[$event_phid][$target_phid][$initial_epoch] = $row;
     }
 
-    $notify_min = $cursor;
-    $notify_max = $cursor + $this->getNotifyWindow();
+    $now = PhabricatorTime::getNow();
+    $notify_min = $now;
+    $notify_max = $now + $this->getNotifyWindow();
     $notify_map = array();
     foreach ($events as $key => $event) {
       $initial_epoch = $event->getUTCInitialEpoch();
