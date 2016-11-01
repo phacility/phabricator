@@ -19,6 +19,7 @@ final class PhabricatorCalendarEventQuery
   private $importUIDs;
   private $utcInitialEpochMin;
   private $utcInitialEpochMax;
+  private $isImported;
 
   private $generateGhosts = false;
 
@@ -100,6 +101,11 @@ final class PhabricatorCalendarEventQuery
 
   public function withImportUIDs(array $uids) {
     $this->importUIDs = $uids;
+    return $this;
+  }
+
+  public function withIsImported($is_imported) {
+    $this->isImported = $is_imported;
     return $this;
   }
 
@@ -470,6 +476,18 @@ final class PhabricatorCalendarEventQuery
         $conn,
         'event.importUID IN (%Ls)',
         $this->importUIDs);
+    }
+
+    if ($this->isImported !== null) {
+      if ($this->isImported) {
+        $where[] = qsprintf(
+          $conn,
+          'event.importSourcePHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'event.importSourcePHID IS NULL');
+      }
     }
 
     return $where;

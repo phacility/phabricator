@@ -1124,6 +1124,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->execute();
   }
 
+  public function getNotificationPHIDs() {
+    $phids = array();
+    if ($this->getPHID()) {
+      $phids[] = $this->getPHID();
+    }
+
+    if ($this->getSeriesParentPHID()) {
+      $phids[] = $this->getSeriesParentPHID();
+    }
+
+    return $phids;
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 
