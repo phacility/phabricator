@@ -331,7 +331,7 @@ abstract class PhabricatorCalendarImportEngine
     foreach ($update_map as $full_uid => $event) {
       $parent_uid = $this->getParentNodeUID($node_map[$full_uid]);
       if ($parent_uid) {
-        $parent_phid = $update_map[$full_uid]->getPHID();
+        $parent_phid = $update_map[$parent_uid]->getPHID();
       } else {
         $parent_phid = null;
       }
