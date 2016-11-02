@@ -13,6 +13,14 @@ final class PhabricatorCalendarEventIconTransaction
     $object->setIcon($value);
   }
 
+  public function shouldHide() {
+    if ($this->isCreateTransaction()) {
+      return true;
+    }
+
+    return false;
+  }
+
   public function getTitle() {
     $old = $this->getIconLabel($this->getOldValue());
     $new = $this->getIconLabel($this->getNewValue());

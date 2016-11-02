@@ -94,7 +94,7 @@ final class PhabricatorCalendarEventEditEngine
 
     // At least for now, just hide "Invitees" when editing all future events.
     // This may eventually deserve a more nuanced approach.
-    $hide_invitees = ($this->getSeriesEditMode() == self::MODE_FUTURE);
+    $is_future = ($this->getSeriesEditMode() == self::MODE_FUTURE);
 
     $fields = array(
       id(new PhabricatorTextEditField())
@@ -162,7 +162,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitTypeDescription(pht('New event host.'))
         ->setSingleValue($object->getHostPHID()),
       id(new PhabricatorDatasourceEditField())
-        ->setIsHidden($hide_invitees)
+        ->setIsHidden($is_future)
         ->setKey('inviteePHIDs')
         ->setAliases(array('invite', 'invitee', 'invitees', 'inviteePHID'))
         ->setLabel(pht('Invitees'))
@@ -193,8 +193,16 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitDescription(pht('Change the event icon.'))
         ->setConduitTypeDescription(pht('New event icon.'))
         ->setValue($object->getIcon()),
+
+      // NOTE: We're being a little sneaky here. This field is hidden and
+      // always has the value "true", so it makes the event recurring when you
+      // submit a form which contains the field. Then we put the the field on
+      // the "recurring" page in the "Make Recurring" dialog to simplify the
+      // workflow. This is still normal, explicit field from the perspective
+      // of the API.
+
       id(new PhabricatorBoolEditField())
-        ->setIsHidden($object->getIsRecurring())
+        ->setIsHidden(true)
         ->setKey('isRecurring')
         ->setLabel(pht('Recurring'))
         ->setOptions(pht('One-Time Event'), pht('Recurring Event'))
@@ -203,7 +211,7 @@ final class PhabricatorCalendarEventEditEngine
         ->setDescription(pht('One time or recurring event.'))
         ->setConduitDescription(pht('Make the event recurring.'))
         ->setConduitTypeDescription(pht('Mark the event as a recurring event.'))
-        ->setValue($object->getIsRecurring()),
+        ->setValue(true),
       id(new PhabricatorSelectEditField())
         ->setKey('frequency')
         ->setLabel(pht('Frequency'))
@@ -295,35 +303,35 @@ final class PhabricatorCalendarEventEditEngine
 
   protected function willApplyTransactions($object, array $xactions) {
     $viewer = $this->getViewer();
-    $this->rawTransactions = $this->cloneTransactions($xactions);
 
     $is_parent = $object->isParentEvent();
     $is_child = $object->isChildEvent();
     $is_future = ($this->getSeriesEditMode() === self::MODE_FUTURE);
 
+    // Figure out which transactions we can apply to the whole series of events.
+    // Some transactions (like comments) can never be bulk applied.
+    $inherited_xactions = array();
+    foreach ($xactions as $xaction) {
+      $modular_type = $xaction->getModularType();
+      if (!($modular_type instanceof PhabricatorCalendarEventTransactionType)) {
+        continue;
+      }
+
+      $inherited_edit = $modular_type->isInheritedEdit();
+      if ($inherited_edit) {
+        $inherited_xactions[] = $xaction;
+      }
+    }
+    $this->rawTransactions = $this->cloneTransactions($inherited_xactions);
+
     $must_fork = ($is_child && $is_future) ||
                  ($is_parent && !$is_future);
 
+    // We don't need to fork when editing a parent event if none of the edits
+    // can transfer to child events. For example, commenting on a parent is
+    // fine.
     if ($is_parent && !$is_future) {
-      // We don't necessarily need to fork if whatever we're editing is not
-      // inherited by children. For example, we can add a comment to the parent
-      // event without needing to fork. Test all the stuff we're doing and see
-      // if anything is actually inherited.
-
-      $inherited_edit = false;
-      foreach ($xactions as $xaction) {
-        $modular_type = $xaction->getTransactionImplementation();
-        if ($modular_type instanceof PhabricatorCalendarEventTransactionType) {
-          $inherited_edit = $modular_type->isInheritedEdit();
-          if ($inherited_edit) {
-            break;
-          }
-        }
-      }
-
-      // Nothing the user is trying to do requires us to fork, so we can just
-      // apply the changes normally.
-      if (!$inherited_edit) {
+      if (!$inherited_xactions) {
         $must_fork = false;
       }
     }

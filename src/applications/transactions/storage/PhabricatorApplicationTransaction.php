@@ -1073,10 +1073,21 @@ abstract class PhabricatorApplicationTransaction
         break;
 
       default:
-        return pht(
-          '%s edited this %s.',
-          $this->renderHandleLink($author_phid),
-          $this->getApplicationObjectTypeName());
+        // In developer mode, provide a better hint here about which string
+        // we're missing.
+        $developer_mode = 'phabricator.developer-mode';
+        $is_developer = PhabricatorEnv::getEnvConfig($developer_mode);
+        if ($is_developer) {
+          return pht(
+            '%s edited this object (transaction type "%s").',
+            $this->renderHandleLink($author_phid),
+            $this->getTransactionType());
+        } else {
+          return pht(
+            '%s edited this %s.',
+            $this->renderHandleLink($author_phid),
+            $this->getApplicationObjectTypeName());
+        }
     }
   }
 
@@ -1613,6 +1624,10 @@ abstract class PhabricatorApplicationTransaction
       'Transactions are visible to users that can see the object which was '.
       'acted upon. Some transactions - in particular, comments - are '.
       'editable by the transaction author.');
+  }
+
+  public function getModularType() {
+    return null;
   }
 
 

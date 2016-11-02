@@ -935,10 +935,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $datetime->newAbsoluteDateTime()->toDictionary());
   }
 
-  public function setUntilDateTime(PhutilCalendarDateTime $datetime) {
-    return $this->setParameter(
-      'untilDateTime',
-      $datetime->newAbsoluteDateTime()->toDictionary());
+  public function setUntilDateTime(PhutilCalendarDateTime $datetime = null) {
+    if ($datetime) {
+      $value = $datetime->newAbsoluteDateTime()->toDictionary();
+    } else {
+      $value = null;
+    }
+
+    return $this->setParameter('untilDateTime', $value);
   }
 
   public function setRecurrenceRule(PhutilCalendarRecurrenceRule $rrule) {
