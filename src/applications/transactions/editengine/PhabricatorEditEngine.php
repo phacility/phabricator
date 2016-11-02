@@ -780,7 +780,7 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
-    $action = $request->getURIData('editAction');
+    $action = $this->getEditAction();
 
     $capabilities = array();
     $use_default = false;
@@ -2097,6 +2097,17 @@ abstract class PhabricatorEditEngine
       $this,
       PhabricatorPolicyCapability::CAN_EDIT);
   }
+
+  public function isCommentAction() {
+    return ($this->getEditAction() == 'comment');
+  }
+
+  public function getEditAction() {
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    return $request->getURIData('editAction');
+  }
+
 
 /* -(  Form Pages  )--------------------------------------------------------- */
 

@@ -8,6 +8,10 @@ abstract class PhabricatorCalendarEventReplyTransaction
     return $object->getUserInviteStatus($actor_phid);
   }
 
+  public function isInheritedEdit() {
+    return false;
+  }
+
   public function applyExternalEffects($object, $value) {
     $acting_phid = $this->getActingAsPHID();
 

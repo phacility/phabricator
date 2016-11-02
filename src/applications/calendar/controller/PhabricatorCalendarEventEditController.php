@@ -34,7 +34,17 @@ final class PhabricatorCalendarEventEditController
             ->addCancelButton($cancel_uri);
         }
       } else if ($event->getIsRecurring()) {
-        $mode = $request->getStr('mode');
+
+        // If the user submits a comment or makes an edit via comment actions,
+        // always target only the current event. It doesn't make sense to add
+        // comments to every instance of an event, and the other actions don't
+        // make much sense to apply to all instances either.
+        if ($engine->isCommentAction()) {
+          $mode = PhabricatorCalendarEventEditEngine::MODE_THIS;
+        } else {
+          $mode = $request->getStr('mode');
+        }
+
         if (!$mode) {
           $form = id(new AphrontFormView())
             ->setViewer($viewer)
@@ -60,7 +70,6 @@ final class PhabricatorCalendarEventEditController
             ->addSubmitButton(pht('Continue'))
             ->addCancelButton($cancel_uri)
             ->setDisableWorkflowOnSubmit(true);
-
         }
 
         $engine

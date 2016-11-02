@@ -295,7 +295,7 @@ final class PhabricatorCalendarEventEditEngine
 
   protected function willApplyTransactions($object, array $xactions) {
     $viewer = $this->getViewer();
-    $this->rawTransactions = $xactions;
+    $this->rawTransactions = $this->cloneTransactions($xactions);
 
     $is_parent = $object->isParentEvent();
     $is_child = $object->isChildEvent();
@@ -303,6 +303,30 @@ final class PhabricatorCalendarEventEditEngine
 
     $must_fork = ($is_child && $is_future) ||
                  ($is_parent && !$is_future);
+
+    if ($is_parent && !$is_future) {
+      // We don't necessarily need to fork if whatever we're editing is not
+      // inherited by children. For example, we can add a comment to the parent
+      // event without needing to fork. Test all the stuff we're doing and see
+      // if anything is actually inherited.
+
+      $inherited_edit = false;
+      foreach ($xactions as $xaction) {
+        $modular_type = $xaction->getTransactionImplementation();
+        if ($modular_type instanceof PhabricatorCalendarEventTransactionType) {
+          $inherited_edit = $modular_type->isInheritedEdit();
+          if ($inherited_edit) {
+            break;
+          }
+        }
+      }
+
+      // Nothing the user is trying to do requires us to fork, so we can just
+      // apply the changes normally.
+      if (!$inherited_edit) {
+        $must_fork = false;
+      }
+    }
 
     if ($must_fork) {
       $fork_target = $object->loadForkTarget($viewer);
@@ -340,7 +364,7 @@ final class PhabricatorCalendarEventEditEngine
     }
 
     foreach ($targets as $target) {
-      $apply = clone $this->rawTransactions;
+      $apply = $this->cloneTransactions($this->rawTransactions);
       $this->applyTransactions($target, $apply);
     }
   }
@@ -364,6 +388,14 @@ final class PhabricatorCalendarEventEditEngine
     } catch (PhabricatorApplicationTransactionValidationException $ex) {
       // Just ignore any issues we run into.
     }
+  }
+
+  private function cloneTransactions(array $xactions) {
+    $result = array();
+    foreach ($xactions as $xaction) {
+      $result[] = clone $xaction;
+    }
+    return $result;
   }
 
 }
