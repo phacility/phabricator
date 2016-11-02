@@ -17,6 +17,9 @@ final class PhabricatorCalendarEventQuery
   private $importSourcePHIDs;
   private $importAuthorPHIDs;
   private $importUIDs;
+  private $utcInitialEpochMin;
+  private $utcInitialEpochMax;
+  private $isImported;
 
   private $generateGhosts = false;
 
@@ -42,6 +45,12 @@ final class PhabricatorCalendarEventQuery
   public function withDateRange($begin, $end) {
     $this->rangeBegin = $begin;
     $this->rangeEnd = $end;
+    return $this;
+  }
+
+  public function withUTCInitialEpochBetween($min, $max) {
+    $this->utcInitialEpochMin = $min;
+    $this->utcInitialEpochMax = $max;
     return $this;
   }
 
@@ -95,6 +104,11 @@ final class PhabricatorCalendarEventQuery
     return $this;
   }
 
+  public function withIsImported($is_imported) {
+    $this->isImported = $is_imported;
+    return $this;
+  }
+
   protected function getDefaultOrderVector() {
     return array('start', 'id');
   }
@@ -112,7 +126,7 @@ final class PhabricatorCalendarEventQuery
     return array(
       'start' => array(
         'table' => $this->getPrimaryTableAlias(),
-        'column' => 'dateFrom',
+        'column' => 'utcInitialEpoch',
         'reverse' => true,
         'type' => 'int',
         'unique' => false,
@@ -371,6 +385,20 @@ final class PhabricatorCalendarEventQuery
         $this->rangeEnd + phutil_units('16 hours in seconds'));
     }
 
+    if ($this->utcInitialEpochMin !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.utcInitialEpoch >= %d',
+        $this->utcInitialEpochMin);
+    }
+
+    if ($this->utcInitialEpochMax !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'event.utcInitialEpoch <= %d',
+        $this->utcInitialEpochMax);
+    }
+
     if ($this->inviteePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
@@ -448,6 +476,18 @@ final class PhabricatorCalendarEventQuery
         $conn,
         'event.importUID IN (%Ls)',
         $this->importUIDs);
+    }
+
+    if ($this->isImported !== null) {
+      if ($this->isImported) {
+        $where[] = qsprintf(
+          $conn,
+          'event.importSourcePHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'event.importSourcePHID IS NULL');
+      }
     }
 
     return $where;
@@ -632,6 +672,11 @@ final class PhabricatorCalendarEventQuery
   private function getRecurrenceLimit(
     PhabricatorCalendarEvent $event,
     $raw_limit) {
+
+    $count = $event->getRecurrenceCount();
+    if ($count && ($count <= $raw_limit)) {
+      return ($count - 1);
+    }
 
     return $raw_limit;
   }

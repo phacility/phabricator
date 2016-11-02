@@ -6,7 +6,11 @@ abstract class PhabricatorCalendarEventDateTransaction
   abstract protected function getInvalidDateMessage();
 
   public function generateNewValue($object, $value) {
-    return $value->getEpoch();
+    $editor = $this->getEditor();
+    return $value->newPhutilDateTime()
+      ->setIsAllDay($editor->getNewIsAllDay())
+      ->newAbsoluteDateTime()
+      ->toDictionary();
   }
 
   public function validateTransactions($object, array $xactions) {

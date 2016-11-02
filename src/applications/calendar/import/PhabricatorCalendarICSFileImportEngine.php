@@ -17,6 +17,10 @@ final class PhabricatorCalendarICSFileImportEngine
     return pht('Import an event in ".ics" (iCalendar) format.');
   }
 
+  public function supportsTriggers(PhabricatorCalendarImport $import) {
+    return false;
+  }
+
   public function appendImportProperties(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import,
@@ -59,7 +63,7 @@ final class PhabricatorCalendarICSFileImportEngine
     }
   }
 
-  public function didCreateImport(
+  public function importEventsFromSource(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import) {
 

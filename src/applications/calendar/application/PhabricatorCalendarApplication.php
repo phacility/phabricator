@@ -85,6 +85,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarImportDisableController',
           'delete/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarImportDeleteController',
+          'reload/(?P<id>[1-9]\d*)/'
+            => 'PhabricatorCalendarImportReloadController',
           'drop/'
             => 'PhabricatorCalendarImportDropController',
           'log/' => array(
@@ -101,6 +103,16 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
       array(
         'name' => pht('Calendar User Guide'),
         'href' => PhabricatorEnv::getDoclink('Calendar User Guide'),
+      ),
+      array(
+        'name' => pht('Importing Events'),
+        'href' => PhabricatorEnv::getDoclink(
+          'Calendar User Guide: Importing Events'),
+      ),
+      array(
+        'name' => pht('Exporting Events'),
+        'href' => PhabricatorEnv::getDoclink(
+          'Calendar User Guide: Exporting Events'),
       ),
     );
   }

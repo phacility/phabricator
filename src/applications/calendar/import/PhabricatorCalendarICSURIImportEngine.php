@@ -17,6 +17,10 @@ final class PhabricatorCalendarICSURIImportEngine
     return pht('Import or subscribe to a calendar in .ics format by URI.');
   }
 
+  public function supportsTriggers(PhabricatorCalendarImport $import) {
+    return true;
+  }
+
   public function appendImportProperties(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import,
@@ -71,7 +75,7 @@ final class PhabricatorCalendarICSURIImportEngine
     return pht('ICS URI');
   }
 
-  public function didCreateImport(
+  public function importEventsFromSource(
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import) {
 

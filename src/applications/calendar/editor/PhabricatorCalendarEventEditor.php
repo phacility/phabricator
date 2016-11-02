@@ -3,6 +3,9 @@
 final class PhabricatorCalendarEventEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $oldIsAllDay;
+  private $newIsAllDay;
+
   public function getEditorApplicationClass() {
     return 'PhabricatorCalendarApplication';
   }
@@ -11,10 +14,26 @@ final class PhabricatorCalendarEventEditor
     return pht('Calendar');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this event.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   protected function shouldApplyInitialEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
     return true;
+  }
+
+  public function getOldIsAllDay() {
+    return $this->oldIsAllDay;
+  }
+
+  public function getNewIsAllDay() {
+    return $this->newIsAllDay;
   }
 
   protected function applyInitialEffects(
@@ -25,6 +44,22 @@ final class PhabricatorCalendarEventEditor
     if ($object->getIsStub()) {
       $this->materializeStub($object);
     }
+
+    // Before doing anything, figure out if the event will be an all day event
+    // or not after the edit. This affects how we store datetime values, and
+    // whether we render times or not.
+    $old_allday = $object->getIsAllDay();
+    $new_allday = $old_allday;
+    $type_allday = PhabricatorCalendarEventAllDayTransaction::TRANSACTIONTYPE;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() != $type_allday) {
+        continue;
+      }
+      $target_alllday = (bool)$xaction->getNewValue();
+    }
+
+    $this->oldIsAllDay = $old_allday;
+    $this->newIsAllDay = $new_allday;
   }
 
   private function materializeStub(PhabricatorCalendarEvent $event) {
@@ -34,25 +69,22 @@ final class PhabricatorCalendarEventEditor
     }
 
     $actor = $this->getActor();
+
+    $invitees = $event->getInvitees();
+
     $event->copyFromParent($actor);
     $event->setIsStub(0);
 
-    $invitees = $event->getParentEvent()->getInvitees();
+    $event->openTransaction();
+      $event->save();
+      foreach ($invitees as $invitee) {
+        $invitee
+          ->setEventPHID($event->getPHID())
+          ->save();
+      }
+    $event->saveTransaction();
 
-    $new_invitees = array();
-    foreach ($invitees as $invitee) {
-      $invitee = id(new PhabricatorCalendarEventInvitee())
-        ->setEventPHID($event->getPHID())
-        ->setInviteePHID($invitee->getInviteePHID())
-        ->setInviterPHID($invitee->getInviterPHID())
-        ->setStatus($invitee->getStatus())
-        ->save();
-
-      $new_invitees[] = $invitee;
-    }
-
-    $event->save();
-    $event->attachInvitees($new_invitees);
+    $event->attachInvitees($invitees);
   }
 
   public function getTransactionTypes() {

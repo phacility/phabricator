@@ -18,7 +18,8 @@ final class PhortuneMerchantSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhortuneMerchantQuery());
+    $query = id(new PhortuneMerchantQuery())
+      ->needProfileImage(true);
 
     return $query;
   }
@@ -74,7 +75,7 @@ final class PhortuneMerchantSearchEngine
         ->setHeader($merchant->getName())
         ->setHref('/phortune/merchant/'.$merchant->getID().'/')
         ->setObject($merchant)
-        ->setImageIcon('fa-bank');
+        ->setImageURI($merchant->getProfileImageURI());
 
       $list->addItem($item);
     }

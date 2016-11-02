@@ -32,88 +32,126 @@ final class PhabricatorCalendarEventCancelController
 
     $is_parent = $event->isParentEvent();
     $is_child = $event->isChildEvent();
-    $is_cancelled = $event->getIsCancelled();
 
-    if ($is_child) {
-      $is_parent_cancelled = $event->getParentEvent()->getIsCancelled();
-    } else {
-      $is_parent_cancelled = false;
-    }
+    $is_cancelled = $event->getIsCancelled();
+    $is_recurring = $event->getIsRecurring();
 
     $validation_exception = null;
     if ($request->isFormPost()) {
-      $xactions = array();
 
-      $xaction = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventCancelTransaction::TRANSACTIONTYPE)
-        ->setNewValue(!$is_cancelled);
+      $targets = array($event);
+      if ($is_recurring) {
+        $mode = $request->getStr('mode');
+        $is_future = ($mode == 'future');
 
-      $editor = id(new PhabricatorCalendarEventEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true)
-        ->setContinueOnMissingFields(true);
+        // We need to fork the event if we're cancelling just the parent, or
+        // are cancelling a child and all future events.
+        $must_fork = ($is_child && $is_future) ||
+                     ($is_parent && !$is_future);
+        if ($must_fork) {
+          $fork_target = $event->loadForkTarget($viewer);
+          if ($fork_target) {
+            $xactions = array();
 
-      try {
-        $editor->applyTransactions($event, array($xaction));
+            $xaction = id(new PhabricatorCalendarEventTransaction())
+              ->setTransactionType(
+                PhabricatorCalendarEventForkTransaction::TRANSACTIONTYPE)
+              ->setNewValue(true);
+
+            $editor = id(new PhabricatorCalendarEventEditor())
+              ->setActor($viewer)
+              ->setContentSourceFromRequest($request)
+              ->setContinueOnNoEffect(true)
+              ->setContinueOnMissingFields(true);
+
+            $editor->applyTransactions($fork_target, array($xaction));
+          }
+        }
+
+        if ($is_future) {
+          $future = $event->loadFutureEvents($viewer);
+          foreach ($future as $future_event) {
+            $targets[] = $future_event;
+          }
+        }
+      }
+
+      foreach ($targets as $target) {
+        $xactions = array();
+
+        $xaction = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventCancelTransaction::TRANSACTIONTYPE)
+          ->setNewValue(!$is_cancelled);
+
+        $editor = id(new PhabricatorCalendarEventEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setContinueOnMissingFields(true);
+
+        try {
+          $editor->applyTransactions($target, array($xaction));
+        } catch (PhabricatorApplicationTransactionValidationException $ex) {
+          $validation_exception = $ex;
+          break;
+        }
+
+      }
+
+      if (!$validation_exception) {
         return id(new AphrontRedirectResponse())->setURI($cancel_uri);
-      } catch (PhabricatorApplicationTransactionValidationException $ex) {
-        $validation_exception = $ex;
       }
     }
 
     if ($is_cancelled) {
-      if ($is_parent_cancelled) {
-        $title = pht('Cannot Reinstate Instance');
-        $paragraph = pht(
-          'You cannot reinstate an instance of a cancelled recurring event.');
-        $cancel = pht('Back');
-        $submit = null;
-      } else if ($is_child) {
-        $title = pht('Reinstate Instance');
-        $paragraph = pht(
-          'Reinstate this instance of this recurring event?');
-        $cancel = pht('Back');
-        $submit = pht('Reinstate Instance');
-      } else if ($is_parent) {
-        $title = pht('Reinstate Recurring Event');
-        $paragraph = pht(
-          'Reinstate all instances of this recurring event which have not '.
-          'been individually cancelled?');
-        $cancel = pht('Back');
-        $submit = pht('Reinstate Recurring Event');
+      $title = pht('Reinstate Event');
+      if ($is_recurring) {
+        $body = pht(
+          'This event is part of a series. Which events do you want to '.
+          'reinstate?');
+        $show_control = true;
       } else {
-        $title = pht('Reinstate Event');
-        $paragraph = pht('Reinstate this event?');
-        $cancel = pht('Back');
-        $submit = pht('Reinstate Event');
+        $body = pht('Reinstate this event?');
+        $show_control = false;
       }
+      $submit = pht('Reinstate Event');
     } else {
-      if ($is_child) {
-        $title = pht('Cancel Instance');
-        $paragraph = pht('Cancel this instance of this recurring event?');
-        $cancel = pht('Back');
-        $submit = pht('Cancel Instance');
-      } else if ($is_parent) {
-        $title = pht('Cancel Recurrin Event');
-        $paragraph = pht('Cancel this entire series of recurring events?');
-        $cancel = pht('Back');
-        $submit = pht('Cancel Recurring Event');
+      $title = pht('Cancel Event');
+      if ($is_recurring) {
+        $body = pht(
+          'This event is part of a series. Which events do you want to '.
+          'cancel?');
+        $show_control = true;
       } else {
-        $title = pht('Cancel Event');
-        $paragraph = pht(
-          'Cancel this event? You can always reinstate the event later.');
-        $cancel = pht('Back');
-        $submit = pht('Cancel Event');
+        $body = pht('Cancel this event?');
+        $show_control = false;
       }
+      $submit = pht('Cancel Event');
     }
 
-    return $this->newDialog()
+    $dialog = $this->newDialog()
       ->setTitle($title)
       ->setValidationException($validation_exception)
-      ->appendParagraph($paragraph)
-      ->addCancelButton($cancel_uri, $cancel)
+      ->appendParagraph($body)
+      ->addCancelButton($cancel_uri, pht('Back'))
       ->addSubmitButton($submit);
+
+    if ($show_control) {
+      $form = id(new AphrontFormView())
+        ->setViewer($viewer)
+        ->appendControl(
+          id(new AphrontFormSelectControl())
+            ->setLabel(pht('Cancel Events'))
+            ->setName('mode')
+            ->setOptions(
+              array(
+                'this' => pht('Only This Event'),
+                'future' => pht('All Future Events'),
+              )));
+      $dialog->appendForm($form);
+    }
+
+    return $dialog;
   }
 }

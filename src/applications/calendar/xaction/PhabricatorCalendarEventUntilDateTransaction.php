@@ -6,20 +6,24 @@ final class PhabricatorCalendarEventUntilDateTransaction
   const TRANSACTIONTYPE = 'calendar.recurrenceenddate';
 
   public function generateOldValue($object) {
-    // TODO: Upgrade this.
-    return $object->getUntilDateTimeEpoch();
+    $editor = $this->getEditor();
+
+    return $object->newUntilDateTime()
+      ->newAbsoluteDateTime()
+      ->setIsAllDay($editor->getOldIsAllDay())
+      ->toDictionary();
   }
 
   public function applyInternalEffects($object, $value) {
     $actor = $this->getActor();
+    $editor = $this->getEditor();
 
     // TODO: DEPRECATED.
     $object->setRecurrenceEndDate($value);
 
-    $datetime = PhutilCalendarAbsoluteDateTime::newFromEpoch(
-      $value,
-      $actor->getTimezoneIdentifier());
-    $datetime->setIsAllDay($object->getIsAllDay());
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromDictionary($value);
+    $datetime->setIsAllDay($editor->getNewIsAllDay());
+
     $object->setUntilDateTime($datetime);
   }
 

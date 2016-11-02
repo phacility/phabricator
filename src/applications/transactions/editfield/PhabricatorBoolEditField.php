@@ -4,6 +4,7 @@ final class PhabricatorBoolEditField
   extends PhabricatorEditField {
 
   private $options;
+  private $asCheckbox;
 
   public function setOptions($off_label, $on_label) {
     $this->options = array(
@@ -17,6 +18,15 @@ final class PhabricatorBoolEditField
     return $this->options;
   }
 
+  public function setAsCheckbox($as_checkbox) {
+    $this->asCheckbox = $as_checkbox;
+    return $this;
+  }
+
+  public function getAsCheckbox() {
+    return $this->asCheckbox;
+  }
+
   protected function newControl() {
     $options = $this->getOptions();
 
@@ -27,8 +37,22 @@ final class PhabricatorBoolEditField
       );
     }
 
-    return id(new AphrontFormSelectControl())
-      ->setOptions($options);
+    if ($this->getAsCheckbox()) {
+      $key = $this->getKey();
+      $value = $this->getValueForControl();
+      $checkbox_key = $this->newHTTPParameterType()
+        ->getCheckboxKey($key);
+      $id = $this->getControlID();
+
+      $control = id(new AphrontFormCheckboxControl())
+        ->setCheckboxKey($checkbox_key)
+        ->addCheckbox($key, '1', $options['1'], $value, $id);
+    } else {
+      $control = id(new AphrontFormSelectControl())
+        ->setOptions($options);
+    }
+
+    return $control;
   }
 
   protected function newHTTPParameterType() {

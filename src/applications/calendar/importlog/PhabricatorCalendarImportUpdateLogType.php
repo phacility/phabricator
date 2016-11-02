@@ -26,7 +26,7 @@ final class PhabricatorCalendarImportUpdateLogType
   public function getDisplayIcon(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return 'fa-upload';
+    return 'fa-calendar';
   }
 
   public function getDisplayColor(

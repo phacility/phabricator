@@ -128,6 +128,9 @@ final class PhabricatorEditEngineConfiguration
 
     $values = $this->getProperty('defaults', array());
     foreach ($fields as $key => $field) {
+      if (!$field->getIsDefaultable()) {
+        continue;
+      }
       if ($is_new) {
         if (array_key_exists($key, $values)) {
           $field->readDefaultValueFromConfiguration($values[$key]);
@@ -155,6 +158,11 @@ final class PhabricatorEditEngineConfiguration
           // If we don't have an explicit value, don't make any adjustments.
           break;
       }
+    }
+
+    // If the field isn't lockable, remove any lock we applied.
+    if (!$field->getIsLockable()) {
+      $field->setIsLocked(false);
     }
 
     $fields = $this->reorderFields($fields);
