@@ -9,6 +9,81 @@ Overview
 IMPORTANT: Calendar is a prototype application. See
 @{article:User Guide: Prototype Applications}.
 
+Calendar allows you to schedule parties and invite other users to party with
+you. Everyone loves to party. Use Calendar primarily for partying.
+
+
+Reminders
+=========
+
+Calendar sends reminder email before events occur. You will receive a reminder
+if:
+
+  - you have marked yourself as **attending** the event;
+  - the event has not been cancelled; and
+  - the event was not imported from an external source.
+
+Reminders are sent 15 minutes before events begin.
+
+
+Availability
+============
+
+Across all applications, Phabricator shows a red dot next to usernames if the
+user is currently attending an event. This provides a hint that they may be in
+a meeting (or on vacation) and could take a while to get back to you about a
+revision or task.
+
+You can click through to a user's profile to see more details about their
+availability.
+
+
+Importing Events
+================
+
+You can import events from email and from other calendar applications
+(like Google Calendar and Calendar.app) into Calendar. For a detailed
+guide, see @{article:Calendar User Guide: Importing Events}.
+
+
+Exporting Events
+================
+
+You can export events from Calendar to other applications by downloading
+events as `.ics` files or configuring a calendar subscription.
+
+Calendar also attaches `.ics` files containing event information when it sends
+email. Most calendar applications can import these files.
+
+For a detailed guide to exporting events, see
+@{article:Calendar User Guide: Exporting Events}.
+
+
+Recurring Events
+================
+
+To create a recurring event (like a weekly meeting), first create an event
+normally, then select {nav Make Recurring} from the action menu and configure
+how often the event should repeat.
+
+**Monthly Events on the 29th, 30th or 31st**: If you configure an event to
+repeat monthly and schedule the first instance on the 29th, 30th, or 31st of
+the month, it can not occur on the same day every month because some months
+do not have enough days.
+
+Instead, these events are internally scheduled to occur relative to the end
+of the month. For example, if you schedule a monthly event on the 30th of a
+31 day month, it will occur on the second-to-last day of each following month.
+
+**Complex RRULEs**: Calendar supports complex RRULEs internally (like events
+that occur every-other Thursday in prime-numbered months) but does not
+currently have a UI for scheduling events with complex rules.
+
+Future versions of Calendar may improve support for complex scheduling by using
+the UI. In some cases, a partial workaround is to schedule the event in another
+application (which has more complex scheduling controls available) and then
+import it into Calendar.
+
 
 Next Steps
 ==========

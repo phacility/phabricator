@@ -8,7 +8,12 @@ final class PhabricatorCalendarEventUntilDateTransaction
   public function generateOldValue($object) {
     $editor = $this->getEditor();
 
-    return $object->newUntilDateTime()
+    $until = $object->newUntilDateTime();
+    if (!$until) {
+      return null;
+    }
+
+    return $until
       ->newAbsoluteDateTime()
       ->setIsAllDay($editor->getOldIsAllDay())
       ->toDictionary();
