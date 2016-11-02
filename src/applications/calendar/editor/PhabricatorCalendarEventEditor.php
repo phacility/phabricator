@@ -304,28 +304,31 @@ final class PhabricatorCalendarEventEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $name = $object->getName();
+    $monogram = $object->getMonogram();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("E{$id}: {$name}")
-      ->addHeader('Thread-Topic', "E{$id}: ".$object->getName());
+      ->setSubject("{$monogram}: {$name}")
+      ->addHeader('Thread-Topic', $monogram);
   }
 
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $description = $object->getDescription();
     $body = parent::buildMailBody($object, $xactions);
 
-    if (strlen($description)) {
-      $body->addRemarkupSection(
-        pht('EVENT DESCRIPTION'),
-        $description);
+    $description = $object->getDescription();
+    if ($this->getIsNewObject()) {
+      if (strlen($description)) {
+        $body->addRemarkupSection(
+          pht('EVENT DESCRIPTION'),
+          $description);
+      }
     }
 
     $body->addLinkSection(
       pht('EVENT DETAIL'),
-      PhabricatorEnv::getProductionURI('/E'.$object->getID()));
+      PhabricatorEnv::getProductionURI($object->getURI()));
 
     $ics_attachment = $this->newICSAttachment($object);
     $body->addAttachment($ics_attachment);
