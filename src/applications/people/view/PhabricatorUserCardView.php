@@ -75,8 +75,11 @@ final class PhabricatorUserCardView extends AphrontTagView {
     if (PhabricatorApplication::isClassInstalledForViewer(
         'PhabricatorCalendarApplication',
         $viewer)) {
-      $availability = $user->getAvailabilityDescription($viewer);
-      $body[] = $this->addItem(pht('Status'), $availability);
+      $body[] = $this->addItem(
+        pht('Availability'),
+        id(new PHUIUserAvailabilityView())
+          ->setViewer($viewer)
+          ->setAvailableUser($user));
     }
 
     $badges = $this->buildBadges($user, $viewer);

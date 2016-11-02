@@ -961,23 +961,6 @@ final class PhabricatorUser
 
 
   /**
-   * Describe the user's availability.
-   *
-   * @param PhabricatorUser Viewing user.
-   * @return string Human-readable description of away status.
-   * @task availability
-   */
-  public function getAvailabilityDescription(PhabricatorUser $viewer) {
-    $until = $this->getAwayUntil();
-    if ($until) {
-      return pht('Away until %s', phabricator_datetime($until, $viewer));
-    } else {
-      return pht('Available');
-    }
-  }
-
-
-  /**
    * Get cached availability, if present.
    *
    * @return wild|null Cache data, or null if no cache is available.
