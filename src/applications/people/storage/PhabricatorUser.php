@@ -960,6 +960,32 @@ final class PhabricatorUser
   }
 
 
+  public function getDisplayAvailability() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    $busy = PhabricatorCalendarEventInvitee::AVAILABILITY_BUSY;
+
+    return idx($availability, 'availability', $busy);
+  }
+
+
+  public function getAvailabilityEventPHID() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    return idx($availability, 'eventPHID');
+  }
+
+
   /**
    * Get cached availability, if present.
    *

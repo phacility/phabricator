@@ -448,6 +448,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->assertAttached($this->invitees);
   }
 
+  public function getInviteeForPHID($phid) {
+    $invitees = $this->getInvitees();
+    $invitees = mpull($invitees, null, 'getInviteePHID');
+    return idx($invitees, $phid);
+  }
+
   public static function getFrequencyMap() {
     return array(
       PhutilCalendarRecurrenceRule::FREQUENCY_DAILY => array(

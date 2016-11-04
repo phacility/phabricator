@@ -395,9 +395,16 @@ final class PhabricatorPeopleQuery
     // Group all the events by invited user. Only examine events that users
     // are actually attending.
     $map = array();
+    $invitee_map = array();
     foreach ($events as $event) {
       foreach ($event->getInvitees() as $invitee) {
         if (!$invitee->isAttending()) {
+          continue;
+        }
+
+        // If the user is set to "Available" for this event, don't consider it
+        // when computin their away status.
+        if (!$invitee->getDisplayAvailability($event)) {
           continue;
         }
 
@@ -407,6 +414,9 @@ final class PhabricatorPeopleQuery
         }
 
         $map[$invitee_phid][] = $event;
+
+        $event_phid = $event->getPHID();
+        $invitee_map[$invitee_phid][$event_phid] = $invitee;
       }
     }
 
@@ -426,6 +436,7 @@ final class PhabricatorPeopleQuery
       }
 
       $cursor = $min_range;
+      $next_event = null;
       if ($events) {
         // Find the next time when the user has no meetings. If we move forward
         // because of an event, we check again for events after that one ends.
@@ -435,6 +446,9 @@ final class PhabricatorPeopleQuery
             $to = $event->getEndDateTimeEpoch();
             if (($from <= $cursor) && ($to > $cursor)) {
               $cursor = $to;
+              if (!$next_event) {
+                $next_event = $event;
+              }
               continue 2;
             }
           }
@@ -443,13 +457,29 @@ final class PhabricatorPeopleQuery
       }
 
       if ($cursor > $min_range) {
+        $invitee = $invitee_map[$phid][$next_event->getPHID()];
+        $availability_type = $invitee->getDisplayAvailability($next_event);
         $availability = array(
           'until' => $cursor,
+          'eventPHID' => $event->getPHID(),
+          'availability' => $availability_type,
         );
-        $availability_ttl = $cursor;
+
+        // We only cache this availability until the end of the current event,
+        // since the event PHID (and possibly the availability type) are only
+        // valid for that long.
+
+        // NOTE: This doesn't handle overlapping events with the greatest
+        // possible care. In theory, if you're attenting multiple events
+        // simultaneously we should accommodate that. However, it's complex
+        // to compute, rare, and probably not confusing most of the time.
+
+        $availability_ttl = $next_event->getStartDateTimeEpochForCache();
       } else {
         $availability = array(
           'until' => null,
+          'eventPHID' => null,
+          'availability' => null,
         );
         $availability_ttl = $max_range;
       }

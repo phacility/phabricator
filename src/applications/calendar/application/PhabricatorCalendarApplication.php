@@ -61,6 +61,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarEventJoinController',
           'export/(?P<id>[1-9]\d*)/(?P<filename>[^/]*)'
             => 'PhabricatorCalendarEventExportController',
+          'availability/(?P<id>[1-9]\d*)/(?P<availability>[^/]+)/'
+            => 'PhabricatorCalendarEventAvailabilityController',
         ),
         'export/' => array(
           $this->getQueryRoutePattern()
