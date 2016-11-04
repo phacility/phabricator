@@ -2130,6 +2130,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarImportICSFileTransaction' => 'applications/calendar/xaction/PhabricatorCalendarImportICSFileTransaction.php',
     'PhabricatorCalendarImportICSLogType' => 'applications/calendar/importlog/PhabricatorCalendarImportICSLogType.php',
     'PhabricatorCalendarImportICSURITransaction' => 'applications/calendar/xaction/PhabricatorCalendarImportICSURITransaction.php',
+    'PhabricatorCalendarImportICSWarningLogType' => 'applications/calendar/importlog/PhabricatorCalendarImportICSWarningLogType.php',
     'PhabricatorCalendarImportIgnoredNodeLogType' => 'applications/calendar/importlog/PhabricatorCalendarImportIgnoredNodeLogType.php',
     'PhabricatorCalendarImportListController' => 'applications/calendar/controller/PhabricatorCalendarImportListController.php',
     'PhabricatorCalendarImportLog' => 'applications/calendar/storage/PhabricatorCalendarImportLog.php',
@@ -6991,6 +6992,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarImportICSFileTransaction' => 'PhabricatorCalendarImportTransactionType',
     'PhabricatorCalendarImportICSLogType' => 'PhabricatorCalendarImportLogType',
     'PhabricatorCalendarImportICSURITransaction' => 'PhabricatorCalendarImportTransactionType',
+    'PhabricatorCalendarImportICSWarningLogType' => 'PhabricatorCalendarImportLogType',
     'PhabricatorCalendarImportIgnoredNodeLogType' => 'PhabricatorCalendarImportLogType',
     'PhabricatorCalendarImportListController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarImportLog' => array(
