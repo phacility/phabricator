@@ -1391,9 +1391,9 @@ abstract class PhabricatorEditEngine
           id(new PhabricatorActionView())
             ->setName($spec['name'])
             ->setIcon($spec['icon'])
-            ->setHref($spec['uri']))
+            ->setHref($spec['uri'])
             ->setDisabled($head['disabled'])
-            ->setWorkflow($head['workflow']);
+            ->setWorkflow($head['workflow']));
       }
 
     } else {
