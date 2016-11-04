@@ -1169,7 +1169,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getImportSource()) {
+        if ($this->isImportedEvent()) {
           return PhabricatorPolicies::POLICY_NOONE;
         } else {
           return $this->getEditPolicy();
@@ -1178,7 +1178,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->getImportSource()) {
+    if ($this->isImportedEvent()) {
       return false;
     }
 
@@ -1204,7 +1204,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($this->getImportSource()) {
+    if ($this->isImportedEvent()) {
       return pht(
         'Events imported from external sources can not be edited in '.
         'Phabricator.');
