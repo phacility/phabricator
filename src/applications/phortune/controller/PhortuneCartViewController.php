@@ -3,9 +3,12 @@
 final class PhortuneCartViewController
   extends PhortuneCartController {
 
+  private $action = null;
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
+    $this->action = $request->getURIData('action');
 
     $authority = $this->loadMerchantAuthority();
     require_celerity_resource('phortune-css');
@@ -129,7 +132,7 @@ final class PhortuneCartViewController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader(pht('Order Detail'))
+      ->setHeader($cart->getName())
       ->setHeaderIcon('fa-shopping-cart');
 
     if ($cart->getStatus() == PhortuneCart::STATUS_PURCHASED) {
@@ -188,36 +191,75 @@ final class PhortuneCartViewController
     $crumbs->addTextCrumb(pht('Cart %d', $cart->getID()));
     $crumbs->setBorder(true);
 
-    $timeline = $this->buildTransactionTimeline(
-      $cart,
-      new PhortuneCartTransactionQuery());
-    $timeline
-     ->setShouldTerminate(true);
+    if (!$this->action) {
+      $class = 'phortune-cart-page';
+      $timeline = $this->buildTransactionTimeline(
+        $cart,
+        new PhortuneCartTransactionQuery());
+      $timeline
+       ->setShouldTerminate(true);
 
-    $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $error_view,
-        $details,
-        $cart_box,
-        $description,
-        $charges,
-        $timeline,
-      ));
+      $view = id(new PHUITwoColumnView())
+        ->setHeader($header)
+        ->setCurtain($curtain)
+        ->setMainColumn(array(
+          $error_view,
+          $details,
+          $cart_box,
+          $description,
+          $charges,
+          $timeline,
+        ));
 
-    return $this->newPage()
+    } else {
+      $class = 'phortune-invoice-view';
+      $crumbs = null;
+      $merchant_phid = $cart->getMerchantPHID();
+      $buyer_phid = $cart->getAuthorPHID();
+      $merchant = id(new PhortuneMerchantQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($merchant_phid))
+        ->needProfileImage(true)
+        ->executeOne();
+      $buyer = id(new PhabricatorPeopleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($buyer_phid))
+        ->needProfileImage(true)
+        ->executeOne();
+      // TODO: Add account "Contact" info
+
+      $merchant_contact = new PHUIRemarkupView(
+        $viewer, $merchant->getContactInfo());
+      $description = null;
+
+      $view = id(new PhortuneInvoiceView())
+        ->setMerchantName($merchant->getName())
+        ->setMerchantLogo($merchant->getProfileImageURI())
+        ->setMerchantContact($merchant_contact)
+        ->setMerchantFooter($merchant->getInvoiceFooter())
+        ->setAccountName($buyer->getRealName())
+        ->setStatus($error_view)
+        ->setContent(array(
+          $description,
+          $details,
+          $cart_box,
+          $charges,
+        ));
+    }
+
+    $page = $this->newPage()
       ->setTitle(pht('Cart %d', $cart->getID()))
-      ->setCrumbs($crumbs)
-      ->addClass('phortune-cart-page')
+      ->addClass($class)
       ->appendChild($view);
 
+    if ($crumbs) {
+      $page->setCrumbs($crumbs);
+    }
+    return $page;
   }
 
   private function buildDetailsView(PhortuneCart $cart) {
-
     $viewer = $this->getViewer();
-
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($cart);
@@ -229,9 +271,10 @@ final class PhortuneCartViewController
         $cart->getMerchantPHID(),
       ));
 
-    $view->addProperty(
-      pht('Order Name'),
-      $cart->getName());
+    if ($this->action == 'print') {
+      $view->addProperty(pht('Order Name'), $cart->getName());
+    }
+
     $view->addProperty(
       pht('Account'),
       $handles[$cart->getAccountPHID()]->renderLink());
@@ -276,7 +319,7 @@ final class PhortuneCartViewController
     $refund_uri = $this->getApplicationURI("{$prefix}cart/{$id}/refund/");
     $update_uri = $this->getApplicationURI("{$prefix}cart/{$id}/update/");
     $accept_uri = $this->getApplicationURI("{$prefix}cart/{$id}/accept/");
-    $print_uri = $this->getApplicationURI("{$prefix}cart/{$id}/?__print__=1");
+    $print_uri = $this->getApplicationURI("{$prefix}cart/{$id}/print/");
 
     $curtain->addAction(
       id(new PhabricatorActionView())

@@ -5,8 +5,21 @@ abstract class PhabricatorCalendarEventDateTransaction
 
   abstract protected function getInvalidDateMessage();
 
+  public function isInheritedEdit() {
+    return false;
+  }
+
   public function generateNewValue($object, $value) {
-    return $value->getEpoch();
+    $editor = $this->getEditor();
+
+    if ($value->isDisabled()) {
+      return null;
+    }
+
+    return $value->newPhutilDateTime()
+      ->setIsAllDay($editor->getNewIsAllDay())
+      ->newAbsoluteDateTime()
+      ->toDictionary();
   }
 
   public function validateTransactions($object, array $xactions) {

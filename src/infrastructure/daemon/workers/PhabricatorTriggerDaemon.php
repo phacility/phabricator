@@ -20,6 +20,8 @@ final class PhabricatorTriggerDaemon
   private $nuanceSources;
   private $nuanceCursors;
 
+  private $calendarEngine;
+
   protected function run() {
 
     // The trigger daemon is a low-level infrastructure daemon which schedules
@@ -105,6 +107,7 @@ final class PhabricatorTriggerDaemon
       $sleep_duration = $this->getSleepDuration();
       $sleep_duration = $this->runNuanceImportCursors($sleep_duration);
       $sleep_duration = $this->runGarbageCollection($sleep_duration);
+      $sleep_duration = $this->runCalendarNotifier($sleep_duration);
       $this->sleep($sleep_duration);
     } while (!$this->shouldExit());
   }
@@ -454,6 +457,23 @@ final class PhabricatorTriggerDaemon
     }
 
     return true;
+  }
+
+
+/* -(  Calendar Notifier  )-------------------------------------------------- */
+
+
+  private function runCalendarNotifier($duration) {
+    $run_until = (PhabricatorTime::getNow() + $duration);
+
+    if (!$this->calendarEngine) {
+      $this->calendarEngine = new PhabricatorCalendarNotificationEngine();
+    }
+
+    $this->calendarEngine->publishNotifications();
+
+    $remaining = max(0, $run_until - PhabricatorTime::getNow());
+    return $remaining;
   }
 
 }

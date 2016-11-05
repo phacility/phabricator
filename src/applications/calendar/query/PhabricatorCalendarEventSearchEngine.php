@@ -303,7 +303,7 @@ final class PhabricatorCalendarEventSearchEngine
 
       $item->addAttribute($event->renderEventDate($viewer, false));
 
-      if ($event->isCancelledEvent()) {
+      if ($event->getIsCancelled()) {
         $item->setDisabled(true);
       }
 
@@ -368,7 +368,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event_view = id(new AphrontCalendarEventView())
         ->setHostPHID($event->getHostPHID())
         ->setEpochRange($epoch_min, $epoch_max)
-        ->setIsCancelled($event->isCancelledEvent())
+        ->setIsCancelled($event->getIsCancelled())
         ->setName($event->getName())
         ->setURI($event->getURI())
         ->setIsAllDay($event->getIsAllDay())
@@ -441,7 +441,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setIconColor($status_color)
         ->setName($event->getName())
         ->setURI($event->getURI())
-        ->setIsCancelled($event->isCancelledEvent());
+        ->setIsCancelled($event->getIsCancelled());
 
       $day_view->addEvent($event_view);
     }

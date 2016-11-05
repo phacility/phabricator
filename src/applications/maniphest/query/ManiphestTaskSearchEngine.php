@@ -405,11 +405,11 @@ final class ManiphestTaskSearchEngine
   }
 
   protected function getNewUserBody() {
-    $create_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Create a Task'))
-      ->setHref('/maniphest/task/edit/')
-      ->setColor(PHUIButtonView::GREEN);
+    $viewer = $this->requireViewer();
+
+    $create_button = id(new ManiphestEditEngine())
+      ->setViewer($viewer)
+      ->newNUXBUtton(pht('Create a Task'));
 
     $icon = $this->getApplication()->getIcon();
     $app_name =  $this->getApplication()->getName();

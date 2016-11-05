@@ -1,0 +1,8 @@
+CREATE TABLE {$NAMESPACE}_calendar.calendar_notification (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  eventPHID VARBINARY(64) NOT NULL,
+  utcInitialEpoch INT UNSIGNED NOT NULL,
+  targetPHID VARBINARY(64) NOT NULL,
+  didNotifyEpoch INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_notify` (eventPHID, utcInitialEpoch, targetPHID)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

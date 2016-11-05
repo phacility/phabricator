@@ -13,6 +13,17 @@ final class PhabricatorCalendarEventRecurringTransaction
     return (int)$value;
   }
 
+  public function isInheritedEdit() {
+    return false;
+  }
+
+  public function shouldHide() {
+    // This event isn't interesting on its own, and is accompanied by an
+    // "alice set this event to repeat weekly." event in normal circumstances
+    // anyway.
+    return true;
+  }
+
   public function applyInternalEffects($object, $value) {
     $object->setIsRecurring($value);
   }
@@ -30,11 +41,14 @@ final class PhabricatorCalendarEventRecurringTransaction
         continue;
       }
 
+      if ($xaction->getNewValue()) {
+        continue;
+      }
+
       $errors[] = $this->newInvalidError(
         pht(
-          'An event can only be made recurring when it is created. '.
-          'You can not convert an existing event into a recurring '.
-          'event or vice versa.'),
+          'An event can not be stopped from recurring once it has been '.
+          'made recurring. You can cancel the event.'),
         $xaction);
     }
 

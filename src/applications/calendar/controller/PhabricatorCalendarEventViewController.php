@@ -101,7 +101,7 @@ final class PhabricatorCalendarEventViewController
     $viewer = $this->getViewer();
     $id = $event->getID();
 
-    if ($event->isCancelledEvent()) {
+    if ($event->getIsCancelled()) {
       $icon = 'fa-ban';
       $color = 'red';
       $status = pht('Cancelled');
@@ -132,6 +132,43 @@ final class PhabricatorCalendarEventViewController
       $header->addActionLink($action);
     }
 
+    $options = PhabricatorCalendarEventInvitee::getAvailabilityMap();
+
+    $is_attending = $event->getIsUserAttending($viewer->getPHID());
+    if ($is_attending) {
+      $invitee = $event->getInviteeForPHID($viewer->getPHID());
+
+      $selected = $invitee->getDisplayAvailability($event);
+      if (!$selected) {
+        $selected = PhabricatorCalendarEventInvitee::AVAILABILITY_AVAILABLE;
+      }
+
+      $selected_option = idx($options, $selected);
+
+      $availability_select = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-circle '.$selected_option['color'])
+        ->setText(pht('Availability: %s', $selected_option['name']));
+
+      $dropdown = id(new PhabricatorActionListView())
+        ->setUser($viewer);
+
+      foreach ($options as $key => $option) {
+        $uri = "event/availability/{$id}/{$key}/";
+        $uri = $this->getApplicationURI($uri);
+
+        $dropdown->addAction(
+          id(new PhabricatorActionView())
+            ->setName($option['name'])
+            ->setIcon('fa-circle '.$option['color'])
+            ->setHref($uri)
+            ->setWorkflow(true));
+      }
+
+      $availability_select->setDropdownMenu($dropdown);
+      $header->addActionLink($availability_select);
+    }
+
     return $header;
   }
 
@@ -146,11 +183,9 @@ final class PhabricatorCalendarEventViewController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $edit_uri = "event/edit/{$id}/";
-    if ($event->isChildEvent()) {
-      $edit_label = pht('Edit This Instance');
-    } else {
-      $edit_label = pht('Edit Event');
-    }
+    $edit_uri = $this->getApplicationURI($edit_uri);
+    $is_recurring = $event->getIsRecurring();
+    $edit_label = pht('Edit Event');
 
     $curtain = $this->newCurtainView($event);
 
@@ -159,10 +194,27 @@ final class PhabricatorCalendarEventViewController
         id(new PhabricatorActionView())
           ->setName($edit_label)
           ->setIcon('fa-pencil')
-          ->setHref($this->getApplicationURI($edit_uri))
+          ->setHref($edit_uri)
           ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit));
+          ->setWorkflow(!$can_edit || $is_recurring));
     }
+
+    $recurring_uri = "{$edit_uri}page/recurring/";
+    $can_recurring = $can_edit && !$event->isChildEvent();
+
+    if ($event->getIsRecurring()) {
+      $recurring_label = pht('Edit Recurrence');
+    } else {
+      $recurring_label = pht('Make Recurring');
+    }
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName($recurring_label)
+        ->setIcon('fa-repeat')
+        ->setHref($recurring_uri)
+        ->setDisabled(!$can_recurring)
+        ->setWorkflow(true));
 
     $can_attend = !$event->isImportedEvent();
 
@@ -187,22 +239,10 @@ final class PhabricatorCalendarEventViewController
     $cancel_uri = $this->getApplicationURI("event/cancel/{$id}/");
     $cancel_disabled = !$can_edit;
 
-    if ($event->isChildEvent()) {
-      $cancel_label = pht('Cancel This Instance');
-      $reinstate_label = pht('Reinstate This Instance');
+    $cancel_label = pht('Cancel Event');
+    $reinstate_label = pht('Reinstate Event');
 
-      if ($event->getParentEvent()->getIsCancelled()) {
-        $cancel_disabled = true;
-      }
-    } else if ($event->isParentEvent()) {
-      $cancel_label = pht('Cancel All');
-      $reinstate_label = pht('Reinstate All');
-    } else {
-      $cancel_label = pht('Cancel Event');
-      $reinstate_label = pht('Reinstate Event');
-    }
-
-    if ($event->isCancelledEvent()) {
+    if ($event->getIsCancelled()) {
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($reinstate_label)

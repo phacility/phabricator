@@ -3,8 +3,21 @@
 final class AphrontBoolHTTPParameterType
   extends AphrontHTTPParameterType {
 
+  protected function getParameterExists(AphrontRequest $request, $key) {
+    if ($request->getExists($key)) {
+      return true;
+    }
+
+    $checkbox_key = $this->getCheckboxKey($key);
+    if ($request->getExists($checkbox_key)) {
+      return true;
+    }
+
+    return false;
+  }
+
   protected function getParameterValue(AphrontRequest $request, $key) {
-    return $request->getBool($key);
+    return (bool)$request->getBool($key);
   }
 
   protected function getParameterTypeName() {
@@ -24,6 +37,10 @@ final class AphrontBoolHTTPParameterType
       'v=1',
       'v=0',
     );
+  }
+
+  public function getCheckboxKey($key) {
+    return "{$key}.exists";
   }
 
 }

@@ -36,7 +36,7 @@ final class PhabricatorHelpMainMenuBarExtension
     $help_name = pht('%s Help', $application->getName());
 
     $help_item = id(new PHUIListItemView())
-      ->setIcon('fa-life-ring')
+      ->setIcon('fa-book')
       ->addClass('core-menu-item')
       ->setID($help_id)
       ->setName($help_name)

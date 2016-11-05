@@ -225,6 +225,7 @@ abstract class PhabricatorCalendarImportEngine
       $xactions[$full_uid] = $this->newUpdateTransactions($event, $node);
       $update_map[$full_uid] = $event;
 
+      $attendee_map[$full_uid] = array();
       $attendees = $node->getAttendees();
       $private_index = 1;
       foreach ($attendees as $attendee) {
@@ -330,7 +331,7 @@ abstract class PhabricatorCalendarImportEngine
     foreach ($update_map as $full_uid => $event) {
       $parent_uid = $this->getParentNodeUID($node_map[$full_uid]);
       if ($parent_uid) {
-        $parent_phid = $update_map[$full_uid]->getPHID();
+        $parent_phid = $update_map[$parent_uid]->getPHID();
       } else {
         $parent_phid = null;
       }
@@ -409,10 +410,28 @@ abstract class PhabricatorCalendarImportEngine
         array());
     }
 
-    // TODO: When the source is a subscription-based ICS file or some other
-    // similar source, we should load all events from the source here and
-    // destroy the ones we didn't update. These are events that have been
-    // deleted.
+    // Delete any events which are no longer present in the source.
+    $updated_events = mpull($update_map, null, 'getPHID');
+    $source_events = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withImportSourcePHIDs(array($import->getPHID()))
+      ->execute();
+
+    $engine = new PhabricatorDestructionEngine();
+    foreach ($source_events as $source_event) {
+      if (isset($updated_events[$source_event->getPHID()])) {
+        // We imported and updated this event, so keep it around.
+        continue;
+      }
+
+      $import->newLogMessage(
+        PhabricatorCalendarImportDeleteLogType::LOGTYPE,
+        array(
+          'name' => $source_event->getName(),
+        ));
+
+      $engine->destroyObject($source_event);
+    }
   }
 
   private function getFullNodeUID(PhutilCalendarEventNode $node) {
@@ -452,6 +471,12 @@ abstract class PhabricatorCalendarImportEngine
 
     $xactions = array();
     $uid = $node->getUID();
+
+    if (!$event->getID()) {
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_CREATE)
+        ->setNewValue(true);
+    }
 
     $name = $node->getName();
     if (!strlen($name)) {
@@ -502,6 +527,8 @@ abstract class PhabricatorCalendarImportEngine
       ->setStartDateTime($start_datetime)
       ->setEndDateTime($end_datetime);
 
+    $event->setIsAllDay((int)$start_datetime->getIsAllDay());
+
     // TODO: This should be transactional, but the transaction only accepts
     // simple frequency rules right now.
     $rrule = $node->getRecurrenceRule();
@@ -525,11 +552,18 @@ abstract class PhabricatorCalendarImportEngine
     PhabricatorUser $viewer,
     PhabricatorCalendarImport $import) {
 
-    $any_event = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($viewer)
-      ->withImportSourcePHIDs(array($import->getPHID()))
-      ->setLimit(1)
-      ->execute();
+    $table = new PhabricatorCalendarEvent();
+    $conn = $table->establishConnection('r');
+
+    // Using a CalendarEventQuery here was failing oddly in a way that was
+    // difficult to reproduce locally (see T11808). Just check the table
+    // directly; this is significantly more efficient anyway.
+
+    $any_event = queryfx_all(
+      $conn,
+      'SELECT phid FROM %T WHERE importSourcePHID = %s LIMIT 1',
+      $table->getTableName(),
+      $import->getPHID());
 
     return (bool)$any_event;
   }

@@ -61,6 +61,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         'cart/(?P<id>\d+)/' => array(
           '' => 'PhortuneCartViewController',
           'checkout/' => 'PhortuneCartCheckoutController',
+          '(?P<action>print)/' => 'PhortuneCartViewController',
           '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
           'update/' => 'PhortuneCartUpdateController',
         ),
@@ -81,7 +82,9 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         ),
         'merchant/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhortuneMerchantListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantEditController',
+          'picture/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantPictureController',
+          $this->getEditRoutePattern('edit/')
+            => 'PhortuneMerchantEditController',
           'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
           '(?P<merchantID>\d+)/' => array(

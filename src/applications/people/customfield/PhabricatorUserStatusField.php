@@ -10,7 +10,7 @@ final class PhabricatorUserStatusField
   }
 
   public function getFieldName() {
-    return pht('Status');
+    return pht('Availability');
   }
 
   public function getFieldDescription() {
@@ -29,7 +29,10 @@ final class PhabricatorUserStatusField
   public function renderPropertyViewValue(array $handles) {
     $user = $this->getObject();
     $viewer = $this->requireViewer();
-    return $user->getAvailabilityDescription($viewer);
+
+    return id(new PHUIUserAvailabilityView())
+      ->setViewer($viewer)
+      ->setAvailableUser($user);
   }
 
 }

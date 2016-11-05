@@ -27,6 +27,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   protected $isRecurring = 0;
 
+  protected $seriesParentPHID;
   protected $instanceOfEventPHID;
   protected $sequenceIndex;
 
@@ -50,14 +51,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   private $importSource = self::ATTACHABLE;
 
   private $viewerTimezone;
-
-  // TODO: DEPRECATED. Remove once we're sure the migrations worked.
-  protected $allDayDateFrom;
-  protected $allDayDateTo;
-  protected $dateFrom;
-  protected $dateTo;
-  protected $recurrenceEndDate;
-  protected $recurrenceFrequency = array();
 
   private $isGhostEvent = false;
   private $stubInvitees;
@@ -94,10 +87,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
-      ->setDateFrom(0)
-      ->setDateTo(0)
-      ->setAllDayDateFrom(0)
-      ->setAllDayDateTo(0)
       ->setStartDateTime($datetime_start)
       ->setEndDateTime($datetime_end)
       ->attachImportSource(null)
@@ -140,17 +129,20 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
           'a recurring parent event!'));
     }
 
+    $series_phid = $this->getSeriesParentPHID();
+    if (!$series_phid) {
+      $series_phid = $this->getPHID();
+    }
+
     $child = id(new self())
       ->setIsCancelled(0)
       ->setIsStub(0)
       ->setInstanceOfEventPHID($this->getPHID())
+      ->setSeriesParentPHID($series_phid)
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
       ->attachParentEvent($this)
-      ->setAllDayDateFrom(0)
-      ->setAllDayDateTo(0)
-      ->setDateFrom(0)
-      ->setDateTo(0);
+      ->attachImportSource(null);
 
     return $child->copyFromParent($actor, $start);
   }
@@ -165,6 +157,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       'editPolicy' => true,
       'name' => true,
       'description' => true,
+      'isCancelled' => true,
     );
 
     // Read these fields from the parent event instead of this event. For
@@ -204,7 +197,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setViewPolicy($parent->getViewPolicy())
       ->setEditPolicy($parent->getEditPolicy())
       ->setName($parent->getName())
-      ->setDescription($parent->getDescription());
+      ->setDescription($parent->getDescription())
+      ->setIsCancelled($parent->getIsCancelled());
 
     if ($start) {
       $start_datetime = $start;
@@ -399,6 +393,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'icon' => 'text32',
         'mailKey' => 'bytes20',
         'isRecurring' => 'bool',
+        'seriesParentPHID' => 'phid?',
         'instanceOfEventPHID' => 'phid?',
         'sequenceIndex' => 'uint32?',
         'isStub' => 'bool',
@@ -410,18 +405,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'importSourcePHID' => 'phid?',
         'importUIDIndex' => 'bytes12?',
         'importUID' => 'text?',
-
-        // TODO: DEPRECATED.
-        'allDayDateFrom' => 'epoch',
-        'allDayDateTo' => 'epoch',
-        'dateFrom' => 'epoch',
-        'dateTo' => 'epoch',
-        'recurrenceEndDate' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_date' => array(
-          'columns' => array('dateFrom', 'dateTo'),
-        ),
         'key_instance' => array(
           'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
           'unique' => true,
@@ -433,9 +418,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
           'columns' => array('instanceOfEventPHID', 'utcInstanceEpoch'),
           'unique' => true,
         ),
+        'key_series' => array(
+          'columns' => array('seriesParentPHID', 'utcInitialEpoch'),
+        ),
       ),
       self::CONFIG_SERIALIZATION => array(
-        'recurrenceFrequency' => self::SERIALIZATION_JSON,
         'parameters' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
@@ -459,6 +446,29 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
 
     return $this->assertAttached($this->invitees);
+  }
+
+  public function getInviteeForPHID($phid) {
+    $invitees = $this->getInvitees();
+    $invitees = mpull($invitees, null, 'getInviteePHID');
+    return idx($invitees, $phid);
+  }
+
+  public static function getFrequencyMap() {
+    return array(
+      PhutilCalendarRecurrenceRule::FREQUENCY_DAILY => array(
+        'label' => pht('Daily'),
+      ),
+      PhutilCalendarRecurrenceRule::FREQUENCY_WEEKLY => array(
+        'label' => pht('Weekly'),
+      ),
+      PhutilCalendarRecurrenceRule::FREQUENCY_MONTHLY => array(
+        'label' => pht('Monthly'),
+      ),
+      PhutilCalendarRecurrenceRule::FREQUENCY_YEARLY => array(
+        'label' => pht('Yearly'),
+      ),
+    );
   }
 
   private function newStubInvitees() {
@@ -552,7 +562,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this->assertAttached($this->parentEvent);
   }
 
-  public function attachParentEvent($event) {
+  public function attachParentEvent(PhabricatorCalendarEvent $event = null) {
     $this->parentEvent = $event;
     return $this;
   }
@@ -563,20 +573,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function isChildEvent() {
     return ($this->instanceOfEventPHID !== null);
-  }
-
-  public function isCancelledEvent() {
-    if ($this->getIsCancelled()) {
-      return true;
-    }
-
-    if ($this->isChildEvent()) {
-      if ($this->getParentEvent()->getIsCancelled()) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   public function renderEventDate(
@@ -631,7 +627,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
 
   public function getDisplayIcon(PhabricatorUser $viewer) {
-    if ($this->isCancelledEvent()) {
+    if ($this->getIsCancelled()) {
       return 'fa-times';
     }
 
@@ -655,7 +651,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getDisplayIconColor(PhabricatorUser $viewer) {
-    if ($this->isCancelledEvent()) {
+    if ($this->getIsCancelled()) {
       return 'red';
     }
 
@@ -679,7 +675,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function getDisplayIconLabel(PhabricatorUser $viewer) {
-    if ($this->isCancelledEvent()) {
+    if ($this->getIsCancelled()) {
       return pht('Cancelled');
     }
 
@@ -758,8 +754,18 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $host_handle = $handles[$host_phid];
     $host_name = $host_handle->getFullName();
-    $host_uri = $host_handle->getURI();
-    $host_uri = PhabricatorEnv::getURI($host_uri);
+
+    // NOTE: Gmail shows "Who: Unknown Organizer*" if the organizer URI does
+    // not look like an email address. Use a synthetic address so it shows
+    // the host name instead.
+    $install_uri = PhabricatorEnv::getProductionURI('/');
+    $install_uri = new PhutilURI($install_uri);
+
+    // This should possibly use "metamta.reply-handler-domain" instead, but
+    // we do not currently accept mail for users anyway, and that option may
+    // not be configured.
+    $mail_domain = $install_uri->getDomain();
+    $host_uri = "mailto:{$host_phid}@{$mail_domain}";
 
     $organizer = id(new PhutilCalendarUserNode())
       ->setName($host_name)
@@ -818,26 +824,35 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newStartDateTime() {
     $datetime = $this->getParameter('startDateTime');
-    if ($datetime) {
-      return $this->newDateTimeFromDictionary($datetime);
-    }
-
-    $epoch = $this->getDateFrom();
-    return $this->newDateTimeFromEpoch($epoch);
+    return $this->newDateTimeFromDictionary($datetime);
   }
 
   public function getStartDateTimeEpoch() {
     return $this->newStartDateTime()->getEpoch();
   }
 
-  public function newEndDateTime() {
+  public function newEndDateTimeForEdit() {
     $datetime = $this->getParameter('endDateTime');
-    if ($datetime) {
-      return $this->newDateTimeFromDictionary($datetime);
+    return $this->newDateTimeFromDictionary($datetime);
+  }
+
+  public function newEndDateTime() {
+    $datetime = $this->newEndDateTimeForEdit();
+
+    // If this is an all day event, we move the end date time forward to the
+    // first second of the following day. This is consistent with what users
+    // expect: an all day event from "Nov 1" to "Nov 1" lasts the entire day.
+    if ($this->getIsAllDay()) {
+      $datetime = $datetime
+        ->newAbsoluteDateTime()
+        ->setHour(0)
+        ->setMinute(0)
+        ->setSecond(0)
+        ->newRelativeDateTime('P1D')
+        ->newAbsoluteDateTime();
     }
 
-    $epoch = $this->getDateTo();
-    return $this->newDateTimeFromEpoch($epoch);
+    return $datetime;
   }
 
   public function getEndDateTimeEpoch() {
@@ -850,11 +865,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return $this->newDateTimeFromDictionary($datetime);
     }
 
-    $epoch = $this->getRecurrenceEndDate();
-    if (!$epoch) {
-      return null;
-    }
-    return $this->newDateTimeFromEpoch($epoch);
+    return null;
   }
 
   public function getUntilDateTimeEpoch() {
@@ -930,10 +941,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $datetime->newAbsoluteDateTime()->toDictionary());
   }
 
-  public function setUntilDateTime(PhutilCalendarDateTime $datetime) {
-    return $this->setParameter(
-      'untilDateTime',
-      $datetime->newAbsoluteDateTime()->toDictionary());
+  public function setUntilDateTime(PhutilCalendarDateTime $datetime = null) {
+    if ($datetime) {
+      $value = $datetime->newAbsoluteDateTime()->toDictionary();
+    } else {
+      $value = null;
+    }
+
+    return $this->setParameter('untilDateTime', $value);
   }
 
   public function setRecurrenceRule(PhutilCalendarRecurrenceRule $rrule) {
@@ -1015,6 +1030,82 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
+  public function loadForkTarget(PhabricatorUser $viewer) {
+    if (!$this->getIsRecurring()) {
+      // Can't fork an event which isn't recurring.
+      return null;
+    }
+
+    if ($this->isChildEvent()) {
+      // If this is a child event, this is the fork target.
+      return $this;
+    }
+
+    if (!$this->isValidSequenceIndex($viewer, 1)) {
+      // This appears to be a "recurring" event with no valid instances: for
+      // example, its "until" date is before the second instance would occur.
+      // This can happen if we already forked the event or if users entered
+      // silly stuff. Just edit the event directly without forking anything.
+      return null;
+    }
+
+
+    $next_event = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withInstanceSequencePairs(
+        array(
+          array($this->getPHID(), 1),
+        ))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+
+    if (!$next_event) {
+      $next_event = $this->newStub($viewer, 1);
+    }
+
+    return $next_event;
+  }
+
+  public function loadFutureEvents(PhabricatorUser $viewer) {
+    // NOTE: If you can't edit some of the future events, we just
+    // don't try to update them. This seems like it's probably what
+    // users are likely to expect.
+
+    // NOTE: This only affects events that are currently in the same
+    // series, not all events that were ever in the original series.
+    // We could use series PHIDs instead of parent PHIDs to affect more
+    // events if this turns out to be counterintuitive. Other
+    // applications differ in their behavior.
+
+    return id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withParentEventPHIDs(array($this->getPHID()))
+      ->withUTCInitialEpochBetween($this->getUTCInitialEpoch(), null)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->execute();
+  }
+
+  public function getNotificationPHIDs() {
+    $phids = array();
+    if ($this->getPHID()) {
+      $phids[] = $this->getPHID();
+    }
+
+    if ($this->getSeriesParentPHID()) {
+      $phids[] = $this->getSeriesParentPHID();
+    }
+
+    return $phids;
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 
@@ -1078,7 +1169,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getImportSource()) {
+        if ($this->isImportedEvent()) {
           return PhabricatorPolicies::POLICY_NOONE;
         } else {
           return $this->getEditPolicy();
@@ -1087,7 +1178,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->getImportSource()) {
+    if ($this->isImportedEvent()) {
       return false;
     }
 
@@ -1113,7 +1204,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($this->getImportSource()) {
+    if ($this->isImportedEvent()) {
       return pht(
         'Events imported from external sources can not be edited in '.
         'Phabricator.');

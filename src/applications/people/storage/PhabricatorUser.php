@@ -960,20 +960,29 @@ final class PhabricatorUser
   }
 
 
-  /**
-   * Describe the user's availability.
-   *
-   * @param PhabricatorUser Viewing user.
-   * @return string Human-readable description of away status.
-   * @task availability
-   */
-  public function getAvailabilityDescription(PhabricatorUser $viewer) {
-    $until = $this->getAwayUntil();
-    if ($until) {
-      return pht('Away until %s', phabricator_datetime($until, $viewer));
-    } else {
-      return pht('Available');
+  public function getDisplayAvailability() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
     }
+
+    $busy = PhabricatorCalendarEventInvitee::AVAILABILITY_BUSY;
+
+    return idx($availability, 'availability', $busy);
+  }
+
+
+  public function getAvailabilityEventPHID() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    return idx($availability, 'eventPHID');
   }
 
 

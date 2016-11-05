@@ -1,0 +1,75 @@
+/**
+ * @provides phortune-invoice-css
+ */
+
+.phortune-invoice-view {
+  max-width: 800px;
+  margin: 16px auto;
+  background: #fff;
+}
+
+.phortune-invoice-view .phabricator-main-menu {
+  display: none;
+}
+
+.phortune-invoice-view .phabricator-standard-page-footer {
+  display: none;
+}
+
+.device-desktop .phortune-invoice-view .phui-property-list-key {
+  width: 16%;
+}
+
+.device-desktop .phortune-invoice-view .phui-property-list-value {
+  width: 80%;
+}
+
+.phortune-invoice-logo {
+  margin-bottom: 24px;
+}
+
+.phortune-invoice-logo img {
+  margin: 0 auto;
+}
+
+.phortune-invoice-contact {
+  margin-bottom: 32px;
+}
+
+.phortune-invoice-contact td {
+  padding: 4px 16px;
+}
+
+.phortune-invoice-to {
+  border-right: 1px solid {$lightblueborder};
+}
+
+.phortune-mini-header {
+  color: {$lightbluetext};
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  letter-spacing: 0.3em;
+}
+
+.phortune-invoice-status {
+  margin-bottom: 24px;
+}
+
+.phortune-invoice-status .phui-info-view {
+  margin: 0;
+}
+
+.phortune-invoice-view .phui-box.phui-object-box {
+  margin-bottom: 24px;
+}
+
+.phortune-invoice-footer {
+  color: {$lightgreytext};
+  margin: 48px 0 64px;
+  text-align: center;
+}
+
+.phortune-invoice-footer strong {
+  color: #000;
+}

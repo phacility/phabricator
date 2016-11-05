@@ -61,6 +61,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarEventJoinController',
           'export/(?P<id>[1-9]\d*)/(?P<filename>[^/]*)'
             => 'PhabricatorCalendarEventExportController',
+          'availability/(?P<id>[1-9]\d*)/(?P<availability>[^/]+)/'
+            => 'PhabricatorCalendarEventAvailabilityController',
         ),
         'export/' => array(
           $this->getQueryRoutePattern()
@@ -103,6 +105,16 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
       array(
         'name' => pht('Calendar User Guide'),
         'href' => PhabricatorEnv::getDoclink('Calendar User Guide'),
+      ),
+      array(
+        'name' => pht('Importing Events'),
+        'href' => PhabricatorEnv::getDoclink(
+          'Calendar User Guide: Importing Events'),
+      ),
+      array(
+        'name' => pht('Exporting Events'),
+        'href' => PhabricatorEnv::getDoclink(
+          'Calendar User Guide: Exporting Events'),
       ),
     );
   }

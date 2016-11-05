@@ -10,6 +10,7 @@ final class PhortuneMerchantViewController
     $merchant = id(new PhortuneMerchantQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needProfileImage(true)
       ->executeOne();
     if (!$merchant) {
       return new Aphront404Response();
@@ -28,7 +29,7 @@ final class PhortuneMerchantViewController
       ->setHeader($merchant->getName())
       ->setUser($viewer)
       ->setPolicyObject($merchant)
-      ->setHeaderIcon('fa-bank');
+      ->setImage($merchant->getProfileImageURI());
 
     $providers = id(new PhortunePaymentProviderConfigQuery())
       ->setViewer($viewer)
@@ -128,6 +129,13 @@ final class PhortuneMerchantViewController
 
     $view->addProperty(pht('Status'), $status_view);
 
+    $invoice_from = $merchant->getInvoiceEmail();
+    if (!$invoice_from) {
+      $invoice_from = pht('No email address set');
+      $invoice_from = phutil_tag('em', array(), $invoice_from);
+    }
+    $view->addProperty(pht('Invoice From'), $invoice_from);
+
     $description = $merchant->getDescription();
     if (strlen($description)) {
       $description = new PHUIRemarkupView($viewer, $description);
@@ -144,6 +152,15 @@ final class PhortuneMerchantViewController
         pht('Contact Info'),
         PHUIPropertyListView::ICON_SUMMARY);
       $view->addTextContent($contact_info);
+    }
+
+    $footer_info = $merchant->getInvoiceFooter();
+    if (strlen($footer_info)) {
+      $footer_info = new PHUIRemarkupView($viewer, $footer_info);
+      $view->addSectionHeader(
+        pht('Invoice Footer'),
+        PHUIPropertyListView::ICON_SUMMARY);
+      $view->addTextContent($footer_info);
     }
 
     return id(new PHUIObjectBoxView())
@@ -170,6 +187,14 @@ final class PhortuneMerchantViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
         ->setHref($this->getApplicationURI("merchant/edit/{$id}/")));
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Logo'))
+        ->setIcon('fa-camera')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit)
+        ->setHref($this->getApplicationURI("merchant/picture/{$id}/")));
 
     $curtain->addAction(
       id(new PhabricatorActionView())

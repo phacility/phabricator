@@ -18,10 +18,34 @@ final class PhabricatorOAuthServerTokenController
     $grant_type = $request->getStr('grant_type');
     $code = $request->getStr('code');
     $redirect_uri = $request->getStr('redirect_uri');
-    $client_phid = $request->getStr('client_id');
-    $client_secret = $request->getStr('client_secret');
     $response = new PhabricatorOAuthResponse();
     $server = new PhabricatorOAuthServer();
+
+    $client_id_parameter = $request->getStr('client_id');
+    $client_id_header = idx($_SERVER, 'PHP_AUTH_USER');
+    if (strlen($client_id_parameter) && strlen($client_id_header)) {
+      if ($client_id_parameter !== $client_id_header) {
+        throw new Exception(
+          pht(
+            'Request included a client_id parameter and an "Authorization" '.
+            'header with a username, but the values "%s" and "%s") disagree. '.
+            'The values must match.',
+            $client_id_parameter,
+            $client_id_header));
+      }
+    }
+
+    $client_secret_parameter = $request->getStr('client_secret');
+    $client_secret_header = idx($_SERVER, 'PHP_AUTH_PW');
+    if (strlen($client_secret_parameter)) {
+      // If the `client_secret` parameter is present, prefer parameters.
+      $client_phid = $client_id_parameter;
+      $client_secret = $client_secret_parameter;
+    } else {
+      // Otherwise, read values from the "Authorization" header.
+      $client_phid = $client_id_header;
+      $client_secret = $client_secret_header;
+    }
 
     if ($grant_type != 'authorization_code') {
       $response->setError('unsupported_grant_type');
