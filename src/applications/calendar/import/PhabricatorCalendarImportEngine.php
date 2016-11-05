@@ -259,7 +259,7 @@ abstract class PhabricatorCalendarImportEngine
     if ($attendee_names) {
       $external_invitees = id(new PhabricatorCalendarExternalInviteeQuery())
         ->setViewer($viewer)
-        ->withNames($attendee_names)
+        ->withNames(array_keys($attendee_names))
         ->execute();
       $external_invitees = mpull($external_invitees, null, 'getName');
 
