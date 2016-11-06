@@ -32,7 +32,6 @@ final class PhabricatorTranslationSetting
   }
 
   protected function getSelectOptionGroups() {
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     $locales = PhutilLocale::loadAllLocales();
 
     $group_labels = array(
@@ -56,10 +55,6 @@ final class PhabricatorTranslationSetting
       unset($raw_scope);
 
       if ($locale->isSillyLocale()) {
-        if ($is_serious) {
-          // Omit silly locales on serious business installs.
-          continue;
-        }
         $groups['silly'][$code] = $name;
         continue;
       }
@@ -87,6 +82,20 @@ final class PhabricatorTranslationSetting
       }
 
       $groups[$type][$code] = $name;
+    }
+
+    // Omit silly locales on serious business installs.
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    if ($is_serious) {
+      unset($groups['silly']);
+    }
+
+    // Omit limited and test translations if Phabricator is not in developer
+    // mode.
+    $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+    if (!$is_dev) {
+      unset($groups['limited']);
+      unset($groups['test']);
     }
 
     $results = array();
