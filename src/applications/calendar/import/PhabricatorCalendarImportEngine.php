@@ -3,10 +3,11 @@
 abstract class PhabricatorCalendarImportEngine
   extends Phobject {
 
+  const QUEUE_BYTE_LIMIT = 524288;
+
   final public function getImportEngineType() {
     return $this->getPhobjectClassConstant('ENGINETYPE', 64);
   }
-
 
   abstract public function getImportEngineName();
   abstract public function getImportEngineTypeName();
@@ -27,7 +28,8 @@ abstract class PhabricatorCalendarImportEngine
 
   abstract public function importEventsFromSource(
     PhabricatorUser $viewer,
-    PhabricatorCalendarImport $import);
+    PhabricatorCalendarImport $import,
+    $should_queue);
 
   abstract public function canDisable(
     PhabricatorUser $viewer,
@@ -567,5 +569,36 @@ abstract class PhabricatorCalendarImportEngine
 
     return (bool)$any_event;
   }
+
+  final protected function shouldQueueDataImport($data) {
+    return (strlen($data) > self::QUEUE_BYTE_LIMIT);
+  }
+
+  final protected function queueDataImport(
+    PhabricatorCalendarImport $import,
+    $data) {
+
+    $import->newLogMessage(
+      PhabricatorCalendarImportQueueLogType::LOGTYPE,
+      array(
+        'data.size' => strlen($data),
+        'data.limit' => self::QUEUE_BYTE_LIMIT,
+      ));
+
+    // When we queue on this pathway, we're queueing in response to an explicit
+    // user action (like uploading a big `.ics` file), so we queue at normal
+    // priority instead of bulk/import priority.
+
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorCalendarImportReloadWorker',
+      array(
+        'importPHID' => $import->getPHID(),
+        'via' => PhabricatorCalendarImportReloadWorker::VIA_BACKGROUND,
+      ),
+      array(
+        'objectPHID' => $import->getPHID(),
+      ));
+  }
+
 
 }

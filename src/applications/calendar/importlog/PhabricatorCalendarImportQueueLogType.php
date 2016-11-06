@@ -1,34 +1,34 @@
 <?php
 
-final class PhabricatorCalendarImportTriggerLogType
+final class PhabricatorCalendarImportQueueLogType
   extends PhabricatorCalendarImportLogType {
 
-  const LOGTYPE = 'trigger';
+  const LOGTYPE = 'queue';
 
   public function getDisplayType(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return pht('Import Triggered');
+    return pht('Queued');
   }
 
   public function getDisplayDescription(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
 
-    $via = $log->getParameter('via');
-    switch ($via) {
-      case PhabricatorCalendarImportReloadWorker::VIA_BACKGROUND:
-        return pht('Started background processing.');
-      case PhabricatorCalendarImportReloadWorker::VIA_TRIGGER:
-      default:
-        return pht('Triggered a periodic update.');
-    }
+    $size = $log->getParameter('data.size');
+    $limit = $log->getParameter('data.limit');
+
+    return pht(
+      'Queued for background import: data size (%s) exceeds limit for '.
+      'immediate processing (%s).',
+      phutil_format_bytes($size),
+      phutil_format_bytes($limit));
   }
 
   public function getDisplayIcon(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return 'fa-clock-o';
+    return 'fa-sort-amount-desc';
   }
 
   public function getDisplayColor(
