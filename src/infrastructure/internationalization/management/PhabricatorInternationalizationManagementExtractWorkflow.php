@@ -54,7 +54,7 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
       }
 
       foreach ($libraries as $library) {
-        $targets[] = Filesystem::resolvePath(dirname($library)).'/';
+        $targets[] = Filesystem::resolvePath(dirname($path.'/'.$library)).'/';
       }
     }
 
