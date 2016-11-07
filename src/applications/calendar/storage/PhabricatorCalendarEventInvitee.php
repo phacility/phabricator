@@ -76,7 +76,7 @@ final class PhabricatorCalendarEventInvitee extends PhabricatorCalendarDAO
         'name' => pht('Available'),
       ),
       self::AVAILABILITY_BUSY => array(
-        'color' => 'yellow',
+        'color' => 'orange',
         'name' => pht('Busy'),
       ),
       self::AVAILABILITY_AWAY => array(
