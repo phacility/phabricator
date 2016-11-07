@@ -593,6 +593,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $min_date = $start->newPHPDateTime();
       $max_date = $end->newPHPDateTime();
 
+      // Subtract one second since the stored date is exclusive.
+      $max_date = $max_date->modify('-1 second');
+
       $min_day = $min_date->format('Y m d');
       $max_day = $max_date->format('Y m d');
 
@@ -849,7 +852,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     // If this is an all day event, we move the end date time forward to the
     // first second of the following day. This is consistent with what users
     // expect: an all day event from "Nov 1" to "Nov 1" lasts the entire day.
-    if ($this->getIsAllDay()) {
+
+    // For imported events, the end date is already stored with this
+    // adjustment.
+
+    if ($this->getIsAllDay() && !$this->isImportedEvent()) {
       $datetime = $datetime
         ->newAbsoluteDateTime()
         ->setHour(0)

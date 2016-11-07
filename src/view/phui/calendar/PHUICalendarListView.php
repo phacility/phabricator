@@ -198,8 +198,11 @@ final class PHUICalendarListView extends AphrontTagView {
       $viewer,
       $event->getEpochEnd()));
 
+    $end_date = $end->getDateTime();
+    $end_date = $end_date->modify('-1 second');
+
     $start_date = $start->getDateTime()->format('m d Y');
-    $end_date = $end->getDateTime()->format('m d Y');
+    $end_date = $end_date->format('m d Y');
 
     if ($event->getIsAllDay()) {
       if ($start_date == $end_date) {
