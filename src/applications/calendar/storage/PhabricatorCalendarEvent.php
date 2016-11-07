@@ -75,9 +75,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $now);
     list($datetime_start, $datetime_end) = $datetime_defaults;
 
+    // When importing events from a context like "bin/calendar reload", we may
+    // be acting as the omnipotent user.
+    $host_phid = $actor->getPHID();
+    if (!$host_phid) {
+      $host_phid = $app->getPHID();
+    }
+
     return id(new PhabricatorCalendarEvent())
       ->setDescription('')
-      ->setHostPHID($actor->getPHID())
+      ->setHostPHID($host_phid)
       ->setIsCancelled(0)
       ->setIsAllDay(0)
       ->setIsStub(0)

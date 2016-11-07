@@ -199,7 +199,7 @@ abstract class PhabricatorCalendarImportEngine
     if ($node_map) {
       $events = id(new PhabricatorCalendarEventQuery())
         ->setViewer($viewer)
-        ->withImportAuthorPHIDs(array($viewer->getPHID()))
+        ->withImportAuthorPHIDs(array($import->getAuthorPHID()))
         ->withImportUIDs(array_keys($node_map))
         ->execute();
       $events = mpull($events, null, 'getImportUID');
@@ -218,7 +218,7 @@ abstract class PhabricatorCalendarImportEngine
       }
 
       $event
-        ->setImportAuthorPHID($viewer->getPHID())
+        ->setImportAuthorPHID($import->getAuthorPHID())
         ->setImportSourcePHID($import->getPHID())
         ->setImportUID($full_uid)
         ->attachImportSource($import);
