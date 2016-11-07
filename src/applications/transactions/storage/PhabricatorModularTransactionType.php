@@ -67,6 +67,10 @@ abstract class PhabricatorModularTransactionType
     throw new PhutilMethodNotImplementedException();
   }
 
+  public function getMailDiffSectionHeader() {
+    return pht('EDIT DETAILS');
+  }
+
   public function newRemarkupChanges() {
     return array();
   }

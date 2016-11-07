@@ -1141,8 +1141,14 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    $this->object = $object;
+    $this->xactions = $xactions;
+
     // Hook for edges or other properties that may need (re-)loading
     $object = $this->willPublish($object, $xactions);
+
+    // The object might have changed, so reassign it.
+    $this->object = $object;
 
     $messages = array();
     if (!$this->getDisableEmail()) {
@@ -2871,10 +2877,22 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($details as $xaction) {
       $details = $xaction->renderChangeDetailsForMail($body->getViewer());
       if ($details !== null) {
-        $body->addHTMLSection(pht('EDIT DETAILS'), $details);
+        $label = $this->getMailDiffSectionHeader($xaction);
+        $body->addHTMLSection($label, $details);
       }
     }
 
+  }
+
+  private function getMailDiffSectionHeader($xaction) {
+    $type = $xaction->getTransactionType();
+
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->getMailDiffSectionHeader();
+    }
+
+    return pht('EDIT DETAILS');
   }
 
   /**
