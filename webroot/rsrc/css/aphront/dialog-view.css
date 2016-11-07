@@ -165,3 +165,7 @@
 .aphront-dialog-object-list .aphront-dialog-body {
   padding: 0 12px;
 }
+
+.aphront-dialog-tab-group .aphront-dialog-body {
+  padding: 0 12px;
+}
