@@ -303,9 +303,9 @@ JX.install('TypeaheadSource', {
       }
 
       var default_comparator = function(u, v) {
-         var key_u = u.sort || u.name;
-         var key_v = v.sort || v.name;
-         return key_u.localeCompare(key_v);
+        var key_u = u.sort || u.name;
+        var key_v = v.sort || v.name;
+        return key_u.localeCompare(key_v);
       };
 
       var filter_handler = this.getFilterHandler() || function(value, list) {
