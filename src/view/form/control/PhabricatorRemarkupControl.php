@@ -158,7 +158,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'align' => 'right',
     );
 
-    $actions['fa-life-bouy'] = array(
+    $actions['fa-book'] = array(
       'tip' => pht('Help'),
       'align' => 'right',
       'href'  => PhabricatorEnv::getDoclink('Remarkup Reference'),
