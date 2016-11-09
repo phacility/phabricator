@@ -77,11 +77,6 @@ final class PhabricatorFileChunk extends PhabricatorFileDAO
   }
 
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 

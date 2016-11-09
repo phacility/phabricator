@@ -86,10 +86,6 @@ final class PhabricatorCalendarImportLog
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

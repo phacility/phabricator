@@ -345,8 +345,4 @@ final class PhragmentFragment extends PhragmentDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

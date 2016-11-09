@@ -121,7 +121,4 @@ final class PhabricatorCalendarEventInvitee extends PhabricatorCalendarDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
 }

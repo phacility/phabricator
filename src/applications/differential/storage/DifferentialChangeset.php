@@ -226,8 +226,4 @@ final class DifferentialChangeset extends DifferentialDAO
     return $this->getDiff()->hasAutomaticCapability($capability, $viewer);
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

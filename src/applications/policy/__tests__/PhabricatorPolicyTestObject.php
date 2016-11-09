@@ -52,10 +52,6 @@ final class PhabricatorPolicyTestObject
     return $this;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
   public function setExtendedPolicies(array $extended_policies) {
     $this->extendedPolicies = $extended_policies;
     return $this;

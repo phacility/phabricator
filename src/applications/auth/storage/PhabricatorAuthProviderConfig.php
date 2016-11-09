@@ -130,8 +130,4 @@ final class PhabricatorAuthProviderConfig
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

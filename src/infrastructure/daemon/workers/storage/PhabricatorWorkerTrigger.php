@@ -190,8 +190,4 @@ final class PhabricatorWorkerTrigger
     return true;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

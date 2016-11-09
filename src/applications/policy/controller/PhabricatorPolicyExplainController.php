@@ -262,46 +262,15 @@ final class PhabricatorPolicyExplainController
     $capability) {
     $viewer = $this->getViewer();
 
-    if ($object instanceof PhabricatorPolicyCodexInterface) {
-      $codex = PhabricatorPolicyCodex::newFromObject($object, $viewer);
-      $rules = $codex->getPolicySpecialRuleDescriptions();
-
-      $exceptions = array();
-      foreach ($rules as $rule) {
-        $is_active = $rule->getIsActive();
-        if ($is_active) {
-          $rule_capabilities = $rule->getCapabilities();
-          if ($rule_capabilities) {
-            if (!in_array($capability, $rule_capabilities)) {
-              $is_active = false;
-            }
-          }
-        }
-
-        $description = $rule->getDescription();
-
-        if (!$is_active) {
-          $description = phutil_tag(
-            'span',
-            array(
-              'class' => 'phui-policy-section-view-inactive-rule',
-            ),
-            $description);
-        }
-
-        $exceptions[] = $description;
-      }
-    } else if (method_exists($object, 'describeAutomaticCapability')) {
-      $exceptions = (array)$object->describeAutomaticCapability($capability);
-      $exceptions = array_filter($exceptions);
-    } else {
-      $exceptions = array();
-    }
+    $exceptions = PhabricatorPolicy::getSpecialRules(
+      $object,
+      $viewer,
+      $capability,
+      false);
 
     if (!$exceptions) {
       return null;
     }
-
 
     return id(new PHUIPolicySectionView())
       ->setViewer($viewer)

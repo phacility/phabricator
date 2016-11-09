@@ -130,8 +130,4 @@ final class PhabricatorRepositoryCommitHint
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }
