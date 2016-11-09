@@ -225,7 +225,9 @@ final class PhabricatorPolicy
 
     switch ($policy) {
       case PhabricatorPolicies::POLICY_PUBLIC:
-        return pht('This object is public.');
+        return pht(
+          'This object is public and can be viewed by anyone, even if they '.
+          'do not have a Phabricator account.');
       case PhabricatorPolicies::POLICY_USER:
         return pht('Logged in users can take this action.');
       case PhabricatorPolicies::POLICY_ADMIN:

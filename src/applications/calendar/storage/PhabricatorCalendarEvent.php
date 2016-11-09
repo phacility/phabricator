@@ -4,6 +4,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorExtendedPolicyInterface,
+    PhabricatorPolicyCodexInterface,
     PhabricatorProjectInterface,
     PhabricatorMarkupInterface,
     PhabricatorApplicationTransactionInterface,
@@ -1217,18 +1218,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    if ($this->isImportedEvent()) {
-      return pht(
-        'Events imported from external sources can not be edited in '.
-        'Phabricator.');
-    }
-
-    return pht(
-      'The host of an event can always view and edit it. Users who are '.
-      'invited to an event can always view it.');
-  }
-
 
 /* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
 
@@ -1249,6 +1238,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
 
     return $extended;
+  }
+
+/* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
+
+  public function newPolicyCodex() {
+    return new PhabricatorCalendarEventPolicyCodex();
   }
 
 
