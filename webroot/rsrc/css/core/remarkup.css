@@ -487,12 +487,8 @@ var.remarkup-assist-textarea {
   float: left;
 }
 
-.remarkup-assist-button:hover {
-  background-color: rgba(100,100,100,.15);
-}
-
 .remarkup-assist-button:hover .phui-icon-view.phui-font-fa {
-  color: {$darkbluetext};
+  color: {$sky};
 }
 
 .remarkup-assist-button:active {

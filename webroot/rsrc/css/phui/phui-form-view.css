@@ -476,7 +476,6 @@ properly, and submit values. */
   display: none;
 }
 
-
 .login-to-comment {
   margin: 12px;
 }
@@ -533,10 +532,11 @@ properly, and submit values. */
 }
 
 .aphront-form-error .phui-icon-view {
+  float: right;
   color: {$lightgreyborder};
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .device-desktop .aphront-form-error .phui-icon-view:hover {
-  color: {$darkgreyborder};
+  color: {$red};
 }
