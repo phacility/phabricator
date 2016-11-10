@@ -58,23 +58,10 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
     border-radius: 0;
 }
 
-.phui-comment-form-view .remarkup-assist-button {
-  margin-top: 2px;
-  padding: 4px 5px;
-  border-radius: 3px;
-}
-
-.phui-comment-form-view .remarkup-assist-separator {
-  height: 18px;
-  margin: 7px 6px;
-}
-
 .phui-comment-form-view .aphront-form-input .remarkup-assist-textarea {
   border-color: {$lightblueborder};
   border-top: 1px solid {$thinblueborder};
   padding: 8px;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
   height: 10em;
   background-color: rgba({$alphablue},.02);
 }
@@ -160,22 +147,6 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 
 .device-phone .phui-comment-form-view .phui-comment-action-icon {
   display: none;
-}
-
-/* h8rs gonna h8 */
-.phui-comment-form-view select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-
-  background: #fff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
-  background-size: 8px 10px;
-  border-radius: 3px;
-  color: {$darkbluetext};
-  height: 28px;
-  position: relative;
-  padding: 0 8px;
-  width: 180px;
 }
 
 .device-phone .aphront-form-control-submit button {

@@ -15,8 +15,9 @@
 }
 
 .phui-form-view label.aphront-form-label {
-  padding-top: 5px;
   width: 19%;
+  height: 28px;
+  line-height: 28px;
   float: left;
   text-align: right;
   font-weight: bold;
