@@ -304,8 +304,9 @@ final class DiffusionURIEditor
               $type,
               pht('Invalid'),
               pht(
-                'Value "%s" is not a valid display setting for this URI. '.
+                'Value "%s" is not a valid IO setting for this URI. '.
                 'Available types for this URI are: %s.',
+                $new,
                 implode(', ', array_keys($available))),
               $xaction);
             continue;
@@ -418,6 +419,7 @@ final class DiffusionURIEditor
               pht(
                 'Value "%s" is not a valid display setting for this URI. '.
                 'Available types for this URI are: %s.',
+                $new,
                 implode(', ', array_keys($available))));
           }
         }
