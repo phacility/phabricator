@@ -557,7 +557,7 @@ var.remarkup-assist-textarea {
 
 .remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea {
   position: absolute;
-  top: 27px;
+  top: 32px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -566,6 +566,16 @@ var.remarkup-assist-textarea {
   border-width: 1px 0 0 0;
   outline: none;
   resize: none;
+  background: #fff !important;
+}
+
+.remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea:focus {
+  border-color: none;
+  box-shadow: none;
+}
+
+.remarkup-control-fullscreen-mode .remarkup-assist-button .fa-arrows-alt {
+  color: {$sky};
 }
 
 .phabricator-image-macro-hero {
