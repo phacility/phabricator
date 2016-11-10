@@ -4,6 +4,8 @@ abstract class PhabricatorTypeaheadCompositeDatasource
   extends PhabricatorTypeaheadDatasource {
 
   private $usable;
+  private $prefixString;
+  private $prefixLength;
 
   abstract public function getComponentDatasources();
 
@@ -22,8 +24,50 @@ abstract class PhabricatorTypeaheadCompositeDatasource
   }
 
   public function loadResults() {
+    $phases = array();
+
+    // We only need to do a prefix phase query if there's an actual query
+    // string. If the user didn't type anything, nothing can possibly match it.
+    if (strlen($this->getRawQuery())) {
+      $phases[] = self::PHASE_PREFIX;
+    }
+
+    $phases[] = self::PHASE_CONTENT;
+
     $offset = $this->getOffset();
     $limit = $this->getLimit();
+
+    $results = array();
+    foreach ($phases as $phase) {
+      if ($limit) {
+        $phase_limit = ($offset + $limit) - count($results);
+      } else {
+        $phase_limit = 0;
+      }
+
+      $phase_results = $this->loadResultsForPhase(
+        $phase,
+        $phase_limit);
+
+      foreach ($phase_results as $result) {
+        $results[] = $result;
+      }
+
+      if ($limit) {
+        if (count($results) >= $offset + $limit) {
+          break;
+        }
+      }
+    }
+
+    return $results;
+  }
+
+  protected function loadResultsForPhase($phase, $limit) {
+    if ($phase == self::PHASE_PREFIX) {
+      $this->prefixString = $this->getPrefixQuery();
+      $this->prefixLength = strlen($this->prefixString);
+    }
 
     // If the input query is a function like `members(platy`, and we can
     // parse the function, we strip the function off and hand the stripped
@@ -62,28 +106,110 @@ abstract class PhabricatorTypeaheadCompositeDatasource
       }
 
       $source
+        ->setPhase($phase)
         ->setFunctionStack($source_stack)
         ->setRawQuery($source_query)
         ->setQuery($this->getQuery())
         ->setViewer($this->getViewer());
 
-      if ($limit) {
-        $source->setLimit($offset + $limit);
-      }
-
       if ($is_browse) {
         $source->setIsBrowse(true);
       }
 
-      $source_results = $source->loadResults();
-      $source_results = $source->didLoadResults($source_results);
+      if ($limit) {
+        // If we are loading results from a source with a limit, it may return
+        // some results which belong to the wrong phase. We need an entire page
+        // of valid results in the correct phase AFTER any results for the
+        // wrong phase are filtered for pagination to work correctly.
+
+        // To make sure we can get there, we fetch more and more results until
+        // enough of them survive filtering to generate a full page.
+
+        // We start by fetching 150% of the results than we think we need, and
+        // double the amount we overfetch by each time.
+        $factor = 1.5;
+        while (true) {
+          $query_source = clone $source;
+          $total = (int)ceil($limit * $factor) + 1;
+          $query_source->setLimit($total);
+
+          $source_results = $query_source->loadResultsForPhase(
+            $phase,
+            $limit);
+
+          // If there are fewer unfiltered results than we asked for, we know
+          // this is the entire result set and we don't need to keep going.
+          if (count($source_results) < $total) {
+            $source_results = $query_source->didLoadResults($source_results);
+            $source_results = $this->filterPhaseResults(
+              $phase,
+              $source_results);
+            break;
+          }
+
+          // Otherwise, this result set have everything we need, or may not.
+          // Filter the results that are part of the wrong phase out first...
+          $source_results = $query_source->didLoadResults($source_results);
+          $source_results = $this->filterPhaseResults($phase, $source_results);
+
+          // Now check if we have enough results left. If we do, we're all set.
+          if (count($source_results) >= $total) {
+            break;
+          }
+
+          // We filtered out too many results to have a full page left, so we
+          // need to run the query again, asking for even more results. We'll
+          // keep doing this until we get a full page or get all of the
+          // results.
+          $factor = $factor * 2;
+        }
+      } else {
+        $source_results = $source->loadResults();
+        $source_results = $source->didLoadResults($source_results);
+        $source_results = $this->filterPhaseResults($phase, $source_results);
+      }
+
       $results[] = $source_results;
     }
 
     $results = array_mergev($results);
     $results = msort($results, 'getSortKey');
 
-    $count = count($results);
+    $results = $this->sliceResults($results);
+
+    return $results;
+  }
+
+  private function filterPhaseResults($phase, $source_results) {
+    foreach ($source_results as $key => $source_result) {
+      $result_phase = $this->getResultPhase($source_result);
+
+      if ($result_phase != $phase) {
+        unset($source_results[$key]);
+        continue;
+      }
+
+      $source_result->setPhase($result_phase);
+    }
+
+    return $source_results;
+  }
+
+  private function getResultPhase(PhabricatorTypeaheadResult $result) {
+    if ($this->prefixLength) {
+      $result_name = phutil_utf8_strtolower($result->getName());
+      if (!strncmp($result_name, $this->prefixString, $this->prefixLength)) {
+        return self::PHASE_PREFIX;
+      }
+    }
+
+    return self::PHASE_CONTENT;
+  }
+
+  protected function sliceResults(array $results) {
+    $offset = $this->getOffset();
+    $limit = $this->getLimit();
+
     if ($offset || $limit) {
       if (!$limit) {
         $limit = count($results);
