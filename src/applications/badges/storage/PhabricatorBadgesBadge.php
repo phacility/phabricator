@@ -129,10 +129,6 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

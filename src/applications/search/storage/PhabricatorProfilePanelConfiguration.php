@@ -162,11 +162,6 @@ final class PhabricatorProfilePanelConfiguration
   }
 
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
 /* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
 
 

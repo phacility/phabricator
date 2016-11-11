@@ -54,7 +54,7 @@ final class PhabricatorCalendarImportEditor
 
     if ($should_reload) {
       $import_engine = $object->getEngine();
-      $import_engine->importEventsFromSource($actor, $object);
+      $import_engine->importEventsFromSource($actor, $object, true);
     }
 
     if ($should_trigger) {
@@ -107,6 +107,7 @@ final class PhabricatorCalendarImportEditor
             'class' => 'PhabricatorCalendarImportReloadWorker',
             'data' => array(
               'importPHID' => $object->getPHID(),
+              'via' => PhabricatorCalendarImportReloadWorker::VIA_TRIGGER,
             ),
             'options' => array(
               'objectPHID' => $object->getPHID(),

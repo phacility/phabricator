@@ -28,6 +28,17 @@ abstract class PhabricatorCalendarICSImportEngine
       $document = null;
     }
 
+    foreach ($parser->getWarnings() as $warning) {
+      $import->newLogMessage(
+        PhabricatorCalendarImportICSWarningLogType::LOGTYPE,
+        array(
+          'ics.warning.code' => $warning['code'],
+          'ics.warning.line' => $warning['line'],
+          'ics.warning.text' => $warning['text'],
+          'ics.warning.message' => $warning['message'],
+        ));
+    }
+
     return $this->importEventDocument($viewer, $import, $document);
   }
 

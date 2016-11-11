@@ -19,7 +19,10 @@ final class PhortuneMerchant extends PhortuneDAO
   public static function initializeNewMerchant(PhabricatorUser $actor) {
     return id(new PhortuneMerchant())
       ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
-      ->attachMemberPHIDs(array());
+      ->attachMemberPHIDs(array())
+      ->setContactInfo('')
+      ->setInvoiceEmail('')
+      ->setInvoiceFooter('');
   }
 
   protected function getConfiguration() {

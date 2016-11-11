@@ -2,6 +2,9 @@
 
 final class PhabricatorCalendarImportReloadWorker extends PhabricatorWorker {
 
+  const VIA_TRIGGER = 'trigger';
+  const VIA_BACKGROUND = 'background';
+
   protected function doWork() {
     $import = $this->loadImport();
     $viewer = PhabricatorUser::getOmnipotentUser();
@@ -18,11 +21,14 @@ final class PhabricatorCalendarImportReloadWorker extends PhabricatorWorker {
 
     $import_engine = $import->getEngine();
 
+    $data = $this->getTaskData();
     $import->newLogMessage(
       PhabricatorCalendarImportTriggerLogType::LOGTYPE,
-      array());
+      array(
+        'via' => idx($data, 'via', self::VIA_TRIGGER),
+      ));
 
-    $import_engine->importEventsFromSource($author, $import);
+    $import_engine->importEventsFromSource($author, $import, false);
   }
 
   private function loadImport() {

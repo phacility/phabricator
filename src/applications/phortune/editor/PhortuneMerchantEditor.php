@@ -134,6 +134,7 @@ final class PhortuneMerchantEditor
         }
        break;
       case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:
+        $new_email = null;
         foreach ($xactions as $xaction) {
           switch ($xaction->getTransactionType()) {
             case PhortuneMerchantTransaction::TYPE_INVOICEEMAIL:

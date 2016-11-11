@@ -483,10 +483,6 @@ abstract class PhabricatorApplication
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  Policies  )----------------------------------------------------------- */
 

@@ -780,7 +780,7 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
 
-    $action = $request->getURIData('editAction');
+    $action = $this->getEditAction();
 
     $capabilities = array();
     $use_default = false;
@@ -1352,9 +1352,78 @@ abstract class PhabricatorEditEngine
   }
 
 
+  public function newNUXButton($text) {
+    $specs = $this->newCreateActionSpecifications(array());
+    $head = head($specs);
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText($text)
+      ->setHref($head['uri'])
+      ->setDisabled($head['disabled'])
+      ->setWorkflow($head['workflow'])
+      ->setColor(PHUIButtonView::GREEN);
+  }
+
+
   final public function addActionToCrumbs(
     PHUICrumbsView $crumbs,
     array $parameters = array()) {
+    $viewer = $this->getViewer();
+
+    $specs = $this->newCreateActionSpecifications($parameters);
+
+    $head = head($specs);
+    $menu_uri = $head['uri'];
+
+    $dropdown = null;
+    if (count($specs) > 1) {
+      $menu_icon = 'fa-caret-square-o-down';
+      $menu_name = $this->getObjectCreateShortText();
+      $workflow = false;
+      $disabled = false;
+
+      $dropdown = id(new PhabricatorActionListView())
+        ->setUser($viewer);
+
+      foreach ($specs as $spec) {
+        $dropdown->addAction(
+          id(new PhabricatorActionView())
+            ->setName($spec['name'])
+            ->setIcon($spec['icon'])
+            ->setHref($spec['uri'])
+            ->setDisabled($head['disabled'])
+            ->setWorkflow($head['workflow']));
+      }
+
+    } else {
+      $menu_icon = $head['icon'];
+      $menu_name = $head['name'];
+
+      $workflow = $head['workflow'];
+      $disabled = $head['disabled'];
+    }
+
+    $action = id(new PHUIListItemView())
+      ->setName($menu_name)
+      ->setHref($menu_uri)
+      ->setIcon($menu_icon)
+      ->setWorkflow($workflow)
+      ->setDisabled($disabled);
+
+    if ($dropdown) {
+      $action->setDropdownMenu($dropdown);
+    }
+
+    $crumbs->addAction($action);
+  }
+
+
+  /**
+   * Build a raw description of available "Create New Object" UI options so
+   * other methods can build menus or buttons.
+   */
+  private function newCreateActionSpecifications(array $parameters) {
     $viewer = $this->getViewer();
 
     $can_create = $this->hasCreateCapability();
@@ -1364,12 +1433,11 @@ abstract class PhabricatorEditEngine
       $configs = array();
     }
 
-    $dropdown = null;
     $disabled = false;
     $workflow = false;
 
     $menu_icon = 'fa-plus-square';
-
+    $specs = array();
     if (!$configs) {
       if ($viewer->isLoggedIn()) {
         $disabled = true;
@@ -1385,54 +1453,35 @@ abstract class PhabricatorEditEngine
       } else {
         $create_uri = $this->getEditURI(null, 'nocreate/');
       }
+
+      $specs[] = array(
+        'name' => $this->getObjectCreateShortText(),
+        'uri' => $create_uri,
+        'icon' => $menu_icon,
+        'disabled' => $disabled,
+        'workflow' => $workflow,
+      );
     } else {
-      $config = head($configs);
-      $form_key = $config->getIdentifier();
-      $create_uri = $this->getEditURI(null, "form/{$form_key}/");
+      foreach ($configs as $config) {
+        $form_key = $config->getIdentifier();
+        $config_uri = $this->getEditURI(null, "form/{$form_key}/");
 
-      if ($parameters) {
-        $create_uri = (string)id(new PhutilURI($create_uri))
-          ->setQueryParams($parameters);
-      }
-
-      if (count($configs) > 1) {
-        $menu_icon = 'fa-caret-square-o-down';
-
-        $dropdown = id(new PhabricatorActionListView())
-          ->setUser($viewer);
-
-        foreach ($configs as $config) {
-          $form_key = $config->getIdentifier();
-          $config_uri = $this->getEditURI(null, "form/{$form_key}/");
-
-          if ($parameters) {
-            $config_uri = (string)id(new PhutilURI($config_uri))
-              ->setQueryParams($parameters);
-          }
-
-          $item_icon = 'fa-plus';
-
-          $dropdown->addAction(
-            id(new PhabricatorActionView())
-              ->setName($config->getDisplayName())
-              ->setIcon($item_icon)
-              ->setHref($config_uri));
+        if ($parameters) {
+          $config_uri = (string)id(new PhutilURI($config_uri))
+            ->setQueryParams($parameters);
         }
+
+        $specs[] = array(
+          'name' => $config->getDisplayName(),
+          'uri' => $config_uri,
+          'icon' => 'fa-plus',
+          'disabled' => false,
+          'workflow' => false,
+        );
       }
     }
 
-    $action = id(new PHUIListItemView())
-      ->setName($this->getObjectCreateShortText())
-      ->setHref($create_uri)
-      ->setIcon($menu_icon)
-      ->setWorkflow($workflow)
-      ->setDisabled($disabled);
-
-    if ($dropdown) {
-      $action->setDropdownMenu($dropdown);
-    }
-
-    $crumbs->addAction($action);
+    return $specs;
   }
 
   final public function buildEditEngineCommentView($object) {
@@ -2098,6 +2147,17 @@ abstract class PhabricatorEditEngine
       PhabricatorPolicyCapability::CAN_EDIT);
   }
 
+  public function isCommentAction() {
+    return ($this->getEditAction() == 'comment');
+  }
+
+  public function getEditAction() {
+    $controller = $this->getController();
+    $request = $controller->getRequest();
+    return $request->getURIData('editAction');
+  }
+
+
 /* -(  Form Pages  )--------------------------------------------------------- */
 
 
@@ -2215,7 +2275,4 @@ abstract class PhabricatorEditEngine
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
 }

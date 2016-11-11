@@ -138,10 +138,6 @@ final class NuanceSource extends NuanceDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorNgramsInterface  )----------------------------------------- */
 

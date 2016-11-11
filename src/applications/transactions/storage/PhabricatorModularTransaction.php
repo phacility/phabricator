@@ -7,6 +7,10 @@ abstract class PhabricatorModularTransaction
 
   abstract public function getBaseTransactionClass();
 
+  public function getModularType() {
+    return $this->getTransactionImplementation();
+  }
+
   final protected function getTransactionImplementation() {
     if (!$this->implementation) {
       $this->implementation = $this->newTransactionImplementation();

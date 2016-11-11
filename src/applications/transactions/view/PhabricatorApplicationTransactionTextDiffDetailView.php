@@ -122,12 +122,44 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
       }
     }
 
-    return phutil_tag(
+    $diff_view = phutil_tag(
       'div',
       array(
         'class' => 'prose-diff',
       ),
       $result);
+
+    $old_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'prose-diff',
+      ),
+      $this->oldText);
+
+    $new_view = phutil_tag(
+      'div',
+      array(
+        'class' => 'prose-diff',
+      ),
+      $this->newText);
+
+    return id(new PHUITabGroupView())
+      ->addTab(
+        id(new PHUITabView())
+          ->setKey('old')
+          ->setName(pht('Old'))
+          ->appendChild($old_view))
+      ->addTab(
+        id(new PHUITabView())
+          ->setKey('new')
+          ->setName(pht('New'))
+          ->appendChild($new_view))
+      ->addTab(
+        id(new PHUITabView())
+          ->setKey('diff')
+          ->setName(pht('Diff'))
+          ->appendChild($diff_view))
+      ->selectTab('diff');
   }
 
   private function buildDiff() {

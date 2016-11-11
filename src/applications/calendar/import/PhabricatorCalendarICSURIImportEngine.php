@@ -77,7 +77,8 @@ final class PhabricatorCalendarICSURIImportEngine
 
   public function importEventsFromSource(
     PhabricatorUser $viewer,
-    PhabricatorCalendarImport $import) {
+    PhabricatorCalendarImport $import,
+    $should_queue) {
 
     $uri_key = PhabricatorCalendarImportICSURITransaction::PARAMKEY_URI;
     $uri = $import->getParameter($uri_key);
@@ -102,6 +103,10 @@ final class PhabricatorCalendarICSURIImportEngine
       ));
 
     $data = $file->loadFileData();
+
+    if ($should_queue && $this->shouldQueueDataImport($data)) {
+      return $this->queueDataImport($import, $data);
+    }
 
     return $this->importICSData($viewer, $import, $data);
   }

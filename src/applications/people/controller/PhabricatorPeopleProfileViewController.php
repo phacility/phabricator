@@ -58,8 +58,8 @@ final class PhabricatorPeopleProfileViewController
       ->appendChild($feed);
 
     $projects = $this->buildProjectsView($user);
-    $badges = $this->buildBadgesView($user);
     $calendar = $this->buildCalendarDayView($user);
+    $badges = $this->buildBadgesView($user);
     require_celerity_resource('project-view-css');
 
     $home = id(new PHUITwoColumnView())
@@ -73,8 +73,8 @@ final class PhabricatorPeopleProfileViewController
       ->setSideColumn(
         array(
           $projects,
-          $badges,
           $calendar,
+          $badges,
         ));
 
     $nav = $this->getProfileMenu();

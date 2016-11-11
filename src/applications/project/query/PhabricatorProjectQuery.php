@@ -12,6 +12,7 @@ final class PhabricatorProjectQuery
   private $slugMap;
   private $allSlugs;
   private $names;
+  private $namePrefixes;
   private $nameTokens;
   private $icons;
   private $colors;
@@ -75,6 +76,11 @@ final class PhabricatorProjectQuery
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function withNamePrefixes(array $prefixes) {
+    $this->namePrefixes = $prefixes;
     return $this;
   }
 
@@ -462,6 +468,17 @@ final class PhabricatorProjectQuery
         $conn,
         'name IN (%Ls)',
         $this->names);
+    }
+
+    if ($this->namePrefixes) {
+      $parts = array();
+      foreach ($this->namePrefixes as $name_prefix) {
+        $parts[] = qsprintf(
+          $conn,
+          'name LIKE %>',
+          $name_prefix);
+      }
+      $where[] = '('.implode(' OR ', $parts).')';
     }
 
     if ($this->icons !== null) {

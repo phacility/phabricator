@@ -2330,11 +2330,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 

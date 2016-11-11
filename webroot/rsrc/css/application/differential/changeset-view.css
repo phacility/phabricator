@@ -94,6 +94,7 @@
 }
 
 .prose-diff {
+  padding: 12px 0;
   white-space: pre-wrap;
   color: {$greytext};
 }

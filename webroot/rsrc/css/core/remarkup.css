@@ -436,11 +436,13 @@ body div.phabricator-remarkup > *:last-child {
 }
 
 .remarkup-assist-textarea {
-  border-left-color: {$blueborder};
-  border-right-color: {$blueborder};
-  border-bottom-color: {$blueborder};
+  border-left-color: {$greyborder};
+  border-right-color: {$greyborder};
+  border-bottom-color: {$greyborder};
   border-top-color: {$thinblueborder};
   border-radius: 0;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 
   box-shadow: none;
   -webkit-box-shadow: none;
@@ -470,12 +472,15 @@ var.remarkup-assist-textarea {
 }
 
 .remarkup-assist-bar {
-  height: 26px;
+  height: 32px;
   border-width: 1px 1px 0;
   border-style: solid;
-  border-top-color: {$blueborder};
-  border-left-color: {$blueborder};
-  border-right-color: {$blueborder};
+  border-top-color: {$greyborder};
+  border-left-color: {$greyborder};
+  border-right-color: {$greyborder};
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  padding: 0 4px;
 
   background: {$lightbluebackground};
   overflow: hidden;
@@ -483,16 +488,13 @@ var.remarkup-assist-textarea {
 
 .remarkup-assist-button {
   display: block;
+  margin-top: 2px;
   padding: 4px 5px;
   float: left;
 }
 
-.remarkup-assist-button:hover {
-  background-color: rgba(100,100,100,.15);
-}
-
 .remarkup-assist-button:hover .phui-icon-view.phui-font-fa {
-  color: {$darkbluetext};
+  color: {$sky};
 }
 
 .remarkup-assist-button:active {
@@ -507,11 +509,11 @@ var.remarkup-assist-textarea {
   display: block;
   float: left;
 
-  margin: 7px 4px;
-  height: 14px;
+  height: 18px;
+  margin: 7px 6px;
 
   width: 0px;
-  border-right: 1px solid #cccccc;
+  border-right: 1px solid {$lightgreyborder};
 }
 
 .remarkup-interpreter-error {
@@ -555,7 +557,7 @@ var.remarkup-assist-textarea {
 
 .remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea {
   position: absolute;
-  top: 27px;
+  top: 32px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -564,6 +566,16 @@ var.remarkup-assist-textarea {
   border-width: 1px 0 0 0;
   outline: none;
   resize: none;
+  background: #fff !important;
+}
+
+.remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea:focus {
+  border-color: none;
+  box-shadow: none;
+}
+
+.remarkup-control-fullscreen-mode .remarkup-assist-button .fa-arrows-alt {
+  color: {$sky};
 }
 
 .phabricator-image-macro-hero {

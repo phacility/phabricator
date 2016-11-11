@@ -372,10 +372,6 @@ abstract class ConduitAPIMethod
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
   protected function hasApplicationCapability(
     $capability,
     PhabricatorUser $viewer) {

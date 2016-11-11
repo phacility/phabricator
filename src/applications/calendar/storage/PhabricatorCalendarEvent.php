@@ -4,6 +4,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorExtendedPolicyInterface,
+    PhabricatorPolicyCodexInterface,
     PhabricatorProjectInterface,
     PhabricatorMarkupInterface,
     PhabricatorApplicationTransactionInterface,
@@ -52,14 +53,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   private $viewerTimezone;
 
-  // TODO: DEPRECATED. Remove once we're sure the migrations worked.
-  protected $allDayDateFrom;
-  protected $allDayDateTo;
-  protected $dateFrom;
-  protected $dateTo;
-  protected $recurrenceEndDate;
-  protected $recurrenceFrequency = array();
-
   private $isGhostEvent = false;
   private $stubInvitees;
 
@@ -83,9 +76,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $now);
     list($datetime_start, $datetime_end) = $datetime_defaults;
 
+    // When importing events from a context like "bin/calendar reload", we may
+    // be acting as the omnipotent user.
+    $host_phid = $actor->getPHID();
+    if (!$host_phid) {
+      $host_phid = $app->getPHID();
+    }
+
     return id(new PhabricatorCalendarEvent())
       ->setDescription('')
-      ->setHostPHID($actor->getPHID())
+      ->setHostPHID($host_phid)
       ->setIsCancelled(0)
       ->setIsAllDay(0)
       ->setIsStub(0)
@@ -95,10 +95,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setEditPolicy($edit_policy)
       ->setSpacePHID($actor->getDefaultSpacePHID())
       ->attachInvitees(array())
-      ->setDateFrom(0)
-      ->setDateTo(0)
-      ->setAllDayDateFrom(0)
-      ->setAllDayDateTo(0)
       ->setStartDateTime($datetime_start)
       ->setEndDateTime($datetime_end)
       ->attachImportSource(null)
@@ -154,11 +150,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setSequenceIndex($sequence)
       ->setIsRecurring(true)
       ->attachParentEvent($this)
-      ->attachImportSource(null)
-      ->setAllDayDateFrom(0)
-      ->setAllDayDateTo(0)
-      ->setDateFrom(0)
-      ->setDateTo(0);
+      ->attachImportSource(null);
 
     return $child->copyFromParent($actor, $start);
   }
@@ -421,18 +413,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'importSourcePHID' => 'phid?',
         'importUIDIndex' => 'bytes12?',
         'importUID' => 'text?',
-
-        // TODO: DEPRECATED.
-        'allDayDateFrom' => 'epoch',
-        'allDayDateTo' => 'epoch',
-        'dateFrom' => 'epoch',
-        'dateTo' => 'epoch',
-        'recurrenceEndDate' => 'epoch?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_date' => array(
-          'columns' => array('dateFrom', 'dateTo'),
-        ),
         'key_instance' => array(
           'columns' => array('instanceOfEventPHID', 'sequenceIndex'),
           'unique' => true,
@@ -449,7 +431,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         ),
       ),
       self::CONFIG_SERIALIZATION => array(
-        'recurrenceFrequency' => self::SERIALIZATION_JSON,
         'parameters' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
@@ -473,6 +454,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
 
     return $this->assertAttached($this->invitees);
+  }
+
+  public function getInviteeForPHID($phid) {
+    $invitees = $this->getInvitees();
+    $invitees = mpull($invitees, null, 'getInviteePHID');
+    return idx($invitees, $phid);
   }
 
   public static function getFrequencyMap() {
@@ -606,6 +593,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     if ($show_end) {
       $min_date = $start->newPHPDateTime();
       $max_date = $end->newPHPDateTime();
+
+      // Subtract one second since the stored date is exclusive.
+      $max_date = $max_date->modify('-1 second');
 
       $min_day = $min_date->format('Y m d');
       $max_day = $max_date->format('Y m d');
@@ -845,12 +835,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newStartDateTime() {
     $datetime = $this->getParameter('startDateTime');
-    if ($datetime) {
-      return $this->newDateTimeFromDictionary($datetime);
-    }
-
-    $epoch = $this->getDateFrom();
-    return $this->newDateTimeFromEpoch($epoch);
+    return $this->newDateTimeFromDictionary($datetime);
   }
 
   public function getStartDateTimeEpoch() {
@@ -859,12 +844,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function newEndDateTimeForEdit() {
     $datetime = $this->getParameter('endDateTime');
-    if ($datetime) {
-      return $this->newDateTimeFromDictionary($datetime);
-    }
-
-    $epoch = $this->getDateTo();
-    return $this->newDateTimeFromEpoch($epoch);
+    return $this->newDateTimeFromDictionary($datetime);
   }
 
   public function newEndDateTime() {
@@ -873,7 +853,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     // If this is an all day event, we move the end date time forward to the
     // first second of the following day. This is consistent with what users
     // expect: an all day event from "Nov 1" to "Nov 1" lasts the entire day.
-    if ($this->getIsAllDay()) {
+
+    // For imported events, the end date is already stored with this
+    // adjustment.
+
+    if ($this->getIsAllDay() && !$this->isImportedEvent()) {
       $datetime = $datetime
         ->newAbsoluteDateTime()
         ->setHour(0)
@@ -896,11 +880,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       return $this->newDateTimeFromDictionary($datetime);
     }
 
-    $epoch = $this->getRecurrenceEndDate();
-    if (!$epoch) {
-      return null;
-    }
-    return $this->newDateTimeFromEpoch($epoch);
+    return null;
   }
 
   public function getUntilDateTimeEpoch() {
@@ -976,10 +956,14 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $datetime->newAbsoluteDateTime()->toDictionary());
   }
 
-  public function setUntilDateTime(PhutilCalendarDateTime $datetime) {
-    return $this->setParameter(
-      'untilDateTime',
-      $datetime->newAbsoluteDateTime()->toDictionary());
+  public function setUntilDateTime(PhutilCalendarDateTime $datetime = null) {
+    if ($datetime) {
+      $value = $datetime->newAbsoluteDateTime()->toDictionary();
+    } else {
+      $value = null;
+    }
+
+    return $this->setParameter('untilDateTime', $value);
   }
 
   public function setRecurrenceRule(PhutilCalendarRecurrenceRule $rrule) {
@@ -1200,7 +1184,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        if ($this->getImportSource()) {
+        if ($this->isImportedEvent()) {
           return PhabricatorPolicies::POLICY_NOONE;
         } else {
           return $this->getEditPolicy();
@@ -1209,7 +1193,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->getImportSource()) {
+    if ($this->isImportedEvent()) {
       return false;
     }
 
@@ -1234,18 +1218,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    if ($this->getImportSource()) {
-      return pht(
-        'Events imported from external sources can not be edited in '.
-        'Phabricator.');
-    }
-
-    return pht(
-      'The host of an event can always view and edit it. Users who are '.
-      'invited to an event can always view it.');
-  }
-
 
 /* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
 
@@ -1266,6 +1238,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
 
     return $extended;
+  }
+
+/* -(  PhabricatorPolicyCodexInterface  )------------------------------------ */
+
+  public function newPolicyCodex() {
+    return new PhabricatorCalendarEventPolicyCodex();
   }
 
 

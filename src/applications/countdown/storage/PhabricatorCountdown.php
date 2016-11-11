@@ -139,10 +139,6 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return false;
-  }
-
 /* -( PhabricatorSpacesInterface )------------------------------------------- */
 
   public function getSpacePHID() {

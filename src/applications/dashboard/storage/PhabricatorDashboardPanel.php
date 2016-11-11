@@ -159,10 +159,6 @@ final class PhabricatorDashboardPanel
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

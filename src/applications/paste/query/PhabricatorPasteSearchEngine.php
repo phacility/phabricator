@@ -204,11 +204,11 @@ final class PhabricatorPasteSearchEngine
   }
 
   protected function getNewUserBody() {
-    $create_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Create a Paste'))
-      ->setHref('/paste/create/')
-      ->setColor(PHUIButtonView::GREEN);
+    $viewer = $this->requireViewer();
+
+    $create_button = id(new PhabricatorPasteEditEngine())
+      ->setViewer($viewer)
+      ->newNUXButton(pht('Create a Paste'));
 
     $icon = $this->getApplication()->getIcon();
     $app_name =  $this->getApplication()->getName();

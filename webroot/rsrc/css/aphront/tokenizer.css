@@ -38,6 +38,7 @@ body input.jx-tokenizer-input {
   font-size: {$normalfontsize};
   color: #333;
   height: 26px;
+  background: transparent;
 }
 
 body input.jx-tokenizer-input:focus {
@@ -63,7 +64,7 @@ a.jx-tokenizer-x:hover {
 }
 
 a.jx-tokenizer-token {
-  padding: 2px 6px;
+  padding: 1px 6px;
   border:  1px solid {$lightblueborder};
   margin: 3px 2px 0 4px;
   background-color: {$sh-bluebackground};
@@ -173,6 +174,8 @@ a.jx-tokenizer-token-invalid:hover {
   border-bottom: none;
   padding: 0;
   width: 30px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .button.tokenizer-browse-button .phui-icon-view {

@@ -30,6 +30,10 @@ final class PhabricatorCalendarEventDescriptionTransaction
     return true;
   }
 
+  public function getMailDiffSectionHeader() {
+    return pht('CHANGES TO EVENT DESCRIPTION');
+  }
+
   public function newChangeDetailView() {
     $viewer = $this->getViewer();
 

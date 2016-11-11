@@ -14,7 +14,15 @@ final class PhabricatorCalendarImportTriggerLogType
   public function getDisplayDescription(
     PhabricatorUser $viewer,
     PhabricatorCalendarImportLog $log) {
-    return pht('Triggered a periodic update.');
+
+    $via = $log->getParameter('via');
+    switch ($via) {
+      case PhabricatorCalendarImportReloadWorker::VIA_BACKGROUND:
+        return pht('Started background processing.');
+      case PhabricatorCalendarImportReloadWorker::VIA_TRIGGER:
+      default:
+        return pht('Triggered a periodic update.');
+    }
   }
 
   public function getDisplayIcon(

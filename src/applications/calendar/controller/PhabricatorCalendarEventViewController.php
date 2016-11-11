@@ -132,6 +132,43 @@ final class PhabricatorCalendarEventViewController
       $header->addActionLink($action);
     }
 
+    $options = PhabricatorCalendarEventInvitee::getAvailabilityMap();
+
+    $is_attending = $event->getIsUserAttending($viewer->getPHID());
+    if ($is_attending) {
+      $invitee = $event->getInviteeForPHID($viewer->getPHID());
+
+      $selected = $invitee->getDisplayAvailability($event);
+      if (!$selected) {
+        $selected = PhabricatorCalendarEventInvitee::AVAILABILITY_AVAILABLE;
+      }
+
+      $selected_option = idx($options, $selected);
+
+      $availability_select = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-circle '.$selected_option['color'])
+        ->setText(pht('Availability: %s', $selected_option['name']));
+
+      $dropdown = id(new PhabricatorActionListView())
+        ->setUser($viewer);
+
+      foreach ($options as $key => $option) {
+        $uri = "event/availability/{$id}/{$key}/";
+        $uri = $this->getApplicationURI($uri);
+
+        $dropdown->addAction(
+          id(new PhabricatorActionView())
+            ->setName($option['name'])
+            ->setIcon('fa-circle '.$option['color'])
+            ->setHref($uri)
+            ->setWorkflow(true));
+      }
+
+      $availability_select->setDropdownMenu($dropdown);
+      $header->addActionLink($availability_select);
+    }
+
     return $header;
   }
 

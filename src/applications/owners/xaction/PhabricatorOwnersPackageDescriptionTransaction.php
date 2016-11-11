@@ -19,6 +19,10 @@ final class PhabricatorOwnersPackageDescriptionTransaction
       $this->renderAuthor());
   }
 
+  public function getMailDiffSectionHeader() {
+    return pht('CHANGES TO PACKAGE DESCRIPTION');
+  }
+
   public function newChangeDetailView() {
     return id(new PhabricatorApplicationTransactionTextDiffDetailView())
       ->setViewer($this->getViewer())

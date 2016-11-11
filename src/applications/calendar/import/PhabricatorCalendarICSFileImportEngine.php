@@ -65,7 +65,8 @@ final class PhabricatorCalendarICSFileImportEngine
 
   public function importEventsFromSource(
     PhabricatorUser $viewer,
-    PhabricatorCalendarImport $import) {
+    PhabricatorCalendarImport $import,
+    $should_queue) {
 
     $phid_key = PhabricatorCalendarImportICSFileTransaction::PARAMKEY_FILE;
     $file_phid = $import->getParameter($phid_key);
@@ -83,9 +84,12 @@ final class PhabricatorCalendarICSFileImportEngine
 
     $data = $file->loadFileData();
 
+    if ($should_queue && $this->shouldQueueDataImport($data)) {
+      return $this->queueDataImport($import, $data);
+    }
+
     return $this->importICSData($viewer, $import, $data);
   }
-
 
   public function canDisable(
     PhabricatorUser $viewer,

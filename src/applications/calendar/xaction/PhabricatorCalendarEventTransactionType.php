@@ -1,4 +1,10 @@
 <?php
 
 abstract class PhabricatorCalendarEventTransactionType
-  extends PhabricatorModularTransactionType {}
+  extends PhabricatorModularTransactionType {
+
+  public function isInheritedEdit() {
+    return true;
+  }
+
+}

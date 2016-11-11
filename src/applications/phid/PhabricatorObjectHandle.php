@@ -314,8 +314,18 @@ final class PhabricatorObjectHandle
       $classes[] = 'handle-status-'.$this->status;
     }
 
+    $circle = null;
     if ($this->availability != self::AVAILABILITY_FULL) {
       $classes[] = 'handle-availability-'.$this->availability;
+      $circle = array(
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'perfect-circle',
+          ),
+          "\xE2\x80\xA2"),
+        ' ',
+      );
     }
 
     if ($this->getType() == PhabricatorPeopleUserPHIDType::TYPECONST) {
@@ -339,7 +349,7 @@ final class PhabricatorObjectHandle
     return javelin_tag(
       $uri ? 'a' : 'span',
       $attributes,
-      array($icon, $name));
+      array($circle, $icon, $name));
   }
 
   public function renderTag() {

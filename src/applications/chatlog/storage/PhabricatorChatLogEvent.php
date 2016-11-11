@@ -56,8 +56,4 @@ final class PhabricatorChatLogEvent
     return $this->getChannel()->hasAutomaticCapability($capability, $viewer);
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

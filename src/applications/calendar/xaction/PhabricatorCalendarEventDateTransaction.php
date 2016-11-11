@@ -5,8 +5,17 @@ abstract class PhabricatorCalendarEventDateTransaction
 
   abstract protected function getInvalidDateMessage();
 
+  public function isInheritedEdit() {
+    return false;
+  }
+
   public function generateNewValue($object, $value) {
     $editor = $this->getEditor();
+
+    if ($value->isDisabled()) {
+      return null;
+    }
+
     return $value->newPhutilDateTime()
       ->setIsAllDay($editor->getNewIsAllDay())
       ->newAbsoluteDateTime()

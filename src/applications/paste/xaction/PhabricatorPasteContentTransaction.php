@@ -104,6 +104,10 @@ final class PhabricatorPasteContentTransaction
     return true;
   }
 
+  public function getMailDiffSectionHeader() {
+    return pht('CHANGES TO PASTE CONTENT');
+  }
+
   public function newChangeDetailView() {
     $viewer = $this->getViewer();
 

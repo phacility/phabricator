@@ -52,8 +52,4 @@ final class PhabricatorConduitMethodCallLog
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

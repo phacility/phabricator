@@ -581,9 +581,16 @@ final class PhabricatorPolicyFilter extends Phobject {
     }
 
     $more = PhabricatorPolicy::getPolicyExplanation($this->viewer, $policy);
-    $exceptions = $object->describeAutomaticCapability($capability);
+    $more = (array)$more;
+    $more = array_filter($more);
 
-    $details = array_filter(array_merge(array($more), (array)$exceptions));
+    $exceptions = PhabricatorPolicy::getSpecialRules(
+      $object,
+      $this->viewer,
+      $capability,
+      true);
+
+    $details = array_filter(array_merge($more, $exceptions));
 
     $access_denied = $this->renderAccessDenied($object);
 
