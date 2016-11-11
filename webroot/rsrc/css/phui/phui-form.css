@@ -115,7 +115,7 @@ select {
   color: {$darkbluetext};
   border: 1px solid {$greyborder};
   height: 28px;
-  padding: 0 8px;
+  padding: 0 24px 0 8px;
   min-width: 180px;
 }
 
