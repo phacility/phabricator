@@ -58,7 +58,7 @@
   left: 240px;
   right: 240px;
   top: 103px;
-  bottom: 122px;
+  bottom: 142px;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -97,7 +97,7 @@
 
 .conpherence-message-pane .phui-form-view {
   border-width: 0;
-  height: 110px;
+  height: 130px;
   padding: 0 20px 12px;
   position: fixed;
   bottom: 0;
@@ -110,7 +110,7 @@
   color: {$lightgreytext};
   font-style: italic;
   position: absolute;
-  bottom: 6px;
+  bottom: 2px;
   left: 24px;
 }
 
@@ -166,17 +166,16 @@
 }
 
 .conpherence-message-pane .remarkup-assist-bar {
-  border: 2px solid {$lightgreyborder};
   border-bottom: none;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-  background-color: {$lightgreybackground};
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 9px;
+  left: 9px;
+  width: 24px;
   background: {$bluebackground};
   border-radius: 3px;
   border: none;
@@ -349,23 +348,13 @@
 }
 
 .conpherence-message-pane .remarkup-assist-textarea {
-  height: 68px;
+  height: 88px;
   padding: 8px;
-  border: 2px solid {$lightgreyborder};
-  border-top: 1px solid {$thinblueborder};
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
-  resize: none;
-  outline: none;
-  box-shadow: none;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
-}
-
-.conpherence-message-pane .remarkup-assist-textarea:focus {
-  border: 2px solid {$lightgreyborder};
-  border-top: 1px solid {$thinblueborder};
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
@@ -374,13 +363,9 @@
   width: 100%;
   height: 34px;
   resize: none;
-  border-top: 2px solid {$lightgreyborder};
+  border-color: {$greyborder};
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-}
-
-.conpherence-message-pane .remarkup-assist-textarea:focus {
-  outline: none;
 }
 
 .device .conpherence-message-pane .aphront-form-control-submit {
