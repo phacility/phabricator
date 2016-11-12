@@ -17,6 +17,7 @@ final class PhabricatorPeopleQuery
   private $isApproved;
   private $nameLike;
   private $nameTokens;
+  private $namePrefixes;
 
   private $needPrimaryEmail;
   private $needProfile;
@@ -92,6 +93,11 @@ final class PhabricatorPeopleQuery
 
   public function withNameTokens(array $tokens) {
     $this->nameTokens = array_values($tokens);
+    return $this;
+  }
+
+  public function withNamePrefixes(array $prefixes) {
+    $this->namePrefixes = $prefixes;
     return $this;
   }
 
@@ -254,6 +260,17 @@ final class PhabricatorPeopleQuery
         $conn,
         'user.userName IN (%Ls)',
         $this->usernames);
+    }
+
+    if ($this->namePrefixes) {
+      $parts = array();
+      foreach ($this->namePrefixes as $name_prefix) {
+        $parts[] = qsprintf(
+          $conn,
+          'user.username LIKE %>',
+          $name_prefix);
+      }
+      $where[] = '('.implode(' OR ', $parts).')';
     }
 
     if ($this->emails !== null) {

@@ -370,14 +370,6 @@ final class DifferentialRevision extends DifferentialDAO
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        // NOTE: In Differential, an automatic capability on a revision (being
-        // an author) is sufficient to view it, even if you can not see the
-        // repository the revision belongs to. We can bail out early in this
-        // case.
-        if ($this->hasAutomaticCapability($capability, $viewer)) {
-          break;
-        }
-
         $repository_phid = $this->getRepositoryPHID();
         $repository = $this->getRepository();
 

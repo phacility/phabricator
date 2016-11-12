@@ -76,24 +76,16 @@ a.handle-status-closed:hover {
   color: #19558D;
 }
 
-a.handle-availability-disabled,
-a.handle-availability-none,
-a.handle-availability-partial {
-  padding-left: 11px;
-  background-repeat: no-repeat;
-  background-position: -4px center;
+.handle-availability-none .perfect-circle {
+  color: {$red};
 }
 
-a.handle-availability-none {
-  background-image: url(/rsrc/image/icon/fatcow/bullet_red.png);
+.handle-availability-partial .perfect-circle {
+  color: {$orange};
 }
 
-a.handle-availability-partial {
-  background-image: url(/rsrc/image/icon/fatcow/bullet_orange.png);
-}
-
-a.handle-availability-disabled {
-  background-image: url(/rsrc/image/icon/fatcow/bullet_black.png);
+.handle-availability-disabled .perfect-circle {
+  color: {$greytext};
 }
 
 .aphront-developer-error-callout {

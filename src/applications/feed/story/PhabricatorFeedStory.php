@@ -454,11 +454,6 @@ abstract class PhabricatorFeedStory
   }
 
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
 /* -(  PhabricatorMarkupInterface Implementation )--------------------------- */
 
 

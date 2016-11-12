@@ -159,11 +159,6 @@ final class PhabricatorCalendarExport extends PhabricatorCalendarDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 

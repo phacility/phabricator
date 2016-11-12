@@ -325,6 +325,11 @@ final class PhabricatorTypeaheadModularDatasourceController
         pht('Icon'),
         pht('Closed'),
         pht('Sprite'),
+        pht('Color'),
+        pht('Type'),
+        pht('Unique'),
+        pht('Auto'),
+        pht('Phase'),
       ));
 
     $result_box = id(new PHUIObjectBoxView())

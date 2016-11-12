@@ -128,6 +128,10 @@
   width: 50%;
 }
 
+.aphront-policy-explain-dialog .aphront-dialog-body {
+  padding: 0 12px;
+}
+
 .aphront-policy-rejection {
   font-weight: bold;
 }
@@ -163,5 +167,9 @@
 }
 
 .aphront-dialog-object-list .aphront-dialog-body {
+  padding: 0 12px;
+}
+
+.aphront-dialog-tab-group .aphront-dialog-body {
   padding: 0 12px;
 }

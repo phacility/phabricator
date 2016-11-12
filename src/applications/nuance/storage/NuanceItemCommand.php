@@ -48,8 +48,4 @@ final class NuanceItemCommand
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

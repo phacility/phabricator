@@ -160,10 +160,6 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

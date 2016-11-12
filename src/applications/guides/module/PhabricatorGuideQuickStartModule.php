@@ -188,18 +188,18 @@ final class PhabricatorGuideQuickStartModule extends PhabricatorGuideModule {
         $description =
           pht('Invite the rest of your team to get started on Phabricator.');
       }
+
+      $item = id(new PhabricatorGuideItemView())
+        ->setTitle($title)
+        ->setHref($href)
+        ->setIcon($icon)
+        ->setIconBackground($icon_bg)
+        ->setDescription($description);
+      $guide_items->addItem($item);
     }
 
-    $item = id(new PhabricatorGuideItemView())
-      ->setTitle($title)
-      ->setHref($href)
-      ->setIcon($icon)
-      ->setIconBackground($icon_bg)
-      ->setDescription($description);
-    $guide_items->addItem($item);
-
     $intro = pht(
-      'If your new to Phabricator, these optional steps can help you learn '.
+      'If you\'re new to Phabricator, these optional steps can help you learn '.
       'the basics. Conceptually, Phabricator is structured as a graph, and '.
       'repositories, tasks, and projects are all independent from each other. '.
       'Feel free to set up Phabricator for how you work best, and explore '.

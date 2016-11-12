@@ -28,7 +28,10 @@ final class PhabricatorProjectDatasource
       ->needImages(true)
       ->needSlugs(true);
 
-    if ($tokens) {
+    if ($this->getPhase() == self::PHASE_PREFIX) {
+      $prefix = $this->getPrefixQuery();
+      $query->withNamePrefixes(array($prefix));
+    } else if ($tokens) {
       $query->withNameTokens($tokens);
     }
 

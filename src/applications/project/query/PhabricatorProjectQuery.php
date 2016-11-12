@@ -12,6 +12,7 @@ final class PhabricatorProjectQuery
   private $slugMap;
   private $allSlugs;
   private $names;
+  private $namePrefixes;
   private $nameTokens;
   private $icons;
   private $colors;
@@ -75,6 +76,11 @@ final class PhabricatorProjectQuery
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function withNamePrefixes(array $prefixes) {
+    $this->namePrefixes = $prefixes;
     return $this;
   }
 
@@ -254,14 +260,14 @@ final class PhabricatorProjectQuery
 
     $all_graph = $this->getAllReachableAncestors($projects);
 
-    if ($this->needAncestorMembers || $this->needWatchers) {
-      $src_projects = $all_graph;
-    } else {
-      $src_projects = $projects;
-    }
+    // NOTE: Although we may not need much information about ancestors, we
+    // always need to test if the viewer is a member, because we will return
+    // ancestor projects to the policy filter via ExtendedPolicy calls. If
+    // we skip populating membership data on a parent, the policy framework
+    // will think the user is not a member of the parent project.
 
     $all_sources = array();
-    foreach ($src_projects as $project) {
+    foreach ($all_graph as $project) {
       // For milestones, we need parent members.
       if ($project->isMilestone()) {
         $parent_phid = $project->getParentProjectPHID();
@@ -300,7 +306,7 @@ final class PhabricatorProjectQuery
     }
 
     $membership_projects = array();
-    foreach ($src_projects as $project) {
+    foreach ($all_graph as $project) {
       $project_phid = $project->getPHID();
 
       if ($project->isMilestone()) {
@@ -462,6 +468,17 @@ final class PhabricatorProjectQuery
         $conn,
         'name IN (%Ls)',
         $this->names);
+    }
+
+    if ($this->namePrefixes) {
+      $parts = array();
+      foreach ($this->namePrefixes as $name_prefix) {
+        $parts[] = qsprintf(
+          $conn,
+          'name LIKE %>',
+          $name_prefix);
+      }
+      $where[] = '('.implode(' OR ', $parts).')';
     }
 
     if ($this->icons !== null) {

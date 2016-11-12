@@ -150,7 +150,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ->setQueryParam('next', (string)$this->getRequestURI());
       return id(new PHUIObjectBoxView())
         ->setFlush(true)
-        ->setHeaderText(pht('Add Comment'))
         ->appendChild(
           javelin_tag(
             'a',
@@ -183,9 +182,25 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ));
     }
 
+    require_celerity_resource('phui-comment-form-css');
+    $image_uri = $user->getProfileImageURI();
+    $image = phutil_tag(
+      'div',
+      array(
+        'style' => 'background-image: url('.$image_uri.')',
+        'class' => 'phui-comment-image',
+      ));
+    $wedge = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-timeline-wedge',
+      ),
+      '');
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
-      ->setHeaderText($this->headerText)
+      ->addClass('phui-comment-form-view')
+      ->appendChild($image)
+      ->appendChild($wedge)
       ->appendChild($comment);
 
     return array($comment_box, $preview);
@@ -287,20 +302,31 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
             'id' => $input_id,
           )));
 
-      $form->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Actions'))
-          ->setID($action_id)
-          ->setOptions($options));
+      $invisi_bar = phutil_tag(
+        'div',
+        array(
+          'id' => $place_id,
+          'class' => 'phui-comment-control-stack',
+        ));
 
-      // This is an empty placeholder node so we know where to insert the
-      // new actions.
-      $form->appendChild(
-        phutil_tag(
-          'div',
-          array(
-            'id' => $place_id,
-          )));
+      $action_select = id(new AphrontFormSelectControl())
+        ->addClass('phui-comment-fullwidth-control')
+        ->addClass('phui-comment-action-control')
+        ->setID($action_id)
+        ->setOptions($options);
+
+      $action_bar = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-comment-action-bar grouped',
+        ),
+        array(
+          $action_select,
+        ));
+
+      $form->appendChild($action_bar);
+      $form->appendChild($invisi_bar);
+      $form->addClass('phui-comment-has-actions');
 
       Javelin::initBehavior(
         'comment-actions',
@@ -318,16 +344,24 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ));
     }
 
+    $submit_button = id(new AphrontFormSubmitControl())
+      ->addClass('phui-comment-fullwidth-control')
+      ->addClass('phui-comment-submit-control')
+      ->setValue($this->getSubmitButtonName());
+
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setID($this->getCommentID())
+          ->addClass('phui-comment-fullwidth-control')
+          ->addClass('phui-comment-textarea-control')
           ->setName('comment')
-          ->setLabel(pht('Comment'))
           ->setUser($this->getUser())
           ->setValue($draft_comment))
       ->appendChild(
         id(new AphrontFormSubmitControl())
+          ->addClass('phui-comment-fullwidth-control')
+          ->addClass('phui-comment-submit-control')
           ->setValue($this->getSubmitButtonName()));
 
     return $form;

@@ -20,7 +20,7 @@ To access Multimeter, go to {nav Applications > Multimeter}.
 By default, Multimeter samples 0.1% of pages. This should be a reasonable rate
 for most installs, but you can increase or decrease the rate by adjusting
 `debug.sample-rate`. Increasing the rate (by setting the value to a lower
-number, like 100, to sample 1% of pages) will increase the granualrity of the
+number, like 100, to sample 1% of pages) will increase the granularity of the
 data, at a small performance cost.
 
 Using Multimeter

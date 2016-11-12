@@ -93,8 +93,4 @@ final class LegalpadDocumentSignature
     return ($viewer->getPHID() == $this->getSignerPHID());
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

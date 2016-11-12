@@ -128,6 +128,11 @@ final class ManiphestTaskGraph
           'graph-status',
           null,
           'wide pri object-link',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          !$this->getRenderOnlyAdjacentNodes(),
         ));
   }
 

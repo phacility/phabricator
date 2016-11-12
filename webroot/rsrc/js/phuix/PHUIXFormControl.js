@@ -11,6 +11,7 @@ JX.install('PHUIXFormControl', {
     _labelNode: null,
     _errorNode: null,
     _inputNode: null,
+    _className: null,
     _valueSetCallback: null,
     _valueGetCallback: null,
 
@@ -21,6 +22,11 @@ JX.install('PHUIXFormControl', {
 
     setError: function(error) {
       JX.DOM.setContent(this._getErrorNode(), error);
+      return this;
+    },
+
+    setClass: function(className) {
+      this._className = className;
       return this;
     },
 
@@ -67,7 +73,7 @@ JX.install('PHUIXFormControl', {
       if (!this._node) {
 
         var attrs = {
-          className: 'aphront-form-control grouped'
+          className: 'aphront-form-control ' + this._className + ' grouped'
         };
 
         var content = [

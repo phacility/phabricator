@@ -572,7 +572,7 @@ final class PhabricatorUser
     return $this;
   }
 
-  public function getSex() {
+  public function getGender() {
     return $this->getUserSetting(PhabricatorPronounSetting::SETTINGKEY);
   }
 

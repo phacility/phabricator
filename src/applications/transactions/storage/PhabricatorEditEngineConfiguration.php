@@ -302,11 +302,6 @@ final class PhabricatorEditEngineConfiguration
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 

@@ -2275,7 +2275,4 @@ abstract class PhabricatorEditEngine
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
 }

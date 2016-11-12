@@ -68,7 +68,4 @@ final class PhabricatorCalendarExternalInvitee
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
 }

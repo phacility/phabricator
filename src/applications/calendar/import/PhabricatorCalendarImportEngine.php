@@ -3,10 +3,11 @@
 abstract class PhabricatorCalendarImportEngine
   extends Phobject {
 
+  const QUEUE_BYTE_LIMIT = 524288;
+
   final public function getImportEngineType() {
     return $this->getPhobjectClassConstant('ENGINETYPE', 64);
   }
-
 
   abstract public function getImportEngineName();
   abstract public function getImportEngineTypeName();
@@ -27,7 +28,8 @@ abstract class PhabricatorCalendarImportEngine
 
   abstract public function importEventsFromSource(
     PhabricatorUser $viewer,
-    PhabricatorCalendarImport $import);
+    PhabricatorCalendarImport $import,
+    $should_queue);
 
   abstract public function canDisable(
     PhabricatorUser $viewer,
@@ -197,7 +199,7 @@ abstract class PhabricatorCalendarImportEngine
     if ($node_map) {
       $events = id(new PhabricatorCalendarEventQuery())
         ->setViewer($viewer)
-        ->withImportAuthorPHIDs(array($viewer->getPHID()))
+        ->withImportAuthorPHIDs(array($import->getAuthorPHID()))
         ->withImportUIDs(array_keys($node_map))
         ->execute();
       $events = mpull($events, null, 'getImportUID');
@@ -216,7 +218,7 @@ abstract class PhabricatorCalendarImportEngine
       }
 
       $event
-        ->setImportAuthorPHID($viewer->getPHID())
+        ->setImportAuthorPHID($import->getAuthorPHID())
         ->setImportSourcePHID($import->getPHID())
         ->setImportUID($full_uid)
         ->attachImportSource($import);
@@ -259,7 +261,7 @@ abstract class PhabricatorCalendarImportEngine
     if ($attendee_names) {
       $external_invitees = id(new PhabricatorCalendarExternalInviteeQuery())
         ->setViewer($viewer)
-        ->withNames($attendee_names)
+        ->withNames(array_keys($attendee_names))
         ->execute();
       $external_invitees = mpull($external_invitees, null, 'getName');
 
@@ -567,5 +569,36 @@ abstract class PhabricatorCalendarImportEngine
 
     return (bool)$any_event;
   }
+
+  final protected function shouldQueueDataImport($data) {
+    return (strlen($data) > self::QUEUE_BYTE_LIMIT);
+  }
+
+  final protected function queueDataImport(
+    PhabricatorCalendarImport $import,
+    $data) {
+
+    $import->newLogMessage(
+      PhabricatorCalendarImportQueueLogType::LOGTYPE,
+      array(
+        'data.size' => strlen($data),
+        'data.limit' => self::QUEUE_BYTE_LIMIT,
+      ));
+
+    // When we queue on this pathway, we're queueing in response to an explicit
+    // user action (like uploading a big `.ics` file), so we queue at normal
+    // priority instead of bulk/import priority.
+
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorCalendarImportReloadWorker',
+      array(
+        'importPHID' => $import->getPHID(),
+        'via' => PhabricatorCalendarImportReloadWorker::VIA_BACKGROUND,
+      ),
+      array(
+        'objectPHID' => $import->getPHID(),
+      ));
+  }
+
 
 }

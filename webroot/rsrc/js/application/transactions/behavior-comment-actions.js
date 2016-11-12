@@ -58,7 +58,8 @@ JX.behavior('comment-actions', function(config) {
     var control = new JX.PHUIXFormControl()
       .setLabel(action.label)
       .setError(remove)
-      .setControl(action.type, action.spec);
+      .setControl(action.type, action.spec)
+      .setClass('phui-comment-action');
     var node = control.getNode();
 
     JX.Stratcom.addSigil(node, 'touchable');

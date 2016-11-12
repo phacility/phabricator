@@ -325,10 +325,6 @@ final class DrydockBlueprint extends DrydockDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 

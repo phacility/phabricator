@@ -76,7 +76,7 @@ final class PhabricatorCalendarEventInvitee extends PhabricatorCalendarDAO
         'name' => pht('Available'),
       ),
       self::AVAILABILITY_BUSY => array(
-        'color' => 'yellow',
+        'color' => 'orange',
         'name' => pht('Busy'),
       ),
       self::AVAILABILITY_AWAY => array(
@@ -121,7 +121,4 @@ final class PhabricatorCalendarEventInvitee extends PhabricatorCalendarDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
 }
