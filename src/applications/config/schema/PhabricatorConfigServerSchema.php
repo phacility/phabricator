@@ -3,7 +3,17 @@
 final class PhabricatorConfigServerSchema
   extends PhabricatorConfigStorageSchema {
 
+  private $ref;
   private $databases = array();
+
+  public function setRef(PhabricatorDatabaseRef $ref) {
+    $this->ref = $ref;
+    return $this;
+  }
+
+  public function getRef() {
+    return $this->ref;
+  }
 
   public function addDatabase(PhabricatorConfigDatabaseSchema $database) {
     $key = $database->getName();

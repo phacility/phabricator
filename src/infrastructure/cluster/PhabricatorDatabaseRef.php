@@ -157,6 +157,17 @@ final class PhabricatorDatabaseRef
     return $this->isIndividual;
   }
 
+  public function getRefKey() {
+    $host = $this->getHost();
+
+    $port = $this->getPort();
+    if (strlen($port)) {
+      return "{$host}:{$port}";
+    }
+
+    return $host;
+  }
+
   public static function getConnectionStatusMap() {
     return array(
       self::STATUS_OKAY => array(
