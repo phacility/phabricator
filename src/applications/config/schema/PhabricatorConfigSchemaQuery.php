@@ -2,6 +2,30 @@
 
 final class PhabricatorConfigSchemaQuery extends Phobject {
 
+  private $refs;
+  private $apis;
+
+  public function setRefs(array $refs) {
+    $this->refs = $refs;
+    return $this;
+  }
+
+  public function getRefs() {
+    if (!$this->refs) {
+      return PhabricatorDatabaseRef::getMasterDatabaseRefs();
+    }
+    return $this->refs;
+  }
+
+  public function setAPIs(array $apis) {
+    $map = array();
+    foreach ($apis as $api) {
+      $map[$api->getRef()->getRefKey()] = $api;
+    }
+    $this->apis = $map;
+    return $this;
+  }
+
   private function getDatabaseNames(PhabricatorDatabaseRef $ref) {
     $api = $this->getAPI($ref);
     $patches = PhabricatorSQLPatchList::buildAllPatches();
@@ -11,6 +35,12 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
   }
 
   private function getAPI(PhabricatorDatabaseRef $ref) {
+    $key = $ref->getRefKey();
+
+    if (isset($this->apis[$key])) {
+      return $this->apis[$key];
+    }
+
     return id(new PhabricatorStorageManagementAPI())
       ->setUser($ref->getUser())
       ->setHost($ref->getHost())
@@ -20,7 +50,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
   }
 
   public function loadActualSchemata() {
-    $refs = PhabricatorDatabaseRef::getMasterDatabaseRefs();
+    $refs = $this->getRefs();
 
     $schemata = array();
     foreach ($refs as $ref) {
@@ -183,7 +213,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
   }
 
   public function loadExpectedSchemata() {
-    $refs = PhabricatorDatabaseRef::getMasterDatabaseRefs();
+    $refs = $this->getRefs();
 
     $schemata = array();
     foreach ($refs as $ref) {

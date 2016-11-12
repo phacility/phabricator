@@ -223,7 +223,7 @@ final class PhabricatorDatabaseRef
     );
   }
 
-  public static function getLiveRefs() {
+  public static function getClusterRefs() {
     $cache = PhabricatorCaches::getRequestCache();
 
     $refs = $cache->getKey(self::KEY_REFS);
@@ -457,8 +457,22 @@ final class PhabricatorDatabaseRef
     return $this->healthRecord;
   }
 
+  public static function getActiveDatabaseRefs() {
+    $refs = array();
+
+    foreach (self::getMasterDatabaseRefs() as $ref) {
+      $refs[] = $ref;
+    }
+
+    foreach (self::getReplicaDatabaseRefs() as $ref) {
+      $refs[] = $ref;
+    }
+
+    return $refs;
+  }
+
   public static function getMasterDatabaseRefs() {
-    $refs = self::getLiveRefs();
+    $refs = self::getClusterRefs();
 
     if (!$refs) {
       return array(self::getLiveIndividualRef());
@@ -475,13 +489,6 @@ final class PhabricatorDatabaseRef
     }
 
     return $masters;
-  }
-
-  public static function getMasterDatabaseRef() {
-    // TODO: Remove this method; it no longer makes sense with application
-    // partitioning.
-
-    return head(self::getMasterDatabaseRefs());
   }
 
   public static function getMasterDatabaseRefForDatabase($database) {
@@ -507,7 +514,7 @@ final class PhabricatorDatabaseRef
   }
 
   public static function getReplicaDatabaseRefs() {
-    $refs = self::getLiveRefs();
+    $refs = self::getClusterRefs();
 
     if (!$refs) {
       return array();

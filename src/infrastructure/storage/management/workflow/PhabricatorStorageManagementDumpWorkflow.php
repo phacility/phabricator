@@ -44,7 +44,7 @@ final class PhabricatorStorageManagementDumpWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
-    $api = $this->getAPI();
+    $api = $this->getSingleAPI();
     $patches = $this->getPatches();
 
     $console = PhutilConsole::getConsole();

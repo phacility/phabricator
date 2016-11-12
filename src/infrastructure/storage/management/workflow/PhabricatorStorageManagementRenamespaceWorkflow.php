@@ -62,7 +62,7 @@ final class PhabricatorStorageManagementRenamespaceWorkflow
     if (!strlen($input) && !$is_live) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify the dumpfile to read with "--in", or use "--live" to '.
+          'Specify the dumpfile to read with "--input", or use "--live" to '.
           'generate one automatically.'));
     }
 
@@ -108,11 +108,15 @@ final class PhabricatorStorageManagementRenamespaceWorkflow
     }
 
     if ($is_live) {
+      $api = $this->getSingleAPI();
+      $ref_key = $api->getRef()->getRefKey();
+
       $root = dirname(phutil_get_library_root('phabricator'));
 
       $future = new ExecFuture(
-        '%R dump',
-        $root.'/bin/storage');
+        '%R dump --ref %s',
+        $root.'/bin/storage',
+        $ref_key);
 
       $lines = new LinesOfALargeExecFuture($future);
     } else {

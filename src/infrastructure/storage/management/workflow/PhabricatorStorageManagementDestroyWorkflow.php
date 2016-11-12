@@ -23,6 +23,8 @@ final class PhabricatorStorageManagementDestroyWorkflow
   public function didExecute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
+    $api = $this->getSingleAPI();
+
     if (!$this->isDryRun() && !$this->isForce()) {
       $console->writeOut(
         phutil_console_wrap(
@@ -42,7 +44,6 @@ final class PhabricatorStorageManagementDestroyWorkflow
       }
     }
 
-    $api     = $this->getAPI();
     $patches = $this->getPatches();
 
     if ($args->getArg('unittest-fixtures')) {
