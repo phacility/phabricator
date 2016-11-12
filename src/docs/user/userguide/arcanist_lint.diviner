@@ -204,8 +204,8 @@ For many linters, you can do this by providing a `severity` map:
 }
 ```
 
-Here, the lint message "E221" (which is "multiple spaces before operator") is
-disabled, so it won't be shown. The message "E401" (which is "multiple imports
+Here, the lint message `E221` (which is "multiple spaces before operator") is
+disabled, so it won't be shown. The message `E401` (which is "multiple imports
 on one line") is set to "warning" severity.
 
 If you want to remap a large number of messages, you can use `severity.rules`
