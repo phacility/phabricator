@@ -17,9 +17,18 @@
 }
 
 .lightbox-attachment img {
-  margin: 3% auto 0;
-  max-height: 90%;
-  max-width: 90%;
+  max-width: calc(100% - 44px);
+  max-height: calc(100% - 44px);
+  position: absolute;
+  top: 44px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+}
+
+.jx-mask + .lightbox-attachment {
+  background: {$lightgreybackground};
 }
 
 .lightbox-attachment .loading {
@@ -29,78 +38,66 @@
 
 .lightbox-attachment .attachment-name {
   width: 100%;
-  color: #F2F2F2;
   line-height: 30px;
   text-align: center;
 }
 
 .lightbox-attachment .lightbox-status {
-  background: #010101;
-  color: #F2F2F2;
-  line-height: 30px;
+  background: #fff;
   position: fixed;
-  bottom: 0px;
-  width: 100%;
-}
-
-.lightbox-attachment .lightbox-status .lightbox-status-txt {
-  padding: 0px 0px 0px 20px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  padding: 0 20px;
+  line-height: 44px;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .lightbox-attachment .lightbox-status .lightbox-download {
-  padding: 0px 20px 0px 0px;
   float: right;
 }
 
 .lightbox-attachment .lightbox-status .lightbox-download
-.lightbox-download-form {
-  display: inline;
-}
-.lightbox-attachment .lightbox-status .lightbox-download
-.lightbox-download-form button {
-  border: 0;
-  background: #010101;
-}
-.lightbox-attachment .lightbox-status .lightbox-download
-.lightbox-download-form button:hover {
-  background: #333;
+  .lightbox-download-form {
+    display: inline;
 }
 
 .lightbox-attachment .lightbox-close {
-  top: 22px;
-  right: 20px;
-  position: fixed;
-  display: block;
-  height: 26px;
-  width: 26px;
-  background: url('/rsrc/image/icon/lightbox/close-2.png');
-}
-.lightbox-attachment .lightbox-close:hover {
-  background: url('/rsrc/image/icon/lightbox/close-hover-2.png');
+  float: right;
+  margin: 9px 0 0px 8px;
 }
 
 .lightbox-attachment .lightbox-left {
   top: 46%;
-  left: 20px;
+  left: 12px;
   position: fixed;
   display: block;
-  height: 38px;
-  width: 21px;
-  background: url('/rsrc/image/icon/lightbox/left-arrow-2.png');
-}
-.lightbox-attachment .lightbox-left:hover {
-  background: url('/rsrc/image/icon/lightbox/left-arrow-hover-2.png');
+  height: 40px;
+  width: 40px;
 }
 
-.lightbox-attachment .lightbox-right {
+.lightbox-attachment .lightbox-left .phui-icon-view {
+  font-size: 40px;
+}
+
+.lightbox-attachment .lightbox-left:hover .phui-icon-view {
+  color: {$sky};
+}
+
+.lightbox-attachment .lightbox-right .phui-icon-view {
   top: 46%;
-  right: 20px;
+  right: 12px;
   position: fixed;
   display: block;
   height: 38px;
   width: 21px;
-  background: url('/rsrc/image/icon/lightbox/right-arrow-2.png');
 }
-.lightbox-attachment .lightbox-right:hover {
-  background: url('/rsrc/image/icon/lightbox/right-arrow-hover-2.png');
+
+.lightbox-attachment .lightbox-right .phui-icon-view {
+  font-size: 40px;
+}
+
+.lightbox-attachment .lightbox-right:hover .phui-icon-view {
+  color: {$sky};
 }

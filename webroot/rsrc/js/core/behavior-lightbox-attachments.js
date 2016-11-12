@@ -5,6 +5,7 @@
  *           javelin-dom
  *           javelin-mask
  *           javelin-util
+ *           phuix-icon-view
  *           phabricator-busy
  */
 
@@ -88,46 +89,6 @@ JX.behavior('lightbox-attachments', function (config) {
                      },
                      img
                     );
-    JX.DOM.appendContent(lightbox, name_element);
-
-    var closeIcon = JX.$N('a',
-                         {
-                           className : 'lightbox-close',
-                           href : '#'
-                         }
-                        );
-    JX.DOM.listen(closeIcon, 'click', null, closeLightBox);
-    JX.DOM.appendContent(lightbox, closeIcon);
-    var leftIcon = '';
-    if (next) {
-      leftIcon = JX.$N('a',
-                       {
-                         className : 'lightbox-right',
-                         href : '#'
-                       }
-                      );
-      JX.DOM.listen(leftIcon,
-                    'click',
-                    null,
-                    JX.bind(null, loadAnotherLightBox, next)
-                   );
-    }
-    JX.DOM.appendContent(lightbox, leftIcon);
-    var rightIcon = '';
-    if (prev) {
-      rightIcon = JX.$N('a',
-                        {
-                          className : 'lightbox-left',
-                          href : '#'
-                        }
-                       );
-      JX.DOM.listen(rightIcon,
-                    'click',
-                    null,
-                    JX.bind(null, loadAnotherLightBox, prev)
-                   );
-    }
-    JX.DOM.appendContent(lightbox, rightIcon);
 
     var statusSpan = JX.$N('span',
                            {
@@ -140,13 +101,61 @@ JX.behavior('lightbox-attachments', function (config) {
                             {
                               className : 'lightbox-download'
                             });
+    var closeButton = JX.$N('a',
+                         {
+                           className : 'lightbox-close button grey',
+                           href : '#'
+                         },
+                        'Close');
     var statusHTML = JX.$N('div',
                            {
                              className : 'lightbox-status'
                            },
-                           [statusSpan, downloadSpan]
+                           [statusSpan, closeButton, downloadSpan]
                           );
     JX.DOM.appendContent(lightbox, statusHTML);
+    JX.DOM.appendContent(lightbox, name_element);
+    JX.DOM.listen(closeButton, 'click', null, closeLightBox);
+
+    var leftIcon = '';
+    if (next) {
+      var r_icon = new JX.PHUIXIconView()
+        .setIcon('fa-angle-right')
+        .setColor('lightgreytext')
+        .getNode();
+      leftIcon = JX.$N('a',
+                       {
+                         className : 'lightbox-right',
+                         href : '#'
+                       },
+                       r_icon);
+      JX.DOM.listen(leftIcon,
+                    'click',
+                    null,
+                    JX.bind(null, loadAnotherLightBox, next)
+                   );
+    }
+    JX.DOM.appendContent(lightbox, leftIcon);
+    var rightIcon = '';
+    if (prev) {
+      var l_icon = new JX.PHUIXIconView()
+        .setIcon('fa-angle-left')
+        .setColor('lightgreytext')
+        .getNode();
+      rightIcon = JX.$N('a',
+                        {
+                          className : 'lightbox-left',
+                          href : '#'
+                        },
+                        l_icon);
+      JX.DOM.listen(rightIcon,
+                    'click',
+                    null,
+                    JX.bind(null, loadAnotherLightBox, prev)
+                   );
+    }
+    JX.DOM.appendContent(lightbox, rightIcon);
+
     JX.DOM.alterClass(document.body, 'lightbox-attached', true);
     JX.Mask.show('jx-dark-mask');
 
