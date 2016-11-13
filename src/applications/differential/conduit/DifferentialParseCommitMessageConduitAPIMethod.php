@@ -33,7 +33,7 @@ final class DifferentialParseCommitMessageConduitAPIMethod
       new DifferentialRevision(),
       DifferentialCustomField::ROLE_COMMITMESSAGE);
     $field_list->setViewer($viewer);
-    $field_map = mpull($field_list, null, 'getFieldKeyForConduit');
+    $field_map = mpull($field_list->getFields(), null, 'getFieldKeyForConduit');
 
     $corpus_map = $this->parseCommitMessage($corpus);
 
