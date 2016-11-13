@@ -117,7 +117,9 @@ final class DiffusionSubversionServeSSHWorkflow
           $uri = $struct[2]['value'];
           $path = $this->getPathFromSubversionURI($uri);
 
-          return $this->loadRepositoryWithPath($path);
+          return $this->loadRepositoryWithPath(
+            $path,
+            PhabricatorRepositoryType::REPOSITORY_TYPE_SVN);
         }
       }
 

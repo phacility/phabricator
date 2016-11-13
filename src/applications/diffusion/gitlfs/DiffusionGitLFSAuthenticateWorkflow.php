@@ -15,7 +15,9 @@ final class DiffusionGitLFSAuthenticateWorkflow
   }
 
   protected function identifyRepository() {
-    return $this->loadRepositoryWithPath($this->getLFSPathArgument());
+    return $this->loadRepositoryWithPath(
+      $this->getLFSPathArgument(),
+      PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
   }
 
   private function getLFSPathArgument() {

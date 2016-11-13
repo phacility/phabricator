@@ -90,6 +90,11 @@ abstract class DiffusionController extends PhabricatorController {
   protected function getRepositoryIdentifierFromRequest(
     AphrontRequest $request) {
 
+    $short_name = $request->getURIData('repositoryShortName');
+    if (strlen($short_name)) {
+      return $short_name;
+    }
+
     $identifier = $request->getURIData('repositoryCallsign');
     if (strlen($identifier)) {
       return $identifier;

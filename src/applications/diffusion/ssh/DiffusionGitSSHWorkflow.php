@@ -17,7 +17,9 @@ abstract class DiffusionGitSSHWorkflow
   protected function identifyRepository() {
     $args = $this->getArgs();
     $path = head($args->getArg('dir'));
-    return $this->loadRepositoryWithPath($path);
+    return $this->loadRepositoryWithPath(
+      $path,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
   }
 
   protected function waitForGitClient() {
