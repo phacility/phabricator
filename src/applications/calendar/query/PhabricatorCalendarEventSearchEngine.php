@@ -373,6 +373,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setURI($event->getURI())
         ->setIsAllDay($event->getIsAllDay())
         ->setIcon($event->getDisplayIcon($viewer))
+        ->setViewerIsInvited($event->getIsUserInvited($viewer->getPHID()))
         ->setIconColor($event->getDisplayIconColor($viewer));
 
       $month_view->addEvent($event_view);
