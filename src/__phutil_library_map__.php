@@ -6436,7 +6436,7 @@ phutil_register_library_map(array(
     'PHUIInfoExample' => 'PhabricatorUIExample',
     'PHUIInfoPanelExample' => 'PhabricatorUIExample',
     'PHUIInfoPanelView' => 'AphrontView',
-    'PHUIInfoView' => 'AphrontView',
+    'PHUIInfoView' => 'AphrontTagView',
     'PHUIInvisibleCharacterTestCase' => 'PhabricatorTestCase',
     'PHUIInvisibleCharacterView' => 'AphrontView',
     'PHUIListExample' => 'PhabricatorUIExample',
