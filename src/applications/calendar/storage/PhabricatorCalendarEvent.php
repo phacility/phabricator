@@ -584,10 +584,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $min_date = $start->newPHPDateTime();
     $max_date = $end->newPHPDateTime();
 
-    if ($show_end) {
+    if ($this->getIsAllDay()) {
       // Subtract one second since the stored date is exclusive.
       $max_date = $max_date->modify('-1 second');
+    }
 
+    if ($show_end) {
       $min_day = $min_date->format('Y m d');
       $max_day = $max_date->format('Y m d');
 
