@@ -130,7 +130,7 @@ final class PHUIInfoView extends AphrontTagView {
         ),
         $list);
     } else if (count($errors) == 1) {
-      $list = $this->errors[0];
+      $list = head($this->errors);
     } else {
       $list = null;
     }
