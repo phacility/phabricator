@@ -50,6 +50,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   private $parentEvent = self::ATTACHABLE;
   private $invitees = self::ATTACHABLE;
   private $importSource = self::ATTACHABLE;
+  private $rsvps = self::ATTACHABLE;
 
   private $viewerTimezone;
 
@@ -643,14 +644,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
 
     if ($viewer->isLoggedIn()) {
-      $status = $this->getUserInviteStatus($viewer->getPHID());
-      switch ($status) {
-        case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
-          return 'fa-check-circle';
-        case PhabricatorCalendarEventInvitee::STATUS_INVITED:
-          return 'fa-user-plus';
-        case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
-          return 'fa-times';
+      $viewer_phid = $viewer->getPHID();
+      if ($this->isRSVPInvited($viewer_phid)) {
+        return 'fa-users';
+      } else {
+        $status = $this->getUserInviteStatus($viewer_phid);
+        switch ($status) {
+          case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
+            return 'fa-check-circle';
+          case PhabricatorCalendarEventInvitee::STATUS_INVITED:
+            return 'fa-user-plus';
+          case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
+            return 'fa-times';
+        }
       }
     }
 
@@ -671,7 +677,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
 
     if ($viewer->isLoggedIn()) {
-      $status = $this->getUserInviteStatus($viewer->getPHID());
+      $viewer_phid = $viewer->getPHID();
+      if ($this->isRSVPInvited($viewer_phid)) {
+        return 'green';
+      }
+
+      $status = $this->getUserInviteStatus($viewer_phid);
       switch ($status) {
         case PhabricatorCalendarEventInvitee::STATUS_ATTENDING:
           return 'green';
@@ -1120,6 +1131,52 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     return $phids;
   }
+
+  public function getRSVPs($phid) {
+    return $this->assertAttachedKey($this->rsvps, $phid);
+  }
+
+  public function attachRSVPs(array $rsvps) {
+    $this->rsvps = $rsvps;
+    return $this;
+  }
+
+  public function isRSVPInvited($phid) {
+    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+    return ($this->getRSVPStatus($phid) == $status_invited);
+  }
+
+  public function hasRSVPAuthority($phid, $other_phid) {
+    foreach ($this->getRSVPs($phid) as $rsvp) {
+      if ($rsvp->getInviteePHID() == $other_phid) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public function getRSVPStatus($phid) {
+    // Check for an individual invitee record first.
+    $invitees = $this->invitees;
+    $invitees = mpull($invitees, null, 'getInviteePHID');
+    $invitee = idx($invitees, $phid);
+    if ($invitee) {
+      return $invitee->getStatus();
+    }
+
+    // If we don't have one, try to find an invited status for the user's
+    // projects.
+    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+    foreach ($this->getRSVPs($phid) as $rsvp) {
+      if ($rsvp->getStatus() == $status_invited) {
+        return $status_invited;
+      }
+    }
+
+    return PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+  }
+
 
 
 /* -(  Markup Interface  )--------------------------------------------------- */
