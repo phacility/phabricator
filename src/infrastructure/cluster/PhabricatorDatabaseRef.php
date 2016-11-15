@@ -36,6 +36,11 @@ final class PhabricatorDatabaseRef
   private $healthRecord;
   private $didFailToConnect;
 
+  private $isDefaultPartition;
+  private $applicationMap = array();
+  private $masterRef;
+  private $replicaRefs = array();
+
   public function setHost($host) {
     $this->host = $host;
     return $this;
@@ -157,6 +162,43 @@ final class PhabricatorDatabaseRef
     return $this->isIndividual;
   }
 
+  public function setIsDefaultPartition($is_default_partition) {
+    $this->isDefaultPartition = $is_default_partition;
+    return $this;
+  }
+
+  public function getIsDefaultPartition() {
+    return $this->isDefaultPartition;
+  }
+
+  public function setApplicationMap(array $application_map) {
+    $this->applicationMap = $application_map;
+    return $this;
+  }
+
+  public function getApplicationMap() {
+    return $this->applicationMap;
+  }
+
+  public function setMasterRef(PhabricatorDatabaseRef $master_ref) {
+    $this->masterRef = $master_ref;
+    return $this;
+  }
+
+  public function getMasterRef() {
+    return $this->masterRef;
+  }
+
+  public function addReplicaRef(PhabricatorDatabaseRef $replica_ref) {
+    $this->replicaRefs[] = $replica_ref;
+    return $this;
+  }
+
+  public function getReplicaRefs() {
+    return $this->replicaRefs;
+  }
+
+
   public function getRefKey() {
     $host = $this->getHost();
 
@@ -248,8 +290,6 @@ final class PhabricatorDatabaseRef
   }
 
   public static function newRefs() {
-    $refs = array();
-
     $default_port = PhabricatorEnv::getEnvConfig('mysql.port');
     $default_port = nonempty($default_port, 3306);
 
@@ -259,33 +299,12 @@ final class PhabricatorDatabaseRef
     $default_pass = new PhutilOpaqueEnvelope($default_pass);
 
     $config = PhabricatorEnv::getEnvConfig('cluster.databases');
-    foreach ($config as $server) {
-      $host = $server['host'];
-      $port = idx($server, 'port', $default_port);
-      $user = idx($server, 'user', $default_user);
-      $disabled = idx($server, 'disabled', false);
 
-      $pass = idx($server, 'pass');
-      if ($pass) {
-        $pass = new PhutilOpaqueEnvelope($pass);
-      } else {
-        $pass = clone $default_pass;
-      }
-
-      $role = $server['role'];
-
-      $ref = id(new self())
-        ->setHost($host)
-        ->setPort($port)
-        ->setUser($user)
-        ->setPass($pass)
-        ->setDisabled($disabled)
-        ->setIsMaster(($role == 'master'));
-
-      $refs[] = $ref;
-    }
-
-    return $refs;
+    return id(new PhabricatorDatabaseRefParser())
+      ->setDefaultPort($default_port)
+      ->setDefaultUser($default_user)
+      ->setDefaultPass($default_pass)
+      ->newRefs($config);
   }
 
   public static function queryAll() {
@@ -471,7 +490,7 @@ final class PhabricatorDatabaseRef
     return $refs;
   }
 
-  public static function getMasterDatabaseRefs() {
+  public static function getAllMasterDatabaseRefs() {
     $refs = self::getClusterRefs();
 
     if (!$refs) {
@@ -491,12 +510,42 @@ final class PhabricatorDatabaseRef
     return $masters;
   }
 
-  public static function getMasterDatabaseRefForDatabase($database) {
+  public static function getMasterDatabaseRefs() {
+    $refs = self::getAllMasterDatabaseRefs();
+    return self::getEnabledRefs($refs);
+  }
+
+  public function isApplicationHost($database) {
+    return isset($this->applicationMap[$database]);
+  }
+
+  public static function getMasterDatabaseRefForApplication($application) {
     $masters = self::getMasterDatabaseRefs();
 
-    // TODO: Actually implement this.
+    $application_master = null;
+    $default_master = null;
+    foreach ($masters as $master) {
+      if ($master->isApplicationHost($application)) {
+        $application_master = $master;
+        break;
+      }
+      if ($master->getIsDefaultPartition()) {
+        $default_master = $master;
+      }
+    }
 
-    return head($masters);
+    if ($application_master) {
+      $masters = array($application_master);
+    } else if ($default_master) {
+      $masters = array($default_master);
+    } else {
+      $masters = array();
+    }
+
+    $masters = self::getEnabledRefs($masters);
+    $master = head($masters);
+
+    return $master;
   }
 
   public static function newIndividualRef() {
@@ -513,7 +562,7 @@ final class PhabricatorDatabaseRef
       ->setIsMaster(true);
   }
 
-  public static function getReplicaDatabaseRefs() {
+  public static function getAllReplicaDatabaseRefs() {
     $refs = self::getClusterRefs();
 
     if (!$refs) {
@@ -522,9 +571,6 @@ final class PhabricatorDatabaseRef
 
     $replicas = array();
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
       if ($ref->getIsMaster()) {
         continue;
       }
@@ -535,10 +581,44 @@ final class PhabricatorDatabaseRef
     return $replicas;
   }
 
-  public static function getReplicaDatabaseRefForDatabase($database) {
+  public static function getReplicaDatabaseRefs() {
+    $refs = self::getAllReplicaDatabaseRefs();
+    return self::getEnabledRefs($refs);
+  }
+
+  private static function getEnabledRefs(array $refs) {
+    foreach ($refs as $key => $ref) {
+      if ($ref->getDisabled()) {
+        unset($refs[$key]);
+      }
+    }
+    return $refs;
+  }
+
+  public static function getReplicaDatabaseRefForApplication($application) {
     $replicas = self::getReplicaDatabaseRefs();
 
-    // TODO: Actually implement this.
+    $application_replicas = array();
+    $default_replicas = array();
+    foreach ($replicas as $replica) {
+      $master = $replica->getMaster();
+
+      if ($master->isApplicationHost($application)) {
+        $application_replicas[] = $replica;
+      }
+
+      if ($master->getIsDefaultPartition()) {
+        $default_replicas[] = $replica;
+      }
+    }
+
+    if ($application_replicas) {
+      $replicas = $application_replicas;
+    } else {
+      $replicas = $default_replicas;
+    }
+
+    $replicas = self::getEnabledRefs($replicas);
 
     // TODO: We may have multiple replicas to choose from, and could make
     // more of an effort to pick the "best" one here instead of always

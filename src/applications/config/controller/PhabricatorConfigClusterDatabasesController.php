@@ -169,8 +169,37 @@ final class PhabricatorConfigClusterDatabasesController
 
       $messages = phutil_implode_html(phutil_tag('br'), $messages);
 
+      $partition = null;
+      if ($database->getIsMaster()) {
+        if ($database->getIsDefaultPartition()) {
+          $partition = id(new PHUIIconView())
+            ->setIcon('fa-circle sky')
+            ->addSigil('has-tooltip')
+            ->setMetadata(
+              array(
+                'tip' => pht('Default Partition'),
+              ));
+        } else {
+          $map = $database->getApplicationMap();
+          if ($map) {
+            $list = implode(', ', $map);
+          } else {
+            $list = pht('Empty');
+          }
+
+          $partition = id(new PHUIIconView())
+            ->setIcon('fa-adjust sky')
+            ->addSigil('has-tooltip')
+            ->setMetadata(
+              array(
+                'tip' => pht('Partition: %s', $list),
+              ));
+        }
+      }
+
       $rows[] = array(
         $role_icon,
+        $partition,
         $database->getHost(),
         $database->getPort(),
         $database->getUser(),
@@ -188,6 +217,7 @@ final class PhabricatorConfigClusterDatabasesController
       ->setHeaders(
         array(
           null,
+          null,
           pht('Host'),
           pht('Port'),
           pht('User'),
@@ -198,6 +228,7 @@ final class PhabricatorConfigClusterDatabasesController
         ))
       ->setColumnClasses(
         array(
+          null,
           null,
           null,
           null,
