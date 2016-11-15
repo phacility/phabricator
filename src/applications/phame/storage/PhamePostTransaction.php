@@ -7,6 +7,7 @@ final class PhamePostTransaction
   const TYPE_SUBTITLE         = 'phame.post.subtitle';
   const TYPE_BODY             = 'phame.post.body';
   const TYPE_VISIBILITY       = 'phame.post.visibility';
+  const TYPE_HEADERIMAGE      = 'phame.post.headerimage';
   const TYPE_BLOG             = 'phame.post.blog';
 
   const MAILTAG_CONTENT       = 'phame-post-content';
@@ -70,6 +71,9 @@ final class PhamePostTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_CREATE:
         return 'fa-plus';
+      break;
+      case self::TYPE_HEADERIMAGE:
+        return 'fa-camera-retro';
       break;
       case self::TYPE_VISIBILITY:
         if ($new == PhameConstants::VISIBILITY_PUBLISHED) {
@@ -156,6 +160,11 @@ final class PhamePostTransaction
           '%s updated the blog post.',
           $this->renderHandleLink($author_phid));
         break;
+      case self::TYPE_HEADERIMAGE:
+        return pht(
+          '%s updated the header image.',
+          $this->renderHandleLink($author_phid));
+        break;
       case self::TYPE_VISIBILITY:
         if ($new == PhameConstants::VISIBILITY_DRAFT) {
           return pht(
@@ -219,6 +228,12 @@ final class PhamePostTransaction
       case self::TYPE_BODY:
         return pht(
           '%s updated the blog post %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
+      case self::TYPE_HEADERIMAGE:
+        return pht(
+          '%s updated the header image for post %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
