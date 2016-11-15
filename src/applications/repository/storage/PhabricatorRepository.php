@@ -760,7 +760,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         if (strlen($path)) {
           $uri = $this->getPathURI("/repository/{$path}");
         } else {
-          $uri = $this->getPathURI();
+          $uri = $this->getPathURI('/');
         }
         break;
       case 'external':
