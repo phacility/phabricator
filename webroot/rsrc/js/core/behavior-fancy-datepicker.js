@@ -14,6 +14,7 @@ JX.behavior('fancy-datepicker', function(config, statics) {
   statics.initialized = true;
 
   var picker;
+  var anchor_node;
   var root;
 
   var value_y;
@@ -79,18 +80,22 @@ JX.behavior('fancy-datepicker', function(config, statics) {
 
     picker = JX.$N(
       'div',
-      {className: 'fancy-datepicker', sigil: 'phabricator-datepicker'},
-      JX.$N('div', {className: 'fancy-datepicker-core'}));
+      {
+        className: 'fancy-datepicker',
+        sigil: 'phabricator-datepicker'
+      },
+      JX.$N(
+        'div',
+        {
+          className: 'fancy-datepicker-core',
+          sigil: 'fancy-datepicker-core'
+        }));
     document.body.appendChild(picker);
 
-    var button = e.getNode('calendar-button');
-    var p = JX.$V(button);
-    var d = JX.Vector.getDim(picker);
-
-    picker.style.left = (p.x - d.x - 2) + 'px';
-    picker.style.top = (p.y) + 'px';
-
+    anchor_node = e.getNode('calendar-button');
     JX.DOM.alterClass(root, 'picker-open', true);
+
+    JX.Mask.show('jx-date-mask');
 
     read_date();
     render();
@@ -100,6 +105,8 @@ JX.behavior('fancy-datepicker', function(config, statics) {
     if (!picker) {
       return;
     }
+
+    JX.Mask.hide('jx-date-mask');
 
     JX.DOM.remove(picker);
     picker = null;
@@ -198,6 +205,23 @@ JX.behavior('fancy-datepicker', function(config, statics) {
   };
 
   var render = function() {
+    if (!picker) {
+      return;
+    }
+
+    var button = anchor_node;
+    var p = JX.$V(button);
+    var d = JX.Vector.getDim(picker);
+    var b = JX.Vector.getDim(button);
+
+    if (JX.Device.isDesktop()) {
+      picker.style.top = (p.y) + 'px';
+      picker.style.left = (p.x - d.x - 2) + 'px';
+    } else {
+      picker.style.top = (p.y + b.y) + 'px';
+      picker.style.left = '';
+    }
+
     JX.DOM.setContent(
       picker.firstChild,
       [
@@ -408,10 +432,12 @@ JX.behavior('fancy-datepicker', function(config, statics) {
     });
 
   JX.Stratcom.listen('click', null, function(e){
-    if (e.getNode('phabricator-datepicker')) {
+    if (e.getNode('phabricator-datepicker-core')) {
       return;
     }
     onclose();
   });
+
+  JX.Stratcom.listen('resize', null, render);
 
 });
