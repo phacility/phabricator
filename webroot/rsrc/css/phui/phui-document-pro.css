@@ -198,10 +198,6 @@ a.button.phui-document-toc {
   border-top: 1px solid rgba({$alphablue}, 0.20);
 }
 
-.phui-document-view-pro-box .phui-timeline-image {
-  border-radius: 25px;
-}
-
 .phui-document-view-pro-box .phui-timeline-wedge {
   display: none;
 }
