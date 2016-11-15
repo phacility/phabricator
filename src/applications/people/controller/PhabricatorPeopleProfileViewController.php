@@ -194,11 +194,12 @@ final class PhabricatorPeopleProfileViewController
       ->withDateRange($range_start, $range_end)
       ->withInvitedPHIDs(array($user->getPHID()))
       ->withIsCancelled(false)
+      ->needRSVPs(array($viewer->getPHID()))
       ->execute();
 
     $event_views = array();
     foreach ($events as $event) {
-      $viewer_is_invited = $event->getIsUserInvited($viewer->getPHID());
+      $viewer_is_invited = $event->isRSVPInvited($viewer->getPHID());
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,

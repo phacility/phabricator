@@ -368,6 +368,8 @@ final class PhabricatorCalendarEventSearchEngine
       $epoch_min = $event->getStartDateTimeEpoch();
       $epoch_max = $event->getEndDateTimeEpoch();
 
+      $is_invited = $event->isRSVPInvited($viewer->getPHID());
+
       $event_view = id(new AphrontCalendarEventView())
         ->setHostPHID($event->getHostPHID())
         ->setEpochRange($epoch_min, $epoch_max)
@@ -376,7 +378,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setURI($event->getURI())
         ->setIsAllDay($event->getIsAllDay())
         ->setIcon($event->getDisplayIcon($viewer))
-        ->setViewerIsInvited($event->getIsUserInvited($viewer->getPHID()))
+        ->setViewerIsInvited($is_invited)
         ->setIconColor($event->getDisplayIconColor($viewer));
 
       $month_view->addEvent($event_view);

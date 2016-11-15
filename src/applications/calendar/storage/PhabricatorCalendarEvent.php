@@ -538,16 +538,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $is_attending;
   }
 
-  public function getIsUserInvited($phid) {
-    $uninvited_status = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
-    $declined_status = PhabricatorCalendarEventInvitee::STATUS_DECLINED;
-    $status = $this->getUserInviteStatus($phid);
-    if ($status == $uninvited_status || $status == $declined_status) {
-      return false;
-    }
-    return true;
-  }
-
   public function getIsGhostEvent() {
     return $this->isGhostEvent;
   }
@@ -655,7 +645,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
           case PhabricatorCalendarEventInvitee::STATUS_INVITED:
             return 'fa-user-plus';
           case PhabricatorCalendarEventInvitee::STATUS_DECLINED:
-            return 'fa-times';
+            return 'fa-times-circle';
         }
       }
     }

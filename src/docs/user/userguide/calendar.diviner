@@ -37,6 +37,22 @@ revision or task.
 You can click through to a user's profile to see more details about their
 availability.
 
+Status Icons
+============
+
+On the month and day views, Calendar shows an icon next to each event to
+indicate status. The icons are:
+
+  - {icon user-plus, color=green} **Invited, Individual**: You're personally
+    invited to the event.
+  - {icon users, color=green} **Invited, Group**: A project you are a member
+    of is invited to the event.
+  - {icon check-circle, color=green} **Attending**: You're attending the event.
+  - {icon times-circle, color=grey} **Declined**: You've declined the event.
+  - {icon times, color=red} **Cancelled**: The event has been cancelled.
+
+If you don't have any special relationship to the event and the event does not
+have any special status, an event-specific icon is shown instead.
 
 Importing Events
 ================
