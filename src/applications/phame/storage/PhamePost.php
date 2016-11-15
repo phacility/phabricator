@@ -18,6 +18,7 @@ final class PhamePost extends PhameDAO
 
   protected $bloggerPHID;
   protected $title;
+  protected $subtitle;
   protected $phameTitle;
   protected $body;
   protected $visibility;
@@ -122,6 +123,7 @@ final class PhamePost extends PhameDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
+        'subtitle' => 'text64',
         'phameTitle' => 'sort64?',
         'visibility' => 'uint32',
         'mailKey' => 'bytes20',

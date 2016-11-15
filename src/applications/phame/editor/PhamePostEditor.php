@@ -16,6 +16,7 @@ final class PhamePostEditor
 
     $types[] = PhamePostTransaction::TYPE_BLOG;
     $types[] = PhamePostTransaction::TYPE_TITLE;
+    $types[] = PhamePostTransaction::TYPE_SUBTITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
     $types[] = PhamePostTransaction::TYPE_VISIBILITY;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
@@ -32,6 +33,8 @@ final class PhamePostEditor
         return $object->getBlogPHID();
       case PhamePostTransaction::TYPE_TITLE:
         return $object->getTitle();
+      case PhamePostTransaction::TYPE_SUBTITLE:
+        return $object->getSubtitle();
       case PhamePostTransaction::TYPE_BODY:
         return $object->getBody();
       case PhamePostTransaction::TYPE_VISIBILITY:
@@ -45,6 +48,7 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
+      case PhamePostTransaction::TYPE_SUBTITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
       case PhamePostTransaction::TYPE_BLOG:
@@ -59,6 +63,8 @@ final class PhamePostEditor
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
         return $object->setTitle($xaction->getNewValue());
+      case PhamePostTransaction::TYPE_SUBTITLE:
+        return $object->setSubtitle($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BODY:
         return $object->setBody($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BLOG:
@@ -84,6 +90,7 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
+      case PhamePostTransaction::TYPE_SUBTITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
       case PhamePostTransaction::TYPE_BLOG:
