@@ -36,7 +36,7 @@ final class PhabricatorCalendarEventSearchEngine
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Invited'))
         ->setKey('invitedPHIDs')
-        ->setDatasource(new PhabricatorPeopleUserFunctionDatasource()),
+        ->setDatasource(new PhabricatorCalendarInviteeDatasource()),
       id(new PhabricatorSearchDateControlField())
         ->setLabel(pht('Occurs After'))
         ->setKey('rangeStart'),
