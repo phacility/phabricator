@@ -108,6 +108,8 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitTypeDescription(pht('New event name.'))
         ->setValue($object->getName()),
       id(new PhabricatorBoolEditField())
+        ->setIsLockable(false)
+        ->setIsDefaultable(false)
         ->setKey('isAllDay')
         ->setOptions(pht('Normal Event'), pht('All Day Event'))
         ->setAsCheckbox(true)
@@ -151,6 +153,8 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitTypeDescription(pht('True to cancel the event.'))
         ->setValue($object->getIsCancelled()),
       id(new PhabricatorUsersEditField())
+        ->setIsLockable(false)
+        ->setIsDefaultable(false)
         ->setKey('hostPHID')
         ->setAliases(array('host'))
         ->setLabel(pht('Host'))
@@ -162,6 +166,8 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitTypeDescription(pht('New event host.'))
         ->setSingleValue($object->getHostPHID()),
       id(new PhabricatorDatasourceEditField())
+        ->setIsLockable(false)
+        ->setIsDefaultable(false)
         ->setIsHidden($is_future)
         ->setKey('inviteePHIDs')
         ->setAliases(array('invite', 'invitee', 'invitees', 'inviteePHID'))
@@ -203,6 +209,8 @@ final class PhabricatorCalendarEventEditEngine
 
       id(new PhabricatorBoolEditField())
         ->setIsHidden(true)
+        ->setIsLockable(false)
+        ->setIsDefaultable(false)
         ->setKey('isRecurring')
         ->setLabel(pht('Recurring'))
         ->setOptions(pht('One-Time Event'), pht('Recurring Event'))
@@ -213,6 +221,8 @@ final class PhabricatorCalendarEventEditEngine
         ->setConduitTypeDescription(pht('Mark the event as a recurring event.'))
         ->setValue(true),
       id(new PhabricatorSelectEditField())
+        ->setIsLockable(false)
+        ->setIsDefaultable(false)
         ->setKey('frequency')
         ->setLabel(pht('Frequency'))
         ->setOptions($frequency_options)
