@@ -217,6 +217,7 @@ final class PhabricatorPeopleProfileViewController
         ->setIcon($event->getIcon())
         ->setViewerIsInvited($viewer_is_invited)
         ->setName($event->getName())
+        ->setDatetimeSummary($event->renderEventDate($viewer, true))
         ->setURI($event->getURI());
 
       $event_views[] = $event_view;

@@ -379,6 +379,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setIsAllDay($event->getIsAllDay())
         ->setIcon($event->getDisplayIcon($viewer))
         ->setViewerIsInvited($is_invited)
+        ->setDatetimeSummary($event->renderEventDate($viewer, true))
         ->setIconColor($event->getDisplayIconColor($viewer));
 
       $month_view->addEvent($event_view);
@@ -447,6 +448,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setIconColor($status_color)
         ->setName($event->getName())
         ->setURI($event->getURI())
+        ->setDatetimeSummary($event->renderEventDate($viewer, true))
         ->setIsCancelled($event->getIsCancelled());
 
       $day_view->addEvent($event_view);
