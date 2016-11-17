@@ -103,15 +103,10 @@ final class PhabricatorProjectDatasource
 
       $all_strings = array();
       $all_strings[] = $proj->getDisplayName();
-
-      // Add an extra space after the name so that the original project
-      // sorts ahead of milestones. This is kind of a hack but ehh?
-      $all_strings[] = null;
-
       foreach ($proj->getSlugs() as $project_slug) {
         $all_strings[] = $project_slug->getSlug();
       }
-      $all_strings = implode(' ', $all_strings);
+      $all_strings = implode("\n", $all_strings);
 
       $proj_result = id(new PhabricatorTypeaheadResult())
         ->setName($all_strings)

@@ -18,6 +18,10 @@ JX.install('TypeaheadNormalizer', {
       // NOTE: We specifically normalize "(" and ")" into spaces so that
       // we can match tokenizer functions like "members(project)".
 
+      // NOTE: We specifically do NOT normalize "\n" because it is used as
+      // a delimiter between components of typeahead result names, like the
+      // name of a project and its tags.
+
       return ('' + str)
         .toLocaleLowerCase()
         .replace(/[\.,\/#!$%\^&\*;:{}=_`~]/g, '')
