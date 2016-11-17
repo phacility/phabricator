@@ -158,11 +158,11 @@ final class PhabricatorEditEngineConfiguration
           // If we don't have an explicit value, don't make any adjustments.
           break;
       }
-    }
 
-    // If the field isn't lockable, remove any lock we applied.
-    if (!$field->getIsLockable()) {
-      $field->setIsLocked(false);
+      // If the field isn't lockable, remove any lock we applied.
+      if (!$field->getIsLockable()) {
+        $field->setIsLocked(false);
+      }
     }
 
     $fields = $this->reorderFields($fields);
