@@ -281,7 +281,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         ),
         phutil_tag(
           'button',
-          array(),
+          array('class' => 'button grey'),
           pht('Download')));
 
       Javelin::initBehavior(

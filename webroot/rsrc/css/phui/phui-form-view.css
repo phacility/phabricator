@@ -296,9 +296,9 @@ table.aphront-form-control-checkbox-layout th {
   padding-bottom: 12px;
 }
 
-.aphront-textarea-drag-and-drop {
-  background: {$lightgreen};
-  border-color: {$green};
+body .phui-form-view .remarkup-assist-textarea.aphront-textarea-drag-and-drop {
+  background: {$sh-greenbackground};
+  border: 1px solid {$sh-greenborder};
 }
 
 .aphront-form-crop .crop-box {
@@ -360,7 +360,13 @@ table.aphront-form-control-checkbox-layout th {
   width: 240px;
 }
 
+.device .fancy-datepicker {
+  width: 100%;
+}
+
 .fancy-datepicker-core {
+  width: 240px;
+  margin: 0 auto;
   padding: 1px;
   font-size: {$smallerfontsize};
   text-align: center;

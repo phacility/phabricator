@@ -9,7 +9,7 @@ final class PHUIInvisibleCharacterTestCase extends PhabricatorTestCase {
   }
 
   public function testEmptyPlainText() {
-    $view = (new PHUIInvisibleCharacterView(''))
+    $view = id(new PHUIInvisibleCharacterView(''))
       ->setPlainText(true);
     $res = $view->render();
     $this->assertEqual($res, '');
@@ -17,7 +17,7 @@ final class PHUIInvisibleCharacterTestCase extends PhabricatorTestCase {
 
   public function testWithNamedChars() {
     $test_input = "\x00\n\t ";
-    $view = (new PHUIInvisibleCharacterView($test_input))
+    $view = id(new PHUIInvisibleCharacterView($test_input))
       ->setPlainText(true);
     $res = $view->render();
     $this->assertEqual($res, '<NULL><NEWLINE><TAB><SPACE>');
@@ -25,7 +25,7 @@ final class PHUIInvisibleCharacterTestCase extends PhabricatorTestCase {
 
   public function testWithHexChars() {
     $test_input = "abc\x01";
-    $view = (new PHUIInvisibleCharacterView($test_input))
+    $view = id(new PHUIInvisibleCharacterView($test_input))
       ->setPlainText(true);
     $res = $view->render();
     $this->assertEqual($res, 'abc<0x01>');
@@ -33,7 +33,7 @@ final class PHUIInvisibleCharacterTestCase extends PhabricatorTestCase {
 
   public function testWithNamedAsHex() {
     $test_input = "\x00\x0a\x09\x20";
-    $view = (new PHUIInvisibleCharacterView($test_input))
+    $view = id(new PHUIInvisibleCharacterView($test_input))
       ->setPlainText(true);
     $res = $view->render();
     $this->assertEqual($res, '<NULL><NEWLINE><TAB><SPACE>');

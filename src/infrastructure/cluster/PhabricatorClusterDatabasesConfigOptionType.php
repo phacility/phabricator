@@ -85,14 +85,6 @@ final class PhabricatorClusterDatabasesConfigOptionType
       $map[$key] = true;
     }
 
-    if (count($masters) > 1) {
-      throw new Exception(
-        pht(
-          'Database cluster configuration is invalid: it describes multiple '.
-          'masters. No more than one host may be a master. Hosts currently '.
-          'configured as masters: %s.',
-          implode(', ', $masters)));
-    }
   }
 
 }

@@ -2,6 +2,7 @@
 
 final class PhabricatorStorageManagementAPI extends Phobject {
 
+  private $ref;
   private $host;
   private $user;
   private $port;
@@ -72,6 +73,15 @@ final class PhabricatorStorageManagementAPI extends Phobject {
 
   public function getPort() {
     return $this->port;
+  }
+
+  public function setRef(PhabricatorDatabaseRef $ref) {
+    $this->ref = $ref;
+    return $this;
+  }
+
+  public function getRef() {
+    return $this->ref;
   }
 
   public function getDatabaseName($fragment) {

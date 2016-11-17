@@ -16,6 +16,7 @@ final class DiffusionLastModifiedController extends DiffusionController {
     $drequest = $this->getDiffusionRequest();
 
     $paths = $request->getStr('paths');
+
     try {
       $paths = phutil_json_decode($paths);
     } catch (PhutilJSONParserException $ex) {

@@ -309,6 +309,15 @@
   padding-top: 8px;
 }
 
-.phame-comment-view .aphront-form-control.aphront-form-control-select {
+.phame-comment-view .phui-comment-form-view .phui-comment-action-bar {
   display: none;
+}
+
+.phame-comment-view .phui-comment-form-view .phui-comment-has-actions
+  .phui-comment-textarea-control {
+    padding-top: 16px;
+}
+
+.phame-comment-view .phui-document-view-pro-box .phui-object-box {
+  margin-bottom: 16px;
 }

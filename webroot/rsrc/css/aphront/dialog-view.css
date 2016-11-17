@@ -108,6 +108,15 @@
   opacity: 0.95;
 }
 
+.jx-date-mask {
+  background: #292f33;
+  opacity: 0.5;
+}
+
+.device-desktop .jx-date-mask {
+  display: none;
+}
+
 .aphront-exception-dialog {
   width: 95%;
 }
@@ -128,7 +137,7 @@
   width: 50%;
 }
 
-.aphront-access-dialog .aphront-dialog-body {
+.aphront-policy-explain-dialog .aphront-dialog-body {
   padding: 0 12px;
 }
 

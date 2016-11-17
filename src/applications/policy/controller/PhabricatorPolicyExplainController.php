@@ -40,7 +40,7 @@ final class PhabricatorPolicyExplainController
 
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
-      ->setClass('aphront-access-dialog')
+      ->setClass('aphront-access-dialog aphront-policy-explain-dialog')
       ->setTitle(pht('Policy Details: %s', $object_name))
       ->addCancelButton($object_uri, pht('Done'));
 

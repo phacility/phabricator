@@ -2,7 +2,7 @@
 <?php
 
 $root = dirname(dirname(dirname(dirname(__FILE__))));
-require_once $root.'/scripts/__init_script__.php';
+require_once $root.'/scripts/init/init-aphlict.php';
 
 PhabricatorAphlictManagementWorkflow::requireExtensions();
 

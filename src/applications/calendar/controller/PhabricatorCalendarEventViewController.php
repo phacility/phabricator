@@ -309,16 +309,48 @@ final class PhabricatorCalendarEventViewController
         $status_declined => 'red',
       );
 
+      $viewer_phid = $viewer->getPHID();
+      $is_rsvp_invited = $event->isRSVPInvited($viewer_phid);
+      $type_user = PhabricatorPeopleUserPHIDType::TYPECONST;
+
+      $head = array();
+      $tail = array();
       foreach ($invitees as $invitee) {
         $item = new PHUIStatusItemView();
         $invitee_phid = $invitee->getInviteePHID();
         $status = $invitee->getStatus();
         $target = $viewer->renderHandle($invitee_phid);
-        $icon = $icon_map[$status];
-        $icon_color = $icon_color_map[$status];
+        $is_user = (phid_get_type($invitee_phid) == $type_user);
+
+        if (!$is_user) {
+          $icon = 'fa-users';
+          $icon_color = 'blue';
+        } else {
+          $icon = $icon_map[$status];
+          $icon_color = $icon_color_map[$status];
+        }
+
+        // Highlight invited groups which you're a member of if you have
+        // not RSVP'd to an event yet.
+        if ($is_rsvp_invited) {
+          if ($invitee_phid != $viewer_phid) {
+            if ($event->hasRSVPAuthority($viewer_phid, $invitee_phid)) {
+              $item->setHighlighted(true);
+            }
+          }
+        }
 
         $item->setIcon($icon, $icon_color)
           ->setTarget($target);
+
+        if ($is_user) {
+          $tail[] = $item;
+        } else {
+          $head[] = $item;
+        }
+      }
+
+      foreach (array_merge($head, $tail) as $item) {
         $invitee_list->addItem($item);
       }
     } else {
@@ -511,6 +543,7 @@ final class PhabricatorCalendarEventViewController
     $event = id(new PhabricatorCalendarEventQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needRSVPs(array($viewer->getPHID()))
       ->executeOne();
     if (!$event) {
       return null;
@@ -586,10 +619,8 @@ final class PhabricatorCalendarEventViewController
     $viewer = $this->getViewer();
     $id = $event->getID();
 
-    $invite_status = $event->getUserInviteStatus($viewer->getPHID());
-    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
-    $is_invite_pending = ($invite_status == $status_invited);
-    if (!$is_invite_pending) {
+    $is_pending = $event->isRSVPInvited($viewer->getPHID());
+    if (!$is_pending) {
       return array();
     }
 

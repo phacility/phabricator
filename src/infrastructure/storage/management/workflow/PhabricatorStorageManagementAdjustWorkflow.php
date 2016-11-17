@@ -27,12 +27,19 @@ final class PhabricatorStorageManagementAdjustWorkflow
   public function didExecute(PhutilArgumentParser $args) {
     $unsafe = $args->getArg('unsafe');
 
-    $this->requireAllPatchesApplied();
-    return $this->adjustSchemata($unsafe);
+    foreach ($this->getMasterAPIs() as $api) {
+      $this->requireAllPatchesApplied($api);
+      $err = $this->adjustSchemata($api, $unsafe);
+      if ($err) {
+        return $err;
+      }
+    }
+
+    return 0;
   }
 
-  private function requireAllPatchesApplied() {
-    $api = $this->getAPI();
+  private function requireAllPatchesApplied(
+    PhabricatorStorageManagementAPI $api) {
     $applied = $api->getAppliedPatches();
 
     if ($applied === null) {

@@ -16,7 +16,10 @@ final class PhabricatorCalendarEventSearchEngine
   }
 
   public function newQuery() {
-    return new PhabricatorCalendarEventQuery();
+    $viewer = $this->requireViewer();
+
+    return id(new PhabricatorCalendarEventQuery())
+      ->needRSVPs(array($viewer->getPHID()));
   }
 
   protected function shouldShowOrderField() {
@@ -33,7 +36,7 @@ final class PhabricatorCalendarEventSearchEngine
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Invited'))
         ->setKey('invitedPHIDs')
-        ->setDatasource(new PhabricatorPeopleUserFunctionDatasource()),
+        ->setDatasource(new PhabricatorCalendarInviteeDatasource()),
       id(new PhabricatorSearchDateControlField())
         ->setLabel(pht('Occurs After'))
         ->setKey('rangeStart'),
@@ -365,6 +368,8 @@ final class PhabricatorCalendarEventSearchEngine
       $epoch_min = $event->getStartDateTimeEpoch();
       $epoch_max = $event->getEndDateTimeEpoch();
 
+      $is_invited = $event->isRSVPInvited($viewer->getPHID());
+
       $event_view = id(new AphrontCalendarEventView())
         ->setHostPHID($event->getHostPHID())
         ->setEpochRange($epoch_min, $epoch_max)
@@ -373,6 +378,8 @@ final class PhabricatorCalendarEventSearchEngine
         ->setURI($event->getURI())
         ->setIsAllDay($event->getIsAllDay())
         ->setIcon($event->getDisplayIcon($viewer))
+        ->setViewerIsInvited($is_invited)
+        ->setDatetimeSummary($event->renderEventDate($viewer, true))
         ->setIconColor($event->getDisplayIconColor($viewer));
 
       $month_view->addEvent($event_view);
@@ -441,6 +448,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setIconColor($status_color)
         ->setName($event->getName())
         ->setURI($event->getURI())
+        ->setDatetimeSummary($event->renderEventDate($viewer, true))
         ->setIsCancelled($event->getIsCancelled());
 
       $day_view->addEvent($event_view);

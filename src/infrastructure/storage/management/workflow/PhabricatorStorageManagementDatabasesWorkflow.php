@@ -15,7 +15,8 @@ final class PhabricatorStorageManagementDatabasesWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
-    $api     = $this->getAPI();
+    $api = $this->getAnyAPI();
+
     $patches = $this->getPatches();
 
     $databases = $api->getDatabaseList($patches, true);

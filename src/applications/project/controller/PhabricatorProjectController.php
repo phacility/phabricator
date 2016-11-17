@@ -119,7 +119,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       foreach ($ancestors as $ancestor) {
         $crumbs->addTextCrumb(
           $ancestor->getName(),
-          $ancestor->getURI());
+          $ancestor->getProfileURI()
+        );
       }
     }
 

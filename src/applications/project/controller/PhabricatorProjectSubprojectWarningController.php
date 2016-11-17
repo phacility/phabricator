@@ -35,7 +35,7 @@ final class PhabricatorProjectSubprojectWarningController
 
     $conversion_help = pht(
       "Creating a project's first subproject **moves all ".
-      "members** to become members of the subproject instead".
+      "members** to become members of the subproject instead.".
       "\n\n".
       "See [[ %s | Projects User Guide ]] in the documentation for details. ".
       "This process can not be undone.",

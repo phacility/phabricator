@@ -1580,6 +1580,14 @@ final class PhabricatorUSEnglishTranslation
         'Restart %s build?',
         'Restart %s builds?',
       ),
+
+      '%s is starting in %s minute(s), at %s.' => array(
+        array(
+          '%s is starting in one minute, at %3$s.',
+          '%s is starting in %s minutes, at %s.',
+        ),
+      ),
+
     );
   }
 

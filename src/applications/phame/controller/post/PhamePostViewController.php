@@ -19,8 +19,10 @@ final class PhamePostViewController
     $is_external = $this->getIsExternal();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($post->getTitle())
+      ->addClass('phame-header-bar')
       ->setUser($viewer);
+
+    $hero = $this->buildPhamePostHeader($post);
 
     if (!$is_external) {
       $actions = $this->renderActions($post);
@@ -167,6 +169,7 @@ final class PhamePostViewController
       ->setCrumbs($crumbs)
       ->appendChild(
         array(
+          $hero,
           $document,
           $about,
           $properties,
@@ -202,6 +205,13 @@ final class PhamePostViewController
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
         ->setName(pht('Edit Post'))
+        ->setDisabled(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-camera-retro')
+        ->setHref($this->getApplicationURI('post/header/'.$id.'/'))
+        ->setName(pht('Edit Header Image'))
         ->setDisabled(!$can_edit));
 
     $actions->addAction(
@@ -305,6 +315,35 @@ final class PhamePostViewController
       ->execute();
 
     return array(head($prev), head($next));
+  }
+
+  private function buildPhamePostHeader(
+    PhamePost $post) {
+
+    $image = null;
+    if ($post->getHeaderImagePHID()) {
+      $image = phutil_tag(
+        'div',
+        array(
+          'class' => 'phame-header-hero',
+        ),
+        phutil_tag(
+          'img',
+          array(
+            'src'     => $post->getHeaderImageURI(),
+            'class'   => 'phame-header-image',
+          )));
+    }
+
+    $title = phutil_tag_div('phame-header-title', $post->getTitle());
+    $subtitle = null;
+    if ($post->getSubtitle()) {
+      $subtitle = phutil_tag_div('phame-header-subtitle', $post->getSubtitle());
+    }
+
+    return phutil_tag_div(
+      'phame-mega-header', array($image, $title, $subtitle));
+
   }
 
 }

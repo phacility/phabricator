@@ -45,9 +45,10 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
         'group/(?P<key>[^/]+)/' => 'PhabricatorConfigGroupController',
         'version/' => 'PhabricatorConfigVersionController',
         'database/'.
+          '(?:(?P<ref>[^/]+)/'.
           '(?:(?P<database>[^/]+)/'.
           '(?:(?P<table>[^/]+)/'.
-          '(?:(?:col/(?P<column>[^/]+)|key/(?P<key>[^/]+))/)?)?)?'
+          '(?:(?:col/(?P<column>[^/]+)|key/(?P<key>[^/]+))/)?)?)?)?'
           => 'PhabricatorConfigDatabaseStatusController',
         'dbissue/' => 'PhabricatorConfigDatabaseIssueController',
         '(?P<verb>ignore|unignore)/(?P<key>[^/]+)/'

@@ -43,7 +43,7 @@ final class PhabricatorCalendarEventInviteesPolicyRule
     if (!isset($this->sourcePHIDs[$viewer_phid])) {
       $source_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $viewer_phid,
-        PhabricatorProjectMemberOfProjectEdgeType::EDGECONST);
+        PhabricatorProjectMaterializedMemberEdgeType::EDGECONST);
       $source_phids[] = $viewer_phid;
       $this->sourcePHIDs[$viewer_phid] = $source_phids;
     }

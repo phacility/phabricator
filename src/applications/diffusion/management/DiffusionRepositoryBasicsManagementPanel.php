@@ -168,8 +168,7 @@ final class DiffusionRepositoryBasicsManagementPanel
 
     $short_name = $repository->getRepositorySlug();
     if ($short_name === null) {
-      $short_name = $repository->getCloneName();
-      $short_name = phutil_tag('em', array(), $short_name);
+      $short_name = phutil_tag('em', array(), pht('No Short Name'));
     }
     $view->addProperty(pht('Short Name'), $short_name);
 

@@ -205,11 +205,7 @@ final class PhabricatorPhurlURLEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
 
-    if ($object->getPHID()) {
-      $phids[] = $object->getPHID();
-    }
     $phids[] = $this->getActingAsPHID();
-    $phids = array_unique($phids);
 
     return $phids;
   }

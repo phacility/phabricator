@@ -416,6 +416,14 @@ abstract class PhabricatorAphlictManagementWorkflow
       while (true) {
         global $g_future;
         $g_future = new ExecFuture('exec %C', $command);
+
+        // Discard all output the subprocess produces: it writes to the log on
+        // disk, so we don't need to send the output anywhere and can just
+        // throw it away.
+        $g_future
+          ->setStdoutSizeLimit(0)
+          ->setStderrSizeLimit(0);
+
         $g_future->resolve();
 
         // If the server exited, wait a couple of seconds and restart it.

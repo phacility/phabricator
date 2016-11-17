@@ -29,18 +29,13 @@ final class DifferentialParseCommitMessageConduitAPIMethod
     $corpus = $request->getValue('corpus');
     $is_partial = $request->getValue('partial');
 
-    $revision = new DifferentialRevision();
-
     $field_list = PhabricatorCustomField::getObjectFields(
-      $revision,
+      new DifferentialRevision(),
       DifferentialCustomField::ROLE_COMMITMESSAGE);
     $field_list->setViewer($viewer);
     $field_map = mpull($field_list->getFields(), null, 'getFieldKeyForConduit');
 
-    $this->errors = array();
-
-    $label_map = $this->buildLabelMap($field_list);
-    $corpus_map = $this->parseCommitMessage($corpus, $label_map);
+    $corpus_map = $this->parseCommitMessage($corpus);
 
     $values = array();
     foreach ($corpus_map as $field_key => $text_value) {
@@ -94,44 +89,12 @@ final class DifferentialParseCommitMessageConduitAPIMethod
     );
   }
 
-  private function buildLabelMap(PhabricatorCustomFieldList $field_list) {
-    $label_map = array();
-
-    foreach ($field_list->getFields() as $key => $field) {
-      $labels = $field->getCommitMessageLabels();
-      $key = $field->getFieldKeyForConduit();
-
-      foreach ($labels as $label) {
-        $normal_label = DifferentialCommitMessageParser::normalizeFieldLabel(
-          $label);
-        if (!empty($label_map[$normal_label])) {
-          throw new Exception(
-            pht(
-              'Field label "%s" is parsed by two custom fields: "%s" and '.
-              '"%s". Each label must be parsed by only one field.',
-              $label,
-              $key,
-              $label_map[$normal_label]));
-        }
-        $label_map[$normal_label] = $key;
-      }
-    }
-
-    return $label_map;
-  }
-
-
-  private function parseCommitMessage($corpus, array $label_map) {
-    $key_title = id(new DifferentialTitleField())->getFieldKeyForConduit();
-    $key_summary = id(new DifferentialSummaryField())->getFieldKeyForConduit();
-
-    $parser = id(new DifferentialCommitMessageParser())
-      ->setLabelMap($label_map)
-      ->setTitleKey($key_title)
-      ->setSummaryKey($key_summary);
-
+  private function parseCommitMessage($corpus) {
+    $viewer = $this->getViewer();
+    $parser = DifferentialCommitMessageParser::newStandardParser($viewer);
     $result = $parser->parseCorpus($corpus);
 
+    $this->errors = array();
     foreach ($parser->getErrors() as $error) {
       $this->errors[] = $error;
     }

@@ -99,6 +99,14 @@ final class PhamePostEditEngine
         ->setConduitTypeDescription(pht('New post title.'))
         ->setTransactionType(PhamePostTransaction::TYPE_TITLE)
         ->setValue($object->getTitle()),
+      id(new PhabricatorTextEditField())
+        ->setKey('subtitle')
+        ->setLabel(pht('Subtitle'))
+        ->setDescription(pht('Post subtitle.'))
+        ->setConduitDescription(pht('Change the post subtitle.'))
+        ->setConduitTypeDescription(pht('New post subtitle.'))
+        ->setTransactionType(PhamePostTransaction::TYPE_SUBTITLE)
+        ->setValue($object->getSubtitle()),
       id(new PhabricatorSelectEditField())
         ->setKey('visibility')
         ->setLabel(pht('Visibility'))
