@@ -115,11 +115,28 @@ final class HarbormasterCreateArtifactConduitAPIMethod
           $build_target_phid));
     }
 
+    $artifact_type = $request->getValue('artifactType');
+
+    // Cast "artifactData" parameters to acceptable types if this request
+    // is submitting raw HTTP parameters. This is not ideal. See T11887 for
+    // discussion.
+    $artifact_data = $request->getValue('artifactData');
+    if (!$request->getIsStrictlyTyped()) {
+      $impl = HarbormasterArtifact::getArtifactType($artifact_type);
+      if ($impl) {
+        foreach ($artifact_data as $key => $value) {
+          $artifact_data[$key] = $impl->readArtifactHTTPParameter(
+            $key,
+            $value);
+        }
+      }
+    }
+
     $artifact = $build_target->createArtifact(
       $viewer,
       $request->getValue('artifactKey'),
-      $request->getValue('artifactType'),
-      $request->getValue('artifactData'));
+      $artifact_type,
+      $artifact_data);
 
     return array(
       'data' => $this->returnArtifactList(array($artifact)),
