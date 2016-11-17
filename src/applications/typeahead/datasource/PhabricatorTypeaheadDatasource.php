@@ -141,8 +141,18 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       return array();
     }
 
-    $tokens = preg_split('/\s+|[-\[\]]/u', $string);
-    return array_unique($tokens);
+    $tokens = preg_split('/[\s\[\]-]+/u', $string);
+    $tokens = array_unique($tokens);
+
+    // Make sure we don't return the empty token, as this will boil down to a
+    // JOIN against every token.
+    foreach ($tokens as $key => $value) {
+      if (!strlen($value)) {
+        unset($tokens[$key]);
+      }
+    }
+
+    return array_values($tokens);
   }
 
   public function getTokens() {
