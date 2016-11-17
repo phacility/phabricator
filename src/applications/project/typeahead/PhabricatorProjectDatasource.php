@@ -130,7 +130,7 @@ final class PhabricatorProjectDatasource
 
         $description = idx($descriptions, $phid);
         if (strlen($description)) {
-          $summary = PhabricatorMarkupEngine::summarize($description);
+          $summary = PhabricatorMarkupEngine::summarizeSentence($description);
           $proj_result->addAttribute($summary);
         }
       }

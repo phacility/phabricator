@@ -2896,6 +2896,7 @@ phutil_register_library_map(array(
     'PhabricatorManiphestTaskTestDataGenerator' => 'applications/maniphest/lipsum/PhabricatorManiphestTaskTestDataGenerator.php',
     'PhabricatorMarkupCache' => 'applications/cache/storage/PhabricatorMarkupCache.php',
     'PhabricatorMarkupEngine' => 'infrastructure/markup/PhabricatorMarkupEngine.php',
+    'PhabricatorMarkupEngineTestCase' => 'infrastructure/markup/__tests__/PhabricatorMarkupEngineTestCase.php',
     'PhabricatorMarkupInterface' => 'infrastructure/markup/PhabricatorMarkupInterface.php',
     'PhabricatorMarkupOneOff' => 'infrastructure/markup/PhabricatorMarkupOneOff.php',
     'PhabricatorMarkupPreviewController' => 'infrastructure/markup/PhabricatorMarkupPreviewController.php',
@@ -7871,6 +7872,7 @@ phutil_register_library_map(array(
     'PhabricatorManiphestTaskTestDataGenerator' => 'PhabricatorTestDataGenerator',
     'PhabricatorMarkupCache' => 'PhabricatorCacheDAO',
     'PhabricatorMarkupEngine' => 'Phobject',
+    'PhabricatorMarkupEngineTestCase' => 'PhabricatorTestCase',
     'PhabricatorMarkupOneOff' => array(
       'Phobject',
       'PhabricatorMarkupInterface',
