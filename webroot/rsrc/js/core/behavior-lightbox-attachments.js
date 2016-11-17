@@ -21,10 +21,7 @@ JX.behavior('lightbox-attachments', function (config) {
       return;
     }
 
-    if (JX.Stratcom.pass()) {
-      return;
-    }
-    e.prevent();
+    e.kill();
 
     var links = JX.DOM.scry(document, 'a', 'lightboxable');
     var phids = {};
@@ -230,7 +227,7 @@ JX.behavior('lightbox-attachments', function (config) {
 
   JX.Stratcom.listen(
     'click',
-    ['lightboxable', 'tag:a'],
+    ['lightboxable'],
     loadLightBox);
 
   JX.Stratcom.listen(
