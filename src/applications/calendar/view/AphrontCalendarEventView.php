@@ -15,6 +15,7 @@ final class AphrontCalendarEventView extends AphrontView {
   private $iconColor;
   private $canEdit;
   private $isCancelled;
+  private $datetimeSummary;
 
   public function setIconColor($icon_color) {
     $this->iconColor = $icon_color;
@@ -133,6 +134,15 @@ final class AphrontCalendarEventView extends AphrontView {
       return true;
     }
     return false;
+  }
+
+  public function setDatetimeSummary($datetime_summary) {
+    $this->datetimeSummary = $datetime_summary;
+    return $this;
+  }
+
+  public function getDatetimeSummary() {
+    return $this->datetimeSummary;
   }
 
   public function render() {

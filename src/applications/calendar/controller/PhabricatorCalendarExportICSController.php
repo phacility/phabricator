@@ -82,6 +82,9 @@ final class PhabricatorCalendarExportICSController
     $saved->setParameter('rangeEnd', null);
     $saved->setParameter('upcoming', null);
 
+    // The "month" and "day" display modes imply time ranges.
+    $saved->setParameter('display', 'list');
+
     $query = $engine->buildQueryFromSavedQuery($saved);
 
     $events = $query

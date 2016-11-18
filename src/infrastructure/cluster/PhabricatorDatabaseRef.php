@@ -157,6 +157,17 @@ final class PhabricatorDatabaseRef
     return $this->isIndividual;
   }
 
+  public function getRefKey() {
+    $host = $this->getHost();
+
+    $port = $this->getPort();
+    if (strlen($port)) {
+      return "{$host}:{$port}";
+    }
+
+    return $host;
+  }
+
   public static function getConnectionStatusMap() {
     return array(
       self::STATUS_OKAY => array(
@@ -212,7 +223,7 @@ final class PhabricatorDatabaseRef
     );
   }
 
-  public static function getLiveRefs() {
+  public static function getClusterRefs() {
     $cache = PhabricatorCaches::getRequestCache();
 
     $refs = $cache->getKey(self::KEY_REFS);
@@ -446,24 +457,46 @@ final class PhabricatorDatabaseRef
     return $this->healthRecord;
   }
 
-  public static function getMasterDatabaseRef() {
-    $refs = self::getLiveRefs();
+  public static function getActiveDatabaseRefs() {
+    $refs = array();
 
-    if (!$refs) {
-      return self::getLiveIndividualRef();
+    foreach (self::getMasterDatabaseRefs() as $ref) {
+      $refs[] = $ref;
     }
 
-    $master = null;
+    foreach (self::getReplicaDatabaseRefs() as $ref) {
+      $refs[] = $ref;
+    }
+
+    return $refs;
+  }
+
+  public static function getMasterDatabaseRefs() {
+    $refs = self::getClusterRefs();
+
+    if (!$refs) {
+      return array(self::getLiveIndividualRef());
+    }
+
+    $masters = array();
     foreach ($refs as $ref) {
       if ($ref->getDisabled()) {
         continue;
       }
       if ($ref->getIsMaster()) {
-        return $ref;
+        $masters[] = $ref;
       }
     }
 
-    return null;
+    return $masters;
+  }
+
+  public static function getMasterDatabaseRefForDatabase($database) {
+    $masters = self::getMasterDatabaseRefs();
+
+    // TODO: Actually implement this.
+
+    return head($masters);
   }
 
   public static function newIndividualRef() {
@@ -480,18 +513,14 @@ final class PhabricatorDatabaseRef
       ->setIsMaster(true);
   }
 
-  public static function getReplicaDatabaseRef() {
-    $refs = self::getLiveRefs();
+  public static function getReplicaDatabaseRefs() {
+    $refs = self::getClusterRefs();
 
     if (!$refs) {
-      return null;
+      return array();
     }
 
-    // TODO: We may have multiple replicas to choose from, and could make
-    // more of an effort to pick the "best" one here instead of always
-    // picking the first one. Once we've picked one, we should try to use
-    // the same replica for the rest of the request, though.
-
+    $replicas = array();
     foreach ($refs as $ref) {
       if ($ref->getDisabled()) {
         continue;
@@ -499,10 +528,24 @@ final class PhabricatorDatabaseRef
       if ($ref->getIsMaster()) {
         continue;
       }
-      return $ref;
+
+      $replicas[] = $ref;
     }
 
-    return null;
+    return $replicas;
+  }
+
+  public static function getReplicaDatabaseRefForDatabase($database) {
+    $replicas = self::getReplicaDatabaseRefs();
+
+    // TODO: Actually implement this.
+
+    // TODO: We may have multiple replicas to choose from, and could make
+    // more of an effort to pick the "best" one here instead of always
+    // picking the first one. Once we've picked one, we should try to use
+    // the same replica for the rest of the request, though.
+
+    return head($replicas);
   }
 
   private function newConnection(array $options) {

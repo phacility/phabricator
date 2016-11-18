@@ -3,22 +3,6 @@
 abstract class PhabricatorConfigDatabaseController
   extends PhabricatorConfigController {
 
-  protected function buildSchemaQuery() {
-    $ref = PhabricatorDatabaseRef::getMasterDatabaseRef();
-
-    $api = id(new PhabricatorStorageManagementAPI())
-      ->setUser($ref->getUser())
-      ->setHost($ref->getHost())
-      ->setPort($ref->getPort())
-      ->setNamespace(PhabricatorLiskDAO::getDefaultStorageNamespace())
-      ->setPassword($ref->getPass());
-
-    $query = id(new PhabricatorConfigSchemaQuery())
-      ->setAPI($api);
-
-    return $query;
-  }
-
   protected function renderIcon($status) {
     switch ($status) {
       case PhabricatorConfigStorageSchema::STATUS_OKAY:

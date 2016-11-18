@@ -1,6 +1,6 @@
 <?php
 
-final class PHUIInfoView extends AphrontView {
+final class PHUIInfoView extends AphrontTagView {
 
   const SEVERITY_ERROR = 'error';
   const SEVERITY_WARNING = 'warning';
@@ -10,11 +10,12 @@ final class PHUIInfoView extends AphrontView {
 
   private $title;
   private $errors;
-  private $severity;
+  private $severity = null;
   private $id;
   private $buttons = array();
   private $isHidden;
   private $flush;
+  private $icon;
 
   public function setTitle($title) {
     $this->title = $title;
@@ -24,6 +25,11 @@ final class PHUIInfoView extends AphrontView {
   public function setSeverity($severity) {
     $this->severity = $severity;
     return $this;
+  }
+
+  private function getSeverity() {
+    $severity = $this->severity ? $this->severity : self::SEVERITY_ERROR;
+    return $severity;
   }
 
   public function setErrors(array $errors) {
@@ -46,12 +52,66 @@ final class PHUIInfoView extends AphrontView {
     return $this;
   }
 
+  public function setIcon(PHUIIconView $icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  private function getIcon() {
+    if ($this->icon) {
+      return $this->icon;
+    }
+
+    switch ($this->getSeverity()) {
+      case self::SEVERITY_ERROR:
+        $icon = 'fa-exclamation-circle';
+      break;
+      case self::SEVERITY_WARNING:
+        $icon = 'fa-exclamation-triangle';
+      break;
+      case self::SEVERITY_NOTICE:
+        $icon = 'fa-info-circle';
+      break;
+      case self::SEVERITY_NODATA:
+        return null;
+      break;
+      case self::SEVERITY_SUCCESS:
+        $icon = 'fa-check-circle';
+      break;
+    }
+
+    $icon = id(new PHUIIconView())
+      ->setIcon($icon)
+      ->addClass('phui-info-icon');
+    return $icon;
+  }
+
   public function addButton(PHUIButtonView $button) {
+    $button->setColor(PHUIButtonView::GREY);
     $this->buttons[] = $button;
     return $this;
   }
 
-  public function render() {
+  protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'phui-info-view';
+    $classes[] = 'phui-info-severity-'.$this->getSeverity();
+    $classes[] = 'grouped';
+    if ($this->flush) {
+      $classes[] = 'phui-info-view-flush';
+    }
+    if ($this->getIcon()) {
+      $classes[] = 'phui-info-has-icon';
+    }
+
+    return array(
+      'id' => $this->id,
+      'class' => implode(' ', $classes),
+      'style' => $this->isHidden ? 'display: none;' : null,
+    );
+  }
+
+  protected function getTagContent() {
     require_celerity_resource('phui-info-view-css');
 
     $errors = $this->errors;
@@ -70,7 +130,7 @@ final class PHUIInfoView extends AphrontView {
         ),
         $list);
     } else if (count($errors) == 1) {
-      $list = $this->errors[0];
+      $list = head($this->errors);
     } else {
       $list = null;
     }
@@ -86,17 +146,6 @@ final class PHUIInfoView extends AphrontView {
     } else {
       $title = null;
     }
-
-    $this->severity = nonempty($this->severity, self::SEVERITY_ERROR);
-
-    $classes = array();
-    $classes[] = 'phui-info-view';
-    $classes[] = 'phui-info-severity-'.$this->severity;
-    $classes[] = 'grouped';
-    if ($this->flush) {
-      $classes[] = 'phui-info-view-flush';
-    }
-    $classes = implode(' ', $classes);
 
     $children = $this->renderChildren();
     if ($list) {
@@ -123,17 +172,21 @@ final class PHUIInfoView extends AphrontView {
         $this->buttons);
     }
 
-    return phutil_tag(
-      'div',
-      array(
-        'id' => $this->id,
-        'class' => $classes,
-        'style' => $this->isHidden ? 'display: none;' : null,
-      ),
-      array(
-        $buttons,
-        $title,
-        $body,
-      ));
+    $icon = null;
+    if ($this->getIcon()) {
+      $icon = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-info-view-icon',
+        ),
+        $this->getIcon());
+    }
+
+    return array(
+      $icon,
+      $buttons,
+      $title,
+      $body,
+    );
   }
 }

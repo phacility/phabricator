@@ -15,13 +15,14 @@ final class PhabricatorStorageManagementProbeWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
+    $api = $this->getSingleAPI();
+
     $console = PhutilConsole::getConsole();
     $console->writeErr(
       "%s\n",
       pht('Analyzing table sizes (this may take a moment)...'));
 
-    $api       = $this->getAPI();
-    $patches   = $this->getPatches();
+    $patches = $this->getPatches();
     $databases = $api->getDatabaseList($patches, true);
 
     $conn_r = $api->getConn(null);

@@ -27,7 +27,9 @@ final class DiffusionMercurialServeSSHWorkflow
   protected function identifyRepository() {
     $args = $this->getArgs();
     $path = $args->getArg('repository');
-    return $this->loadRepositoryWithPath($path);
+    return $this->loadRepositoryWithPath(
+      $path,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL);
   }
 
   protected function executeRepositoryOperations() {

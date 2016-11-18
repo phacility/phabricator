@@ -20,6 +20,7 @@ final class PhabricatorCalendarEventQuery
   private $utcInitialEpochMin;
   private $utcInitialEpochMax;
   private $isImported;
+  private $needRSVPs;
 
   private $generateGhosts = false;
 
@@ -109,6 +110,11 @@ final class PhabricatorCalendarEventQuery
     return $this;
   }
 
+  public function needRSVPs(array $phids) {
+    $this->needRSVPs = $phids;
+    return $this;
+  }
+
   protected function getDefaultOrderVector() {
     return array('start', 'id');
   }
@@ -166,7 +172,6 @@ final class PhabricatorCalendarEventQuery
     }
 
     $raw_limit = $this->getRawResultLimit();
-
     if (!$raw_limit && !$this->rangeEnd) {
       throw new Exception(
         pht(
@@ -613,6 +618,70 @@ final class PhabricatorCalendarEventQuery
     }
 
     $events = msort($events, 'getStartDateTimeEpoch');
+
+    if ($this->needRSVPs) {
+      $rsvp_phids = $this->needRSVPs;
+      $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
+
+      $project_phids = array();
+      foreach ($events as $event) {
+        foreach ($event->getInvitees() as $invitee) {
+          $invitee_phid = $invitee->getInviteePHID();
+          if (phid_get_type($invitee_phid) == $project_type) {
+            $project_phids[] = $invitee_phid;
+          }
+        }
+      }
+
+      if ($project_phids) {
+        $member_type = PhabricatorProjectMaterializedMemberEdgeType::EDGECONST;
+
+        $query = id(new PhabricatorEdgeQuery())
+          ->withSourcePHIDs($project_phids)
+          ->withEdgeTypes(array($member_type))
+          ->withDestinationPHIDs($rsvp_phids);
+
+        $edges = $query->execute();
+
+        $project_map = array();
+        foreach ($edges as $src => $types) {
+          foreach ($types as $type => $dsts) {
+            foreach ($dsts as $dst => $edge) {
+              $project_map[$dst][] = $src;
+            }
+          }
+        }
+      } else {
+        $project_map = array();
+      }
+
+      $membership_map = array();
+      foreach ($rsvp_phids as $rsvp_phid) {
+        $membership_map[$rsvp_phid] = array();
+        $membership_map[$rsvp_phid][] = $rsvp_phid;
+
+        $project_phids = idx($project_map, $rsvp_phid);
+        if ($project_phids) {
+          foreach ($project_phids as $project_phid) {
+            $membership_map[$rsvp_phid][] = $project_phid;
+          }
+        }
+      }
+
+      foreach ($events as $event) {
+        $invitees = $event->getInvitees();
+        $invitees = mpull($invitees, null, 'getInviteePHID');
+
+        $rsvp_map = array();
+        foreach ($rsvp_phids as $rsvp_phid) {
+          $membership_phids = $membership_map[$rsvp_phid];
+          $rsvps = array_select_keys($invitees, $membership_phids);
+          $rsvp_map[$rsvp_phid] = $rsvps;
+        }
+
+        $event->attachRSVPs($rsvp_map);
+      }
+    }
 
     return $events;
   }

@@ -73,16 +73,24 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     $init_only     = $args->getArg('init-only');
     $no_adjust     = $args->getArg('no-adjust');
 
-    $this->upgradeSchemata($apply_only, $no_quickstart, $init_only);
+    $apis = $this->getMasterAPIs();
 
-    if ($no_adjust || $init_only || $apply_only) {
-      $console->writeOut(
-        "%s\n",
-        pht('Declining to apply storage adjustments.'));
-      return 0;
-    } else {
-      return $this->adjustSchemata(false);
+    foreach ($apis as $api) {
+      $this->upgradeSchemata($api, $apply_only, $no_quickstart, $init_only);
+
+      if ($no_adjust || $init_only || $apply_only) {
+        $console->writeOut(
+          "%s\n",
+          pht('Declining to apply storage adjustments.'));
+      } else {
+        $err = $this->adjustSchemata($api, false);
+        if ($err) {
+          return $err;
+        }
+      }
     }
+
+    return 0;
   }
 
 }

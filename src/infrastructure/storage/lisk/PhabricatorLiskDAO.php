@@ -114,7 +114,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   }
 
   private function newClusterConnection($database, $mode) {
-    $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRefForDatabase(
+      $database);
 
     if ($master && !$master->isSevered()) {
       $connection = $master->newApplicationConnection($database);
@@ -130,7 +131,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       }
     }
 
-    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRef();
+    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRefForDatabase(
+      $database);
     if ($replica) {
       $connection = $replica->newApplicationConnection($database);
       $connection->setReadOnly(true);

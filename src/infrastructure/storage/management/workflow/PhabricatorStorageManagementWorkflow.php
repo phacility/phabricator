@@ -3,20 +3,56 @@
 abstract class PhabricatorStorageManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
-  private $api;
+  private $apis = array();
   private $dryRun;
   private $force;
   private $patches;
 
   private $didInitialize;
 
-  final public function getAPI() {
-    return $this->api;
+  final public function setAPIs(array $apis) {
+    $this->apis = $apis;
+    return $this;
   }
 
-  final public function setAPI(PhabricatorStorageManagementAPI $api) {
-    $this->api = $api;
-    return $this;
+  final public function getAnyAPI() {
+    return head($this->getAPIs());
+  }
+
+  final public function getMasterAPIs() {
+    $apis = $this->getAPIs();
+
+    $results = array();
+    foreach ($apis as $api) {
+      if ($api->getRef()->getIsMaster()) {
+        $results[] = $api;
+      }
+    }
+
+    if (!$results) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'This command only operates on database masters, but the selected '.
+          'database hosts do not include any masters.'));
+    }
+
+    return $results;
+  }
+
+  final public function getSingleAPI() {
+    $apis = $this->getAPIs();
+    if (count($apis) == 1) {
+      return head($apis);
+    }
+
+    throw new PhutilArgumentUsageException(
+      pht(
+        'Phabricator is configured in cluster mode, with multiple database '.
+        'hosts. Use "--host" to specify which host you want to operate on.'));
+  }
+
+  final public function getAPIs() {
+    return $this->apis;
   }
 
   final protected function isDryRun() {
@@ -73,22 +109,34 @@ abstract class PhabricatorStorageManagementWorkflow
 
   public function didExecute(PhutilArgumentParser $args) {}
 
-  private function loadSchemata() {
-    $query = id(new PhabricatorConfigSchemaQuery())
-      ->setAPI($this->getAPI());
+  private function loadSchemata(PhabricatorStorageManagementAPI $api) {
+    $query = id(new PhabricatorConfigSchemaQuery());
 
-    $actual = $query->loadActualSchema();
-    $expect = $query->loadExpectedSchema();
-    $comp = $query->buildComparisonSchema($expect, $actual);
+    $ref = $api->getRef();
+    $ref_key = $ref->getRefKey();
 
-    return array($comp, $expect, $actual);
+    $query->setAPIs(array($api));
+    $query->setRefs(array($ref));
+
+    $actual = $query->loadActualSchemata();
+    $expect = $query->loadExpectedSchemata();
+    $comp = $query->buildComparisonSchemata($expect, $actual);
+
+    return array(
+      $comp[$ref_key],
+      $expect[$ref_key],
+      $actual[$ref_key],
+    );
   }
 
-  final protected function adjustSchemata($unsafe) {
-    $lock = $this->lock();
+  final protected function adjustSchemata(
+    PhabricatorStorageManagementAPI $api,
+    $unsafe) {
+
+    $lock = $this->lock($api);
 
     try {
-      $err = $this->doAdjustSchemata($unsafe);
+      $err = $this->doAdjustSchemata($api, $unsafe);
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
@@ -99,15 +147,19 @@ abstract class PhabricatorStorageManagementWorkflow
     return $err;
   }
 
-  final private function doAdjustSchemata($unsafe) {
+  final private function doAdjustSchemata(
+    PhabricatorStorageManagementAPI $api,
+    $unsafe) {
+
     $console = PhutilConsole::getConsole();
 
     $console->writeOut(
       "%s\n",
-      pht('Verifying database schemata...'));
+      pht(
+        'Verifying database schemata on "%s"...',
+        $api->getRef()->getRefKey()));
 
-    list($adjustments, $errors) = $this->findAdjustments();
-    $api = $this->getAPI();
+    list($adjustments, $errors) = $this->findAdjustments($api);
 
     if (!$adjustments) {
       $console->writeOut(
@@ -415,8 +467,9 @@ abstract class PhabricatorStorageManagementWorkflow
     return $this->printErrors($errors, $err);
   }
 
-  private function findAdjustments() {
-    list($comp, $expect, $actual) = $this->loadSchemata();
+  private function findAdjustments(
+    PhabricatorStorageManagementAPI $api) {
+    list($comp, $expect, $actual) = $this->loadSchemata($api);
 
     $issue_charset = PhabricatorConfigStorageSchema::ISSUE_CHARSET;
     $issue_collation = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
@@ -766,14 +819,15 @@ abstract class PhabricatorStorageManagementWorkflow
   }
 
   final protected function upgradeSchemata(
+    PhabricatorStorageManagementAPI $api,
     $apply_only = null,
     $no_quickstart = false,
     $init_only = false) {
 
-    $lock = $this->lock();
+    $lock = $this->lock($api);
 
     try {
-      $this->doUpgradeSchemata($apply_only, $no_quickstart, $init_only);
+      $this->doUpgradeSchemata($api, $apply_only, $no_quickstart, $init_only);
     } catch (Exception $ex) {
       $lock->unlock();
       throw $ex;
@@ -783,13 +837,12 @@ abstract class PhabricatorStorageManagementWorkflow
   }
 
   final private function doUpgradeSchemata(
+    PhabricatorStorageManagementAPI $api,
     $apply_only,
     $no_quickstart,
     $init_only) {
 
-    $api = $this->getAPI();
-
-    $applied = $this->getApi()->getAppliedPatches();
+    $applied = $api->getAppliedPatches();
     if ($applied === null) {
       if ($this->dryRun) {
         echo pht(
@@ -923,11 +976,13 @@ abstract class PhabricatorStorageManagementWorkflow
         if (count($this->patches)) {
           throw new Exception(
             pht(
-              'Some patches could not be applied: %s',
+              'Some patches could not be applied to "%s": %s',
+              $api->getRef()->getRefKey(),
               implode(', ', array_keys($this->patches))));
         } else if (!$this->dryRun && !$apply_only) {
           echo pht(
-            "Storage is up to date. Use '%s' for details.",
+            'Storage is up to date on "%s". Use "%s" for details.',
+            $api->getRef()->getRefKey(),
             'storage status')."\n";
         }
         break;
@@ -955,9 +1010,9 @@ abstract class PhabricatorStorageManagementWorkflow
    *
    * @return PhabricatorGlobalLock
    */
-  final protected function lock() {
+  final protected function lock(PhabricatorStorageManagementAPI $api) {
     return PhabricatorGlobalLock::newLock(__CLASS__)
-      ->useSpecificConnection($this->getApi()->getConn(null))
+      ->useSpecificConnection($api->getConn(null))
       ->lock();
   }
 

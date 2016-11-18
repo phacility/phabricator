@@ -271,6 +271,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       $default_img_uri =
         celerity_get_resource_uri(
           'rsrc/image/icon/fatcow/document_black.png');
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-download');
+      $lightbox_id = celerity_generate_unique_node_id();
       $download_form = phabricator_form(
         $user,
         array(
@@ -281,12 +284,18 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         ),
         phutil_tag(
           'button',
-          array(),
-          pht('Download')));
+          array(
+            'class' => 'button grey has-icon',
+          ),
+          array(
+            $icon,
+            pht('Download'),
+          )));
 
       Javelin::initBehavior(
         'lightbox-attachments',
         array(
+          'lightbox_id'     => $lightbox_id,
           'defaultImageUri' => $default_img_uri,
           'downloadForm'    => $download_form,
         ));

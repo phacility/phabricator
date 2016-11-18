@@ -98,7 +98,7 @@ final class PhabricatorEmbedFileRemarkupRule
     PhabricatorObjectHandle $handle,
     array $options) {
 
-    require_celerity_resource('lightbox-attachment-css');
+    require_celerity_resource('phui-lightbox-css');
 
     $attrs = array();
     $image_class = 'phabricator-remarkup-embed-image';
@@ -176,6 +176,7 @@ final class PhabricatorEmbedFileRemarkupRule
           'uri'      => $file->getBestURI(),
           'dUri'     => $file->getDownloadURI(),
           'viewable' => true,
+          'monogram' => $file->getMonogram(),
         ),
       ),
       $img);
@@ -279,7 +280,8 @@ final class PhabricatorEmbedFileRemarkupRule
       ->setFileName($this->assertFlatText($options['name']))
       ->setFileDownloadURI($file->getDownloadURI())
       ->setFileViewURI($file->getBestURI())
-      ->setFileViewable((bool)$options['viewable']);
+      ->setFileViewable((bool)$options['viewable'])
+      ->setFileMonogram($file->getMonogram());
   }
 
   private function parseDimension($string) {

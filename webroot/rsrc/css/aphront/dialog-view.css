@@ -108,6 +108,20 @@
   opacity: 0.95;
 }
 
+.jx-white-mask {
+  background: #fff;
+  opacity: 1;
+}
+
+.jx-date-mask {
+  background: #292f33;
+  opacity: 0.5;
+}
+
+.device-desktop .jx-date-mask {
+  display: none;
+}
+
 .aphront-exception-dialog {
   width: 95%;
 }
