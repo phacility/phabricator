@@ -510,15 +510,23 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $viewer = $this->getViewer();
+    $in_handles = $viewer->loadHandles($in_phids);
+    $out_handles = $viewer->loadHandles($out_phids);
+
+    $in_handles = $this->getCompleteHandles($in_handles);
+    $out_handles = $this->getCompleteHandles($out_handles);
+
+    if (!count($in_handles) && !count($out_handles)) {
+      return null;
+    }
+
     $view = new PHUIPropertyListView();
 
-    if ($in_phids) {
-      $in_handles = $viewer->loadHandles($in_phids);
+    if (count($in_handles)) {
       $view->addProperty(pht('Mentioned In'), $in_handles->renderList());
     }
 
-    if ($out_phids) {
-      $out_handles = $viewer->loadHandles($out_phids);
+    if (count($out_handles)) {
       $view->addProperty(pht('Mentioned Here'), $out_handles->renderList());
     }
 
@@ -527,5 +535,19 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setKey('mentions')
       ->appendChild($view);
   }
+
+  private function getCompleteHandles(PhabricatorHandleList $handles) {
+    $phids = array();
+
+    foreach ($handles as $phid => $handle) {
+      if (!$handle->isComplete()) {
+        continue;
+      }
+      $phids[] = $phid;
+    }
+
+    return $handles->newSublist($phids);
+  }
+
 
 }
