@@ -76,6 +76,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
         'dropupload/' => 'PhabricatorFileDropUploadController',
         'compose/' => 'PhabricatorFileComposeController',
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorFileCommentController',
+        'thread/(?P<phid>[^/]+)/' => 'PhabricatorFileLightboxController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorFileEditController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',

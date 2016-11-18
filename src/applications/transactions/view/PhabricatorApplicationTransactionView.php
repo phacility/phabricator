@@ -233,6 +233,10 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $view;
   }
 
+  public function isTimelineEmpty() {
+    return !count($this->buildEvents(true));
+  }
+
   protected function getOrBuildEngine() {
     if (!$this->engine) {
       $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
