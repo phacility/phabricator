@@ -206,6 +206,9 @@ foreach ($refs as $ref) {
     ->setDisableUTF8MB4($args->getArg('disable-utf8mb4'));
   PhabricatorEnv::overrideConfig('mysql.user', $api->getUser());
 
+  $ref->setUser($selected_user);
+  $ref->setPass($password);
+
   try {
     queryfx(
       $api->getConn(null),
