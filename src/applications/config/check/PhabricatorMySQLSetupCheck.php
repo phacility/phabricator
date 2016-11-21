@@ -6,54 +6,49 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
     return self::GROUP_MYSQL;
   }
 
-  public static function loadRawConfigValue($key) {
-    $conn_raw = id(new PhabricatorUser())->establishConnection('w');
-
-    try {
-      $value = queryfx_one($conn_raw, 'SELECT @@%Q', $key);
-      $value = $value['@@'.$key];
-    } catch (AphrontQueryException $ex) {
-      $value = null;
+  protected function executeChecks() {
+    $refs = PhabricatorDatabaseRef::getActiveDatabaseRefs();
+    foreach ($refs as $ref) {
+      $this->executeRefChecks($ref);
     }
-
-    return $value;
   }
 
-  protected function executeChecks() {
-    // TODO: These checks should be executed against every reachable replica?
-    // See T10759.
-    if (PhabricatorEnv::isReadOnly()) {
-      return;
-    }
+  private function executeRefChecks(PhabricatorDatabaseRef $ref) {
+    $max_allowed_packet = $ref->loadRawMySQLConfigValue('max_allowed_packet');
 
-    $max_allowed_packet = self::loadRawConfigValue('max_allowed_packet');
+    $host_name = $ref->getRefKey();
 
     // This primarily supports setting the filesize limit for MySQL to 8MB,
     // which may produce a >16MB packet after escaping.
     $recommended_minimum = (32 * 1024 * 1024);
     if ($max_allowed_packet < $recommended_minimum) {
       $message = pht(
-        "MySQL is configured with a small '%s' (%d), ".
-        "which may cause some large writes to fail.",
+        'On host "%s", MySQL is configured with a small "%s" (%d), which '.
+        'may cause some large writes to fail. The recommended minimum value '.
+        'for this setting is "%d".',
+        $host_name,
         'max_allowed_packet',
-        $max_allowed_packet);
+        $max_allowed_packet,
+        $recommended_minimum);
 
       $this->newIssue('mysql.max_allowed_packet')
         ->setName(pht('Small MySQL "%s"', 'max_allowed_packet'))
         ->setMessage($message)
+        ->setDatabaseRef($ref)
         ->addMySQLConfig('max_allowed_packet');
     }
 
-    $modes = self::loadRawConfigValue('sql_mode');
+    $modes = $ref->loadRawMySQLConfigValue('sql_mode');
     $modes = explode(',', $modes);
 
     if (!in_array('STRICT_ALL_TABLES', $modes)) {
       $summary = pht(
-        'MySQL is not in strict mode, but using strict mode is strongly '.
-        'encouraged.');
+        'MySQL is not in strict mode (on host "%s"), but using strict mode '.
+        'is strongly encouraged.',
+        $host_name);
 
       $message = pht(
-        "On your MySQL instance, the global %s is not set to %s. ".
+        "On database host \"%s\", the global %s is not set to %s. ".
         "It is strongly encouraged that you enable this mode when running ".
         "Phabricator.\n\n".
         "By default MySQL will silently ignore some types of errors, which ".
@@ -67,6 +62,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         "(Note that if you run other applications against the same database, ".
         "they may not work in strict mode. Be careful about enabling it in ".
         "these cases.)",
+        $host_name,
         phutil_tag('tt', array(), 'sql_mode'),
         phutil_tag('tt', array(), 'STRICT_ALL_TABLES'),
         phutil_tag('tt', array(), 'my.cnf'),
@@ -78,15 +74,18 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('MySQL %s Mode Not Set', 'STRICT_ALL_TABLES'))
         ->setSummary($summary)
         ->setMessage($message)
+        ->setDatabaseRef($ref)
         ->addMySQLConfig('sql_mode');
     }
+
     if (in_array('ONLY_FULL_GROUP_BY', $modes)) {
       $summary = pht(
-        'MySQL is in ONLY_FULL_GROUP_BY mode, but using this mode is strongly '.
-        'discouraged.');
+        'MySQL is in ONLY_FULL_GROUP_BY mode (on host "%s"), but using this '.
+        'mode is strongly discouraged.',
+        $host_name);
 
       $message = pht(
-        "On your MySQL instance, the global %s is set to %s. ".
+        "On database host \"%s\", the global %s is set to %s. ".
         "It is strongly encouraged that you disable this mode when running ".
         "Phabricator.\n\n".
         "With %s enabled, MySQL rejects queries for which the select list ".
@@ -101,6 +100,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         "they may not work with %s. Be careful about enabling ".
         "it in these cases and consider migrating Phabricator to a different ".
         "database.)",
+        $host_name,
         phutil_tag('tt', array(), 'sql_mode'),
         phutil_tag('tt', array(), 'ONLY_FULL_GROUP_BY'),
         phutil_tag('tt', array(), 'ONLY_FULL_GROUP_BY'),
@@ -117,31 +117,34 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('MySQL %s Mode Set', 'ONLY_FULL_GROUP_BY'))
         ->setSummary($summary)
         ->setMessage($message)
+        ->setDatabaseRef($ref)
         ->addMySQLConfig('sql_mode');
     }
 
-    $stopword_file = self::loadRawConfigValue('ft_stopword_file');
-
+    $stopword_file = $ref->loadRawMySQLConfigValue('ft_stopword_file');
     if ($this->shouldUseMySQLSearchEngine()) {
       if ($stopword_file === null) {
         $summary = pht(
-          'Your version of MySQL does not support configuration of a '.
-          'stopword file. You will not be able to find search results for '.
-          'common words.');
+          'Your version of MySQL (on database host "%s") does not support '.
+          'configuration of a stopword file. You will not be able to find '.
+          'search results for common words.',
+          $host_name);
 
         $message = pht(
-          "Your MySQL instance does not support the %s option. You will not ".
+          "Database host \"%s\" does not support the %s option. You will not ".
           "be able to find search results for common words. You can gain ".
           "access to this option by upgrading MySQL to a more recent ".
           "version.\n\n".
           "You can ignore this warning if you plan to configure ElasticSearch ".
           "later, or aren't concerned about searching for common words.",
+          $host_name,
           phutil_tag('tt', array(), 'ft_stopword_file'));
 
         $this->newIssue('mysql.ft_stopword_file')
           ->setName(pht('MySQL %s Not Supported', 'ft_stopword_file'))
           ->setSummary($summary)
           ->setMessage($message)
+          ->setDatabaseRef($ref)
           ->addMySQLConfig('ft_stopword_file');
 
       } else if ($stopword_file == '(built-in)') {
@@ -152,11 +155,12 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
 
         $summary = pht(
-          'MySQL is using a default stopword file, which will prevent '.
-          'searching for many common words.');
+          'MySQL (on host "%s") is using a default stopword file, which '.
+          'will prevent searching for many common words.',
+          $host_name);
 
         $message = pht(
-          "Your MySQL instance is using the builtin stopword file for ".
+          "Database host \"%s\" is using the builtin stopword file for ".
           "building search indexes. This can make Phabricator's search ".
           "feature less useful.\n\n".
           "Stopwords are common words which are not indexed and thus can not ".
@@ -177,6 +181,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           "Finally, run this command to rebuild indexes using the new ".
           "rules:\n\n".
           "%s",
+          $host_name,
           phutil_tag('tt', array(), 'my.cnf'),
           phutil_tag('tt', array(), '[mysqld]'),
           phutil_tag('tt', array(), 'mysqld'),
@@ -190,22 +195,24 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           ->setName(pht('MySQL is Using Default Stopword File'))
           ->setSummary($summary)
           ->setMessage($message)
+          ->setDatabaseRef($ref)
           ->addMySQLConfig('ft_stopword_file');
       }
     }
 
-    $min_len = self::loadRawConfigValue('ft_min_word_len');
+    $min_len = $ref->loadRawMySQLConfigValue('ft_min_word_len');
     if ($min_len >= 4) {
       if ($this->shouldUseMySQLSearchEngine()) {
         $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
 
         $summary = pht(
-          'MySQL is configured to only index words with at least %d '.
-          'characters.',
+          'MySQL is configured (on host "%s") to only index words with at '.
+          'least %d characters.',
+          $host_name,
           $min_len);
 
         $message = pht(
-          "Your MySQL instance is configured to use the default minimum word ".
+          "Database host \"%s\" is configured to use the default minimum word ".
           "length when building search indexes, which is 4. This means words ".
           "which are only 3 characters long will not be indexed and can not ".
           "be searched for.\n\n".
@@ -222,6 +229,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           "Finally, run this command to rebuild indexes using the new ".
           "rules:\n\n".
           "%s",
+          $host_name,
           phutil_tag('tt', array(), 'my.cnf'),
           phutil_tag('tt', array(), '[mysqld]'),
           phutil_tag('tt', array(), 'mysqld'),
@@ -235,19 +243,22 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           ->setName(pht('MySQL is Using Default Minimum Word Length'))
           ->setSummary($summary)
           ->setMessage($message)
+          ->setDatabaseRef($ref)
           ->addMySQLConfig('ft_min_word_len');
       }
     }
 
-    $bool_syntax = self::loadRawConfigValue('ft_boolean_syntax');
+    $bool_syntax = $ref->loadRawMySQLConfigValue('ft_boolean_syntax');
     if ($bool_syntax != ' |-><()~*:""&^') {
       if ($this->shouldUseMySQLSearchEngine()) {
         $summary = pht(
-          'MySQL is configured to search on fulltext indexes using "OR" by '.
-          'default. Using "AND" is usually the desired behaviour.');
+          'MySQL (on host "%s") is configured to search on fulltext indexes '.
+          'using "OR" by default. Using "AND" is usually the desired '.
+          'behaviour.',
+          $host_name);
 
         $message = pht(
-          "Your MySQL instance is configured to use the default Boolean ".
+          "Database host \"%s\" is configured to use the default Boolean ".
           "search syntax when using fulltext indexes. This means searching ".
           "for 'search words' will yield the query 'search OR words' ".
           "instead of the desired 'search AND words'.\n\n".
@@ -260,6 +271,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           "To change this setting, add this to your %s file ".
           "(in the %s section) and then restart %s:\n\n".
           "%s\n",
+          $host_name,
           phutil_tag('tt', array(), 'my.cnf'),
           phutil_tag('tt', array(), '[mysqld]'),
           phutil_tag('tt', array(), 'mysqld'),
@@ -269,11 +281,12 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           ->setName(pht('MySQL is Using the Default Boolean Syntax'))
           ->setSummary($summary)
           ->setMessage($message)
+          ->setDatabaseRef($ref)
           ->addMySQLConfig('ft_boolean_syntax');
       }
     }
 
-    $innodb_pool = self::loadRawConfigValue('innodb_buffer_pool_size');
+    $innodb_pool = $ref->loadRawMySQLConfigValue('innodb_buffer_pool_size');
     $innodb_bytes = phutil_parse_bytes($innodb_pool);
     $innodb_readable = phutil_format_bytes($innodb_bytes);
 
@@ -286,11 +299,12 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
     $minimum_bytes = phutil_parse_bytes($minimum_readable);
     if ($innodb_bytes < $minimum_bytes) {
       $summary = pht(
-        'MySQL is configured with a very small innodb_buffer_pool_size, '.
-        'which may impact performance.');
+        'MySQL (on host "%s") is configured with a very small '.
+        'innodb_buffer_pool_size, which may impact performance.',
+        $host_name);
 
       $message = pht(
-        "Your MySQL instance is configured with a very small %s (%s). ".
+        "Database host \"%s\" is configured with a very small %s (%s). ".
         "This may cause poor database performance and lock exhaustion.\n\n".
         "There are no hard-and-fast rules to setting an appropriate value, ".
         "but a reasonable starting point for a standard install is something ".
@@ -307,6 +321,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         "%s\n".
         "If you're satisfied with the current setting, you can safely ".
         "ignore this setup warning.",
+        $host_name,
         phutil_tag('tt', array(), 'innodb_buffer_pool_size'),
         phutil_tag('tt', array(), $innodb_readable),
         phutil_tag('tt', array(), '1600M'),
@@ -320,33 +335,38 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('MySQL May Run Slowly'))
         ->setSummary($summary)
         ->setMessage($message)
+        ->setDatabaseRef($ref)
         ->addMySQLConfig('innodb_buffer_pool_size');
     }
 
-    $conn_w = id(new PhabricatorUser())->establishConnection('w');
+    $conn = $ref->newManagementConnection();
 
     $ok = PhabricatorStorageManagementAPI::isCharacterSetAvailableOnConnection(
       'utf8mb4',
-      $conn_w);
+      $conn);
     if (!$ok) {
       $summary = pht(
-        'You are using an old version of MySQL, and should upgrade.');
+        'You are using an old version of MySQL (on host "%s"), and should '.
+        'upgrade.',
+        $host_name);
 
       $message = pht(
-        'You are using an old version of MySQL which has poor unicode '.
-        'support (it does not support the "utf8mb4" collation set). You will '.
-        'encounter limitations when working with some unicode data.'.
+        'You are using an old version of MySQL (on host "%s") which has poor '.
+        'unicode support (it does not support the "utf8mb4" collation set). '.
+        'You will encounter limitations when working with some unicode data.'.
         "\n\n".
-        'We strongly recommend you upgrade to MySQL 5.5 or newer.');
+        'We strongly recommend you upgrade to MySQL 5.5 or newer.',
+        $host_name);
 
       $this->newIssue('mysql.utf8mb4')
         ->setName(pht('Old MySQL Version'))
         ->setSummary($summary)
+        ->setDatabaseRef($ref)
         ->setMessage($message);
     }
 
     $info = queryfx_one(
-      $conn_w,
+      $conn,
       'SELECT UNIX_TIMESTAMP() epoch');
 
     $epoch = (int)$info['epoch'];
@@ -357,12 +377,17 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->setName(pht('Major Web/Database Clock Skew'))
         ->setSummary(
           pht(
-            'This host is set to a very different time than the database.'))
+            'This web host ("%s") is set to a very different time than a '.
+            'database host "%s".',
+            php_uname('n'),
+            $host_name))
         ->setMessage(
           pht(
-            'The database host and this host ("%s") disagree on the current '.
-            'time by more than 60 seconds (absolute skew is %s seconds). '.
-            'Check that the current time is set correctly everywhere.',
+            'A database host ("%s") and this web host ("%s") disagree on the '.
+            'current time by more than 60 seconds (absolute skew is %s '.
+            'seconds). Check that the current time is set correctly '.
+            'everywhere.',
+            $host_name,
             php_uname('n'),
             new PhutilNumber($delta)));
     }

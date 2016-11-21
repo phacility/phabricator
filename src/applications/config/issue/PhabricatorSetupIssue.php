@@ -9,6 +9,7 @@ final class PhabricatorSetupIssue extends Phobject {
   private $summary;
   private $shortName;
   private $group;
+  private $databaseRef;
 
   private $isIgnored = false;
   private $phpExtensions = array();
@@ -66,6 +67,15 @@ final class PhabricatorSetupIssue extends Phobject {
       return $this->getName();
     }
     return $this->shortName;
+  }
+
+  public function setDatabaseRef(PhabricatorDatabaseRef $database_ref) {
+    $this->databaseRef = $database_ref;
+    return $this;
+  }
+
+  public function getDatabaseRef() {
+    return $this->databaseRef;
   }
 
   public function setGroup($group) {

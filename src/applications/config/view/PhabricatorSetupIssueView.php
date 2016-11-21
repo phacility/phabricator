@@ -470,15 +470,19 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
   private function renderMySQLConfig(array $config) {
     $values = array();
-    foreach ($config as $key) {
-      $value = PhabricatorMySQLSetupCheck::loadRawConfigValue($key);
-      if ($value === null) {
-        $value = phutil_tag(
-          'em',
-          array(),
-          pht('(Not Supported)'));
+    $issue = $this->getIssue();
+    $ref = $issue->getDatabaseRef();
+    if ($ref) {
+      foreach ($config as $key) {
+        $value = $ref->loadRawMySQLConfigValue($key);
+        if ($value === null) {
+          $value = phutil_tag(
+            'em',
+            array(),
+            pht('(Not Supported)'));
+        }
+        $values[$key] = $value;
       }
-      $values[$key] = $value;
     }
 
     $table = $this->renderValueTable($values);

@@ -518,6 +518,19 @@ final class PhabricatorDatabaseRef
     return isset($this->applicationMap[$database]);
   }
 
+  public function loadRawMySQLConfigValue($key) {
+    $conn = $this->newManagementConnection();
+
+    try {
+      $value = queryfx_one($conn, 'SELECT @@%Q', $key);
+      $value = $value['@@'.$key];
+    } catch (AphrontQueryException $ex) {
+      $value = null;
+    }
+
+    return $value;
+  }
+
   public static function getMasterDatabaseRefForApplication($application) {
     $masters = self::getMasterDatabaseRefs();
 
