@@ -7,10 +7,12 @@ final class PhabricatorConfigIssueViewController
     $viewer = $request->getViewer();
     $issue_key = $request->getURIData('key');
 
-    $issues = PhabricatorSetupCheck::runNormalChecks();
-    PhabricatorSetupCheck::setOpenSetupIssueKeys(
-      PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
-      $update_database = true);
+    $engine = new PhabricatorSetupEngine();
+    $response = $engine->execute();
+    if ($response) {
+      return $response;
+    }
+    $issues = $engine->getIssues();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('issue/');

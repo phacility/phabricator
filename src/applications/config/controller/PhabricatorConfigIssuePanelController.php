@@ -5,11 +5,14 @@ final class PhabricatorConfigIssuePanelController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $open_items = PhabricatorSetupCheck::getOpenSetupIssueKeys();
-    $issues = PhabricatorSetupCheck::runNormalChecks();
-    PhabricatorSetupCheck::setOpenSetupIssueKeys(
-      PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
-      $update_database = true);
+
+    $engine = new PhabricatorSetupEngine();
+    $response = $engine->execute();
+    if ($response) {
+      return $response;
+    }
+    $issues = $engine->getIssues();
+    $unresolved_count = count($engine->getUnresolvedIssues());
 
     if ($issues) {
       require_celerity_resource('phabricator-notification-menu-css');
@@ -54,8 +57,6 @@ final class PhabricatorConfigIssuePanelController
         ),
         pht('Unresolved Setup Issues')),
       $content);
-
-    $unresolved_count = count($open_items);
 
     $json = array(
       'content' => $content,
