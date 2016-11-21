@@ -16,6 +16,14 @@ abstract class PhabricatorAuthSessionEngineExtension
 
   abstract public function getExtensionName();
 
+  public function didEstablishSession(PhabricatorAuthSessionInfo $info) {
+    return;
+  }
+
+  public function willServeRequestForUser(PhabricatorUser $user) {
+    return;
+  }
+
   public function didLogout(PhabricatorUser $user, array $sessions) {
     return;
   }

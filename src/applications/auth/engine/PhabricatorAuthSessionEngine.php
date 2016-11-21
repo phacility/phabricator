@@ -270,6 +270,16 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $log->save();
     unset($unguarded);
 
+    $info = id(new PhabricatorAuthSessionInfo())
+      ->setSessionType($session_type)
+      ->setIdentityPHID($identity_phid)
+      ->setIsPartial($partial);
+
+    $extensions = PhabricatorAuthSessionEngineExtension::getAllExtensions();
+    foreach ($extensions as $extension) {
+      $extension->didEstablishSession($info);
+    }
+
     return $session_key;
   }
 
@@ -837,6 +847,11 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
     // Switch to the user's translation.
     PhabricatorEnv::setLocaleCode($user->getTranslation());
+
+    $extensions = PhabricatorAuthSessionEngineExtension::getAllExtensions();
+    foreach ($extensions as $extension) {
+      $extension->willServeRequestForUser($user);
+    }
   }
 
 }

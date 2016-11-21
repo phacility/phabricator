@@ -311,6 +311,11 @@ final class PhabricatorTypeaheadModularDatasourceController
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
+    // Make "\n" delimiters more visible.
+    foreach ($content as $key => $row) {
+      $content[$key][0] = str_replace("\n", '<\n>', $row[0]);
+    }
+
     $table = new AphrontTableView($content);
     $table->setHeaders(
       array(

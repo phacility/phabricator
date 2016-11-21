@@ -1,0 +1,60 @@
+/**
+ * @provides phui-comment-panel-css
+ * @requires phui-timeline-view-css
+ */
+
+.phui-comment-panel .phui-timeline-view {
+  background: none;
+}
+
+.phui-comment-panel .phui-comment-panel-empty {
+  margin: 16px;
+  padding: 12px;
+  border: 1px solid {$thinblueborder};
+  background: {$lightbluebackground};
+  text-align: center;
+  color: {$lightbluetext};
+}
+
+.phui-comment-panel .phui-timeline-view .phui-timeline-event-view {
+  margin: 0;
+}
+
+.phui-comment-panel .phui-timeline-view .phui-timeline-image {
+  display: none;
+}
+
+.phui-comment-panel .phui-timeline-view .phui-timeline-wedge {
+  display: none;
+}
+
+.phui-comment-panel .phui-timeline-major-event .phui-timeline-group {
+  border: none;
+}
+
+.phui-comment-panel .phui-timeline-major-event .phui-timeline-title {
+  background: none;
+  border: none;
+  padding: 0;
+  visibility: hidden;
+}
+
+.phui-comment-panel .phui-timeline-major-event .phui-timeline-title a {
+  visibility: visible;
+}
+
+.phui-comment-panel .phui-timeline-icon-fill,
+.phui-comment-panel .phui-timeline-menu {
+  display: none;
+}
+
+.phui-comment-panel .phui-timeline-major-event .phui-timeline-content {
+  border: none;
+}
+
+.phui-comment-panel .phui-timeline-major-event .phui-timeline-content
+  .phui-timeline-core-content {
+    border: none;
+    padding: 4px 0;
+    background: transparent;
+}

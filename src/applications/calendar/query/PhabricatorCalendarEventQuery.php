@@ -172,7 +172,6 @@ final class PhabricatorCalendarEventQuery
     }
 
     $raw_limit = $this->getRawResultLimit();
-
     if (!$raw_limit && !$this->rangeEnd) {
       throw new Exception(
         pht(

@@ -144,25 +144,26 @@ final class PhabricatorEditEngineConfiguration
       switch (idx($locks, $key)) {
         case self::LOCK_LOCKED:
           $field->setIsHidden(false);
-          $field->setIsLocked(true);
+          if ($field->getIsLockable()) {
+            $field->setIsLocked(true);
+          }
           break;
         case self::LOCK_HIDDEN:
           $field->setIsHidden(true);
-          $field->setIsLocked(false);
+          if ($field->getIsLockable()) {
+            $field->setIsLocked(false);
+          }
           break;
         case self::LOCK_VISIBLE:
           $field->setIsHidden(false);
-          $field->setIsLocked(false);
+          if ($field->getIsLockable()) {
+            $field->setIsLocked(false);
+          }
           break;
         default:
           // If we don't have an explicit value, don't make any adjustments.
           break;
       }
-    }
-
-    // If the field isn't lockable, remove any lock we applied.
-    if (!$field->getIsLockable()) {
-      $field->setIsLocked(false);
     }
 
     $fields = $this->reorderFields($fields);

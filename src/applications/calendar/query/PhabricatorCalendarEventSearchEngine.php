@@ -82,6 +82,18 @@ final class PhabricatorCalendarEventSearchEngine
     );
   }
 
+  public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
+    $query = parent::buildQueryFromSavedQuery($saved);
+
+    // If this is an export query for generating an ".ics" file, don't
+    // build ghost events.
+    if ($saved->getParameter('export')) {
+      $query->setGenerateGhosts(false);
+    }
+
+    return $query;
+  }
+
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
     $viewer = $this->requireViewer();
@@ -125,13 +137,7 @@ final class PhabricatorCalendarEventSearchEngine
       $query->withImportSourcePHIDs($map['importSourcePHIDs']);
     }
 
-    // Generate ghosts (and ignore stub events) if we aren't querying for
-    // specific events or exporting.
-    if (!empty($map['export'])) {
-      // This is a specific mode enabled by event exports.
-      $query
-        ->withIsStub(false);
-    } else if (!$map['ids'] && !$map['phids']) {
+    if (!$map['ids'] && !$map['phids']) {
       $query
         ->withIsStub(false)
         ->setGenerateGhosts(true);
@@ -364,11 +370,13 @@ final class PhabricatorCalendarEventSearchEngine
 
     $month_view->setUser($viewer);
 
+    $viewer_phid = $viewer->getPHID();
     foreach ($events as $event) {
       $epoch_min = $event->getStartDateTimeEpoch();
       $epoch_max = $event->getEndDateTimeEpoch();
 
-      $is_invited = $event->isRSVPInvited($viewer->getPHID());
+      $is_invited = $event->isRSVPInvited($viewer_phid);
+      $is_attending = $event->getIsUserAttending($viewer_phid);
 
       $event_view = id(new AphrontCalendarEventView())
         ->setHostPHID($event->getHostPHID())
@@ -378,7 +386,7 @@ final class PhabricatorCalendarEventSearchEngine
         ->setURI($event->getURI())
         ->setIsAllDay($event->getIsAllDay())
         ->setIcon($event->getDisplayIcon($viewer))
-        ->setViewerIsInvited($is_invited)
+        ->setViewerIsInvited($is_invited || $is_attending)
         ->setDatetimeSummary($event->renderEventDate($viewer, true))
         ->setIconColor($event->getDisplayIconColor($viewer));
 
