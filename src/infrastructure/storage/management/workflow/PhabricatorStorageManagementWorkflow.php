@@ -842,6 +842,8 @@ abstract class PhabricatorStorageManagementWorkflow
     $no_quickstart,
     $init_only) {
 
+    $patches = $this->patches;
+
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
       if ($this->dryRun) {
@@ -864,7 +866,7 @@ abstract class PhabricatorStorageManagementWorkflow
       // adjustment phase.
       $this->didInitialize = true;
 
-      $legacy = $api->getLegacyPatches($this->patches);
+      $legacy = $api->getLegacyPatches($patches);
       if ($legacy || $no_quickstart || $init_only) {
 
         // If we have legacy patches, we can't quickstart.
@@ -921,14 +923,14 @@ abstract class PhabricatorStorageManagementWorkflow
 
     while (true) {
       $applied_something = false;
-      foreach ($this->patches as $key => $patch) {
+      foreach ($patches as $key => $patch) {
         if (isset($applied[$key])) {
-          unset($this->patches[$key]);
+          unset($patches[$key]);
           continue;
         }
 
         if ($apply_only && $apply_only != $key) {
-          unset($this->patches[$key]);
+          unset($patches[$key]);
           continue;
         }
 
@@ -968,17 +970,17 @@ abstract class PhabricatorStorageManagementWorkflow
           }
         }
 
-        unset($this->patches[$key]);
+        unset($patches[$key]);
         $applied[$key] = true;
       }
 
       if (!$applied_something) {
-        if (count($this->patches)) {
+        if (count($patches)) {
           throw new Exception(
             pht(
               'Some patches could not be applied to "%s": %s',
               $api->getRef()->getRefKey(),
-              implode(', ', array_keys($this->patches))));
+              implode(', ', array_keys($patches))));
         } else if (!$this->dryRun && !$apply_only) {
           echo pht(
             'Storage is up to date on "%s". Use "%s" for details.',

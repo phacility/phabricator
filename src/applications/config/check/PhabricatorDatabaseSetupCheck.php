@@ -43,7 +43,7 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
             $port));
     }
 
-    $refs = PhabricatorDatabaseRef::getActiveDatabaseRefs();
+    $refs = PhabricatorDatabaseRef::queryAll();
     $refs = mpull($refs, null, 'getRefKey');
 
     // Test if we can connect to each database first. If we can not connect
@@ -164,5 +164,47 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
       return true;
     }
+
+    // NOTE: It's possible that replication is broken but we have not been
+    // granted permission to "SHOW SLAVE STATUS" so we can't figure it out.
+    // We allow this kind of configuration and survive these checks, trusting
+    // that operations knows what they're doing. This issue is shown on the
+    // "Database Servers" console.
+
+    switch ($ref->getReplicaStatus()) {
+      case PhabricatorDatabaseRef::REPLICATION_MASTER_REPLICA:
+        $message = pht(
+          'Database host "%s" is configured as a master, but is replicating '.
+          'another host. This is dangerous and can mangle or destroy data. '.
+          'Only replicas should be replicating. Stop replication on the '.
+          'host or reconfigure Phabricator.',
+          $ref->getRefKey());
+
+        $this->newIssue('db.master.replicating')
+          ->setName(pht('Replicating Master'))
+          ->setIsFatal(true)
+          ->setMessage($message);
+
+        return true;
+      case PhabricatorDatabaseRef::REPLICATION_REPLICA_NONE:
+      case PhabricatorDatabaseRef::REPLICATION_NOT_REPLICATING:
+        if (!$ref->getIsMaster()) {
+          $message = pht(
+            'Database replica "%s" is listed as a replica, but is not '.
+            'currently replicating. You are vulnerable to data loss if '.
+            'the master fails.',
+            $ref->getRefKey());
+
+          // This isn't a fatal because it can normally only put data at risk,
+          // not actually do anything destructive or unrecoverable.
+
+          $this->newIssue('db.replica.not-replicating')
+            ->setName(pht('Nonreplicating Replica'))
+            ->setMessage($message);
+        }
+        break;
+    }
+
+
   }
 }

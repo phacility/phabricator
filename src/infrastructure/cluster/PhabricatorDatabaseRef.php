@@ -308,13 +308,12 @@ final class PhabricatorDatabaseRef
   }
 
   public static function queryAll() {
-    $refs = self::newRefs();
+    $refs = self::getActiveDatabaseRefs();
+    return self::queryRefs($refs);
+  }
 
+  private static function queryRefs(array $refs) {
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
-
       $conn = $ref->newManagementConnection();
 
       $t_start = microtime(true);
