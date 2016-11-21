@@ -190,6 +190,9 @@ final class PhabricatorRepositoryTestCase
       '-ated',
       '_underscores_',
       'yes!',
+      'quack.git',
+      'git.git',
+      '.git.git.git',
 
       // 65-character names are no good.
       str_repeat('a', 65),

@@ -442,6 +442,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'short names may not contain only numbers.',
           $slug));
     }
+
+    if (preg_match('/\\.git/', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names must not end in ".git". This suffix will be added '.
+          'automatically in appropriate contexts.',
+          $slug));
+    }
   }
 
   public static function assertValidCallsign($callsign) {
@@ -592,21 +601,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public static function parseRepositoryServicePath($request_path, $vcs) {
-
-    // NOTE: In Mercurial over SSH, the path will begin without a leading "/",
-    // so we're matching it optionally.
-
-    if ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT) {
-      $maybe_git = '(?:\\.git)?';
-    } else {
-      $maybe_git = null;
-    }
+    $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
 
     $patterns = array(
       '(^'.
-        '(?P<base>/?(?:diffusion|source)/(?P<identifier>[^/.]+))'.
-        $maybe_git.
-        '(?P<path>(?:/|.*)?)'.
+        '(?P<base>/?(?:diffusion|source)/(?P<identifier>[^/]+))'.
+        '(?P<path>.*)'.
       '\z)',
     );
 
@@ -618,6 +618,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
 
       $identifier = $matches['identifier'];
+      if ($is_git) {
+        $identifier = preg_replace('/\\.git\z/', '', $identifier);
+      }
+
       $base = $matches['base'];
       $path = $matches['path'];
       break;
