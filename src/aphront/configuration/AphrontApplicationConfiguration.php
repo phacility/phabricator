@@ -89,7 +89,8 @@ abstract class AphrontApplicationConfiguration extends Phobject {
 
     if ($database_exception) {
       $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
-        $database_exception);
+        $database_exception,
+        true);
       $response = PhabricatorSetupCheck::newIssueResponse($issue);
       return self::writeResponse($sink, $response);
     }

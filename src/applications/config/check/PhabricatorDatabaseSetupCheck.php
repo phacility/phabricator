@@ -43,38 +43,59 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
             $port));
     }
 
-    $masters = PhabricatorDatabaseRef::getMasterDatabaseRefs();
-    if (!$masters) {
-      // If we're implicitly in read-only mode during disaster recovery,
-      // don't bother with these setup checks.
-      return;
+    $refs = PhabricatorDatabaseRef::getActiveDatabaseRefs();
+    $refs = mpull($refs, null, 'getRefKey');
+
+    // Test if we can connect to each database first. If we can not connect
+    // to a particular database, we only raise a warning: this allows new web
+    // nodes to start during a disaster, when some databases may be correctly
+    // configured but not reachable.
+
+    $connect_map = array();
+    $any_connection = false;
+    foreach ($refs as $ref_key => $ref) {
+      $conn_raw = $ref->newManagementConnection();
+
+      try {
+        queryfx($conn_raw, 'SELECT 1');
+        $database_exception = null;
+        $any_connection = true;
+      } catch (AphrontInvalidCredentialsQueryException $ex) {
+        $database_exception = $ex;
+      } catch (AphrontConnectionQueryException $ex) {
+        $database_exception = $ex;
+      }
+
+      if ($database_exception) {
+        $connect_map[$ref_key] = $database_exception;
+        unset($refs[$ref_key]);
+      }
     }
 
-    foreach ($masters as $master) {
-      if ($this->checkMasterDatabase($master)) {
-        break;
+    if ($connect_map) {
+      // This is only a fatal error if we could not connect to anything. If
+      // possible, we still want to start if some database hosts can not be
+      // reached.
+      $is_fatal = !$any_connection;
+
+      foreach ($connect_map as $ref_key => $database_exception) {
+        $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
+          $database_exception,
+          $is_fatal);
+        $this->addIssue($issue);
+      }
+    }
+
+    foreach ($refs as $ref_key => $ref) {
+      if ($this->executeRefChecks($ref)) {
+        return;
       }
     }
   }
 
-  private function checkMasterDatabase(PhabricatorDatabaseRef $master) {
-    $conn_raw = $master->newManagementConnection();
-
-    try {
-      queryfx($conn_raw, 'SELECT 1');
-      $database_exception = null;
-    } catch (AphrontInvalidCredentialsQueryException $ex) {
-      $database_exception = $ex;
-    } catch (AphrontConnectionQueryException $ex) {
-      $database_exception = $ex;
-    }
-
-    if ($database_exception) {
-      $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
-        $database_exception);
-      $this->addIssue($issue);
-      return true;
-    }
+  private function executeRefChecks(PhabricatorDatabaseRef $ref) {
+    $conn_raw = $ref->newManagementConnection();
+    $ref_key = $ref->getRefKey();
 
     $engines = queryfx_all($conn_raw, 'SHOW ENGINES');
     $engines = ipull($engines, 'Support', 'Engine');
@@ -82,17 +103,19 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
     $innodb = idx($engines, 'InnoDB');
     if ($innodb != 'YES' && $innodb != 'DEFAULT') {
       $message = pht(
-        "The 'InnoDB' engine is not available in MySQL. Enable InnoDB in ".
-        "your MySQL configuration.".
+        'The "InnoDB" engine is not available in MySQL (on host "%s"). '.
+        'Enable InnoDB in your MySQL configuration.'.
         "\n\n".
-        "(If you aleady created tables, MySQL incorrectly used some other ".
-        "engine to create them. You need to convert them or drop and ".
-        "reinitialize them.)");
+        '(If you aleady created tables, MySQL incorrectly used some other '.
+        'engine to create them. You need to convert them or drop and '.
+        'reinitialize them.)',
+        $ref_key);
 
       $this->newIssue('mysql.innodb')
         ->setName(pht('MySQL InnoDB Engine Not Available'))
         ->setMessage($message)
         ->setIsFatal(true);
+
       return true;
     }
 
@@ -103,18 +126,20 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
     if (empty($databases[$namespace.'_meta_data'])) {
       $message = pht(
-        "Run the storage upgrade script to setup Phabricator's database ".
-        "schema.");
+        'Run the storage upgrade script to setup databases (host "%s" has '.
+        'not been initialized).',
+        $ref_key);
 
       $this->newIssue('storage.upgrade')
         ->setName(pht('Setup MySQL Schema'))
         ->setMessage($message)
         ->setIsFatal(true)
         ->addCommand(hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
+
       return true;
     }
 
-    $conn_meta = $master->newApplicationConnection(
+    $conn_meta = $ref->newApplicationConnection(
       $namespace.'_meta_data');
 
     $applied = queryfx_all($conn_meta, 'SELECT patch FROM patch_status');
@@ -124,15 +149,19 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
     $diff = array_diff_key($all, $applied);
 
     if ($diff) {
+      $message = pht(
+        'Run the storage upgrade script to upgrade databases (host "%s" is '.
+        'out of date). Missing patches: %s.',
+        $ref_key,
+        implode(', ', array_keys($diff)));
+
       $this->newIssue('storage.patch')
         ->setName(pht('Upgrade MySQL Schema'))
-        ->setMessage(
-          pht(
-            "Run the storage upgrade script to upgrade Phabricator's ".
-            "database schema. Missing patches:<br />%s<br />",
-            phutil_implode_html(phutil_tag('br'), array_keys($diff))))
+        ->setIsFatal(true)
+        ->setMessage($message)
         ->addCommand(
           hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
+
       return true;
     }
   }

@@ -21,7 +21,8 @@ final class PhabricatorSetupIssue extends Phobject {
   private $links;
 
   public static function newDatabaseConnectionIssue(
-    AphrontQueryException $ex) {
+    AphrontQueryException $ex,
+    $is_fatal) {
 
     $message = pht(
       "Unable to connect to MySQL!\n\n".
@@ -29,15 +30,21 @@ final class PhabricatorSetupIssue extends Phobject {
       "Make sure Phabricator and MySQL are correctly configured.",
       $ex->getMessage());
 
-    return id(new self())
+    $issue = id(new self())
       ->setIssueKey('mysql.connect')
       ->setName(pht('Can Not Connect to MySQL'))
       ->setMessage($message)
-      ->setIsFatal(true)
+      ->setIsFatal($is_fatal)
       ->addRelatedPhabricatorConfig('mysql.host')
       ->addRelatedPhabricatorConfig('mysql.port')
       ->addRelatedPhabricatorConfig('mysql.user')
       ->addRelatedPhabricatorConfig('mysql.pass');
+
+    if (PhabricatorEnv::getEnvConfig('cluster.databases')) {
+      $issue->addRelatedPhabricatorConfig('cluster.databases');
+    }
+
+    return $issue;
   }
 
   public function addCommand($command) {
