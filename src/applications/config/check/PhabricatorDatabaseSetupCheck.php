@@ -205,6 +205,38 @@ final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
         break;
     }
 
+    // If we have more than one master, we require that the cluster database
+    // configuration written to each database node is exactly the same as the
+    // one we are running with.
+    $masters = PhabricatorDatabaseRef::getAllMasterDatabaseRefs();
+    if (count($masters) > 1) {
+      $state_actual = queryfx_one(
+        $conn_meta,
+        'SELECT stateValue FROM %T WHERE stateKey = %s',
+        PhabricatorStorageManagementAPI::TABLE_HOSTSTATE,
+        'cluster.databases');
+      if ($state_actual) {
+        $state_actual = $state_actual['stateValue'];
+      }
 
+      $state_expect = $ref->getPartitionStateForCommit();
+
+      if ($state_expect !== $state_actual) {
+        $message = pht(
+          'Database host "%s" has a configured cluster state which disagrees '.
+          'with the state on this host ("%s"). Run `bin/storage partition` '.
+          'to commit local state to the cluster. This host may have started '.
+          'with an out-of-date configuration.',
+          $ref->getRefKey(),
+          php_uname('n'));
+
+        $this->newIssue('db.state.desync')
+          ->setName(pht('Cluster Configuration Out of Sync'))
+          ->setMessage($message)
+          ->setIsFatal(true);
+        return true;
+      }
+    }
   }
+
 }

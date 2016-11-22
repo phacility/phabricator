@@ -180,6 +180,17 @@ final class PhabricatorDatabaseRef
     return $this->applicationMap;
   }
 
+  public function getPartitionStateForCommit() {
+    $state = PhabricatorEnv::getEnvConfig('cluster.databases');
+    foreach ($state as $key => $value) {
+      // Don't store passwords, since we don't care if they differ and
+      // users may find it surprising.
+      unset($state[$key]['pass']);
+    }
+
+    return phutil_json_encode($state);
+  }
+
   public function setMasterRef(PhabricatorDatabaseRef $master_ref) {
     $this->masterRef = $master_ref;
     return $this;
@@ -498,9 +509,6 @@ final class PhabricatorDatabaseRef
 
     $masters = array();
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
       if ($ref->getIsMaster()) {
         $masters[] = $ref;
       }

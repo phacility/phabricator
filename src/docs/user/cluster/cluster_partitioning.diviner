@@ -123,6 +123,21 @@ Not all of the database partition names are the same as the application
 names. You can get a list of databases with `bin/storage databases` to identify
 the correct database names.
 
+After you have configured partitioning, it needs to be committed to the
+databases. This writes a copy of the configuration to tables on the databases,
+preventing errors if a webserver accidentally starts with an old or invalid
+configuration.
+
+To commit the configuration, run this command:
+
+```
+phabricator/ $ ./bin/storage partition
+```
+
+Run this command after making any partition or clustering changes. Webservers
+will not serve traffic if their configuration and the database configuration
+differ.
+
 
 Launching a new Partition
 =========================
@@ -135,6 +150,7 @@ To add a new partition, follow these steps:
     are partitioning, you will need to configure your existing master as the
     new "default". This will let Phabricator interact with it, but won't send
     any traffic to it yet.
+  - Run `bin/storage partition`.
   - Run `bin/storage upgrade` to initialize the schemata on the new hosts.
   - Stop writes to the applications you want to move by putting Phabricator
     in read-only mode, or shutting down the webserver and daemons, or telling
@@ -143,6 +159,7 @@ To add a new partition, follow these steps:
   - Load the data into the application databases on the new master.
   - Reconfigure the "partition" setup so that Phabricator knows the databases
     have moved.
+  - Run `bin/storage partition`.
   - While still in read-only mode, check that all the data appears to be
     intact.
   - Resume writes.

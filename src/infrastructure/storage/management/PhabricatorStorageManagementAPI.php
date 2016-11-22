@@ -19,6 +19,7 @@ final class PhabricatorStorageManagementAPI extends Phobject {
   const COLLATE_FULLTEXT = 'COLLATE_FULLTEXT';
 
   const TABLE_STATUS = 'patch_status';
+  const TABLE_HOSTSTATE = 'hoststate';
 
   public function setDisableUTF8MB4($disable_utf8_mb4) {
     $this->disableUTF8MB4 = $disable_utf8_mb4;
