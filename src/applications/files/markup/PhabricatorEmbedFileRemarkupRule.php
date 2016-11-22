@@ -252,6 +252,12 @@ final class PhabricatorEmbedFileRemarkupRule
       $autoplay = null;
     }
 
+    // Rendering contexts like feed can disable autoplay.
+    $engine = $this->getEngine();
+    if ($engine->getConfig('autoplay.disable')) {
+      $autoplay = null;
+    }
+
     return $this->newTag(
       $tag,
       array(
