@@ -48,23 +48,6 @@ final class PhabricatorMySQLConfigOptions
             'Phabricator chooses which database to connect to through a '.
             'swappable configuration provider. You almost certainly do not '.
             'need to change this.')),
-      $this->newOption(
-        'mysql.implementation',
-        'class',
-        (extension_loaded('mysqli')
-          ? 'AphrontMySQLiDatabaseConnection'
-          : 'AphrontMySQLDatabaseConnection'))
-        ->setLocked(true)
-        ->setBaseClass('AphrontMySQLDatabaseConnectionBase')
-        ->setSummary(
-          pht('Configure database connection class.'))
-        ->setDescription(
-          pht(
-            'Phabricator connects to MySQL through a swappable abstraction '.
-            'layer. You can choose an alternate implementation by setting '.
-            'this option. To provide your own implementation, extend '.
-            '`%s`. It is very unlikely that you need to change this.',
-            'AphrontMySQLDatabaseConnectionBase')),
       $this->newOption('storage.default-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setSummary(

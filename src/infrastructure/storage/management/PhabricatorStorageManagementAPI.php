@@ -109,9 +109,7 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     $database = $this->getDatabaseName($fragment);
     $return = &$this->conns[$this->host][$this->user][$database];
     if (!$return) {
-      $return = PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
+      $return = PhabricatorDatabaseRef::newRawConnection(
         array(
           'user'      => $this->user,
           'pass'      => $this->password,
@@ -120,8 +118,7 @@ final class PhabricatorStorageManagementAPI extends Phobject {
           'database'  => $fragment
             ? $database
             : null,
-        ),
-      ));
+        ));
     }
     return $return;
   }

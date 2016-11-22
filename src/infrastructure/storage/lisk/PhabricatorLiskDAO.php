@@ -101,18 +101,15 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       'mysql.configuration-provider',
       array($this, $mode, $namespace));
 
-    return PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
+    return PhabricatorDatabaseRef::newRawConnection(
       array(
-        array(
-          'user'      => $conf->getUser(),
-          'pass'      => $conf->getPassword(),
-          'host'      => $conf->getHost(),
-          'port'      => $conf->getPort(),
-          'database'  => $database,
-          'retries'   => 3,
-          'timeout' => 10,
-        ),
+        'user' => $conf->getUser(),
+        'pass' => $conf->getPassword(),
+        'host' => $conf->getHost(),
+        'port' => $conf->getPort(),
+        'database' => $database,
+        'retries' => 3,
+        'timeout' => 10,
       ));
   }
 

@@ -663,11 +663,15 @@ final class PhabricatorDatabaseRef
       'timeout' => $default_timeout,
     );
 
-    return PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
-        $spec,
-      ));
+    return self::newRawConnection($spec);
+  }
+
+  public static function newRawConnection(array $options) {
+    if (extension_loaded('mysqli')) {
+      return new AphrontMySQLiDatabaseConnection($options);
+    } else {
+      return new AphrontMySQLDatabaseConnection($options);
+    }
   }
 
 }
