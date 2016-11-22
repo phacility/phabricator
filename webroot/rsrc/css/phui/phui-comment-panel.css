@@ -16,6 +16,12 @@
   color: {$lightbluetext};
 }
 
+.phui-comment-panel-header {
+  font-weight: bold;
+  padding: 12px 16px 0;
+  word-break: break-word;
+}
+
 .phui-comment-panel .phui-timeline-view .phui-timeline-event-view {
   margin-left: 40px;
 }
