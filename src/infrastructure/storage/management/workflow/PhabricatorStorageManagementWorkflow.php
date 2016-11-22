@@ -826,7 +826,6 @@ abstract class PhabricatorStorageManagementWorkflow
 
     $locks = array();
     foreach ($apis as $api) {
-      $ref_key = $api->getRef()->getRefKey();
       $locks[] = $this->lock($api);
     }
 
@@ -981,6 +980,21 @@ abstract class PhabricatorStorageManagementWorkflow
     // up to date one at a time we can end up in a big mess.
 
     $duration_map = array();
+
+    // First, find any global patches which have been applied to ANY database.
+    // We are just going to mark these as applied without actually running
+    // them. Otherwise, adding new empty masters to an existing cluster will
+    // try to apply them against invalid states.
+    foreach ($patches as $key => $patch) {
+      if ($patch->getIsGlobalPatch()) {
+        foreach ($applied_map as $ref_key => $applied) {
+          if (isset($applied[$key])) {
+            $duration_map[$key] = 1;
+          }
+        }
+      }
+    }
+
     while (true) {
       $applied_something = false;
       foreach ($patches as $key => $patch) {
