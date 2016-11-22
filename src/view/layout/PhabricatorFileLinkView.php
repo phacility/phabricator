@@ -97,6 +97,9 @@ final class PhabricatorFileLinkView extends AphrontView {
       $class = $this->getCustomClass();
     }
 
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-file-text-o');
+
     return javelin_tag(
       'a',
       array(
@@ -106,6 +109,9 @@ final class PhabricatorFileLinkView extends AphrontView {
         'meta'        => $meta,
         'mustcapture' => $mustcapture,
       ),
-      $this->getFileName());
+      array(
+        $icon,
+        $this->getFileName(),
+      ));
   }
 }

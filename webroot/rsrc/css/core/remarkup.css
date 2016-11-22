@@ -370,8 +370,22 @@ video.phabricator-media {
 }
 
 .phabricator-remarkup-embed-layout-link {
-  padding-left: 20px;
-  background: url(/rsrc/image/icon/fatcow/page_white_put.png) 0 0 no-repeat;
+  padding: 2px 0;
+  border-radius: 3px;
+  margin: 0;
+  display: inline-block;
+  font-weight: bold;
+  color: {$anchor};
+  -webkit-font-smoothing: antialiased;
+}
+
+.phabricator-remarkup-embed-layout-link .phui-icon-view {
+  margin-right: 8px;
+}
+
+.phabricator-remarkup-embed-layout-link:hover,
+.phabricator-remarkup-embed-layout-link:hover .phui-icon-view {
+  color: {$violet};
 }
 
 .phabricator-remarkup-embed-float-left {
