@@ -569,17 +569,20 @@ final class PhabricatorDatabaseRef
   }
 
   public static function newIndividualRef() {
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array(null, 'w', null));
+    $default_user = PhabricatorEnv::getEnvConfig('mysql.user');
+    $default_pass = new PhutilOpaqueEnvelope(
+      PhabricatorEnv::getEnvConfig('mysql.pass'));
+    $default_host = PhabricatorEnv::getEnvConfig('mysql.host');
+    $default_port = PhabricatorEnv::getEnvConfig('mysql.port');
 
     return id(new self())
-      ->setHost($conf->getHost())
-      ->setPort($conf->getPort())
-      ->setUser($conf->getUser())
-      ->setPass($conf->getPassword())
+      ->setUser($default_user)
+      ->setPass($default_pass)
+      ->setHost($default_host)
+      ->setPort($default_port)
       ->setIsIndividual(true)
-      ->setIsMaster(true);
+      ->setIsMaster(true)
+      ->setIsDefaultPartition(true);
   }
 
   public static function getAllReplicaDatabaseRefs() {

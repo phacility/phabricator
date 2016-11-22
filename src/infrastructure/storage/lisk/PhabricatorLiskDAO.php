@@ -60,15 +60,10 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $this->raiseImproperWrite($database);
     }
 
-    $is_cluster = (bool)PhabricatorEnv::getEnvConfig('cluster.databases');
-    if ($is_cluster) {
-      $connection = $this->newClusterConnection(
-        $this->getApplicationName(),
-        $database,
-        $mode);
-    } else {
-      $connection = $this->newBasicConnection($database, $mode, $namespace);
-    }
+    $connection = $this->newClusterConnection(
+      $this->getApplicationName(),
+      $database,
+      $mode);
 
     // TODO: This should be testing if the mode is "r", but that would probably
     // break a lot of things. Perform a more narrow test for readonly mode
@@ -94,23 +89,6 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     }
 
     return $connection;
-  }
-
-  private function newBasicConnection($database, $mode, $namespace) {
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array($this, $mode, $namespace));
-
-    return PhabricatorDatabaseRef::newRawConnection(
-      array(
-        'user' => $conf->getUser(),
-        'pass' => $conf->getPassword(),
-        'host' => $conf->getHost(),
-        'port' => $conf->getPort(),
-        'database' => $database,
-        'retries' => 3,
-        'timeout' => 10,
-      ));
   }
 
   private function newClusterConnection($application, $database, $mode) {

@@ -35,19 +35,6 @@ final class PhabricatorMySQLConfigOptions
         ->setHidden(true)
         ->setDescription(
           pht('MySQL password to use when connecting to the database.')),
-      $this->newOption(
-        'mysql.configuration-provider',
-        'class',
-        'DefaultDatabaseConfigurationProvider')
-        ->setLocked(true)
-        ->setBaseClass('DatabaseConfigurationProvider')
-        ->setSummary(
-          pht('Configure database configuration class.'))
-        ->setDescription(
-          pht(
-            'Phabricator chooses which database to connect to through a '.
-            'swappable configuration provider. You almost certainly do not '.
-            'need to change this.')),
       $this->newOption('storage.default-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setSummary(

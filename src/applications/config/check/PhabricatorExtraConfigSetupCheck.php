@@ -344,6 +344,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'mysql.implementation' => pht(
         'Phabricator now automatically selects the best available '.
         'MySQL implementation.'),
+
+      'mysql.configuration-provider' => pht(
+        'Phabricator now has application-level management of partitioning '.
+        'and replicas.'),
     );
 
     return $ancient_config;
