@@ -335,4 +335,17 @@ JX.behavior('lightbox-attachments', function (config) {
     'lightbox-comment',
   _toggleComment);
 
+  var _sendMessage = function(e) {
+    e.kill();
+    var form = e.getNode('tag:form');
+    JX.Workflow.newFromForm(form)
+      .setHandler(onLoadCommentsResponse)
+      .start();
+  };
+
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
+    'lightbox-comment-form',
+    _sendMessage);
+
 });
