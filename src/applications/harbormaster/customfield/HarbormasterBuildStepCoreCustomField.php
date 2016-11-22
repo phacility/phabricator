@@ -43,7 +43,7 @@ final class HarbormasterBuildStepCoreCustomField
           'the result for this step. After the result is recorded, the build '.
           'plan will resume.'),
         'options' => array(
-          '' => pht('Continue Build Normally'),
+          'continue' => pht('Continue Build Normally'),
           'wait' => pht('Wait For Message'),
         ),
       );
