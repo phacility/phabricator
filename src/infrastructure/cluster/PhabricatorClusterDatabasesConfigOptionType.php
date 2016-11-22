@@ -37,6 +37,7 @@ final class PhabricatorClusterDatabasesConfigOptionType
             'disabled' => 'optional bool',
             'master' => 'optional string',
             'partition' => 'optional list<string>',
+            'persistent' => 'optional bool',
           ));
       } catch (Exception $ex) {
         throw new Exception(

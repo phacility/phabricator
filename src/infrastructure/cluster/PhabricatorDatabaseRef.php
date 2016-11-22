@@ -40,6 +40,7 @@ final class PhabricatorDatabaseRef
   private $applicationMap = array();
   private $masterRef;
   private $replicaRefs = array();
+  private $usePersistentConnections;
 
   public function setHost($host) {
     $this->host = $host;
@@ -169,6 +170,15 @@ final class PhabricatorDatabaseRef
 
   public function getIsDefaultPartition() {
     return $this->isDefaultPartition;
+  }
+
+  public function setUsePersistentConnections($use_persistent_connections) {
+    $this->usePersistentConnections = $use_persistent_connections;
+    return $this;
+  }
+
+  public function getUsePersistentConnections() {
+    return $this->usePersistentConnections;
   }
 
   public function setApplicationMap(array $application_map) {
@@ -582,7 +592,8 @@ final class PhabricatorDatabaseRef
       ->setPort($default_port)
       ->setIsIndividual(true)
       ->setIsMaster(true)
-      ->setIsDefaultPartition(true);
+      ->setIsDefaultPartition(true)
+      ->setUsePersistentConnections(false);
   }
 
   public static function getAllReplicaDatabaseRefs() {
@@ -672,9 +683,31 @@ final class PhabricatorDatabaseRef
       'database' => null,
       'retries' => $default_retries,
       'timeout' => $default_timeout,
+      'persistent' => $this->getUsePersistentConnections(),
     );
 
-    return self::newRawConnection($spec);
+    $is_cli = (php_sapi_name() == 'cli');
+
+    $use_persistent = false;
+    if (!empty($spec['persistent']) && !$is_cli) {
+      $use_persistent = true;
+    }
+    unset($spec['persistent']);
+
+    $connection = self::newRawConnection($spec);
+
+    // If configured, use persistent connections. See T11672 for details.
+    if ($use_persistent) {
+      $connection->setPersistent($use_persistent);
+    }
+
+    // Unless this is a script running from the CLI, prevent any query from
+    // running for more than 30 seconds. See T10849 for details.
+    if (!$is_cli) {
+      $connection->setQueryTimeout(30);
+    }
+
+    return $connection;
   }
 
   public static function newRawConnection(array $options) {
