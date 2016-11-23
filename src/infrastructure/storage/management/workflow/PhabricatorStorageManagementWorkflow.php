@@ -1141,7 +1141,9 @@ abstract class PhabricatorStorageManagementWorkflow
     // Although we're holding this lock on different databases so it could
     // have the same name on each as far as the database is concerned, the
     // locks would be the same within this process.
-    $lock_name = 'adjust/'.$api->getRef()->getRefKey();
+    $ref_key = $api->getRef()->getRefKey();
+    $ref_hash = PhabricatorHash::digestForIndex($ref_key);
+    $lock_name = 'adjust('.$ref_hash.')';
 
     return PhabricatorGlobalLock::newLock($lock_name)
       ->useSpecificConnection($api->getConn(null))
