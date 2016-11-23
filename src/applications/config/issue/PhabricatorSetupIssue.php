@@ -22,7 +22,7 @@ final class PhabricatorSetupIssue extends Phobject {
   private $links;
 
   public static function newDatabaseConnectionIssue(
-    AphrontQueryException $ex,
+    Exception $ex,
     $is_fatal) {
 
     $message = pht(
