@@ -487,7 +487,7 @@ final class PhabricatorUser
     if ($this->getPHID()) {
       $settings = $this->requireCacheData($settings_key);
     } else {
-      $settings = array();
+      $settings = $this->loadGlobalSettings();
     }
 
     // NOTE: To slightly improve performance, we're using all settings here,
@@ -553,6 +553,20 @@ final class PhabricatorUser
 
   public function getTimezoneIdentifier() {
     return $this->getUserSetting(PhabricatorTimezoneSetting::SETTINGKEY);
+  }
+
+  private function loadGlobalSettings() {
+    $cache_key = 'user.settings.global';
+    $cache = PhabricatorCaches::getRequestCache();
+    $settings = $cache->getKey($cache_key);
+
+    if ($settings === null) {
+      $preferences = PhabricatorUserPreferences::loadGlobalPreferences($this);
+      $settings = $preferences->getPreferences();
+      $cache->setKey($cache_key, $settings);
+    }
+
+    return $settings;
   }
 
 
