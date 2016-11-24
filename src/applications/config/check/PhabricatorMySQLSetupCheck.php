@@ -248,44 +248,6 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
       }
     }
 
-    $bool_syntax = $ref->loadRawMySQLConfigValue('ft_boolean_syntax');
-    if ($bool_syntax != ' |-><()~*:""&^') {
-      if ($this->shouldUseMySQLSearchEngine()) {
-        $summary = pht(
-          'MySQL (on host "%s") is configured to search on fulltext indexes '.
-          'using "OR" by default. Using "AND" is usually the desired '.
-          'behaviour.',
-          $host_name);
-
-        $message = pht(
-          "Database host \"%s\" is configured to use the default Boolean ".
-          "search syntax when using fulltext indexes. This means searching ".
-          "for 'search words' will yield the query 'search OR words' ".
-          "instead of the desired 'search AND words'.\n\n".
-          "This might produce unexpected search results. \n\n".
-          "You can change this setting to a more sensible default. ".
-          "Alternatively, you can ignore this warning if ".
-          "using 'OR' is the desired behaviour. If you later plan ".
-          "to configure ElasticSearch, you can also ignore this warning: ".
-          "only MySQL fulltext search is affected.\n\n".
-          "To change this setting, add this to your %s file ".
-          "(in the %s section) and then restart %s:\n\n".
-          "%s\n",
-          $host_name,
-          phutil_tag('tt', array(), 'my.cnf'),
-          phutil_tag('tt', array(), '[mysqld]'),
-          phutil_tag('tt', array(), 'mysqld'),
-          phutil_tag('pre', array(), 'ft_boolean_syntax=\' |-><()~*:""&^\''));
-
-        $this->newIssue('mysql.ft_boolean_syntax')
-          ->setName(pht('MySQL is Using the Default Boolean Syntax'))
-          ->setSummary($summary)
-          ->setMessage($message)
-          ->setDatabaseRef($ref)
-          ->addMySQLConfig('ft_boolean_syntax');
-      }
-    }
-
     $innodb_pool = $ref->loadRawMySQLConfigValue('innodb_buffer_pool_size');
     $innodb_bytes = phutil_parse_bytes($innodb_pool);
     $innodb_readable = phutil_format_bytes($innodb_bytes);

@@ -56,10 +56,14 @@ final class ConpherenceFulltextQuery
     }
 
     if (strlen($this->fulltext)) {
+      $compiled_query = PhabricatorSearchDocument::newQueryCompiler()
+        ->setQuery($this->fulltext)
+        ->compileQuery();
+
       $where[] = qsprintf(
         $conn_r,
         'MATCH(i.corpus) AGAINST (%s IN BOOLEAN MODE)',
-        $this->fulltext);
+        $compiled_query);
     }
 
     return $this->formatWhereClause($where);
