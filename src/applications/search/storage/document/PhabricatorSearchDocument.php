@@ -45,14 +45,24 @@ final class PhabricatorSearchDocument extends PhabricatorSearchDAO {
 
     $compiler = new PhutilSearchQueryCompiler();
 
-    $operators = queryfx_one(
-      $conn,
-      'SELECT @@ft_boolean_syntax AS syntax');
-    if ($operators) {
-      $compiler->setOperators($operators['syntax']);
+    if (self::isInnoDBFulltextEngineAvailable()) {
+      // The InnoDB fulltext boolean operators are always the same as the
+      // default MyISAM operators, so we do not need to adjust the compiler.
+    } else {
+      $operators = queryfx_one(
+        $conn,
+        'SELECT @@ft_boolean_syntax AS syntax');
+      if ($operators) {
+        $compiler->setOperators($operators['syntax']);
+      }
     }
 
     return $compiler;
+  }
+
+  public static function isInnoDBFulltextEngineAvailable() {
+    // For now, never consider this engine to be available.
+    return false;
   }
 
 }

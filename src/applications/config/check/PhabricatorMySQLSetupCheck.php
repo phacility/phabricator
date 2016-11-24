@@ -121,8 +121,18 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->addMySQLConfig('sql_mode');
     }
 
-    $stopword_file = $ref->loadRawMySQLConfigValue('ft_stopword_file');
+    $is_innodb_fulltext = false;
+    $is_myisam_fulltext = false;
     if ($this->shouldUseMySQLSearchEngine()) {
+      if (PhabricatorSearchDocument::isInnoDBFulltextEngineAvailable()) {
+        $is_innodb_fulltext = true;
+      } else {
+        $is_myisam_fulltext = true;
+      }
+    }
+
+    if ($is_myisam_fulltext) {
+      $stopword_file = $ref->loadRawMySQLConfigValue('ft_stopword_file');
       if ($stopword_file === null) {
         $summary = pht(
           'Your version of MySQL (on database host "%s") does not support '.
@@ -200,9 +210,9 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
       }
     }
 
-    $min_len = $ref->loadRawMySQLConfigValue('ft_min_word_len');
-    if ($min_len >= 4) {
-      if ($this->shouldUseMySQLSearchEngine()) {
+    if ($is_myisam_fulltext) {
+      $min_len = $ref->loadRawMySQLConfigValue('ft_min_word_len');
+      if ($min_len >= 4) {
         $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
 
         $summary = pht(
@@ -247,6 +257,18 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
           ->addMySQLConfig('ft_min_word_len');
       }
     }
+
+    // NOTE: The default value of "innodb_ft_min_token_size" is 3, which is
+    // a reasonable value, so we do not warn about it: if it is set to
+    // something else, the user adjusted it on their own.
+
+    // NOTE: We populate a stopwords table at "phabricator_search.stopwords",
+    // but the default InnoDB stopword list is pretty reasonable (36 words,
+    // versus 500+ in MyISAM). Just use the builtin list until we run into
+    // concrete issues with it. Users can switch to our stopword table with:
+    //
+    // [mysqld]
+    //   innodb_ft_server_stopword_table = phabricator_search/stopwords
 
     $innodb_pool = $ref->loadRawMySQLConfigValue('innodb_buffer_pool_size');
     $innodb_bytes = phutil_parse_bytes($innodb_pool);

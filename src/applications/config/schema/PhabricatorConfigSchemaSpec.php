@@ -63,7 +63,12 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     $database = $this->getDatabase($database_name);
 
     $table = $this->newTable($table_name);
-    $fulltext_engine = 'MyISAM';
+
+    if (PhabricatorSearchDocument::isInnoDBFulltextEngineAvailable()) {
+      $fulltext_engine = 'InnoDB';
+    } else {
+      $fulltext_engine = 'MyISAM';
+    }
 
     foreach ($columns as $name => $type) {
       if ($type === null) {
