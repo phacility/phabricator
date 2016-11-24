@@ -7,6 +7,8 @@ final class PhabricatorSearchDocument extends PhabricatorSearchDAO {
   protected $documentCreated;
   protected $documentModified;
 
+  const STOPWORDS_TABLE = 'stopwords';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
