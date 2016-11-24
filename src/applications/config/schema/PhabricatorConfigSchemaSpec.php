@@ -63,6 +63,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     $database = $this->getDatabase($database_name);
 
     $table = $this->newTable($table_name);
+    $fulltext_engine = 'MyISAM';
 
     foreach ($columns as $name => $type) {
       if ($type === null) {
@@ -84,6 +85,15 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         ->setCollation($collation)
         ->setNullable($nullable)
         ->setAutoIncrement($auto);
+
+      // If this table has any FULLTEXT fields, we expect it to use the best
+      // available FULLTEXT engine, which may not be InnoDB.
+      switch ($type) {
+        case 'fulltext':
+        case 'fulltext?':
+          $table->setEngine($fulltext_engine);
+          break;
+      }
 
       $table->addColumn($column);
     }
@@ -174,7 +184,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   protected function newTable($name) {
     return id(new PhabricatorConfigTableSchema())
       ->setName($name)
-      ->setCollation($this->getUTF8BinaryCollation());
+      ->setCollation($this->getUTF8BinaryCollation())
+      ->setEngine('InnoDB');
   }
 
   protected function newColumn($name) {
