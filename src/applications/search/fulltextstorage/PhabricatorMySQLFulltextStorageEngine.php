@@ -197,12 +197,18 @@ final class PhabricatorMySQLFulltextStorageEngine
     $join = array();
     $where = array();
 
+    $title_field = PhabricatorSearchDocumentFieldType::FIELD_TITLE;
+    $title_boost = 1024;
+
     $raw_query = $query->getParameter('query');
     $compiled_query = $this->compileQuery($raw_query);
     if (strlen($compiled_query)) {
       $select[] = qsprintf(
         $conn,
+        'IF(field.field = %s, %d, 0) + '.
         'MATCH(corpus) AGAINST (%s IN BOOLEAN MODE) AS fieldScore',
+        $title_field,
+        $title_boost,
         $compiled_query);
 
       $join[] = qsprintf(
