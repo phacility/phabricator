@@ -40,15 +40,15 @@ final class PhabricatorSearchDocument extends PhabricatorSearchDAO {
   }
 
   public static function newQueryCompiler() {
-    $table = new self();
-    $conn = $table->establishConnection('r');
-
     $compiler = new PhutilSearchQueryCompiler();
 
     if (self::isInnoDBFulltextEngineAvailable()) {
       // The InnoDB fulltext boolean operators are always the same as the
       // default MyISAM operators, so we do not need to adjust the compiler.
     } else {
+      $table = new self();
+      $conn = $table->establishConnection('r');
+
       $operators = queryfx_one(
         $conn,
         'SELECT @@ft_boolean_syntax AS syntax');
@@ -61,8 +61,25 @@ final class PhabricatorSearchDocument extends PhabricatorSearchDAO {
   }
 
   public static function isInnoDBFulltextEngineAvailable() {
-    // For now, never consider this engine to be available.
-    return false;
+    static $available;
+
+    if ($available === null) {
+      $table = new self();
+      $conn = $table->establishConnection('r');
+
+      // If this system variable exists, we can use InnoDB fulltext. If it
+      // does not, this query will throw and we're stuck with MyISAM.
+      try {
+        queryfx_one(
+          $conn,
+          'SELECT @@innodb_ft_max_token_size');
+        $available = true;
+      } catch (AphrontQueryException $x) {
+        $available = false;
+      }
+    }
+
+    return $available;
   }
 
 }
