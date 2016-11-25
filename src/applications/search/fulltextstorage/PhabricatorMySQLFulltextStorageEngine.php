@@ -33,6 +33,8 @@ final class PhabricatorMySQLFulltextStorageEngine
 
     $conn_w = $store->establishConnection('w');
 
+    $stemmer = new PhutilSearchStemmer();
+
     $field_dao = new PhabricatorSearchDocumentField();
     queryfx(
       $conn_w,
@@ -41,16 +43,21 @@ final class PhabricatorMySQLFulltextStorageEngine
       $phid);
     foreach ($doc->getFieldData() as $field) {
       list($ftype, $corpus, $aux_phid) = $field;
+
+      $stemmed_corpus = $stemmer->stemCorpus($corpus);
+
       queryfx(
         $conn_w,
-        'INSERT INTO %T (phid, phidType, field, auxPHID, corpus) '.
-        'VALUES (%s, %s, %s, %ns, %s)',
+        'INSERT INTO %T
+          (phid, phidType, field, auxPHID, corpus, stemmedCorpus) '.
+        'VALUES (%s, %s, %s, %ns, %s, %s)',
         $field_dao->getTableName(),
         $phid,
         $doc->getDocumentType(),
         $ftype,
         $aux_phid,
-        $corpus);
+        $corpus,
+        $stemmed_corpus);
     }
 
 
@@ -205,8 +212,9 @@ final class PhabricatorMySQLFulltextStorageEngine
     if (strlen($compiled_query)) {
       $select[] = qsprintf(
         $conn,
-        'IF(field.field = %s, %d, 0) + '.
-        'MATCH(corpus) AGAINST (%s IN BOOLEAN MODE) AS fieldScore',
+        'IF(field.field = %s, %d, 0) +
+          MATCH(corpus, stemmedCorpus) AGAINST (%s IN BOOLEAN MODE)
+            AS fieldScore',
         $title_field,
         $title_boost,
         $compiled_query);
@@ -218,7 +226,7 @@ final class PhabricatorMySQLFulltextStorageEngine
 
       $where[] = qsprintf(
         $conn,
-        'MATCH(corpus) AGAINST (%s IN BOOLEAN MODE)',
+        'MATCH(corpus, stemmedCorpus) AGAINST (%s IN BOOLEAN MODE)',
         $compiled_query);
 
       if ($query->getParameter('field')) {
@@ -380,11 +388,17 @@ final class PhabricatorMySQLFulltextStorageEngine
   }
 
   private function compileQuery($raw_query) {
-    $compiler = PhabricatorSearchDocument::newQueryCompiler();
+    $stemmer = new PhutilSearchStemmer();
 
-    return $compiler
+    $compiler = PhabricatorSearchDocument::newQueryCompiler()
       ->setQuery($raw_query)
-      ->compileQuery();
+      ->setStemmer($stemmer);
+
+    $queries = array();
+    $queries[] = $compiler->compileLiteralQuery();
+    $queries[] = $compiler->compileStemmedQuery();
+
+    return implode(' ', array_filter($queries));
   }
 
   public function indexExists() {
