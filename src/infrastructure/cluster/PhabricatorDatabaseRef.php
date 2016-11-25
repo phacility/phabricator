@@ -36,6 +36,12 @@ final class PhabricatorDatabaseRef
   private $healthRecord;
   private $didFailToConnect;
 
+  private $isDefaultPartition;
+  private $applicationMap = array();
+  private $masterRef;
+  private $replicaRefs = array();
+  private $usePersistentConnections;
+
   public function setHost($host) {
     $this->host = $host;
     return $this;
@@ -157,6 +163,63 @@ final class PhabricatorDatabaseRef
     return $this->isIndividual;
   }
 
+  public function setIsDefaultPartition($is_default_partition) {
+    $this->isDefaultPartition = $is_default_partition;
+    return $this;
+  }
+
+  public function getIsDefaultPartition() {
+    return $this->isDefaultPartition;
+  }
+
+  public function setUsePersistentConnections($use_persistent_connections) {
+    $this->usePersistentConnections = $use_persistent_connections;
+    return $this;
+  }
+
+  public function getUsePersistentConnections() {
+    return $this->usePersistentConnections;
+  }
+
+  public function setApplicationMap(array $application_map) {
+    $this->applicationMap = $application_map;
+    return $this;
+  }
+
+  public function getApplicationMap() {
+    return $this->applicationMap;
+  }
+
+  public function getPartitionStateForCommit() {
+    $state = PhabricatorEnv::getEnvConfig('cluster.databases');
+    foreach ($state as $key => $value) {
+      // Don't store passwords, since we don't care if they differ and
+      // users may find it surprising.
+      unset($state[$key]['pass']);
+    }
+
+    return phutil_json_encode($state);
+  }
+
+  public function setMasterRef(PhabricatorDatabaseRef $master_ref) {
+    $this->masterRef = $master_ref;
+    return $this;
+  }
+
+  public function getMasterRef() {
+    return $this->masterRef;
+  }
+
+  public function addReplicaRef(PhabricatorDatabaseRef $replica_ref) {
+    $this->replicaRefs[] = $replica_ref;
+    return $this;
+  }
+
+  public function getReplicaRefs() {
+    return $this->replicaRefs;
+  }
+
+
   public function getRefKey() {
     $host = $this->getHost();
 
@@ -248,8 +311,6 @@ final class PhabricatorDatabaseRef
   }
 
   public static function newRefs() {
-    $refs = array();
-
     $default_port = PhabricatorEnv::getEnvConfig('mysql.port');
     $default_port = nonempty($default_port, 3306);
 
@@ -259,43 +320,21 @@ final class PhabricatorDatabaseRef
     $default_pass = new PhutilOpaqueEnvelope($default_pass);
 
     $config = PhabricatorEnv::getEnvConfig('cluster.databases');
-    foreach ($config as $server) {
-      $host = $server['host'];
-      $port = idx($server, 'port', $default_port);
-      $user = idx($server, 'user', $default_user);
-      $disabled = idx($server, 'disabled', false);
 
-      $pass = idx($server, 'pass');
-      if ($pass) {
-        $pass = new PhutilOpaqueEnvelope($pass);
-      } else {
-        $pass = clone $default_pass;
-      }
-
-      $role = $server['role'];
-
-      $ref = id(new self())
-        ->setHost($host)
-        ->setPort($port)
-        ->setUser($user)
-        ->setPass($pass)
-        ->setDisabled($disabled)
-        ->setIsMaster(($role == 'master'));
-
-      $refs[] = $ref;
-    }
-
-    return $refs;
+    return id(new PhabricatorDatabaseRefParser())
+      ->setDefaultPort($default_port)
+      ->setDefaultUser($default_user)
+      ->setDefaultPass($default_pass)
+      ->newRefs($config);
   }
 
   public static function queryAll() {
-    $refs = self::newRefs();
+    $refs = self::getActiveDatabaseRefs();
+    return self::queryRefs($refs);
+  }
 
+  private static function queryRefs(array $refs) {
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
-
       $conn = $ref->newManagementConnection();
 
       $t_start = microtime(true);
@@ -471,7 +510,7 @@ final class PhabricatorDatabaseRef
     return $refs;
   }
 
-  public static function getMasterDatabaseRefs() {
+  public static function getAllMasterDatabaseRefs() {
     $refs = self::getClusterRefs();
 
     if (!$refs) {
@@ -480,9 +519,6 @@ final class PhabricatorDatabaseRef
 
     $masters = array();
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
       if ($ref->getIsMaster()) {
         $masters[] = $ref;
       }
@@ -491,29 +527,76 @@ final class PhabricatorDatabaseRef
     return $masters;
   }
 
-  public static function getMasterDatabaseRefForDatabase($database) {
+  public static function getMasterDatabaseRefs() {
+    $refs = self::getAllMasterDatabaseRefs();
+    return self::getEnabledRefs($refs);
+  }
+
+  public function isApplicationHost($database) {
+    return isset($this->applicationMap[$database]);
+  }
+
+  public function loadRawMySQLConfigValue($key) {
+    $conn = $this->newManagementConnection();
+
+    try {
+      $value = queryfx_one($conn, 'SELECT @@%Q', $key);
+      $value = $value['@@'.$key];
+    } catch (AphrontQueryException $ex) {
+      $value = null;
+    }
+
+    return $value;
+  }
+
+  public static function getMasterDatabaseRefForApplication($application) {
     $masters = self::getMasterDatabaseRefs();
 
-    // TODO: Actually implement this.
+    $application_master = null;
+    $default_master = null;
+    foreach ($masters as $master) {
+      if ($master->isApplicationHost($application)) {
+        $application_master = $master;
+        break;
+      }
+      if ($master->getIsDefaultPartition()) {
+        $default_master = $master;
+      }
+    }
 
-    return head($masters);
+    if ($application_master) {
+      $masters = array($application_master);
+    } else if ($default_master) {
+      $masters = array($default_master);
+    } else {
+      $masters = array();
+    }
+
+    $masters = self::getEnabledRefs($masters);
+    $master = head($masters);
+
+    return $master;
   }
 
   public static function newIndividualRef() {
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array(null, 'w', null));
+    $default_user = PhabricatorEnv::getEnvConfig('mysql.user');
+    $default_pass = new PhutilOpaqueEnvelope(
+      PhabricatorEnv::getEnvConfig('mysql.pass'));
+    $default_host = PhabricatorEnv::getEnvConfig('mysql.host');
+    $default_port = PhabricatorEnv::getEnvConfig('mysql.port');
 
     return id(new self())
-      ->setHost($conf->getHost())
-      ->setPort($conf->getPort())
-      ->setUser($conf->getUser())
-      ->setPass($conf->getPassword())
+      ->setUser($default_user)
+      ->setPass($default_pass)
+      ->setHost($default_host)
+      ->setPort($default_port)
       ->setIsIndividual(true)
-      ->setIsMaster(true);
+      ->setIsMaster(true)
+      ->setIsDefaultPartition(true)
+      ->setUsePersistentConnections(false);
   }
 
-  public static function getReplicaDatabaseRefs() {
+  public static function getAllReplicaDatabaseRefs() {
     $refs = self::getClusterRefs();
 
     if (!$refs) {
@@ -522,9 +605,6 @@ final class PhabricatorDatabaseRef
 
     $replicas = array();
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
       if ($ref->getIsMaster()) {
         continue;
       }
@@ -535,10 +615,44 @@ final class PhabricatorDatabaseRef
     return $replicas;
   }
 
-  public static function getReplicaDatabaseRefForDatabase($database) {
+  public static function getReplicaDatabaseRefs() {
+    $refs = self::getAllReplicaDatabaseRefs();
+    return self::getEnabledRefs($refs);
+  }
+
+  private static function getEnabledRefs(array $refs) {
+    foreach ($refs as $key => $ref) {
+      if ($ref->getDisabled()) {
+        unset($refs[$key]);
+      }
+    }
+    return $refs;
+  }
+
+  public static function getReplicaDatabaseRefForApplication($application) {
     $replicas = self::getReplicaDatabaseRefs();
 
-    // TODO: Actually implement this.
+    $application_replicas = array();
+    $default_replicas = array();
+    foreach ($replicas as $replica) {
+      $master = $replica->getMaster();
+
+      if ($master->isApplicationHost($application)) {
+        $application_replicas[] = $replica;
+      }
+
+      if ($master->getIsDefaultPartition()) {
+        $default_replicas[] = $replica;
+      }
+    }
+
+    if ($application_replicas) {
+      $replicas = $application_replicas;
+    } else {
+      $replicas = $default_replicas;
+    }
+
+    $replicas = self::getEnabledRefs($replicas);
 
     // TODO: We may have multiple replicas to choose from, and could make
     // more of an effort to pick the "best" one here instead of always
@@ -569,13 +683,39 @@ final class PhabricatorDatabaseRef
       'database' => null,
       'retries' => $default_retries,
       'timeout' => $default_timeout,
+      'persistent' => $this->getUsePersistentConnections(),
     );
 
-    return PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
-        $spec,
-      ));
+    $is_cli = (php_sapi_name() == 'cli');
+
+    $use_persistent = false;
+    if (!empty($spec['persistent']) && !$is_cli) {
+      $use_persistent = true;
+    }
+    unset($spec['persistent']);
+
+    $connection = self::newRawConnection($spec);
+
+    // If configured, use persistent connections. See T11672 for details.
+    if ($use_persistent) {
+      $connection->setPersistent($use_persistent);
+    }
+
+    // Unless this is a script running from the CLI, prevent any query from
+    // running for more than 30 seconds. See T10849 for details.
+    if (!$is_cli) {
+      $connection->setQueryTimeout(30);
+    }
+
+    return $connection;
+  }
+
+  public static function newRawConnection(array $options) {
+    if (extension_loaded('mysqli')) {
+      return new AphrontMySQLiDatabaseConnection($options);
+    } else {
+      return new AphrontMySQLDatabaseConnection($options);
+    }
   }
 
 }

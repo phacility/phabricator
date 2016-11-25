@@ -101,7 +101,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
       ')(?P<commit>[a-f0-9]+)'
         => 'DiffusionCommitController',
 
-      '/source/(?P<repositoryShortName>[^/.]+)(?P<dotgit>\.git)?'
+      '/source/(?P<repositoryShortName>[^/]+)'
         => $repository_routes,
 
       '/diffusion/' => array(

@@ -165,7 +165,8 @@ final class PhabricatorMySQLFulltextStorageEngine
 
     $conn_r = $dao_doc->establishConnection('r');
 
-    $q = $query->getParameter('query');
+    $raw_query = $query->getParameter('query');
+    $q = $this->compileQuery($raw_query);
 
     if (strlen($q)) {
      $join[] = qsprintf(
@@ -349,6 +350,14 @@ final class PhabricatorMySQLFulltextStorageEngine
     }
 
     return $sql;
+  }
+
+  private function compileQuery($raw_query) {
+    $compiler = PhabricatorSearchDocument::newQueryCompiler();
+
+    return $compiler
+      ->setQuery($raw_query)
+      ->compileQuery();
   }
 
   public function indexExists() {

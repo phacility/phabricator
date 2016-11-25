@@ -48,4 +48,8 @@ final class PhabricatorStoragePatch extends Phobject {
     return $this->dead;
   }
 
+  public function getIsGlobalPatch() {
+    return ($this->getType() == 'php');
+  }
+
 }

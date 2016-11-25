@@ -37,4 +37,20 @@ final class PhabricatorSearchDocument extends PhabricatorSearchDAO {
     return 'phid';
   }
 
+  public static function newQueryCompiler() {
+    $table = new self();
+    $conn = $table->establishConnection('r');
+
+    $compiler = new PhutilSearchQueryCompiler();
+
+    $operators = queryfx_one(
+      $conn,
+      'SELECT @@ft_boolean_syntax AS syntax');
+    if ($operators) {
+      $compiler->setOperators($operators['syntax']);
+    }
+
+    return $compiler;
+  }
+
 }

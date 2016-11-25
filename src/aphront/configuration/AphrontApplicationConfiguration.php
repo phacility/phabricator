@@ -81,15 +81,14 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     try {
       PhabricatorEnv::initializeWebEnvironment();
       $database_exception = null;
-    } catch (AphrontInvalidCredentialsQueryException $ex) {
-      $database_exception = $ex;
-    } catch (AphrontConnectionQueryException $ex) {
+    } catch (PhabricatorClusterStrandedException $ex) {
       $database_exception = $ex;
     }
 
     if ($database_exception) {
       $issue = PhabricatorSetupIssue::newDatabaseConnectionIssue(
-        $database_exception);
+        $database_exception,
+        true);
       $response = PhabricatorSetupCheck::newIssueResponse($issue);
       return self::writeResponse($sink, $response);
     }

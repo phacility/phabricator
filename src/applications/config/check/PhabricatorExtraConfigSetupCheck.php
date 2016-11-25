@@ -341,6 +341,13 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'maniphest.priorities.unbreak-now' => $dashboard_reason,
       'maniphest.priorities.needs-triage' => $dashboard_reason,
 
+      'mysql.implementation' => pht(
+        'Phabricator now automatically selects the best available '.
+        'MySQL implementation.'),
+
+      'mysql.configuration-provider' => pht(
+        'Phabricator now has application-level management of partitioning '.
+        'and replicas.'),
     );
 
     return $ancient_config;

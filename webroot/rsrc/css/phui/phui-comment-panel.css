@@ -16,12 +16,21 @@
   color: {$lightbluetext};
 }
 
-.phui-comment-panel .phui-timeline-view .phui-timeline-event-view {
-  margin: 0;
+.phui-comment-panel-header {
+  font-weight: bold;
+  padding: 12px 16px 0;
+  word-break: break-word;
 }
 
-.phui-comment-panel .phui-timeline-view .phui-timeline-image {
-  display: none;
+.phui-comment-panel .phui-timeline-view .phui-timeline-event-view {
+  margin-left: 40px;
+}
+
+.device-desktop .phui-comment-panel .phui-timeline-view .phui-timeline-image {
+  width: 30px;
+  height: 30px;
+  top: 4px;
+  left: -40px;
 }
 
 .phui-comment-panel .phui-timeline-view .phui-timeline-wedge {
@@ -57,4 +66,32 @@
     border: none;
     padding: 4px 0;
     background: transparent;
+}
+
+.phui-comment-panel .phui-timeline-older-transactions-are-hidden {
+  background-color: {$lightgreybackground};
+  border: none;
+}
+
+.lightbox-comment-form .phui-form-view {
+  padding-top: 0;
+}
+
+.lightbox-comment-form .aphront-form-control {
+  padding: 0;
+}
+
+.lightbox-comment-form .aphront-form-input {
+  margin: 0;
+  width: auto;
+}
+
+.lightbox-comment-form .remarkup-assist-bar {
+  display: none;
+}
+
+.lightbox-comment-form .aphront-form-input .remarkup-assist-textarea {
+  border-radius: 3px;
+  border: 1px solid {$lightgreyborder};
+  height: 6em;
 }

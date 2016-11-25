@@ -819,56 +819,78 @@ abstract class PhabricatorStorageManagementWorkflow
   }
 
   final protected function upgradeSchemata(
-    PhabricatorStorageManagementAPI $api,
+    array $apis,
     $apply_only = null,
     $no_quickstart = false,
     $init_only = false) {
 
-    $lock = $this->lock($api);
+    $locks = array();
+    foreach ($apis as $api) {
+      $locks[] = $this->lock($api);
+    }
 
     try {
-      $this->doUpgradeSchemata($api, $apply_only, $no_quickstart, $init_only);
+      $this->doUpgradeSchemata($apis, $apply_only, $no_quickstart, $init_only);
     } catch (Exception $ex) {
-      $lock->unlock();
+      foreach ($locks as $lock) {
+        $lock->unlock();
+      }
       throw $ex;
     }
 
-    $lock->unlock();
+    foreach ($locks as $lock) {
+      $lock->unlock();
+    }
   }
 
   final private function doUpgradeSchemata(
-    PhabricatorStorageManagementAPI $api,
+    array $apis,
     $apply_only,
     $no_quickstart,
     $init_only) {
 
-    $applied = $api->getAppliedPatches();
-    if ($applied === null) {
-      if ($this->dryRun) {
-        echo pht(
-          "DRYRUN: Patch metadata storage doesn't exist yet, ".
-          "it would be created.\n");
-        return 0;
+    $patches = $this->patches;
+    $is_dryrun = $this->dryRun;
+
+    $api_map = array();
+    foreach ($apis as $api) {
+      $api_map[$api->getRef()->getRefKey()] = $api;
+    }
+
+    foreach ($api_map as $ref_key => $api) {
+      $applied = $api->getAppliedPatches();
+
+      $needs_init = ($applied === null);
+      if (!$needs_init) {
+        continue;
+      }
+
+      if ($is_dryrun) {
+        echo tsprintf(
+          "%s\n",
+          pht(
+            'DRYRUN: Storage on host "%s" does not exist yet, so it '.
+            'would be created.',
+            $ref_key));
+        continue;
       }
 
       if ($apply_only) {
         throw new PhutilArgumentUsageException(
           pht(
-            'Storage has not been initialized yet, you must initialize '.
-            'storage before selectively applying patches.'));
-        return 1;
+            'Storage on host "%s" has not been initialized yet. You must '.
+            'initialize storage before selectively applying patches.',
+            $ref_key));
       }
 
-      // If we're initializing storage for the first time, track it so that
-      // we can give the user a nicer experience during the subsequent
-      // adjustment phase.
+      // If we're initializing storage for the first time on any host, track
+      // it so that we can give the user a nicer experience during the
+      // subsequent adjustment phase.
       $this->didInitialize = true;
 
-      $legacy = $api->getLegacyPatches($this->patches);
+      $legacy = $api->getLegacyPatches($patches);
       if ($legacy || $no_quickstart || $init_only) {
-
         // If we have legacy patches, we can't quickstart.
-
         $api->createDatabase('meta_data');
         $api->createTable(
           'meta_data',
@@ -882,7 +904,12 @@ abstract class PhabricatorStorageManagementWorkflow
           $api->markPatchApplied($patch);
         }
       } else {
-        echo pht('Loading quickstart template...')."\n";
+        echo tsprintf(
+          "%s\n",
+          pht(
+            'Loading quickstart template onto "%s"...',
+            $ref_key));
+
         $root = dirname(phutil_get_library_root('phabricator'));
         $sql  = $root.'/resources/sql/quickstart.sql';
         $api->applyPatchSQL($sql);
@@ -894,26 +921,75 @@ abstract class PhabricatorStorageManagementWorkflow
       return 0;
     }
 
-    $applied = $api->getAppliedPatches();
-    $applied = array_fuse($applied);
+    $applied_map = array();
+    foreach ($api_map as $ref_key => $api) {
+      $applied = $api->getAppliedPatches();
 
-    $skip_mark = false;
-    if ($apply_only) {
-      if (isset($applied[$apply_only])) {
-
-        unset($applied[$apply_only]);
-        $skip_mark = true;
-
-        if (!$this->force && !$this->dryRun) {
-          echo phutil_console_wrap(
+      // If we still have nothing applied, this is a dry run and we didn't
+      // actually initialize storage. Here, just do nothing.
+      if ($applied === null) {
+        if ($is_dryrun) {
+          continue;
+        } else {
+          throw new Exception(
             pht(
-              "Patch '%s' has already been applied. Are you sure you want ".
-              "to apply it again? This may put your storage in a state ".
-              "that the upgrade scripts can not automatically manage.",
-              $apply_only));
-          if (!phutil_console_confirm(pht('Apply patch again?'))) {
-            echo pht('Cancelled.')."\n";
-            return 1;
+              'Database initialization on host "%s" applied no patches!',
+              $ref_key));
+        }
+      }
+
+      $applied = array_fuse($applied);
+
+      if ($apply_only) {
+        if (isset($applied[$apply_only])) {
+          if (!$this->force && !$is_dryrun) {
+            echo phutil_console_wrap(
+              pht(
+                'Patch "%s" has already been applied on host "%s". Are you '.
+                'sure you want to apply it again? This may put your storage '.
+                'in a state that the upgrade scripts can not automatically '.
+                'manage.',
+                $apply_only,
+                $ref_key));
+            if (!phutil_console_confirm(pht('Apply patch again?'))) {
+              echo pht('Cancelled.')."\n";
+              return 1;
+            }
+          }
+
+          // Mark this patch as not yet applied on this host.
+          unset($applied[$apply_only]);
+        }
+      }
+
+      $applied_map[$ref_key] = $applied;
+    }
+
+    // If we're applying only a specific patch, select just that patch.
+    if ($apply_only) {
+      $patches = array_select_keys($patches, array($apply_only));
+    }
+
+    // Apply each patch to each database. We apply patches patch-by-patch,
+    // not database-by-database: for each patch we apply it to every database,
+    // then move to the next patch.
+
+    // We must do this because ".php" patches may depend on ".sql" patches
+    // being up to date on all masters, and that will work fine if we put each
+    // patch on every host before moving on. If we try to bring database hosts
+    // up to date one at a time we can end up in a big mess.
+
+    $duration_map = array();
+
+    // First, find any global patches which have been applied to ANY database.
+    // We are just going to mark these as applied without actually running
+    // them. Otherwise, adding new empty masters to an existing cluster will
+    // try to apply them against invalid states.
+    foreach ($patches as $key => $patch) {
+      if ($patch->getIsGlobalPatch()) {
+        foreach ($applied_map as $ref_key => $applied) {
+          if (isset($applied[$key])) {
+            $duration_map[$key] = 1;
           }
         }
       }
@@ -921,68 +997,119 @@ abstract class PhabricatorStorageManagementWorkflow
 
     while (true) {
       $applied_something = false;
-      foreach ($this->patches as $key => $patch) {
-        if (isset($applied[$key])) {
-          unset($this->patches[$key]);
+      foreach ($patches as $key => $patch) {
+        // First, check if any databases need this patch. We can just skip it
+        // if it has already been applied everywhere.
+        $need_patch = array();
+        foreach ($applied_map as $ref_key => $applied) {
+          if (isset($applied[$key])) {
+            continue;
+          }
+          $need_patch[] = $ref_key;
+        }
+
+        if (!$need_patch) {
+          unset($patches[$key]);
           continue;
         }
 
-        if ($apply_only && $apply_only != $key) {
-          unset($this->patches[$key]);
-          continue;
-        }
-
-        $can_apply = true;
+        // Check if we can apply this patch yet. Before we can apply a patch,
+        // all of the dependencies for the patch must have been applied on all
+        // databases. Requiring that all databases stay in sync prevents one
+        // database from racing ahead if it happens to get a patch that nothing
+        // else has yet.
+        $missing_patch = null;
         foreach ($patch->getAfter() as $after) {
-          if (empty($applied[$after])) {
-            if ($apply_only) {
-              echo pht(
-                "Unable to apply patch '%s' because it depends ".
-                "on patch '%s', which has not been applied.\n",
-                $apply_only,
-                $after);
-              return 1;
+          foreach ($applied_map as $ref_key => $applied) {
+            if (isset($applied[$after])) {
+              // This database already has the patch. We can apply it to
+              // other databases but don't need to apply it here.
+              continue;
             }
-            $can_apply = false;
-            break;
+
+            $missing_patch = $after;
+            break 2;
           }
         }
 
-        if (!$can_apply) {
-          continue;
+        if ($missing_patch) {
+          if ($apply_only) {
+            echo tsprintf(
+              "%s\n",
+              pht(
+                'Unable to apply patch "%s" because it depends on patch '.
+                '"%s", which has not been applied on some hosts: %s.',
+                $apply_only,
+                $missing_patch,
+                implode(', ', $need_patch)));
+            return 1;
+          } else {
+            // Some databases are missing the dependencies, so keep trying
+            // other patches instead. If everything goes right, we'll apply the
+            // dependencies and then come back and apply this patch later.
+            continue;
+          }
         }
 
-        $applied_something = true;
+        $is_global = $patch->getIsGlobalPatch();
+        $patch_apis = array_select_keys($api_map, $need_patch);
+        foreach ($patch_apis as $ref_key => $api) {
+          if ($is_global) {
+            // If this is a global patch which we previously applied, just
+            // read the duration from the map without actually applying
+            // the patch.
+            $duration = idx($duration_map, $key);
+          } else {
+            $duration = null;
+          }
 
-        if ($this->dryRun) {
-          echo pht("DRYRUN: Would apply patch '%s'.", $key)."\n";
-        } else {
-          echo pht("Applying patch '%s'...", $key)."\n";
+          if ($duration === null) {
+            if ($is_dryrun) {
+              echo tsprintf(
+                "%s\n",
+                pht(
+                  'DRYRUN: Would apply patch "%s" to host "%s".',
+                  $key,
+                  $ref_key));
+            } else {
+              echo tsprintf(
+                "%s\n",
+                pht(
+                  'Applying patch "%s" to host "%s"...',
+                  $key,
+                  $ref_key));
+            }
 
-          $t_begin = microtime(true);
-          $api->applyPatch($patch);
-          $t_end = microtime(true);
+            $t_begin = microtime(true);
+            $api->applyPatch($patch);
+            $t_end = microtime(true);
 
-          if (!$skip_mark) {
+            $duration = ($t_end - $t_begin);
+            $duration_map[$key] = $duration;
+          }
+
+          // If we're explicitly reapplying this patch, we don't need to
+          // mark it as applied.
+          if (!isset($applied_map[$ref_key][$key])) {
             $api->markPatchApplied($key, ($t_end - $t_begin));
+            $applied_map[$ref_key][$key] = true;
           }
         }
 
-        unset($this->patches[$key]);
-        $applied[$key] = true;
+        // We applied this everywhere, so we're done with the patch.
+        unset($patches[$key]);
+        $applied_something = true;
       }
 
       if (!$applied_something) {
-        if (count($this->patches)) {
+        if ($patches) {
           throw new Exception(
             pht(
-              'Some patches could not be applied to "%s": %s',
-              $api->getRef()->getRefKey(),
-              implode(', ', array_keys($this->patches))));
-        } else if (!$this->dryRun && !$apply_only) {
+              'Some patches could not be applied: %s',
+              implode(', ', array_keys($patches))));
+        } else if (!$is_dryrun && !$apply_only) {
           echo pht(
-            'Storage is up to date on "%s". Use "%s" for details.',
-            $api->getRef()->getRefKey(),
+            'Storage is up to date. Use "%s" for details.',
             'storage status')."\n";
         }
         break;
@@ -1011,7 +1138,14 @@ abstract class PhabricatorStorageManagementWorkflow
    * @return PhabricatorGlobalLock
    */
   final protected function lock(PhabricatorStorageManagementAPI $api) {
-    return PhabricatorGlobalLock::newLock(__CLASS__)
+    // Although we're holding this lock on different databases so it could
+    // have the same name on each as far as the database is concerned, the
+    // locks would be the same within this process.
+    $ref_key = $api->getRef()->getRefKey();
+    $ref_hash = PhabricatorHash::digestForIndex($ref_key);
+    $lock_name = 'adjust('.$ref_hash.')';
+
+    return PhabricatorGlobalLock::newLock($lock_name)
       ->useSpecificConnection($api->getConn(null))
       ->lock();
   }

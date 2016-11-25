@@ -498,7 +498,16 @@ final class PhabricatorPeopleQuery
           'eventPHID' => null,
           'availability' => null,
         );
+
+        // Cache that the user is available until the next event they are
+        // invited to starts.
         $availability_ttl = $max_range;
+        foreach ($events as $event) {
+          $from = $event->getStartDateTimeEpochForCache();
+          if ($from > $cursor) {
+            $availability_ttl = min($from, $availability_ttl);
+          }
+        }
       }
 
       // Never TTL the cache to longer than the maximum range we examined.

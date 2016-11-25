@@ -88,19 +88,17 @@ final class PhabricatorFileLinkView extends AphrontView {
     require_celerity_resource('phabricator-remarkup-css');
     require_celerity_resource('phui-lightbox-css');
 
-    $sigil       = null;
-    $meta        = null;
-    $mustcapture = false;
-    if ($this->getFileViewable()) {
-      $mustcapture = true;
-      $sigil = 'lightboxable';
-      $meta = $this->getMetadata();
-    }
+    $mustcapture = true;
+    $sigil = 'lightboxable';
+    $meta = $this->getMetadata();
 
     $class = 'phabricator-remarkup-embed-layout-link';
     if ($this->getCustomClass()) {
       $class = $this->getCustomClass();
     }
+
+    $icon = id(new PHUIIconView())
+      ->setIcon('fa-file-text-o');
 
     return javelin_tag(
       'a',
@@ -111,6 +109,9 @@ final class PhabricatorFileLinkView extends AphrontView {
         'meta'        => $meta,
         'mustcapture' => $mustcapture,
       ),
-      $this->getFileName());
+      array(
+        $icon,
+        $this->getFileName(),
+      ));
   }
 }

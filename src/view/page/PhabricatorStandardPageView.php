@@ -268,9 +268,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         }
       }
 
-      $default_img_uri =
-        celerity_get_resource_uri(
-          'rsrc/image/icon/fatcow/document_black.png');
       $icon = id(new PHUIIconView())
         ->setIcon('fa-download');
       $lightbox_id = celerity_generate_unique_node_id();
@@ -296,7 +293,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         'lightbox-attachments',
         array(
           'lightbox_id'     => $lightbox_id,
-          'defaultImageUri' => $default_img_uri,
           'downloadForm'    => $download_form,
         ));
     }

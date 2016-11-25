@@ -60,12 +60,10 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $this->raiseImproperWrite($database);
     }
 
-    $is_cluster = (bool)PhabricatorEnv::getEnvConfig('cluster.databases');
-    if ($is_cluster) {
-      $connection = $this->newClusterConnection($database, $mode);
-    } else {
-      $connection = $this->newBasicConnection($database, $mode, $namespace);
-    }
+    $connection = $this->newClusterConnection(
+      $this->getApplicationName(),
+      $database,
+      $mode);
 
     // TODO: This should be testing if the mode is "r", but that would probably
     // break a lot of things. Perform a more narrow test for readonly mode
@@ -75,47 +73,12 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $connection->setReadOnly(true);
     }
 
-    // Unless this is a script running from the CLI:
-    //   - (T10849) Prevent any query from running for more than 30 seconds.
-    //   - (T11672) Use persistent connections.
-    if (php_sapi_name() != 'cli') {
-
-      // TODO: For now, disable this until after T11044: it's better at high
-      // load, but causes us to use slightly more connections at low load and
-      // is pushing users over limits like MySQL "max_connections".
-      $use_persistent = false;
-
-      $connection
-        ->setQueryTimeout(30)
-        ->setPersistent($use_persistent);
-    }
-
     return $connection;
   }
 
-  private function newBasicConnection($database, $mode, $namespace) {
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array($this, $mode, $namespace));
-
-    return PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
-        array(
-          'user'      => $conf->getUser(),
-          'pass'      => $conf->getPassword(),
-          'host'      => $conf->getHost(),
-          'port'      => $conf->getPort(),
-          'database'  => $database,
-          'retries'   => 3,
-          'timeout' => 10,
-        ),
-      ));
-  }
-
-  private function newClusterConnection($database, $mode) {
-    $master = PhabricatorDatabaseRef::getMasterDatabaseRefForDatabase(
-      $database);
+  private function newClusterConnection($application, $database, $mode) {
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRefForApplication(
+      $application);
 
     if ($master && !$master->isSevered()) {
       $connection = $master->newApplicationConnection($database);
@@ -131,8 +94,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       }
     }
 
-    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRefForDatabase(
-      $database);
+    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRefForApplication(
+      $application);
     if ($replica) {
       $connection = $replica->newApplicationConnection($database);
       $connection->setReadOnly(true);

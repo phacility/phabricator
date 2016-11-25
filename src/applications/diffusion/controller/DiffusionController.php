@@ -92,6 +92,8 @@ abstract class DiffusionController extends PhabricatorController {
 
     $short_name = $request->getURIData('repositoryShortName');
     if (strlen($short_name)) {
+      // If the short name ends in ".git", ignore it.
+      $short_name = preg_replace('/\\.git\z/', '', $short_name);
       return $short_name;
     }
 

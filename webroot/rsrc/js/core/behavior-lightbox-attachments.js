@@ -79,36 +79,43 @@ JX.behavior('lightbox-attachments', function (config) {
     }
 
     var img_uri = '';
+    var img = '';
     var extra_status = '';
-    var name_element = '';
     // for now, this conditional is always true
     // revisit if / when we decide to add non-images to lightbox view
     if (target_data.viewable) {
       img_uri = target_data.uri;
+      var alt_name = '';
+      if (typeof target_data.name != 'undefined') {
+        alt_name = target_data.name;
+      }
+
+      img =
+        JX.$N('img',
+          {
+            className : 'loading',
+            alt : alt_name
+          }
+        );
     } else {
-      img_uri = config.defaultImageUri;
-      extra_status = ' Image may not be representative of actual attachment.';
-      name_element =
+      var imgIcon = new JX.PHUIXIconView()
+        .setIcon('fa-file-text-o phui-lightbox-file-icon')
+        .getNode();
+      var nameElement =
         JX.$N('div',
           {
             className : 'attachment-name'
           },
           target_data.name
         );
+      img =
+        JX.$N('div',
+          {
+            className : 'lightbox-icon-frame',
+          },
+          [ imgIcon, nameElement ]
+        );
     }
-
-    var alt_name = '';
-    if (typeof target_data.name != 'undefined') {
-      alt_name = target_data.name;
-    }
-
-    var img =
-      JX.$N('img',
-        {
-          className : 'loading',
-          alt : alt_name
-        }
-      );
 
     var imgFrame =
       JX.$N('div',
@@ -146,7 +153,7 @@ JX.behavior('lightbox-attachments', function (config) {
         },
         [
           m_url,
-          ' Image ' + current + ' of ' + total + '.' + extra_status
+          ' Image ' + current + ' of ' + total + '.'
         ]
       );
 
@@ -184,7 +191,6 @@ JX.behavior('lightbox-attachments', function (config) {
        [statusSpan, closeButton, commentButton, downloadSpan]
       );
     JX.DOM.appendContent(lightbox, statusHTML);
-    JX.DOM.appendContent(lightbox, name_element);
     JX.DOM.listen(closeButton, 'click', null, closeLightBox);
 
     var leftIcon = '';
@@ -238,13 +244,15 @@ JX.behavior('lightbox-attachments', function (config) {
 
     document.body.appendChild(lightbox);
 
-    JX.Busy.start();
-    img.onload = function() {
-      JX.DOM.alterClass(img, 'loading', false);
-      JX.Busy.done();
-    };
+    if (img_uri) {
+      JX.Busy.start();
+      img.onload = function() {
+        JX.DOM.alterClass(img, 'loading', false);
+        JX.Busy.done();
+      };
 
-    img.src = img_uri;
+      img.src = img_uri;
+    }
     loadComments(target_data.phid);
   }
 
@@ -334,5 +342,18 @@ JX.behavior('lightbox-attachments', function (config) {
     'click',
     'lightbox-comment',
   _toggleComment);
+
+  var _sendMessage = function(e) {
+    e.kill();
+    var form = e.getNode('tag:form');
+    JX.Workflow.newFromForm(form)
+      .setHandler(onLoadCommentsResponse)
+      .start();
+  };
+
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
+    'lightbox-comment-form',
+    _sendMessage);
 
 });

@@ -88,13 +88,6 @@ final class DiffusionServeController extends DiffusionController {
       }
     }
 
-    // If the request was for a path like "/source/libphutil.git" but the
-    // repository is not a Git repository, reject the request.
-    $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
-    if ($request->getURIData('dotgit') && ($vcs !== $type_git)) {
-      return null;
-    }
-
     return $vcs;
   }
 

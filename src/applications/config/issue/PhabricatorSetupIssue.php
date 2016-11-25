@@ -9,6 +9,7 @@ final class PhabricatorSetupIssue extends Phobject {
   private $summary;
   private $shortName;
   private $group;
+  private $databaseRef;
 
   private $isIgnored = false;
   private $phpExtensions = array();
@@ -21,7 +22,8 @@ final class PhabricatorSetupIssue extends Phobject {
   private $links;
 
   public static function newDatabaseConnectionIssue(
-    AphrontQueryException $ex) {
+    Exception $ex,
+    $is_fatal) {
 
     $message = pht(
       "Unable to connect to MySQL!\n\n".
@@ -29,15 +31,21 @@ final class PhabricatorSetupIssue extends Phobject {
       "Make sure Phabricator and MySQL are correctly configured.",
       $ex->getMessage());
 
-    return id(new self())
+    $issue = id(new self())
       ->setIssueKey('mysql.connect')
       ->setName(pht('Can Not Connect to MySQL'))
       ->setMessage($message)
-      ->setIsFatal(true)
+      ->setIsFatal($is_fatal)
       ->addRelatedPhabricatorConfig('mysql.host')
       ->addRelatedPhabricatorConfig('mysql.port')
       ->addRelatedPhabricatorConfig('mysql.user')
       ->addRelatedPhabricatorConfig('mysql.pass');
+
+    if (PhabricatorEnv::getEnvConfig('cluster.databases')) {
+      $issue->addRelatedPhabricatorConfig('cluster.databases');
+    }
+
+    return $issue;
   }
 
   public function addCommand($command) {
@@ -59,6 +67,15 @@ final class PhabricatorSetupIssue extends Phobject {
       return $this->getName();
     }
     return $this->shortName;
+  }
+
+  public function setDatabaseRef(PhabricatorDatabaseRef $database_ref) {
+    $this->databaseRef = $database_ref;
+    return $this;
+  }
+
+  public function getDatabaseRef() {
+    return $this->databaseRef;
   }
 
   public function setGroup($group) {
