@@ -238,7 +238,7 @@ final class PhabricatorMySQLFulltextStorageEngine
     } else {
       $select[] = qsprintf(
         $conn,
-        'document.dateCreated AS fieldScore');
+        'document.documentCreated AS fieldScore');
     }
 
     $exclude = $query->getParameter('exclude');

@@ -635,7 +635,7 @@ final class PhabricatorDatabaseRef
     $application_replicas = array();
     $default_replicas = array();
     foreach ($replicas as $replica) {
-      $master = $replica->getMaster();
+      $master = $replica->getMasterRef();
 
       if ($master->isApplicationHost($application)) {
         $application_replicas[] = $replica;
