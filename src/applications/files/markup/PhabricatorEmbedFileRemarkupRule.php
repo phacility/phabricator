@@ -287,6 +287,7 @@ final class PhabricatorEmbedFileRemarkupRule
       ->setFileDownloadURI($file->getDownloadURI())
       ->setFileViewURI($file->getBestURI())
       ->setFileViewable((bool)$options['viewable'])
+      ->setFileSize(phutil_format_bytes($file->getByteSize()))
       ->setFileMonogram($file->getMonogram());
   }
 
