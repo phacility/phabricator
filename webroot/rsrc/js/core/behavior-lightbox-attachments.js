@@ -153,7 +153,7 @@ JX.behavior('lightbox-attachments', function (config) {
         },
         [
           m_url,
-          ' Image ' + current + ' of ' + total + '.'
+          current + ' / ' + total
         ]
       );
 
