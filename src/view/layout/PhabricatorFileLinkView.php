@@ -83,6 +83,10 @@ final class PhabricatorFileLinkView extends AphrontView {
     return $this->fileSize;
   }
 
+  private function getFileIcon() {
+    return FileTypeIcon::getFileIcon($this->getFileName());
+  }
+
   public function getMetadata() {
     return array(
       'phid'     => $this->getFilePHID(),
@@ -91,6 +95,8 @@ final class PhabricatorFileLinkView extends AphrontView {
       'dUri'     => $this->getFileDownloadURI(),
       'name'     => $this->getFileName(),
       'monogram' => $this->getFileMonogram(),
+      'icon'     => $this->getFileIcon(),
+      'size'     => $this->getFileSize(),
     );
   }
 
@@ -107,11 +113,8 @@ final class PhabricatorFileLinkView extends AphrontView {
       $class = $this->getCustomClass();
     }
 
-    $filename = $this->getFileName();
-    $type_icon = FileTypeIcon::getFileIcon($filename);
-
     $icon = id(new PHUIIconView())
-      ->setIcon($type_icon);
+      ->setIcon($this->getFileIcon());
 
     $info = phutil_tag(
       'span',
@@ -125,7 +128,7 @@ final class PhabricatorFileLinkView extends AphrontView {
       array(
         'class' => 'phabricator-remarkup-embed-layout-name',
       ),
-      $filename);
+      $this->getFileName());
 
     $inner = phutil_tag(
       'span',

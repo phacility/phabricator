@@ -99,7 +99,7 @@ JX.behavior('lightbox-attachments', function (config) {
         );
     } else {
       var imgIcon = new JX.PHUIXIconView()
-        .setIcon('fa-file-text-o phui-lightbox-file-icon')
+        .setIcon(target_data.icon + ' phui-lightbox-file-icon')
         .getNode();
       var nameElement =
         JX.$N('div',
