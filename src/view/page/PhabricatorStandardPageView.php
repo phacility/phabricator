@@ -277,16 +277,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
           'action' => '#',
           'method' => 'POST',
           'class'  => 'lightbox-download-form',
-          'sigil'  => 'download',
+          'sigil'  => 'download lightbox-download-submit',
         ),
         phutil_tag(
-          'button',
+          'a',
           array(
-            'class' => 'button grey has-icon',
+            'class' => 'lightbox-download phui-icon-circle hover-green',
+            'href' => '#',
           ),
           array(
             $icon,
-            pht('Download'),
           )));
 
       Javelin::initBehavior(

@@ -49,6 +49,8 @@ a.phui-icon-view:hover {
   text-align: center;
   display: inline-block;
   cursor: pointer;
+  background: transparent;
+  padding: 0;
 }
 
 .phui-icon-circle.circle-medium {
@@ -109,6 +111,16 @@ a.phui-icon-circle.hover-green:hover {
 
 a.phui-icon-circle.hover-green:hover .phui-icon-view {
   color: {$green};
+}
+
+a.phui-icon-circle.hover-red:hover {
+  text-decoration: none;
+  border-color: {$red};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-red:hover .phui-icon-view {
+  color: {$red};
 }
 
 /* - Icon in a Square ------------------------------------------------------- */

@@ -166,24 +166,27 @@ JX.behavior('lightbox-attachments', function (config) {
       );
 
     var commentIcon = new JX.PHUIXIconView()
-      .setIcon('fa-comment-o')
+      .setIcon('fa-comments')
       .getNode();
     var commentButton =
       JX.$N('a',
         {
-          className : 'lightbox-comment button grey has-icon',
+          className : 'lightbox-comment phui-icon-circle hover-sky',
           href : '#',
           sigil : 'lightbox-comment'
         },
-        [commentIcon, 'Comment']
+        commentIcon
       );
+    var closeIcon = new JX.PHUIXIconView()
+      .setIcon('fa-times')
+      .getNode();
     var closeButton =
       JX.$N('a',
         {
-          className : 'lightbox-close button grey',
+          className : 'lightbox-close phui-icon-circle hover-red',
           href : '#'
         },
-        'Close');
+        closeIcon);
     var statusHTML =
       JX.$N('div',
         {
@@ -356,5 +359,16 @@ JX.behavior('lightbox-attachments', function (config) {
     ['submit', 'didSyntheticSubmit'],
     'lightbox-comment-form',
     _sendMessage);
+
+  var _startDownload = function(e) {
+    e.kill();
+    var form = e.getNode('tag:form');
+    form.submit();
+  };
+
+  JX.Stratcom.listen(
+    'click',
+    'lightbox-download-submit',
+    _startDownload);
 
 });
