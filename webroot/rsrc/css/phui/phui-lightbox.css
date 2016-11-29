@@ -43,7 +43,6 @@
 .lightbox-comment-frame {
   position: absolute;
   top: -19999px;
-  bottom: 0;
   right: 0;
   opacity: 0;
   transition: all 0.3s;

@@ -121,6 +121,7 @@ JX.behavior('lightbox-attachments', function (config) {
       JX.$N('div',
         {
           className : 'lightbox-image-frame',
+          sigil : 'lightbox-image-frame',
         },
         img
       );
@@ -324,12 +325,12 @@ JX.behavior('lightbox-attachments', function (config) {
   // When the user clicks the background, close the lightbox.
   JX.Stratcom.listen(
     'click',
-    'lightbox-attachment',
+    'lightbox-image-frame',
     function (e) {
       if (!lightbox) {
         return;
       }
-      if (e.getTarget() != e.getNode('lightbox-attachment')) {
+      if (e.getTarget() != e.getNode('lightbox-image-frame')) {
         // Don't close if they clicked some other element, like the image
         // itself or the next/previous arrows.
         return;
