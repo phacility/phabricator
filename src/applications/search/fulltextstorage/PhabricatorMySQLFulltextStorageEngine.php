@@ -347,13 +347,24 @@ final class PhabricatorMySQLFulltextStorageEngine
       $where = '';
     }
 
+    if (strlen($compiled_query)) {
+      $order = '';
+    } else {
+      // When not executing a query, order by document creation date. This
+      // is the default view in object browser dialogs, like "Close Duplicate".
+      $order = qsprintf(
+        $conn,
+        'ORDER BY document.documentCreated DESC');
+    }
+
     return qsprintf(
       $conn,
-      'SELECT %Q FROM %T document %Q %Q LIMIT 1000',
+      'SELECT %Q FROM %T document %Q %Q %Q LIMIT 1000',
       $select,
       $document_table,
       $join,
-      $where);
+      $where,
+      $order);
   }
 
   protected function joinRelationship(
