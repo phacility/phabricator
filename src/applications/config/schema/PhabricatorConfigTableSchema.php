@@ -4,6 +4,7 @@ final class PhabricatorConfigTableSchema
   extends PhabricatorConfigStorageSchema {
 
   private $collation;
+  private $engine;
   private $columns = array();
   private $keys = array();
 
@@ -62,12 +63,25 @@ final class PhabricatorConfigTableSchema
     return $this->collation;
   }
 
+  public function setEngine($engine) {
+    $this->engine = $engine;
+    return $this;
+  }
+
+  public function getEngine() {
+    return $this->engine;
+  }
+
   protected function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
 
     $issues = array();
     if ($this->getCollation() != $expect->getCollation()) {
       $issues[] = self::ISSUE_COLLATION;
+    }
+
+    if ($this->getEngine() != $expect->getEngine()) {
+      $issues[] = self::ISSUE_ENGINE;
     }
 
     return $issues;

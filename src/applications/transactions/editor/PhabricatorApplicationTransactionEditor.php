@@ -502,6 +502,15 @@ abstract class PhabricatorApplicationTransactionEditor
         return false;
     }
 
+    $type = $xaction->getTransactionType();
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      return $xtype->getTransactionHasEffect(
+        $object,
+        $xaction->getOldValue(),
+        $xaction->getNewValue());
+    }
+
     return ($xaction->getOldValue() !== $xaction->getNewValue());
   }
 

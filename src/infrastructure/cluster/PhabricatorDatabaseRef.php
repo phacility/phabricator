@@ -40,6 +40,7 @@ final class PhabricatorDatabaseRef
   private $applicationMap = array();
   private $masterRef;
   private $replicaRefs = array();
+  private $usePersistentConnections;
 
   public function setHost($host) {
     $this->host = $host;
@@ -171,6 +172,15 @@ final class PhabricatorDatabaseRef
     return $this->isDefaultPartition;
   }
 
+  public function setUsePersistentConnections($use_persistent_connections) {
+    $this->usePersistentConnections = $use_persistent_connections;
+    return $this;
+  }
+
+  public function getUsePersistentConnections() {
+    return $this->usePersistentConnections;
+  }
+
   public function setApplicationMap(array $application_map) {
     $this->applicationMap = $application_map;
     return $this;
@@ -178,6 +188,17 @@ final class PhabricatorDatabaseRef
 
   public function getApplicationMap() {
     return $this->applicationMap;
+  }
+
+  public function getPartitionStateForCommit() {
+    $state = PhabricatorEnv::getEnvConfig('cluster.databases');
+    foreach ($state as $key => $value) {
+      // Don't store passwords, since we don't care if they differ and
+      // users may find it surprising.
+      unset($state[$key]['pass']);
+    }
+
+    return phutil_json_encode($state);
   }
 
   public function setMasterRef(PhabricatorDatabaseRef $master_ref) {
@@ -308,13 +329,12 @@ final class PhabricatorDatabaseRef
   }
 
   public static function queryAll() {
-    $refs = self::newRefs();
+    $refs = self::getActiveDatabaseRefs();
+    return self::queryRefs($refs);
+  }
 
+  private static function queryRefs(array $refs) {
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
-
       $conn = $ref->newManagementConnection();
 
       $t_start = microtime(true);
@@ -499,9 +519,6 @@ final class PhabricatorDatabaseRef
 
     $masters = array();
     foreach ($refs as $ref) {
-      if ($ref->getDisabled()) {
-        continue;
-      }
       if ($ref->getIsMaster()) {
         $masters[] = $ref;
       }
@@ -517,6 +534,19 @@ final class PhabricatorDatabaseRef
 
   public function isApplicationHost($database) {
     return isset($this->applicationMap[$database]);
+  }
+
+  public function loadRawMySQLConfigValue($key) {
+    $conn = $this->newManagementConnection();
+
+    try {
+      $value = queryfx_one($conn, 'SELECT @@%Q', $key);
+      $value = $value['@@'.$key];
+    } catch (AphrontQueryException $ex) {
+      $value = null;
+    }
+
+    return $value;
   }
 
   public static function getMasterDatabaseRefForApplication($application) {
@@ -549,17 +579,21 @@ final class PhabricatorDatabaseRef
   }
 
   public static function newIndividualRef() {
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array(null, 'w', null));
+    $default_user = PhabricatorEnv::getEnvConfig('mysql.user');
+    $default_pass = new PhutilOpaqueEnvelope(
+      PhabricatorEnv::getEnvConfig('mysql.pass'));
+    $default_host = PhabricatorEnv::getEnvConfig('mysql.host');
+    $default_port = PhabricatorEnv::getEnvConfig('mysql.port');
 
     return id(new self())
-      ->setHost($conf->getHost())
-      ->setPort($conf->getPort())
-      ->setUser($conf->getUser())
-      ->setPass($conf->getPassword())
+      ->setUser($default_user)
+      ->setPass($default_pass)
+      ->setHost($default_host)
+      ->setPort($default_port)
       ->setIsIndividual(true)
-      ->setIsMaster(true);
+      ->setIsMaster(true)
+      ->setIsDefaultPartition(true)
+      ->setUsePersistentConnections(false);
   }
 
   public static function getAllReplicaDatabaseRefs() {
@@ -601,7 +635,7 @@ final class PhabricatorDatabaseRef
     $application_replicas = array();
     $default_replicas = array();
     foreach ($replicas as $replica) {
-      $master = $replica->getMaster();
+      $master = $replica->getMasterRef();
 
       if ($master->isApplicationHost($application)) {
         $application_replicas[] = $replica;
@@ -649,13 +683,39 @@ final class PhabricatorDatabaseRef
       'database' => null,
       'retries' => $default_retries,
       'timeout' => $default_timeout,
+      'persistent' => $this->getUsePersistentConnections(),
     );
 
-    return PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
-        $spec,
-      ));
+    $is_cli = (php_sapi_name() == 'cli');
+
+    $use_persistent = false;
+    if (!empty($spec['persistent']) && !$is_cli) {
+      $use_persistent = true;
+    }
+    unset($spec['persistent']);
+
+    $connection = self::newRawConnection($spec);
+
+    // If configured, use persistent connections. See T11672 for details.
+    if ($use_persistent) {
+      $connection->setPersistent($use_persistent);
+    }
+
+    // Unless this is a script running from the CLI, prevent any query from
+    // running for more than 30 seconds. See T10849 for details.
+    if (!$is_cli) {
+      $connection->setQueryTimeout(30);
+    }
+
+    return $connection;
+  }
+
+  public static function newRawConnection(array $options) {
+    if (extension_loaded('mysqli')) {
+      return new AphrontMySQLiDatabaseConnection($options);
+    } else {
+      return new AphrontMySQLDatabaseConnection($options);
+    }
   }
 
 }

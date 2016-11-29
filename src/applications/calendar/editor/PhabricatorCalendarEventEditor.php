@@ -55,7 +55,7 @@ final class PhabricatorCalendarEventEditor
       if ($xaction->getTransactionType() != $type_allday) {
         continue;
       }
-      $target_alllday = (bool)$xaction->getNewValue();
+      $new_allday = (bool)$xaction->getNewValue();
     }
 
     $this->oldIsAllDay = $old_allday;

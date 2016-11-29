@@ -58,13 +58,16 @@ final class PhabricatorDatabaseRefParser
       $role = $server['role'];
       $is_master = ($role == 'master');
 
+      $use_persistent = (bool)idx($server, 'persistent', false);
+
       $ref = id(new PhabricatorDatabaseRef())
         ->setHost($host)
         ->setPort($port)
         ->setUser($user)
         ->setPass($pass)
         ->setDisabled($disabled)
-        ->setIsMaster($is_master);
+        ->setIsMaster($is_master)
+        ->setUsePersistentConnections($use_persistent);
 
       if ($is_master) {
         $master_count++;

@@ -414,6 +414,10 @@ final class PhabricatorMarkupEngine extends Phobject {
       case 'default':
         $engine = self::newMarkupEngine(array());
         break;
+      case 'feed':
+        $engine = self::newMarkupEngine(array());
+        $engine->setConfig('autoplay.disable', true);
+        break;
       case 'nolinebreaks':
         $engine = self::newMarkupEngine(array());
         $engine->setConfig('preserve-linebreaks', false);

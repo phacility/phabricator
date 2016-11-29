@@ -19,6 +19,7 @@ final class PhabricatorStorageManagementAPI extends Phobject {
   const COLLATE_FULLTEXT = 'COLLATE_FULLTEXT';
 
   const TABLE_STATUS = 'patch_status';
+  const TABLE_HOSTSTATE = 'hoststate';
 
   public function setDisableUTF8MB4($disable_utf8_mb4) {
     $this->disableUTF8MB4 = $disable_utf8_mb4;
@@ -109,9 +110,7 @@ final class PhabricatorStorageManagementAPI extends Phobject {
     $database = $this->getDatabaseName($fragment);
     $return = &$this->conns[$this->host][$this->user][$database];
     if (!$return) {
-      $return = PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
+      $return = PhabricatorDatabaseRef::newRawConnection(
         array(
           'user'      => $this->user,
           'pass'      => $this->password,
@@ -120,8 +119,7 @@ final class PhabricatorStorageManagementAPI extends Phobject {
           'database'  => $fragment
             ? $database
             : null,
-        ),
-      ));
+        ));
     }
     return $return;
   }

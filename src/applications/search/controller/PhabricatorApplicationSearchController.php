@@ -317,6 +317,8 @@ final class PhabricatorApplicationSearchController
         $exec_errors[] = pht(
           'This query specifies an invalid parameter. Review the '.
           'query parameters and correct errors.');
+      } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
+        $exec_errors[] = $ex->getMessage();
       }
 
       // The engine may have encountered additional errors during rendering;

@@ -8,6 +8,7 @@ final class PhabricatorFileLinkView extends AphrontView {
   private $fileViewable;
   private $filePHID;
   private $fileMonogram;
+  private $fileSize;
   private $customClass;
 
   public function setCustomClass($custom_class) {
@@ -73,6 +74,19 @@ final class PhabricatorFileLinkView extends AphrontView {
     return $this->fileName;
   }
 
+  public function setFileSize($file_size) {
+    $this->fileSize = $file_size;
+    return $this;
+  }
+
+  private function getFileSize() {
+    return $this->fileSize;
+  }
+
+  private function getFileIcon() {
+    return FileTypeIcon::getFileIcon($this->getFileName());
+  }
+
   public function getMetadata() {
     return array(
       'phid'     => $this->getFilePHID(),
@@ -81,6 +95,8 @@ final class PhabricatorFileLinkView extends AphrontView {
       'dUri'     => $this->getFileDownloadURI(),
       'name'     => $this->getFileName(),
       'monogram' => $this->getFileMonogram(),
+      'icon'     => $this->getFileIcon(),
+      'size'     => $this->getFileSize(),
     );
   }
 
@@ -88,19 +104,41 @@ final class PhabricatorFileLinkView extends AphrontView {
     require_celerity_resource('phabricator-remarkup-css');
     require_celerity_resource('phui-lightbox-css');
 
-    $sigil       = null;
-    $meta        = null;
-    $mustcapture = false;
-    if ($this->getFileViewable()) {
-      $mustcapture = true;
-      $sigil = 'lightboxable';
-      $meta = $this->getMetadata();
-    }
+    $mustcapture = true;
+    $sigil = 'lightboxable';
+    $meta = $this->getMetadata();
 
     $class = 'phabricator-remarkup-embed-layout-link';
     if ($this->getCustomClass()) {
       $class = $this->getCustomClass();
     }
+
+    $icon = id(new PHUIIconView())
+      ->setIcon($this->getFileIcon());
+
+    $info = phutil_tag(
+      'span',
+      array(
+        'class' => 'phabricator-remarkup-embed-layout-info',
+      ),
+      $this->getFileSize());
+
+    $name = phutil_tag(
+      'span',
+      array(
+        'class' => 'phabricator-remarkup-embed-layout-name',
+      ),
+      $this->getFileName());
+
+    $inner = phutil_tag(
+      'span',
+      array(
+        'class' => 'phabricator-remarkup-embed-layout-info-block',
+      ),
+      array(
+        $name,
+        $info,
+      ));
 
     return javelin_tag(
       'a',
@@ -111,6 +149,9 @@ final class PhabricatorFileLinkView extends AphrontView {
         'meta'        => $meta,
         'mustcapture' => $mustcapture,
       ),
-      $this->getFileName());
+      array(
+        $icon,
+        $inner,
+      ));
   }
 }
