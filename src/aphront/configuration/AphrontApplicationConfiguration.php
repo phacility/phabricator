@@ -409,17 +409,23 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     if (!preg_match('@/$@', $path) && $request->isHTTPGet()) {
       $result = $this->routePath($maps, $path.'/');
       if ($result) {
-        $slash_uri = $request->getRequestURI()->setPath($path.'/');
+        $target_uri = $request->getAbsoluteRequestURI();
 
         // We need to restore URI encoding because the webserver has
         // interpreted it. For example, this allows us to redirect a path
         // like `/tag/aa%20bb` to `/tag/aa%20bb/`, which may eventually be
         // resolved meaningfully by an application.
-        $slash_uri = phutil_escape_uri($slash_uri);
+        $target_path = phutil_escape_uri($path.'/');
+        $target_uri->setPath($target_path);
+        $target_uri = (string)$target_uri;
 
-        $external = strlen($request->getRequestURI()->getDomain());
-        return $this->buildRedirectController($slash_uri, $external);
+        return $this->buildRedirectController($target_uri, true);
       }
+    }
+
+    $result = $site->new404Controller($request);
+    if ($result) {
+      return array($result, array());
     }
 
     return $this->build404Controller();

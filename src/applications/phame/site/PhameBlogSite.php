@@ -60,6 +60,10 @@ final class PhameBlogSite extends PhameSite {
     return id(new PhameBlogSite())->setBlog($blog);
   }
 
+  public function new404Controller(AphrontRequest $request) {
+    return new PhameBlog404Controller();
+  }
+
   public function getRoutingMaps() {
     $app = PhabricatorApplication::getByClass('PhabricatorPhameApplication');
 
