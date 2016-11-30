@@ -929,6 +929,7 @@ abstract class PhabricatorStorageManagementWorkflow
     }
 
     $applied_map = array();
+    $state_map = array();
     foreach ($api_map as $ref_key => $api) {
       $applied = $api->getAppliedPatches();
 
@@ -946,6 +947,7 @@ abstract class PhabricatorStorageManagementWorkflow
       }
 
       $applied = array_fuse($applied);
+      $state_map[$ref_key] = $applied;
 
       if ($apply_only) {
         if (isset($applied[$apply_only])) {
@@ -1097,7 +1099,7 @@ abstract class PhabricatorStorageManagementWorkflow
 
           // If we're explicitly reapplying this patch, we don't need to
           // mark it as applied.
-          if (!isset($applied_map[$ref_key][$key])) {
+          if (!isset($state_map[$ref_key][$key])) {
             $api->markPatchApplied($key, ($t_end - $t_begin));
             $applied_map[$ref_key][$key] = true;
           }
