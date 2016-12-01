@@ -11,6 +11,13 @@ final class PhabricatorConfigManagementDoneWorkflow
       ->setArguments(
         array(
           array(
+            'name' => 'force',
+            'short' => 'f',
+            'help' => pht(
+              'Mark activities complete even if there is no outstanding '.
+              'need to complete them.'),
+          ),
+          array(
             'name' => 'activities',
             'wildcard' => true,
           ),
@@ -18,6 +25,8 @@ final class PhabricatorConfigManagementDoneWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $is_force = $args->getArg('force');
+
     $activities = $args->getArg('activities');
     if (!$activities) {
       throw new PhutilArgumentUsageException(
@@ -29,11 +38,19 @@ final class PhabricatorConfigManagementDoneWorkflow
         'activityType = %s',
         $type);
       if (!$activity) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'Activity "%s" is not currently marked as required, so there '.
-            'is no need to complete it.',
-            $type));
+        if ($is_force) {
+          echo tsprintf(
+            "%s\n",
+            pht(
+              'Activity "%s" did not need to be marked as complete.',
+              $type));
+        } else {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Activity "%s" is not currently marked as required, so there '.
+              'is no need to complete it.',
+              $type));
+        }
       } else {
         $activity->delete();
         echo tsprintf(
