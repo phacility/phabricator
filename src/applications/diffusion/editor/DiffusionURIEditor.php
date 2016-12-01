@@ -462,6 +462,11 @@ final class DiffusionURIEditor
       ->withRepositories(array($repository))
       ->execute();
 
+    // Reattach the current URIs to the repository: we're going to rebuild
+    // the index explicitly below, and want to include any changes made to
+    // this URI in the index update.
+    $repository->attachURIs($uris);
+
     $observe_uri = null;
     foreach ($uris as $uri) {
       if ($uri->getIoType() != PhabricatorRepositoryURI::IO_OBSERVE) {
@@ -487,6 +492,9 @@ final class DiffusionURIEditor
     }
 
     $repository->save();
+
+    // Explicitly update the URI index.
+    $repository->updateURIIndex();
 
     $is_hosted = $repository->isHosted();
 
