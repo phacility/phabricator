@@ -278,6 +278,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
           'method' => 'POST',
           'class'  => 'lightbox-download-form',
           'sigil'  => 'download lightbox-download-submit',
+          'id'     => 'lightbox-download-form',
         ),
         phutil_tag(
           'a',

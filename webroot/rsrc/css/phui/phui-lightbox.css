@@ -55,6 +55,13 @@
   display: block;
   height: 120px;
   width: 320px;
+  color: {$darkbluetext};
+}
+
+.lightbox-attachment .lightbox-icon-frame:hover,
+.lightbox-attachment .lightbox-icon-frame:hover .phui-icon-view {
+  color: {$anchor};
+  text-decoration: none;
 }
 
 .lightbox-attachment.comment-panel-open .lightbox-icon-frame {

@@ -109,9 +109,11 @@ JX.behavior('lightbox-attachments', function (config) {
           target_data.name
         );
       img =
-        JX.$N('div',
+        JX.$N('a',
           {
             className : 'lightbox-icon-frame',
+            sigil : 'lightbox-download-submit',
+            href : '#',
           },
           [ imgIcon, nameElement ]
         );
@@ -362,7 +364,7 @@ JX.behavior('lightbox-attachments', function (config) {
 
   var _startDownload = function(e) {
     e.kill();
-    var form = e.getNode('tag:form');
+    var form = JX.$('lightbox-download-form');
     form.submit();
   };
 
