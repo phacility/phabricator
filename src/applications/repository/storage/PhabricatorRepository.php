@@ -2015,6 +2015,57 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $client;
   }
 
+  public function getPassthroughEnvironmentalVariables() {
+    $env = $_ENV;
+
+    if ($this->isGit()) {
+      // $_ENV does not populate in CLI contexts if "E" is missing from
+      // "variables_order" in PHP config. Currently, we do not require this
+      // to be configured. Since it may not be, explictitly bring expected Git
+      // environmental variables into scope. This list is not exhaustive, but
+      // only lists variables with a known impact on commit hook behavior.
+
+      // This can be removed if we later require "E" in "variables_order".
+
+      $git_env = array(
+        'GIT_OBJECT_DIRECTORY',
+        'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+        'GIT_QUARANTINE_PATH',
+      );
+      foreach ($git_env as $key) {
+        $value = getenv($key);
+        if (strlen($value)) {
+          $env[$key] = $value;
+        }
+      }
+
+      $key = 'GIT_PUSH_OPTION_COUNT';
+      $git_count = getenv($key);
+      if (strlen($git_count)) {
+        $git_count = (int)$git_count;
+        $env[$key] = $git_count;
+        for ($ii = 0; $ii < $git_count; $ii++) {
+          $key = 'GIT_PUSH_OPTION_'.$ii;
+          $env[$key] = getenv($key);
+        }
+      }
+    }
+
+    $result = array();
+    foreach ($env as $key => $value) {
+      // In Git, pass anything matching "GIT_*" though. Some of these variables
+      // need to be preserved to allow `git` operations to work properly when
+      // running from commit hooks.
+      if ($this->isGit()) {
+        if (preg_match('/^GIT_/', $key)) {
+          $result[$key] = $value;
+        }
+      }
+    }
+
+    return $result;
+  }
+
 /* -(  Repository URIs  )---------------------------------------------------- */
 
 

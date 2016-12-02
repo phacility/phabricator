@@ -209,6 +209,8 @@ abstract class DiffusionCommandEngine extends Phobject {
       }
     }
 
+    $env += $repository->getPassthroughEnvironmentalVariables();
+
     return $env;
   }
 

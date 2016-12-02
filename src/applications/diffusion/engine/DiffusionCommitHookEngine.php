@@ -610,7 +610,11 @@ final class DiffusionCommitHookEngine extends Phobject {
       self::ENV_REMOTE_ADDRESS => $this->getRemoteAddress(),
     );
 
-    $directories = $this->getRepository()->getHookDirectories();
+    $repository = $this->getRepository();
+
+    $env += $repository->getPassthroughEnvironmentalVariables();
+
+    $directories = $repository->getHookDirectories();
     foreach ($directories as $directory) {
       $hooks = $this->getExecutablesInDirectory($directory);
       sort($hooks);
