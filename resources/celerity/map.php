@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => '0b64e988',
     'conpherence.pkg.js' => '6249a1cf',
-    'core.pkg.css' => '27fd330b',
+    'core.pkg.css' => '94090cab',
     'core.pkg.js' => 'e4260032',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'a4ba74b5',
@@ -132,7 +132,7 @@ return array(
     'rsrc/css/phui/phui-chart.css' => '6bf6f78e',
     'rsrc/css/phui/phui-cms.css' => 'be43c8a8',
     'rsrc/css/phui/phui-comment-form.css' => '4ecc56ef',
-    'rsrc/css/phui/phui-comment-panel.css' => 'c40ce0ea',
+    'rsrc/css/phui/phui-comment-panel.css' => 'f50152ad',
     'rsrc/css/phui/phui-crumbs-view.css' => '195ac419',
     'rsrc/css/phui/phui-curtain-view.css' => '947bf1a4',
     'rsrc/css/phui/phui-document-pro.css' => 'c354e312',
@@ -847,7 +847,7 @@ return array(
     'phui-chart-css' => '6bf6f78e',
     'phui-cms-css' => 'be43c8a8',
     'phui-comment-form-css' => '4ecc56ef',
-    'phui-comment-panel-css' => 'c40ce0ea',
+    'phui-comment-panel-css' => 'f50152ad',
     'phui-crumbs-view-css' => '195ac419',
     'phui-curtain-view-css' => '947bf1a4',
     'phui-document-summary-view-css' => '9ca48bdf',
@@ -1946,9 +1946,6 @@ return array(
       'javelin-install',
       'javelin-dom',
     ),
-    'c40ce0ea' => array(
-      'phui-timeline-view-css',
-    ),
     'c587b80f' => array(
       'javelin-install',
     ),
@@ -2176,6 +2173,9 @@ return array(
       'javelin-dom',
       'javelin-request',
       'phabricator-keyboard-shortcut',
+    ),
+    'f50152ad' => array(
+      'phui-timeline-view-css',
     ),
     'f6555212' => array(
       'javelin-install',

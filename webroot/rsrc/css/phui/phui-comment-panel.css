@@ -78,6 +78,10 @@
   border: none;
 }
 
+.phui-comment-panel .phui-timeline-badges {
+  display: none;
+}
+
 .lightbox-comment-form .phui-form-view {
   padding-top: 0;
 }
