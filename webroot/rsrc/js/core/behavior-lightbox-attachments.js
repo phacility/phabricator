@@ -50,7 +50,8 @@ JX.behavior('lightbox-attachments', function (config) {
 
     e.kill();
 
-    var links = JX.DOM.scry(document, 'a', 'lightboxable');
+    var mainFrame = JX.$('main-page-frame');
+    var links = JX.DOM.scry(mainFrame, 'a', 'lightboxable');
     var phids = {};
     var data;
     for (var i = 0; i < links.length; i++) {
@@ -317,7 +318,9 @@ JX.behavior('lightbox-attachments', function (config) {
     el.click();
   }
 
-  JX.Stratcom.listen(
+  // Only look for lightboxable inside the main page, not other lightboxes.
+  JX.DOM.listen(
+    JX.$('main-page-frame'),
     'click',
     ['lightboxable'],
     loadLightBox);

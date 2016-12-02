@@ -512,6 +512,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       'div',
       array(
         'class' => implode(' ', $classes),
+        'id' => 'main-page-frame',
       ),
       array(
         $main_page,
