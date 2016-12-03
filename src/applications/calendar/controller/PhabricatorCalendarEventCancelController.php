@@ -138,18 +138,54 @@ final class PhabricatorCalendarEventCancelController
       ->addSubmitButton($submit);
 
     if ($show_control) {
+      $start_time = phutil_tag(
+        'strong',
+        array(),
+        phabricator_datetime($event->getStartDateTimeEpoch(), $viewer));
+
+      if ($is_cancelled) {
+        $this_name = pht('Reinstate Only This Event');
+        $this_caption = pht(
+          'Reinstate only the event which occurs on %s.',
+          $start_time);
+
+        $future_name = pht('Reinstate This And All Later Events');
+        $future_caption = pht(
+          'Reinstate this event and all events in the series which occur '.
+          'on or after %s.',
+          $start_time);
+      } else {
+        $this_name = pht('Cancel Only This Event');
+        $this_caption = pht(
+          'Cancel only the event which occurs on %s.',
+          $start_time);
+
+        $future_name = pht('Cancel This And All Later Events');
+        $future_caption = pht(
+          'Cancel this event and all events in the series which occur '.
+          'on or after %s.',
+          $start_time);
+      }
+
+
       $form = id(new AphrontFormView())
         ->setViewer($viewer)
         ->appendControl(
-          id(new AphrontFormSelectControl())
-            ->setLabel(pht('Cancel Events'))
+          id(new AphrontFormRadioButtonControl())
             ->setName('mode')
-            ->setOptions(
-              array(
-                'this' => pht('Only This Event'),
-                'future' => pht('All Future Events'),
-              )));
-      $dialog->appendForm($form);
+            ->setValue(PhabricatorCalendarEventEditEngine::MODE_THIS)
+            ->addButton(
+              PhabricatorCalendarEventEditEngine::MODE_THIS,
+              $this_name,
+              $this_caption)
+            ->addButton(
+              PhabricatorCalendarEventEditEngine::MODE_FUTURE,
+              $future_name,
+              $future_caption));
+
+      $dialog
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->appendForm($form);
     }
 
     return $dialog;

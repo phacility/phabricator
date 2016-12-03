@@ -35,6 +35,10 @@ abstract class PhabricatorModularTransactionType
     return;
   }
 
+  public function getTransactionHasEffect($object, $old, $new) {
+    return ($old !== $new);
+  }
+
   public function extractFilePHIDs($object, $value) {
     return array();
   }

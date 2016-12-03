@@ -68,7 +68,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
     $tables = queryfx_all(
       $conn,
-      'SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_COLLATION
+      'SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_COLLATION, ENGINE
         FROM INFORMATION_SCHEMA.TABLES
         WHERE TABLE_SCHEMA IN (%Ls)',
       $databases);
@@ -146,7 +146,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
         $table_schema = id(new PhabricatorConfigTableSchema())
           ->setName($table_name)
-          ->setCollation($table['TABLE_COLLATION']);
+          ->setCollation($table['TABLE_COLLATION'])
+          ->setEngine($table['ENGINE']);
 
         $columns = idx($database_column_info, $table_name, array());
         foreach ($columns as $column) {

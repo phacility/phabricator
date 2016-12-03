@@ -50,7 +50,8 @@ JX.behavior('lightbox-attachments', function (config) {
 
     e.kill();
 
-    var links = JX.DOM.scry(document, 'a', 'lightboxable');
+    var mainFrame = JX.$('main-page-frame');
+    var links = JX.DOM.scry(mainFrame, 'a', 'lightboxable');
     var phids = {};
     var data;
     for (var i = 0; i < links.length; i++) {
@@ -99,7 +100,7 @@ JX.behavior('lightbox-attachments', function (config) {
         );
     } else {
       var imgIcon = new JX.PHUIXIconView()
-        .setIcon('fa-file-text-o phui-lightbox-file-icon')
+        .setIcon(target_data.icon + ' phui-lightbox-file-icon')
         .getNode();
       var nameElement =
         JX.$N('div',
@@ -109,9 +110,11 @@ JX.behavior('lightbox-attachments', function (config) {
           target_data.name
         );
       img =
-        JX.$N('div',
+        JX.$N('a',
           {
             className : 'lightbox-icon-frame',
+            sigil : 'lightbox-download-submit',
+            href : '#',
           },
           [ imgIcon, nameElement ]
         );
@@ -121,6 +124,7 @@ JX.behavior('lightbox-attachments', function (config) {
       JX.$N('div',
         {
           className : 'lightbox-image-frame',
+          sigil : 'lightbox-image-frame',
         },
         img
       );
@@ -153,7 +157,7 @@ JX.behavior('lightbox-attachments', function (config) {
         },
         [
           m_url,
-          ' Image ' + current + ' of ' + total + '.'
+          current + ' / ' + total
         ]
       );
 
@@ -165,24 +169,27 @@ JX.behavior('lightbox-attachments', function (config) {
       );
 
     var commentIcon = new JX.PHUIXIconView()
-      .setIcon('fa-comment-o')
+      .setIcon('fa-comments')
       .getNode();
     var commentButton =
       JX.$N('a',
         {
-          className : 'lightbox-comment button grey has-icon',
+          className : 'lightbox-comment phui-icon-circle hover-sky',
           href : '#',
           sigil : 'lightbox-comment'
         },
-        [commentIcon, 'Comment']
+        commentIcon
       );
+    var closeIcon = new JX.PHUIXIconView()
+      .setIcon('fa-times')
+      .getNode();
     var closeButton =
       JX.$N('a',
         {
-          className : 'lightbox-close button grey',
+          className : 'lightbox-close phui-icon-circle hover-red',
           href : '#'
         },
-        'Close');
+        closeIcon);
     var statusHTML =
       JX.$N('div',
         {
@@ -311,7 +318,9 @@ JX.behavior('lightbox-attachments', function (config) {
     el.click();
   }
 
-  JX.Stratcom.listen(
+  // Only look for lightboxable inside the main page, not other lightboxes.
+  JX.DOM.listen(
+    JX.$('main-page-frame'),
     'click',
     ['lightboxable'],
     loadLightBox);
@@ -324,12 +333,12 @@ JX.behavior('lightbox-attachments', function (config) {
   // When the user clicks the background, close the lightbox.
   JX.Stratcom.listen(
     'click',
-    'lightbox-attachment',
+    'lightbox-image-frame',
     function (e) {
       if (!lightbox) {
         return;
       }
-      if (e.getTarget() != e.getNode('lightbox-attachment')) {
+      if (e.getTarget() != e.getNode('lightbox-image-frame')) {
         // Don't close if they clicked some other element, like the image
         // itself or the next/previous arrows.
         return;
@@ -355,5 +364,16 @@ JX.behavior('lightbox-attachments', function (config) {
     ['submit', 'didSyntheticSubmit'],
     'lightbox-comment-form',
     _sendMessage);
+
+  var _startDownload = function(e) {
+    e.kill();
+    var form = JX.$('lightbox-download-form');
+    form.submit();
+  };
+
+  JX.Stratcom.listen(
+    'click',
+    'lightbox-download-submit',
+    _startDownload);
 
 });

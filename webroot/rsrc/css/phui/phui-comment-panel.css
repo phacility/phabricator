@@ -26,6 +26,11 @@
   margin-left: 40px;
 }
 
+.device-phone .phui-comment-panel .phui-timeline-view
+  .phui-timeline-event-view {
+    margin-left: 16px;
+}
+
 .device-desktop .phui-comment-panel .phui-timeline-view .phui-timeline-image {
   width: 30px;
   height: 30px;
@@ -71,6 +76,10 @@
 .phui-comment-panel .phui-timeline-older-transactions-are-hidden {
   background-color: {$lightgreybackground};
   border: none;
+}
+
+.phui-comment-panel .phui-timeline-badges {
+  display: none;
 }
 
 .lightbox-comment-form .phui-form-view {

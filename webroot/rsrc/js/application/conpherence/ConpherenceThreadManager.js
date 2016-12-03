@@ -468,6 +468,7 @@ JX.install('ConpherenceThreadManager', {
           }
         }));
       this.syncWorkflow(workflow, 'finally');
+      textarea.value = '';
 
       this._willSendMessageCallback();
     },

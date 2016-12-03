@@ -370,20 +370,41 @@ video.phabricator-media {
 }
 
 .phabricator-remarkup-embed-layout-link {
-  padding: 2px 0;
+  padding: 8px 8px 8px 32px;
   border-radius: 3px;
-  margin: 0;
+  margin: 0 0 4px;
   display: inline-block;
   font-weight: bold;
-  color: {$anchor};
   -webkit-font-smoothing: antialiased;
+  border: 1px solid {$lightblueborder};
+  border-radius: 3px;
+  color: #000;
+  min-width: 240px;
+  position: relative;
+  height: 22px;
+  line-height: 20px;
 }
 
 .phabricator-remarkup-embed-layout-link .phui-icon-view {
   margin-right: 8px;
+  font-size: 20px;
+  position: absolute;
+  top: 8px;
+  left: 8px;
 }
 
-.phabricator-remarkup-embed-layout-link:hover,
+.phabricator-remarkup-embed-layout-info {
+  color: {$lightgreytext};
+  font-size: {$smallerfontsize};
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+.phabricator-remarkup-embed-layout-link:hover {
+  border-color: {$violet};
+  text-decoration: none;
+}
+
 .phabricator-remarkup-embed-layout-link:hover .phui-icon-view {
   color: {$violet};
 }

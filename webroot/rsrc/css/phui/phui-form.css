@@ -116,6 +116,7 @@ select {
   border: 1px solid {$greyborder};
   height: 28px;
   padding: 0 24px 0 8px;
+  margin: 0;
   min-width: 180px;
 }
 

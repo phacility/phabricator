@@ -46,22 +46,34 @@ final class PhabricatorCalendarEventEditController
         }
 
         if (!$mode) {
+          $start_time = phutil_tag(
+            'strong',
+            array(),
+            phabricator_datetime($event->getStartDateTimeEpoch(), $viewer));
+
           $form = id(new AphrontFormView())
             ->setViewer($viewer)
             ->appendControl(
-              id(new AphrontFormSelectControl())
-                ->setLabel(pht('Edit Events'))
+              id(new AphrontFormRadioButtonControl())
                 ->setName('mode')
-                ->setOptions(
-                  array(
-                    PhabricatorCalendarEventEditEngine::MODE_THIS
-                      => pht('Edit Only This Event'),
-                    PhabricatorCalendarEventEditEngine::MODE_FUTURE
-                      => pht('Edit All Future Events'),
-                  )));
-
+                ->setValue(PhabricatorCalendarEventEditEngine::MODE_THIS)
+                ->addButton(
+                  PhabricatorCalendarEventEditEngine::MODE_THIS,
+                  pht('Edit Only This Event'),
+                  pht(
+                    'Edit only the event which occurs at %s.',
+                    $start_time))
+                ->addButton(
+                  PhabricatorCalendarEventEditEngine::MODE_FUTURE,
+                  pht('Edit This And All Later Events'),
+                  pht(
+                    'Edit this event and all events in the series which '.
+                    'occur on or after %s. This will overwrite previous '.
+                    'edits!',
+                    $start_time)));
           return $this->newDialog()
             ->setTitle(pht('Edit Event'))
+            ->setWidth(AphrontDialogView::WIDTH_FORM)
             ->appendParagraph(
               pht(
                 'This event is part of a series. Which events do you '.

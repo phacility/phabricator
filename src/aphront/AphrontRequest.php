@@ -545,6 +545,13 @@ final class AphrontRequest extends Phobject {
     return id(new PhutilURI($path))->setQueryParams($get);
   }
 
+  public function getAbsoluteRequestURI() {
+    $uri = $this->getRequestURI();
+    $uri->setDomain($this->getHost());
+    $uri->setProtocol($this->isHTTPS() ? 'https' : 'http');
+    return $uri;
+  }
+
   public function isDialogFormPost() {
     return $this->isFormPost() && $this->getStr('__dialog__');
   }

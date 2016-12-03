@@ -31,6 +31,15 @@
   background: {$lightbluetext};
 }
 
+.device-desktop .project-board-wrapper .phui-workboard-view-shadow {
+  left: {$menu.profile.width};
+}
+
+.device-desktop .phui-profile-menu-collapsed .project-board-wrapper
+  .phui-workboard-view-shadow {
+  left: {$menu.profile.width.collapsed};
+}
+
 !print .project-board-wrapper .phui-workboard-view-shadow {
   position: static;
 }
@@ -65,13 +74,19 @@
   display: none;
 }
 
-.device-desktop .phui-workboard-fullscreen .phui-workboard-view-shadow {
-  top: 35px;
-  left: 0;
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phui-workboard-view-shadow {
+    top: 35px;
+    left: 0;
 }
 
 .device-desktop .phui-workboard-fullscreen .phui-workpanel-body-content {
   max-height: calc(100vh - 120px);
+}
+
+.device-desktop .phui-workboard-fullscreen .phui-profile-menu
+  .phabricator-nav-local {
+    display: none;
 }
 
 .device .phui-workboard-expand-icon {

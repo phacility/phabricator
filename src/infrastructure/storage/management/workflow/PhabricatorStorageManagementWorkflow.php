@@ -308,10 +308,11 @@ abstract class PhabricatorStorageManagementWorkflow
               if ($phase == 'main') {
                 queryfx(
                   $conn,
-                  'ALTER TABLE %T.%T COLLATE = %s',
+                  'ALTER TABLE %T.%T COLLATE = %s, ENGINE = %s',
                   $adjust['database'],
                   $adjust['table'],
-                  $adjust['collation']);
+                  $adjust['collation'],
+                  $adjust['engine']);
               }
               break;
             case 'column':
@@ -480,6 +481,7 @@ abstract class PhabricatorStorageManagementWorkflow
     $issue_unique = PhabricatorConfigStorageSchema::ISSUE_UNIQUE;
     $issue_longkey = PhabricatorConfigStorageSchema::ISSUE_LONGKEY;
     $issue_auto = PhabricatorConfigStorageSchema::ISSUE_AUTOINCREMENT;
+    $issue_engine = PhabricatorConfigStorageSchema::ISSUE_ENGINE;
 
     $adjustments = array();
     $errors = array();
@@ -543,6 +545,10 @@ abstract class PhabricatorStorageManagementWorkflow
           $issues[] = $issue_collation;
         }
 
+        if ($table->hasIssue($issue_engine)) {
+          $issues[] = $issue_engine;
+        }
+
         if ($issues) {
           $adjustments[] = array(
             'kind' => 'table',
@@ -550,6 +556,7 @@ abstract class PhabricatorStorageManagementWorkflow
             'table' => $table_name,
             'issues' => $issues,
             'collation' => $expect_table->getCollation(),
+            'engine' => $expect_table->getEngine(),
           );
         }
 
@@ -922,6 +929,7 @@ abstract class PhabricatorStorageManagementWorkflow
     }
 
     $applied_map = array();
+    $state_map = array();
     foreach ($api_map as $ref_key => $api) {
       $applied = $api->getAppliedPatches();
 
@@ -939,6 +947,7 @@ abstract class PhabricatorStorageManagementWorkflow
       }
 
       $applied = array_fuse($applied);
+      $state_map[$ref_key] = $applied;
 
       if ($apply_only) {
         if (isset($applied[$apply_only])) {
@@ -1090,7 +1099,7 @@ abstract class PhabricatorStorageManagementWorkflow
 
           // If we're explicitly reapplying this patch, we don't need to
           // mark it as applied.
-          if (!isset($applied_map[$ref_key][$key])) {
+          if (!isset($state_map[$ref_key][$key])) {
             $api->markPatchApplied($key, ($t_end - $t_begin));
             $applied_map[$ref_key][$key] = true;
           }

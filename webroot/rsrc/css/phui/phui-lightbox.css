@@ -43,7 +43,6 @@
 .lightbox-comment-frame {
   position: absolute;
   top: -19999px;
-  bottom: 0;
   right: 0;
   opacity: 0;
   transition: all 0.3s;
@@ -56,6 +55,13 @@
   display: block;
   height: 120px;
   width: 320px;
+  color: {$darkbluetext};
+}
+
+.lightbox-attachment .lightbox-icon-frame:hover,
+.lightbox-attachment .lightbox-icon-frame:hover .phui-icon-view {
+  color: {$anchor};
+  text-decoration: none;
 }
 
 .lightbox-attachment.comment-panel-open .lightbox-icon-frame {
@@ -76,6 +82,11 @@
   overflow-y: auto;
   background: #fff;
   opacity: 1;
+}
+
+.device-phone .comment-panel-open .lightbox-comment-frame {
+  width: auto;
+  left: 0;
 }
 
 .jx-mask + .lightbox-attachment {
@@ -101,18 +112,26 @@
   color: {$greytext};
 }
 
+.device-phone .lightbox-attachment .lightbox-status {
+  padding: 0 12px;
+}
+
 .lightbox-attachment .lightbox-status .lightbox-download {
   float: right;
 }
 
-.lightbox-attachment .lightbox-status a {
+.lightbox-attachment .lightbox-status-txt a {
   color: #000;
-  margin-right: 4px;
+  margin-right: 12px;
   font-size: {$biggerfontsize};
 }
 
-.lightbox-download button.has-icon {
-  padding-left: 28px;
+.lightbox-attachment .lightbox-status .phui-icon-view {
+  height: 18px;
+  width: 24px;
+  font-size: 14px;
+  line-height: 23px;
+  display: block;
 }
 
 .lightbox-attachment .lightbox-status .lightbox-download
@@ -120,20 +139,17 @@
     display: inline;
 }
 
-.lightbox-attachment .lightbox-comment {
+.lightbox-attachment a.lightbox-download,
+.lightbox-attachment a.lightbox-comment,
+.lightbox-attachment a.lightbox-close {
   float: right;
   margin: 9px 0 0 8px;
-  padding-left: 28px;
 }
 
-.lightbox-attachment.comment-panel-open .lightbox-comment,
+.lightbox-attachment.comment-panel-open .lightbox-comment.phui-icon-circle,
 .lightbox-attachment.comment-panel-open .lightbox-comment .phui-icon-view {
   color: {$sky};
-}
-
-.lightbox-attachment .lightbox-close {
-  float: right;
-  margin: 9px 0 0 8px;
+  border-color: {$sky};
 }
 
 .lightbox-attachment .lightbox-left {

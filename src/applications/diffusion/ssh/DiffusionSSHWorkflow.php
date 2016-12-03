@@ -43,6 +43,8 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
    */
   abstract protected function identifyRepository();
   abstract protected function executeRepositoryOperations();
+  abstract protected function raiseWrongVCSException(
+    PhabricatorRepository $repository);
 
   protected function getBaseRequestPath() {
     return $this->baseRequestPath;
@@ -197,6 +199,10 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
         pht(
           'This repository ("%s") is not available over SSH.',
           $repository->getDisplayName()));
+    }
+
+    if ($repository->getVersionControlSystem() != $vcs) {
+      $this->raiseWrongVCSException($repository);
     }
 
     return $repository;
