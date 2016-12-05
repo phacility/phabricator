@@ -30,10 +30,6 @@ final class PhabricatorPhragmentApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function canUninstall() {
-    return true;
-  }
-
   public function getRoutes() {
     return array(
       '/phragment/' => array(
