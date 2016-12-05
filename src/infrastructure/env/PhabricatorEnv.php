@@ -818,12 +818,12 @@ final class PhabricatorEnv extends Phobject {
       return false;
     }
 
-    $address = idx($_SERVER, 'REMOTE_ADDR');
+    $address = self::getRemoteAddress();
     if (!$address) {
       throw new Exception(
         pht(
           'Unable to test remote address against cluster whitelist: '.
-          'REMOTE_ADDR is not defined.'));
+          'REMOTE_ADDR is not defined or not valid.'));
     }
 
     return self::isClusterAddress($address);
@@ -842,6 +842,19 @@ final class PhabricatorEnv extends Phobject {
 
     return PhutilCIDRList::newList($cluster_addresses)
       ->containsAddress($address);
+  }
+
+  public static function getRemoteAddress() {
+    $address = idx($_SERVER, 'REMOTE_ADDR');
+    if (!$address) {
+      return null;
+    }
+
+    try {
+      return PhutilIPAddress::newAddress($address);
+    } catch (Exception $ex) {
+      return null;
+    }
   }
 
 /* -(  Internals  )---------------------------------------------------------- */

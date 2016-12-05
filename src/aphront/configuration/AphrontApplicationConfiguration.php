@@ -106,10 +106,18 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     PhabricatorAccessLog::init();
     $access_log = PhabricatorAccessLog::getLog();
     PhabricatorStartup::setAccessLog($access_log);
+
+    $address = PhabricatorEnv::getRemoteAddress();
+    if ($address) {
+      $address_string = $address->getAddress();
+    } else {
+      $address_string = '-';
+    }
+
     $access_log->setData(
       array(
         'R' => AphrontRequest::getHTTPHeader('Referer', '-'),
-        'r' => idx($_SERVER, 'REMOTE_ADDR', '-'),
+        'r' => $address_string,
         'M' => idx($_SERVER, 'REQUEST_METHOD', '-'),
       ));
 
