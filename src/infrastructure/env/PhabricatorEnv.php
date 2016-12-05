@@ -737,10 +737,10 @@ final class PhabricatorEnv extends Phobject {
    * @task uri
    */
   public static function requireValidRemoteURIForFetch(
-    $uri,
+    $raw_uri,
     array $protocols) {
 
-    $uri = new PhutilURI($uri);
+    $uri = new PhutilURI($raw_uri);
 
     $proto = $uri->getProtocol();
     if (!strlen($proto)) {
@@ -748,7 +748,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid fetchable resource. A valid fetchable '.
           'resource URI must specify a protocol.',
-          $uri));
+          $raw_uri));
     }
 
     $protocols = array_fuse($protocols);
@@ -757,7 +757,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid fetchable resource. A valid fetchable '.
           'resource URI must use one of these protocols: %s.',
-          $uri,
+          $raw_uri,
           implode(', ', array_keys($protocols))));
     }
 
@@ -767,7 +767,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid fetchable resource. A valid fetchable '.
           'resource URI must specify a domain.',
-          $uri));
+          $raw_uri));
     }
 
     $addresses = gethostbynamel($domain);
@@ -776,7 +776,7 @@ final class PhabricatorEnv extends Phobject {
         pht(
           'URI "%s" is not a valid fetchable resource. The domain "%s" could '.
           'not be resolved.',
-          $uri,
+          $raw_uri,
           $domain));
     }
 
@@ -787,7 +787,7 @@ final class PhabricatorEnv extends Phobject {
             'URI "%s" is not a valid fetchable resource. The domain "%s" '.
             'resolves to the address "%s", which is blacklisted for '.
             'outbound requests.',
-            $uri,
+            $raw_uri,
             $domain,
             $address));
       }

@@ -23,8 +23,8 @@ final class PhabricatorSecurityConfigOptions
     $doc_href = PhabricatorEnv::getDoclink('Configuring a File Domain');
     $doc_name = pht('Configuration Guide: Configuring a File Domain');
 
-    // This is all of the IANA special/reserved blocks in IPv4 space.
     $default_address_blacklist = array(
+      // This is all of the IANA special/reserved blocks in IPv4 space.
       '0.0.0.0/8',
       '10.0.0.0/8',
       '100.64.0.0/10',
@@ -41,6 +41,21 @@ final class PhabricatorSecurityConfigOptions
       '224.0.0.0/4',
       '240.0.0.0/4',
       '255.255.255.255/32',
+
+      // And these are the IANA special/reserved blocks in IPv6 space.
+      '::/128',
+      '::1/128',
+      '::ffff:0:0/96',
+      '100::/64',
+      '64:ff9b::/96',
+      '2001::/32',
+      '2001:10::/28',
+      '2001:20::/28',
+      '2001:db8::/32',
+      '2002::/16',
+      'fc00::/7',
+      'fe80::/10',
+      'ff00::/8',
     );
 
     $keyring_type = 'custom:PhabricatorKeyringConfigOptionType';
