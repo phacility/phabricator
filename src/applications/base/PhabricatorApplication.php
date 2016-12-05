@@ -437,10 +437,19 @@ abstract class PhabricatorApplication
       if (!self::isClassInstalled($class)) {
         $result = false;
       } else {
-        $result = PhabricatorPolicyFilter::hasCapability(
-          $viewer,
-          self::getByClass($class),
-          PhabricatorPolicyCapability::CAN_VIEW);
+        $application = self::getByClass($class);
+        if (!$application->canUninstall()) {
+          // If the application can not be uninstalled, always allow viewers
+          // to see it. In particular, this allows logged-out viewers to see
+          // Settings and load global default settings even if the install
+          // does not allow public viewers.
+          $result = true;
+        } else {
+          $result = PhabricatorPolicyFilter::hasCapability(
+            $viewer,
+            self::getByClass($class),
+            PhabricatorPolicyCapability::CAN_VIEW);
+        }
       }
 
       $cache->setKey($key, $result);
