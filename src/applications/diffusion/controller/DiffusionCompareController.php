@@ -301,11 +301,11 @@ final class DiffusionCompareController extends DiffusionController {
 
     $history_table->loadRevisions();
 
-    if ($history) {
-      $history_table->setParents($results['parents']);
-      $history_table->setIsHead(!$pager->getOffset());
-      $history_table->setIsTail(!$pager->getHasMorePages());
-    }
+    $history_table
+      ->setParents($results['parents'])
+      ->setFilterParents(true)
+      ->setIsHead(!$pager->getOffset())
+      ->setIsTail(!$pager->getHasMorePages());
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Commits'));
