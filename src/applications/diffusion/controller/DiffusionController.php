@@ -344,11 +344,14 @@ abstract class DiffusionController extends PhabricatorController {
     $repository_phid = $repository->getPHID();
     $stable_commit = $drequest->getStableCommit();
 
+    $stable_commit_hash = PhabricatorHash::digestForIndex($stable_commit);
+    $readme_path_hash = PhabricatorHash::digestForindex($readme_path);
+
     $cache = PhabricatorCaches::getMutableStructureCache();
     $cache_key = "diffusion".
       ".repository({$repository_phid})".
-      ".commit({$stable_commit})".
-      ".readme({$readme_path})";
+      ".commit({$stable_commit_hash})".
+      ".readme({$readme_path_hash})";
 
     $readme_cache = $cache->getKey($cache_key);
     if (!$readme_cache) {
