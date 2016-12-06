@@ -1865,21 +1865,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $never_proxy,
     array $protocols) {
 
-    $service = $this->loadAlmanacService();
-    if (!$service) {
+    $cache_key = $this->getAlmanacServiceCacheKey();
+    if (!$cache_key) {
       return null;
     }
 
-    $bindings = $service->getActiveBindings();
-    if (!$bindings) {
-      throw new Exception(
-        pht(
-          'The Almanac service for this repository is not bound to any '.
-          'interfaces.'));
+    $cache = PhabricatorCaches::getMutableStructureCache();
+    $uris = $cache->getKey($cache_key, false);
+
+    // If we haven't built the cache yet, build it now.
+    if ($uris === false) {
+      $uris = $this->buildAlmanacServiceURIs();
+      $cache->setKey($cache_key, $uris);
+    }
+
+    if ($uris === null) {
+      return null;
     }
 
     $local_device = AlmanacKeys::getDeviceID();
-
     if ($never_proxy && !$local_device) {
       throw new Exception(
         pht(
@@ -1890,10 +1894,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $protocol_map = array_fuse($protocols);
 
-    $uris = array();
-    foreach ($bindings as $binding) {
-      $iface = $binding->getInterface();
-
+    $results = array();
+    foreach ($uris as $uri) {
       // If we're never proxying this and it's locally satisfiable, return
       // `null` to tell the caller to handle it locally. If we're allowed to
       // proxy, we skip this check and may proxy the request to ourselves.
@@ -1901,22 +1903,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       // return `null`, and then the request will actually run.)
 
       if ($local_device && $never_proxy) {
-        if ($iface->getDevice()->getName() == $local_device) {
+        if ($uri['device'] == $local_device) {
           return null;
         }
       }
 
-      $uri = $this->getClusterRepositoryURIFromBinding($binding);
-
-      $protocol = $uri->getProtocol();
-      if (empty($protocol_map[$protocol])) {
-        continue;
+      if (isset($protocol_map[$uri['protocol']])) {
+        $results[] = new PhutilURI($uri['uri']);
       }
-
-      $uris[] = $uri;
     }
 
-    if (!$uris) {
+    if (!$results) {
       throw new Exception(
         pht(
           'The Almanac service for this repository is not bound to any '.
@@ -1931,10 +1928,51 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'Cluster hosts must correctly route their intracluster requests.'));
     }
 
-    shuffle($uris);
-    return head($uris);
+    shuffle($results);
+    return head($results);
   }
 
+  public function getAlmanacServiceCacheKey() {
+    $service_phid = $this->getAlmanacServicePHID();
+    if (!$service_phid) {
+      return null;
+    }
+
+    $repository_phid = $this->getPHID();
+    return "diffusion.repository({$repository_phid}).service({$service_phid})";
+  }
+
+  private function buildAlmanacServiceURIs() {
+    $service = $this->loadAlmanacService();
+    if (!$service) {
+      return null;
+    }
+
+    $bindings = $service->getActiveBindings();
+    if (!$bindings) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is not bound to any '.
+          'interfaces.'));
+    }
+
+    $uris = array();
+    foreach ($bindings as $binding) {
+      $iface = $binding->getInterface();
+
+      $uri = $this->getClusterRepositoryURIFromBinding($binding);
+      $protocol = $uri->getProtocol();
+      $device_name = $iface->getDevice()->getName();
+
+      $uris[] = array(
+        'protocol' => $protocol,
+        'uri' => (string)$uri,
+        'device' => $device_name,
+      );
+    }
+
+    return $uris;
+  }
 
   /**
    * Build a new Conduit client in order to make a service call to this
