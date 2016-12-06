@@ -213,6 +213,9 @@ abstract class DiffusionController extends PhabricatorController {
       case 'change':
         $view_name = pht('Change');
         break;
+      case 'compare':
+        $view_name = pht('Compare');
+        break;
     }
 
     $crumb = id(new PHUICrumbView())
