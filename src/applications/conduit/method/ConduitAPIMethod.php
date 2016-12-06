@@ -158,15 +158,20 @@ abstract class ConduitAPIMethod
   }
 
   public static function loadAllConduitMethods() {
+    return self::newClassMapQuery()->execute();
+  }
+
+  private static function newClassMapQuery() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setUniqueMethod('getAPIMethodName')
-      ->execute();
+      ->setUniqueMethod('getAPIMethodName');
   }
 
   public static function getConduitMethod($method_name) {
-    $method_map = self::loadAllConduitMethods();
-    return idx($method_map, $method_name);
+    return id(new PhabricatorCachedClassMapQuery())
+      ->setClassMapQuery(self::newClassMapQuery())
+      ->setMapKeyMethod('getAPIMethodName')
+      ->loadClass($method_name);
   }
 
   public function shouldRequireAuthentication() {
