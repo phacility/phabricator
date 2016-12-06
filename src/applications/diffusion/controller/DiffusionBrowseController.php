@@ -1651,6 +1651,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
   protected function buildCurtain(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
+    $repository = $drequest->getRepository();
 
     $curtain = $this->newCurtainView($drequest);
 
@@ -1666,6 +1667,21 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setIcon('fa-list'));
 
     $behind_head = $drequest->getSymbolicCommit();
+
+    if ($repository->supportsBranchComparison()) {
+      $compare_uri = $drequest->generateURI(
+        array(
+          'action' => 'compare',
+        ));
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Compare Against...'))
+          ->setIcon('fa-code-fork')
+          ->setWorkflow(true)
+          ->setHref($compare_uri));
+    }
+
     $head_uri = $drequest->generateURI(
       array(
         'commit' => '',

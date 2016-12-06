@@ -689,6 +689,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'lint':
       case 'pathtree':
       case 'refs':
+      case 'compare':
         break;
       case 'branch':
         // NOTE: This does not actually require a branch, and won't have one
@@ -709,6 +710,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $branch   = idx($params, 'branch');
     $commit   = idx($params, 'commit');
     $line     = idx($params, 'line');
+
+    $head = idx($params, 'head');
+    $against = idx($params, 'against');
 
     if ($req_commit && !strlen($commit)) {
       throw new Exception(
@@ -734,11 +738,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $path = phutil_escape_uri($path);
     }
 
+    $raw_branch = $branch;
     if (strlen($branch)) {
       $branch = phutil_escape_uri_path_component($branch);
       $path = "{$branch}/{$path}";
     }
 
+    $raw_commit = $commit;
     if (strlen($commit)) {
       $commit = str_replace('$', '$$', $commit);
       $commit = ';'.phutil_escape_uri($commit);
@@ -748,6 +754,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $line = '$'.phutil_escape_uri($line);
     }
 
+    $query = array();
     switch ($action) {
       case 'change':
       case 'history':
@@ -759,6 +766,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'pathtree':
       case 'refs':
         $uri = $this->getPathURI("/{$action}/{$path}{$commit}{$line}");
+        break;
+      case 'compare':
+        $uri = $this->getPathURI("/{$action}/");
+        if (strlen($head)) {
+          $query['head'] = $head;
+        } else if (strlen($raw_commit)) {
+          $query['commit'] = $raw_commit;
+        } else if (strlen($raw_branch)) {
+          $query['head'] = $raw_branch;
+        }
+
+        if (strlen($against)) {
+          $query['against'] = $against;
+        }
         break;
       case 'branch':
         if (strlen($path)) {
@@ -791,8 +812,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       );
     }
 
-    if (idx($params, 'params')) {
-      $uri->setQueryParams($params['params']);
+    $query = idx($params, 'params', array()) + $query;
+
+    if ($query) {
+      $uri->setQueryParams($query);
     }
 
     return $uri;
@@ -2064,6 +2087,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $result;
+  }
+
+  public function supportsBranchComparison() {
+    return $this->isGit();
   }
 
 /* -(  Repository URIs  )---------------------------------------------------- */
