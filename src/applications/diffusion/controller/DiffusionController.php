@@ -340,41 +340,60 @@ abstract class DiffusionController extends PhabricatorController {
 
     $drequest = $this->getDiffusionRequest();
     $viewer = $this->getViewer();
+    $repository = $drequest->getRepository();
+    $repository_phid = $repository->getPHID();
+    $stable_commit = $drequest->getStableCommit();
 
-    try {
-      $result = $this->callConduitWithDiffusionRequest(
-        'diffusion.filecontentquery',
-        array(
-          'path' => $readme_path,
-          'commit' => $drequest->getStableCommit(),
-        ));
-    } catch (Exception $ex) {
-      return null;
+    $cache = PhabricatorCaches::getMutableStructureCache();
+    $cache_key = "diffusion".
+      ".repository({$repository_phid})".
+      ".commit({$stable_commit})".
+      ".readme({$readme_path})";
+
+    $readme_cache = $cache->getKey($cache_key);
+    if (!$readme_cache) {
+      try {
+        $result = $this->callConduitWithDiffusionRequest(
+          'diffusion.filecontentquery',
+          array(
+            'path' => $readme_path,
+            'commit' => $drequest->getStableCommit(),
+          ));
+      } catch (Exception $ex) {
+        return null;
+      }
+
+      $file_phid = $result['filePHID'];
+      if (!$file_phid) {
+        return null;
+      }
+
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($file_phid))
+        ->executeOne();
+      if (!$file) {
+        return null;
+      }
+
+      $corpus = $file->loadFileData();
+
+      $readme_cache = array(
+        'corpus' => $corpus,
+      );
+
+      $cache->setKey($cache_key, $readme_cache);
     }
 
-    $file_phid = $result['filePHID'];
-    if (!$file_phid) {
-      return null;
-    }
-
-    $file = id(new PhabricatorFileQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(array($file_phid))
-      ->executeOne();
-    if (!$file) {
-      return null;
-    }
-
-    $corpus = $file->loadFileData();
-
-    if (!strlen($corpus)) {
+    $readme_corpus = $readme_cache['corpus'];
+    if (!strlen($readme_corpus)) {
       return null;
     }
 
     return id(new DiffusionReadmeView())
       ->setUser($this->getViewer())
       ->setPath($readme_path)
-      ->setContent($corpus);
+      ->setContent($readme_corpus);
   }
 
 }
