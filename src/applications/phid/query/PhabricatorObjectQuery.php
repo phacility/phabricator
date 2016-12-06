@@ -29,11 +29,6 @@ final class PhabricatorObjectQuery
       $this->namedResults = array();
     }
 
-    $types = PhabricatorPHIDType::getAllTypes();
-    if ($this->types) {
-      $types = array_select_keys($types, $this->types);
-    }
-
     $names = array_unique($this->names);
     $phids = $this->phids;
 
@@ -51,15 +46,30 @@ final class PhabricatorObjectQuery
       }
     }
 
-    $phids = array_unique($phids);
-
     if ($names) {
+      $types = PhabricatorPHIDType::getAllTypes();
+      if ($this->types) {
+        $types = array_select_keys($types, $this->types);
+      }
       $name_results = $this->loadObjectsByName($types, $names);
     } else {
       $name_results = array();
     }
 
     if ($phids) {
+      $phids = array_unique($phids);
+
+      $phid_types = array();
+      foreach ($phids as $phid) {
+        $phid_type = phid_get_type($phid);
+        $phid_types[$phid_type] = $phid_type;
+      }
+
+      $types = PhabricatorPHIDType::getTypes($phid_types);
+      if ($this->types) {
+        $types = array_select_keys($types, $this->types);
+      }
+
       $phid_results = $this->loadObjectsByPHID($types, $phids);
     } else {
       $phid_results = array();

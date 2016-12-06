@@ -144,10 +144,21 @@ abstract class PhabricatorPHIDType extends Phobject {
    * @return dict<string, PhabricatorPHIDType> Map of type constants to types.
    */
   final public static function getAllTypes() {
+    return self::newClassMapQuery()
+      ->execute();
+  }
+
+  final public static function getTypes(array $types) {
+    return id(new PhabricatorCachedClassMapQuery())
+      ->setClassMapQuery(self::newClassMapQuery())
+      ->setMapKeyMethod('getTypeConstant')
+      ->loadClasses($types);
+  }
+
+  private static function newClassMapQuery() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setUniqueMethod('getTypeConstant')
-      ->execute();
+      ->setUniqueMethod('getTypeConstant');
   }
 
 
