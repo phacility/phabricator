@@ -116,6 +116,24 @@ final class PhabricatorCaches extends Phobject {
     return $caches;
   }
 
+  public static function getMutableStructureCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildMutableStructureCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildMutableStructureCaches() {
+    $caches = array();
+
+    $cache = new PhabricatorKeyValueDatabaseCache();
+    $cache = new PhabricatorKeyValueSerializingCacheProxy($cache);
+    $caches[] = $cache;
+
+    return $caches;
+  }
 
 /* -(  Runtime Cache  )------------------------------------------------------ */
 
