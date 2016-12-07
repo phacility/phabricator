@@ -159,11 +159,6 @@
   padding: 0 12px;
 }
 
-.phui-two-column-properties .phabricator-action-view-icon {
-  top: 8px;
-  left: 8px;
-}
-
 .phabricator-action-view button.phabricator-action-view-item,
 .phabricator-action-view-item {
   padding: 5px 4px 5px 28px;
