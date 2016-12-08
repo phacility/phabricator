@@ -42,6 +42,10 @@ final class PhabricatorConduitToken
       return null;
     }
 
+    if ($user->hasConduitClusterToken()) {
+      return $user->getConduitClusterToken();
+    }
+
     $tokens = id(new PhabricatorConduitTokenQuery())
       ->setViewer($user)
       ->withObjectPHIDs(array($user->getPHID()))
@@ -55,23 +59,28 @@ final class PhabricatorConduitToken
     $now = PhabricatorTime::getNow();
     $must_expire_after = $now + phutil_units('5 minutes in seconds');
 
+    $valid_token = null;
     foreach ($tokens as $token) {
       if ($token->getExpires() > $must_expire_after) {
-        return $token;
+        $valid_token = $token;
+        break;
       }
     }
 
     // We didn't find any existing tokens (or the existing tokens are all about
     // to expire) so generate a new token.
+    if (!$valid_token) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $valid_token = self::initializeNewToken(
+          $user->getPHID(),
+          self::TYPE_CLUSTER);
+        $valid_token->save();
+      unset($unguarded);
+    }
 
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $token = self::initializeNewToken(
-        $user->getPHID(),
-        self::TYPE_CLUSTER);
-      $token->save();
-    unset($unguarded);
+    $user->attachConduitClusterToken($valid_token);
 
-    return $token;
+    return $valid_token;
   }
 
   public static function initializeNewToken($object_phid, $token_type) {

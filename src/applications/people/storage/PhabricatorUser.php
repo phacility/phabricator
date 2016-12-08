@@ -64,6 +64,7 @@ final class PhabricatorUser
   private $settingCacheKeys = array();
   private $settingCache = array();
   private $allowInlineCacheGeneration;
+  private $conduitClusterToken = self::ATTACHABLE;
 
   protected function readField($field) {
     switch ($field) {
@@ -935,6 +936,19 @@ final class PhabricatorUser
    */
   public function getAuthorities() {
     return $this->authorities;
+  }
+
+  public function hasConduitClusterToken() {
+    return ($this->conduitClusterToken !== self::ATTACHABLE);
+  }
+
+  public function attachConduitClusterToken(PhabricatorConduitToken $token) {
+    $this->conduitClusterToken = $token;
+    return $this;
+  }
+
+  public function getConduitClusterToken() {
+    return $this->assertAttached($this->conduitClusterToken);
   }
 
 
