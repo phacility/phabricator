@@ -42,7 +42,7 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
       ->setPath($send_path)
       ->setQueryParam($expect_key, $expect_value);
 
-    $future = id(new HTTPSFuture($base_uri))
+    $self_future = id(new HTTPSFuture($base_uri))
       ->addHeader('X-Phabricator-SelfCheck', 1)
       ->addHeader('Accept-Encoding', 'gzip')
       ->setHTTPBasicAuthCredentials(
@@ -50,8 +50,49 @@ final class PhabricatorWebServerSetupCheck extends PhabricatorSetupCheck {
         new PhutilOpaqueEnvelope($expect_pass))
       ->setTimeout(5);
 
+    // Make a request to the metadata service available on EC2 instances,
+    // to test if we're running on a T2 instance in AWS so we can warn that
+    // this is a bad idea. Outside of AWS, this request will just fail.
+    $ec2_uri = 'http://169.254.169.254/latest/meta-data/instance-type';
+    $ec2_future = id(new HTTPSFuture($ec2_uri))
+      ->setTimeout(1);
+
+    $futures = array(
+      $self_future,
+      $ec2_future,
+    );
+    $futures = new FutureIterator($futures);
+    foreach ($futures as $future) {
+      // Just resolve the futures here.
+    }
+
+
     try {
-      list($body, $headers) = $future->resolvex();
+      list($body) = $ec2_future->resolvex();
+      $body = trim($body);
+      if (preg_match('/^t2/', $body)) {
+        $message = pht(
+          'Phabricator appears to be installed on a very small EC2 instance '.
+          '(of class "%s") with burstable CPU. This is strongly discouraged. '.
+          'Phabricator regularly needs CPU, and these instances are often '.
+          'choked to death by CPU throttling. Use an instance with a normal '.
+          'CPU instead.',
+          $body);
+
+        $this->newIssue('ec2.burstable')
+          ->setName(pht('Installed on Burstable CPU Instance'))
+          ->setSummary(
+            pht(
+              'Do not install Phabricator on an instance class with '.
+              'burstable CPU.'))
+          ->setMessage($message);
+      }
+    } catch (Exception $ex) {
+      // If this fails, just continue. We're probably not running in EC2.
+    }
+
+    try {
+      list($body, $headers) = $self_future->resolvex();
     } catch (Exception $ex) {
       // If this fails for whatever reason, just ignore it. Hopefully, the
       // error is obvious and the user can correct it on their own, but we
