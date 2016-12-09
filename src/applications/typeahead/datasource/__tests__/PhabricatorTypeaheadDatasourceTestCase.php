@@ -27,6 +27,18 @@ final class PhabricatorTypeaheadDatasourceTestCase
     $this->assertTokenization(
       '[[ brackets ]] [-] ]-[ tie-fighters',
       array('brackets', 'tie', 'fighters'));
+
+    $this->assertTokenization(
+      'viewer()',
+      array('viewer'));
+
+    $this->assertTokenization(
+      'Work (Done)',
+      array('work', 'done'));
+
+    $this->assertTokenization(
+      'A (B C D)',
+      array('a', 'b', 'c', 'd'));
   }
 
   private function assertTokenization($input, $expect) {
