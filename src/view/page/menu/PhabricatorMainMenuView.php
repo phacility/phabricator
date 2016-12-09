@@ -317,19 +317,26 @@ final class PhabricatorMainMenuView extends AphrontView {
 
       $logo_uri = $cache->getKey($cache_key_logo);
       if (!$logo_uri) {
-        $file = id(new PhabricatorFileQuery())
+        // NOTE: If the file policy has been changed to be restrictive, we'll
+        // miss here and just show the default logo. The cache will fill later
+        // when someone who can see the file loads the page. This might be a
+        // little spooky, see T11982.
+        $files = id(new PhabricatorFileQuery())
           ->setViewer($this->getViewer())
           ->withPHIDs(array($custom_header))
-          ->executeOne();
+          ->execute();
+        $file = head($files);
         if ($file) {
           $logo_uri = $file->getViewURI();
           $cache->setKey($cache_key_logo, $logo_uri);
         }
       }
 
-      $logo_style[] = 'background-size: 40px 40px;';
-      $logo_style[] = 'background-position: 0 0;';
-      $logo_style[] = 'background-image: url('.$logo_uri.')';
+      if ($logo_uri) {
+        $logo_style[] = 'background-size: 40px 40px;';
+        $logo_style[] = 'background-position: 0 0;';
+        $logo_style[] = 'background-image: url('.$logo_uri.')';
+      }
     }
 
     $logo_node = phutil_tag(
