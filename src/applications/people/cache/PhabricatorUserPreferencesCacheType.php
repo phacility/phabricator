@@ -5,7 +5,7 @@ final class PhabricatorUserPreferencesCacheType
 
   const CACHETYPE = 'preferences';
 
-  const KEY_PREFERENCES = 'user.preferences.v1';
+  const KEY_PREFERENCES = 'user.preferences.v2';
 
   public function getAutoloadKeys() {
     return array(
@@ -46,6 +46,16 @@ final class PhabricatorUserPreferencesCacheType
 
       foreach ($all_settings as $key => $setting) {
         $value = $preference->getSettingValue($key);
+
+        try {
+          id(clone $setting)
+            ->setViewer($viewer)
+            ->assertValidValue($value);
+        } catch (Exception $ex) {
+          // If the saved value isn't valid, don't cache it: we'll use the
+          // default value instead.
+          continue;
+        }
 
         // As an optimization, we omit the value from the cache if it is
         // exactly the same as the hardcoded default.

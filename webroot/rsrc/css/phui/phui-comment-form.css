@@ -107,7 +107,7 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 .phui-comment-form-view .phui-comment-action-bar {
   border-bottom: 1px solid {$thinblueborder};
   background-color: rgba(239, 243, 252, .75);
-  padding: 2px 12px 4px 12px;
+  padding: 4px 12px 4px 12px;
   margin-bottom: 16px;
 }
 

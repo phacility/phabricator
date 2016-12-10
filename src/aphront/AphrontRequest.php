@@ -557,11 +557,13 @@ final class AphrontRequest extends Phobject {
   }
 
   public function getRemoteAddress() {
-    $address = $_SERVER['REMOTE_ADDR'];
-    if (!strlen($address)) {
+    $address = PhabricatorEnv::getRemoteAddress();
+
+    if (!$address) {
       return null;
     }
-    return substr($address, 0, 64);
+
+    return $address->getAddress();
   }
 
   public function isHTTPS() {

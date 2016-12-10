@@ -2,6 +2,11 @@
 
 final class DiffusionRepositoryController extends DiffusionController {
 
+  private $historyFuture;
+  private $browseFuture;
+  private $tagFuture;
+  private $branchFuture;
+
   public function shouldAllowPublic() {
     return true;
   }
@@ -106,18 +111,67 @@ final class DiffusionRepositoryController extends DiffusionController {
     $request = $this->getRequest();
     $repository = $drequest->getRepository();
 
+    $commit = $drequest->getCommit();
+    $path = $drequest->getPath();
+
+    $this->historyFuture = $this->callConduitMethod(
+      'diffusion.historyquery',
+      array(
+        'commit' => $commit,
+        'path' => $path,
+        'offset' => 0,
+        'limit' => 15,
+      ));
+
+    $browse_pager = id(new PHUIPagerView())
+      ->readFromRequest($request);
+
+    $this->browseFuture = $this->callConduitMethod(
+      'diffusion.browsequery',
+      array(
+        'commit' => $commit,
+        'path' => $path,
+        'limit' => $browse_pager->getPageSize() + 1,
+      ));
+
+    if ($this->needTagFuture()) {
+      $tag_limit = $this->getTagLimit();
+      $this->tagFuture = $this->callConduitMethod(
+        'diffusion.tagsquery',
+        array(
+          // On the home page, we want to find tags on any branch.
+          'commit' => null,
+          'limit' => $tag_limit + 1,
+        ));
+    }
+
+    if ($this->needBranchFuture()) {
+      $branch_limit = $this->getBranchLimit();
+      $this->branchFuture = $this->callConduitMethod(
+        'diffusion.branchquery',
+        array(
+          'closed' => false,
+          'limit' => $branch_limit + 1,
+        ));
+    }
+
+    $futures = array(
+      $this->historyFuture,
+      $this->browseFuture,
+      $this->tagFuture,
+      $this->branchFuture,
+    );
+    $futures = array_filter($futures);
+    $futures = new FutureIterator($futures);
+    foreach ($futures as $future) {
+      // Just resolve all the futures before continuing.
+    }
+
     $phids = array();
     $content = array();
 
     try {
-      $history_results = $this->callConduitWithDiffusionRequest(
-        'diffusion.historyquery',
-        array(
-          'commit' => $drequest->getCommit(),
-          'path' => $drequest->getPath(),
-          'offset' => 0,
-          'limit' => 15,
-        ));
+      $history_results = $this->historyFuture->resolve();
       $history = DiffusionPathChange::newFromConduit(
         $history_results['pathChanges']);
 
@@ -139,18 +193,11 @@ final class DiffusionRepositoryController extends DiffusionController {
       $history_exception = $ex;
     }
 
-    $browse_pager = id(new PHUIPagerView())
-      ->readFromRequest($request);
-
     try {
+      $browse_results = $this->browseFuture->resolve();
       $browse_results = DiffusionBrowseResultSet::newFromConduit(
-        $this->callConduitWithDiffusionRequest(
-          'diffusion.browsequery',
-          array(
-            'path' => $drequest->getPath(),
-            'commit' => $drequest->getCommit(),
-            'limit' => $browse_pager->getPageSize() + 1,
-          )));
+        $browse_results);
+
       $browse_paths = $browse_results->getPaths();
       $browse_paths = $browse_pager->sliceResults($browse_paths);
 
@@ -366,22 +413,16 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildBranchListTable(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
 
-    if ($drequest->getBranch() === null) {
+    if (!$this->needBranchFuture()) {
       return null;
     }
 
-    $limit = 15;
-
-    $branches = $this->callConduitWithDiffusionRequest(
-      'diffusion.branchquery',
-      array(
-        'closed' => false,
-        'limit' => $limit + 1,
-      ));
+    $branches = $this->branchFuture->resolve();
     if (!$branches) {
       return null;
     }
 
+    $limit = $this->getBranchLimit();
     $more_branches = (count($branches) > $limit);
     $branches = array_slice($branches, 0, $limit);
 
@@ -428,26 +469,17 @@ final class DiffusionRepositoryController extends DiffusionController {
     $viewer = $this->getViewer();
     $repository = $drequest->getRepository();
 
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        // no tags in SVN
-        return null;
+    if (!$this->needTagFuture()) {
+      return null;
     }
-    $tag_limit = 15;
-    $tags = array();
-    $tags = DiffusionRepositoryTag::newFromConduit(
-      $this->callConduitWithDiffusionRequest(
-        'diffusion.tagsquery',
-        array(
-          // On the home page, we want to find tags on any branch.
-          'commit' => null,
-          'limit' => $tag_limit + 1,
-        )));
 
+    $tags = $this->tagFuture->resolve();
+    $tags = DiffusionRepositoryTag::newFromConduit($tags);
     if (!$tags) {
       return null;
     }
 
+    $tag_limit = $this->getTagLimit();
     $more_tags = (count($tags) > $tag_limit);
     $tags = array_slice($tags, 0, $tag_limit);
 
@@ -686,6 +718,37 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setRepository($repository)
       ->setRepositoryURI($uri)
       ->setDisplayURI($display);
+  }
+
+  private function needTagFuture() {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // No tags in SVN.
+        return false;
+    }
+
+    return true;
+  }
+
+  private function getTagLimit() {
+    return 15;
+  }
+
+  private function needBranchFuture() {
+    $drequest = $this->getDiffusionRequest();
+
+    if ($drequest->getBranch() === null) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private function getBranchLimit() {
+    return 15;
   }
 
 }

@@ -64,6 +64,7 @@ final class PhabricatorUser
   private $settingCacheKeys = array();
   private $settingCache = array();
   private $allowInlineCacheGeneration;
+  private $conduitClusterToken = self::ATTACHABLE;
 
   protected function readField($field) {
     switch ($field) {
@@ -490,38 +491,28 @@ final class PhabricatorUser
       $settings = $this->loadGlobalSettings();
     }
 
-    // NOTE: To slightly improve performance, we're using all settings here,
-    // not just settings that are enabled for the current viewer. It's fine to
-    // get the value of a setting that we wouldn't let the user edit in the UI.
-    $defaults = PhabricatorSetting::getAllSettings();
-
     if (array_key_exists($key, $settings)) {
       $value = $settings[$key];
-
-      // Make sure the value is valid before we return it. This makes things
-      // more robust when options are changed or removed.
-      if (isset($defaults[$key])) {
-        try {
-          id(clone $defaults[$key])
-            ->setViewer($this)
-            ->assertValidValue($value);
-
-          return $this->writeUserSettingCache($key, $value);
-        } catch (Exception $ex) {
-          // Fall through below and return the default value.
-        }
-      } else {
-        // This is an ad-hoc setting with no controlling object.
-        return $this->writeUserSettingCache($key, $value);
-      }
+      return $this->writeUserSettingCache($key, $value);
     }
 
-    if (isset($defaults[$key])) {
-      $value = id(clone $defaults[$key])
-        ->setViewer($this)
-        ->getSettingDefaultValue();
+    $cache = PhabricatorCaches::getRuntimeCache();
+    $cache_key = "settings.defaults({$key})";
+    $cache_map = $cache->getKeys(array($cache_key));
+
+    if ($cache_map) {
+      $value = $cache_map[$cache_key];
     } else {
-      $value = null;
+      $defaults = PhabricatorSetting::getAllSettings();
+      if (isset($defaults[$key])) {
+        $value = id(clone $defaults[$key])
+          ->setViewer($this)
+          ->getSettingDefaultValue();
+      } else {
+        $value = null;
+      }
+
+      $cache->setKey($cache_key, $value);
     }
 
     return $this->writeUserSettingCache($key, $value);
@@ -555,12 +546,16 @@ final class PhabricatorUser
     return $this->getUserSetting(PhabricatorTimezoneSetting::SETTINGKEY);
   }
 
-  private function loadGlobalSettings() {
-    $cache_key = 'user.settings.global';
-    $cache = PhabricatorCaches::getRequestCache();
-    $settings = $cache->getKey($cache_key);
+  public static function getGlobalSettingsCacheKey() {
+    return 'user.settings.globals.v1';
+  }
 
-    if ($settings === null) {
+  private function loadGlobalSettings() {
+    $cache_key = self::getGlobalSettingsCacheKey();
+    $cache = PhabricatorCaches::getMutableStructureCache();
+
+    $settings = $cache->getKey($cache_key);
+    if (!$settings) {
       $preferences = PhabricatorUserPreferences::loadGlobalPreferences($this);
       $settings = $preferences->getPreferences();
       $cache->setKey($cache_key, $settings);
@@ -941,6 +936,19 @@ final class PhabricatorUser
    */
   public function getAuthorities() {
     return $this->authorities;
+  }
+
+  public function hasConduitClusterToken() {
+    return ($this->conduitClusterToken !== self::ATTACHABLE);
+  }
+
+  public function attachConduitClusterToken(PhabricatorConduitToken $token) {
+    $this->conduitClusterToken = $token;
+    return $this;
+  }
+
+  public function getConduitClusterToken() {
+    return $this->assertAttached($this->conduitClusterToken);
   }
 
 
@@ -1495,9 +1503,27 @@ final class PhabricatorUser
       throw new PhabricatorDataNotAttachedException($this);
     }
 
+    $user_phid = $this->getPHID();
+
+    // Try to read the actual cache before we generate a new value. We can
+    // end up here via Conduit, which does not use normal sessions and can
+    // not pick up a free cache load during session identification.
+    if ($user_phid) {
+      $raw_data = PhabricatorUserCache::readCaches(
+        $type,
+        $key,
+        array($user_phid));
+      if (array_key_exists($user_phid, $raw_data)) {
+        $raw_value = $raw_data[$user_phid];
+        $usable_value = $type->getValueFromStorage($raw_value);
+        $this->rawCacheData[$key] = $raw_value;
+        $this->usableCacheData[$key] = $usable_value;
+        return $usable_value;
+      }
+    }
+
     $usable_value = $type->getDefaultValue();
 
-    $user_phid = $this->getPHID();
     if ($user_phid) {
       $map = $type->newValueForUsers($key, array($this));
       if (array_key_exists($user_phid, $map)) {

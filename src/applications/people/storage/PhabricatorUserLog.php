@@ -108,18 +108,28 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
     $log->setUserPHID((string)$object_phid);
     $log->setAction($action);
 
-    $log->remoteAddr = (string)idx($_SERVER, 'REMOTE_ADDR', '');
+    $address = PhabricatorEnv::getRemoteAddress();
+    if ($address) {
+      $log->remoteAddr = $address->getAddress();
+    } else {
+      $log->remoteAddr = '';
+    }
 
     return $log;
   }
 
   public static function loadRecentEventsFromThisIP($action, $timespan) {
+    $address = PhabricatorEnv::getRemoteAddress();
+    if (!$address) {
+      return array();
+    }
+
     return id(new PhabricatorUserLog())->loadAllWhere(
       'action = %s AND remoteAddr = %s AND dateCreated > %d
         ORDER BY dateCreated DESC',
       $action,
-      idx($_SERVER, 'REMOTE_ADDR'),
-      time() - $timespan);
+      $address->getAddress(),
+      PhabricatorTime::getNow() - $timespan);
   }
 
   public function save() {

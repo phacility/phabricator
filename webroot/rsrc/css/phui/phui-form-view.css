@@ -154,10 +154,6 @@
   height: 24em;
 }
 
-.aphront-form-control-select .aphront-form-input {
-  padding-top: 2px;
-}
-
 .phui-form-view .aphront-form-caption {
   font-size: {$smallerfontsize};
   color: {$bluetext};
@@ -198,10 +194,12 @@
   margin: .5em 2em;
 }
 
-.aphront-form-control-static .aphront-form-input,
 .aphront-form-control-markup .aphront-form-input {
-  padding-top: 6px;
   font-size: {$normalfontsize};
+}
+
+.aphront-form-control-static .aphront-form-input {
+  line-height: 28px;
 }
 
 .aphront-form-control-togglebuttons .aphront-form-input {

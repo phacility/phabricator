@@ -141,7 +141,9 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       return array();
     }
 
-    $tokens = preg_split('/[\s\[\]-]+/u', $string);
+    // NOTE: Splitting on "(" and ")" is important for milestones.
+
+    $tokens = preg_split('/[\s\[\]\(\)-]+/u', $string);
     $tokens = array_unique($tokens);
 
     // Make sure we don't return the empty token, as this will boil down to a
