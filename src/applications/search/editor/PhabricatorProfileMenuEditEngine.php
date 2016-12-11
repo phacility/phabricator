@@ -1,9 +1,9 @@
 <?php
 
-final class PhabricatorProfilePanelEditEngine
+final class PhabricatorProfileMenuEditEngine
   extends PhabricatorEditEngine {
 
-  const ENGINECONST = 'search.profilepanel';
+  const ENGINECONST = 'search.profilemenu';
 
   private $menuEngine;
   private $profileObject;

@@ -708,7 +708,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $controller = $this->getController();
 
-    return id(new PhabricatorProfilePanelEditEngine())
+    return id(new PhabricatorProfileMenuEditEngine())
       ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setNewPanelConfiguration($configuration)
@@ -721,7 +721,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $object = $this->getProfileObject();
     $controller = $this->getController();
 
-    return id(new PhabricatorProfilePanelEditEngine())
+    return id(new PhabricatorProfileMenuEditEngine())
       ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setController($controller)
@@ -751,7 +751,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $object = $this->getProfileObject();
     $controller = $this->getController();
 
-    return id(new PhabricatorProfilePanelEditEngine())
+    return id(new PhabricatorProfileMenuEditEngine())
       ->setIsBuiltin(true)
       ->setMenuEngine($this)
       ->setProfileObject($object)
