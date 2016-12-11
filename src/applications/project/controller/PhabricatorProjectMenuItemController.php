@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectPanelController
+final class PhabricatorProjectMenuItemController
   extends PhabricatorProjectController {
 
   public function handleRequest(AphrontRequest $request) {

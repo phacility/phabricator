@@ -3,28 +3,28 @@
 final class PhabricatorPeopleProfileMenuEngine
   extends PhabricatorProfileMenuEngine {
 
-  const PANEL_PROFILE = 'people.profile';
-  const PANEL_MANAGE = 'people.manage';
+  const ITEM_PROFILE = 'people.profile';
+  const ITEM_MANAGE = 'people.manage';
 
   protected function isMenuEngineConfigurable() {
     return false;
   }
 
-  protected function getPanelURI($path) {
+  protected function getItemURI($path) {
     $user = $this->getProfileObject();
     $username = $user->getUsername();
     $username = phutil_escape_uri($username);
-    return "/p/{$username}/panel/{$path}";
+    return "/p/{$username}/item/{$path}";
   }
 
-  protected function getBuiltinProfilePanels($object) {
+  protected function getBuiltinProfileItems($object) {
     $viewer = $this->getViewer();
 
-    $panels = array();
+    $items = array();
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(self::PANEL_PROFILE)
-      ->setMenuItemKey(PhabricatorPeopleDetailsProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(self::ITEM_PROFILE)
+      ->setMenuItemKey(PhabricatorPeopleDetailsProfileMenuItem::MENUITEMKEY);
 
     $have_maniphest = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorManiphestApplication',
@@ -34,9 +34,9 @@ final class PhabricatorPeopleProfileMenuEngine
         '/maniphest/?statuses=open()&assigned=%s#R',
         $object->getPHID());
 
-      $panels[] = $this->newPanel()
+      $items[] = $this->newItem()
         ->setBuiltinKey('tasks')
-        ->setMenuItemKey(PhabricatorLinkProfilePanel::PANELKEY)
+        ->setMenuItemKey(PhabricatorLinkProfileMenuItem::MENUITEMKEY)
         ->setMenuItemProperty('icon', 'maniphest')
         ->setMenuItemProperty('name', pht('Open Tasks'))
         ->setMenuItemProperty('uri', $uri);
@@ -50,9 +50,9 @@ final class PhabricatorPeopleProfileMenuEngine
         '/differential/?authors=%s#R',
         $object->getPHID());
 
-      $panels[] = $this->newPanel()
+      $items[] = $this->newItem()
         ->setBuiltinKey('revisions')
-        ->setMenuItemKey(PhabricatorLinkProfilePanel::PANELKEY)
+        ->setMenuItemKey(PhabricatorLinkProfileMenuItem::MENUITEMKEY)
         ->setMenuItemProperty('icon', 'differential')
         ->setMenuItemProperty('name', pht('Revisions'))
         ->setMenuItemProperty('uri', $uri);
@@ -66,19 +66,19 @@ final class PhabricatorPeopleProfileMenuEngine
         '/audit/?authors=%s#R',
         $object->getPHID());
 
-      $panels[] = $this->newPanel()
+      $items[] = $this->newItem()
         ->setBuiltinKey('commits')
-        ->setMenuItemKey(PhabricatorLinkProfilePanel::PANELKEY)
+        ->setMenuItemKey(PhabricatorLinkProfileMenuItem::MENUITEMKEY)
         ->setMenuItemProperty('icon', 'diffusion')
         ->setMenuItemProperty('name', pht('Commits'))
         ->setMenuItemProperty('uri', $uri);
     }
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(self::PANEL_MANAGE)
-      ->setMenuItemKey(PhabricatorPeopleManageProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(self::ITEM_MANAGE)
+      ->setMenuItemKey(PhabricatorPeopleManageProfileMenuItem::MENUITEMKEY);
 
-    return $panels;
+    return $items;
   }
 
 }

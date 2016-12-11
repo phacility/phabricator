@@ -58,15 +58,15 @@ final class PhabricatorProfileMenuItemConfigurationQuery
   }
 
   protected function willFilterPage(array $page) {
-    $panels = PhabricatorProfilePanel::getAllPanels();
-    foreach ($page as $key => $panel) {
-      $panel_type = idx($panels, $panel->getMenuItemKey());
-      if (!$panel_type) {
-        $this->didRejectResult($panel);
+    $items = PhabricatorProfileMenuItem::getAllMenuItems();
+    foreach ($page as $key => $item) {
+      $item_type = idx($items, $item->getMenuItemKey());
+      if (!$item_type) {
+        $this->didRejectResult($item);
         unset($page[$key]);
         continue;
       }
-      $panel->attachPanel($panel_type);
+      $item->attachMenuItem($item_type);
     }
 
     if (!$page) {
@@ -82,14 +82,14 @@ final class PhabricatorProfileMenuItemConfigurationQuery
       ->execute();
     $profiles = mpull($profiles, null, 'getPHID');
 
-    foreach ($page as $key => $panel) {
-      $profile = idx($profiles, $panel->getProfilePHID());
+    foreach ($page as $key => $item) {
+      $profile = idx($profiles, $item->getProfilePHID());
       if (!$profile) {
-        $this->didRejectResult($panel);
+        $this->didRejectResult($item);
         unset($page[$key]);
         continue;
       }
-      $panel->attachProfileObject($profile);
+      $item->attachProfileObject($profile);
     }
 
     return $page;

@@ -7,40 +7,41 @@ final class PhabricatorProjectProfileMenuEngine
     return true;
   }
 
-  protected function getPanelURI($path) {
+  protected function getItemURI($path) {
     $project = $this->getProfileObject();
     $id = $project->getID();
-    return "/project/{$id}/panel/{$path}";
+    return "/project/{$id}/item/{$path}";
   }
 
-  protected function getBuiltinProfilePanels($object) {
-    $panels = array();
+  protected function getBuiltinProfileItems($object) {
+    $items = array();
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(PhabricatorProject::PANEL_PROFILE)
-      ->setMenuItemKey(PhabricatorProjectDetailsProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_PROFILE)
+      ->setMenuItemKey(PhabricatorProjectDetailsProfileMenuItem::MENUITEMKEY);
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(PhabricatorProject::PANEL_POINTS)
-      ->setMenuItemKey(PhabricatorProjectPointsProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_POINTS)
+      ->setMenuItemKey(PhabricatorProjectPointsProfileMenuItem::MENUITEMKEY);
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(PhabricatorProject::PANEL_WORKBOARD)
-      ->setMenuItemKey(PhabricatorProjectWorkboardProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_WORKBOARD)
+      ->setMenuItemKey(PhabricatorProjectWorkboardProfileMenuItem::MENUITEMKEY);
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(PhabricatorProject::PANEL_MEMBERS)
-      ->setMenuItemKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_MEMBERS)
+      ->setMenuItemKey(PhabricatorProjectMembersProfileMenuItem::MENUITEMKEY);
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(PhabricatorProject::PANEL_SUBPROJECTS)
-      ->setMenuItemKey(PhabricatorProjectSubprojectsProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_SUBPROJECTS)
+      ->setMenuItemKey(
+        PhabricatorProjectSubprojectsProfileMenuItem::MENUITEMKEY);
 
-    $panels[] = $this->newPanel()
-      ->setBuiltinKey(PhabricatorProject::PANEL_MANAGE)
-      ->setMenuItemKey(PhabricatorProjectManageProfilePanel::PANELKEY);
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_MANAGE)
+      ->setMenuItemKey(PhabricatorProjectManageProfileMenuItem::MENUITEMKEY);
 
-    return $panels;
+    return $items;
   }
 
 }

@@ -1,21 +1,24 @@
 <?php
 
-final class PhabricatorPeopleManageProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorProjectSubprojectsProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'people.manage';
+  const MENUITEMKEY = 'project.subprojects';
 
-  public function getPanelTypeName() {
-    return pht('Manage User');
+  public function getMenuItemTypeName() {
+    return pht('Project Subprojects');
   }
 
   private function getDefaultName() {
-    return pht('Manage');
+    return pht('Subprojects');
   }
 
-  public function canHidePanel(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return false;
+  public function shouldEnableForObject($object) {
+    if ($object->isMilestone()) {
+      return false;
+    }
+
+    return true;
   }
 
   public function getDisplayName(
@@ -43,13 +46,22 @@ final class PhabricatorPeopleManageProfilePanel
   protected function newNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config) {
 
-    $user = $config->getProfileObject();
-    $id = $user->getID();
+    $project = $config->getProfileObject();
+
+    $has_children = ($project->getHasSubprojects()) ||
+                    ($project->getHasMilestones());
+
+    $id = $project->getID();
+
+    $name = $this->getDisplayName($config);
+    $icon = 'fa-sitemap';
+    $href = "/project/subprojects/{$id}/";
 
     $item = $this->newItem()
-      ->setHref("/people/manage/{$id}/")
-      ->setName($this->getDisplayName($config))
-      ->setIcon('fa-gears');
+      ->setHref($href)
+      ->setName($name)
+      ->setDisabled(!$has_children)
+      ->setIcon($icon);
 
     return array(
       $item,

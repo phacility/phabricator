@@ -39,7 +39,7 @@ final class PhabricatorProjectManageController
     $timeline->setShouldTerminate(true);
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::PANEL_MANAGE);
+    $nav->selectFilter(PhabricatorProject::ITEM_MANAGE);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Manage'));
@@ -91,7 +91,7 @@ final class PhabricatorProjectManageController
       id(new PhabricatorActionView())
         ->setName(pht('Edit Menu'))
         ->setIcon('fa-th-list')
-        ->setHref($this->getApplicationURI("{$id}/panel/configure/"))
+        ->setHref($this->getApplicationURI("{$id}/item/configure/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 

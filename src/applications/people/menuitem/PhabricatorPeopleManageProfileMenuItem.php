@@ -1,16 +1,21 @@
 <?php
 
-final class PhabricatorPeopleDetailsProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorPeopleManageProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'people.details';
+  const MENUITEMKEY = 'people.manage';
 
-  public function getPanelTypeName() {
-    return pht('User Details');
+  public function getMenuItemTypeName() {
+    return pht('Manage User');
   }
 
   private function getDefaultName() {
-    return pht('User Details');
+    return pht('Manage');
+  }
+
+  public function canHideMenuItem(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return false;
   }
 
   public function getDisplayName(
@@ -31,7 +36,7 @@ final class PhabricatorPeopleDetailsProfilePanel
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setPlaceholder($this->getDefaultName())
-        ->setValue($config->getMenuProperty('name')),
+        ->setValue($config->getMenuItemProperty('name')),
     );
   }
 
@@ -39,17 +44,12 @@ final class PhabricatorPeopleDetailsProfilePanel
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $user = $config->getProfileObject();
-
-    $picture = $user->getProfileImageURI();
-    $name = $user->getUsername();
-    $href = urisprintf(
-      '/p/%s/',
-      $user->getUsername());
+    $id = $user->getID();
 
     $item = $this->newItem()
-      ->setHref($href)
-      ->setName($name)
-      ->setProfileImage($picture);
+      ->setHref("/people/manage/{$id}/")
+      ->setName($this->getDisplayName($config))
+      ->setIcon('fa-gears');
 
     return array(
       $item,

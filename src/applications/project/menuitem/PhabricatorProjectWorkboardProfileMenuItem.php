@@ -1,20 +1,29 @@
 <?php
 
-final class PhabricatorProjectSubprojectsProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorProjectWorkboardProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'project.subprojects';
+  const MENUITEMKEY = 'project.workboard';
 
-  public function getPanelTypeName() {
-    return pht('Project Subprojects');
+  public function getMenuItemTypeName() {
+    return pht('Project Workboard');
   }
 
   private function getDefaultName() {
-    return pht('Subprojects');
+    return pht('Workboard');
+  }
+
+  public function canMakeDefault(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return true;
   }
 
   public function shouldEnableForObject($object) {
-    if ($object->isMilestone()) {
+    $viewer = $this->getViewer();
+
+    // Workboards are only available if Maniphest is installed.
+    $class = 'PhabricatorManiphestApplication';
+    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
       return false;
     }
 
@@ -45,23 +54,19 @@ final class PhabricatorProjectSubprojectsProfilePanel
 
   protected function newNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config) {
-
     $project = $config->getProfileObject();
 
-    $has_children = ($project->getHasSubprojects()) ||
-                    ($project->getHasMilestones());
+    $has_workboard = $project->getHasWorkboard();
 
     $id = $project->getID();
-
+    $href = "/project/board/{$id}/";
     $name = $this->getDisplayName($config);
-    $icon = 'fa-sitemap';
-    $href = "/project/subprojects/{$id}/";
 
     $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setDisabled(!$has_children)
-      ->setIcon($icon);
+      ->setDisabled(!$has_workboard)
+      ->setIcon('fa-columns');
 
     return array(
       $item,

@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorProfilePanel extends Phobject {
+abstract class PhabricatorProfileMenuItem extends Phobject {
 
   private $viewer;
 
@@ -12,11 +12,11 @@ abstract class PhabricatorProfilePanel extends Phobject {
   abstract protected function newNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config);
 
-  public function getPanelTypeIcon() {
+  public function getMenuItemTypeIcon() {
     return null;
   }
 
-  abstract public function getPanelTypeName();
+  abstract public function getMenuItemTypeName();
 
   abstract public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config);
@@ -34,7 +34,7 @@ abstract class PhabricatorProfilePanel extends Phobject {
     return true;
   }
 
-  public function canHidePanel(
+  public function canHideMenuItem(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;
   }
@@ -53,14 +53,14 @@ abstract class PhabricatorProfilePanel extends Phobject {
     return $this->viewer;
   }
 
-  final public function getPanelKey() {
-    return $this->getPhobjectClassConstant('PANELKEY');
+  final public function getMenuItemKey() {
+    return $this->getPhobjectClassConstant('MENUITEMKEY');
   }
 
-  final public static function getAllPanels() {
+  final public static function getAllMenuItems() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
-      ->setUniqueMethod('getPanelKey')
+      ->setUniqueMethod('getMenuItemKey')
       ->execute();
   }
 

@@ -1,32 +1,25 @@
 <?php
 
-final class PhabricatorProjectWorkboardProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorProjectManageProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'project.workboard';
+  const MENUITEMKEY = 'project.manage';
 
-  public function getPanelTypeName() {
-    return pht('Project Workboard');
+  public function getMenuItemTypeName() {
+    return pht('Manage Project');
   }
 
   private function getDefaultName() {
-    return pht('Workboard');
+    return pht('Manage');
+  }
+
+  public function canHideMenuItem(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return false;
   }
 
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
-    return true;
-  }
-
-  public function shouldEnableForObject($object) {
-    $viewer = $this->getViewer();
-
-    // Workboards are only available if Maniphest is installed.
-    $class = 'PhabricatorManiphestApplication';
-    if (!PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
-      return false;
-    }
-
     return true;
   }
 
@@ -54,19 +47,19 @@ final class PhabricatorProjectWorkboardProfilePanel
 
   protected function newNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config) {
+
     $project = $config->getProfileObject();
 
-    $has_workboard = $project->getHasWorkboard();
-
     $id = $project->getID();
-    $href = "/project/board/{$id}/";
+
     $name = $this->getDisplayName($config);
+    $icon = 'fa-gears';
+    $href = "/project/manage/{$id}/";
 
     $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setDisabled(!$has_workboard)
-      ->setIcon('fa-columns');
+      ->setIcon($icon);
 
     return array(
       $item,

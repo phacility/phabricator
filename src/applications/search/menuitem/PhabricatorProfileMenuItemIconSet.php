@@ -1,9 +1,9 @@
 <?php
 
-final class PhabricatorProfilePanelIconSet
+final class PhabricatorProfileMenuItemIconSet
   extends PhabricatorIconSet {
 
-  const ICONSETKEY = 'profilepanel';
+  const ICONSETKEY = 'profilemenuitem';
 
   public function getSelectIconTitleText() {
     return pht('Choose Item Icon');

@@ -60,7 +60,7 @@ final class PhabricatorProfileMenuEditor
       case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue('property.key');
         $value = $xaction->getNewValue();
-        $object->getMenuItemProperty($key, $value);
+        $object->setMenuItemProperty($key, $value);
         return;
       case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER:
         $object->setMenuItemOrder($xaction->getNewValue());

@@ -1,15 +1,15 @@
 <?php
 
-final class PhabricatorMotivatorProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorMotivatorProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'motivator';
+  const MENUITEMKEY = 'motivator';
 
-  public function getPanelTypeIcon() {
+  public function getMenuItemTypeIcon() {
     return 'fa-coffee';
   }
 
-  public function getPanelTypeName() {
+  public function getMenuItemTypeName() {
     return pht('Motivator');
   }
 
@@ -36,7 +36,7 @@ final class PhabricatorMotivatorProfilePanel
         ->setValue(
           pht(
             'Motivate your team with inspirational quotes from great minds. '.
-            'This panel shows a new quote every day.')),
+            'This menu item shows a new quote every day.')),
       id(new PhabricatorSelectEditField())
         ->setKey('source')
         ->setLabel(pht('Source'))

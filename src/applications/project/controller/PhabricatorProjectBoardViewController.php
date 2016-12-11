@@ -170,7 +170,7 @@ final class PhabricatorProjectBoardViewController
       }
 
       $nav = $this->getProfileMenu();
-      $nav->selectFilter(PhabricatorProject::PANEL_WORKBOARD);
+      $nav->selectFilter(PhabricatorProject::ITEM_WORKBOARD);
 
       $crumbs = $this->buildApplicationCrumbs();
       $crumbs->addTextCrumb(pht('Workboard'));
@@ -936,7 +936,7 @@ final class PhabricatorProjectBoardViewController
     if ($set_default) {
       $this
         ->getProfileMenuEngine()
-        ->adjustDefault(PhabricatorProject::PANEL_WORKBOARD);
+        ->adjustDefault(PhabricatorProject::ITEM_WORKBOARD);
     }
 
     if ($request->isFormPost()) {

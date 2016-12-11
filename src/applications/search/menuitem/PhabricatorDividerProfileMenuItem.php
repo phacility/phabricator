@@ -1,15 +1,15 @@
 <?php
 
-final class PhabricatorDividerProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorDividerProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'divider';
+  const MENUITEMKEY = 'divider';
 
-  public function getPanelTypeIcon() {
+  public function getMenuItemTypeIcon() {
     return 'fa-minus';
   }
 
-  public function getPanelTypeName() {
+  public function getMenuItemTypeName() {
     return pht('Divider');
   }
 

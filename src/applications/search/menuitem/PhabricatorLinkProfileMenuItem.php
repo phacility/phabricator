@@ -1,15 +1,15 @@
 <?php
 
-final class PhabricatorLinkProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorLinkProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'link';
+  const MENUITEMKEY = 'link';
 
-  public function getPanelTypeIcon() {
+  public function getMenuItemTypeIcon() {
     return 'fa-link';
   }
 
-  public function getPanelTypeName() {
+  public function getMenuItemTypeName() {
     return pht('Link');
   }
 
@@ -38,7 +38,7 @@ final class PhabricatorLinkProfilePanel
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
-        ->setIconSet(new PhabricatorProfilePanelIconSet())
+        ->setIconSet(new PhabricatorProfileMenuItemIconSet())
         ->setValue($this->getLinkIcon($config)),
     );
   }
@@ -73,7 +73,7 @@ final class PhabricatorLinkProfilePanel
       $href = '#';
     }
 
-    $icon_object = id(new PhabricatorProfilePanelIconSet())
+    $icon_object = id(new PhabricatorProfileMenuItemIconSet())
       ->getIcon($icon);
     if ($icon_object) {
       $icon_class = $icon_object->getIcon();

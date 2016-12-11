@@ -15,7 +15,7 @@ final class PhabricatorProfileMenuItemConfiguration
   protected $menuItemProperties = array();
 
   private $profileObject = self::ATTACHABLE;
-  private $panel = self::ATTACHABLE;
+  private $menuItem = self::ATTACHABLE;
 
   const VISIBILITY_DEFAULT = 'default';
   const VISIBILITY_VISIBLE = 'visible';
@@ -31,14 +31,14 @@ final class PhabricatorProfileMenuItemConfiguration
       ->setVisibility(self::VISIBILITY_VISIBLE);
   }
 
-  public static function initializeNewPanelConfiguration(
+  public static function initializeNewItem(
     $profile_object,
-    PhabricatorProfilePanel $panel) {
+    PhabricatorProfileMenuItem $item) {
 
     return self::initializeNewBuiltin()
       ->setProfilePHID($profile_object->getPHID())
-      ->setMenuItemKey($panel->getPanelKey())
-      ->attachPanel($panel)
+      ->setMenuItemKey($item->getMenuItemKey())
+      ->attachMenuItem($item)
       ->attachProfileObject($profile_object);
   }
 
@@ -67,13 +67,13 @@ final class PhabricatorProfileMenuItemConfiguration
       PhabricatorProfileMenuItemPHIDType::TYPECONST);
   }
 
-  public function attachPanel(PhabricatorProfilePanel $panel) {
-    $this->panel = $panel;
+  public function attachMenuItem(PhabricatorProfileMenuItem $item) {
+    $this->menuItem = $item;
     return $this;
   }
 
-  public function getPanel() {
-    return $this->assertAttached($this->panel);
+  public function getMenuItem() {
+    return $this->assertAttached($this->menuItem);
   }
 
   public function attachProfileObject($profile_object) {
@@ -95,27 +95,27 @@ final class PhabricatorProfileMenuItemConfiguration
   }
 
   public function buildNavigationMenuItems() {
-    return $this->getPanel()->buildNavigationMenuItems($this);
+    return $this->getMenuItem()->buildNavigationMenuItems($this);
   }
 
-  public function getPanelTypeName() {
-    return $this->getPanel()->getPanelTypeName();
+  public function getMenuItemTypeName() {
+    return $this->getMenuItem()->getMenuItemTypeName();
   }
 
   public function getDisplayName() {
-    return $this->getPanel()->getDisplayName($this);
+    return $this->getMenuItem()->getDisplayName($this);
   }
 
   public function canMakeDefault() {
-    return $this->getPanel()->canMakeDefault($this);
+    return $this->getMenuItem()->canMakeDefault($this);
   }
 
   public function canHideMenuItem() {
-    return $this->getPanel()->canHidePanel($this);
+    return $this->getMenuItem()->canHideMenuItem($this);
   }
 
   public function shouldEnableForObject($object) {
-    return $this->getPanel()->shouldEnableForObject($object);
+    return $this->getMenuItem()->shouldEnableForObject($object);
   }
 
   public function getSortKey() {

@@ -1,11 +1,11 @@
 <?php
 
-final class PhabricatorProjectMembersProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorProjectMembersProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'project.members';
+  const MENUITEMKEY = 'project.members';
 
-  public function getPanelTypeName() {
+  public function getMenuItemTypeName() {
     return pht('Project Members');
   }
 

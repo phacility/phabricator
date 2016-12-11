@@ -7,7 +7,7 @@ final class PhabricatorProfileMenuEditEngine
 
   private $menuEngine;
   private $profileObject;
-  private $newPanelConfiguration;
+  private $newMenuItemConfiguration;
   private $isBuiltin;
 
   public function isEngineConfigurable() {
@@ -32,14 +32,14 @@ final class PhabricatorProfileMenuEditEngine
     return $this->profileObject;
   }
 
-  public function setNewPanelConfiguration(
+  public function setNewMenuItemConfiguration(
     PhabricatorProfileMenuItemConfiguration $configuration) {
-    $this->newPanelConfiguration = $configuration;
+    $this->newMenuItemConfiguration = $configuration;
     return $this;
   }
 
-  public function getNewPanelConfiguration() {
-    return $this->newPanelConfiguration;
+  public function getNewMenuItemConfiguration() {
+    return $this->newMenuItemConfiguration;
   }
 
   public function setIsBuiltin($is_builtin) {
@@ -52,11 +52,11 @@ final class PhabricatorProfileMenuEditEngine
   }
 
   public function getEngineName() {
-    return pht('Profile Panels');
+    return pht('Profile Menu Items');
   }
 
   public function getSummaryHeader() {
-    return pht('Edit Profile Panel Configurations');
+    return pht('Edit Profile Menu Item Configurations');
   }
 
   public function getSummaryText() {
@@ -68,12 +68,14 @@ final class PhabricatorProfileMenuEditEngine
   }
 
   protected function newEditableObject() {
-    if (!$this->newPanelConfiguration) {
+    if (!$this->newMenuItemConfiguration) {
       throw new Exception(
-        pht('Profile panels can not be generated without an object context.'));
+        pht(
+          'Profile menu items can not be generated without an '.
+          'object context.'));
     }
 
-    return clone $this->newPanelConfiguration;
+    return clone $this->newMenuItemConfiguration;
   }
 
   protected function newObjectQuery() {
@@ -121,8 +123,8 @@ final class PhabricatorProfileMenuEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    $panel = $object->getPanel();
-    $fields = $panel->buildEditEngineFields($object);
+    $item = $object->getMenuItem();
+    $fields = $item->buildEditEngineFields($object);
 
     $type_property =
       PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY;

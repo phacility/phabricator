@@ -1,15 +1,15 @@
 <?php
 
-final class PhabricatorApplicationProfilePanel
-  extends PhabricatorProfilePanel {
+final class PhabricatorApplicationProfileMenuItem
+  extends PhabricatorProfileMenuItem {
 
-  const PANELKEY = 'application';
+  const MENUITEMKEY = 'application';
 
-  public function getPanelTypeIcon() {
+  public function getMenuItemTypeIcon() {
     return 'fa-globe';
   }
 
-  public function getPanelTypeName() {
+  public function getMenuItemTypeName() {
     return pht('Application');
   }
 

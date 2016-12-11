@@ -4,8 +4,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   private $viewer;
   private $profileObject;
-  private $panels;
-  private $defaultPanel;
+  private $items;
+  private $defaultItem;
   private $controller;
   private $navigation;
 
@@ -36,18 +36,18 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->controller;
   }
 
-  private function setDefaultPanel(
-    PhabricatorProfileMenuItemConfiguration $default_panel) {
-    $this->defaultPanel = $default_panel;
+  private function setDefaultItem(
+    PhabricatorProfileMenuItemConfiguration $default_item) {
+    $this->defaultItem = $default_item;
     return $this;
   }
 
-  public function getDefaultPanel() {
-    $this->loadPanels();
-    return $this->defaultPanel;
+  public function getDefaultItem() {
+    $this->loadItems();
+    return $this->defaultItem;
   }
 
-  abstract protected function getPanelURI($path);
+  abstract protected function getItemURI($path);
 
   abstract protected function isMenuEngineConfigurable();
 
@@ -59,12 +59,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $request = $controller->getRequest();
 
-    $panel_action = $request->getURIData('panelAction');
+    $item_action = $request->getURIData('itemAction');
 
     // If the engine is not configurable, don't respond to any of the editing
     // or configuration routes.
     if (!$this->isMenuEngineConfigurable()) {
-      switch ($panel_action) {
+      switch ($item_action) {
         case 'view':
           break;
         default:
@@ -72,80 +72,79 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $panel_id = $request->getURIData('panelID');
+    $item_id = $request->getURIData('itemID');
+    $item_list = $this->loadItems();
 
-    $panel_list = $this->loadPanels();
-
-    $selected_panel = null;
-    if (strlen($panel_id)) {
-      $panel_id_int = (int)$panel_id;
-      foreach ($panel_list as $panel) {
-        if ($panel_id_int) {
-          if ((int)$panel->getID() === $panel_id_int) {
-            $selected_panel = $panel;
+    $selected_item = null;
+    if (strlen($item_id)) {
+      $item_id_int = (int)$item_id;
+      foreach ($item_list as $item) {
+        if ($item_id_int) {
+          if ((int)$item->getID() === $item_id_int) {
+            $selected_item = $item;
             break;
           }
         }
 
-        $builtin_key = $panel->getBuiltinKey();
-        if ($builtin_key === (string)$panel_id) {
-          $selected_panel = $panel;
+        $builtin_key = $item->getBuiltinKey();
+        if ($builtin_key === (string)$item_id) {
+          $selected_item = $item;
           break;
         }
       }
     }
 
-    switch ($panel_action) {
+    switch ($item_action) {
       case 'view':
       case 'info':
       case 'hide':
       case 'default':
       case 'builtin':
-        if (!$selected_panel) {
+        if (!$selected_item) {
           return new Aphront404Response();
         }
         break;
     }
 
     $navigation = $this->buildNavigation();
-    $navigation->selectFilter('panel.configure');
+    $navigation->selectFilter('item.configure');
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
-    switch ($panel_action) {
+    switch ($item_action) {
       case 'view':
-        $content = $this->buildPanelViewContent($selected_panel);
+        $content = $this->buildItemViewContent($selected_item);
         break;
       case 'configure':
-        $content = $this->buildPanelConfigureContent($panel_list);
+        $content = $this->buildItemConfigureContent($item_list);
         $crumbs->addTextCrumb(pht('Configure Menu'));
         break;
       case 'reorder':
-        $content = $this->buildPanelReorderContent($panel_list);
+        $content = $this->buildItemReorderContent($item_list);
         break;
       case 'new':
-        $panel_key = $request->getURIData('panelKey');
-        $content = $this->buildPanelNewContent($panel_key);
+        $item_key = $request->getURIData('itemKey');
+        $content = $this->buildItemNewContent($item_key);
         break;
       case 'builtin':
-        $content = $this->buildPanelBuiltinContent($selected_panel);
+        $content = $this->buildItemBuiltinContent($selected_item);
         break;
       case 'hide':
-        $content = $this->buildPanelHideContent($selected_panel);
+        $content = $this->buildItemHideContent($selected_item);
         break;
       case 'default':
-        $content = $this->buildPanelDefaultContent(
-          $selected_panel,
-          $panel_list);
+        $content = $this->buildItemDefaultContent(
+          $selected_item,
+          $item_list);
         break;
       case 'edit':
-        $content = $this->buildPanelEditContent();
+        $content = $this->buildItemEditContent();
         break;
       default:
         throw new Exception(
           pht(
-            'Unsupported panel action "%s".',
-            $panel_action));
+            'Unsupported item action "%s".',
+            $item_action));
     }
 
     if ($content instanceof AphrontResponse) {
@@ -170,33 +169,33 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $nav = id(new AphrontSideNavFilterView())
       ->setIsProfileMenu(true)
-      ->setBaseURI(new PhutilURI($this->getPanelURI('')));
+      ->setBaseURI(new PhutilURI($this->getItemURI('')));
 
-    $panels = $this->getPanels();
+    $menu_items = $this->getItems();
 
-    foreach ($panels as $panel) {
-      if ($panel->isDisabled()) {
+    foreach ($menu_items as $menu_item) {
+      if ($menu_item->isDisabled()) {
         continue;
       }
 
-      $items = $panel->buildNavigationMenuItems();
+      $items = $menu_item->buildNavigationMenuItems();
       foreach ($items as $item) {
         $this->validateNavigationMenuItem($item);
       }
 
-      // If the panel produced only a single item which does not otherwise
+      // If the item produced only a single item which does not otherwise
       // have a key, try to automatically assign it a reasonable key. This
       // makes selecting the correct item simpler.
 
       if (count($items) == 1) {
         $item = head($items);
         if ($item->getKey() === null) {
-          $builtin_key = $panel->getBuiltinKey();
-          $panel_phid = $panel->getPHID();
+          $builtin_key = $menu_item->getBuiltinKey();
+          $item_phid = $menu_item->getPHID();
           if ($builtin_key !== null) {
             $item->setKey($builtin_key);
-          } else if ($panel_phid !== null) {
-            $item->setKey($panel_phid);
+          } else if ($item_phid !== null) {
+            $item->setKey($item_phid);
           }
         }
       }
@@ -217,75 +216,75 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->navigation;
   }
 
-  private function getPanels() {
-    if ($this->panels === null) {
-      $this->panels = $this->loadPanels();
+  private function getItems() {
+    if ($this->items === null) {
+      $this->items = $this->loadItems();
     }
 
-    return $this->panels;
+    return $this->items;
   }
 
-  private function loadPanels() {
+  private function loadItems() {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
-    $panels = $this->loadBuiltinProfilePanels();
+    $items = $this->loadBuiltinProfileItems();
 
-    $stored_panels = id(new PhabricatorProfileMenuItemConfigurationQuery())
+    $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
       ->setViewer($viewer)
       ->withProfilePHIDs(array($object->getPHID()))
       ->execute();
 
-    foreach ($stored_panels as $stored_panel) {
-      $impl = $stored_panel->getPanel();
+    foreach ($stored_items as $stored_item) {
+      $impl = $stored_item->getMenuItem();
       $impl->setViewer($viewer);
     }
 
-    // Merge the stored panels into the builtin panels. If a builtin panel has
+    // Merge the stored items into the builtin items. If a builtin item has
     // a stored version, replace the defaults with the stored changes.
-    foreach ($stored_panels as $stored_panel) {
-      if (!$stored_panel->shouldEnableForObject($object)) {
+    foreach ($stored_items as $stored_item) {
+      if (!$stored_item->shouldEnableForObject($object)) {
         continue;
       }
 
-      $builtin_key = $stored_panel->getBuiltinKey();
+      $builtin_key = $stored_item->getBuiltinKey();
       if ($builtin_key !== null) {
         // If this builtin actually exists, replace the builtin with the
         // stored configuration. Otherwise, we're just going to drop the
         // stored config: it corresponds to an out-of-date or uninstalled
-        // panel.
-        if (isset($panels[$builtin_key])) {
-          $panels[$builtin_key] = $stored_panel;
+        // item.
+        if (isset($items[$builtin_key])) {
+          $items[$builtin_key] = $stored_item;
         } else {
           continue;
         }
       } else {
-        $panels[] = $stored_panel;
+        $items[] = $stored_item;
       }
     }
 
-    $panels = msort($panels, 'getSortKey');
+    $items = msort($items, 'getSortKey');
 
     // Normalize keys since callers shouldn't rely on this array being
     // partially keyed.
-    $panels = array_values($panels);
+    $items = array_values($items);
 
 
-    // Make sure exactly one valid panel is marked as default.
+    // Make sure exactly one valid item is marked as default.
     $default = null;
     $first = null;
-    foreach ($panels as $panel) {
-      if (!$panel->canMakeDefault()) {
+    foreach ($items as $item) {
+      if (!$item->canMakeDefault()) {
         continue;
       }
 
-      if ($panel->isDefault()) {
-        $default = $panel;
+      if ($item->isDefault()) {
+        $default = $item;
         break;
       }
 
       if ($first === null) {
-        $first = $panel;
+        $first = $item;
       }
     }
 
@@ -294,17 +293,17 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     if ($default) {
-      $this->setDefaultPanel($default);
+      $this->setDefaultItem($default);
     }
 
-    return $panels;
+    return $items;
   }
 
-  private function loadBuiltinProfilePanels() {
+  private function loadBuiltinProfileItems() {
     $object = $this->getProfileObject();
-    $builtins = $this->getBuiltinProfilePanels($object);
+    $builtins = $this->getBuiltinProfileItems($object);
 
-    $panels = PhabricatorProfilePanel::getAllPanels();
+    $items = PhabricatorProfileMenuItem::getAllMenuItems();
     $viewer = $this->getViewer();
 
     $order = 1;
@@ -315,36 +314,36 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       if (!$builtin_key) {
         throw new Exception(
           pht(
-            'Object produced a builtin panel with no builtin panel key! '.
-            'Builtin panels must have a unique key.'));
+            'Object produced a builtin item with no builtin item key! '.
+            'Builtin items must have a unique key.'));
       }
 
       if (isset($map[$builtin_key])) {
         throw new Exception(
           pht(
-            'Object produced two panels with the same builtin key ("%s"). '.
-            'Each panel must have a unique builtin key.',
+            'Object produced two items with the same builtin key ("%s"). '.
+            'Each item must have a unique builtin key.',
             $builtin_key));
       }
 
-      $panel_key = $builtin->getMenuItemKey();
+      $item_key = $builtin->getMenuItemKey();
 
-      $panel = idx($panels, $panel_key);
-      if (!$panel) {
+      $item = idx($items, $item_key);
+      if (!$item) {
         throw new Exception(
           pht(
-            'Builtin panel ("%s") specifies a bad panel key ("%s"); there '.
-            'is no corresponding panel implementation available.',
+            'Builtin item ("%s") specifies a bad item key ("%s"); there '.
+            'is no corresponding item implementation available.',
             $builtin_key,
-            $panel_key));
+            $item_key));
       }
 
-      $panel = clone $panel;
-      $panel->setViewer($viewer);
+      $item = clone $item;
+      $item->setViewer($viewer);
 
       $builtin
         ->setProfilePHID($object->getPHID())
-        ->attachPanel($panel)
+        ->attachMenuItem($item)
         ->attachProfileObject($object)
         ->setMenuItemOrder($order);
 
@@ -437,10 +436,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   public function getConfigureURI() {
-    return $this->getPanelURI('configure/');
+    return $this->getItemURI('configure/');
   }
 
-  private function buildPanelReorderContent(array $panels) {
+  private function buildItemReorderContent(array $items) {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
@@ -459,14 +458,14 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $by_builtin = array();
     $by_id = array();
 
-    foreach ($panels as $key => $panel) {
-      $id = $panel->getID();
+    foreach ($items as $key => $item) {
+      $id = $item->getID();
       if ($id) {
         $by_id[$id] = $key;
         continue;
       }
 
-      $builtin_key = $panel->getBuiltinKey();
+      $builtin_key = $item->getBuiltinKey();
       if ($builtin_key) {
         $by_builtin[$builtin_key] = $key;
         continue;
@@ -485,13 +484,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $panels = array_select_keys($panels, $key_order) + $panels;
+    $items = array_select_keys($items, $key_order) + $items;
 
     $type_order =
       PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER;
 
     $order = 1;
-    foreach ($panels as $panel) {
+    foreach ($items as $item) {
       $xactions = array();
 
       $xactions[] = id(new PhabricatorProfileMenuItemConfigurationTransaction())
@@ -503,7 +502,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         ->setActor($viewer)
         ->setContinueOnMissingFields(true)
         ->setContinueOnNoEffect(true)
-        ->applyTransactions($panel, $xactions);
+        ->applyTransactions($item, $xactions);
 
       $order++;
     }
@@ -513,7 +512,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
 
-  private function buildPanelConfigureContent(array $panels) {
+  private function buildItemConfigureContent(array $items) {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
@@ -528,34 +527,34 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       'reorder-profile-menu-items',
       array(
         'listID' => $list_id,
-        'orderURI' => $this->getPanelURI('reorder/'),
+        'orderURI' => $this->getItemURI('reorder/'),
       ));
 
     $list = id(new PHUIObjectItemListView())
       ->setID($list_id);
 
-    foreach ($panels as $panel) {
-      $id = $panel->getID();
-      $builtin_key = $panel->getBuiltinKey();
+    foreach ($items as $item) {
+      $id = $item->getID();
+      $builtin_key = $item->getBuiltinKey();
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
-        $panel,
+        $item,
         PhabricatorPolicyCapability::CAN_EDIT);
 
-      $item = id(new PHUIObjectItemView());
+      $view = id(new PHUIObjectItemView());
 
-      $name = $panel->getDisplayName();
-      $type = $panel->getPanelTypeName();
+      $name = $item->getDisplayName();
+      $type = $item->getMenuItemTypeName();
       if (!strlen(trim($name))) {
         $name = pht('Untitled "%s" Item', $type);
       }
 
-      $item->setHeader($name);
-      $item->addAttribute($type);
+      $view->setHeader($name);
+      $view->addAttribute($type);
 
       if ($can_edit) {
-        $item
+        $view
           ->setGrippable(true)
           ->addSigil('profile-menu-item')
           ->setMetadata(
@@ -564,15 +563,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
             ));
 
         if ($id) {
-          $default_uri = $this->getPanelURI("default/{$id}/");
+          $default_uri = $this->getItemURI("default/{$id}/");
         } else {
-          $default_uri = $this->getPanelURI("default/{$builtin_key}/");
+          $default_uri = $this->getItemURI("default/{$builtin_key}/");
         }
 
-        if ($panel->isDefault()) {
+        if ($item->isDefault()) {
           $default_icon = 'fa-thumb-tack green';
           $default_text = pht('Current Default');
-        } else if ($panel->canMakeDefault()) {
+        } else if ($item->canMakeDefault()) {
           $default_icon = 'fa-thumb-tack';
           $default_text = pht('Make Default');
         } else {
@@ -580,7 +579,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         }
 
         if ($default_text !== null) {
-          $item->addAction(
+          $view->addAction(
             id(new PHUIListItemView())
               ->setHref($default_uri)
               ->setWorkflow(true)
@@ -589,17 +588,17 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         }
 
         if ($id) {
-          $item->setHref($this->getPanelURI("edit/{$id}/"));
-          $hide_uri = $this->getPanelURI("hide/{$id}/");
+          $view->setHref($this->getItemURI("edit/{$id}/"));
+          $hide_uri = $this->getItemURI("hide/{$id}/");
         } else {
-          $item->setHref($this->getPanelURI("builtin/{$builtin_key}/"));
-          $hide_uri = $this->getPanelURI("hide/{$builtin_key}/");
+          $view->setHref($this->getItemURI("builtin/{$builtin_key}/"));
+          $hide_uri = $this->getItemURI("hide/{$builtin_key}/");
         }
 
-        if ($panel->isDisabled()) {
+        if ($item->isDisabled()) {
           $hide_icon = 'fa-plus';
           $hide_text = pht('Enable');
-        } else if ($panel->getBuiltinKey() !== null) {
+        } else if ($item->getBuiltinKey() !== null) {
           $hide_icon = 'fa-times';
           $hide_text = pht('Disable');
         } else {
@@ -607,9 +606,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           $hide_text = pht('Delete');
         }
 
-        $can_disable = $panel->canHideMenuItem();
+        $can_disable = $item->canHideMenuItem();
 
-        $item->addAction(
+        $view->addAction(
           id(new PHUIListItemView())
             ->setHref($hide_uri)
             ->setWorkflow(true)
@@ -618,35 +617,35 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
             ->setIcon($hide_icon));
       }
 
-      if ($panel->isDisabled()) {
-        $item->setDisabled(true);
+      if ($item->isDisabled()) {
+        $view->setDisabled(true);
       }
 
-      $list->addItem($item);
+      $list->addItem($view);
     }
 
     $action_view = id(new PhabricatorActionListView())
       ->setUser($viewer);
 
-    $panel_types = PhabricatorProfilePanel::getAllPanels();
+    $item_types = PhabricatorProfileMenuItem::getAllMenuItems();
 
     $action_view->addAction(
       id(new PhabricatorActionView())
         ->setLabel(true)
         ->setName(pht('Add New Menu Item...')));
 
-    foreach ($panel_types as $panel_type) {
-      if (!$panel_type->canAddToObject($object)) {
+    foreach ($item_types as $item_type) {
+      if (!$item_type->canAddToObject($object)) {
         continue;
       }
 
-      $panel_key = $panel_type->getPanelKey();
+      $item_key = $item_type->getMenuItemKey();
 
       $action_view->addAction(
         id(new PhabricatorActionView())
-          ->setIcon($panel_type->getPanelTypeIcon())
-          ->setName($panel_type->getPanelTypeName())
-          ->setHref($this->getPanelURI("new/{$panel_key}/")));
+          ->setIcon($item_type->getMenuItemTypeIcon())
+          ->setName($item_type->getMenuItemTypeName())
+          ->setHref($this->getItemURI("new/{$item_key}/")));
     }
 
     $action_view->addAction(
@@ -682,22 +681,21 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $box;
   }
 
-  private function buildPanelNewContent($panel_key) {
-    $panel_types = PhabricatorProfilePanel::getAllPanels();
-    $panel_type = idx($panel_types, $panel_key);
-    if (!$panel_type) {
+  private function buildItemNewContent($item_key) {
+    $item_types = PhabricatorProfileMenuItem::getAllMenuItems();
+    $item_type = idx($item_types, $item_key);
+    if (!$item_type) {
       return new Aphront404Response();
     }
 
     $object = $this->getProfileObject();
-    if (!$panel_type->canAddToObject($object)) {
+    if (!$item_type->canAddToObject($object)) {
       return new Aphront404Response();
     }
 
-    $configuration =
-      PhabricatorProfileMenuItemConfiguration::initializeNewPanelConfiguration(
-        $object,
-        $panel_type);
+    $configuration = PhabricatorProfileMenuItemConfiguration::initializeNewItem(
+      $object,
+      $item_type);
 
     $viewer = $this->getViewer();
 
@@ -711,12 +709,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return id(new PhabricatorProfileMenuEditEngine())
       ->setMenuEngine($this)
       ->setProfileObject($object)
-      ->setNewPanelConfiguration($configuration)
+      ->setNewMenuItemConfiguration($configuration)
       ->setController($controller)
       ->buildResponse();
   }
 
-  private function buildPanelEditContent() {
+  private function buildItemEditContent() {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
     $controller = $this->getController();
@@ -728,18 +726,18 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->buildResponse();
   }
 
-  private function buildPanelBuiltinContent(
+  private function buildItemBuiltinContent(
     PhabricatorProfileMenuItemConfiguration $configuration) {
 
-    // If this builtin panel has already been persisted, redirect to the
+    // If this builtin item has already been persisted, redirect to the
     // edit page.
     $id = $configuration->getID();
     if ($id) {
       return id(new AphrontRedirectResponse())
-        ->setURI($this->getPanelURI("edit/{$id}/"));
+        ->setURI($this->getItemURI("edit/{$id}/"));
     }
 
-    // Otherwise, act like we're creating a new panel, we're just starting
+    // Otherwise, act like we're creating a new item, we're just starting
     // with the builtin template.
     $viewer = $this->getViewer();
 
@@ -755,12 +753,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setIsBuiltin(true)
       ->setMenuEngine($this)
       ->setProfileObject($object)
-      ->setNewPanelConfiguration($configuration)
+      ->setNewMenuItemConfiguration($configuration)
       ->setController($controller)
       ->buildResponse();
   }
 
-  private function buildPanelHideContent(
+  private function buildItemHideContent(
     PhabricatorProfileMenuItemConfiguration $configuration) {
 
     $controller = $this->getController();
@@ -774,9 +772,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     if (!$configuration->canHideMenuItem()) {
       return $controller->newDialog()
-        ->setTitle(pht('Mandatory Panel'))
+        ->setTitle(pht('Mandatory Item'))
         ->appendParagraph(
-          pht('This panel is very important, and can not be disabled.'))
+          pht('This menu item is very important, and can not be disabled.'))
         ->addCancelButton($this->getConfigureURI());
     }
 
@@ -837,9 +835,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->addSubmitButton($button);
   }
 
-  private function buildPanelDefaultContent(
+  private function buildItemDefaultContent(
     PhabricatorProfileMenuItemConfiguration $configuration,
-    array $panels) {
+    array $items) {
 
     $controller = $this->getController();
     $request = $controller->getRequest();
@@ -894,7 +892,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->addSubmitButton(pht('Make Default'));
   }
 
-  protected function newPanel() {
+  protected function newItem() {
     return PhabricatorProfileMenuItemConfiguration::initializeNewBuiltin();
   }
 
@@ -903,30 +901,30 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $request = $controller->getRequest();
     $viewer = $request->getViewer();
 
-    $panels = $this->loadPanels();
+    $items = $this->loadItems();
 
-    // To adjust the default panel, we first change any existing panels that
-    // are marked as defaults to "visible", then make the new default panel
+    // To adjust the default item, we first change any existing items that
+    // are marked as defaults to "visible", then make the new default item
     // the default.
 
     $default = array();
     $visible = array();
 
-    foreach ($panels as $panel) {
-      $builtin_key = $panel->getBuiltinKey();
-      $id = $panel->getID();
+    foreach ($items as $item) {
+      $builtin_key = $item->getBuiltinKey();
+      $id = $item->getID();
 
       $is_target =
         (($builtin_key !== null) && ($builtin_key === $key)) ||
         (($id !== null) && ((int)$id === (int)$key));
 
       if ($is_target) {
-        if (!$panel->isDefault()) {
-          $default[] = $panel;
+        if (!$item->isDefault()) {
+          $default[] = $item;
         }
       } else {
-        if ($panel->isDefault()) {
-          $visible[] = $panel;
+        if ($item->isDefault()) {
+          $visible[] = $item;
         }
       }
     }
@@ -943,8 +941,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     );
 
     foreach ($apply as $group) {
-      list($value, $panels) = $group;
-      foreach ($panels as $panel) {
+      list($value, $items) = $group;
+      foreach ($items as $item) {
         $xactions = array();
 
         $xactions[] =
@@ -957,7 +955,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           ->setActor($viewer)
           ->setContinueOnMissingFields(true)
           ->setContinueOnNoEffect(true)
-          ->applyTransactions($panel, $xactions);
+          ->applyTransactions($item, $xactions);
       }
     }
 
