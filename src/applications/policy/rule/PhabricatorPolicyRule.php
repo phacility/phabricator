@@ -144,9 +144,30 @@ abstract class PhabricatorPolicyRule extends Phobject {
   private static function getObjectPolicyCacheKey(
     PhabricatorPolicyInterface $object,
     PhabricatorPolicyRule $rule) {
-    $hash = spl_object_hash($object);
-    $rule = get_class($rule);
-    return 'policycache.'.$hash.'.'.$rule;
+
+    // NOTE: This is quite a bit of a hack, but we don't currently have a
+    // better way to carry hints from the TransactionEditor into PolicyRules
+    // about pending policy changes.
+
+    // Put some magic secret unique value on each object so we can pass
+    // information about it by proxy. This allows us to test if pending
+    // edits to an object will cause policy violations or not, before allowing
+    // those edits to go through.
+
+    // Some better approaches might be:
+    //   - Use traits to give `PhabricatorPolicyInterface` objects real
+    //     storage (requires PHP 5.4.0).
+    //   - Wrap policy objects in a container with extra storage which the
+    //     policy filter knows how to unbox (lots of work).
+
+    // When this eventually gets cleaned up, the corresponding hack in
+    // LiskDAO->__set() should also be cleaned up.
+    static $id = 0;
+    if (!isset($object->_hashKey)) {
+      @$object->_hashKey = 'object.id('.(++$id).')';
+    }
+
+    return $object->_hashKey;
   }
 
 

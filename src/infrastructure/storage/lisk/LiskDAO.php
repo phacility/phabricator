@@ -1780,10 +1780,13 @@ abstract class LiskDAO extends Phobject {
    * @task   util
    */
   public function __set($name, $value) {
-    phlog(
-      pht(
-        'Wrote to undeclared property %s.',
-        get_class($this).'::$'.$name));
+    // Hack for policy system hints, see PhabricatorPolicyRule for notes.
+    if ($name != '_hashKey') {
+      phlog(
+        pht(
+          'Wrote to undeclared property %s.',
+          get_class($this).'::$'.$name));
+    }
     $this->$name = $value;
   }
 
