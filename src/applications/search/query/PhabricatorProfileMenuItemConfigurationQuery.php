@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProfilePanelConfigurationQuery
+final class PhabricatorProfileMenuItemConfigurationQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
@@ -23,7 +23,7 @@ final class PhabricatorProfilePanelConfigurationQuery
   }
 
   public function newResultObject() {
-    return new PhabricatorProfilePanelConfiguration();
+    return new PhabricatorProfileMenuItemConfiguration();
   }
 
   protected function loadPage() {
@@ -60,7 +60,7 @@ final class PhabricatorProfilePanelConfigurationQuery
   protected function willFilterPage(array $page) {
     $panels = PhabricatorProfilePanel::getAllPanels();
     foreach ($page as $key => $panel) {
-      $panel_type = idx($panels, $panel->getPanelKey());
+      $panel_type = idx($panels, $panel->getMenuItemKey());
       if (!$panel_type) {
         $this->didRejectResult($panel);
         unset($page[$key]);

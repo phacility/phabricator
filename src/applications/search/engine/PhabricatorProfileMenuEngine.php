@@ -37,7 +37,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   private function setDefaultPanel(
-    PhabricatorProfilePanelConfiguration $default_panel) {
+    PhabricatorProfileMenuItemConfiguration $default_panel) {
     $this->defaultPanel = $default_panel;
     return $this;
   }
@@ -231,7 +231,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $panels = $this->loadBuiltinProfilePanels();
 
-    $stored_panels = id(new PhabricatorProfilePanelConfigurationQuery())
+    $stored_panels = id(new PhabricatorProfileMenuItemConfigurationQuery())
       ->setViewer($viewer)
       ->withProfilePHIDs(array($object->getPHID()))
       ->execute();
@@ -327,7 +327,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
             $builtin_key));
       }
 
-      $panel_key = $builtin->getPanelKey();
+      $panel_key = $builtin->getMenuItemKey();
 
       $panel = idx($panels, $panel_key);
       if (!$panel) {
@@ -346,7 +346,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         ->setProfilePHID($object->getPHID())
         ->attachPanel($panel)
         ->attachProfileObject($object)
-        ->setPanelOrder($order);
+        ->setMenuItemOrder($order);
 
       if (!$builtin->shouldEnableForObject($object)) {
         continue;
@@ -488,17 +488,17 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $panels = array_select_keys($panels, $key_order) + $panels;
 
     $type_order =
-      PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER;
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER;
 
     $order = 1;
     foreach ($panels as $panel) {
       $xactions = array();
 
-      $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
+      $xactions[] = id(new PhabricatorProfileMenuItemConfigurationTransaction())
         ->setTransactionType($type_order)
         ->setNewValue($order);
 
-      $editor = id(new PhabricatorProfilePanelEditor())
+      $editor = id(new PhabricatorProfileMenuEditor())
         ->setContentSourceFromRequest($request)
         ->setActor($viewer)
         ->setContinueOnMissingFields(true)
@@ -607,7 +607,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           $hide_text = pht('Delete');
         }
 
-        $can_disable = $panel->canHidePanel();
+        $can_disable = $panel->canHideMenuItem();
 
         $item->addAction(
           id(new PHUIListItemView())
@@ -695,7 +695,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     $configuration =
-      PhabricatorProfilePanelConfiguration::initializeNewPanelConfiguration(
+      PhabricatorProfileMenuItemConfiguration::initializeNewPanelConfiguration(
         $object,
         $panel_type);
 
@@ -729,7 +729,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   private function buildPanelBuiltinContent(
-    PhabricatorProfilePanelConfiguration $configuration) {
+    PhabricatorProfileMenuItemConfiguration $configuration) {
 
     // If this builtin panel has already been persisted, redirect to the
     // edit page.
@@ -761,7 +761,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   private function buildPanelHideContent(
-    PhabricatorProfilePanelConfiguration $configuration) {
+    PhabricatorProfileMenuItemConfiguration $configuration) {
 
     $controller = $this->getController();
     $request = $controller->getRequest();
@@ -772,7 +772,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $configuration,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    if (!$configuration->canHidePanel()) {
+    if (!$configuration->canHideMenuItem()) {
       return $controller->newDialog()
         ->setTitle(pht('Mandatory Panel'))
         ->appendParagraph(
@@ -787,14 +787,14 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $body = pht('Delete this menu item?');
       $button = pht('Delete Menu Item');
     } else if ($configuration->isDisabled()) {
-      $new_value = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
+      $new_value = PhabricatorProfileMenuItemConfiguration::VISIBILITY_VISIBLE;
 
       $title = pht('Enable Menu Item');
       $body = pht(
         'Enable this menu item? It will appear in the menu again.');
       $button = pht('Enable Menu Item');
     } else {
-      $new_value = PhabricatorProfilePanelConfiguration::VISIBILITY_DISABLED;
+      $new_value = PhabricatorProfileMenuItemConfiguration::VISIBILITY_DISABLED;
 
       $title = pht('Disable Menu Item');
       $body = pht(
@@ -809,15 +809,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         $configuration->delete();
       } else {
         $type_visibility =
-          PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+          PhabricatorProfileMenuItemConfigurationTransaction::TYPE_VISIBILITY;
 
         $xactions = array();
 
-        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
-          ->setTransactionType($type_visibility)
-          ->setNewValue($new_value);
+        $xactions[] =
+          id(new PhabricatorProfileMenuItemConfigurationTransaction())
+            ->setTransactionType($type_visibility)
+            ->setNewValue($new_value);
 
-        $editor = id(new PhabricatorProfilePanelEditor())
+        $editor = id(new PhabricatorProfileMenuEditor())
           ->setContentSourceFromRequest($request)
           ->setActor($viewer)
           ->setContinueOnMissingFields(true)
@@ -837,7 +838,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   private function buildPanelDefaultContent(
-    PhabricatorProfilePanelConfiguration $configuration,
+    PhabricatorProfileMenuItemConfiguration $configuration,
     array $panels) {
 
     $controller = $this->getController();
@@ -894,7 +895,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   protected function newPanel() {
-    return PhabricatorProfilePanelConfiguration::initializeNewBuiltin();
+    return PhabricatorProfileMenuItemConfiguration::initializeNewBuiltin();
   }
 
   public function adjustDefault($key) {
@@ -931,10 +932,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     $type_visibility =
-      PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_VISIBILITY;
 
-    $v_visible = PhabricatorProfilePanelConfiguration::VISIBILITY_VISIBLE;
-    $v_default = PhabricatorProfilePanelConfiguration::VISIBILITY_DEFAULT;
+    $v_visible = PhabricatorProfileMenuItemConfiguration::VISIBILITY_VISIBLE;
+    $v_default = PhabricatorProfileMenuItemConfiguration::VISIBILITY_DEFAULT;
 
     $apply = array(
       array($v_visible, $visible),
@@ -946,11 +947,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       foreach ($panels as $panel) {
         $xactions = array();
 
-        $xactions[] = id(new PhabricatorProfilePanelConfigurationTransaction())
-          ->setTransactionType($type_visibility)
-          ->setNewValue($value);
+        $xactions[] =
+          id(new PhabricatorProfileMenuItemConfigurationTransaction())
+            ->setTransactionType($type_visibility)
+            ->setNewValue($value);
 
-        $editor = id(new PhabricatorProfilePanelEditor())
+        $editor = id(new PhabricatorProfileMenuEditor())
           ->setContentSourceFromRequest($request)
           ->setActor($viewer)
           ->setContinueOnMissingFields(true)

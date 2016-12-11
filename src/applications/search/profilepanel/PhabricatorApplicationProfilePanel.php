@@ -18,7 +18,7 @@ final class PhabricatorApplicationProfilePanel
   }
 
   public function getDisplayName(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     $app = $this->getApplication($config);
     if ($app) {
       return $app->getName();
@@ -29,20 +29,20 @@ final class PhabricatorApplicationProfilePanel
   }
 
   public function buildEditEngineFields(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return array(
       id(new PhabricatorDatasourceEditField())
         ->setKey('application')
         ->setLabel(pht('Application'))
         ->setDatasource(new PhabricatorApplicationDatasource())
-        ->setSingleValue($config->getPanelProperty('application')),
+        ->setSingleValue($config->getMenuItemProperty('application')),
     );
   }
 
   private function getApplication(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
-    $phid = $config->getPanelProperty('application');
+    $phid = $config->getMenuItemProperty('application');
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($phid))
@@ -52,7 +52,7 @@ final class PhabricatorApplicationProfilePanel
   }
 
   protected function newNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
     $app = $this->getApplication($config);
     if (!$app) {

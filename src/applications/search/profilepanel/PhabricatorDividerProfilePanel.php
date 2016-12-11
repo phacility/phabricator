@@ -18,12 +18,12 @@ final class PhabricatorDividerProfilePanel
   }
 
   public function getDisplayName(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return pht("\xE2\x80\x94");
   }
 
   public function buildEditEngineFields(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return array(
       id(new PhabricatorInstructionsEditField())
         ->setValue(
@@ -35,7 +35,7 @@ final class PhabricatorDividerProfilePanel
   }
 
   protected function newNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
 
     $item = $this->newItem()
       ->addClass('phui-divider');

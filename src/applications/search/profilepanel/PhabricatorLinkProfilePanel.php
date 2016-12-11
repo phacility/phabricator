@@ -18,12 +18,12 @@ final class PhabricatorLinkProfilePanel
   }
 
   public function getDisplayName(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return $this->getLinkName($config);
   }
 
   public function buildEditEngineFields(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
@@ -44,18 +44,18 @@ final class PhabricatorLinkProfilePanel
   }
 
   private function getLinkName(
-    PhabricatorProfilePanelConfiguration $config) {
-    return $config->getPanelProperty('name');
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $config->getMenuItemProperty('name');
   }
 
   private function getLinkIcon(
-    PhabricatorProfilePanelConfiguration $config) {
-    return $config->getPanelProperty('icon', 'link');
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $config->getMenuItemProperty('icon', 'link');
   }
 
   private function getLinkURI(
-    PhabricatorProfilePanelConfiguration $config) {
-    return $config->getPanelProperty('uri');
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $config->getMenuItemProperty('uri');
   }
 
   private function isValidLinkURI($uri) {
@@ -63,7 +63,7 @@ final class PhabricatorLinkProfilePanel
   }
 
   protected function newNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
 
     $icon = $this->getLinkIcon($config);
     $name = $this->getLinkName($config);

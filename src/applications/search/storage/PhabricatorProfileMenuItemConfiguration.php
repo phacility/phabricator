@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProfilePanelConfiguration
+final class PhabricatorProfileMenuItemConfiguration
   extends PhabricatorSearchDAO
   implements
     PhabricatorPolicyInterface,
@@ -8,11 +8,11 @@ final class PhabricatorProfilePanelConfiguration
     PhabricatorApplicationTransactionInterface {
 
   protected $profilePHID;
-  protected $panelKey;
+  protected $menuItemKey;
   protected $builtinKey;
-  protected $panelOrder;
+  protected $menuItemOrder;
   protected $visibility;
-  protected $panelProperties = array();
+  protected $menuItemProperties = array();
 
   private $profileObject = self::ATTACHABLE;
   private $panel = self::ATTACHABLE;
@@ -20,6 +20,11 @@ final class PhabricatorProfilePanelConfiguration
   const VISIBILITY_DEFAULT = 'default';
   const VISIBILITY_VISIBLE = 'visible';
   const VISIBILITY_DISABLED = 'disabled';
+
+  public function getTableName() {
+    // For now, this class uses an older table name.
+    return 'search_profilepanelconfiguration';
+  }
 
   public static function initializeNewBuiltin() {
     return id(new self())
@@ -32,7 +37,7 @@ final class PhabricatorProfilePanelConfiguration
 
     return self::initializeNewBuiltin()
       ->setProfilePHID($profile_object->getPHID())
-      ->setPanelKey($panel->getPanelKey())
+      ->setMenuItemKey($panel->getPanelKey())
       ->attachPanel($panel)
       ->attachProfileObject($profile_object);
   }
@@ -41,17 +46,17 @@ final class PhabricatorProfilePanelConfiguration
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'panelProperties' => self::SERIALIZATION_JSON,
+        'menuItemProperties' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'panelKey' => 'text64',
+        'menuItemKey' => 'text64',
         'builtinKey' => 'text64?',
-        'panelOrder' => 'uint32?',
+        'menuItemOrder' => 'uint32?',
         'visibility' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_profile' => array(
-          'columns' => array('profilePHID', 'panelOrder'),
+          'columns' => array('profilePHID', 'menuItemOrder'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -59,7 +64,7 @@ final class PhabricatorProfilePanelConfiguration
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorProfilePanelPHIDType::TYPECONST);
+      PhabricatorProfileMenuItemPHIDType::TYPECONST);
   }
 
   public function attachPanel(PhabricatorProfilePanel $panel) {
@@ -80,13 +85,13 @@ final class PhabricatorProfilePanelConfiguration
     return $this->assertAttached($this->profileObject);
   }
 
-  public function setPanelProperty($key, $value) {
-    $this->panelProperties[$key] = $value;
+  public function setMenuItemProperty($key, $value) {
+    $this->menuItemProperties[$key] = $value;
     return $this;
   }
 
-  public function getPanelProperty($key, $default = null) {
-    return idx($this->panelProperties, $key, $default);
+  public function getMenuItemProperty($key, $default = null) {
+    return idx($this->menuItemProperties, $key, $default);
   }
 
   public function buildNavigationMenuItems() {
@@ -105,7 +110,7 @@ final class PhabricatorProfilePanelConfiguration
     return $this->getPanel()->canMakeDefault($this);
   }
 
-  public function canHidePanel() {
+  public function canHideMenuItem() {
     return $this->getPanel()->canHidePanel($this);
   }
 
@@ -114,7 +119,7 @@ final class PhabricatorProfilePanelConfiguration
   }
 
   public function getSortKey() {
-    $order = $this->getPanelOrder();
+    $order = $this->getMenuItemOrder();
     if ($order === null) {
       $order = 'Z';
     } else {
@@ -128,7 +133,7 @@ final class PhabricatorProfilePanelConfiguration
   }
 
   public function isDisabled() {
-    if (!$this->canHidePanel()) {
+    if (!$this->canHideMenuItem()) {
       return false;
     }
     return ($this->getVisibility() === self::VISIBILITY_DISABLED);
@@ -179,7 +184,7 @@ final class PhabricatorProfilePanelConfiguration
 
 
   public function getApplicationTransactionEditor() {
-    return new PhabricatorProfilePanelEditor();
+    return new PhabricatorProfileMenuEditor();
   }
 
   public function getApplicationTransactionObject() {
@@ -187,7 +192,7 @@ final class PhabricatorProfilePanelConfiguration
   }
 
   public function getApplicationTransactionTemplate() {
-    return new PhabricatorProfilePanelConfigurationTransaction();
+    return new PhabricatorProfileMenuItemConfigurationTransaction();
   }
 
   public function willRenderTimeline(

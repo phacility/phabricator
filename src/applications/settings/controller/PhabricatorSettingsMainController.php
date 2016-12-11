@@ -98,7 +98,7 @@ final class PhabricatorSettingsMainController
     $panels = $this->buildPanels($preferences);
     $nav = $this->renderSideNav($panels);
 
-    $key = $nav->selectFilter($key, head($panels)->getPanelKey());
+    $key = $nav->selectFilter($key, head($panels)->getMenuItemKey());
 
     $panel = $panels[$key]
       ->setController($this)
@@ -196,7 +196,7 @@ final class PhabricatorSettingsMainController
         $nav->addLabel($group->getPanelGroupName());
       }
 
-      $nav->addFilter($panel->getPanelKey(), $panel->getPanelName());
+      $nav->addFilter($panel->getMenuItemKey(), $panel->getPanelName());
     }
 
     return $nav;

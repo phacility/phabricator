@@ -33,7 +33,7 @@ final class PhabricatorProfileMenuEditEngine
   }
 
   public function setNewPanelConfiguration(
-    PhabricatorProfilePanelConfiguration $configuration) {
+    PhabricatorProfileMenuItemConfiguration $configuration) {
     $this->newPanelConfiguration = $configuration;
     return $this;
   }
@@ -77,7 +77,7 @@ final class PhabricatorProfileMenuEditEngine
   }
 
   protected function newObjectQuery() {
-    return id(new PhabricatorProfilePanelConfigurationQuery());
+    return id(new PhabricatorProfileMenuItemConfigurationQuery());
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -125,7 +125,7 @@ final class PhabricatorProfileMenuEditEngine
     $fields = $panel->buildEditEngineFields($object);
 
     $type_property =
-      PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY;
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY;
 
     foreach ($fields as $field) {
       $field

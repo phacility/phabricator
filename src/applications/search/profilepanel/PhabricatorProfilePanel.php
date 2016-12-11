@@ -5,12 +5,12 @@ abstract class PhabricatorProfilePanel extends Phobject {
   private $viewer;
 
   final public function buildNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return $this->newNavigationMenuItems($config);
   }
 
   abstract protected function newNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config);
+    PhabricatorProfileMenuItemConfiguration $config);
 
   public function getPanelTypeIcon() {
     return null;
@@ -19,10 +19,10 @@ abstract class PhabricatorProfilePanel extends Phobject {
   abstract public function getPanelTypeName();
 
   abstract public function getDisplayName(
-    PhabricatorProfilePanelConfiguration $config);
+    PhabricatorProfileMenuItemConfiguration $config);
 
   public function buildEditEngineFields(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return array();
   }
 
@@ -35,12 +35,12 @@ abstract class PhabricatorProfilePanel extends Phobject {
   }
 
   public function canHidePanel(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return true;
   }
 
   public function canMakeDefault(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return false;
   }
 

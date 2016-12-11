@@ -14,13 +14,13 @@ final class PhabricatorProjectDetailsProfilePanel
   }
 
   public function canMakeDefault(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return true;
   }
 
   public function getDisplayName(
-    PhabricatorProfilePanelConfiguration $config) {
-    $name = $config->getPanelProperty('name');
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $name = $config->getMenuItemProperty('name');
 
     if (strlen($name)) {
       return $name;
@@ -30,18 +30,18 @@ final class PhabricatorProjectDetailsProfilePanel
   }
 
   public function buildEditEngineFields(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return array(
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setPlaceholder($this->getDefaultName())
-        ->setValue($config->getPanelProperty('name')),
+        ->setValue($config->getMenuItemProperty('name')),
     );
   }
 
   protected function newNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
 
     $project = $config->getProfileObject();
 

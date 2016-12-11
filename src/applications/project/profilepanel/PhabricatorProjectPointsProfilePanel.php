@@ -36,12 +36,12 @@ final class PhabricatorProjectPointsProfilePanel
   }
 
   public function getDisplayName(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return $this->getDefaultName();
   }
 
   public function buildEditEngineFields(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return array(
       id(new PhabricatorInstructionsEditField())
         ->setValue(
@@ -53,7 +53,7 @@ final class PhabricatorProjectPointsProfilePanel
   }
 
   protected function newNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
     $project = $config->getProfileObject();
 

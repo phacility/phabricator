@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProfilePanelConfigurationTransaction
+final class PhabricatorProfileMenuItemConfigurationTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_PROPERTY = 'profilepanel.property';
@@ -11,8 +11,13 @@ final class PhabricatorProfilePanelConfigurationTransaction
     return 'search';
   }
 
+  public function getTableName() {
+    // At least for now, this object uses an older table name.
+    return 'search_profilepanelconfigurationtransaction';
+  }
+
   public function getApplicationTransactionType() {
-    return PhabricatorProfilePanelPHIDType::TYPECONST;
+    return PhabricatorProfileMenuItemPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

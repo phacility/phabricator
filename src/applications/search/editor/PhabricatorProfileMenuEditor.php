@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProfilePanelEditor
+final class PhabricatorProfileMenuEditor
   extends PhabricatorApplicationTransactionEditor {
 
   public function getEditorApplicationClass() {
@@ -8,15 +8,18 @@ final class PhabricatorProfilePanelEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Profile Panels');
+    return pht('Profile Menu Items');
   }
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY;
-    $types[] = PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER;
-    $types[] = PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY;
+    $types[] =
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY;
+    $types[] =
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER;
+    $types[] =
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_VISIBILITY;
 
     return $types;
   }
@@ -26,12 +29,12 @@ final class PhabricatorProfilePanelEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue('property.key');
-        return $object->getPanelProperty($key, null);
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
-        return $object->getPanelOrder();
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
+        return $object->getMenuItemProperty($key, null);
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER:
+        return $object->getMenuItemOrder();
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_VISIBILITY:
         return $object->getVisibility();
     }
   }
@@ -41,10 +44,10 @@ final class PhabricatorProfilePanelEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY:
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_VISIBILITY:
         return $xaction->getNewValue();
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER:
         return (int)$xaction->getNewValue();
     }
   }
@@ -54,15 +57,15 @@ final class PhabricatorProfilePanelEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue('property.key');
         $value = $xaction->getNewValue();
-        $object->setPanelProperty($key, $value);
+        $object->getMenuItemProperty($key, $value);
         return;
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
-        $object->setPanelOrder($xaction->getNewValue());
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER:
+        $object->setMenuItemOrder($xaction->getNewValue());
         return;
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_VISIBILITY:
         $object->setVisibility($xaction->getNewValue());
         return;
     }
@@ -75,9 +78,9 @@ final class PhabricatorProfilePanelEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_PROPERTY:
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_ORDER:
-      case PhabricatorProfilePanelConfigurationTransaction::TYPE_VISIBILITY:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_ORDER:
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_VISIBILITY:
         return;
     }
 

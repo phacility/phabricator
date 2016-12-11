@@ -1,16 +1,16 @@
 <?php
 
-final class PhabricatorProfilePanelPHIDType
+final class PhabricatorProfileMenuItemPHIDType
   extends PhabricatorPHIDType {
 
   const TYPECONST = 'PANL';
 
   public function getTypeName() {
-    return pht('Profile Panel');
+    return pht('Profile Menu Item');
   }
 
   public function newObject() {
-    return new PhabricatorProfilePanelConfiguration();
+    return new PhabricatorProfileMenuItemConfiguration();
   }
 
   public function getPHIDTypeApplicationClass() {
@@ -20,7 +20,7 @@ final class PhabricatorProfilePanelPHIDType
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $object_query,
     array $phids) {
-    return id(new PhabricatorProfilePanelConfigurationQuery())
+    return id(new PhabricatorProfileMenuItemConfigurationQuery())
       ->withPHIDs($phids);
   }
 
@@ -32,7 +32,7 @@ final class PhabricatorProfilePanelPHIDType
     foreach ($handles as $phid => $handle) {
       $config = $objects[$phid];
 
-      $handle->setName(pht('Profile Panel'));
+      $handle->setName(pht('Profile Menu Item'));
     }
   }
 

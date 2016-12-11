@@ -24,7 +24,7 @@ final class PhabricatorPeopleProfileMenuEngine
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(self::PANEL_PROFILE)
-      ->setPanelKey(PhabricatorPeopleDetailsProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorPeopleDetailsProfilePanel::PANELKEY);
 
     $have_maniphest = PhabricatorApplication::isClassInstalledForViewer(
       'PhabricatorManiphestApplication',
@@ -36,10 +36,10 @@ final class PhabricatorPeopleProfileMenuEngine
 
       $panels[] = $this->newPanel()
         ->setBuiltinKey('tasks')
-        ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-        ->setPanelProperty('icon', 'maniphest')
-        ->setPanelProperty('name', pht('Open Tasks'))
-        ->setPanelProperty('uri', $uri);
+        ->setMenuItemKey(PhabricatorLinkProfilePanel::PANELKEY)
+        ->setMenuItemProperty('icon', 'maniphest')
+        ->setMenuItemProperty('name', pht('Open Tasks'))
+        ->setMenuItemProperty('uri', $uri);
     }
 
     $have_differential = PhabricatorApplication::isClassInstalledForViewer(
@@ -52,10 +52,10 @@ final class PhabricatorPeopleProfileMenuEngine
 
       $panels[] = $this->newPanel()
         ->setBuiltinKey('revisions')
-        ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-        ->setPanelProperty('icon', 'differential')
-        ->setPanelProperty('name', pht('Revisions'))
-        ->setPanelProperty('uri', $uri);
+        ->setMenuItemKey(PhabricatorLinkProfilePanel::PANELKEY)
+        ->setMenuItemProperty('icon', 'differential')
+        ->setMenuItemProperty('name', pht('Revisions'))
+        ->setMenuItemProperty('uri', $uri);
     }
 
     $have_diffusion = PhabricatorApplication::isClassInstalledForViewer(
@@ -68,15 +68,15 @@ final class PhabricatorPeopleProfileMenuEngine
 
       $panels[] = $this->newPanel()
         ->setBuiltinKey('commits')
-        ->setPanelKey(PhabricatorLinkProfilePanel::PANELKEY)
-        ->setPanelProperty('icon', 'diffusion')
-        ->setPanelProperty('name', pht('Commits'))
-        ->setPanelProperty('uri', $uri);
+        ->setMenuItemKey(PhabricatorLinkProfilePanel::PANELKEY)
+        ->setMenuItemProperty('icon', 'diffusion')
+        ->setMenuItemProperty('name', pht('Commits'))
+        ->setMenuItemProperty('uri', $uri);
     }
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(self::PANEL_MANAGE)
-      ->setPanelKey(PhabricatorPeopleManageProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorPeopleManageProfilePanel::PANELKEY);
 
     return $panels;
   }

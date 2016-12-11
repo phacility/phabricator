@@ -18,27 +18,27 @@ final class PhabricatorProjectProfileMenuEngine
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_PROFILE)
-      ->setPanelKey(PhabricatorProjectDetailsProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorProjectDetailsProfilePanel::PANELKEY);
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_POINTS)
-      ->setPanelKey(PhabricatorProjectPointsProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorProjectPointsProfilePanel::PANELKEY);
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_WORKBOARD)
-      ->setPanelKey(PhabricatorProjectWorkboardProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorProjectWorkboardProfilePanel::PANELKEY);
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_MEMBERS)
-      ->setPanelKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorProjectMembersProfilePanel::PANELKEY);
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_SUBPROJECTS)
-      ->setPanelKey(PhabricatorProjectSubprojectsProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorProjectSubprojectsProfilePanel::PANELKEY);
 
     $panels[] = $this->newPanel()
       ->setBuiltinKey(PhabricatorProject::PANEL_MANAGE)
-      ->setPanelKey(PhabricatorProjectManageProfilePanel::PANELKEY);
+      ->setMenuItemKey(PhabricatorProjectManageProfilePanel::PANELKEY);
 
     return $panels;
   }

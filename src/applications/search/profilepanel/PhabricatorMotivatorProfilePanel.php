@@ -18,10 +18,10 @@ final class PhabricatorMotivatorProfilePanel
   }
 
   public function getDisplayName(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
 
     $options = $this->getOptions();
-    $name = idx($options, $config->getPanelProperty('source'));
+    $name = idx($options, $config->getMenuItemProperty('source'));
     if ($name !== null) {
       return pht('Motivator: %s', $name);
     } else {
@@ -30,7 +30,7 @@ final class PhabricatorMotivatorProfilePanel
   }
 
   public function buildEditEngineFields(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
     return array(
       id(new PhabricatorInstructionsEditField())
         ->setValue(
@@ -51,9 +51,9 @@ final class PhabricatorMotivatorProfilePanel
   }
 
   protected function newNavigationMenuItems(
-    PhabricatorProfilePanelConfiguration $config) {
+    PhabricatorProfileMenuItemConfiguration $config) {
 
-    $source = $config->getPanelProperty('source');
+    $source = $config->getMenuItemProperty('source');
 
     switch ($source) {
       case 'catfacts':
