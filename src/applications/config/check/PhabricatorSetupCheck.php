@@ -82,22 +82,18 @@ abstract class PhabricatorSetupCheck extends Phobject {
       AphrontWriteGuard::allowDangerousUnguardedWrites(true);
     }
 
-    $caught = null;
     try {
       $db_cache = new PhabricatorKeyValueDatabaseCache();
       $db_cache->deleteKey('phabricator.setup.issue-keys');
     } catch (Exception $ex) {
-      $caught = $ex;
+      // If we hit an exception here, just ignore it. In particular, this can
+      // happen on initial startup before the databases are initialized.
     }
 
     if ($use_scope) {
       unset($unguarded);
     } else {
       AphrontWriteGuard::allowDangerousUnguardedWrites(false);
-    }
-
-    if ($caught) {
-      throw $caught;
     }
   }
 
