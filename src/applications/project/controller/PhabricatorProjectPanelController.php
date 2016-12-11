@@ -12,11 +12,11 @@ final class PhabricatorProjectPanelController
     $viewer = $this->getViewer();
     $project = $this->getProject();
 
-    $engine = id(new PhabricatorProjectProfilePanelEngine())
+    $engine = id(new PhabricatorProjectProfileMenuEngine())
       ->setProfileObject($project)
       ->setController($this);
 
-    $this->setProfilePanelEngine($engine);
+    $this->setProfileMenuEngine($engine);
 
     return $engine->buildResponse();
   }

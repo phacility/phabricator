@@ -1,12 +1,12 @@
 <?php
 
-final class PhabricatorPeopleProfilePanelEngine
-  extends PhabricatorProfilePanelEngine {
+final class PhabricatorPeopleProfileMenuEngine
+  extends PhabricatorProfileMenuEngine {
 
   const PANEL_PROFILE = 'people.profile';
   const PANEL_MANAGE = 'people.manage';
 
-  protected function isPanelEngineConfigurable() {
+  protected function isMenuEngineConfigurable() {
     return false;
   }
 

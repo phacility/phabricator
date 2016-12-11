@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorProfilePanelEngine extends Phobject {
+abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   private $viewer;
   private $profileObject;
@@ -49,7 +49,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
   abstract protected function getPanelURI($path);
 
-  abstract protected function isPanelEngineConfigurable();
+  abstract protected function isMenuEngineConfigurable();
 
   public function buildResponse() {
     $controller = $this->getController();
@@ -63,7 +63,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
     // If the engine is not configurable, don't respond to any of the editing
     // or configuration routes.
-    if (!$this->isPanelEngineConfigurable()) {
+    if (!$this->isMenuEngineConfigurable()) {
       switch ($panel_action) {
         case 'view':
           break;
@@ -709,7 +709,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     $controller = $this->getController();
 
     return id(new PhabricatorProfilePanelEditEngine())
-      ->setPanelEngine($this)
+      ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setNewPanelConfiguration($configuration)
       ->setController($controller)
@@ -722,7 +722,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
     $controller = $this->getController();
 
     return id(new PhabricatorProfilePanelEditEngine())
-      ->setPanelEngine($this)
+      ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setController($controller)
       ->buildResponse();
@@ -753,7 +753,7 @@ abstract class PhabricatorProfilePanelEngine extends Phobject {
 
     return id(new PhabricatorProfilePanelEditEngine())
       ->setIsBuiltin(true)
-      ->setPanelEngine($this)
+      ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setNewPanelConfiguration($configuration)
       ->setController($controller)

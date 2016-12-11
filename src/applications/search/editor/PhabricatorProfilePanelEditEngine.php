@@ -5,7 +5,7 @@ final class PhabricatorProfilePanelEditEngine
 
   const ENGINECONST = 'search.profilepanel';
 
-  private $panelEngine;
+  private $menuEngine;
   private $profileObject;
   private $newPanelConfiguration;
   private $isBuiltin;
@@ -14,13 +14,13 @@ final class PhabricatorProfilePanelEditEngine
     return false;
   }
 
-  public function setPanelEngine(PhabricatorProfilePanelEngine $engine) {
-    $this->panelEngine = $engine;
+  public function setMenuEngine(PhabricatorProfileMenuEngine $engine) {
+    $this->menuEngine = $engine;
     return $this;
   }
 
-  public function getPanelEngine() {
-    return $this->panelEngine;
+  public function getMenuEngine() {
+    return $this->menuEngine;
   }
 
   public function setProfileObject($profile_object) {
@@ -113,11 +113,11 @@ final class PhabricatorProfilePanelEditEngine
   }
 
   protected function getObjectCreateCancelURI($object) {
-    return $this->getPanelEngine()->getConfigureURI();
+    return $this->getMenuEngine()->getConfigureURI();
   }
 
   protected function getObjectViewURI($object) {
-    return $this->getPanelEngine()->getConfigureURI();
+    return $this->getMenuEngine()->getConfigureURI();
   }
 
   protected function buildCustomEditFields($object) {

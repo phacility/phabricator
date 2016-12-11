@@ -935,7 +935,7 @@ final class PhabricatorProjectBoardViewController
     $set_default = $request->getBool('default');
     if ($set_default) {
       $this
-        ->getProfilePanelEngine()
+        ->getProfileMenuEngine()
         ->adjustDefault(PhabricatorProject::PANEL_WORKBOARD);
     }
 

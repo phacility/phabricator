@@ -1,9 +1,9 @@
 <?php
 
-final class PhabricatorProjectProfilePanelEngine
-  extends PhabricatorProfilePanelEngine {
+final class PhabricatorProjectProfileMenuEngine
+  extends PhabricatorProfileMenuEngine {
 
-  protected function isPanelEngineConfigurable() {
+  protected function isMenuEngineConfigurable() {
     return true;
   }
 

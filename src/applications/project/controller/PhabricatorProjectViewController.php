@@ -17,7 +17,7 @@ final class PhabricatorProjectViewController
     }
     $project = $this->getProject();
 
-    $engine = $this->getProfilePanelEngine();
+    $engine = $this->getProfileMenuEngine();
     $default = $engine->getDefaultPanel();
 
     switch ($default->getBuiltinKey()) {
