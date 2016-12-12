@@ -347,6 +347,17 @@ final class PHUITimelineEventView extends AphrontView {
     $group_children = array();
     foreach ($events as $event) {
       if ($event->shouldRenderEventTitle()) {
+
+        // Render the group anchor here, outside the title box. If we render
+        // it inside the title box it ends up completely hidden and Chrome 55
+        // refuses to jump to it. See T11997 for discussion.
+
+        if ($extra && $this->anchor) {
+          $group_titles[] = id(new PhabricatorAnchorView())
+            ->setAnchorName($this->anchor)
+            ->render();
+        }
+
         $group_titles[] = $event->renderEventTitle(
           $force_icon,
           $has_menu,
@@ -533,12 +544,7 @@ final class PHUITimelineEventView extends AphrontView {
           Javelin::initBehavior('phabricator-watch-anchor');
           Javelin::initBehavior('phabricator-tooltips');
 
-          $anchor = id(new PhabricatorAnchorView())
-            ->setAnchorName($this->anchor)
-            ->render();
-
           $date = array(
-            $anchor,
             javelin_tag(
               'a',
               array(
@@ -546,7 +552,7 @@ final class PHUITimelineEventView extends AphrontView {
                 'sigil' => 'has-tooltip',
                 'meta' => array(
                   'tip' => $content_source,
-          ),
+                ),
               ),
               $date),
           );
