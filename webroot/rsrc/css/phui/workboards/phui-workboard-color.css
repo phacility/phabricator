@@ -2,6 +2,10 @@
  * @provides phui-workboard-color-css
  */
 
+.phui-workboard-color .phabricator-nav-content .phui-workboard-view-shadow {
+  background-color: transparent;
+}
+
 .phui-workboard-color .phui-crumbs-view {
   background-color: rgba({$alphagrey},.15);
   border: none;
@@ -26,10 +30,34 @@
   background-color: rgba({$alphawhite},.6);
 }
 
+body.phui-workboard-color .phui-profile-menu .phabricator-side-menu {
+  background-color: rgba({$alphagrey},.3);
+}
+
+body.phui-workboard-color .phabricator-side-menu .phui-profile-menu-footer-1 {
+  background-color: transparent;
+}
+
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu {
+  box-shadow: none;
+}
+
 .phui-workboard-color-preview {
   width: 50px;
   height: 50px;
   font-size: 34px;
+}
+
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href {
+    color: rgba({$alphawhite},.8);
+}
+
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-icon,
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href .phui-list-item-icon {
+    color: rgba({$alphawhite},.8);
 }
 
 /* Gradients */

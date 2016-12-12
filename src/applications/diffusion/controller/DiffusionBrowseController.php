@@ -55,7 +55,6 @@ final class DiffusionBrowseController extends DiffusionController {
   }
 
   private function browseSearch() {
-
     $drequest = $this->getDiffusionRequest();
     $header = $this->buildHeaderView($drequest);
 
@@ -77,7 +76,8 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter(array(
+      ->setFooter(
+        array(
           $search_form,
           $search_results,
         ));
@@ -337,6 +337,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $empty_result = null;
     $browse_panel = null;
+    $branch_panel = null;
     if (!$results->isValidResults()) {
       $empty_result = new DiffusionEmptyResultView();
       $empty_result->setDiffusionRequest($drequest);
@@ -376,6 +377,12 @@ final class DiffusionBrowseController extends DiffusionController {
         pht('Hide Search'),
         $search_form,
         '#');
+
+      $path = $drequest->getPath();
+      $is_branch = (!strlen($path) && $repository->supportsBranchComparison());
+      if ($is_branch) {
+        $branch_panel = $this->buildBranchTable();
+      }
     }
 
     $open_revisions = $this->buildOpenRevisions();
@@ -394,15 +401,18 @@ final class DiffusionBrowseController extends DiffusionController {
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $empty_result,
-        $browse_panel,
-      ))
-      ->setFooter(array(
+      ->setMainColumn(
+        array(
+          $branch_panel,
+          $empty_result,
+          $browse_panel,
+        ))
+      ->setFooter(
+        array(
           $open_revisions,
           $readme,
           $pager_box,
-      ));
+        ));
 
     if ($details) {
       $view->addPropertySection(pht('Details'), $details);
@@ -1651,6 +1661,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
   protected function buildCurtain(DiffusionRequest $drequest) {
     $viewer = $this->getViewer();
+    $repository = $drequest->getRepository();
 
     $curtain = $this->newCurtainView($drequest);
 
@@ -1666,6 +1677,21 @@ final class DiffusionBrowseController extends DiffusionController {
         ->setIcon('fa-list'));
 
     $behind_head = $drequest->getSymbolicCommit();
+
+    if ($repository->supportsBranchComparison()) {
+      $compare_uri = $drequest->generateURI(
+        array(
+          'action' => 'compare',
+        ));
+
+      $curtain->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Compare Against...'))
+          ->setIcon('fa-code-fork')
+          ->setWorkflow(true)
+          ->setHref($compare_uri));
+    }
+
     $head_uri = $drequest->generateURI(
       array(
         'commit' => '',
@@ -1935,5 +1961,62 @@ final class DiffusionBrowseController extends DiffusionController {
     return $file;
   }
 
+  private function buildBranchTable() {
+    $viewer = $this->getViewer();
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $branch = $drequest->getBranch();
+    $default_branch = $repository->getDefaultBranch();
+
+    if ($branch === $default_branch) {
+      return null;
+    }
+
+    $pager = id(new PHUIPagerView())
+      ->setPageSize(10);
+
+    try {
+      $results = $this->callConduitWithDiffusionRequest(
+        'diffusion.historyquery',
+        array(
+          'commit' => $branch,
+          'against' => $default_branch,
+          'path' => $drequest->getPath(),
+          'offset' => $pager->getOffset(),
+          'limit' => $pager->getPageSize() + 1,
+        ));
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    $history = DiffusionPathChange::newFromConduit($results['pathChanges']);
+    $history = $pager->sliceResults($history);
+
+    if (!$history) {
+      return null;
+    }
+
+    $history_table = id(new DiffusionHistoryTableView())
+      ->setViewer($viewer)
+      ->setDiffusionRequest($drequest)
+      ->setHistory($history);
+
+    $history_table->loadRevisions();
+
+    $history_table
+      ->setParents($results['parents'])
+      ->setFilterParents(true)
+      ->setIsHead(true)
+      ->setIsTail(!$pager->getHasMorePages());
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('%s vs %s', $branch, $default_branch));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+      ->setTable($history_table);
+  }
 
 }

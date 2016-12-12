@@ -26,10 +26,6 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function canUninstall() {
-    return true;
-  }
-
   public function isPrototype() {
     return true;
   }

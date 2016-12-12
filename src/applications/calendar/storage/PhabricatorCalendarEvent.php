@@ -1024,6 +1024,10 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     $set = new PhutilCalendarRecurrenceSet();
 
+    if ($this->viewerTimezone) {
+      $set->setViewerTimezone($this->viewerTimezone);
+    }
+
     $rrule = $this->newRecurrenceRule();
     if (!$rrule) {
       return null;

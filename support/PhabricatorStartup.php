@@ -395,6 +395,11 @@ final class PhabricatorStartup {
     if (function_exists('libxml_disable_entity_loader')) {
       libxml_disable_entity_loader(true);
     }
+
+    // Enable automatic compression here. Webservers sometimes do this for
+    // us, but we now detect the absence of compression and warn users about
+    // it so try to cover our bases more thoroughly.
+    ini_set('zlib.output_compression', 1);
   }
 
 

@@ -92,7 +92,7 @@ final class PhabricatorProjectSubprojectsController
       ->addPropertyList($property_list);
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::PANEL_SUBPROJECTS);
+    $nav->selectFilter(PhabricatorProject::ITEM_SUBPROJECTS);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Subprojects'));

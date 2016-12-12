@@ -81,11 +81,6 @@
       "rule": ".login-PayPal",
       "hash": "dfa09f45369c93bb0fd82a333b0fe927"
     },
-    "login-Persona": {
-      "name": "login-Persona",
-      "rule": ".login-Persona",
-      "hash": "14cc5b479b14abe16261c01fc432ffd1"
-    },
     "login-Phabricator": {
       "name": "login-Phabricator",
       "rule": ".login-Phabricator",

@@ -170,7 +170,7 @@ final class PhabricatorProjectBoardViewController
       }
 
       $nav = $this->getProfileMenu();
-      $nav->selectFilter(PhabricatorProject::PANEL_WORKBOARD);
+      $nav->selectFilter(PhabricatorProject::ITEM_WORKBOARD);
 
       $crumbs = $this->buildApplicationCrumbs();
       $crumbs->addTextCrumb(pht('Workboard'));
@@ -416,6 +416,8 @@ final class PhabricatorProjectBoardViewController
       ->appendChild($board)
       ->addClass('project-board-wrapper');
 
+    $nav = $this->getProfileMenu();
+
     $divider = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_DIVIDER);
     $fullscreen = $this->buildFullscreenMenu();
@@ -438,6 +440,7 @@ final class PhabricatorProjectBoardViewController
         ))
       ->setPageObjectPHIDs(array($project->getPHID()))
       ->setShowFooter(false)
+      ->setNavigation($nav)
       ->setCrumbs($crumbs)
       ->addQuicksandConfig(
         array(
@@ -932,8 +935,8 @@ final class PhabricatorProjectBoardViewController
     $set_default = $request->getBool('default');
     if ($set_default) {
       $this
-        ->getProfilePanelEngine()
-        ->adjustDefault(PhabricatorProject::PANEL_WORKBOARD);
+        ->getProfileMenuEngine()
+        ->adjustDefault(PhabricatorProject::ITEM_WORKBOARD);
     }
 
     if ($request->isFormPost()) {

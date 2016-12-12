@@ -119,4 +119,14 @@ final class DiffusionMercurialServeSSHWorkflow
     return $raw_message;
   }
 
+  protected function raiseWrongVCSException(
+    PhabricatorRepository $repository) {
+    throw new Exception(
+      pht(
+        'This repository ("%s") is not a Mercurial repository. Use "%s" to '.
+        'interact with this repository.',
+        $repository->getDisplayName(),
+        $repository->getVersionControlSystem()));
+  }
+
 }

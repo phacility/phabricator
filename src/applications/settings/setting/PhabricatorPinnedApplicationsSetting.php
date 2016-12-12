@@ -10,12 +10,7 @@ final class PhabricatorPinnedApplicationsSetting
   }
 
   public function getSettingDefaultValue() {
-    $viewer = $this->getViewer();
-
-    // If we're editing a template, just show every available application.
-    if (!$viewer) {
-      $viewer = PhabricatorUser::getOmnipotentUser();
-    }
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $applications = id(new PhabricatorApplicationQuery())
       ->setViewer($viewer)

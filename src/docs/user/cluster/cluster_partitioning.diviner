@@ -6,8 +6,6 @@ Guide to partitioning Phabricator applications across multiple database hosts.
 Overview
 ========
 
-WARNING: Partitioning is a prototype.
-
 You can partition Phabricator's applications across multiple databases. For
 example, you can move an application like Files or Maniphest to a dedicated
 database host.
@@ -19,17 +17,18 @@ The advantages of doing this are:
   - you can match application workloads to hardware or configuration to make
     operating the cluster easier.
 
-This configuration is complex, and very few installs need to pursue it.
-Phabricator will normally run comfortably with a single database master even
-for large organizations.
+This configuration is complex, and very few installs will benefit from pursuing
+it. Phabricator will normally run comfortably with a single database master
+even for large organizations.
 
 Partitioning generally does not do much to increase resiliance or make it
-easier to recover from disasters, and is primarily a mechanism for scaling.
+easier to recover from disasters, and is primarily a mechanism for scaling and
+operational convenience.
 
 If you are considering partitioning, you likely want to configure replication
 with a single master first. Even if you choose not to deploy replication, you
 should review and understand how replication works before you partition. For
-details, see @{Cluster:Databases}.
+details, see @{article:Cluster: Databases}.
 
 Databases also support some advanced configuration options. Briefly:
 

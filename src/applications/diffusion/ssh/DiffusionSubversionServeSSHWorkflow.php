@@ -449,4 +449,14 @@ final class DiffusionSubversionServeSSHWorkflow
     return $path;
   }
 
+  protected function raiseWrongVCSException(
+    PhabricatorRepository $repository) {
+    throw new Exception(
+      pht(
+        'This repository ("%s") is not a Subversion repository. Use "%s" to '.
+        'interact with this repository.',
+        $repository->getDisplayName(),
+        $repository->getVersionControlSystem()));
+  }
+
 }

@@ -102,10 +102,21 @@ final class PhabricatorProjectDatasource
       }
 
       $all_strings = array();
-      $all_strings[] = $proj->getDisplayName();
+
+      // NOTE: We list the project's name first because results will be
+      // sorted into prefix vs content phases incorrectly if we don't: it
+      // will look like "Parent (Milestone)" matched "Parent" as a prefix,
+      // but it did not.
+      $all_strings[] = $proj->getName();
+
+      if ($proj->isMilestone()) {
+        $all_strings[] = $proj->getParentProject()->getName();
+      }
+
       foreach ($proj->getSlugs() as $project_slug) {
         $all_strings[] = $project_slug->getSlug();
       }
+
       $all_strings = implode("\n", $all_strings);
 
       $proj_result = id(new PhabricatorTypeaheadResult())

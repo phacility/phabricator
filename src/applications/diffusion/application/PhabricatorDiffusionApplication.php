@@ -65,6 +65,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           => 'DiffusionCommitTagsController',
         'commit/(?P<commit>[a-z0-9]+)/edit/'
           => 'DiffusionCommitEditController',
+        'compare/' => 'DiffusionCompareController',
         'manage/(?:(?P<panel>[^/]+)/)?'
           => 'DiffusionRepositoryManagePanelsController',
         'uri/' => array(

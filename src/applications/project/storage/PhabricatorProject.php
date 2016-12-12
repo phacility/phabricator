@@ -49,13 +49,13 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
 
-  const PANEL_PROFILE = 'project.profile';
-  const PANEL_POINTS = 'project.points';
-  const PANEL_WORKBOARD = 'project.workboard';
-  const PANEL_MEMBERS = 'project.members';
-  const PANEL_MANAGE = 'project.manage';
-  const PANEL_MILESTONES = 'project.milestones';
-  const PANEL_SUBPROJECTS = 'project.subprojects';
+  const ITEM_PROFILE = 'project.profile';
+  const ITEM_POINTS = 'project.points';
+  const ITEM_WORKBOARD = 'project.workboard';
+  const ITEM_MEMBERS = 'project.members';
+  const ITEM_MANAGE = 'project.manage';
+  const ITEM_MILESTONES = 'project.milestones';
+  const ITEM_SUBPROJECTS = 'project.subprojects';
 
   public static function initializeNewProject(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())

@@ -36,7 +36,7 @@ abstract class PhabricatorPeopleProfileController
       if ($user) {
         $viewer = $this->getViewer();
 
-        $engine = id(new PhabricatorPeopleProfilePanelEngine())
+        $engine = id(new PhabricatorPeopleProfileMenuEngine())
           ->setViewer($viewer)
           ->setProfileObject($user);
 

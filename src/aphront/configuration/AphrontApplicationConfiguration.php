@@ -59,6 +59,11 @@ abstract class AphrontApplicationConfiguration extends Phobject {
    * @phutil-external-symbol class PhabricatorStartup
    */
   public static function runHTTPRequest(AphrontHTTPSink $sink) {
+    if (isset($_SERVER['HTTP_X_PHABRICATOR_SELFCHECK'])) {
+      $response = self::newSelfCheckResponse();
+      return self::writeResponse($sink, $response);
+    }
+
     PhabricatorStartup::beginStartupPhase('multimeter');
     $multimeter = MultimeterControl::newInstance();
     $multimeter->setEventContext('<http-init>');
@@ -106,10 +111,18 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     PhabricatorAccessLog::init();
     $access_log = PhabricatorAccessLog::getLog();
     PhabricatorStartup::setAccessLog($access_log);
+
+    $address = PhabricatorEnv::getRemoteAddress();
+    if ($address) {
+      $address_string = $address->getAddress();
+    } else {
+      $address_string = '-';
+    }
+
     $access_log->setData(
       array(
         'R' => AphrontRequest::getHTTPHeader('Referer', '-'),
-        'r' => idx($_SERVER, 'REMOTE_ADDR', '-'),
+        'r' => $address_string,
         'M' => idx($_SERVER, 'REQUEST_METHOD', '-'),
       ));
 
@@ -409,17 +422,23 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     if (!preg_match('@/$@', $path) && $request->isHTTPGet()) {
       $result = $this->routePath($maps, $path.'/');
       if ($result) {
-        $slash_uri = $request->getRequestURI()->setPath($path.'/');
+        $target_uri = $request->getAbsoluteRequestURI();
 
         // We need to restore URI encoding because the webserver has
         // interpreted it. For example, this allows us to redirect a path
         // like `/tag/aa%20bb` to `/tag/aa%20bb/`, which may eventually be
         // resolved meaningfully by an application.
-        $slash_uri = phutil_escape_uri($slash_uri);
+        $target_path = phutil_escape_uri($path.'/');
+        $target_uri->setPath($target_path);
+        $target_uri = (string)$target_uri;
 
-        $external = strlen($request->getRequestURI()->getDomain());
-        return $this->buildRedirectController($slash_uri, $external);
+        return $this->buildRedirectController($target_uri, true);
       }
+    }
+
+    $result = $site->new404Controller($request);
+    if ($result) {
+      return array($result, array());
     }
 
     return $this->build404Controller();
@@ -676,5 +695,36 @@ abstract class AphrontApplicationConfiguration extends Phobject {
     throw $ex;
   }
 
+  private static function newSelfCheckResponse() {
+    $path = idx($_REQUEST, '__path__', '');
+    $query = idx($_SERVER, 'QUERY_STRING', '');
+
+    $pairs = id(new PhutilQueryStringParser())
+      ->parseQueryStringToPairList($query);
+
+    $params = array();
+    foreach ($pairs as $v) {
+      $params[] = array(
+        'name' => $v[0],
+        'value' => $v[1],
+      );
+    }
+
+    $result = array(
+      'path' => $path,
+      'params' => $params,
+      'user' => idx($_SERVER, 'PHP_AUTH_USER'),
+      'pass' => idx($_SERVER, 'PHP_AUTH_PW'),
+
+      // This just makes sure that the response compresses well, so reasonable
+      // algorithms should want to gzip or deflate it.
+      'filler' => str_repeat('Q', 1024 * 16),
+    );
+
+
+    return id(new AphrontJSONResponse())
+      ->setAddJSONShield(false)
+      ->setContent($result);
+  }
 
 }

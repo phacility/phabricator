@@ -83,10 +83,6 @@ only screen and (min-resolution: 1.5dppx) {
   background-position: 0px -87px;
 }
 
-.login-Persona {
-  background-position: -29px -87px;
-}
-
 .login-Phabricator {
   background-position: -58px -87px;
 }

@@ -95,7 +95,13 @@ abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
     // This has the format "<ip> <remote-port> <local-port>". Grab the IP.
     $remote_address = head(explode(' ', $ssh_client));
 
-    return $remote_address;
+    try {
+      $address = PhutilIPAddress::newAddress($remote_address);
+    } catch (Exception $ex) {
+      return null;
+    }
+
+    return $address->getAddress();
   }
 
 }

@@ -12,6 +12,7 @@ final class PhabricatorRepositoryQuery
   private $uris;
   private $datasourceQuery;
   private $slugs;
+  private $almanacServicePHIDs;
 
   private $numericIdentifiers;
   private $callsignIdentifiers;
@@ -131,6 +132,11 @@ final class PhabricatorRepositoryQuery
 
   public function withSlugs(array $slugs) {
     $this->slugs = $slugs;
+    return $this;
+  }
+
+  public function withAlmanacServicePHIDs(array $phids) {
+    $this->almanacServicePHIDs = $phids;
     return $this;
   }
 
@@ -657,6 +663,13 @@ final class PhabricatorRepositoryQuery
         $conn,
         'uri.repositoryURI IN (%Ls)',
         $try_uris);
+    }
+
+    if ($this->almanacServicePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'r.almanacServicePHID IN (%Ls)',
+        $this->almanacServicePHIDs);
     }
 
     return $where;
