@@ -6,6 +6,7 @@ final class PhabricatorDashboardQuery
   private $ids;
   private $phids;
   private $statuses;
+  private $authorPHIDs;
 
   private $needPanels;
   private $needProjects;
@@ -22,6 +23,11 @@ final class PhabricatorDashboardQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
+    return $this;
+  }
+
+  public function withAuthorPHIDs(array $authors) {
+    $this->authorPHIDs = $authors;
     return $this;
   }
 
@@ -119,6 +125,13 @@ final class PhabricatorDashboardQuery
         $conn,
         'status IN (%Ls)',
         $this->statuses);
+    }
+
+    if ($this->authorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'authorPHID IN (%Ls)',
+        $this->authorPHIDs);
     }
 
     return $where;
