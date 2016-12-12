@@ -100,16 +100,6 @@ messages.
 EODOC
 ));
 
-    $bulk_description = $this->deformat(pht(<<<EODOC
-If this option is enabled, Phabricator will add a "Precedence: bulk" header to
-transactional mail (e.g., Differential, Maniphest and Herald notifications).
-This may improve the behavior of some auto-responder software and prevent it
-from replying. However, it may also cause deliverability issues -- notably, you
-currently can not send this header via Amazon SES, and enabling this option with
-SES will prevent delivery of any affected mail.
-EODOC
-));
-
     $email_preferences_description = $this->deformat(pht(<<<EODOC
 You can disable the email preference link in emails if users prefer smaller
 emails.
