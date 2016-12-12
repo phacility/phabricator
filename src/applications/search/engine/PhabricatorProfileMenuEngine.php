@@ -155,8 +155,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       return $content;
     }
 
+    $crumbs->setBorder(true);
+
     return $controller->newPage()
-      ->setTitle(pht('Profile Stuff'))
+      ->setTitle(pht('Configure Menu'))
       ->setNavigation($navigation)
       ->setCrumbs($crumbs)
       ->appendChild($content);
@@ -628,8 +630,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setUser($viewer);
 
     $item_types = PhabricatorProfileMenuItem::getAllMenuItems();
+    $object = $this->getProfileObject();
 
-    $action_view->addAction(
+    $action_list = id(new PhabricatorActionListView())
+      ->setViewer($viewer);
+
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setLabel(true)
         ->setName(pht('Add New Menu Item...')));
@@ -641,14 +647,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
       $item_key = $item_type->getMenuItemKey();
 
-      $action_view->addAction(
+      $action_list->addAction(
         id(new PhabricatorActionView())
           ->setIcon($item_type->getMenuItemTypeIcon())
           ->setName($item_type->getMenuItemTypeName())
-          ->setHref($this->getItemURI("new/{$item_key}/")));
+          ->setHref($this->getItemURI("new/{$item_key}/"))
+          ->setWorkflow(true));
     }
 
-    $action_view->addAction(
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setLabel(true)
         ->setName(pht('Documentation')));
@@ -656,29 +663,37 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $doc_link = PhabricatorEnv::getDoclink('Profile Menu User Guide');
     $doc_name = pht('Profile Menu User Guide');
 
-    $action_view->addAction(
+    $action_list->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-book')
         ->setHref($doc_link)
         ->setName($doc_name));
 
-    $action_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Configure Menu'))
-      ->setHref('#')
-      ->setIcon('fa-gear')
-      ->setDropdownMenu($action_view);
-
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Profile Menu Items'))
-      ->setSubHeader(pht('Drag tabs to reorder menu'))
-      ->addActionLink($action_button);
+      ->setHeaderIcon('fa-list');
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
+      ->setHeaderText(pht('Navigation'))
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
-    return $box;
+    $panel = id(new PHUICurtainPanelView())
+      ->appendChild($action_view);
+
+    $curtain = id(new PHUICurtainView())
+      ->setViewer($viewer)
+      ->setActionList($action_list);
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(
+        array(
+          $box,
+        ));
+
+    return $view;
   }
 
   private function buildItemNewContent($item_key) {
