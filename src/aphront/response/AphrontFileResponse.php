@@ -5,6 +5,7 @@ final class AphrontFileResponse extends AphrontResponse {
   private $content;
   private $contentIterator;
   private $contentLength;
+  private $compressResponse;
 
   private $mimeType;
   private $download;
@@ -69,6 +70,15 @@ final class AphrontFileResponse extends AphrontResponse {
     return $this->contentLength;
   }
 
+  public function setCompressResponse($compress_response) {
+    $this->compressResponse = $compress_response;
+    return $this;
+  }
+
+  public function getCompressResponse() {
+    return $this->compressResponse;
+  }
+
   public function setRange($min, $max) {
     $this->rangeMin = $min;
     $this->rangeMax = $max;
@@ -94,7 +104,9 @@ final class AphrontFileResponse extends AphrontResponse {
       $content_len = $this->getContentLength();
     }
 
-    $headers[] = array('Content-Length', $this->getContentLength());
+    if (!$this->shouldCompressResponse()) {
+      $headers[] = array('Content-Length', $this->getContentLength());
+    }
 
     if (strlen($this->getDownload())) {
       $headers[] = array('X-Download-Options', 'noopen');
@@ -116,6 +128,10 @@ final class AphrontFileResponse extends AphrontResponse {
 
     $headers = array_merge(parent::getHeaders(), $headers);
     return $headers;
+  }
+
+  protected function shouldCompressResponse() {
+    return $this->getCompressResponse();
   }
 
 }
