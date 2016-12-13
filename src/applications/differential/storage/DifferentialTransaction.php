@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialTransaction extends PhabricatorApplicationTransaction {
+final class DifferentialTransaction
+  extends PhabricatorModularTransaction {
 
   private $isCommandeerSideEffect;
 
@@ -17,6 +18,9 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   const MAILTAG_REVIEW_REQUEST = 'differential-review-request';
   const MAILTAG_OTHER          = 'differential-other';
 
+  public function getBaseTransactionClass() {
+    return 'DifferentialRevisionTransactionType';
+  }
 
   public function setIsCommandeerSideEffect($is_side_effect) {
     $this->isCommandeerSideEffect = $is_side_effect;

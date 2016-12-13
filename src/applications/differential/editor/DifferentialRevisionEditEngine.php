@@ -60,7 +60,17 @@ final class DifferentialRevisionEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    return array();
+    return array(
+      id(new PhabricatorTextEditField())
+        ->setKey('title')
+        ->setLabel(pht('Title'))
+        ->setTransactionType(
+          DifferentialRevisionTitleTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('The title of the revision.'))
+        ->setConduitDescription(pht('Retitle the revision.'))
+        ->setConduitTypeDescription(pht('New revision title.'))
+        ->setValue($object->getTitle()),
+    );
   }
 
 }
