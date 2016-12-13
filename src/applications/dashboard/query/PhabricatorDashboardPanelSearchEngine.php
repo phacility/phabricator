@@ -34,12 +34,20 @@ final class PhabricatorDashboardPanelSearchEngine
       $query->withPanelTypes(array($map['paneltype']));
     }
 
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
 
     return array(
+        id(new PhabricatorSearchDatasourceField())
+          ->setLabel(pht('Authored By'))
+          ->setKey('authorPHIDs')
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource()),
         id(new PhabricatorSearchSelectField())
           ->setKey('status')
           ->setLabel(pht('Status'))
@@ -60,19 +68,32 @@ final class PhabricatorDashboardPanelSearchEngine
   }
 
   protected function getBuiltinQueryNames() {
-    return array(
-      'active' => pht('Active Panels'),
-      'all'    => pht('All Panels'),
-    );
+    $names = array();
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['authored'] = pht('Authored');
+    }
+
+    $names['active'] = pht('Active Panels');
+    $names['all'] = pht('All Panels');
+
+    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
+    $viewer = $this->requireViewer();
 
     switch ($query_key) {
       case 'active':
         return $query->setParameter('status', 'active');
+      case 'authored':
+        return $query->setParameter(
+          'authorPHIDs',
+          array(
+            $viewer->getPHID(),
+          ));
       case 'all':
         return $query;
     }

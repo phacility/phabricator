@@ -56,7 +56,7 @@ final class PhabricatorDashboardSearchEngine
         return $query;
       case 'authored':
         return $query->setParameter(
-          'authored',
+          'authorPHIDs',
           array(
             $viewer->getPHID(),
           ));

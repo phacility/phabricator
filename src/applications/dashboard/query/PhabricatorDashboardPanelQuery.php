@@ -7,6 +7,7 @@ final class PhabricatorDashboardPanelQuery
   private $phids;
   private $archived;
   private $panelTypes;
+  private $authorPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -25,6 +26,11 @@ final class PhabricatorDashboardPanelQuery
 
   public function withPanelTypes(array $types) {
     $this->panelTypes = $types;
+    return $this;
+  }
+
+  public function withAuthorPHIDs(array $authors) {
+    $this->authorPHIDs = $authors;
     return $this;
   }
 
@@ -73,6 +79,13 @@ final class PhabricatorDashboardPanelQuery
         $conn,
         'panelType IN (%Ls)',
         $this->panelTypes);
+    }
+
+    if ($this->authorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'authorPHID IN (%Ls)',
+        $this->authorPHIDs);
     }
 
     return $where;
