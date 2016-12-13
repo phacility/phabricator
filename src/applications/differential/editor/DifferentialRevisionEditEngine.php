@@ -60,37 +60,70 @@ final class DifferentialRevisionEditEngine
   }
 
   protected function buildCustomEditFields($object) {
-    return array(
-      id(new PhabricatorTextEditField())
-        ->setKey('title')
-        ->setLabel(pht('Title'))
-        ->setIsRequired(true)
+
+    $plan_required = PhabricatorEnv::getEnvConfig(
+      'differential.require-test-plan-field');
+    $plan_enabled = $this->isCustomFieldEnabled(
+      $object,
+      'differential:test-plan');
+
+    $fields = array();
+    $fields[] = id(new PhabricatorTextEditField())
+      ->setKey('title')
+      ->setLabel(pht('Title'))
+      ->setIsRequired(true)
+      ->setTransactionType(
+        DifferentialRevisionTitleTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('The title of the revision.'))
+      ->setConduitDescription(pht('Retitle the revision.'))
+      ->setConduitTypeDescription(pht('New revision title.'))
+      ->setValue($object->getTitle());
+
+    $fields[] = id(new PhabricatorRemarkupEditField())
+      ->setKey('summary')
+      ->setLabel(pht('Summary'))
+      ->setTransactionType(
+        DifferentialRevisionSummaryTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('The summary of the revision.'))
+      ->setConduitDescription(pht('Change the revision summary.'))
+      ->setConduitTypeDescription(pht('New revision summary.'))
+      ->setValue($object->getSummary());
+
+    if ($plan_enabled) {
+      $fields[] = id(new PhabricatorRemarkupEditField())
+        ->setKey('testPlan')
+        ->setLabel(pht('Test Plan'))
+        ->setIsRequired($plan_required)
         ->setTransactionType(
-          DifferentialRevisionTitleTransaction::TRANSACTIONTYPE)
-        ->setDescription(pht('The title of the revision.'))
-        ->setConduitDescription(pht('Retitle the revision.'))
-        ->setConduitTypeDescription(pht('New revision title.'))
-        ->setValue($object->getTitle()),
-      id(new PhabricatorRemarkupEditField())
-        ->setKey('summary')
-        ->setLabel(pht('Summary'))
-        ->setTransactionType(
-          DifferentialRevisionSummaryTransaction::TRANSACTIONTYPE)
-        ->setDescription(pht('The summary of the revision.'))
-        ->setConduitDescription(pht('Change the revision summary.'))
-        ->setConduitTypeDescription(pht('New revision summary.'))
-        ->setValue($object->getSummary()),
-      id(new PhabricatorDatasourceEditField())
-        ->setKey('repositoryPHID')
-        ->setLabel(pht('Repository'))
-        ->setDatasource(new DiffusionRepositoryDatasource())
-        ->setTransactionType(
-          DifferentialRevisionRepositoryTransaction::TRANSACTIONTYPE)
-        ->setDescription(pht('The repository the revision belongs to.'))
-        ->setConduitDescription(pht('Change the repository for this revision.'))
-        ->setConduitTypeDescription(pht('New repository.'))
-        ->setSingleValue($object->getRepositoryPHID()),
-    );
+          DifferentialRevisionTestPlanTransaction::TRANSACTIONTYPE)
+        ->setDescription(
+          pht('Actions performed to verify the behavior of the change.'))
+        ->setConduitDescription(pht('Update the revision test plan.'))
+        ->setConduitTypeDescription(pht('New test plan.'))
+        ->setValue($object->getTestPlan());
+    }
+
+    $fields[] = id(new PhabricatorDatasourceEditField())
+      ->setKey('repositoryPHID')
+      ->setLabel(pht('Repository'))
+      ->setDatasource(new DiffusionRepositoryDatasource())
+      ->setTransactionType(
+        DifferentialRevisionRepositoryTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('The repository the revision belongs to.'))
+      ->setConduitDescription(pht('Change the repository for this revision.'))
+      ->setConduitTypeDescription(pht('New repository.'))
+      ->setSingleValue($object->getRepositoryPHID());
+
+    return $fields;
+  }
+
+  private function isCustomFieldEnabled(DifferentialRevision $revision, $key) {
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $revision,
+      PhabricatorCustomField::ROLE_EDIT);
+
+    $fields = $field_list->getFields();
+    return isset($fields[$key]);
   }
 
 }
