@@ -16,6 +16,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $status;
+  protected $icon;
   protected $layoutConfig = array();
 
   const STATUS_ACTIVE = 'active';
@@ -29,6 +30,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   public static function initializeNewDashboard(PhabricatorUser $actor) {
     return id(new PhabricatorDashboard())
       ->setName('')
+      ->setIcon('fa-dashboard')
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy($actor->getPHID())
       ->setStatus(self::STATUS_ACTIVE)
@@ -63,6 +65,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
         'status' => 'text32',
+        'icon' => 'text32',
         'authorPHID' => 'phid',
       ),
     ) + parent::getConfiguration();

@@ -51,6 +51,7 @@ final class PhabricatorDashboardTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = PhabricatorDashboardTransaction::TYPE_NAME;
+    $types[] = PhabricatorDashboardTransaction::TYPE_ICON;
     $types[] = PhabricatorDashboardTransaction::TYPE_STATUS;
     $types[] = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
 
@@ -66,6 +67,11 @@ final class PhabricatorDashboardTransactionEditor
           return null;
         }
         return $object->getName();
+      case PhabricatorDashboardTransaction::TYPE_ICON:
+        if ($this->getIsNewObject()) {
+          return null;
+        }
+        return $object->getIcon();
       case PhabricatorDashboardTransaction::TYPE_STATUS:
         if ($this->getIsNewObject()) {
           return null;
@@ -87,6 +93,7 @@ final class PhabricatorDashboardTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
+      case PhabricatorDashboardTransaction::TYPE_ICON:
       case PhabricatorDashboardTransaction::TYPE_STATUS:
       case PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE:
         return $xaction->getNewValue();
@@ -100,6 +107,9 @@ final class PhabricatorDashboardTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
+        return;
+      case PhabricatorDashboardTransaction::TYPE_ICON:
+        $object->setIcon($xaction->getNewValue());
         return;
       case PhabricatorDashboardTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
@@ -130,6 +140,7 @@ final class PhabricatorDashboardTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardTransaction::TYPE_NAME:
+      case PhabricatorDashboardTransaction::TYPE_ICON:
       case PhabricatorDashboardTransaction::TYPE_STATUS:
       case PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE:
         return;
