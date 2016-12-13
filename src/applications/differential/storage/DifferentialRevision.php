@@ -409,6 +409,24 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
+  public function getReviewerPHIDsForEdit() {
+    $reviewers = $this->getReviewerStatus();
+
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+
+    $value = array();
+    foreach ($reviewers as $reviewer) {
+      $phid = $reviewer->getReviewerPHID();
+      if ($reviewer->getStatus() == $status_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
+    }
+
+    return $value;
+  }
+
   public function getRepository() {
     return $this->assertAttached($this->repository);
   }

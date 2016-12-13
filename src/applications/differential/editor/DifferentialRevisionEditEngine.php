@@ -32,7 +32,8 @@ final class DifferentialRevisionEditEngine
   }
 
   protected function newObjectQuery() {
-    return new DifferentialRevisionQuery();
+    return id(new DifferentialRevisionQuery())
+      ->needReviewerStatus(true);
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -102,6 +103,18 @@ final class DifferentialRevisionEditEngine
         ->setConduitTypeDescription(pht('New test plan.'))
         ->setValue($object->getTestPlan());
     }
+
+    $fields[] = id(new PhabricatorDatasourceEditField())
+      ->setKey('reviewerPHIDs')
+      ->setLabel(pht('Reviewers'))
+      ->setDatasource(new DifferentialReviewerDatasource())
+      ->setUseEdgeTransactions(true)
+      ->setTransactionType(
+        DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE)
+      ->setDescription(pht('Reviewers for this revision.'))
+      ->setConduitDescription(pht('Change the reviewers for this revision.'))
+      ->setConduitTypeDescription(pht('New reviewers.'))
+      ->setValue($object->getReviewerPHIDsForEdit());
 
     $fields[] = id(new PhabricatorDatasourceEditField())
       ->setKey('repositoryPHID')

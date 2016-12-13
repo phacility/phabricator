@@ -277,7 +277,7 @@ abstract class PhabricatorModularTransactionType
     return !strlen($value);
   }
 
-  private function isTextMode() {
+  protected function isTextMode() {
     $target = $this->getStorage()->getRenderingTarget();
     return ($target == PhabricatorApplicationTransaction::TARGET_TEXT);
   }
