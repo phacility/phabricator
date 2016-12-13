@@ -64,12 +64,32 @@ final class DifferentialRevisionEditEngine
       id(new PhabricatorTextEditField())
         ->setKey('title')
         ->setLabel(pht('Title'))
+        ->setIsRequired(true)
         ->setTransactionType(
           DifferentialRevisionTitleTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('The title of the revision.'))
         ->setConduitDescription(pht('Retitle the revision.'))
         ->setConduitTypeDescription(pht('New revision title.'))
         ->setValue($object->getTitle()),
+      id(new PhabricatorRemarkupEditField())
+        ->setKey('summary')
+        ->setLabel(pht('Summary'))
+        ->setTransactionType(
+          DifferentialRevisionSummaryTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('The summary of the revision.'))
+        ->setConduitDescription(pht('Change the revision summary.'))
+        ->setConduitTypeDescription(pht('New revision summary.'))
+        ->setValue($object->getSummary()),
+      id(new PhabricatorDatasourceEditField())
+        ->setKey('repositoryPHID')
+        ->setLabel(pht('Repository'))
+        ->setDatasource(new DiffusionRepositoryDatasource())
+        ->setTransactionType(
+          DifferentialRevisionRepositoryTransaction::TRANSACTIONTYPE)
+        ->setDescription(pht('The repository the revision belongs to.'))
+        ->setConduitDescription(pht('Change the repository for this revision.'))
+        ->setConduitTypeDescription(pht('New repository.'))
+        ->setSingleValue($object->getRepositoryPHID()),
     );
   }
 
