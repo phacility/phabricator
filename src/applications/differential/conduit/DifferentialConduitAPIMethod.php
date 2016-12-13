@@ -124,8 +124,15 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
     $message = $request->getValue('message');
     if (strlen($message)) {
       // This is a little awkward, and should maybe move inside the transaction
-      // editor. It largely exists for legacy reasons.
+      // editor. It largely exists for legacy reasons. See some discussion in
+      // T7899.
       $first_line = head(phutil_split_lines($message, false));
+
+      $first_line = id(new PhutilUTF8StringTruncator())
+        ->setMaximumBytes(250)
+        ->setMaximumGlyphs(80)
+        ->truncateString($first_line);
+
       $diff->setDescription($first_line);
       $diff->save();
 
