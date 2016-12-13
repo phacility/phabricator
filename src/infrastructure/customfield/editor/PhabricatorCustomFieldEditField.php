@@ -47,14 +47,13 @@ final class PhabricatorCustomFieldEditField
   }
 
   protected function newEditType() {
-    $conduit_type = $this->newConduitParameterType();
-    if (!$conduit_type) {
-      return null;
-    }
-
     $type = id(new PhabricatorCustomFieldEditType())
-      ->setCustomField($this->getCustomField())
-      ->setConduitParameterType($conduit_type);
+      ->setCustomField($this->getCustomField());
+
+    $conduit_type = $this->newConduitParameterType();
+    if ($conduit_type) {
+      $type->setConduitParameterType($conduit_type);
+    }
 
     return $type;
   }

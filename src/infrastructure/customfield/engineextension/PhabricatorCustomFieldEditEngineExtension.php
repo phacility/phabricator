@@ -27,12 +27,6 @@ final class PhabricatorCustomFieldEditEngineExtension
     PhabricatorEditEngine $engine,
     PhabricatorApplicationTransactionInterface $object) {
 
-    // TODO: Remove this hack once Differential modernizes more fully. Today,
-    // its custom fields are too custom to interact cleanly with EditEngine.
-    if ($object instanceof DifferentialRevision) {
-      return array();
-    }
-
     $viewer = $this->getViewer();
 
     $field_list = PhabricatorCustomField::getObjectFields(

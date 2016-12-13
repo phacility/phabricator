@@ -15,10 +15,6 @@ final class DifferentialManiphestTasksField
     return false;
   }
 
-  public function shouldAppearInEditView() {
-    return false;
-  }
-
   public function getFieldName() {
     return pht('Maniphest Tasks');
   }

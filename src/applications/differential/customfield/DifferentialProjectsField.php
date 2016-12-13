@@ -19,10 +19,6 @@ final class DifferentialProjectsField
     return false;
   }
 
-  public function shouldAppearInEditView() {
-    return true;
-  }
-
   public function shouldAppearInApplicationTransactions() {
     return true;
   }

@@ -23,10 +23,6 @@ final class DifferentialReviewedByField
     return false;
   }
 
-  public function shouldAppearInEditView() {
-    return false;
-  }
-
   public function canDisableField() {
     return true;
   }

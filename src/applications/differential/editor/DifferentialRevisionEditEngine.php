@@ -95,23 +95,26 @@ final class DifferentialRevisionEditEngine
       $diff_phid = null;
     }
 
-    $is_update = ($diff && $object->getID());
+    $is_create = $this->getIsCreate();
+    $is_update = ($diff && !$is_create);
 
     $fields = array();
 
-    $fields[] = id(new PhabricatorHandlesEditField())
-      ->setKey('update')
-      ->setLabel(pht('Update Diff'))
-      ->setDescription(pht('New diff to create or update the revision with.'))
-      ->setConduitDescription(pht('Create or update a revision with a diff.'))
-      ->setConduitTypeDescription(pht('PHID of the diff.'))
-      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
-      ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
-      ->setSingleValue($diff_phid)
-      ->setIsReorderable(false)
-      ->setIsDefaultable(false)
-      ->setIsInvisible(true)
-      ->setIsLockable(false);
+    if ($diff || $is_create) {
+      $fields[] = id(new PhabricatorHandlesEditField())
+        ->setKey('update')
+        ->setLabel(pht('Update Diff'))
+        ->setDescription(pht('New diff to create or update the revision with.'))
+        ->setConduitDescription(pht('Create or update a revision with a diff.'))
+        ->setConduitTypeDescription(pht('PHID of the diff.'))
+        ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+        ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
+        ->setSingleValue($diff_phid)
+        ->setIsReorderable(false)
+        ->setIsDefaultable(false)
+        ->setIsInvisible(true)
+        ->setIsLockable(false);
+    }
 
     if ($is_update) {
       $fields[] = id(new PhabricatorInstructionsEditField())
@@ -194,7 +197,7 @@ final class DifferentialRevisionEditEngine
   private function isCustomFieldEnabled(DifferentialRevision $revision, $key) {
     $field_list = PhabricatorCustomField::getObjectFields(
       $revision,
-      PhabricatorCustomField::ROLE_EDIT);
+      PhabricatorCustomField::ROLE_VIEW);
 
     $fields = $field_list->getFields();
     return isset($fields[$key]);
