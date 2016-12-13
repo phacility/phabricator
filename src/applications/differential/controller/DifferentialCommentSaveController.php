@@ -64,7 +64,7 @@ final class DifferentialCommentSaveController
       if (isset($current_reviewers[$reviewer_phid])) {
         continue;
       }
-      $reviewer = new DifferentialReviewer(
+      $reviewer = new DifferentialReviewerProxy(
         $reviewer_phid,
         array(
           'status' => DifferentialReviewerStatus::STATUS_ADDED,

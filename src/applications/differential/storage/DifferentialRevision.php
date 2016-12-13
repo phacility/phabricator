@@ -403,7 +403,7 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function attachReviewerStatus(array $reviewers) {
-    assert_instances_of($reviewers, 'DifferentialReviewer');
+    assert_instances_of($reviewers, 'DifferentialReviewerProxy');
 
     $this->reviewerStatus = $reviewers;
     return $this;

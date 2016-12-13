@@ -7,7 +7,7 @@ final class DifferentialReviewersView extends AphrontView {
   private $diff;
 
   public function setReviewers(array $reviewers) {
-    assert_instances_of($reviewers, 'DifferentialReviewer');
+    assert_instances_of($reviewers, 'DifferentialReviewerProxy');
     $this->reviewers = $reviewers;
     return $this;
   }

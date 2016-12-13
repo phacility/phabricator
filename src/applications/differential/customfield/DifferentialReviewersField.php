@@ -84,7 +84,7 @@ final class DifferentialReviewersField
     }
 
     foreach ($new_reviewers as $phid => $status) {
-      $new_reviewers[$phid] = new DifferentialReviewer(
+      $new_reviewers[$phid] = new DifferentialReviewerProxy(
         $phid,
         array(
           'status' => $status,

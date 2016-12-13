@@ -1008,7 +1008,9 @@ final class DifferentialRevisionQuery
       $revision_edges = $edges[$revision->getPHID()][$edge_type];
       $reviewers = array();
       foreach ($revision_edges as $reviewer_phid => $edge) {
-        $reviewer = new DifferentialReviewer($reviewer_phid, $edge['data']);
+        $reviewer = new DifferentialReviewerProxy(
+          $reviewer_phid,
+          $edge['data']);
 
         if ($this->needReviewerAuthority) {
           if (!$viewer_phid) {

@@ -474,7 +474,7 @@ final class DifferentialTransactionEditor
 
             $owner_phid = $object->getAuthorPHID();
             if ($owner_phid) {
-              $reviewer = new DifferentialReviewer(
+              $reviewer = new DifferentialReviewerProxy(
                 $owner_phid,
                 array(
                   'status' => DifferentialReviewerStatus::STATUS_ADDED,
