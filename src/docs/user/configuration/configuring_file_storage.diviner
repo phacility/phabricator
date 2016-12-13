@@ -133,15 +133,15 @@ Engine: MySQL
 MySQL storage is configured by default, for files up to (just under) 1MB. You
 can configure it with these keys:
 
-  - `storage.mysql-engine.max-size`: Change the filesize limit. Set to 0
-    to disable.
+  - `storage.mysql-engine.max-size`: Change the filesize limit, in bytes. Set
+    to 0 to disable.
 
 For most installs, it is reasonable to leave this engine as-is and let small
 files (like thumbnails and profile images) be stored in MySQL, which is usually
 the lowest-latency filestore, even if you configure another storage engine.
 
-To support large files, increase this limit to at least **8MB**. This will
-activate chunk storage in MySQL.
+To support large files, increase this limit to at least `8388608` (8MB).
+This will activate chunk storage in MySQL.
 
 Engine: Local Disk
 ==================

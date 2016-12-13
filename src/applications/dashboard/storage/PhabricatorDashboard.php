@@ -12,6 +12,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     PhabricatorProjectInterface {
 
   protected $name;
+  protected $authorPHID;
   protected $viewPolicy;
   protected $editPolicy;
   protected $status;
@@ -31,6 +32,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy($actor->getPHID())
       ->setStatus(self::STATUS_ACTIVE)
+      ->setAuthorPHID($actor->getPHID())
       ->attachPanels(array())
       ->attachPanelPHIDs(array());
   }
@@ -61,6 +63,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
         'status' => 'text32',
+        'authorPHID' => 'phid',
       ),
     ) + parent::getConfiguration();
   }
