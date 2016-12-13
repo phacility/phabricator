@@ -46,23 +46,9 @@ final class DifferentialHunkQuery
       $this->buildLimitClause($conn_r));
     $modern_results = $table->loadAllFromArray($modern_data);
 
-
-    // Now, load legacy hunks.
-    $table = new DifferentialLegacyHunk();
-    $conn_r = $table->establishConnection('r');
-
-    $legacy_data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-    $legacy_results = $table->loadAllFromArray($legacy_data);
-
     // Strip all the IDs off since they're not unique and nothing should be
     // using them.
-    return array_values(array_merge($legacy_results, $modern_results));
+    return array_values($modern_results);
   }
 
   protected function willFilterPage(array $hunks) {
