@@ -7,7 +7,7 @@
 $project_table = new PhabricatorProject();
 $conn_w = $project_table->establishConnection('w');
 
-$panel_table = id(new PhabricatorProfilePanelConfiguration());
+$panel_table = id(new PhabricatorProfileMenuItemConfiguration());
 $panel_conn = $panel_table->establishConnection('w');
 
 foreach (new LiskMigrationIterator($project_table) as $project) {
