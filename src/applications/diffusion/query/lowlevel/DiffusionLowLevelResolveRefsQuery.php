@@ -178,7 +178,10 @@ final class DiffusionLowLevelResolveRefsQuery
       // repositories with a huge number of tags.
       $tag_refs = id(new DiffusionLowLevelGitRefQuery())
         ->setRepository($repository)
-        ->withIsTag(true)
+        ->withRefTypes(
+          array(
+            PhabricatorRepositoryRefCursor::TYPE_TAG,
+          ))
         ->executeQuery();
       foreach ($tag_refs as $tag_ref) {
         $tag_map[$tag_ref->getShortName()] = $tag_ref->getCommitIdentifier();
