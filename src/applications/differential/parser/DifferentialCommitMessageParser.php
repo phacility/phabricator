@@ -26,43 +26,18 @@ final class DifferentialCommitMessageParser extends Phobject {
   private $titleKey;
   private $summaryKey;
   private $errors;
+  private $commitMessageFields;
   private $raiseMissingFieldErrors = true;
 
   public static function newStandardParser(PhabricatorUser $viewer) {
+    $key_title = DifferentialTitleCommitMessageField::FIELDKEY;
+    $key_summary = DifferentialSummaryCommitMessageField::FIELDKEY;
 
-    $key_title = id(new DifferentialTitleField())->getFieldKeyForConduit();
-    $key_summary = id(new DifferentialSummaryField())->getFieldKeyForConduit();
-
-    $field_list = PhabricatorCustomField::getObjectFields(
-      new DifferentialRevision(),
-      DifferentialCustomField::ROLE_COMMITMESSAGE);
-    $field_list->setViewer($viewer);
-
-    $label_map = array();
-
-    foreach ($field_list->getFields() as $field) {
-      $labels = $field->getCommitMessageLabels();
-      $key = $field->getFieldKeyForConduit();
-
-      foreach ($labels as $label) {
-        $normal_label = self::normalizeFieldLabel(
-          $label);
-        if (!empty($label_map[$normal_label])) {
-          throw new Exception(
-            pht(
-              'Field label "%s" is parsed by two custom fields: "%s" and '.
-              '"%s". Each label must be parsed by only one field.',
-              $label,
-              $key,
-              $label_map[$normal_label]));
-        }
-        $label_map[$normal_label] = $key;
-      }
-    }
+    $field_list = DifferentialCommitMessageField::newEnabledFields($viewer);
 
     return id(new self())
       ->setViewer($viewer)
-      ->setLabelMap($label_map)
+      ->setCommitMessageFields($field_list)
       ->setTitleKey($key_title)
       ->setSummaryKey($key_summary);
   }
@@ -85,6 +60,25 @@ final class DifferentialCommitMessageParser extends Phobject {
    */
   public function getViewer() {
     return $this->viewer;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function setCommitMessageFields($fields) {
+    assert_instances_of($fields, 'DifferentialCommitMessageField');
+    $fields = mpull($fields, null, 'getCommitMessageFieldKey');
+    $this->commitMessageFields = $fields;
+    return $this;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function getCommitMessageFields() {
+    return $this->commitMessageFields;
   }
 
 
@@ -141,7 +135,7 @@ final class DifferentialCommitMessageParser extends Phobject {
   public function parseCorpus($corpus) {
     $this->errors = array();
 
-    $label_map = $this->labelMap;
+    $label_map = $this->getLabelMap();
     $key_title = $this->titleKey;
     $key_summary = $this->summaryKey;
 
@@ -258,13 +252,7 @@ final class DifferentialCommitMessageParser extends Phobject {
     $viewer = $this->getViewer();
     $text_map = $this->parseCorpus($corpus);
 
-    $field_list = PhabricatorCustomField::getObjectFields(
-      new DifferentialRevision(),
-      DifferentialCustomField::ROLE_COMMITMESSAGE);
-    $field_list->setViewer($viewer);
-
-    $field_map = $field_list->getFields();
-    $field_map = mpull($field_map, null, 'getFieldKeyForConduit');
+    $field_map = $this->getCommitMessageFields();
 
     $result_map = array();
     foreach ($text_map as $field_key => $text_value) {
@@ -281,7 +269,7 @@ final class DifferentialCommitMessageParser extends Phobject {
       }
 
       try {
-        $result = $field->parseValueFromCommitMessage($text_value);
+        $result = $field->parseFieldValue($text_value);
         $result_map[$field_key] = $result;
       } catch (DifferentialFieldParseException $ex) {
         $this->errors[] = pht(
@@ -294,7 +282,7 @@ final class DifferentialCommitMessageParser extends Phobject {
     if ($this->getRaiseMissingFieldErrors()) {
       foreach ($field_map as $key => $field) {
         try {
-          $field->validateCommitMessageValue(idx($result_map, $key));
+          $field->validateFieldValue(idx($result_map, $key));
         } catch (DifferentialFieldValidationException $ex) {
           $this->errors[] = pht(
             'Invalid or missing field "%s": %s',
@@ -328,6 +316,38 @@ final class DifferentialCommitMessageParser extends Phobject {
 
 
 /* -(  Internals  )---------------------------------------------------------- */
+
+
+  private function getLabelMap() {
+    if ($this->labelMap === null) {
+      $field_list = $this->getCommitMessageFields();
+
+      $label_map = array();
+      foreach ($field_list as $field_key => $field) {
+        $labels = $field->getFieldAliases();
+        $labels[] = $field->getFieldName();
+
+        foreach ($labels as $label) {
+          $normal_label = self::normalizeFieldLabel($label);
+          if (!empty($label_map[$normal_label])) {
+            throw new Exception(
+              pht(
+                'Field label "%s" is parsed by two custom fields: "%s" and '.
+                '"%s". Each label must be parsed by only one field.',
+                $label,
+                $field_key,
+                $label_map[$normal_label]));
+          }
+
+          $label_map[$normal_label] = $field_key;
+        }
+      }
+
+      $this->labelMap = $label_map;
+    }
+
+    return $this->labelMap;
+  }
 
 
   /**
