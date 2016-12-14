@@ -286,6 +286,13 @@ final class DifferentialRevisionReviewersTransaction
     $actor = $this->getActor();
     $errors = array();
 
+    if (!$xactions) {
+      // If we aren't applying new reviewer transactions, just bail. We need
+      // reviewers to be attached to the revision continue validation, and
+      // they won't always be (for example, when mentioning a revision).
+      return $errors;
+    }
+
     $author_phid = $object->getAuthorPHID();
     $config_self_accept_key = 'differential.allow-self-accept';
     $allow_self_accept = PhabricatorEnv::getEnvConfig($config_self_accept_key);
