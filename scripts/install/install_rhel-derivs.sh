@@ -27,7 +27,7 @@ if [[ $(cat $RHEL_VER_FILE) =~ $RHEL_REGEX ]]
 then
   RHEL_MAJOR_VER=${BASH_REMATCH[1]}
 else
-  echo "Ut oh, we were unable to determine your distribution's major"
+  echo "Uh oh, we were unable to determine your distribution's major"
   echo "version number. Please make sure you're running 6.0+ before"
   echo "proceeding."
   confirm
