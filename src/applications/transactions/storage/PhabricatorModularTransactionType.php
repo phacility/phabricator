@@ -68,7 +68,7 @@ abstract class PhabricatorModularTransactionType
   }
 
   public function newChangeDetailView() {
-    throw new PhutilMethodNotImplementedException();
+    return null;
   }
 
   public function getMailDiffSectionHeader() {
