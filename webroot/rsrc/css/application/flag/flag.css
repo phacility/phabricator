@@ -7,7 +7,7 @@
   background: transparent 0 0 no-repeat;
 }
 
-.phui-object-item .phabricator-flag-icon {
+.phui-oi .phabricator-flag-icon {
   float: left;
   margin: 2px;
   margin-right: 8px;

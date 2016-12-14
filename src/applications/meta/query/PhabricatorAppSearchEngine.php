@@ -201,7 +201,7 @@ final class PhabricatorAppSearchEngine
         $results[] = phutil_tag(
           'h1',
           array(
-            'class' => 'phui-object-item-list-header',
+            'class' => 'phui-oi-list-header',
           ),
           idx($group_names, $group, $group));
       }

@@ -148,7 +148,8 @@ final class PhabricatorHomePreferencesSettingsPanel
 
     $list = id(new PHUIObjectItemListView())
       ->setViewer($viewer)
-      ->setID($list_id);
+      ->setID($list_id)
+      ->setDrag(true);
 
     Javelin::initBehavior(
       'reorder-applications',
@@ -170,7 +171,6 @@ final class PhabricatorHomePreferencesSettingsPanel
       $item = id(new PHUIObjectItemView())
         ->setHeader($application->getName())
         ->setImageIcon($icon)
-        ->addAttribute($application->getShortDescription())
         ->setGrippable(true);
 
       $item->addAction(

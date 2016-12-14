@@ -83,7 +83,7 @@
   width: auto;
 }
 
-.phui-workpanel-body .phui-object-item-list-view {
+.phui-workpanel-body .phui-oi-list-view {
   min-height: 54px;
   background-color: transparent;
 }
@@ -115,18 +115,18 @@
   border-radius: 4px;
 }
 
-.project-panel-empty .phui-object-item-list-view {
+.project-panel-empty .phui-oi-list-view {
   background: rgba(234, 230, 247, 0.85);
   border-radius: 3px;
   margin-bottom: 4px;
   border: 1px dashed {$sh-indigoborder};
 }
 
-.project-panel-empty .phui-object-item-list-view .drag-ghost {
+.project-panel-empty .phui-oi-list-view .drag-ghost {
   display: none;
 }
 
-.project-panel-empty .phui-object-item-list-view.drag-target-list {
+.project-panel-empty .phui-oi-list-view.drag-target-list {
   background: rgba({$alphawhite},.7);
 }
 

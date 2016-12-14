@@ -1,0 +1,68 @@
+/**
+ * @provides phui-oi-color-css
+ * @requires phui-oi-list-view-css
+ */
+
+
+/* - Bar Colors ----------------------------------------------------------------
+  Colors for the left-hand border bars, used to indicate object status or other
+  attributes.
+*/
+
+.phui-oi-bar-color-red {
+  border-left-color: {$red};
+}
+
+.phui-oi-bar-color-orange {
+  border-left-color: {$orange};
+}
+
+.phui-oi-bar-color-yellow {
+  border-left-color: {$yellow};
+}
+
+.phui-oi-bar-color-green {
+  border-left-color: {$green};
+}
+
+.phui-oi-bar-color-sky {
+  border-left-color: {$sky};
+}
+
+.phui-oi-bar-color-blue {
+  border-left-color: {$blue};
+}
+
+.phui-oi-bar-color-indigo {
+  border-left-color: {$indigo};
+}
+
+.phui-oi-bar-color-violet {
+  border-left-color: {$violet};
+}
+
+.phui-oi-bar-color-pink {
+  border-left-color: {$pink};
+}
+
+.phui-oi-bar-color-fire {
+  border-left-color: {$fire};
+}
+
+.phui-oi-bar-color-bluegrey {
+  border-left-color: {$bluetext};
+}
+
+.phui-oi-bar-color-lightbluetext {
+  border-left-color: {$lightbluetext};
+}
+
+.phui-oi-bar-color-grey,
+.phui-oi-bar-color-lightgreytext {
+  border-left-color: {$lightgreytext};
+}
+
+.phui-oi-bar-color-black,
+.phui-oi-bar-color-dark {
+  border-left-color: {$darkgreytext};
+}
