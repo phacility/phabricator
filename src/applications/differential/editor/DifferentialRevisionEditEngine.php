@@ -3,6 +3,8 @@
 final class DifferentialRevisionEditEngine
   extends PhabricatorEditEngine {
 
+  private $diff;
+
   const ENGINECONST = 'differential.revision';
 
   public function getEngineName() {
@@ -33,6 +35,7 @@ final class DifferentialRevisionEditEngine
 
   protected function newObjectQuery() {
     return id(new DifferentialRevisionQuery())
+      ->needActiveDiffs(true)
       ->needReviewerStatus(true);
   }
 
@@ -41,7 +44,15 @@ final class DifferentialRevisionEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
-    return pht('Edit Revision: %s', $object->getTitle());
+    $monogram = $object->getMonogram();
+    $title = $object->getTitle();
+
+    $diff = $this->getDiff();
+    if ($diff) {
+      return pht('Update Revision %s: %s', $monogram, $title);
+    } else {
+      return pht('Edit Revision %s: %s', $monogram, $title);
+    }
   }
 
   protected function getObjectEditShortText($object) {
@@ -60,6 +71,15 @@ final class DifferentialRevisionEditEngine
     return $object->getURI();
   }
 
+  public function setDiff(DifferentialDiff $diff) {
+    $this->diff = $diff;
+    return $this;
+  }
+
+  public function getDiff() {
+    return $this->diff;
+  }
+
   protected function buildCustomEditFields($object) {
 
     $plan_required = PhabricatorEnv::getEnvConfig(
@@ -68,7 +88,48 @@ final class DifferentialRevisionEditEngine
       $object,
       'differential:test-plan');
 
+    $diff = $this->getDiff();
+    if ($diff) {
+      $diff_phid = $diff->getPHID();
+    } else {
+      $diff_phid = null;
+    }
+
+    $is_update = ($diff && $object->getID());
+
     $fields = array();
+
+    $fields[] = id(new PhabricatorHandlesEditField())
+      ->setKey('update')
+      ->setLabel(pht('Update Diff'))
+      ->setDescription(pht('New diff to create or update the revision with.'))
+      ->setConduitDescription(pht('Create or update a revision with a diff.'))
+      ->setConduitTypeDescription(pht('PHID of the diff.'))
+      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+      ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
+      ->setSingleValue($diff_phid)
+      ->setIsReorderable(false)
+      ->setIsDefaultable(false)
+      ->setIsInvisible(true)
+      ->setIsLockable(false);
+
+    if ($is_update) {
+      $fields[] = id(new PhabricatorInstructionsEditField())
+        ->setKey('update.help')
+        ->setValue(pht('Describe the updates you have made to the diff.'));
+      $fields[] = id(new PhabricatorCommentEditField())
+        ->setKey('update.comment')
+        ->setLabel(pht('Comment'))
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->setIsWebOnly(true)
+        ->setDescription(pht('Comments providing context for the update.'));
+      $fields[] = id(new PhabricatorSubmitEditField())
+        ->setKey('update.submit')
+        ->setValue($this->getObjectEditButtonText($object));
+      $fields[] = id(new PhabricatorDividerEditField())
+        ->setKey('update.note');
+    }
+
     $fields[] = id(new PhabricatorTextEditField())
       ->setKey('title')
       ->setLabel(pht('Title'))

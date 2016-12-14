@@ -69,6 +69,8 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
             => 'DifferentialRevisionEditController',
           $this->getEditRoutePattern('editpro/')
             => 'DifferentialRevisionEditProController',
+          $this->getEditRoutePattern('attach/(?P<diffID>[^/]+)/to/')
+            => 'DifferentialRevisionEditProController',
           'land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
             => 'DifferentialRevisionLandController',
           'closedetails/(?P<phid>[^/]+)/'
