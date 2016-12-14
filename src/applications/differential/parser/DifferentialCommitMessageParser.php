@@ -21,11 +21,12 @@
  */
 final class DifferentialCommitMessageParser extends Phobject {
 
+  private $viewer;
   private $labelMap;
   private $titleKey;
   private $summaryKey;
   private $errors;
-
+  private $raiseMissingFieldErrors = true;
 
   public static function newStandardParser(PhabricatorUser $viewer) {
 
@@ -60,6 +61,7 @@ final class DifferentialCommitMessageParser extends Phobject {
     }
 
     return id(new self())
+      ->setViewer($viewer)
       ->setLabelMap($label_map)
       ->setTitleKey($key_title)
       ->setSummaryKey($key_summary);
@@ -67,6 +69,40 @@ final class DifferentialCommitMessageParser extends Phobject {
 
 
 /* -(  Configuring the Parser  )--------------------------------------------- */
+
+
+  /**
+   * @task config
+   */
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function getViewer() {
+    return $this->viewer;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function setRaiseMissingFieldErrors($raise) {
+    $this->raiseMissingFieldErrors = $raise;
+    return $this;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function getRaiseMissingFieldErrors() {
+    return $this->raiseMissingFieldErrors;
+  }
 
 
   /**
@@ -212,6 +248,63 @@ final class DifferentialCommitMessageParser extends Phobject {
     }
 
     return $fields;
+  }
+
+
+  /**
+   * @task parse
+   */
+  public function parseFields($corpus) {
+    $viewer = $this->getViewer();
+    $text_map = $this->parseCorpus($corpus);
+
+    $field_list = PhabricatorCustomField::getObjectFields(
+      new DifferentialRevision(),
+      DifferentialCustomField::ROLE_COMMITMESSAGE);
+    $field_list->setViewer($viewer);
+
+    $field_map = $field_list->getFields();
+    $field_map = mpull($field_map, null, 'getFieldKeyForConduit');
+
+    $result_map = array();
+    foreach ($text_map as $field_key => $text_value) {
+      $field = idx($field_map, $field_key);
+      if (!$field) {
+        // This is a strict error, since we only parse fields which we have
+        // been told are valid. The caller probably handed us an invalid label
+        // map.
+        throw new Exception(
+          pht(
+            'Parser emitted a field with key "%s", but no corresponding '.
+            'field definition exists.',
+            $field_key));
+      }
+
+      try {
+        $result = $field->parseValueFromCommitMessage($text_value);
+        $result_map[$field_key] = $result;
+      } catch (DifferentialFieldParseException $ex) {
+        $this->errors[] = pht(
+          'Error parsing field "%s": %s',
+          $field->renderCommitMessageLabel(),
+          $ex->getMessage());
+      }
+    }
+
+    if ($this->getRaiseMissingFieldErrors()) {
+      foreach ($field_map as $key => $field) {
+        try {
+          $field->validateCommitMessageValue(idx($result_map, $key));
+        } catch (DifferentialFieldValidationException $ex) {
+          $this->errors[] = pht(
+            'Invalid or missing field "%s": %s',
+            $field->renderCommitMessageLabel(),
+            $ex->getMessage());
+        }
+      }
+    }
+
+    return $result_map;
   }
 
 
