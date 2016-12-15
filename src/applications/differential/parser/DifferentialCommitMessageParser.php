@@ -274,7 +274,7 @@ final class DifferentialCommitMessageParser extends Phobject {
       } catch (DifferentialFieldParseException $ex) {
         $this->errors[] = pht(
           'Error parsing field "%s": %s',
-          $field->renderCommitMessageLabel(),
+          $field->getFieldName(),
           $ex->getMessage());
       }
     }
@@ -286,7 +286,7 @@ final class DifferentialCommitMessageParser extends Phobject {
         } catch (DifferentialFieldValidationException $ex) {
           $this->errors[] = pht(
             'Invalid or missing field "%s": %s',
-            $field->renderCommitMessageLabel(),
+            $field->getFieldName(),
             $ex->getMessage());
         }
       }
