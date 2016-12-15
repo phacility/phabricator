@@ -9,4 +9,12 @@ final class DifferentialSummaryCommitMessageField
     return pht('Summary');
   }
 
+  public function getFieldOrder() {
+    return 2000;
+  }
+
+  public function readFieldValueFromObject(DifferentialRevision $revision) {
+    return $revision->getSummary();
+  }
+
 }

@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialAuditorsCommitMessageField
-  extends DifferentialCommitMessageField {
+  extends DifferentialCommitMessageCustomField {
 
   const FIELDKEY = 'phabricator:auditors';
 
@@ -16,6 +16,22 @@ final class DifferentialAuditorsCommitMessageField
         PhabricatorPeopleUserPHIDType::TYPECONST,
         PhabricatorProjectProjectPHIDType::TYPECONST,
       ));
+  }
+
+  public function getCustomFieldKey() {
+    return 'phabricator:auditors';
+  }
+
+  public function readFieldValueFromConduit($value) {
+    return $this->readStringListFieldValueFromConduit($value);
+  }
+
+  public function renderFieldValue($value) {
+    return $this->renderHandleList($value);
+  }
+
+  protected function readFieldValueFromCustomFieldStorage($value) {
+    return $this->readJSONFieldValueFromCustomFieldStorage($value, array());
   }
 
 }

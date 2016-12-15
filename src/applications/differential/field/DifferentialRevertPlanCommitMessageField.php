@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialRevertPlanCommitMessageField
-  extends DifferentialCommitMessageField {
+  extends DifferentialCommitMessageCustomField {
 
   const FIELDKEY = 'revertPlan';
 
@@ -9,8 +9,8 @@ final class DifferentialRevertPlanCommitMessageField
     return pht('Revert Plan');
   }
 
-  public function isFieldEnabled() {
-    return $this->isCustomFieldEnabled('phabricator:revert-plan');
+  public function getCustomFieldKey() {
+    return 'phabricator:revert-plan';
   }
 
 }

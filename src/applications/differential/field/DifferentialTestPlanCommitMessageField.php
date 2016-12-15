@@ -9,6 +9,10 @@ final class DifferentialTestPlanCommitMessageField
     return pht('Test Plan');
   }
 
+  public function getFieldOrder() {
+    return 3000;
+  }
+
   public function getFieldAliases() {
     return array(
       'Testplan',
@@ -31,6 +35,10 @@ final class DifferentialTestPlanCommitMessageField
           'You must provide a test plan. Describe the actions you performed '.
           'to verify the behavior of this change.'));
     }
+  }
+
+  public function readFieldValueFromObject(DifferentialRevision $revision) {
+    return $revision->getTestPlan();
   }
 
 }

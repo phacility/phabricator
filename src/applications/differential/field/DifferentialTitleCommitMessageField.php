@@ -9,6 +9,10 @@ final class DifferentialTitleCommitMessageField
     return pht('Title');
   }
 
+  public function getFieldOrder() {
+    return 1000;
+  }
+
   public static function getDefaultTitle() {
     return pht('<<Replace this line with your revision title>');
   }
@@ -31,6 +35,16 @@ final class DifferentialTitleCommitMessageField
           'You must provide a revision title in the first line '.
           'of your commit message.'));
     }
+  }
+
+  public function readFieldValueFromObject(DifferentialRevision $revision) {
+    $value = $revision->getTitle();
+
+    if (!strlen($value)) {
+      return self::getDefaultTitle();
+    }
+
+    return $value;
   }
 
 }

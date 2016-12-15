@@ -9,6 +9,10 @@ final class DifferentialSubscribersCommitMessageField
     return pht('Subscribers');
   }
 
+  public function getFieldOrder() {
+    return 6000;
+  }
+
   public function getFieldAliases() {
     return array(
       'CC',
@@ -25,6 +29,23 @@ final class DifferentialSubscribersCommitMessageField
         PhabricatorProjectProjectPHIDType::TYPECONST,
         PhabricatorOwnersPackagePHIDType::TYPECONST,
       ));
+  }
+
+  public function readFieldValueFromObject(DifferentialRevision $revision) {
+    if (!$revision->getPHID()) {
+      return array();
+    }
+
+    return PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $revision->getPHID());
+  }
+
+  public function readFieldValueFromConduit($value) {
+    return $this->readStringListFieldValueFromConduit($value);
+  }
+
+  public function renderFieldValue($value) {
+    return $this->renderHandleList($value);
   }
 
 }

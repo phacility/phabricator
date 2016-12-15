@@ -9,4 +9,12 @@ final class DifferentialConflictsCommitMessageField
     return pht('Conflicts');
   }
 
+  public function getFieldOrder() {
+    return 900000;
+  }
+
+  public function isFieldEditable() {
+    return false;
+  }
+
 }

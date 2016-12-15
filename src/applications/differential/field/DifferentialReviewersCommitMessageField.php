@@ -9,6 +9,10 @@ final class DifferentialReviewersCommitMessageField
     return pht('Reviewers');
   }
 
+  public function getFieldOrder() {
+    return 4000;
+  }
+
   public function getFieldAliases() {
     return array(
       'Reviewer',
@@ -27,6 +31,50 @@ final class DifferentialReviewersCommitMessageField
       array('!'));
 
     return $this->flattenReviewers($results);
+  }
+
+  public function readFieldValueFromConduit($value) {
+    return $this->readStringListFieldValueFromConduit($value);
+  }
+
+  public function readFieldValueFromObject(DifferentialRevision $revision) {
+    if (!$revision->getPHID()) {
+      return array();
+    }
+
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+
+    $results = array();
+    foreach ($revision->getReviewerStatus() as $reviewer) {
+      if ($reviewer->getStatus() == $status_blocking) {
+        $suffixes = array('!' => '!');
+      } else {
+        $suffixes = array();
+      }
+
+      $results[] = array(
+        'phid' => $reviewer->getReviewerPHID(),
+        'suffixes' => $suffixes,
+      );
+    }
+
+    return $this->flattenReviewers($results);
+  }
+
+  public function renderFieldValue($value) {
+    $value = $this->inflateReviewers($value);
+
+    $phid_list = array();
+    $suffix_map = array();
+    foreach ($value as $reviewer) {
+      $phid = $reviewer['phid'];
+      $phid_list[] = $phid;
+      if (isset($reviewer['suffixes']['!'])) {
+        $suffix_map[$phid] = '!';
+      }
+    }
+
+    return $this->renderHandleList($phid_list, $suffix_map);
   }
 
   private function flattenReviewers(array $values) {

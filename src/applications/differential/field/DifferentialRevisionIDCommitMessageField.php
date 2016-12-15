@@ -9,6 +9,14 @@ final class DifferentialRevisionIDCommitMessageField
     return pht('Differential Revision');
   }
 
+  public function getFieldOrder() {
+    return 200000;
+  }
+
+  public function isTemplateField() {
+    return false;
+  }
+
   public function parseFieldValue($value) {
     // If the value is just "D123" or similar, parse the ID from it directly.
     $value = trim($value);
@@ -47,6 +55,25 @@ final class DifferentialRevisionIDCommitMessageField
     }
 
     return null;
+  }
+
+  public function readFieldValueFromObject(DifferentialRevision $revision) {
+    return $revision->getID();
+  }
+
+  public function readFieldValueFromConduit($value) {
+    if (is_int($value)) {
+      $value = (string)$value;
+    }
+    return $this->readStringFieldValueFromConduit($value);
+  }
+
+  public function renderFieldValue($value) {
+    if (!strlen($value)) {
+      return null;
+    }
+
+    return PhabricatorEnv::getProductionURI('/D'.$value);
   }
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialBlameRevisionCommitMessageField
-  extends DifferentialCommitMessageField {
+  extends DifferentialCommitMessageCustomField {
 
   const FIELDKEY = 'blameRevision';
 
@@ -15,8 +15,8 @@ final class DifferentialBlameRevisionCommitMessageField
     );
   }
 
-  public function isFieldEnabled() {
-    return $this->isCustomFieldEnabled('phabricator:blame-revision');
+  public function getCustomFieldKey() {
+    return 'phabricator:blame-revision';
   }
 
 }

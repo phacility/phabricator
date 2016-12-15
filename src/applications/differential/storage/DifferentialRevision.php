@@ -70,6 +70,7 @@ final class DifferentialRevision extends DifferentialDAO
       ->setAuthorPHID($actor->getPHID())
       ->attachRelationships(array())
       ->attachRepository(null)
+      ->attachActiveDiff(null)
       ->attachReviewerStatus(array())
       ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
   }

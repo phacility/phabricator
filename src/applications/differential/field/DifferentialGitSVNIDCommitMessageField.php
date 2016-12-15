@@ -9,4 +9,12 @@ final class DifferentialGitSVNIDCommitMessageField
     return pht('git-svn-id');
   }
 
+  public function getFieldOrder() {
+    return 900001;
+  }
+
+  public function isFieldEditable() {
+    return false;
+  }
+
 }
