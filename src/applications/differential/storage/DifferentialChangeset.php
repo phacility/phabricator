@@ -30,8 +30,8 @@ final class DifferentialChangeset extends DifferentialDAO
         'awayPaths'     => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'oldFile' => 'text255?',
-        'filename' => 'text255',
+        'oldFile' => 'bytes?',
+        'filename' => 'bytes',
         'changeType' => 'uint32',
         'fileType' => 'uint32',
         'addLines' => 'uint32',
