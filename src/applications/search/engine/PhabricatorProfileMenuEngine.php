@@ -73,7 +73,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     $item_id = $request->getURIData('itemID');
-    $item_list = $this->loadItems();
+    $item_list = $this->getItems();
 
     $selected_item = null;
     if (strlen($item_id)) {
@@ -174,6 +174,18 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setBaseURI(new PhutilURI($this->getItemURI('')));
 
     $menu_items = $this->getItems();
+    $filtered_items = array();
+    foreach ($menu_items as $menu_item) {
+      if ($menu_item->isDisabled()) {
+        continue;
+      }
+      $filtered_items[] = $menu_item;
+    }
+    $filtered_groups = mgroup($filtered_items, 'getMenuItemKey');
+    foreach ($filtered_groups as $group) {
+      $first_item = head($group);
+      $first_item->willBuildNavigationItems($group);
+    }
 
     foreach ($menu_items as $menu_item) {
       if ($menu_item->isDisabled()) {

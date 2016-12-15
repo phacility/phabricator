@@ -66,6 +66,7 @@ final class PhabricatorProfileMenuItemConfigurationQuery
         unset($page[$key]);
         continue;
       }
+      $item_type = clone $item_type;
       $item->attachMenuItem($item_type);
     }
 

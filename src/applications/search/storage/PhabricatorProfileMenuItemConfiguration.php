@@ -118,6 +118,10 @@ final class PhabricatorProfileMenuItemConfiguration
     return $this->getMenuItem()->shouldEnableForObject($object);
   }
 
+  public function willBuildNavigationItems(array $items) {
+    return $this->getMenuItem()->willBuildNavigationItems($items);
+  }
+
   public function getSortKey() {
     $order = $this->getMenuItemOrder();
     if ($order === null) {
