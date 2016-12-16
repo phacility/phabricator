@@ -41,6 +41,12 @@ final class PhabricatorDashboardQuery
     return $this;
   }
 
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new PhabricatorDashboardNgrams()),
+      $ngrams);
+  }
+
   protected function loadPage() {
     return $this->loadStandardPage($this->newResultObject());
   }
@@ -139,6 +145,10 @@ final class PhabricatorDashboardQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDashboardApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'dashboard';
   }
 
 }

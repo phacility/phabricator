@@ -9,7 +9,8 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $authorPHID;
@@ -63,7 +64,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
         'layoutConfig' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'sort255',
         'status' => 'text32',
         'icon' => 'text32',
         'authorPHID' => 'phid',
@@ -185,5 +186,15 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     $this->saveTransaction();
   }
 
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorDashboardNgrams())
+        ->setValue($this->getName()),
+    );
+  }
 
 }

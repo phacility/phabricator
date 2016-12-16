@@ -10,7 +10,8 @@ final class PhabricatorDashboardPanel
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
   protected $panelType;
@@ -50,7 +51,7 @@ final class PhabricatorDashboardPanel
         'properties' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'sort255',
         'panelType' => 'text64',
         'authorPHID' => 'phid',
         'isArchived' => 'bool',
@@ -195,6 +196,17 @@ final class PhabricatorDashboardPanel
     $this->openTransaction();
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorDashboardPanelNgrams())
+        ->setValue($this->getName()),
+    );
   }
 
 }
