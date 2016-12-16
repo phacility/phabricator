@@ -32,6 +32,8 @@ final class DifferentialTransaction
       switch ($this->getMetadataValue('customfield:key')) {
         case 'differential:title':
           return new DifferentialRevisionTitleTransaction();
+        case 'differential:test-plan':
+          return new DifferentialRevisionTestPlanTransaction();
       }
     }
 
