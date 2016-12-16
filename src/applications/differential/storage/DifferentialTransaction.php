@@ -37,6 +37,8 @@ final class DifferentialTransaction
           return new DifferentialRevisionTitleTransaction();
         case 'differential:test-plan':
           return new DifferentialRevisionTestPlanTransaction();
+        case 'differential:repository':
+          return new DifferentialRevisionRepositoryTransaction();
       }
     }
 
