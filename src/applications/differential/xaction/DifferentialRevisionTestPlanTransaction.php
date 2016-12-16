@@ -4,6 +4,7 @@ final class DifferentialRevisionTestPlanTransaction
   extends DifferentialRevisionTransactionType {
 
   const TRANSACTIONTYPE = 'differential.revision.testplan';
+  const EDITKEY = 'testPlan';
 
   public function generateOldValue($object) {
     return $object->getTestPlan();

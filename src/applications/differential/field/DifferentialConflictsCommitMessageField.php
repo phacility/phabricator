@@ -17,4 +17,8 @@ final class DifferentialConflictsCommitMessageField
     return false;
   }
 
+  public function isTemplateField() {
+    return false;
+  }
+
 }

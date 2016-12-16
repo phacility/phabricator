@@ -60,4 +60,9 @@ abstract class DifferentialCommitMessageCustomField
     return $idx;
   }
 
+  public function getFieldTransactions($value) {
+    // TODO: Implement this!
+    return array();
+  }
+
 }

@@ -47,4 +47,13 @@ final class DifferentialTitleCommitMessageField
     return $value;
   }
 
+  public function getFieldTransactions($value) {
+    return array(
+      array(
+        'type' => DifferentialRevisionTitleTransaction::EDITKEY,
+        'value' => $value,
+      ),
+    );
+  }
+
 }

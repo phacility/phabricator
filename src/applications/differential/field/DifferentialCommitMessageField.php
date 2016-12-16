@@ -67,6 +67,13 @@ abstract class DifferentialCommitMessageField
     return $value;
   }
 
+  public function getFieldTransactions($value) {
+    if (!$this->isFieldEditable()) {
+      return array();
+    }
+    throw new PhutilMethodNotImplementedException();
+  }
+
   final public function getCommitMessageFieldKey() {
     return $this->getPhobjectClassConstant('FIELDKEY', 64);
   }

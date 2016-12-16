@@ -76,4 +76,8 @@ final class DifferentialRevisionIDCommitMessageField
     return PhabricatorEnv::getProductionURI('/D'.$value);
   }
 
+  public function getFieldTransactions($value) {
+    return array();
+  }
+
 }

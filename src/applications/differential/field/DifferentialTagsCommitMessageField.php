@@ -54,5 +54,13 @@ final class DifferentialTagsCommitMessageField
     return $this->renderHandleList($value);
   }
 
+  public function getFieldTransactions($value) {
+    return array(
+      array(
+        'type' => PhabricatorProjectsEditEngineExtension::EDITKEY_SET,
+        'value' => $value,
+      ),
+    );
+  }
 
 }

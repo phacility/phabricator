@@ -17,4 +17,13 @@ final class DifferentialSummaryCommitMessageField
     return $revision->getSummary();
   }
 
+  public function getFieldTransactions($value) {
+    return array(
+      array(
+        'type' => DifferentialRevisionSummaryTransaction::EDITKEY,
+        'value' => $value,
+      ),
+    );
+  }
+
 }

@@ -77,6 +77,30 @@ final class DifferentialReviewersCommitMessageField
     return $this->renderHandleList($phid_list, $suffix_map);
   }
 
+  public function getFieldTransactions($value) {
+    $value = $this->inflateReviewers($value);
+
+    $reviewer_list = array();
+    foreach ($value as $reviewer) {
+      $phid = $reviewer['phid'];
+      if (isset($reviewer['suffixes']['!'])) {
+        $reviewer_list[] = 'blocking('.$phid.')';
+      } else {
+        $reviewer_list[] = $phid;
+      }
+    }
+
+    $xaction_key = DifferentialRevisionReviewersTransaction::EDITKEY;
+    $xaction_type = "{$xaction_key}.set";
+
+    return array(
+      array(
+        'type' => $xaction_type,
+        'value' => $reviewer_list,
+      ),
+    );
+  }
+
   private function flattenReviewers(array $values) {
     // NOTE: For now, `arc` relies on this field returning only scalars, so we
     // need to reduce the results into scalars. See T10981.

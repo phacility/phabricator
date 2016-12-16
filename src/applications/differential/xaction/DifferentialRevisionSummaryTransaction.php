@@ -4,6 +4,7 @@ final class DifferentialRevisionSummaryTransaction
   extends DifferentialRevisionTransactionType {
 
   const TRANSACTIONTYPE = 'differential.revision.summary';
+  const EDITKEY = 'summary';
 
   public function generateOldValue($object) {
     return $object->getSummary();

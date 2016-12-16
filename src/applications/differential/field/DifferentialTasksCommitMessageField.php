@@ -54,4 +54,8 @@ final class DifferentialTasksCommitMessageField
     return $this->renderHandleList($value);
   }
 
+  public function getFieldTransactions($value) {
+    // TODO: Implement this!
+    return array();
+  }
 }

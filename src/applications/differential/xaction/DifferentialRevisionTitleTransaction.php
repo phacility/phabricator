@@ -4,6 +4,7 @@ final class DifferentialRevisionTitleTransaction
   extends DifferentialRevisionTransactionType {
 
   const TRANSACTIONTYPE = 'differential.revision.title';
+  const EDITKEY = 'title';
 
   public function generateOldValue($object) {
     return $object->getTitle();

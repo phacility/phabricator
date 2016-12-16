@@ -17,4 +17,8 @@ final class DifferentialGitSVNIDCommitMessageField
     return false;
   }
 
+  public function isTemplateField() {
+    return false;
+  }
+
 }

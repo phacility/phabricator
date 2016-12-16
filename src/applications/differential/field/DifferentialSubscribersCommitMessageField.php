@@ -48,4 +48,13 @@ final class DifferentialSubscribersCommitMessageField
     return $this->renderHandleList($value);
   }
 
+  public function getFieldTransactions($value) {
+    return array(
+      array(
+        'type' => PhabricatorSubscriptionsEditEngineExtension::EDITKEY_SET,
+        'value' => $value,
+      ),
+    );
+  }
+
 }

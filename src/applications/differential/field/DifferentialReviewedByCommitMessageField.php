@@ -27,6 +27,10 @@ final class DifferentialReviewedByCommitMessageField
     return false;
   }
 
+  public function isTemplateField() {
+    return false;
+  }
+
   public function readFieldValueFromObject(DifferentialRevision $revision) {
     if (!$revision->getPHID()) {
       return array();

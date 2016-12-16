@@ -7,6 +7,8 @@ final class DifferentialRevisionEditEngine
 
   const ENGINECONST = 'differential.revision';
 
+  const KEY_UPDATE = 'update';
+
   public function getEngineName() {
     return pht('Revisions');
   }
@@ -100,21 +102,20 @@ final class DifferentialRevisionEditEngine
 
     $fields = array();
 
-    if ($diff || $is_create) {
-      $fields[] = id(new PhabricatorHandlesEditField())
-        ->setKey('update')
-        ->setLabel(pht('Update Diff'))
-        ->setDescription(pht('New diff to create or update the revision with.'))
-        ->setConduitDescription(pht('Create or update a revision with a diff.'))
-        ->setConduitTypeDescription(pht('PHID of the diff.'))
-        ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
-        ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
-        ->setSingleValue($diff_phid)
-        ->setIsReorderable(false)
-        ->setIsDefaultable(false)
-        ->setIsInvisible(true)
-        ->setIsLockable(false);
-    }
+    $fields[] = id(new PhabricatorHandlesEditField())
+      ->setKey(self::KEY_UPDATE)
+      ->setLabel(pht('Update Diff'))
+      ->setDescription(pht('New diff to create or update the revision with.'))
+      ->setConduitDescription(pht('Create or update a revision with a diff.'))
+      ->setConduitTypeDescription(pht('PHID of the diff.'))
+      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
+      ->setHandleParameterType(new AphrontPHIDListHTTPParameterType())
+      ->setSingleValue($diff_phid)
+      ->setIsConduitOnly(!$diff)
+      ->setIsReorderable(false)
+      ->setIsDefaultable(false)
+      ->setIsInvisible(true)
+      ->setIsLockable(false);
 
     if ($is_update) {
       $fields[] = id(new PhabricatorInstructionsEditField())
@@ -134,7 +135,7 @@ final class DifferentialRevisionEditEngine
     }
 
     $fields[] = id(new PhabricatorTextEditField())
-      ->setKey('title')
+      ->setKey(DifferentialRevisionTitleTransaction::EDITKEY)
       ->setLabel(pht('Title'))
       ->setIsRequired(true)
       ->setTransactionType(
@@ -145,7 +146,7 @@ final class DifferentialRevisionEditEngine
       ->setValue($object->getTitle());
 
     $fields[] = id(new PhabricatorRemarkupEditField())
-      ->setKey('summary')
+      ->setKey(DifferentialRevisionSummaryTransaction::EDITKEY)
       ->setLabel(pht('Summary'))
       ->setTransactionType(
         DifferentialRevisionSummaryTransaction::TRANSACTIONTYPE)
@@ -156,7 +157,7 @@ final class DifferentialRevisionEditEngine
 
     if ($plan_enabled) {
       $fields[] = id(new PhabricatorRemarkupEditField())
-        ->setKey('testPlan')
+        ->setKey(DifferentialRevisionTestPlanTransaction::EDITKEY)
         ->setLabel(pht('Test Plan'))
         ->setIsRequired($plan_required)
         ->setTransactionType(
@@ -169,7 +170,7 @@ final class DifferentialRevisionEditEngine
     }
 
     $fields[] = id(new PhabricatorDatasourceEditField())
-      ->setKey('reviewerPHIDs')
+      ->setKey(DifferentialRevisionReviewersTransaction::EDITKEY)
       ->setLabel(pht('Reviewers'))
       ->setDatasource(new DifferentialReviewerDatasource())
       ->setUseEdgeTransactions(true)

@@ -49,9 +49,15 @@ final class DifferentialGetCommitMessageConduitAPIMethod
       $revision = DifferentialRevision::initializeNewRevision($viewer);
     }
 
+    // There are three modes here: "edit", "create", and "read" (which has
+    // no value for the "edit" parameter).
+
+    // In edit or create mode, we hide read-only fields. In create mode, we
+    // show "Field:" templates for some fields even if they are empty.
     $edit_mode = $request->getValue('edit');
+
+    $is_any_edit = (bool)strlen($edit_mode);
     $is_create = ($edit_mode == 'create');
-    $is_edit = ($edit_mode && !$is_create);
 
     $field_list = DifferentialCommitMessageField::newEnabledFields($viewer);
 
@@ -62,7 +68,7 @@ final class DifferentialGetCommitMessageConduitAPIMethod
 
     // If we're editing the message, remove fields like "Conflicts" and
     // "git-svn-id" which should not be presented to the user for editing.
-    if ($is_edit) {
+    if ($is_any_edit) {
       foreach ($field_list as $field_key => $field) {
         if (!$field->isFieldEditable()) {
           unset($field_list[$field_key]);
@@ -96,7 +102,7 @@ final class DifferentialGetCommitMessageConduitAPIMethod
       $wire_value = $value_map[$field_key];
       $value = $field->renderFieldValue($wire_value);
 
-      $is_template = ($is_edit && $field->isTemplateField());
+      $is_template = ($is_create && $field->isTemplateField());
 
       if (!is_string($value) && !is_null($value)) {
         throw new Exception(

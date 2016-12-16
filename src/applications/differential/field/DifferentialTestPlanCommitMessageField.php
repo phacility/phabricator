@@ -41,4 +41,13 @@ final class DifferentialTestPlanCommitMessageField
     return $revision->getTestPlan();
   }
 
+  public function getFieldTransactions($value) {
+    return array(
+      array(
+        'type' => DifferentialRevisionTestPlanTransaction::EDITKEY,
+        'value' => $value,
+      ),
+    );
+  }
+
 }

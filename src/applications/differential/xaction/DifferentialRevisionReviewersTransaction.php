@@ -4,6 +4,7 @@ final class DifferentialRevisionReviewersTransaction
   extends DifferentialRevisionTransactionType {
 
   const TRANSACTIONTYPE = 'differential.revision.reviewers';
+  const EDITKEY = 'reviewers';
 
   public function generateOldValue($object) {
     $reviewers = $object->getReviewerStatus();
@@ -18,6 +19,7 @@ final class DifferentialRevisionReviewersTransaction
       ->setViewer($actor);
 
     $reviewers = $this->generateOldValue($object);
+    $old_reviewers = $reviewers;
 
     // First, remove any reviewers we're getting rid of.
     $rem = idx($value, '-', array());
@@ -63,7 +65,7 @@ final class DifferentialRevisionReviewersTransaction
 
     $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
     foreach ($add_map as $phid => $new_status) {
-      $old_status = idx($reviewers, $phid);
+      $old_status = idx($old_reviewers, $phid);
 
       // If we have an old status and this didn't make the reviewer blocking
       // or nonblocking, just retain the old status. This makes sure we don't
@@ -76,6 +78,7 @@ final class DifferentialRevisionReviewersTransaction
         $is_unblock = (!$now_blocking && $was_blocking);
 
         if (!$is_block && !$is_unblock) {
+          $reviewers[$phid] = $old_status;
           continue;
         }
       }
@@ -84,6 +87,14 @@ final class DifferentialRevisionReviewersTransaction
     }
 
     return $reviewers;
+  }
+
+  public function getTransactionHasEffect($object, $old, $new) {
+    // At least for now, we ignore transactions which ONLY reorder reviewers
+    // without making any actual changes.
+    ksort($old);
+    ksort($new);
+    return ($old !== $new);
   }
 
   public function applyExternalEffects($object, $value) {
