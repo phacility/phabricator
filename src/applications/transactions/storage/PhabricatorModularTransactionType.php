@@ -227,7 +227,7 @@ abstract class PhabricatorModularTransactionType
       // server's settings, or the user may later refer back to it after
       // changing timezones.
 
-      if ($this->isTextMode()) {
+      if ($this->isRenderingTargetExternal()) {
         $offset = $viewer->getTimeZoneOffsetInHours();
         if ($offset >= 0) {
           $display = pht('%s (UTC+%d)', $display, $offset);
@@ -277,7 +277,17 @@ abstract class PhabricatorModularTransactionType
     return !strlen($value);
   }
 
-  protected function isTextMode() {
+  /**
+   * When rendering to external targets (Email/Asana/etc), we need to include
+   * more information that users can't obtain later.
+   */
+  final protected function isRenderingTargetExternal() {
+    // Right now, this is our best proxy for this:
+    return $this->isTextMode();
+    // "TARGET_TEXT" means "EMail" and "TARGET_HTML" means "Web".
+  }
+
+  final protected function isTextMode() {
     $target = $this->getStorage()->getRenderingTarget();
     return ($target == PhabricatorApplicationTransaction::TARGET_TEXT);
   }
