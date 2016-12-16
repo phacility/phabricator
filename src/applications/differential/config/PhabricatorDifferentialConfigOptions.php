@@ -30,7 +30,6 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialTitleField(),
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
-      new DifferentialAuthorField(),
       new DifferentialReviewersField(),
       new DifferentialProjectReviewersField(),
       new DifferentialReviewedByField(),
