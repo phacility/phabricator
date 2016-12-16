@@ -114,4 +114,12 @@ final class DifferentialBlameRevisionField
     return true;
   }
 
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
+  }
+
 }

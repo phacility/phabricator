@@ -57,4 +57,12 @@ final class DifferentialAuditorsField
     return $this->renderObjectList($handles);
   }
 
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitPHIDListParameterType();
+  }
+
 }

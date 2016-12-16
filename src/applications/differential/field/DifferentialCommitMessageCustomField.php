@@ -61,8 +61,12 @@ abstract class DifferentialCommitMessageCustomField
   }
 
   public function getFieldTransactions($value) {
-    // TODO: Implement this!
-    return array();
+    return array(
+      array(
+        'type' => $this->getCommitMessageFieldKey(),
+        'value' => $value,
+      ),
+    );
   }
 
 }
