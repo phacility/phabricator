@@ -120,6 +120,10 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
+  public function getViewURI() {
+    return '/dashboard/view/'.$this->getID().'/';
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
