@@ -36,7 +36,6 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialProjectsField(),
       new DifferentialViewPolicyField(),
 
-      new DifferentialParentRevisionsField(),
       new DifferentialManiphestTasksField(),
       new DifferentialCommitsField(),
 
