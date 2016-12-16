@@ -27,6 +27,9 @@ final class DifferentialTransaction
     // without doing a migration. At some point, we should do a migration and
     // throw this away.
 
+    // NOTE: Old reviewer edits are raw edge transactions. They could be
+    // migrated to modular transactions when the rest of this migrates.
+
     $xaction_type = $this->getTransactionType();
     if ($xaction_type == PhabricatorTransactions::TYPE_CUSTOMFIELD) {
       switch ($this->getMetadataValue('customfield:key')) {
