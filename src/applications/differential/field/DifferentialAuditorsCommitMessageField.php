@@ -22,6 +22,14 @@ final class DifferentialAuditorsCommitMessageField
     return 'phabricator:auditors';
   }
 
+  public function isFieldEditable() {
+    return true;
+  }
+
+  public function isTemplateField() {
+    return false;
+  }
+
   public function readFieldValueFromConduit($value) {
     return $this->readStringListFieldValueFromConduit($value);
   }

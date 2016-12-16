@@ -182,7 +182,7 @@ abstract class DifferentialCommitMessageField
   protected function isCustomFieldEnabled($key) {
     $field_list = PhabricatorCustomField::getObjectFields(
       new DifferentialRevision(),
-      PhabricatorCustomField::ROLE_VIEW);
+      DifferentialCustomField::ROLE_COMMITMESSAGE);
 
     $fields = $field_list->getFields();
     return isset($fields[$key]);

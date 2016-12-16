@@ -37,6 +37,10 @@ final class PhabricatorCustomFieldEditField
   }
 
   protected function buildControl() {
+    if ($this->getIsConduitOnly()) {
+      return null;
+    }
+
     $field = $this->getCustomField();
     $clone = clone $field;
 
