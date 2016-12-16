@@ -37,11 +37,9 @@ final class DifferentialParseCommitMessageConduitAPIMethod
 
     $errors = $parser->getErrors();
 
-    // grab some extra information about the Differential Revision: field...
-    $revision_id_field = new DifferentialRevisionIDField();
     $revision_id_value = idx(
       $field_map,
-      $revision_id_field->getFieldKeyForConduit());
+      DifferentialRevisionIDCommitMessageField::FIELDKEY);
     $revision_id_valid_domain = PhabricatorEnv::getProductionURI('');
 
     return array(

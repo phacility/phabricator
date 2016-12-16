@@ -49,8 +49,6 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialLintField(),
       new DifferentialUnitField(),
       new DifferentialRevertPlanField(),
-
-      new DifferentialRevisionIDField(),
     );
 
     $default_fields = array();
