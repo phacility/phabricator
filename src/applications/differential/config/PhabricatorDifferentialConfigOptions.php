@@ -25,7 +25,6 @@ final class PhabricatorDifferentialConfigOptions
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
     $fields = array(
-      new DifferentialTitleField(),
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
       new DifferentialReviewersField(),

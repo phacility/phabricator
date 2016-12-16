@@ -46,7 +46,7 @@ abstract class PhabricatorModularTransaction
     $key = $this->getTransactionType();
 
     if (empty($types[$key])) {
-      $type = new PhabricatorCoreVoidTransaction();
+      $type = $this->newFallbackModularTransactionType();
     } else {
       $type = clone $types[$key];
     }
@@ -54,6 +54,10 @@ abstract class PhabricatorModularTransaction
     $type->setStorage($this);
 
     return $type;
+  }
+
+  protected function newFallbackModularTransactionType() {
+    return new PhabricatorCoreVoidTransaction();
   }
 
   final public function generateOldValue($object) {

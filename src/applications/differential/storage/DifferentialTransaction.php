@@ -22,6 +22,23 @@ final class DifferentialTransaction
     return 'DifferentialRevisionTransactionType';
   }
 
+  protected function newFallbackModularTransactionType() {
+    // TODO: This allows us to render modern strings for older transactions
+    // without doing a migration. At some point, we should do a migration and
+    // throw this away.
+
+    $xaction_type = $this->getTransactionType();
+    if ($xaction_type == PhabricatorTransactions::TYPE_CUSTOMFIELD) {
+      switch ($this->getMetadataValue('customfield:key')) {
+        case 'differential:title':
+          return new DifferentialRevisionTitleTransaction();
+      }
+    }
+
+    return parent::newFallbackModularTransactionType();
+  }
+
+
   public function setIsCommandeerSideEffect($is_side_effect) {
     $this->isCommandeerSideEffect = $is_side_effect;
     return $this;
