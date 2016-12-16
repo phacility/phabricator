@@ -55,7 +55,11 @@ final class DifferentialTasksCommitMessageField
   }
 
   public function getFieldTransactions($value) {
-    // TODO: Implement this!
-    return array();
+    return array(
+      array(
+        'type' => 'tasks.set',
+        'value' => $value,
+      ),
+    );
   }
 }
