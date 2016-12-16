@@ -570,7 +570,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $curtain->addAction(
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
-        ->setHref("/differential/revision/editpro/{$revision_id}/")
+        ->setHref("/differential/revision/edit/{$revision_id}/")
         ->setName(pht('Edit Revision'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));

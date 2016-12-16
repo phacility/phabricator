@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialRevisionEditProController
+final class DifferentialRevisionEditController
   extends DifferentialController {
 
   public function handleRequest(AphrontRequest $request) {
