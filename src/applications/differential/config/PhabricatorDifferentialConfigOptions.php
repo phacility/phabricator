@@ -58,8 +58,6 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialUnitField(),
       new DifferentialRevertPlanField(),
 
-      new DifferentialApplyPatchField(),
-
       new DifferentialRevisionIDField(),
     );
 
