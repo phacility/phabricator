@@ -23,7 +23,6 @@
   display: inline-block;
   background-repeat: no-repeat;
   background-size: 100%;
-  box-shadow: inset 0 0 0 1px rgba({$alphagrey},.15);
   width: 40px;
   height: 40px;
   border-radius: 3px;
@@ -98,7 +97,6 @@
   display: inline-block;
   background-repeat: no-repeat;
   background-size: 100%;
-  box-shadow: inset 0 0 0 1px rgba({$alphagrey},.15);
   width: 24px;
   height: 24px;
   border-radius: 3px;
@@ -253,14 +251,16 @@
 
 /* Blog Chrome */
 .phame-live-view .phui-crumbs-view {
-  background: #fff;
   border: none;
-  padding-left: 8px;
+  width: 960px;
+  margin: 0 auto;
+  padding: 4px 0;
 }
 
 /* Hero Image */
 .phame-header-hero {
   background-color: #fff;
+  margin-top: 16px;
 }
 
 .phame-header-image {
