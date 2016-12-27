@@ -31,7 +31,7 @@ final class PhabricatorCustomFieldEditEngineExtension
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $object,
-      PhabricatorCustomField::ROLE_EDIT);
+      PhabricatorCustomField::ROLE_EDITENGINE);
 
     $field_list->setViewer($viewer);
 

@@ -2,7 +2,7 @@
  * @provides phabricator-search-results-css
  */
 
-.phui-object-item-link strong {
+.phui-oi-link strong {
   color: {$fire};
   text-decoration: underline;
 }

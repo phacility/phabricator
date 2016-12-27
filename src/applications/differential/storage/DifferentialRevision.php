@@ -70,6 +70,8 @@ final class DifferentialRevision extends DifferentialDAO
       ->setAuthorPHID($actor->getPHID())
       ->attachRelationships(array())
       ->attachRepository(null)
+      ->attachActiveDiff(null)
+      ->attachReviewerStatus(array())
       ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
   }
 
@@ -403,10 +405,28 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function attachReviewerStatus(array $reviewers) {
-    assert_instances_of($reviewers, 'DifferentialReviewer');
+    assert_instances_of($reviewers, 'DifferentialReviewerProxy');
 
     $this->reviewerStatus = $reviewers;
     return $this;
+  }
+
+  public function getReviewerPHIDsForEdit() {
+    $reviewers = $this->getReviewerStatus();
+
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+
+    $value = array();
+    foreach ($reviewers as $reviewer) {
+      $phid = $reviewer->getReviewerPHID();
+      if ($reviewer->getStatus() == $status_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
+    }
+
+    return $value;
   }
 
   public function getRepository() {

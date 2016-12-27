@@ -14,7 +14,7 @@ Drydock builds and manages various hardware and software resources, like
 hosts and repository working copies. Other applications can use these resources
 to perform useful work (like running tests or builds).
 
-For additional disussion of Drydock, see @{article:Drydock User Guide}.
+For additional discussion of Drydock, see @{article:Drydock User Guide}.
 
 Drydock can't create any resources until you configure it. You'll configure
 Drydock by creating **Blueprints**. Each blueprint tells Drydock how to build

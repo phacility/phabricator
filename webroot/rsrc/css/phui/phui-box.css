@@ -24,18 +24,18 @@
   border-color: {$thinblueborder};
 }
 
-.phui-box-blue .phui-object-item,
-.phui-box-grey .phui-object-item {
+.phui-box-blue .phui-oi,
+.phui-box-grey .phui-oi {
   background: transparent;
 }
 
-.phui-box-blue .phui-object-item-link,
-.phui-box-grey .phui-object-item-link {
+.phui-box-blue .phui-oi-link,
+.phui-box-grey .phui-oi-link {
   color: {$darkbluetext};
 }
 
-.phui-box-blue .phui-object-item-list-view,
-.phui-box-grey .phui-object-item-list-view {
+.phui-box-blue .phui-oi-list-view,
+.phui-box-grey .phui-oi-list-view {
   background-color: #fff;
 }
 
@@ -98,7 +98,7 @@ body.device .phui-box-blue-property.phui-object-box.phui-object-box-collapsed
   color: {$bluetext};
 }
 
-.phui-box-blue-property .phui-object-item-list-view {
+.phui-box-blue-property .phui-oi-list-view {
   padding: 2px 8px;
 }
 

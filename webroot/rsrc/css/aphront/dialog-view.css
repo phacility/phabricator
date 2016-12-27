@@ -158,18 +158,18 @@
   margin-top: 16px;
 }
 
-.device-desktop .aphront-dialog-flush .phui-object-item-list-view {
+.device-desktop .aphront-dialog-flush .phui-oi-list-view {
   margin: 0;
   padding: 0;
 }
 
-.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
- .phui-object-item {
+.aphront-dialog-flush .phui-oi-list-view.phui-object-list-stackable
+ .phui-oi {
   border: 0;
 }
 
-.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
- .phui-object-item-frame {
+.aphront-dialog-flush .phui-oi-list-view.phui-object-list-stackable
+ .phui-oi-frame {
   border: 0;
   border-top: 1px solid {$thinblueborder};
 }

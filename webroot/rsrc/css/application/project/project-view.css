@@ -72,7 +72,7 @@
   margin-bottom: 0;
 }
 
-.project-view-home .phui-box-grey .phui-object-item-list-view {
+.project-view-home .phui-box-grey .phui-oi-list-view {
   padding: 4px 8px 0 8px;
 }
 
@@ -80,7 +80,7 @@
   background-color: #fff;
 }
 
-.project-view-home .phui-box-grey .phui-object-item-attribute .phui-icon-view {
+.project-view-home .phui-box-grey .phui-oi-attribute .phui-icon-view {
   color: {$lightgreytext};
 }
 

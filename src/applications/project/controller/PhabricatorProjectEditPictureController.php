@@ -255,7 +255,7 @@ final class PhabricatorProjectEditPictureController
       ->setForm($upload_form);
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::PANEL_MANAGE);
+    $nav->selectFilter(PhabricatorProject::ITEM_MANAGE);
 
     return $this->newPage()
       ->setTitle($title)

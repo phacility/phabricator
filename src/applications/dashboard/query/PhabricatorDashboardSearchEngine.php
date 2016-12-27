@@ -18,6 +18,14 @@ final class PhabricatorDashboardSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name')
+        ->setDescription(pht('Search for dashboards by name substring.')),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Authored By'))
+        ->setKey('authorPHIDs')
+        ->setDatasource(new PhabricatorPeopleUserFunctionDatasource()),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')
         ->setLabel(pht('Status'))
@@ -30,19 +38,32 @@ final class PhabricatorDashboardSearchEngine
   }
 
   protected function getBuiltinQueryNames() {
-    return array(
-      'open' => pht('Active Dashboards'),
-      'all' => pht('All Dashboards'),
-    );
+    $names = array();
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['authored'] = pht('Authored');
+    }
+
+    $names['open'] = pht('Active Dashboards');
+    $names['all'] = pht('All Dashboards');
+
+    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
+    $viewer = $this->requireViewer();
 
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'authored':
+        return $query->setParameter(
+          'authorPHIDs',
+          array(
+            $viewer->getPHID(),
+          ));
       case 'open':
         return $query->setParameter(
           'statuses',
@@ -59,6 +80,14 @@ final class PhabricatorDashboardSearchEngine
 
     if ($map['statuses']) {
       $query->withStatuses($map['statuses']);
+    }
+
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    if ($map['name'] !== null) {
+      $query->withNameNgrams($map['name']);
     }
 
     return $query;

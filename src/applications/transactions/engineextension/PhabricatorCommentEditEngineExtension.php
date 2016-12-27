@@ -4,6 +4,7 @@ final class PhabricatorCommentEditEngineExtension
   extends PhabricatorEditEngineExtension {
 
   const EXTENSIONKEY = 'transactions.comment';
+  const EDITKEY = 'comment';
 
   public function getExtensionPriority() {
     return 9000;
@@ -39,7 +40,7 @@ final class PhabricatorCommentEditEngineExtension
     $comment_type = PhabricatorTransactions::TYPE_COMMENT;
 
     $comment_field = id(new PhabricatorCommentEditField())
-      ->setKey('comment')
+      ->setKey(self::EDITKEY)
       ->setLabel(pht('Comments'))
       ->setAliases(array('comments'))
       ->setIsHidden(true)

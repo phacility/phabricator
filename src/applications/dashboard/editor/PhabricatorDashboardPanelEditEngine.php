@@ -28,12 +28,16 @@ final class PhabricatorDashboardPanelEditEngine
     return pht('Edit Dashboard Panels');
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getSummaryText() {
     return pht('This engine is used to modify dashboard panels.');
   }
 
   public function getEngineApplicationClass() {
-    return 'PhabricatorSearchApplication';
+    return 'PhabricatorDashboardApplication';
   }
 
   protected function newEditableObject() {

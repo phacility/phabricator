@@ -164,7 +164,7 @@
   padding: 5px 4px 5px 28px;
 }
 
-.device-desktop .phui-two-column-properties .phabricator-action-view:hover
+.device-desktop .phui-two-column-properties .phabricator-action-view-href:hover
   .phabricator-action-view-item {
     text-decoration: none;
     background-color: rgba({$alphablue}, .08);
@@ -172,7 +172,7 @@
     border-radius: 3px;
 }
 
-.device-desktop .phui-two-column-properties .phabricator-action-view:hover
+.device-desktop .phui-two-column-properties .phabricator-action-view-href:hover
   .phabricator-action-view-icon {
     color: {$sky};
 }
@@ -199,7 +199,7 @@
   padding: 12px;
 }
 
-.phui-two-column-view .phui-side-column .phui-object-item-empty
+.phui-two-column-view .phui-side-column .phui-oi-empty
   .phui-info-view {
    margin-bottom: 0;
 }

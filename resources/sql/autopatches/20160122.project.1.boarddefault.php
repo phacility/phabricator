@@ -7,7 +7,7 @@
 $project_table = new PhabricatorProject();
 $conn_w = $project_table->establishConnection('w');
 
-$panel_table = id(new PhabricatorProfilePanelConfiguration());
+$panel_table = id(new PhabricatorProfileMenuItemConfiguration());
 $panel_conn = $panel_table->establishConnection('w');
 
 foreach (new LiskMigrationIterator($project_table) as $project) {
@@ -50,9 +50,9 @@ foreach (new LiskMigrationIterator($project_table) as $project) {
     $panel_table->getTableName(),
     $panel_table->generatePHID(),
     $project->getPHID(),
-    PhabricatorProjectWorkboardProfilePanel::PANELKEY,
-    PhabricatorProject::PANEL_WORKBOARD,
-    PhabricatorProfilePanelConfiguration::VISIBILITY_DEFAULT,
+    PhabricatorProjectWorkboardProfileMenuItem::MENUITEMKEY,
+    PhabricatorProject::ITEM_WORKBOARD,
+    PhabricatorProfileMenuItemConfiguration::VISIBILITY_DEFAULT,
     '{}',
     2,
     PhabricatorTime::getNow(),

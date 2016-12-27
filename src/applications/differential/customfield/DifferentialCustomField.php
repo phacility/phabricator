@@ -20,6 +20,11 @@ abstract class DifferentialCustomField
     return $this->getFieldKey();
   }
 
+  // TODO: As above.
+  public function getModernFieldKey() {
+    return $this->getFieldKeyForConduit();
+  }
+
   public function shouldEnableForRole($role) {
     switch ($role) {
       case self::ROLE_COMMITMESSAGE:

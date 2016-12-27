@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialTransaction extends PhabricatorApplicationTransaction {
+final class DifferentialTransaction
+  extends PhabricatorModularTransaction {
 
   private $isCommandeerSideEffect;
 
@@ -16,6 +17,33 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   const MAILTAG_UPDATED        = 'differential-updated';
   const MAILTAG_REVIEW_REQUEST = 'differential-review-request';
   const MAILTAG_OTHER          = 'differential-other';
+
+  public function getBaseTransactionClass() {
+    return 'DifferentialRevisionTransactionType';
+  }
+
+  protected function newFallbackModularTransactionType() {
+    // TODO: This allows us to render modern strings for older transactions
+    // without doing a migration. At some point, we should do a migration and
+    // throw this away.
+
+    // NOTE: Old reviewer edits are raw edge transactions. They could be
+    // migrated to modular transactions when the rest of this migrates.
+
+    $xaction_type = $this->getTransactionType();
+    if ($xaction_type == PhabricatorTransactions::TYPE_CUSTOMFIELD) {
+      switch ($this->getMetadataValue('customfield:key')) {
+        case 'differential:title':
+          return new DifferentialRevisionTitleTransaction();
+        case 'differential:test-plan':
+          return new DifferentialRevisionTestPlanTransaction();
+        case 'differential:repository':
+          return new DifferentialRevisionRepositoryTransaction();
+      }
+    }
+
+    return parent::newFallbackModularTransactionType();
+  }
 
 
   public function setIsCommandeerSideEffect($is_side_effect) {

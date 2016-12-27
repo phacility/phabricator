@@ -1,0 +1,625 @@
+/**
+ * @provides phui-oi-list-view-css
+ */
+
+.phui-oi {
+  border-left-width: 0;
+}
+
+ul.phui-oi-list-view {
+  padding: 8px;
+  list-style: none;
+}
+
+.device-desktop .phui-oi-list-view {
+  padding: 16px;
+}
+
+.phui-oi-list-view + .phui-oi-list-view {
+  padding-top: 0;
+}
+
+.phui-object-box .phui-oi-list-view .phui-oi {
+  margin: 0;
+}
+
+.phui-oi-list-view .phui-info-view {
+  margin: 0;
+}
+
+.phui-object-box .phui-oi-list-view .phui-info-view {
+  color: {$greytext};
+  border: none;
+}
+
+.phui-oi {
+  border-style: solid;
+  border-color: {$lightgreyborder};
+  margin: 5px 0;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 4px;
+}
+
+.phui-oi .phui-icon-view {
+  display: inline-block;
+}
+
+.phui-oi-frame {
+  border-color: {$lightblueborder};
+  border-width: 1px 1px 1px 0;
+  border-style: solid;
+  position: relative;
+  min-height: 33px;
+  overflow: hidden;
+}
+
+.phui-oi-cover-image {
+  display: none;
+}
+
+.phui-oi-no-bar .phui-oi-frame {
+  border-width: 1px;
+}
+
+.device-desktop .phui-oi {
+  margin: 0 0 4px 0;
+}
+
+.phui-object-box .phui-oi-list-view {
+  margin: 0;
+}
+
+.phui-oi-status-icon {
+  font-weight: bold;
+  padding: 3px;
+  font-size: 16px;
+}
+
+.phui-oi-list-view .phui-oi-col0 .phui-icon-view {
+  width: 17px;
+  text-align: center;
+  overflow: visible;
+  position: relative;
+  left: -1px;
+}
+
+.phui-oi-name {
+  padding: 8px 8px 0;
+  white-space: nowrap;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+.device-phone .phui-oi-name {
+  overflow: normal;
+  white-space: normal;
+  font-weight: bold;
+}
+
+.phui-oi-link {
+  display: inline;
+}
+
+.phui-oi-objname {
+  color: #000;
+  cursor: text;
+  font-weight: bold;
+}
+
+.phui-oi-content {
+  margin: 4px 8px 2px 0;
+  overflow: hidden;
+}
+
+.phui-oi-grippable {
+  cursor: move;
+}
+
+.device .phui-oi-grippable {
+  cursor: normal;
+}
+
+.phui-oi-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 20px;
+  background: url('/rsrc/image/texture/grip.png') center center no-repeat;
+}
+
+.device .phui-oi-grip {
+  display: none;
+}
+
+.phui-oi-grippable .phui-oi-frame {
+  padding-left: 16px;
+}
+
+.device .phui-oi-grippable .phui-oi-frame {
+  padding-left: 0;
+}
+
+.phui-oi-list-header {
+  padding: 0 0 8px 0;
+  color: {$darkgreytext};
+}
+
+.phui-oi-table {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.phui-oi-table-row {
+  display: table-row;
+}
+
+.phui-oi-col0 {
+  width: 20px;
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 4px;
+}
+
+.device-phone .phui-oi-col0 {
+  vertical-align: top;
+  padding-top: 8px;
+}
+
+.phui-oi-col1 {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.phui-oi-col2 {
+  width: 160px;
+  display: table-cell;
+  vertical-align: top;
+}
+
+.device-phone .phui-oi-col1,
+.device-phone .phui-oi-col2 {
+  display: block;
+  width: auto;
+}
+
+/* - Item Actions --------------------------------------------------------------
+
+  Action buttons, like "Edit" and "Delete".
+
+*/
+
+.phui-oi-actions {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  vertical-align: middle;
+  text-align: right;
+}
+
+.phui-oi-actions .phui-list-item-view {
+  float: right;
+  height: 100%;
+  width: 24px;
+  display: inline-block;
+  position: relative;
+}
+
+.phui-oi-actions .phui-list-item-href {
+  display: inline-block;
+  position: relative;
+  width: 24px;
+  height: 100%;
+}
+
+.device-desktop .phui-oi-actions .phui-list-item-href:hover {
+  background: {$hoverblue};
+  border-radius: 3px;
+}
+
+.phui-oi-actions .phui-list-item-icon {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  display: block;
+  top: 50%;
+  margin-top: -7px;
+  left: 3px;
+}
+
+.phui-oi-actions .phui-list-item-name {
+  display: none;
+}
+
+.phui-oi-with-1-actions .phui-oi-content-box {
+  margin-right: 28px;
+  overflow: hidden;
+}
+
+.phui-oi-with-2-actions .phui-oi-content-box {
+  margin-right: 54px;
+  overflow: hidden;
+}
+
+.phui-oi-with-3-actions .phui-oi-content-box {
+  margin-right: 76px;
+  overflow: hidden;
+}
+
+
+/* - Object Box List -----------------------------------------------------------
+
+  Tighter, stacking list when inside an Object Box
+
+*/
+
+.phui-object-box .phui-oi-list-view {
+  padding: 0;
+  border: none;
+}
+
+.phui-object-box .phui-oi-frame {
+  border-right: none;
+}
+
+.phui-object-box .phui-oi:last-child
+  .phui-oi-frame {
+  border-bottom: none;
+}
+
+
+/* - Subhead -------------------------------------------------------------------
+
+  Descriptive Text or Links under the main header, before attributes.
+
+*/
+
+.phui-oi-subhead {
+  color: {$greytext};
+  padding: 0 8px 6px;
+}
+
+
+/* - Attribute List ------------------------------------------------------------
+
+  Object attributes, commonly used to render created date, etc.
+
+*/
+
+.phui-oi-attributes {
+  padding: 0 8px 6px;
+  line-height: 18px;
+  min-height: 21px;
+}
+
+.phui-oi-attribute {
+  display: inline-block;
+  color: {$greytext};
+  vertical-align: top;
+}
+
+.phui-oi-attribute-spacer {
+  padding: 0 4px;
+}
+
+
+/* - Icons ---------------------------------------------------------------------
+
+  Icons, which show object state. On mobile, they are rendered without labels
+  to save space.
+
+*/
+
+.phui-object-icon-pane {
+  margin: 8px 0 4px;
+}
+
+.device-phone .phui-object-icon-pane {
+  margin: 0 0 4px;
+}
+
+.phui-oi-icons {
+  padding: 0 4px 0 0;
+}
+
+.device-phone .phui-oi-icons {
+  padding: 0 0 0 8px;
+}
+
+ul.phui-oi-icons {
+  margin: 0;
+}
+
+.phui-oi-icon {
+  vertical-align: middle;
+  font-size: {$smallerfontsize};
+  color: {$greytext};
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  min-height: 18px;
+  line-height: 18px;
+}
+
+.device-phone .phui-oi-icon {
+  text-align: left;
+  font-size: 13px;
+}
+
+/*
+ * Items with icon 'none' still have on mobile, thus creating a weird vertical
+ * margin for elements which follow
+ */
+.device-phone .phui-oi-icon .none {
+  display: none;
+}
+
+.phui-oi-icon-image {
+  width: 14px;
+  height: 14px;
+  font-size: 13px;
+  margin-right: 4px;
+}
+
+
+/* - Disabled ------------------------------------------------------------------
+
+  Disabled/inactive objects.
+
+*/
+
+
+.phui-oi.phui-oi-disabled .phui-oi-link,
+.phui-oi.phui-oi-disabled .phui-oi-link a {
+  color: {$lightgreytext};
+}
+
+.phui-oi.phui-oi-disabled .phui-oi-frame {
+  border-color: #d7d7d7;
+}
+
+.phui-oi.phui-oi-disabled .phui-oi-objname {
+  color: {$greytext};
+  text-decoration: line-through;
+}
+
+
+/* - Effects -------------------------------------------------------------------
+
+  Effects like highlighted items.
+
+*/
+
+.phui-oi.phui-oi-highlighted {
+  background: {$sh-yellowbackground};
+}
+
+ul.phui-oi-list-view .phui-oi-highlighted
+  .phui-oi-frame {
+  border-color: {$sh-yellowborder};
+}
+
+.phui-oi-selected {
+  background: {$sh-bluebackground};
+}
+
+ul.phui-oi-list-view .phui-oi-selected
+  .phui-oi-frame {
+  border-color: {$sh-blueborder};
+}
+
+
+/* - Handle Icons --------------------------------------------------------------
+
+  Shows owners, reviewers, etc., using profile picture icons.
+
+*/
+
+.phui-oi-handle-icons {
+  bottom: 0;
+  right: 4px;
+  position: absolute;
+}
+
+.phui-oi-handle-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  background-size: 100%;
+  border-radius: 3px;
+  background-repeat: no-repeat;
+}
+
+
+/* - Bylines -------------------------------------------------------------------
+
+  Shows owners, authors, reviewers, etc., in text.
+
+*/
+
+.phui-oi-bylines {
+  padding: 0 4px 0 8px;
+  margin: 4px 0 8px;
+  font-size: {$smallerfontsize};
+  color: {$greytext};
+  text-align: right;
+}
+
+.phui-oi-byline {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.device-phone .phui-oi-bylines {
+  float: none;
+  text-align: left;
+  padding: 0 8px;
+  font-size: {$normalfontsize};
+}
+
+
+/* - Draggable List ------------------------------------------------------------
+
+  These classes are applied by and/or provided for use with JX.DraggableList.
+
+*/
+
+.drag-ghost {
+  position: relative;
+  background: {$sh-indigobackground};
+  border-radius: 3px;
+  margin-bottom: 4px;
+  border: 1px dashed {$sh-indigoborder};
+}
+
+.drag-dragging {
+  opacity: 0.25;
+}
+
+.drag-sending {
+  opacity: 0.5;
+}
+
+.drag-clone,
+.drag-frame {
+  /* This allows mousewheel events to pass through the clone and frame while
+     they are being dragged. Without this, the mousewheel does not work during
+     a drag operation. */
+  pointer-events: none;
+}
+
+.drag-frame {
+  position: fixed;
+  overflow: hidden;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.drag-clone {
+  position: absolute;
+  list-style: none;
+}
+
+/* - Badges ---------------------------------------------------------------- */
+
+.phui-oi-col0.phui-oi-badge {
+  width: 28px;
+}
+
+.phui-oi-col0.phui-oi-badge .phui-icon-view {
+  left: 0;
+}
+
+/* - Countdowns ------------------------------------------------------------ */
+
+.phui-oi-col0.phui-oi-countdown {
+  width: 52px;
+  padding: 0;
+}
+
+.phui-oi-countdown .phui-oi-countdown-number {
+  border-right: 1px solid {$thinblueborder};
+  text-align: center;
+  color: {$bluetext};
+}
+
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.phui-object-box .phui-oi-list-view .phui-oi-frame {
+  border: none;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+.drag-clone.phui-oi-standard .phui-oi-frame {
+  border: none;
+  opacity: 0.8;
+  background: {$sh-bluebackground};
+}
+
+.phui-object-box .phui-oi-list-header {
+  font-size: {$normalfontsize};
+  color: {$darkbluetext};
+  border-top: 1px solid {$thinblueborder};
+  border-bottom: 1px solid {$thinblueborder};
+  padding: 8px;
+  background-color: {$lightgreybackground};
+}
+
+.phui-object-box .phui-header-shell + .phui-oi-list-view .phui-oi-list-header,
+.phui-object-box .phui-object-box-hidden-content + .phui-oi-list-view
+ .phui-oi-list-header,
+.phui-object-box .phui-object-box-hidden-content + .phui-oi-list-header {
+   border-top: none;
+ }
+
+.dashboard-pane .phui-oi-empty .phui-info-view {
+  border: none;
+  margin: 0;
+}
+
+.device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
+ .aphront-multi-column-column-outer.third .phui-oi-col2 {
+   display: none;
+ }
+
+
+/* - Launcher List ---------------------------------------------------------- */
+
+.phui-oi-image-icon {
+  background: none;
+  width: 40px;
+  height: 40px;
+  margin: 8px 6px;
+  position: absolute;
+}
+
+.phui-oi-image-icon .phui-icon-view {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  font-size: 26px;
+  text-align: center;
+  line-height: 36px;
+}
+
+.phui-oi-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 3px;
+  background-size: 100%;
+  margin: 8px 6px;
+  position: absolute;
+}
+
+.phui-oi-with-image-icon .phui-oi-frame,
+.phui-oi-with-image .phui-oi-frame {
+  min-height: 52px;
+}
+
+.phui-oi-with-image-icon .phui-oi-content-box,
+.phui-oi-with-image .phui-oi-content-box {
+  margin-left: 46px;
+}
+
+/* - Launcher Button -------------------------------------------------------- */
+
+.phui-oi-col2.phui-oi-launch-button {
+  text-align: right;
+  vertical-align: middle;
+  padding-right: 4px;
+}
+
+.device-phone .phui-oi-col2.phui-oi-launch-button {
+  padding: 0 8px 8px;
+  text-align: left;
+}

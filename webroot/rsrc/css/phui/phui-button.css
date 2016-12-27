@@ -17,9 +17,16 @@ button.phabricator-action-view-item {
   -webkit-font-smoothing: auto;
 }
 
-button::-moz-focus-inner {
-  padding: 0;
+button::-moz-focus-inner,
+input::-moz-focus-inner {
   border: 0;
+  padding: 0;
+}
+
+button:focus,
+a.button:focus {
+  outline: 0;
+  box-shadow: 0 0 2pt 2pt rgba(82, 168, 236, 0.7);
 }
 
 button,

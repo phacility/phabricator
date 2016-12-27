@@ -78,7 +78,7 @@ final class PhabricatorPeopleProfileViewController
         ));
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_PROFILE);
+    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_PROFILE);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setBorder(true);

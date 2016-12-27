@@ -1,5 +1,9 @@
 <?php
 
+// TODO: Some "final" modifiers have been VERY TEMPORARILY moved aside to
+// allow DifferentialTransaction to extend this class without converting
+// fully to ModularTransactions.
+
 abstract class PhabricatorModularTransaction
   extends PhabricatorApplicationTransaction {
 
@@ -42,7 +46,7 @@ abstract class PhabricatorModularTransaction
     $key = $this->getTransactionType();
 
     if (empty($types[$key])) {
-      $type = new PhabricatorCoreVoidTransaction();
+      $type = $this->newFallbackModularTransactionType();
     } else {
       $type = clone $types[$key];
     }
@@ -50,6 +54,10 @@ abstract class PhabricatorModularTransaction
     $type->setStorage($this);
 
     return $type;
+  }
+
+  protected function newFallbackModularTransactionType() {
+    return new PhabricatorCoreVoidTransaction();
   }
 
   final public function generateOldValue($object) {
@@ -76,7 +84,7 @@ abstract class PhabricatorModularTransaction
       ->applyExternalEffects($object);
   }
 
-  final public function shouldHide() {
+  /* final */ public function shouldHide() {
     if ($this->getTransactionImplementation()->shouldHide()) {
       return true;
     }
@@ -84,7 +92,7 @@ abstract class PhabricatorModularTransaction
     return parent::shouldHide();
   }
 
-  final public function getIcon() {
+  /* final */ public function getIcon() {
     $icon = $this->getTransactionImplementation()->getIcon();
     if ($icon !== null) {
       return $icon;
@@ -93,7 +101,7 @@ abstract class PhabricatorModularTransaction
     return parent::getIcon();
   }
 
-  final public function getTitle() {
+  /* final */ public function getTitle() {
     $title = $this->getTransactionImplementation()->getTitle();
     if ($title !== null) {
       return $title;
@@ -111,7 +119,7 @@ abstract class PhabricatorModularTransaction
     return $title;
   }
 
-  final public function getTitleForFeed() {
+  /* final */ public function getTitleForFeed() {
     $title = $this->getTransactionImplementation()->getTitleForFeed();
     if ($title !== null) {
       return $title;
@@ -120,7 +128,7 @@ abstract class PhabricatorModularTransaction
     return parent::getTitleForFeed();
   }
 
-  final public function getColor() {
+  /* final */ public function getColor() {
     $color = $this->getTransactionImplementation()->getColor();
     if ($color !== null) {
       return $color;

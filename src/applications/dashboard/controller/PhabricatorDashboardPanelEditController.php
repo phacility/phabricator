@@ -400,7 +400,7 @@ final class PhabricatorDashboardPanelEditController
     $viewer = $request->getUser();
 
     $copy = PhabricatorDashboardPanel::initializeNewPanel($viewer);
-    $copy = PhabricatorDashboardPanel::copyPanel($copy, $panel);
+    $copy = PhabricatorDashboardPanel::copyPanel($copy, $panel, $viewer);
 
     $copy->openTransaction();
       $copy->save();
