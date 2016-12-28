@@ -87,6 +87,7 @@ final class DifferentialRevisionEditEngine
   }
 
   protected function buildCustomEditFields($object) {
+    $viewer = $this->getViewer();
 
     $plan_required = PhabricatorEnv::getEnvConfig(
       'differential.require-test-plan-field');
@@ -180,7 +181,7 @@ final class DifferentialRevisionEditEngine
       ->setUseEdgeTransactions(true)
       ->setTransactionType(
         DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE)
-      ->setCommentActionLabel(pht('Edit Reviewers'))
+      ->setCommentActionLabel(pht('Change Reviewers'))
       ->setDescription(pht('Reviewers for this revision.'))
       ->setConduitDescription(pht('Change the reviewers for this revision.'))
       ->setConduitTypeDescription(pht('New reviewers.'))
@@ -211,6 +212,11 @@ final class DifferentialRevisionEditEngine
       ->setConduitDescription(pht('Change associated tasks.'))
       ->setConduitTypeDescription(pht('List of tasks.'))
       ->setValue(array());
+
+    $actions = DifferentialRevisionActionTransaction::loadAllActions();
+    foreach ($actions as $key => $action) {
+      $fields[] = $action->newEditField($object, $viewer);
+    }
 
     return $fields;
   }

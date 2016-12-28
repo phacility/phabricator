@@ -442,6 +442,11 @@ final class DifferentialRevision extends DifferentialDAO
     return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
   }
 
+  public function isAbandoned() {
+    $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
+    return ($this->getStatus() == $status_abandoned);
+  }
+
   public function getStatusIcon() {
     $map = array(
       ArcanistDifferentialRevisionStatus::NEEDS_REVIEW
