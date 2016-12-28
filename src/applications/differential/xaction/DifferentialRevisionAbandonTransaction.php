@@ -45,7 +45,7 @@ final class DifferentialRevisionAbandonTransaction
           pht(
             'You can not abandon this revision because you are not the '.
             'author. You can only abandon revisions you own. You can change '.
-            'this behavior by adjusting the "%s" setting in Config',
+            'this behavior by adjusting the "%s" setting in Config.',
             $config_key));
       }
     }
