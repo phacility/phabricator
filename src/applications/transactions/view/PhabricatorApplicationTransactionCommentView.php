@@ -199,6 +199,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->addClass('phui-comment-form-view')
+      ->addSigil('phui-comment-form')
       ->appendChild($image)
       ->appendChild($wedge)
       ->appendChild($comment);
@@ -355,6 +356,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           ->setID($this->getCommentID())
           ->addClass('phui-comment-fullwidth-control')
           ->addClass('phui-comment-textarea-control')
+          ->setCanPin(true)
           ->setName('comment')
           ->setUser($this->getUser())
           ->setValue($draft_comment))
