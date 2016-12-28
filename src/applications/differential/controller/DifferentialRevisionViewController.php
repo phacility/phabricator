@@ -390,11 +390,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addTabGroup($tab_group);
 
-    $comment_form = null;
-    if (!$viewer_is_anonymous) {
-      $comment_form = $this->buildCommentForm($revision, $field_list);
-    }
-
     $signatures = DifferentialRequiredSignaturesField::loadForRevision(
       $revision);
     $missing_signatures = false;
@@ -426,14 +421,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       );
     }
 
-    if ($comment_form) {
-      $footer[] = $comment_form;
-    } else {
-      // TODO: For now, just use this to get "Login to Comment".
-      $footer[] = id(new PhabricatorApplicationTransactionCommentView())
-        ->setUser($viewer)
-        ->setRequestURI($request->getRequestURI());
-    }
+    $footer[] = id(new DifferentialRevisionEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($revision);
 
     $object_id = 'D'.$revision->getID();
     $operations_box = $this->buildOperationsBox($revision);
@@ -458,20 +448,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->build($changesets);
     }
 
-    // Haunt Mode
-    $pane_id = celerity_generate_unique_node_id();
-    Javelin::initBehavior(
-      'differential-keyboard-navigation',
-      array(
-        'haunt' => $pane_id,
-      ));
     Javelin::initBehavior('differential-user-select');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setSubheader($subheader)
       ->setCurtain($curtain)
-      ->setID($pane_id)
       ->setMainColumn(array(
         $operations_box,
         $info_view,
@@ -611,172 +593,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     return $curtain;
-  }
-
-  private function buildCommentForm(
-    DifferentialRevision $revision,
-    $field_list) {
-
-    $viewer = $this->getViewer();
-
-    $draft = id(new PhabricatorDraft())->loadOneWhere(
-      'authorPHID = %s AND draftKey = %s',
-      $viewer->getPHID(),
-      'differential-comment-'.$revision->getID());
-
-    $reviewers = array();
-    $ccs = array();
-    if ($draft) {
-      $reviewers = idx($draft->getMetadata(), 'reviewers', array());
-      $ccs = idx($draft->getMetadata(), 'ccs', array());
-      if ($reviewers || $ccs) {
-        $handles = $this->loadViewerHandles(array_merge($reviewers, $ccs));
-        $reviewers = array_select_keys($handles, $reviewers);
-        $ccs = array_select_keys($handles, $ccs);
-      }
-    }
-
-    $comment_form = id(new DifferentialAddCommentView())
-      ->setRevision($revision);
-
-    $review_warnings = array();
-    foreach ($field_list->getFields() as $field) {
-      $review_warnings[] = $field->getWarningsForDetailView();
-    }
-    $review_warnings = array_mergev($review_warnings);
-
-    if ($review_warnings) {
-      $review_warnings_panel = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
-        ->setErrors($review_warnings);
-      $comment_form->setInfoView($review_warnings_panel);
-    }
-
-    $action_uri = $this->getApplicationURI(
-      'comment/save/'.$revision->getID().'/');
-
-    $comment_form->setActions($this->getRevisionCommentActions($revision))
-      ->setActionURI($action_uri)
-      ->setUser($viewer)
-      ->setDraft($draft)
-      ->setReviewers(mpull($reviewers, 'getFullName', 'getPHID'))
-      ->setCCs(mpull($ccs, 'getFullName', 'getPHID'));
-
-    // TODO: This just makes the "Z" key work. Generalize this and remove
-    // it at some point.
-    $comment_form = phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-add-comment-panel',
-      ),
-      $comment_form);
-    return $comment_form;
-  }
-
-  private function getRevisionCommentActions(DifferentialRevision $revision) {
-    $actions = array(
-      DifferentialAction::ACTION_COMMENT => true,
-    );
-
-    $viewer = $this->getViewer();
-    $viewer_phid = $viewer->getPHID();
-    $viewer_is_owner = ($viewer_phid == $revision->getAuthorPHID());
-    $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
-    $status = $revision->getStatus();
-
-    $viewer_has_accepted = false;
-    $viewer_has_rejected = false;
-    $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
-    $status_rejected = DifferentialReviewerStatus::STATUS_REJECTED;
-    foreach ($revision->getReviewerStatus() as $reviewer) {
-      if ($reviewer->getReviewerPHID() == $viewer_phid) {
-        if ($reviewer->getStatus() == $status_accepted) {
-          $viewer_has_accepted = true;
-        }
-        if ($reviewer->getStatus() == $status_rejected) {
-          $viewer_has_rejected = true;
-        }
-        break;
-      }
-    }
-
-    $allow_self_accept = PhabricatorEnv::getEnvConfig(
-      'differential.allow-self-accept');
-    $always_allow_abandon = PhabricatorEnv::getEnvConfig(
-      'differential.always-allow-abandon');
-    $always_allow_close = PhabricatorEnv::getEnvConfig(
-      'differential.always-allow-close');
-    $allow_reopen = PhabricatorEnv::getEnvConfig(
-      'differential.allow-reopen');
-
-    if ($viewer_is_owner) {
-      switch ($status) {
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-          $actions[DifferentialAction::ACTION_ACCEPT] = $allow_self_accept;
-          $actions[DifferentialAction::ACTION_ABANDON] = true;
-          $actions[DifferentialAction::ACTION_RETHINK] = true;
-          break;
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-        case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
-          $actions[DifferentialAction::ACTION_ACCEPT] = $allow_self_accept;
-          $actions[DifferentialAction::ACTION_ABANDON] = true;
-          $actions[DifferentialAction::ACTION_REQUEST] = true;
-          break;
-        case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          $actions[DifferentialAction::ACTION_ABANDON] = true;
-          $actions[DifferentialAction::ACTION_REQUEST] = true;
-          $actions[DifferentialAction::ACTION_RETHINK] = true;
-          $actions[DifferentialAction::ACTION_CLOSE] = true;
-          break;
-        case ArcanistDifferentialRevisionStatus::CLOSED:
-          break;
-        case ArcanistDifferentialRevisionStatus::ABANDONED:
-          $actions[DifferentialAction::ACTION_RECLAIM] = true;
-          break;
-      }
-    } else {
-      switch ($status) {
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-          $actions[DifferentialAction::ACTION_ABANDON] = $always_allow_abandon;
-          $actions[DifferentialAction::ACTION_ACCEPT] = true;
-          $actions[DifferentialAction::ACTION_REJECT] = true;
-          $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
-          break;
-        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
-        case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
-          $actions[DifferentialAction::ACTION_ABANDON] = $always_allow_abandon;
-          $actions[DifferentialAction::ACTION_ACCEPT] = true;
-          $actions[DifferentialAction::ACTION_REJECT] = !$viewer_has_rejected;
-          $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
-          break;
-        case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          $actions[DifferentialAction::ACTION_ABANDON] = $always_allow_abandon;
-          $actions[DifferentialAction::ACTION_ACCEPT] = !$viewer_has_accepted;
-          $actions[DifferentialAction::ACTION_REJECT] = true;
-          $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
-          break;
-        case ArcanistDifferentialRevisionStatus::CLOSED:
-        case ArcanistDifferentialRevisionStatus::ABANDONED:
-          break;
-      }
-      if ($status != ArcanistDifferentialRevisionStatus::CLOSED) {
-        $actions[DifferentialAction::ACTION_CLAIM] = true;
-        $actions[DifferentialAction::ACTION_CLOSE] = $always_allow_close;
-      }
-    }
-
-    $actions[DifferentialAction::ACTION_ADDREVIEWERS] = true;
-    $actions[DifferentialAction::ACTION_ADDCCS] = true;
-    $actions[DifferentialAction::ACTION_REOPEN] = $allow_reopen &&
-      ($status == ArcanistDifferentialRevisionStatus::CLOSED);
-
-    $actions = array_keys(array_filter($actions));
-    $actions_dict = array();
-    foreach ($actions as $action) {
-      $actions_dict[$action] = DifferentialAction::getActionVerb($action);
-    }
-
-    return $actions_dict;
   }
 
   private function loadHistoryDiffStatus(array $diffs) {

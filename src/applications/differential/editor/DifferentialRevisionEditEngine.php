@@ -73,6 +73,10 @@ final class DifferentialRevisionEditEngine
     return $object->getURI();
   }
 
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('revision/edit/');
+  }
+
   public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
     return $this;
@@ -176,6 +180,7 @@ final class DifferentialRevisionEditEngine
       ->setUseEdgeTransactions(true)
       ->setTransactionType(
         DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE)
+      ->setCommentActionLabel(pht('Edit Reviewers'))
       ->setDescription(pht('Reviewers for this revision.'))
       ->setConduitDescription(pht('Change the reviewers for this revision.'))
       ->setConduitTypeDescription(pht('New reviewers.'))
