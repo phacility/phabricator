@@ -9,6 +9,7 @@ final class DifferentialReviewerStatus extends Phobject {
   const STATUS_COMMENTED = 'commented';
   const STATUS_ACCEPTED_OLDER = 'accepted-older';
   const STATUS_REJECTED_OLDER = 'rejected-older';
+  const STATUS_RESIGNED = 'resigned';
 
   /**
    * Returns the relative strength of a status, used to pick a winner when a
@@ -34,6 +35,7 @@ final class DifferentialReviewerStatus extends Phobject {
 
       self::STATUS_ACCEPTED   => 5,
       self::STATUS_REJECTED   => 5,
+      self::STATUS_RESIGNED => 5,
     );
 
     return idx($map, $constant, 0);

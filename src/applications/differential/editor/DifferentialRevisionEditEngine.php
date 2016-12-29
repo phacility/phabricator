@@ -38,7 +38,8 @@ final class DifferentialRevisionEditEngine
   protected function newObjectQuery() {
     return id(new DifferentialRevisionQuery())
       ->needActiveDiffs(true)
-      ->needReviewerStatus(true);
+      ->needReviewerStatus(true)
+      ->needReviewerAuthority(true);
   }
 
   protected function getObjectCreateTitleText($object) {
