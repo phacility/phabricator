@@ -1549,6 +1549,9 @@ abstract class PhabricatorEditEngine
 
     $view->setCommentActions($comment_actions);
 
+    $comment_groups = $this->newCommentActionGroups();
+    $view->setCommentActionGroups($comment_groups);
+
     return $view;
   }
 
@@ -2155,6 +2158,10 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
     return $request->getURIData('editAction');
+  }
+
+  protected function newCommentActionGroups() {
+    return array();
   }
 
 

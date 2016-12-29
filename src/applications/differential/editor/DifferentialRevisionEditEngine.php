@@ -9,6 +9,9 @@ final class DifferentialRevisionEditEngine
 
   const KEY_UPDATE = 'update';
 
+  const ACTIONGROUP_REVIEW = 'review';
+  const ACTIONGROUP_REVISION = 'revision';
+
   public function getEngineName() {
     return pht('Revisions');
   }
@@ -85,6 +88,17 @@ final class DifferentialRevisionEditEngine
 
   public function getDiff() {
     return $this->diff;
+  }
+
+  protected function newCommentActionGroups() {
+    return array(
+      id(new PhabricatorEditEngineCommentActionGroup())
+        ->setKey(self::ACTIONGROUP_REVIEW)
+        ->setLabel(pht('Review Actions')),
+      id(new PhabricatorEditEngineCommentActionGroup())
+        ->setKey(self::ACTIONGROUP_REVISION)
+        ->setLabel(pht('Revision Actions')),
+    );
   }
 
   protected function buildCustomEditFields($object) {

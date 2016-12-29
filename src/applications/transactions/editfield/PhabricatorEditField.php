@@ -25,6 +25,7 @@ abstract class PhabricatorEditField extends Phobject {
 
   private $commentActionLabel;
   private $commentActionValue;
+  private $commentActionGroupKey;
   private $commentActionOrder = 1000;
   private $hasCommentActionValue;
 
@@ -243,6 +244,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getCommentActionLabel() {
     return $this->commentActionLabel;
+  }
+
+  public function setCommentActionGroupKey($key) {
+    $this->commentActionGroupKey = $key;
+    return $this;
+  }
+
+  public function getCommentActionGroupKey() {
+    return $this->commentActionGroupKey;
   }
 
   public function setCommentActionOrder($order) {
@@ -719,7 +729,8 @@ abstract class PhabricatorEditField extends Phobject {
       ->setKey($this->getKey())
       ->setLabel($label)
       ->setValue($this->getValueForCommentAction($value))
-      ->setOrder($this->getCommentActionOrder());
+      ->setOrder($this->getCommentActionOrder())
+      ->setGroupKey($this->getCommentActionGroupKey());
 
     return $action;
   }

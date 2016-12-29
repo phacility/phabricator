@@ -1,7 +1,7 @@
 <?php
 
 final class DifferentialRevisionAcceptTransaction
-  extends DifferentialRevisionActionTransaction {
+  extends DifferentialRevisionReviewTransaction {
 
   const TRANSACTIONTYPE = 'differential.revision.accept';
   const ACTIONKEY = 'accept';

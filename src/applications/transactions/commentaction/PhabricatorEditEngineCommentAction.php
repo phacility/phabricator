@@ -7,6 +7,7 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
   private $value;
   private $initialValue;
   private $order;
+  private $groupKey;
 
   abstract public function getPHUIXControlType();
   abstract public function getPHUIXControlSpecification();
@@ -18,6 +19,15 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
 
   public function getKey() {
     return $this->key;
+  }
+
+  public function setGroupKey($group_key) {
+    $this->groupKey = $group_key;
+    return $this;
+  }
+
+  public function getGroupKey() {
+    return $this->groupKey;
   }
 
   public function setLabel($label) {
