@@ -18,6 +18,10 @@ final class DifferentialRevisionRequestReviewTransaction
     return 'sky';
   }
 
+  protected function getRevisionActionOrder() {
+    return 200;
+  }
+
   public function generateOldValue($object) {
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
     return ($object->getStatus() == $status_review);

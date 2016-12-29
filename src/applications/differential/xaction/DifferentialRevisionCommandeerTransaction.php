@@ -22,6 +22,10 @@ final class DifferentialRevisionCommandeerTransaction
     return 'sky';
   }
 
+  protected function getRevisionActionOrder() {
+    return 700;
+  }
+
   public function generateOldValue($object) {
     return $object->getAuthorPHID();
   }

@@ -22,6 +22,10 @@ final class DifferentialRevisionCloseTransaction
     return 'indigo';
   }
 
+  protected function getRevisionActionOrder() {
+    return 300;
+  }
+
   public function generateOldValue($object) {
     return $object->isClosed();
   }
@@ -47,6 +51,13 @@ final class DifferentialRevisionCloseTransaction
         pht(
           'You can not close this revision because it has already been '.
           'closed. Only open revisions can be closed.'));
+    }
+
+    if (!$object->isAccepted()) {
+      throw new Exception(
+        pht(
+          'You can not close this revision because it has not been accepted. '.
+          'Revisions must be accepted before they can be closed.'));
     }
 
     $config_key = 'differential.always-allow-close';

@@ -22,6 +22,10 @@ final class DifferentialRevisionReopenTransaction
     return 'sky';
   }
 
+  protected function getRevisionActionOrder() {
+    return 400;
+  }
+
   public function generateOldValue($object) {
     return !$object->isClosed();
   }

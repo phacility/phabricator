@@ -19,6 +19,15 @@ abstract class DifferentialRevisionActionTransaction
   abstract protected function validateAction($object, PhabricatorUser $viewer);
   abstract protected function getRevisionActionLabel();
 
+  protected function getRevisionActionOrder() {
+    return 1000;
+  }
+
+  public function getRevisionActionOrderVector() {
+    return id(new PhutilSortVector())
+      ->addInt($this->getRevisionActionOrder());
+  }
+
   protected function getRevisionActionGroupKey() {
     return DifferentialRevisionEditEngine::ACTIONGROUP_REVISION;
   }

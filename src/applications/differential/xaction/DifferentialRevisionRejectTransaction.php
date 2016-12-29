@@ -22,6 +22,10 @@ final class DifferentialRevisionRejectTransaction
     return 'red';
   }
 
+  protected function getRevisionActionOrder() {
+    return 600;
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return $this->isViewerRejectingReviewer($object, $actor);

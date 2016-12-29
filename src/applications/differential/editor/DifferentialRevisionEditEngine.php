@@ -229,6 +229,8 @@ final class DifferentialRevisionEditEngine
       ->setValue(array());
 
     $actions = DifferentialRevisionActionTransaction::loadAllActions();
+    $actions = msortv($actions, 'getRevisionActionOrderVector');
+
     foreach ($actions as $key => $action) {
       $fields[] = $action->newEditField($object, $viewer);
     }

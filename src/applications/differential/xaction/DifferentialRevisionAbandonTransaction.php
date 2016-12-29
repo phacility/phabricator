@@ -22,6 +22,10 @@ final class DifferentialRevisionAbandonTransaction
     return 'indigo';
   }
 
+  protected function getRevisionActionOrder() {
+    return 500;
+  }
+
   public function generateOldValue($object) {
     return $object->isAbandoned();
   }

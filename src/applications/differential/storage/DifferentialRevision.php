@@ -447,6 +447,11 @@ final class DifferentialRevision extends DifferentialDAO
     return ($this->getStatus() == $status_abandoned);
   }
 
+  public function isAccepted() {
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    return ($this->getStatus() == $status_accepted);
+  }
+
   public function getStatusIcon() {
     $map = array(
       ArcanistDifferentialRevisionStatus::NEEDS_REVIEW

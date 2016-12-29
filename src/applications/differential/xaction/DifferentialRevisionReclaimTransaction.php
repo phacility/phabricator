@@ -22,6 +22,10 @@ final class DifferentialRevisionReclaimTransaction
     return 'sky';
   }
 
+  protected function getRevisionActionOrder() {
+    return 600;
+  }
+
   public function generateOldValue($object) {
     return !$object->isAbandoned();
   }

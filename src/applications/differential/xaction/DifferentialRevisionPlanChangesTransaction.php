@@ -23,6 +23,10 @@ final class DifferentialRevisionPlanChangesTransaction
     return 'red';
   }
 
+  protected function getRevisionActionOrder() {
+    return 200;
+  }
+
   public function generateOldValue($object) {
     $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
     return ($object->getStatus() == $status_planned);

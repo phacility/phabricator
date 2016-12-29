@@ -22,6 +22,10 @@ final class DifferentialRevisionResignTransaction
     return 'orange';
   }
 
+  protected function getRevisionActionOrder() {
+    return 700;
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return !$this->isViewerAnyReviewer($object, $actor);
