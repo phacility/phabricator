@@ -66,7 +66,7 @@ final class DifferentialCommitMessageParser extends Phobject {
   /**
    * @task config
    */
-  public function setCommitMessageFields($fields) {
+  public function setCommitMessageFields(array $fields) {
     assert_instances_of($fields, 'DifferentialCommitMessageField');
     $fields = mpull($fields, null, 'getCommitMessageFieldKey');
     $this->commitMessageFields = $fields;
