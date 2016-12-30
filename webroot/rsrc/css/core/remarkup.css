@@ -728,3 +728,23 @@ var.remarkup-assist-textarea {
   background: {$sh-bluebackground};
   color: #000;
 }
+
+.phui-box.phui-object-box.phui-comment-form-view.remarkup-assist-pinned {
+  position: fixed;
+  background-color: #ffffff;
+  border-top: 1px solid {$lightblueborder};
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.25);
+
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+
+  overflow: auto;
+  max-height: 40vh;
+}
+
+.remarkup-assist-pinned-spacer {
+  position: relative;
+}
