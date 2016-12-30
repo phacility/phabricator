@@ -247,4 +247,52 @@ final class DifferentialRevisionEditEngine
     return isset($fields[$key]);
   }
 
+  protected function newAutomaticCommentTransactions($object) {
+    $viewer = $this->getViewer();
+    $xactions = array();
+
+    $inlines = DifferentialTransactionQuery::loadUnsubmittedInlineComments(
+      $viewer,
+      $object);
+    $inlines = msort($inlines, 'getID');
+
+    foreach ($inlines as $inline) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(DifferentialTransaction::TYPE_INLINE)
+        ->attachComment($inline);
+    }
+
+    return $xactions;
+  }
+
+  protected function newCommentPreviewContent($object, array $xactions) {
+    $viewer = $this->getViewer();
+    $type_inline = DifferentialTransaction::TYPE_INLINE;
+
+    $inlines = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() === $type_inline) {
+        $inlines[] = $xaction->getComment();
+      }
+    }
+
+    $content = array();
+
+    if ($inlines) {
+      $inline_preview = id(new PHUIDiffInlineCommentPreviewListView())
+        ->setViewer($viewer)
+        ->setInlineComments($inlines);
+
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'id' => 'inline-comment-preview',
+        ),
+        $inline_preview);
+    }
+
+    return $content;
+  }
+
+
 }

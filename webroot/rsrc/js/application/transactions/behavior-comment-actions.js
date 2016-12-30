@@ -149,7 +149,10 @@ JX.behavior('comment-actions', function(config) {
     } else {
       JX.DOM.setContent(
         JX.$(config.timelineID),
-        JX.$H(response.xactions.join('')));
+        [
+          JX.$H(response.xactions.join('')),
+          JX.$H(response.previewContent)
+        ]);
       JX.DOM.show(panel);
     }
   }

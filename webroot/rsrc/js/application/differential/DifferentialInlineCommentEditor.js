@@ -183,7 +183,7 @@ JX.install('DifferentialInlineCommentEditor', {
 
       this._completed = true;
 
-      JX.Stratcom.invoke('differential-inline-comment-update');
+      this._didUpdate();
       this.invoke('done');
     },
 
@@ -335,7 +335,15 @@ JX.install('DifferentialInlineCommentEditor', {
     },
 
     _didUpdate: function() {
-      JX.Stratcom.invoke('differential-inline-comment-update');
+      // After making changes to inline comments, refresh the transaction
+      // preview at the bottom of the page.
+
+      // TODO: This isn't the cleanest way to find the preview form, but
+      // rendering no longer has direct access to it.
+      var forms = JX.DOM.scry(document.body, 'form', 'transaction-append');
+      if (forms.length) {
+        JX.DOM.invoke(forms[0], 'shouldRefresh');
+      }
     }
 
   },

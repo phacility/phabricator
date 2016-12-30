@@ -1783,6 +1783,11 @@ abstract class PhabricatorEditEngine
       }
     }
 
+    $auto_xactions = $this->newAutomaticCommentTransactions($object);
+    foreach ($auto_xactions as $xaction) {
+      $xactions[] = $xaction;
+    }
+
     if (strlen($comment_text) || !$xactions) {
       $xactions[] = id(clone $template)
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
@@ -1814,10 +1819,13 @@ abstract class PhabricatorEditEngine
     }
 
     if ($request->isAjax() && $is_preview) {
+      $preview_content = $this->newCommentPreviewContent($object, $xactions);
+
       return id(new PhabricatorApplicationTransactionResponse())
         ->setViewer($viewer)
         ->setTransactions($xactions)
-        ->setIsPreview($is_preview);
+        ->setIsPreview($is_preview)
+        ->setPreviewContent($preview_content);
     } else {
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
@@ -2162,6 +2170,14 @@ abstract class PhabricatorEditEngine
 
   protected function newCommentActionGroups() {
     return array();
+  }
+
+  protected function newAutomaticCommentTransactions($object) {
+    return array();
+  }
+
+  protected function newCommentPreviewContent($object, array $xactions) {
+    return null;
   }
 
 
