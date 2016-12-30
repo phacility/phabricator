@@ -24,7 +24,6 @@ final class DifferentialCommentSaveController
     $type_action = DifferentialTransaction::TYPE_ACTION;
     $type_subscribers = PhabricatorTransactions::TYPE_SUBSCRIBERS;
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
-    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
     $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
@@ -36,13 +35,18 @@ final class DifferentialCommentSaveController
       case DifferentialAction::ACTION_COMMENT:
       case DifferentialAction::ACTION_ADDREVIEWERS:
       case DifferentialAction::ACTION_ADDCCS:
+        $type_comment = PhabricatorTransactions::TYPE_COMMENT;
         // These transaction types have no direct effect, they just
         // accompany other transaction types which can have an effect.
         break;
+      case DifferentialAction::ACTION_PULL_REQUEST:
+        $type_comment = PhabricatorTransactions::TYPE_PULL_REQUEST;
+        break;  
       default:
         $xactions[] = id(new DifferentialTransaction())
           ->setTransactionType($type_action)
           ->setNewValue($request->getStr('action'));
+        $type_comment = PhabricatorTransactions::TYPE_COMMENT;
         break;
     }
 
@@ -104,7 +108,6 @@ final class DifferentialCommentSaveController
             ->setRevisionPHID($revision->getPHID())
             ->setContent($comment));
     }
-
 
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($viewer)

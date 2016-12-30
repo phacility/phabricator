@@ -425,6 +425,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function getIcon() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
+        return 'fa-upload';
       case PhabricatorTransactions::TYPE_COMMENT:
         $comment = $this->getComment();
         if ($comment && $comment->getIsRemoved()) {
@@ -482,6 +484,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function getColor() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST;
+        return 'blue';
       case PhabricatorTransactions::TYPE_COMMENT;
         $comment = $this->getComment();
         if ($comment && $comment->getIsRemoved()) {
@@ -790,6 +794,8 @@ abstract class PhabricatorApplicationTransaction
   public function getNoEffectDescription() {
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
+        return pht('You can not post an empty pull request.');
       case PhabricatorTransactions::TYPE_COMMENT:
         return pht('You can not post an empty comment.');
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -838,6 +844,10 @@ abstract class PhabricatorApplicationTransaction
         return pht(
           '%s added a comment.',
           $this->renderHandleLink($author_phid));
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
+        return pht(
+          '%s created a github pull request.',
+          $this->renderHandleLink($author_phid));  
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         if ($this->getIsCreateTransaction()) {
           return pht(
@@ -1118,6 +1128,11 @@ abstract class PhabricatorApplicationTransaction
           '%s added a comment to %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
+        return pht(
+          '%s created a github pull request for this %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));  
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return pht(
           '%s changed the visibility for %s.',
@@ -1270,6 +1285,7 @@ abstract class PhabricatorApplicationTransaction
     $fields = array();
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
       case PhabricatorTransactions::TYPE_COMMENT:
         $text = $this->getComment()->getContent();
         if (strlen($text)) {
@@ -1283,6 +1299,7 @@ abstract class PhabricatorApplicationTransaction
 
   public function getMarkupTextForFeed(PhabricatorFeedStory $story, $field) {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
       case PhabricatorTransactions::TYPE_COMMENT:
         $text = $this->getComment()->getContent();
         return PhabricatorMarkupEngine::summarize($text);
@@ -1304,6 +1321,7 @@ abstract class PhabricatorApplicationTransaction
     $body = null;
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
       case PhabricatorTransactions::TYPE_COMMENT:
         $text = $this->getComment()->getContent();
         if (strlen($text)) {
@@ -1325,6 +1343,7 @@ abstract class PhabricatorApplicationTransaction
     }
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
       case PhabricatorTransactions::TYPE_COMMENT:
         return 0.5;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
@@ -1354,6 +1373,7 @@ abstract class PhabricatorApplicationTransaction
     }
 
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
       case PhabricatorTransactions::TYPE_COMMENT:
         return true;
     }
@@ -1367,6 +1387,8 @@ abstract class PhabricatorApplicationTransaction
 
   public function getActionName() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
+        return pht('Pull Request Created');
       case PhabricatorTransactions::TYPE_COMMENT:
         return pht('Commented On');
       case PhabricatorTransactions::TYPE_VIEW_POLICY:

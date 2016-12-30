@@ -3,6 +3,7 @@
 final class PhabricatorTransactions extends Phobject {
 
   const TYPE_COMMENT      = 'core:comment';
+  const TYPE_PULL_REQUEST = 'core:pull-request';
   const TYPE_SUBSCRIBERS  = 'core:subscribers';
   const TYPE_VIEW_POLICY  = 'core:view-policy';
   const TYPE_EDIT_POLICY  = 'core:edit-policy';

@@ -676,6 +676,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
   private function getRevisionCommentActions(DifferentialRevision $revision) {
     $actions = array(
       DifferentialAction::ACTION_COMMENT => true,
+      DifferentialAction::ACTION_PULL_REQUEST => true,
     );
 
     $viewer = $this->getViewer();

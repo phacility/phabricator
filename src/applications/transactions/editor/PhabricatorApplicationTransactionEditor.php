@@ -382,6 +382,7 @@ abstract class PhabricatorApplicationTransactionEditor
         // built by PhabricatorCustomFieldList.
         return $xaction->getOldValue();
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
         return null;
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
@@ -438,6 +439,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->getNewValueFromApplicationTransactions($xaction);
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
         return null;
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
@@ -464,6 +466,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CREATE:
         return true;
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
         return $xaction->hasComment();
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
@@ -552,6 +555,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
 
@@ -610,6 +614,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_SPACE:
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
         return $this->applyBuiltinExternalTransaction($object, $xaction);
     }
 
@@ -1364,6 +1369,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $actor = $this->requireActor();
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
+      case PhabricatorTransactions::TYPE_PULL_REQUEST:
         PhabricatorPolicyFilter::requireCapability(
           $actor,
           $object,

@@ -53,10 +53,22 @@ final class DifferentialCreateCommentConduitAPIMethod
         ->setNewValue($action);
     }
 
+    switch ($action) {
+      case DifferentialAction::ACTION_COMMENT:
+        $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+        break;
+      case DifferentialAction::ACTION_PULL_REQUEST:
+        $type_comment = PhabricatorTransactions::TYPE_PULL_REQUEST;
+        break;   
+      default:
+        $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+        break;  
+    }
+
     $content = $request->getValue('message');
     if (strlen($content)) {
       $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->setTransactionType($type_comment)
         ->attachComment(
           id(new DifferentialTransactionComment())
             ->setContent($content));

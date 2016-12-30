@@ -15,7 +15,6 @@ final class DifferentialCommentPreviewController
       return new Aphront404Response();
     }
 
-    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
     $type_action = DifferentialTransaction::TYPE_ACTION;
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
     $type_subscribers = PhabricatorTransactions::TYPE_SUBSCRIBERS;
@@ -27,11 +26,16 @@ final class DifferentialCommentPreviewController
       case DifferentialAction::ACTION_COMMENT:
       case DifferentialAction::ACTION_ADDREVIEWERS:
       case DifferentialAction::ACTION_ADDCCS:
+        $type_comment = PhabricatorTransactions::TYPE_COMMENT;
         break;
+      case DifferentialAction::ACTION_PULL_REQUEST:
+        $type_comment = PhabricatorTransactions::TYPE_PULL_REQUEST;
+        break;   
       default:
         $xactions[] = id(new DifferentialTransaction())
           ->setTransactionType($type_action)
           ->setNewValue($action);
+        $type_comment = PhabricatorTransactions::TYPE_COMMENT;  
         break;
     }
 
