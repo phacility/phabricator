@@ -223,6 +223,12 @@ final class DifferentialTransaction
       case self::TYPE_INLINE:
         $tags[] = self::MAILTAG_COMMENT;
         break;
+      case DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_REVIEWERS;
+        break;
+      case DifferentialRevisionCloseTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_CLSOED;
+        break;
     }
 
     if (!$tags) {
