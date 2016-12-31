@@ -58,6 +58,7 @@ final class DifferentialTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_INLINESTATE;
 
     $types[] = DifferentialTransaction::TYPE_ACTION;
     $types[] = DifferentialTransaction::TYPE_INLINE;
@@ -254,6 +255,23 @@ final class DifferentialTransactionEditor
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
+  }
+
+  protected function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // If we have an "Inline State" transaction already, the caller built it
+    // for us so we don't need to expand it again.
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_INLINESTATE:
+          $this->didExpandInlineState = true;
+          break;
+      }
+    }
+
+    return parent::expandTransactions($object, $xactions);
   }
 
   protected function expandTransaction(
