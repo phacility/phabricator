@@ -20,6 +20,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $headerText;
   private $noPermission;
   private $fullWidth;
+  private $infoView;
 
   private $currentVersion;
   private $versionedDraft;
@@ -107,6 +108,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   public function setFullWidth($fw) {
     $this->fullWidth = $fw;
     return $this;
+  }
+
+  public function setInfoView(PHUIInfoView $info_view) {
+    $this->infoView = $info_view;
+    return $this;
+  }
+
+  public function getInfoView() {
+    return $this->infoView;
   }
 
   public function setCommentActions(array $comment_actions) {
@@ -334,6 +344,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ));
 
       $form->appendChild($action_bar);
+
+      $info_view = $this->getInfoView();
+      if ($info_view) {
+        $info_box = id(new PHUIBoxView())
+          ->addMargin(PHUI::MARGIN_LARGE)
+          ->appendChild($info_view);
+        $form->appendChild($info_box);
+      }
+
       $form->appendChild($invisi_bar);
       $form->addClass('phui-comment-has-actions');
 

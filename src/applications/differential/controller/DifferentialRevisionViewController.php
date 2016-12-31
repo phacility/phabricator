@@ -255,17 +255,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $target,
       $revision);
 
-    $comment_view = $this->buildTransactions(
+    $timeline = $this->buildTransactions(
       $revision,
       $diff_vs ? $diffs[$diff_vs] : $target,
       $target,
       $old_ids,
       $new_ids);
 
-    if (!$viewer_is_anonymous) {
-      $comment_view->setQuoteRef('D'.$revision->getID());
-      $comment_view->setQuoteTargetID('comment-content');
-    }
+    $timeline->setQuoteRef($revision->getMonogram());
 
     $changeset_view = id(new DifferentialChangesetListView())
       ->setChangesets($changesets)
@@ -421,15 +418,33 @@ final class DifferentialRevisionViewController extends DifferentialController {
       );
     }
 
-    $footer[] = id(new DifferentialRevisionEditEngine())
+    $comment_view = id(new DifferentialRevisionEditEngine())
       ->setViewer($viewer)
       ->buildEditEngineCommentView($revision);
 
-    $object_id = 'D'.$revision->getID();
+    $comment_view->setTransactionTimeline($timeline);
+
+    $review_warnings = array();
+    foreach ($field_list->getFields() as $field) {
+      $review_warnings[] = $field->getWarningsForDetailView();
+    }
+    $review_warnings = array_mergev($review_warnings);
+
+    if ($review_warnings) {
+      $warnings_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors($review_warnings);
+
+      $comment_view->setInfoView($warnings_view);
+    }
+
+    $footer[] = $comment_view;
+
+    $monogram = $revision->getMonogram();
     $operations_box = $this->buildOperationsBox($revision);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($object_id, '/'.$object_id);
+    $crumbs->addTextCrumb($monogram, $revision->getURI());
     $crumbs->setBorder(true);
 
     $filetree_on = $viewer->compareUserSetting(
@@ -442,8 +457,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $collapsed_value = $viewer->getUserSetting($collapsed_key);
 
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setTitle('D'.$revision->getID())
-        ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
+        ->setTitle($monogram)
+        ->setBaseURI(new PhutilURI($revision->getURI()))
         ->setCollapsed((bool)$collapsed_value)
         ->build($changesets);
     }
@@ -454,19 +469,20 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setHeader($header)
       ->setSubheader($subheader)
       ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $operations_box,
-        $info_view,
-        $details,
-        $diff_detail_box,
-        $unit_box,
-        $comment_view,
-        $signature_message,
-      ))
+      ->setMainColumn(
+        array(
+          $operations_box,
+          $info_view,
+          $details,
+          $diff_detail_box,
+          $unit_box,
+          $timeline,
+          $signature_message,
+        ))
       ->setFooter($footer);
 
     $page =  $this->newPage()
-      ->setTitle($object_id.' '.$revision->getTitle())
+      ->setTitle($monogram.' '.$revision->getTitle())
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($revision->getPHID()))
       ->appendChild($view);
