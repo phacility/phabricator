@@ -1805,6 +1805,10 @@ abstract class PhabricatorEditEngine
 
     try {
       $xactions = $editor->applyTransactions($object, $xactions);
+    } catch (PhabricatorApplicationTransactionValidationException $ex) {
+      return id(new PhabricatorApplicationTransactionValidationResponse())
+        ->setCancelURI($view_uri)
+        ->setException($ex);
     } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
         ->setCancelURI($view_uri)

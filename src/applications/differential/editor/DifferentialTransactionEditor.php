@@ -288,16 +288,26 @@ final class DifferentialTransactionEditor
             $downgrade_accepts = true;
           }
           break;
+        case DifferentialRevisionRequestReviewTransaction::TRANSACTIONTYPE:
+          $downgrade_rejects = true;
+          if ((!$is_sticky_accept) ||
+              ($object->getStatus() != $status_plan)) {
+            // If the old state isn't "changes planned", downgrade the accepts.
+            // This exception allows an accepted revision to go through
+            // "Plan Changes" -> "Request Review" and return to "accepted" if
+            // the author didn't update the revision, essentially undoing the
+            // "Plan Changes".
+            $downgrade_accepts = true;
+          }
+          break;
+
+        // TODO: Remove this, obsoleted by ModularTransactions above.
         case DifferentialTransaction::TYPE_ACTION:
           switch ($xaction->getNewValue()) {
             case DifferentialAction::ACTION_REQUEST:
               $downgrade_rejects = true;
               if ((!$is_sticky_accept) ||
                   ($object->getStatus() != $status_plan)) {
-                // If the old state isn't "changes planned", downgrade the
-                // accepts. This exception allows an accepted revision to
-                // go through Plan Changes -> Request Review to return to
-                // "accepted" if the author didn't update the revision.
                 $downgrade_accepts = true;
               }
               break;
@@ -353,6 +363,7 @@ final class DifferentialTransactionEditor
       }
     }
 
+    $is_commandeer = false;
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_UPDATE:
         if ($this->getIsCloseByCommit()) {
@@ -424,6 +435,10 @@ final class DifferentialTransactionEditor
         }
         break;
 
+      case DifferentialRevisionCommandeerTransaction::TRANSACTIONTYPE:
+        $is_commandeer = true;
+        break;
+
       case DifferentialTransaction::TYPE_ACTION:
         $action_type = $xaction->getNewValue();
 
@@ -463,41 +478,7 @@ final class DifferentialTransactionEditor
             break;
 
           case DifferentialAction::ACTION_CLAIM:
-            // If the user is commandeering, add the previous owner as a
-            // reviewer and remove the actor.
-
-            $edits = array(
-              '-' => array(
-                $actor_phid => $actor_phid,
-              ),
-            );
-
-            $owner_phid = $object->getAuthorPHID();
-            if ($owner_phid) {
-              $reviewer = new DifferentialReviewerProxy(
-                $owner_phid,
-                array(
-                  'status' => DifferentialReviewerStatus::STATUS_ADDED,
-                ));
-
-              $edits['+'] = array(
-                $owner_phid => array(
-                  'data' => $reviewer->getEdgeData(),
-                ),
-              );
-            }
-
-            // NOTE: We're setting setIsCommandeerSideEffect() on this because
-            // normally you can't add a revision's author as a reviewer, but
-            // this action swaps them after validation executes.
-
-            $results[] = id(new DifferentialTransaction())
-              ->setTransactionType($type_edge)
-              ->setMetadataValue('edge:type', $edge_reviewer)
-              ->setIgnoreOnNoEffect(true)
-              ->setIsCommandeerSideEffect(true)
-              ->setNewValue($edits);
-
+            $is_commandeer = true;
             break;
           case DifferentialAction::ACTION_RESIGN:
             // If the user is resigning, add a separate reviewer edit
@@ -517,6 +498,10 @@ final class DifferentialTransactionEditor
             break;
         }
       break;
+    }
+
+    if ($is_commandeer) {
+      $results[] = $this->newCommandeerReviewerTransaction($object);
     }
 
     if (!$this->didExpandInlineState) {
@@ -1499,6 +1484,10 @@ final class DifferentialTransactionEditor
             return true;
           }
           break;
+        case DifferentialRevisionCommandeerTransaction::TRANSACTIONTYPE:
+          // When users commandeer revisions, we may need to trigger
+          // signatures or author-based rules.
+          return true;
         case DifferentialTransaction::TYPE_ACTION:
           switch ($xaction->getNewValue()) {
             case DifferentialAction::ACTION_CLAIM:
@@ -1920,6 +1909,37 @@ final class DifferentialTransactionEditor
   protected function loadCustomWorkerState(array $state) {
     $this->changedPriorToCommitURI = idx($state, 'changedPriorToCommitURI');
     return $this;
+  }
+
+  private function newCommandeerReviewerTransaction(
+    DifferentialRevision $revision) {
+
+    $actor_phid = $this->getActingAsPHID();
+    $owner_phid = $revision->getAuthorPHID();
+
+    // If the user is commandeering, add the previous owner as a
+    // reviewer and remove the actor.
+
+    $edits = array(
+      '-' => array(
+        $actor_phid,
+      ),
+      '+' => array(
+        $owner_phid,
+      ),
+    );
+
+    // NOTE: We're setting setIsCommandeerSideEffect() on this because normally
+    // you can't add a revision's author as a reviewer, but this action swaps
+    // them after validation executes.
+
+    $xaction_type = DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE;
+
+    return id(new DifferentialTransaction())
+      ->setTransactionType($xaction_type)
+      ->setIgnoreOnNoEffect(true)
+      ->setIsCommandeerSideEffect(true)
+      ->setNewValue($edits);
   }
 
 }
