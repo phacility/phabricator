@@ -155,7 +155,10 @@ final class DifferentialCommitMessageParser extends Phobject {
     $field = $key_title;
 
     $seen = array();
-    $lines = explode("\n", trim($corpus));
+
+    $lines = trim($corpus);
+    $lines = phutil_split_lines($lines, false);
+
     $field_map = array();
     foreach ($lines as $key => $line) {
       $match = null;
