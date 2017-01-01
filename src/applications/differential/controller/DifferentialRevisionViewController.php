@@ -16,18 +16,17 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($this->revisionID))
-      ->setViewer($request->getUser())
+      ->setViewer($viewer)
       ->needRelationships(true)
       ->needReviewerStatus(true)
       ->needReviewerAuthority(true)
       ->executeOne();
-
     if (!$revision) {
       return new Aphront404Response();
     }
 
     $diffs = id(new DifferentialDiffQuery())
-      ->setViewer($request->getUser())
+      ->setViewer($viewer)
       ->withRevisionIDs(array($this->revisionID))
       ->execute();
     $diffs = array_reverse($diffs, $preserve_keys = true);

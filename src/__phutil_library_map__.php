@@ -5058,6 +5058,7 @@ phutil_register_library_map(array(
     'DifferentialDiff' => array(
       'DifferentialDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorExtendedPolicyInterface',
       'HarbormasterBuildableInterface',
       'HarbormasterCircleCIBuildableInterface',
       'PhabricatorApplicationTransactionInterface',

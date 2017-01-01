@@ -4,6 +4,7 @@ final class DifferentialDiff
   extends DifferentialDAO
   implements
     PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
     HarbormasterBuildableInterface,
     HarbormasterCircleCIBuildableInterface,
     PhabricatorApplicationTransactionInterface,
@@ -429,7 +430,7 @@ final class DifferentialDiff
 
   public function getPolicy($capability) {
     if ($this->hasRevision()) {
-      return $this->getRevision()->getPolicy($capability);
+      return PhabricatorPolicies::getMostOpenPolicy();
     }
 
     return $this->viewPolicy;
@@ -440,7 +441,7 @@ final class DifferentialDiff
       return $this->getRevision()->hasAutomaticCapability($capability, $viewer);
     }
 
-    return ($this->getAuthorPHID() == $viewer->getPhid());
+    return ($this->getAuthorPHID() == $viewer->getPHID());
   }
 
   public function describeAutomaticCapability($capability) {
@@ -448,9 +449,30 @@ final class DifferentialDiff
       return pht(
         'This diff is attached to a revision, and inherits its policies.');
     }
+
     return pht('The author of a diff can see it.');
   }
 
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    $extended = array();
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        if ($this->hasRevision()) {
+          $extended[] = array(
+            $this->getRevision(),
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
+        }
+        break;
+    }
+
+    return $extended;
+  }
 
 
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
