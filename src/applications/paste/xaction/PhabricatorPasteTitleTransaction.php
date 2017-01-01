@@ -14,20 +14,52 @@ final class PhabricatorPasteTitleTransaction
   }
 
   public function getTitle() {
-    return pht(
-      '%s changed the title of this paste from %s to %s.',
-      $this->renderAuthor(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+    $old = $this->getOldValue();
+    $new = $this->getNeWValue();
+
+    if (strlen($old) && strlen($new)) {
+      return pht(
+        '%s changed the title of this paste from %s to %s.',
+        $this->renderAuthor(),
+        $this->renderOldValue(),
+        $this->renderNewValue());
+    } else if (strlen($new)) {
+      return pht(
+        '%s changed the title of this paste from untitled to %s.',
+        $this->renderAuthor(),
+        $this->renderNewValue());
+    } else {
+      return pht(
+        '%s changed the title of this paste from %s to untitled.',
+        $this->renderAuthor(),
+        $this->renderOldValue());
+    }
   }
 
   public function getTitleForFeed() {
-    return pht(
-      '%s updated the title for %s from %s to %s.',
-      $this->renderAuthor(),
-      $this->renderObject(),
-      $this->renderOldValue(),
-      $this->renderNewValue());
+    $old = $this->getOldValue();
+    $new = $this->getNeWValue();
+
+    if (strlen($old) && strlen($new)) {
+      return pht(
+        '%s updated the title for %s from %s to %s.',
+        $this->renderAuthor(),
+        $this->renderObject(),
+        $this->renderOldValue(),
+        $this->renderNewValue());
+    } else if (strlen($new)) {
+      return pht(
+        '%s updated the title for %s from untitled to %s.',
+        $this->renderAuthor(),
+        $this->renderObject(),
+        $this->renderNewValue());
+    } else {
+      return pht(
+        '%s updated the title for %s from %s to untitled.',
+        $this->renderAuthor(),
+        $this->renderObject(),
+        $this->renderOldValue());
+    }
   }
 
 }
