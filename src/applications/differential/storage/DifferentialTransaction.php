@@ -227,7 +227,7 @@ final class DifferentialTransaction
         $tags[] = self::MAILTAG_REVIEWERS;
         break;
       case DifferentialRevisionCloseTransaction::TRANSACTIONTYPE:
-        $tags[] = self::MAILTAG_CLSOED;
+        $tags[] = self::MAILTAG_CLOSED;
         break;
     }
 
