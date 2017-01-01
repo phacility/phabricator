@@ -161,17 +161,27 @@ final class DifferentialCommitMessageParser extends Phobject {
 
     $field_map = array();
     foreach ($lines as $key => $line) {
-      $match = null;
-      if (preg_match($label_regexp, $line, $match)) {
-        $lines[$key] = trim($match['text']);
-        $field = $label_map[self::normalizeFieldLabel($match['field'])];
-        if (!empty($seen[$field])) {
-          $this->errors[] = pht(
-            'Field "%s" occurs twice in commit message!',
-            $field);
-        }
+      // We always parse the first line of the message as a title, even if it
+      // contains something we recognize as a field header.
+      if (!isset($seen[$key_title])) {
+        $field = $key_title;
+
+        $lines[$key] = trim($line);
         $seen[$field] = true;
+      } else {
+        $match = null;
+        if (preg_match($label_regexp, $line, $match)) {
+          $lines[$key] = trim($match['text']);
+          $field = $label_map[self::normalizeFieldLabel($match['field'])];
+          if (!empty($seen[$field])) {
+            $this->errors[] = pht(
+              'Field "%s" occurs twice in commit message!',
+              $match['field']);
+          }
+          $seen[$field] = true;
+        }
       }
+
       $field_map[$key] = $field;
     }
 
