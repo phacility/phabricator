@@ -147,13 +147,27 @@ JX.behavior('comment-actions', function(config) {
     if (!response.xactions.length) {
       JX.DOM.hide(panel);
     } else {
+      var preview_root = JX.$(config.timelineID);
       JX.DOM.setContent(
-        JX.$(config.timelineID),
+        preview_root,
         [
           JX.$H(response.xactions.join('')),
           JX.$H(response.previewContent)
         ]);
       JX.DOM.show(panel);
+
+      // NOTE: Resonses are currently processed before associated behaviors are
+      // registered. We need to defer invoking this event so that any behaviors
+      // accompanying the response are registered.
+      var invoke_preview = function() {
+        JX.Stratcom.invoke(
+          'EditEngine.didCommentPreview',
+          null,
+          {
+            rootNode: preview_root
+          });
+      };
+      setTimeout(invoke_preview, 0);
     }
   }
 
