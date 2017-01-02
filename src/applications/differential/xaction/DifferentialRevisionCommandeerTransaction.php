@@ -26,6 +26,20 @@ final class DifferentialRevisionCommandeerTransaction
     return 700;
   }
 
+  public function getCommandKeyword() {
+    return 'commandeer';
+  }
+
+  public function getCommandAliases() {
+    return array(
+      'claim',
+    );
+  }
+
+  public function getCommandSummary() {
+    return pht('Commadeer a revision.');
+  }
+
   public function generateOldValue($object) {
     return $object->getAuthorPHID();
   }

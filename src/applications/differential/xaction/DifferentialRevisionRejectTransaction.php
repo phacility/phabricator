@@ -26,6 +26,20 @@ final class DifferentialRevisionRejectTransaction
     return 600;
   }
 
+  public function getCommandKeyword() {
+    return 'request';
+  }
+
+  public function getCommandAliases() {
+    return array(
+      'reject',
+    );
+  }
+
+  public function getCommandSummary() {
+    return pht('Request changes to a revision.');
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return $this->isViewerRejectingReviewer($object, $actor);

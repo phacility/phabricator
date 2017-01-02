@@ -26,6 +26,24 @@ final class DifferentialRevisionAcceptTransaction
     return 500;
   }
 
+  public function getCommandKeyword() {
+    $accept_key = 'differential.enable-email-accept';
+    $allow_email_accept = PhabricatorEnv::getEnvConfig($accept_key);
+    if (!$allow_email_accept) {
+      return null;
+    }
+
+    return 'accept';
+  }
+
+  public function getCommandAliases() {
+    return array();
+  }
+
+  public function getCommandSummary() {
+    return pht('Accept a revision.');
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return $this->isViewerAcceptingReviewer($object, $actor);

@@ -26,6 +26,18 @@ final class DifferentialRevisionResignTransaction
     return 700;
   }
 
+  public function getCommandKeyword() {
+    return 'resign';
+  }
+
+  public function getCommandAliases() {
+    return array();
+  }
+
+  public function getCommandSummary() {
+    return pht('Resign from a revision.');
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return !$this->isViewerAnyReviewer($object, $actor);

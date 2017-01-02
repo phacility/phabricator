@@ -27,6 +27,20 @@ final class DifferentialRevisionPlanChangesTransaction
     return 200;
   }
 
+  public function getCommandKeyword() {
+    return 'planchanges';
+  }
+
+  public function getCommandAliases() {
+    return array(
+      'rethink',
+    );
+  }
+
+  public function getCommandSummary() {
+    return pht('Plan changes to a revision.');
+  }
+
   public function generateOldValue($object) {
     $status_planned = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
     return ($object->getStatus() == $status_planned);

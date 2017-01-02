@@ -26,6 +26,18 @@ final class DifferentialRevisionReclaimTransaction
     return 600;
   }
 
+  public function getCommandKeyword() {
+    return 'reclaim';
+  }
+
+  public function getCommandAliases() {
+    return array();
+  }
+
+  public function getCommandSummary() {
+    return pht('Reclaim a revision.');
+  }
+
   public function generateOldValue($object) {
     return !$object->isAbandoned();
   }

@@ -26,6 +26,18 @@ final class DifferentialRevisionAbandonTransaction
     return 500;
   }
 
+  public function getCommandKeyword() {
+    return 'abandon';
+  }
+
+  public function getCommandAliases() {
+    return array();
+  }
+
+  public function getCommandSummary() {
+    return pht('Abandon a revision.');
+  }
+
   public function generateOldValue($object) {
     return $object->isAbandoned();
   }

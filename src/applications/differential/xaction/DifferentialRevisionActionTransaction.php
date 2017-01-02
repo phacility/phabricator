@@ -19,6 +19,18 @@ abstract class DifferentialRevisionActionTransaction
   abstract protected function validateAction($object, PhabricatorUser $viewer);
   abstract protected function getRevisionActionLabel();
 
+  public function getCommandKeyword() {
+    return null;
+  }
+
+  public function getCommandAliases() {
+    return array();
+  }
+
+  public function getCommandSummary() {
+    return null;
+  }
+
   protected function getRevisionActionOrder() {
     return 1000;
   }
