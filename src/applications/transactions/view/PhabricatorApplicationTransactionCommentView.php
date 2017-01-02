@@ -347,10 +347,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
       $info_view = $this->getInfoView();
       if ($info_view) {
-        $info_box = id(new PHUIBoxView())
-          ->addMargin(PHUI::MARGIN_LARGE)
-          ->appendChild($info_view);
-        $form->appendChild($info_box);
+        $form->appendChild($info_view);
       }
 
       $form->appendChild($invisi_bar);
