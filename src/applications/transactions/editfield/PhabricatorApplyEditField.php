@@ -4,6 +4,7 @@ final class PhabricatorApplyEditField
   extends PhabricatorEditField {
 
   private $actionDescription;
+  private $actionConflictKey;
 
   protected function newControl() {
     return null;
@@ -16,6 +17,15 @@ final class PhabricatorApplyEditField
 
   public function getActionDescription() {
     return $this->actionDescription;
+  }
+
+  public function setActionConflictKey($action_conflict_key) {
+    $this->actionConflictKey = $action_conflict_key;
+    return $this;
+  }
+
+  public function getActionConflictKey() {
+    return $this->actionConflictKey;
   }
 
   protected function newHTTPParameterType() {
@@ -34,7 +44,8 @@ final class PhabricatorApplyEditField
 
   protected function newCommentAction() {
     return id(new PhabricatorEditEngineStaticCommentAction())
-      ->setDescription($this->getActionDescription());
+      ->setDescription($this->getActionDescription())
+      ->setConflictKey($this->getActionConflictKey());
   }
 
 }

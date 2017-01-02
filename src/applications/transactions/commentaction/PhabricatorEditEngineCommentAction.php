@@ -8,6 +8,7 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
   private $initialValue;
   private $order;
   private $groupKey;
+  private $conflictKey;
 
   abstract public function getPHUIXControlType();
   abstract public function getPHUIXControlSpecification();
@@ -28,6 +29,15 @@ abstract class PhabricatorEditEngineCommentAction extends Phobject {
 
   public function getGroupKey() {
     return $this->groupKey;
+  }
+
+  public function setConflictKey($conflict_key) {
+    $this->conflictKey = $conflict_key;
+    return $this;
+  }
+
+  public function getConflictKey() {
+    return $this->conflictKey;
   }
 
   public function setLabel($label) {

@@ -301,6 +301,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'spec' => $comment_action->getPHUIXControlSpecification(),
           'initialValue' => $comment_action->getInitialValue(),
           'groupKey' => $comment_action->getGroupKey(),
+          'conflictKey' => $comment_action->getConflictKey(),
         );
 
         $type_map[$key] = $comment_action;
