@@ -109,6 +109,14 @@ final class PhabricatorEditEngineConfiguration
     return $this;
   }
 
+  public function setBuiltinKey($key) {
+    if (strpos($key, '/') !== false) {
+      throw new Exception(
+        pht('EditEngine BuiltinKey contains an invalid key character "/".'));
+    }
+    return parent::setBuiltinKey($key);
+  }
+
   public function attachEngine(PhabricatorEditEngine $engine) {
     $this->engine = $engine;
     return $this;
