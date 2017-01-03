@@ -7715,7 +7715,7 @@ phutil_register_library_map(array(
     'PhabricatorFileImageTransform' => 'PhabricatorFileTransform',
     'PhabricatorFileInfoController' => 'PhabricatorFileController',
     'PhabricatorFileLightboxController' => 'PhabricatorFileController',
-    'PhabricatorFileLinkView' => 'AphrontView',
+    'PhabricatorFileLinkView' => 'AphrontTagView',
     'PhabricatorFileListController' => 'PhabricatorFileController',
     'PhabricatorFileQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFileROT13StorageFormat' => 'PhabricatorFileStorageFormat',
