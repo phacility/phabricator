@@ -548,7 +548,31 @@ final class AphrontRequest extends Phobject {
   public function getAbsoluteRequestURI() {
     $uri = $this->getRequestURI();
     $uri->setDomain($this->getHost());
-    $uri->setProtocol($this->isHTTPS() ? 'https' : 'http');
+
+    if ($this->isHTTPS()) {
+      $protocol = 'https';
+    } else {
+      $protocol = 'http';
+    }
+
+    $uri->setProtocol($protocol);
+
+    // If the request used a nonstandard port, preserve it while building the
+    // absolute URI.
+
+    // First, get the default port for the request protocol.
+    $default_port = id(new PhutilURI($protocol.'://example.com/'))
+      ->getPortWithProtocolDefault();
+
+    // NOTE: See note in getHost() about malicious "Host" headers. This
+    // construction defuses some obscure potential attacks.
+    $port = id(new PhutilURI($protocol.'://'.$this->host))
+      ->getPort();
+
+    if (($port !== null) && ($port !== $default_port)) {
+      $uri->setPort($port);
+    }
+
     return $uri;
   }
 
