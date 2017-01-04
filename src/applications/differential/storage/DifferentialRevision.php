@@ -513,6 +513,10 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getPHID();
   }
 
+  public function getHarbormasterPublishablePHID() {
+    return $this->getPHID();
+  }
+
   public function getBuildVariables() {
     return array();
   }

@@ -497,17 +497,28 @@ final class HarbormasterBuildEngine extends Phobject {
       return;
     }
 
-    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+    $publish_phid = $object->getHarbormasterPublishablePHID();
+    if (!$publish_phid) {
       return;
     }
 
-    // TODO: Publishing these transactions is causing a race. See T8650.
-    // We shouldn't be publishing to diffs anyway.
-    if ($object instanceof DifferentialDiff) {
+    if ($publish_phid === $object->getPHID()) {
+      $publish = $object;
+    } else {
+      $publish = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($publish_phid))
+        ->executeOne();
+      if (!$publish) {
+        return;
+      }
+    }
+
+    if (!($publish instanceof PhabricatorApplicationTransactionInterface)) {
       return;
     }
 
-    $template = $object->getApplicationTransactionTemplate();
+    $template = $publish->getApplicationTransactionTemplate();
     if (!$template) {
       return;
     }
@@ -526,7 +537,7 @@ final class HarbormasterBuildEngine extends Phobject {
     $daemon_source = PhabricatorContentSource::newForSource(
       PhabricatorDaemonContentSource::SOURCECONST);
 
-    $editor = $object->getApplicationTransactionEditor()
+    $editor = $publish->getApplicationTransactionEditor()
       ->setActor($viewer)
       ->setActingAsPHID($harbormaster_phid)
       ->setContentSource($daemon_source)
@@ -534,7 +545,7 @@ final class HarbormasterBuildEngine extends Phobject {
       ->setContinueOnMissingFields(true);
 
     $editor->applyTransactions(
-      $object->getApplicationTransactionObject(),
+      $publish->getApplicationTransactionObject(),
       array($template));
   }
 
