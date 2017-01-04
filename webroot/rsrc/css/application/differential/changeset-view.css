@@ -121,6 +121,16 @@
   cursor: auto;
 }
 
+.differential-diff th.old {
+  background: #ffdddd;
+  border-right-color: #f8cbcb;
+}
+
+.differential-diff th.new {
+  background: #dbffdb;
+  border-right-color: #a6f3a6;
+}
+
 .differential-diff td.old,
 .differential-diff td.old-full {
   background: #ffecec;
