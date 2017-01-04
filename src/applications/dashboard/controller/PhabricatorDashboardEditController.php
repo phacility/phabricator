@@ -67,12 +67,14 @@ final class PhabricatorDashboardEditController
     }
 
     $v_name = $dashboard->getName();
+    $v_icon = $dashboard->getIcon();
     $v_layout_mode = $dashboard->getLayoutConfigObject()->getLayoutMode();
     $e_name = true;
 
     $validation_exception = null;
     if ($request->isFormPost() && $request->getStr('edit')) {
       $v_name = $request->getStr('name');
+      $v_icon = $request->getStr('icon');
       $v_layout_mode = $request->getStr('layout_mode');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
@@ -81,6 +83,7 @@ final class PhabricatorDashboardEditController
       $xactions = array();
 
       $type_name = PhabricatorDashboardTransaction::TYPE_NAME;
+      $type_icon = PhabricatorDashboardTransaction::TYPE_ICON;
       $type_layout_mode = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
       $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -91,6 +94,9 @@ final class PhabricatorDashboardEditController
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_layout_mode)
         ->setNewValue($v_layout_mode);
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType($type_icon)
+        ->setNewValue($v_icon);
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_view_policy)
         ->setNewValue($v_view_policy);
@@ -146,6 +152,12 @@ final class PhabricatorDashboardEditController
           ->setName('layout_mode')
           ->setValue($v_layout_mode)
           ->setOptions($layout_mode_options))
+      ->appendChild(
+        id(new PHUIFormIconSetControl())
+          ->setLabel(pht('Icon'))
+          ->setName('icon')
+          ->setIconSet(new PhabricatorDashboardIconSet())
+          ->setValue($v_icon))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')

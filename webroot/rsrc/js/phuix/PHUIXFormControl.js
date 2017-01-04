@@ -47,6 +47,9 @@ JX.install('PHUIXFormControl', {
         case 'optgroups':
           input = this._newOptgroups(spec);
           break;
+        case 'static':
+          input = this._newStatic(spec);
+          break;
         default:
           // TODO: Default or better error?
           JX.$E('Bad Input Type');
@@ -168,6 +171,25 @@ JX.install('PHUIXFormControl', {
         },
         set: function(value) {
           node.value = value;
+        }
+      };
+    },
+
+    _newStatic: function(spec) {
+      var node = JX.$N(
+        'div',
+        {
+          className: 'phui-form-static-action'
+        },
+        spec.description || '');
+
+      return {
+        node: node,
+        get: function() {
+          return true;
+        },
+        set: function() {
+          return;
         }
       };
     },

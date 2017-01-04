@@ -18,6 +18,10 @@ final class PhabricatorDashboardSearchEngine
 
   protected function buildCustomSearchFields() {
     return array(
+      id(new PhabricatorSearchTextField())
+        ->setLabel(pht('Name Contains'))
+        ->setKey('name')
+        ->setDescription(pht('Search for dashboards by name substring.')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Authored By'))
         ->setKey('authorPHIDs')
@@ -56,7 +60,7 @@ final class PhabricatorDashboardSearchEngine
         return $query;
       case 'authored':
         return $query->setParameter(
-          'authored',
+          'authorPHIDs',
           array(
             $viewer->getPHID(),
           ));
@@ -80,6 +84,10 @@ final class PhabricatorDashboardSearchEngine
 
     if ($map['authorPHIDs']) {
       $query->withAuthorPHIDs($map['authorPHIDs']);
+    }
+
+    if ($map['name'] !== null) {
+      $query->withNameNgrams($map['name']);
     }
 
     return $query;

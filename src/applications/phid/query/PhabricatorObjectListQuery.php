@@ -149,7 +149,22 @@ final class PhabricatorObjectListQuery extends Phobject {
     $missing = array();
     foreach ($name_map as $key => $name) {
       if (empty($objects[$key])) {
-        $missing[] = $name;
+        $missing[$key] = $name;
+      }
+    }
+
+    $result = array_unique(mpull($objects, 'getPHID'));
+
+    // For values which are plain PHIDs of allowed types, let them through
+    // unchecked. This can happen occur if subscribers or reviewers which the
+    // revision author does not have permission to see are added by Herald
+    // rules. Any actual edits will be checked later: users are not allowed
+    // to add new reviewers they can't see, but they can touch a field which
+    // contains them.
+    foreach ($missing as $key => $value) {
+      if (isset($allowed[phid_get_type($value)])) {
+        unset($missing[$key]);
+        $result[$key] = $value;
       }
     }
 
@@ -180,8 +195,6 @@ final class PhabricatorObjectListQuery extends Phobject {
             implode(', ', $missing)));
       }
     }
-
-    $result = array_unique(mpull($objects, 'getPHID'));
 
     if ($suffixes) {
       foreach ($result as $key => $phid) {

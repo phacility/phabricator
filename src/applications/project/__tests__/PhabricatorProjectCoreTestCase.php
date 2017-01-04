@@ -39,6 +39,46 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertFalse((bool)$this->refreshProject($proj, $user2));
   }
 
+  public function testApplicationPolicy() {
+    $user = $this->createUser()
+      ->save();
+
+    $proj = $this->createProject($user);
+
+    $this->assertTrue(
+      PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $proj,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    // Change the "Can Use Application" policy for Projecs to "No One". This
+    // should cause filtering checks to fail even when they are executed
+    // directly rather than via a Query.
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig(
+      'phabricator.application-settings',
+      array(
+        'PHID-APPS-PhabricatorProjectApplication' => array(
+          'policy' => array(
+            'view' => PhabricatorPolicies::POLICY_NOONE,
+          ),
+        ),
+      ));
+
+    // Application visibility is cached because it does not normally change
+    // over the course of a single request. Drop the cache so the next filter
+    // test uses the new visibility.
+    PhabricatorCaches::destroyRequestCache();
+
+    $this->assertFalse(
+      PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $proj,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    unset($env);
+  }
+
   public function testIsViewerMemberOrWatcher() {
     $user1 = $this->createUser()
       ->save();

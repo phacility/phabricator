@@ -3,6 +3,8 @@
 final class PhabricatorEmbedFileRemarkupRule
   extends PhabricatorObjectRemarkupRule {
 
+  private $viewer;
+
   const KEY_EMBED_FILE_PHIDS = 'phabricator.embedded-file-phids';
 
   protected function getObjectNamePrefix() {
@@ -12,9 +14,9 @@ final class PhabricatorEmbedFileRemarkupRule
   protected function loadObjects(array $ids) {
     $engine = $this->getEngine();
 
-    $viewer = $engine->getConfig('viewer');
+    $this->viewer = $engine->getConfig('viewer');
     $objects = id(new PhabricatorFileQuery())
-      ->setViewer($viewer)
+      ->setViewer($this->viewer)
       ->withIDs($ids)
       ->needTransforms(
         array(
@@ -282,6 +284,7 @@ final class PhabricatorEmbedFileRemarkupRule
     array $options) {
 
     return id(new PhabricatorFileLinkView())
+      ->setViewer($this->viewer)
       ->setFilePHID($file->getPHID())
       ->setFileName($this->assertFlatText($options['name']))
       ->setFileDownloadURI($file->getDownloadURI())

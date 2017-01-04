@@ -123,6 +123,12 @@ final class PhabricatorPolicyFilter extends Phobject {
       return $objects;
     }
 
+    // Before doing any actual object checks, make sure the viewer can see
+    // the applications that these objects belong to. This is normally enforced
+    // in the Query layer before we reach object filtering, but execution
+    // sometimes reaches policy filtering without running application checks.
+    $objects = $this->applyApplicationChecks($objects);
+
     $filtered = array();
     $viewer_phid = $viewer->getPHID();
 
@@ -862,6 +868,51 @@ final class PhabricatorPolicyFilter extends Phobject {
       ->setCapability(PhabricatorPolicyCapability::CAN_VIEW);
 
     throw $exception;
+  }
+
+  private function applyApplicationChecks(array $objects) {
+    $viewer = $this->viewer;
+
+    foreach ($objects as $key => $object) {
+      $phid = $object->getPHID();
+      if (!$phid) {
+        continue;
+      }
+
+      $application_class = $this->getApplicationForPHID($phid);
+      if ($application_class === null) {
+        continue;
+      }
+
+      $can_see = PhabricatorApplication::isClassInstalledForViewer(
+        $application_class,
+        $viewer);
+      if ($can_see) {
+        continue;
+      }
+
+      unset($objects[$key]);
+
+      $application = newv($application_class, array());
+      $this->rejectObject(
+        $application,
+        $application->getPolicy(PhabricatorPolicyCapability::CAN_VIEW),
+        PhabricatorPolicyCapability::CAN_VIEW);
+    }
+
+    return $objects;
+  }
+
+  private function getApplicationForPHID($phid) {
+    $phid_type = phid_get_type($phid);
+
+    $type_objects = PhabricatorPHIDType::getTypes(array($phid_type));
+    $type_object = idx($type_objects, $phid_type);
+    if (!$type_object) {
+      return null;
+    }
+
+    return $type_object->getPHIDTypeApplicationClass();
   }
 
 }

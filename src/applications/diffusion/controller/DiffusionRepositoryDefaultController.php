@@ -2,6 +2,15 @@
 
 final class DiffusionRepositoryDefaultController extends DiffusionController {
 
+  public function shouldAllowPublic() {
+    // NOTE: We allow public access to this controller because it handles
+    // redirecting paths that are missing a trailing "/". We need to manually
+    // redirect these instead of relying on the automatic redirect because
+    // some VCS requests may omit the slashes. See T12035, and below, for some
+    // discussion.
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $response = $this->loadDiffusionContext();
     if ($response) {

@@ -106,6 +106,10 @@ div.phui-calendar-day-event {
   z-index: 8;
 }
 
+.remarkup-assist-pinned {
+  z-index: 8;
+}
+
 .device-desktop .phabricator-notification-menu {
   z-index: 9;
 }

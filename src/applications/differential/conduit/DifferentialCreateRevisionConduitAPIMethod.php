@@ -45,16 +45,18 @@ final class DifferentialCreateRevisionConduitAPIMethod
     $revision = DifferentialRevision::initializeNewRevision($viewer);
     $revision->attachReviewerStatus(array());
 
-    $this->applyFieldEdit(
+    $result = $this->applyFieldEdit(
       $request,
       $revision,
       $diff,
       $request->getValue('fields', array()),
       $message = null);
 
+    $revision_id = $result['object']['id'];
+
     return array(
-      'revisionid'  => $revision->getID(),
-      'uri'         => PhabricatorEnv::getURI('/D'.$revision->getID()),
+      'revisionid'  => $revision_id,
+      'uri'         => PhabricatorEnv::getURI('/D'.$revision_id),
     );
   }
 

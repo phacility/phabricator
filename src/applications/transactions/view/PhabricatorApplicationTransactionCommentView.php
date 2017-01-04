@@ -20,10 +20,12 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $headerText;
   private $noPermission;
   private $fullWidth;
+  private $infoView;
 
   private $currentVersion;
   private $versionedDraft;
   private $commentActions;
+  private $commentActionGroups = array();
   private $transactionTimeline;
 
   public function setObjectPHID($object_phid) {
@@ -108,6 +110,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this;
   }
 
+  public function setInfoView(PHUIInfoView $info_view) {
+    $this->infoView = $info_view;
+    return $this;
+  }
+
+  public function getInfoView() {
+    return $this->infoView;
+  }
+
   public function setCommentActions(array $comment_actions) {
     assert_instances_of($comment_actions, 'PhabricatorEditEngineCommentAction');
     $this->commentActions = $comment_actions;
@@ -116,6 +127,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
   public function getCommentActions() {
     return $this->commentActions;
+  }
+
+  public function setCommentActionGroups(array $groups) {
+    assert_instances_of($groups, 'PhabricatorEditEngineCommentActionGroup');
+    $this->commentActionGroups = $groups;
+    return $this;
+  }
+
+  public function getCommentActionGroups() {
+    return $this->commentActionGroups;
   }
 
   public function setNoPermission($no_permission) {
@@ -199,6 +220,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->addClass('phui-comment-form-view')
+      ->addSigil('phui-comment-form')
       ->appendChild($image)
       ->appendChild($wedge)
       ->appendChild($comment);
@@ -278,16 +300,14 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'type' => $comment_action->getPHUIXControlType(),
           'spec' => $comment_action->getPHUIXControlSpecification(),
           'initialValue' => $comment_action->getInitialValue(),
+          'groupKey' => $comment_action->getGroupKey(),
+          'conflictKey' => $comment_action->getConflictKey(),
         );
 
         $type_map[$key] = $comment_action;
       }
 
-      $options = array();
-      $options['+'] = pht('Add Action...');
-      foreach ($action_map as $key => $item) {
-        $options[$key] = $item['label'];
-      }
+      $options = $this->newCommentActionOptions($action_map);
 
       $action_id = celerity_generate_unique_node_id();
       $input_id = celerity_generate_unique_node_id();
@@ -325,6 +345,12 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ));
 
       $form->appendChild($action_bar);
+
+      $info_view = $this->getInfoView();
+      if ($info_view) {
+        $form->appendChild($info_view);
+      }
+
       $form->appendChild($invisi_bar);
       $form->addClass('phui-comment-has-actions');
 
@@ -355,6 +381,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           ->setID($this->getCommentID())
           ->addClass('phui-comment-fullwidth-control')
           ->addClass('phui-comment-textarea-control')
+          ->setCanPin(true)
           ->setName('comment')
           ->setUser($this->getUser())
           ->setValue($draft_comment))
@@ -420,6 +447,48 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $this->commentID = celerity_generate_unique_node_id();
     }
     return $this->commentID;
+  }
+
+  private function newCommentActionOptions(array $action_map) {
+    $options = array();
+    $options['+'] = pht('Add Action...');
+
+    // Merge options into groups.
+    $groups = array();
+    foreach ($action_map as $key => $item) {
+      $group_key = $item['groupKey'];
+      if (!isset($groups[$group_key])) {
+        $groups[$group_key] = array();
+      }
+      $groups[$group_key][$key] = $item;
+    }
+
+    $group_specs = $this->getCommentActionGroups();
+    $group_labels = mpull($group_specs, 'getLabel', 'getKey');
+
+    // Reorder groups to put them in the same order as the recognized
+    // group definitions.
+    $groups = array_select_keys($groups, array_keys($group_labels)) + $groups;
+
+    // Move options with no group to the end.
+    $default_group = idx($groups, '');
+    if ($default_group) {
+      unset($groups['']);
+      $groups[''] = $default_group;
+    }
+
+    foreach ($groups as $group_key => $group_items) {
+      if (strlen($group_key)) {
+        $group_label = idx($group_labels, $group_key, $group_key);
+        $options[$group_label] = ipull($group_items, 'label');
+      } else {
+        foreach ($group_items as $key => $item) {
+          $options[$key] = $item['label'];
+        }
+      }
+    }
+
+    return $options;
   }
 
 }

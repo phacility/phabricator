@@ -1,9 +1,10 @@
 <?php
 
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
-  private $disableMacro = false;
 
+  private $disableMacro = false;
   private $disableFullScreen = false;
+  private $canPin;
 
   public function setDisableMacros($disable) {
     $this->disableMacro = $disable;
@@ -13,6 +14,15 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
   public function setDisableFullScreen($disable) {
     $this->disableFullScreen = $disable;
     return $this;
+  }
+
+  public function setCanPin($can_pin) {
+    $this->canPin = $can_pin;
+    return $this;
+  }
+
+  public function getCanPin() {
+    return $this->canPin;
   }
 
   protected function renderInput() {
@@ -63,7 +73,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'data' => pht('data'),
           'name' => pht('name'),
           'URL' => pht('URL'),
+          'key-help' => pht('Pin or unpin the comment form.'),
         ),
+        'canPin' => $this->getCanPin(),
         'disabled' => $this->getDisabled(),
         'rootID' => $root_id,
         'autocompleteMap' => (object)array(
@@ -164,17 +176,28 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'href'  => PhabricatorEnv::getDoclink('Remarkup Reference'),
     );
 
+    $mode_actions = array();
 
     if (!$this->disableFullScreen) {
+      $mode_actions['fa-arrows-alt'] = array(
+        'tip' => pht('Fullscreen Mode'),
+        'align' => 'right',
+      );
+    }
+
+    if ($this->getCanPin()) {
+      $mode_actions['fa-thumb-tack'] = array(
+        'tip' => pht('Pin Form On Screen'),
+        'align' => 'right',
+      );
+    }
+
+    if ($mode_actions) {
       $actions[] = array(
         'spacer' => true,
         'align' => 'right',
       );
-
-      $actions['fa-arrows-alt'] = array(
-        'tip' => pht('Fullscreen Mode'),
-        'align' => 'right',
-      );
+      $actions += $mode_actions;
     }
 
     $buttons = array();

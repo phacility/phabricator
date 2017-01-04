@@ -118,10 +118,6 @@ abstract class DifferentialCoreCustomField
     return true;
   }
 
-  public function shouldAppearInEditView() {
-    return true;
-  }
-
   public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
     if ($this->isCoreFieldRequired()) {
       $this->setFieldError(true);

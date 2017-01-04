@@ -30,8 +30,8 @@ final class DifferentialChangeset extends DifferentialDAO
         'awayPaths'     => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'oldFile' => 'text255?',
-        'filename' => 'text255',
+        'oldFile' => 'bytes?',
+        'filename' => 'bytes',
         'changeType' => 'uint32',
         'fileType' => 'uint32',
         'addLines' => 'uint32',
@@ -97,13 +97,6 @@ final class DifferentialChangeset extends DifferentialDAO
 
   public function delete() {
     $this->openTransaction();
-
-      $legacy_hunks = id(new DifferentialLegacyHunk())->loadAllWhere(
-        'changesetID = %d',
-        $this->getID());
-      foreach ($legacy_hunks as $legacy_hunk) {
-        $legacy_hunk->delete();
-      }
 
       $modern_hunks = id(new DifferentialModernHunk())->loadAllWhere(
         'changesetID = %d',

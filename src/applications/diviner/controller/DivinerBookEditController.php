@@ -92,15 +92,13 @@ final class DivinerBookEditController extends DivinerController {
           ->setName('viewPolicy')
           ->setPolicyObject($book)
           ->setCapability($view_capability)
-          ->setPolicies($policies)
-          ->setCaption($book->describeAutomaticCapability($view_capability)))
+          ->setPolicies($policies))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('editPolicy')
           ->setPolicyObject($book)
           ->setCapability($edit_capability)
-          ->setPolicies($policies)
-          ->setCaption($book->describeAutomaticCapability($edit_capability)))
+          ->setPolicies($policies))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save'))

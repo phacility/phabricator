@@ -1,0 +1,43 @@
+/**
+ * @provides phui-oi-simple-ui-css
+ * @requires phui-oi-list-view-css
+ */
+
+.phui-oi-list-simple .phui-oi-with-image .phui-oi-frame {
+  min-height: 26px;
+}
+
+.phui-oi-list-simple .phui-oi-image {
+  height: 26px;
+  width: 26px;
+  margin: 0;
+}
+
+.phui-oi-list-simple .phui-oi-with-image
+  .phui-oi-content-box {
+    margin-left: 32px;
+}
+
+.phui-oi-list-simple .phui-oi-name {
+  padding: 2px 0;
+}
+
+.phui-oi-list-simple .phui-oi-name a {
+  color: {$darkbluetext};
+}
+
+.phui-oi-list-view.phui-oi-list-simple .phui-oi-frame {
+  border: none;
+  margin-bottom: 4px;
+}
+
+.phui-oi-list-view.phui-oi-list-simple li:last-child
+  .phui-oi-frame {
+    margin: 0;
+}
+
+.phui-oi-list-simple .phui-oi-actions {
+  top: 2px;
+  bottom: 2px;
+  right: 2px;
+}

@@ -272,6 +272,11 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     $future->setTimeout($timeout);
 
+    // The default TERM inherited by this process is "unknown", which causes PHP
+    // to produce a warning upon startup.  Override it to squash this output to
+    // STDERR.
+    $future->updateEnv('TERM', 'dumb');
+
     return $future;
   }
 

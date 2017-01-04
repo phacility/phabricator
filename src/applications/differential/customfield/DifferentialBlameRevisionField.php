@@ -32,6 +32,10 @@ final class DifferentialBlameRevisionField
   }
 
   public function renderPropertyViewValue(array $handles) {
+    if (!strlen($this->getValue())) {
+      return null;
+    }
+
     return $this->getValue();
   }
 
@@ -91,27 +95,16 @@ final class DifferentialBlameRevisionField
     return true;
   }
 
-  public function shouldAllowEditInCommitMessage() {
-    return true;
-  }
-
-  public function shouldOverwriteWhenCommitMessageIsEdited() {
-    return true;
-  }
-
-  public function getCommitMessageLabels() {
-    return array(
-      'Blame Revision',
-      'Blame Rev',
-    );
-  }
-
-  public function renderCommitMessageValue(array $handles) {
-    return $this->getValue();
-  }
-
   public function shouldAppearInConduitDictionary() {
     return true;
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
   }
 
 }

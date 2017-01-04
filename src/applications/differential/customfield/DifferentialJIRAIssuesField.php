@@ -295,8 +295,6 @@ final class DifferentialJIRAIssuesField
     return $this;
   }
 
-
-
   public function renderCommitMessageValue(array $handles) {
     $value = $this->getValue();
     if (!$value) {
@@ -309,5 +307,12 @@ final class DifferentialJIRAIssuesField
     return true;
   }
 
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringListParameterType();
+  }
 
 }

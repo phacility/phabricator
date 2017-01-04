@@ -12,6 +12,8 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
   abstract protected function newNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config);
 
+  public function willBuildNavigationItems(array $items) {}
+
   public function getMenuItemTypeIcon() {
     return null;
   }

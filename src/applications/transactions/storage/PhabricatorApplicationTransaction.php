@@ -960,9 +960,18 @@ abstract class PhabricatorApplicationTransaction
         if ($field) {
           return $field->getApplicationTransactionTitle($this);
         } else {
-          return pht(
-            '%s edited a custom field.',
-            $this->renderHandleLink($author_phid));
+          $developer_mode = 'phabricator.developer-mode';
+          $is_developer = PhabricatorEnv::getEnvConfig($developer_mode);
+          if ($is_developer) {
+            return pht(
+              '%s edited a custom field (with key "%s").',
+              $this->renderHandleLink($author_phid),
+              $this->getMetadata('customfield:key'));
+          } else {
+            return pht(
+              '%s edited a custom field.',
+              $this->renderHandleLink($author_phid));
+          }
         }
 
       case PhabricatorTransactions::TYPE_TOKEN:

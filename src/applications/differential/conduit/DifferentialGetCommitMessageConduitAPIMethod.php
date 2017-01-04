@@ -47,94 +47,77 @@ final class DifferentialGetCommitMessageConduitAPIMethod
       }
     } else {
       $revision = DifferentialRevision::initializeNewRevision($viewer);
-      $revision->attachReviewerStatus(array());
-      $revision->attachActiveDiff(null);
     }
 
-    $is_edit = $request->getValue('edit');
-    $is_create = ($is_edit == 'create');
+    // There are three modes here: "edit", "create", and "read" (which has
+    // no value for the "edit" parameter).
 
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $revision,
-      ($is_edit
-        ? DifferentialCustomField::ROLE_COMMITMESSAGEEDIT
-        : DifferentialCustomField::ROLE_COMMITMESSAGE));
+    // In edit or create mode, we hide read-only fields. In create mode, we
+    // show "Field:" templates for some fields even if they are empty.
+    $edit_mode = $request->getValue('edit');
 
-    $field_list
-      ->setViewer($viewer)
-      ->readFieldsFromStorage($revision);
+    $is_any_edit = (bool)strlen($edit_mode);
+    $is_create = ($edit_mode == 'create');
 
-    $field_map = mpull($field_list->getFields(), null, 'getFieldKeyForConduit');
+    $field_list = DifferentialCommitMessageField::newEnabledFields($viewer);
 
-    if ($is_edit) {
-      $fields = $request->getValue('fields', array());
-      foreach ($fields as $field => $value) {
-        $custom_field = idx($field_map, $field);
-        if (!$custom_field) {
-          // Just ignore this, these workflows don't make strong distictions
-          // about field editability on the client side.
-          continue;
-        }
-        if ($is_create ||
-            $custom_field->shouldOverwriteWhenCommitMessageIsEdited()) {
-          $custom_field->readValueFromCommitMessage($value);
+    $custom_storage = $this->loadCustomFieldStorage($viewer, $revision);
+    foreach ($field_list as $field) {
+      $field->setCustomFieldStorage($custom_storage);
+    }
+
+    // If we're editing the message, remove fields like "Conflicts" and
+    // "git-svn-id" which should not be presented to the user for editing.
+    if ($is_any_edit) {
+      foreach ($field_list as $field_key => $field) {
+        if (!$field->isFieldEditable()) {
+          unset($field_list[$field_key]);
         }
       }
     }
 
-    $phids = array();
-    foreach ($field_list->getFields() as $key => $field) {
-      $field_phids = $field->getRequiredHandlePHIDsForCommitMessage();
-      if (!is_array($field_phids)) {
-        throw new Exception(
-          pht(
-            'Custom field "%s" was expected to return an array of handle '.
-            'PHIDs required for commit message rendering, but returned "%s" '.
-            'instead.',
-            $field->getFieldKey(),
-            gettype($field_phids)));
+    $overrides = $request->getValue('fields', array());
+
+    $value_map = array();
+    foreach ($field_list as $field_key => $field) {
+      if (array_key_exists($field_key, $overrides)) {
+        $field_value = $overrides[$field_key];
+      } else {
+        $field_value = $field->readFieldValueFromObject($revision);
       }
-      $phids[$key] = $field_phids;
+
+      // We're calling this method on the value no matter where we got it
+      // from, so we hit the same validation logic for values which came over
+      // the wire and which we generated.
+      $field_value = $field->readFieldValueFromConduit($field_value);
+
+      $value_map[$field_key] = $field_value;
     }
 
-    $all_phids = array_mergev($phids);
-    if ($all_phids) {
-      $all_handles = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs($all_phids)
-        ->execute();
-    } else {
-      $all_handles = array();
-    }
-
-    $key_title = id(new DifferentialTitleField())->getFieldKey();
-    $default_title = DifferentialTitleField::getDefaultTitle();
+    $key_title = DifferentialTitleCommitMessageField::FIELDKEY;
 
     $commit_message = array();
-    foreach ($field_list->getFields() as $key => $field) {
-      $handles = array_select_keys($all_handles, $phids[$key]);
+    foreach ($field_list as $field_key => $field) {
+      $label = $field->getFieldName();
+      $wire_value = $value_map[$field_key];
+      $value = $field->renderFieldValue($wire_value);
 
-      $label = $field->renderCommitMessageLabel();
-      $value = $field->renderCommitMessageValue($handles);
+      $is_template = ($is_create && $field->isTemplateField());
 
       if (!is_string($value) && !is_null($value)) {
         throw new Exception(
           pht(
-            'Custom field "%s" was expected to render a string or null value, '.
-            'but rendered a "%s" instead.',
+            'Commit message field "%s" was expected to render a string or '.
+            'null value, but rendered a "%s" instead.',
             $field->getFieldKey(),
             gettype($value)));
       }
 
-      $is_title = ($key == $key_title);
+      $is_title = ($field_key == $key_title);
 
       if (!strlen($value)) {
-        if ($is_title) {
-          $commit_message[] = $default_title;
-        } else {
-          if ($is_edit && $field->shouldAppearInCommitMessageTemplate()) {
-            $commit_message[] = $label.': ';
-          }
+        if ($is_template) {
+          $commit_message[] = $label.': ';
         }
       } else {
         if ($is_title) {
@@ -153,46 +136,31 @@ final class DifferentialGetCommitMessageConduitAPIMethod
       }
     }
 
-    if ($is_edit) {
-      $tip = $this->getProTip($field_list);
-      if ($tip !== null) {
-        $commit_message[] = "\n".$tip;
+    return implode("\n\n", $commit_message);
+  }
+
+  private function loadCustomFieldStorage(
+    PhabricatorUser $viewer,
+    DifferentialRevision $revision) {
+    $custom_field_list = PhabricatorCustomField::getObjectFields(
+      $revision,
+      DifferentialCustomField::ROLE_COMMITMESSAGE);
+    $custom_field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($revision);
+
+    $custom_field_map = array();
+    foreach ($custom_field_list->getFields() as $custom_field) {
+      if (!$custom_field->shouldUseStorage()) {
+        continue;
       }
+      $custom_field_key = $custom_field->getFieldKey();
+      $custom_field_value = $custom_field->getValueForStorage();
+      $custom_field_map[$custom_field_key] = $custom_field_value;
     }
 
-    $commit_message = implode("\n\n", $commit_message);
-
-    return $commit_message;
+    return $custom_field_map;
   }
 
-  private function getProTip() {
-    // Any field can provide tips, whether it normally appears on commit
-    // messages or not.
-    $field_list = PhabricatorCustomField::getObjectFields(
-      new DifferentialRevision(),
-      PhabricatorCustomField::ROLE_DEFAULT);
-
-    $tips = array();
-    foreach ($field_list->getFields() as $key => $field) {
-      $tips[] = $field->getProTips();
-    }
-    $tips = array_mergev($tips);
-
-    if (!$tips) {
-      return null;
-    }
-
-    shuffle($tips);
-
-    $tip = pht('Tip: %s', head($tips));
-    $tip = wordwrap($tip, 78, "\n", true);
-
-    $lines = explode("\n", $tip);
-    foreach ($lines as $key => $line) {
-      $lines[$key] = '# '.$line;
-    }
-
-    return implode("\n", $lines);
-  }
 
 }

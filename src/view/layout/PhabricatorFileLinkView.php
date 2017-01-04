@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFileLinkView extends AphrontView {
+final class PhabricatorFileLinkView extends AphrontTagView {
 
   private $fileName;
   private $fileDownloadURI;
@@ -87,7 +87,7 @@ final class PhabricatorFileLinkView extends AphrontView {
     return FileTypeIcon::getFileIcon($this->getFileName());
   }
 
-  public function getMetadata() {
+  public function getMeta() {
     return array(
       'phid'     => $this->getFilePHID(),
       'viewable' => $this->getFileViewable(),
@@ -100,21 +100,55 @@ final class PhabricatorFileLinkView extends AphrontView {
     );
   }
 
-  public function render() {
-    require_celerity_resource('phabricator-remarkup-css');
-    require_celerity_resource('phui-lightbox-css');
+  protected function getTagName() {
+    return 'div';
+  }
 
+  protected function getTagAttributes() {
     $mustcapture = true;
     $sigil = 'lightboxable';
-    $meta = $this->getMetadata();
+    $meta = $this->getMeta();
 
     $class = 'phabricator-remarkup-embed-layout-link';
     if ($this->getCustomClass()) {
       $class = $this->getCustomClass();
     }
 
+    return array(
+      'href'        => $this->getFileViewURI(),
+      'class'       => $class,
+      'sigil'       => $sigil,
+      'meta'        => $meta,
+      'mustcapture' => $mustcapture,
+    );
+  }
+
+  protected function getTagContent() {
+    require_celerity_resource('phabricator-remarkup-css');
+    require_celerity_resource('phui-lightbox-css');
+
     $icon = id(new PHUIIconView())
-      ->setIcon($this->getFileIcon());
+      ->setIcon($this->getFileIcon())
+      ->addClass('phabricator-remarkup-embed-layout-icon');
+
+    $dl_icon = id(new PHUIIconView())
+      ->setIcon('fa-download');
+
+    $download_form = phabricator_form(
+      $this->getViewer(),
+      array(
+        'action' => $this->getFileDownloadURI(),
+        'method' => 'POST',
+        'class'  => 'embed-download-form',
+        'sigil'  => 'embed-download-form download',
+      ),
+      phutil_tag(
+        'button',
+        array(
+          'class' => 'phabricator-remarkup-embed-layout-download',
+          'type' => 'submit',
+        ),
+        pht('Download')));
 
     $info = phutil_tag(
       'span',
@@ -140,18 +174,10 @@ final class PhabricatorFileLinkView extends AphrontView {
         $info,
       ));
 
-    return javelin_tag(
-      'a',
-      array(
-        'href'        => $this->getFileViewURI(),
-        'class'       => $class,
-        'sigil'       => $sigil,
-        'meta'        => $meta,
-        'mustcapture' => $mustcapture,
-      ),
-      array(
-        $icon,
-        $inner,
-      ));
+    return array(
+      $icon,
+      $inner,
+      $download_form,
+    );
   }
 }

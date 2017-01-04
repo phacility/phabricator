@@ -5,6 +5,10 @@ final class PhabricatorProjectsEditEngineExtension
 
   const EXTENSIONKEY = 'projects.projects';
 
+  const EDITKEY_ADD = 'projects.add';
+  const EDITKEY_SET = 'projects.set';
+  const EDITKEY_REMOVE = 'projects.remove';
+
   public function getExtensionPriority() {
     return 500;
   }
@@ -58,14 +62,14 @@ final class PhabricatorProjectsEditEngineExtension
 
     $projects_field->setViewer($engine->getViewer());
 
-    $edit_add = $projects_field->getConduitEditType('projects.add')
+    $edit_add = $projects_field->getConduitEditType(self::EDITKEY_ADD)
       ->setConduitDescription(pht('Add project tags.'));
 
-    $edit_set = $projects_field->getConduitEditType('projects.set')
+    $edit_set = $projects_field->getConduitEditType(self::EDITKEY_SET)
       ->setConduitDescription(
         pht('Set project tags, overwriting current value.'));
 
-    $edit_rem = $projects_field->getConduitEditType('projects.remove')
+    $edit_rem = $projects_field->getConduitEditType(self::EDITKEY_REMOVE)
       ->setConduitDescription(pht('Remove project tags.'));
 
     return array(

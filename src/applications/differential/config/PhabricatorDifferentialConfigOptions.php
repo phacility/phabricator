@@ -25,23 +25,12 @@ final class PhabricatorDifferentialConfigOptions
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
     $fields = array(
-      new DifferentialNextStepField(),
-
-      new DifferentialTitleField(),
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
-      new DifferentialAuthorField(),
       new DifferentialReviewersField(),
       new DifferentialProjectReviewersField(),
-      new DifferentialReviewedByField(),
-      new DifferentialSubscribersField(),
       new DifferentialRepositoryField(),
-      new DifferentialProjectsField(),
-      new DifferentialViewPolicyField(),
-      new DifferentialEditPolicyField(),
 
-      new DifferentialParentRevisionsField(),
-      new DifferentialChildRevisionsField(),
       new DifferentialManiphestTasksField(),
       new DifferentialCommitsField(),
 
@@ -57,10 +46,6 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialLintField(),
       new DifferentialUnitField(),
       new DifferentialRevertPlanField(),
-
-      new DifferentialApplyPatchField(),
-
-      new DifferentialRevisionIDField(),
     );
 
     $default_fields = array();

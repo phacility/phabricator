@@ -1,0 +1,13 @@
+/**
+ * @provides phui-oi-flush-ui-css
+ * @requires phui-oi-list-view-css
+ */
+
+.phui-oi-list-view.phui-oi-list-flush {
+  padding: 0;
+  margin: 0;
+}
+
+.phui-object-box .phui-oi-list-flush .phui-oi {
+  margin: 0;
+}
