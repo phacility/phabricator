@@ -65,15 +65,48 @@ JX.install('Tooltip', {
 
     _getSmartPosition: function (align, root, node) {
       var self = JX.Tooltip;
-      var pos = self._proposePosition(align, root, node);
 
-      // If toolip is offscreen, try to be clever
-      if (!JX.Tooltip.isOnScreen(pos, node)) {
-        align = self._getImprovedOrientation(pos, node);
-        pos = self._proposePosition(align, root, node);
+      // Figure out how to position the tooltip on screen. We will try the
+      // configured aligment first.
+      var try_alignments = [align];
+
+      // If the configured alignment does not fit, we'll try the opposite
+      // alignment.
+      var opposites = {
+        N: 'S',
+        S: 'N',
+        E: 'W',
+        W: 'E'
+      };
+      try_alignments.push(opposites[align]);
+
+      // Then we'll try the other alignments, in arbitrary order.
+      for (var k in opposites) {
+        try_alignments.push(k);
       }
 
-      self._setAnchor(align);
+      var use_alignment = null;
+      var use_pos = null;
+      for (var ii = 0; ii < try_alignments.length; ii++) {
+        var try_alignment = try_alignments[ii];
+
+        var pos = self._proposePosition(try_alignment, root, node);
+        if (self.isOnScreen(pos, node)) {
+          use_alignment = try_alignment;
+          use_pos = pos;
+          break;
+        }
+      }
+
+      // If we don't come up with a good answer, default to the configured
+      // alignment.
+      if (use_alignment === null) {
+        use_alignment = align;
+        use_pos = self._proposePosition(use_alignment, root, node);
+      }
+
+      self._setAnchor(use_alignment);
+
       return pos;
     },
 
@@ -108,61 +141,47 @@ JX.install('Tooltip', {
     },
 
     isOnScreen: function (a, node) {
-      var s = JX.Vector.getScroll();
-      var v = JX.Vector.getViewport();
-      var max_x = s.x + v.x;
-      var max_y = s.y + v.y;
-
+      var view = this._getViewBoundaries();
       var corners = this._getNodeCornerPositions(a, node);
 
-      // Check if any of the corners are offscreen
+      // Check if any of the corners are offscreen.
       for (var i = 0; i < corners.length; i++) {
         var corner = corners[i];
-        if (corner.x < s.x ||
-            corner.y < s.y ||
-            corner.x > max_x ||
-            corner.y > max_y) {
+        if (corner.x < view.w ||
+            corner.y < view.n ||
+            corner.x > view.e ||
+            corner.y > view.s) {
           return false;
         }
       }
       return true;
     },
 
-    _getImprovedOrientation: function (a, node) {
-      // Try to predict the "more correct" orientation
-      var s = JX.Vector.getScroll();
-      var v = JX.Vector.getViewport();
-      var max_x = s.x + v.x;
-      var max_y = s.y + v.y;
-
-      var corners = this._getNodeCornerPositions(a, node);
-
-      for (var i = 0; i < corners.length; i++) {
-        var corner = corners[i];
-        if (corner.y < v.y) {
-          return 'S';
-        } else
-        if (corner.x < v.x) {
-          return 'E';
-        } else
-        if (corner.y > max_y) {
-          return 'N';
-        } else
-        if (corner.x > max_x) {
-          return 'W';
-        } else {
-          return 'N';
-        }
-      }
-    },
-
     _getNodeCornerPositions: function(pos, node) {
-      // Get positions of all four corners of a node
+      // Get positions of all four corners of a node.
       var n = JX.Vector.getDim(node);
       return [new JX.Vector(pos.x, pos.y),
               new JX.Vector(pos.x + n.x, pos.y),
               new JX.Vector(pos.x, pos.y + n.y),
               new JX.Vector(pos.x + n.x, pos.y + n.y)];
+    },
+
+    _getViewBoundaries: function() {
+      var s = JX.Vector.getScroll();
+      var v = JX.Vector.getViewport();
+      var max_x = s.x + v.x;
+      var max_y = s.y + v.y;
+
+      // Even if the corner is technically on the screen, don't allow the
+      // tip to display too close to the edge of the screen.
+      var margin = 16;
+
+      return {
+        w: s.x + margin,
+        e: max_x - margin,
+        n: s.y + margin,
+        s: max_y - margin
+      };
     },
 
     _setAnchor: function (align) {
