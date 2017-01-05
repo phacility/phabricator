@@ -146,7 +146,7 @@ JX.behavior('comment-actions', function(config) {
     var conflict_key = action.conflictKey || null;
     if (conflict_key !== null) {
       for (var k in action_map) {
-        if (k === action) {
+        if (k === action.key) {
           continue;
         }
         if (action_map[k].conflictKey !== conflict_key) {
@@ -189,7 +189,7 @@ JX.behavior('comment-actions', function(config) {
         return;
       }
 
-      remove_action(action);
+      remove_action(action.key);
     });
 
     rows[action.key] = {
@@ -200,7 +200,7 @@ JX.behavior('comment-actions', function(config) {
 
     JX.DOM.listen(remove, 'click', null, function(e) {
       e.kill();
-      remove_action(action);
+      remove_action(action.key);
     });
 
     place_node.parentNode.insertBefore(node, place_node);
