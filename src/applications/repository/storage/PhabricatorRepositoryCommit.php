@@ -413,6 +413,10 @@ final class PhabricatorRepositoryCommit
     return $this->getRepository()->getPHID();
   }
 
+  public function getHarbormasterPublishablePHID() {
+    return $this->getPHID();
+  }
+
   public function getBuildVariables() {
     $results = array();
 

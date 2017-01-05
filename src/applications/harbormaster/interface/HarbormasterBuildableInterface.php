@@ -18,6 +18,21 @@ interface HarbormasterBuildableInterface {
   public function getHarbormasterBuildablePHID();
   public function getHarbormasterContainerPHID();
 
+
+  /**
+   * Get the object PHID which build status should be published to.
+   *
+   * In some cases (like commits), this is the object itself. In other cases,
+   * it is a different object: for example, diffs publish builds to revisions.
+   *
+   * This method can return `null` to disable publishing.
+   *
+   * @return phid|null Build status updates will be published to this object's
+   *  transaction timeline.
+   */
+  public function getHarbormasterPublishablePHID();
+
+
   public function getBuildVariables();
   public function getAvailableBuildVariables();
 

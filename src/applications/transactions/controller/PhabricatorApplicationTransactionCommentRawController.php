@@ -48,7 +48,7 @@ final class PhabricatorApplicationTransactionCommentRawController
             $title = pht('Email Body Text');
             $body = $message->getRawTextBody();
             $details_text = pht(
-              'For full details, run `/bin/mail show-outbound --id %d`',
+              'For full details, run `/bin/mail show-inbound --id %d`',
               $source_id);
             $addendum = new PHUIRemarkupView($viewer, $details_text);
           }

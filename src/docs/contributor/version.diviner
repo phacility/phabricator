@@ -65,7 +65,7 @@ In most cases, you can find the upstream commit you've branched from like this:
 
 ```
 $ git merge-base HEAD origin/master
-````
+```
 
 Note that if you report a bug and have local commits, we will almost always ask
 you to reproduce the issue against a clean copy of Phabricator before we

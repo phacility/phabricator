@@ -49,7 +49,14 @@ abstract class PhabricatorEditEngine
   }
 
   final public function getEngineKey() {
-    return $this->getPhobjectClassConstant('ENGINECONST', 64);
+    $key = $this->getPhobjectClassConstant('ENGINECONST', 64);
+    if (strpos($key, '/') !== false) {
+      throw new Exception(
+        pht(
+          'EditEngine ("%s") contains an invalid key character "/".',
+          get_class($this)));
+    }
+    return $key;
   }
 
   final public function getApplication() {

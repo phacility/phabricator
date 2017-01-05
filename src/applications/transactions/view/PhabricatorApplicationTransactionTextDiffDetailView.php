@@ -21,15 +21,15 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
 
     $old_styles = array(
       'padding: 0 2px;',
-      'color: #802b2b;',
-      'background: rgba(251, 175, 175, .7);',
+      'color: #333333;',
+      'background: #f8cbcb;',
     );
     $old_styles = implode(' ', $old_styles);
 
     $new_styles = array(
       'padding: 0 2px;',
-      'color: #3e6d35;',
-      'background: rgba(151, 234, 151, .6);',
+      'color: #333333;',
+      'background: #a6f3a6;',
     );
     $new_styles = implode(' ', $new_styles);
 
