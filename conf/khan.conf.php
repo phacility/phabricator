@@ -7,6 +7,11 @@
 // cold here... Won't you join me by the fire? Hello? hello? daisy... daisyyy
 //
 // http://phabricator.khanacademy.org/config/
+//
+// ^^^^^^ The web UI is better, these days.  It seems that the phabricator
+// @@@@@@ daemons are not very good at reading this config file (probably
+// @@@@@@ a bug) and thus if you *do* make changes here, make them in
+// ^^^^^^ config/ as well.
 
 return array(
 
