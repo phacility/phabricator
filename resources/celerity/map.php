@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '0b64e988',
     'conpherence.pkg.js' => '6249a1cf',
     'core.pkg.css' => '9c725fa0',
-    'core.pkg.js' => 'f998932d',
+    'core.pkg.js' => 'a2ead3fe',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'f69afb45',
     'differential.pkg.js' => '40b18f35',
@@ -489,7 +489,7 @@ return array(
     'rsrc/js/core/ShapedRequest.js' => '7cbe244b',
     'rsrc/js/core/TextAreaUtils.js' => '320810c8',
     'rsrc/js/core/Title.js' => '485aaa6c',
-    'rsrc/js/core/ToolTip.js' => '6323f942',
+    'rsrc/js/core/ToolTip.js' => 'b5c62c3b',
     'rsrc/js/core/behavior-active-nav.js' => 'e379b58e',
     'rsrc/js/core/behavior-audio-source.js' => '59b251eb',
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
@@ -816,7 +816,7 @@ return array(
     'phabricator-standard-page-view' => '894d8a25',
     'phabricator-textareautils' => '320810c8',
     'phabricator-title' => '485aaa6c',
-    'phabricator-tooltip' => '6323f942',
+    'phabricator-tooltip' => 'b5c62c3b',
     'phabricator-ui-example-css' => '528b19de',
     'phabricator-uiexample-javelin-view' => 'd4a14807',
     'phabricator-uiexample-reactor-button' => 'd19198c8',
@@ -1418,12 +1418,6 @@ return array(
       'javelin-install',
       'javelin-util',
     ),
-    '6323f942' => array(
-      'javelin-install',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-vector',
-    ),
     '635de1ec' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1902,6 +1896,12 @@ return array(
     'b5c256b8' => array(
       'javelin-install',
       'javelin-dom',
+    ),
+    'b5c62c3b' => array(
+      'javelin-install',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-vector',
     ),
     'b5d57730' => array(
       'javelin-install',

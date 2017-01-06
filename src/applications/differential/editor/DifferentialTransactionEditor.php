@@ -7,6 +7,7 @@ final class DifferentialTransactionEditor
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
   private $didExpandInlineState = false;
+  private $hasReviewTransaction = false;
   private $affectedPaths;
 
   public function getEditorApplicationClass() {
@@ -261,12 +262,19 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    // If we have an "Inline State" transaction already, the caller built it
-    // for us so we don't need to expand it again.
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_INLINESTATE:
+          // If we have an "Inline State" transaction already, the caller
+          // built it for us so we don't need to expand it again.
           $this->didExpandInlineState = true;
+          break;
+        case DifferentialRevisionAcceptTransaction::TRANSACTIONTYPE:
+        case DifferentialRevisionRejectTransaction::TRANSACTIONTYPE:
+        case DifferentialRevisionResignTransaction::TRANSACTIONTYPE:
+          // If we have a review transaction, we'll skip marking the user
+          // as "Commented" later. This should get cleaner after T10967.
+          $this->hasReviewTransaction = true;
           break;
       }
     }
@@ -425,6 +433,11 @@ final class DifferentialTransactionEditor
         // When a user leaves a comment, upgrade their reviewer status from
         // "added" to "commented" if they're also a reviewer. We may further
         // upgrade this based on other actions in the transaction group.
+
+        if ($this->hasReviewTransaction) {
+          // If we're also applying a review transaction, skip this.
+          break;
+        }
 
         $status_added = DifferentialReviewerStatus::STATUS_ADDED;
         $status_commented = DifferentialReviewerStatus::STATUS_COMMENTED;
