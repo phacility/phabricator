@@ -23,6 +23,14 @@ abstract class PhabricatorCalendarEventDateTransaction
   }
 
   public function getTransactionHasEffect($object, $old, $new) {
+    // If either value is `null` (for example, when setting a recurring event
+    // end date for the first time) and the other value is not `null`, this
+    // transaction has an effect.
+    $has_null = (($old === null) || ($new === null));
+    if ($has_null) {
+      return ($old !== $new);
+    }
+
     $editor = $this->getEditor();
 
     $actor = $this->getActor();
