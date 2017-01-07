@@ -9,6 +9,9 @@ final class DifferentialRevisionEditEngine
 
   const KEY_UPDATE = 'update';
 
+  const ACTIONGROUP_REVIEW = 'review';
+  const ACTIONGROUP_REVISION = 'revision';
+
   public function getEngineName() {
     return pht('Revisions');
   }
@@ -38,7 +41,8 @@ final class DifferentialRevisionEditEngine
   protected function newObjectQuery() {
     return id(new DifferentialRevisionQuery())
       ->needActiveDiffs(true)
-      ->needReviewerStatus(true);
+      ->needReviewerStatus(true)
+      ->needReviewerAuthority(true);
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -73,6 +77,10 @@ final class DifferentialRevisionEditEngine
     return $object->getURI();
   }
 
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('revision/edit/');
+  }
+
   public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
     return $this;
@@ -82,7 +90,19 @@ final class DifferentialRevisionEditEngine
     return $this->diff;
   }
 
+  protected function newCommentActionGroups() {
+    return array(
+      id(new PhabricatorEditEngineCommentActionGroup())
+        ->setKey(self::ACTIONGROUP_REVIEW)
+        ->setLabel(pht('Review Actions')),
+      id(new PhabricatorEditEngineCommentActionGroup())
+        ->setKey(self::ACTIONGROUP_REVISION)
+        ->setLabel(pht('Revision Actions')),
+    );
+  }
+
   protected function buildCustomEditFields($object) {
+    $viewer = $this->getViewer();
 
     $plan_required = PhabricatorEnv::getEnvConfig(
       'differential.require-test-plan-field');
@@ -176,6 +196,7 @@ final class DifferentialRevisionEditEngine
       ->setUseEdgeTransactions(true)
       ->setTransactionType(
         DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE)
+      ->setCommentActionLabel(pht('Change Reviewers'))
       ->setDescription(pht('Reviewers for this revision.'))
       ->setConduitDescription(pht('Change the reviewers for this revision.'))
       ->setConduitTypeDescription(pht('New reviewers.'))
@@ -207,6 +228,13 @@ final class DifferentialRevisionEditEngine
       ->setConduitTypeDescription(pht('List of tasks.'))
       ->setValue(array());
 
+    $actions = DifferentialRevisionActionTransaction::loadAllActions();
+    $actions = msortv($actions, 'getRevisionActionOrderVector');
+
+    foreach ($actions as $key => $action) {
+      $fields[] = $action->newEditField($object, $viewer);
+    }
+
     return $fields;
   }
 
@@ -218,5 +246,78 @@ final class DifferentialRevisionEditEngine
     $fields = $field_list->getFields();
     return isset($fields[$key]);
   }
+
+  protected function newAutomaticCommentTransactions($object) {
+    $viewer = $this->getViewer();
+    $xactions = array();
+
+    $inlines = DifferentialTransactionQuery::loadUnsubmittedInlineComments(
+      $viewer,
+      $object);
+    $inlines = msort($inlines, 'getID');
+
+    foreach ($inlines as $inline) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(DifferentialTransaction::TYPE_INLINE)
+        ->attachComment($inline);
+    }
+
+    $viewer_phid = $viewer->getPHID();
+    $viewer_is_author = ($object->getAuthorPHID() == $viewer_phid);
+    if ($viewer_is_author) {
+      $state_map = PhabricatorTransactions::getInlineStateMap();
+
+      $inlines = id(new DifferentialDiffInlineCommentQuery())
+        ->setViewer($viewer)
+        ->withRevisionPHIDs(array($object->getPHID()))
+        ->withFixedStates(array_keys($state_map))
+        ->execute();
+      if ($inlines) {
+        $old_value = mpull($inlines, 'getFixedState', 'getPHID');
+        $new_value = array();
+        foreach ($old_value as $key => $state) {
+          $new_value[$key] = $state_map[$state];
+        }
+
+        $xactions[] = id(new DifferentialTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
+          ->setIgnoreOnNoEffect(true)
+          ->setOldValue($old_value)
+          ->setNewValue($new_value);
+      }
+    }
+
+    return $xactions;
+  }
+
+  protected function newCommentPreviewContent($object, array $xactions) {
+    $viewer = $this->getViewer();
+    $type_inline = DifferentialTransaction::TYPE_INLINE;
+
+    $inlines = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() === $type_inline) {
+        $inlines[] = $xaction->getComment();
+      }
+    }
+
+    $content = array();
+
+    if ($inlines) {
+      $inline_preview = id(new PHUIDiffInlineCommentPreviewListView())
+        ->setViewer($viewer)
+        ->setInlineComments($inlines);
+
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'id' => 'inline-comment-preview',
+        ),
+        $inline_preview);
+    }
+
+    return $content;
+  }
+
 
 }

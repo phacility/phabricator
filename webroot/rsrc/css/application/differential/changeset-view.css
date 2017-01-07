@@ -108,12 +108,9 @@
   padding: 0 2px;
 }
 
-.prose-diff span.old {
-  color: {$redtext};
-}
-
+.prose-diff span.old,
 .prose-diff span.new {
-  color: {$greentext};
+  color: {$darkgreytext};
 }
 
 .differential-diff th.selected {
@@ -124,12 +121,24 @@
   cursor: auto;
 }
 
-.differential-diff td.old {
-  background: rgba(251, 175, 175, .3);
+.differential-diff th.old {
+  background: #ffdddd;
+  border-right-color: #f8cbcb;
 }
 
-.differential-diff td.new {
-  background: rgba(151, 234, 151, .3);
+.differential-diff th.new {
+  background: #dbffdb;
+  border-right-color: #a6f3a6;
+}
+
+.differential-diff td.old,
+.differential-diff td.old-full {
+  background: #ffecec;
+}
+
+.differential-diff td.new,
+.differential-diff td.new-full {
+  background: #eaffea;
 }
 
 .differential-diff td.old-rebase {
@@ -140,16 +149,14 @@
   background: #eeffee;
 }
 
-.differential-diff td.old-full,
 .differential-diff td.old span.bright,
 .prose-diff span.old {
-  background: rgba(251, 175, 175, .7);
+  background: #f8cbcb;
 }
 
-.differential-diff td.new-full,
 .differential-diff td.new span.bright,
 .prose-diff span.new {
-  background: rgba(151, 234, 151, .6);
+  background: #a6f3a6;
 }
 
 .differential-diff td.copy {

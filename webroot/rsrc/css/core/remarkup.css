@@ -66,7 +66,7 @@
   border-radius: 3px;
   box-shadow: inset 0 -1px 0 rgba({$alphablue},0.08);
   user-select: none;
-  background: #f7f7f7;
+  background: {$lightgreybackground};
   border: 1px solid {$lightgreyborder};
 }
 
@@ -370,7 +370,7 @@ video.phabricator-media {
 }
 
 .phabricator-remarkup-embed-layout-link {
-  padding: 8px 8px 8px 32px;
+  padding: 6px 6px 6px 42px;
   border-radius: 3px;
   margin: 0 0 4px;
   display: inline-block;
@@ -379,18 +379,17 @@ video.phabricator-media {
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
   color: #000;
-  min-width: 240px;
+  min-width: 256px;
   position: relative;
-  height: 22px;
+  /*height: 22px;*/
   line-height: 20px;
 }
 
-.phabricator-remarkup-embed-layout-link .phui-icon-view {
-  margin-right: 8px;
-  font-size: 20px;
+.phabricator-remarkup-embed-layout-icon {
+  font-size: 28px;
   position: absolute;
-  top: 8px;
-  left: 8px;
+  top: 10px;
+  left: 10px;
 }
 
 .phabricator-remarkup-embed-layout-info {
@@ -402,11 +401,46 @@ video.phabricator-media {
 
 .phabricator-remarkup-embed-layout-link:hover {
   border-color: {$violet};
+  cursor: pointer;
   text-decoration: none;
 }
 
-.phabricator-remarkup-embed-layout-link:hover .phui-icon-view {
-  color: {$violet};
+.phabricator-remarkup-embed-layout-link:hover
+  .phabricator-remarkup-embed-layout-icon {
+    color: {$violet};
+}
+
+.phabricator-remarkup-embed-layout-info-block {
+  display: block;
+}
+
+.embed-download-form {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.phabricator-remarkup-embed-layout-link
+  .phabricator-remarkup-embed-layout-download {
+    color: {$lightgreytext};
+    border: none;
+    background: rgba(0, 0, 0, 0);
+    box-shadow: none;
+    outline: 0;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    text-shadow: none;
+    border-radius: 0;
+    font: inherit;
+    display: inline;
+    min-width: 0;
+    font-weight: normal !important;
+}
+
+.phabricator-remarkup-embed-layout-download:hover {
+  color: {$anchor};
+  text-decoration: underline;
 }
 
 .phabricator-remarkup-embed-float-left {

@@ -1,0 +1,11 @@
+color: orange
+~~~~~~~~~~
+{
+  "color": "color"
+}
+~~~~~~~~~~
+{
+  "title": "color: orange"
+}
+~~~~~~~~~~
+[]

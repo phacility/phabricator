@@ -414,6 +414,13 @@ final class PhabricatorRepositoryDiscoveryEngine
         $epoch = PhabricatorTime::getNow();
       }
 
+      // If the epoch is not present at all, treat it as though it stores the
+      // value "0". For discussion, see T12062. This behavior is consistent
+      // with the behavior of "git show".
+      if (!strlen($epoch)) {
+        $epoch = 0;
+      }
+
       $refs[] = id(new PhabricatorRepositoryCommitRef())
         ->setIdentifier($commit)
         ->setEpoch($epoch)

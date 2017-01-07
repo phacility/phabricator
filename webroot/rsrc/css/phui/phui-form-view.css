@@ -545,3 +545,8 @@ properly, and submit values. */
 .device-desktop .aphront-form-error .phui-icon-view:hover {
   color: {$red};
 }
+
+.phui-form-static-action {
+  padding: 4px;
+  color: {$bluetext};
+}

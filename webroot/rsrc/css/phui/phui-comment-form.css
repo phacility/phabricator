@@ -163,3 +163,11 @@ body.device .phui-box.phui-object-box.phui-comment-form-view {
 .phui-comment-form-view .aphront-form-error .phui-icon-view {
   padding: 4px;
 }
+
+.phui-comment-form-view .phui-form-view .phui-info-view {
+  margin: 16px;
+}
+
+.device-phone .phui-comment-form-view .phui-form-view .phui-info-view {
+  margin: 8px;
+}

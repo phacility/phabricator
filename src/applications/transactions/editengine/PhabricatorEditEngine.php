@@ -49,7 +49,14 @@ abstract class PhabricatorEditEngine
   }
 
   final public function getEngineKey() {
-    return $this->getPhobjectClassConstant('ENGINECONST', 64);
+    $key = $this->getPhobjectClassConstant('ENGINECONST', 64);
+    if (strpos($key, '/') !== false) {
+      throw new Exception(
+        pht(
+          'EditEngine ("%s") contains an invalid key character "/".',
+          get_class($this)));
+    }
+    return $key;
   }
 
   final public function getApplication() {
@@ -1549,6 +1556,9 @@ abstract class PhabricatorEditEngine
 
     $view->setCommentActions($comment_actions);
 
+    $comment_groups = $this->newCommentActionGroups();
+    $view->setCommentActionGroups($comment_groups);
+
     return $view;
   }
 
@@ -1780,6 +1790,11 @@ abstract class PhabricatorEditEngine
       }
     }
 
+    $auto_xactions = $this->newAutomaticCommentTransactions($object);
+    foreach ($auto_xactions as $xaction) {
+      $xactions[] = $xaction;
+    }
+
     if (strlen($comment_text) || !$xactions) {
       $xactions[] = id(clone $template)
         ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
@@ -1797,6 +1812,10 @@ abstract class PhabricatorEditEngine
 
     try {
       $xactions = $editor->applyTransactions($object, $xactions);
+    } catch (PhabricatorApplicationTransactionValidationException $ex) {
+      return id(new PhabricatorApplicationTransactionValidationResponse())
+        ->setCancelURI($view_uri)
+        ->setException($ex);
     } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
         ->setCancelURI($view_uri)
@@ -1811,10 +1830,13 @@ abstract class PhabricatorEditEngine
     }
 
     if ($request->isAjax() && $is_preview) {
+      $preview_content = $this->newCommentPreviewContent($object, $xactions);
+
       return id(new PhabricatorApplicationTransactionResponse())
         ->setViewer($viewer)
         ->setTransactions($xactions)
-        ->setIsPreview($is_preview);
+        ->setIsPreview($is_preview)
+        ->setPreviewContent($preview_content);
     } else {
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
@@ -2155,6 +2177,18 @@ abstract class PhabricatorEditEngine
     $controller = $this->getController();
     $request = $controller->getRequest();
     return $request->getURIData('editAction');
+  }
+
+  protected function newCommentActionGroups() {
+    return array();
+  }
+
+  protected function newAutomaticCommentTransactions($object) {
+    return array();
+  }
+
+  protected function newCommentPreviewContent($object, array $xactions) {
+    return null;
   }
 
 

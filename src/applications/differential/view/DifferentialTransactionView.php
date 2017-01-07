@@ -3,7 +3,7 @@
 final class DifferentialTransactionView
   extends PhabricatorApplicationTransactionView {
 
-  private $changesets;
+  private $changesets = array();
   private $revision;
   private $rightDiff;
   private $leftDiff;
@@ -91,6 +91,13 @@ final class DifferentialTransactionView
       array_unshift($group, $xaction);
     } else {
       $out[] = parent::renderTransactionContent($xaction);
+    }
+
+    // If we're rendering a preview, we show the inline comments in a separate
+    // section underneath the main transaction preview, so we skip rendering
+    // them in the preview body.
+    if ($this->getIsPreview()) {
+      return $out;
     }
 
     if (!$group) {

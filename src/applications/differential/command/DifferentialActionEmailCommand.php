@@ -55,64 +55,27 @@ final class DifferentialActionEmailCommand
   }
 
   public function getCommandObjects() {
-    $actions = array(
-      DifferentialAction::ACTION_REJECT => 'request',
-      DifferentialAction::ACTION_ABANDON => 'abandon',
-      DifferentialAction::ACTION_RECLAIM => 'reclaim',
-      DifferentialAction::ACTION_RESIGN => 'resign',
-      DifferentialAction::ACTION_RETHINK => 'planchanges',
-      DifferentialAction::ACTION_CLAIM => 'commandeer',
-    );
-
-    if (PhabricatorEnv::getEnvConfig('differential.enable-email-accept')) {
-      $actions[DifferentialAction::ACTION_ACCEPT] = 'accept';
-    }
-
-    $aliases = array(
-      DifferentialAction::ACTION_REJECT => array('reject'),
-      DifferentialAction::ACTION_CLAIM => array('claim'),
-      DifferentialAction::ACTION_RETHINK => array('rethink'),
-    );
-
-    $summaries = array(
-      DifferentialAction::ACTION_REJECT =>
-        pht('Request changes to a revision.'),
-      DifferentialAction::ACTION_ABANDON =>
-        pht('Abandon a revision.'),
-      DifferentialAction::ACTION_RECLAIM =>
-        pht('Reclaim a revision.'),
-      DifferentialAction::ACTION_RESIGN =>
-        pht('Resign from a revision.'),
-      DifferentialAction::ACTION_RETHINK =>
-        pht('Plan changes to a revision.'),
-      DifferentialAction::ACTION_CLAIM =>
-        pht('Commandeer a revision.'),
-      DifferentialAction::ACTION_ACCEPT =>
-        pht('Accept a revision.'),
-    );
-
-    $descriptions = array(
-
-    );
+    $actions = DifferentialRevisionActionTransaction::loadAllActions();
+    $actions = msort($actions, 'getRevisionActionOrderVector');
 
     $objects = array();
-    foreach ($actions as $action => $keyword) {
-      $object = id(new DifferentialActionEmailCommand())
+    foreach ($actions as $action) {
+      $keyword = $action->getCommandKeyword();
+      if ($keyword === null) {
+        continue;
+      }
+
+      $aliases = $action->getCommandAliases();
+      $summary = $action->getCommandSummary();
+
+      $object = id(new self())
         ->setCommand($keyword)
-        ->setAction($action)
-        ->setCommandSummary($summaries[$action]);
-
-      if (isset($aliases[$action])) {
-        $object->setCommandAliases($aliases[$action]);
-      }
-
-      if (isset($descriptions[$action])) {
-        $object->setCommandDescription($descriptions[$action]);
-      }
+        ->setCommandAliases($aliases)
+        ->setAction($action->getTransactionTypeConstant())
+        ->setCommandSummary($summary);
 
       $objects[] = $object;
     }
-
 
     return $objects;
   }
@@ -131,8 +94,8 @@ final class DifferentialActionEmailCommand
     $xactions = array();
 
     $xactions[] = $object->getApplicationTransactionTemplate()
-      ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
-      ->setNewValue($this->getAction());
+      ->setTransactionType($this->getAction())
+      ->setNewValue(true);
 
     return $xactions;
   }

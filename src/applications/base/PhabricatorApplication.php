@@ -429,8 +429,8 @@ abstract class PhabricatorApplication
     }
 
     $cache = PhabricatorCaches::getRequestCache();
-    $viewer_phid = $viewer->getPHID();
-    $key = 'app.'.$class.'.installed.'.$viewer_phid;
+    $viewer_fragment = $viewer->getCacheFragment();
+    $key = 'app.'.$class.'.installed.'.$viewer_fragment;
 
     $result = $cache->getKey($key);
     if ($result === null) {
