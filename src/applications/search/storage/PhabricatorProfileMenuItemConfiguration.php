@@ -12,6 +12,7 @@ final class PhabricatorProfileMenuItemConfiguration
   protected $builtinKey;
   protected $menuItemOrder;
   protected $visibility;
+  protected $customPHID;
   protected $menuItemProperties = array();
 
   private $profileObject = self::ATTACHABLE;
@@ -52,6 +53,7 @@ final class PhabricatorProfileMenuItemConfiguration
         'menuItemKey' => 'text64',
         'builtinKey' => 'text64?',
         'menuItemOrder' => 'uint32?',
+        'customPHID' => 'phid?',
         'visibility' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(

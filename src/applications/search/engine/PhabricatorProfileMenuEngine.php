@@ -4,6 +4,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   private $viewer;
   private $profileObject;
+  private $customPHID;
   private $items;
   private $defaultItem;
   private $controller;
@@ -25,6 +26,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   public function getProfileObject() {
     return $this->profileObject;
+  }
+
+  public function setCustomPHID($custom_phid) {
+    $this->customPHID = $custom_phid;
+    return $this;
+  }
+
+  public function getCustomPHID() {
+    return $this->customPHID;
   }
 
   public function setController(PhabricatorController $controller) {
@@ -244,10 +254,18 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $items = $this->loadBuiltinProfileItems();
 
-    $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-      ->setViewer($viewer)
-      ->withProfilePHIDs(array($object->getPHID()))
-      ->execute();
+    if ($this->getCustomPHID()) {
+      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
+        ->setViewer($viewer)
+        ->withProfilePHIDs(array($object->getPHID()))
+        ->withCustomPHIDs(array($this->getCustomPHID()))
+        ->execute();
+    } else {
+      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
+        ->setViewer($viewer)
+        ->withProfilePHIDs(array($object->getPHID()))
+        ->execute();
+    }
 
     foreach ($stored_items as $stored_item) {
       $impl = $stored_item->getMenuItem();

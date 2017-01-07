@@ -7,6 +7,7 @@ final class PhabricatorProfileMenuEditEngine
 
   private $menuEngine;
   private $profileObject;
+  private $customPHID;
   private $newMenuItemConfiguration;
   private $isBuiltin;
 
@@ -30,6 +31,15 @@ final class PhabricatorProfileMenuEditEngine
 
   public function getProfileObject() {
     return $this->profileObject;
+  }
+
+  public function setCustomPHID($custom_phid) {
+    $this->customPHID = $custom_phid;
+    return $this;
+  }
+
+  public function getCustomPHID() {
+    return $this->customPHID;
   }
 
   public function setNewMenuItemConfiguration(
