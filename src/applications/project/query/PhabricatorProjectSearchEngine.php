@@ -52,6 +52,17 @@ final class PhabricatorProjectSearchEngine
         ->setLabel(pht('Colors'))
         ->setKey('colors')
         ->setOptions($this->getColorOptions()),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Parent Projects'))
+        ->setKey('parentPHIDs')
+        ->setAliases(array('parent', 'parents', 'parentPHID'))
+        ->setDescription(pht('Find direct subprojects of specified parents.')),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Ancestor Projects'))
+        ->setKey('ancestorPHIDs')
+        ->setAliases(array('ancestor', 'ancestors', 'ancestorPHID'))
+        ->setDescription(
+          pht('Find all subprojects beneath specified ancestors.')),
     );
   }
 
@@ -89,6 +100,14 @@ final class PhabricatorProjectSearchEngine
 
     if ($map['isMilestone'] !== null) {
       $query->withIsMilestone($map['isMilestone']);
+    }
+
+    if ($map['parentPHIDs']) {
+      $query->withParentProjectPHIDs($map['parentPHIDs']);
+    }
+
+    if ($map['ancestorPHIDs']) {
+      $query->withAncestorProjectPHIDs($map['ancestorPHIDs']);
     }
 
     return $query;
