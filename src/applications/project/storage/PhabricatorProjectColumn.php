@@ -183,6 +183,14 @@ final class PhabricatorProjectColumn
     return sprintf('%s%012d', $group, $sequence);
   }
 
+  public function getRefForConduit() {
+    return array(
+      'id' => (int)$this->getID(),
+      'phid' => $this->getPHID(),
+      'name' => $this->getDisplayName(),
+    );
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
