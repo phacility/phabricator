@@ -742,6 +742,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setType('string')
         ->setDescription(pht('Primary slug/hashtag.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('milestone')
+        ->setType('int?')
+        ->setDescription(pht('For milestones, milestone sequence number.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('icon')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about the project icon.')),
@@ -756,9 +760,16 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $color_key = $this->getColor();
     $color_name = PhabricatorProjectIconSet::getColorName($color_key);
 
+    if ($this->isMilestone()) {
+      $milestone = (int)$this->getMilestoneNumber();
+    } else {
+      $milestone = null;
+    }
+
     return array(
       'name' => $this->getName(),
       'slug' => $this->getPrimarySlug(),
+      'milestone' => $milestone,
       'icon' => array(
         'key' => $this->getDisplayIconKey(),
         'name' => $this->getDisplayIconName(),

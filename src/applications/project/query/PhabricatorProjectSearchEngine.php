@@ -13,8 +13,7 @@ final class PhabricatorProjectSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorProjectQuery())
-      ->needImages(true)
-      ->withIsMilestone(false);
+      ->needImages(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -34,6 +33,17 @@ final class PhabricatorProjectSearchEngine
         ->setLabel(pht('Status'))
         ->setKey('status')
         ->setOptions($this->getStatusOptions()),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Milestones'))
+        ->setKey('isMilestone')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Milestones'),
+          pht('Hide Milestones'))
+        ->setDescription(
+          pht(
+            'Pass true to find only milestones, or false to omit '.
+            'milestones.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setLabel(pht('Icons'))
         ->setKey('icons')
@@ -77,6 +87,10 @@ final class PhabricatorProjectSearchEngine
       $query->withColors($map['colors']);
     }
 
+    if ($map['isMilestone'] !== null) {
+      $query->withIsMilestone($map['isMilestone']);
+    }
+
     return $query;
   }
 
@@ -102,6 +116,9 @@ final class PhabricatorProjectSearchEngine
     $query->setQueryKey($query_key);
 
     $viewer_phid = $this->requireViewer()->getPHID();
+
+    // By default, do not show milestones in the list view.
+    $query->setParameter('isMilestone', false);
 
     switch ($query_key) {
       case 'all':
