@@ -10,6 +10,16 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
     return pht('Create a project.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "project.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'name'       => 'required string',

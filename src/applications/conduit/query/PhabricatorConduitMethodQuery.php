@@ -66,7 +66,8 @@ final class PhabricatorConduitMethodQuery
     }
 
     $status = array(
-      ConduitAPIMethod::METHOD_STATUS_STABLE     => $this->isStable,
+      ConduitAPIMethod::METHOD_STATUS_STABLE => $this->isStable,
+      ConduitAPIMethod::METHOD_STATUS_FROZEN => $this->isStable,
       ConduitAPIMethod::METHOD_STATUS_DEPRECATED => $this->isDeprecated,
       ConduitAPIMethod::METHOD_STATUS_UNSTABLE   => $this->isUnstable,
     );

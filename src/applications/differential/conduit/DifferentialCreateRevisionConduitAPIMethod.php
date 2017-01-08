@@ -11,6 +11,16 @@ final class DifferentialCreateRevisionConduitAPIMethod
     return pht('Create a new Differential revision.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "differential.revision.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       // TODO: Arcanist passes this; prevent fatals after D4191 until Conduit

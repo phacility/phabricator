@@ -10,6 +10,16 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
     return pht('Execute complex searches for Maniphest tasks.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "maniphest.search" instead.');
+  }
+
   protected function defineParamTypes() {
     $statuses = array(
       ManiphestTaskQuery::STATUS_ANY,
