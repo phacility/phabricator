@@ -24,7 +24,13 @@ final class DifferentialRevisionReviewersTransaction
     // First, remove any reviewers we're getting rid of.
     $rem = idx($value, '-', array());
     $rem = $datasource->evaluateTokens($rem);
-    foreach ($rem as $phid) {
+    foreach ($rem as $spec) {
+      if (!is_array($spec)) {
+        $phid = $spec;
+      } else {
+        $phid = $spec['phid'];
+      }
+
       unset($reviewers[$phid]);
     }
 
