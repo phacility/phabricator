@@ -92,6 +92,15 @@ abstract class AphrontTagView extends AphrontView {
   final public function render() {
     $this->willRender();
 
+    // A tag view may render no tag at all. For example, the HandleListView is
+    // a container which renders a tag in HTML mode, but can also render in
+    // text mode without producing a tag. When a tag view has no tag name, just
+    // return the tag content as though the view did not exist.
+    $tag_name = $this->getTagName();
+    if ($tag_name === null) {
+      return $this->getTagContent();
+    }
+
     $attributes = $this->getTagAttributes();
 
     $implode = array('class', 'sigil');
@@ -147,7 +156,7 @@ abstract class AphrontTagView extends AphrontView {
     }
 
     return javelin_tag(
-      $this->getTagName(),
+      $tag_name,
       $attributes,
       $this->getTagContent());
   }

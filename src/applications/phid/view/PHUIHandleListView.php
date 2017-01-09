@@ -38,9 +38,13 @@ final class PHUIHandleListView
   }
 
   protected function getTagName() {
-    // TODO: It would be nice to render this with a proper <ul />, at least in
-    // block mode, but don't stir the waters up too much for now.
-    return 'span';
+    if ($this->getAsText()) {
+      return null;
+    } else {
+      // TODO: It would be nice to render this with a proper <ul />, at least
+      // in block mode, but don't stir the waters up too much for now.
+      return 'span';
+    }
   }
 
   protected function getTagContent() {
