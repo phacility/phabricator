@@ -80,6 +80,7 @@ final class PhabricatorProfileMenuItemConfigurationQuery
         continue;
       }
       $item_type = clone $item_type;
+      $item_type->setViewer($this->getViewer());
       $item->attachMenuItem($item_type);
     }
 

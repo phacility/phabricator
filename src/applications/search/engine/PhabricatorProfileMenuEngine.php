@@ -114,6 +114,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           return new Aphront404Response();
         }
         break;
+      case 'edit':
+        if (!$request->getURIData('id')) {
+          // If we continue along the "edit" pathway without an ID, we hit an
+          // unrelated exception because we can not build a new menu item out
+          // of thin air. For menus, new items are created via the "new"
+          // action. Just catch this case and 404 early since there's currently
+          // no clean way to make EditEngine aware of this.
+          return new Aphront404Response();
+        }
+        break;
     }
 
     $navigation = $this->buildNavigation();
