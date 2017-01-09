@@ -20,6 +20,7 @@ final class PhabricatorProjectColumnSearchEngine
       id(new PhabricatorPHIDsSearchField())
         ->setLabel(pht('Projects'))
         ->setKey('projectPHIDs')
+        ->setConduitKey('projects')
         ->setAliases(array('project', 'projects', 'projectPHID')),
     );
   }

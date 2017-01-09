@@ -24,10 +24,12 @@ final class PhabricatorProjectSearchEngine
       id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Members'))
         ->setKey('memberPHIDs')
+        ->setConduitKey('members')
         ->setAliases(array('member', 'members')),
       id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Watchers'))
         ->setKey('watcherPHIDs')
+        ->setConduitKey('watchers')
         ->setAliases(array('watcher', 'watchers')),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Status'))
@@ -55,11 +57,13 @@ final class PhabricatorProjectSearchEngine
       id(new PhabricatorPHIDsSearchField())
         ->setLabel(pht('Parent Projects'))
         ->setKey('parentPHIDs')
+        ->setConduitKey('parents')
         ->setAliases(array('parent', 'parents', 'parentPHID'))
         ->setDescription(pht('Find direct subprojects of specified parents.')),
       id(new PhabricatorPHIDsSearchField())
         ->setLabel(pht('Ancestor Projects'))
         ->setKey('ancestorPHIDs')
+        ->setConduitKey('ancestors')
         ->setAliases(array('ancestor', 'ancestors', 'ancestorPHID'))
         ->setDescription(
           pht('Find all subprojects beneath specified ancestors.')),
