@@ -748,9 +748,11 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       return new Aphront404Response();
     }
 
+    $custom_phid = $this->getCustomPHID();
     $configuration = PhabricatorProfileMenuItemConfiguration::initializeNewItem(
       $object,
-      $item_type);
+      $item_type,
+      $custom_phid);
 
     $viewer = $this->getViewer();
 
@@ -765,6 +767,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setNewMenuItemConfiguration($configuration)
+      ->setCustomPHID($custom_phid)
       ->setController($controller)
       ->buildResponse();
   }
@@ -778,6 +781,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setController($controller)
+      ->setCustomPHID($this->getCustomPHID())
       ->buildResponse();
   }
 
@@ -810,6 +814,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setProfileObject($object)
       ->setNewMenuItemConfiguration($configuration)
       ->setController($controller)
+      ->setCustomPHID($this->getCustomPHID())
       ->buildResponse();
   }
 

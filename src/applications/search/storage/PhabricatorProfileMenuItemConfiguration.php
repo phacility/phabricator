@@ -34,13 +34,15 @@ final class PhabricatorProfileMenuItemConfiguration
 
   public static function initializeNewItem(
     $profile_object,
-    PhabricatorProfileMenuItem $item) {
+    PhabricatorProfileMenuItem $item,
+    $custom_phid) {
 
     return self::initializeNewBuiltin()
       ->setProfilePHID($profile_object->getPHID())
       ->setMenuItemKey($item->getMenuItemKey())
       ->attachMenuItem($item)
-      ->attachProfileObject($profile_object);
+      ->attachProfileObject($profile_object)
+      ->setCustomPHID($custom_phid);
   }
 
   protected function getConfiguration() {
