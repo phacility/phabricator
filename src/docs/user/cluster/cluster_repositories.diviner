@@ -37,7 +37,7 @@ Before responding to a write, replicas obtain a global lock, perform the same
 version check and fetch if necessary, then allow the write to continue.
 
 Additionally, repositories passively check other nodes for updates and
-replicate changes in the background. After you push a change to a repositroy,
+replicate changes in the background. After you push a change to a repository,
 it will usually spread passively to all other repository nodes within a few
 minutes.
 
@@ -381,8 +381,8 @@ this:
 
 Here, all of the "leader" devices with the most up-to-date copy of the
 repository have been lost. Phabricator will freeze the repository refuse to
-serve requests because it can not serve it consistently, and can not accept new
-writes without data loss.
+serve requests because it can not serve reads consistently and can not accept
+new writes without data loss.
 
 The most straightforward way to resolve this issue is to restore any leader to
 service. The change will be able to replicate to other devices once a leader
