@@ -26,7 +26,16 @@ final class DiffusionCommitEditEngine
   }
 
   protected function newEditableObject() {
-    throw new PhutilMethodNotImplementedException();
+    // NOTE: We must return a valid object here so that things like Conduit
+    // documentation generation work. You can't actually create commits via
+    // EditEngine. This is enforced with a "No One" creation policy.
+
+    $repository = new PhabricatorRepository();
+    $data = new PhabricatorRepositoryCommitData();
+
+    return id(new PhabricatorRepositoryCommit())
+      ->attachRepository($repository)
+      ->attachCommitData($data);
   }
 
   protected function newObjectQuery() {
