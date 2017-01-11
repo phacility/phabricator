@@ -203,6 +203,11 @@ final class PhabricatorRepositoryCommit
     return $authority_audits;
   }
 
+  public function getAuditorPHIDsForEdit() {
+    $audits = $this->getAudits();
+    return mpull($audits, 'getAuditorPHID');
+  }
+
   public function save() {
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);

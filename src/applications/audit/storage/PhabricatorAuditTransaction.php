@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorAuditTransaction
-  extends PhabricatorApplicationTransaction {
+  extends PhabricatorModularTransaction {
 
   const TYPE_COMMIT = 'audit:commit';
 
@@ -18,6 +18,10 @@ final class PhabricatorAuditTransaction
 
   public function getApplicationName() {
     return 'audit';
+  }
+
+  public function getBaseTransactionClass() {
+    return 'DiffusionCommitTransactionType';
   }
 
   public function getApplicationTransactionType() {

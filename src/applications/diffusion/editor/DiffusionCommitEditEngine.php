@@ -35,12 +35,14 @@ final class DiffusionCommitEditEngine
 
     return id(new PhabricatorRepositoryCommit())
       ->attachRepository($repository)
-      ->attachCommitData($data);
+      ->attachCommitData($data)
+      ->attachAudits(array());
   }
 
   protected function newObjectQuery() {
     return id(new DiffusionCommitQuery())
-      ->needCommitData(true);
+      ->needCommitData(true)
+      ->needAuditRequests(true);
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -76,6 +78,19 @@ final class DiffusionCommitEditEngine
     $data = $object->getCommitData();
 
     $fields = array();
+
+    $fields[] = id(new PhabricatorDatasourceEditField())
+      ->setKey('auditors')
+      ->setLabel(pht('Auditors'))
+      ->setDatasource(new DiffusionAuditorDatasource())
+      ->setUseEdgeTransactions(true)
+      ->setTransactionType(
+        DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE)
+      ->setCommentActionLabel(pht('Change Auditors'))
+      ->setDescription(pht('Auditors for this commit.'))
+      ->setConduitDescription(pht('Change the auditors for this commit.'))
+      ->setConduitTypeDescription(pht('New auditors.'))
+      ->setValue($object->getAuditorPHIDsForEdit());
 
     $reason = $data->getCommitDetail('autocloseReason', false);
     $reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
