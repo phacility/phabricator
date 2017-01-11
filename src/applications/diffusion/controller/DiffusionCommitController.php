@@ -997,12 +997,12 @@ final class DiffusionCommitController extends DiffusionController {
       $commit,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $identifier = $commit->getCommitIdentifier();
-    $uri = $repository->getPathURI("commit/{$identifier}/edit/");
+    $id = $commit->getID();
+    $edit_uri = $this->getApplicationURI("/commit/edit/{$id}/");
 
     $action = id(new PhabricatorActionView())
       ->setName(pht('Edit Commit'))
-      ->setHref($uri)
+      ->setHref($edit_uri)
       ->setIcon('fa-pencil')
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit);

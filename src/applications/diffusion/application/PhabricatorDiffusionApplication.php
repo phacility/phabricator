@@ -63,8 +63,6 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           => 'DiffusionCommitBranchesController',
         'commit/(?P<commit>[a-z0-9]+)/tags/'
           => 'DiffusionCommitTagsController',
-        'commit/(?P<commit>[a-z0-9]+)/edit/'
-          => 'DiffusionCommitEditController',
         'compare/' => 'DiffusionCompareController',
         'manage/(?:(?P<panel>[^/]+)/)?'
           => 'DiffusionRepositoryManagePanelsController',
@@ -134,7 +132,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
         'commit/' => array(
           $this->getEditRoutePattern('edit/') =>
-            'DiffusionCommitEditProController',
+            'DiffusionCommitEditController',
         ),
       ),
     );
