@@ -65,7 +65,7 @@ final class PhabricatorOwnersDetailController
 
     $commit_views = array();
 
-    $commit_uri = id(new PhutilURI('/audit/'))
+    $commit_uri = id(new PhutilURI('/diffusion/commit/'))
       ->setQueryParams(
         array(
           'auditorPHIDs' => $package->getPHID(),

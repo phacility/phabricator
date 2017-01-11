@@ -3,7 +3,7 @@
 final class PhabricatorAuditApplication extends PhabricatorApplication {
 
   public function getBaseURI() {
-    return '/audit/';
+    return '/diffusion/commit/';
   }
 
   public function getIcon() {
@@ -18,25 +18,16 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return pht('Browse and Audit Commits');
   }
 
+  public function canUninstall() {
+    // Audit was once a separate application, but has largely merged with
+    // Diffusion.
+    return false;
+  }
+
   public function isPinnedByDefault(PhabricatorUser $viewer) {
-    return true;
-  }
-
-  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
-    return array(
-      array(
-        'name' => pht('Audit User Guide'),
-        'href' => PhabricatorEnv::getDoclink('Audit User Guide'),
-      ),
-    );
-  }
-
-  public function getRoutes() {
-    return array(
-      '/audit/' => array(
-        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorAuditListController',
-      ),
-    );
+    return parent::isClassInstalledForViewer(
+      'PhabricatorDiffusionApplication',
+      $viewer);
   }
 
   public function getApplicationOrder() {

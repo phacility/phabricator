@@ -28,6 +28,10 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         'name' => pht('Diffusion User Guide'),
         'href' => PhabricatorEnv::getDoclink('Diffusion User Guide'),
       ),
+      array(
+        'name' => pht('Audit User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Audit User Guide'),
+      ),
     );
   }
 
@@ -131,6 +135,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         'lint/' => 'DiffusionLintController',
 
         'commit/' => array(
+          $this->getQueryRoutePattern() =>
+            'DiffusionCommitListController',
           $this->getEditRoutePattern('edit/') =>
             'DiffusionCommitEditController',
         ),

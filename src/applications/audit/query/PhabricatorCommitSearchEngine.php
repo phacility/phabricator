@@ -73,7 +73,7 @@ final class PhabricatorCommitSearchEngine
   }
 
   protected function getURI($path) {
-    return '/audit/'.$path;
+    return '/diffusion/commit/'.$path;
   }
 
   protected function getBuiltinQueryNames() {

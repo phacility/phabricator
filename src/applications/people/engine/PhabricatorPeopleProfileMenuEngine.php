@@ -63,7 +63,7 @@ final class PhabricatorPeopleProfileMenuEngine
       $viewer);
     if ($have_diffusion) {
       $uri = urisprintf(
-        '/audit/?authors=%s#R',
+        '/diffusion/commit/?authors=%s#R',
         $object->getPHID());
 
       $items[] = $this->newItem()
