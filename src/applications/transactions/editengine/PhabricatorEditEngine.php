@@ -107,6 +107,10 @@ abstract class PhabricatorEditEngine
     return $this->hideHeader;
   }
 
+  public function getProfileMenuItemDefault() {
+    return $this->getEngineKey().'/'.self::EDITENGINECONFIG_DEFAULT;
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 

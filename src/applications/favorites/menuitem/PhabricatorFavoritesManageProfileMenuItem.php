@@ -47,15 +47,22 @@ final class PhabricatorFavoritesManageProfileMenuItem
 
   protected function newNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config) {
+    $viewer = $this->getViewer();
 
-    $name = $this->getDisplayName($config);
-    $icon = 'fa-pencil';
-    $href = '/favorites/personal/item/configure/';
+    if ($viewer->isLoggedIn()) {
+      $admin = $viewer->getIsAdmin();
+      $name = $this->getDisplayName($config);
+      $icon = 'fa-pencil';
+      $href = '/favorites/personal/item/configure/';
+      if ($admin) {
+        $href = '/favorites/';
+      }
 
-    $item = $this->newItem()
-      ->setHref($href)
-      ->setName($name)
-      ->setIcon($icon);
+      $item = $this->newItem()
+        ->setHref($href)
+        ->setName($name)
+        ->setIcon($icon);
+    }
 
     return array(
       $item,
