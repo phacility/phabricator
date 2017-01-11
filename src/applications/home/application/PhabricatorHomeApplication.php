@@ -27,6 +27,11 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
       '/(?P<only>home)/' => 'PhabricatorHomeMainController',
       '/home/' => array(
         'create/' => 'PhabricatorHomeQuickCreateController',
+        'menu/' => array(
+          '' => 'PhabricatorHomeMenuController',
+          '(?P<type>global|personal)/item/' => $this->getProfileMenuRouting(
+          'PhabricatorHomeMenuItemController'),
+        ),
       ),
     );
   }
