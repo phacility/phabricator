@@ -30,7 +30,8 @@ final class DiffusionCommitEditEngine
   }
 
   protected function newObjectQuery() {
-    return new DiffusionCommitQuery();
+    return id(new DiffusionCommitQuery())
+      ->needCommitData(true);
   }
 
   protected function getObjectCreateTitleText($object) {
@@ -63,8 +64,49 @@ final class DiffusionCommitEditEngine
 
   protected function buildCustomEditFields($object) {
     $viewer = $this->getViewer();
+    $data = $object->getCommitData();
 
-    return array();
+    $fields = array();
+
+    $reason = $data->getCommitDetail('autocloseReason', false);
+    $reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
+    if ($reason !== false) {
+      switch ($reason) {
+        case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:
+          $desc = pht('No, Repository Importing');
+          break;
+        case PhabricatorRepository::BECAUSE_AUTOCLOSE_DISABLED:
+          $desc = pht('No, Autoclose Disabled');
+          break;
+        case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
+          $desc = pht('No, Not On Autoclose Branch');
+          break;
+        case PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED:
+          $desc = pht('Yes, Forced Via bin/repository CLI Tool.');
+          break;
+        case null:
+          $desc = pht('Yes');
+          break;
+        default:
+          $desc = pht('Unknown');
+          break;
+      }
+
+      $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: Autoclose');
+      $doc_link = phutil_tag(
+        'a',
+        array(
+          'href' => $doc_href,
+          'target' => '_blank',
+        ),
+        pht('Learn More'));
+
+        $fields[] = id(new PhabricatorStaticEditField())
+          ->setLabel(pht('Autoclose?'))
+          ->setValue(array($desc, " \xC2\xB7 ", $doc_link));
+    }
+
+    return $fields;
   }
 
 }
