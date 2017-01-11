@@ -131,6 +131,11 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
         'symbol/(?P<name>[^/]+)/' => 'DiffusionSymbolController',
         'external/' => 'DiffusionExternalController',
         'lint/' => 'DiffusionLintController',
+
+        'commit/' => array(
+          $this->getEditRoutePattern('edit/') =>
+            'DiffusionCommitEditProController',
+        ),
       ),
     );
   }
