@@ -5,6 +5,9 @@ final class DiffusionCommitEditEngine
 
   const ENGINECONST = 'diffusion.commit';
 
+  const ACTIONGROUP_AUDIT = 'audit';
+  const ACTIONGROUP_COMMIT = 'commit';
+
   public function isEngineConfigurable() {
     return false;
   }
@@ -128,6 +131,13 @@ final class DiffusionCommitEditEngine
         $fields[] = id(new PhabricatorStaticEditField())
           ->setLabel(pht('Autoclose?'))
           ->setValue(array($desc, " \xC2\xB7 ", $doc_link));
+    }
+
+    $actions = DiffusionCommitActionTransaction::loadAllActions();
+    $actions = msortv($actions, 'getCommitActionOrderVector');
+
+    foreach ($actions as $key => $action) {
+      $fields[] = $action->newEditField($object, $viewer);
     }
 
     return $fields;

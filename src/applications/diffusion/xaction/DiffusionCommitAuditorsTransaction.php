@@ -75,22 +75,7 @@ final class DiffusionCommitAuditorsTransaction
       }
     }
 
-    foreach ($new as $phid => $status) {
-      $auditor = idx($auditors, $phid);
-      if (!$auditor) {
-        $auditor = id(new PhabricatorRepositoryAuditRequest())
-          ->setAuditorPHID($phid)
-          ->setCommitPHID($object->getPHID());
-      } else {
-        if ($auditor->getAuditStatus() === $status) {
-          continue;
-        }
-      }
-
-      $auditor
-        ->setAuditStatus($status)
-        ->save();
-    }
+    $this->updateAudits($object, $new);
   }
 
   public function getTitle() {
