@@ -10,7 +10,7 @@ final class PhabricatorAuditEditor
   private $rawPatch;
   private $auditorPHIDs = array();
 
-  private $didExpandInlineState;
+  private $didExpandInlineState = false;
 
   public function addAuditReason($phid, $reason) {
     if (!isset($this->auditReasonMap[$phid])) {
@@ -65,6 +65,21 @@ final class PhabricatorAuditEditor
     $types[] = PhabricatorAuditActionConstants::ADD_AUDITORS;
 
     return $types;
+  }
+
+  protected function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_INLINESTATE:
+          $this->didExpandInlineState = true;
+          break;
+      }
+    }
+
+    return parent::expandTransactions($object, $xactions);
   }
 
   protected function transactionHasEffect(

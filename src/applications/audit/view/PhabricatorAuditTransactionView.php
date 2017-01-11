@@ -3,7 +3,7 @@
 final class PhabricatorAuditTransactionView
   extends PhabricatorApplicationTransactionView {
 
-  private $pathMap;
+  private $pathMap = array();
 
   public function setPathMap(array $path_map) {
     $this->pathMap = $path_map;
@@ -55,10 +55,15 @@ final class PhabricatorAuditTransactionView
     $type_inline = PhabricatorAuditActionConstants::INLINE;
 
     $group = $xaction->getTransactionGroup();
+
     if ($xaction->getTransactionType() == $type_inline) {
       array_unshift($group, $xaction);
     } else {
       $out[] = parent::renderTransactionContent($xaction);
+    }
+
+    if ($this->getIsPreview()) {
+      return $out;
     }
 
     if (!$group) {

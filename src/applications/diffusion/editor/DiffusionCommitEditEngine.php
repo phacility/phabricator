@@ -48,6 +48,21 @@ final class DiffusionCommitEditEngine
       ->needAuditRequests(true);
   }
 
+  protected function getEditorURI() {
+    return $this->getApplication()->getApplicationURI('commit/edit/');
+  }
+
+  protected function newCommentActionGroups() {
+    return array(
+      id(new PhabricatorEditEngineCommentActionGroup())
+        ->setKey(self::ACTIONGROUP_AUDIT)
+        ->setLabel(pht('Audit Actions')),
+      id(new PhabricatorEditEngineCommentActionGroup())
+        ->setKey(self::ACTIONGROUP_COMMIT)
+        ->setLabel(pht('Commit Actions')),
+    );
+  }
+
   protected function getObjectCreateTitleText($object) {
     return pht('Create Commit');
   }
@@ -143,4 +158,76 @@ final class DiffusionCommitEditEngine
     return $fields;
   }
 
+  protected function newAutomaticCommentTransactions($object) {
+    $viewer = $this->getViewer();
+    $xactions = array();
+
+    $inlines = PhabricatorAuditInlineComment::loadDraftComments(
+      $viewer,
+      $object->getPHID(),
+      $raw = true);
+    $inlines = msort($inlines, 'getID');
+
+    foreach ($inlines as $inline) {
+      $xactions[] = $object->getApplicationTransactionTemplate()
+        ->setTransactionType(PhabricatorAuditActionConstants::INLINE)
+        ->attachComment($inline);
+    }
+
+    $viewer_phid = $viewer->getPHID();
+    $viewer_is_author = ($object->getAuthorPHID() == $viewer_phid);
+    if ($viewer_is_author) {
+      $state_map = PhabricatorTransactions::getInlineStateMap();
+
+      $inlines = id(new DiffusionDiffInlineCommentQuery())
+        ->setViewer($viewer)
+        ->withCommitPHIDs(array($object->getPHID()))
+        ->withFixedStates(array_keys($state_map))
+        ->execute();
+      if ($inlines) {
+        $old_value = mpull($inlines, 'getFixedState', 'getPHID');
+        $new_value = array();
+        foreach ($old_value as $key => $state) {
+          $new_value[$key] = $state_map[$state];
+        }
+
+        $xactions[] = $object->getApplicationTransactionTemplate()
+          ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
+          ->setIgnoreOnNoEffect(true)
+          ->setOldValue($old_value)
+          ->setNewValue($new_value);
+      }
+    }
+
+    return $xactions;
+  }
+
+  protected function newCommentPreviewContent($object, array $xactions) {
+    $viewer = $this->getViewer();
+    $type_inline = PhabricatorAuditActionConstants::INLINE;
+
+    $inlines = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() === $type_inline) {
+        $inlines[] = $xaction->getComment();
+      }
+    }
+
+    $content = array();
+
+    if ($inlines) {
+      $inline_preview = id(new PHUIDiffInlineCommentPreviewListView())
+        ->setViewer($viewer)
+        ->setInlineComments($inlines);
+
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'id' => 'inline-comment-preview',
+        ),
+        $inline_preview);
+    }
+
+    return $content;
+  }
 }

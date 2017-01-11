@@ -35,8 +35,6 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return array(
       '/audit/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorAuditListController',
-        'addcomment/' => 'PhabricatorAuditAddCommentController',
-        'preview/(?P<id>[1-9]\d*)/' => 'PhabricatorAuditPreviewController',
       ),
     );
   }
