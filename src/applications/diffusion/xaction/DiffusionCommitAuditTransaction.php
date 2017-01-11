@@ -13,6 +13,23 @@ abstract class DiffusionCommitAuditTransaction
     return ($this->getViewerAuditStatus($commit, $viewer) !== null);
   }
 
+  protected function isViewerAnyActiveAuditor(
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorUser $viewer) {
+
+    // This omits various inactive states like "Resigned" and "Not Required".
+
+    return $this->isViewerAuditStatusAmong(
+      $commit,
+      $viewer,
+      array(
+        PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
+        PhabricatorAuditStatusConstants::CONCERNED,
+        PhabricatorAuditStatusConstants::ACCEPTED,
+        PhabricatorAuditStatusConstants::AUDIT_REQUESTED,
+      ));
+  }
+
   protected function isViewerAcceptingAuditor(
     PhabricatorRepositoryCommit $commit,
     PhabricatorUser $viewer) {

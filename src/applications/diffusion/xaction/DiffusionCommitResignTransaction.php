@@ -28,7 +28,7 @@ final class DiffusionCommitResignTransaction
 
   public function generateOldValue($object) {
     $actor = $this->getActor();
-    return !$this->isViewerAnyAuditor($object, $actor);
+    return !$this->isViewerAnyActiveAuditor($object, $actor);
   }
 
   public function applyExternalEffects($object, $value) {
@@ -38,11 +38,11 @@ final class DiffusionCommitResignTransaction
   }
 
   protected function validateAction($object, PhabricatorUser $viewer) {
-    if (!$this->isViewerAnyAuditor($object, $viewer)) {
+    if (!$this->isViewerAnyActiveAuditor($object, $viewer)) {
       throw new Exception(
         pht(
           'You can not resign from this commit because you are not an '.
-          'auditor.'));
+          'active auditor.'));
     }
   }
 
