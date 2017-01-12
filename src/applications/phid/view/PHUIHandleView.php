@@ -17,6 +17,7 @@ final class PHUIHandleView
   private $asText;
   private $useShortName;
   private $showHovercard;
+  private $showStateIcon;
 
   public function setHandleList(PhabricatorHandleList $list) {
     $this->handleList = $list;
@@ -48,6 +49,15 @@ final class PHUIHandleView
     return $this;
   }
 
+  public function setShowStateIcon($show_state_icon) {
+    $this->showStateIcon = $show_state_icon;
+    return $this;
+  }
+
+  public function getShowStateIcon() {
+    return $this->showStateIcon;
+  }
+
   public function render() {
     $handle = $this->handleList[$this->handlePHID];
 
@@ -75,6 +85,11 @@ final class PHUIHandleView
       $link = $handle->renderHovercardLink($name);
     } else {
       $link = $handle->renderLink($name);
+    }
+
+    if ($this->showStateIcon) {
+      $icon = $handle->renderStateIcon();
+      $link = array($icon, ' ', $link);
     }
 
     return $link;

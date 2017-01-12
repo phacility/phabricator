@@ -13,6 +13,7 @@ final class PHUIHandleListView
   private $handleList;
   private $asInline;
   private $asText;
+  private $showStateIcons;
 
   public function setHandleList(PhabricatorHandleList $list) {
     $this->handleList = $list;
@@ -37,6 +38,15 @@ final class PHUIHandleListView
     return $this->asText;
   }
 
+  public function setShowStateIcons($show_state_icons) {
+    $this->showStateIcons = $show_state_icons;
+    return $this;
+  }
+
+  public function getShowStateIcons() {
+    return $this->showStateIcons;
+  }
+
   protected function getTagName() {
     if ($this->getAsText()) {
       return null;
@@ -49,11 +59,18 @@ final class PHUIHandleListView
 
   protected function getTagContent() {
     $list = $this->handleList;
+
+    $show_state_icons = $this->getShowStateIcons();
+
     $items = array();
     foreach ($list as $handle) {
       $view = $list->renderHandle($handle->getPHID())
         ->setShowHovercard(true)
         ->setAsText($this->getAsText());
+
+      if ($show_state_icons) {
+        $view->setShowStateIcon(true);
+      }
 
       $items[] = $view;
     }
