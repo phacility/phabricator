@@ -139,12 +139,8 @@ final class PhabricatorCommitSearchEngine
 
     $bucket = $this->getResultBucket($query);
 
-    $authority_phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser(
-      $viewer);
-
     $template = id(new PhabricatorAuditListView())
-      ->setViewer($viewer)
-      ->setAuthorityPHIDs($authority_phids);
+      ->setViewer($viewer);
 
     $views = array();
     if ($bucket) {

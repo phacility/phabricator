@@ -3,15 +3,9 @@
 final class PhabricatorAuditListView extends AphrontView {
 
   private $commits;
-  private $authorityPHIDs = array();
   private $header;
   private $noDataString;
   private $highlightedAudits;
-
-  public function setAuthorityPHIDs(array $phids) {
-    $this->authorityPHIDs = $phids;
-    return $this;
-  }
 
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
@@ -101,28 +95,15 @@ final class PhabricatorAuditListView extends AphrontView {
       }
       $auditors = phutil_implode_html(', ', $auditors);
 
-      $authority_audits = array_select_keys($audits, $this->authorityPHIDs);
-      if ($authority_audits) {
-        $audit = reset($authority_audits);
-      } else {
-        $audit = reset($audits);
-      }
-      if ($audit) {
-        $reasons = $audit->getAuditReasons();
-        $reasons = phutil_implode_html(', ', $reasons);
-        $status_code = $audit->getAuditStatus();
-        $status_text =
-          PhabricatorAuditStatusConstants::getStatusName($status_code);
-        $status_color =
-          PhabricatorAuditStatusConstants::getStatusColor($status_code);
-        $status_icon =
-          PhabricatorAuditStatusConstants::getStatusIcon($status_code);
-      } else {
-        $reasons = null;
-        $status_text = null;
-        $status_color = null;
-        $status_icon = null;
-      }
+      $status = $commit->getAuditStatus();
+
+      $status_text =
+        PhabricatorAuditCommitStatusConstants::getStatusName($status);
+      $status_color =
+        PhabricatorAuditCommitStatusConstants::getStatusColor($status);
+      $status_icon =
+        PhabricatorAuditCommitStatusConstants::getStatusIcon($status);
+
       $author_phid = $commit->getAuthorPHID();
       if ($author_phid) {
         $author_name = $viewer->renderHandle($author_phid);
@@ -143,8 +124,7 @@ final class PhabricatorAuditListView extends AphrontView {
       }
 
       if ($status_color) {
-        $item->setStatusIcon(
-          $status_icon.' '.$status_color, $status_text);
+        $item->setStatusIcon($status_icon.' '.$status_color, $status_text);
       }
 
       $list->addItem($item);
