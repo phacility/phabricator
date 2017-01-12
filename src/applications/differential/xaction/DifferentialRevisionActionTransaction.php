@@ -35,6 +35,10 @@ abstract class DifferentialRevisionActionTransaction
     return 1000;
   }
 
+  public function getActionStrength() {
+    return 3;
+  }
+
   public function getRevisionActionOrderVector() {
     return id(new PhutilSortVector())
       ->addInt($this->getRevisionActionOrder());

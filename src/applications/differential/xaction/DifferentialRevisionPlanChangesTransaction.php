@@ -27,6 +27,10 @@ final class DifferentialRevisionPlanChangesTransaction
     return 200;
   }
 
+  public function getActionName() {
+    return pht('Planned Changes');
+  }
+
   public function getCommandKeyword() {
     return 'planchanges';
   }

@@ -26,6 +26,10 @@ final class DiffusionCommitConcernTransaction
     return 600;
   }
 
+  public function getActionName() {
+    return pht('Raised Concern');
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return $this->isViewerRejectingAuditor($object, $actor);

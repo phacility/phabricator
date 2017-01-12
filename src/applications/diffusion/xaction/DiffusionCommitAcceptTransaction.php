@@ -26,6 +26,10 @@ final class DiffusionCommitAcceptTransaction
     return 500;
   }
 
+  public function getActionName() {
+    return pht('Accepted');
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return $this->isViewerAcceptingAuditor($object, $actor);

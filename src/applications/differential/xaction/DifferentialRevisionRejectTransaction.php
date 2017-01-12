@@ -26,6 +26,10 @@ final class DifferentialRevisionRejectTransaction
     return 600;
   }
 
+  public function getActionName() {
+    return pht('Requested Changes');
+  }
+
   public function getCommandKeyword() {
     return 'request';
   }

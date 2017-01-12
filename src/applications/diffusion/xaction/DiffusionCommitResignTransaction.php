@@ -26,6 +26,10 @@ final class DiffusionCommitResignTransaction
     return 700;
   }
 
+  public function getActionName() {
+    return pht('Resigned');
+  }
+
   public function generateOldValue($object) {
     $actor = $this->getActor();
     return !$this->isViewerAnyActiveAuditor($object, $actor);

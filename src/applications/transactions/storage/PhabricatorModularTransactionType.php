@@ -59,6 +59,14 @@ abstract class PhabricatorModularTransactionType
     return null;
   }
 
+  public function getActionName() {
+    return null;
+  }
+
+  public function getActionStrength() {
+    return null;
+  }
+
   public function getColor() {
     return null;
   }

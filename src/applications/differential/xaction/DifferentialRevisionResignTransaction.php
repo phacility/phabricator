@@ -30,6 +30,10 @@ final class DifferentialRevisionResignTransaction
     return 'resign';
   }
 
+  public function getActionName() {
+    return pht('Resigned');
+  }
+
   public function getCommandAliases() {
     return array();
   }
