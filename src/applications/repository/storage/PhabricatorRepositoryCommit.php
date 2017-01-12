@@ -13,7 +13,8 @@ final class PhabricatorRepositoryCommit
     HarbormasterCircleCIBuildableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -578,6 +579,28 @@ final class PhabricatorRepositoryCommit
 
   public function newFulltextEngine() {
     return new DiffusionCommitFulltextEngine();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('identifier')
+        ->setType('string')
+        ->setDescription(pht('The commit identifier.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'identifier' => $this->getCommitIdentifier(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }
