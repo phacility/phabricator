@@ -438,6 +438,18 @@ final class PhabricatorAuditTransaction
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
+      case DiffusionCommitAcceptTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ACTION_ACCEPT;
+        break;
+      case DiffusionCommitConcernTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ACTION_CONCERN;
+        break;
+      case DiffusionCommitResignTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ACTION_RESIGN;
+        break;
+      case DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ADD_AUDITORS;
+        break;
       case PhabricatorAuditActionConstants::ACTION:
         switch ($this->getNewValue()) {
           case PhabricatorAuditActionConstants::CONCERN:
