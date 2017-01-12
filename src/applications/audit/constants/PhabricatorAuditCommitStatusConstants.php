@@ -28,6 +28,7 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return array(
       self::CONCERN_RAISED,
       self::NEEDS_AUDIT,
+      self::PARTIALLY_AUDITED,
     );
   }
 

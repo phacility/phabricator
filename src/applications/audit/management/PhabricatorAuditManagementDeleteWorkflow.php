@@ -67,9 +67,6 @@ final class PhabricatorAuditManagementDeleteWorkflow
     $ids = $this->parseList($args->getArg('ids'));
 
     $status = $args->getArg('status');
-    if (!$status) {
-      $status = DiffusionCommitQuery::AUDIT_STATUS_OPEN;
-    }
 
     $min_date = $this->loadDate($args->getArg('min-commit-date'));
     $max_date = $this->loadDate($args->getArg('max-commit-date'));
@@ -85,7 +82,7 @@ final class PhabricatorAuditManagementDeleteWorkflow
       ->needAuditRequests(true);
 
     if ($status) {
-      $query->withAuditStatus($status);
+      $query->withStatuses(array($status));
     }
 
     $id_map = array();

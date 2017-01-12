@@ -917,15 +917,27 @@ final class PhabricatorPolicyFilter extends Phobject {
   }
 
   private function getApplicationForPHID($phid) {
-    $phid_type = phid_get_type($phid);
+    static $class_map = array();
 
-    $type_objects = PhabricatorPHIDType::getTypes(array($phid_type));
-    $type_object = idx($type_objects, $phid_type);
-    if (!$type_object) {
+    $phid_type = phid_get_type($phid);
+    if (!isset($class_map[$phid_type])) {
+      $type_objects = PhabricatorPHIDType::getTypes(array($phid_type));
+      $type_object = idx($type_objects, $phid_type);
+      if (!$type_object) {
+        $class = false;
+      } else {
+        $class = $type_object->getPHIDTypeApplicationClass();
+      }
+
+      $class_map[$phid_type] = $class;
+    }
+
+    $class = $class_map[$phid_type];
+    if ($class === false) {
       return null;
     }
 
-    return $type_object->getPHIDTypeApplicationClass();
+    return $class;
   }
 
 }

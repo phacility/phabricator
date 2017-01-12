@@ -11,21 +11,15 @@ final class DiffusionCommitQuery
   private $repositoryIDs;
   private $repositoryPHIDs;
   private $identifierMap;
+  private $responsiblePHIDs;
+  private $statuses;
 
   private $needAuditRequests;
   private $auditIDs;
   private $auditorPHIDs;
-  private $needsAuditByPHIDs;
-  private $auditStatus;
   private $epochMin;
   private $epochMax;
   private $importing;
-
-  const AUDIT_STATUS_ANY       = 'audit-status-any';
-  const AUDIT_STATUS_OPEN      = 'audit-status-open';
-  const AUDIT_STATUS_CONCERN   = 'audit-status-concern';
-  const AUDIT_STATUS_ACCEPTED  = 'audit-status-accepted';
-  const AUDIT_STATUS_PARTIAL   = 'audit-status-partial';
 
   private $needCommitData;
 
@@ -119,14 +113,22 @@ final class DiffusionCommitQuery
     return $this;
   }
 
-  public function withNeedsAuditByPHIDs(array $needs_phids) {
-    $this->needsAuditByPHIDs = $needs_phids;
+  public function withResponsiblePHIDs(array $responsible_phids) {
+    $this->responsiblePHIDs = $responsible_phids;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
   public function withAuditStatus($status) {
-    $this->auditStatus = $status;
-    return $this;
+    // TODO: Replace callers with `withStatuses()`.
+    return $this->withStatuses(
+      array(
+        $status,
+      ));
   }
 
   public function withEpochRange($min, $max) {
@@ -251,10 +253,7 @@ final class DiffusionCommitQuery
       }
     }
 
-    // TODO: This should just be `needAuditRequests`, not `shouldJoinAudits()`,
-    // but leave that for a future diff.
-
-    if ($this->needAuditRequests || $this->shouldJoinAudits()) {
+    if ($this->needAuditRequests) {
       $requests = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
         'commitPHID IN (%Ls)',
         mpull($commits, 'getPHID'));
@@ -459,67 +458,30 @@ final class DiffusionCommitQuery
     if ($this->auditIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'audit.id IN (%Ld)',
+        'auditor.id IN (%Ld)',
         $this->auditIDs);
     }
 
     if ($this->auditorPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'audit.auditorPHID IN (%Ls)',
+        'auditor.auditorPHID IN (%Ls)',
         $this->auditorPHIDs);
     }
 
-    if ($this->needsAuditByPHIDs !== null) {
+    if ($this->responsiblePHIDs !== null) {
       $where[] = qsprintf(
         $conn,
-        'needs.auditorPHID IN (%Ls)',
-        $this->needsAuditByPHIDs);
+        '(audit.auditorPHID IN (%Ls) OR commit.authorPHID IN (%Ls))',
+        $this->responsiblePHIDs,
+        $this->responsiblePHIDs);
     }
 
-    $status = $this->auditStatus;
-    if ($status !== null) {
-      switch ($status) {
-        case self::AUDIT_STATUS_PARTIAL:
-          $where[] = qsprintf(
-            $conn,
-            'commit.auditStatus = %d',
-            PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED);
-          break;
-        case self::AUDIT_STATUS_ACCEPTED:
-          $where[] = qsprintf(
-            $conn,
-            'commit.auditStatus = %d',
-            PhabricatorAuditCommitStatusConstants::FULLY_AUDITED);
-          break;
-        case self::AUDIT_STATUS_CONCERN:
-          $where[] = qsprintf(
-            $conn,
-            'status.auditStatus = %s',
-            PhabricatorAuditStatusConstants::CONCERNED);
-          break;
-        case self::AUDIT_STATUS_OPEN:
-          $where[] = qsprintf(
-            $conn,
-            'status.auditStatus in (%Ls)',
-            PhabricatorAuditStatusConstants::getOpenStatusConstants());
-          break;
-        case self::AUDIT_STATUS_ANY:
-          break;
-        default:
-          $valid = array(
-            self::AUDIT_STATUS_ANY,
-            self::AUDIT_STATUS_OPEN,
-            self::AUDIT_STATUS_CONCERN,
-            self::AUDIT_STATUS_ACCEPTED,
-            self::AUDIT_STATUS_PARTIAL,
-          );
-          throw new Exception(
-            pht(
-              "Unknown audit status '%s'! Valid statuses are: %s.",
-              $status,
-              implode(', ', $valid)));
-      }
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'commit.auditStatus IN (%Ls)',
+        $this->statuses);
     }
 
     return $where;
@@ -535,61 +497,41 @@ final class DiffusionCommitQuery
     }
   }
 
-  private function shouldJoinStatus() {
-    return $this->auditStatus;
+  private function shouldJoinAuditor() {
+    return ($this->auditIDs || $this->auditorPHIDs);
   }
 
-  private function shouldJoinAudits() {
-    return $this->auditIDs || $this->auditorPHIDs;
-  }
-
-  private function shouldJoinNeeds() {
-    return $this->needsAuditByPHIDs;
+  private function shouldJoinAudit() {
+    return (bool)$this->responsiblePHIDs;
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $join = parent::buildJoinClauseParts($conn);
     $audit_request = new PhabricatorRepositoryAuditRequest();
 
-    if ($this->shouldJoinStatus()) {
+    if ($this->shouldJoinAuditor()) {
       $join[] = qsprintf(
         $conn,
-        'LEFT JOIN %T status ON commit.phid = status.commitPHID',
+        'JOIN %T auditor ON commit.phid = auditor.commitPHID',
         $audit_request->getTableName());
     }
 
-    if ($this->shouldJoinAudits()) {
+    if ($this->shouldJoinAudit()) {
       $join[] = qsprintf(
         $conn,
-        'JOIN %T audit ON commit.phid = audit.commitPHID',
+        'LEFT JOIN %T audit ON commit.phid = audit.commitPHID',
         $audit_request->getTableName());
-    }
-
-    if ($this->shouldJoinNeeds()) {
-      $join[] = qsprintf(
-        $conn,
-        'JOIN %T needs ON commit.phid = needs.commitPHID
-          AND needs.auditStatus IN (%Ls)',
-        $audit_request->getTableName(),
-        array(
-          PhabricatorAuditStatusConstants::AUDIT_REQUESTED,
-          PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
-        ));
     }
 
     return $join;
   }
 
   protected function shouldGroupQueryResultRows() {
-    if ($this->shouldJoinStatus()) {
+    if ($this->shouldJoinAuditor()) {
       return true;
     }
 
-    if ($this->shouldJoinAudits()) {
-      return true;
-    }
-
-    if ($this->shouldJoinNeeds()) {
+    if ($this->shouldJoinAudit()) {
       return true;
     }
 

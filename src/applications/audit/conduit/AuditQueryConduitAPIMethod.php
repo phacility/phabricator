@@ -2,6 +2,12 @@
 
 final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
 
+  const AUDIT_LEGACYSTATUS_ANY       = 'audit-status-any';
+  const AUDIT_LEGACYSTATUS_OPEN      = 'audit-status-open';
+  const AUDIT_LEGACYSTATUS_CONCERN   = 'audit-status-concern';
+  const AUDIT_LEGACYSTATUS_ACCEPTED  = 'audit-status-accepted';
+  const AUDIT_LEGACYSTATUS_PARTIAL   = 'audit-status-partial';
+
   public function getAPIMethodName() {
     return 'audit.query';
   }
@@ -10,13 +16,23 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
     return pht('Query audit requests.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "diffusion.commit.search" instead.');
+  }
+
   protected function defineParamTypes() {
     $statuses = array(
-      DiffusionCommitQuery::AUDIT_STATUS_ANY,
-      DiffusionCommitQuery::AUDIT_STATUS_OPEN,
-      DiffusionCommitQuery::AUDIT_STATUS_CONCERN,
-      DiffusionCommitQuery::AUDIT_STATUS_ACCEPTED,
-      DiffusionCommitQuery::AUDIT_STATUS_PARTIAL,
+      self::AUDIT_LEGACYSTATUS_ANY,
+      self::AUDIT_LEGACYSTATUS_OPEN,
+      self::AUDIT_LEGACYSTATUS_CONCERN,
+      self::AUDIT_LEGACYSTATUS_ACCEPTED,
+      self::AUDIT_LEGACYSTATUS_PARTIAL,
     );
     $status_const = $this->formatStringConstants($statuses);
 
@@ -50,10 +66,26 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
       $query->withPHIDs($commit_phids);
     }
 
-    $status = $request->getValue(
-      'status',
-      DiffusionCommitQuery::AUDIT_STATUS_ANY);
-    $query->withAuditStatus($status);
+    $status_map = array(
+      self::AUDIT_LEGACYSTATUS_OPEN => array(
+        PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT,
+        PhabricatorAuditCommitStatusConstants::CONCERN_RAISED,
+      ),
+      self::AUDIT_LEGACYSTATUS_CONCERN => array(
+        PhabricatorAuditCommitStatusConstants::CONCERN_RAISED,
+      ),
+      self::AUDIT_LEGACYSTATUS_ACCEPTED => array(
+        PhabricatorAuditCommitStatusConstants::CONCERN_ACCEPTED,
+      ),
+      self::AUDIT_LEGACYSTATUS_PARTIAL => array(
+        PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED,
+      ),
+    );
+
+    $status = $request->getValue('status');
+    if (isset($status_map[$status])) {
+      $query->withStatuses($status_map[$status]);
+    }
 
     // NOTE: These affect the number of commits identified, which is sort of
     // reasonable but means the method may return an arbitrary number of
