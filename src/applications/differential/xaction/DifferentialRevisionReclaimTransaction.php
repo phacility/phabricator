@@ -26,6 +26,10 @@ final class DifferentialRevisionReclaimTransaction
     return 600;
   }
 
+  public function getActionName() {
+    return pht('Reclaimed');
+  }
+
   public function getCommandKeyword() {
     return 'reclaim';
   }

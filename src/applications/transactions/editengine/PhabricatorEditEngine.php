@@ -107,6 +107,10 @@ abstract class PhabricatorEditEngine
     return $this->hideHeader;
   }
 
+  public function getProfileMenuItemDefault() {
+    return $this->getEngineKey().'/'.self::EDITENGINECONFIG_DEFAULT;
+  }
+
 
 /* -(  Managing Fields  )---------------------------------------------------- */
 
@@ -1742,10 +1746,19 @@ abstract class PhabricatorEditEngine
           $viewer->getPHID(),
           $current_version);
 
+        $is_empty = (!strlen($comment_text) && !$actions);
+
         $draft
           ->setProperty('comment', $comment_text)
           ->setProperty('actions', $actions)
           ->save();
+
+        $draft_engine = $this->newDraftEngine($object);
+        if ($draft_engine) {
+          $draft_engine
+            ->setVersionedDraft($draft)
+            ->synchronize();
+        }
       }
     }
 
@@ -1827,6 +1840,13 @@ abstract class PhabricatorEditEngine
         $object->getPHID(),
         $viewer->getPHID(),
         $this->loadDraftVersion($object));
+
+      $draft_engine = $this->newDraftEngine($object);
+      if ($draft_engine) {
+        $draft_engine
+          ->setVersionedDraft(null)
+          ->synchronize();
+      }
     }
 
     if ($request->isAjax() && $is_preview) {
@@ -1841,6 +1861,20 @@ abstract class PhabricatorEditEngine
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
     }
+  }
+
+  protected function newDraftEngine($object) {
+    $viewer = $this->getViewer();
+
+    if ($object instanceof PhabricatorDraftInterface) {
+      $engine = $object->newDraftEngine();
+    } else {
+      $engine = new PhabricatorBuiltinDraftEngine();
+    }
+
+    return $engine
+      ->setObject($object)
+      ->setViewer($viewer);
   }
 
 

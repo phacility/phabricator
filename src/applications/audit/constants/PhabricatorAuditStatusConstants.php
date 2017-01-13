@@ -28,6 +28,13 @@ final class PhabricatorAuditStatusConstants extends Phobject {
     return $map;
   }
 
+  public static function getActionRequiredStatusConstants() {
+    return array(
+      self::AUDIT_REQUIRED,
+      self::AUDIT_REQUESTED,
+    );
+  }
+
   public static function getStatusName($code) {
     return idx(self::getStatusNameMap(), $code, pht('Unknown'));
   }

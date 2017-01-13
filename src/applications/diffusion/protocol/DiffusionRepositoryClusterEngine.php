@@ -251,9 +251,8 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
           pht(
             'Repository "%s" exists on more than one device, but no device '.
             'has any repository version information. Phabricator can not '.
-            'guess which copy of the existing data is authoritative. Remove '.
-            'all but one device from service to mark the remaining device '.
-            'as the authority.',
+            'guess which copy of the existing data is authoritative. Promote '.
+            'a device or see "Ambigous Leaders" in the documentation.',
             $repository->getDisplayName()));
       }
 

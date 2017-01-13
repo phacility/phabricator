@@ -13,8 +13,7 @@ final class PhabricatorProjectSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorProjectQuery())
-      ->needImages(true)
-      ->withIsMilestone(false);
+      ->needImages(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -25,15 +24,28 @@ final class PhabricatorProjectSearchEngine
       id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Members'))
         ->setKey('memberPHIDs')
+        ->setConduitKey('members')
         ->setAliases(array('member', 'members')),
       id(new PhabricatorUsersSearchField())
         ->setLabel(pht('Watchers'))
         ->setKey('watcherPHIDs')
+        ->setConduitKey('watchers')
         ->setAliases(array('watcher', 'watchers')),
       id(new PhabricatorSearchSelectField())
         ->setLabel(pht('Status'))
         ->setKey('status')
         ->setOptions($this->getStatusOptions()),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Milestones'))
+        ->setKey('isMilestone')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Milestones'),
+          pht('Hide Milestones'))
+        ->setDescription(
+          pht(
+            'Pass true to find only milestones, or false to omit '.
+            'milestones.')),
       id(new PhabricatorSearchCheckboxesField())
         ->setLabel(pht('Icons'))
         ->setKey('icons')
@@ -42,6 +54,19 @@ final class PhabricatorProjectSearchEngine
         ->setLabel(pht('Colors'))
         ->setKey('colors')
         ->setOptions($this->getColorOptions()),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Parent Projects'))
+        ->setKey('parentPHIDs')
+        ->setConduitKey('parents')
+        ->setAliases(array('parent', 'parents', 'parentPHID'))
+        ->setDescription(pht('Find direct subprojects of specified parents.')),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Ancestor Projects'))
+        ->setKey('ancestorPHIDs')
+        ->setConduitKey('ancestors')
+        ->setAliases(array('ancestor', 'ancestors', 'ancestorPHID'))
+        ->setDescription(
+          pht('Find all subprojects beneath specified ancestors.')),
     );
   }
 
@@ -77,6 +102,18 @@ final class PhabricatorProjectSearchEngine
       $query->withColors($map['colors']);
     }
 
+    if ($map['isMilestone'] !== null) {
+      $query->withIsMilestone($map['isMilestone']);
+    }
+
+    if ($map['parentPHIDs']) {
+      $query->withParentProjectPHIDs($map['parentPHIDs']);
+    }
+
+    if ($map['ancestorPHIDs']) {
+      $query->withAncestorProjectPHIDs($map['ancestorPHIDs']);
+    }
+
     return $query;
   }
 
@@ -102,6 +139,9 @@ final class PhabricatorProjectSearchEngine
     $query->setQueryKey($query_key);
 
     $viewer_phid = $this->requireViewer()->getPHID();
+
+    // By default, do not show milestones in the list view.
+    $query->setParameter('isMilestone', false);
 
     switch ($query_key) {
       case 'all':

@@ -22,6 +22,10 @@ final class DifferentialRevisionRequestReviewTransaction
     return 200;
   }
 
+  public function getActionName() {
+    return pht('Requested Review');
+  }
+
   public function generateOldValue($object) {
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
     return ($object->getStatus() == $status_review);

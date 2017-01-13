@@ -28,7 +28,8 @@ foreach (new LiskRawMigrationIterator($conn, $src_table) as $row) {
     DifferentialModernHunk::DATATYPE_TEXT,
     'utf8',
     DifferentialModernHunk::DATAFORMAT_RAW,
-    $row['changes'],
+    // In rare cases, this could be NULL. See T12090.
+    (string)$row['changes'],
     $row['dateCreated'],
     $row['dateModified']);
 }

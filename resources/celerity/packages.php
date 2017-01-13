@@ -195,7 +195,6 @@ return array(
     'javelin-behavior-differential-populate',
     'javelin-behavior-differential-diff-radios',
     'javelin-behavior-differential-comment-jump',
-    'javelin-behavior-differential-add-reviewers-and-ccs',
     'javelin-behavior-differential-keyboard-navigation',
     'javelin-behavior-aphront-drag-and-drop-textarea',
     'javelin-behavior-phabricator-object-selector',

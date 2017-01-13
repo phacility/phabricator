@@ -23,8 +23,8 @@ track of two things:
   - **Audit Requests** which ask a user (or some other entity) to audit a
     commit. These can be triggered in a number of ways (see below).
 
-In the Audit tool's home screen (at `/audit/`) and on the homepage you can see
-commits and requests that require your action:
+In the Audit tool's home screen and on the homepage you can see commits and
+requests that require your action:
 
   - **Required Audits** are open audit requests that require you, a project
     you are a member of, or a package you own to audit a commit. An audit

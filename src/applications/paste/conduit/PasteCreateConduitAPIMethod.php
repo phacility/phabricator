@@ -10,6 +10,16 @@ final class PasteCreateConduitAPIMethod extends PasteConduitAPIMethod {
     return pht('Create a new paste.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "paste.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'content'   => 'required string',

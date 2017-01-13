@@ -104,12 +104,26 @@ final class HeraldCommitAdapter
   public function getTriggerObjectPHIDs() {
     $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
 
-    return array_merge(
-      array(
-        $this->getRepository()->getPHID(),
-        $this->getPHID(),
-      ),
-      $this->loadEdgePHIDs($project_type));
+    $repository_phid = $this->getRepository()->getPHID();
+    $commit_phid = $this->getObject()->getPHID();
+
+    $phids = array();
+    $phids[] = $commit_phid;
+    $phids[] = $repository_phid;
+
+    // NOTE: This is projects for the repository, not for the commit. When
+    // Herald evalutes, commits normally can not have any project tags yet.
+    $repository_project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $repository_phid,
+      $project_type);
+    foreach ($repository_project_phids as $phid) {
+      $phids[] = $phid;
+    }
+
+    $phids = array_unique($phids);
+    $phids = array_values($phids);
+
+    return $phids;
   }
 
   public function explainValidTriggerObjects() {

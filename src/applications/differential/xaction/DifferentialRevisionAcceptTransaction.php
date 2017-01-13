@@ -26,6 +26,10 @@ final class DifferentialRevisionAcceptTransaction
     return 500;
   }
 
+  public function getActionName() {
+    return pht('Accepted');
+  }
+
   public function getCommandKeyword() {
     $accept_key = 'differential.enable-email-accept';
     $allow_email_accept = PhabricatorEnv::getEnvConfig($accept_key);

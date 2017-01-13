@@ -35,6 +35,8 @@ final class DiffusionCloneURIView extends AphrontView {
   }
 
   public function render() {
+    $viewer = $this->getViewer();
+
     require_celerity_resource('diffusion-icons-css');
 
     Javelin::initBehavior('select-content');
@@ -87,12 +89,18 @@ final class DiffusionCloneURIView extends AphrontView {
       case PhabricatorRepositoryURI::IO_READWRITE:
         switch ($uri->getBuiltinProtocol()) {
           case PhabricatorRepositoryURI::BUILTIN_PROTOCOL_SSH:
-            $auth_uri = '/settings/panel/ssh/';
+            $auth_uri = id(new PhabricatorSSHKeysSettingsPanel())
+              ->setViewer($viewer)
+              ->setUser($viewer)
+              ->getPanelURI();
             $auth_tip = pht('Manage SSH Keys');
             $auth_disabled = false;
             break;
           default:
-            $auth_uri = '/settings/panel/vcspassword';
+            $auth_uri = id(new DiffusionSetPasswordSettingsPanel())
+              ->setViewer($viewer)
+              ->setUser($viewer)
+              ->getPanelURI();
             $auth_tip = pht('Manage Password');
             $auth_disabled = false;
             break;

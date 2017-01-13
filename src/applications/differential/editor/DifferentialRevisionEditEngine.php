@@ -29,7 +29,7 @@ final class DifferentialRevisionEditEngine
     return 'PhabricatorDifferentialApplication';
   }
 
-  protected function supportsEditEngineConfiguration() {
+  public function isEngineConfigurable() {
     return false;
   }
 

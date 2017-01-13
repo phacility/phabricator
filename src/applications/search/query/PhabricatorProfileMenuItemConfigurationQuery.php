@@ -6,6 +6,7 @@ final class PhabricatorProfileMenuItemConfigurationQuery
   private $ids;
   private $phids;
   private $profilePHIDs;
+  private $customPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class PhabricatorProfileMenuItemConfigurationQuery
 
   public function withProfilePHIDs(array $phids) {
     $this->profilePHIDs = $phids;
+    return $this;
+  }
+
+  public function withCustomPHIDs(array $phids) {
+    $this->customPHIDs = $phids;
     return $this;
   }
 
@@ -54,6 +60,13 @@ final class PhabricatorProfileMenuItemConfigurationQuery
         $this->profilePHIDs);
     }
 
+    if ($this->customPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'customPHID IN (%Ls)',
+        $this->customPHIDs);
+    }
+
     return $where;
   }
 
@@ -67,6 +80,7 @@ final class PhabricatorProfileMenuItemConfigurationQuery
         continue;
       }
       $item_type = clone $item_type;
+      $item_type->setViewer($this->getViewer());
       $item->attachMenuItem($item_type);
     }
 

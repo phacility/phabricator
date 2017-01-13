@@ -166,6 +166,10 @@ final class PhabricatorConduitSearchEngine
           $item->addIcon('fa-warning', pht('Deprecated'));
           $item->setStatusIcon('fa-warning red');
           break;
+        case ConduitAPIMethod::METHOD_STATUS_FROZEN:
+          $item->addIcon('fa-archive', pht('Frozen'));
+          $item->setStatusIcon('fa-archive grey');
+          break;
       }
 
       $list->addItem($item);

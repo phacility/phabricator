@@ -4,6 +4,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   private $viewer;
   private $profileObject;
+  private $customPHID;
   private $items;
   private $defaultItem;
   private $controller;
@@ -25,6 +26,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   public function getProfileObject() {
     return $this->profileObject;
+  }
+
+  public function setCustomPHID($custom_phid) {
+    $this->customPHID = $custom_phid;
+    return $this;
+  }
+
+  public function getCustomPHID() {
+    return $this->customPHID;
   }
 
   public function setController(PhabricatorController $controller) {
@@ -101,6 +111,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       case 'default':
       case 'builtin':
         if (!$selected_item) {
+          return new Aphront404Response();
+        }
+        break;
+      case 'edit':
+        if (!$request->getURIData('id')) {
+          // If we continue along the "edit" pathway without an ID, we hit an
+          // unrelated exception because we can not build a new menu item out
+          // of thin air. For menus, new items are created via the "new"
+          // action. Just catch this case and 404 early since there's currently
+          // no clean way to make EditEngine aware of this.
           return new Aphront404Response();
         }
         break;
@@ -244,10 +264,18 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $items = $this->loadBuiltinProfileItems();
 
-    $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-      ->setViewer($viewer)
-      ->withProfilePHIDs(array($object->getPHID()))
-      ->execute();
+    if ($this->getCustomPHID()) {
+      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
+        ->setViewer($viewer)
+        ->withProfilePHIDs(array($object->getPHID()))
+        ->withCustomPHIDs(array($this->getCustomPHID()))
+        ->execute();
+    } else {
+      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
+        ->setViewer($viewer)
+        ->withProfilePHIDs(array($object->getPHID()))
+        ->execute();
+    }
 
     foreach ($stored_items as $stored_item) {
       $impl = $stored_item->getMenuItem();
@@ -720,9 +748,11 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       return new Aphront404Response();
     }
 
+    $custom_phid = $this->getCustomPHID();
     $configuration = PhabricatorProfileMenuItemConfiguration::initializeNewItem(
       $object,
-      $item_type);
+      $item_type,
+      $custom_phid);
 
     $viewer = $this->getViewer();
 
@@ -737,6 +767,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setNewMenuItemConfiguration($configuration)
+      ->setCustomPHID($custom_phid)
       ->setController($controller)
       ->buildResponse();
   }
@@ -750,6 +781,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setController($controller)
+      ->setCustomPHID($this->getCustomPHID())
       ->buildResponse();
   }
 
@@ -782,6 +814,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setProfileObject($object)
       ->setNewMenuItemConfiguration($configuration)
       ->setController($controller)
+      ->setCustomPHID($this->getCustomPHID())
       ->buildResponse();
   }
 

@@ -37,7 +37,7 @@ Before responding to a write, replicas obtain a global lock, perform the same
 version check and fetch if necessary, then allow the write to continue.
 
 Additionally, repositories passively check other nodes for updates and
-replicate changes in the background. After you push a change to a repositroy,
+replicate changes in the background. After you push a change to a repository,
 it will usually spread passively to all other repository nodes within a few
 minutes.
 
@@ -381,8 +381,8 @@ this:
 
 Here, all of the "leader" devices with the most up-to-date copy of the
 repository have been lost. Phabricator will freeze the repository refuse to
-serve requests because it can not serve it consistently, and can not accept new
-writes without data loss.
+serve requests because it can not serve reads consistently and can not accept
+new writes without data loss.
 
 The most straightforward way to resolve this issue is to restore any leader to
 service. The change will be able to replicate to other devices once a leader
@@ -422,16 +422,21 @@ Ambiguous Leaders
 =================
 
 Repository clusters can also freeze if the leader devices are ambiguous. This
-can happen if you replace an entire cluster with new devices suddenly, or
-make a mistake with the `--demote` flag. This generally arises from some kind
-of operator error, like this:
+can happen if you replace an entire cluster with new devices suddenly, or make
+a mistake with the `--demote` flag. This may arise from some kind of operator
+error, like these:
 
   - Someone accidentally uses `bin/repository thaw ... --demote` to demote
     every device in a cluster.
   - Someone accidentally deletes all the version information for a repository
     from the database by making a mistake with a `DELETE` or `UPDATE` query.
-  - Someone accidentally disable all of the devices in a cluster, then add
+  - Someone accidentally disables all of the devices in a cluster, then adds
     entirely new ones before repositories can propagate.
+
+If you are moving repositories into cluster services, you can also reach this
+state if you use `clusterize` to associate a repository with a service that is
+bound to multiple active devices. In this case, Phabricator will not know which
+device or devices have up-to-date information.
 
 When Phabricator can not tell which device in a cluster is a leader, it freezes
 the cluster because it is possible that some devices have less data and others

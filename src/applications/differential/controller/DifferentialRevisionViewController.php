@@ -463,6 +463,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     Javelin::initBehavior('differential-user-select');
+    Javelin::initBehavior('differential-keyboard-navigation');
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)

@@ -26,6 +26,10 @@ final class DifferentialRevisionCommandeerTransaction
     return 700;
   }
 
+  public function getActionName() {
+    return pht('Commandeered');
+  }
+
   public function getCommandKeyword() {
     return 'commandeer';
   }

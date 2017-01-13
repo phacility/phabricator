@@ -38,8 +38,15 @@ final class PHUIDiffInlineCommentPreviewListView
 
     $inlines = $this->getInlineComments();
     foreach ($inlines as $key => $inline) {
-      $inlines[$key] = DifferentialInlineComment::newFromModernComment(
-        $inline);
+      // TODO: This is real, real gross.
+
+      if ($inline instanceof DifferentialTransactionComment) {
+        $inlines[$key] = DifferentialInlineComment::newFromModernComment(
+          $inline);
+      } else {
+        $inlines[$key] = PhabricatorAuditInlineComment::newFromModernComment(
+          $inline);
+      }
     }
 
     $engine = new PhabricatorMarkupEngine();

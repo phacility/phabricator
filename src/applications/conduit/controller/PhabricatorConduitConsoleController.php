@@ -128,6 +128,13 @@ final class PhabricatorConduitConsoleController
         $stability_label = pht('Deprecated Method');
         $stability_info = nonempty($reason, pht('This method is deprecated.'));
         break;
+      case ConduitAPIMethod::METHOD_STATUS_FROZEN:
+        $stability_icon = 'fa-archive grey';
+        $stability_label = pht('Frozen Method');
+        $stability_info = nonempty(
+          $reason,
+          pht('This method is frozen and will eventually be deprecated.'));
+        break;
       default:
         $stability_label = null;
         break;

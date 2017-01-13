@@ -122,23 +122,19 @@
 }
 
 .differential-diff th.old {
-  background: #ffdddd;
-  border-right-color: #f8cbcb;
+  border-right-color: {$old-bright};
 }
 
 .differential-diff th.new {
-  background: #dbffdb;
-  border-right-color: #a6f3a6;
+  border-right-color: {$new-bright};
 }
 
-.differential-diff td.old,
-.differential-diff td.old-full {
-  background: #ffecec;
+.differential-diff td.old {
+  background: {$old-background};
 }
 
-.differential-diff td.new,
-.differential-diff td.new-full {
-  background: #eaffea;
+.differential-diff td.new {
+  background: {$new-background};
 }
 
 .differential-diff td.old-rebase {
@@ -150,13 +146,15 @@
 }
 
 .differential-diff td.old span.bright,
+.differential-diff td.old-full,
 .prose-diff span.old {
-  background: #f8cbcb;
+  background: {$old-bright};
 }
 
 .differential-diff td.new span.bright,
+.differential-diff td.new-full,
 .prose-diff span.new {
-  background: #a6f3a6;
+  background: {$new-bright};
 }
 
 .differential-diff td.copy {
@@ -167,12 +165,12 @@
 
 .differential-diff td.new-copy,
 .differential-diff td.new-copy span.bright {
-  background: {$lightyellow};
+  background: {$copy-background};
 }
 
 .differential-diff td.new-move,
 .differential-diff td.new-move span.bright {
-  background: {$yellow};
+  background: {$move-background};
 }
 
 .differential-diff td.comment {

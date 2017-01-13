@@ -11,6 +11,16 @@ final class DiffusionQueryCommitsConduitAPIMethod
     return pht('Retrieve information about commits.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "diffusion.commit.search" instead.');
+  }
+
   protected function defineReturnType() {
     return 'map<string, dict>';
   }
