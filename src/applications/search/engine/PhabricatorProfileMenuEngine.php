@@ -239,11 +239,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $more_items = $this->newAutomaticMenuItems($nav);
-    foreach ($more_items as $item) {
-      $nav->addMenuItem($item);
-    }
-
     $nav->selectFilter(null);
 
     $this->navigation = $nav;
@@ -408,73 +403,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           'Expected buildNavigationMenuItems() to return a list of '.
           'PHUIListItemView objects, but got a surprise.'));
     }
-  }
-
-  private function newAutomaticMenuItems(AphrontSideNavFilterView $nav) {
-    $items = array();
-
-    // NOTE: We're adding a spacer item for the fixed footer, so that if the
-    // menu taller than the page content you can still scroll down the page far
-    // enough to access the last item without the content being obscured by the
-    // fixed items.
-    $items[] = id(new PHUIListItemView())
-      ->setHideInApplicationMenu(true)
-      ->addClass('phui-profile-menu-spacer');
-
-    $collapse_id = celerity_generate_unique_node_id();
-    $viewer = $this->getViewer();
-    $collapse_key = PhabricatorProfileMenuCollapsedSetting::SETTINGKEY;
-
-    $is_collapsed = $viewer->getUserSetting($collapse_key);
-
-    if ($is_collapsed) {
-      $nav->addClass('phui-profile-menu-collapsed');
-    } else {
-      $nav->addClass('phui-profile-menu-expanded');
-    }
-
-    if ($viewer->isLoggedIn()) {
-      $settings_uri = '/settings/adjust/?key='.$collapse_key;
-    } else {
-      $settings_uri = null;
-    }
-
-    Javelin::initBehavior(
-      'phui-profile-menu',
-      array(
-        'menuID' => $nav->getMainID(),
-        'collapseID' => $collapse_id,
-        'isCollapsed' => (bool)$is_collapsed,
-        'settingsURI' => $settings_uri,
-      ));
-
-    $collapse_icon = id(new PHUIIconCircleView())
-      ->addClass('phui-list-item-icon')
-      ->addClass('phui-profile-menu-visible-when-expanded')
-      ->setIcon('fa-chevron-left');
-
-    $expand_icon = id(new PHUIIconCircleView())
-      ->addClass('phui-list-item-icon')
-      ->addClass('phui-profile-menu-visible-when-collapsed')
-      ->addSigil('has-tooltip')
-      ->setMetadata(
-        array(
-          'tip' => pht('Expand'),
-          'align' => 'E',
-        ))
-      ->setIcon('fa-chevron-right');
-
-    $items[] = id(new PHUIListItemView())
-      ->setName('Collapse')
-      ->addIcon($collapse_icon)
-      ->addIcon($expand_icon)
-      ->setID($collapse_id)
-      ->addClass('phui-profile-menu-footer')
-      ->addClass('phui-profile-menu-footer-1')
-      ->setHideInApplicationMenu(true)
-      ->setHref('#');
-
-    return $items;
   }
 
   public function getConfigureURI() {

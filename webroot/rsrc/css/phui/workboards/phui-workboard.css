@@ -32,11 +32,6 @@
 }
 
 .device-desktop .project-board-wrapper .phui-workboard-view-shadow {
-  left: {$menu.profile.width};
-}
-
-.device-desktop .phui-profile-menu-collapsed .project-board-wrapper
-  .phui-workboard-view-shadow {
   left: {$menu.profile.width.collapsed};
 }
 
