@@ -7,9 +7,6 @@
 abstract class DifferentialCustomField
   extends PhabricatorCustomField {
 
-  const ROLE_COMMITMESSAGE      = 'differential:commitmessage';
-  const ROLE_COMMITMESSAGEEDIT  = 'differential:commitmessageedit';
-
   /**
    * TODO: It would be nice to remove this, but a lot of different code is
    * bound together by it. Until everything is modernized, retaining the old
@@ -23,18 +20,6 @@ abstract class DifferentialCustomField
   // TODO: As above.
   public function getModernFieldKey() {
     return $this->getFieldKeyForConduit();
-  }
-
-  public function shouldEnableForRole($role) {
-    switch ($role) {
-      case self::ROLE_COMMITMESSAGE:
-        return $this->shouldAppearInCommitMessage();
-      case self::ROLE_COMMITMESSAGEEDIT:
-        return $this->shouldAppearInCommitMessage() &&
-               $this->shouldAllowEditInCommitMessage();
-    }
-
-    return parent::shouldEnableForRole($role);
   }
 
   protected function parseObjectList(
@@ -100,133 +85,11 @@ abstract class DifferentialCustomField
   /**
    * @task commitmessage
    */
-  public function shouldAppearInCommitMessage() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->shouldAppearInCommitMessage();
-    }
-    return false;
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function shouldAppearInCommitMessageTemplate() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->shouldAppearInCommitMessageTemplate();
-    }
-    return false;
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function shouldAllowEditInCommitMessage() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->shouldAllowEditInCommitMessage();
-    }
-    return true;
-  }
-
-
-  /**
-   * @task commitmessage
-   */
   public function getProTips() {
     if ($this->getProxy()) {
       return $this->getProxy()->getProTips();
     }
     return array();
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function getCommitMessageLabels() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->getCommitMessageLabels();
-    }
-    return array($this->renderCommitMessageLabel());
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function parseValueFromCommitMessage($value) {
-    if ($this->getProxy()) {
-      return $this->getProxy()->parseValueFromCommitMessage($value);
-    }
-    return $value;
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function readValueFromCommitMessage($value) {
-    if ($this->getProxy()) {
-      $this->getProxy()->readValueFromCommitMessage($value);
-      return $this;
-    }
-    return $this;
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function shouldOverwriteWhenCommitMessageIsEdited() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->shouldOverwriteWhenCommitMessageIsEdited();
-    }
-    return false;
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function getRequiredHandlePHIDsForCommitMessage() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->getRequiredHandlePHIDsForCommitMessage();
-    }
-    return array();
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function renderCommitMessageLabel() {
-    if ($this->getProxy()) {
-      return $this->getProxy()->renderCommitMessageLabel();
-    }
-    return $this->getFieldName();
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function renderCommitMessageValue(array $handles) {
-    if ($this->getProxy()) {
-      return $this->getProxy()->renderCommitMessageValue($handles);
-    }
-    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
-  }
-
-
-  /**
-   * @task commitmessage
-   */
-  public function validateCommitMessageValue($value) {
-    if ($this->getProxy()) {
-      return $this->getProxy()->validateCommitMessageValue($value);
-    }
-    return;
   }
 
 

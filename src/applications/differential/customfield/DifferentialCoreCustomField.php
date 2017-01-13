@@ -156,15 +156,6 @@ abstract class DifferentialCoreCustomField
     return $this->value;
   }
 
-  public function readValueFromCommitMessage($value) {
-    $this->setValue($value);
-    return $this;
-  }
-
-  public function renderCommitMessageValue(array $handles) {
-    return $this->getValue();
-  }
-
   public function getConduitDictionaryValue() {
     return $this->getValue();
   }
