@@ -22,6 +22,7 @@ final class DiffusionCommitQuery
   private $importing;
 
   private $needCommitData;
+  private $needDrafts;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -95,6 +96,11 @@ final class DiffusionCommitQuery
 
   public function needCommitData($need) {
     $this->needCommitData = $need;
+    return $this;
+  }
+
+  public function needDrafts($need) {
+    $this->needDrafts = $need;
     return $this;
   }
 
@@ -239,6 +245,8 @@ final class DiffusionCommitQuery
   }
 
   protected function didFilterPage(array $commits) {
+    $viewer = $this->getViewer();
+
     if ($this->needCommitData) {
       $data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
         'commitID in (%Ld)',
@@ -266,6 +274,12 @@ final class DiffusionCommitQuery
           $audit_request->attachCommit($commit);
         }
       }
+    }
+
+    if ($this->needDrafts) {
+      PhabricatorDraftEngine::attachDrafts(
+        $viewer,
+        $commits);
     }
 
     return $commits;

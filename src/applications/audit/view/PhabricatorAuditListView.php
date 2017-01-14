@@ -4,6 +4,7 @@ final class PhabricatorAuditListView extends AphrontView {
 
   private $commits;
   private $header;
+  private $showDrafts;
   private $noDataString;
   private $highlightedAudits;
 
@@ -23,6 +24,15 @@ final class PhabricatorAuditListView extends AphrontView {
 
   public function getHeader() {
     return $this->header;
+  }
+
+  public function setShowDrafts($show_drafts) {
+    $this->showDrafts = $show_drafts;
+    return $this;
+  }
+
+  public function getShowDrafts() {
+    return $this->showDrafts;
   }
 
   /**
@@ -75,6 +85,16 @@ final class PhabricatorAuditListView extends AphrontView {
 
     $handles = $viewer->loadHandles(mpull($this->commits, 'getPHID'));
 
+    $show_drafts = $this->getShowDrafts();
+
+    $draft_icon = id(new PHUIIconView())
+      ->setIcon('fa-comment yellow')
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => pht('Unsubmitted Comments'),
+        ));
+
     $list = new PHUIObjectItemListView();
     foreach ($this->commits as $commit) {
       $commit_phid = $commit->getPHID();
@@ -88,7 +108,6 @@ final class PhabricatorAuditListView extends AphrontView {
 
       $audits = mpull($commit->getAudits(), null, 'getAuditorPHID');
       $auditors = array();
-      $reasons = array();
       foreach ($audits as $audit) {
         $auditor_phid = $audit->getAuditorPHID();
         $auditors[$auditor_phid] = $viewer->renderHandle($auditor_phid);
@@ -114,9 +133,16 @@ final class PhabricatorAuditListView extends AphrontView {
       $item = id(new PHUIObjectItemView())
         ->setObjectName($commit_name)
         ->setHeader($commit_desc)
-        ->setHref($commit_link)
+        ->setHref($commit_link);
+
+      if ($show_drafts) {
+        if ($commit->getHasDraft($viewer)) {
+          $item->addAttribute($draft_icon);
+        }
+      }
+
+      $item
         ->addAttribute(pht('Author: %s', $author_name))
-        ->addAttribute($reasons)
         ->addIcon('none', $committed);
 
       if (!empty($auditors)) {
