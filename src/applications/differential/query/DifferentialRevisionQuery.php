@@ -473,15 +473,33 @@ final class DifferentialRevisionQuery
     }
 
     if ($this->needDrafts) {
-      $drafts = id(new DifferentialDraft())->loadAllWhere(
-        'authorPHID = %s AND objectPHID IN (%Ls)',
-        $viewer->getPHID(),
-        mpull($revisions, 'getPHID'));
-      $drafts = mgroup($drafts, 'getObjectPHID');
-      foreach ($revisions as $revision) {
-        $revision->attachDrafts(
-          $viewer,
-          idx($drafts, $revision->getPHID(), array()));
+      $viewer_phid = $viewer->getPHID();
+      $draft_type = PhabricatorObjectHasDraftEdgeType::EDGECONST;
+
+      if (!$viewer_phid) {
+        // Viewers without a valid PHID can never have drafts.
+        foreach ($revisions as $revision) {
+          $revision->attachHasDraft($viewer, false);
+        }
+      } else {
+        $edge_query = id(new PhabricatorEdgeQuery())
+          ->withSourcePHIDs(mpull($revisions, 'getPHID'))
+          ->withEdgeTypes(
+            array(
+              $draft_type,
+            ))
+          ->withDestinationPHIDs(array($viewer_phid));
+
+        $edge_query->execute();
+
+        foreach ($revisions as $revision) {
+          $has_draft = (bool)$edge_query->getDestinationPHIDs(
+            array(
+              $revision->getPHID(),
+            ));
+
+          $revision->attachHasDraft($viewer, $has_draft);
+        }
       }
     }
 
@@ -621,12 +639,13 @@ final class DifferentialRevisionQuery
     }
 
     if ($this->draftAuthors) {
-      $differential_draft = new DifferentialDraft();
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T has_draft ON has_draft.objectPHID = r.phid '.
-        'AND has_draft.authorPHID IN (%Ls)',
-        $differential_draft->getTableName(),
+        'JOIN %T has_draft ON has_draft.srcPHID = r.phid
+          AND has_draft.type = %s
+          AND has_draft.dstPHID IN (%Ls)',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorObjectHasDraftEdgeType::EDGECONST,
         $this->draftAuthors);
     }
 
@@ -1008,7 +1027,9 @@ final class DifferentialRevisionQuery
       $revision_edges = $edges[$revision->getPHID()][$edge_type];
       $reviewers = array();
       foreach ($revision_edges as $reviewer_phid => $edge) {
-        $reviewer = new DifferentialReviewer($reviewer_phid, $edge['data']);
+        $reviewer = new DifferentialReviewerProxy(
+          $reviewer_phid,
+          $edge['data']);
 
         if ($this->needReviewerAuthority) {
           if (!$viewer_phid) {

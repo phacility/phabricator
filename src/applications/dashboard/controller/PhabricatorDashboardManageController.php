@@ -109,7 +109,7 @@ final class PhabricatorDashboardManageController
       ->setHeader($dashboard->getName())
       ->setPolicyObject($dashboard)
       ->setStatus($status_icon, $status_color, $status_name)
-      ->setHeaderIcon('fa-dashboard')
+      ->setHeaderIcon($dashboard->getIcon())
       ->addActionLink($button);
   }
 

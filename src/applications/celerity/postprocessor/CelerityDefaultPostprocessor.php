@@ -192,6 +192,14 @@ final class CelerityDefaultPostprocessor
       'sh-disabledtext'         => '#a6a6a6',
       'sh-disabledbackground'   => '#f3f3f3',
 
+      // Diffs
+      'new-background' => '#eaffea',
+      'new-bright' => '#a6f3a6',
+      'old-background' => '#ffecec',
+      'old-bright' => '#f8cbcb',
+      'move-background' => '#fdf5d4',
+      'copy-background' => '#f1c40f',
+
       // Background color for "most" themes.
       'page.background' => '#f8f8fb',
       'page.sidenav' => '#f0f0f2',

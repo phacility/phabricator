@@ -306,9 +306,9 @@ final class DifferentialChangesetTwoUpRenderer
       $zero_space = "\xE2\x80\x8B";
 
       $html[] = phutil_tag('tr', array(), array(
-        phutil_tag('th', array('id' => $o_id), $o_num),
+        phutil_tag('th', array('id' => $o_id, 'class' => $o_classes), $o_num),
         phutil_tag('td', array('class' => $o_classes), $o_text),
-        phutil_tag('th', array('id' => $n_id), $n_num),
+        phutil_tag('th', array('id' => $n_id, 'class' => $n_classes), $n_num),
         $n_copy,
         phutil_tag(
           'td',

@@ -6,6 +6,7 @@ final class PhabricatorSearchDocumentField extends PhabricatorSearchDAO {
   protected $field;
   protected $auxPHID;
   protected $corpus;
+  protected $stemmedCorpus;
 
   protected function getConfiguration() {
     return array(
@@ -16,14 +17,15 @@ final class PhabricatorSearchDocumentField extends PhabricatorSearchDAO {
         'field' => 'text4',
         'auxPHID' => 'phid?',
         'corpus' => 'fulltext?',
+        'stemmedCorpus' => 'fulltext?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
         ),
-        'corpus' => array(
-          'columns' => array('corpus'),
+        'key_corpus' => array(
+          'columns' => array('corpus', 'stemmedCorpus'),
           'type' => 'FULLTEXT',
         ),
       ),

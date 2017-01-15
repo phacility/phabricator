@@ -78,7 +78,7 @@ final class DiffusionRepositoryActionsManagementPanel
     $autoclose = phutil_tag('em', array(), $autoclose);
     $view->addProperty(pht('Autoclose'), $autoclose);
 
-    return $this->newBox(pht('Branches'), $view);
+    return $this->newBox(pht('Actions'), $view);
   }
 
 }

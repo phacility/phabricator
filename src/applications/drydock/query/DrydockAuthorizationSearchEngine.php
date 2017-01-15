@@ -30,7 +30,9 @@ final class DrydockAuthorizationSearchEngine
     $query = new DrydockAuthorizationQuery();
 
     $blueprint = $this->getBlueprint();
-    $query->withBlueprintPHIDs(array($blueprint->getPHID()));
+    if ($blueprint) {
+      $query->withBlueprintPHIDs(array($blueprint->getPHID()));
+    }
 
     return $query;
   }
@@ -38,15 +40,46 @@ final class DrydockAuthorizationSearchEngine
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
+    if ($map['blueprintPHIDs']) {
+      $query->withBlueprintPHIDs($map['blueprintPHIDs']);
+    }
+
+    if ($map['objectPHIDs']) {
+      $query->withObjectPHIDs($map['objectPHIDs']);
+    }
+
     return $query;
   }
 
   protected function buildCustomSearchFields() {
-    return array();
+    return array(
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Blueprints'))
+        ->setKey('blueprintPHIDs')
+        ->setConduitParameterType(new ConduitPHIDListParameterType())
+        ->setDescription(pht('Search authorizations for specific blueprints.'))
+        ->setAliases(array('blueprint', 'blueprints'))
+        ->setDatasource(new DrydockBlueprintDatasource()),
+      id(new PhabricatorPHIDsSearchField())
+        ->setLabel(pht('Objects'))
+        ->setKey('objectPHIDs')
+        ->setDescription(pht('Search authorizations from specific objects.'))
+        ->setAliases(array('object', 'objects')),
+    );
+  }
+
+  protected function getHiddenFields() {
+    return array(
+      'blueprintPHIDs',
+      'objectPHIDs',
+    );
   }
 
   protected function getURI($path) {
     $blueprint = $this->getBlueprint();
+    if (!$blueprint) {
+      throw new PhutilInvalidStateException('setBlueprint');
+    }
     $id = $blueprint->getID();
     return "/drydock/blueprint/{$id}/authorizations/".$path;
   }

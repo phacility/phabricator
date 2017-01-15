@@ -187,7 +187,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     return array($this->getAuthorPHID());
   }
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

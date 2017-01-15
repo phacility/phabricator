@@ -34,7 +34,13 @@ try {
         'name' => 'host',
         'param' => 'hostname',
         'help' => pht(
-          'Connect to __host__ instead of the default host.'),
+          'Operate on the database server identified by __hostname__.'),
+      ),
+      array(
+        'name' => 'ref',
+        'param' => 'ref',
+        'help' => pht(
+          'Operate on the database identified by __ref__.'),
       ),
       array(
         'name'    => 'user',
@@ -81,118 +87,150 @@ try {
 // First, test that the Phabricator configuration is set up correctly. After
 // we know this works we'll test any administrative credentials specifically.
 
+$refs = PhabricatorDatabaseRef::getActiveDatabaseRefs();
+if (!$refs) {
+  throw new PhutilArgumentUsageException(
+    pht('No databases are configured.'));
+}
+
 $host = $args->getArg('host');
-if (strlen($host)) {
-  $ref = null;
+$ref_key = $args->getArg('ref');
+if (strlen($host) || strlen($ref_key)) {
+  if ($host && $ref_key) {
+    throw new PhutilArgumentUsageException(
+      pht(
+        'Use "--host" or "--ref" to select a database, but not both.'));
+  }
 
-  $refs = PhabricatorDatabaseRef::getLiveRefs();
+  $refs = PhabricatorDatabaseRef::getActiveDatabaseRefs();
 
-  // Include the master in case the user is just specifying a redundant
-  // "--host" flag for no reason and does not actually have a database
-  // cluster configured.
-  $refs[] = PhabricatorDatabaseRef::getMasterDatabaseRef();
-
+  $possible_refs = array();
   foreach ($refs as $possible_ref) {
-    if ($possible_ref->getHost() == $host) {
-      $ref = $possible_ref;
+    if ($host && ($possible_ref->getHost() == $host)) {
+      $possible_refs[] = $possible_ref;
+      break;
+    }
+    if ($ref_key && ($possible_ref->getRefKey() == $ref_key)) {
+      $possible_refs[] = $possible_ref;
       break;
     }
   }
 
-  if (!$ref) {
+  if (!$possible_refs) {
+    if ($host) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'There is no configured database on host "%s". This command can '.
+          'only interact with configured databases.',
+          $host));
+    } else {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'There is no configured database with ref "%s". This command can '.
+          'only interact with configured databases.',
+          $ref_key));
+    }
+  }
+
+  if (count($possible_refs) > 1) {
     throw new PhutilArgumentUsageException(
       pht(
-        'There is no configured database on host "%s". This command can '.
-        'only interact with configured databases.',
+        'Host "%s" identifies more than one database. Use "--ref" to select '.
+        'a specific database.',
         $host));
   }
-} else {
-  $ref = PhabricatorDatabaseRef::getMasterDatabaseRef();
-  if (!$ref) {
-    throw new Exception(
-      pht('No database master is configured.'));
+
+  $refs = $possible_refs;
+}
+
+$apis = array();
+foreach ($refs as $ref) {
+  $default_user = $ref->getUser();
+  $default_host = $ref->getHost();
+  $default_port = $ref->getPort();
+
+  $test_api = id(new PhabricatorStorageManagementAPI())
+    ->setUser($default_user)
+    ->setHost($default_host)
+    ->setPort($default_port)
+    ->setPassword($ref->getPass())
+    ->setNamespace($args->getArg('namespace'));
+
+  try {
+    queryfx(
+      $test_api->getConn(null),
+      'SELECT 1');
+  } catch (AphrontQueryException $ex) {
+    $message = phutil_console_format(
+      "**%s**\n\n%s\n\n%s\n\n%s\n\n**%s**: %s\n",
+      pht('MySQL Credentials Not Configured'),
+      pht(
+        'Unable to connect to MySQL using the configured credentials. '.
+        'You must configure standard credentials before you can upgrade '.
+        'storage. Run these commands to set up credentials:'),
+      "  phabricator/ $ ./bin/config set mysql.host __host__\n".
+      "  phabricator/ $ ./bin/config set mysql.user __username__\n".
+      "  phabricator/ $ ./bin/config set mysql.pass __password__",
+      pht(
+        'These standard credentials are separate from any administrative '.
+        'credentials provided to this command with __%s__ or '.
+        '__%s__, and must be configured correctly before you can proceed.',
+        '--user',
+        '--password'),
+      pht('Raw MySQL Error'),
+      $ex->getMessage());
+    echo phutil_console_wrap($message);
+    exit(1);
   }
-}
 
-$default_user = $ref->getUser();
-$default_host = $ref->getHost();
-$default_port = $ref->getPort();
+  if ($args->getArg('password') === null) {
+    // This is already a PhutilOpaqueEnvelope.
+    $password = $ref->getPass();
+  } else {
+    // Put this in a PhutilOpaqueEnvelope.
+    $password = new PhutilOpaqueEnvelope($args->getArg('password'));
+    PhabricatorEnv::overrideConfig('mysql.pass', $args->getArg('password'));
+  }
 
-$test_api = id(new PhabricatorStorageManagementAPI())
-  ->setUser($default_user)
-  ->setHost($default_host)
-  ->setPort($default_port)
-  ->setPassword($ref->getPass())
-  ->setNamespace($args->getArg('namespace'));
+  $selected_user = $args->getArg('user');
+  if ($selected_user === null) {
+    $selected_user = $default_user;
+  }
 
-try {
-  queryfx(
-    $test_api->getConn(null),
-    'SELECT 1');
-} catch (AphrontQueryException $ex) {
-  $message = phutil_console_format(
-    "**%s**\n\n%s\n\n%s\n\n%s\n\n**%s**: %s\n",
-    pht('MySQL Credentials Not Configured'),
-    pht(
-      'Unable to connect to MySQL using the configured credentials. '.
-      'You must configure standard credentials before you can upgrade '.
-      'storage. Run these commands to set up credentials:'),
-    "  phabricator/ $ ./bin/config set mysql.host __host__\n".
-    "  phabricator/ $ ./bin/config set mysql.user __username__\n".
-    "  phabricator/ $ ./bin/config set mysql.pass __password__",
-    pht(
-      'These standard credentials are separate from any administrative '.
-      'credentials provided to this command with __%s__ or '.
-      '__%s__, and must be configured correctly before you can proceed.',
-      '--user',
-      '--password'),
-    pht('Raw MySQL Error'),
-    $ex->getMessage());
-  echo phutil_console_wrap($message);
-  exit(1);
-}
+  $api = id(new PhabricatorStorageManagementAPI())
+    ->setUser($selected_user)
+    ->setHost($default_host)
+    ->setPort($default_port)
+    ->setPassword($password)
+    ->setNamespace($args->getArg('namespace'))
+    ->setDisableUTF8MB4($args->getArg('disable-utf8mb4'));
+  PhabricatorEnv::overrideConfig('mysql.user', $api->getUser());
 
-if ($args->getArg('password') === null) {
-  // This is already a PhutilOpaqueEnvelope.
-  $password = $ref->getPass();
-} else {
-  // Put this in a PhutilOpaqueEnvelope.
-  $password = new PhutilOpaqueEnvelope($args->getArg('password'));
-  PhabricatorEnv::overrideConfig('mysql.pass', $args->getArg('password'));
-}
+  $ref->setUser($selected_user);
+  $ref->setPass($password);
 
-$selected_user = $args->getArg('user');
-if ($selected_user === null) {
-  $selected_user = $default_user;
-}
+  try {
+    queryfx(
+      $api->getConn(null),
+      'SELECT 1');
+  } catch (AphrontQueryException $ex) {
+    $message = phutil_console_format(
+      "**%s**\n\n%s\n\n**%s**: %s\n",
+      pht('Bad Administrative Credentials'),
+      pht(
+        'Unable to connect to MySQL using the administrative credentials '.
+        'provided with the __%s__ and __%s__ flags. Check that '.
+        'you have entered them correctly.',
+        '--user',
+        '--password'),
+      pht('Raw MySQL Error'),
+      $ex->getMessage());
+    echo phutil_console_wrap($message);
+    exit(1);
+  }
 
-$api = id(new PhabricatorStorageManagementAPI())
-  ->setUser($selected_user)
-  ->setHost($default_host)
-  ->setPort($default_port)
-  ->setPassword($password)
-  ->setNamespace($args->getArg('namespace'))
-  ->setDisableUTF8MB4($args->getArg('disable-utf8mb4'));
-PhabricatorEnv::overrideConfig('mysql.user', $api->getUser());
-
-try {
-  queryfx(
-    $api->getConn(null),
-    'SELECT 1');
-} catch (AphrontQueryException $ex) {
-  $message = phutil_console_format(
-    "**%s**\n\n%s\n\n**%s**: %s\n",
-    pht('Bad Administrative Credentials'),
-    pht(
-      'Unable to connect to MySQL using the administrative credentials '.
-      'provided with the __%s__ and __%s__ flags. Check that '.
-      'you have entered them correctly.',
-      '--user',
-      '--password'),
-    pht('Raw MySQL Error'),
-    $ex->getMessage());
-  echo phutil_console_wrap($message);
-  exit(1);
+  $api->setRef($ref);
+  $apis[] = $api;
 }
 
 $workflows = id(new PhutilClassMapQuery())
@@ -202,7 +240,7 @@ $workflows = id(new PhutilClassMapQuery())
 $patches = PhabricatorSQLPatchList::buildAllPatches();
 
 foreach ($workflows as $workflow) {
-  $workflow->setAPI($api);
+  $workflow->setAPIs($apis);
   $workflow->setPatches($patches);
 }
 

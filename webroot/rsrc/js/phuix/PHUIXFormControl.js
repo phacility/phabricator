@@ -11,6 +11,7 @@ JX.install('PHUIXFormControl', {
     _labelNode: null,
     _errorNode: null,
     _inputNode: null,
+    _className: null,
     _valueSetCallback: null,
     _valueGetCallback: null,
 
@@ -21,6 +22,11 @@ JX.install('PHUIXFormControl', {
 
     setError: function(error) {
       JX.DOM.setContent(this._getErrorNode(), error);
+      return this;
+    },
+
+    setClass: function(className) {
+      this._className = className;
       return this;
     },
 
@@ -40,6 +46,9 @@ JX.install('PHUIXFormControl', {
           break;
         case 'optgroups':
           input = this._newOptgroups(spec);
+          break;
+        case 'static':
+          input = this._newStatic(spec);
           break;
         default:
           // TODO: Default or better error?
@@ -67,7 +76,7 @@ JX.install('PHUIXFormControl', {
       if (!this._node) {
 
         var attrs = {
-          className: 'aphront-form-control grouped'
+          className: 'aphront-form-control ' + this._className + ' grouped'
         };
 
         var content = [
@@ -162,6 +171,25 @@ JX.install('PHUIXFormControl', {
         },
         set: function(value) {
           node.value = value;
+        }
+      };
+    },
+
+    _newStatic: function(spec) {
+      var node = JX.$N(
+        'div',
+        {
+          className: 'phui-form-static-action'
+        },
+        spec.description || '');
+
+      return {
+        node: node,
+        get: function() {
+          return true;
+        },
+        set: function() {
+          return;
         }
       };
     },

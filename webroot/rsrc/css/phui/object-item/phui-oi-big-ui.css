@@ -1,0 +1,48 @@
+/**
+ * @provides phui-oi-big-ui-css
+ * @requires phui-oi-list-view-css
+ */
+
+.phui-oi-list-big ul.phui-oi-list-view  {
+  margin: 0;
+  padding: 20px;
+}
+
+.phui-oi-list-big .phui-oi-no-bar .phui-oi-frame {
+  border: 0;
+}
+
+.phui-oi-list-big .phui-oi-image-icon {
+  margin: 8px 2px 12px;
+}
+
+.phui-oi-list-big a.phui-oi-link {
+  color: #000;
+  font-size: {$biggestfontsize};
+}
+
+.phui-oi-list-big .phui-oi-name {
+  padding-top: 6px;
+}
+
+.phui-oi-list-big .phui-oi-launch-button a.button {
+  font-size: {$normalfontsize};
+  padding: 3px 12px 4px;
+}
+
+.device-desktop .phui-oi-list-big .phui-oi {
+  margin-bottom: 8px;
+}
+
+.phui-oi-list-big .phui-oi-col0 {
+  vertical-align: top;
+  padding: 0;
+}
+
+.phui-oi-list-big .phui-oi-status-icon {
+  padding: 5px;
+}
+
+.phui-oi-list-big .phui-oi-visited a.phui-oi-link {
+  color: {$violet};
+}

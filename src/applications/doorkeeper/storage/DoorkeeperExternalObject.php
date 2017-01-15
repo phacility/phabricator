@@ -121,8 +121,4 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

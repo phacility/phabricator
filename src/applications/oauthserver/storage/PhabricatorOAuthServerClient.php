@@ -83,10 +83,6 @@ final class PhabricatorOAuthServerClient
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

@@ -2,8 +2,7 @@
  * @provides conpherence-notification-css
  */
 
-/* kill styles on phabricator-notification */
-.conpherence-notification {
+.phabricator-notification.conpherence-notification {
   padding: 0;
 }
 
@@ -27,7 +26,6 @@
   width: 30px;
   height: 30px;
   background-size: 100%;
-  box-shadow: {$borderinset};
   border-radius: 3px;
 }
 
@@ -70,4 +68,20 @@
   font-weight: bold;
   padding: 0 5px 1px;
   font-size: {$smallestfontsize};
+}
+
+.phabricator-notification .no-room-notification {
+  color: {$lightgreytext};
+  display: block;
+}
+
+.phabricator-notification-header .persistent-option {
+  white-space: nowrap;
+  float: right;
+}
+
+.phabricator-notification-header .persistent-option span {
+  margin-left: 4px;
+  font-weight: normal;
+  color: {$greytext};
 }

@@ -54,6 +54,8 @@ final class PHUICalendarListView extends AphrontTagView {
       return '';
     }
 
+    Javelin::initBehavior('phabricator-tooltips');
+
     $singletons = array();
     $allday = false;
     foreach ($this->events as $event) {
@@ -97,7 +99,7 @@ final class PHUICalendarListView extends AphrontTagView {
         $event_classes[] = 'event-cancelled';
       }
 
-      $tip = $this->getEventTooltip($event);
+      $tip = $event->getDateTimeSummary();
       if ($this->getView() == 'day') {
         $tip_align = 'E';
       } else if ($this->getView() == 'month') {
@@ -181,49 +183,6 @@ final class PHUICalendarListView extends AphrontTagView {
         'class' => $class,
       ),
       $event->getName());
-  }
-
-  private function getEventTooltip(AphrontCalendarEventView $event) {
-    $viewer = $this->getViewer();
-    $time_key = PhabricatorTimeFormatSetting::SETTINGKEY;
-    $time_pref = $viewer->getUserSetting($time_key);
-
-    Javelin::initBehavior('phabricator-tooltips');
-
-    $start = id(AphrontFormDateControlValue::newFromEpoch(
-      $viewer,
-      $event->getEpochStart()));
-
-    $end = id(AphrontFormDateControlValue::newFromEpoch(
-      $viewer,
-      $event->getEpochEnd()));
-
-    $start_date = $start->getDateTime()->format('m d Y');
-    $end_date = $end->getDateTime()->format('m d Y');
-
-    if ($event->getIsAllDay()) {
-      if ($start_date == $end_date) {
-        $tip = pht('All day');
-      } else {
-        $tip = pht(
-          'All day, %s - %s',
-          $start->getValueAsFormat('M j, Y'),
-          $end->getValueAsFormat('M j, Y'));
-      }
-    } else {
-      if ($start->getValueDate() == $end->getValueDate()) {
-        $tip = pht(
-          '%s - %s',
-          $start->getValueAsFormat($time_pref),
-          $end->getValueAsFormat($time_pref));
-      } else {
-        $tip = pht(
-          '%s - %s',
-          $start->getValueAsFormat('M j, Y, '.$time_pref),
-          $end->getValueAsFormat('M j, Y, '.$time_pref));
-      }
-    }
-    return $tip;
   }
 
   public function getIsViewerInvitedOnList() {

@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorAuditTransaction
-  extends PhabricatorApplicationTransaction {
+  extends PhabricatorModularTransaction {
 
   const TYPE_COMMIT = 'audit:commit';
 
@@ -18,6 +18,10 @@ final class PhabricatorAuditTransaction
 
   public function getApplicationName() {
     return 'audit';
+  }
+
+  public function getBaseTransactionClass() {
+    return 'DiffusionCommitTransactionType';
   }
 
   public function getApplicationTransactionType() {
@@ -434,6 +438,18 @@ final class PhabricatorAuditTransaction
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
+      case DiffusionCommitAcceptTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ACTION_ACCEPT;
+        break;
+      case DiffusionCommitConcernTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ACTION_CONCERN;
+        break;
+      case DiffusionCommitResignTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ACTION_RESIGN;
+        break;
+      case DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE:
+        $tags[] = self::MAILTAG_ADD_AUDITORS;
+        break;
       case PhabricatorAuditActionConstants::ACTION:
         switch ($this->getNewValue()) {
           case PhabricatorAuditActionConstants::CONCERN:

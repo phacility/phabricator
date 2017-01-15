@@ -36,7 +36,14 @@ final class PhabricatorStorageManagementQuickstartWorkflow
 
     $bin = dirname(phutil_get_library_root('phabricator')).'/bin/storage';
 
-    if (!$this->getAPI()->isCharacterSetAvailable('utf8mb4')) {
+    // We don't care which database we're using to generate a quickstart file,
+    // since all of the schemata should be identical.
+    $api = $this->getAnyAPI();
+
+    $ref = $api->getRef();
+    $ref_key = $ref->getRefKey();
+
+    if (!$api->isCharacterSetAvailable('utf8mb4')) {
       throw new PhutilArgumentUsageException(
         pht(
           'You can only generate a new quickstart file if MySQL supports '.
@@ -47,35 +54,39 @@ final class PhabricatorStorageManagementQuickstartWorkflow
     }
 
     $err = phutil_passthru(
-      '%s upgrade --force --no-quickstart --namespace %s',
+      '%s upgrade --force --no-quickstart --namespace %s --ref %s',
       $bin,
-      $namespace);
+      $namespace,
+      $ref_key);
     if ($err) {
       return $err;
     }
 
     $err = phutil_passthru(
-      '%s adjust --force --namespace %s',
+      '%s adjust --force --namespace %s --ref %s',
       $bin,
-      $namespace);
+      $namespace,
+      $ref_key);
     if ($err) {
       return $err;
     }
 
     $tmp = new TempFile();
     $err = phutil_passthru(
-      '%s dump --namespace %s > %s',
+      '%s dump --namespace %s --ref %s > %s',
       $bin,
       $namespace,
+      $ref_key,
       $tmp);
     if ($err) {
       return $err;
     }
 
     $err = phutil_passthru(
-      '%s destroy --force --namespace %s',
+      '%s destroy --force --namespace %s --ref %s',
       $bin,
-      $namespace);
+      $namespace,
+      $ref_key);
     if ($err) {
       return $err;
     }

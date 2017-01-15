@@ -1402,8 +1402,10 @@ final class PhabricatorUSEnglishTranslation
       ),
 
       'Setting retention policy for "%s" to %s day(s).' => array(
-        'Setting retention policy for "%s" to one day.',
-        'Setting retention policy for "%s" to %s days.',
+        array(
+          'Setting retention policy for "%s" to one day.',
+          'Setting retention policy for "%s" to %s days.',
+        ),
       ),
 
       'Waiting %s second(s) for lease to activate.' => array(
@@ -1578,6 +1580,14 @@ final class PhabricatorUSEnglishTranslation
         'Restart %s build?',
         'Restart %s builds?',
       ),
+
+      '%s is starting in %s minute(s), at %s.' => array(
+        array(
+          '%s is starting in one minute, at %3$s.',
+          '%s is starting in %s minutes, at %s.',
+        ),
+      ),
+
     );
   }
 

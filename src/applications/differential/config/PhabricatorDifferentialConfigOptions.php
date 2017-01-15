@@ -25,23 +25,12 @@ final class PhabricatorDifferentialConfigOptions
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
     $fields = array(
-      new DifferentialNextStepField(),
-
-      new DifferentialTitleField(),
       new DifferentialSummaryField(),
       new DifferentialTestPlanField(),
-      new DifferentialAuthorField(),
       new DifferentialReviewersField(),
       new DifferentialProjectReviewersField(),
-      new DifferentialReviewedByField(),
-      new DifferentialSubscribersField(),
       new DifferentialRepositoryField(),
-      new DifferentialProjectsField(),
-      new DifferentialViewPolicyField(),
-      new DifferentialEditPolicyField(),
 
-      new DifferentialParentRevisionsField(),
-      new DifferentialChildRevisionsField(),
       new DifferentialManiphestTasksField(),
       new DifferentialCommitsField(),
 
@@ -57,10 +46,6 @@ final class PhabricatorDifferentialConfigOptions
       new DifferentialLintField(),
       new DifferentialUnitField(),
       new DifferentialRevertPlanField(),
-
-      new DifferentialApplyPatchField(),
-
-      new DifferentialRevisionIDField(),
     );
 
     $default_fields = array();
@@ -69,6 +54,19 @@ final class PhabricatorDifferentialConfigOptions
         'disabled' => $field->shouldDisableByDefault(),
       );
     }
+
+    $inline_description = $this->deformat(
+      pht(<<<EOHELP
+To include patches inline in email bodies, set this option to a positive
+integer. Patches will be inlined if they are at most that many lines and at
+most 256 times that many bytes.
+
+For example, a value of 100 means "inline patches if they are at not more than
+100 lines long and not more than 25,600 bytes large".
+
+By default, patches are not inlined.
+EOHELP
+      ));
 
     return array(
       $this->newOption(
@@ -254,13 +252,7 @@ final class PhabricatorDifferentialConfigOptions
         'int',
         0)
         ->setSummary(pht('Inline patches in email, as body text.'))
-        ->setDescription(
-          pht(
-            "To include patches inline in email bodies, set this to a ".
-            "positive integer. Patches will be inlined if they are at most ".
-            "that many lines. For instance, a value of 100 means 'inline ".
-            "patches if they are no longer than 100 lines'. By default, ".
-            "patches are not inlined.")),
+        ->setDescription($inline_description),
       $this->newOption(
         'metamta.differential.patch-format',
         'enum',

@@ -17,13 +17,18 @@ final class PhabricatorPeopleDatasource
 
   public function loadResults() {
     $viewer = $this->getViewer();
-    $tokens = $this->getTokens();
 
     $query = id(new PhabricatorPeopleQuery())
       ->setOrderVector(array('username'));
 
-    if ($tokens) {
-      $query->withNameTokens($tokens);
+    if ($this->getPhase() == self::PHASE_PREFIX) {
+      $prefix = $this->getPrefixQuery();
+      $query->withNamePrefixes(array($prefix));
+    } else {
+      $tokens = $this->getTokens();
+      if ($tokens) {
+        $query->withNameTokens($tokens);
+      }
     }
 
     $users = $this->executeQuery($query);

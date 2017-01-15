@@ -35,6 +35,10 @@ abstract class PhabricatorModularTransactionType
     return;
   }
 
+  public function getTransactionHasEffect($object, $old, $new) {
+    return ($old !== $new);
+  }
+
   public function extractFilePHIDs($object, $value) {
     return array();
   }
@@ -55,6 +59,14 @@ abstract class PhabricatorModularTransactionType
     return null;
   }
 
+  public function getActionName() {
+    return null;
+  }
+
+  public function getActionStrength() {
+    return null;
+  }
+
   public function getColor() {
     return null;
   }
@@ -64,7 +76,11 @@ abstract class PhabricatorModularTransactionType
   }
 
   public function newChangeDetailView() {
-    throw new PhutilMethodNotImplementedException();
+    return null;
+  }
+
+  public function getMailDiffSectionHeader() {
+    return pht('EDIT DETAILS');
   }
 
   public function newRemarkupChanges() {
@@ -196,19 +212,36 @@ abstract class PhabricatorModularTransactionType
   final protected function renderDate($epoch) {
     $viewer = $this->getViewer();
 
-    $display = phabricator_datetime($epoch, $viewer);
+    // We accept either epoch timestamps or dictionaries describing a
+    // PhutilCalendarDateTime.
+    if (is_array($epoch)) {
+      $datetime = PhutilCalendarAbsoluteDateTime::newFromDictionary($epoch)
+        ->setViewerTimezone($viewer->getTimezoneIdentifier());
 
-    // When rendering to text, we explicitly render the offset from UTC to
-    // provide context to the date: the mail may be generating with the
-    // server's settings, or the user may later refer back to it after changing
-    // timezones.
+      $all_day = $datetime->getIsAllDay();
 
-    if ($this->isTextMode()) {
-      $offset = $viewer->getTimeZoneOffsetInHours();
-      if ($offset >= 0) {
-        $display = pht('%s (UTC+%d)', $display, $offset);
-      } else {
-        $display = pht('%s (UTC-%d)', $display, abs($offset));
+      $epoch = $datetime->getEpoch();
+    } else {
+      $all_day = false;
+    }
+
+    if ($all_day) {
+      $display = phabricator_date($epoch, $viewer);
+    } else {
+      $display = phabricator_datetime($epoch, $viewer);
+
+      // When rendering to text, we explicitly render the offset from UTC to
+      // provide context to the date: the mail may be generating with the
+      // server's settings, or the user may later refer back to it after
+      // changing timezones.
+
+      if ($this->isRenderingTargetExternal()) {
+        $offset = $viewer->getTimeZoneOffsetInHours();
+        if ($offset >= 0) {
+          $display = pht('%s (UTC+%d)', $display, $offset);
+        } else {
+          $display = pht('%s (UTC-%d)', $display, abs($offset));
+        }
       }
     }
 
@@ -252,7 +285,17 @@ abstract class PhabricatorModularTransactionType
     return !strlen($value);
   }
 
-  private function isTextMode() {
+  /**
+   * When rendering to external targets (Email/Asana/etc), we need to include
+   * more information that users can't obtain later.
+   */
+  final protected function isRenderingTargetExternal() {
+    // Right now, this is our best proxy for this:
+    return $this->isTextMode();
+    // "TARGET_TEXT" means "EMail" and "TARGET_HTML" means "Web".
+  }
+
+  final protected function isTextMode() {
     $target = $this->getStorage()->getRenderingTarget();
     return ($target == PhabricatorApplicationTransaction::TARGET_TEXT);
   }
@@ -260,6 +303,10 @@ abstract class PhabricatorModularTransactionType
   final protected function newRemarkupChange() {
     return id(new PhabricatorTransactionRemarkupChange())
       ->setTransaction($this->getStorage());
+  }
+
+  final protected function isCreateTransaction() {
+    return $this->getStorage()->getIsCreateTransaction();
   }
 
 }

@@ -95,14 +95,16 @@ EOTEXT
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('Name of the package.'))
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_NAME)
+        ->setTransactionType(
+          PhabricatorOwnersPackageNameTransaction::TRANSACTIONTYPE)
         ->setIsRequired(true)
         ->setValue($object->getName()),
       id(new PhabricatorDatasourceEditField())
         ->setKey('owners')
         ->setLabel(pht('Owners'))
         ->setDescription(pht('Users and projects which own the package.'))
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_OWNERS)
+        ->setTransactionType(
+          PhabricatorOwnersPackageOwnersTransaction::TRANSACTIONTYPE)
         ->setDatasource(new PhabricatorProjectOrUserDatasource())
         ->setIsCopyable(true)
         ->setValue($object->getOwnerPHIDs()),
@@ -112,7 +114,7 @@ EOTEXT
         ->setDescription(
           pht('Change package dominion rules.'))
         ->setTransactionType(
-          PhabricatorOwnersPackageTransaction::TYPE_DOMINION)
+          PhabricatorOwnersPackageDominionTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setValue($object->getDominion())
         ->setOptions($dominion_map),
@@ -124,7 +126,7 @@ EOTEXT
             'Automatically trigger reviews for commits affecting files in '.
             'this package.'))
         ->setTransactionType(
-          PhabricatorOwnersPackageTransaction::TYPE_AUTOREVIEW)
+          PhabricatorOwnersPackageAutoreviewTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setValue($object->getAutoReview())
         ->setOptions($autoreview_map),
@@ -135,7 +137,8 @@ EOTEXT
           pht(
             'Automatically trigger audits for commits affecting files in '.
             'this package.'))
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_AUDITING)
+        ->setTransactionType(
+          PhabricatorOwnersPackageAuditingTransaction::TRANSACTIONTYPE)
         ->setIsCopyable(true)
         ->setValue($object->getAuditingEnabled())
         ->setOptions(
@@ -148,13 +151,14 @@ EOTEXT
         ->setLabel(pht('Description'))
         ->setDescription(pht('Human-readable description of the package.'))
         ->setTransactionType(
-          PhabricatorOwnersPackageTransaction::TYPE_DESCRIPTION)
+          PhabricatorOwnersPackageDescriptionTransaction::TRANSACTIONTYPE)
         ->setValue($object->getDescription()),
       id(new PhabricatorSelectEditField())
         ->setKey('status')
         ->setLabel(pht('Status'))
         ->setDescription(pht('Archive or enable the package.'))
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_STATUS)
+        ->setTransactionType(
+          PhabricatorOwnersPackageStatusTransaction::TRANSACTIONTYPE)
         ->setIsConduitOnly(true)
         ->setValue($object->getStatus())
         ->setOptions($object->getStatusNameMap()),
@@ -162,7 +166,8 @@ EOTEXT
         ->setKey('paths.set')
         ->setLabel(pht('Paths'))
         ->setIsConduitOnly(true)
-        ->setTransactionType(PhabricatorOwnersPackageTransaction::TYPE_PATHS)
+        ->setTransactionType(
+          PhabricatorOwnersPackagePathsTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(
           pht('Overwrite existing package paths with new paths.'))
         ->setConduitTypeDescription(

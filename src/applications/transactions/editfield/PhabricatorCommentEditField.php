@@ -3,6 +3,17 @@
 final class PhabricatorCommentEditField
   extends PhabricatorEditField {
 
+  private $isWebOnly;
+
+  public function setIsWebOnly($is_web_only) {
+    $this->isWebOnly = $is_web_only;
+    return $this;
+  }
+
+  public function getIsWebOnly() {
+    return $this->isWebOnly;
+  }
+
   protected function newControl() {
     return new PhabricatorRemarkupControl();
   }
@@ -12,15 +23,23 @@ final class PhabricatorCommentEditField
   }
 
   protected function newConduitParameterType() {
-    return new ConduitStringParameterType();
+    if ($this->getIsWebOnly()) {
+      return null;
+    } else {
+      return new ConduitStringParameterType();
+    }
   }
 
   public function shouldGenerateTransactionsFromSubmit() {
-    return false;
+    return !$this->isPrimaryCommentField();
   }
 
   public function shouldGenerateTransactionsFromComment() {
-    return true;
+    return $this->isPrimaryCommentField();
+  }
+
+  private function isPrimaryCommentField() {
+    return ($this->getKey() === 'comment');
   }
 
 }

@@ -1339,11 +1339,12 @@ abstract class LiskDAO extends Phobject {
    * @task   hook
    */
   public function generatePHID() {
-    throw new Exception(
-      pht(
-        'To use %s, you need to overload %s to perform PHID generation.',
-        'CONFIG_AUX_PHID',
-        'generatePHID()'));
+    $type = $this->getPHIDType();
+    return PhabricatorPHID::generateNewPHID($type);
+  }
+
+  public function getPHIDType() {
+    throw new PhutilMethodNotImplementedException();
   }
 
 
@@ -1779,10 +1780,13 @@ abstract class LiskDAO extends Phobject {
    * @task   util
    */
   public function __set($name, $value) {
-    phlog(
-      pht(
-        'Wrote to undeclared property %s.',
-        get_class($this).'::$'.$name));
+    // Hack for policy system hints, see PhabricatorPolicyRule for notes.
+    if ($name != '_hashKey') {
+      phlog(
+        pht(
+          'Wrote to undeclared property %s.',
+          get_class($this).'::$'.$name));
+    }
     $this->$name = $value;
   }
 

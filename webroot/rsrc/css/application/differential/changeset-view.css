@@ -94,6 +94,7 @@
 }
 
 .prose-diff {
+  padding: 12px 0;
   white-space: pre-wrap;
   color: {$greytext};
 }
@@ -107,12 +108,9 @@
   padding: 0 2px;
 }
 
-.prose-diff span.old {
-  color: {$redtext};
-}
-
+.prose-diff span.old,
 .prose-diff span.new {
-  color: {$greentext};
+  color: {$darkgreytext};
 }
 
 .differential-diff th.selected {
@@ -123,12 +121,20 @@
   cursor: auto;
 }
 
+.differential-diff th.old {
+  border-right-color: {$old-bright};
+}
+
+.differential-diff th.new {
+  border-right-color: {$new-bright};
+}
+
 .differential-diff td.old {
-  background: rgba(251, 175, 175, .3);
+  background: {$old-background};
 }
 
 .differential-diff td.new {
-  background: rgba(151, 234, 151, .3);
+  background: {$new-background};
 }
 
 .differential-diff td.old-rebase {
@@ -139,16 +145,16 @@
   background: #eeffee;
 }
 
-.differential-diff td.old-full,
 .differential-diff td.old span.bright,
+.differential-diff td.old-full,
 .prose-diff span.old {
-  background: rgba(251, 175, 175, .7);
+  background: {$old-bright};
 }
 
-.differential-diff td.new-full,
 .differential-diff td.new span.bright,
+.differential-diff td.new-full,
 .prose-diff span.new {
-  background: rgba(151, 234, 151, .6);
+  background: {$new-bright};
 }
 
 .differential-diff td.copy {
@@ -159,12 +165,12 @@
 
 .differential-diff td.new-copy,
 .differential-diff td.new-copy span.bright {
-  background: {$lightyellow};
+  background: {$copy-background};
 }
 
 .differential-diff td.new-move,
 .differential-diff td.new-move span.bright {
-  background: {$yellow};
+  background: {$move-background};
 }
 
 .differential-diff td.comment {

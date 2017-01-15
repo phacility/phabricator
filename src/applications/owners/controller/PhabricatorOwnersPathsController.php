@@ -48,7 +48,7 @@ final class PhabricatorOwnersPathsController
         );
       }
 
-      $type_paths = PhabricatorOwnersPackageTransaction::TYPE_PATHS;
+      $type_paths = PhabricatorOwnersPackagePathsTransaction::TRANSACTIONTYPE;
 
       $xactions = array();
       $xactions[] = id(new PhabricatorOwnersPackageTransaction())

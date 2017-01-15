@@ -67,7 +67,7 @@ then
   if [ $? -ne 0 ]; then
     echo "It doesn't look like you have the EPEL repo enabled. We are to add it"
     echo "for you, so that we can install git."
-    $SUDO rpm -Uvh http://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+    $SUDO rpm -Uvh https://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
   fi
   YUMCOMMAND="$SUDO yum install httpd git php53 php53-cli php53-mysql php53-process php53-devel php53-gd gcc wget make pcre-devel mysql-server"
 else
@@ -92,7 +92,7 @@ then
   # Now that we've ensured all the devel packages required for pecl/apc are there, let's
   # set up PEAR, and install apc.
   echo "Attempting to install PEAR"
-  wget http://pear.php.net/go-pear.phar
+  wget https://pear.php.net/go-pear.phar
   $SUDO php go-pear.phar && $SUDO pecl install apc
 fi
 

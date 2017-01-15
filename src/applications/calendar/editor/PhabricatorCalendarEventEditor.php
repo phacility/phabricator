@@ -3,6 +3,9 @@
 final class PhabricatorCalendarEventEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  private $oldIsAllDay;
+  private $newIsAllDay;
+
   public function getEditorApplicationClass() {
     return 'PhabricatorCalendarApplication';
   }
@@ -11,10 +14,26 @@ final class PhabricatorCalendarEventEditor
     return pht('Calendar');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this event.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   protected function shouldApplyInitialEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
     return true;
+  }
+
+  public function getOldIsAllDay() {
+    return $this->oldIsAllDay;
+  }
+
+  public function getNewIsAllDay() {
+    return $this->newIsAllDay;
   }
 
   protected function applyInitialEffects(
@@ -25,6 +44,22 @@ final class PhabricatorCalendarEventEditor
     if ($object->getIsStub()) {
       $this->materializeStub($object);
     }
+
+    // Before doing anything, figure out if the event will be an all day event
+    // or not after the edit. This affects how we store datetime values, and
+    // whether we render times or not.
+    $old_allday = $object->getIsAllDay();
+    $new_allday = $old_allday;
+    $type_allday = PhabricatorCalendarEventAllDayTransaction::TRANSACTIONTYPE;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() != $type_allday) {
+        continue;
+      }
+      $new_allday = (bool)$xaction->getNewValue();
+    }
+
+    $this->oldIsAllDay = $old_allday;
+    $this->newIsAllDay = $new_allday;
   }
 
   private function materializeStub(PhabricatorCalendarEvent $event) {
@@ -34,25 +69,22 @@ final class PhabricatorCalendarEventEditor
     }
 
     $actor = $this->getActor();
+
+    $invitees = $event->getInvitees();
+
     $event->copyFromParent($actor);
     $event->setIsStub(0);
 
-    $invitees = $event->getParentEvent()->getInvitees();
+    $event->openTransaction();
+      $event->save();
+      foreach ($invitees as $invitee) {
+        $invitee
+          ->setEventPHID($event->getPHID())
+          ->save();
+      }
+    $event->saveTransaction();
 
-    $new_invitees = array();
-    foreach ($invitees as $invitee) {
-      $invitee = id(new PhabricatorCalendarEventInvitee())
-        ->setEventPHID($event->getPHID())
-        ->setInviteePHID($invitee->getInviteePHID())
-        ->setInviterPHID($invitee->getInviterPHID())
-        ->setStatus($invitee->getStatus())
-        ->save();
-
-      $new_invitees[] = $invitee;
-    }
-
-    $event->save();
-    $event->attachInvitees($new_invitees);
+    $event->attachInvitees($invitees);
   }
 
   public function getTransactionTypes() {
@@ -139,7 +171,7 @@ final class PhabricatorCalendarEventEditor
           WHERE phid IN (%Ls) AND availabilityCacheTTL >= %d',
         $user->getTableName(),
         $phids,
-        $object->getDateFromForCache());
+        $object->getStartDateTimeEpochForCache());
     }
 
     return $xactions;
@@ -159,9 +191,9 @@ final class PhabricatorCalendarEventEditor
     $recurrence_end_xaction =
       PhabricatorCalendarEventUntilDateTransaction::TRANSACTIONTYPE;
 
-    $start_date = $object->getDateFrom();
-    $end_date = $object->getDateTo();
-    $recurrence_end = $object->getRecurrenceEndDate();
+    $start_date = $object->getStartDateTimeEpoch();
+    $end_date = $object->getEndDateTimeEpoch();
+    $recurrence_end = $object->getUntilDateTimeEpoch();
     $is_recurring = $object->getIsRecurring();
 
     $errors = array();
@@ -200,6 +232,11 @@ final class PhabricatorCalendarEventEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    if ($object->isImportedEvent()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -210,6 +247,11 @@ final class PhabricatorCalendarEventEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    if ($object->isImportedEvent()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -262,29 +304,34 @@ final class PhabricatorCalendarEventEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $name = $object->getName();
+    $monogram = $object->getMonogram();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("E{$id}: {$name}")
-      ->addHeader('Thread-Topic', "E{$id}: ".$object->getName());
+      ->setSubject("{$monogram}: {$name}")
+      ->addHeader('Thread-Topic', $monogram);
   }
 
   protected function buildMailBody(
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $description = $object->getDescription();
     $body = parent::buildMailBody($object, $xactions);
 
-    if (strlen($description)) {
-      $body->addRemarkupSection(
-        pht('EVENT DESCRIPTION'),
-        $description);
+    $description = $object->getDescription();
+    if ($this->getIsNewObject()) {
+      if (strlen($description)) {
+        $body->addRemarkupSection(
+          pht('EVENT DESCRIPTION'),
+          $description);
+      }
     }
 
     $body->addLinkSection(
       pht('EVENT DETAIL'),
-      PhabricatorEnv::getProductionURI('/E'.$object->getID()));
+      PhabricatorEnv::getProductionURI($object->getURI()));
 
+    $ics_attachment = $this->newICSAttachment($object);
+    $body->addAttachment($ics_attachment);
 
     return $body;
   }
@@ -303,5 +350,21 @@ final class PhabricatorCalendarEventEditor
       ->setObject($object);
   }
 
+  private function newICSAttachment(
+    PhabricatorCalendarEvent $event) {
+    $actor = $this->getActor();
+
+    $ics_data = id(new PhabricatorCalendarICSWriter())
+      ->setViewer($actor)
+      ->setEvents(array($event))
+      ->writeICSDocument();
+
+    $ics_attachment = new PhabricatorMetaMTAAttachment(
+      $ics_data,
+      $event->getICSFilename(),
+      'text/calendar');
+
+    return $ics_attachment;
+  }
 
 }

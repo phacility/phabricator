@@ -27,7 +27,9 @@ final class DiffusionMercurialServeSSHWorkflow
   protected function identifyRepository() {
     $args = $this->getArgs();
     $path = $args->getArg('repository');
-    return $this->loadRepositoryWithPath($path);
+    return $this->loadRepositoryWithPath(
+      $path,
+      PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL);
   }
 
   protected function executeRepositoryOperations() {
@@ -115,6 +117,16 @@ final class DiffusionMercurialServeSSHWorkflow
 
     // If we're good, return the raw message data.
     return $raw_message;
+  }
+
+  protected function raiseWrongVCSException(
+    PhabricatorRepository $repository) {
+    throw new Exception(
+      pht(
+        'This repository ("%s") is not a Mercurial repository. Use "%s" to '.
+        'interact with this repository.',
+        $repository->getDisplayName(),
+        $repository->getVersionControlSystem()));
   }
 
 }

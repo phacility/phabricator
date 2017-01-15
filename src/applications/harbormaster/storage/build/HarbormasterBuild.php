@@ -420,6 +420,10 @@ final class HarbormasterBuild extends HarbormasterDAO
         ->setKey('initiatorPHID')
         ->setType('phid')
         ->setDescription(pht('The person (or thing) that started this build.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of this build.')),
     );
   }
 
@@ -433,6 +437,7 @@ final class HarbormasterBuild extends HarbormasterDAO
         'name' => HarbormasterBuildStatus::getBuildStatusName($status),
       ),
       'initiatorPHID' => nonempty($this->getInitiatorPHID(), null),
+      'name' => $this->getName(),
     );
   }
 

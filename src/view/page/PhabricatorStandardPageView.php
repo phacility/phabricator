@@ -136,6 +136,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     return (bool)$this->getUserPreference($column_key, false);
   }
 
+  public function getDurableColumnMinimize() {
+    $column_key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
+    return (bool)$this->getUserPreference($column_key, false);
+  }
+
   public function addQuicksandConfig(array $config) {
     $this->quicksandConfig = $config + $this->quicksandConfig;
     return $this;
@@ -263,26 +268,32 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         }
       }
 
-      $default_img_uri =
-        celerity_get_resource_uri(
-          'rsrc/image/icon/fatcow/document_black.png');
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-download');
+      $lightbox_id = celerity_generate_unique_node_id();
       $download_form = phabricator_form(
         $user,
         array(
           'action' => '#',
           'method' => 'POST',
           'class'  => 'lightbox-download-form',
-          'sigil'  => 'download',
+          'sigil'  => 'download lightbox-download-submit',
+          'id'     => 'lightbox-download-form',
         ),
         phutil_tag(
-          'button',
-          array(),
-          pht('Download')));
+          'a',
+          array(
+            'class' => 'lightbox-download phui-icon-circle hover-green',
+            'href' => '#',
+          ),
+          array(
+            $icon,
+          )));
 
       Javelin::initBehavior(
         'lightbox-attachments',
         array(
-          'defaultImageUri' => $default_img_uri,
+          'lightbox_id'     => $lightbox_id,
           'downloadForm'    => $download_form,
         ));
     }
@@ -480,12 +491,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     $durable_column = null;
     if ($this->getShowDurableColumn()) {
       $is_visible = $this->getDurableColumnVisible();
+      $is_minimize = $this->getDurableColumnMinimize();
       $durable_column = id(new ConpherenceDurableColumnView())
         ->setSelectedConpherence(null)
         ->setUser($user)
         ->setQuicksandConfig($this->buildQuicksandConfig())
         ->setVisible($is_visible)
+        ->setMinimize($is_minimize)
         ->setInitialLoad(true);
+      if ($is_minimize) {
+        $this->classes[] = 'minimize-column';
+      }
     }
 
     Javelin::initBehavior('quicksand-blacklist', array(
@@ -496,6 +512,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       'div',
       array(
         'class' => implode(' ', $classes),
+        'id' => 'main-page-frame',
       ),
       array(
         $main_page,
@@ -795,6 +812,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     return array(
       'title' => $this->getTitle(),
+      'bodyClasses' => $this->getBodyClasses(),
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),

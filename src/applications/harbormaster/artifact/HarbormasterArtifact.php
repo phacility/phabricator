@@ -16,6 +16,10 @@ abstract class HarbormasterArtifact extends Phobject {
   abstract public function getArtifactParameterDescriptions();
   abstract public function willCreateArtifact(PhabricatorUser $actor);
 
+  public function readArtifactHTTPParameter($key, $value) {
+    return $value;
+  }
+
   public function validateArtifactData(array $artifact_data) {
     $artifact_spec = $this->getArtifactParameterSpecification();
     PhutilTypeSpec::checkMap($artifact_data, $artifact_spec);

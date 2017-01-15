@@ -228,8 +228,4 @@ abstract class DifferentialHunk extends DifferentialDAO
     return $this->getChangeset()->hasAutomaticCapability($capability, $viewer);
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

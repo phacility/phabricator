@@ -1,0 +1,132 @@
+@title Calendar User Guide: Importing Events
+@group userguide
+
+Importing events from other calendars.
+
+Overview
+========
+
+IMPORTANT: Calendar is a prototype application. See
+@{article:User Guide: Prototype Applications}.
+
+You can import events into Phabricator to other calendar applications or from
+`.ics` files. This document will guide you through how to importe event data
+into Phabricator.
+
+When you import events from another application, they can not be edited in
+Phabricator. Importing events allows you to share events or keep track of
+events from different sources, but does not let you edit events from other
+applications in Phabricator.
+
+
+Import Policies
+===============
+
+When you import events, you select a visibility policy for the import. By
+default, imported events are only visible to you (the user importing them).
+
+To share imported events with other users, make the import **Visible To**
+a wider set of users, like "All Users".
+
+
+Importing `.ics` Files
+======================
+
+`.ics` files contain information about events, usually either about a single
+event or an entire event calendar.
+
+If you have an event or calendar in `.ics` format, you can import it into
+Phabricator in two ways:
+
+  - Navigate to {nav Calendar > Imports > Import Events > Import .ics File}.
+  - Drag and drop the file onto a Calendar.
+
+This will create a copy of the event in Phabricator.
+
+If you want to update an imported event later, just repeat this process. The
+event will be updated with the latest information.
+
+Many applications send `.ics` files as email attachments. You can import these
+into Phabricator.
+
+
+.ics Files: Google Calendar
+===========================
+
+In **Google Calendar**, you can generate a `.ics` file for a calendar by
+clicking the dropdown menu next to the calendar and selecting
+{nav Calendar Settings > Export Calendar > Export this calendar}.
+
+
+.ics Files: Calendar.app
+========================
+
+In **Calendar.app**, you can generate an `.ics` file for a calendar by
+selecting the calendar, then selecting {nav File > Export > Export...} and
+saving the calendar as a `.ics` file.
+
+You can also convert an individual event into an `.ics` file by dragging it
+from the calendar to your desktop (or any other folder).
+
+When you import an event using an `.ics` file, Phabricator can not
+automatically keep the event up to date. You'll need to repeat the process if
+there are changes to the event or calendar later, so Phabricator can learn
+about the updates.
+
+
+Importing .ics URIs
+=====================
+
+If you have a calendar in another application that supports publishing a
+`.ics` URI, you can subscribe to it in Phabricator. This will import the entire
+calendar, and can be configured to automatically keep it up to date and in sync
+with the external calendar.
+
+First, find the subscription URI for the calendar you want to import (see
+below for some guidance on popular calendar applications). Then, browse to
+{nav Calendar > Imports > Import Events > Import .ics URI}.
+
+When you import a URI, you can choose to enable automatic updates. If you do,
+Phabricator will periodically update the events it imports from this source.
+You can stop this later by turning off the automatic updates or disabling
+the import.
+
+{icon lock} **Privacy Note**: When you import via URI, the URI often contains
+sensitive information (like a username, password, or secret key) which allows
+anyone who knows it to access private details about events. Anyone who can edit
+the import will also be able to view and edit the URI, so make sure you don't
+grant edit access to users who should not have access to the event details.
+
+
+.ics URIs: Google Calendar
+==========================
+
+In **Google Calendar**, you can get the subscription URI for a calendar
+by selecting {nav Calendar Settings} from the dropdown next to the calendar,
+then copying the URL from the {nav ICAL} link under **Private Address**. This
+URI provides access to all event details, including private information.
+
+You may need to adjust the sharing and visibility settings for the calendar
+before this option is available.
+
+Alternatively, you can use the URI from the {nav ICAL} link under
+**Calendar Address** to access a more limited set of event details. You can
+configure which details are available by configuring how the calendar is
+shared.
+
+
+.ics URIs: Calendar.app
+=======================
+
+**Calendar.app** does not support subscriptions via `.ics` URIs.
+
+You can export a calendar as an `.ics` file by following the steps above, but
+Phabricator can not automatically keep events imported in this way up to date.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Calendar User Guide}.

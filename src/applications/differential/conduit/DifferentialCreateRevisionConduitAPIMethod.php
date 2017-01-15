@@ -11,6 +11,16 @@ final class DifferentialCreateRevisionConduitAPIMethod
     return pht('Create a new Differential revision.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "differential.revision.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       // TODO: Arcanist passes this; prevent fatals after D4191 until Conduit
@@ -45,16 +55,18 @@ final class DifferentialCreateRevisionConduitAPIMethod
     $revision = DifferentialRevision::initializeNewRevision($viewer);
     $revision->attachReviewerStatus(array());
 
-    $this->applyFieldEdit(
+    $result = $this->applyFieldEdit(
       $request,
       $revision,
       $diff,
       $request->getValue('fields', array()),
       $message = null);
 
+    $revision_id = $result['object']['id'];
+
     return array(
-      'revisionid'  => $revision->getID(),
-      'uri'         => PhabricatorEnv::getURI('/D'.$revision->getID()),
+      'revisionid'  => $revision_id,
+      'uri'         => PhabricatorEnv::getURI('/D'.$revision_id),
     );
   }
 

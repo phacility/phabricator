@@ -6,21 +6,30 @@ final class PhabricatorCalendarEventStartDateTransaction
   const TRANSACTIONTYPE = 'calendar.startdate';
 
   public function generateOldValue($object) {
-    return $object->getDateFrom();
+    $editor = $this->getEditor();
+
+    return $object->newStartDateTime()
+      ->newAbsoluteDateTime()
+      ->setIsAllDay($editor->getOldIsAllDay())
+      ->toDictionary();
   }
 
   public function applyInternalEffects($object, $value) {
     $actor = $this->getActor();
+    $editor = $this->getEditor();
 
-    $object->setDateFrom($value);
+    $datetime = PhutilCalendarAbsoluteDateTime::newFromDictionary($value);
+    $datetime->setIsAllDay($editor->getNewIsAllDay());
 
-    $object->setAllDayDateFrom(
-      $object->getDateEpochForTimezone(
-        $value,
-        $actor->getTimeZone(),
-        'Y-m-d',
-        null,
-        new DateTimeZone('UTC')));
+    $object->setStartDateTime($datetime);
+  }
+
+  public function shouldHide() {
+    if ($this->isCreateTransaction()) {
+      return true;
+    }
+
+    return false;
   }
 
   public function getTitle() {

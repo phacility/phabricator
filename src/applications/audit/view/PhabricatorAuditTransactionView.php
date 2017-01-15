@@ -3,7 +3,7 @@
 final class PhabricatorAuditTransactionView
   extends PhabricatorApplicationTransactionView {
 
-  private $pathMap;
+  private $pathMap = array();
 
   public function setPathMap(array $path_map) {
     $this->pathMap = $path_map;
@@ -55,10 +55,15 @@ final class PhabricatorAuditTransactionView
     $type_inline = PhabricatorAuditActionConstants::INLINE;
 
     $group = $xaction->getTransactionGroup();
+
     if ($xaction->getTransactionType() == $type_inline) {
       array_unshift($group, $xaction);
     } else {
       $out[] = parent::renderTransactionContent($xaction);
+    }
+
+    if ($this->getIsPreview()) {
+      return $out;
     }
 
     if (!$group) {
@@ -76,47 +81,57 @@ final class PhabricatorAuditTransactionView
       }
     }
 
-    if ($inlines) {
-
-      // TODO: This should do something similar to sortAndGroupInlines() to get
-      // a stable ordering.
-
-      $inlines_by_path = array();
-      foreach ($inlines as $key => $inline) {
-        $comment = $inline->getComment();
-        if (!$comment) {
-          // TODO: Migrate these away? They probably do not exist on normal
-          // non-development installs.
-          unset($inlines[$key]);
-          continue;
-        }
-        $path_id = $comment->getPathID();
-        $inlines_by_path[$path_id][] = $inline;
+    $structs = array();
+    foreach ($inlines as $key => $inline) {
+      $comment = $inline->getComment();
+      if (!$comment) {
+        // TODO: Migrate these away? They probably do not exist on normal
+        // non-development installs.
+        unset($inlines[$key]);
+        continue;
       }
 
-      $inline_view = new PhabricatorInlineSummaryView();
-      foreach ($inlines_by_path as $path_id => $group) {
-        $path = idx($this->pathMap, $path_id);
-        if ($path === null) {
-          continue;
-        }
-
-        $items = array();
-        foreach ($group as $inline) {
-          $comment = $inline->getComment();
-          $item = array(
-            'id' => $comment->getID(),
-            'line' => $comment->getLineNumber(),
-            'length' => $comment->getLineLength(),
-            'content' => parent::renderTransactionContent($inline),
-          );
-          $items[] = $item;
-        }
-        $inline_view->addCommentGroup($path, $items);
+      $path_id = $comment->getPathID();
+      $path = idx($this->pathMap, $path_id);
+      if ($path === null) {
+        continue;
       }
 
-      $out[] = $inline_view;
+      $structs[] = array(
+        'inline' => $inline,
+        'path' => $path,
+        'sort' => (string)id(new PhutilSortVector())
+          ->addString($path)
+          ->addInt($comment->getLineNumber())
+          ->addInt($comment->getLineLength())
+          ->addInt($inline->getID()),
+      );
     }
+
+    if (!$structs) {
+      return $out;
+    }
+
+    $structs = isort($structs, 'sort');
+    $structs = igroup($structs, 'path');
+
+    $inline_view = new PhabricatorInlineSummaryView();
+    foreach ($structs as $path => $group) {
+      $inlines = ipull($group, 'inline');
+      $items = array();
+      foreach ($inlines as $inline) {
+        $comment = $inline->getComment();
+        $items[] = array(
+          'id' => $comment->getID(),
+          'line' => $comment->getLineNumber(),
+          'length' => $comment->getLineLength(),
+          'content' => parent::renderTransactionContent($inline),
+        );
+      }
+      $inline_view->addCommentGroup($path, $items);
+    }
+
+    $out[] = $inline_view;
 
     return $out;
   }

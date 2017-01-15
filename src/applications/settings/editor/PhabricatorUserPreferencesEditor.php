@@ -158,6 +158,9 @@ final class PhabricatorUserPreferencesEditor
         PhabricatorUserPreferencesCacheType::KEY_PREFERENCES,
         $user_phid);
     } else {
+      $cache = PhabricatorCaches::getMutableStructureCache();
+      $cache->deleteKey(PhabricatorUser::getGlobalSettingsCacheKey());
+
       PhabricatorUserCache::clearCacheForAllUsers(
         PhabricatorUserPreferencesCacheType::KEY_PREFERENCES);
     }

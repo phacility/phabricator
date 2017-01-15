@@ -46,6 +46,10 @@
   border: none;
 }
 
+.device-phone .aphront-dialog-body {
+  padding: 8px;
+}
+
 .aphront-dialog-tail {
   border: none;
   position: relative;
@@ -104,6 +108,20 @@
   opacity: 0.95;
 }
 
+.jx-white-mask {
+  background: #fff;
+  opacity: 1;
+}
+
+.jx-date-mask {
+  background: #292f33;
+  opacity: 0.5;
+}
+
+.device-desktop .jx-date-mask {
+  display: none;
+}
+
 .aphront-exception-dialog {
   width: 95%;
 }
@@ -124,6 +142,10 @@
   width: 50%;
 }
 
+.aphront-policy-explain-dialog .aphront-dialog-body {
+  padding: 0 12px;
+}
+
 .aphront-policy-rejection {
   font-weight: bold;
 }
@@ -136,18 +158,18 @@
   margin-top: 16px;
 }
 
-.device-desktop .aphront-dialog-flush .phui-object-item-list-view {
+.device-desktop .aphront-dialog-flush .phui-oi-list-view {
   margin: 0;
   padding: 0;
 }
 
-.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
- .phui-object-item {
+.aphront-dialog-flush .phui-oi-list-view.phui-object-list-stackable
+ .phui-oi {
   border: 0;
 }
 
-.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
- .phui-object-item-frame {
+.aphront-dialog-flush .phui-oi-list-view.phui-object-list-stackable
+ .phui-oi-frame {
   border: 0;
   border-top: 1px solid {$thinblueborder};
 }
@@ -159,5 +181,9 @@
 }
 
 .aphront-dialog-object-list .aphront-dialog-body {
+  padding: 0 12px;
+}
+
+.aphront-dialog-tab-group .aphront-dialog-body {
   padding: 0 12px;
 }

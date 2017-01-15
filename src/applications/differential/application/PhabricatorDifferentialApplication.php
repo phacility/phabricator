@@ -65,7 +65,9 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
         ),
         'changeset/' => 'DifferentialChangesetViewController',
         'revision/' => array(
-          'edit/(?:(?P<id>[1-9]\d*)/)?'
+          $this->getEditRoutePattern('edit/')
+            => 'DifferentialRevisionEditController',
+          $this->getEditRoutePattern('attach/(?P<diffID>[^/]+)/to/')
             => 'DifferentialRevisionEditController',
           'land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
             => 'DifferentialRevisionLandController',

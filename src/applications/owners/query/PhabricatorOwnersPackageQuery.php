@@ -358,6 +358,13 @@ final class PhabricatorOwnersPackageQuery
       $best_match = null;
       $include = false;
 
+      // If this package is archived, it's no longer a controlling package
+      // for the given path. In particular, it can not force active packages
+      // with weak dominion to give up control.
+      if ($package->isArchived()) {
+        continue;
+      }
+
       foreach ($package->getPaths() as $package_path) {
         if ($package_path->getRepositoryPHID() != $repository_phid) {
           // If this path is for some other repository, skip it.

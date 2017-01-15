@@ -33,6 +33,8 @@ final class PhabricatorMySQLFulltextStorageEngine
 
     $conn_w = $store->establishConnection('w');
 
+    $stemmer = new PhutilSearchStemmer();
+
     $field_dao = new PhabricatorSearchDocumentField();
     queryfx(
       $conn_w,
@@ -41,16 +43,21 @@ final class PhabricatorMySQLFulltextStorageEngine
       $phid);
     foreach ($doc->getFieldData() as $field) {
       list($ftype, $corpus, $aux_phid) = $field;
+
+      $stemmed_corpus = $stemmer->stemCorpus($corpus);
+
       queryfx(
         $conn_w,
-        'INSERT INTO %T (phid, phidType, field, auxPHID, corpus) '.
-        'VALUES (%s, %s, %s, %ns, %s)',
+        'INSERT INTO %T
+          (phid, phidType, field, auxPHID, corpus, stemmedCorpus) '.
+        'VALUES (%s, %s, %s, %ns, %s, %s)',
         $field_dao->getTableName(),
         $phid,
         $doc->getDocumentType(),
         $ftype,
         $aux_phid,
-        $corpus);
+        $corpus,
+        $stemmed_corpus);
     }
 
 
@@ -153,70 +160,112 @@ final class PhabricatorMySQLFulltextStorageEngine
   }
 
   public function executeSearch(PhabricatorSavedQuery $query) {
+    $table = new PhabricatorSearchDocument();
+    $document_table = $table->getTableName();
+    $conn = $table->establishConnection('r');
+
+    $subquery = $this->newFulltextSubquery($query, $conn);
+
+    $offset = (int)$query->getParameter('offset', 0);
+    $limit  = (int)$query->getParameter('limit', 25);
+
+    // NOTE: We must JOIN the subquery in order to apply a limit.
+    $results = queryfx_all(
+      $conn,
+      'SELECT
+        documentPHID,
+        MAX(fieldScore) AS documentScore
+        FROM (%Q) query
+        JOIN %T root ON query.documentPHID = root.phid
+        GROUP BY documentPHID
+        ORDER BY documentScore DESC
+        LIMIT %d, %d',
+      $subquery,
+      $document_table,
+      $offset,
+      $limit);
+
+    return ipull($results, 'documentPHID');
+  }
+
+  private function newFulltextSubquery(
+    PhabricatorSavedQuery $query,
+    AphrontDatabaseConnection $conn) {
+
+    $field = new PhabricatorSearchDocumentField();
+    $field_table = $field->getTableName();
+
+    $document = new PhabricatorSearchDocument();
+    $document_table = $document->getTableName();
+
+    $select = array();
+    $select[] = 'document.phid AS documentPHID';
+
+    $join = array();
     $where = array();
-    $join  = array();
-    $order = 'ORDER BY documentCreated DESC';
 
-    $dao_doc = new PhabricatorSearchDocument();
-    $dao_field = new PhabricatorSearchDocumentField();
+    $title_field = PhabricatorSearchDocumentFieldType::FIELD_TITLE;
+    $title_boost = 1024;
 
-    $t_doc   = $dao_doc->getTableName();
-    $t_field = $dao_field->getTableName();
+    $raw_query = $query->getParameter('query');
+    $compiled_query = $this->compileQuery($raw_query);
+    if (strlen($compiled_query)) {
+      $select[] = qsprintf(
+        $conn,
+        'IF(field.field = %s, %d, 0) +
+          MATCH(corpus, stemmedCorpus) AGAINST (%s IN BOOLEAN MODE)
+            AS fieldScore',
+        $title_field,
+        $title_boost,
+        $compiled_query);
 
-    $conn_r = $dao_doc->establishConnection('r');
-
-    $q = $query->getParameter('query');
-
-    if (strlen($q)) {
-     $join[] = qsprintf(
-        $conn_r,
+      $join[] = qsprintf(
+        $conn,
         '%T field ON field.phid = document.phid',
-        $t_field);
+        $field_table);
+
       $where[] = qsprintf(
-        $conn_r,
-        'MATCH(corpus) AGAINST (%s IN BOOLEAN MODE)',
-        $q);
+        $conn,
+        'MATCH(corpus, stemmedCorpus) AGAINST (%s IN BOOLEAN MODE)',
+        $compiled_query);
 
-      // When searching for a string, promote user listings above other
-      // listings.
-      $order = qsprintf(
-        $conn_r,
-        'ORDER BY
-          IF(documentType = %s, 0, 1) ASC,
-          MAX(MATCH(corpus) AGAINST (%s)) DESC',
-        'USER',
-        $q);
-
-      $field = $query->getParameter('field');
-      if ($field) {
+      if ($query->getParameter('field')) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'field.field = %s',
           $field);
       }
+    } else {
+      $select[] = qsprintf(
+        $conn,
+        'document.documentCreated AS fieldScore');
     }
 
     $exclude = $query->getParameter('exclude');
     if ($exclude) {
-      $where[] = qsprintf($conn_r, 'document.phid != %s', $exclude);
+      $where[] = qsprintf(
+        $conn,
+        'document.phid != %s',
+        $exclude);
     }
 
     $types = $query->getParameter('types');
     if ($types) {
-      if (strlen($q)) {
+      if (strlen($compiled_query)) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'field.phidType IN (%Ls)',
           $types);
       }
+
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'document.documentType IN (%Ls)',
         $types);
     }
 
     $join[] = $this->joinRelationship(
-      $conn_r,
+      $conn,
       $query,
       'authorPHIDs',
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR);
@@ -230,14 +279,14 @@ final class PhabricatorMySQLFulltextStorageEngine
 
     if ($include_open && !$include_closed) {
       $join[] = $this->joinRelationship(
-        $conn_r,
+        $conn,
         $query,
         'statuses',
         $open_rel,
         true);
     } else if ($include_closed && !$include_open) {
       $join[] = $this->joinRelationship(
-        $conn_r,
+        $conn,
         $query,
         'statuses',
         $closed_rel,
@@ -246,46 +295,47 @@ final class PhabricatorMySQLFulltextStorageEngine
 
     if ($query->getParameter('withAnyOwner')) {
       $join[] = $this->joinRelationship(
-        $conn_r,
+        $conn,
         $query,
         'withAnyOwner',
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         true);
     } else if ($query->getParameter('withUnowned')) {
       $join[] = $this->joinRelationship(
-        $conn_r,
+        $conn,
         $query,
         'withUnowned',
         PhabricatorSearchRelationship::RELATIONSHIP_UNOWNED,
         true);
     } else {
       $join[] = $this->joinRelationship(
-        $conn_r,
+        $conn,
         $query,
         'ownerPHIDs',
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER);
     }
 
     $join[] = $this->joinRelationship(
-      $conn_r,
+      $conn,
       $query,
       'subscriberPHIDs',
       PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER);
 
     $join[] = $this->joinRelationship(
-      $conn_r,
+      $conn,
       $query,
       'projectPHIDs',
       PhabricatorSearchRelationship::RELATIONSHIP_PROJECT);
 
     $join[] = $this->joinRelationship(
-      $conn_r,
+      $conn,
       $query,
       'repository',
       PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY);
 
-    $join = array_filter($join);
+    $select = implode(', ', $select);
 
+    $join = array_filter($join);
     foreach ($join as $key => $clause) {
       $join[$key] = ' JOIN '.$clause;
     }
@@ -297,27 +347,24 @@ final class PhabricatorMySQLFulltextStorageEngine
       $where = '';
     }
 
-    $offset = (int)$query->getParameter('offset', 0);
-    $limit  = (int)$query->getParameter('limit', 25);
+    if (strlen($compiled_query)) {
+      $order = '';
+    } else {
+      // When not executing a query, order by document creation date. This
+      // is the default view in object browser dialogs, like "Close Duplicate".
+      $order = qsprintf(
+        $conn,
+        'ORDER BY document.documentCreated DESC');
+    }
 
-    $hits = queryfx_all(
-      $conn_r,
-      'SELECT
-        document.phid
-        FROM %T document
-          %Q
-          %Q
-        GROUP BY document.phid
-          %Q
-        LIMIT %d, %d',
-      $t_doc,
+    return qsprintf(
+      $conn,
+      'SELECT %Q FROM %T document %Q %Q %Q LIMIT 1000',
+      $select,
+      $document_table,
       $join,
       $where,
-      $order,
-      $offset,
-      $limit);
-
-    return ipull($hits, 'phid');
+      $order);
   }
 
   protected function joinRelationship(
@@ -349,6 +396,20 @@ final class PhabricatorMySQLFulltextStorageEngine
     }
 
     return $sql;
+  }
+
+  private function compileQuery($raw_query) {
+    $stemmer = new PhutilSearchStemmer();
+
+    $compiler = PhabricatorSearchDocument::newQueryCompiler()
+      ->setQuery($raw_query)
+      ->setStemmer($stemmer);
+
+    $queries = array();
+    $queries[] = $compiler->compileLiteralQuery();
+    $queries[] = $compiler->compileStemmedQuery();
+
+    return implode(' ', array_filter($queries));
   }
 
   public function indexExists() {

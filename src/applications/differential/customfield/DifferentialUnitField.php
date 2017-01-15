@@ -32,9 +32,31 @@ final class DifferentialUnitField
   }
 
   public function getWarningsForDetailView() {
-    $status = $this->getObject()->getActiveDiff()->getUnitStatus();
-
     $warnings = array();
+
+    $viewer = $this->getViewer();
+    $diff = $this->getObject()->getActiveDiff();
+
+    $buildable = id(new HarbormasterBuildableQuery())
+      ->setViewer($viewer)
+      ->withBuildablePHIDs(array($diff->getPHID()))
+      ->withManualBuildables(false)
+      ->executeOne();
+    if ($buildable) {
+      switch ($buildable->getBuildableStatus()) {
+        case HarbormasterBuildable::STATUS_BUILDING:
+          $warnings[] = pht(
+            'These changes have not finished building yet and may have build '.
+            'failures.');
+          break;
+        case HarbormasterBuildable::STATUS_FAILED:
+          $warnings[] = pht(
+            'These changes have failed to build.');
+          break;
+      }
+    }
+
+    $status = $this->getObject()->getActiveDiff()->getUnitStatus();
     if ($status < DifferentialUnitStatus::UNIT_WARN) {
       // Don't show any warnings.
     } else if ($status == DifferentialUnitStatus::UNIT_AUTO_SKIP) {

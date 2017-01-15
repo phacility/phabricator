@@ -256,7 +256,7 @@ final class PhabricatorPeopleProfilePictureController
     $crumbs->setBorder(true);
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
+    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit Profile Picture'))

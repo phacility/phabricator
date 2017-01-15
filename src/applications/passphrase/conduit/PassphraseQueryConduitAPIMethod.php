@@ -82,7 +82,7 @@ final class PassphraseQueryConduitAPIMethod
 
       switch ($credential->getCredentialType()) {
         case PassphraseSSHPrivateKeyFileCredentialType::CREDENTIAL_TYPE:
-          if ($secret) {
+          if ($secret !== null) {
             $material['file'] = $secret;
           }
           if ($public_key) {
@@ -91,7 +91,7 @@ final class PassphraseQueryConduitAPIMethod
           break;
         case PassphraseSSHGeneratedKeyCredentialType::CREDENTIAL_TYPE:
         case PassphraseSSHPrivateKeyTextCredentialType::CREDENTIAL_TYPE:
-          if ($secret) {
+          if ($secret !== null) {
             $material['privateKey'] = $secret;
           }
           if ($public_key) {
@@ -99,8 +99,13 @@ final class PassphraseQueryConduitAPIMethod
           }
           break;
         case PassphrasePasswordCredentialType::CREDENTIAL_TYPE:
-          if ($secret) {
+          if ($secret !== null) {
             $material['password'] = $secret;
+          }
+          break;
+        case PassphraseTokenCredentialType::CREDENTIAL_TYPE:
+          if ($secret !== null) {
+            $material['token'] = $secret;
           }
           break;
       }

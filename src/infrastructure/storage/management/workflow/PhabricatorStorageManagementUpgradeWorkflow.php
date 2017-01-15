@@ -73,16 +73,77 @@ final class PhabricatorStorageManagementUpgradeWorkflow
     $init_only     = $args->getArg('init-only');
     $no_adjust     = $args->getArg('no-adjust');
 
-    $this->upgradeSchemata($apply_only, $no_quickstart, $init_only);
+    $apis = $this->getMasterAPIs();
+
+    $this->upgradeSchemata($apis, $apply_only, $no_quickstart, $init_only);
+
+    if ($apply_only || $init_only) {
+      echo tsprintf(
+        "%s\n",
+        pht('Declining to synchronize static tables.'));
+    } else {
+      echo tsprintf(
+        "%s\n",
+        pht('Synchronizing static tables...'));
+      $this->synchronizeSchemata();
+    }
 
     if ($no_adjust || $init_only || $apply_only) {
       $console->writeOut(
         "%s\n",
         pht('Declining to apply storage adjustments.'));
-      return 0;
     } else {
-      return $this->adjustSchemata(false);
+      foreach ($apis as $api) {
+        $err = $this->adjustSchemata($api, false);
+        if ($err) {
+          return $err;
+        }
+      }
+    }
+
+    return 0;
+  }
+
+  private function synchronizeSchemata() {
+    // Synchronize the InnoDB fulltext stopwords table from the stopwords file
+    // on disk.
+
+    $table = new PhabricatorSearchDocument();
+    $conn = $table->establishConnection('w');
+    $table_ref = PhabricatorSearchDocument::STOPWORDS_TABLE;
+
+    $stopwords_database = queryfx_all(
+      $conn,
+      'SELECT value FROM %T',
+      $table_ref);
+    $stopwords_database = ipull($stopwords_database, 'value', 'value');
+
+    $stopwords_path = phutil_get_library_root('phabricator');
+    $stopwords_path = $stopwords_path.'/../resources/sql/stopwords.txt';
+    $stopwords_file = Filesystem::readFile($stopwords_path);
+    $stopwords_file = phutil_split_lines($stopwords_file, false);
+    $stopwords_file = array_fuse($stopwords_file);
+
+    $rem_words = array_diff_key($stopwords_database, $stopwords_file);
+    if ($rem_words) {
+      queryfx(
+        $conn,
+        'DELETE FROM %T WHERE value IN (%Ls)',
+        $table_ref,
+        $rem_words);
+    }
+
+    $add_words = array_diff_key($stopwords_file, $stopwords_database);
+    if ($add_words) {
+      foreach ($add_words as $word) {
+        queryfx(
+          $conn,
+          'INSERT IGNORE INTO %T (value) VALUES (%s)',
+          $table_ref,
+          $word);
+      }
     }
   }
+
 
 }

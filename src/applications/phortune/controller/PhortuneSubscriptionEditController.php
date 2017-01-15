@@ -50,6 +50,11 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
 
     $current_phid = $subscription->getDefaultPaymentMethodPHID();
 
+    $e_method = null;
+    if ($current_phid && empty($valid_methods[$current_phid])) {
+      $e_method = pht('Needs Update');
+    }
+
     $errors = array();
     if ($request->isFormPost()) {
 
@@ -57,12 +62,14 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
       if (!$default_method_phid) {
         $default_method_phid = null;
         $e_method = null;
-      } else if ($default_method_phid == $current_phid) {
-        // If you have an invalid setting already, it's OK to retain it.
-        $e_method = null;
-      } else {
-        if (empty($valid_methods[$default_method_phid])) {
-          $e_method = pht('Invalid');
+      } else if (empty($valid_methods[$default_method_phid])) {
+        $e_method = pht('Invalid');
+        if ($default_method_phid == $current_phid) {
+          $errors[] = pht(
+            'This subscription is configured to autopay with a payment method '.
+            'that has been deleted. Choose a valid payment method or disable '.
+            'autopay.');
+        } else {
           $errors[] = pht('You must select a valid default payment method.');
         }
       }
@@ -86,11 +93,9 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
 
     // Don't require the user to make a valid selection if the current method
     // has become invalid.
-    // TODO: This should probably have a note about why this is bogus.
     if ($current_phid && empty($valid_methods[$current_phid])) {
-      $handles = $this->loadViewerHandles(array($current_phid));
       $current_options = array(
-        $current_phid => $handles[$current_phid]->getName(),
+        $current_phid => pht('<Deleted Payment Method>'),
       );
     } else {
       $current_options = array();
@@ -129,6 +134,7 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
           ->setName('defaultPaymentMethodPHID')
           ->setLabel(pht('Autopay With'))
           ->setValue($current_phid)
+          ->setError($e_method)
           ->setOptions($options))
       ->appendChild(
         id(new AphrontFormMarkupControl())

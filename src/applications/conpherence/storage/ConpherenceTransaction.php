@@ -2,12 +2,12 @@
 
 final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
-  const TYPE_FILES           = 'files';
   const TYPE_TITLE           = 'title';
+  const TYPE_TOPIC           = 'topic';
   const TYPE_PARTICIPANTS    = 'participants';
   const TYPE_DATE_MARKER     = 'date-marker';
   const TYPE_PICTURE         = 'picture';
-  const TYPE_PICTURE_CROP    = 'picture-crop';
+  const TYPE_PICTURE_CROP    = 'picture-crop'; // TODO: Nuke these from DB.
 
   public function getApplicationName() {
     return 'conpherence';
@@ -39,11 +39,10 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_PARTICIPANTS:
         return ($old === null);
       case self::TYPE_TITLE:
+      case self::TYPE_TOPIC:
       case self::TYPE_PICTURE:
       case self::TYPE_DATE_MARKER:
         return false;
-      case self::TYPE_FILES:
-        return true;
       case self::TYPE_PICTURE_CROP:
         return true;
     }
@@ -59,34 +58,12 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
+      case self::TYPE_TOPIC:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case self::TYPE_PICTURE:
         return $this->getRoomTitle();
-        break;
-      case self::TYPE_FILES:
-        $add = array_diff($new, $old);
-        $rem = array_diff($old, $new);
-
-        if ($add && $rem) {
-          $title = pht(
-            '%s edited files(s), added %d and removed %d.',
-            $this->renderHandleLink($author_phid),
-            count($add),
-            count($rem));
-        } else if ($add) {
-          $title = pht(
-            '%s added %s files(s).',
-            $this->renderHandleLink($author_phid),
-            phutil_count($add));
-        } else {
-          $title = pht(
-            '%s removed %s file(s).',
-            $this->renderHandleLink($author_phid),
-            phutil_count($rem));
-        }
-        return $title;
         break;
       case self::TYPE_PARTICIPANTS:
         $add = array_diff($new, $old);
@@ -120,6 +97,55 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitle();
   }
 
+  public function getTitleForFeed() {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case self::TYPE_TITLE:
+        if (strlen($old) && strlen($new)) {
+          return pht(
+            '%s renamed %s from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old,
+            $new);
+        } else {
+          return pht(
+            '%s created the room %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+        break;
+      break;
+      case self::TYPE_TOPIC:
+        if (strlen($new)) {
+          return pht(
+            '%s set the topic of %s to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $new);
+        } else if (strlen($old)) {
+          return pht(
+            '%s deleted the topic in %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
+      break;
+      case self::TYPE_PICTURE:
+        return pht(
+          '%s updated the room image for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
+    }
+    return parent::getTitleForFeed();
+  }
+
   private function getRoomTitle() {
     $author_phid = $this->getAuthorPHID();
 
@@ -144,6 +170,20 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
             '%s named this room "%s".',
             $this->renderHandleLink($author_phid),
             $new);
+        }
+        return $title;
+        break;
+      case self::TYPE_TOPIC:
+        if ($new) {
+          $title = pht(
+            '%s set the topic of this room to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else if ($old) {
+          $title = pht(
+            '%s deleted the room topic "%s"',
+            $this->renderHandleLink($author_phid),
+            $old);
         }
         return $title;
         break;
@@ -186,7 +226,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
       case self::TYPE_PICTURE:
-      case self::TYPE_FILES:
       case self::TYPE_DATE_MARKER:
         break;
       case self::TYPE_PARTICIPANTS:

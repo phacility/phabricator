@@ -126,10 +126,6 @@ final class PhabricatorPackagesVersion
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
 

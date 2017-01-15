@@ -2,7 +2,8 @@
 
 final class DrydockAuthorization extends DrydockDAO
   implements
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorConduitResultInterface {
 
   const OBJECTAUTH_ACTIVE = 'active';
   const OBJECTAUTH_INACTIVE = 'inactive';
@@ -203,5 +204,53 @@ final class DrydockAuthorization extends DrydockDAO
       'authorizes access to.');
   }
 
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('blueprintPHID')
+        ->setType('phid')
+        ->setDescription(pht(
+          'PHID of the blueprint this request was made for.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('blueprintAuthorizationState')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Authorization state of this request.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('objectPHID')
+        ->setType('phid')
+        ->setDescription(pht(
+          'PHID of the object which requested authorization.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('objectAuthorizationState')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('Authorization state of the requesting object.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $blueprint_state = $this->getBlueprintAuthorizationState();
+    $object_state = $this->getObjectAuthorizationState();
+    return array(
+      'blueprintPHID' => $this->getBlueprintPHID(),
+      'blueprintAuthorizationState' => array(
+        'value' => $blueprint_state,
+        'name' => self::getBlueprintStateName($blueprint_state),
+      ),
+      'objectPHID' => $this->getObjectPHID(),
+      'objectAuthorizationState' => array(
+        'value' => $object_state,
+        'name' => self::getObjectStateName($object_state),
+      ),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+    );
+  }
 
 }

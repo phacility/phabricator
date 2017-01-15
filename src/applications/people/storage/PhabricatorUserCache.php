@@ -96,6 +96,26 @@ final class PhabricatorUserCache extends PhabricatorUserDAO {
     unset($unguarded);
   }
 
+  public static function readCaches(
+    PhabricatorUserCacheType $type,
+    $key,
+    array $user_phids) {
+
+    $table = new self();
+    $conn = $table->establishConnection('r');
+
+    $rows = queryfx_all(
+      $conn,
+      'SELECT userPHID, cacheData FROM %T WHERE userPHID IN (%Ls)
+        AND cacheType = %s AND cacheIndex = %s',
+      $table->getTableName(),
+      $user_phids,
+      $type->getUserCacheType(),
+      PhabricatorHash::digestForIndex($key));
+
+    return ipull($rows, 'cacheData', 'userPHID');
+  }
+
   public static function clearCache($key, $user_phid) {
     return self::clearCaches($key, array($user_phid));
   }

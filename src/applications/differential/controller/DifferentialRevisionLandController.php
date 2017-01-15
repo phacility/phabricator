@@ -2,19 +2,12 @@
 
 final class DifferentialRevisionLandController extends DifferentialController {
 
-  private $revisionID;
-  private $strategyClass;
   private $pushStrategy;
-
-  public function willProcessRequest(array $data) {
-    $this->revisionID = $data['id'];
-    $this->strategyClass = $data['strategy'];
-  }
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-
-    $revision_id = $this->revisionID;
+    $revision_id = $request->getURIData('id');
+    $strategy_class = $request->getURIData('strategy');
 
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($revision_id))
@@ -24,15 +17,15 @@ final class DifferentialRevisionLandController extends DifferentialController {
       return new Aphront404Response();
     }
 
-    if (is_subclass_of($this->strategyClass, 'DifferentialLandingStrategy')) {
-      $this->pushStrategy = newv($this->strategyClass, array());
+    if (is_subclass_of($strategy_class, 'DifferentialLandingStrategy')) {
+      $this->pushStrategy = newv($strategy_class, array());
     } else {
       throw new Exception(
         pht(
           "Strategy type must be a valid class name and must subclass ".
           "%s. '%s' is not a subclass of %s",
           'DifferentialLandingStrategy',
-          $this->strategyClass,
+          $strategy_class,
           'DifferentialLandingStrategy'));
     }
 

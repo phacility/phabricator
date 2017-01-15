@@ -92,10 +92,6 @@ final class AlmanacNetwork
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

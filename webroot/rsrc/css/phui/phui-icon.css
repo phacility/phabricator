@@ -49,6 +49,8 @@ a.phui-icon-view:hover {
   text-align: center;
   display: inline-block;
   cursor: pointer;
+  background: transparent;
+  padding: 0;
 }
 
 .phui-icon-circle.circle-medium {
@@ -71,14 +73,54 @@ a.phui-icon-view:hover {
   line-height: 36px;
 }
 
-a.phui-icon-circle:hover {
+a.phui-icon-circle.hover-sky:hover {
   text-decoration: none;
   border-color: {$sky};
   cursor: pointer;
 }
 
-a.phui-icon-circle:hover .phui-icon-view {
+a.phui-icon-circle.hover-sky:hover .phui-icon-view {
   color: {$sky};
+}
+
+a.phui-icon-circle.hover-violet:hover {
+  text-decoration: none;
+  border-color: {$violet};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-violet:hover .phui-icon-view {
+  color: {$violet};
+}
+
+a.phui-icon-circle.hover-pink:hover {
+  text-decoration: none;
+  border-color: {$pink};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-pink:hover .phui-icon-view {
+  color: {$pink};
+}
+
+a.phui-icon-circle.hover-green:hover {
+  text-decoration: none;
+  border-color: {$green};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-green:hover .phui-icon-view {
+  color: {$green};
+}
+
+a.phui-icon-circle.hover-red:hover {
+  text-decoration: none;
+  border-color: {$red};
+  cursor: pointer;
+}
+
+a.phui-icon-circle.hover-red:hover .phui-icon-view {
+  color: {$red};
 }
 
 /* - Icon in a Square ------------------------------------------------------- */

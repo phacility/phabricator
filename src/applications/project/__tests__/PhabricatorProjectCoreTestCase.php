@@ -39,6 +39,66 @@ final class PhabricatorProjectCoreTestCase extends PhabricatorTestCase {
     $this->assertFalse((bool)$this->refreshProject($proj, $user2));
   }
 
+  public function testApplicationPolicy() {
+    $user = $this->createUser()
+      ->save();
+
+    $proj = $this->createProject($user);
+
+    $this->assertTrue(
+      PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $proj,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    // This object is visible so its handle should load normally.
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($proj->getPHID()))
+      ->executeOne();
+    $this->assertEqual($proj->getPHID(), $handle->getPHID());
+
+    // Change the "Can Use Application" policy for Projecs to "No One". This
+    // should cause filtering checks to fail even when they are executed
+    // directly rather than via a Query.
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig(
+      'phabricator.application-settings',
+      array(
+        'PHID-APPS-PhabricatorProjectApplication' => array(
+          'policy' => array(
+            'view' => PhabricatorPolicies::POLICY_NOONE,
+          ),
+        ),
+      ));
+
+    // Application visibility is cached because it does not normally change
+    // over the course of a single request. Drop the cache so the next filter
+    // test uses the new visibility.
+    PhabricatorCaches::destroyRequestCache();
+
+    $this->assertFalse(
+      PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $proj,
+        PhabricatorPolicyCapability::CAN_VIEW));
+
+    // We should still be able to load a handle for the project, even if we
+    // can not see the application.
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($proj->getPHID()))
+      ->executeOne();
+
+    // The handle should load...
+    $this->assertEqual($proj->getPHID(), $handle->getPHID());
+
+    // ...but be policy filtered.
+    $this->assertTrue($handle->getPolicyFiltered());
+
+    unset($env);
+  }
+
   public function testIsViewerMemberOrWatcher() {
     $user1 = $this->createUser()
       ->save();

@@ -26,6 +26,19 @@ final class DifferentialDiffExtractionEngine extends Phobject {
   public function newDiffFromCommit(PhabricatorRepositoryCommit $commit) {
     $viewer = $this->getViewer();
 
+    // If we already have an unattached diff for this commit, just reuse it.
+    // This stops us from repeatedly generating diffs if something goes wrong
+    // later in the process. See T10968 for context.
+    $existing_diffs = id(new DifferentialDiffQuery())
+      ->setViewer($viewer)
+      ->withCommitPHIDs(array($commit->getPHID()))
+      ->withHasRevision(false)
+      ->needChangesets(true)
+      ->execute();
+    if ($existing_diffs) {
+      return head($existing_diffs);
+    }
+
     $repository = $commit->getRepository();
     $identifier = $commit->getCommitIdentifier();
     $monogram = $commit->getMonogram();
@@ -73,6 +86,7 @@ final class DifferentialDiffExtractionEngine extends Phobject {
 
     $diff = DifferentialDiff::newFromRawChanges($viewer, $changes)
       ->setRepositoryPHID($repository->getPHID())
+      ->setCommitPHID($commit->getPHID())
       ->setCreationMethod('commit')
       ->setSourceControlSystem($repository->getVersionControlSystem())
       ->setLintStatus(DifferentialLintStatus::LINT_AUTO_SKIP)

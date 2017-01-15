@@ -19,8 +19,9 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
     $device = AlmanacKeys::getLiveDevice();
 
     $skip_sync = $this->shouldSkipReadSynchronization();
+    $is_proxy = $this->shouldProxy();
 
-    if ($this->shouldProxy()) {
+    if ($is_proxy) {
       $command = $this->getProxyCommand();
 
       if ($device) {
@@ -48,6 +49,8 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
     }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
+    $pull_event = $this->newPullEvent();
+
     $future = id(new ExecFuture('%C', $command))
       ->setEnv($this->getEnvironment());
 
@@ -55,6 +58,26 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
       ->setIOChannel($this->getIOChannel())
       ->setCommandChannelFromExecFuture($future)
       ->execute();
+
+    if ($err) {
+      $pull_event
+        ->setResultType('error')
+        ->setResultCode($err);
+    } else {
+      $pull_event
+        ->setResultType('pull')
+        ->setResultCode(0);
+    }
+
+    // TODO: Currently, when proxying, we do not write a log on the proxy.
+    // Perhaps we should write a "proxy log". This is not very useful for
+    // statistics or auditing, but could be useful for diagnostics. Marking
+    // the proxy logs as proxied (and recording devicePHID on all logs) would
+    // make differentiating between these use cases easier.
+
+    if (!$is_proxy) {
+      $pull_event->save();
+    }
 
     if (!$err) {
       $this->waitForGitClient();

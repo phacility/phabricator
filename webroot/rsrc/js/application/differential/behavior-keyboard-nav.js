@@ -173,16 +173,6 @@ JX.behavior('differential-keyboard-navigation', function(config) {
       refreshFocus();
     });
 
-  var haunt_mode = 0;
-  function haunt() {
-    haunt_mode = (haunt_mode + 1) % 3;
-
-    var el = JX.$(config.haunt);
-    for (var ii = 1; ii <= 2; ii++) {
-      JX.DOM.alterClass(el, 'differential-haunt-mode-'+ii, (haunt_mode == ii));
-    }
-  }
-
   new JX.KeyboardShortcut('j', 'Jump to next change.')
     .setHandler(function(manager) {
       jump(manager, 1);
@@ -270,11 +260,5 @@ JX.behavior('differential-keyboard-navigation', function(config) {
       inline_op(selection_begin, 'edit');
     })
     .register();
-
-  if (config.haunt) {
-    new JX.KeyboardShortcut('z', 'Cycle comment panel haunting modes.')
-      .setHandler(haunt)
-      .register();
-  }
 
 });

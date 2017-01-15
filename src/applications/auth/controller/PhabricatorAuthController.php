@@ -259,8 +259,12 @@ abstract class PhabricatorAuthController extends PhabricatorController {
   protected function renderInviteHeader(PhabricatorAuthInvite $invite) {
     $viewer = $this->getViewer();
 
+    // Since the user hasn't registered yet, they may not be able to see other
+    // user accounts. Load the inviting user with the omnipotent viewer.
+    $omnipotent_viewer = PhabricatorUser::getOmnipotentUser();
+
     $invite_author = id(new PhabricatorPeopleQuery())
-      ->setViewer($viewer)
+      ->setViewer($omnipotent_viewer)
       ->withPHIDs(array($invite->getAuthorPHID()))
       ->needProfileImage(true)
       ->executeOne();

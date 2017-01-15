@@ -16,37 +16,47 @@ abstract class PhabricatorWorkerManagementWorkflow
         'param' => 'name',
         'help' => pht('Select all tasks of a given class.'),
       ),
+      array(
+        'name' => 'min-failure-count',
+        'param' => 'int',
+        'help' => pht('Limit to tasks with at least this many failures.'),
+      ),
     );
   }
 
   protected function loadTasks(PhutilArgumentParser $args) {
     $ids = $args->getArg('id');
     $class = $args->getArg('class');
+    $min_failures = $args->getArg('min-failure-count');
 
-    if (!$ids && !$class) {
+    if (!$ids && !$class && !$min_failures) {
       throw new PhutilArgumentUsageException(
-        pht('Use --id or --class to select tasks.'));
-    } if ($ids && $class) {
-      throw new PhutilArgumentUsageException(
-        pht('Use one of --id or --class to select tasks, but not both.'));
+        pht('Use --id, --class, or --min-failure-count to select tasks.'));
     }
+
+    $active_query = new PhabricatorWorkerActiveTaskQuery();
+    $archive_query = new PhabricatorWorkerArchiveTaskQuery();
 
     if ($ids) {
-      $active_tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
-        'id IN (%Ls)',
-        $ids);
-      $archive_tasks = id(new PhabricatorWorkerArchiveTaskQuery())
-        ->withIDs($ids)
-        ->execute();
-    } else {
-      $active_tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
-        'taskClass IN (%Ls)',
-        array($class));
-      $archive_tasks = id(new PhabricatorWorkerArchiveTaskQuery())
-        ->withClassNames(array($class))
-        ->execute();
+      $active_query = $active_query->withIDs($ids);
+      $archive_query = $archive_query->withIDs($ids);
     }
 
+    if ($class) {
+      $class_array = array($class);
+      $active_query = $active_query->withClassNames($class_array);
+      $archive_query = $archive_query->withClassNames($class_array);
+    }
+
+    if ($min_failures) {
+      $active_query = $active_query->withFailureCountBetween(
+        $min_failures, null);
+      $archive_query = $archive_query->withFailureCountBetween(
+        $min_failures, null);
+    }
+
+    $active_tasks = $active_query->execute();
+    $archive_tasks = $archive_query->execute();
     $tasks =
       mpull($active_tasks, null, 'getID') +
       mpull($archive_tasks, null, 'getID');
@@ -58,10 +68,23 @@ abstract class PhabricatorWorkerManagementWorkflow
             pht('No task exists with id "%s"!', $id));
         }
       }
-    } else {
+    }
+    if ($class && $min_failures) {
+      if (!$tasks) {
+        throw new PhutilArgumentUsageException(
+          pht('No task exists with class "%s" and at least %d failures!',
+            $class,
+            $min_failures));
+      }
+    } else if ($class) {
       if (!$tasks) {
         throw new PhutilArgumentUsageException(
           pht('No task exists with class "%s"!', $class));
+      }
+    } else if ($min_failures) {
+      if (!$tasks) {
+        throw new PhutilArgumentUsageException(
+          pht('No tasks exist with at least %d failures!', $min_failures));
       }
     }
 

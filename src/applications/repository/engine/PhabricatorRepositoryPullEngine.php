@@ -172,8 +172,6 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function logPull($message) {
-    $code_working = PhabricatorRepositoryStatusMessage::CODE_WORKING;
-    $this->updateRepositoryInitStatus($code_working, $message);
     $this->log('%s', $message);
   }
 

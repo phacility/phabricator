@@ -23,6 +23,17 @@ final class PhabricatorMainMenuView extends AphrontView {
     return $this->controller;
   }
 
+  private function getFaviconURI($type = null) {
+    switch ($type) {
+      case 'message':
+        return celerity_get_resource_uri('/rsrc/favicons/favicon-message.ico');
+      case 'mention':
+        return celerity_get_resource_uri('/rsrc/favicons/favicon-mention.ico');
+      default:
+        return celerity_get_resource_uri('/rsrc/favicons/favicon.ico');
+    }
+  }
+
   public function render() {
     $viewer = $this->getViewer();
 
@@ -306,19 +317,26 @@ final class PhabricatorMainMenuView extends AphrontView {
 
       $logo_uri = $cache->getKey($cache_key_logo);
       if (!$logo_uri) {
-        $file = id(new PhabricatorFileQuery())
+        // NOTE: If the file policy has been changed to be restrictive, we'll
+        // miss here and just show the default logo. The cache will fill later
+        // when someone who can see the file loads the page. This might be a
+        // little spooky, see T11982.
+        $files = id(new PhabricatorFileQuery())
           ->setViewer($this->getViewer())
           ->withPHIDs(array($custom_header))
-          ->executeOne();
+          ->execute();
+        $file = head($files);
         if ($file) {
           $logo_uri = $file->getViewURI();
           $cache->setKey($cache_key_logo, $logo_uri);
         }
       }
 
-      $logo_style[] = 'background-size: 40px 40px;';
-      $logo_style[] = 'background-position: 0 0;';
-      $logo_style[] = 'background-image: url('.$logo_uri.')';
+      if ($logo_uri) {
+        $logo_style[] = 'background-size: 40px 40px;';
+        $logo_style[] = 'background-position: 0 0;';
+        $logo_style[] = 'background-image: url('.$logo_uri.')';
+      }
     }
 
     $logo_node = phutil_tag(
@@ -440,6 +458,9 @@ final class PhabricatorMainMenuView extends AphrontView {
           'countType'   => $conpherence_data['countType'],
           'countNumber' => $message_count_number,
           'unreadClass' => 'message-unread',
+          'favicon'     => $this->getFaviconURI('default'),
+          'message_favicon' => $this->getFaviconURI('message'),
+          'mention_favicon' => $this->getFaviconURI('mention'),
         ));
 
       $message_notification_dropdown = javelin_tag(
@@ -518,6 +539,9 @@ final class PhabricatorMainMenuView extends AphrontView {
           'countType'   => $notification_data['countType'],
           'countNumber' => $count_number,
           'unreadClass' => 'alert-unread',
+          'favicon'     => $this->getFaviconURI('default'),
+          'message_favicon' => $this->getFaviconURI('message'),
+          'mention_favicon' => $this->getFaviconURI('mention'),
         ));
 
       $notification_dropdown = javelin_tag(
@@ -600,6 +624,9 @@ final class PhabricatorMainMenuView extends AphrontView {
             'countType'   => null,
             'countNumber' => null,
             'unreadClass' => 'setup-unread',
+            'favicon'     => $this->getFaviconURI('default'),
+            'message_favicon' => $this->getFaviconURI('message'),
+            'mention_favicon' => $this->getFaviconURI('mention'),
           ));
 
         $setup_notification_dropdown = javelin_tag(

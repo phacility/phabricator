@@ -1,0 +1,59 @@
+/**
+ * @provides phui-oi-drag-ui-css
+ * @requires phui-oi-list-view-css
+ */
+
+.phui-object-box .phui-oi-list-view.phui-oi-list-drag {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.phui-oi.phui-oi-drag {
+  background: {$bluebackground};
+  border-radius: 3px;
+  border: none;
+}
+
+.phui-oi.phui-oi-drag,
+.phui-oi.phui-oi-drag .phui-oi-frame {
+  border: none;
+}
+
+.phui-object-box .phui-oi-list-view .phui-oi.phui-oi-drag {
+  margin-top: 4px;
+}
+
+.phui-oi-drag.phui-oi-with-image-icon .phui-oi-frame,
+.phui-oi-drag.phui-oi-with-image .phui-oi-frame,
+.phui-oi-drag .phui-oi-frame {
+  min-height: 36px;
+}
+
+.phui-oi-drag .phui-oi-list-icon {
+  height: auto;
+  width: auto;
+}
+
+.phui-oi-drag .phui-oi-image-icon .phui-icon-view {
+  height: 16px;
+  width: 16px;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.phui-oi-drag.phui-oi-grippable .phui-oi-frame {
+  padding-left: 28px;
+}
+
+.phui-oi-drag .phui-oi-grip {
+  left: 4px;
+}
+
+.phui-oi-drag.phui-oi-with-image-icon .phui-oi-content-box,
+.phui-oi-drag.phui-oi-with-image .phui-oi-content-box {
+  margin-left: 24px;
+}
+
+.phui-oi-list-drag .drag-ghost {
+  margin-top: 4px;
+}

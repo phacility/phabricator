@@ -41,7 +41,7 @@ final class PhabricatorCalendarEventPHIDType extends PhabricatorPHIDType {
         ->setFullName(pht('%s: %s', $monogram, $name))
         ->setURI($uri);
 
-      if ($event->isCancelledEvent()) {
+      if ($event->getIsCancelled()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }

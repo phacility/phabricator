@@ -119,7 +119,7 @@ body .phui-crumbs-view + .phui-object-box {
   margin-top: 0;
 }
 
-body .phui-crumbs-view + .phui-object-item-list-view {
+body .phui-crumbs-view + .phui-oi-list-view {
   padding-top: 0;
 }
 

@@ -54,7 +54,7 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
       }
 
       foreach ($libraries as $library) {
-        $targets[] = Filesystem::resolvePath(dirname($library)).'/';
+        $targets[] = Filesystem::resolvePath(dirname($path.'/'.$library)).'/';
       }
     }
 
@@ -175,10 +175,49 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
         try {
           $string_value = $string_node->evalStatic();
 
+          $args = $params->getChildren();
+          $args = array_slice($args, 1);
+
+          $types = array();
+          foreach ($args as $child) {
+            $type = null;
+
+            switch ($child->getTypeName()) {
+              case 'n_FUNCTION_CALL':
+                $call = $child->getChildByIndex(0);
+                if ($call->getTypeName() == 'n_SYMBOL_NAME') {
+                  switch ($call->getConcreteString()) {
+                    case 'phutil_count':
+                      $type = 'number';
+                      break;
+                    case 'phutil_person':
+                      $type = 'person';
+                      break;
+                  }
+                }
+                break;
+              case 'n_NEW':
+                $class = $child->getChildByIndex(0);
+                if ($class->getTypeName() == 'n_CLASS_NAME') {
+                  switch ($class->getConcreteString()) {
+                    case 'PhutilNumber':
+                      $type = 'number';
+                      break;
+                  }
+                }
+                break;
+              default:
+                break;
+            }
+
+            $types[] = $type;
+          }
+
           $results[$hash][] = array(
             'string' => $string_value,
             'file' => Filesystem::readablePath($full_path, $root_path),
             'line' => $string_line,
+            'types' => $types,
           );
         } catch (Exception $ex) {
           $messages[] = pht(
@@ -207,10 +246,23 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
     $map = array();
     foreach ($strings as $hash => $string_list) {
       foreach ($string_list as $string_info) {
-        $map[$string_info['string']]['uses'][] = array(
+        $string = $string_info['string'];
+
+        $map[$string]['uses'][] = array(
           'file' => $string_info['file'],
           'line' => $string_info['line'],
         );
+
+        if (!isset($map[$string]['types'])) {
+          $map[$string]['types'] = $string_info['types'];
+        } else if ($map[$string]['types'] !== $string_info['types']) {
+          echo tsprintf(
+            "**<bg:yellow> %s </bg>** %s\n",
+            pht('WARNING'),
+            pht(
+              'Inferred types for string "%s" vary across callsites.',
+              $string_info['string']));
+        }
       }
     }
 

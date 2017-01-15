@@ -41,6 +41,36 @@ final class DifferentialCommitMessageParserTestCase
     }
   }
 
+
+  public function testDifferentialCommitMessageFieldParser() {
+    $message = <<<EOMESSAGE
+This is the title.
+
+Summary: This is the summary.
+EOMESSAGE;
+
+    $fields = array(
+      new DifferentialTitleCommitMessageField(),
+      new DifferentialSummaryCommitMessageField(),
+    );
+
+    $expect = array(
+      DifferentialTitleCommitMessageField::FIELDKEY =>
+        'This is the title.',
+      DifferentialSummaryCommitMessageField::FIELDKEY =>
+        'This is the summary.',
+    );
+
+    $parser = id(new DifferentialCommitMessageParser())
+      ->setCommitMessageFields($fields)
+      ->setTitleKey(DifferentialTitleCommitMessageField::FIELDKEY)
+      ->setSummaryKey(DifferentialSummaryCommitMessageField::FIELDKEY);
+
+    $actual = $parser->parseFields($message);
+
+    $this->assertEqual($expect, $actual);
+  }
+
   public function testDifferentialCommitMessageParserNormalization() {
     $map = array(
       'Test Plan' => 'test plan',

@@ -2,11 +2,17 @@
 
 final class PhabricatorLocalTimeTestCase extends PhabricatorTestCase {
 
+  protected function getPhabricatorTestCaseConfiguration() {
+    return array(
+      self::PHABRICATOR_TESTCONFIG_BUILD_STORAGE_FIXTURES => true,
+    );
+  }
+
   public function testLocalTimeFormatting() {
-    $user = new PhabricatorUser();
+    $user = $this->generateNewTestUser();
     $user->overrideTimezoneIdentifier('America/Los_Angeles');
 
-    $utc = new PhabricatorUser();
+    $utc = $this->generateNewTestUser();
     $utc->overrideTimezoneIdentifier('UTC');
 
     $this->assertEqual(

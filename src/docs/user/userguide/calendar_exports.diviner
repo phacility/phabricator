@@ -1,0 +1,97 @@
+@title Calendar User Guide: Exporting Events
+@group userguide
+
+Exporting events to other calendars.
+
+Overview
+========
+
+IMPORTANT: Calendar is a prototype application. See
+@{article:User Guide: Prototype Applications}.
+
+You can export events from Phabricator to other calendar applications like
+**Google Calendar** or **Calendar.app**. This document will guide you through
+how to export event data from Phabricator.
+
+When you export events into another application, they generally will not be
+editable from that application. Exporting events allows you to create one
+calendar that shows all the events you care about in whatever application you
+prefer (so you can keep track of everything you need to do), but does not let
+you edit Phabricator events from another application.
+
+When exporting events, you can either export individual events one at a time
+or export an entire group of events (for example, all events you are attending).
+
+
+Exporting a Single Event
+========================
+
+To export a single event, visit the event detail page and click
+{nav Export as .ics}. This will download an `.ics` file which you can import
+into most other calendar applications.
+
+Mail you receive about events also has a copy of this `.ics` file attached to
+it. You can import this `.ics` file directly.
+
+In **Google Calendar**, use {nav Other Calendars > Import Calendar} to import
+the `.ics` file.
+
+In **Calendar.app**, use {nav File > Import...} to import the `.ics` file, or
+drag the `.ics` file onto your calendar.
+
+When you export a recurring event, the `.ics` file will contain information
+about the entire event series.
+
+If you want to update event information later, you can just repeat this
+process. Calendar applications will update the existing event if you've
+previously imported an older version of it.
+
+
+Exporting a Group of Events
+===========================
+
+You can export a group of events matching an arbitrary query (like all events
+you are attending) to keep different calendars in sync.
+
+To export a group of events:
+
+  - Run a query in Calendar which selects the events you want to export.
+    - Example: All events you are attending.
+    - Example: All events you are invited to.
+    - Example: All events tagged `#meetup`.
+  - Select the {nav Use Results... > Export Query as .ics} action to turn
+    the query into an export.
+  - Name the export with a descritive name.
+  - Select a policy mode for the export (see below for discussion).
+  - Click {nav Create New Export} to finish the process.
+
+The **policy modes** for exports are:
+
+  - **Public**: Only public information (visible to logged-out users) will
+    be exported. This mode is not available if your install does not have
+    public information (per `policy.allow-public` in Config).
+  - **Privileged**: All event information will be exported. This means that
+    anyone who knows the export URI can see ALL of the related event
+    information, as though they were logged in with your account.
+
+WARNING: Anyone who learns the URI for an export can see the data you choose
+to export, even if they don't have a Phabricator account! Be careful about how
+much data you export and treat the URI as a secret. If you accidentally share
+a URI, you can disable the export.
+
+After finishing the process, you'll see a screen with some details about the
+export and an **ICS URI**. This URI allows you to import the events which match
+the query into another calendar application.
+
+In **Google Calendar**, use {nav Other Calendars > Add by URL} to import the
+URI.
+
+In **Calendar.app**, use {nav File > New Calendar Subscription...} to subscribe
+to the URI.
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Calendar User Guide}.

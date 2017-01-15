@@ -49,13 +49,13 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
 
-  const PANEL_PROFILE = 'project.profile';
-  const PANEL_POINTS = 'project.points';
-  const PANEL_WORKBOARD = 'project.workboard';
-  const PANEL_MEMBERS = 'project.members';
-  const PANEL_MANAGE = 'project.manage';
-  const PANEL_MILESTONES = 'project.milestones';
-  const PANEL_SUBPROJECTS = 'project.subprojects';
+  const ITEM_PROFILE = 'project.profile';
+  const ITEM_POINTS = 'project.points';
+  const ITEM_WORKBOARD = 'project.workboard';
+  const ITEM_MEMBERS = 'project.members';
+  const ITEM_MANAGE = 'project.manage';
+  const ITEM_MILESTONES = 'project.milestones';
+  const ITEM_SUBPROJECTS = 'project.subprojects';
 
   public static function initializeNewProject(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -365,6 +365,11 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   public function getURI() {
     $id = $this->getID();
     return "/project/view/{$id}/";
+  }
+
+  public function getProfileURI() {
+    $id = $this->getID();
+    return "/project/profile/{$id}/";
   }
 
   public function save() {
@@ -737,6 +742,24 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setType('string')
         ->setDescription(pht('Primary slug/hashtag.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('milestone')
+        ->setType('int?')
+        ->setDescription(pht('For milestones, milestone sequence number.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('parent')
+        ->setType('map<string, wild>?')
+        ->setDescription(
+          pht(
+            'For subprojects and milestones, a brief description of the '.
+            'parent project.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('depth')
+        ->setType('int')
+        ->setDescription(
+          pht(
+            'For subprojects and milestones, depth of this project in the '.
+            'tree. Root projects have depth 0.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('icon')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about the project icon.')),
@@ -751,9 +774,25 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $color_key = $this->getColor();
     $color_name = PhabricatorProjectIconSet::getColorName($color_key);
 
+    if ($this->isMilestone()) {
+      $milestone = (int)$this->getMilestoneNumber();
+    } else {
+      $milestone = null;
+    }
+
+    $parent = $this->getParentProject();
+    if ($parent) {
+      $parent_ref = $parent->getRefForConduit();
+    } else {
+      $parent_ref = null;
+    }
+
     return array(
       'name' => $this->getName(),
       'slug' => $this->getPrimarySlug(),
+      'milestone' => $milestone,
+      'depth' => (int)$this->getProjectDepth(),
+      'parent' => $parent_ref,
       'icon' => array(
         'key' => $this->getDisplayIconKey(),
         'name' => $this->getDisplayIconName(),
@@ -772,6 +811,20 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setAttachmentKey('members'),
       id(new PhabricatorProjectsWatchersSearchEngineAttachment())
         ->setAttachmentKey('watchers'),
+      id(new PhabricatorProjectsAncestorsSearchEngineAttachment())
+        ->setAttachmentKey('ancestors'),
+    );
+  }
+
+  /**
+   * Get an abbreviated representation of this project for use in providing
+   * "parent" and "ancestor" information.
+   */
+  public function getRefForConduit() {
+    return array(
+      'id' => (int)$this->getID(),
+      'phid' => $this->getPHID(),
+      'name' => $this->getName(),
     );
   }
 

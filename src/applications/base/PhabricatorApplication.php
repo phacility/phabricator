@@ -429,18 +429,27 @@ abstract class PhabricatorApplication
     }
 
     $cache = PhabricatorCaches::getRequestCache();
-    $viewer_phid = $viewer->getPHID();
-    $key = 'app.'.$class.'.installed.'.$viewer_phid;
+    $viewer_fragment = $viewer->getCacheFragment();
+    $key = 'app.'.$class.'.installed.'.$viewer_fragment;
 
     $result = $cache->getKey($key);
     if ($result === null) {
       if (!self::isClassInstalled($class)) {
         $result = false;
       } else {
-        $result = PhabricatorPolicyFilter::hasCapability(
-          $viewer,
-          self::getByClass($class),
-          PhabricatorPolicyCapability::CAN_VIEW);
+        $application = self::getByClass($class);
+        if (!$application->canUninstall()) {
+          // If the application can not be uninstalled, always allow viewers
+          // to see it. In particular, this allows logged-out viewers to see
+          // Settings and load global default settings even if the install
+          // does not allow public viewers.
+          $result = true;
+        } else {
+          $result = PhabricatorPolicyFilter::hasCapability(
+            $viewer,
+            self::getByClass($class),
+            PhabricatorPolicyCapability::CAN_VIEW);
+        }
       }
 
       $cache->setKey($key, $result);
@@ -481,10 +490,6 @@ abstract class PhabricatorApplication
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
-  }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
   }
 
 
@@ -622,18 +627,18 @@ abstract class PhabricatorApplication
     return $base.'(?:query/(?P<queryKey>[^/]+)/)?';
   }
 
-  protected function getPanelRouting($controller) {
+  protected function getProfileMenuRouting($controller) {
     $edit_route = $this->getEditRoutePattern();
 
     return array(
-      '(?P<panelAction>view)/(?P<panelID>[^/]+)/' => $controller,
-      '(?P<panelAction>hide)/(?P<panelID>[^/]+)/' => $controller,
-      '(?P<panelAction>default)/(?P<panelID>[^/]+)/' => $controller,
-      '(?P<panelAction>configure)/' => $controller,
-      '(?P<panelAction>reorder)/' => $controller,
-      '(?P<panelAction>edit)/'.$edit_route => $controller,
-      '(?P<panelAction>new)/(?<panelKey>[^/]+)/'.$edit_route => $controller,
-      '(?P<panelAction>builtin)/(?<panelID>[^/]+)/'.$edit_route
+      '(?P<itemAction>view)/(?P<itemID>[^/]+)/' => $controller,
+      '(?P<itemAction>hide)/(?P<itemID>[^/]+)/' => $controller,
+      '(?P<itemAction>default)/(?P<itemID>[^/]+)/' => $controller,
+      '(?P<itemAction>configure)/' => $controller,
+      '(?P<itemAction>reorder)/' => $controller,
+      '(?P<itemAction>edit)/'.$edit_route => $controller,
+      '(?P<itemAction>new)/(?<itemKey>[^/]+)/'.$edit_route => $controller,
+      '(?P<itemAction>builtin)/(?<itemID>[^/]+)/'.$edit_route
         => $controller,
     );
   }

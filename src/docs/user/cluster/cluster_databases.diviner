@@ -29,6 +29,12 @@ it be configured to automatically promote a replica to become the new master.
 There are no current plans to support multi-master mode or autonomous failover,
 although this may change in the future.
 
+Phabricator applications //can// be partitioned across multiple database
+masters. This does not provide redundancy and generally does not increase
+resiliance or resistance to data loss, but can help you scale and operate
+Phabricator. For details, see
+@{article:Cluster: Partitioning and Advanced Configuration}.
+
 
 Setting up MySQL Replication
 ============================

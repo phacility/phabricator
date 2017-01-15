@@ -87,8 +87,4 @@ final class PhabricatorProjectColumnPosition extends PhabricatorProjectDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

@@ -19,10 +19,6 @@ final class DifferentialRequiredSignaturesField
     return true;
   }
 
-  public function shouldAppearInEditView() {
-    return false;
-  }
-
   protected function readValueFromRevision(DifferentialRevision $revision) {
     return self::loadForRevision($revision);
   }

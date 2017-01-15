@@ -71,8 +71,8 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         ),
       '/p/(?P<username>[\w._-]+)/' => array(
         '' => 'PhabricatorPeopleProfileViewController',
-        'panel/'
-          => $this->getPanelRouting('PhabricatorPeopleProfilePanelController'),
+        'item/' => $this->getProfileMenuRouting(
+          'PhabricatorPeopleProfileMenuController'),
       ),
     );
   }

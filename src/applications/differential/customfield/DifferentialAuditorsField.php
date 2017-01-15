@@ -16,7 +16,7 @@ final class DifferentialAuditorsField
   }
 
   public function getValueForStorage() {
-    return json_encode($this->getValue());
+    return phutil_json_encode($this->getValue());
   }
 
   public function setValueFromStorage($value) {
@@ -28,33 +28,24 @@ final class DifferentialAuditorsField
     return $this;
   }
 
-  public function shouldAppearInCommitMessage() {
-    return true;
-  }
-
-  public function shouldAllowEditInCommitMessage() {
-    return true;
-  }
-
   public function canDisableField() {
     return false;
   }
 
-  public function getRequiredHandlePHIDsForCommitMessage() {
-    return nonempty($this->getValue(), array());
+  public function shouldAppearInEditEngine() {
+    return true;
   }
 
-  public function parseCommitMessageValue($value) {
-    return $this->parseObjectList(
-      $value,
-      array(
-        PhabricatorPeopleUserPHIDType::TYPECONST,
-        PhabricatorProjectProjectPHIDType::TYPECONST,
-      ));
+  public function shouldAppearInConduitTransactions() {
+    return true;
   }
 
-  public function renderCommitMessageValue(array $handles) {
-    return $this->renderObjectList($handles);
+  protected function newConduitEditParameterType() {
+    return new ConduitPHIDListParameterType();
+  }
+
+  public function shouldAppearInApplicationTransactions() {
+    return true;
   }
 
 }

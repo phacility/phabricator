@@ -125,8 +125,4 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

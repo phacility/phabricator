@@ -43,7 +43,7 @@ final class PhabricatorPeopleProfileManageController
     $name = $user->getUsername();
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
+    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
     $timeline = $this->buildTransactionTimeline(
       $user,

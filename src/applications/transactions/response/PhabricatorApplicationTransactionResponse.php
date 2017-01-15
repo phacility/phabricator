@@ -7,6 +7,7 @@ final class PhabricatorApplicationTransactionResponse
   private $transactions;
   private $isPreview;
   private $transactionView;
+  private $previewContent;
 
   public function setTransactionView($transaction_view) {
     $this->transactionView = $transaction_view;
@@ -46,6 +47,15 @@ final class PhabricatorApplicationTransactionResponse
     return $this;
   }
 
+  public function setPreviewContent($preview_content) {
+    $this->previewContent = $preview_content;
+    return $this;
+  }
+
+  public function getPreviewContent() {
+    return $this->previewContent;
+  }
+
   public function reduceProxyResponse() {
     if ($this->transactionView) {
       $view = $this->transactionView;
@@ -75,7 +85,8 @@ final class PhabricatorApplicationTransactionResponse
 
     $content = array(
       'xactions' => $xactions,
-      'spacer'   => PHUITimelineView::renderSpacer(),
+      'spacer' => PHUITimelineView::renderSpacer(),
+      'previewContent' => hsprintf('%s', $this->getPreviewContent()),
     );
 
     return $this->getProxy()->setContent($content);

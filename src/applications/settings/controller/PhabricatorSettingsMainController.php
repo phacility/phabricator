@@ -32,7 +32,7 @@ final class PhabricatorSettingsMainController
 
     // Redirect "/panel/XYZ/" to the viewer's personal settings panel. This
     // was the primary URI before global settings were introduced and allows
-    // generation of viewer-agnostic URIs for email.
+    // generation of viewer-agnostic URIs for email and logged-out users.
     $panel = $request->getURIData('panel');
     if ($panel) {
       $panel = phutil_escape_uri($panel);

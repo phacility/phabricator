@@ -109,6 +109,14 @@ final class PhabricatorEditEngineConfiguration
     return $this;
   }
 
+  public function setBuiltinKey($key) {
+    if (strpos($key, '/') !== false) {
+      throw new Exception(
+        pht('EditEngine BuiltinKey contains an invalid key character "/".'));
+    }
+    return parent::setBuiltinKey($key);
+  }
+
   public function attachEngine(PhabricatorEditEngine $engine) {
     $this->engine = $engine;
     return $this;
@@ -128,6 +136,9 @@ final class PhabricatorEditEngineConfiguration
 
     $values = $this->getProperty('defaults', array());
     foreach ($fields as $key => $field) {
+      if (!$field->getIsDefaultable()) {
+        continue;
+      }
       if ($is_new) {
         if (array_key_exists($key, $values)) {
           $field->readDefaultValueFromConfiguration($values[$key]);
@@ -141,15 +152,21 @@ final class PhabricatorEditEngineConfiguration
       switch (idx($locks, $key)) {
         case self::LOCK_LOCKED:
           $field->setIsHidden(false);
-          $field->setIsLocked(true);
+          if ($field->getIsLockable()) {
+            $field->setIsLocked(true);
+          }
           break;
         case self::LOCK_HIDDEN:
           $field->setIsHidden(true);
-          $field->setIsLocked(false);
+          if ($field->getIsLockable()) {
+            $field->setIsLocked(false);
+          }
           break;
         case self::LOCK_VISIBLE:
           $field->setIsHidden(false);
-          $field->setIsLocked(false);
+          if ($field->getIsLockable()) {
+            $field->setIsLocked(false);
+          }
           break;
         default:
           // If we don't have an explicit value, don't make any adjustments.
@@ -293,11 +310,6 @@ final class PhabricatorEditEngineConfiguration
 
     return false;
   }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

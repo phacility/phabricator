@@ -130,16 +130,16 @@ final class DifferentialRevertPlanField
     return array($xaction->getNewValue());
   }
 
-  public function shouldAppearInCommitMessage() {
-    return true;
-  }
-
-  public function renderCommitMessageValue(array $handles) {
-    return $this->getValue();
-  }
-
   public function shouldAppearInConduitDictionary() {
     return true;
+  }
+
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringParameterType();
   }
 
 }

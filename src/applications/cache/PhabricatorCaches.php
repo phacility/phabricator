@@ -99,6 +99,77 @@ final class PhabricatorCaches extends Phobject {
     return $caches;
   }
 
+  public static function getMutableCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildMutableCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildMutableCaches() {
+    $caches = array();
+
+    $caches[] = new PhabricatorKeyValueDatabaseCache();
+
+    return $caches;
+  }
+
+  public static function getMutableStructureCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildMutableStructureCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildMutableStructureCaches() {
+    $caches = array();
+
+    $cache = new PhabricatorKeyValueDatabaseCache();
+    $cache = new PhabricatorKeyValueSerializingCacheProxy($cache);
+    $caches[] = $cache;
+
+    return $caches;
+  }
+
+/* -(  Runtime Cache  )------------------------------------------------------ */
+
+
+  /**
+   * Get a runtime cache stack.
+   *
+   * This stack is just APC. It's fast, it's effectively immutable, and it
+   * gets thrown away when the webserver restarts.
+   *
+   * This cache is suitable for deriving runtime caches, like a map of Conduit
+   * method names to provider classes.
+   *
+   * @return PhutilKeyValueCacheStack Best runtime stack available.
+   */
+  public static function getRuntimeCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildRuntimeCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+
+  private static function buildRuntimeCaches() {
+    $caches = array();
+
+    $apc = new PhutilAPCKeyValueCache();
+    if ($apc->isAvailable()) {
+      $caches[] = $apc;
+    }
+
+    return $caches;
+  }
+
 
 /* -(  Repository Graph Cache  )--------------------------------------------- */
 

@@ -8,6 +8,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
   private $isHead;
   private $isTail;
   private $parents;
+  private $filterParents;
 
   public function setHistory(array $history) {
     assert_instances_of($history, 'DiffusionPathChange');
@@ -66,6 +67,15 @@ final class DiffusionHistoryTableView extends DiffusionView {
     return $this;
   }
 
+  public function setFilterParents($filter_parents) {
+    $this->filterParents = $filter_parents;
+    return $this;
+  }
+
+  public function getFilterParents() {
+    return $this->filterParents;
+  }
+
   public function render() {
     $drequest = $this->getDiffusionRequest();
 
@@ -82,10 +92,26 @@ final class DiffusionHistoryTableView extends DiffusionView {
 
     $graph = null;
     if ($this->parents) {
+      $parents = $this->parents;
+
+      // If we're filtering parents, remove relationships which point to
+      // commits that are not part of the visible graph. Otherwise, we get
+      // a big tree of nonsense when viewing release branches like "stable"
+      // versus "master".
+      if ($this->filterParents) {
+        foreach ($parents as $key => $nodes) {
+          foreach ($nodes as $nkey => $node) {
+            if (empty($parents[$node])) {
+              unset($parents[$key][$nkey]);
+            }
+          }
+        }
+      }
+
       $graph = id(new PHUIDiffGraphView())
         ->setIsHead($this->isHead)
         ->setIsTail($this->isTail)
-        ->renderGraph($this->parents);
+        ->renderGraph($parents);
     }
 
     $show_builds = PhabricatorApplication::isClassInstalledForViewer(

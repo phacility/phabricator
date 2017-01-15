@@ -103,9 +103,10 @@ abstract class CelerityResourceController extends PhabricatorController {
       }
     }
 
-    $response = new AphrontFileResponse();
-    $response->setContent($data);
-    $response->setMimeType($type_map[$type]);
+    $response = id(new AphrontFileResponse())
+      ->setContent($data)
+      ->setMimeType($type_map[$type])
+      ->setCompressResponse(true);
 
     // NOTE: This is a piece of magic required to make WOFF fonts work in
     // Firefox and IE. Possibly we should generalize this more.
@@ -145,6 +146,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       'eot' => 'font/eot',
       'ttf' => 'font/ttf',
       'mp3' => 'audio/mpeg',
+      'ico' => 'image/x-icon',
     );
   }
 

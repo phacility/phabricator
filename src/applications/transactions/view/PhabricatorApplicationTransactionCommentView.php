@@ -20,10 +20,12 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $headerText;
   private $noPermission;
   private $fullWidth;
+  private $infoView;
 
   private $currentVersion;
   private $versionedDraft;
   private $commentActions;
+  private $commentActionGroups = array();
   private $transactionTimeline;
 
   public function setObjectPHID($object_phid) {
@@ -108,6 +110,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this;
   }
 
+  public function setInfoView(PHUIInfoView $info_view) {
+    $this->infoView = $info_view;
+    return $this;
+  }
+
+  public function getInfoView() {
+    return $this->infoView;
+  }
+
   public function setCommentActions(array $comment_actions) {
     assert_instances_of($comment_actions, 'PhabricatorEditEngineCommentAction');
     $this->commentActions = $comment_actions;
@@ -116,6 +127,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
   public function getCommentActions() {
     return $this->commentActions;
+  }
+
+  public function setCommentActionGroups(array $groups) {
+    assert_instances_of($groups, 'PhabricatorEditEngineCommentActionGroup');
+    $this->commentActionGroups = $groups;
+    return $this;
+  }
+
+  public function getCommentActionGroups() {
+    return $this->commentActionGroups;
   }
 
   public function setNoPermission($no_permission) {
@@ -150,7 +171,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ->setQueryParam('next', (string)$this->getRequestURI());
       return id(new PHUIObjectBoxView())
         ->setFlush(true)
-        ->setHeaderText(pht('Add Comment'))
         ->appendChild(
           javelin_tag(
             'a',
@@ -183,9 +203,26 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ));
     }
 
+    require_celerity_resource('phui-comment-form-css');
+    $image_uri = $user->getProfileImageURI();
+    $image = phutil_tag(
+      'div',
+      array(
+        'style' => 'background-image: url('.$image_uri.')',
+        'class' => 'phui-comment-image',
+      ));
+    $wedge = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-timeline-wedge',
+      ),
+      '');
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
-      ->setHeaderText($this->headerText)
+      ->addClass('phui-comment-form-view')
+      ->addSigil('phui-comment-form')
+      ->appendChild($image)
+      ->appendChild($wedge)
       ->appendChild($comment);
 
     return array($comment_box, $preview);
@@ -263,16 +300,14 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           'type' => $comment_action->getPHUIXControlType(),
           'spec' => $comment_action->getPHUIXControlSpecification(),
           'initialValue' => $comment_action->getInitialValue(),
+          'groupKey' => $comment_action->getGroupKey(),
+          'conflictKey' => $comment_action->getConflictKey(),
         );
 
         $type_map[$key] = $comment_action;
       }
 
-      $options = array();
-      $options['+'] = pht('Add Action...');
-      foreach ($action_map as $key => $item) {
-        $options[$key] = $item['label'];
-      }
+      $options = $this->newCommentActionOptions($action_map);
 
       $action_id = celerity_generate_unique_node_id();
       $input_id = celerity_generate_unique_node_id();
@@ -287,20 +322,37 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
             'id' => $input_id,
           )));
 
-      $form->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Actions'))
-          ->setID($action_id)
-          ->setOptions($options));
+      $invisi_bar = phutil_tag(
+        'div',
+        array(
+          'id' => $place_id,
+          'class' => 'phui-comment-control-stack',
+        ));
 
-      // This is an empty placeholder node so we know where to insert the
-      // new actions.
-      $form->appendChild(
-        phutil_tag(
-          'div',
-          array(
-            'id' => $place_id,
-          )));
+      $action_select = id(new AphrontFormSelectControl())
+        ->addClass('phui-comment-fullwidth-control')
+        ->addClass('phui-comment-action-control')
+        ->setID($action_id)
+        ->setOptions($options);
+
+      $action_bar = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-comment-action-bar grouped',
+        ),
+        array(
+          $action_select,
+        ));
+
+      $form->appendChild($action_bar);
+
+      $info_view = $this->getInfoView();
+      if ($info_view) {
+        $form->appendChild($info_view);
+      }
+
+      $form->appendChild($invisi_bar);
+      $form->addClass('phui-comment-has-actions');
 
       Javelin::initBehavior(
         'comment-actions',
@@ -318,16 +370,25 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ));
     }
 
+    $submit_button = id(new AphrontFormSubmitControl())
+      ->addClass('phui-comment-fullwidth-control')
+      ->addClass('phui-comment-submit-control')
+      ->setValue($this->getSubmitButtonName());
+
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setID($this->getCommentID())
+          ->addClass('phui-comment-fullwidth-control')
+          ->addClass('phui-comment-textarea-control')
+          ->setCanPin(true)
           ->setName('comment')
-          ->setLabel(pht('Comment'))
           ->setUser($this->getUser())
           ->setValue($draft_comment))
       ->appendChild(
         id(new AphrontFormSubmitControl())
+          ->addClass('phui-comment-fullwidth-control')
+          ->addClass('phui-comment-submit-control')
           ->setValue($this->getSubmitButtonName()));
 
     return $form;
@@ -386,6 +447,48 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $this->commentID = celerity_generate_unique_node_id();
     }
     return $this->commentID;
+  }
+
+  private function newCommentActionOptions(array $action_map) {
+    $options = array();
+    $options['+'] = pht('Add Action...');
+
+    // Merge options into groups.
+    $groups = array();
+    foreach ($action_map as $key => $item) {
+      $group_key = $item['groupKey'];
+      if (!isset($groups[$group_key])) {
+        $groups[$group_key] = array();
+      }
+      $groups[$group_key][$key] = $item;
+    }
+
+    $group_specs = $this->getCommentActionGroups();
+    $group_labels = mpull($group_specs, 'getLabel', 'getKey');
+
+    // Reorder groups to put them in the same order as the recognized
+    // group definitions.
+    $groups = array_select_keys($groups, array_keys($group_labels)) + $groups;
+
+    // Move options with no group to the end.
+    $default_group = idx($groups, '');
+    if ($default_group) {
+      unset($groups['']);
+      $groups[''] = $default_group;
+    }
+
+    foreach ($groups as $group_key => $group_items) {
+      if (strlen($group_key)) {
+        $group_label = idx($group_labels, $group_key, $group_key);
+        $options[$group_label] = ipull($group_items, 'label');
+      } else {
+        foreach ($group_items as $key => $item) {
+          $options[$key] = $item['label'];
+        }
+      }
+    }
+
+    return $options;
   }
 
 }

@@ -8,20 +8,38 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
+.device-phone .config-page-header {
+  margin: 4px 12px 0;
+  padding-bottom: 4px;
+}
+
 .config-page-header .phui-profile-header {
   padding: 0;
+}
+
+.device-phone .config-page-header .phui-profile-header {
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .config-page-header .phui-profile-header.phui-header-shell .phui-header-header {
   font-size: 20px;
 }
 
+.device-phone .config-page-header .phui-profile-header.phui-header-shell
+  .phui-header-header {
+    font-size: 16px;
+}
 
 .config-page-content {
   margin: 0 24px;
 }
 
-.device-desktop .config-page-content .phui-object-item-list-view {
+.device-phone .config-page-content {
+  margin: 0 4px;
+}
+
+.device-desktop .config-page-content .phui-oi-list-view {
   padding-left: 0;
   padding-right: 0;
 }

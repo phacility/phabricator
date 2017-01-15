@@ -18,6 +18,20 @@ final class PhabricatorStorageSchemaSpec
           'unique' => true,
         ),
       ));
+
+    $this->buildRawSchema(
+      'meta_data',
+      PhabricatorStorageManagementAPI::TABLE_HOSTSTATE,
+      array(
+        'stateKey' => 'text128',
+        'stateValue' => 'text',
+      ),
+      array(
+        'PRIMARY' => array(
+          'columns' => array('stateKey'),
+          'unique' => true,
+        ),
+      ));
   }
 
 }

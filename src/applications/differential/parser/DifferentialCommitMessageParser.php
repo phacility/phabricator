@@ -21,13 +21,82 @@
  */
 final class DifferentialCommitMessageParser extends Phobject {
 
+  private $viewer;
   private $labelMap;
   private $titleKey;
   private $summaryKey;
   private $errors;
+  private $commitMessageFields;
+  private $raiseMissingFieldErrors = true;
+
+  public static function newStandardParser(PhabricatorUser $viewer) {
+    $key_title = DifferentialTitleCommitMessageField::FIELDKEY;
+    $key_summary = DifferentialSummaryCommitMessageField::FIELDKEY;
+
+    $field_list = DifferentialCommitMessageField::newEnabledFields($viewer);
+
+    return id(new self())
+      ->setViewer($viewer)
+      ->setCommitMessageFields($field_list)
+      ->setTitleKey($key_title)
+      ->setSummaryKey($key_summary);
+  }
 
 
 /* -(  Configuring the Parser  )--------------------------------------------- */
+
+
+  /**
+   * @task config
+   */
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function getViewer() {
+    return $this->viewer;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function setCommitMessageFields(array $fields) {
+    assert_instances_of($fields, 'DifferentialCommitMessageField');
+    $fields = mpull($fields, null, 'getCommitMessageFieldKey');
+    $this->commitMessageFields = $fields;
+    return $this;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function getCommitMessageFields() {
+    return $this->commitMessageFields;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function setRaiseMissingFieldErrors($raise) {
+    $this->raiseMissingFieldErrors = $raise;
+    return $this;
+  }
+
+
+  /**
+   * @task config
+   */
+  public function getRaiseMissingFieldErrors() {
+    return $this->raiseMissingFieldErrors;
+  }
 
 
   /**
@@ -66,7 +135,7 @@ final class DifferentialCommitMessageParser extends Phobject {
   public function parseCorpus($corpus) {
     $this->errors = array();
 
-    $label_map = $this->labelMap;
+    $label_map = $this->getLabelMap();
     $key_title = $this->titleKey;
     $key_summary = $this->summaryKey;
 
@@ -86,20 +155,33 @@ final class DifferentialCommitMessageParser extends Phobject {
     $field = $key_title;
 
     $seen = array();
-    $lines = explode("\n", trim($corpus));
+
+    $lines = trim($corpus);
+    $lines = phutil_split_lines($lines, false);
+
     $field_map = array();
     foreach ($lines as $key => $line) {
-      $match = null;
-      if (preg_match($label_regexp, $line, $match)) {
-        $lines[$key] = trim($match['text']);
-        $field = $label_map[self::normalizeFieldLabel($match['field'])];
-        if (!empty($seen[$field])) {
-          $this->errors[] = pht(
-            'Field "%s" occurs twice in commit message!',
-            $field);
-        }
+      // We always parse the first line of the message as a title, even if it
+      // contains something we recognize as a field header.
+      if (!isset($seen[$key_title])) {
+        $field = $key_title;
+
+        $lines[$key] = trim($line);
         $seen[$field] = true;
+      } else {
+        $match = null;
+        if (preg_match($label_regexp, $line, $match)) {
+          $lines[$key] = trim($match['text']);
+          $field = $label_map[self::normalizeFieldLabel($match['field'])];
+          if (!empty($seen[$field])) {
+            $this->errors[] = pht(
+              'Field "%s" occurs twice in commit message!',
+              $match['field']);
+          }
+          $seen[$field] = true;
+        }
       }
+
       $field_map[$key] = $field;
     }
 
@@ -179,6 +261,57 @@ final class DifferentialCommitMessageParser extends Phobject {
   /**
    * @task parse
    */
+  public function parseFields($corpus) {
+    $viewer = $this->getViewer();
+    $text_map = $this->parseCorpus($corpus);
+
+    $field_map = $this->getCommitMessageFields();
+
+    $result_map = array();
+    foreach ($text_map as $field_key => $text_value) {
+      $field = idx($field_map, $field_key);
+      if (!$field) {
+        // This is a strict error, since we only parse fields which we have
+        // been told are valid. The caller probably handed us an invalid label
+        // map.
+        throw new Exception(
+          pht(
+            'Parser emitted a field with key "%s", but no corresponding '.
+            'field definition exists.',
+            $field_key));
+      }
+
+      try {
+        $result = $field->parseFieldValue($text_value);
+        $result_map[$field_key] = $result;
+      } catch (DifferentialFieldParseException $ex) {
+        $this->errors[] = pht(
+          'Error parsing field "%s": %s',
+          $field->getFieldName(),
+          $ex->getMessage());
+      }
+    }
+
+    if ($this->getRaiseMissingFieldErrors()) {
+      foreach ($field_map as $key => $field) {
+        try {
+          $field->validateFieldValue(idx($result_map, $key));
+        } catch (DifferentialFieldValidationException $ex) {
+          $this->errors[] = pht(
+            'Invalid or missing field "%s": %s',
+            $field->getFieldName(),
+            $ex->getMessage());
+        }
+      }
+    }
+
+    return $result_map;
+  }
+
+
+  /**
+   * @task parse
+   */
   public function getErrors() {
     return $this->errors;
   }
@@ -196,6 +329,38 @@ final class DifferentialCommitMessageParser extends Phobject {
 
 
 /* -(  Internals  )---------------------------------------------------------- */
+
+
+  private function getLabelMap() {
+    if ($this->labelMap === null) {
+      $field_list = $this->getCommitMessageFields();
+
+      $label_map = array();
+      foreach ($field_list as $field_key => $field) {
+        $labels = $field->getFieldAliases();
+        $labels[] = $field->getFieldName();
+
+        foreach ($labels as $label) {
+          $normal_label = self::normalizeFieldLabel($label);
+          if (!empty($label_map[$normal_label])) {
+            throw new Exception(
+              pht(
+                'Field label "%s" is parsed by two custom fields: "%s" and '.
+                '"%s". Each label must be parsed by only one field.',
+                $label,
+                $field_key,
+                $label_map[$normal_label]));
+          }
+
+          $label_map[$normal_label] = $field_key;
+        }
+      }
+
+      $this->labelMap = $label_map;
+    }
+
+    return $this->labelMap;
+  }
 
 
   /**

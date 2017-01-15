@@ -13,7 +13,8 @@ final class PhabricatorRepositoryCommit
     HarbormasterCircleCIBuildableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorFulltextInterface {
+    PhabricatorFulltextInterface,
+    PhabricatorConduitResultInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -203,6 +204,11 @@ final class PhabricatorRepositoryCommit
     return $authority_audits;
   }
 
+  public function getAuditorPHIDsForEdit() {
+    $audits = $this->getAudits();
+    return mpull($audits, 'getAuditorPHID');
+  }
+
   public function save() {
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);
@@ -251,6 +257,7 @@ final class PhabricatorRepositoryCommit
     foreach ($requests as $request) {
       switch ($request->getAuditStatus()) {
         case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
+        case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
           $any_need = true;
           break;
         case PhabricatorAuditStatusConstants::ACCEPTED:
@@ -413,6 +420,10 @@ final class PhabricatorRepositoryCommit
     return $this->getRepository()->getPHID();
   }
 
+  public function getHarbormasterPublishablePHID() {
+    return $this->getPHID();
+  }
+
   public function getBuildVariables() {
     $results = array();
 
@@ -568,6 +579,28 @@ final class PhabricatorRepositoryCommit
 
   public function newFulltextEngine() {
     return new DiffusionCommitFulltextEngine();
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('identifier')
+        ->setType('string')
+        ->setDescription(pht('The commit identifier.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'identifier' => $this->getCommitIdentifier(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
   }
 
 }

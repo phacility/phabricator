@@ -48,6 +48,18 @@ body.phui-workboard-color .phabricator-side-menu .phui-profile-menu-footer-1 {
   font-size: 34px;
 }
 
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href {
+    color: rgba({$alphawhite},.8);
+}
+
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-icon,
+.phui-workboard-color .phui-profile-menu .phabricator-side-menu
+  .phui-list-item-href .phui-list-item-icon {
+    color: rgba({$alphawhite},.8);
+}
+
 /* Gradients */
 
 .phui-workboard-gradient-red {

@@ -6,11 +6,11 @@ final class PhabricatorConfigDatabaseIssueController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $query = $this->buildSchemaQuery();
+    $query = new PhabricatorConfigSchemaQuery();
 
-    $actual = $query->loadActualSchema();
-    $expect = $query->loadExpectedSchema();
-    $comp = $query->buildComparisonSchema($expect, $actual);
+    $actual = $query->loadActualSchemata();
+    $expect = $query->loadExpectedSchemata();
+    $comp_servers = $query->buildComparisonSchemata($expect, $actual);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Database Issues'));
@@ -18,65 +18,70 @@ final class PhabricatorConfigDatabaseIssueController
 
     // Collect all open issues.
     $issues = array();
-    foreach ($comp->getDatabases() as $database_name => $database) {
-      foreach ($database->getLocalIssues() as $issue) {
-        $issues[] = array(
-          $database_name,
-          null,
-          null,
-          null,
-          $issue,
-        );
-      }
-      foreach ($database->getTables() as $table_name => $table) {
-        foreach ($table->getLocalIssues() as $issue) {
+    foreach ($comp_servers as $ref_name => $comp) {
+      foreach ($comp->getDatabases() as $database_name => $database) {
+        foreach ($database->getLocalIssues() as $issue) {
           $issues[] = array(
+            $ref_name,
             $database_name,
-            $table_name,
+            null,
             null,
             null,
             $issue,
           );
         }
-        foreach ($table->getColumns() as $column_name => $column) {
-          foreach ($column->getLocalIssues() as $issue) {
+        foreach ($database->getTables() as $table_name => $table) {
+          foreach ($table->getLocalIssues() as $issue) {
             $issues[] = array(
+              $ref_name,
               $database_name,
               $table_name,
-              'column',
-              $column_name,
+              null,
+              null,
               $issue,
             );
           }
-        }
-        foreach ($table->getKeys() as $key_name => $key) {
-          foreach ($key->getLocalIssues() as $issue) {
-            $issues[] = array(
-              $database_name,
-              $table_name,
-              'key',
-              $key_name,
-              $issue,
-            );
+          foreach ($table->getColumns() as $column_name => $column) {
+            foreach ($column->getLocalIssues() as $issue) {
+              $issues[] = array(
+                $ref_name,
+                $database_name,
+                $table_name,
+                'column',
+                $column_name,
+                $issue,
+              );
+            }
+          }
+          foreach ($table->getKeys() as $key_name => $key) {
+            foreach ($key->getLocalIssues() as $issue) {
+              $issues[] = array(
+                $ref_name,
+                $database_name,
+                $table_name,
+                'key',
+                $key_name,
+                $issue,
+              );
+            }
           }
         }
       }
     }
 
-
     // Sort all open issues so that the most severe issues appear first.
     $order = array();
     $counts = array();
     foreach ($issues as $key => $issue) {
-      $const = $issue[4];
+      $const = $issue[5];
       $status = PhabricatorConfigStorageSchema::getIssueStatus($const);
       $severity = PhabricatorConfigStorageSchema::getStatusSeverity($status);
       $order[$key] = sprintf(
         '~%d~%s%s%s',
         9 - $severity,
-        $issue[0],
         $issue[1],
-        $issue[3]);
+        $issue[2],
+        $issue[4]);
 
       if (empty($counts[$status])) {
         $counts[$status] = 0;
@@ -91,22 +96,25 @@ final class PhabricatorConfigDatabaseIssueController
     // Render the issues.
     $rows = array();
     foreach ($issues as $issue) {
-      $const = $issue[4];
+      $const = $issue[5];
+
+      $uri = $this->getApplicationURI('/database/'.$issue[0].'/'.$issue[1].'/');
 
       $database_link = phutil_tag(
         'a',
         array(
-          'href' => $this->getApplicationURI('/database/'.$issue[0].'/'),
+          'href' => $uri,
         ),
-        $issue[0]);
+        $issue[1]);
 
       $rows[] = array(
         $this->renderIcon(
           PhabricatorConfigStorageSchema::getIssueStatus($const)),
+        $issue[0],
         $database_link,
-        $issue[1],
         $issue[2],
         $issue[3],
+        $issue[4],
         PhabricatorConfigStorageSchema::getIssueDescription($const),
       );
     }
@@ -117,6 +125,7 @@ final class PhabricatorConfigDatabaseIssueController
       ->setHeaders(
         array(
           null,
+          pht('Server'),
           pht('Database'),
           pht('Table'),
           pht('Type'),
@@ -125,6 +134,7 @@ final class PhabricatorConfigDatabaseIssueController
         ))
       ->setColumnClasses(
         array(
+          null,
           null,
           null,
           null,

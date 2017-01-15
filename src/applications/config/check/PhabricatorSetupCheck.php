@@ -68,6 +68,35 @@ abstract class PhabricatorSetupCheck extends Phobject {
     return $cache->getKey('phabricator.setup.issue-keys');
   }
 
+  final public static function resetSetupState() {
+    $cache = PhabricatorCaches::getSetupCache();
+    $cache->deleteKey('phabricator.setup.issue-keys');
+
+    $server_cache = PhabricatorCaches::getServerStateCache();
+    $server_cache->deleteKey('phabricator.in-flight');
+
+    $use_scope = AphrontWriteGuard::isGuardActive();
+    if ($use_scope) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    } else {
+      AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+    }
+
+    try {
+      $db_cache = new PhabricatorKeyValueDatabaseCache();
+      $db_cache->deleteKey('phabricator.setup.issue-keys');
+    } catch (Exception $ex) {
+      // If we hit an exception here, just ignore it. In particular, this can
+      // happen on initial startup before the databases are initialized.
+    }
+
+    if ($use_scope) {
+      unset($unguarded);
+    } else {
+      AphrontWriteGuard::allowDangerousUnguardedWrites(false);
+    }
+  }
+
   final public static function setOpenSetupIssueKeys(
     array $keys,
     $update_database) {
@@ -161,14 +190,11 @@ abstract class PhabricatorSetupCheck extends Phobject {
   final public static function willProcessRequest() {
     $issue_keys = self::getOpenSetupIssueKeys();
     if ($issue_keys === null) {
-      $issues = self::runNormalChecks();
-      foreach ($issues as $issue) {
-        if ($issue->getIsFatal()) {
-          return self::newIssueResponse($issue);
-        }
+      $engine = new PhabricatorSetupEngine();
+      $response = $engine->execute();
+      if ($response) {
+        return $response;
       }
-      $issue_keys = self::getUnignoredIssueKeys($issues);
-      self::setOpenSetupIssueKeys($issue_keys, $update_database = true);
     } else if ($issue_keys) {
       // If Phabricator is configured in a cluster with multiple web devices,
       // we can end up with setup issues cached on every device. This can cause

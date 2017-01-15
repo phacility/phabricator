@@ -242,6 +242,21 @@ abstract class AphrontResponse extends Phobject {
     return gmdate('D, d M Y H:i:s', $epoch_timestamp).' GMT';
   }
 
+  protected function shouldCompressResponse() {
+    return true;
+  }
+
+  public function willBeginWrite() {
+    if ($this->shouldCompressResponse()) {
+      // Enable automatic compression here. Webservers sometimes do this for
+      // us, but we now detect the absence of compression and warn users about
+      // it so try to cover our bases more thoroughly.
+      ini_set('zlib.output_compression', 1);
+    } else {
+      ini_set('zlib.output_compression', 0);
+    }
+  }
+
   public function didCompleteWrite($aborted) {
     return;
   }

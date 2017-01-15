@@ -271,6 +271,10 @@ final class PhabricatorActionView extends AphrontView {
       $classes[] = 'phabricator-action-view-submenu';
     }
 
+    if ($this->getHref()) {
+      $classes[] = 'phabricator-action-view-href';
+    }
+
     $style = array();
 
     if ($this->hidden) {

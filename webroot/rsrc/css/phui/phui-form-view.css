@@ -14,15 +14,10 @@
   padding: 0;
 }
 
-/* only used in transaction comments */
-.phui-form-shaded .phui-form-view {
-  border-bottom: 1px solid #D4DAE0;
-  background: #F4F5F8;
-}
-
 .phui-form-view label.aphront-form-label {
-  padding-top: 5px;
   width: 19%;
+  height: 28px;
+  line-height: 28px;
   float: left;
   text-align: right;
   font-weight: bold;
@@ -159,10 +154,6 @@
   height: 24em;
 }
 
-.aphront-form-control-select .aphront-form-input {
-  padding-top: 2px;
-}
-
 .phui-form-view .aphront-form-caption {
   font-size: {$smallerfontsize};
   color: {$bluetext};
@@ -203,10 +194,12 @@
   margin: .5em 2em;
 }
 
-.aphront-form-control-static .aphront-form-input,
 .aphront-form-control-markup .aphront-form-input {
-  padding-top: 6px;
   font-size: {$normalfontsize};
+}
+
+.aphront-form-control-static .aphront-form-input {
+  line-height: 28px;
 }
 
 .aphront-form-control-togglebuttons .aphront-form-input {
@@ -301,9 +294,9 @@ table.aphront-form-control-checkbox-layout th {
   padding-bottom: 12px;
 }
 
-.aphront-textarea-drag-and-drop {
-  background: {$lightgreen};
-  border-color: {$green};
+body .phui-form-view .remarkup-assist-textarea.aphront-textarea-drag-and-drop {
+  background: {$sh-greenbackground};
+  border: 1px solid {$sh-greenborder};
 }
 
 .aphront-form-crop .crop-box {
@@ -365,7 +358,13 @@ table.aphront-form-control-checkbox-layout th {
   width: 240px;
 }
 
+.device .fancy-datepicker {
+  width: 100%;
+}
+
 .fancy-datepicker-core {
+  width: 240px;
+  margin: 0 auto;
   padding: 1px;
   font-size: {$smallerfontsize};
   text-align: center;
@@ -482,7 +481,6 @@ properly, and submit values. */
   display: none;
 }
 
-
 .login-to-comment {
   margin: 12px;
 }
@@ -539,10 +537,16 @@ properly, and submit values. */
 }
 
 .aphront-form-error .phui-icon-view {
+  float: right;
   color: {$lightgreyborder};
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .device-desktop .aphront-form-error .phui-icon-view:hover {
-  color: {$darkgreyborder};
+  color: {$red};
+}
+
+.phui-form-static-action {
+  padding: 4px;
+  color: {$bluetext};
 }

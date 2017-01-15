@@ -38,6 +38,10 @@ final class HeraldRulePHIDType extends PhabricatorPHIDType {
       $handle->setName($monogram);
       $handle->setFullName("{$monogram} {$name}");
       $handle->setURI("/{$monogram}");
+
+      if ($rule->getIsDisabled()) {
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
+      }
     }
   }
 

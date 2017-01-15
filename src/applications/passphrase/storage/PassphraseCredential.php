@@ -155,10 +155,6 @@ final class PassphraseCredential extends PassphraseDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

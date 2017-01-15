@@ -10,6 +10,7 @@ abstract class DifferentialCoreCustomField
 
   private $value;
   private $fieldError;
+  private $fieldParser;
 
   abstract protected function readValueFromRevision(
     DifferentialRevision $revision);
@@ -60,6 +61,32 @@ abstract class DifferentialCoreCustomField
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
           $this->setFieldError(pht('Required'));
+          continue;
+        }
+      }
+
+      if (is_string($value)) {
+        $parser = $this->getFieldParser();
+        $result = $parser->parseCorpus($value);
+
+        unset($result['__title__']);
+        unset($result['__summary__']);
+
+        if ($result) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Invalid'),
+            pht(
+              'The value you have entered in "%s" can not be parsed '.
+              'unambiguously when rendered in a commit message. Edit the '.
+              'message so that keywords like "Summary:" and "Test Plan:" do '.
+              'not appear at the beginning of lines. Parsed keys: %s.',
+              $this->getFieldName(),
+              implode(', ', array_keys($result))),
+            $xaction);
+          $errors[] = $error;
+          $this->setFieldError(pht('Invalid'));
+          continue;
         }
       }
     }
@@ -67,15 +94,27 @@ abstract class DifferentialCoreCustomField
     return $errors;
   }
 
+  private function getFieldParser() {
+    if (!$this->fieldParser) {
+      $viewer = $this->getViewer();
+      $parser = DifferentialCommitMessageParser::newStandardParser($viewer);
+
+      // Set custom title and summary keys so we can detect the presence of
+      // "Summary:" in, e.g., a test plan.
+      $parser->setTitleKey('__title__');
+      $parser->setSummaryKey('__summary__');
+
+      $this->fieldParser = $parser;
+    }
+
+    return $this->fieldParser;
+  }
+
   public function canDisableField() {
     return false;
   }
 
   public function shouldAppearInApplicationTransactions() {
-    return true;
-  }
-
-  public function shouldAppearInEditView() {
     return true;
   }
 
@@ -115,15 +154,6 @@ abstract class DifferentialCoreCustomField
 
   public function getValue() {
     return $this->value;
-  }
-
-  public function readValueFromCommitMessage($value) {
-    $this->setValue($value);
-    return $this;
-  }
-
-  public function renderCommitMessageValue(array $handles) {
-    return $this->getValue();
   }
 
   public function getConduitDictionaryValue() {

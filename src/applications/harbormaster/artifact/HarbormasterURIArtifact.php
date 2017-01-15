@@ -27,6 +27,16 @@ final class HarbormasterURIArtifact extends HarbormasterArtifact {
     );
   }
 
+  public function readArtifactHTTPParameter($key, $value) {
+    // TODO: This is hacky and artifact parameters should be replaced more
+    // broadly, likely with EditFields. See T11887.
+    switch ($key) {
+      case 'ui.external':
+        return (bool)$value;
+    }
+    return $value;
+  }
+
   public function getArtifactParameterDescriptions() {
     return array(
       'uri' => pht('The URI to store.'),

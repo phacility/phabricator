@@ -43,58 +43,13 @@ JX.behavior('comment-actions', function(config) {
     return null;
   }
 
-  function add_row(option) {
-    var action = action_map[option.value];
-    if (!action) {
-      return;
+  function remove_action(key) {
+    var row = rows[key];
+    if (row) {
+      JX.DOM.remove(row.node);
+      row.option.disabled = false;
+      delete rows[key];
     }
-
-    option.disabled = true;
-
-    var icon = new JX.PHUIXIconView()
-      .setIcon('fa-times-circle');
-    var remove = JX.$N('a', {href: '#'}, icon.getNode());
-
-    var control = new JX.PHUIXFormControl()
-      .setLabel(action.label)
-      .setError(remove)
-      .setControl(action.type, action.spec);
-    var node = control.getNode();
-
-    JX.Stratcom.addSigil(node, 'touchable');
-
-    var remove_action = function() {
-      JX.DOM.remove(node);
-      delete rows[action.key];
-      option.disabled = false;
-    };
-
-    JX.DOM.listen(node, 'gesture.swipe.end', null, function(e) {
-      var data = e.getData();
-
-      if (data.direction != 'left') {
-        // Didn't swipe left.
-        return;
-      }
-
-      if (data.length <= (JX.Vector.getDim(node).x / 2)) {
-        // Didn't swipe far enough.
-        return;
-      }
-
-      remove_action();
-    });
-
-    rows[action.key] = control;
-
-    JX.DOM.listen(remove, 'click', null, function(e) {
-      e.kill();
-      remove_action();
-    });
-
-    place_node.parentNode.insertBefore(node, place_node);
-
-    return control;
   }
 
   function serialize_actions() {
@@ -103,7 +58,7 @@ JX.behavior('comment-actions', function(config) {
     for (var k in rows) {
       data.push({
         type: k,
-        value: rows[k].getValue(),
+        value: rows[k].control.getValue(),
         initialValue: action_map[k].initialValue || null
       });
     }
@@ -146,11 +101,113 @@ JX.behavior('comment-actions', function(config) {
     if (!response.xactions.length) {
       JX.DOM.hide(panel);
     } else {
+      var preview_root = JX.$(config.timelineID);
       JX.DOM.setContent(
-        JX.$(config.timelineID),
-        JX.$H(response.xactions.join('')));
+        preview_root,
+        [
+          JX.$H(response.xactions.join('')),
+          JX.$H(response.previewContent)
+        ]);
       JX.DOM.show(panel);
+
+      // NOTE: Resonses are currently processed before associated behaviors are
+      // registered. We need to defer invoking this event so that any behaviors
+      // accompanying the response are registered.
+      var invoke_preview = function() {
+        JX.Stratcom.invoke(
+          'EditEngine.didCommentPreview',
+          null,
+          {
+            rootNode: preview_root
+          });
+      };
+      setTimeout(invoke_preview, 0);
     }
+  }
+
+  function force_preview() {
+    if (!config.shouldPreview) {
+      return;
+    }
+
+    new JX.Request(config.actionURI, onresponse)
+      .setData(get_data())
+      .send();
+  }
+
+  function add_row(option) {
+    var action = action_map[option.value];
+    if (!action) {
+      return;
+    }
+
+    // Remove any conflicting actions. For example, "Accept Revision" conflicts
+    // with "Reject Revision".
+    var conflict_key = action.conflictKey || null;
+    if (conflict_key !== null) {
+      for (var k in action_map) {
+        if (k === action.key) {
+          continue;
+        }
+        if (action_map[k].conflictKey !== conflict_key) {
+          continue;
+        }
+
+        if (!(k in rows)) {
+          continue;
+        }
+
+        remove_action(k);
+      }
+    }
+
+    option.disabled = true;
+
+    var icon = new JX.PHUIXIconView()
+      .setIcon('fa-times-circle');
+    var remove = JX.$N('a', {href: '#'}, icon.getNode());
+
+    var control = new JX.PHUIXFormControl()
+      .setLabel(action.label)
+      .setError(remove)
+      .setControl(action.type, action.spec)
+      .setClass('phui-comment-action');
+    var node = control.getNode();
+
+    JX.Stratcom.addSigil(node, 'touchable');
+
+    JX.DOM.listen(node, 'gesture.swipe.end', null, function(e) {
+      var data = e.getData();
+
+      if (data.direction != 'left') {
+        // Didn't swipe left.
+        return;
+      }
+
+      if (data.length <= (JX.Vector.getDim(node).x / 2)) {
+        // Didn't swipe far enough.
+        return;
+      }
+
+      remove_action(action.key);
+    });
+
+    rows[action.key] = {
+      control: control,
+      node: node,
+      option: option
+    };
+
+    JX.DOM.listen(remove, 'click', null, function(e) {
+      e.kill();
+      remove_action(action.key);
+    });
+
+    place_node.parentNode.insertBefore(node, place_node);
+
+    force_preview();
+
+    return control;
   }
 
   JX.DOM.listen(form_node, ['submit', 'didSyntheticSubmit'], null, function() {
@@ -167,13 +224,7 @@ JX.behavior('comment-actions', function(config) {
 
     JX.DOM.listen(form_node, 'keydown', null, trigger);
 
-    var always_trigger = function() {
-      new JX.Request(config.actionURI, onresponse)
-        .setData(get_data())
-        .send();
-    };
-
-    JX.DOM.listen(form_node, 'shouldRefresh', null, always_trigger);
+    JX.DOM.listen(form_node, 'shouldRefresh', null, force_preview);
     request.start();
 
     var old_device = JX.Device.getDevice();
@@ -188,7 +239,7 @@ JX.behavior('comment-actions', function(config) {
         // Force an immediate refresh if we switched from another device type
         // to desktop.
         if (old_device != new_device) {
-          always_trigger();
+          force_preview();
         }
       } else {
         // On mobile, don't show live previews and only save drafts every

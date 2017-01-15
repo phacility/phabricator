@@ -28,7 +28,10 @@ final class PhabricatorProjectDatasource
       ->needImages(true)
       ->needSlugs(true);
 
-    if ($tokens) {
+    if ($this->getPhase() == self::PHASE_PREFIX) {
+      $prefix = $this->getPrefixQuery();
+      $query->withNamePrefixes(array($prefix));
+    } else if ($tokens) {
       $query->withNameTokens($tokens);
     }
 
@@ -99,16 +102,22 @@ final class PhabricatorProjectDatasource
       }
 
       $all_strings = array();
-      $all_strings[] = $proj->getDisplayName();
 
-      // Add an extra space after the name so that the original project
-      // sorts ahead of milestones. This is kind of a hack but ehh?
-      $all_strings[] = null;
+      // NOTE: We list the project's name first because results will be
+      // sorted into prefix vs content phases incorrectly if we don't: it
+      // will look like "Parent (Milestone)" matched "Parent" as a prefix,
+      // but it did not.
+      $all_strings[] = $proj->getName();
+
+      if ($proj->isMilestone()) {
+        $all_strings[] = $proj->getParentProject()->getName();
+      }
 
       foreach ($proj->getSlugs() as $project_slug) {
         $all_strings[] = $project_slug->getSlug();
       }
-      $all_strings = implode(' ', $all_strings);
+
+      $all_strings = implode("\n", $all_strings);
 
       $proj_result = id(new PhabricatorTypeaheadResult())
         ->setName($all_strings)
@@ -132,7 +141,7 @@ final class PhabricatorProjectDatasource
 
         $description = idx($descriptions, $phid);
         if (strlen($description)) {
-          $summary = PhabricatorMarkupEngine::summarize($description);
+          $summary = PhabricatorMarkupEngine::summarizeSentence($description);
           $proj_result->addAttribute($summary);
         }
       }

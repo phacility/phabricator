@@ -30,20 +30,19 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setViewer($viewer)
       ->setTargetObject($task);
 
-    $e_commit = ManiphestTaskHasCommitEdgeType::EDGECONST;
-    $e_rev    = ManiphestTaskHasRevisionEdgeType::EDGECONST;
-    $e_mock   = ManiphestTaskHasMockEdgeType::EDGECONST;
+    $edge_types = array(
+      ManiphestTaskHasCommitEdgeType::EDGECONST,
+      ManiphestTaskHasRevisionEdgeType::EDGECONST,
+      ManiphestTaskHasMockEdgeType::EDGECONST,
+      PhabricatorObjectMentionedByObjectEdgeType::EDGECONST,
+      PhabricatorObjectMentionsObjectEdgeType::EDGECONST,
+    );
 
     $phid = $task->getPHID();
 
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($phid))
-      ->withEdgeTypes(
-        array(
-          $e_commit,
-          $e_rev,
-          $e_mock,
-        ));
+      ->withEdgeTypes($edge_types);
     $edges = idx($query->execute(), $phid);
     $phids = array_fill_keys($query->getDestinationPHIDs(), true);
 
@@ -77,15 +76,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $timeline->setQuoteRef($monogram);
     $comment_view->setTransactionTimeline($timeline);
 
-    $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setCurtain($curtain)
-      ->setMainColumn(array(
-        $timeline,
-        $comment_view,
-      ))
-      ->addPropertySection(pht('Description'), $description)
-      ->addPropertySection(pht('Details'), $details);
+    $related_tabs = array();
+    $graph_menu = null;
 
     $graph_limit = 100;
     $task_graph = id(new ManiphestTaskGraph())
@@ -159,12 +151,49 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setText($search_text)
         ->setDropdownMenu($dropdown_menu);
 
-      $graph_header = id(new PHUIHeaderView())
-        ->setHeader(pht('Task Graph'))
-        ->addActionLink($graph_menu);
-
-      $view->addPropertySection($graph_header, $graph_table);
+      $related_tabs[] = id(new PHUITabView())
+        ->setName(pht('Task Graph'))
+        ->setKey('graph')
+        ->appendChild($graph_table);
     }
+
+    $related_tabs[] = $this->newMocksTab($task, $query);
+    $related_tabs[] = $this->newMentionsTab($task, $query);
+
+    $tab_view = null;
+
+    $related_tabs = array_filter($related_tabs);
+    if ($related_tabs) {
+      $tab_group = new PHUITabGroupView();
+      foreach ($related_tabs as $tab) {
+        $tab_group->addTab($tab);
+      }
+
+      $related_header = id(new PHUIHeaderView())
+        ->setHeader(pht('Related Objects'));
+
+      if ($graph_menu) {
+        $related_header->addActionLink($graph_menu);
+      }
+
+      $tab_view = id(new PHUIObjectBoxView())
+        ->setHeader($related_header)
+        ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
+        ->addTabGroup($tab_group);
+    }
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setCurtain($curtain)
+      ->setMainColumn(
+        array(
+          $tab_view,
+          $timeline,
+          $comment_view,
+        ))
+      ->addPropertySection(pht('Description'), $description)
+      ->addPropertySection(pht('Details'), $details);
+
 
     return $this->newPage()
       ->setTitle($title)
@@ -173,10 +202,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         array(
           $task->getPHID(),
         ))
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->appendChild($view);
 
   }
 
@@ -356,8 +382,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $edge_types = array(
       ManiphestTaskHasRevisionEdgeType::EDGECONST
         => pht('Differential Revisions'),
-      ManiphestTaskHasMockEdgeType::EDGECONST
-        => pht('Pholio Mocks'),
     );
 
     $revisions_commits = array();
@@ -373,7 +397,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
       foreach ($commit_phids as $phid) {
         $revisions_commits[$phid] = $handles->renderHandle($phid)
-          ->setShowHovercard(true);
+          ->setShowHovercard(true)
+          ->setShowStateIcon(true);
         $revision_phid = key($drev_edges[$phid][$commit_drev]);
         $revision_handle = $handles->getHandleIfExists($revision_phid);
         if ($revision_handle) {
@@ -388,12 +413,16 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     foreach ($edge_types as $edge_type => $edge_name) {
-      if ($edges[$edge_type]) {
-        $edge_handles = $viewer->loadHandles(array_keys($edges[$edge_type]));
-        $view->addProperty(
-          $edge_name,
-          $edge_handles->renderList());
+      if (!$edges[$edge_type]) {
+        continue;
       }
+
+      $edge_handles = $viewer->loadHandles(array_keys($edges[$edge_type]));
+
+      $edge_list = $edge_handles->renderList()
+        ->setShowStateIcons(true);
+
+      $view->addProperty($edge_name, $edge_list);
     }
 
     if ($revisions_commits) {
@@ -434,5 +463,96 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     return $section;
   }
+
+  private function newMocksTab(
+    ManiphestTask $task,
+    PhabricatorEdgeQuery $edge_query) {
+
+    $mock_type = ManiphestTaskHasMockEdgeType::EDGECONST;
+    $mock_phids = $edge_query->getDestinationPHIDs(array(), array($mock_type));
+    if (!$mock_phids) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+    $handles = $viewer->loadHandles($mock_phids);
+
+    // TODO: It would be nice to render this as pinboard-style thumbnails,
+    // similar to "{M123}", instead of a list of links.
+
+    $view = id(new PHUIPropertyListView())
+      ->addProperty(pht('Mocks'), $handles->renderList());
+
+    return id(new PHUITabView())
+      ->setName(pht('Mocks'))
+      ->setKey('mocks')
+      ->appendChild($view);
+  }
+
+  private function newMentionsTab(
+    ManiphestTask $task,
+    PhabricatorEdgeQuery $edge_query) {
+
+    $in_type = PhabricatorObjectMentionedByObjectEdgeType::EDGECONST;
+    $out_type = PhabricatorObjectMentionsObjectEdgeType::EDGECONST;
+
+    $in_phids = $edge_query->getDestinationPHIDs(array(), array($in_type));
+    $out_phids = $edge_query->getDestinationPHIDs(array(), array($out_type));
+
+    // Filter out any mentioned users from the list. These are not generally
+    // very interesting to show in a relationship summary since they usually
+    // end up as subscribers anyway.
+
+    $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
+    foreach ($out_phids as $key => $out_phid) {
+      if (phid_get_type($out_phid) == $user_type) {
+        unset($out_phids[$key]);
+      }
+    }
+
+    if (!$in_phids && !$out_phids) {
+      return null;
+    }
+
+    $viewer = $this->getViewer();
+    $in_handles = $viewer->loadHandles($in_phids);
+    $out_handles = $viewer->loadHandles($out_phids);
+
+    $in_handles = $this->getCompleteHandles($in_handles);
+    $out_handles = $this->getCompleteHandles($out_handles);
+
+    if (!count($in_handles) && !count($out_handles)) {
+      return null;
+    }
+
+    $view = new PHUIPropertyListView();
+
+    if (count($in_handles)) {
+      $view->addProperty(pht('Mentioned In'), $in_handles->renderList());
+    }
+
+    if (count($out_handles)) {
+      $view->addProperty(pht('Mentioned Here'), $out_handles->renderList());
+    }
+
+    return id(new PHUITabView())
+      ->setName(pht('Mentions'))
+      ->setKey('mentions')
+      ->appendChild($view);
+  }
+
+  private function getCompleteHandles(PhabricatorHandleList $handles) {
+    $phids = array();
+
+    foreach ($handles as $phid => $handle) {
+      if (!$handle->isComplete()) {
+        continue;
+      }
+      $phids[] = $phid;
+    }
+
+    return $handles->newSublist($phids);
+  }
+
 
 }

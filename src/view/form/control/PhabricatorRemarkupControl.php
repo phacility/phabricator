@@ -1,9 +1,10 @@
 <?php
 
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
-  private $disableMacro = false;
 
+  private $disableMacro = false;
   private $disableFullScreen = false;
+  private $canPin;
 
   public function setDisableMacros($disable) {
     $this->disableMacro = $disable;
@@ -13,6 +14,15 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
   public function setDisableFullScreen($disable) {
     $this->disableFullScreen = $disable;
     return $this;
+  }
+
+  public function setCanPin($can_pin) {
+    $this->canPin = $can_pin;
+    return $this;
+  }
+
+  public function getCanPin() {
+    return $this->canPin;
   }
 
   protected function renderInput() {
@@ -29,7 +39,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
     // We need to have this if previews render images, since Ajax can not
     // currently ship JS or CSS.
-    require_celerity_resource('lightbox-attachment-css');
+    require_celerity_resource('phui-lightbox-css');
 
     if (!$this->getDisabled()) {
       Javelin::initBehavior(
@@ -63,7 +73,9 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'data' => pht('data'),
           'name' => pht('name'),
           'URL' => pht('URL'),
+          'key-help' => pht('Pin or unpin the comment form.'),
         ),
+        'canPin' => $this->getCanPin(),
         'disabled' => $this->getDisabled(),
         'rootID' => $root_id,
         'autocompleteMap' => (object)array(
@@ -158,23 +170,34 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'align' => 'right',
     );
 
-    $actions['fa-life-bouy'] = array(
+    $actions['fa-book'] = array(
       'tip' => pht('Help'),
       'align' => 'right',
       'href'  => PhabricatorEnv::getDoclink('Remarkup Reference'),
     );
 
+    $mode_actions = array();
 
     if (!$this->disableFullScreen) {
+      $mode_actions['fa-arrows-alt'] = array(
+        'tip' => pht('Fullscreen Mode'),
+        'align' => 'right',
+      );
+    }
+
+    if ($this->getCanPin()) {
+      $mode_actions['fa-thumb-tack'] = array(
+        'tip' => pht('Pin Form On Screen'),
+        'align' => 'right',
+      );
+    }
+
+    if ($mode_actions) {
       $actions[] = array(
         'spacer' => true,
         'align' => 'right',
       );
-
-      $actions['fa-arrows-alt'] = array(
-        'tip' => pht('Fullscreen Mode'),
-        'align' => 'right',
-      );
+      $actions += $mode_actions;
     }
 
     $buttons = array();
@@ -201,6 +224,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         continue;
       } else {
         $classes[] = 'remarkup-assist-button';
+      }
+
+      if ($action == 'fa-cloud-upload') {
+        $classes[] = 'remarkup-assist-upload';
       }
 
       $href = idx($spec, 'href', '#');

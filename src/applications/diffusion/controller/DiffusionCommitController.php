@@ -369,7 +369,9 @@ final class DiffusionCommitController extends DiffusionController {
 
     }
 
-    $add_comment = $this->renderAddCommentPanel($commit, $audit_requests);
+    $add_comment = $this->renderAddCommentPanel(
+      $commit,
+      $timeline);
 
     $filetree_on = $viewer->compareUserSetting(
       PhabricatorShowFiletreeSetting::SETTINGKEY,
@@ -717,150 +719,24 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function renderAddCommentPanel(
     PhabricatorRepositoryCommit $commit,
-    array $audit_requests) {
-    assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
+    $timeline) {
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    if (!$viewer->isLoggedIn()) {
-      return id(new PhabricatorApplicationTransactionCommentView())
-        ->setUser($viewer)
-        ->setRequestURI($request->getRequestURI());
-    }
-
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-    $pane_id = celerity_generate_unique_node_id();
-    Javelin::initBehavior(
-      'differential-keyboard-navigation',
-      array(
-        'haunt' => $pane_id,
-      ));
-
-    $draft = id(new PhabricatorDraft())->loadOneWhere(
-      'authorPHID = %s AND draftKey = %s',
-      $viewer->getPHID(),
-      'diffusion-audit-'.$commit->getID());
-    if ($draft) {
-      $draft = $draft->getDraft();
-    } else {
-      $draft = null;
-    }
-
-    $actions = $this->getAuditActions($commit, $audit_requests);
-
-    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $auditor_source = new DiffusionAuditorDatasource();
-
-    $form = id(new AphrontFormView())
-      ->setUser($viewer)
-      ->setAction('/audit/addcomment/')
-      ->addHiddenInput('commit', $commit->getPHID())
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Action'))
-          ->setName('action')
-          ->setID('audit-action')
-          ->setOptions($actions))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Add Auditors'))
-          ->setName('auditors')
-          ->setControlID('add-auditors')
-          ->setControlStyle('display: none')
-          ->setID('add-auditors-tokenizer')
-          ->setDisableBehavior(true)
-          ->setDatasource($auditor_source))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Add CCs'))
-          ->setName('ccs')
-          ->setControlID('add-ccs')
-          ->setControlStyle('display: none')
-          ->setID('add-ccs-tokenizer')
-          ->setDisableBehavior(true)
-          ->setDatasource($mailable_source))
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-          ->setLabel(pht('Comments'))
-          ->setName('content')
-          ->setValue($draft)
-          ->setID('audit-content')
-          ->setUser($viewer))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Submit')));
-
-    $header = new PHUIHeaderView();
-    $header->setHeader(
-      $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
-
-    Javelin::initBehavior(
-      'differential-add-reviewers-and-ccs',
-      array(
-        'dynamic' => array(
-          'add-auditors-tokenizer' => array(
-            'actions' => array('add_auditors' => 1),
-            'src' => $auditor_source->getDatasourceURI(),
-            'row' => 'add-auditors',
-            'placeholder' => $auditor_source->getPlaceholderText(),
-          ),
-          'add-ccs-tokenizer' => array(
-            'actions' => array('add_ccs' => 1),
-            'src' => $mailable_source->getDatasourceURI(),
-            'row' => 'add-ccs',
-            'placeholder' => $mailable_source->getPlaceholderText(),
-          ),
-        ),
-        'select' => 'audit-action',
-      ));
-
-    Javelin::initBehavior('differential-feedback-preview', array(
-      'uri'       => '/audit/preview/'.$commit->getID().'/',
-      'preview'   => 'audit-preview',
-      'content'   => 'audit-content',
-      'action'    => 'audit-action',
-      'previewTokenizers' => array(
-        'auditors' => 'add-auditors-tokenizer',
-        'ccs'      => 'add-ccs-tokenizer',
-      ),
-      'inline'     => 'inline-comment-preview',
-      'inlineuri'  => '/diffusion/inline/preview/'.$commit->getPHID().'/',
-    ));
-
-    $loading = phutil_tag_div(
-      'aphront-panel-preview-loading-text',
-      pht('Loading preview...'));
-
-    $preview_panel = phutil_tag_div(
-      'aphront-panel-preview aphront-panel-flush',
-      array(
-        phutil_tag('div', array('id' => 'audit-preview'), $loading),
-        phutil_tag('div', array('id' => 'inline-comment-preview')),
-      ));
+    Javelin::initBehavior('differential-keyboard-navigation');
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
 
-    $anchor = id(new PhabricatorAnchorView())
-      ->setAnchorName('comment')
-      ->setNavigationMarker(true)
-      ->render();
+    $comment_view = id(new DiffusionCommitEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($commit);
 
-    $comment_box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->appendChild($form);
+    $comment_view->setTransactionTimeline($timeline);
 
-    return phutil_tag(
-      'div',
-      array(
-        'id' => $pane_id,
-      ),
-      phutil_tag_div(
-        'differential-add-comment-panel',
-        array($anchor, $comment_box, $preview_panel)));
+    return $comment_view;
   }
 
   /**
@@ -997,12 +873,12 @@ final class DiffusionCommitController extends DiffusionController {
       $commit,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $identifier = $commit->getCommitIdentifier();
-    $uri = $repository->getPathURI("commit/{$identifier}/edit/");
+    $id = $commit->getID();
+    $edit_uri = $this->getApplicationURI("/commit/edit/{$id}/");
 
     $action = id(new PhabricatorActionView())
       ->setName(pht('Edit Commit'))
-      ->setHref($uri)
+      ->setHref($edit_uri)
       ->setIcon('fa-pencil')
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit);

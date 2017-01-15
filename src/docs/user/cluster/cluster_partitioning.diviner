@@ -1,0 +1,241 @@
+@title Cluster: Partitioning and Advanced Configuration
+@group cluster
+
+Guide to partitioning Phabricator applications across multiple database hosts.
+
+Overview
+========
+
+You can partition Phabricator's applications across multiple databases. For
+example, you can move an application like Files or Maniphest to a dedicated
+database host.
+
+The advantages of doing this are:
+
+  - moving heavily used applications to dedicated hardware can help you
+    scale; and
+  - you can match application workloads to hardware or configuration to make
+    operating the cluster easier.
+
+This configuration is complex, and very few installs will benefit from pursuing
+it. Phabricator will normally run comfortably with a single database master
+even for large organizations.
+
+Partitioning generally does not do much to increase resiliance or make it
+easier to recover from disasters, and is primarily a mechanism for scaling and
+operational convenience.
+
+If you are considering partitioning, you likely want to configure replication
+with a single master first. Even if you choose not to deploy replication, you
+should review and understand how replication works before you partition. For
+details, see @{article:Cluster: Databases}.
+
+Databases also support some advanced configuration options. Briefly:
+
+  - `persistent`: Allows use of persistent connections, reducing pressure on
+    outbound ports.
+
+See "Advanced Configuration", below, for additional discussion.
+
+
+What Partitioning Does
+======================
+
+When you partition Phabricator, you move all of the data for one or more
+applications (like Maniphest) to a new master database host. This is possible
+because Phabricator stores data for each application in its own logical
+database (like `phabricator_maniphest`) and performs no joins between databases.
+
+If you're running into scale limits on a single master database, you can move
+one or more of your most commonly-used applications to a second database host
+and continue adding users. You can keep partitioning applications until all
+heavily used applications have dedicated database servers.
+
+Alternatively or additionally, you can partition applications to make operating
+the cluster easier. Some applications have unusual workloads or requirements,
+and moving them to separate hosts may make things easier to deal with overall.
+
+For example: if Files accounts for most of the data on your install, you might
+move it to a different host to make backing up everything else easier.
+
+
+Configuration Overview
+======================
+
+To configure partitioning, you will add multiple entries to `cluster.databases`
+with the `master` role. Each `master` should specify a new `partition` key,
+which contains a list of application databases it should host.
+
+One master may be specified as the `default` partition. Applications not
+explicitly configured to be assigned elsewhere will be assigned here.
+
+When you define multiple `master` databases, you must also specify which master
+each `replica` database follows. Here's a simple example config:
+
+```lang=json
+...
+"cluster.databases": [
+  {
+    "host": "db001.corporation.com",
+    "role": "master",
+    "user": "phabricator",
+    "pass": "hunter2!trustno1",
+    "port": 3306,
+    "partition": [
+      "default"
+    ]
+  },
+  {
+    "host": "db002.corporation.com",
+    "role": "replica",
+    "user": "phabricator",
+    "pass": "hunter2!trustno1",
+    "port": 3306,
+    "master": "db001.corporation.com:3306"
+  },
+  {
+    "host": "db003.corporation.com",
+    "role": "master",
+    "user": "phabricator",
+    "pass": "hunter2!trustno1",
+    "port": 3306,
+    "partition": [
+      "file",
+      "passphrase",
+      "slowvote"
+    ]
+  },
+  {
+    "host": "db004.corporation.com",
+    "role": "replica",
+    "user": "phabricator",
+    "pass": "hunter2!trustno1",
+    "port": 3306,
+    "master": "db003.corporation.com:3306"
+  }
+],
+...
+```
+
+In this configuration, `db001` is a master and `db002` replicates it.
+`db003` is a second master, replicated by `db004`.
+
+Applications have been partitioned like this:
+
+  - `db003`/`db004`: Files, Passphrase, Slowvote
+  - `db001`/`db002`: Default (all other applications)
+
+Not all of the database partition names are the same as the application
+names. You can get a list of databases with `bin/storage databases` to identify
+the correct database names.
+
+After you have configured partitioning, it needs to be committed to the
+databases. This writes a copy of the configuration to tables on the databases,
+preventing errors if a webserver accidentally starts with an old or invalid
+configuration.
+
+To commit the configuration, run this command:
+
+```
+phabricator/ $ ./bin/storage partition
+```
+
+Run this command after making any partition or clustering changes. Webservers
+will not serve traffic if their configuration and the database configuration
+differ.
+
+
+Launching a new Partition
+=========================
+
+To add a new partition, follow these steps:
+
+  - Set up the new database host or hosts.
+  - Add the new database to `cluster.databases`, but keep its "partition"
+    configuration empty (just an empty list). If this is the first time you
+    are partitioning, you will need to configure your existing master as the
+    new "default". This will let Phabricator interact with it, but won't send
+    any traffic to it yet.
+  - Run `bin/storage partition`.
+  - Run `bin/storage upgrade` to initialize the schemata on the new hosts.
+  - Stop writes to the applications you want to move by putting Phabricator
+    in read-only mode, or shutting down the webserver and daemons, or telling
+    everyone not to touch anything.
+  - Dump the data from the application databases on the old master.
+  - Load the data into the application databases on the new master.
+  - Reconfigure the "partition" setup so that Phabricator knows the databases
+    have moved.
+  - Run `bin/storage partition`.
+  - While still in read-only mode, check that all the data appears to be
+    intact.
+  - Resume writes.
+
+You can do this with a small, rarely-used application first (on most installs,
+Slowvote might be a good candidate) if you want to run through the process
+end-to-end before performing a larger, higher-stakes migration.
+
+
+How Partitioning Works
+======================
+
+If you have multiple masters, Phabricator keeps the entire set of schemata up
+to date on all of them. When you run `bin/storage upgrade` or other storage
+management commands, they generally affect all masters (if they do not, they
+will prompt you to be more specific).
+
+When the application goes to read or write normal data (for example, to query a
+list of tasks) it only connects to the master which the application it is
+acting on behalf of is assigned to.
+
+In most cases, a masters will not have any data in most the databases which are
+not assigned to it. If they do (for example, because they previously hosted the
+application) the data is ignored. This approach (of maintaining all schemata on
+all hosts) makes it easier to move data and to quickly revert changes if a
+configuration mistake occurs.
+
+There are some exceptions to this rule. For example, all masters keep track
+of which patches have been applied to that particular master so that
+`bin/storage upgrade` can upgrade hosts correctly.
+
+Phabricator does not perform joins across logical databases, so there are no
+meaningful differences in runtime behavior if two applications are on the same
+physical host or different physical hosts.
+
+
+Advanced Configuration
+======================
+
+Separate from partitioning, some advanced configuration is supported. These
+options must be set on database specifications in `cluster.databases`. You can
+configure them without actually building a cluster by defining a cluster with
+only one master.
+
+`persistent` //(bool)// Enables persistent connections. Defaults to off.
+
+With persitent connections enabled, Phabricator will keep a pool of database
+connections open between web requests and reuse them when serving subsequent
+requests.
+
+The primary benefit of using persistent connections is that it will greatly
+reduce pressure on how quickly outbound TCP ports are opened and closed. After
+a TCP port closes, it normally can't be used again for about 60 seconds, so
+rapidly cycling ports can cause resource exuastion. If you're seeing failures
+because requests are unable to bind to an outbound port, enabling this option
+is likely to fix the issue. This option may also slightly increase performance.
+
+The cost of using persistent connections is that you may need to raise the
+MySQL `max_connections` setting: although Phabricator will make far fewer
+connections, the connections it does make will be longer-lived. Raising this
+setting will increase MySQL memory requirements and may run into other limits,
+like `open_files_limit`, which may also need to be raised.
+
+Persistent connections are enabled per-database. If you always want to use
+them, set the flag on each configured database in `cluster.databases`.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to @{article:Clustering Introduction}.

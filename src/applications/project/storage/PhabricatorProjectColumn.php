@@ -6,7 +6,8 @@ final class PhabricatorProjectColumn
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorExtendedPolicyInterface {
+    PhabricatorExtendedPolicyInterface,
+    PhabricatorConduitResultInterface {
 
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
@@ -181,6 +182,48 @@ final class PhabricatorProjectColumn
     }
 
     return sprintf('%s%012d', $group, $sequence);
+  }
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The display name of the column.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('project')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('The project the column belongs to.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('proxyPHID')
+        ->setType('phid?')
+        ->setDescription(
+          pht(
+            'For columns that proxy another object (like a subproject or '.
+            'milestone), the PHID of the object they proxy.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    return array(
+      'name' => $this->getDisplayName(),
+      'proxyPHID' => $this->getProxyPHID(),
+      'project' => $this->getProject()->getRefForConduit(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array();
+  }
+
+  public function getRefForConduit() {
+    return array(
+      'id' => (int)$this->getID(),
+      'phid' => $this->getPHID(),
+      'name' => $this->getDisplayName(),
+    );
   }
 
 

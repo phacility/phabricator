@@ -545,16 +545,49 @@ final class AphrontRequest extends Phobject {
     return id(new PhutilURI($path))->setQueryParams($get);
   }
 
+  public function getAbsoluteRequestURI() {
+    $uri = $this->getRequestURI();
+    $uri->setDomain($this->getHost());
+
+    if ($this->isHTTPS()) {
+      $protocol = 'https';
+    } else {
+      $protocol = 'http';
+    }
+
+    $uri->setProtocol($protocol);
+
+    // If the request used a nonstandard port, preserve it while building the
+    // absolute URI.
+
+    // First, get the default port for the request protocol.
+    $default_port = id(new PhutilURI($protocol.'://example.com/'))
+      ->getPortWithProtocolDefault();
+
+    // NOTE: See note in getHost() about malicious "Host" headers. This
+    // construction defuses some obscure potential attacks.
+    $port = id(new PhutilURI($protocol.'://'.$this->host))
+      ->getPort();
+
+    if (($port !== null) && ($port !== $default_port)) {
+      $uri->setPort($port);
+    }
+
+    return $uri;
+  }
+
   public function isDialogFormPost() {
     return $this->isFormPost() && $this->getStr('__dialog__');
   }
 
   public function getRemoteAddress() {
-    $address = $_SERVER['REMOTE_ADDR'];
-    if (!strlen($address)) {
+    $address = PhabricatorEnv::getRemoteAddress();
+
+    if (!$address) {
       return null;
     }
-    return substr($address, 0, 64);
+
+    return $address->getAddress();
   }
 
   public function isHTTPS() {

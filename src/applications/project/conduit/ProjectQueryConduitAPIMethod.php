@@ -10,6 +10,16 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
     return pht('Execute searches for Projects.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "project.search" instead.');
+  }
+
   protected function defineParamTypes() {
 
     $statuses = array(

@@ -46,7 +46,8 @@ input[type="color"],
 div.jx-tokenizer-container {
   padding: 4px 6px;
   background-color: #ffffff;
-  border: 1px solid {$blueborder};
+  border: 1px solid {$greyborder};
+  border-radius: 3px;
 
   -webkit-box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
   -moz-box-shadow: inset 0 1px 1px rgba({$alphablack}, 0.075);
@@ -63,7 +64,6 @@ div.jx-tokenizer-container {
 
   /* iOS Safari */
   -webkit-appearance: none;
-  border-radius: 0;
 }
 
 textarea:focus,
@@ -105,11 +105,19 @@ input[type="checkbox"] {
 }
 
 select {
-  height: 24px;
-  line-height: 24px;
-  border: 1px solid {$lightgreyborder};
-  background-color: #ffffff;
-  min-width: 140px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  background: #fff url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAUCAMAAACzvE1FAAAADFBMVEUzMzMzMzMzMzMzMzMKAG/3AAAAA3RSTlMAf4C/aSLHAAAAPElEQVR42q3NMQ4AIAgEQTn//2cLdRKppSGzBYwzVXvznNWs8C58CiussPJj8h6NwgorrKRdTvuV9v16Afn0AYFOB7aYAAAAAElFTkSuQmCC") no-repeat right 8px center;
+  background-size: 8px 10px;
+  border-radius: 3px;
+  color: {$darkbluetext};
+  border: 1px solid {$greyborder};
+  height: 28px;
+  padding: 0 24px 0 8px;
+  margin: 0;
+  min-width: 180px;
 }
 
 select[multiple],

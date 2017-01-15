@@ -414,6 +414,10 @@ final class PhabricatorMarkupEngine extends Phobject {
       case 'default':
         $engine = self::newMarkupEngine(array());
         break;
+      case 'feed':
+        $engine = self::newMarkupEngine(array());
+        $engine->setConfig('autoplay.disable', true);
+        break;
       case 'nolinebreaks':
         $engine = self::newMarkupEngine(array());
         $engine->setConfig('preserve-linebreaks', false);
@@ -605,6 +609,28 @@ final class PhabricatorMarkupEngine extends Phobject {
     }
 
     return array_values($files);
+  }
+
+  public static function summarizeSentence($corpus) {
+    $corpus = trim($corpus);
+    $blocks = preg_split('/\n+/', $corpus, 2);
+    $block = head($blocks);
+
+    $sentences = preg_split(
+      '/\b([.?!]+)\B/u',
+      $block,
+      2,
+      PREG_SPLIT_DELIM_CAPTURE);
+
+    if (count($sentences) > 1) {
+      $result = $sentences[0].$sentences[1];
+    } else {
+      $result = head($sentences);
+    }
+
+    return id(new PhutilUTF8StringTruncator())
+      ->setMaximumGlyphs(128)
+      ->truncateString($result);
   }
 
   /**

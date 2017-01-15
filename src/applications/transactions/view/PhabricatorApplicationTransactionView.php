@@ -55,6 +55,10 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $this;
   }
 
+  public function getIsPreview() {
+    return $this->isPreview;
+  }
+
   public function setShowEditActions($show_edit_actions) {
     $this->showEditActions = $show_edit_actions;
     return $this;
@@ -231,6 +235,10 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     return $view;
+  }
+
+  public function isTimelineEmpty() {
+    return !count($this->buildEvents(true));
   }
 
   protected function getOrBuildEngine() {
