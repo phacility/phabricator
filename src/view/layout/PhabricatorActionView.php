@@ -173,22 +173,26 @@ final class PhabricatorActionView extends AphrontView {
         ->setIcon($this->icon.$color);
     }
 
+    $sigils = array();
+    if ($this->workflow) {
+      $sigils[] = 'workflow';
+    }
+
+    if ($this->download) {
+      $sigils[] = 'download';
+    }
+
+    if ($this->submenu) {
+      $sigils[] = 'keep-open';
+    }
+
+    if ($this->sigils) {
+      $sigils = array_merge($sigils, $this->sigils);
+    }
+
+    $sigils = $sigils ? implode(' ', $sigils) : null;
+
     if ($this->href) {
-
-      $sigils = array();
-      if ($this->workflow) {
-        $sigils[] = 'workflow';
-      }
-      if ($this->download) {
-        $sigils[] = 'download';
-      }
-
-      if ($this->sigils) {
-        $sigils = array_merge($sigils, $this->sigils);
-      }
-
-      $sigils = $sigils ? implode(' ', $sigils) : null;
-
       if ($this->renderAsForm) {
         if (!$this->hasViewer()) {
           throw new Exception(
@@ -248,6 +252,7 @@ final class PhabricatorActionView extends AphrontView {
         'span',
         array(
           'class' => 'phabricator-action-view-item',
+          'sigil' => $sigils,
         ),
         array($icon, $this->name));
     }

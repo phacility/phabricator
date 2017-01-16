@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '0b64e988',
     'conpherence.pkg.js' => '6249a1cf',
     'core.pkg.css' => '1afa1d13',
-    'core.pkg.js' => 'a2ead3fe',
+    'core.pkg.js' => '892976d4',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '9535a7e6',
     'differential.pkg.js' => 'ddfeb49b',
@@ -533,7 +533,7 @@ return array(
     'rsrc/js/core/behavior-watch-anchor.js' => '9f36c42d',
     'rsrc/js/core/behavior-workflow.js' => '0a3f3021',
     'rsrc/js/core/phtize.js' => 'd254d646',
-    'rsrc/js/phui/behavior-phui-dropdown-menu.js' => '1aa4c968',
+    'rsrc/js/phui/behavior-phui-dropdown-menu.js' => '8744dfd1',
     'rsrc/js/phui/behavior-phui-file-upload.js' => 'b003d4fb',
     'rsrc/js/phui/behavior-phui-submenu.js' => 'a6f7a73b',
     'rsrc/js/phui/behavior-phui-tab-group.js' => '0a0b10e9',
@@ -686,7 +686,7 @@ return array(
     'javelin-behavior-phabricator-watch-anchor' => '9f36c42d',
     'javelin-behavior-pholio-mock-edit' => 'bee502c8',
     'javelin-behavior-pholio-mock-view' => 'fbe497e7',
-    'javelin-behavior-phui-dropdown-menu' => '1aa4c968',
+    'javelin-behavior-phui-dropdown-menu' => '8744dfd1',
     'javelin-behavior-phui-file-upload' => 'b003d4fb',
     'javelin-behavior-phui-hovercards' => 'bcaccd64',
     'javelin-behavior-phui-submenu' => 'a6f7a73b',
@@ -1056,12 +1056,6 @@ return array(
     ),
     '19f9369b' => array(
       'phui-oi-list-view-css',
-    ),
-    '1aa4c968' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'phuix-dropdown-menu',
     ),
     '1ad0a787' => array(
       'javelin-install',
@@ -1572,6 +1566,12 @@ return array(
       'javelin-stratcom',
       'phabricator-tooltip',
       'changeset-view-manager',
+    ),
+    '8744dfd1' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'phuix-dropdown-menu',
     ),
     '88236f00' => array(
       'javelin-behavior',
