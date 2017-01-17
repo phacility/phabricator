@@ -22,38 +22,25 @@ final class PhabricatorFavoritesProfileMenuEngine
     $items = array();
     $viewer = $this->getViewer();
 
-    $create_task = array(
-      'name' => null,
-      'formKey' =>
-        id(new ManiphestEditEngine())->getProfileMenuItemDefault(),
-    );
+    $engines = PhabricatorEditEngine::getAllEditEngines();
+    $engines = msortv($engines, 'getQuickCreateOrderVector');
 
-    $create_project = array(
-      'name' => null,
-      'formKey' =>
-        id(new PhabricatorProjectEditEngine())->getProfileMenuItemDefault(),
-    );
+    foreach ($engines as $engine) {
+      foreach ($engine->getDefaultQuickCreateFormKeys() as $form_key) {
+        $form_hash = PhabricatorHash::digestForIndex($form_key);
+        $builtin_key = "editengine.form({$form_hash})";
 
-    $create_repository = array(
-      'name' => null,
-      'formKey' =>
-        id(new DiffusionRepositoryEditEngine())->getProfileMenuItemDefault(),
-    );
+        $properties = array(
+          'name' => null,
+          'formKey' => $form_key,
+        );
 
-    $items[] = $this->newItem()
-      ->setBuiltinKey(PhabricatorFavoritesConstants::ITEM_TASK)
-      ->setMenuItemKey(PhabricatorEditEngineProfileMenuItem::MENUITEMKEY)
-      ->setMenuItemProperties($create_task);
-
-    $items[] = $this->newItem()
-      ->setBuiltinKey(PhabricatorFavoritesConstants::ITEM_PROJECT)
-      ->setMenuItemKey(PhabricatorEditEngineProfileMenuItem::MENUITEMKEY)
-      ->setMenuItemProperties($create_project);
-
-    $items[] = $this->newItem()
-      ->setBuiltinKey(PhabricatorFavoritesConstants::ITEM_REPOSITORY)
-      ->setMenuItemKey(PhabricatorEditEngineProfileMenuItem::MENUITEMKEY)
-      ->setMenuItemProperties($create_repository);
+        $items[] = $this->newItem()
+          ->setBuiltinKey($builtin_key)
+          ->setMenuItemKey(PhabricatorEditEngineProfileMenuItem::MENUITEMKEY)
+          ->setMenuItemProperties($properties);
+      }
+    }
 
     return $items;
   }
