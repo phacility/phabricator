@@ -126,18 +126,28 @@ final class PhabricatorProfileMenuItemConfiguration
     return $this->getMenuItem()->willBuildNavigationItems($items);
   }
 
-  public function getSortKey() {
-    $order = $this->getMenuItemOrder();
-    if ($order === null) {
-      $order = 'Z';
+  public function getSortVector() {
+    // Sort custom items above global items.
+    if ($this->getCustomPHID()) {
+      $is_global = 0;
     } else {
-      $order = sprintf('%020d', $order);
+      $is_global = 1;
     }
 
-    return sprintf(
-      '~%s%020d',
-      $order,
-      $this->getID());
+    // Sort items with an explicit order above items without an explicit order,
+    // so any newly created builtins go to the bottom.
+    $order = $this->getMenuItemOrder();
+    if ($order !== null) {
+      $has_order = 0;
+    } else {
+      $has_order = 1;
+    }
+
+    return id(new PhutilSortVector())
+      ->addInt($is_global)
+      ->addInt($has_order)
+      ->addInt((int)$order)
+      ->addInt((int)$this->getID());
   }
 
   public function isDisabled() {

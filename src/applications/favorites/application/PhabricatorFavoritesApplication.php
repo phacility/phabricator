@@ -55,11 +55,20 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
       ->withInstalled(true)
       ->executeOne();
 
-    $filter_view = id(new PhabricatorFavoritesProfileMenuEngine())
+    $menu_engine = id(new PhabricatorFavoritesProfileMenuEngine())
       ->setViewer($viewer)
-      ->setProfileObject($favorites)
-      ->setMenuType(PhabricatorProfileMenuEngine::MENU_COMBINED)
-      ->buildNavigation();
+      ->setProfileObject($favorites);
+
+    if ($viewer->getPHID()) {
+      $menu_engine
+        ->setCustomPHID($viewer->getPHID())
+        ->setMenuType(PhabricatorProfileMenuEngine::MENU_COMBINED);
+    } else {
+      $menu_engine
+        ->setMenuType(PhabricatorProfileMenuEngine::MENU_GLOBAL);
+    }
+
+    $filter_view = $menu_engine->buildNavigation();
 
     $menu_view = $filter_view->getMenu();
     $item_views = $menu_view->getItems();

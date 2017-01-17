@@ -6,7 +6,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $profileObject;
   private $customPHID;
   private $items;
-  private $menuType;
+  private $menuType = self::MENU_GLOBAL;
   private $defaultItem;
   private $controller;
   private $navigation;
@@ -15,6 +15,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   const MENU_GLOBAL = 'global';
   const MENU_PERSONAL = 'personal';
   const MENU_COMBINED = 'menu';
+  const ITEM_CUSTOM_DIVIDER = 'engine.divider';
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -82,8 +83,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   abstract protected function getItemURI($path);
-
   abstract protected function isMenuEngineConfigurable();
+
+  abstract protected function getBuiltinProfileItems($object);
+
+  protected function getBuiltinCustomProfileItems(
+    $object,
+    $custom_phid) {
+    return array();
+  }
 
   public function buildResponse() {
     $controller = $this->getController();
@@ -230,6 +238,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setBaseURI(new PhutilURI($this->getItemURI('')));
 
     $menu_items = $this->getItems();
+
     $filtered_items = array();
     foreach ($menu_items as $menu_item) {
       if ($menu_item->isDisabled()) {
@@ -294,22 +303,25 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $object = $this->getProfileObject();
 
     $items = $this->loadBuiltinProfileItems();
-    $menu = $this->getMenuType();
 
-    if ($this->getCustomPHID()) {
-      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-        ->setViewer($viewer)
-        ->withProfilePHIDs(array($object->getPHID()))
-        ->withCustomPHIDs(array($this->getCustomPHID()))
-        ->setMenuType($menu)
-        ->execute();
-    } else {
-      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-        ->setViewer($viewer)
-        ->withProfilePHIDs(array($object->getPHID()))
-        ->setMenuType($menu)
-        ->execute();
+    $query = id(new PhabricatorProfileMenuItemConfigurationQuery())
+      ->setViewer($viewer)
+      ->withProfilePHIDs(array($object->getPHID()));
+
+    $menu_type = $this->getMenuType();
+    switch ($menu_type) {
+      case self::MENU_GLOBAL:
+        $query->withCustomPHIDs(array(), true);
+        break;
+      case self::MENU_PERSONAL:
+        $query->withCustomPHIDs(array($this->getCustomPHID()), false);
+        break;
+      case self::MENU_COMBINED:
+        $query->withCustomPHIDs(array($this->getCustomPHID()), true);
+        break;
     }
+
+    $stored_items = $query->execute();
 
     foreach ($stored_items as $stored_item) {
       $impl = $stored_item->getMenuItem();
@@ -339,12 +351,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $items = msort($items, 'getSortKey');
-
-    // Normalize keys since callers shouldn't rely on this array being
-    // partially keyed.
-    $items = array_values($items);
-
+    $items = $this->arrangeItems($items);
 
     // Make sure exactly one valid item is marked as default.
     $default = null;
@@ -377,7 +384,26 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   private function loadBuiltinProfileItems() {
     $object = $this->getProfileObject();
-    $builtins = $this->getBuiltinProfileItems($object);
+
+    $menu_type = $this->getMenuType();
+    switch ($menu_type) {
+      case self::MENU_GLOBAL:
+        $builtins = $this->getBuiltinProfileItems($object);
+        break;
+      case self::MENU_PERSONAL:
+        $builtins = $this->getBuiltinCustomProfileItems(
+          $object,
+          $this->getCustomPHID());
+        break;
+      case self::MENU_COMBINED:
+        $builtins = array();
+        $builtins[] = $this->getBuiltinCustomProfileItems(
+          $object,
+          $this->getCustomPHID());
+        $builtins[] = $this->getBuiltinProfileItems($object);
+        $builtins = array_mergev($builtins);
+        break;
+    }
 
     $items = PhabricatorProfileMenuItem::getAllMenuItems();
     $viewer = $this->getViewer();
@@ -989,5 +1015,41 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     return $this;
   }
+
+  private function arrangeItems(array $items) {
+    // Sort the items.
+    $items = msortv($items, 'getSortVector');
+
+    // If we have some global items and some custom items and are in "combined"
+    // mode, put a hard-coded divider item between them.
+    if ($this->getMenuType() == self::MENU_COMBINED) {
+      $list = array();
+      $seen_custom = false;
+      $seen_global = false;
+      foreach ($items as $item) {
+        if ($item->getCustomPHID()) {
+          $seen_custom = true;
+        } else {
+          if ($seen_custom && !$seen_global) {
+            $list[] = $this->newItem()
+              ->setBuiltinKey(self::ITEM_CUSTOM_DIVIDER)
+              ->setMenuItemKey(PhabricatorDividerProfileMenuItem::MENUITEMKEY)
+              ->attachMenuItem(
+                new PhabricatorDividerProfileMenuItem());
+          }
+          $seen_global = true;
+        }
+        $list[] = $item;
+      }
+      $items = $list;
+    }
+
+    // Normalize keys since callers shouldn't rely on this array being
+    // partially keyed.
+    $items = array_values($items);
+
+    return $items;
+  }
+
 
 }
