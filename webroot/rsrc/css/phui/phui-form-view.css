@@ -460,8 +460,7 @@ body .phui-form-view .remarkup-assist-textarea.aphront-textarea-drag-and-drop {
 
 .fancy-datepicker-core {
   background-color: white;
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+  border: 1px solid {$lightgreyborder};
   box-shadow: {$dropshadow};
   border-radius: 3px;
 }

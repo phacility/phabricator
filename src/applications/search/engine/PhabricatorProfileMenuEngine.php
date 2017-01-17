@@ -6,9 +6,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $profileObject;
   private $customPHID;
   private $items;
+  private $menuType;
   private $defaultItem;
   private $controller;
   private $navigation;
+  private $showNavigation = true;
+
+  const MENU_GLOBAL = 'global';
+  const MENU_PERSONAL = 'personal';
+  const MENU_COMBINED = 'menu';
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -55,6 +61,24 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   public function getDefaultItem() {
     $this->loadItems();
     return $this->defaultItem;
+  }
+
+  public function setMenuType($type) {
+    $this->menuType = $type;
+    return $this;
+  }
+
+  private function getMenuType() {
+    return $this->menuType;
+  }
+
+  public function setShowNavigation($show) {
+    $this->showNavigation = $show;
+    return $this;
+  }
+
+  public function getShowNavigation() {
+    return $this->showNavigation;
   }
 
   abstract protected function getItemURI($path);
@@ -130,6 +154,14 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $navigation->selectFilter('item.configure');
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
+    switch ($this->getMenuType()) {
+      case 'personal':
+        $crumbs->addTextCrumb(pht('Personal'));
+        break;
+      case 'global':
+        $crumbs->addTextCrumb(pht('Global'));
+      break;
+    }
 
     switch ($item_action) {
       case 'view':
@@ -177,11 +209,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $crumbs->setBorder(true);
 
-    return $controller->newPage()
+    $page = $controller->newPage()
       ->setTitle(pht('Configure Menu'))
-      ->setNavigation($navigation)
       ->setCrumbs($crumbs)
       ->appendChild($content);
+
+    if ($this->getShowNavigation()) {
+      $page->setNavigation($navigation);
+    }
+    return $page;
   }
 
   public function buildNavigation() {
@@ -258,17 +294,20 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $object = $this->getProfileObject();
 
     $items = $this->loadBuiltinProfileItems();
+    $menu = $this->getMenuType();
 
     if ($this->getCustomPHID()) {
       $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
         ->setViewer($viewer)
         ->withProfilePHIDs(array($object->getPHID()))
         ->withCustomPHIDs(array($this->getCustomPHID()))
+        ->setMenuType($menu)
         ->execute();
     } else {
       $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
         ->setViewer($viewer)
         ->withProfilePHIDs(array($object->getPHID()))
+        ->setMenuType($menu)
         ->execute();
     }
 
@@ -501,7 +540,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ));
 
     $list = id(new PHUIObjectItemListView())
-      ->setID($list_id);
+      ->setID($list_id)
+      ->setNoDataString(pht('This menu currently has no items.'));
 
     foreach ($items as $item) {
       $id = $item->getID();
@@ -638,11 +678,11 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         ->setName($doc_name));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Profile Menu Items'))
+      ->setHeader(pht('Menu Items'))
       ->setHeaderIcon('fa-list');
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Navigation'))
+      ->setHeaderText(pht('Current Menu Items'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 

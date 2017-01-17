@@ -27,6 +27,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $disabled;
   private $name;
   private $tooltip;
+  private $noCSS;
 
   public function setName($name) {
     $this->name = $name;
@@ -84,6 +85,11 @@ final class PHUIButtonView extends AphrontTagView {
 
   public function setTooltip($text) {
     $this->tooltip = $text;
+    return $this;
+  }
+
+  public function setNoCSS($no_css) {
+    $this->noCSS = $no_css;
     return $this;
   }
 
@@ -162,6 +168,10 @@ final class PHUIButtonView extends AphrontTagView {
       $meta = array(
         'tip' => $this->tooltip,
       );
+    }
+
+    if ($this->noCSS) {
+      $classes = array();
     }
 
     return array(

@@ -15,7 +15,7 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
   }
 
   public function getIcon() {
-    return 'fa-star-o';
+    return 'fa-star';
   }
 
   public function getRoutes() {
@@ -32,8 +32,64 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
     return false;
   }
 
-  public function getApplicationOrder() {
-    return 9;
+  public function buildMainMenuExtraNodes(
+    PhabricatorUser $viewer,
+    PhabricatorController $controller = null) {
+
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setHref('#')
+      ->setIcon('fa-star')
+      ->addClass('phabricator-core-user-menu')
+      ->setNoCSS(true)
+      ->setDropdown(true)
+      ->setDropdownMenu($this->renderFavoritesDropdown($viewer));
+  }
+
+  private function renderFavoritesDropdown(PhabricatorUser $viewer) {
+
+    $application = __CLASS__;
+    $favorites = id(new PhabricatorApplicationQuery())
+      ->setViewer($viewer)
+      ->withClasses(array($application))
+      ->withInstalled(true)
+      ->executeOne();
+
+    $filter_view = id(new PhabricatorFavoritesProfileMenuEngine())
+      ->setViewer($viewer)
+      ->setProfileObject($favorites)
+      ->setMenuType(PhabricatorProfileMenuEngine::MENU_COMBINED)
+      ->buildNavigation();
+
+    $menu_view = $filter_view->getMenu();
+    $item_views = $menu_view->getItems();
+
+    $view = id(new PhabricatorActionListView())
+      ->setViewer($viewer);
+    foreach ($item_views as $item) {
+      $type = null;
+      if (!strlen($item->getName())) {
+        $type = PhabricatorActionView::TYPE_DIVIDER;
+      }
+      $action = id(new PhabricatorActionView())
+        ->setName($item->getName())
+        ->setHref($item->getHref())
+        ->setType($type);
+      $view->addAction($action);
+    }
+
+    // Build out edit interface
+    if ($viewer->isLoggedIn()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setType(PhabricatorActionView::TYPE_DIVIDER));
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit Favorites'))
+          ->setHref('/favorites/'));
+    }
+
+    return $view;
   }
 
 }

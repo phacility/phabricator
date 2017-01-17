@@ -77,15 +77,24 @@ JX.install('PHUIXActionView', {
 
     getNode: function() {
       if (!this._node) {
-        var attr = {
-          className: 'phabricator-action-view'
-        };
+        var classes = ['phabricator-action-view'];
+
+        if (this._href || this._handler) {
+          classes.push('phabricator-action-view-href');
+        }
+
+        if (this._icon) {
+          classes.push('action-has-icon');
+        }
 
         var content = [
           this._buildIconNode(),
           this._buildNameNode()
         ];
 
+        var attr = {
+          className: classes.join(' ')
+        };
         this._node = JX.$N('li', attr, content);
       }
 

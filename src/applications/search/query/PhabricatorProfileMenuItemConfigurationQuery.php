@@ -7,6 +7,7 @@ final class PhabricatorProfileMenuItemConfigurationQuery
   private $phids;
   private $profilePHIDs;
   private $customPHIDs;
+  private $menuType;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -25,6 +26,11 @@ final class PhabricatorProfileMenuItemConfigurationQuery
 
   public function withCustomPHIDs(array $phids) {
     $this->customPHIDs = $phids;
+    return $this;
+  }
+
+  public function setMenuType($type) {
+    $this->menuType = $type;
     return $this;
   }
 

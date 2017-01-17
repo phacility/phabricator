@@ -18,6 +18,13 @@ final class PhabricatorActionView extends AphrontView {
   private $hidden;
   private $depth;
   private $id;
+  private $order;
+  private $color;
+  private $type;
+
+  const TYPE_DIVIDER  = 'type-divider';
+  const TYPE_LABEL  = 'label';
+  const RED = 'action-item-red';
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -48,6 +55,11 @@ final class PhabricatorActionView extends AphrontView {
 
   public function setHref($href) {
     $this->href = $href;
+    return $this;
+  }
+
+  public function setColor($color) {
+    $this->color = $color;
     return $this;
   }
 
@@ -112,6 +124,24 @@ final class PhabricatorActionView extends AphrontView {
       $this->id = celerity_generate_unique_node_id();
     }
     return $this->id;
+  }
+
+  public function setOrder($order) {
+    $this->order = $order;
+    return $this;
+  }
+
+  public function getOrder() {
+    return $this->order;
+  }
+
+  public function setType($type) {
+    $this->type = $type;
+    return $this;
+  }
+
+  public function getType() {
+    return $this->type;
   }
 
   public function setSubmenu(array $submenu) {
@@ -278,6 +308,18 @@ final class PhabricatorActionView extends AphrontView {
 
     if ($this->getHref()) {
       $classes[] = 'phabricator-action-view-href';
+    }
+
+    if ($this->icon) {
+      $classes[] = 'action-has-icon';
+    }
+
+    if ($this->color) {
+      $classes[] = $this->color;
+    }
+
+    if ($this->type) {
+      $classes[] = 'phabricator-action-view-'.$this->type;
     }
 
     $style = array();

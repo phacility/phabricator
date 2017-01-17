@@ -10,6 +10,11 @@ final class PhabricatorFavoritesMainController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
+    if (!$viewer->getIsAdmin()) {
+      $uri = '/favorites/personal/item/configure/';
+      return id(new AphrontRedirectResponse())->setURI($uri);
+    }
+
     $menu = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 

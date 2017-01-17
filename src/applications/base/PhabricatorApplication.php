@@ -172,36 +172,24 @@ abstract class PhabricatorApplication
 
     $articles = $this->getHelpDocumentationArticles($viewer);
     if ($articles) {
-      $items[] = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL)
-        ->setName(pht('%s Documentation', $this->getName()));
       foreach ($articles as $article) {
-        $item = id(new PHUIListItemView())
+        $item = id(new PhabricatorActionView())
           ->setName($article['name'])
-          ->setIcon('fa-book')
-          ->setHref($article['href'])
-          ->setOpenInNewWindow(true);
-
+          ->setHref($article['href']);
         $items[] = $item;
       }
     }
 
     $command_specs = $this->getMailCommandObjects();
     if ($command_specs) {
-      $items[] = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL)
-        ->setName(pht('Email Help'));
       foreach ($command_specs as $key => $spec) {
         $object = $spec['object'];
 
         $class = get_class($this);
         $href = '/applications/mailcommands/'.$class.'/'.$key.'/';
-
-        $item = id(new PHUIListItemView())
+        $item = id(new PhabricatorActionView())
           ->setName($spec['name'])
-          ->setIcon('fa-envelope-o')
-          ->setHref($href)
-          ->setOpenInNewWindow(true);
+          ->setHref($href);
         $items[] = $item;
       }
     }

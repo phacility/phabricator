@@ -21,6 +21,7 @@ final class PhabricatorFavoritesProfileMenuEngine
   protected function getBuiltinProfileItems($object) {
     $items = array();
     $custom_phid = $this->getCustomPHID();
+    $viewer = $this->getViewer();
 
     // Built-in Global Defaults
     if (!$custom_phid) {
@@ -57,12 +58,6 @@ final class PhabricatorFavoritesProfileMenuEngine
         ->setMenuItemKey(PhabricatorEditEngineProfileMenuItem::MENUITEMKEY)
         ->setMenuItemProperties($create_repository);
     }
-
-    // Single Manage Item, switches URI based on admin/user
-    $items[] = $this->newItem()
-      ->setBuiltinKey(PhabricatorFavoritesConstants::ITEM_MANAGE)
-      ->setMenuItemKey(
-        PhabricatorFavoritesManageProfileMenuItem::MENUITEMKEY);
 
     return $items;
   }

@@ -769,7 +769,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     $rendered_dropdowns = array();
     $applications = array(
-      'PhabricatorHelpApplication',
+      'PhabricatorHomeApplication',
     );
     foreach ($applications as $application_class) {
       if (!PhabricatorApplication::isClassInstalledForViewer(
@@ -778,10 +778,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         continue;
       }
       $application = PhabricatorApplication::getByClass($application_class);
-      $rendered_dropdowns[$application_class] =
-        $application->buildMainMenuExtraNodes(
-          $viewer,
-          $controller);
+      $menu = $application->buildMainMenuExtraNodes($viewer, $controller);
+      // TODO: Doesn't work with Quicksand active.
+      $rendered_dropdowns[$application_class] = hsprintf('%s', $menu);
     }
 
     $hisec_warning_config = $this->getHighSecurityWarningConfig();
