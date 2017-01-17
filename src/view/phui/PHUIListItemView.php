@@ -249,7 +249,7 @@ final class PHUIListItemView extends AphrontTagView {
         $name = phutil_tag(
           'span',
           array(
-            'class' => $classes,
+            'class' => implode(' ', $classes),
           ),
           array(
             $this->name,
