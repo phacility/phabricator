@@ -175,7 +175,9 @@ abstract class PhabricatorApplication
       foreach ($articles as $article) {
         $item = id(new PhabricatorActionView())
           ->setName($article['name'])
-          ->setHref($article['href']);
+          ->setHref($article['href'])
+          ->addSigil('help-item')
+          ->setOpenInNewWindow(true);
         $items[] = $item;
       }
     }
@@ -189,12 +191,21 @@ abstract class PhabricatorApplication
         $href = '/applications/mailcommands/'.$class.'/'.$key.'/';
         $item = id(new PhabricatorActionView())
           ->setName($spec['name'])
-          ->setHref($href);
+          ->setHref($href)
+          ->addSigil('help-item')
+          ->setOpenInNewWindow(true);
         $items[] = $item;
       }
     }
 
-    return $items;
+    if ($items) {
+      $divider = id(new PhabricatorActionView())
+        ->addSigil('help-item')
+        ->setType(PhabricatorActionView::TYPE_DIVIDER);
+      array_unshift($items, $divider);
+    }
+
+    return array_values($items);
   }
 
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {

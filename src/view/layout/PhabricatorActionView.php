@@ -278,7 +278,7 @@ final class PhabricatorActionView extends AphrontView {
           array($icon, $this->name, $caret));
       }
     } else {
-      $item = phutil_tag(
+      $item = javelin_tag(
         'span',
         array(
           'class' => 'phabricator-action-view-item',

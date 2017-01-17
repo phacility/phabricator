@@ -2,8 +2,6 @@
 
 final class PhabricatorHomeApplication extends PhabricatorApplication {
 
-  private $application;
-
   const DASHBOARD_DEFAULT = 'dashboard:default';
 
   public function getBaseURI() {
@@ -53,25 +51,40 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     }
 
     $image = $viewer->getProfileImageURI();
-    if ($controller) {
-      $this->application = $controller->getCurrentApplication();
-    }
 
     $profile_image = id(new PHUIIconView())
       ->setImage($image)
       ->setHeadSize(PHUIIconView::HEAD_SMALL);
 
+    if ($controller) {
+      $application = $controller->getCurrentApplication();
+    } else {
+      $application = null;
+    }
+    $dropdown_menu = $this->renderUserDropdown($viewer, $application);
+
+    $menu_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior(
+      'user-menu',
+      array(
+        'menuID' => $menu_id,
+        'menu' => $dropdown_menu->getDropdownMenuMetadata(),
+      ));
+
     return id(new PHUIButtonView())
+      ->setID($menu_id)
       ->setTag('a')
       ->setHref('/p/'.$viewer->getUsername().'/')
       ->setIcon($profile_image)
       ->addClass('phabricator-core-user-menu')
-      ->setNoCSS(true)
-      ->setDropdown(true)
-      ->setDropdownMenu($this->renderUserDropdown($viewer));
+      ->setHasCaret(true)
+      ->setNoCSS(true);
   }
 
-  private function renderUserDropdown(PhabricatorUser $viewer) {
+  private function renderUserDropdown(
+    PhabricatorUser $viewer,
+    $application) {
 
     $view = id(new PhabricatorActionListView())
       ->setViewer($viewer);
@@ -98,16 +111,10 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
         ->setHref('/people/manage/'.$viewer->getID().'/'));
 
     // Help Menus
-    if ($this->application) {
-      $application = $this->application;
+    if ($application) {
       $help_links = $application->getHelpMenuItems($viewer);
       if ($help_links) {
-        $view->addAction(
-          id(new PhabricatorActionView())
-            ->setType(PhabricatorActionView::TYPE_DIVIDER));
-
         foreach ($help_links as $link) {
-          $link->setOpenInNewWindow(true);
           $view->addAction($link);
         }
       }
@@ -116,11 +123,13 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     // Logout Menu
     $view->addAction(
       id(new PhabricatorActionView())
+        ->addSigil('logout-item')
         ->setType(PhabricatorActionView::TYPE_DIVIDER));
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Log Out %s', $viewer->getUsername()))
+        ->addSigil('logout-item')
         ->setHref('/logout/')
         ->setWorkflow(true));
 

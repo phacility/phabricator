@@ -28,6 +28,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $name;
   private $tooltip;
   private $noCSS;
+  private $hasCaret;
 
   public function setName($name) {
     $this->name = $name;
@@ -91,6 +92,15 @@ final class PHUIButtonView extends AphrontTagView {
   public function setNoCSS($no_css) {
     $this->noCSS = $no_css;
     return $this;
+  }
+
+  public function setHasCaret($has_caret) {
+    $this->hasCaret = $has_caret;
+    return $this;
+  }
+
+  public function getHasCaret() {
+    return $this->hasCaret;
   }
 
   public function setIcon($icon, $first = true) {
@@ -201,7 +211,7 @@ final class PHUIButtonView extends AphrontTagView {
     }
 
     $caret = null;
-    if ($this->dropdown) {
+    if ($this->dropdown || $this->getHasCaret()) {
       $caret = phutil_tag('span', array('class' => 'caret'), '');
     }
 
