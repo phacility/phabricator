@@ -42,20 +42,6 @@ JX.behavior('phui-dropdown-menu', function() {
     });
 
     data.menu.open();
-
-    JX.DOM.listen(list, 'click', 'tag:a', function(e) {
-      if (!e.isNormalClick()) {
-        return;
-      }
-
-      // If this item opens a submenu, we don't want to close the current
-      // menu. One submenu is "Edit Related Objects..." on mobile.
-      if (JX.Stratcom.hasSigil(e.getTarget(), 'keep-open')) {
-        return;
-      }
-
-      data.menu.close();
-    });
   });
 
 });

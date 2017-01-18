@@ -96,6 +96,8 @@ JX.install('PHUIXActionView', {
           className: classes.join(' ')
         };
         this._node = JX.$N('li', attr, content);
+
+        JX.Stratcom.addSigil(this._node, 'phuix-action-view');
       }
 
       return this._node;
