@@ -86,14 +86,29 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     PhabricatorUser $viewer,
     $application) {
 
+    $person_to_show = id(new PHUIObjectItemView())
+      ->setObjectName($viewer->getRealName())
+      ->setSubHead($viewer->getUsername())
+      ->setImageURI($viewer->getProfileImageURI());
+
+    $user_view = id(new PHUIObjectItemListView())
+      ->setViewer($viewer)
+      ->setFlush(true)
+      ->setSimple(true)
+      ->addItem($person_to_show)
+      ->addClass('phabricator-core-user-profile-object');
+
     $view = id(new PhabricatorActionListView())
       ->setViewer($viewer);
 
     // User Menu
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName($viewer->getRealName())
-        ->setLabel(true));
+        ->appendChild($user_view));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER));
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -131,6 +146,7 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
         ->setName(pht('Log Out %s', $viewer->getUsername()))
         ->addSigil('logout-item')
         ->setHref('/logout/')
+        ->setColor(PhabricatorActionView::RED)
         ->setWorkflow(true));
 
     return $view;

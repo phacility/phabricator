@@ -284,7 +284,7 @@ final class PhabricatorActionView extends AphrontView {
           'class' => 'phabricator-action-view-item',
           'sigil' => $sigils,
         ),
-        array($icon, $this->name));
+        array($icon, $this->name, $this->renderChildren()));
     }
 
     $classes = array();
