@@ -84,6 +84,9 @@ return array(
     'conpherence-thread-manager',
     'javelin-behavior-detect-timezone',
     'javelin-behavior-setup-check-https',
+    'javelin-behavior-aphlict-status',
+    'javelin-behavior-user-menu',
+    'phabricator-favicon',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',

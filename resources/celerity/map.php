@@ -10,7 +10,7 @@ return array(
     'conpherence.pkg.css' => '0b64e988',
     'conpherence.pkg.js' => '6249a1cf',
     'core.pkg.css' => '85f51b68',
-    'core.pkg.js' => '666970d7',
+    'core.pkg.js' => 'f70cb91f',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '9535a7e6',
     'differential.pkg.js' => 'ddfeb49b',
@@ -2427,6 +2427,9 @@ return array(
       'conpherence-thread-manager',
       'javelin-behavior-detect-timezone',
       'javelin-behavior-setup-check-https',
+      'javelin-behavior-aphlict-status',
+      'javelin-behavior-user-menu',
+      'phabricator-favicon',
     ),
     'darkconsole.pkg.js' => array(
       'javelin-behavior-dark-console',
