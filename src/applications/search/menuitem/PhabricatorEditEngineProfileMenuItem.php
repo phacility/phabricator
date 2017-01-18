@@ -12,7 +12,7 @@ final class PhabricatorEditEngineProfileMenuItem
   }
 
   public function getMenuItemTypeName() {
-    return pht('Forms');
+    return pht('Form');
   }
 
   public function canAddToObject($object) {

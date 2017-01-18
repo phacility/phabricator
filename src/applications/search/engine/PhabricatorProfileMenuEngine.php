@@ -551,6 +551,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
+    $filtered_groups = mgroup($items, 'getMenuItemKey');
+    foreach ($filtered_groups as $group) {
+      $first_item = head($group);
+      $first_item->willBuildNavigationItems($group);
+    }
+
     PhabricatorPolicyFilter::requireCapability(
       $viewer,
       $object,

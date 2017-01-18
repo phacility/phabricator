@@ -109,6 +109,7 @@ final class PhabricatorProfileMenuEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
+    $object->willBuildNavigationItems(array($object));
     return pht('Edit Menu Item: %s', $object->getDisplayName());
   }
 
