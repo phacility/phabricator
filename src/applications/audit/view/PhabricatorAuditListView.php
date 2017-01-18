@@ -83,7 +83,21 @@ final class PhabricatorAuditListView extends AphrontView {
     $viewer = $this->getViewer();
     $rowc = array();
 
-    $handles = $viewer->loadHandles(mpull($this->commits, 'getPHID'));
+    $phids = array();
+    foreach ($this->getCommits() as $commit) {
+      $phids[] = $commit->getPHID();
+
+      foreach ($commit->getAudits() as $audit) {
+        $phids[] = $audit->getAuditorPHID();
+      }
+
+      $author_phid = $commit->getAuthorPHID();
+      if ($author_phid) {
+        $phids[] = $author_phid;
+      }
+    }
+
+    $handles = $viewer->loadHandles($phids);
 
     $show_drafts = $this->getShowDrafts();
 
@@ -106,14 +120,6 @@ final class PhabricatorAuditListView extends AphrontView {
       $commit_desc = $this->getCommitDescription($commit_phid);
       $committed = phabricator_datetime($commit->getEpoch(), $viewer);
 
-      $audits = mpull($commit->getAudits(), null, 'getAuditorPHID');
-      $auditors = array();
-      foreach ($audits as $audit) {
-        $auditor_phid = $audit->getAuditorPHID();
-        $auditors[$auditor_phid] = $viewer->renderHandle($auditor_phid);
-      }
-      $auditors = phutil_implode_html(', ', $auditors);
-
       $status = $commit->getAuditStatus();
 
       $status_text =
@@ -125,7 +131,7 @@ final class PhabricatorAuditListView extends AphrontView {
 
       $author_phid = $commit->getAuthorPHID();
       if ($author_phid) {
-        $author_name = $viewer->renderHandle($author_phid);
+        $author_name = $handles[$author_phid]->renderLink();
       } else {
         $author_name = $commit->getCommitData()->getAuthorName();
       }
@@ -145,8 +151,15 @@ final class PhabricatorAuditListView extends AphrontView {
         ->addAttribute(pht('Author: %s', $author_name))
         ->addIcon('none', $committed);
 
-      if (!empty($auditors)) {
-        $item->addByLine(pht('Auditors: %s', $auditors));
+      $audits = $commit->getAudits();
+      $auditor_phids = mpull($audits, 'getAuditorPHID');
+      if ($auditor_phids) {
+        $item->addByLine(
+          array(
+            pht('Auditors:'),
+            ' ',
+            $handles->newSublist($auditor_phids)->renderList(),
+          ));
       }
 
       if ($status_color) {
