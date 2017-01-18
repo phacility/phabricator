@@ -36,6 +36,11 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
     PhabricatorUser $viewer,
     PhabricatorController $controller = null) {
 
+    $dropdown = $this->renderFavoritesDropdown($viewer);
+    if (!$dropdown) {
+      return null;
+    }
+
     return id(new PHUIButtonView())
       ->setTag('a')
       ->setHref('#')
@@ -43,17 +48,21 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
       ->addClass('phabricator-core-user-menu')
       ->setNoCSS(true)
       ->setDropdown(true)
-      ->setDropdownMenu($this->renderFavoritesDropdown($viewer));
+      ->setDropdownMenu($dropdown);
   }
 
   private function renderFavoritesDropdown(PhabricatorUser $viewer) {
-
     $application = __CLASS__;
-    $favorites = id(new PhabricatorApplicationQuery())
+
+    $applications = id(new PhabricatorApplicationQuery())
       ->setViewer($viewer)
       ->withClasses(array($application))
       ->withInstalled(true)
-      ->executeOne();
+      ->execute();
+    $favorites = head($applications);
+    if (!$favorites) {
+      return null;
+    }
 
     $menu_engine = id(new PhabricatorFavoritesProfileMenuEngine())
       ->setViewer($viewer)
