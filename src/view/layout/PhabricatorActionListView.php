@@ -4,7 +4,6 @@ final class PhabricatorActionListView extends AphrontTagView {
 
   private $actions = array();
   private $object;
-  private $id = null;
 
   public function setObject(PhabricatorLiskDAO $object) {
     $this->object = $object;
@@ -14,15 +13,6 @@ final class PhabricatorActionListView extends AphrontTagView {
   public function addAction(PhabricatorActionView $view) {
     $this->actions[] = $view;
     return $this;
-  }
-
-  public function setID($id) {
-    $this->id = $id;
-    return $this;
-  }
-
-  public function getID() {
-    return $this->id;
   }
 
   protected function getTagName() {
