@@ -270,7 +270,7 @@ final class PHUIDiffInlineCommentDetailView
           ),
           'sigil'  => 'differential-inline-preview-jump',
         ),
-        pht('Not Visible'));
+        pht('View'));
 
       $action_buttons[] = id(new PHUIButtonView())
         ->setTag('a')
