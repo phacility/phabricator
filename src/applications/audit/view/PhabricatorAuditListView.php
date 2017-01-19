@@ -139,7 +139,9 @@ final class PhabricatorAuditListView extends AphrontView {
       $item = id(new PHUIObjectItemView())
         ->setObjectName($commit_name)
         ->setHeader($commit_desc)
-        ->setHref($commit_link);
+        ->setHref($commit_link)
+        ->addByline(pht('Author: %s', $author_name))
+        ->addIcon('none', $committed);
 
       if ($show_drafts) {
         if ($commit->getHasDraft($viewer)) {
@@ -147,20 +149,16 @@ final class PhabricatorAuditListView extends AphrontView {
         }
       }
 
-      $item
-        ->addAttribute(pht('Author: %s', $author_name))
-        ->addIcon('none', $committed);
-
       $audits = $commit->getAudits();
       $auditor_phids = mpull($audits, 'getAuditorPHID');
       if ($auditor_phids) {
-        $item->addByLine(
-          array(
-            pht('Auditors:'),
-            ' ',
-            $handles->newSublist($auditor_phids)->renderList(),
-          ));
+        $auditor_list = $handles->newSublist($auditor_phids)
+          ->renderList()
+          ->setAsInline(true);
+      } else {
+        $auditor_list = phutil_tag('em', array(), pht('None'));
       }
+      $item->addAttribute(pht('Auditors: %s', $auditor_list));
 
       if ($status_color) {
         $item->setStatusIcon($status_icon.' '.$status_color, $status_text);
