@@ -557,10 +557,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $first_item->willBuildNavigationItems($group);
     }
 
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    // Users only need to be able to edit the object which this menu appears
+    // on if they're editing global menu items. For example, users do not need
+    // to be able to edit the Favorites application to add new items to the
+    // Favorites menu.
+    if (!$this->getCustomPHID()) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
 
     $list_id = celerity_generate_unique_node_id();
 

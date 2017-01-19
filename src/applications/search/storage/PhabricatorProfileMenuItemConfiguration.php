@@ -189,6 +189,21 @@ final class PhabricatorProfileMenuItemConfiguration
 
 
   public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    // If this is an item with a custom PHID (like a personal menu item),
+    // we only require that the user can edit the corresponding custom
+    // object (usually their own user profile), not the object that the
+    // menu appears on (which may be an Application like Favorites or Home).
+    if ($capability == PhabricatorPolicyCapability::CAN_EDIT) {
+      if ($this->getCustomPHID()) {
+        return array(
+          array(
+            $this->getCustomPHID(),
+            $capability,
+          ),
+        );
+      }
+    }
+
     return array(
       array(
         $this->getProfileObject(),
