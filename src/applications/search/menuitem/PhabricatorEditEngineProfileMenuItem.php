@@ -85,6 +85,7 @@ final class PhabricatorEditEngineProfileMenuItem
       id(new PhabricatorDatasourceEditField())
         ->setKey('formKey')
         ->setLabel(pht('Form'))
+        ->setIsRequired(true)
         ->setDatasource(new PhabricatorEditEngineDatasource())
         ->setSingleValue($config->getMenuItemProperty('formKey')),
     );

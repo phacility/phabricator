@@ -78,6 +78,7 @@ final class PhabricatorProjectProfileMenuItem
       id(new PhabricatorDatasourceEditField())
         ->setKey('project')
         ->setLabel(pht('Project'))
+        ->setIsRequired(true)
         ->setDatasource(new PhabricatorProjectDatasource())
         ->setSingleValue($config->getMenuItemProperty('project')),
     );

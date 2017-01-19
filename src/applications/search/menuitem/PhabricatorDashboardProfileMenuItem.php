@@ -77,6 +77,7 @@ final class PhabricatorDashboardProfileMenuItem
       id(new PhabricatorDatasourceEditField())
         ->setKey('dashboardPHID')
         ->setLabel(pht('Dashboard'))
+        ->setIsRequired(true)
         ->setDatasource(new PhabricatorDashboardDatasource())
         ->setSingleValue($config->getMenuItemProperty('dashboardPHID')),
     );
