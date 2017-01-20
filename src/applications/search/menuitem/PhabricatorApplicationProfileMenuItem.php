@@ -21,13 +21,17 @@ final class PhabricatorApplicationProfileMenuItem
 
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
-    $app = $this->getApplication($config);
-    if ($app) {
-      return $app->getName();
-    } else {
-      return pht('(Uninstalled Application)');
+    $application = $this->getApplication($config);
+    if (!$application) {
+      return pht('(Restricted/Invalid Application)');
     }
-    return $app->getName();
+
+    $name = $this->getName($config);
+    if (strlen($name)) {
+      return $name;
+    }
+
+    return $application->getName();
   }
 
   public function buildEditEngineFields(
@@ -40,7 +44,16 @@ final class PhabricatorApplicationProfileMenuItem
         ->setDatasource(new PhabricatorApplicationDatasource())
         ->setIsRequired(true)
         ->setSingleValue($config->getMenuItemProperty('application')),
+      id(new PhabricatorTextEditField())
+        ->setKey('name')
+        ->setLabel(pht('Name'))
+        ->setValue($this->getName($config)),
     );
+  }
+
+  private function getName(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $config->getMenuItemProperty('name');
   }
 
   private function getApplication(
@@ -73,7 +86,7 @@ final class PhabricatorApplicationProfileMenuItem
 
     $item = $this->newItem()
       ->setHref($app->getApplicationURI())
-      ->setName($app->getName())
+      ->setName($this->getDisplayName($config))
       ->setIcon($app->getIcon());
 
     return array(

@@ -72,16 +72,16 @@ final class PhabricatorProjectProfileMenuItem
   public function buildEditEngineFields(
     PhabricatorProfileMenuItemConfiguration $config) {
     return array(
-      id(new PhabricatorTextEditField())
-        ->setKey('name')
-        ->setLabel(pht('Name'))
-        ->setValue($this->getName($config)),
       id(new PhabricatorDatasourceEditField())
         ->setKey(self::FIELD_PROJECT)
         ->setLabel(pht('Project'))
         ->setIsRequired(true)
         ->setDatasource(new PhabricatorProjectDatasource())
         ->setSingleValue($config->getMenuItemProperty('project')),
+      id(new PhabricatorTextEditField())
+        ->setKey('name')
+        ->setLabel(pht('Name'))
+        ->setValue($this->getName($config)),
     );
   }
 

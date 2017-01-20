@@ -72,16 +72,16 @@ final class PhabricatorDashboardProfileMenuItem
   public function buildEditEngineFields(
     PhabricatorProfileMenuItemConfiguration $config) {
     return array(
-      id(new PhabricatorTextEditField())
-        ->setKey('name')
-        ->setLabel(pht('Name'))
-        ->setValue($this->getName($config)),
       id(new PhabricatorDatasourceEditField())
         ->setKey(self::FIELD_DASHBOARD)
         ->setLabel(pht('Dashboard'))
         ->setIsRequired(true)
         ->setDatasource(new PhabricatorDashboardDatasource())
         ->setSingleValue($config->getMenuItemProperty('dashboardPHID')),
+      id(new PhabricatorTextEditField())
+        ->setKey('name')
+        ->setLabel(pht('Name'))
+        ->setValue($this->getName($config)),
     );
   }
 
