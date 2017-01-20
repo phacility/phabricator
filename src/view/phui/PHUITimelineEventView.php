@@ -646,6 +646,14 @@ final class PHUITimelineEventView extends AphrontView {
       }
     }
 
+    if ($this->getIsEdited()) {
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-list')
+        ->setHref('/transactions/history/'.$xaction_phid.'/')
+        ->setName(pht('View Edit History'))
+        ->setWorkflow(true);
+    }
+
     if ($this->getIsRemovable()) {
       $items[] = id(new PhabricatorActionView())
         ->setType(PhabricatorActionView::TYPE_DIVIDER);
@@ -661,14 +669,6 @@ final class PHUITimelineEventView extends AphrontView {
             'anchor' => $anchor,
           ));
 
-    }
-
-    if ($this->getIsEdited()) {
-      $items[] = id(new PhabricatorActionView())
-        ->setIcon('fa-list')
-        ->setHref('/transactions/history/'.$xaction_phid.'/')
-        ->setName(pht('View Edit History'))
-        ->setWorkflow(true);
     }
 
     return $items;
