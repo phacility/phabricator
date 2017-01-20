@@ -40,7 +40,6 @@ final class PhabricatorApplicationProfileMenuItem
       id(new PhabricatorDatasourceEditField())
         ->setKey(self::FIELD_APPLICATION)
         ->setLabel(pht('Application'))
-        ->setIsRequired(true)
         ->setDatasource(new PhabricatorApplicationDatasource())
         ->setIsRequired(true)
         ->setSingleValue($config->getMenuItemProperty('application')),
