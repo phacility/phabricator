@@ -126,6 +126,30 @@ final class PhabricatorProfileMenuItemConfiguration
     return $this->getMenuItem()->willBuildNavigationItems($items);
   }
 
+  public function validateTransactions(array $map) {
+    $item = $this->getMenuItem();
+
+    $fields = $item->buildEditEngineFields($this);
+    $errors = array();
+    foreach ($fields as $field) {
+      $field_key = $field->getKey();
+
+      $xactions = idx($map, $field_key, array());
+      $value = $this->getMenuItemProperty($field_key);
+
+      $field_errors = $item->validateTransactions(
+        $this,
+        $field_key,
+        $value,
+        $xactions);
+      foreach ($field_errors as $error) {
+        $errors[] = $error;
+      }
+    }
+
+    return $errors;
+  }
+
   public function getSortVector() {
     // Sort custom items above global items.
     if ($this->getCustomPHID()) {

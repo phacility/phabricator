@@ -70,4 +70,41 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
     return new PHUIListItemView();
   }
 
+  public function valdateTransactions(
+    PhabricatorProfileMenuItemConfiguration $config,
+    $field_key,
+    $value,
+    array $xactions) {
+    return array();
+  }
+
+  final protected function isEmptyTransaction($value, array $xactions) {
+    $result = $value;
+    foreach ($xactions as $xaction) {
+      $result = $xaction['new'];
+    }
+
+    return !strlen($result);
+  }
+
+  final protected function newError($title, $message, $xaction = null) {
+    return new PhabricatorApplicationTransactionValidationError(
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY,
+      $title,
+      $message,
+      $xaction);
+  }
+
+  final protected function newRequiredError($message, $type) {
+    $xaction = id(new PhabricatorProfileMenuItemConfigurationTransaction())
+      ->setMetadataValue('property.key', $type);
+
+    return $this->newError(pht('Required'), $message, $xaction)
+      ->setIsMissingFieldError(true);
+  }
+
+  final protected function newInvalidError($message, $xaction = null) {
+    return $this->newError(pht('Invalid'), $message, $xaction);
+  }
+
 }

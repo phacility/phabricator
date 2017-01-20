@@ -5,6 +5,8 @@ final class PhabricatorDashboardProfileMenuItem
 
   const MENUITEMKEY = 'dashboard';
 
+  const FIELD_DASHBOARD = 'dashboardPHID';
+
   private $dashboard;
 
   public function getMenuItemTypeIcon() {
@@ -75,7 +77,7 @@ final class PhabricatorDashboardProfileMenuItem
         ->setLabel(pht('Name'))
         ->setValue($this->getName($config)),
       id(new PhabricatorDatasourceEditField())
-        ->setKey('dashboardPHID')
+        ->setKey(self::FIELD_DASHBOARD)
         ->setLabel(pht('Dashboard'))
         ->setIsRequired(true)
         ->setDatasource(new PhabricatorDashboardDatasource())
@@ -108,6 +110,51 @@ final class PhabricatorDashboardProfileMenuItem
     return array(
       $item,
     );
+  }
+
+  public function validateTransactions(
+    PhabricatorProfileMenuItemConfiguration $config,
+    $field_key,
+    $value,
+    array $xactions) {
+
+    $viewer = $this->getViewer();
+    $errors = array();
+
+    if ($field_key == self::FIELD_DASHBOARD) {
+      if ($this->isEmptyTransaction($value, $xactions)) {
+       $errors[] = $this->newRequiredError(
+         pht('You must choose a dashboard.'),
+         $field_key);
+      }
+
+      foreach ($xactions as $xaction) {
+        $new = $xaction['new'];
+
+        if (!$new) {
+          continue;
+        }
+
+        if ($new === $value) {
+          continue;
+        }
+
+        $dashboards = id(new PhabricatorDashboardQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($new))
+          ->execute();
+        if (!$dashboards) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'Dashboard "%s" is not a valid dashboard which you have '.
+              'permission to see.',
+              $new),
+            $xaction['xaction']);
+        }
+      }
+    }
+
+    return $errors;
   }
 
 }

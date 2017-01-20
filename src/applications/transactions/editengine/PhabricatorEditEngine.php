@@ -95,6 +95,10 @@ abstract class PhabricatorEditEngine
     return $keys;
   }
 
+  public static function splitFullKey($full_key) {
+    return explode('/', $full_key, 2);
+  }
+
   public function getQuickCreateOrderVector() {
     return id(new PhutilSortVector())
       ->addString($this->getObjectCreateShortText());

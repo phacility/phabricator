@@ -5,6 +5,8 @@ final class PhabricatorEditEngineProfileMenuItem
 
   const MENUITEMKEY = 'editengine';
 
+  const FIELD_FORM = 'formKey';
+
   private $form;
 
   public function getMenuItemTypeIcon() {
@@ -51,7 +53,8 @@ final class PhabricatorEditEngineProfileMenuItem
 
     foreach ($items as $item) {
       $key = $item->getMenuItemProperty('formKey');
-      list($engine_key, $form_key) = explode('/', $key);
+      list($engine_key, $form_key) = PhabricatorEditEngine::splitFullKey($key);
+
       if (is_numeric($form_key)) {
         $form = idx($form_ids, $form_key, null);
         $item->getMenuItem()->attachForm($form);
@@ -83,7 +86,7 @@ final class PhabricatorEditEngineProfileMenuItem
         ->setLabel(pht('Name'))
         ->setValue($this->getName($config)),
       id(new PhabricatorDatasourceEditField())
-        ->setKey('formKey')
+        ->setKey(self::FIELD_FORM)
         ->setLabel(pht('Form'))
         ->setIsRequired(true)
         ->setDatasource(new PhabricatorEditEngineDatasource())
@@ -118,6 +121,55 @@ final class PhabricatorEditEngineProfileMenuItem
     return array(
       $item,
     );
+  }
+
+  public function validateTransactions(
+    PhabricatorProfileMenuItemConfiguration $config,
+    $field_key,
+    $value,
+    array $xactions) {
+
+    $viewer = $this->getViewer();
+    $errors = array();
+
+    if ($field_key == self::FIELD_FORM) {
+      if ($this->isEmptyTransaction($value, $xactions)) {
+       $errors[] = $this->newRequiredError(
+         pht('You must choose a form.'),
+         $field_key);
+      }
+
+      foreach ($xactions as $xaction) {
+        $new = $xaction['new'];
+
+        if (!$new) {
+          continue;
+        }
+
+        if ($new === $value) {
+          continue;
+        }
+
+        list($engine_key, $form_key) = PhabricatorEditEngine::splitFullKey(
+          $new);
+
+        $forms = id(new PhabricatorEditEngineConfigurationQuery())
+          ->setViewer($viewer)
+          ->withEngineKeys(array($engine_key))
+          ->withIdentifiers(array($form_key))
+          ->execute();
+        if (!$forms) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'Form "%s" is not a valid form which you have permission to '.
+              'see.',
+              $new),
+            $xaction['xaction']);
+        }
+      }
+    }
+
+    return $errors;
   }
 
 }
