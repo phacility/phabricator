@@ -64,12 +64,17 @@ abstract class PhabricatorMainMenuBarExtension extends Phobject {
     return true;
   }
 
+  public function getExtensionOrder() {
+    return 1000;
+  }
+
   abstract public function buildMainMenus();
 
   final public static function getAllExtensions() {
     return id(new PhutilClassMapQuery())
       ->setAncestorClass(__CLASS__)
       ->setUniqueMethod('getExtensionKey')
+      ->setSortMethod('getExtensionOrder')
       ->execute();
   }
 

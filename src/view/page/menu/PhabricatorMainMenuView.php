@@ -82,20 +82,6 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_implode_html(' ', $aural));
     }
 
-    // Build out Header Menus
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-
-    $menus = array();
-    $controller = $this->getController();
-    foreach ($applications as $application) {
-      $app_extra = $application->buildMainMenuExtraNodes(
-        $viewer,
-        $controller);
-      if ($app_extra !== null) {
-        $menus[] = $app_extra;
-      }
-    }
-
     $extensions = PhabricatorMainMenuBarExtension::getAllEnabledExtensions();
     foreach ($extensions as $extension) {
       $extension->setViewer($viewer);
@@ -116,12 +102,17 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
     }
 
-    // Builds out "login" button
+    $menus = array();
     foreach ($extensions as $extension) {
       foreach ($extension->buildMainMenus() as $menu) {
         $menus[] = $menu;
       }
     }
+
+    // Because we display these with "float: right", reverse their order before
+    // rendering them into the document so that the extension order and display
+    // order are the same.
+    $menus = array_reverse($menus);
 
     foreach ($menus as $menu) {
       $menu_bar[] = $menu;

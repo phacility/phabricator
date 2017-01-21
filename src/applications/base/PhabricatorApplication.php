@@ -315,23 +315,6 @@ abstract class PhabricatorApplication
   }
 
 
-  /**
-   * Build extra items for the main menu. Generally, this is used to render
-   * static dropdowns.
-   *
-   * @param  PhabricatorUser    The viewing user.
-   * @param  AphrontController  The current controller. May be null for special
-   *                            pages like 404, exception handlers, etc.
-   * @return view               List of menu items.
-   * @task ui
-   */
-  public function buildMainMenuExtraNodes(
-    PhabricatorUser $viewer,
-    PhabricatorController $controller = null) {
-    return array();
-  }
-
-
 /* -(  Application Management  )--------------------------------------------- */
 
 
