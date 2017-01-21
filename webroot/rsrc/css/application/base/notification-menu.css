@@ -8,7 +8,7 @@
   word-wrap: break-word;
   overflow-y: auto;
   box-shadow: {$dropshadow};
-  border: 1px solid {$blueborder};
+  border: 1px solid {$lightgreyborder};
   border-radius: 3px;
 }
 

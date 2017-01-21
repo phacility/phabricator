@@ -198,12 +198,12 @@ button.link:hover {
 
 .phuix-dropdown-menu {
   position: absolute;
-  width: 240px;
+  width: 200px;
   background: #fff;
   margin-top: -1px;
-  padding: 5px 0;
+  padding: 12px;
   box-shadow: {$dropshadow};
-  border: 1px solid {$blueborder};
+  border: 1px solid {$lightgreyborder};
   border-radius: 3px;
   margin-bottom: 16px;
 }

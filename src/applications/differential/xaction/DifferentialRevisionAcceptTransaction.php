@@ -50,7 +50,7 @@ final class DifferentialRevisionAcceptTransaction
 
   public function generateOldValue($object) {
     $actor = $this->getActor();
-    return $this->isViewerAcceptingReviewer($object, $actor);
+    return $this->isViewerFullyAccepted($object, $actor);
   }
 
   public function applyExternalEffects($object, $value) {
@@ -79,7 +79,7 @@ final class DifferentialRevisionAcceptTransaction
       }
     }
 
-    if ($this->isViewerAcceptingReviewer($object, $viewer)) {
+    if ($this->isViewerFullyAccepted($object, $viewer)) {
       throw new Exception(
         pht(
           'You can not accept this revision because you have already '.

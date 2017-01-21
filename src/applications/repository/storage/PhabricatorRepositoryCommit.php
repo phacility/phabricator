@@ -14,7 +14,8 @@ final class PhabricatorRepositoryCommit
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorDraftInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -39,6 +40,7 @@ final class PhabricatorRepositoryCommit
   private $audits = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $drafts = array();
 
   public function attachRepository(PhabricatorRepository $repository) {
     $this->repository = $repository;
@@ -342,6 +344,7 @@ final class PhabricatorRepositoryCommit
     return nonempty($parsed->getDisplayName(), $parsed->getAddress());
   }
 
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
   public function getCapabilities() {
@@ -601,6 +604,22 @@ final class PhabricatorRepositoryCommit
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorDraftInterface  )------------------------------------------ */
+
+  public function newDraftEngine() {
+    return new DiffusionCommitDraftEngine();
+  }
+
+  public function getHasDraft(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->drafts, $viewer->getCacheFragment());
+  }
+
+  public function attachHasDraft(PhabricatorUser $viewer, $has_draft) {
+    $this->drafts[$viewer->getCacheFragment()] = $has_draft;
+    return $this;
   }
 
 }

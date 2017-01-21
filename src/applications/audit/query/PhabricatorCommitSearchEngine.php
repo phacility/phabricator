@@ -14,7 +14,8 @@ final class PhabricatorCommitSearchEngine
   public function newQuery() {
     return id(new DiffusionCommitQuery())
       ->needAuditRequests(true)
-      ->needCommitData(true);
+      ->needCommitData(true)
+      ->needDrafts(true);
   }
 
   protected function newResultBuckets() {
@@ -140,7 +141,8 @@ final class PhabricatorCommitSearchEngine
     $bucket = $this->getResultBucket($query);
 
     $template = id(new PhabricatorAuditListView())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->setShowDrafts(true);
 
     $views = array();
     if ($bucket) {

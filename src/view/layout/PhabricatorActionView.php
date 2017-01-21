@@ -18,6 +18,13 @@ final class PhabricatorActionView extends AphrontView {
   private $hidden;
   private $depth;
   private $id;
+  private $order;
+  private $color;
+  private $type;
+
+  const TYPE_DIVIDER  = 'type-divider';
+  const TYPE_LABEL  = 'label';
+  const RED = 'action-item-red';
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -48,6 +55,11 @@ final class PhabricatorActionView extends AphrontView {
 
   public function setHref($href) {
     $this->href = $href;
+    return $this;
+  }
+
+  public function setColor($color) {
+    $this->color = $color;
     return $this;
   }
 
@@ -114,6 +126,24 @@ final class PhabricatorActionView extends AphrontView {
     return $this->id;
   }
 
+  public function setOrder($order) {
+    $this->order = $order;
+    return $this;
+  }
+
+  public function getOrder() {
+    return $this->order;
+  }
+
+  public function setType($type) {
+    $this->type = $type;
+    return $this;
+  }
+
+  public function getType() {
+    return $this->type;
+  }
+
   public function setSubmenu(array $submenu) {
     $this->submenu = $submenu;
 
@@ -173,22 +203,26 @@ final class PhabricatorActionView extends AphrontView {
         ->setIcon($this->icon.$color);
     }
 
+    $sigils = array();
+    if ($this->workflow) {
+      $sigils[] = 'workflow';
+    }
+
+    if ($this->download) {
+      $sigils[] = 'download';
+    }
+
+    if ($this->submenu) {
+      $sigils[] = 'keep-open';
+    }
+
+    if ($this->sigils) {
+      $sigils = array_merge($sigils, $this->sigils);
+    }
+
+    $sigils = $sigils ? implode(' ', $sigils) : null;
+
     if ($this->href) {
-
-      $sigils = array();
-      if ($this->workflow) {
-        $sigils[] = 'workflow';
-      }
-      if ($this->download) {
-        $sigils[] = 'download';
-      }
-
-      if ($this->sigils) {
-        $sigils = array_merge($sigils, $this->sigils);
-      }
-
-      $sigils = $sigils ? implode(' ', $sigils) : null;
-
       if ($this->renderAsForm) {
         if (!$this->hasViewer()) {
           throw new Exception(
@@ -244,12 +278,13 @@ final class PhabricatorActionView extends AphrontView {
           array($icon, $this->name, $caret));
       }
     } else {
-      $item = phutil_tag(
+      $item = javelin_tag(
         'span',
         array(
           'class' => 'phabricator-action-view-item',
+          'sigil' => $sigils,
         ),
-        array($icon, $this->name));
+        array($icon, $this->name, $this->renderChildren()));
     }
 
     $classes = array();
@@ -273,6 +308,18 @@ final class PhabricatorActionView extends AphrontView {
 
     if ($this->getHref()) {
       $classes[] = 'phabricator-action-view-href';
+    }
+
+    if ($this->icon) {
+      $classes[] = 'action-has-icon';
+    }
+
+    if ($this->color) {
+      $classes[] = $this->color;
+    }
+
+    if ($this->type) {
+      $classes[] = 'phabricator-action-view-'.$this->type;
     }
 
     $style = array();

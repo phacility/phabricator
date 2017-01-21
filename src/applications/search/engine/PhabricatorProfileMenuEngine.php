@@ -6,9 +6,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $profileObject;
   private $customPHID;
   private $items;
+  private $menuType = self::MENU_GLOBAL;
   private $defaultItem;
   private $controller;
   private $navigation;
+  private $showNavigation = true;
+
+  const MENU_GLOBAL = 'global';
+  const MENU_PERSONAL = 'personal';
+  const MENU_COMBINED = 'menu';
+  const ITEM_CUSTOM_DIVIDER = 'engine.divider';
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -57,9 +64,34 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->defaultItem;
   }
 
-  abstract protected function getItemURI($path);
+  public function setMenuType($type) {
+    $this->menuType = $type;
+    return $this;
+  }
 
+  private function getMenuType() {
+    return $this->menuType;
+  }
+
+  public function setShowNavigation($show) {
+    $this->showNavigation = $show;
+    return $this;
+  }
+
+  public function getShowNavigation() {
+    return $this->showNavigation;
+  }
+
+  abstract protected function getItemURI($path);
   abstract protected function isMenuEngineConfigurable();
+
+  abstract protected function getBuiltinProfileItems($object);
+
+  protected function getBuiltinCustomProfileItems(
+    $object,
+    $custom_phid) {
+    return array();
+  }
 
   public function buildResponse() {
     $controller = $this->getController();
@@ -130,6 +162,14 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $navigation->selectFilter('item.configure');
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
+    switch ($this->getMenuType()) {
+      case 'personal':
+        $crumbs->addTextCrumb(pht('Personal'));
+        break;
+      case 'global':
+        $crumbs->addTextCrumb(pht('Global'));
+      break;
+    }
 
     switch ($item_action) {
       case 'view':
@@ -177,11 +217,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $crumbs->setBorder(true);
 
-    return $controller->newPage()
+    $page = $controller->newPage()
       ->setTitle(pht('Configure Menu'))
-      ->setNavigation($navigation)
       ->setCrumbs($crumbs)
       ->appendChild($content);
+
+    if ($this->getShowNavigation()) {
+      $page->setNavigation($navigation);
+    }
+    return $page;
   }
 
   public function buildNavigation() {
@@ -194,6 +238,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setBaseURI(new PhutilURI($this->getItemURI('')));
 
     $menu_items = $this->getItems();
+
     $filtered_items = array();
     foreach ($menu_items as $menu_item) {
       if ($menu_item->isDisabled()) {
@@ -239,11 +284,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $more_items = $this->newAutomaticMenuItems($nav);
-    foreach ($more_items as $item) {
-      $nav->addMenuItem($item);
-    }
-
     $nav->selectFilter(null);
 
     $this->navigation = $nav;
@@ -264,18 +304,24 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $items = $this->loadBuiltinProfileItems();
 
-    if ($this->getCustomPHID()) {
-      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-        ->setViewer($viewer)
-        ->withProfilePHIDs(array($object->getPHID()))
-        ->withCustomPHIDs(array($this->getCustomPHID()))
-        ->execute();
-    } else {
-      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-        ->setViewer($viewer)
-        ->withProfilePHIDs(array($object->getPHID()))
-        ->execute();
+    $query = id(new PhabricatorProfileMenuItemConfigurationQuery())
+      ->setViewer($viewer)
+      ->withProfilePHIDs(array($object->getPHID()));
+
+    $menu_type = $this->getMenuType();
+    switch ($menu_type) {
+      case self::MENU_GLOBAL:
+        $query->withCustomPHIDs(array(), true);
+        break;
+      case self::MENU_PERSONAL:
+        $query->withCustomPHIDs(array($this->getCustomPHID()), false);
+        break;
+      case self::MENU_COMBINED:
+        $query->withCustomPHIDs(array($this->getCustomPHID()), true);
+        break;
     }
+
+    $stored_items = $query->execute();
 
     foreach ($stored_items as $stored_item) {
       $impl = $stored_item->getMenuItem();
@@ -305,12 +351,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $items = msort($items, 'getSortKey');
-
-    // Normalize keys since callers shouldn't rely on this array being
-    // partially keyed.
-    $items = array_values($items);
-
+    $items = $this->arrangeItems($items);
 
     // Make sure exactly one valid item is marked as default.
     $default = null;
@@ -343,7 +384,26 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   private function loadBuiltinProfileItems() {
     $object = $this->getProfileObject();
-    $builtins = $this->getBuiltinProfileItems($object);
+
+    $menu_type = $this->getMenuType();
+    switch ($menu_type) {
+      case self::MENU_GLOBAL:
+        $builtins = $this->getBuiltinProfileItems($object);
+        break;
+      case self::MENU_PERSONAL:
+        $builtins = $this->getBuiltinCustomProfileItems(
+          $object,
+          $this->getCustomPHID());
+        break;
+      case self::MENU_COMBINED:
+        $builtins = array();
+        $builtins[] = $this->getBuiltinCustomProfileItems(
+          $object,
+          $this->getCustomPHID());
+        $builtins[] = $this->getBuiltinProfileItems($object);
+        $builtins = array_mergev($builtins);
+        break;
+    }
 
     $items = PhabricatorProfileMenuItem::getAllMenuItems();
     $viewer = $this->getViewer();
@@ -408,73 +468,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           'Expected buildNavigationMenuItems() to return a list of '.
           'PHUIListItemView objects, but got a surprise.'));
     }
-  }
-
-  private function newAutomaticMenuItems(AphrontSideNavFilterView $nav) {
-    $items = array();
-
-    // NOTE: We're adding a spacer item for the fixed footer, so that if the
-    // menu taller than the page content you can still scroll down the page far
-    // enough to access the last item without the content being obscured by the
-    // fixed items.
-    $items[] = id(new PHUIListItemView())
-      ->setHideInApplicationMenu(true)
-      ->addClass('phui-profile-menu-spacer');
-
-    $collapse_id = celerity_generate_unique_node_id();
-    $viewer = $this->getViewer();
-    $collapse_key = PhabricatorProfileMenuCollapsedSetting::SETTINGKEY;
-
-    $is_collapsed = $viewer->getUserSetting($collapse_key);
-
-    if ($is_collapsed) {
-      $nav->addClass('phui-profile-menu-collapsed');
-    } else {
-      $nav->addClass('phui-profile-menu-expanded');
-    }
-
-    if ($viewer->isLoggedIn()) {
-      $settings_uri = '/settings/adjust/?key='.$collapse_key;
-    } else {
-      $settings_uri = null;
-    }
-
-    Javelin::initBehavior(
-      'phui-profile-menu',
-      array(
-        'menuID' => $nav->getMainID(),
-        'collapseID' => $collapse_id,
-        'isCollapsed' => (bool)$is_collapsed,
-        'settingsURI' => $settings_uri,
-      ));
-
-    $collapse_icon = id(new PHUIIconCircleView())
-      ->addClass('phui-list-item-icon')
-      ->addClass('phui-profile-menu-visible-when-expanded')
-      ->setIcon('fa-chevron-left');
-
-    $expand_icon = id(new PHUIIconCircleView())
-      ->addClass('phui-list-item-icon')
-      ->addClass('phui-profile-menu-visible-when-collapsed')
-      ->addSigil('has-tooltip')
-      ->setMetadata(
-        array(
-          'tip' => pht('Expand'),
-          'align' => 'E',
-        ))
-      ->setIcon('fa-chevron-right');
-
-    $items[] = id(new PHUIListItemView())
-      ->setName('Collapse')
-      ->addIcon($collapse_icon)
-      ->addIcon($expand_icon)
-      ->setID($collapse_id)
-      ->addClass('phui-profile-menu-footer')
-      ->addClass('phui-profile-menu-footer-1')
-      ->setHideInApplicationMenu(true)
-      ->setHref('#');
-
-    return $items;
   }
 
   public function getConfigureURI() {
@@ -558,10 +551,22 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    $filtered_groups = mgroup($items, 'getMenuItemKey');
+    foreach ($filtered_groups as $group) {
+      $first_item = head($group);
+      $first_item->willBuildNavigationItems($group);
+    }
+
+    // Users only need to be able to edit the object which this menu appears
+    // on if they're editing global menu items. For example, users do not need
+    // to be able to edit the Favorites application to add new items to the
+    // Favorites menu.
+    if (!$this->getCustomPHID()) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
 
     $list_id = celerity_generate_unique_node_id();
 
@@ -573,7 +578,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ));
 
     $list = id(new PHUIObjectItemListView())
-      ->setID($list_id);
+      ->setID($list_id)
+      ->setNoDataString(pht('This menu currently has no items.'));
 
     foreach ($items as $item) {
       $id = $item->getID();
@@ -710,11 +716,11 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         ->setName($doc_name));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Profile Menu Items'))
+      ->setHeader(pht('Menu Items'))
       ->setHeaderIcon('fa-list');
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Navigation'))
+      ->setHeaderText(pht('Current Menu Items'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
@@ -1021,5 +1027,41 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     return $this;
   }
+
+  private function arrangeItems(array $items) {
+    // Sort the items.
+    $items = msortv($items, 'getSortVector');
+
+    // If we have some global items and some custom items and are in "combined"
+    // mode, put a hard-coded divider item between them.
+    if ($this->getMenuType() == self::MENU_COMBINED) {
+      $list = array();
+      $seen_custom = false;
+      $seen_global = false;
+      foreach ($items as $item) {
+        if ($item->getCustomPHID()) {
+          $seen_custom = true;
+        } else {
+          if ($seen_custom && !$seen_global) {
+            $list[] = $this->newItem()
+              ->setBuiltinKey(self::ITEM_CUSTOM_DIVIDER)
+              ->setMenuItemKey(PhabricatorDividerProfileMenuItem::MENUITEMKEY)
+              ->attachMenuItem(
+                new PhabricatorDividerProfileMenuItem());
+          }
+          $seen_global = true;
+        }
+        $list[] = $item;
+      }
+      $items = $list;
+    }
+
+    // Normalize keys since callers shouldn't rely on this array being
+    // partially keyed.
+    $items = array_values($items);
+
+    return $items;
+  }
+
 
 }

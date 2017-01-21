@@ -767,23 +767,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       ->setViewer($viewer);
     $dropdown_query->execute();
 
-    $rendered_dropdowns = array();
-    $applications = array(
-      'PhabricatorHelpApplication',
-    );
-    foreach ($applications as $application_class) {
-      if (!PhabricatorApplication::isClassInstalledForViewer(
-        $application_class,
-        $viewer)) {
-        continue;
-      }
-      $application = PhabricatorApplication::getByClass($application_class);
-      $rendered_dropdowns[$application_class] =
-        $application->buildMainMenuExtraNodes(
-          $viewer,
-          $controller);
-    }
-
     $hisec_warning_config = $this->getHighSecurityWarningConfig();
 
     $console_config = null;
@@ -799,6 +782,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     $application_class = null;
     $application_search_icon = null;
+    $application_help = null;
     $controller = $this->getController();
     if ($controller) {
       $application = $controller->getCurrentApplication();
@@ -806,6 +790,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         $application_class = get_class($application);
         if ($application->getApplicationSearchDocumentTypes()) {
           $application_search_icon = $application->getIcon();
+        }
+
+        $help_items = $application->getHelpMenuItems($viewer);
+        if ($help_items) {
+          $help_list = id(new PhabricatorActionListView())
+            ->setViewer($viewer);
+          foreach ($help_items as $help_item) {
+            $help_list->addAction($help_item);
+          }
+          $application_help = $help_list->getDropdownMenuMetadata();
         }
       }
     }
@@ -818,11 +812,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         $dropdown_query->getConpherenceData(),
       ),
       'globalDragAndDrop' => $upload_enabled,
-      'aphlictDropdowns' => $rendered_dropdowns,
       'hisecWarningConfig' => $hisec_warning_config,
       'consoleConfig' => $console_config,
       'applicationClass' => $application_class,
       'applicationSearchIcon' => $application_search_icon,
+      'helpItems' => $application_help,
     ) + $this->buildAphlictListenConfigData();
   }
 

@@ -91,10 +91,6 @@ final class DifferentialBlameRevisionField
       $xaction->renderHandleLink($object_phid));
   }
 
-  public function shouldAppearInCommitMessage() {
-    return true;
-  }
-
   public function shouldAppearInConduitDictionary() {
     return true;
   }

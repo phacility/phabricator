@@ -2,7 +2,6 @@
 
 final class PhabricatorHomeApplication extends PhabricatorApplication {
 
-  private $quickItems;
   const DASHBOARD_DEFAULT = 'dashboard:default';
 
   public function getBaseURI() {
@@ -26,7 +25,6 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
       '/' => 'PhabricatorHomeMainController',
       '/(?P<only>home)/' => 'PhabricatorHomeMainController',
       '/home/' => array(
-        'create/' => 'PhabricatorHomeQuickCreateController',
         'menu/' => array(
           '' => 'PhabricatorHomeMenuController',
           '(?P<type>global|personal)/item/' => $this->getProfileMenuRouting(
@@ -44,73 +42,114 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     return 9;
   }
 
-  public function buildMainMenuItems(
-    PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-
-    $quick_items = $this->getQuickActionItems($user);
-    if (!$quick_items) {
-      return array();
-    }
-
-    $items = array();
-    $create_id = celerity_generate_unique_node_id();
-
-    Javelin::initBehavior(
-      'aphlict-dropdown',
-      array(
-        'bubbleID' => $create_id,
-        'dropdownID' => 'phabricator-quick-create-menu',
-        'local' => true,
-        'desktop' => true,
-        'right' => true,
-      ));
-
-    $item = id(new PHUIListItemView())
-      ->setName(pht('Quick Actions'))
-      ->setIcon('fa-plus')
-      ->addClass('core-menu-item')
-      ->setHref('/home/create/')
-      ->addSigil('quick-create-menu')
-      ->setID($create_id)
-      ->setAural(pht('Quick Actions'))
-      ->setOrder(300);
-    $items[] = $item;
-
-    return $items;
-  }
-
   public function buildMainMenuExtraNodes(
     PhabricatorUser $viewer,
     PhabricatorController $controller = null) {
 
-    $items = $this->getQuickActionItems($viewer);
-
-    $view = null;
-    if ($items) {
-      $view = new PHUIListView();
-      foreach ($items as $item) {
-        $view->addMenuItem($item);
-      }
-
-      return phutil_tag(
-        'div',
-        array(
-          'id' => 'phabricator-quick-create-menu',
-          'class' => 'phabricator-main-menu-dropdown phui-list-sidenav',
-          'style' => 'display: none',
-        ),
-        $view);
+    if (!$viewer->isLoggedIn()) {
+      return;
     }
-    return $view;
+
+    $image = $viewer->getProfileImageURI();
+
+    $profile_image = id(new PHUIIconView())
+      ->setImage($image)
+      ->setHeadSize(PHUIIconView::HEAD_SMALL);
+
+    if ($controller) {
+      $application = $controller->getCurrentApplication();
+    } else {
+      $application = null;
+    }
+    $dropdown_menu = $this->renderUserDropdown($viewer, $application);
+
+    $menu_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior(
+      'user-menu',
+      array(
+        'menuID' => $menu_id,
+        'menu' => $dropdown_menu->getDropdownMenuMetadata(),
+      ));
+
+    return id(new PHUIButtonView())
+      ->setID($menu_id)
+      ->setTag('a')
+      ->setHref('/p/'.$viewer->getUsername().'/')
+      ->setIcon($profile_image)
+      ->addClass('phabricator-core-user-menu')
+      ->setHasCaret(true)
+      ->setNoCSS(true);
   }
 
-  private function getQuickActionItems(PhabricatorUser $viewer) {
-    if ($this->quickItems === null) {
-      $items = PhabricatorQuickActions::loadMenuItemsForUser($viewer);
-      $this->quickItems = $items;
+  private function renderUserDropdown(
+    PhabricatorUser $viewer,
+    $application) {
+
+    $person_to_show = id(new PHUIObjectItemView())
+      ->setObjectName($viewer->getRealName())
+      ->setSubHead($viewer->getUsername())
+      ->setImageURI($viewer->getProfileImageURI());
+
+    $user_view = id(new PHUIObjectItemListView())
+      ->setViewer($viewer)
+      ->setFlush(true)
+      ->setSimple(true)
+      ->addItem($person_to_show)
+      ->addClass('phabricator-core-user-profile-object');
+
+    $view = id(new PhabricatorActionListView())
+      ->setViewer($viewer);
+
+    // User Menu
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->appendChild($user_view));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Profile'))
+        ->setHref('/p/'.$viewer->getUsername().'/'));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Settings'))
+        ->setHref('/settings/user/'.$viewer->getUsername().'/'));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Manage'))
+        ->setHref('/people/manage/'.$viewer->getID().'/'));
+
+    // Help Menus
+    if ($application) {
+      $help_links = $application->getHelpMenuItems($viewer);
+      if ($help_links) {
+        foreach ($help_links as $link) {
+          $view->addAction($link);
+        }
+      }
     }
-    return $this->quickItems;
+
+    // Logout Menu
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->addSigil('logout-item')
+        ->setType(PhabricatorActionView::TYPE_DIVIDER));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Log Out %s', $viewer->getUsername()))
+        ->addSigil('logout-item')
+        ->setHref('/logout/')
+        ->setColor(PhabricatorActionView::RED)
+        ->setWorkflow(true));
+
+    return $view;
   }
 
 }

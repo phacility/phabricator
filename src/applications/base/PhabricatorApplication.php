@@ -172,41 +172,40 @@ abstract class PhabricatorApplication
 
     $articles = $this->getHelpDocumentationArticles($viewer);
     if ($articles) {
-      $items[] = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL)
-        ->setName(pht('%s Documentation', $this->getName()));
       foreach ($articles as $article) {
-        $item = id(new PHUIListItemView())
+        $item = id(new PhabricatorActionView())
           ->setName($article['name'])
-          ->setIcon('fa-book')
           ->setHref($article['href'])
+          ->addSigil('help-item')
           ->setOpenInNewWindow(true);
-
         $items[] = $item;
       }
     }
 
     $command_specs = $this->getMailCommandObjects();
     if ($command_specs) {
-      $items[] = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL)
-        ->setName(pht('Email Help'));
       foreach ($command_specs as $key => $spec) {
         $object = $spec['object'];
 
         $class = get_class($this);
         $href = '/applications/mailcommands/'.$class.'/'.$key.'/';
-
-        $item = id(new PHUIListItemView())
+        $item = id(new PhabricatorActionView())
           ->setName($spec['name'])
-          ->setIcon('fa-envelope-o')
           ->setHref($href)
+          ->addSigil('help-item')
           ->setOpenInNewWindow(true);
         $items[] = $item;
       }
     }
 
-    return $items;
+    if ($items) {
+      $divider = id(new PhabricatorActionView())
+        ->addSigil('help-item')
+        ->setType(PhabricatorActionView::TYPE_DIVIDER);
+      array_unshift($items, $divider);
+    }
+
+    return array_values($items);
   }
 
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {

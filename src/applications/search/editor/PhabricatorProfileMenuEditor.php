@@ -87,4 +87,39 @@ final class PhabricatorProfileMenuEditor
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    $actor = $this->getActor();
+    $menu_item = $object->getMenuItem();
+    $menu_item->setViewer($actor);
+
+    switch ($type) {
+      case PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY:
+        $key_map = array();
+        foreach ($xactions as $xaction) {
+          $xaction_key = $xaction->getMetadataValue('property.key');
+          $old = $this->getCustomTransactionOldValue($object, $xaction);
+          $new = $xaction->getNewValue();
+          $key_map[$xaction_key][] = array(
+            'xaction' => $xaction,
+            'old' => $old,
+            'new' => $new,
+          );
+        }
+
+        foreach ($object->validateTransactions($key_map) as $error) {
+          $errors[] = $error;
+        }
+        break;
+    }
+
+    return $errors;
+  }
+
+
 }

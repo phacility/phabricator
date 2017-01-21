@@ -126,7 +126,7 @@ JX.behavior('comment-actions', function(config) {
   }
 
   function force_preview() {
-    if (!config.shouldPreview) {
+    if (!config.showPreview) {
       return;
     }
 

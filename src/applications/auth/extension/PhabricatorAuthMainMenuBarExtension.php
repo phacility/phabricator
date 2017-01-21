@@ -13,9 +13,7 @@ final class PhabricatorAuthMainMenuBarExtension
     $viewer = $this->getViewer();
 
     if ($viewer->isLoggedIn()) {
-      return array(
-        $this->buildLogoutMenu(),
-      );
+      return array();
     }
 
     $controller = $this->getController();
@@ -30,25 +28,6 @@ final class PhabricatorAuthMainMenuBarExtension
     );
   }
 
-  private function buildLogoutMenu() {
-    $controller = $this->getController();
-
-    $is_selected = ($controller instanceof PhabricatorLogoutController);
-
-    $bar_item = id(new PHUIListItemView())
-      ->addClass('core-menu-item')
-      ->setName(pht('Log Out'))
-      ->setIcon('fa-sign-out')
-      ->setWorkflow(true)
-      ->setHref('/logout/')
-      ->setSelected($is_selected)
-      ->setAural(pht('Log Out'));
-
-    return id(new PHUIMainMenuView())
-      ->setOrder(900)
-      ->setMenuBarItem($bar_item);
-  }
-
   private function buildLoginMenu() {
     $controller = $this->getController();
 
@@ -58,16 +37,12 @@ final class PhabricatorAuthMainMenuBarExtension
       $uri->setQueryParam('next', $path);
     }
 
-    $bar_item = id(new PHUIListItemView())
-      ->addClass('core-menu-item')
-      ->setName(pht('Log In'))
-      ->setIcon('fa-sign-in')
+    return id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('Log In'))
       ->setHref($uri)
-      ->setAural(pht('Log In'));
-
-    return id(new PHUIMainMenuView())
-      ->setOrder(900)
-      ->setMenuBarItem($bar_item);
+      ->setNoCSS(true)
+      ->addClass('phabricator-core-login-button');
   }
 
 }

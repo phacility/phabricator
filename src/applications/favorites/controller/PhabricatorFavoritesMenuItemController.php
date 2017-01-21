@@ -7,8 +7,10 @@ final class PhabricatorFavoritesMenuItemController
     $viewer = $this->getViewer();
     $type = $request->getURIData('type');
     $custom_phid = null;
+    $menu = PhabricatorProfileMenuEngine::MENU_GLOBAL;
     if ($type == 'personal') {
       $custom_phid = $viewer->getPHID();
+      $menu = PhabricatorProfileMenuEngine::MENU_PERSONAL;
     }
 
     $application = 'PhabricatorFavoritesApplication';
@@ -21,7 +23,9 @@ final class PhabricatorFavoritesMenuItemController
     $engine = id(new PhabricatorFavoritesProfileMenuEngine())
       ->setProfileObject($favorites)
       ->setCustomPHID($custom_phid)
-      ->setController($this);
+      ->setController($this)
+      ->setMenuType($menu)
+      ->setShowNavigation(false);
 
     return $engine->buildResponse();
   }

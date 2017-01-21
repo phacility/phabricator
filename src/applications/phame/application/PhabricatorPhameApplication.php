@@ -11,7 +11,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
   }
 
   public function getIcon() {
-    return 'fa-star';
+    return 'fa-feed';
   }
 
   public function getShortDescription() {

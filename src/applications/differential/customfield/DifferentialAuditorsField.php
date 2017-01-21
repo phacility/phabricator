@@ -36,10 +36,6 @@ final class DifferentialAuditorsField
     return true;
   }
 
-  public function shouldAppearInCommitMessage() {
-    return true;
-  }
-
   public function shouldAppearInConduitTransactions() {
     return true;
   }

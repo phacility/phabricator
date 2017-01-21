@@ -99,8 +99,10 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
             'id' => $button_id,
             'class' => 'phui-icon-view phui-font-fa fa-search',
             ),
-          $search_text),
-        $selector,
+          array(
+            $selector,
+            $search_text,
+          )),
         $primary_input,
         $target,
       )));
@@ -118,7 +120,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
 
     $items[] = array(
       'icon' => 'fa-globe',
-      'name' => pht('Search All Documents'),
+      'name' => pht('All Documents'),
       'value' => 'all',
     );
 
@@ -134,7 +136,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
 
     $items[] = array(
       'icon' => $application_icon,
-      'name' => pht('Search Current Application'),
+      'name' => pht('Current Application'),
       'value' => PhabricatorSearchController::SCOPE_CURRENT_APPLICATION,
     );
 

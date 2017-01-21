@@ -46,7 +46,7 @@ final class DifferentialRevisionRejectTransaction
 
   public function generateOldValue($object) {
     $actor = $this->getActor();
-    return $this->isViewerRejectingReviewer($object, $actor);
+    return $this->isViewerFullyRejected($object, $actor);
   }
 
   public function applyExternalEffects($object, $value) {
@@ -72,7 +72,7 @@ final class DifferentialRevisionRejectTransaction
           'not own.'));
     }
 
-    if ($this->isViewerRejectingReviewer($object, $viewer)) {
+    if ($this->isViewerFullyRejected($object, $viewer)) {
       throw new Exception(
         pht(
           'You can not request changes to this revision because you have '.
