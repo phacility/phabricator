@@ -9,6 +9,10 @@ final class PhabricatorAuthMainMenuBarExtension
     return true;
   }
 
+  public function getExtensionOrder() {
+    return 900;
+  }
+
   public function buildMainMenus() {
     $viewer = $this->getViewer();
 
