@@ -31,7 +31,6 @@ abstract class PhabricatorHomeController extends PhabricatorController {
 
     $tiles[] = id(new PhabricatorApplicationLaunchView())
       ->setApplication($home_app)
-      ->setApplicationStatus($home_app->loadStatus($user))
       ->addClass('phabricator-application-launch-phone-only')
       ->setUser($user);
 
@@ -44,7 +43,6 @@ abstract class PhabricatorHomeController extends PhabricatorController {
 
       $tile = id(new PhabricatorApplicationLaunchView())
         ->setApplication($application)
-        ->setApplicationStatus($application->loadStatus($user))
         ->setUser($user);
 
       $tiles[] = $tile;
