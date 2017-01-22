@@ -70,7 +70,7 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
     return new PHUIListItemView();
   }
 
-  public function valdateTransactions(
+  public function validateTransactions(
     PhabricatorProfileMenuItemConfiguration $config,
     $field_key,
     $value,
