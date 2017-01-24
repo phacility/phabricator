@@ -361,12 +361,39 @@ final class PhabricatorAuditEditor
       }
     }
 
+    $old_status = $object->getAuditStatus();
+
     $requests = $object->getAudits();
     $object->updateAuditStatus($requests);
+
+    $new_status = $object->getAuditStatus();
+
     $object->save();
 
     if ($import_status_flag) {
       $object->writeImportStatusFlag($import_status_flag);
+    }
+
+    $partial_status = PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED;
+
+    // If the commit has changed state after this edit, add an informational
+    // transaction about the state change.
+    if ($old_status !== $new_status) {
+      if ($new_status === $partial_status) {
+        // This state isn't interesting enough to get a transaction. The
+        // best way we could lead the user forward is something like "This
+        // commit still requires additional audits." but that's redundant and
+        // probably not very useful.
+      } else {
+        $xaction = $object->getApplicationTransactionTemplate()
+          ->setTransactionType(DiffusionCommitStateTransaction::TRANSACTIONTYPE)
+          ->setOldValue($old_status)
+          ->setNewValue($new_status);
+
+        $xaction = $this->populateTransaction($object, $xaction);
+
+        $xaction->save();
+      }
     }
 
     // Collect auditor PHIDs for building mail.
