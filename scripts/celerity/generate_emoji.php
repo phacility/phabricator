@@ -21,8 +21,9 @@ $args->parse(
   ));
 
 $root = dirname(phutil_get_library_root('phabricator'));
-$path = $root.'/webroot/rsrc/externals/emojione/emoji_strategy.json';
-$export_path = $root.'/webroot/rsrc/emoji/manifest.json';
+// move this to an argument?
+$path = $root.'/emoji_strategy.json';
+$export_path = $root.'/resources/emoji/manifest.json';
 
 if (Filesystem::pathExists($path)) {
   $json = Filesystem::readFile($path);
@@ -39,6 +40,7 @@ if (Filesystem::pathExists($path)) {
     $data[$shortname] = $hex;
   }
 
+  ksort($data);
   $json = new PhutilJSON();
   $data = $json->encodeFormatted($data);
   Filesystem::writeFile($export_path, $data);

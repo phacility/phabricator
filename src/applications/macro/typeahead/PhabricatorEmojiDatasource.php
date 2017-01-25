@@ -32,9 +32,11 @@ final class PhabricatorEmojiDatasource extends PhabricatorTypeaheadDatasource {
     $results = array();
     foreach ($emojis as $shortname => $emoji) {
       $display_name = $emoji.' '.$shortname;
+      $name = str_replace('_', ' ', $shortname);
       $result = id(new PhabricatorTypeaheadResult())
         ->setPHID($shortname)
-        ->setName($display_name)
+        ->setName($name)
+        ->setDisplayname($display_name)
         ->setAutocomplete($emoji);
 
       $results[$shortname] = $result;
