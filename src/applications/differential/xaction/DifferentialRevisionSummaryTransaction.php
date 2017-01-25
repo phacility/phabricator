@@ -54,4 +54,11 @@ final class DifferentialRevisionSummaryTransaction
     return $changes;
   }
 
+  public function validateTransactions($object, array $xactions) {
+    return $this->validateCommitMessageCorpusTransactions(
+      $object,
+      $xactions,
+      pht('Summary'));
+  }
+
 }
