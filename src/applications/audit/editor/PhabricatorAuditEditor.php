@@ -60,7 +60,6 @@ final class PhabricatorAuditEditor
 
     // TODO: These will get modernized eventually, but that can happen one
     // at a time later on.
-    $types[] = PhabricatorAuditActionConstants::ACTION;
     $types[] = PhabricatorAuditActionConstants::INLINE;
     $types[] = PhabricatorAuditActionConstants::ADD_AUDITORS;
 
@@ -98,7 +97,6 @@ final class PhabricatorAuditEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return null;
@@ -116,7 +114,6 @@ final class PhabricatorAuditEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
@@ -131,7 +128,6 @@ final class PhabricatorAuditEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
@@ -146,7 +142,6 @@ final class PhabricatorAuditEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return;
       case PhabricatorAuditActionConstants::INLINE:
@@ -267,97 +262,6 @@ final class PhabricatorAuditEditor
         case PhabricatorAuditTransaction::TYPE_COMMIT:
           $import_status_flag = PhabricatorRepositoryCommit::IMPORTED_HERALD;
           break;
-        case PhabricatorAuditActionConstants::ACTION:
-          $new = $xaction->getNewValue();
-          switch ($new) {
-            case PhabricatorAuditActionConstants::CLOSE:
-              // "Close" means wipe out all the concerns.
-              $requests = $object->getAudits();
-              foreach ($requests as $request) {
-                if ($request->getAuditStatus() == $status_concerned) {
-                  $request
-                    ->setAuditStatus($status_closed)
-                    ->save();
-                }
-              }
-              break;
-            case PhabricatorAuditActionConstants::RESIGN:
-              $requests = $object->getAudits();
-              $requests = mpull($requests, null, 'getAuditorPHID');
-              $actor_request = idx($requests, $actor_phid);
-
-              // If the actor doesn't currently have a relationship to the
-              // commit, add one explicitly. For example, this allows members
-              // of a project to resign from a commit and have it drop out of
-              // their queue.
-
-              if (!$actor_request) {
-                $actor_request = id(new PhabricatorRepositoryAuditRequest())
-                  ->setCommitPHID($object->getPHID())
-                  ->setAuditorPHID($actor_phid);
-
-                $requests[] = $actor_request;
-                $object->attachAudits($requests);
-              }
-
-              $actor_request
-                ->setAuditStatus($status_resigned)
-                ->save();
-              break;
-            case PhabricatorAuditActionConstants::ACCEPT:
-            case PhabricatorAuditActionConstants::CONCERN:
-              if ($new == PhabricatorAuditActionConstants::ACCEPT) {
-                $new_status = $status_accepted;
-              } else {
-                $new_status = $status_concerned;
-              }
-
-              $requests = $object->getAudits();
-              $requests = mpull($requests, null, 'getAuditorPHID');
-
-              // Figure out which requests the actor has authority over: these
-              // are user requests where they are the auditor, and packages
-              // and projects they are a member of.
-
-              if ($actor_is_author) {
-                // When modifying your own commits, you act only on behalf of
-                // yourself, not your packages/projects -- the idea being that
-                // you can't accept your own commits.
-                $authority_phids = array($actor_phid);
-              } else {
-                $authority_phids =
-                  PhabricatorAuditCommentEditor::loadAuditPHIDsForUser(
-                    $this->requireActor());
-              }
-
-              $authority = array_select_keys(
-                $requests,
-                $authority_phids);
-
-              if (!$authority) {
-                // If the actor has no authority over any existing requests,
-                // create a new request for them.
-
-                $actor_request = id(new PhabricatorRepositoryAuditRequest())
-                  ->setCommitPHID($object->getPHID())
-                  ->setAuditorPHID($actor_phid)
-                  ->setAuditStatus($new_status)
-                  ->save();
-
-                $requests[$actor_phid] = $actor_request;
-                $object->attachAudits($requests);
-              } else {
-                // Otherwise, update the audit status of the existing requests.
-                foreach ($authority as $request) {
-                  $request
-                    ->setAuditStatus($new_status)
-                    ->save();
-                }
-              }
-              break;
-
-          }
-          break;
       }
     }
 
@@ -423,7 +327,6 @@ final class PhabricatorAuditEditor
     if (!$this->didExpandInlineState) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_COMMENT:
-        case PhabricatorAuditActionConstants::ACTION:
           $this->didExpandInlineState = true;
 
           $actor_phid = $this->getActingAsPHID();
@@ -513,69 +416,6 @@ final class PhabricatorAuditEditor
 
     return array_values(array_merge($head, $tail));
   }
-
-  protected function validateTransaction(
-    PhabricatorLiskDAO $object,
-    $type,
-    array $xactions) {
-
-    $errors = parent::validateTransaction($object, $type, $xactions);
-
-    foreach ($xactions as $xaction) {
-      switch ($type) {
-        case PhabricatorAuditActionConstants::ACTION:
-          $error = $this->validateAuditAction(
-            $object,
-            $type,
-            $xaction,
-            $xaction->getNewValue());
-          if ($error) {
-            $errors[] = new PhabricatorApplicationTransactionValidationError(
-              $type,
-              pht('Invalid'),
-              $error,
-              $xaction);
-          }
-          break;
-      }
-    }
-
-    return $errors;
-  }
-
-  private function validateAuditAction(
-    PhabricatorLiskDAO $object,
-    $type,
-    PhabricatorAuditTransaction $xaction,
-    $action) {
-
-    $can_author_close_key = 'audit.can-author-close-audit';
-    $can_author_close = PhabricatorEnv::getEnvConfig($can_author_close_key);
-
-    $actor_is_author = ($object->getAuthorPHID()) &&
-      ($object->getAuthorPHID() == $this->getActingAsPHID());
-
-    switch ($action) {
-      case PhabricatorAuditActionConstants::CLOSE:
-        if (!$actor_is_author) {
-          return pht(
-            'You can not close this audit because you are not the author '.
-            'of the commit.');
-        }
-
-        if (!$can_author_close) {
-          return pht(
-            'You can not close this audit because "%s" is disabled in '.
-            'the Phabricator configuration.',
-            $can_author_close_key);
-        }
-
-        break;
-    }
-
-    return null;
-  }
-
 
   protected function supportsSearch() {
     return true;
