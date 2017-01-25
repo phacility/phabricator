@@ -30,11 +30,6 @@ final class DiffusionCommitAcceptTransaction
     return pht('Accepted');
   }
 
-  public function generateOldValue($object) {
-    $actor = $this->getActor();
-    return $this->isViewerAcceptingAuditor($object, $actor);
-  }
-
   public function applyExternalEffects($object, $value) {
     $status = PhabricatorAuditStatusConstants::ACCEPTED;
     $actor = $this->getActor();
@@ -54,7 +49,7 @@ final class DiffusionCommitAcceptTransaction
       }
     }
 
-    if ($this->isViewerAcceptingAuditor($object, $viewer)) {
+    if ($this->isViewerFullyAccepted($object, $viewer)) {
       throw new Exception(
         pht(
           'You can not accept this commit because you have already '.

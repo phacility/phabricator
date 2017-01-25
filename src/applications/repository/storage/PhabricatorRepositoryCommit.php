@@ -327,8 +327,17 @@ final class PhabricatorRepositoryCommit
       }
     }
 
+    $current_status = $this->getAuditStatus();
+    $status_verify = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
+
     if ($any_concern) {
-      $status = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+      if ($current_status == $status_verify) {
+        // If the change is in "Needs Verification", we keep it there as
+        // long as any auditors still have concerns.
+        $status = $status_verify;
+      } else {
+        $status = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+      }
     } else if ($any_accept) {
       if ($any_need) {
         $status = PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED;

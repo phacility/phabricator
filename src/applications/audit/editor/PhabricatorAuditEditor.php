@@ -11,6 +11,7 @@ final class PhabricatorAuditEditor
   private $auditorPHIDs = array();
 
   private $didExpandInlineState = false;
+  private $oldAuditStatus = null;
 
   public function addAuditReason($phid, $reason) {
     if (!isset($this->auditReasonMap[$phid])) {
@@ -77,6 +78,8 @@ final class PhabricatorAuditEditor
           break;
       }
     }
+
+    $this->oldAuditStatus = $object->getAuditStatus();
 
     $object->loadAndAttachAuditAuthority(
       $this->getActor(),
@@ -269,7 +272,7 @@ final class PhabricatorAuditEditor
       }
     }
 
-    $old_status = $object->getAuditStatus();
+    $old_status = $this->oldAuditStatus;
 
     $requests = $object->getAudits();
     $object->updateAuditStatus($requests);

@@ -31,6 +31,8 @@ final class DiffusionCommitStateTransaction
         return pht('This commit now requires audit.');
       case PhabricatorAuditCommitStatusConstants::CONCERN_RAISED:
         return pht('This commit now has outstanding concerns.');
+      case PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION:
+        return pht('This commit now requires verification by auditors.');
       case PhabricatorAuditCommitStatusConstants::FULLY_AUDITED:
         return pht('All concerns with this commit have now been addressed.');
     }
@@ -53,6 +55,10 @@ final class DiffusionCommitStateTransaction
       case PhabricatorAuditCommitStatusConstants::CONCERN_RAISED:
         return pht(
           '%s now has outstanding concerns.',
+          $this->renderObject());
+      case PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION:
+        return pht(
+          '%s now requires verification by auditors.',
           $this->renderObject());
       case PhabricatorAuditCommitStatusConstants::FULLY_AUDITED:
         return pht(
