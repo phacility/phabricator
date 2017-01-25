@@ -91,6 +91,9 @@ abstract class DiffusionCommitAuditTransaction
     $value,
     $status) {
 
+    $actor = $this->getActor();
+    $acting_phid = $this->getActingAsPHID();
+
     $audits = $commit->getAudits();
     $audits = mpull($audits, null, 'getAuditorPHID');
 
@@ -98,13 +101,9 @@ abstract class DiffusionCommitAuditTransaction
 
     $with_authority = ($status != PhabricatorAuditStatusConstants::RESIGNED);
     if ($with_authority) {
-      $has_authority = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser(
-        $viewer);
-      $has_authority = array_fuse($has_authority);
       foreach ($audits as $audit) {
-        $auditor_phid = $audit->getAuditorPHID();
-        if (isset($has_authority[$auditor_phid])) {
-          $map[$auditor_phid] = $status;
+        if ($commit->hasAuditAuthority($actor, $audit, $acting_phid)) {
+          $map[$audit->getAuditorPHID()] = $status;
         }
       }
     }

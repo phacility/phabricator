@@ -78,6 +78,10 @@ final class PhabricatorAuditEditor
       }
     }
 
+    $object->loadAndAttachAuditAuthority(
+      $this->getActor(),
+      $this->getActingAsPHID());
+
     return parent::expandTransactions($object, $xactions);
   }
 

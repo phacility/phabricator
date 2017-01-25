@@ -4,9 +4,6 @@ final class DiffusionCommitController extends DiffusionController {
 
   const CHANGES_LIMIT = 100;
 
-  private $auditAuthorityPHIDs;
-  private $highlightedAudits;
-
   private $commitParents;
   private $commitRefs;
   private $commitMerges;
@@ -67,8 +64,7 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $audit_requests = $commit->getAudits();
-    $this->auditAuthorityPHIDs =
-      PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($viewer);
+    $commit->loadAndAttachAuditAuthority($viewer);
 
     $commit_data = $commit->getCommitData();
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
@@ -208,10 +204,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $timeline = $this->buildComments($commit);
     $merge_table = $this->buildMergesTable($commit);
-
-    $highlighted_audits = $commit->getAuthorityAudits(
-      $viewer,
-      $this->auditAuthorityPHIDs);
 
     $show_changesets = false;
     $info_panel = null;
@@ -520,13 +512,13 @@ final class DiffusionCommitController extends DiffusionController {
       if ($user_requests) {
         $view->addProperty(
           pht('Auditors'),
-          $this->renderAuditStatusView($user_requests));
+          $this->renderAuditStatusView($commit, $user_requests));
       }
 
       if ($other_requests) {
         $view->addProperty(
           pht('Group Auditors'),
-          $this->renderAuditStatusView($other_requests));
+          $this->renderAuditStatusView($commit, $other_requests));
       }
     }
 
@@ -848,11 +840,11 @@ final class DiffusionCommitController extends DiffusionController {
     return $file->getRedirectResponse();
   }
 
-  private function renderAuditStatusView(array $audit_requests) {
+  private function renderAuditStatusView(
+    PhabricatorRepositoryCommit $commit,
+    array $audit_requests) {
     assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
     $viewer = $this->getViewer();
-
-    $authority_map = array_fill_keys($this->auditAuthorityPHIDs, true);
 
     $view = new PHUIStatusListView();
     foreach ($audit_requests as $request) {
@@ -873,7 +865,7 @@ final class DiffusionCommitController extends DiffusionController {
       $target = $viewer->renderHandle($auditor_phid);
       $item->setTarget($target);
 
-      if (isset($authority_map[$auditor_phid])) {
+      if ($commit->hasAuditAuthority($viewer, $request)) {
         $item->setHighlighted(true);
       }
 
