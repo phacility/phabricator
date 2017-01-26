@@ -855,12 +855,6 @@ final class DiffusionCommitController extends DiffusionController {
         PhabricatorAuditStatusConstants::getStatusColor($code),
         PhabricatorAuditStatusConstants::getStatusName($code));
 
-      $note = array();
-      foreach ($request->getAuditReasons() as $reason) {
-        $note[] = phutil_tag('div', array(), $reason);
-      }
-      $item->setNote($note);
-
       $auditor_phid = $request->getAuditorPHID();
       $target = $viewer->renderHandle($auditor_phid);
       $item->setTarget($target);

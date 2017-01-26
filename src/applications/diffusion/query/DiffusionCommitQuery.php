@@ -135,14 +135,6 @@ final class DiffusionCommitQuery
     return $this;
   }
 
-  public function withAuditStatus($status) {
-    // TODO: Replace callers with `withStatuses()`.
-    return $this->withStatuses(
-      array(
-        $status,
-      ));
-  }
-
   public function withEpochRange($min, $max) {
     $this->epochMin = $min;
     $this->epochMax = $max;
