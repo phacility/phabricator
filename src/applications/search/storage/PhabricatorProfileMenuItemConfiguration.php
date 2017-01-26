@@ -185,6 +185,19 @@ final class PhabricatorProfileMenuItemConfiguration
     return ($this->getVisibility() === self::VISIBILITY_DEFAULT);
   }
 
+  public function getItemIdentifier() {
+    $id = $this->getID();
+
+    if ($id) {
+      return (int)$id;
+    }
+
+    return $this->getBuiltinKey();
+  }
+
+  public function newPageContent() {
+    return $this->getMenuItem()->newPageContent($this);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

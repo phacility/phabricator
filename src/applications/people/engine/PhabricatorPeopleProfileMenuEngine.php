@@ -10,7 +10,7 @@ final class PhabricatorPeopleProfileMenuEngine
     return false;
   }
 
-  protected function getItemURI($path) {
+  public function getItemURI($path) {
     $user = $this->getProfileObject();
     $username = $user->getUsername();
     $username = phutil_escape_uri($username);
