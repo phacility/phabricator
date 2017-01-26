@@ -7,7 +7,7 @@ final class PhabricatorFavoritesProfileMenuEngine
     return true;
   }
 
-  protected function getItemURI($path) {
+  public function getItemURI($path) {
     $object = $this->getProfileObject();
     $custom = $this->getCustomPHID();
 

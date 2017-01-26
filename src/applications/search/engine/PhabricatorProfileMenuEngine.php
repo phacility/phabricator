@@ -82,7 +82,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->showNavigation;
   }
 
-  abstract protected function getItemURI($path);
+  abstract public function getItemURI($path);
   abstract protected function isMenuEngineConfigurable();
 
   abstract protected function getBuiltinProfileItems($object);
@@ -102,6 +102,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $request = $controller->getRequest();
 
     $item_action = $request->getURIData('itemAction');
+    if (!$item_action) {
+      $item_action = 'view';
+    }
 
     // If the engine is not configurable, don't respond to any of the editing
     // or configuration routes.
@@ -136,6 +139,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
+    if (!$selected_item) {
+      if ($item_action == 'view') {
+        $selected_item = $this->getDefaultItem();
+      }
+    }
+
     switch ($item_action) {
       case 'view':
       case 'info':
@@ -159,21 +168,33 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     $navigation = $this->buildNavigation();
-    $navigation->selectFilter('item.configure');
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
-    switch ($this->getMenuType()) {
-      case 'personal':
-        $crumbs->addTextCrumb(pht('Personal'));
-        break;
-      case 'global':
-        $crumbs->addTextCrumb(pht('Global'));
-      break;
+
+    // TODO: This stuff might need a little tweaking at some point, since it
+    // causes "Global"  and "Personal" to show up in contexts where they don't
+    // make sense, notably Projects.
+    if ($item_action != 'view') {
+      $navigation->selectFilter('item.configure');
+      switch ($this->getMenuType()) {
+        case 'personal':
+          $crumbs->addTextCrumb(pht('Personal'));
+          break;
+        case 'global':
+          $crumbs->addTextCrumb(pht('Global'));
+          break;
+      }
     }
 
     switch ($item_action) {
       case 'view':
+        $navigation->selectFilter($selected_item->getItemIdentifier());
+
         $content = $this->buildItemViewContent($selected_item);
+        $crumbs->addTextCrumb($selected_item->getDisplayName());
+        if (!$content) {
+          return new Aphront404Response();
+        }
         break;
       case 'configure':
         $content = $this->buildItemConfigureContent($item_list);
@@ -225,6 +246,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     if ($this->getShowNavigation()) {
       $page->setNavigation($navigation);
     }
+
     return $page;
   }
 
@@ -269,13 +291,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       if (count($items) == 1) {
         $item = head($items);
         if ($item->getKey() === null) {
-          $builtin_key = $menu_item->getBuiltinKey();
-          $item_phid = $menu_item->getPHID();
-          if ($builtin_key !== null) {
-            $item->setKey($builtin_key);
-          } else if ($item_phid !== null) {
-            $item->setKey($item_phid);
-          }
+          $item_identifier = $menu_item->getItemIdentifier();
+          $item->setKey($item_identifier);
         }
       }
 
@@ -326,6 +343,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     foreach ($stored_items as $stored_item) {
       $impl = $stored_item->getMenuItem();
       $impl->setViewer($viewer);
+      $impl->setEngine($this);
     }
 
     // Merge the stored items into the builtin items. If a builtin item has
@@ -442,6 +460,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
       $item = clone $item;
       $item->setViewer($viewer);
+      $item->setEngine($this);
 
       $builtin
         ->setProfilePHID($object->getPHID())
@@ -546,6 +565,10 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setURI($this->getConfigureURI());
   }
 
+  private function buildItemViewContent(
+    PhabricatorProfileMenuItemConfiguration $item) {
+    return $item->newPageContent();
+  }
 
   private function buildItemConfigureContent(array $items) {
     $viewer = $this->getViewer();

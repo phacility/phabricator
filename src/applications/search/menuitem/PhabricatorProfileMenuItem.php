@@ -3,6 +3,7 @@
 abstract class PhabricatorProfileMenuItem extends Phobject {
 
   private $viewer;
+  private $engine;
 
   final public function buildNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config) {
@@ -55,6 +56,15 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
     return $this->viewer;
   }
 
+  public function setEngine(PhabricatorProfileMenuEngine $engine) {
+    $this->engine = $engine;
+    return $this;
+  }
+
+  public function getEngine() {
+    return $this->engine;
+  }
+
   final public function getMenuItemKey() {
     return $this->getPhobjectClassConstant('MENUITEMKEY');
   }
@@ -68,6 +78,20 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
 
   protected function newItem() {
     return new PHUIListItemView();
+  }
+
+  public function newPageContent(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return null;
+  }
+
+  public function getItemViewURI(
+    PhabricatorProfileMenuItemConfiguration $config) {
+
+    $engine = $this->getEngine();
+    $key = $config->getItemIdentifier();
+
+    return $engine->getItemURI("view/{$key}/");
   }
 
   public function validateTransactions(

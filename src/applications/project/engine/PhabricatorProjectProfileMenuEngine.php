@@ -7,7 +7,7 @@ final class PhabricatorProjectProfileMenuEngine
     return true;
   }
 
-  protected function getItemURI($path) {
+  public function getItemURI($path) {
     $project = $this->getProfileObject();
     $id = $project->getID();
     return "/project/{$id}/item/{$path}";
