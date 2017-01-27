@@ -12,8 +12,6 @@ abstract class PhabricatorApplication
   extends Phobject
   implements PhabricatorPolicyInterface {
 
-  const MAX_STATUS_ITEMS      = 100;
-
   const GROUP_CORE            = 'core';
   const GROUP_UTILITIES       = 'util';
   const GROUP_ADMIN           = 'admin';
@@ -270,20 +268,6 @@ abstract class PhabricatorApplication
 
 
 /* -(  UI Integration  )----------------------------------------------------- */
-
-
-  /**
-   * Render status elements (like "3 Waiting Reviews") for application list
-   * views. These provide a way to alert users to new or pending action items
-   * in applications.
-   *
-   * @param PhabricatorUser Viewing user.
-   * @return list<PhabricatorApplicationStatusView> Application status elements.
-   * @task ui
-   */
-  public function loadStatus(PhabricatorUser $user) {
-    return array();
-  }
 
 
   /**

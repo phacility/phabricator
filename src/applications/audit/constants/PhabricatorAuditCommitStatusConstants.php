@@ -7,12 +7,14 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
   const CONCERN_RAISED      = 2;
   const PARTIALLY_AUDITED   = 3;
   const FULLY_AUDITED       = 4;
+  const NEEDS_VERIFICATION = 5;
 
   public static function getStatusNameMap() {
     $map = array(
       self::NONE                => pht('No Audits'),
       self::NEEDS_AUDIT         => pht('Audit Required'),
       self::CONCERN_RAISED      => pht('Concern Raised'),
+      self::NEEDS_VERIFICATION => pht('Needs Verification'),
       self::PARTIALLY_AUDITED   => pht('Partially Audited'),
       self::FULLY_AUDITED       => pht('Audited'),
     );
@@ -28,6 +30,7 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return array(
       self::CONCERN_RAISED,
       self::NEEDS_AUDIT,
+      self::NEEDS_VERIFICATION,
       self::PARTIALLY_AUDITED,
     );
   }
@@ -49,6 +52,9 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
       case self::NONE:
         $color = 'bluegrey';
         break;
+      case self::NEEDS_VERIFICATION:
+        $color = 'indigo';
+        break;
       default:
         $color = null;
         break;
@@ -56,7 +62,7 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
     return $color;
   }
 
-    public static function getStatusIcon($code) {
+  public static function getStatusIcon($code) {
     switch ($code) {
       case self::CONCERN_RAISED:
         $icon = 'fa-times-circle';
@@ -72,6 +78,9 @@ final class PhabricatorAuditCommitStatusConstants extends Phobject {
         break;
       case self::NONE:
         $icon = 'fa-check';
+        break;
+      case self::NEEDS_VERIFICATION:
+        $icon = 'fa-refresh';
         break;
       default:
         $icon = null;

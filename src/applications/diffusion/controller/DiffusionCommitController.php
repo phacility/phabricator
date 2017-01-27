@@ -4,9 +4,6 @@ final class DiffusionCommitController extends DiffusionController {
 
   const CHANGES_LIMIT = 100;
 
-  private $auditAuthorityPHIDs;
-  private $highlightedAudits;
-
   private $commitParents;
   private $commitRefs;
   private $commitMerges;
@@ -67,8 +64,7 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $audit_requests = $commit->getAudits();
-    $this->auditAuthorityPHIDs =
-      PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($viewer);
+    $commit->loadAndAttachAuditAuthority($viewer);
 
     $commit_data = $commit->getCommitData();
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
@@ -208,10 +204,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $timeline = $this->buildComments($commit);
     $merge_table = $this->buildMergesTable($commit);
-
-    $highlighted_audits = $commit->getAuthorityAudits(
-      $viewer,
-      $this->auditAuthorityPHIDs);
 
     $show_changesets = false;
     $info_panel = null;
@@ -520,13 +512,13 @@ final class DiffusionCommitController extends DiffusionController {
       if ($user_requests) {
         $view->addProperty(
           pht('Auditors'),
-          $this->renderAuditStatusView($user_requests));
+          $this->renderAuditStatusView($commit, $user_requests));
       }
 
       if ($other_requests) {
         $view->addProperty(
           pht('Group Auditors'),
-          $this->renderAuditStatusView($other_requests));
+          $this->renderAuditStatusView($commit, $other_requests));
       }
     }
 
@@ -739,85 +731,6 @@ final class DiffusionCommitController extends DiffusionController {
     return $comment_view;
   }
 
-  /**
-   * Return a map of available audit actions for rendering into a <select />.
-   * This shows the user valid actions, and does not show nonsense/invalid
-   * actions (like closing an already-closed commit, or resigning from a commit
-   * you have no association with).
-   */
-  private function getAuditActions(
-    PhabricatorRepositoryCommit $commit,
-    array $audit_requests) {
-    assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
-    $viewer = $this->getViewer();
-
-    $user_is_author = ($commit->getAuthorPHID() == $viewer->getPHID());
-
-    $user_request = null;
-    foreach ($audit_requests as $audit_request) {
-      if ($audit_request->getAuditorPHID() == $viewer->getPHID()) {
-        $user_request = $audit_request;
-        break;
-      }
-    }
-
-    $actions = array();
-    $actions[PhabricatorAuditActionConstants::COMMENT] = true;
-
-    // We allow you to accept your own commits. A use case here is that you
-    // notice an issue with your own commit and "Raise Concern" as an indicator
-    // to other auditors that you're on top of the issue, then later resolve it
-    // and "Accept". You can not accept on behalf of projects or packages,
-    // however.
-    $actions[PhabricatorAuditActionConstants::ACCEPT]  = true;
-    $actions[PhabricatorAuditActionConstants::CONCERN] = true;
-
-    // To resign, a user must have authority on some request and not be the
-    // commit's author.
-    if (!$user_is_author) {
-      $may_resign = false;
-
-      $authority_map = array_fill_keys($this->auditAuthorityPHIDs, true);
-      foreach ($audit_requests as $request) {
-        if (empty($authority_map[$request->getAuditorPHID()])) {
-          continue;
-        }
-        $may_resign = true;
-        break;
-      }
-
-      // If the user has already resigned, don't show "Resign...".
-      $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
-      if ($user_request) {
-        if ($user_request->getAuditStatus() == $status_resigned) {
-          $may_resign = false;
-        }
-      }
-
-      if ($may_resign) {
-        $actions[PhabricatorAuditActionConstants::RESIGN] = true;
-      }
-    }
-
-    $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
-    $concern_raised = ($commit->getAuditStatus() == $status_concern);
-    $can_close_option = PhabricatorEnv::getEnvConfig(
-      'audit.can-author-close-audit');
-    if ($can_close_option && $user_is_author && $concern_raised) {
-      $actions[PhabricatorAuditActionConstants::CLOSE] = true;
-    }
-
-    $actions[PhabricatorAuditActionConstants::ADD_AUDITORS] = true;
-    $actions[PhabricatorAuditActionConstants::ADD_CCS] = true;
-
-    foreach ($actions as $constant => $ignored) {
-      $actions[$constant] =
-        PhabricatorAuditActionConstants::getActionName($constant);
-    }
-
-    return $actions;
-  }
-
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
     $viewer = $this->getViewer();
     $drequest = $this->getDiffusionRequest();
@@ -927,11 +840,11 @@ final class DiffusionCommitController extends DiffusionController {
     return $file->getRedirectResponse();
   }
 
-  private function renderAuditStatusView(array $audit_requests) {
+  private function renderAuditStatusView(
+    PhabricatorRepositoryCommit $commit,
+    array $audit_requests) {
     assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
     $viewer = $this->getViewer();
-
-    $authority_map = array_fill_keys($this->auditAuthorityPHIDs, true);
 
     $view = new PHUIStatusListView();
     foreach ($audit_requests as $request) {
@@ -952,7 +865,7 @@ final class DiffusionCommitController extends DiffusionController {
       $target = $viewer->renderHandle($auditor_phid);
       $item->setTarget($target);
 
-      if (isset($authority_map[$auditor_phid])) {
+      if ($commit->hasAuditAuthority($viewer, $request)) {
         $item->setHighlighted(true);
       }
 

@@ -497,10 +497,34 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    // If you're reordering global items, you need to be able to edit the
+    // object the menu appears on. If you're reordering custom items, you only
+    // need to be able to edit the custom object. Currently, the custom object
+    // is always the viewing user's own user object.
+    $custom_phid = $this->getCustomPHID();
+    if (!$custom_phid) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    } else {
+      $policy_object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($custom_phid))
+        ->executeOne();
+
+      if (!$policy_object) {
+        throw new Exception(
+          pht(
+            'Failed to load custom PHID "%s"!',
+            $custom_phid));
+      }
+
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $policy_object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
 
     $controller = $this->getController();
     $request = $controller->getRequest();

@@ -8,10 +8,12 @@ final class PhabricatorPasteSnippet extends Phobject {
 
   private $content;
   private $type;
+  private $contentLineCount;
 
-  public function __construct($content, $type) {
+  public function __construct($content, $type, $content_line_count) {
     $this->content = $content;
     $this->type = $type;
+    $this->contentLineCount = $content_line_count;
   }
 
   public function getContent() {
@@ -20,5 +22,9 @@ final class PhabricatorPasteSnippet extends Phobject {
 
   public function getType() {
     return $this->type;
+  }
+
+  public function getContentLineCount() {
+    return $this->contentLineCount;
   }
 }

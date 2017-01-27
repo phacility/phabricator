@@ -204,7 +204,14 @@ JX.install('WorkboardBoard', {
 
       if (!this._templates[phid]) {
         for (var add_phid in response.columnMaps) {
-          this.getColumn(add_phid).newCard(phid);
+          var target_column = this.getColumn(add_phid);
+
+          if (!target_column) {
+            // If the column isn't visible, don't try to add a card to it.
+            continue;
+          }
+
+          target_column.newCard(phid);
         }
       }
 

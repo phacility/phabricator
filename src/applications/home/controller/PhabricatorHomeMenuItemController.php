@@ -7,8 +7,10 @@ final class PhabricatorHomeMenuItemController
     $viewer = $this->getViewer();
     $type = $request->getURIData('type');
     $custom_phid = null;
+    $menu = PhabricatorProfileMenuEngine::MENU_GLOBAL;
     if ($type == 'personal') {
       $custom_phid = $viewer->getPHID();
+      $menu = PhabricatorProfileMenuEngine::MENU_PERSONAL;
     }
 
     $application = 'PhabricatorHomeApplication';
@@ -21,7 +23,9 @@ final class PhabricatorHomeMenuItemController
     $engine = id(new PhabricatorHomeProfileMenuEngine())
       ->setProfileObject($home_app)
       ->setCustomPHID($custom_phid)
-      ->setController($this);
+      ->setMenuType($menu)
+      ->setController($this)
+      ->setShowNavigation(false);
 
     return $engine->buildResponse();
   }
