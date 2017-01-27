@@ -742,6 +742,24 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setType('string')
         ->setDescription(pht('Primary slug/hashtag.')),
       id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('milestone')
+        ->setType('int?')
+        ->setDescription(pht('For milestones, milestone sequence number.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('parent')
+        ->setType('map<string, wild>?')
+        ->setDescription(
+          pht(
+            'For subprojects and milestones, a brief description of the '.
+            'parent project.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('depth')
+        ->setType('int')
+        ->setDescription(
+          pht(
+            'For subprojects and milestones, depth of this project in the '.
+            'tree. Root projects have depth 0.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
         ->setKey('icon')
         ->setType('map<string, wild>')
         ->setDescription(pht('Information about the project icon.')),
@@ -756,9 +774,25 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $color_key = $this->getColor();
     $color_name = PhabricatorProjectIconSet::getColorName($color_key);
 
+    if ($this->isMilestone()) {
+      $milestone = (int)$this->getMilestoneNumber();
+    } else {
+      $milestone = null;
+    }
+
+    $parent = $this->getParentProject();
+    if ($parent) {
+      $parent_ref = $parent->getRefForConduit();
+    } else {
+      $parent_ref = null;
+    }
+
     return array(
       'name' => $this->getName(),
       'slug' => $this->getPrimarySlug(),
+      'milestone' => $milestone,
+      'depth' => (int)$this->getProjectDepth(),
+      'parent' => $parent_ref,
       'icon' => array(
         'key' => $this->getDisplayIconKey(),
         'name' => $this->getDisplayIconName(),
@@ -777,6 +811,20 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         ->setAttachmentKey('members'),
       id(new PhabricatorProjectsWatchersSearchEngineAttachment())
         ->setAttachmentKey('watchers'),
+      id(new PhabricatorProjectsAncestorsSearchEngineAttachment())
+        ->setAttachmentKey('ancestors'),
+    );
+  }
+
+  /**
+   * Get an abbreviated representation of this project for use in providing
+   * "parent" and "ancestor" information.
+   */
+  public function getRefForConduit() {
+    return array(
+      'id' => (int)$this->getID(),
+      'phid' => $this->getPHID(),
+      'name' => $this->getName(),
     );
   }
 

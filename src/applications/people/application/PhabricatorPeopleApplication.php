@@ -92,44 +92,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     );
   }
 
-  public function loadStatus(PhabricatorUser $user) {
-    if (!$user->getIsAdmin()) {
-      return array();
-    }
-    $limit = self::MAX_STATUS_ITEMS;
-
-    $need_approval = id(new PhabricatorPeopleQuery())
-      ->setViewer($user)
-      ->withIsApproved(false)
-      ->withIsDisabled(false)
-      ->setLimit($limit)
-      ->execute();
-    if (!$need_approval) {
-      return array();
-    }
-
-    $status = array();
-
-    $count = count($need_approval);
-    if ($count >= $limit) {
-      $count_str = pht(
-        '%s+ User(s) Need Approval',
-        new PhutilNumber($limit - 1));
-    } else {
-      $count_str = pht(
-        '%s User(s) Need Approval',
-        new PhutilNumber($count));
-    }
-
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText($count_str)
-      ->setCount($count);
-
-    return $status;
-  }
-
   public function getApplicationSearchDocumentTypes() {
     return array(
       PhabricatorPeopleUserPHIDType::TYPECONST,

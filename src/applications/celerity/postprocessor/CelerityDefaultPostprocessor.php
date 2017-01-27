@@ -20,16 +20,16 @@ final class CelerityDefaultPostprocessor
   public function buildVariables() {
     return array(
       // Fonts
-      'basefont' => "13px 'Segoe UI', 'Segoe UI Web Regular', ".
-        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', Helvetica, ".
-        "Arial, sans-serif",
+      'basefont' => "13px 'Segoe UI', 'Segoe UI Emoji', ".
+        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', ".
+        "Helvetica, Arial, sans-serif",
 
-      'fontfamily' => "'Segoe UI', 'Segoe UI Web Regular', ".
-        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', Helvetica, ".
-        "Arial, sans-serif",
+      'fontfamily' => "'Segoe UI', 'Segoe UI Emoji', ".
+        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', ".
+        "Helvetica, Arial, sans-serif",
 
       // Drop Shadow
-      'dropshadow' => '0 1px 6px rgba(0, 0, 0, .25)',
+      'dropshadow' => '0 2px 12px rgba(0, 0, 0, .20)',
       'whitetextshadow' => '0 1px 0 rgba(255, 255, 255, 1)',
 
       // Anchors
@@ -191,6 +191,14 @@ final class CelerityDefaultPostprocessor
       'sh-disabledicon'         => '#bababa',
       'sh-disabledtext'         => '#a6a6a6',
       'sh-disabledbackground'   => '#f3f3f3',
+
+      // Diffs
+      'new-background' => '#eaffea',
+      'new-bright' => '#a6f3a6',
+      'old-background' => '#ffecec',
+      'old-bright' => '#f8cbcb',
+      'move-background' => '#fdf5d4',
+      'copy-background' => '#f1c40f',
 
       // Background color for "most" themes.
       'page.background' => '#f8f8fb',

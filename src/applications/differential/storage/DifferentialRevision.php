@@ -15,7 +15,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
     PhabricatorFulltextInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorDraftInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -488,12 +489,12 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
-  public function getDrafts(PhabricatorUser $viewer) {
-    return $this->assertAttachedKey($this->drafts, $viewer->getPHID());
+  public function getHasDraft(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->drafts, $viewer->getCacheFragment());
   }
 
-  public function attachDrafts(PhabricatorUser $viewer, array $drafts) {
-    $this->drafts[$viewer->getPHID()] = $drafts;
+  public function attachHasDraft(PhabricatorUser $viewer, $has_draft) {
+    $this->drafts[$viewer->getCacheFragment()] = $has_draft;
     return $this;
   }
 
@@ -733,6 +734,14 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorDraftInterface  )------------------------------------------ */
+
+
+  public function newDraftEngine() {
+    return new DifferentialRevisionDraftEngine();
   }
 
 }

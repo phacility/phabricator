@@ -874,6 +874,19 @@ final class PhabricatorPolicyFilter extends Phobject {
     $viewer = $this->viewer;
 
     foreach ($objects as $key => $object) {
+      // Don't filter handles: users are allowed to see handles from an
+      // application they can't see even if they can not see objects from
+      // that application. Note that the application policies still apply to
+      // the underlying object, so these will be "Restricted Object" handles.
+
+      // If we don't let these through, PhabricatorHandleQuery will completely
+      // fail to load results for PHIDs that are part of applications which
+      // the viewer can not see, but a fundamental property of handles is that
+      // we always load something and they can safely be assumed to load.
+      if ($object instanceof PhabricatorObjectHandle) {
+        continue;
+      }
+
       $phid = $object->getPHID();
       if (!$phid) {
         continue;
@@ -904,15 +917,27 @@ final class PhabricatorPolicyFilter extends Phobject {
   }
 
   private function getApplicationForPHID($phid) {
-    $phid_type = phid_get_type($phid);
+    static $class_map = array();
 
-    $type_objects = PhabricatorPHIDType::getTypes(array($phid_type));
-    $type_object = idx($type_objects, $phid_type);
-    if (!$type_object) {
+    $phid_type = phid_get_type($phid);
+    if (!isset($class_map[$phid_type])) {
+      $type_objects = PhabricatorPHIDType::getTypes(array($phid_type));
+      $type_object = idx($type_objects, $phid_type);
+      if (!$type_object) {
+        $class = false;
+      } else {
+        $class = $type_object->getPHIDTypeApplicationClass();
+      }
+
+      $class_map[$phid_type] = $class;
+    }
+
+    $class = $class_map[$phid_type];
+    if ($class === false) {
       return null;
     }
 
-    return $type_object->getPHIDTypeApplicationClass();
+    return $class;
   }
 
 }

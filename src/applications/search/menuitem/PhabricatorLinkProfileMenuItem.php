@@ -5,6 +5,9 @@ final class PhabricatorLinkProfileMenuItem
 
   const MENUITEMKEY = 'link';
 
+  const FIELD_URI = 'uri';
+  const FIELD_NAME = 'name';
+
   public function getMenuItemTypeIcon() {
     return 'fa-link';
   }
@@ -26,12 +29,12 @@ final class PhabricatorLinkProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
     return array(
       id(new PhabricatorTextEditField())
-        ->setKey('name')
+        ->setKey(self::FIELD_NAME)
         ->setLabel(pht('Name'))
         ->setIsRequired(true)
         ->setValue($this->getLinkName($config)),
       id(new PhabricatorTextEditField())
-        ->setKey('uri')
+        ->setKey(self::FIELD_URI)
         ->setLabel(pht('URI'))
         ->setIsRequired(true)
         ->setValue($this->getLinkURI($config)),
@@ -91,4 +94,53 @@ final class PhabricatorLinkProfileMenuItem
     );
   }
 
+  public function validateTransactions(
+    PhabricatorProfileMenuItemConfiguration $config,
+    $field_key,
+    $value,
+    array $xactions) {
+
+    $viewer = $this->getViewer();
+    $errors = array();
+
+    if ($field_key == self::FIELD_NAME) {
+      if ($this->isEmptyTransaction($value, $xactions)) {
+       $errors[] = $this->newRequiredError(
+         pht('You must choose a link name.'),
+         $field_key);
+      }
+    }
+
+    if ($field_key == self::FIELD_URI) {
+      if ($this->isEmptyTransaction($value, $xactions)) {
+       $errors[] = $this->newRequiredError(
+         pht('You must choose a URI to link to.'),
+         $field_key);
+      }
+
+      foreach ($xactions as $xaction) {
+        $new = $xaction['new'];
+
+        if (!$new) {
+          continue;
+        }
+
+        if ($new === $value) {
+          continue;
+        }
+
+        if (!$this->isValidLinkURI($new)) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'URI "%s" is not a valid link URI. It should be a full, valid '.
+              'URI beginning with a protocol like "%s".',
+              $new,
+              'https://'),
+            $xaction['xaction']);
+        }
+      }
+    }
+
+    return $errors;
+  }
 }

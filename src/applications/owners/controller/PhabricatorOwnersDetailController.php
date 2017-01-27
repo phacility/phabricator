@@ -65,19 +65,23 @@ final class PhabricatorOwnersDetailController
 
     $commit_views = array();
 
-    $commit_uri = id(new PhutilURI('/audit/'))
+    $commit_uri = id(new PhutilURI('/diffusion/commit/'))
       ->setQueryParams(
         array(
           'auditorPHIDs' => $package->getPHID(),
         ));
 
-    $status_concern = DiffusionCommitQuery::AUDIT_STATUS_CONCERN;
+    $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
 
     $attention_commits = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())
       ->withAuditorPHIDs(array($package->getPHID()))
-      ->withAuditStatus($status_concern)
+      ->withStatuses(
+        array(
+          $status_concern,
+        ))
       ->needCommitData(true)
+      ->needAuditRequests(true)
       ->setLimit(10)
       ->execute();
     $view = id(new PhabricatorAuditListView())
@@ -100,7 +104,8 @@ final class PhabricatorOwnersDetailController
       ->setViewer($request->getUser())
       ->withAuditorPHIDs(array($package->getPHID()))
       ->needCommitData(true)
-      ->setLimit(100)
+      ->needAuditRequests(true)
+      ->setLimit(25)
       ->execute();
 
     $view = id(new PhabricatorAuditListView())
@@ -119,13 +124,6 @@ final class PhabricatorOwnersDetailController
         ->setText(pht('View All')),
     );
 
-    $phids = array();
-    foreach ($commit_views as $commit_view) {
-      $phids[] = $commit_view['view']->getRequiredHandlePHIDs();
-    }
-    $phids = array_mergev($phids);
-    $handles = $this->loadViewerHandles($phids);
-
     $commit_panels = array();
     foreach ($commit_views as $commit_view) {
       $commit_panel = id(new PHUIObjectBoxView())
@@ -136,7 +134,6 @@ final class PhabricatorOwnersDetailController
       if (isset($commit_view['button'])) {
         $commit_header->addActionLink($commit_view['button']);
       }
-      $commit_view['view']->setHandles($handles);
       $commit_panel->setHeader($commit_header);
       $commit_panel->appendChild($commit_view['view']);
 

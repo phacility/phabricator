@@ -10,7 +10,7 @@ final class PhabricatorPeopleProfileMenuEngine
     return false;
   }
 
-  protected function getItemURI($path) {
+  public function getItemURI($path) {
     $user = $this->getProfileObject();
     $username = $user->getUsername();
     $username = phutil_escape_uri($username);
@@ -63,7 +63,7 @@ final class PhabricatorPeopleProfileMenuEngine
       $viewer);
     if ($have_diffusion) {
       $uri = urisprintf(
-        '/audit/?authors=%s#R',
+        '/diffusion/commit/?authors=%s#R',
         $object->getPHID());
 
       $items[] = $this->newItem()

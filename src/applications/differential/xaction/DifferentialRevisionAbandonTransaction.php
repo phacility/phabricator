@@ -26,6 +26,10 @@ final class DifferentialRevisionAbandonTransaction
     return 500;
   }
 
+  public function getActionName() {
+    return pht('Abandoned');
+  }
+
   public function getCommandKeyword() {
     return 'abandon';
   }

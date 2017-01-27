@@ -92,7 +92,7 @@ final class DifferentialRevisionListView extends AphrontView {
           '');
       }
 
-      if ($revision->getDrafts($viewer)) {
+      if ($revision->getHasDraft($viewer)) {
         $icons['draft'] = true;
       }
 

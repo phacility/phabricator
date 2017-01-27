@@ -11,9 +11,10 @@ abstract class ConduitAPIMethod
 
   private $viewer;
 
-  const METHOD_STATUS_STABLE      = 'stable';
-  const METHOD_STATUS_UNSTABLE    = 'unstable';
-  const METHOD_STATUS_DEPRECATED  = 'deprecated';
+  const METHOD_STATUS_STABLE = 'stable';
+  const METHOD_STATUS_UNSTABLE = 'unstable';
+  const METHOD_STATUS_DEPRECATED = 'deprecated';
+  const METHOD_STATUS_FROZEN = 'frozen';
 
   const SCOPE_NEVER = 'scope.never';
   const SCOPE_ALWAYS = 'scope.always';

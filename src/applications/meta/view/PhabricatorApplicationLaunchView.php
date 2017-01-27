@@ -3,15 +3,9 @@
 final class PhabricatorApplicationLaunchView extends AphrontTagView {
 
   private $application;
-  private $status;
 
   public function setApplication(PhabricatorApplication $application) {
     $this->application = $application;
-    return $this;
-  }
-
-  public function setApplicationStatus(array $status) {
-    $this->status = $status;
     return $this;
   }
 
@@ -49,65 +43,9 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
         ),
         $application->getShortDescription());
 
-      $counts = array();
-      $text = array();
-      if ($this->status) {
-        foreach ($this->status as $status) {
-          $type = $status->getType();
-          $counts[$type] = idx($counts, $type, 0) + $status->getCount();
-          if ($status->getCount()) {
-            $text[] = $status->getText();
-          }
-        }
-      }
-
-      $attention = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-      $warning = PhabricatorApplicationStatusView::TYPE_WARNING;
-      if (!empty($counts[$attention]) || !empty($counts[$warning])) {
-        $count = idx($counts, $attention, 0);
-        $count1 = $count2 = '';
-        if ($count > 0) {
-          $count1 = phutil_tag(
-          'span',
-          array(
-            'class' => 'phabricator-application-attention-count',
-          ),
-          $this->formatStatusItemCount($count));
-        }
-
-
-        if (!empty($counts[$warning])) {
-          $count2 = phutil_tag(
-          'span',
-          array(
-            'class' => 'phabricator-application-warning-count',
-          ),
-          $this->formatStatusItemCount($counts[$warning]));
-        }
-
-        if (nonempty($count1) && nonempty($count2)) {
-          $numbers = array($count1, ' / ', $count2);
-        } else {
-          $numbers = array($count1, $count2);
-        }
-
-        Javelin::initBehavior('phabricator-tooltips');
-        $content[] = javelin_tag(
-          'span',
-          array(
-            'sigil' => 'has-tooltip',
-            'meta' => array(
-              'tip' => implode("\n", $text),
-              'size' => 300,
-              'align' => 'E',
-            ),
-            'class' => 'phabricator-application-launch-attention',
-          ),
-          $numbers);
-      }
-
       $classes = array();
       $classes[] = 'phabricator-application-launch-icon';
+
       $styles = array();
       $classes[] = $application->getIcon();
       $classes[] = 'phui-icon-view';
@@ -126,15 +64,6 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
       $icon,
       $content,
     );
-  }
-
-  private function formatStatusItemCount($count) {
-    $limit = PhabricatorApplication::MAX_STATUS_ITEMS;
-    if ($count >= $limit) {
-      return pht('%s+', new PhutilNumber($limit - 1));
-    } else {
-      return pht('%s', new PhutilNumber($count));
-    }
   }
 
 }

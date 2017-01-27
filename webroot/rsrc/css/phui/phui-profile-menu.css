@@ -2,7 +2,7 @@
  * @provides phui-profile-menu-css
  */
 
-.device-desktop .phui-profile-menu-collapsed .phabricator-nav-local {
+.device-desktop .phui-profile-menu .phabricator-nav-local {
   width: {$menu.profile.width.collapsed};
   max-width: {$menu.profile.width.collapsed};
 }
@@ -58,8 +58,7 @@
   background-size: 100%;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-list-item-href {
+.phui-profile-menu .phabricator-side-menu .phui-list-item-href {
   text-align: center;
   padding: 42px 4px 14px;
   line-height: 14px;
@@ -67,19 +66,17 @@
   font-size: {$smallerfontsize};
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-list-item-name {
+.phui-profile-menu .phabricator-side-menu .phui-list-item-name {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-list-item-icon,
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-list-item-href .phui-list-item-icon  {
-  top: 14px;
-  left: 32px;
+.phui-profile-menu .phabricator-side-menu .phui-list-item-icon,
+.phui-profile-menu .phabricator-side-menu .phui-list-item-href
+  .phui-list-item-icon  {
+    top: 14px;
+    left: 32px;
 }
 
 .phui-profile-menu .phabricator-side-menu
@@ -131,13 +128,11 @@
   padding: 16px;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-error {
+.phui-profile-menu .phabricator-side-menu .phui-profile-menu-error {
   padding: 16px 8px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 .phui-profile-menu .phabricator-side-menu .phui-list-item-disabled
   .phui-list-item-href,
@@ -153,148 +148,13 @@
   padding: 8px 12px 16px;
 }
 
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-segment-bar {
+.phui-profile-menu .phabricator-side-menu .phui-profile-segment-bar {
     padding: 8px 8px 16px;
 }
-
 
 .phui-profile-menu .phabricator-side-menu .phui-profile-menu-spacer {
   box-sizing: border-box;
   height: {$menu.profile.item.height};
-}
-
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-footer
-  .phui-list-item-name {
-  display: none;
-}
-
-.phui-profile-menu .phui-profile-menu-expanded
-  .phui-profile-menu-visible-when-collapsed,
-.phui-profile-menu .phui-profile-menu-collapsed
-  .phui-profile-menu-visible-when-expanded {
-  display: none;
-}
-
-
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-footer .phui-list-item-href {
-  padding: 20px 0 24px;
-}
-
-.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer
-  .phui-list-item-href:hover {
-    background: transparent;
-}
-
-.phui-profile-menu .phui-profile-menu-collapsed .phabricator-side-menu
-  .phui-profile-menu-footer .phui-list-item-href .phui-list-item-icon {
-    top: 8px;
-}
-
-.phui-profile-menu .phui-profile-menu-footer .phui-icon-circle {
-  border-color: {$darkbluetext};
-}
-
-.phui-profile-menu .phui-profile-menu-footer .phui-icon-circle .phui-icon-view {
-  color: {$darkbluetext};
-}
-
-.phui-profile-menu .phui-profile-menu-footer
-  .phui-icon-circle.phui-list-item-icon {
-  font-size: 12px;
-}
-
-.phui-profile-menu .phabricator-side-menu .phui-profile-menu-footer-1 {
-  bottom: 0;
-  position: fixed;
-}
-
-.phui-profile-menu .phui-profile-menu-footer-1 {
-  width: {$menu.profile.width};
-}
-
-.phui-profile-menu .phui-profile-menu-collapsed .phui-profile-menu-footer-1 {
-  width: {$menu.profile.width.collapsed};
-}
-
-.phui-profile-menu .phabricator-side-menu
-  .phui-list-item-selected.phui-profile-menu-footer .phui-list-item-href {
-  background: transparent;
-}
-
-.phui-profile-menu .phui-profile-menu-collapsing
-  .phabricator-nav-local {
-  animation: profile-menu-collapse 0.2s;
-}
-
-.phui-profile-menu .phui-profile-menu-expanding
-  .phabricator-nav-local {
-  animation: profile-menu-expand 0.2s;
-}
-
-.phui-profile-menu .phui-profile-menu-collapsing
-  .phabricator-side-menu .phui-list-item-href {
-  animation: profile-menu-blink 0.2s;
-}
-
-.phui-profile-menu .phui-profile-menu-expanding
-  .phabricator-side-menu .phui-list-item-href {
-  animation: profile-menu-blink 0.2s;
-}
-
-@keyframes profile-menu-blink {
-  0% {
-    opacity: 1.0;
-  }
-  25% {
-    opacity: 0.0;
-  }
-  75% {
-    opacity: 0.0;
-  }
-  100% {
-    opacity: 1.0;
-  }
-}
-
-@keyframes profile-menu-collapse {
-  0% {
-    width: {$menu.profile.width};
-    max-width: {$menu.profile.width};
-  }
-  33% {
-    width: {$menu.profile.width};
-    max-width: {$menu.profile.width};
-  }
-  66% {
-    width: {$menu.profile.width.collapsed};
-    max-width: {$menu.profile.width.collapsed};
-  }
-  100% {
-    width: {$menu.profile.width.collapsed};
-    max-width: {$menu.profile.width.collapsed};
-  }
-}
-
-@keyframes profile-menu-expand {
-  0% {
-    width: {$menu.profile.width.collapsed};
-    max-width: {$menu.profile.width.collapsed};
-  }
-  33% {
-    width: {$menu.profile.width.collapsed};
-    max-width: {$menu.profile.width.collapsed};
-  }
-  66% {
-    width: {$menu.profile.width};
-    max-width: {$menu.profile.width};
-  }
-  100% {
-    width: {$menu.profile.width};
-    max-width: {$menu.profile.width};
-  }
 }
 
 !print .phui-profile-menu .phabricator-side-menu {

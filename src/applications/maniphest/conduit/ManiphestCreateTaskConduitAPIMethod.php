@@ -11,6 +11,16 @@ final class ManiphestCreateTaskConduitAPIMethod
     return pht('Create a new Maniphest task.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "maniphest.edit" instead.');
+  }
+
   protected function defineParamTypes() {
     return $this->getTaskFields($is_new = true);
   }

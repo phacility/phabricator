@@ -61,6 +61,7 @@ final class PhabricatorRepositoryManagementClusterizeWorkflow
           array(
             AlmanacClusterRepositoryServiceType::SERVICETYPE,
           ))
+        ->needBindings(true)
         ->executeOne();
       if (!$service) {
         throw new PhutilArgumentUsageException(
@@ -70,9 +71,41 @@ final class PhabricatorRepositoryManagementClusterizeWorkflow
       }
     }
 
-
     if ($service) {
       $service_phid = $service->getPHID();
+
+      $bindings = $service->getActiveBindings();
+
+      $unique_devices = array();
+      foreach ($bindings as $binding) {
+        $unique_devices[$binding->getDevicePHID()] = $binding->getDevice();
+      }
+
+      if (count($unique_devices) > 1) {
+        $device_names = mpull($unique_devices, 'getName');
+
+        echo id(new PhutilConsoleBlock())
+          ->addParagraph(
+            pht(
+              'Service "%s" is actively bound to more than one device (%s).',
+              $service_name,
+              implode(', ', $device_names)))
+          ->addParagraph(
+            pht(
+              'If you clusterize a repository onto this service it may be '.
+              'unclear which devices have up-to-date copies of the '.
+              'repository. If so, leader/follower ambiguity will freeze the '.
+              'repository. You may need to manually promote a device to '.
+              'unfreeze it. See "Ambiguous Leaders" in the documentation '.
+              'for discussion.'))
+          ->drawConsoleString();
+
+        $prompt = pht('Continue anyway?');
+        if (!phutil_console_confirm($prompt)) {
+          throw new PhutilArgumentUsageException(
+            pht('User aborted the workflow.'));
+        }
+      }
     } else {
       $service_phid = null;
     }

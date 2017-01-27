@@ -80,7 +80,7 @@ a.button.phui-document-toc {
 
 .phui-document-view-pro .phui-document-toc-list {
   margin: 8px;
-  border: 1px solid {$blueborder};
+  border: 1px solid {$lightgreyborder};
   border-radius: 3px;
   box-shadow: {$dropshadow};
   width: 200px;

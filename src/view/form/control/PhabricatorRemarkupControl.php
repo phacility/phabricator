@@ -55,6 +55,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     $root_id = celerity_generate_unique_node_id();
 
     $user_datasource = new PhabricatorPeopleDatasource();
+    $emoji_datasource = new PhabricatorEmojiDatasource();
     $proj_datasource = id(new PhabricatorProjectDatasource())
       ->setParameters(
         array(
@@ -90,6 +91,12 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
             'headerIcon' => 'fa-briefcase',
             'headerText' => pht('Find Project:'),
             'hintText' => $proj_datasource->getPlaceholderText(),
+          ),
+          58 => array( // ":"
+            'datasourceURI' => $emoji_datasource->getDatasourceURI(),
+            'headerIcon' => 'fa-smile-o',
+            'headerText' => pht('Find Emoji:'),
+            'hintText' => $emoji_datasource->getPlaceholderText(),
           ),
         ),
       ));

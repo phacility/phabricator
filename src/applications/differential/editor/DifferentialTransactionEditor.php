@@ -18,6 +18,14 @@ final class DifferentialTransactionEditor
     return pht('Differential Revisions');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this revision.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
   public function getDiffUpdateTransaction(array $xactions) {
     $type_update = DifferentialTransaction::TYPE_UPDATE;
 

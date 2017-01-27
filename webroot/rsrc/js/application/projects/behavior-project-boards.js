@@ -34,13 +34,6 @@ JX.behavior('project-boards', function(config, statics) {
       data.menu = new JX.PHUIXDropdownMenu(button);
       data.menu.setContent(list);
       data.menu.open();
-
-      JX.DOM.listen(list, 'click', 'tag:a', function(e) {
-        if (!e.isNormalClick()) {
-          return;
-        }
-        data.menu.close();
-      });
     });
 
     JX.Stratcom.listen(

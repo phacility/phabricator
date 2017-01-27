@@ -6,6 +6,8 @@ final class PhabricatorProfileMenuItemConfigurationQuery
   private $ids;
   private $phids;
   private $profilePHIDs;
+  private $customPHIDs;
+  private $includeGlobal;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +21,12 @@ final class PhabricatorProfileMenuItemConfigurationQuery
 
   public function withProfilePHIDs(array $phids) {
     $this->profilePHIDs = $phids;
+    return $this;
+  }
+
+  public function withCustomPHIDs(array $phids, $include_global = false) {
+    $this->customPHIDs = $phids;
+    $this->includeGlobal = $include_global;
     return $this;
   }
 
@@ -54,6 +62,24 @@ final class PhabricatorProfileMenuItemConfigurationQuery
         $this->profilePHIDs);
     }
 
+    if ($this->customPHIDs !== null) {
+      if ($this->customPHIDs && $this->includeGlobal) {
+        $where[] = qsprintf(
+          $conn,
+          'customPHID IN (%Ls) OR customPHID IS NULL',
+          $this->customPHIDs);
+      } else if ($this->customPHIDs) {
+        $where[] = qsprintf(
+          $conn,
+          'customPHID IN (%Ls)',
+          $this->customPHIDs);
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'customPHID IS NULL');
+      }
+    }
+
     return $where;
   }
 
@@ -67,6 +93,7 @@ final class PhabricatorProfileMenuItemConfigurationQuery
         continue;
       }
       $item_type = clone $item_type;
+      $item_type->setViewer($this->getViewer());
       $item->attachMenuItem($item_type);
     }
 

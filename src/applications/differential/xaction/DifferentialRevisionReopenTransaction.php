@@ -26,6 +26,10 @@ final class DifferentialRevisionReopenTransaction
     return 400;
   }
 
+  public function getActionName() {
+    return pht('Reopened');
+  }
+
   public function generateOldValue($object) {
     return !$object->isClosed();
   }

@@ -10,6 +10,16 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
     return pht('Query users.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_FROZEN;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method is frozen and will eventually be deprecated. New code '.
+      'should use "user.search" instead.');
+  }
+
   protected function defineParamTypes() {
     return array(
       'usernames'    => 'optional list<string>',

@@ -26,6 +26,10 @@ final class DifferentialRevisionCloseTransaction
     return 300;
   }
 
+  public function getActionName() {
+    return pht('Closed');
+  }
+
   public function generateOldValue($object) {
     return $object->isClosed();
   }

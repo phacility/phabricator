@@ -42,18 +42,6 @@ JX.behavior('phui-dropdown-menu', function() {
     });
 
     data.menu.open();
-
-    JX.DOM.listen(list, 'click', 'tag:a', function(e) {
-      if (!e.isNormalClick()) {
-        return;
-      }
-
-      if (JX.Stratcom.pass()) {
-        return;
-      }
-
-      data.menu.close();
-    });
   });
 
 });

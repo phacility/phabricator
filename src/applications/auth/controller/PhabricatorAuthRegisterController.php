@@ -54,6 +54,8 @@ final class PhabricatorAuthRegisterController
       }
     }
 
+    $errors = array();
+
     $user = new PhabricatorUser();
 
     $default_username = $account->getUsername();
@@ -65,23 +67,37 @@ final class PhabricatorAuthRegisterController
       $default_email = $invite->getEmailAddress();
     }
 
-    if (!PhabricatorUserEmail::isValidAddress($default_email)) {
-      $default_email = null;
+    if ($default_email !== null) {
+      if (!PhabricatorUserEmail::isValidAddress($default_email)) {
+        $errors[] = pht(
+          'The email address associated with this external account ("%s") is '.
+          'not a valid email address and can not be used to register a '.
+          'Phabricator account. Choose a different, valid address.',
+          phutil_tag('strong', array(), $default_email));
+        $default_email = null;
+      }
     }
 
     if ($default_email !== null) {
       // We should bypass policy here becase e.g. limiting an application use
       // to a subset of users should not allow the others to overwrite
-      // configured application emails
+      // configured application emails.
       $application_email = id(new PhabricatorMetaMTAApplicationEmailQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withAddresses(array($default_email))
         ->executeOne();
       if ($application_email) {
+        $errors[] = pht(
+          'The email address associated with this account ("%s") is '.
+          'already in use by an application and can not be used to '.
+          'register a new Phabricator account. Choose a different, valid '.
+          'address.',
+          phutil_tag('strong', array(), $default_email));
         $default_email = null;
       }
     }
 
+    $show_existing = null;
     if ($default_email !== null) {
       // If the account source provided an email, but it's not allowed by
       // the configuration, roadblock the user. Previously, we let the user
@@ -105,9 +121,6 @@ final class PhabricatorAuthRegisterController
 
       // If the account source provided an email, but another account already
       // has that email, just pretend we didn't get an email.
-
-      // TODO: See T3472.
-
       if ($default_email !== null) {
         $same_email = id(new PhabricatorUserEmail())->loadOneWhere(
           'address = %s',
@@ -118,9 +131,54 @@ final class PhabricatorAuthRegisterController
             // invite means that the address is nonprimary and unverified and
             // we're OK to steal it.
           } else {
+            $show_existing = $default_email;
             $default_email = null;
           }
         }
+      }
+    }
+
+    if ($show_existing !== null) {
+      if (!$request->getInt('phase')) {
+        return $this->newDialog()
+          ->setTitle(pht('Email Address Already in Use'))
+          ->addHiddenInput('phase', 1)
+          ->appendParagraph(
+            pht(
+              'You are creating a new Phabricator account linked to an '.
+              'existing external account from outside Phabricator.'))
+          ->appendParagraph(
+            pht(
+              'The email address ("%s") associated with the external account '.
+              'is already in use by an existing Phabricator account. Multiple '.
+              'Phabricator accounts may not have the same email address, so '.
+              'you can not use this email address to register a new '.
+              'Phabricator account.',
+              phutil_tag('strong', array(), $show_existing)))
+          ->appendParagraph(
+            pht(
+              'If you want to register a new account, continue with this '.
+              'registration workflow and choose a new, unique email address '.
+              'for the new account.'))
+          ->appendParagraph(
+            pht(
+              'If you want to link an existing Phabricator account to this '.
+              'external account, do not continue. Instead: log in to your '.
+              'existing account, then go to "Settings" and link the account '.
+              'in the "External Accounts" panel.'))
+          ->appendParagraph(
+            pht(
+              'If you continue, you will create a new account. You will not '.
+              'be able to link this external account to an existing account.'))
+          ->addCancelButton('/auth/login/', pht('Cancel'))
+          ->addSubmitButton(pht('Create New Account'));
+      } else {
+        $errors[] = pht(
+          'The external account you are registering with has an email address '.
+          'that is already in use ("%s") by an existing Phabricator account. '.
+          'Choose a new, valid email address to register a new Phabricator '.
+          'account.',
+          phutil_tag('strong', array(), $show_existing));
       }
     }
 
@@ -167,8 +225,6 @@ final class PhabricatorAuthRegisterController
     $value_email = $default_email;
     $value_password = null;
 
-    $errors = array();
-
     $require_real_name = PhabricatorEnv::getEnvConfig('user.require-real-name');
 
     $e_username = strlen($value_username) ? null : true;
@@ -193,7 +249,14 @@ final class PhabricatorAuthRegisterController
       $e_username = null;
     }
 
-    if (($request->isFormPost() || !$can_edit_anything) && !$from_invite) {
+    $try_register =
+      ($request->isFormPost() || !$can_edit_anything) &&
+      !$from_invite &&
+      ($request->getInt('phase') != 1);
+
+    if ($try_register) {
+      $errors = array();
+
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
       if ($must_set_password && !$skip_captcha) {
@@ -402,7 +465,8 @@ final class PhabricatorAuthRegisterController
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($request->getUser());
+      ->setUser($request->getUser())
+      ->addHiddenInput('phase', 2);
 
     if (!$is_default) {
       $form->appendChild(

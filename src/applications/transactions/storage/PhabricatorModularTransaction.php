@@ -110,6 +110,24 @@ abstract class PhabricatorModularTransaction
     return parent::getTitle();
   }
 
+  /* final */ public function getActionName() {
+    $action = $this->getTransactionImplementation()->getActionName();
+    if ($action !== null) {
+      return $action;
+    }
+
+    return parent::getActionName();
+  }
+
+  /* final */ public function getActionStrength() {
+    $strength = $this->getTransactionImplementation()->getActionStrength();
+    if ($strength !== null) {
+      return $strength;
+    }
+
+    return parent::getActionStrength();
+  }
+
   public function getTitleForMail() {
     $old_target = $this->getRenderingTarget();
     $new_target = self::TARGET_TEXT;

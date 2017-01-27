@@ -37,10 +37,6 @@
       "name": "Arcanist Integration",
       "include": "(^src/applications/arcanist/)"
     },
-    "audit": {
-      "name": "Audit",
-      "include": "(^src/applications/audit/)"
-    },
     "auth": {
       "name": "Auth",
       "include": "(^src/applications/auth/)"

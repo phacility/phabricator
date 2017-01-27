@@ -77,6 +77,33 @@ abstract class PhabricatorEditEngine
     return true;
   }
 
+  public function isDefaultQuickCreateEngine() {
+    return false;
+  }
+
+  public function getDefaultQuickCreateFormKeys() {
+    $keys = array();
+
+    if ($this->isDefaultQuickCreateEngine()) {
+      $keys[] = self::EDITENGINECONFIG_DEFAULT;
+    }
+
+    foreach ($keys as $idx => $key) {
+      $keys[$idx] = $this->getEngineKey().'/'.$key;
+    }
+
+    return $keys;
+  }
+
+  public static function splitFullKey($full_key) {
+    return explode('/', $full_key, 2);
+  }
+
+  public function getQuickCreateOrderVector() {
+    return id(new PhutilSortVector())
+      ->addString($this->getObjectCreateShortText());
+  }
+
   /**
    * Force the engine to edit a particular object.
    */
@@ -276,14 +303,6 @@ abstract class PhabricatorEditEngine
    */
   protected function getCommentViewButtonText($object) {
     return $this->getCommentViewSeriousButtonText($object);
-  }
-
-
-  /**
-   * @task text
-   */
-  protected function getQuickCreateMenuHeaderText() {
-    return $this->getObjectCreateShortText();
   }
 
 
@@ -1742,10 +1761,19 @@ abstract class PhabricatorEditEngine
           $viewer->getPHID(),
           $current_version);
 
+        $is_empty = (!strlen($comment_text) && !$actions);
+
         $draft
           ->setProperty('comment', $comment_text)
           ->setProperty('actions', $actions)
           ->save();
+
+        $draft_engine = $this->newDraftEngine($object);
+        if ($draft_engine) {
+          $draft_engine
+            ->setVersionedDraft($draft)
+            ->synchronize();
+        }
       }
     }
 
@@ -1827,6 +1855,13 @@ abstract class PhabricatorEditEngine
         $object->getPHID(),
         $viewer->getPHID(),
         $this->loadDraftVersion($object));
+
+      $draft_engine = $this->newDraftEngine($object);
+      if ($draft_engine) {
+        $draft_engine
+          ->setVersionedDraft(null)
+          ->synchronize();
+      }
     }
 
     if ($request->isAjax() && $is_preview) {
@@ -1841,6 +1876,20 @@ abstract class PhabricatorEditEngine
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
     }
+  }
+
+  protected function newDraftEngine($object) {
+    $viewer = $this->getViewer();
+
+    if ($object instanceof PhabricatorDraftInterface) {
+      $engine = $object->newDraftEngine();
+    } else {
+      $engine = new PhabricatorBuiltinDraftEngine();
+    }
+
+    return $engine
+      ->setObject($object)
+      ->setViewer($viewer);
   }
 
 
@@ -2066,50 +2115,6 @@ abstract class PhabricatorEditEngine
     return $application->getIcon();
   }
 
-  public function hasQuickCreateActions() {
-    if (!$this->isEngineConfigurable()) {
-      return false;
-    }
-
-    return true;
-  }
-
-  public function newQuickCreateActions(array $configs) {
-    $items = array();
-
-    if (!$configs) {
-      return array();
-    }
-
-    // If the viewer is logged in and can't create objects, don't show the
-    // menu item. If they're logged out, we assume they could create objects
-    // if they logged in, so we show the item as a hint about how to
-    // accomplish the action.
-    if ($this->getViewer()->isLoggedIn()) {
-      if (!$this->hasCreateCapability()) {
-        return array();
-      }
-    }
-
-    if (count($configs) == 1) {
-      $config = head($configs);
-      $items[] = $this->newQuickCreateAction($config);
-    } else {
-      $group_name = $this->getQuickCreateMenuHeaderText();
-
-      $items[] = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL)
-        ->setName($group_name);
-
-      foreach ($configs as $config) {
-        $items[] = $this->newQuickCreateAction($config)
-          ->setIndented(true);
-      }
-    }
-
-    return $items;
-  }
-
   private function loadUsableConfigurationsForCreate() {
     $viewer = $this->getViewer();
 
@@ -2123,20 +2128,6 @@ abstract class PhabricatorEditEngine
     $configs = msort($configs, 'getCreateSortKey');
 
     return $configs;
-  }
-
-  private function newQuickCreateAction(
-    PhabricatorEditEngineConfiguration $config) {
-
-    $item_name = $config->getName();
-    $item_icon = $config->getIcon();
-    $form_key = $config->getIdentifier();
-    $item_uri = $this->getEditURI(null, "form/{$form_key}/");
-
-    return id(new PHUIListItemView())
-      ->setName($item_name)
-      ->setIcon($item_icon)
-      ->setHref($item_uri);
   }
 
   protected function getValidationExceptionShortMessage(

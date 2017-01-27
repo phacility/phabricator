@@ -26,6 +26,10 @@ final class DifferentialRevisionAcceptTransaction
     return 500;
   }
 
+  public function getActionName() {
+    return pht('Accepted');
+  }
+
   public function getCommandKeyword() {
     $accept_key = 'differential.enable-email-accept';
     $allow_email_accept = PhabricatorEnv::getEnvConfig($accept_key);
@@ -46,7 +50,7 @@ final class DifferentialRevisionAcceptTransaction
 
   public function generateOldValue($object) {
     $actor = $this->getActor();
-    return $this->isViewerAcceptingReviewer($object, $actor);
+    return $this->isViewerFullyAccepted($object, $actor);
   }
 
   public function applyExternalEffects($object, $value) {
@@ -75,7 +79,7 @@ final class DifferentialRevisionAcceptTransaction
       }
     }
 
-    if ($this->isViewerAcceptingReviewer($object, $viewer)) {
+    if ($this->isViewerFullyAccepted($object, $viewer)) {
       throw new Exception(
         pht(
           'You can not accept this revision because you have already '.

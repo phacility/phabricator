@@ -26,15 +26,26 @@ final class DifferentialQueryDiffsConduitAPIMethod
     $ids = $request->getValue('ids', array());
     $revision_ids = $request->getValue('revisionIDs', array());
 
-    $diffs = array();
-    if ($ids || $revision_ids) {
-      $diffs = id(new DifferentialDiffQuery())
-        ->setViewer($request->getUser())
-        ->withIDs($ids)
-        ->withRevisionIDs($revision_ids)
-        ->needChangesets(true)
-        ->execute();
+    if (!$ids && !$revision_ids) {
+      // This method just returns nothing if you pass no constraints because
+      // pagination hadn't been invented yet in 2008 when this method was
+      // written.
+      return array();
     }
+
+    $query = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->needChangesets(true);
+
+    if ($ids) {
+      $query->withIDs($ids);
+    }
+
+    if ($revision_ids) {
+      $query->withRevisionIDs($revision_ids);
+    }
+
+    $diffs = $query->execute();
 
     return mpull($diffs, 'getDiffDict', 'getID');
   }

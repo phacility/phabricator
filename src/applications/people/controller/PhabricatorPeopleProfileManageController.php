@@ -45,11 +45,6 @@ final class PhabricatorPeopleProfileManageController
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
-    $timeline = $this->buildTransactionTimeline(
-      $user,
-      new PhabricatorPeopleTransactionQuery());
-    $timeline->setShouldTerminate(true);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Manage'));
     $crumbs->setBorder(true);
@@ -57,11 +52,7 @@ final class PhabricatorPeopleProfileManageController
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setCurtain($curtain)
-      ->addPropertySection(pht('Details'), $properties)
-      ->setMainColumn(
-        array(
-          $timeline,
-        ));
+      ->addPropertySection(pht('Details'), $properties);
 
     return $this->newPage()
       ->setTitle(

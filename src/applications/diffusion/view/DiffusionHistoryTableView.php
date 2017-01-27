@@ -187,6 +187,19 @@ final class DiffusionHistoryTableView extends DiffusionView {
           'type' => $history->getFileType(),
         ));
 
+      $status = $commit->getAuditStatus();
+      $icon = PhabricatorAuditCommitStatusConstants::getStatusIcon($status);
+      $color = PhabricatorAuditCommitStatusConstants::getStatusColor($status);
+      $name = PhabricatorAuditCommitStatusConstants::getStatusName($status);
+
+      $audit_view = id(new PHUIIconView())
+        ->setIcon($icon, $color)
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $name,
+          ));
+
       $rows[] = array(
         $graph ? $graph[$ii++] : null,
         $browse,
@@ -194,6 +207,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
         $build,
+        $audit_view,
         ($commit ?
           self::linkRevision(idx($this->revisions, $commit->getPHID())) :
           null),
@@ -211,7 +225,8 @@ final class DiffusionHistoryTableView extends DiffusionView {
         pht('Commit'),
         null,
         null,
-        pht('Author/Committer'),
+        null,
+        pht('Author'),
         pht('Details'),
         pht('Committed'),
       ));
@@ -220,6 +235,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         'threads',
         'nudgeright',
         '',
+        'icon',
         'icon',
         '',
         '',
@@ -232,11 +248,13 @@ final class DiffusionHistoryTableView extends DiffusionView {
         true,
         true,
         $has_any_build,
+        true,
         $show_revisions,
       ));
     $view->setDeviceVisibility(
       array(
         $graph ? true : false,
+        true,
         true,
         true,
         true,

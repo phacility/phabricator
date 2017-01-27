@@ -202,7 +202,7 @@ final class PHUIListItemView extends AphrontTagView {
     }
 
     return array(
-      'class' => $classes,
+      'class' => implode(' ', $classes),
     );
   }
 

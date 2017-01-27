@@ -6,7 +6,7 @@ final class PhabricatorJumpNavHandler extends Phobject {
     $jump = trim($jump);
 
     $patterns = array(
-      '/^a$/i' => 'uri:/audit/',
+      '/^a$/i' => 'uri:/diffusion/commit/',
       '/^f$/i' => 'uri:/feed/',
       '/^d$/i' => 'uri:/differential/',
       '/^r$/i' => 'uri:/diffusion/',

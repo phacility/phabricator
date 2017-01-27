@@ -229,8 +229,15 @@ abstract class PhabricatorSettingsPanel extends Phobject {
 
     $user = $this->getUser();
     if ($user) {
-      $username = $user->getUsername();
-      return "/settings/user/{$username}/page/{$key}/{$path}";
+      if ($user->isLoggedIn()) {
+        $username = $user->getUsername();
+        return "/settings/user/{$username}/page/{$key}/{$path}";
+      } else {
+        // For logged-out users, we can't put their username in the URI. This
+        // page will prompt them to login, then redirect them to the correct
+        // location.
+        return "/settings/panel/{$key}/";
+      }
     } else {
       $builtin = $this->getPreferences()->getBuiltinKey();
       return "/settings/builtin/{$builtin}/page/{$key}/{$path}";
