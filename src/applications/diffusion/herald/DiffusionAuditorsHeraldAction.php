@@ -39,19 +39,12 @@ abstract class DiffusionAuditorsHeraldAction
 
     $phids = array_fuse(array_keys($targets));
 
-    // TODO: Convert this to be translatable, structured data eventually.
-    $reason_map = array();
-    foreach ($phids as $phid) {
-      $reason_map[$phid][] = pht('%s Triggered Audit', $rule->getMonogram());
-    }
-
     $xaction = $adapter->newTransaction()
-      ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
-      ->setNewValue($phids)
-      ->setMetadataValue(
-        'auditStatus',
-        PhabricatorAuditStatusConstants::AUDIT_REQUIRED)
-      ->setMetadataValue('auditReasonMap', $reason_map);
+      ->setTransactionType(DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE)
+      ->setNewValue(
+        array(
+          '+' => $phids,
+        ));
 
     $adapter->queueTransaction($xaction);
 
