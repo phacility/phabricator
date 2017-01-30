@@ -1588,6 +1588,26 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s added %s auditor(s): %s.' => array(
+        array(
+          '%s added an auditor: %3$s.',
+          '%s added auditors: %3$s.',
+        ),
+      ),
+
+      '%s removed %s auditor(s): %s.' => array(
+        array(
+          '%s removed an auditor: %3$s.',
+          '%s removed auditors: %3$s.',
+        ),
+      ),
+
+      '%s edited %s auditor(s), removed %s: %s; added %s: %s.' => array(
+        array(
+          '%s edited auditors, removed: %4$s; added: %6$s.',
+        ),
+      ),
+
     );
   }
 

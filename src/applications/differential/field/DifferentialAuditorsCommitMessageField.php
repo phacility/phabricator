@@ -15,6 +15,7 @@ final class DifferentialAuditorsCommitMessageField
       array(
         PhabricatorPeopleUserPHIDType::TYPECONST,
         PhabricatorProjectProjectPHIDType::TYPECONST,
+        PhabricatorOwnersPackagePHIDType::TYPECONST,
       ));
   }
 

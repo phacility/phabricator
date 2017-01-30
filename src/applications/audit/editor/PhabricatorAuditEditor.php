@@ -375,35 +375,26 @@ final class PhabricatorAuditEditor
   private function createAuditRequestTransactionFromCommitMessage(
     PhabricatorRepositoryCommit $commit) {
 
+    $actor = $this->getActor();
     $data = $commit->getCommitData();
     $message = $data->getCommitMessage();
 
-    $matches = null;
-    if (!preg_match('/^Auditors?:\s*(.*)$/im', $message, $matches)) {
-      return array();
-    }
+    $result = DifferentialCommitMessageParser::newStandardParser($actor)
+      ->setRaiseMissingFieldErrors(false)
+      ->parseFields($message);
 
-    $phids = id(new PhabricatorObjectListQuery())
-      ->setViewer($this->getActor())
-      ->setAllowPartialResults(true)
-      ->setAllowedTypes(
-        array(
-          PhabricatorPeopleUserPHIDType::TYPECONST,
-          PhabricatorProjectProjectPHIDType::TYPECONST,
-        ))
-      ->setObjectList($matches[1])
-      ->execute();
-
+    $field_key = DifferentialAuditorsCommitMessageField::FIELDKEY;
+    $phids = idx($result, $field_key, null);
     if (!$phids) {
       return array();
     }
 
-    foreach ($phids as $phid) {
-      $this->addAuditReason($phid, pht('Requested by Author'));
-    }
     return id(new PhabricatorAuditTransaction())
-      ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
-      ->setNewValue(array_fuse($phids));
+      ->setTransactionType(DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE)
+      ->setNewValue(
+        array(
+          '+' => array_fuse($phids),
+        ));
   }
 
   protected function sortTransactions(array $xactions) {
