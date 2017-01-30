@@ -262,6 +262,29 @@ final class PhabricatorRepositoryCommit
     return isset($map[$audit->getAuditorPHID()]);
   }
 
+  public function writeOwnersEdges(array $package_phids) {
+    $src_phid = $this->getPHID();
+    $edge_type = DiffusionCommitHasPackageEdgeType::EDGECONST;
+
+    $editor = new PhabricatorEdgeEditor();
+
+    $dst_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $src_phid,
+      $edge_type);
+
+    foreach ($dst_phids as $dst_phid) {
+      $editor->removeEdge($src_phid, $edge_type, $dst_phid);
+    }
+
+    foreach ($package_phids as $package_phid) {
+      $editor->addEdge($src_phid, $edge_type, $package_phid);
+    }
+
+    $editor->save();
+
+    return $this;
+  }
+
   public function getAuditorPHIDsForEdit() {
     $audits = $this->getAudits();
     return mpull($audits, 'getAuditorPHID');

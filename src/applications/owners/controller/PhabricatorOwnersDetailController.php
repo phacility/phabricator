@@ -68,14 +68,14 @@ final class PhabricatorOwnersDetailController
     $commit_uri = id(new PhutilURI('/diffusion/commit/'))
       ->setQueryParams(
         array(
-          'auditorPHIDs' => $package->getPHID(),
+          'package' => $package->getPHID(),
         ));
 
     $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
 
     $attention_commits = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())
-      ->withAuditorPHIDs(array($package->getPHID()))
+      ->withPackagePHIDs(array($package->getPHID()))
       ->withStatuses(
         array(
           $status_concern,
@@ -102,7 +102,7 @@ final class PhabricatorOwnersDetailController
 
     $all_commits = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())
-      ->withAuditorPHIDs(array($package->getPHID()))
+      ->withPackagePHIDs(array($package->getPHID()))
       ->needCommitData(true)
       ->needAuditRequests(true)
       ->setLimit(25)

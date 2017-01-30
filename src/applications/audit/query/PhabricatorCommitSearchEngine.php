@@ -45,6 +45,10 @@ final class PhabricatorCommitSearchEngine
       $query->withRepositoryPHIDs($map['repositoryPHIDs']);
     }
 
+    if ($map['packagePHIDs']) {
+      $query->withPackagePHIDs($map['packagePHIDs']);
+    }
+
     return $query;
   }
 
@@ -78,6 +82,12 @@ final class PhabricatorCommitSearchEngine
         ->setConduitKey('repositories')
         ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
         ->setDatasource(new DiffusionRepositoryDatasource()),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Packages'))
+        ->setKey('packagePHIDs')
+        ->setConduitKey('packages')
+        ->setAliases(array('package', 'packages', 'packagePHID'))
+        ->setDatasource(new PhabricatorOwnersPackageDatasource()),
     );
   }
 

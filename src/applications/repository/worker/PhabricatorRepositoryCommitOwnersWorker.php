@@ -42,6 +42,8 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $repository,
       $affected_paths);
 
+    $commit->writeOwnersEdges(mpull($affected_packages, 'getPHID'));
+
     if (!$affected_packages) {
       return;
     }
