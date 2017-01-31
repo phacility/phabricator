@@ -41,7 +41,9 @@ final class PhabricatorProjectProfileMenuEngine
       ->setMenuItemKey(
         PhabricatorProjectSubprojectsProfileMenuItem::MENUITEMKEY);
 
-    $items[] = $this->newManageItem();
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorProject::ITEM_MANAGE)
+      ->setMenuItemKey(PhabricatorProjectManageProfileMenuItem::MENUITEMKEY);
 
     return $items;
   }
