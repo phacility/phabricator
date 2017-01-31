@@ -14,12 +14,6 @@ final class PhabricatorHomeMenuItemController
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    if ($viewer->getPHID()) {
-      $custom_phid = $viewer->getPHID();
-    } else {
-      $custom_phid = null;
-    }
-
     $application = 'PhabricatorHomeApplication';
     $home_app = id(new PhabricatorApplicationQuery())
       ->setViewer($viewer)
@@ -29,7 +23,7 @@ final class PhabricatorHomeMenuItemController
 
     $engine = id(new PhabricatorHomeProfileMenuEngine())
       ->setProfileObject($home_app)
-      ->setCustomPHID($custom_phid)
+      ->setCustomPHID($viewer->getPHID())
       ->setController($this);
 
     return $engine->buildResponse();

@@ -49,16 +49,14 @@ final class PhabricatorHomeLauncherProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
-    if ($viewer->isLoggedIn()) {
-      $name = $this->getDisplayName($config);
-      $icon = 'fa-globe';
-      $href = '/applications/';
+    $name = $this->getDisplayName($config);
+    $icon = 'fa-globe';
+    $href = '/applications/';
 
-      $item = $this->newItem()
-        ->setHref($href)
-        ->setName($name)
-        ->setIcon($icon);
-    }
+    $item = $this->newItem()
+      ->setHref($href)
+      ->setName($name)
+      ->setIcon($icon);
 
     return array(
       $item,

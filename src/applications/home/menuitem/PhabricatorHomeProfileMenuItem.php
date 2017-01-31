@@ -56,16 +56,18 @@ final class PhabricatorHomeProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
-    if ($viewer->isLoggedIn()) {
-      $name = $this->getDisplayName($config);
-      $icon = 'fa-home';
-      $href = $this->getItemViewURI($config);
-
-      $item = $this->newItem()
-        ->setHref($href)
-        ->setName($name)
-        ->setIcon($icon);
+    if (!$viewer->isLoggedIn()) {
+      return array();
     }
+
+    $name = $this->getDisplayName($config);
+    $icon = 'fa-home';
+    $href = $this->getItemViewURI($config);
+
+    $item = $this->newItem()
+      ->setHref($href)
+      ->setName($name)
+      ->setIcon($icon);
 
     return array(
       $item,
