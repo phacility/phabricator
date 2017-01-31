@@ -9,79 +9,17 @@ final class PhabricatorAuditUpdateOwnersManagementWorkflow
       ->setExamples('**update-owners** ...')
       ->setSynopsis(pht('Update package relationships for commits.'))
       ->setArguments(
-        array(
-          array(
-            'name' => 'all',
-            'help' => pht('Update all commits in all repositories.'),
-          ),
-          array(
-            'name' => 'objects',
-            'wildcard' => true,
-            'help' => pht('Update named commits and repositories.'),
-          ),
-        ));
+        array_merge(
+          $this->getCommitConstraintArguments(),
+          array()));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $viewer = $this->getViewer();
-
-    $all = $args->getArg('all');
-    $names = $args->getArg('objects');
-
-    if (!$names && !$all) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Specify "--all" to update everything, or a list of specific '.
-          'commits or repositories to update.'));
-    } else if ($names && $all) {
-      throw new PhutilArgumentUsageException(
-        pht(
-          'Specify either a list of objects to update or "--all", but not '.
-          'both.'));
-    }
-
-    if ($all) {
-      $objects = new LiskMigrationIterator(new PhabricatorRepository());
-    } else {
-      $query = id(new PhabricatorObjectQuery())
-        ->setViewer($viewer)
-        ->withNames($names);
-
-      $query->execute();
-
-      $objects = array();
-
-      $results = $query->getNamedResults();
-      foreach ($names as $name) {
-        if (!isset($results[$name])) {
-          throw new PhutilArgumentUsageException(
-            pht(
-              'Object "%s" is not a valid object.',
-              $name));
-        }
-
-        $object = $results[$name];
-        if (!($object instanceof PhabricatorRepository) &&
-            !($object instanceof PhabricatorRepositoryCommit)) {
-          throw new PhutilArgumentUsageException(
-            pht(
-              'Object "%s" is not a valid repository or commit.',
-              $name));
-        }
-
-        $objects[] = $object;
-      }
-    }
+    $objects = $this->loadCommitsWithConstraints($args);
 
     foreach ($objects as $object) {
-      if ($object instanceof PhabricatorRepository) {
-        $commits = id(new DiffusionCommitQuery())
-          ->setViewer($viewer)
-          ->withRepository($object)
-          ->execute();
-      } else {
-        $commits = array($object);
-      }
+      $commits = $this->loadCommitsForConstraintObject($object);
 
       foreach ($commits as $commit) {
         $repository = $commit->getRepository();
