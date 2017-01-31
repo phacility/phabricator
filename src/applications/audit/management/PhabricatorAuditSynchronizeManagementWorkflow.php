@@ -44,12 +44,14 @@ final class PhabricatorAuditSynchronizeManagementWorkflow
           echo tsprintf(
             "%s\n",
             pht(
-              'Updated "%s": "%s" -> "%s".',
+              'Updating "%s": "%s" -> "%s".',
               $commit->getDisplayName(),
               PhabricatorAuditCommitStatusConstants::getStatusName(
                 $old_status),
               PhabricatorAuditCommitStatusConstants::getStatusName(
                 $new_status)));
+
+          $commit->save();
         }
       }
     }
