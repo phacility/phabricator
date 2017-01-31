@@ -1,52 +1,23 @@
 <?php
 
-final class PhabricatorHomeMainController extends PhabricatorHomeController {
+final class PHUIHomeView
+  extends AphrontTagView {
 
-  public function shouldAllowPublic() {
-    return true;
+  protected function getTagName() {
+    return null;
   }
 
-  public function isGlobalDragAndDropUploadEnabled() {
-    return true;
+  protected function getTagAttributes() {
+    return array();
   }
 
-  public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
+  protected function getTagContent() {
+    $viewer = $this->getViewer();
 
-    $dashboard = PhabricatorDashboardInstall::getDashboard(
-      $viewer,
-      $viewer->getPHID(),
-      get_class($this->getCurrentApplication()));
-
-    if (!$dashboard) {
-      $dashboard = PhabricatorDashboardInstall::getDashboard(
-        $viewer,
-        PhabricatorHomeApplication::DASHBOARD_DEFAULT,
-        get_class($this->getCurrentApplication()));
-    }
-
-    if ($dashboard) {
-      $content = id(new PhabricatorDashboardRenderingEngine())
-        ->setViewer($viewer)
-        ->setDashboard($dashboard)
-        ->renderDashboard();
-    } else {
-      $content = $this->buildMainResponse();
-    }
-
-    $nav = $this->getProfileMenu();
-    $content =
-      array(
-        $content,
-        id(new PhabricatorGlobalUploadTargetView())->setUser($viewer),
-      );
-
-    return $this->newPage()
-      ->setTitle('Phabricator')
-      ->addClass('phabricator-home')
-      ->setNavigation($nav)
-      ->appendChild($content);
-
+    return array(
+      $this->buildMainResponse(),
+      id(new PhabricatorGlobalUploadTargetView())->setUser($viewer),
+    );
   }
 
   private function buildMainResponse() {

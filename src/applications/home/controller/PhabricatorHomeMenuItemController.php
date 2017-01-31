@@ -3,14 +3,21 @@
 final class PhabricatorHomeMenuItemController
   extends PhabricatorHomeController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $type = $request->getURIData('type');
-    $custom_phid = null;
-    $menu = PhabricatorProfileMenuEngine::MENU_GLOBAL;
-    if ($type == 'personal') {
+
+    if ($viewer->getPHID()) {
       $custom_phid = $viewer->getPHID();
-      $menu = PhabricatorProfileMenuEngine::MENU_PERSONAL;
+    } else {
+      $custom_phid = null;
     }
 
     $application = 'PhabricatorHomeApplication';
@@ -23,7 +30,6 @@ final class PhabricatorHomeMenuItemController
     $engine = id(new PhabricatorHomeProfileMenuEngine())
       ->setProfileObject($home_app)
       ->setCustomPHID($custom_phid)
-      ->setMenuType($menu)
       ->setController($this);
 
     return $engine->buildResponse();

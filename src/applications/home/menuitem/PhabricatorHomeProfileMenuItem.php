@@ -34,6 +34,13 @@ final class PhabricatorHomeProfileMenuItem
     return $this->getDefaultName();
   }
 
+  public function newPageContent() {
+    $viewer = $this->getViewer();
+
+    return id(new PHUIHomeView())
+      ->setViewer($viewer);
+  }
+
   public function buildEditEngineFields(
     PhabricatorProfileMenuItemConfiguration $config) {
     return array(
@@ -52,7 +59,7 @@ final class PhabricatorHomeProfileMenuItem
     if ($viewer->isLoggedIn()) {
       $name = $this->getDisplayName($config);
       $icon = 'fa-home';
-      $href = '/home/';
+      $href = $this->getItemViewURI($config);
 
       $item = $this->newItem()
         ->setHref($href)

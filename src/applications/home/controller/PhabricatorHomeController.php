@@ -31,14 +31,8 @@ abstract class PhabricatorHomeController extends PhabricatorController {
 
       $engine = id(new PhabricatorHomeProfileMenuEngine())
         ->setViewer($viewer)
-        ->setProfileObject($home);
-
-      if ($viewer->getPHID()) {
-        $engine->setCustomPHID($viewer->getPHID())
-          ->setMenuType(PhabricatorProfileMenuEngine::MENU_COMBINED);
-      } else {
-        $engine->setMenuType(PhabricatorProfileMenuEngine::MENU_GLOBAL);
-      }
+        ->setProfileObject($home)
+        ->setCustomPHID($viewer->getPHID());
 
       $this->profileMenu = $engine->buildNavigation();
     }

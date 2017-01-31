@@ -50,16 +50,8 @@ final class PhabricatorFavoritesMainMenuBarExtension
 
     $menu_engine = id(new PhabricatorFavoritesProfileMenuEngine())
       ->setViewer($viewer)
-      ->setProfileObject($favorites);
-
-    if ($viewer->getPHID()) {
-      $menu_engine
-        ->setCustomPHID($viewer->getPHID())
-        ->setMenuType(PhabricatorProfileMenuEngine::MENU_COMBINED);
-    } else {
-      $menu_engine
-        ->setMenuType(PhabricatorProfileMenuEngine::MENU_GLOBAL);
-    }
+      ->setProfileObject($favorites)
+      ->setCustomPHID($viewer->getPHID());
 
     $filter_view = $menu_engine->buildNavigation();
 
@@ -87,7 +79,7 @@ final class PhabricatorFavoritesMainMenuBarExtension
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Favorites'))
-          ->setHref('/favorites/'));
+          ->setHref('/favorites/menu/configure/'));
     }
 
     return $view;

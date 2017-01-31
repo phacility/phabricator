@@ -22,14 +22,11 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/' => 'PhabricatorHomeMainController',
-      '/(?P<only>home)/' => 'PhabricatorHomeMainController',
+      '/' => 'PhabricatorHomeMenuItemController',
       '/home/' => array(
-        'menu/' => array(
-          '' => 'PhabricatorHomeMenuController',
-          '(?P<type>global|personal)/item/' => $this->getProfileMenuRouting(
+        '' => 'PhabricatorHomeMenuItemController',
+        'menu/' => $this->getProfileMenuRouting(
           'PhabricatorHomeMenuItemController'),
-        ),
       ),
     );
   }

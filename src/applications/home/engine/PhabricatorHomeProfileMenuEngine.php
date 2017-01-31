@@ -8,14 +8,7 @@ final class PhabricatorHomeProfileMenuEngine
   }
 
   public function getItemURI($path) {
-    $object = $this->getProfileObject();
-    $custom = $this->getCustomPHID();
-
-    if ($custom) {
-      return "/home/menu/personal/item/{$path}";
-    } else {
-      return "/home/menu/global/item/{$path}";
-    }
+    return "/home/menu/{$path}";
   }
 
   protected function getBuiltinProfileItems($object) {
@@ -58,11 +51,7 @@ final class PhabricatorHomeProfileMenuEngine
       ->setMenuItemKey(
         PhabricatorHomeLauncherProfileMenuItem::MENUITEMKEY);
 
-    // Single Manage Item, switches URI based on admin/user
-    $items[] = $this->newItem()
-      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_MANAGE)
-      ->setMenuItemKey(
-        PhabricatorHomeManageProfileMenuItem::MENUITEMKEY);
+    $items[] = $this->newManageItem();
 
     return $items;
   }

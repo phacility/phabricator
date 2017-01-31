@@ -7,6 +7,10 @@ final class PhabricatorProjectProfileMenuEngine
     return true;
   }
 
+  protected function isMenuEnginePersonalizable() {
+    return false;
+  }
+
   public function getItemURI($path) {
     $project = $this->getProfileObject();
     $id = $project->getID();
@@ -37,9 +41,7 @@ final class PhabricatorProjectProfileMenuEngine
       ->setMenuItemKey(
         PhabricatorProjectSubprojectsProfileMenuItem::MENUITEMKEY);
 
-    $items[] = $this->newItem()
-      ->setBuiltinKey(PhabricatorProject::ITEM_MANAGE)
-      ->setMenuItemKey(PhabricatorProjectManageProfileMenuItem::MENUITEMKEY);
+    $items[] = $this->newManageItem();
 
     return $items;
   }
