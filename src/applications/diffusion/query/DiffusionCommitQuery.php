@@ -14,6 +14,7 @@ final class DiffusionCommitQuery
   private $responsiblePHIDs;
   private $statuses;
   private $packagePHIDs;
+  private $unreachable;
 
   private $needAuditRequests;
   private $auditIDs;
@@ -127,6 +128,11 @@ final class DiffusionCommitQuery
 
   public function withPackagePHIDs(array $package_phids) {
     $this->packagePHIDs = $package_phids;
+    return $this;
+  }
+
+  public function withUnreachable($unreachable) {
+    $this->unreachable = $unreachable;
     return $this;
   }
 
@@ -501,6 +507,21 @@ final class DiffusionCommitQuery
         $conn,
         'package.dst IN (%Ls)',
         $this->packagePHIDs);
+    }
+
+    if ($this->unreachable !== null) {
+      if ($this->unreachable) {
+        $where[] = qsprintf(
+          $conn,
+          '(commit.importStatus & %d) = %d',
+          PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+          PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          '(commit.importStatus & %d) = 0',
+          PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
+      }
     }
 
     return $where;
