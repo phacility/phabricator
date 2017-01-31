@@ -12,7 +12,7 @@ return array(
     'core.pkg.css' => '12c56bd9',
     'core.pkg.js' => '1fa7c0c5',
     'darkconsole.pkg.js' => 'e7393ebb',
-    'differential.pkg.css' => '4815647b',
+    'differential.pkg.css' => '90b30783',
     'differential.pkg.js' => 'ddfeb49b',
     'diffusion.pkg.css' => '91c5d3a6',
     'diffusion.pkg.js' => '84c8f8fd',
@@ -58,7 +58,7 @@ return array(
     'rsrc/css/application/dashboard/dashboard.css' => '0921c307',
     'rsrc/css/application/diff/inline-comment-summary.css' => '51efda3a',
     'rsrc/css/application/differential/add-comment.css' => 'c47f8c40',
-    'rsrc/css/application/differential/changeset-view.css' => '6a9bdf9c',
+    'rsrc/css/application/differential/changeset-view.css' => '41af6d25',
     'rsrc/css/application/differential/core.css' => '5b7b8ff4',
     'rsrc/css/application/differential/phui-inline-comment.css' => 'be663c95',
     'rsrc/css/application/differential/revision-comment.css' => '14b8565a',
@@ -572,7 +572,7 @@ return array(
     'conpherence-thread-manager' => 'c8b5ee6f',
     'conpherence-transaction-css' => '85129c68',
     'd3' => 'a11a5ff2',
-    'differential-changeset-view-css' => '6a9bdf9c',
+    'differential-changeset-view-css' => '41af6d25',
     'differential-core-view-css' => '5b7b8ff4',
     'differential-inline-comment-editor' => '2e3f9738',
     'differential-revision-add-comment-css' => 'c47f8c40',
@@ -1166,6 +1166,9 @@ return array(
       'javelin-dom',
       'javelin-reactor-dom',
     ),
+    '41af6d25' => array(
+      'phui-inline-comment-view-css',
+    ),
     42126667 => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1385,9 +1388,6 @@ return array(
     ),
     '69adf288' => array(
       'javelin-install',
-    ),
-    '6a9bdf9c' => array(
-      'phui-inline-comment-view-css',
     ),
     '6ad39b6f' => array(
       'javelin-install',

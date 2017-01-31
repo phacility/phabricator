@@ -1580,4 +1580,22 @@ final class PhabricatorUser
     return $this;
   }
 
+
+  public function getCSSValue($variable_key) {
+    $preference = PhabricatorAccessibilitySetting::SETTINGKEY;
+    $key = $this->getUserSetting($preference);
+
+    $postprocessor = CelerityPostprocessor::getPostprocessor($key);
+    $variables = $postprocessor->getVariables();
+
+    if (!isset($variables[$variable_key])) {
+      throw new Exception(
+        pht(
+          'Unknown CSS variable "%s"!',
+          $variable_key));
+    }
+
+    return $variables[$variable_key];
+  }
+
 }
