@@ -24,8 +24,7 @@ final class PhabricatorHomeMenuItemController
       ->setProfileObject($home_app)
       ->setCustomPHID($custom_phid)
       ->setMenuType($menu)
-      ->setController($this)
-      ->setShowNavigation(false);
+      ->setController($this);
 
     return $engine->buildResponse();
   }

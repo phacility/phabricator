@@ -156,26 +156,6 @@ final class PhabricatorDashboardManageController
         ->setHref($this->getApplicationURI("copy/{$id}/"))
         ->setWorkflow(true));
 
-    $installed_dashboard = id(new PhabricatorDashboardInstall())
-      ->loadOneWhere(
-        'objectPHID = %s AND applicationClass = %s',
-        $viewer->getPHID(),
-        'PhabricatorHomeApplication');
-    if ($installed_dashboard &&
-        $installed_dashboard->getDashboardPHID() == $dashboard->getPHID()) {
-      $title_install = pht('Uninstall Dashboard');
-      $href_install = "uninstall/{$id}/";
-    } else {
-      $title_install = pht('Install Dashboard');
-      $href_install = "install/{$id}/";
-    }
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-      ->setName($title_install)
-      ->setIcon('fa-wrench')
-      ->setHref($this->getApplicationURI($href_install))
-      ->setWorkflow(true));
-
     return $curtain;
   }
 

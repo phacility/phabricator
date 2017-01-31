@@ -5,17 +5,24 @@
 .jx-tooltip-container {
   position: absolute;
   padding: 5px;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.jx-tooltip-hidden {
+  opacity: 0;
 }
 
 .jx-tooltip-inner {
   position: relative;
-  background: rgba({$alphablack}, .9);
+  background: #000;
   border-radius: 3px;
 }
 
 .jx-tooltip {
   color: #f9f9f9;
   font-size: {$normalfontsize};
+  -webkit-font-smoothing: antialiased;
   padding: 6px 8px;
   overflow: hidden;
   white-space: pre-wrap;

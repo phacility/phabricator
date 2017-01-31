@@ -49,10 +49,11 @@
 
 .phui-object-box.phui-box-blue div.phui-info-severity-nodata,
 .phui-object-box.phui-box-grey div.phui-info-severity-nodata {
-  background: transparent;
-  padding: 20px 4px 24px;
+  background: #fff;
+  padding: 32px 0;
   text-align: center;
   border: none;
+  margin: 0;
   color: {$greytext};
 }
 

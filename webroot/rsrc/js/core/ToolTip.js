@@ -46,7 +46,7 @@ JX.install('Tooltip', {
 
       var node = JX.$N(
         'div',
-        { className: 'jx-tooltip-container' },
+        { className: 'jx-tooltip-container jx-tooltip-hidden' },
         node_inner);
 
       node.style.maxWidth  = scale + 'px';
@@ -61,6 +61,7 @@ JX.install('Tooltip', {
       // Jump through some hoops trying to auto-position the tooltip
       var pos = self._getSmartPosition(align, root, node);
       pos.setPos(node);
+      JX.DOM.alterClass(node, 'jx-tooltip-hidden', false);
     },
 
     _getSmartPosition: function (align, root, node) {

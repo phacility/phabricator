@@ -254,7 +254,6 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     if ($this->navigation) {
       return $this->navigation;
     }
-
     $nav = id(new AphrontSideNavFilterView())
       ->setIsProfileMenu(true)
       ->setBaseURI(new PhutilURI($this->getItemURI('')));

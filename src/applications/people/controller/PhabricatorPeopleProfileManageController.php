@@ -23,20 +23,7 @@ final class PhabricatorPeopleProfileManageController
     }
 
     $this->setUser($user);
-
-    $profile = $user->loadUserProfile();
-    $picture = $user->getProfileImageURI();
-
-    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
-    $profile_icon = id(new PHUIIconView())
-      ->setIcon($profile_icon);
-    $profile_title = $profile->getDisplayTitle();
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($user->getFullName())
-      ->setSubheader(array($profile_icon, $profile_title))
-      ->setImage($picture)
-      ->setProfileHeader(true);
+    $header = $this->buildProfileHeader();
 
     $curtain = $this->buildCurtain($user);
     $properties = $this->buildPropertyView($user);
@@ -51,8 +38,10 @@ final class PhabricatorPeopleProfileManageController
 
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->addClass('project-view-home')
       ->setCurtain($curtain)
       ->addPropertySection(pht('Details'), $properties);
+    require_celerity_resource('project-view-css');
 
     return $this->newPage()
       ->setTitle(

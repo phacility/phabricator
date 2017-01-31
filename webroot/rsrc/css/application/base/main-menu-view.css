@@ -164,10 +164,7 @@
   right: 0;
   position: absolute;
   font-size: {$normalfontsize};
-  border-width: 1px;
-  border-color: {$lightblueborder};
-  border-radius: 3px;
-  border-style: solid;
+  border: none;
   background-color: #fff;
   height: 28px;
   padding: 3px 28px 3px 52px;
@@ -186,7 +183,6 @@
   background: #fff;
   opacity: 1;
   color: {$darkbluetext};
-  border-color: {$sky};
   box-shadow: none;
 }
 

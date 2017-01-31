@@ -9,6 +9,11 @@ final class PhabricatorHomeMenuController extends PhabricatorHomeController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
+    if (!$viewer->getIsAdmin()) {
+      $uri = '/home/menu/personal/item/configure/';
+      return id(new AphrontRedirectResponse())->setURI($uri);
+    }
+
     $menu = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 

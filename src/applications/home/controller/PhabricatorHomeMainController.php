@@ -34,19 +34,17 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       $content = $this->buildMainResponse();
     }
 
-    if (!$request->getURIData('only')) {
-      $nav = $this->buildNav();
-      $nav->appendChild(
-        array(
-          $content,
-          id(new PhabricatorGlobalUploadTargetView())->setUser($viewer),
-        ));
-      $content = $nav;
-    }
+    $nav = $this->getProfileMenu();
+    $content =
+      array(
+        $content,
+        id(new PhabricatorGlobalUploadTargetView())->setUser($viewer),
+      );
 
     return $this->newPage()
       ->setTitle('Phabricator')
       ->addClass('phabricator-home')
+      ->setNavigation($nav)
       ->appendChild($content);
 
   }

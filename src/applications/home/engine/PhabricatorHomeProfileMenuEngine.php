@@ -30,6 +30,12 @@ final class PhabricatorHomeProfileMenuEngine
       ->withLaunchable(true)
       ->execute();
 
+    // Default Home Dashboard
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_HOME)
+      ->setMenuItemKey(
+        PhabricatorHomeProfileMenuItem::MENUITEMKEY);
+
     foreach ($applications as $application) {
       if (!$application->isPinnedByDefault($viewer)) {
         continue;
@@ -45,6 +51,12 @@ final class PhabricatorHomeProfileMenuEngine
         ->setMenuItemKey(PhabricatorApplicationProfileMenuItem::MENUITEMKEY)
         ->setMenuItemProperties($properties);
     }
+
+    // Hotlink to More Applications Launcher...
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_LAUNCHER)
+      ->setMenuItemKey(
+        PhabricatorHomeLauncherProfileMenuItem::MENUITEMKEY);
 
     // Single Manage Item, switches URI based on admin/user
     $items[] = $this->newItem()
