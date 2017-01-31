@@ -214,6 +214,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           }
         }
       }
+      $page_title = pht('Configure Menu');
+    } else {
+      $page_title = $selected_item->getDisplayName();
     }
 
     switch ($item_action) {
@@ -293,10 +296,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $crumbs->setBorder(true);
 
-    // TODO: This title is not correct when viewing items.
-
     $page = $controller->newPage()
-      ->setTitle(pht('Configure Menu'))
+      ->setTitle($page_title)
       ->setCrumbs($crumbs)
       ->appendChild($content);
 
