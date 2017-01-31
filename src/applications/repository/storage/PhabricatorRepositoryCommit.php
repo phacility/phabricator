@@ -11,6 +11,7 @@ final class PhabricatorRepositoryCommit
     PhabricatorMentionableInterface,
     HarbormasterBuildableInterface,
     HarbormasterCircleCIBuildableInterface,
+    HarbormasterBuildkiteBuildableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
@@ -586,6 +587,44 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getCircleCIBuildIdentifier() {
+    return $this->getCommitIdentifier();
+  }
+
+
+/* -(  HarbormasterBuildkiteBuildableInterface  )---------------------------- */
+
+
+  public function getBuildkiteBranch() {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $repository = $this->getRepository();
+
+    $branches = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      DiffusionRequest::newFromDictionary(
+        array(
+          'repository' => $repository,
+          'user' => $viewer,
+        )),
+      'diffusion.branchquery',
+      array(
+        'contains' => $this->getCommitIdentifier(),
+        'repository' => $repository->getPHID(),
+      ));
+
+    if (!$branches) {
+      throw new Exception(
+        pht(
+          'Commit "%s" is not an ancestor of any branch head, so it can not '.
+          'be built with Buildkite.',
+          $this->getCommitIdentifier()));
+    }
+
+    $branch = head($branches);
+
+    return 'refs/heads/'.$branch['shortName'];
+  }
+
+  public function getBuildkiteCommit() {
     return $this->getCommitIdentifier();
   }
 

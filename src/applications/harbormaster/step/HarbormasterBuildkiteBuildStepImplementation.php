@@ -75,7 +75,7 @@ EOTEXT
     $buildable = $build->getBuildable();
 
     $object = $buildable->getBuildableObject();
-    if (!($object instanceof HarbormasterCircleCIBuildableInterface)) {
+    if (!($object instanceof HarbormasterBuildkiteBuildableInterface)) {
       throw new Exception(
         pht('This object does not support builds with Buildkite.'));
     }
@@ -89,8 +89,8 @@ EOTEXT
       $pipeline);
 
     $data_structure = array(
-      'commit' => $object->getCircleCIBuildIdentifier(),
-      'branch' => 'master',
+      'commit' => $object->getBuildkiteCommit(),
+      'branch' => $object->getBuildkiteBranch(),
       'message' => pht(
         'Harbormaster Build %s ("%s") for %s',
         $build->getID(),
