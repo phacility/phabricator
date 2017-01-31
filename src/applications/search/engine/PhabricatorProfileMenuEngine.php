@@ -130,6 +130,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     $item_id = $request->getURIData('itemID');
+
+    // If we miss on the MenuEngine route, try the EditEngine route. This will
+    // be populated while editing items.
+    if (!$item_id) {
+      $item_id = $request->getURIData('id');
+    }
+
     $item_list = $this->getItems();
 
     $selected_item = null;
