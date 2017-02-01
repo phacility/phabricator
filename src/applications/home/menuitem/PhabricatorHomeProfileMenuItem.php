@@ -13,11 +13,6 @@ final class PhabricatorHomeProfileMenuItem
     return pht('Home');
   }
 
-  public function canHideMenuItem(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return false;
-  }
-
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
     return true;
