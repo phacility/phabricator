@@ -39,7 +39,7 @@ final class PhabricatorHomeProfileMenuEngine
       }
 
       $properties = array(
-        'name' => $application->getName(),
+        'name' => '',
         'application' => $application->getPHID(),
       );
 
