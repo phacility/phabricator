@@ -31,6 +31,13 @@
   background: transparent;
 }
 
+.device-phone.phabricator-home .phui-basic-nav .phabricator-side-menu
+  .phui-list-item-selected {
+    background-color: transparent;
+    border-left-color: transparent;
+    font-weight: normal;
+}
+
 .phui-basic-nav.phui-navigation-shell .phabricator-nav-local {
   width: 205px;
   padding-top: 12px;
