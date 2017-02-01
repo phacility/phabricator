@@ -61,14 +61,10 @@ final class PhabricatorFavoritesMainMenuBarExtension
     $view = id(new PhabricatorActionListView())
       ->setViewer($viewer);
     foreach ($item_views as $item) {
-      $type = null;
-      if (!strlen($item->getName())) {
-        $type = PhabricatorActionView::TYPE_DIVIDER;
-      }
       $action = id(new PhabricatorActionView())
         ->setName($item->getName())
         ->setHref($item->getHref())
-        ->setType($type);
+        ->setType($item->getType());
       $view->addAction($action);
     }
 
