@@ -26,8 +26,12 @@ final class PhabricatorHomeProfileMenuEngine
     // Default Home Dashboard
     $items[] = $this->newItem()
       ->setBuiltinKey(PhabricatorHomeConstants::ITEM_HOME)
-      ->setMenuItemKey(
-        PhabricatorHomeProfileMenuItem::MENUITEMKEY);
+      ->setMenuItemKey(PhabricatorHomeProfileMenuItem::MENUITEMKEY);
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_APPS_LABEL)
+      ->setMenuItemKey(PhabricatorLabelProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemProperties(array('name' => pht('Applications')));
 
     foreach ($applications as $application) {
       if (!$application->isPinnedByDefault($viewer)) {
@@ -48,8 +52,7 @@ final class PhabricatorHomeProfileMenuEngine
     // Hotlink to More Applications Launcher...
     $items[] = $this->newItem()
       ->setBuiltinKey(PhabricatorHomeConstants::ITEM_LAUNCHER)
-      ->setMenuItemKey(
-        PhabricatorHomeLauncherProfileMenuItem::MENUITEMKEY);
+      ->setMenuItemKey(PhabricatorHomeLauncherProfileMenuItem::MENUITEMKEY);
 
     $items[] = $this->newManageItem();
 
