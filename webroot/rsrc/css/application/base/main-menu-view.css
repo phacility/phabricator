@@ -177,6 +177,7 @@
   font-size: {$biggestfontsize};
   width: 100%;
   padding-left: 50px;
+  border: 1px solid {$lightblueborder};
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
