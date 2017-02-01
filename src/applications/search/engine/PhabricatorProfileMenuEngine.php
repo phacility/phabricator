@@ -11,6 +11,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $navigation;
   private $showNavigation = true;
   private $editMode;
+  private $pageClasses = array();
+  private $showContentCrumbs = true;
 
   const ITEM_CUSTOM_DIVIDER = 'engine.divider';
   const ITEM_MANAGE = 'item.configure';
@@ -90,6 +92,20 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->showNavigation;
   }
 
+  public function addContentPageClass($class) {
+    $this->pageClasses[] = $class;
+    return $this;
+  }
+
+  public function setShowContentCrumbs($show_content_crumbs) {
+    $this->showContentCrumbs = $show_content_crumbs;
+    return $this;
+  }
+
+  public function getShowContentCrumbs() {
+    return $this->showContentCrumbs;
+  }
+
   abstract public function getItemURI($path);
   abstract protected function isMenuEngineConfigurable();
 
@@ -118,14 +134,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       $item_action = 'view';
     }
 
+    $is_view = ($item_action == 'view');
+
     // If the engine is not configurable, don't respond to any of the editing
     // or configuration routes.
     if (!$this->isMenuEngineConfigurable()) {
-      switch ($item_action) {
-        case 'view':
-          break;
-        default:
-          return new Aphront404Response();
+      if (!$is_view) {
+        return new Aphront404Response();
       }
     }
 
@@ -159,7 +174,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     if (!$selected_item) {
-      if ($item_action == 'view') {
+      if ($is_view) {
         $selected_item = $this->getDefaultItem();
       }
     }
@@ -190,7 +205,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
-    if ($item_action != 'view') {
+    if (!$is_view) {
       $navigation->selectFilter(self::ITEM_MANAGE);
 
       if ($selected_item) {
@@ -298,11 +313,20 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $page = $controller->newPage()
       ->setTitle($page_title)
-      ->setCrumbs($crumbs)
       ->appendChild($content);
+
+    if (!$is_view || $this->getShowContentCrumbs()) {
+      $page->setCrumbs($crumbs);
+    }
 
     if ($this->getShowNavigation()) {
       $page->setNavigation($navigation);
+    }
+
+    if ($is_view) {
+      foreach ($this->pageClasses as $class) {
+        $page->addClass($class);
+      }
     }
 
     return $page;
