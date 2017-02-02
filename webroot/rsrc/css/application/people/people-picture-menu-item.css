@@ -1,0 +1,18 @@
+/**
+ * @provides people-picture-menu-item-css
+ */
+
+.people-menu-image {
+  width: 160px;
+  height: 160px;
+  border: 1px solid {$thinblueborder};
+}
+
+.people-menu-image-container {
+  background: #fff;
+  padding: 4px;
+  border-radius: 3px;
+  border: 1px solid {$lightblueborder};
+  margin: 4px 0px 16px 20px;
+  display: inline-block;
+}

@@ -98,7 +98,8 @@ abstract class PhabricatorPeopleProfileController
     $header = id(new PHUIHeaderView())
       ->setHeader(array($user->getFullName(), $tag))
       ->setImage($picture)
-      ->setProfileHeader(true);
+      ->setProfileHeader(true)
+      ->addClass('people-profile-header');
 
     if ($user->getIsDisabled()) {
       $header->setStatus('fa-ban', 'red', pht('Disabled'));
