@@ -6,7 +6,7 @@ final class PhabricatorHomeProfileMenuItem
   const MENUITEMKEY = 'home.dashboard';
 
   public function getMenuItemTypeName() {
-    return pht('Home');
+    return pht('Built-in Homepage');
   }
 
   private function getDefaultName() {
