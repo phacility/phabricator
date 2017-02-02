@@ -29,7 +29,8 @@ final class PhabricatorHomeProfileMenuItem
     return $this->getDefaultName();
   }
 
-  public function newPageContent() {
+  public function newPageContent(
+    PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
     return id(new PHUIHomeView())
