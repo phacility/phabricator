@@ -287,6 +287,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         $content = $this->buildItemHideContent($selected_item);
         break;
       case 'default':
+        if (!$this->isMenuEnginePinnable()) {
+          return new Aphront404Response();
+        }
         $content = $this->buildItemDefaultContent(
           $selected_item,
           $item_list);
@@ -459,9 +462,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         continue;
       }
 
-      if ($item->isDefault()) {
-        $default = $item;
-        break;
+      // If this engine doesn't support pinning items, don't respect any
+      // setting which might be present in the database.
+      if ($this->isMenuEnginePinnable()) {
+        if ($item->isDefault()) {
+          $default = $item;
+          break;
+        }
       }
 
       if ($first === null) {
@@ -709,6 +716,18 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return true;
   }
 
+  /**
+   * Does this engine support pinning items?
+   *
+   * Personalizable menus disable pinning by default since it creates a number
+   * of weird edge cases without providing many benefits for current menus.
+   *
+   * @return bool True if items may be pinned as default items.
+   */
+  protected function isMenuEnginePinnable() {
+    return !$this->isMenuEnginePersonalizable();
+  }
+
   private function buildMenuEditModeContent() {
     $viewer = $this->getViewer();
 
@@ -833,14 +852,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           $default_uri = $this->getItemURI("default/{$builtin_key}/");
         }
 
-        if ($item->isDefault()) {
-          $default_icon = 'fa-thumb-tack green';
-          $default_text = pht('Current Default');
-        } else if ($item->canMakeDefault()) {
-          $default_icon = 'fa-thumb-tack';
-          $default_text = pht('Make Default');
-        } else {
-          $default_text = null;
+        $default_text = null;
+
+        if ($this->isMenuEnginePinnable()) {
+          if ($item->isDefault()) {
+            $default_icon = 'fa-thumb-tack green';
+            $default_text = pht('Current Default');
+          } else if ($item->canMakeDefault()) {
+            $default_icon = 'fa-thumb-tack';
+            $default_text = pht('Make Default');
+          }
         }
 
         if ($default_text !== null) {
