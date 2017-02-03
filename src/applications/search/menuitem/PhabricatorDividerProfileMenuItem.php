@@ -38,6 +38,7 @@ final class PhabricatorDividerProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $item = $this->newItem()
+      ->setType(PHUIListItemView::TYPE_DIVIDER)
       ->addClass('phui-divider');
 
     return array(

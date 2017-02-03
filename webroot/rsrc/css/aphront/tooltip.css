@@ -7,15 +7,40 @@
   padding: 5px;
 }
 
+.jx-tooltip-appear {
+  animation: 0.5s tooltip-appear;
+
+  /* Without this, there's a nasty pop-in effect at the end of the animation
+     when Safari changes font smoothing. The text becomes visibly more bold
+     after the last frame of animation. */
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+@keyframes tooltip-appear {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.jx-tooltip-hidden {
+  opacity: 0;
+}
+
 .jx-tooltip-inner {
   position: relative;
-  background: rgba({$alphablack}, .9);
+  background: #000;
   border-radius: 3px;
 }
 
 .jx-tooltip {
-  color: #f9f9f9;
+  color: #fff;
   font-size: {$normalfontsize};
+  -webkit-font-smoothing: antialiased;
+  font-weight: bold;
   padding: 6px 8px;
   overflow: hidden;
   white-space: pre-wrap;

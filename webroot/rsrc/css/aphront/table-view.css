@@ -210,7 +210,9 @@ th.aphront-table-view-sortable-selected {
   padding: 0px;
 }
 
-
+.aphront-table-view td.icon + td.icon {
+  padding-left: 8px;
+}
 
 div.single-display-line-bounds {
   width: 100%;

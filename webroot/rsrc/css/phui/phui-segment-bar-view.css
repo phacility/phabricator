@@ -7,14 +7,14 @@
   margin-bottom: 4px;
 }
 
-.phui-profile-menu-collapsed .phui-segment-bar-label {
-  width: 74px;
+.phui-basic-nav .phui-segment-bar-label {
+  width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .phui-segment-bar-segments {
-  background: {$lightgreybackground};
+  background: rgba({$alphablue}, .1);
   border-radius: 4px;
   position: relative;
   overflow: hidden;

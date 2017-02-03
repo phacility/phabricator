@@ -1,26 +1,21 @@
 <?php
 
-final class PhabricatorHomeManageProfileMenuItem
+final class PhabricatorHomeProfileMenuItem
   extends PhabricatorProfileMenuItem {
 
-  const MENUITEMKEY = 'home.manage.menu';
+  const MENUITEMKEY = 'home.dashboard';
 
   public function getMenuItemTypeName() {
-    return pht('Manage Home Menu');
+    return pht('Built-in Homepage');
   }
 
   private function getDefaultName() {
-    return pht('Manage');
-  }
-
-  public function canHideMenuItem(
-    PhabricatorProfileMenuItemConfiguration $config) {
-    return false;
+    return pht('Home');
   }
 
   public function canMakeDefault(
     PhabricatorProfileMenuItemConfiguration $config) {
-    return false;
+    return true;
   }
 
   public function getDisplayName(
@@ -32,6 +27,14 @@ final class PhabricatorHomeManageProfileMenuItem
     }
 
     return $this->getDefaultName();
+  }
+
+  public function newPageContent(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $viewer = $this->getViewer();
+
+    return id(new PHUIHomeView())
+      ->setViewer($viewer);
   }
 
   public function buildEditEngineFields(
@@ -49,20 +52,14 @@ final class PhabricatorHomeManageProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
-    if ($viewer->isLoggedIn()) {
-      $admin = $viewer->getIsAdmin();
-      $name = $this->getDisplayName($config);
-      $icon = 'fa-pencil';
-      $href = '/home/menu/personal/item/configure/';
-      if ($admin) {
-        $href = '/home/menu/';
-      }
+    $name = $this->getDisplayName($config);
+    $icon = 'fa-home';
+    $href = $this->getItemViewURI($config);
 
-      $item = $this->newItem()
-        ->setHref($href)
-        ->setName($name)
-        ->setIcon($icon);
-    }
+    $item = $this->newItem()
+      ->setHref($href)
+      ->setName($name)
+      ->setIcon($icon);
 
     return array(
       $item,

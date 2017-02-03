@@ -11,6 +11,7 @@ JX.install('Tooltip', {
 
   statics: {
     _node: null,
+    _last: null,
     _lock: 0,
 
     show : function(root, scale, align, content) {
@@ -61,6 +62,28 @@ JX.install('Tooltip', {
       // Jump through some hoops trying to auto-position the tooltip
       var pos = self._getSmartPosition(align, root, node);
       pos.setPos(node);
+
+      // Animate the tip if we haven't shown any tips recently. If we are
+      // already showing a tip (or hid one very recently) just show the tip
+      // immediately. This makes hunting for a particular item by mousing
+      // through tips smoother: you only have to sit through the animation
+      // once, at the beginning.
+
+      var is_recent = false;
+
+      var last_tip = self._last;
+      if (last_tip) {
+        // If we recently hid a tip, compute how many milliseconds ago we
+        // hid it.
+        var last_tip_age = (new Date().getTime() - self._last);
+        if (last_tip_age < 500) {
+          is_recent = true;
+        }
+      }
+
+      if (!is_recent) {
+        JX.DOM.alterClass(node, 'jx-tooltip-appear', true);
+      }
     },
 
     _getSmartPosition: function (align, root, node) {
@@ -193,6 +216,7 @@ JX.install('Tooltip', {
       if (this._node) {
         JX.DOM.remove(this._node);
         this._node = null;
+        this._last = new Date().getTime();
       }
     },
 

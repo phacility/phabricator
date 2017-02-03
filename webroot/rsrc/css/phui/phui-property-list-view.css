@@ -61,7 +61,7 @@
 }
 
 .device .phui-property-list-key,
-.phui-property-list-stacked .phui-property-list-properties
+div.phui-property-list-stacked .phui-property-list-properties
   .phui-property-list-key {
     padding-left: 4px;
     text-align: left;

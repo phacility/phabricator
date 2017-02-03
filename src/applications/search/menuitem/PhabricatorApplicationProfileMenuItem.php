@@ -88,6 +88,12 @@ final class PhabricatorApplicationProfileMenuItem
       ->setName($this->getDisplayName($config))
       ->setIcon($app->getIcon());
 
+    // Don't show tooltip if they've set a custom name
+    $name = $config->getMenuItemProperty('name');
+    if (!strlen($name)) {
+      $item->setTooltip($app->getShortDescription());
+    }
+
     return array(
       $item,
     );

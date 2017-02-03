@@ -45,6 +45,14 @@ final class PhabricatorCommitSearchEngine
       $query->withRepositoryPHIDs($map['repositoryPHIDs']);
     }
 
+    if ($map['packagePHIDs']) {
+      $query->withPackagePHIDs($map['packagePHIDs']);
+    }
+
+    if ($map['unreachable'] !== null) {
+      $query->withUnreachable($map['unreachable']);
+    }
+
     return $query;
   }
 
@@ -78,6 +86,23 @@ final class PhabricatorCommitSearchEngine
         ->setConduitKey('repositories')
         ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
         ->setDatasource(new DiffusionRepositoryDatasource()),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Packages'))
+        ->setKey('packagePHIDs')
+        ->setConduitKey('packages')
+        ->setAliases(array('package', 'packages', 'packagePHID'))
+        ->setDatasource(new PhabricatorOwnersPackageDatasource()),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Unreachable'))
+        ->setKey('unreachable')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Unreachable Commits'),
+          pht('Hide Unreachable Commits'))
+        ->setDescription(
+          pht(
+            'Find or exclude unreachable commits which are not ancestors of '.
+            'any branch, tag, or ref.')),
     );
   }
 
@@ -116,7 +141,8 @@ final class PhabricatorCommitSearchEngine
         $query
           ->setParameter('responsiblePHIDs', array($viewer_phid))
           ->setParameter('statuses', $open)
-          ->setParameter('bucket', $bucket_key);
+          ->setParameter('bucket', $bucket_key)
+          ->setParameter('unreachable', false);
         return $query;
       case 'authored':
         $query

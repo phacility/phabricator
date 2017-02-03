@@ -195,6 +195,14 @@ final class PhabricatorProfileMenuItemConfiguration
     return $this->getBuiltinKey();
   }
 
+  public function getDefaultMenuItemKey() {
+    if ($this->getBuiltinKey()) {
+      return $this->getBuiltinKey();
+    }
+
+    return $this->getPHID();
+  }
+
   public function newPageContent() {
     return $this->getMenuItem()->newPageContent($this);
   }
