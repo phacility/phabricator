@@ -23,6 +23,7 @@ final class PhabricatorRecaptchaConfigOptions
 
     return array(
       $this->newOption('recaptcha.enabled', 'bool', false)
+        ->setLocked(true)
         ->setBoolOptions(
           array(
             pht('Enable Recaptcha'),
@@ -35,6 +36,7 @@ final class PhabricatorRecaptchaConfigOptions
             'failed login attempts. This hinders brute-force attacks against '.
             'user passwords. For more information, see http://recaptcha.net/')),
       $this->newOption('recaptcha.public-key', 'string', null)
+        ->setLocked(true)
         ->setDescription(
           pht('Recaptcha public key, obtained by signing up for Recaptcha.')),
       $this->newOption('recaptcha.private-key', 'string', null)
