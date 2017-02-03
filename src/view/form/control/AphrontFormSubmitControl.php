@@ -2,20 +2,23 @@
 
 final class AphrontFormSubmitControl extends AphrontFormControl {
 
-  private $cancelButton;
+  private $buttons = array();
 
   public function addCancelButton($href, $label = null) {
     if (!$label) {
       $label = pht('Cancel');
     }
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setHref($href)
+      ->setText($label)
+      ->setColor(PHUIButtonView::GREY);
+    $this->addButton($button);
+    return $this;
+  }
 
-    $this->cancelButton = phutil_tag(
-      'a',
-      array(
-        'href' => $href,
-        'class' => 'button grey',
-      ),
-      $label);
+  public function addButton(PHUIButtonView $button) {
+    $this->buttons[] = $button;
     return $this;
   }
 
@@ -38,7 +41,7 @@ final class AphrontFormSubmitControl extends AphrontFormControl {
 
     return array(
       $submit_button,
-      $this->cancelButton,
+      $this->buttons,
     );
   }
 
