@@ -12,15 +12,6 @@ final class PHUIHomeView
   }
 
   protected function getTagContent() {
-    $viewer = $this->getViewer();
-
-    return array(
-      $this->buildMainResponse(),
-      id(new PhabricatorGlobalUploadTargetView())->setUser($viewer),
-    );
-  }
-
-  private function buildMainResponse() {
     require_celerity_resource('phabricator-dashboard-css');
     $viewer = $this->getViewer();
 

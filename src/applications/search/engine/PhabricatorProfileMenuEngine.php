@@ -685,7 +685,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setURI($this->getConfigureURI());
   }
 
-  private function buildItemViewContent(
+  protected function buildItemViewContent(
     PhabricatorProfileMenuItemConfiguration $item) {
     return $item->newPageContent();
   }
