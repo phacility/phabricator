@@ -32,7 +32,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $dashboard_id = celerity_generate_unique_node_id();
     $result = id(new AphrontMultiColumnView())
       ->setID($dashboard_id)
-      ->setFluidlayout(true)
+      ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
 
     if ($this->arrangeMode) {
@@ -43,17 +43,27 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
     foreach ($panel_grid_locations as $column => $panel_column_locations) {
       $panel_phids = $panel_column_locations;
-      $column_panels = array_select_keys($panels, $panel_phids);
+
+      // TODO: This list may contain duplicates when the dashboard itself
+      // does not? Perhaps this is related to T10612. For now, just unique
+      // the list before moving on.
+      $panel_phids = array_unique($panel_phids);
+
       $column_result = array();
-      foreach ($column_panels as $panel) {
-        $column_result[] = id(new PhabricatorDashboardPanelRenderingEngine())
+      foreach ($panel_phids as $panel_phid) {
+        $panel_engine = id(new PhabricatorDashboardPanelRenderingEngine())
           ->setViewer($viewer)
-          ->setPanel($panel)
           ->setDashboardID($dashboard->getID())
           ->setEnableAsyncRendering(true)
           ->setParentPanelPHIDs(array())
-          ->setHeaderMode($h_mode)
-          ->renderPanel();
+          ->setHeaderMode($h_mode);
+
+        $panel = idx($panels, $panel_phid);
+        if ($panel) {
+          $panel_engine->setPanel($panel);
+        }
+
+        $column_result[] = $panel_engine->renderPanel();
       }
       $column_class = $layout_config->getColumnClass(
         $column,
