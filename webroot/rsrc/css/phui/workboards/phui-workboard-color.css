@@ -60,6 +60,10 @@ body.phui-workboard-color .phabricator-side-menu .phui-profile-menu-footer-1 {
     color: rgba({$alphawhite},.8);
 }
 
+.phui-workboard-color .phui-segment-bar-label {
+  color: rgba({$alphawhite},.8);
+}
+
 /* Gradients */
 
 .phui-workboard-gradient-red {

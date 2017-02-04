@@ -26,7 +26,7 @@ JX.behavior('phabricator-tooltips', function() {
 
       JX.Tooltip.show(
         e.getNode('has-tooltip'),
-        data.size || 120,
+        data.size || 160,
         data.align || 'N',
         data.tip);
     });

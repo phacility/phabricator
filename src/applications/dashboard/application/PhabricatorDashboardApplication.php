@@ -30,7 +30,6 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
         'create/' => 'PhabricatorDashboardEditController',
         'copy/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardCopyController',
         'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorDashboardEditController',
-        'install/(?P<id>\d+)/' => 'PhabricatorDashboardInstallController',
         'uninstall/(?P<id>\d+)/' => 'PhabricatorDashboardUninstallController',
         'addpanel/(?P<id>\d+)/' => 'PhabricatorDashboardAddPanelController',
         'movepanel/(?P<id>\d+)/' => 'PhabricatorDashboardMovePanelController',

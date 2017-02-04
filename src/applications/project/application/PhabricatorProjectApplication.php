@@ -7,7 +7,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Get Organized');
+    return pht('Projects, Tags, and Teams');
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {

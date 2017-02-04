@@ -39,17 +39,14 @@ final class PhabricatorPeopleDetailsProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $user = $config->getProfileObject();
-
-    $picture = $user->getProfileImageURI();
-    $name = $user->getUsername();
     $href = urisprintf(
       '/p/%s/',
       $user->getUsername());
 
     $item = $this->newItem()
       ->setHref($href)
-      ->setName($name)
-      ->setProfileImage($picture);
+      ->setName(pht('Profile'))
+      ->setIcon('fa-user');
 
     return array(
       $item,

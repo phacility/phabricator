@@ -68,17 +68,16 @@ final class PhabricatorProjectPointsProfileMenuItem
       ->setLimit($limit + 1)
       ->execute();
 
+    $error = array();
     if (count($tasks) > $limit) {
-      return $this->renderError(
+      $error[] =
         pht(
-          'Too many tasks to compute statistics for (more than %s).',
-          new PhutilNumber($limit)));
+          'Too many tasks (%s).',
+          new PhutilNumber($limit));
     }
 
     if (!$tasks) {
-      return $this->renderError(
-        pht(
-          'This milestone has no tasks yet.'));
+      $error[] = pht('This milestone has no tasks.');
     }
 
     $statuses = array();
@@ -111,14 +110,11 @@ final class PhabricatorProjectPointsProfileMenuItem
     }
 
     if ($no_points == count($tasks)) {
-      return $this->renderError(
-        pht('No tasks have assigned point values.'));
+      $error[] = pht('No tasks have points assigned.');
     }
 
-
     if (!$points_total) {
-      return $this->renderError(
-        pht('All tasks with assigned point values are worth zero points.'));
+      $error[] = pht('No tasks have positive points.');
     }
 
     $label = pht(
@@ -158,6 +154,10 @@ final class PhabricatorProjectPointsProfileMenuItem
         ->setTooltip($tooltip);
     }
 
+    if ($error) {
+      $bar->setLabel(head($error));
+    }
+
     $bar = phutil_tag(
       'div',
       array(
@@ -167,22 +167,6 @@ final class PhabricatorProjectPointsProfileMenuItem
 
     $item = $this->newItem()
       ->appendChild($bar);
-
-    return array(
-      $item,
-    );
-  }
-
-  private function renderError($message) {
-    $message = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-profile-menu-error',
-      ),
-      $message);
-
-    $item = $this->newItem()
-      ->appendChild($message);
 
     return array(
       $item,

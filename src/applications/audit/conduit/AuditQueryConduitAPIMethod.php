@@ -112,7 +112,7 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
           'id'              => $request->getID(),
           'commitPHID'      => $request->getCommitPHID(),
           'auditorPHID'     => $request->getAuditorPHID(),
-          'reasons'         => $request->getAuditReasons(),
+          'reasons'         => array(),
           'status'          => $request->getAuditStatus(),
         );
       }

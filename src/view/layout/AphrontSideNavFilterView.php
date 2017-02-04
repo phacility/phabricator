@@ -204,7 +204,6 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   private function renderFlexNav() {
     require_celerity_resource('phabricator-nav-view-css');
-    require_celerity_resource('phui-profile-menu-css');
 
     $nav_classes = array();
     $nav_classes[] = 'phabricator-nav';
@@ -310,7 +309,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $classes[] = 'phui-navigation-shell';
 
     if ($this->getIsProfileMenu()) {
-      $classes[] = 'phui-profile-menu';
+      $classes[] = 'phui-profile-menu phui-basic-nav';
     } else {
       $classes[] = 'phui-basic-nav';
     }

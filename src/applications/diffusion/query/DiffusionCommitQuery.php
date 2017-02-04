@@ -13,6 +13,8 @@ final class DiffusionCommitQuery
   private $identifierMap;
   private $responsiblePHIDs;
   private $statuses;
+  private $packagePHIDs;
+  private $unreachable;
 
   private $needAuditRequests;
   private $auditIDs;
@@ -124,17 +126,19 @@ final class DiffusionCommitQuery
     return $this;
   }
 
-  public function withStatuses(array $statuses) {
-    $this->statuses = $statuses;
+  public function withPackagePHIDs(array $package_phids) {
+    $this->packagePHIDs = $package_phids;
     return $this;
   }
 
-  public function withAuditStatus($status) {
-    // TODO: Replace callers with `withStatuses()`.
-    return $this->withStatuses(
-      array(
-        $status,
-      ));
+  public function withUnreachable($unreachable) {
+    $this->unreachable = $unreachable;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
+    return $this;
   }
 
   public function withEpochRange($min, $max) {
@@ -498,6 +502,28 @@ final class DiffusionCommitQuery
         $this->statuses);
     }
 
+    if ($this->packagePHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'package.dst IN (%Ls)',
+        $this->packagePHIDs);
+    }
+
+    if ($this->unreachable !== null) {
+      if ($this->unreachable) {
+        $where[] = qsprintf(
+          $conn,
+          '(commit.importStatus & %d) = %d',
+          PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE,
+          PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          '(commit.importStatus & %d) = 0',
+          PhabricatorRepositoryCommit::IMPORTED_UNREACHABLE);
+      }
+    }
+
     return $where;
   }
 
@@ -519,6 +545,10 @@ final class DiffusionCommitQuery
     return (bool)$this->responsiblePHIDs;
   }
 
+  private function shouldJoinOwners() {
+    return (bool)$this->packagePHIDs;
+  }
+
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $join = parent::buildJoinClauseParts($conn);
     $audit_request = new PhabricatorRepositoryAuditRequest();
@@ -537,6 +567,15 @@ final class DiffusionCommitQuery
         $audit_request->getTableName());
     }
 
+    if ($this->shouldJoinOwners()) {
+      $join[] = qsprintf(
+        $conn,
+        'JOIN %T package ON commit.phid = package.src
+          AND package.type = %s',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        DiffusionCommitHasPackageEdgeType::EDGECONST);
+    }
+
     return $join;
   }
 
@@ -546,6 +585,10 @@ final class DiffusionCommitQuery
     }
 
     if ($this->shouldJoinAudit()) {
+      return true;
+    }
+
+    if ($this->shouldJoinOwners()) {
       return true;
     }
 

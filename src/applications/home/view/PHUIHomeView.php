@@ -1,57 +1,17 @@
 <?php
 
-final class PhabricatorHomeMainController extends PhabricatorHomeController {
+final class PHUIHomeView
+  extends AphrontTagView {
 
-  public function shouldAllowPublic() {
-    return true;
+  protected function getTagName() {
+    return null;
   }
 
-  public function isGlobalDragAndDropUploadEnabled() {
-    return true;
+  protected function getTagAttributes() {
+    return array();
   }
 
-  public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-
-    $dashboard = PhabricatorDashboardInstall::getDashboard(
-      $viewer,
-      $viewer->getPHID(),
-      get_class($this->getCurrentApplication()));
-
-    if (!$dashboard) {
-      $dashboard = PhabricatorDashboardInstall::getDashboard(
-        $viewer,
-        PhabricatorHomeApplication::DASHBOARD_DEFAULT,
-        get_class($this->getCurrentApplication()));
-    }
-
-    if ($dashboard) {
-      $content = id(new PhabricatorDashboardRenderingEngine())
-        ->setViewer($viewer)
-        ->setDashboard($dashboard)
-        ->renderDashboard();
-    } else {
-      $content = $this->buildMainResponse();
-    }
-
-    if (!$request->getURIData('only')) {
-      $nav = $this->buildNav();
-      $nav->appendChild(
-        array(
-          $content,
-          id(new PhabricatorGlobalUploadTargetView())->setUser($viewer),
-        ));
-      $content = $nav;
-    }
-
-    return $this->newPage()
-      ->setTitle('Phabricator')
-      ->addClass('phabricator-home')
-      ->appendChild($content);
-
-  }
-
-  private function buildMainResponse() {
+  protected function getTagContent() {
     require_celerity_resource('phabricator-dashboard-css');
     $viewer = $this->getViewer();
 

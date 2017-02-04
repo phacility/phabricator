@@ -21,8 +21,7 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/favorites/' => array(
-        '' => 'PhabricatorFavoritesMainController',
-        '(?P<type>global|personal)/item/' => $this->getProfileMenuRouting(
+        'menu/' => $this->getProfileMenuRouting(
           'PhabricatorFavoritesMenuItemController'),
       ),
     );

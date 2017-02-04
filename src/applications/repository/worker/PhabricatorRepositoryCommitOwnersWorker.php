@@ -28,6 +28,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
   private function triggerOwnerAudits(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     if (!$repository->shouldPublish()) {
       return;
@@ -42,20 +43,29 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $repository,
       $affected_paths);
 
+    $commit->writeOwnersEdges(mpull($affected_packages, 'getPHID'));
+
     if (!$affected_packages) {
       return;
     }
 
-    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-      'commitID = %d',
-      $commit->getID());
-    $commit->attachCommitData($data);
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($commit->getPHID()))
+      ->needCommitData(true)
+      ->needAuditRequests(true)
+      ->executeOne();
+    if (!$commit) {
+      return;
+    }
+
+    $data = $commit->getCommitData();
 
     $author_phid = $data->getCommitDetail('authorPHID');
     $revision_id = $data->getCommitDetail('differential.revisionID');
     if ($revision_id) {
       $revision = id(new DifferentialRevisionQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($viewer)
         ->withIDs(array($revision_id))
         ->needReviewerStatus(true)
         ->executeOne();
@@ -63,13 +73,10 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $revision = null;
     }
 
-    $requests = id(new PhabricatorRepositoryAuditRequest())
-      ->loadAllWhere(
-        'commitPHID = %s',
-        $commit->getPHID());
+    $requests = $commit->getAudits();
     $requests = mpull($requests, null, 'getAuditorPHID');
 
-
+    $auditor_phids = array();
     foreach ($affected_packages as $package) {
       $request = idx($requests, $package->getPHID());
       if ($request) {
@@ -77,43 +84,63 @@ final class PhabricatorRepositoryCommitOwnersWorker
         continue;
       }
 
-      if ($package->getAuditingEnabled()) {
-        $reasons = $this->checkAuditReasons(
-          $commit,
-          $package,
-          $author_phid,
-          $revision);
-
-        if ($reasons) {
-          $audit_status = PhabricatorAuditStatusConstants::AUDIT_REQUIRED;
-        } else {
-          $audit_status = PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
-        }
-      } else {
-        $reasons = array();
-        $audit_status = PhabricatorAuditStatusConstants::NONE;
+      $should_audit = $this->shouldTriggerAudit(
+        $commit,
+        $package,
+        $author_phid,
+        $revision);
+      if (!$should_audit) {
+        continue;
       }
 
-      $relationship = new PhabricatorRepositoryAuditRequest();
-      $relationship->setAuditorPHID($package->getPHID());
-      $relationship->setCommitPHID($commit->getPHID());
-      $relationship->setAuditReasons($reasons);
-      $relationship->setAuditStatus($audit_status);
-
-      $relationship->save();
-
-      $requests[$package->getPHID()] = $relationship;
+      $auditor_phids[] = $package->getPHID();
     }
 
-    $commit->updateAuditStatus($requests);
-    $commit->save();
+    // If none of the packages are triggering audits, we're all done.
+    if (!$auditor_phids) {
+      return;
+    }
+
+    $audit_type = DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE;
+
+    $owners_phid = id(new PhabricatorOwnersApplication())
+      ->getPHID();
+
+    $content_source = $this->newContentSource();
+
+    $xactions = array();
+    $xactions[] = $commit->getApplicationTransactionTemplate()
+      ->setTransactionType($audit_type)
+      ->setNewValue(
+        array(
+          '+' => array_fuse($auditor_phids),
+        ));
+
+    $editor = $commit->getApplicationTransactionEditor()
+      ->setActor($viewer)
+      ->setActingAsPHID($owners_phid)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true)
+      ->setContentSource($content_source);
+
+    $editor->applyTransactions($commit, $xactions);
   }
 
-  private function checkAuditReasons(
+  private function shouldTriggerAudit(
     PhabricatorRepositoryCommit $commit,
     PhabricatorOwnersPackage $package,
     $author_phid,
     $revision) {
+
+    // Don't trigger an audit if auditing isn't enabled for the package.
+    if (!$package->getAuditingEnabled()) {
+      return false;
+    }
+
+    // Trigger an audit if we don't recognize the commit's author.
+    if (!$author_phid) {
+      return true;
+    }
 
     $owner_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
       array(
@@ -121,17 +148,14 @@ final class PhabricatorRepositoryCommitOwnersWorker
       ));
     $owner_phids = array_fuse($owner_phids);
 
-    $reasons = array();
-
-    if (!$author_phid) {
-      $reasons[] = pht('Commit Author Not Recognized');
-    } else if (isset($owner_phids[$author_phid])) {
-      return $reasons;
+    // Don't trigger an audit if the author is a package owner.
+    if (isset($owner_phids[$author_phid])) {
+      return false;
     }
 
+    // Trigger an audit of there is no corresponding revision.
     if (!$revision) {
-      $reasons[] = pht('No Revision Specified');
-      return $reasons;
+      return true;
     }
 
     $accepted_statuses = array(
@@ -157,11 +181,13 @@ final class PhabricatorRepositoryCommitOwnersWorker
       }
     }
 
-    if (!$found_accept) {
-      $reasons[] = pht('Owners Not Involved');
+    // Don't trigger an audit if a package owner already reviewed the
+    // revision.
+    if ($found_accept) {
+      return false;
     }
 
-    return $reasons;
+    return true;
   }
 
 }

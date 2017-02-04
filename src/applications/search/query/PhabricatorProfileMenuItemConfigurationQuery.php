@@ -117,6 +117,7 @@ final class PhabricatorProfileMenuItemConfigurationQuery
         unset($page[$key]);
         continue;
       }
+
       $item->attachProfileObject($profile);
     }
 

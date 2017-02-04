@@ -180,8 +180,6 @@ final class PholioMockImagesView extends AphrontView {
       'pholio-mock-view',
       $this->getBehaviorConfig());
 
-    $mockview = '';
-
     $mock_wrapper = javelin_tag(
       'div',
       array(
@@ -220,7 +218,7 @@ final class PholioMockImagesView extends AphrontView {
       ),
       '');
 
-    $mockview[] = phutil_tag(
+    return phutil_tag(
       'div',
         array(
           'class' => 'pholio-mock-image-container',
@@ -228,7 +226,6 @@ final class PholioMockImagesView extends AphrontView {
         ),
       array($mock_wrapper, $inline_comments_holder));
 
-    return $mockview;
   }
 
   private function getImagePageURI(PholioImage $image, PholioMock $mock) {

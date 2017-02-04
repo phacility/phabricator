@@ -72,8 +72,10 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
     if (!$panel) {
       return $this->renderErrorPanel(
-        pht('Missing Panel'),
-        pht('This panel does not exist.'));
+        pht('Missing or Restricted Panel'),
+        pht(
+          'This panel does not exist, or you do not have permission '.
+          'to see it.'));
     }
 
     $panel_type = $panel->getImplementation();
@@ -166,10 +168,13 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     }
     $icon = id(new PHUIIconView())
       ->setIcon('fa-warning red msr');
+
     $content = id(new PHUIBoxView())
       ->addClass('dashboard-box')
+      ->addMargin(PHUI::MARGIN_MEDIUM)
       ->appendChild($icon)
       ->appendChild($body);
+
     return $this->renderPanelDiv(
       $content,
       $header);
@@ -203,10 +208,17 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       $box->appendChild($content);
     }
 
-    $box->setHeader($header)
+    $box
+      ->setHeader($header)
       ->setID($id)
-      ->addSigil('dashboard-panel')
-      ->setMetadata(array('objectPHID' => $panel->getPHID()));
+      ->addSigil('dashboard-panel');
+
+    if ($panel) {
+      $box->setMetadata(
+        array(
+          'objectPHID' => $panel->getPHID(),
+        ));
+    }
 
     return phutil_tag_div('dashboard-pane', $box);
   }
@@ -242,6 +254,10 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   private function addPanelHeaderActions(
     PHUIHeaderView $header) {
     $panel = $this->getPanel();
+
+    if (!$panel) {
+      return $header;
+    }
 
     $dashboard_id = $this->getDashboardID();
     $edit_uri = id(new PhutilURI(

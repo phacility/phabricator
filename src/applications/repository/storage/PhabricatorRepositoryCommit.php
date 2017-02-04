@@ -11,6 +11,7 @@ final class PhabricatorRepositoryCommit
     PhabricatorMentionableInterface,
     HarbormasterBuildableInterface,
     HarbormasterCircleCIBuildableInterface,
+    HarbormasterBuildkiteBuildableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
@@ -260,6 +261,29 @@ final class PhabricatorRepositoryCommit
     }
 
     return isset($map[$audit->getAuditorPHID()]);
+  }
+
+  public function writeOwnersEdges(array $package_phids) {
+    $src_phid = $this->getPHID();
+    $edge_type = DiffusionCommitHasPackageEdgeType::EDGECONST;
+
+    $editor = new PhabricatorEdgeEditor();
+
+    $dst_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $src_phid,
+      $edge_type);
+
+    foreach ($dst_phids as $dst_phid) {
+      $editor->removeEdge($src_phid, $edge_type, $dst_phid);
+    }
+
+    foreach ($package_phids as $package_phid) {
+      $editor->addEdge($src_phid, $edge_type, $package_phid);
+    }
+
+    $editor->save();
+
+    return $this;
   }
 
   public function getAuditorPHIDsForEdit() {
@@ -563,6 +587,44 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getCircleCIBuildIdentifier() {
+    return $this->getCommitIdentifier();
+  }
+
+
+/* -(  HarbormasterBuildkiteBuildableInterface  )---------------------------- */
+
+
+  public function getBuildkiteBranch() {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $repository = $this->getRepository();
+
+    $branches = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      DiffusionRequest::newFromDictionary(
+        array(
+          'repository' => $repository,
+          'user' => $viewer,
+        )),
+      'diffusion.branchquery',
+      array(
+        'contains' => $this->getCommitIdentifier(),
+        'repository' => $repository->getPHID(),
+      ));
+
+    if (!$branches) {
+      throw new Exception(
+        pht(
+          'Commit "%s" is not an ancestor of any branch head, so it can not '.
+          'be built with Buildkite.',
+          $this->getCommitIdentifier()));
+    }
+
+    $branch = head($branches);
+
+    return 'refs/heads/'.$branch['shortName'];
+  }
+
+  public function getBuildkiteCommit() {
     return $this->getCommitIdentifier();
   }
 

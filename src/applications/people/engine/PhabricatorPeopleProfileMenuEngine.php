@@ -5,6 +5,7 @@ final class PhabricatorPeopleProfileMenuEngine
 
   const ITEM_PROFILE = 'people.profile';
   const ITEM_MANAGE = 'people.manage';
+  const ITEM_PICTURE = 'people.picture';
 
   protected function isMenuEngineConfigurable() {
     return false;
@@ -21,6 +22,10 @@ final class PhabricatorPeopleProfileMenuEngine
     $viewer = $this->getViewer();
 
     $items = array();
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(self::ITEM_PICTURE)
+      ->setMenuItemKey(PhabricatorPeoplePictureProfileMenuItem::MENUITEMKEY);
 
     $items[] = $this->newItem()
       ->setBuiltinKey(self::ITEM_PROFILE)

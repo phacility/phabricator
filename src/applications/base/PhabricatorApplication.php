@@ -596,14 +596,18 @@ abstract class PhabricatorApplication
   protected function getProfileMenuRouting($controller) {
     $edit_route = $this->getEditRoutePattern();
 
+    $mode_route = '(?P<itemEditMode>global|custom)/';
+
     return array(
       '(?P<itemAction>view)/(?P<itemID>[^/]+)/' => $controller,
       '(?P<itemAction>hide)/(?P<itemID>[^/]+)/' => $controller,
       '(?P<itemAction>default)/(?P<itemID>[^/]+)/' => $controller,
       '(?P<itemAction>configure)/' => $controller,
-      '(?P<itemAction>reorder)/' => $controller,
+      '(?P<itemAction>configure)/'.$mode_route => $controller,
+      '(?P<itemAction>reorder)/'.$mode_route => $controller,
       '(?P<itemAction>edit)/'.$edit_route => $controller,
-      '(?P<itemAction>new)/(?<itemKey>[^/]+)/'.$edit_route => $controller,
+      '(?P<itemAction>new)/'.$mode_route.'(?<itemKey>[^/]+)/'.$edit_route
+        => $controller,
       '(?P<itemAction>builtin)/(?<itemID>[^/]+)/'.$edit_route
         => $controller,
     );

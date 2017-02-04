@@ -169,12 +169,15 @@ final class PhabricatorApplicationSearchController
     }
 
     $submit = id(new AphrontFormSubmitControl())
-      ->setValue(pht('Execute Query'));
+      ->setValue(pht('Search'));
 
     if ($run_query && !$named_query && $user->isLoggedIn()) {
-      $submit->addCancelButton(
-        '/search/edit/'.$saved_query->getQueryKey().'/',
-        pht('Save Custom Query...'));
+      $save_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref('/search/edit/'.$saved_query->getQueryKey().'/')
+        ->setText(pht('Save Query'))
+        ->setIcon('fa-floppy-o');
+      $submit->addButton($save_button);
     }
 
     // TODO: A "Create Dashboard Panel" action goes here somewhere once

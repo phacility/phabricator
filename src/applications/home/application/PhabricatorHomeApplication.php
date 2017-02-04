@@ -22,14 +22,16 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/' => 'PhabricatorHomeMainController',
-      '/(?P<only>home)/' => 'PhabricatorHomeMainController',
-      '/home/' => array(
-        'menu/' => array(
-          '' => 'PhabricatorHomeMenuController',
-          '(?P<type>global|personal)/item/' => $this->getProfileMenuRouting(
+      '/' => 'PhabricatorHomeMenuItemController',
+
+      // NOTE: If you visit "/" on mobile, you get just the menu. If you visit
+      // "/home/" on mobile, you get the content. From the normal desktop
+      // UI, there's no difference between these pages.
+
+      '/(?P<content>home)/' => array(
+        '' => 'PhabricatorHomeMenuItemController',
+        'menu/' => $this->getProfileMenuRouting(
           'PhabricatorHomeMenuItemController'),
-        ),
       ),
     );
   }

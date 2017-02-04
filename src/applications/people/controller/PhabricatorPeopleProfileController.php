@@ -60,4 +60,64 @@ abstract class PhabricatorPeopleProfileController
     return $crumbs;
   }
 
+  public function buildProfileHeader() {
+    $user = $this->user;
+    $viewer = $this->getViewer();
+
+    $profile = $user->loadUserProfile();
+    $picture = $user->getProfileImageURI();
+
+    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
+    $profile_title = $profile->getDisplayTitle();
+
+    $roles = array();
+    if ($user->getIsAdmin()) {
+      $roles[] = pht('Administrator');
+    }
+    if ($user->getIsDisabled()) {
+      $roles[] = pht('Disabled');
+    }
+    if (!$user->getIsApproved()) {
+      $roles[] = pht('Not Approved');
+    }
+    if ($user->getIsSystemAgent()) {
+      $roles[] = pht('Bot');
+    }
+    if ($user->getIsMailingList()) {
+      $roles[] = pht('Mailing List');
+    }
+
+    $tag = null;
+    if ($roles) {
+      $tag = id(new PHUITagView())
+        ->setName(implode(', ', $roles))
+        ->addClass('project-view-header-tag')
+        ->setType(PHUITagView::TYPE_SHADE);
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(array($user->getFullName(), $tag))
+      ->setImage($picture)
+      ->setProfileHeader(true)
+      ->addClass('people-profile-header');
+
+    if ($user->getIsDisabled()) {
+      $header->setStatus('fa-ban', 'red', pht('Disabled'));
+    } else {
+      $header->setStatus($profile_icon, 'bluegrey', $profile_title);
+    }
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $user,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    if ($can_edit) {
+      $id = $user->getID();
+      $header->setImageEditURL($this->getApplicationURI("picture/{$id}/"));
+    }
+
+    return $header;
+  }
+
 }

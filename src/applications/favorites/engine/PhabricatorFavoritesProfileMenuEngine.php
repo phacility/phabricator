@@ -8,14 +8,7 @@ final class PhabricatorFavoritesProfileMenuEngine
   }
 
   public function getItemURI($path) {
-    $object = $this->getProfileObject();
-    $custom = $this->getCustomPHID();
-
-    if ($custom) {
-      return "/favorites/personal/item/{$path}";
-    } else {
-      return "/favorites/global/item/{$path}";
-    }
+    return "/favorites/menu/{$path}";
   }
 
   protected function getBuiltinProfileItems($object) {

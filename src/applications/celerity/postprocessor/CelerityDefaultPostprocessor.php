@@ -209,10 +209,7 @@ final class CelerityDefaultPostprocessor
       'menu.profile.icon.disabled' => 'rgba(255,255,255,.4)',
 
       'menu.main.height' => '44px',
-
       'menu.profile.width' => '240px',
-      'menu.profile.width.collapsed' => '88px',
-      'menu.profile.item.height' => '46px',
 
     );
   }

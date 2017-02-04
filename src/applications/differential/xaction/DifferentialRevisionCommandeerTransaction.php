@@ -41,7 +41,7 @@ final class DifferentialRevisionCommandeerTransaction
   }
 
   public function getCommandSummary() {
-    return pht('Commadeer a revision.');
+    return pht('Commandeer a revision.');
   }
 
   public function generateOldValue($object) {
