@@ -60,12 +60,12 @@ final class PhabricatorApplicationProfileMenuItem
     $viewer = $this->getViewer();
     $phid = $config->getMenuItemProperty('application');
 
-    $app = id(new PhabricatorApplicationQuery())
+    $apps = id(new PhabricatorApplicationQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($phid))
-      ->executeOne();
+      ->execute();
 
-    return $app;
+    return head($apps);
   }
 
   protected function newNavigationMenuItems(
