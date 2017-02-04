@@ -255,6 +255,10 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     PHUIHeaderView $header) {
     $panel = $this->getPanel();
 
+    if (!$panel) {
+      return $header;
+    }
+
     $dashboard_id = $this->getDashboardID();
     $edit_uri = id(new PhutilURI(
       '/dashboard/panel/edit/'.$panel->getID().'/'));
