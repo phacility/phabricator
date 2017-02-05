@@ -7,6 +7,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   const HEADER_MODE_EDIT   = 'edit';
 
   private $panel;
+  private $panelPHID;
   private $viewer;
   private $enableAsyncRendering;
   private $parentPanelPHIDs;
@@ -64,6 +65,15 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
   public function getPanel() {
     return $this->panel;
+  }
+
+  public function setPanelPHID($panel_phid) {
+    $this->panelPHID = $panel_phid;
+    return $this;
+  }
+
+  public function getPanelPHID() {
+    return $this->panelPHID;
   }
 
   public function renderPanel() {
@@ -255,32 +265,40 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     PHUIHeaderView $header) {
     $panel = $this->getPanel();
 
-    if (!$panel) {
-      return $header;
-    }
-
     $dashboard_id = $this->getDashboardID();
-    $edit_uri = id(new PhutilURI(
-      '/dashboard/panel/edit/'.$panel->getID().'/'));
-    if ($dashboard_id) {
-      $edit_uri->setQueryParam('dashboardID', $dashboard_id);
+
+    if ($panel) {
+      $panel_id = $panel->getID();
+
+      $edit_uri = "/dashboard/panel/edit/{$panel_id}/";
+      $edit_uri = new PhutilURI($edit_uri);
+      if ($dashboard_id) {
+        $edit_uri->setQueryParam('dashboardID', $dashboard_id);
+      }
+
+      $action_edit = id(new PHUIIconView())
+        ->setIcon('fa-pencil')
+        ->setWorkflow(true)
+        ->setHref((string)$edit_uri);
+
+      $header->addActionItem($action_edit);
     }
-    $action_edit = id(new PHUIIconView())
-      ->setIcon('fa-pencil')
-      ->setWorkflow(true)
-      ->setHref((string)$edit_uri);
-    $header->addActionItem($action_edit);
 
     if ($dashboard_id) {
-      $uri = id(new PhutilURI(
-        '/dashboard/removepanel/'.$dashboard_id.'/'))
-        ->setQueryParam('panelPHID', $panel->getPHID());
+      $panel_phid = $this->getPanelPHID();
+
+      $remove_uri = "/dashboard/removepanel/{$dashboard_id}/";
+      $remove_uri = id(new PhutilURI($remove_uri))
+        ->setQueryParam('panelPHID', $panel_phid);
+
       $action_remove = id(new PHUIIconView())
         ->setIcon('fa-trash-o')
-        ->setHref((string)$uri)
+        ->setHref((string)$remove_uri)
         ->setWorkflow(true);
+
       $header->addActionItem($action_remove);
     }
+
     return $header;
   }
 
