@@ -55,6 +55,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
           ->setViewer($viewer)
           ->setDashboardID($dashboard->getID())
           ->setEnableAsyncRendering(true)
+          ->setPanelPHID($panel_phid)
           ->setParentPanelPHIDs(array())
           ->setHeaderMode($h_mode);
 
