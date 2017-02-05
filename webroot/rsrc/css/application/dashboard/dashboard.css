@@ -14,6 +14,27 @@
   margin: 0 0 16px 0;
 }
 
+.dashboard-view .phui-box-border {
+  border-color: rgba({$alphablue},.2);
+  border-bottom-color: rgba({$alphablue},.3);
+}
+
+.dashboard-view .phui-header-shell {
+  padding-top: 4px;
+  padding-bottom: 16px;
+}
+
+.dashboard-view .phui-header-header {
+  color: #000;
+}
+
+.dashboard-view .phui-oi-empty .phui-info-view {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  font-style: italic;
+  color: {$lightgreytext};
+}
+
 .dashboard-view .phui-object-box .phui-object-box {
   margin: 0;
 }

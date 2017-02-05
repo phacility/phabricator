@@ -6,6 +6,10 @@
   background-color: transparent;
 }
 
+.phui-workboard-no-color {
+  background-color: #fff;
+}
+
 .phui-workboard-color .phui-crumbs-view {
   background-color: rgba({$alphagrey},.15);
   border: none;

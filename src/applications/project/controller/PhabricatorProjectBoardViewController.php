@@ -452,12 +452,14 @@ final class PhabricatorProjectBoardViewController
         ));
 
     $background = $project->getDisplayWorkboardBackgroundColor();
+    require_celerity_resource('phui-workboard-color-css');
     if ($background !== null) {
-      require_celerity_resource('phui-workboard-color-css');
       $background_color_class = "phui-workboard-{$background}";
 
       $page->addClass('phui-workboard-color');
       $page->addClass($background_color_class);
+    } else {
+      $page->addClass('phui-workboard-no-color');
     }
 
     return $page;
