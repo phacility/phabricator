@@ -67,6 +67,8 @@
   display: block;
   text-decoration: none;
   color: {$darkbluetext};
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .action-has-icon button.phabricator-action-view-item,
