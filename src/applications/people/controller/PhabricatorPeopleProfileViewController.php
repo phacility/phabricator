@@ -42,6 +42,7 @@ final class PhabricatorPeopleProfileViewController
     $home = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setMainColumn(
         array(
           $properties,
@@ -87,8 +88,13 @@ final class PhabricatorPeopleProfileViewController
       return null;
     }
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('User Details'));
+
     $view = id(new PHUIObjectBoxView())
       ->appendChild($view)
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addClass('project-view-properties');
 
     return $view;
@@ -143,7 +149,7 @@ final class PhabricatorPeopleProfileViewController
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($list)
-      ->setBackground(PHUIObjectBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $box;
   }
@@ -217,7 +223,7 @@ final class PhabricatorPeopleProfileViewController
       ->setHeader($header)
       ->appendChild($day_view)
       ->addClass('calendar-profile-box')
-      ->setBackground(PHUIObjectBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $box;
   }
@@ -317,7 +323,7 @@ final class PhabricatorPeopleProfileViewController
       ->setHeader($header)
       ->addClass('project-view-badges')
       ->appendChild($flex)
-      ->setBackground(PHUIObjectBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $box;
   }

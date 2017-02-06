@@ -14,11 +14,6 @@
   margin: 0 0 16px 0;
 }
 
-.dashboard-view .phui-box-border {
-  border-color: rgba({$alphablue},.2);
-  border-bottom-color: rgba({$alphablue},.3);
-}
-
 .dashboard-view .phui-header-shell {
   padding-top: 4px;
   padding-bottom: 16px;

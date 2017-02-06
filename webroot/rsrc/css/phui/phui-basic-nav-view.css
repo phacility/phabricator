@@ -27,10 +27,6 @@
   display: none;
 }
 
-.phabricator-home .phui-basic-nav .phabricator-side-menu {
-  background: transparent;
-}
-
 .device-phone.phabricator-home .phui-basic-nav .phabricator-side-menu
   .phui-list-item-selected {
     background-color: transparent;
