@@ -40,6 +40,7 @@
 
 .phui-basic-nav.phui-navigation-shell .phabricator-nav-local {
   width: 205px;
+  max-width: 205px;
   padding-top: 12px;
   padding-right: 8px;
 }
