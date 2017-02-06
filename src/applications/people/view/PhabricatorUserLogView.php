@@ -43,12 +43,6 @@ final class PhabricatorUserLogView extends AphrontView {
             'href' => $base_uri.'?ip='.$ip.'#R',
           ),
           $ip);
-        $session = phutil_tag(
-          'a',
-          array(
-            'href' => $base_uri.'?sessions='.$ip.'#R',
-          ),
-          $session);
       }
 
       $action = $log->getAction();
