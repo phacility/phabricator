@@ -335,7 +335,8 @@ final class DiffusionRepositoryClusterEngine extends Phobject {
         pht(
           'Failed to acquire write lock after waiting %s second(s). You '.
           'may be able to retry later.',
-          new PhutilNumber($lock_wait)));
+          new PhutilNumber($lock_wait)),
+        $ex);
     }
 
     $versions = PhabricatorRepositoryWorkingCopyVersion::loadVersions(
