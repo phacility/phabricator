@@ -20,7 +20,8 @@ final class PhabricatorDashboardAddPanelController
       return new Aphront404Response();
     }
 
-    $redirect_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+    $redirect_uri = $this->getApplicationURI(
+      'arrange/'.$dashboard->getID().'/');
 
     $v_panel = $request->getStr('panel');
     $e_panel = true;

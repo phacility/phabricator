@@ -117,7 +117,7 @@ final class PhabricatorDashboardEditController
           ->setContentSourceFromRequest($request)
           ->applyTransactions($dashboard, $xactions);
 
-        $uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+        $uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
 
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
@@ -351,7 +351,7 @@ final class PhabricatorDashboardEditController
       ->setContentSourceFromRequest($request)
       ->applyTransactions($dashboard, $xactions);
 
-    $manage_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+    $manage_uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
 
     return id(new AphrontRedirectResponse())
       ->setURI($manage_uri);

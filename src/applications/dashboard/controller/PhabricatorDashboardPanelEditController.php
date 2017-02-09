@@ -26,7 +26,7 @@ final class PhabricatorDashboardPanelEditController
         return new Aphront404Response();
       }
 
-      $manage_uri = $this->getApplicationURI('manage/'.$dashboard_id.'/');
+      $manage_uri = $this->getApplicationURI('arrange/'.$dashboard_id.'/');
     }
 
     if ($id) {
@@ -372,7 +372,7 @@ final class PhabricatorDashboardPanelEditController
 
     $viewer = $request->getUser();
 
-    $manage_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+    $manage_uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
 
     return $this->newDialog()
       ->setTitle(pht('Copy Panel?'))

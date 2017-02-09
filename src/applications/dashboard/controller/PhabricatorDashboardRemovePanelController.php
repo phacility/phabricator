@@ -43,7 +43,7 @@ final class PhabricatorDashboardRemovePanelController
     }
 
     $redirect_uri = $this->getApplicationURI(
-      'manage/'.$dashboard->getID().'/');
+      'arrange/'.$dashboard->getID().'/');
     $layout_config = $dashboard->getLayoutConfigObject();
 
     if ($request->isFormPost()) {
