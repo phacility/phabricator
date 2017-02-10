@@ -433,7 +433,7 @@ return array(
     'rsrc/js/application/passphrase/passphrase-credential-control.js' => '3cb0b2fc',
     'rsrc/js/application/pholio/behavior-pholio-mock-edit.js' => 'bee502c8',
     'rsrc/js/application/pholio/behavior-pholio-mock-view.js' => 'fbe497e7',
-    'rsrc/js/application/phortune/behavior-stripe-payment-form.js' => '3f5d6dbf',
+    'rsrc/js/application/phortune/behavior-stripe-payment-form.js' => 'a6b98425',
     'rsrc/js/application/phortune/behavior-test-payment-form.js' => 'fc91ab6c',
     'rsrc/js/application/phortune/phortune-credit-card-form.js' => '2290aeef',
     'rsrc/js/application/policy/behavior-policy-control.js' => 'd0c516d5',
@@ -712,7 +712,7 @@ return array(
     'javelin-behavior-select-on-click' => '4e3e79a6',
     'javelin-behavior-setup-check-https' => '491416b3',
     'javelin-behavior-slowvote-embed' => '887ad43f',
-    'javelin-behavior-stripe-payment-form' => '3f5d6dbf',
+    'javelin-behavior-stripe-payment-form' => 'a6b98425',
     'javelin-behavior-test-payment-form' => 'fc91ab6c',
     'javelin-behavior-time-typeahead' => '522431f7',
     'javelin-behavior-toggle-class' => '92b9ec77',
@@ -1160,11 +1160,6 @@ return array(
       'javelin-util',
       'javelin-workflow',
       'javelin-stratcom',
-    ),
-    '3f5d6dbf' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'phortune-credit-card-form',
     ),
     '40a6a403' => array(
       'javelin-install',
@@ -1760,6 +1755,11 @@ return array(
       'javelin-util',
       'phuix-icon-view',
       'phabricator-busy',
+    ),
+    'a6b98425' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'phortune-credit-card-form',
     ),
     'a6f7a73b' => array(
       'javelin-behavior',

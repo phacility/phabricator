@@ -6,10 +6,11 @@
  */
 
 JX.behavior('stripe-payment-form', function(config) {
-  Stripe.setPublishableKey(config.stripePublishableKey);
 
   function onsubmit(card_data) {
     var errors = [];
+
+    Stripe.setPublishableKey(config.stripePublishableKey);
 
     if (!Stripe.validateCardNumber(card_data.number)) {
       errors.push('cc:invalid:number');
