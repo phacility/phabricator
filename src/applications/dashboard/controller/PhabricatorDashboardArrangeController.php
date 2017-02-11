@@ -34,8 +34,7 @@ final class PhabricatorDashboardArrangeController
     $info_view = null;
     if (!$can_edit) {
       $no_edit = pht(
-        'You do not have permission to edit this dashboard. If you want to '.
-        'make changes, make a copy first.');
+        'You do not have permission to edit this dashboard.');
 
       $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
