@@ -11,6 +11,7 @@
   /* When an action list view appears inside a dropdown menu, don't hide it
      by default. */
   display: block;
+  padding: 0;
 }
 
 .device .phabricator-action-list-view.phabricator-action-list-toggle,
@@ -18,7 +19,7 @@
   .phabricator-action-list-view.phabricator-action-list-toggle {
   display: block;
   width: 200px;
-  border: 1px solid {$lightblueborder};
+  border: 1px solid {$lightgreyborder};
   border-radius: 3px;
   position: absolute;
   right: 16px;
@@ -56,20 +57,57 @@
   min-width: 0;
 }
 
-.phabricator-action-view button.phabricator-action-view-item,
-.phabricator-action-view-item {
-  padding: 4px 4px 4px 28px;
-  display: block;
-  text-decoration: none;
+.phabricator-action-view button.phabricator-action-view-item .phui-icon-view {
   color: {$darkbluetext};
 }
 
-.phabricator-action-view-label .phabricator-action-view-item {
-  font-size: {$normalfontsize};
+.phabricator-action-view button.phabricator-action-view-item,
+.phabricator-action-view-item {
+  padding: 4px 8px 6px 8px;
+  display: block;
+  text-decoration: none;
+  color: {$darkbluetext};
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.action-has-icon button.phabricator-action-view-item,
+.action-has-icon .phabricator-action-view-item {
+  padding: 4px 4px 4px 28px;
+}
+
+.device-desktop .phabricator-action-view-href:hover
+  .phabricator-action-view-item {
+    text-decoration: none;
+    background: rgba({$alphablue}, .08);
+    color: {$sky};
+    border-radius: 3px;
+}
+
+.device-desktop .phabricator-action-view-href:hover
+  .phabricator-action-view-icon {
+    color: {$sky};
+}
+
+.device-desktop .phabricator-action-view-href.action-item-red:hover
+  .phabricator-action-view-item {
+    background-color: {$sh-redbackground};
+    color: {$sh-redtext};
+}
+
+.device-desktop .phabricator-action-view-href.action-item-red:hover
+  .phabricator-action-view-icon {
+    color: {$red};
+}
+
+.phabricator-action-view-label .phabricator-action-view-item,
+.phabricator-action-view-type-label .phabricator-action-view-item {
+  font-size: {$smallerfontsize};
   font-weight: bold;
   color: {$bluetext};
   padding: 4px 8px 6px 8px;
   display: block;
+  text-transform: uppercase;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -87,19 +125,9 @@
   width: 14px;
   height: 14px;
   position: absolute;
-  top: 8px;
+  top: 7px;
   left: 8px;
   text-align: center;
-}
-
-.device-desktop .phabricator-action-view:hover .phabricator-action-view-item {
-  text-decoration: none;
-  background-color: {$sky};
-  color: #fff;
-}
-
-.device-desktop .phabricator-action-view:hover .phabricator-action-view-icon {
-  color: #fff;
 }
 
 .phabricator-action-view-disabled .phabricator-action-view-item,
@@ -108,16 +136,12 @@
 }
 
 .phabricator-action-view-selected {
-  border-left: 3px solid {$sky};
-  background: {$hoverblue};
+  background: {$sh-violetbackground};
+  border-radius: 3px;
 }
 
-.phabricator-action-view-selected .phabricator-action-view-item {
-  padding-left: 25px;
-}
-
-.phabricator-action-view-selected .phabricator-action-view-icon {
-  left: 6px;
+.phabricator-action-view-selected:hover a {
+  text-decoration: none;
 }
 
 .phabricator-action-view button[disabled] {
@@ -134,4 +158,9 @@
   button.phabricator-action-view-icon {
   background-color: {$greybackground};
   color: {$lightgreytext};
+}
+
+.phabricator-action-view-type-divider {
+  margin-top: 8px;
+  border-top: 1px solid {$thinblueborder};
 }

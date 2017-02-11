@@ -20,6 +20,10 @@ final class DiffusionRepositoryEditEngine
     return false;
   }
 
+  public function isDefaultQuickCreateEngine() {
+    return true;
+  }
+
   public function getEngineName() {
     return pht('Repositories');
   }

@@ -498,4 +498,22 @@ final class PhabricatorAuditTransaction
     }
     return $tags;
   }
+
+  public function shouldDisplayGroupWith(array $group) {
+    // Make the "This commit now requires audit." state message stand alone.
+    $type_state = DiffusionCommitStateTransaction::TRANSACTIONTYPE;
+
+    if ($this->getTransactionType() == $type_state) {
+      return false;
+    }
+
+    foreach ($group as $xaction) {
+      if ($xaction->getTransactionType() == $type_state) {
+        return false;
+      }
+    }
+
+    return parent::shouldDisplayGroupWith($group);
+  }
+
 }

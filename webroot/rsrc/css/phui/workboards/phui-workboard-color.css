@@ -6,6 +6,10 @@
   background-color: transparent;
 }
 
+.phui-workboard-no-color {
+  background-color: #fff;
+}
+
 .phui-workboard-color .phui-crumbs-view {
   background-color: rgba({$alphagrey},.15);
   border: none;
@@ -58,6 +62,10 @@ body.phui-workboard-color .phabricator-side-menu .phui-profile-menu-footer-1 {
 .phui-workboard-color .phui-profile-menu .phabricator-side-menu
   .phui-list-item-href .phui-list-item-icon {
     color: rgba({$alphawhite},.8);
+}
+
+.phui-workboard-color .phui-segment-bar-label {
+  color: rgba({$alphawhite},.8);
 }
 
 /* Gradients */

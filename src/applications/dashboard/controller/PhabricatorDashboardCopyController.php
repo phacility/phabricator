@@ -16,7 +16,7 @@ final class PhabricatorDashboardCopyController
       return new Aphront404Response();
     }
 
-    $manage_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+    $cancel_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
 
     if ($request->isFormPost()) {
 
@@ -45,8 +45,8 @@ final class PhabricatorDashboardCopyController
         ->setContinueOnNoEffect(true)
         ->applyTransactions($copy, $xactions);
 
-      $manage_uri = $this->getApplicationURI('edit/'.$copy->getID().'/');
-      return id(new AphrontRedirectResponse())->setURI($manage_uri);
+      $cancel_uri = $this->getApplicationURI('edit/'.$copy->getID().'/');
+      return id(new AphrontRedirectResponse())->setURI($cancel_uri);
     }
 
     return $this->newDialog()
@@ -55,7 +55,7 @@ final class PhabricatorDashboardCopyController
         pht(
           'Create a copy of the dashboard "%s"?',
           phutil_tag('strong', array(), $dashboard->getName())))
-      ->addCancelButton($manage_uri)
+      ->addCancelButton($cancel_uri)
       ->addSubmitButton(pht('Create Copy'));
   }
 

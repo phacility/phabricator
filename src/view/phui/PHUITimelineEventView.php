@@ -606,8 +606,8 @@ final class PHUITimelineEventView extends AphrontView {
 
       $items[] = id(new PhabricatorActionView())
         ->setIcon('fa-quote-left')
+        ->setName(pht('Quote Comment'))
         ->setHref('#')
-        ->setName(pht('Quote'))
         ->addSigil('transaction-quote')
         ->setMetadata(
           array(
@@ -619,9 +619,9 @@ final class PHUITimelineEventView extends AphrontView {
 
     if ($this->getIsNormalComment()) {
       $items[] = id(new PhabricatorActionView())
-        ->setIcon('fa-cutlery')
+        ->setIcon('fa-code')
         ->setHref('/transactions/raw/'.$xaction_phid.'/')
-        ->setName(pht('View Raw'))
+        ->setName(pht('View Remarkup'))
         ->addSigil('transaction-raw')
         ->setMetadata(
           array(
@@ -646,25 +646,29 @@ final class PHUITimelineEventView extends AphrontView {
       }
     }
 
-    if ($this->getIsRemovable()) {
-      $items[] = id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setHref('/transactions/remove/'.$xaction_phid.'/')
-        ->setName(pht('Remove Comment'))
-        ->addSigil('transaction-remove')
-        ->setMetadata(
-          array(
-            'anchor' => $anchor,
-          ));
-
-    }
-
     if ($this->getIsEdited()) {
       $items[] = id(new PhabricatorActionView())
         ->setIcon('fa-list')
         ->setHref('/transactions/history/'.$xaction_phid.'/')
         ->setName(pht('View Edit History'))
         ->setWorkflow(true);
+    }
+
+    if ($this->getIsRemovable()) {
+      $items[] = id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER);
+
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-trash-o')
+        ->setHref('/transactions/remove/'.$xaction_phid.'/')
+        ->setName(pht('Remove Comment'))
+        ->setColor(PhabricatorActionView::RED)
+        ->addSigil('transaction-remove')
+        ->setMetadata(
+          array(
+            'anchor' => $anchor,
+          ));
+
     }
 
     return $items;

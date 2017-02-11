@@ -31,7 +31,6 @@ final class PhabricatorHelpDocumentationController
       $list->addItem(
         id(new PHUIObjectItemView())
           ->setHeader($item->getName())
-          ->setWorkflow($item->getWorkflow())
           ->setHref($item->getHref()));
     }
 

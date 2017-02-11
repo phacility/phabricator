@@ -166,7 +166,7 @@ final class PhabricatorPasteSearchEngine
         $preview);
 
       $created = phabricator_datetime($paste->getDateCreated(), $viewer);
-      $line_count = count($lines);
+      $line_count = $paste->getSnippet()->getContentLineCount();
       $line_count = pht(
         '%s Line(s)',
         new PhutilNumber($line_count));

@@ -93,6 +93,10 @@ body .phui-header-shell.phui-bleed-header
   color: {$darkbluetext};
 }
 
+.phui-box-blue-property .phui-header-view .phui-header-header a {
+  color: {$bluetext};
+}
+
 .device-desktop .phui-header-view .phui-header-header a:hover {
   text-decoration: none;
   color: {$blue};

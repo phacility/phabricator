@@ -26,6 +26,7 @@
   padding-bottom: 1px;
   padding-left: 8px;
   width: 100%;
+  word-break: break-all;
 }
 
 .diffusion-browse-type-form {

@@ -91,6 +91,7 @@ final class PhabricatorDashboardTabsPanelType
           ->setEnableAsyncRendering(true)
           ->setParentPanelPHIDs($parent_phids)
           ->setPanel($panel)
+          ->setPanelPHID($panel->getPHID())
           ->setHeaderMode($no_headers)
           ->renderPanel();
       } else {

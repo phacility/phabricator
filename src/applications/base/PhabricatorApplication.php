@@ -12,8 +12,6 @@ abstract class PhabricatorApplication
   extends Phobject
   implements PhabricatorPolicyInterface {
 
-  const MAX_STATUS_ITEMS      = 100;
-
   const GROUP_CORE            = 'core';
   const GROUP_UTILITIES       = 'util';
   const GROUP_ADMIN           = 'admin';
@@ -172,41 +170,40 @@ abstract class PhabricatorApplication
 
     $articles = $this->getHelpDocumentationArticles($viewer);
     if ($articles) {
-      $items[] = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL)
-        ->setName(pht('%s Documentation', $this->getName()));
       foreach ($articles as $article) {
-        $item = id(new PHUIListItemView())
+        $item = id(new PhabricatorActionView())
           ->setName($article['name'])
-          ->setIcon('fa-book')
           ->setHref($article['href'])
+          ->addSigil('help-item')
           ->setOpenInNewWindow(true);
-
         $items[] = $item;
       }
     }
 
     $command_specs = $this->getMailCommandObjects();
     if ($command_specs) {
-      $items[] = id(new PHUIListItemView())
-        ->setType(PHUIListItemView::TYPE_LABEL)
-        ->setName(pht('Email Help'));
       foreach ($command_specs as $key => $spec) {
         $object = $spec['object'];
 
         $class = get_class($this);
         $href = '/applications/mailcommands/'.$class.'/'.$key.'/';
-
-        $item = id(new PHUIListItemView())
+        $item = id(new PhabricatorActionView())
           ->setName($spec['name'])
-          ->setIcon('fa-envelope-o')
           ->setHref($href)
+          ->addSigil('help-item')
           ->setOpenInNewWindow(true);
         $items[] = $item;
       }
     }
 
-    return $items;
+    if ($items) {
+      $divider = id(new PhabricatorActionView())
+        ->addSigil('help-item')
+        ->setType(PhabricatorActionView::TYPE_DIVIDER);
+      array_unshift($items, $divider);
+    }
+
+    return array_values($items);
   }
 
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
@@ -274,20 +271,6 @@ abstract class PhabricatorApplication
 
 
   /**
-   * Render status elements (like "3 Waiting Reviews") for application list
-   * views. These provide a way to alert users to new or pending action items
-   * in applications.
-   *
-   * @param PhabricatorUser Viewing user.
-   * @return list<PhabricatorApplicationStatusView> Application status elements.
-   * @task ui
-   */
-  public function loadStatus(PhabricatorUser $user) {
-    return array();
-  }
-
-
-  /**
    * You can provide an optional piece of flavor text for the application. This
    * is currently rendered in application launch views if the application has no
    * status elements.
@@ -311,23 +294,6 @@ abstract class PhabricatorApplication
    */
   public function buildMainMenuItems(
     PhabricatorUser $user,
-    PhabricatorController $controller = null) {
-    return array();
-  }
-
-
-  /**
-   * Build extra items for the main menu. Generally, this is used to render
-   * static dropdowns.
-   *
-   * @param  PhabricatorUser    The viewing user.
-   * @param  AphrontController  The current controller. May be null for special
-   *                            pages like 404, exception handlers, etc.
-   * @return view               List of menu items.
-   * @task ui
-   */
-  public function buildMainMenuExtraNodes(
-    PhabricatorUser $viewer,
     PhabricatorController $controller = null) {
     return array();
   }
@@ -630,14 +596,18 @@ abstract class PhabricatorApplication
   protected function getProfileMenuRouting($controller) {
     $edit_route = $this->getEditRoutePattern();
 
+    $mode_route = '(?P<itemEditMode>global|custom)/';
+
     return array(
       '(?P<itemAction>view)/(?P<itemID>[^/]+)/' => $controller,
       '(?P<itemAction>hide)/(?P<itemID>[^/]+)/' => $controller,
       '(?P<itemAction>default)/(?P<itemID>[^/]+)/' => $controller,
       '(?P<itemAction>configure)/' => $controller,
-      '(?P<itemAction>reorder)/' => $controller,
+      '(?P<itemAction>configure)/'.$mode_route => $controller,
+      '(?P<itemAction>reorder)/'.$mode_route => $controller,
       '(?P<itemAction>edit)/'.$edit_route => $controller,
-      '(?P<itemAction>new)/(?<itemKey>[^/]+)/'.$edit_route => $controller,
+      '(?P<itemAction>new)/'.$mode_route.'(?<itemKey>[^/]+)/'.$edit_route
+        => $controller,
       '(?P<itemAction>builtin)/(?<itemID>[^/]+)/'.$edit_route
         => $controller,
     );

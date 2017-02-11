@@ -5,11 +5,6 @@ final class PhabricatorFavoritesMenuItemController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $type = $request->getURIData('type');
-    $custom_phid = null;
-    if ($type == 'personal') {
-      $custom_phid = $viewer->getPHID();
-    }
 
     $application = 'PhabricatorFavoritesApplication';
     $favorites = id(new PhabricatorApplicationQuery())
@@ -20,8 +15,9 @@ final class PhabricatorFavoritesMenuItemController
 
     $engine = id(new PhabricatorFavoritesProfileMenuEngine())
       ->setProfileObject($favorites)
-      ->setCustomPHID($custom_phid)
-      ->setController($this);
+      ->setCustomPHID($viewer->getPHID())
+      ->setController($this)
+      ->setShowNavigation(false);
 
     return $engine->buildResponse();
   }

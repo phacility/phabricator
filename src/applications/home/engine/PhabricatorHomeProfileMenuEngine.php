@@ -7,15 +7,26 @@ final class PhabricatorHomeProfileMenuEngine
     return true;
   }
 
-  protected function getItemURI($path) {
-    $object = $this->getProfileObject();
-    $custom = $this->getCustomPHID();
+  public function getItemURI($path) {
+    return "/home/menu/{$path}";
+  }
 
-    if ($custom) {
-      return "/home/menu/personal/item/{$path}";
-    } else {
-      return "/home/menu/global/item/{$path}";
-    }
+  protected function buildItemViewContent(
+    PhabricatorProfileMenuItemConfiguration $item) {
+    $viewer = $this->getViewer();
+
+    // Add content to the document so that you can drag-and-drop files onto
+    // the home page or any home dashboard to upload them.
+
+    $upload = id(new PhabricatorGlobalUploadTargetView())
+      ->setUser($viewer);
+
+    $content = parent::buildItemViewContent($item);
+
+    return array(
+      $content,
+      $upload,
+    );
   }
 
   protected function getBuiltinProfileItems($object) {
@@ -30,13 +41,23 @@ final class PhabricatorHomeProfileMenuEngine
       ->withLaunchable(true)
       ->execute();
 
+    // Default Home Dashboard
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_HOME)
+      ->setMenuItemKey(PhabricatorHomeProfileMenuItem::MENUITEMKEY);
+
+    $items[] = $this->newItem()
+      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_APPS_LABEL)
+      ->setMenuItemKey(PhabricatorLabelProfileMenuItem::MENUITEMKEY)
+      ->setMenuItemProperties(array('name' => pht('Applications')));
+
     foreach ($applications as $application) {
       if (!$application->isPinnedByDefault($viewer)) {
         continue;
       }
 
       $properties = array(
-        'name' => $application->getName(),
+        'name' => '',
         'application' => $application->getPHID(),
       );
 
@@ -46,11 +67,12 @@ final class PhabricatorHomeProfileMenuEngine
         ->setMenuItemProperties($properties);
     }
 
-    // Single Manage Item, switches URI based on admin/user
+    // Hotlink to More Applications Launcher...
     $items[] = $this->newItem()
-      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_MANAGE)
-      ->setMenuItemKey(
-        PhabricatorHomeManageProfileMenuItem::MENUITEMKEY);
+      ->setBuiltinKey(PhabricatorHomeConstants::ITEM_LAUNCHER)
+      ->setMenuItemKey(PhabricatorHomeLauncherProfileMenuItem::MENUITEMKEY);
+
+    $items[] = $this->newManageItem();
 
     return $items;
   }

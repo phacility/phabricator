@@ -3,13 +3,21 @@
 final class PhabricatorHomeMenuItemController
   extends PhabricatorHomeController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $type = $request->getURIData('type');
-    $custom_phid = null;
-    if ($type == 'personal') {
-      $custom_phid = $viewer->getPHID();
-    }
+
+    // Test if we should show mobile users the menu or the page content:
+    // if you visit "/", you just get the menu. If you visit "/home/", you
+    // get the content.
+    $is_content = $request->getURIData('content');
 
     $application = 'PhabricatorHomeApplication';
     $home_app = id(new PhabricatorApplicationQuery())
@@ -20,8 +28,13 @@ final class PhabricatorHomeMenuItemController
 
     $engine = id(new PhabricatorHomeProfileMenuEngine())
       ->setProfileObject($home_app)
-      ->setCustomPHID($custom_phid)
-      ->setController($this);
+      ->setCustomPHID($viewer->getPHID())
+      ->setController($this)
+      ->setShowContentCrumbs(false);
+
+    if (!$is_content) {
+      $engine->addContentPageClass('phabricator-home');
+    }
 
     return $engine->buildResponse();
   }

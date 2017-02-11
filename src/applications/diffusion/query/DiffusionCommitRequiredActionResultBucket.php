@@ -34,6 +34,11 @@ final class DiffusionCommitRequiredActionResultBucket
       ->setObjects($this->filterConcernRaised($phids));
 
     $groups[] = $this->newGroup()
+      ->setName(pht('Needs Verification'))
+      ->setNoDataString(pht('No commits are awaiting your verification.'))
+      ->setObjects($this->filterNeedsVerification($phids));
+
+    $groups[] = $this->newGroup()
       ->setName(pht('Ready to Audit'))
       ->setNoDataString(pht('No commits are waiting for you to audit them.'))
       ->setObjects($this->filterShouldAudit($phids));
@@ -82,6 +87,36 @@ final class DiffusionCommitRequiredActionResultBucket
     return $results;
   }
 
+  private function filterNeedsVerification(array $phids) {
+    $results = array();
+    $objects = $this->objects;
+
+    $status_verify = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
+    $has_concern = array(
+      PhabricatorAuditStatusConstants::CONCERNED,
+    );
+    $has_concern = array_fuse($has_concern);
+
+    foreach ($objects as $key => $object) {
+      if (isset($phids[$object->getAuthorPHID()])) {
+        continue;
+      }
+
+      if ($object->getAuditStatus() != $status_verify) {
+        continue;
+      }
+
+      if (!$this->hasAuditorsWithStatus($object, $phids, $has_concern)) {
+        continue;
+      }
+
+      $results[$key] = $object;
+      unset($this->objects[$key]);
+    }
+
+    return $results;
+  }
+
   private function filterShouldAudit(array $phids) {
     $results = array();
     $objects = $this->objects;
@@ -93,6 +128,10 @@ final class DiffusionCommitRequiredActionResultBucket
     $should_audit = array_fuse($should_audit);
 
     foreach ($objects as $key => $object) {
+      if (isset($phids[$object->getAuthorPHID()])) {
+        continue;
+      }
+
       if (!$this->hasAuditorsWithStatus($object, $phids, $should_audit)) {
         continue;
       }
@@ -132,6 +171,7 @@ final class DiffusionCommitRequiredActionResultBucket
 
     $status_waiting = array(
       PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT,
+      PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION,
       PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED,
     );
     $status_waiting = array_fuse($status_waiting);

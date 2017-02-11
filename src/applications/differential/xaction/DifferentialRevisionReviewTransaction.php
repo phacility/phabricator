@@ -13,10 +13,10 @@ abstract class DifferentialRevisionReviewTransaction
     return ($this->getViewerReviewerStatus($revision, $viewer) !== null);
   }
 
-  protected function isViewerAcceptingReviewer(
+  protected function isViewerFullyAccepted(
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
-    return $this->isViewerReviewerStatusAmong(
+    return $this->isViewerReviewerStatusFullyAmong(
       $revision,
       $viewer,
       array(
@@ -24,10 +24,10 @@ abstract class DifferentialRevisionReviewTransaction
       ));
   }
 
-  protected function isViewerRejectingReviewer(
+  protected function isViewerFullyRejected(
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
-    return $this->isViewerReviewerStatusAmong(
+    return $this->isViewerReviewerStatusFullyAmong(
       $revision,
       $viewer,
       array(
@@ -54,18 +54,34 @@ abstract class DifferentialRevisionReviewTransaction
     return null;
   }
 
-  protected function isViewerReviewerStatusAmong(
+  protected function isViewerReviewerStatusFullyAmong(
     DifferentialRevision $revision,
     PhabricatorUser $viewer,
     array $status_list) {
 
+    // If the user themselves is not a reviewer, the reviews they have
+    // authority over can not all be in any set of states since their own
+    // personal review has no state.
     $status = $this->getViewerReviewerStatus($revision, $viewer);
     if ($status === null) {
       return false;
     }
 
+    // Otherwise, check that all reviews they have authority over are in
+    // the desired set of states.
     $status_map = array_fuse($status_list);
-    return isset($status_map[$status]);
+    foreach ($revision->getReviewerStatus() as $reviewer) {
+      if (!$reviewer->hasAuthority($viewer)) {
+        continue;
+      }
+
+      $status = $reviewer->getStatus();
+      if (!isset($status_map[$status])) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   protected function applyReviewerEffect(

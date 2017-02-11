@@ -45,10 +45,10 @@ final class PHUIDiffGraphViewTestCase extends PhabricatorTestCase {
       '^',
       '|^',
       'o ',
-      '|^',
-      '||^',
-      'o  ',
-      'x',
+      '| ^',
+      '| |^',
+      'o   ',
+      'x   ',
     );
 
     $this->assertGraph($picture, $graph, pht('Reverse Tree'));
@@ -71,7 +71,30 @@ final class PHUIDiffGraphViewTestCase extends PhabricatorTestCase {
       'x ',
     );
 
-    $this->assertGraph($picture, $graph, pht('Reverse Tree'));
+    $this->assertGraph($picture, $graph, pht('Terminated Tree'));
+  }
+
+  public function testThreeWayGraphJoin() {
+    $nodes = array(
+      'A' => array('D', 'C', 'B'),
+      'B' => array('D'),
+      'C' => array('B', 'E', 'F'),
+      'D' => array(),
+      'E' => array(),
+      'F' => array(),
+    );
+
+    $graph = $this->newGraph($nodes);
+    $picture = array(
+      '^',
+      '||o',
+      '|o|',
+      'x| ||',
+      ' | x|',
+      ' |  x',
+    );
+
+    $this->assertGraph($picture, $graph, pht('Three-Way Tree'));
   }
 
   private function newGraph(array $nodes) {

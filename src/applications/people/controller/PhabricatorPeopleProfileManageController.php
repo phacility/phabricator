@@ -23,20 +23,7 @@ final class PhabricatorPeopleProfileManageController
     }
 
     $this->setUser($user);
-
-    $profile = $user->loadUserProfile();
-    $picture = $user->getProfileImageURI();
-
-    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
-    $profile_icon = id(new PHUIIconView())
-      ->setIcon($profile_icon);
-    $profile_title = $profile->getDisplayTitle();
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($user->getFullName())
-      ->setSubheader(array($profile_icon, $profile_title))
-      ->setImage($picture)
-      ->setProfileHeader(true);
+    $header = $this->buildProfileHeader();
 
     $curtain = $this->buildCurtain($user);
     $properties = $this->buildPropertyView($user);
@@ -45,23 +32,16 @@ final class PhabricatorPeopleProfileManageController
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
-    $timeline = $this->buildTransactionTimeline(
-      $user,
-      new PhabricatorPeopleTransactionQuery());
-    $timeline->setShouldTerminate(true);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Manage'));
     $crumbs->setBorder(true);
 
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->addClass('project-view-home')
       ->setCurtain($curtain)
-      ->addPropertySection(pht('Details'), $properties)
-      ->setMainColumn(
-        array(
-          $timeline,
-        ));
+      ->addPropertySection(pht('Details'), $properties);
+    require_celerity_resource('project-view-css');
 
     return $this->newPage()
       ->setTitle(

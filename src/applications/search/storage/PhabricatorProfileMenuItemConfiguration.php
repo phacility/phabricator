@@ -126,18 +126,52 @@ final class PhabricatorProfileMenuItemConfiguration
     return $this->getMenuItem()->willBuildNavigationItems($items);
   }
 
-  public function getSortKey() {
-    $order = $this->getMenuItemOrder();
-    if ($order === null) {
-      $order = 'Z';
-    } else {
-      $order = sprintf('%020d', $order);
+  public function validateTransactions(array $map) {
+    $item = $this->getMenuItem();
+
+    $fields = $item->buildEditEngineFields($this);
+    $errors = array();
+    foreach ($fields as $field) {
+      $field_key = $field->getKey();
+
+      $xactions = idx($map, $field_key, array());
+      $value = $this->getMenuItemProperty($field_key);
+
+      $field_errors = $item->validateTransactions(
+        $this,
+        $field_key,
+        $value,
+        $xactions);
+      foreach ($field_errors as $error) {
+        $errors[] = $error;
+      }
     }
 
-    return sprintf(
-      '~%s%020d',
-      $order,
-      $this->getID());
+    return $errors;
+  }
+
+  public function getSortVector() {
+    // Sort custom items above global items.
+    if ($this->getCustomPHID()) {
+      $is_global = 0;
+    } else {
+      $is_global = 1;
+    }
+
+    // Sort items with an explicit order above items without an explicit order,
+    // so any newly created builtins go to the bottom.
+    $order = $this->getMenuItemOrder();
+    if ($order !== null) {
+      $has_order = 0;
+    } else {
+      $has_order = 1;
+    }
+
+    return id(new PhutilSortVector())
+      ->addInt($is_global)
+      ->addInt($has_order)
+      ->addInt((int)$order)
+      ->addInt((int)$this->getID());
   }
 
   public function isDisabled() {
@@ -151,6 +185,27 @@ final class PhabricatorProfileMenuItemConfiguration
     return ($this->getVisibility() === self::VISIBILITY_DEFAULT);
   }
 
+  public function getItemIdentifier() {
+    $id = $this->getID();
+
+    if ($id) {
+      return (int)$id;
+    }
+
+    return $this->getBuiltinKey();
+  }
+
+  public function getDefaultMenuItemKey() {
+    if ($this->getBuiltinKey()) {
+      return $this->getBuiltinKey();
+    }
+
+    return $this->getPHID();
+  }
+
+  public function newPageContent() {
+    return $this->getMenuItem()->newPageContent($this);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -179,6 +234,21 @@ final class PhabricatorProfileMenuItemConfiguration
 
 
   public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    // If this is an item with a custom PHID (like a personal menu item),
+    // we only require that the user can edit the corresponding custom
+    // object (usually their own user profile), not the object that the
+    // menu appears on (which may be an Application like Favorites or Home).
+    if ($capability == PhabricatorPolicyCapability::CAN_EDIT) {
+      if ($this->getCustomPHID()) {
+        return array(
+          array(
+            $this->getCustomPHID(),
+            $capability,
+          ),
+        );
+      }
+    }
+
     return array(
       array(
         $this->getProfileObject(),

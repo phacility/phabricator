@@ -91,24 +91,6 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
     null,
     function (e) {
       var data = e.getData();
-      if (config.local && config.applicationClass) {
-        var local_dropdowns = data.newResponse.aphlictDropdowns;
-        if (local_dropdowns[config.applicationClass]) {
-          JX.DOM.replace(
-            dropdown,
-            JX.$H(local_dropdowns[config.applicationClass]));
-          dropdown = JX.$(config.dropdownID);
-          if (dropdown.childNodes.length === 0) {
-            JX.DOM.hide(bubble);
-          } else {
-            JX.DOM.show(bubble);
-          }
-        } else {
-          JX.DOM.hide(bubble);
-        }
-        return;
-      }
-
       if (!data.fromServer) {
         return;
       }

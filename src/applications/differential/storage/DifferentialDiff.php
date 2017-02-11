@@ -7,6 +7,7 @@ final class DifferentialDiff
     PhabricatorExtendedPolicyInterface,
     HarbormasterBuildableInterface,
     HarbormasterCircleCIBuildableInterface,
+    HarbormasterBuildkiteBuildableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorDestructibleInterface {
 
@@ -620,6 +621,27 @@ final class DifferentialDiff
     $ref = preg_replace('(^refs/tags/)', '', $ref);
     return $ref;
   }
+
+
+/* -(  HarbormasterBuildkiteBuildableInterface  )---------------------------- */
+
+  public function getBuildkiteBranch() {
+    $ref = $this->getStagingRef();
+
+    // NOTE: Circa late January 2017, Buildkite fails with the error message
+    // "Tags have been disabled for this project" if we pass the "refs/tags/"
+    // prefix via the API and the project doesn't have GitHub tag builds
+    // enabled, even if GitHub builds are disabled. The tag builds fine
+    // without this prefix.
+    $ref = preg_replace('(^refs/tags/)', '', $ref);
+
+    return $ref;
+  }
+
+  public function getBuildkiteCommit() {
+    return 'HEAD';
+  }
+
 
   public function getStagingRef() {
     // TODO: We're just hoping to get lucky. Instead, `arc` should store

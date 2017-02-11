@@ -61,9 +61,10 @@ of each approach are:
       a normal recipient and also Cc'd on a mailing list.
     - Getting threading to work properly is harder, and probably requires
       making mail less useful by turning off options.
-    - Sometimes people will "Reply All" and everyone will get two mails,
-      one from the user and one from Phabricator turning their mail into
-      a comment.
+    - Sometimes people will "Reply All", which can send mail to too many
+      recipients. Phabricator will try not to send mail to users who already
+      received a similar message, but can not prevent all stray email arising
+      from "Reply All".
     - Not supported with a private reply-to address.
     - Mails are sent in the server default translation.
   - One mail to each user:
@@ -73,7 +74,8 @@ of each approach are:
       mail.
     - Getting threading to work properly is easier, and threading settings
       can be customzied by each user.
-    - "Reply All" no longer spams all other users.
+    - "Reply All" will never send extra mail to other users involved in the
+      thread.
     - Required if private reply-to addresses are configured.
     - Mails are sent in the language of user preference.
 

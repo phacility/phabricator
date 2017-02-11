@@ -9,6 +9,17 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private $defaultItem;
   private $controller;
   private $navigation;
+  private $showNavigation = true;
+  private $editMode;
+  private $pageClasses = array();
+  private $showContentCrumbs = true;
+
+  const ITEM_CUSTOM_DIVIDER = 'engine.divider';
+  const ITEM_MANAGE = 'item.configure';
+
+  const MODE_COMBINED = 'combined';
+  const MODE_GLOBAL = 'global';
+  const MODE_CUSTOM = 'custom';
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -37,6 +48,21 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $this->customPHID;
   }
 
+  private function getEditModeCustomPHID() {
+    $mode = $this->getEditMode();
+
+    switch ($mode) {
+      case self::MODE_CUSTOM:
+        $custom_phid = $this->getCustomPHID();
+        break;
+      case self::MODE_GLOBAL:
+        $custom_phid = null;
+        break;
+    }
+
+    return $custom_phid;
+  }
+
   public function setController(PhabricatorController $controller) {
     $this->controller = $controller;
     return $this;
@@ -53,13 +79,47 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   public function getDefaultItem() {
-    $this->loadItems();
+    $this->getItems();
     return $this->defaultItem;
   }
 
-  abstract protected function getItemURI($path);
+  public function setShowNavigation($show) {
+    $this->showNavigation = $show;
+    return $this;
+  }
 
+  public function getShowNavigation() {
+    return $this->showNavigation;
+  }
+
+  public function addContentPageClass($class) {
+    $this->pageClasses[] = $class;
+    return $this;
+  }
+
+  public function setShowContentCrumbs($show_content_crumbs) {
+    $this->showContentCrumbs = $show_content_crumbs;
+    return $this;
+  }
+
+  public function getShowContentCrumbs() {
+    return $this->showContentCrumbs;
+  }
+
+  abstract public function getItemURI($path);
   abstract protected function isMenuEngineConfigurable();
+
+  abstract protected function getBuiltinProfileItems($object);
+
+  protected function getBuiltinCustomProfileItems(
+    $object,
+    $custom_phid) {
+    return array();
+  }
+
+  protected function getEditMode() {
+    return $this->editMode;
+  }
 
   public function buildResponse() {
     $controller = $this->getController();
@@ -70,19 +130,28 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $request = $controller->getRequest();
 
     $item_action = $request->getURIData('itemAction');
+    if (!$item_action) {
+      $item_action = 'view';
+    }
+
+    $is_view = ($item_action == 'view');
 
     // If the engine is not configurable, don't respond to any of the editing
     // or configuration routes.
     if (!$this->isMenuEngineConfigurable()) {
-      switch ($item_action) {
-        case 'view':
-          break;
-        default:
-          return new Aphront404Response();
+      if (!$is_view) {
+        return new Aphront404Response();
       }
     }
 
     $item_id = $request->getURIData('itemID');
+
+    // If we miss on the MenuEngine route, try the EditEngine route. This will
+    // be populated while editing items.
+    if (!$item_id) {
+      $item_id = $request->getURIData('id');
+    }
+
     $item_list = $this->getItems();
 
     $selected_item = null;
@@ -101,6 +170,12 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           $selected_item = $item;
           break;
         }
+      }
+    }
+
+    if (!$selected_item) {
+      if ($is_view) {
+        $selected_item = $this->getDefaultItem();
       }
     }
 
@@ -127,24 +202,83 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     }
 
     $navigation = $this->buildNavigation();
-    $navigation->selectFilter('item.configure');
 
     $crumbs = $controller->buildApplicationCrumbsForEditEngine();
 
+    if (!$is_view) {
+      $navigation->selectFilter(self::ITEM_MANAGE);
+
+      if ($selected_item) {
+        if ($selected_item->getCustomPHID()) {
+          $edit_mode = 'custom';
+        } else {
+          $edit_mode = 'global';
+        }
+      } else {
+        $edit_mode = $request->getURIData('itemEditMode');
+      }
+
+      $available_modes = $this->getViewerEditModes($viewer);
+      if ($available_modes) {
+        $available_modes = array_fuse($available_modes);
+        if (isset($available_modes[$edit_mode])) {
+          $this->editMode = $edit_mode;
+        } else {
+          if ($item_action != 'configure') {
+            return new Aphront404Response();
+          }
+        }
+      }
+      $page_title = pht('Configure Menu');
+    } else {
+      $page_title = $selected_item->getDisplayName();
+    }
+
     switch ($item_action) {
       case 'view':
+        $navigation->selectFilter($selected_item->getDefaultMenuItemKey());
+
         $content = $this->buildItemViewContent($selected_item);
+        $crumbs->addTextCrumb($selected_item->getDisplayName());
+        if (!$content) {
+          return new Aphront404Response();
+        }
         break;
       case 'configure':
-        $content = $this->buildItemConfigureContent($item_list);
-        $crumbs->addTextCrumb(pht('Configure Menu'));
+        $mode = $this->getEditMode();
+        if (!$mode) {
+          $crumbs->addTextCrumb(pht('Configure Menu'));
+          $content = $this->buildMenuEditModeContent();
+        } else {
+          if (count($available_modes) > 1) {
+            $crumbs->addTextCrumb(
+              pht('Configure Menu'),
+              $this->getItemURI('configure/'));
+
+            switch ($mode) {
+              case self::MODE_CUSTOM:
+                $crumbs->addTextCrumb(pht('Personal'));
+                break;
+              case self::MODE_GLOBAL:
+                $crumbs->addTextCrumb(pht('Global'));
+                break;
+            }
+          } else {
+            $crumbs->addTextCrumb(pht('Configure Menu'));
+          }
+          $edit_list = $this->loadItems($mode);
+          $content = $this->buildItemConfigureContent($edit_list);
+        }
         break;
       case 'reorder':
-        $content = $this->buildItemReorderContent($item_list);
+        $mode = $this->getEditMode();
+        $edit_list = $this->loadItems($mode);
+        $content = $this->buildItemReorderContent($edit_list);
         break;
       case 'new':
         $item_key = $request->getURIData('itemKey');
-        $content = $this->buildItemNewContent($item_key);
+        $mode = $this->getEditMode();
+        $content = $this->buildItemNewContent($item_key, $mode);
         break;
       case 'builtin':
         $content = $this->buildItemBuiltinContent($selected_item);
@@ -153,6 +287,9 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         $content = $this->buildItemHideContent($selected_item);
         break;
       case 'default':
+        if (!$this->isMenuEnginePinnable()) {
+          return new Aphront404Response();
+        }
         $content = $this->buildItemDefaultContent(
           $selected_item,
           $item_list);
@@ -177,23 +314,37 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $crumbs->setBorder(true);
 
-    return $controller->newPage()
-      ->setTitle(pht('Configure Menu'))
-      ->setNavigation($navigation)
-      ->setCrumbs($crumbs)
+    $page = $controller->newPage()
+      ->setTitle($page_title)
       ->appendChild($content);
+
+    if (!$is_view || $this->getShowContentCrumbs()) {
+      $page->setCrumbs($crumbs);
+    }
+
+    if ($this->getShowNavigation()) {
+      $page->setNavigation($navigation);
+    }
+
+    if ($is_view) {
+      foreach ($this->pageClasses as $class) {
+        $page->addClass($class);
+      }
+    }
+
+    return $page;
   }
 
   public function buildNavigation() {
     if ($this->navigation) {
       return $this->navigation;
     }
-
     $nav = id(new AphrontSideNavFilterView())
       ->setIsProfileMenu(true)
       ->setBaseURI(new PhutilURI($this->getItemURI('')));
 
     $menu_items = $this->getItems();
+
     $filtered_items = array();
     foreach ($menu_items as $menu_item) {
       if ($menu_item->isDisabled()) {
@@ -224,13 +375,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       if (count($items) == 1) {
         $item = head($items);
         if ($item->getKey() === null) {
-          $builtin_key = $menu_item->getBuiltinKey();
-          $item_phid = $menu_item->getPHID();
-          if ($builtin_key !== null) {
-            $item->setKey($builtin_key);
-          } else if ($item_phid !== null) {
-            $item->setKey($item_phid);
-          }
+          $default_key = $menu_item->getDefaultMenuItemKey();
+          $item->setKey($default_key);
         }
       }
 
@@ -247,34 +393,40 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
   private function getItems() {
     if ($this->items === null) {
-      $this->items = $this->loadItems();
+      $this->items = $this->loadItems(self::MODE_COMBINED);
     }
 
     return $this->items;
   }
 
-  private function loadItems() {
+  private function loadItems($mode) {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
-    $items = $this->loadBuiltinProfileItems();
+    $items = $this->loadBuiltinProfileItems($mode);
 
-    if ($this->getCustomPHID()) {
-      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-        ->setViewer($viewer)
-        ->withProfilePHIDs(array($object->getPHID()))
-        ->withCustomPHIDs(array($this->getCustomPHID()))
-        ->execute();
-    } else {
-      $stored_items = id(new PhabricatorProfileMenuItemConfigurationQuery())
-        ->setViewer($viewer)
-        ->withProfilePHIDs(array($object->getPHID()))
-        ->execute();
+    $query = id(new PhabricatorProfileMenuItemConfigurationQuery())
+      ->setViewer($viewer)
+      ->withProfilePHIDs(array($object->getPHID()));
+
+    switch ($mode) {
+      case self::MODE_GLOBAL:
+        $query->withCustomPHIDs(array(), true);
+        break;
+      case self::MODE_CUSTOM:
+        $query->withCustomPHIDs(array($this->getCustomPHID()), false);
+        break;
+      case self::MODE_COMBINED:
+        $query->withCustomPHIDs(array($this->getCustomPHID()), true);
+        break;
     }
+
+    $stored_items = $query->execute();
 
     foreach ($stored_items as $stored_item) {
       $impl = $stored_item->getMenuItem();
       $impl->setViewer($viewer);
+      $impl->setEngine($this);
     }
 
     // Merge the stored items into the builtin items. If a builtin item has
@@ -300,12 +452,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
     }
 
-    $items = msort($items, 'getSortKey');
-
-    // Normalize keys since callers shouldn't rely on this array being
-    // partially keyed.
-    $items = array_values($items);
-
+    $items = $this->arrangeItems($items, $mode);
 
     // Make sure exactly one valid item is marked as default.
     $default = null;
@@ -315,9 +462,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         continue;
       }
 
-      if ($item->isDefault()) {
-        $default = $item;
-        break;
+      // If this engine doesn't support pinning items, don't respect any
+      // setting which might be present in the database.
+      if ($this->isMenuEnginePinnable()) {
+        if ($item->isDefault()) {
+          $default = $item;
+          break;
+        }
       }
 
       if ($first === null) {
@@ -336,9 +487,27 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $items;
   }
 
-  private function loadBuiltinProfileItems() {
+  private function loadBuiltinProfileItems($mode) {
     $object = $this->getProfileObject();
-    $builtins = $this->getBuiltinProfileItems($object);
+
+    switch ($mode) {
+      case self::MODE_GLOBAL:
+        $builtins = $this->getBuiltinProfileItems($object);
+        break;
+      case self::MODE_CUSTOM:
+        $builtins = $this->getBuiltinCustomProfileItems(
+          $object,
+          $this->getCustomPHID());
+        break;
+      case self::MODE_COMBINED:
+        $builtins = array();
+        $builtins[] = $this->getBuiltinCustomProfileItems(
+          $object,
+          $this->getCustomPHID());
+        $builtins[] = $this->getBuiltinProfileItems($object);
+        $builtins = array_mergev($builtins);
+        break;
+    }
 
     $items = PhabricatorProfileMenuItem::getAllMenuItems();
     $viewer = $this->getViewer();
@@ -377,6 +546,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
       $item = clone $item;
       $item->setViewer($viewer);
+      $item->setEngine($this);
 
       $builtin
         ->setProfilePHID($object->getPHID())
@@ -406,6 +576,15 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   }
 
   public function getConfigureURI() {
+    $mode = $this->getEditMode();
+
+    switch ($mode) {
+      case self::MODE_CUSTOM:
+        return $this->getItemURI('configure/custom/');
+      case self::MODE_GLOBAL:
+        return $this->getItemURI('configure/global/');
+    }
+
     return $this->getItemURI('configure/');
   }
 
@@ -413,10 +592,35 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    // If you're reordering global items, you need to be able to edit the
+    // object the menu appears on. If you're reordering custom items, you only
+    // need to be able to edit the custom object. Currently, the custom object
+    // is always the viewing user's own user object.
+    $custom_phid = $this->getEditModeCustomPHID();
+
+    if (!$custom_phid) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    } else {
+      $policy_object = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($custom_phid))
+        ->executeOne();
+
+      if (!$policy_object) {
+        throw new Exception(
+          pht(
+            'Failed to load custom PHID "%s"!',
+            $custom_phid));
+      }
+
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $policy_object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
 
     $controller = $this->getController();
     $request = $controller->getRequest();
@@ -481,27 +685,137 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setURI($this->getConfigureURI());
   }
 
+  protected function buildItemViewContent(
+    PhabricatorProfileMenuItemConfiguration $item) {
+    return $item->newPageContent();
+  }
+
+  private function getViewerEditModes() {
+    $modes = array();
+
+    $viewer = $this->getViewer();
+
+    if ($viewer->isLoggedIn() && $this->isMenuEnginePersonalizable()) {
+      $modes[] = self::MODE_CUSTOM;
+    }
+
+    $object = $this->getProfileObject();
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    if ($can_edit) {
+      $modes[] = self::MODE_GLOBAL;
+    }
+
+    return $modes;
+  }
+
+  protected function isMenuEnginePersonalizable() {
+    return true;
+  }
+
+  /**
+   * Does this engine support pinning items?
+   *
+   * Personalizable menus disable pinning by default since it creates a number
+   * of weird edge cases without providing many benefits for current menus.
+   *
+   * @return bool True if items may be pinned as default items.
+   */
+  protected function isMenuEnginePinnable() {
+    return !$this->isMenuEnginePersonalizable();
+  }
+
+  private function buildMenuEditModeContent() {
+    $viewer = $this->getViewer();
+
+    $modes = $this->getViewerEditModes($viewer);
+    if (!$modes) {
+      return new Aphront404Response();
+    }
+
+    if (count($modes) == 1) {
+      $mode = head($modes);
+      return id(new AphrontRedirectResponse())
+        ->setURI($this->getItemURI("configure/{$mode}/"));
+    }
+
+    $menu = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    $modes = array_fuse($modes);
+
+    if (isset($modes['custom'])) {
+      $menu->addItem(
+        id(new PHUIObjectItemView())
+          ->setHeader(pht('Personal Menu Items'))
+          ->setHref($this->getItemURI('configure/custom/'))
+          ->setImageURI($viewer->getProfileImageURI())
+          ->addAttribute(pht('Edit the menu for your personal account.')));
+    }
+
+    if (isset($modes['global'])) {
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-globe')
+        ->setBackground('bg-blue');
+
+      $menu->addItem(
+        id(new PHUIObjectItemView())
+          ->setHeader(pht('Global Menu Items'))
+          ->setHref($this->getItemURI('configure/global/'))
+          ->setImageIcon($icon)
+          ->addAttribute(pht('Edit the global default menu for all users.')));
+    }
+
+    $box = id(new PHUIObjectBoxView())
+      ->setObjectList($menu);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Manage Menu'))
+      ->setHeaderIcon('fa-list');
+
+    return id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter($box);
+  }
 
   private function buildItemConfigureContent(array $items) {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
 
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $object,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    $filtered_groups = mgroup($items, 'getMenuItemKey');
+    foreach ($filtered_groups as $group) {
+      $first_item = head($group);
+      $first_item->willBuildNavigationItems($group);
+    }
+
+    // Users only need to be able to edit the object which this menu appears
+    // on if they're editing global menu items. For example, users do not need
+    // to be able to edit the Favorites application to add new items to the
+    // Favorites menu.
+    if (!$this->getCustomPHID()) {
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $object,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
 
     $list_id = celerity_generate_unique_node_id();
+
+    $mode = $this->getEditMode();
 
     Javelin::initBehavior(
       'reorder-profile-menu-items',
       array(
         'listID' => $list_id,
-        'orderURI' => $this->getItemURI('reorder/'),
+        'orderURI' => $this->getItemURI("reorder/{$mode}/"),
       ));
 
     $list = id(new PHUIObjectItemListView())
-      ->setID($list_id);
+      ->setID($list_id)
+      ->setNoDataString(pht('This menu currently has no items.'));
 
     foreach ($items as $item) {
       $id = $item->getID();
@@ -538,14 +852,16 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
           $default_uri = $this->getItemURI("default/{$builtin_key}/");
         }
 
-        if ($item->isDefault()) {
-          $default_icon = 'fa-thumb-tack green';
-          $default_text = pht('Current Default');
-        } else if ($item->canMakeDefault()) {
-          $default_icon = 'fa-thumb-tack';
-          $default_text = pht('Make Default');
-        } else {
-          $default_text = null;
+        $default_text = null;
+
+        if ($this->isMenuEnginePinnable()) {
+          if ($item->isDefault()) {
+            $default_icon = 'fa-thumb-tack green';
+            $default_text = pht('Current Default');
+          } else if ($item->canMakeDefault()) {
+            $default_icon = 'fa-thumb-tack';
+            $default_text = pht('Make Default');
+          }
         }
 
         if ($default_text !== null) {
@@ -614,12 +930,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       }
 
       $item_key = $item_type->getMenuItemKey();
+      $edit_mode = $this->getEditMode();
 
       $action_list->addAction(
         id(new PhabricatorActionView())
           ->setIcon($item_type->getMenuItemTypeIcon())
           ->setName($item_type->getMenuItemTypeName())
-          ->setHref($this->getItemURI("new/{$item_key}/"))
+          ->setHref($this->getItemURI("new/{$edit_mode}/{$item_key}/"))
           ->setWorkflow(true));
     }
 
@@ -638,11 +955,11 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         ->setName($doc_name));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Profile Menu Items'))
+      ->setHeader(pht('Menu Items'))
       ->setHeaderIcon('fa-list');
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Navigation'))
+      ->setHeaderText(pht('Current Menu Items'))
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 
@@ -664,7 +981,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return $view;
   }
 
-  private function buildItemNewContent($item_key) {
+  private function buildItemNewContent($item_key, $mode) {
     $item_types = PhabricatorProfileMenuItem::getAllMenuItems();
     $item_type = idx($item_types, $item_key);
     if (!$item_type) {
@@ -676,7 +993,8 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       return new Aphront404Response();
     }
 
-    $custom_phid = $this->getCustomPHID();
+    $custom_phid = $this->getEditModeCustomPHID();
+
     $configuration = PhabricatorProfileMenuItemConfiguration::initializeNewItem(
       $object,
       $item_type,
@@ -704,12 +1022,13 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     $viewer = $this->getViewer();
     $object = $this->getProfileObject();
     $controller = $this->getController();
+    $custom_phid = $this->getEditModeCustomPHID();
 
     return id(new PhabricatorProfileMenuEditEngine())
       ->setMenuEngine($this)
       ->setProfileObject($object)
       ->setController($controller)
-      ->setCustomPHID($this->getCustomPHID())
+      ->setCustomPHID($custom_phid)
       ->buildResponse();
   }
 
@@ -735,6 +1054,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     $object = $this->getProfileObject();
     $controller = $this->getController();
+    $custom_phid = $this->getEditModeCustomPHID();
 
     return id(new PhabricatorProfileMenuEditEngine())
       ->setIsBuiltin(true)
@@ -742,7 +1062,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setProfileObject($object)
       ->setNewMenuItemConfiguration($configuration)
       ->setController($controller)
-      ->setCustomPHID($this->getCustomPHID())
+      ->setCustomPHID($custom_phid)
       ->buildResponse();
   }
 
@@ -884,12 +1204,18 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
     return PhabricatorProfileMenuItemConfiguration::initializeNewBuiltin();
   }
 
+  protected function newManageItem() {
+    return $this->newItem()
+      ->setBuiltinKey(self::ITEM_MANAGE)
+      ->setMenuItemKey(PhabricatorManageProfileMenuItem::MENUITEMKEY);
+  }
+
   public function adjustDefault($key) {
     $controller = $this->getController();
     $request = $controller->getRequest();
     $viewer = $request->getViewer();
 
-    $items = $this->loadItems();
+    $items = $this->loadItems(self::MODE_COMBINED);
 
     // To adjust the default item, we first change any existing items that
     // are marked as defaults to "visible", then make the new default item
@@ -949,5 +1275,44 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
 
     return $this;
   }
+
+  private function arrangeItems(array $items, $mode) {
+    // Sort the items.
+    $items = msortv($items, 'getSortVector');
+
+    $object = $this->getProfileObject();
+
+    // If we have some global items and some custom items and are in "combined"
+    // mode, put a hard-coded divider item between them.
+    if ($mode == self::MODE_COMBINED) {
+      $list = array();
+      $seen_custom = false;
+      $seen_global = false;
+      foreach ($items as $item) {
+        if ($item->getCustomPHID()) {
+          $seen_custom = true;
+        } else {
+          if ($seen_custom && !$seen_global) {
+            $list[] = $this->newItem()
+              ->setBuiltinKey(self::ITEM_CUSTOM_DIVIDER)
+              ->setMenuItemKey(PhabricatorDividerProfileMenuItem::MENUITEMKEY)
+              ->attachProfileObject($object)
+              ->attachMenuItem(
+                new PhabricatorDividerProfileMenuItem());
+          }
+          $seen_global = true;
+        }
+        $list[] = $item;
+      }
+      $items = $list;
+    }
+
+    // Normalize keys since callers shouldn't rely on this array being
+    // partially keyed.
+    $items = array_values($items);
+
+    return $items;
+  }
+
 
 }

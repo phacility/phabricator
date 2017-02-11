@@ -1,10 +1,5 @@
 <?php
 
-/**
- *
- * @phutil-external-symbol function recaptcha_get_html
- * @phutil-external-symbol function recaptcha_check_answer
- */
 final class AphrontFormRecaptchaControl extends AphrontFormControl {
 
   protected function getCustomControlClass() {
@@ -19,13 +14,8 @@ final class AphrontFormRecaptchaControl extends AphrontFormControl {
     return PhabricatorEnv::getEnvConfig('recaptcha.enabled');
   }
 
-  private static function requireLib() {
-    $root = phutil_get_library_root('phabricator');
-    require_once dirname($root).'/externals/recaptcha/recaptchalib.php';
-  }
-
   public static function hasCaptchaResponse(AphrontRequest $request) {
-    return $request->getBool('recaptcha_response_field');
+    return $request->getBool('g-recaptcha-response');
   }
 
   public static function processCaptcha(AphrontRequest $request) {
@@ -33,30 +23,35 @@ final class AphrontFormRecaptchaControl extends AphrontFormControl {
       return true;
     }
 
-    self::requireLib();
+    $uri = 'https://www.google.com/recaptcha/api/siteverify';
+    $params = array(
+      'secret'   => PhabricatorEnv::getEnvConfig('recaptcha.private-key'),
+      'response' => $request->getStr('g-recaptcha-response'),
+      'remoteip' => $request->getRemoteAddress(),
+    );
 
-    $challenge = $request->getStr('recaptcha_challenge_field');
-    $response = $request->getStr('recaptcha_response_field');
-    $resp = recaptcha_check_answer(
-      PhabricatorEnv::getEnvConfig('recaptcha.private-key'),
-      $_SERVER['REMOTE_ADDR'],
-      $challenge,
-      $response);
+    list($body) = id(new HTTPSFuture($uri, $params))
+      ->setMethod('POST')
+      ->resolvex();
 
-    return (bool)@$resp->is_valid;
+    $json = phutil_json_decode($body);
+    return (bool)idx($json, 'success');
   }
 
   protected function renderInput() {
-    self::requireLib();
+    $js = 'https://www.google.com/recaptcha/api.js';
+    $pubkey = PhabricatorEnv::getEnvConfig('recaptcha.public-key');
 
-    $uri = new PhutilURI(PhabricatorEnv::getEnvConfig('phabricator.base-uri'));
-    $protocol = $uri->getProtocol();
-    $use_ssl = ($protocol == 'https');
+    return array(
+      phutil_tag('div', array(
+        'class'        => 'g-recaptcha',
+        'data-sitekey' => $pubkey,
+      )),
 
-    return phutil_safe_html(recaptcha_get_html(
-      PhabricatorEnv::getEnvConfig('recaptcha.public-key'),
-      $error = null,
-      $use_ssl));
+      phutil_tag('script', array(
+        'type' => 'text/javascript',
+        'src'  => $js,
+      )),
+    );
   }
-
 }

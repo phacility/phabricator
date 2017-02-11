@@ -50,4 +50,11 @@ final class DifferentialTestPlanCommitMessageField
     );
   }
 
+  public function validateTransactions($object, array $xactions) {
+    return $this->validateCommitMessageCorpusTransactions(
+      $object,
+      $xactions,
+      pht('Test Plan'));
+  }
+
 }

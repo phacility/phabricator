@@ -551,7 +551,7 @@ ul.phui-oi-list-view .phui-oi-selected
   color: {$darkbluetext};
   border-top: 1px solid {$thinblueborder};
   border-bottom: 1px solid {$thinblueborder};
-  padding: 8px;
+  padding: 8px 12px;
   background-color: {$lightgreybackground};
 }
 

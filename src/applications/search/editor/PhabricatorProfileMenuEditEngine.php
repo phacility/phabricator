@@ -109,6 +109,7 @@ final class PhabricatorProfileMenuEditEngine
   }
 
   protected function getObjectEditTitleText($object) {
+    $object->willBuildNavigationItems(array($object));
     return pht('Edit Menu Item: %s', $object->getDisplayName());
   }
 
@@ -146,6 +147,49 @@ final class PhabricatorProfileMenuEditEngine
     }
 
     return $fields;
+  }
+
+  protected function getValidationExceptionShortMessage(
+    PhabricatorApplicationTransactionValidationException $ex,
+    PhabricatorEditField $field) {
+
+    // Menu item properties all have the same transaction type, so we need
+    // to make sure errors about a specific property (like the URI for a
+    // link) are only applied to the field for that particular property. If
+    // we don't do this, the red error text like "Required" will display
+    // next to every field.
+
+    $property_type =
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY;
+
+    $xaction_type = $field->getTransactionType();
+    if ($xaction_type == $property_type) {
+      $field_key = $field->getKey();
+      foreach ($ex->getErrors() as $error) {
+        if ($error->getType() !== $xaction_type) {
+          continue;
+        }
+
+        $xaction = $error->getTransaction();
+        if (!$xaction) {
+          continue;
+        }
+
+        $xaction_setting = $xaction->getMetadataValue('property.key');
+        if ($xaction_setting != $field_key) {
+          continue;
+        }
+
+        $short_message = $error->getShortMessage();
+        if ($short_message !== null) {
+          return $short_message;
+        }
+      }
+
+      return null;
+    }
+
+    return parent::getValidationExceptionShortMessage($ex, $field);
   }
 
 }

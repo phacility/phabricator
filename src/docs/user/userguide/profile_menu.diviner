@@ -16,21 +16,12 @@ Supported Applications
 
 These applications currently support profile menus:
 
-| Application | Support |
-|-----|-----|
-| Projects | Full |
-| People | //Read-Only// |
-
-
-Collapsing and Expanding
-========================
-
-To collapse a full-width profile menu, click
-{nav icon="angle-left", name="Collapse"}. To expand a narrow menu, click
-{nav icon="angle-right", name="Expand"}.
-
-If you're logged in, this setting is sticky, and all menus will respect your
-preference.
+| Application | Customization | Support |
+|-----|-----|-----|
+| Home | Global/Personal | Full |
+| Projects | Per Project | Full |
+| Favorites Menu | Global/Personal | Full |
+| People | None | //Read-Only// |
 
 
 Editing Menus
@@ -40,7 +31,10 @@ You can only edit an object's menu if you can edit the object. For example, you
 must have permission to edit a project in order to reconfigure the menu for the
 project.
 
-To edit a menu, click {nav icon="cogs", name="Manage"} in the menu, then click
+To edit a menu, click {nav icon="cogs", name="Manage"} or {nav icon="pencil",
+name="Edit ..."} in the menu itself. If you are an administrator and the
+application supports Global/Personal customization, you'll have the option
+of editing either the Global settings or your own Personal menu, otherwise click
 {nav icon="th-list", name="Edit Menu"}. This brings you to the menu
 configuration interface which allows you to add and remove items, reorder the
 menu, edit existing items, and choose a default item.
@@ -94,7 +88,7 @@ To remove items, click the {nav icon="times", name="Delete"} action.
 Builtin items can not be deleted and have a
 {nav icon="times", name="Disable"} action instead, which will hide them but
 not delete them. You an re-enable a disabled item with the
-{nav icon="plus', name="Enable"} action.
+{nav icon="plus", name="Enable"} action.
 
 A few items can not be hidden or deleted. For example, the
 {nav icon="cogs", name="Manage"} item must always be available in the menu
@@ -130,15 +124,34 @@ When you add items, you can choose between different types of items to add.
 Which item types are available depends on what sort of object you are editing
 the menu for, but most objects support these items:
 
-  - {icon link} **Link**: Allows you to create an item which links to
-    somewhere else in Phabricator, or to an external site.
+
   - {icon minus} **Divider**: Adds a visual separator to the menu. This is
     purely cosmetic.
-  - {icon coffee} **Motivator**: Motivate your employees with inspirational
-    quotes. A new quote every day!
+  - {icon map-marker} **Label**: Lets you label sections of menu items.
+    This is also purely cosmetic.
+  - {icon link} **Link**: Allows you to create an item which links to
+    somewhere else in Phabricator, or to an external site.
+  - {icon plus} **Form**: Provides quick access to custom and built-in forms
+    from any application that supports EditEngine.
+  - {icon briefcase} **Projects**: Provides quick access to a project.
+  - {icon globe} **Applications**: Provides quick access to your favorite
+    applications. Can be renamed.
+  - {icon tachometer} **Dashboard**: Provides quick access to your favorite
+    dashboard. These items will display with the current nav on the item
+    you've attached it to.
+
 
 To learn more about how an item works, try adding it. You can always delete
 it later if it doesn't do what you wanted.
+
+
+Dashboard Integration
+=====================
+
+Dashboards are directly integrated with Profile Menus. If you add a Dashboard
+to a Project or to a Home menu, that Dashboard will be presented in the
+context of that menu. This allows customization of different pages of content
+without having the user leave Home or the Project.
 
 
 Writing New Item Types

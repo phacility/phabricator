@@ -21,6 +21,10 @@ final class ManiphestEditEngine
     return 'PhabricatorManiphestApplication';
   }
 
+  public function isDefaultQuickCreateEngine() {
+    return true;
+  }
+
   protected function newEditableObject() {
     return ManiphestTask::initializeNewTask($this->getViewer());
   }

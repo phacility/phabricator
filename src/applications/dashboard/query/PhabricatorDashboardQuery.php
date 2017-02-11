@@ -70,8 +70,13 @@ final class PhabricatorDashboardQuery
 
       $panel_phids = $edge_query->getDestinationPHIDs();
       if ($panel_phids) {
+        // NOTE: We explicitly disable policy exceptions when loading panels.
+        // If a particular panel is invalid or not visible to the viewer,
+        // we'll still render the dashboard, just not that panel.
+
         $panels = id(new PhabricatorDashboardPanelQuery())
           ->setParentQuery($this)
+          ->setRaisePolicyExceptions(false)
           ->setViewer($this->getViewer())
           ->withPHIDs($panel_phids)
           ->execute();

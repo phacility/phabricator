@@ -5,6 +5,8 @@ final class PhabricatorDashboardProfileMenuItem
 
   const MENUITEMKEY = 'dashboard';
 
+  const FIELD_DASHBOARD = 'dashboardPHID';
+
   private $dashboard;
 
   public function getMenuItemTypeIcon() {
@@ -19,6 +21,11 @@ final class PhabricatorDashboardProfileMenuItem
     return true;
   }
 
+  public function canMakeDefault(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return true;
+  }
+
   public function attachDashboard($dashboard) {
     $this->dashboard = $dashboard;
     return $this;
@@ -26,12 +33,37 @@ final class PhabricatorDashboardProfileMenuItem
 
   public function getDashboard() {
     $dashboard = $this->dashboard;
+
     if (!$dashboard) {
       return null;
     } else if ($dashboard->isArchived()) {
       return null;
     }
+
     return $dashboard;
+  }
+
+  public function newPageContent(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    $viewer = $this->getViewer();
+
+    $dashboard_phid = $config->getMenuItemProperty('dashboardPHID');
+
+    // Reload the dashboard to attach panels, which we need for rendering.
+    $dashboard = id(new PhabricatorDashboardQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($dashboard_phid))
+      ->needPanels(true)
+      ->executeOne();
+    if (!$dashboard) {
+      return null;
+    }
+
+    $engine = id(new PhabricatorDashboardRenderingEngine())
+      ->setViewer($viewer)
+      ->setDashboard($dashboard);
+
+    return $engine->renderDashboard();
   }
 
   public function willBuildNavigationItems(array $items) {
@@ -57,9 +89,11 @@ final class PhabricatorDashboardProfileMenuItem
   public function getDisplayName(
     PhabricatorProfileMenuItemConfiguration $config) {
     $dashboard = $this->getDashboard();
+
     if (!$dashboard) {
       return pht('(Restricted/Invalid Dashboard)');
     }
+
     if (strlen($this->getName($config))) {
       return $this->getName($config);
     } else {
@@ -70,15 +104,16 @@ final class PhabricatorDashboardProfileMenuItem
   public function buildEditEngineFields(
     PhabricatorProfileMenuItemConfiguration $config) {
     return array(
+      id(new PhabricatorDatasourceEditField())
+        ->setKey(self::FIELD_DASHBOARD)
+        ->setLabel(pht('Dashboard'))
+        ->setIsRequired(true)
+        ->setDatasource(new PhabricatorDashboardDatasource())
+        ->setSingleValue($config->getMenuItemProperty('dashboardPHID')),
       id(new PhabricatorTextEditField())
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setValue($this->getName($config)),
-      id(new PhabricatorDatasourceEditField())
-        ->setKey('dashboardPHID')
-        ->setLabel(pht('Dashboard'))
-        ->setDatasource(new PhabricatorDashboardDatasource())
-        ->setSingleValue($config->getMenuItemProperty('dashboardPHID')),
     );
   }
 
@@ -97,7 +132,7 @@ final class PhabricatorDashboardProfileMenuItem
 
     $icon = $dashboard->getIcon();
     $name = $this->getDisplayName($config);
-    $href = $dashboard->getViewURI();
+    $href = $this->getItemViewURI($config);
 
     $item = $this->newItem()
       ->setHref($href)
@@ -107,6 +142,51 @@ final class PhabricatorDashboardProfileMenuItem
     return array(
       $item,
     );
+  }
+
+  public function validateTransactions(
+    PhabricatorProfileMenuItemConfiguration $config,
+    $field_key,
+    $value,
+    array $xactions) {
+
+    $viewer = $this->getViewer();
+    $errors = array();
+
+    if ($field_key == self::FIELD_DASHBOARD) {
+      if ($this->isEmptyTransaction($value, $xactions)) {
+       $errors[] = $this->newRequiredError(
+         pht('You must choose a dashboard.'),
+         $field_key);
+      }
+
+      foreach ($xactions as $xaction) {
+        $new = $xaction['new'];
+
+        if (!$new) {
+          continue;
+        }
+
+        if ($new === $value) {
+          continue;
+        }
+
+        $dashboards = id(new PhabricatorDashboardQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($new))
+          ->execute();
+        if (!$dashboards) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'Dashboard "%s" is not a valid dashboard which you have '.
+              'permission to see.',
+              $new),
+            $xaction['xaction']);
+        }
+      }
+    }
+
+    return $errors;
   }
 
 }

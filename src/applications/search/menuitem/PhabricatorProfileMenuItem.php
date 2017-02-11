@@ -3,6 +3,7 @@
 abstract class PhabricatorProfileMenuItem extends Phobject {
 
   private $viewer;
+  private $engine;
 
   final public function buildNavigationMenuItems(
     PhabricatorProfileMenuItemConfiguration $config) {
@@ -55,6 +56,15 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
     return $this->viewer;
   }
 
+  public function setEngine(PhabricatorProfileMenuEngine $engine) {
+    $this->engine = $engine;
+    return $this;
+  }
+
+  public function getEngine() {
+    return $this->engine;
+  }
+
   final public function getMenuItemKey() {
     return $this->getPhobjectClassConstant('MENUITEMKEY');
   }
@@ -68,6 +78,57 @@ abstract class PhabricatorProfileMenuItem extends Phobject {
 
   protected function newItem() {
     return new PHUIListItemView();
+  }
+
+  public function newPageContent(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return null;
+  }
+
+  public function getItemViewURI(
+    PhabricatorProfileMenuItemConfiguration $config) {
+
+    $engine = $this->getEngine();
+    $key = $config->getItemIdentifier();
+
+    return $engine->getItemURI("view/{$key}/");
+  }
+
+  public function validateTransactions(
+    PhabricatorProfileMenuItemConfiguration $config,
+    $field_key,
+    $value,
+    array $xactions) {
+    return array();
+  }
+
+  final protected function isEmptyTransaction($value, array $xactions) {
+    $result = $value;
+    foreach ($xactions as $xaction) {
+      $result = $xaction['new'];
+    }
+
+    return !strlen($result);
+  }
+
+  final protected function newError($title, $message, $xaction = null) {
+    return new PhabricatorApplicationTransactionValidationError(
+      PhabricatorProfileMenuItemConfigurationTransaction::TYPE_PROPERTY,
+      $title,
+      $message,
+      $xaction);
+  }
+
+  final protected function newRequiredError($message, $type) {
+    $xaction = id(new PhabricatorProfileMenuItemConfigurationTransaction())
+      ->setMetadataValue('property.key', $type);
+
+    return $this->newError(pht('Required'), $message, $xaction)
+      ->setIsMissingFieldError(true);
+  }
+
+  final protected function newInvalidError($message, $xaction = null) {
+    return $this->newError(pht('Invalid'), $message, $xaction);
   }
 
 }

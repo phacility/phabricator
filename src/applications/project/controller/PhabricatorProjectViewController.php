@@ -25,9 +25,10 @@ final class PhabricatorProjectViewController
         $controller_object = new PhabricatorProjectBoardViewController();
         break;
       case PhabricatorProject::ITEM_PROFILE:
-      default:
         $controller_object = new PhabricatorProjectProfileController();
         break;
+      default:
+        return $engine->buildResponse();
     }
 
     return $this->delegateToController($controller_object);

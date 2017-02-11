@@ -473,34 +473,9 @@ final class DifferentialRevisionQuery
     }
 
     if ($this->needDrafts) {
-      $viewer_phid = $viewer->getPHID();
-      $draft_type = PhabricatorObjectHasDraftEdgeType::EDGECONST;
-
-      if (!$viewer_phid) {
-        // Viewers without a valid PHID can never have drafts.
-        foreach ($revisions as $revision) {
-          $revision->attachHasDraft($viewer, false);
-        }
-      } else {
-        $edge_query = id(new PhabricatorEdgeQuery())
-          ->withSourcePHIDs(mpull($revisions, 'getPHID'))
-          ->withEdgeTypes(
-            array(
-              $draft_type,
-            ))
-          ->withDestinationPHIDs(array($viewer_phid));
-
-        $edge_query->execute();
-
-        foreach ($revisions as $revision) {
-          $has_draft = (bool)$edge_query->getDestinationPHIDs(
-            array(
-              $revision->getPHID(),
-            ));
-
-          $revision->attachHasDraft($viewer, $has_draft);
-        }
-      }
+      PhabricatorDraftEngine::attachDrafts(
+        $viewer,
+        $revisions);
     }
 
     return $revisions;

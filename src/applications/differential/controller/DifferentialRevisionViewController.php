@@ -443,7 +443,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $operations_box = $this->buildOperationsBox($revision);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($monogram, $revision->getURI());
+    $crumbs->addTextCrumb($monogram);
     $crumbs->setBorder(true);
 
     $filetree_on = $viewer->compareUserSetting(

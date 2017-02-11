@@ -75,7 +75,7 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
         PhabricatorAuditCommitStatusConstants::CONCERN_RAISED,
       ),
       self::AUDIT_LEGACYSTATUS_ACCEPTED => array(
-        PhabricatorAuditCommitStatusConstants::CONCERN_ACCEPTED,
+        PhabricatorAuditCommitStatusConstants::FULLY_AUDITED,
       ),
       self::AUDIT_LEGACYSTATUS_PARTIAL => array(
         PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED,
@@ -112,7 +112,7 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
           'id'              => $request->getID(),
           'commitPHID'      => $request->getCommitPHID(),
           'auditorPHID'     => $request->getAuditorPHID(),
-          'reasons'         => $request->getAuditReasons(),
+          'reasons'         => array(),
           'status'          => $request->getAuditStatus(),
         );
       }

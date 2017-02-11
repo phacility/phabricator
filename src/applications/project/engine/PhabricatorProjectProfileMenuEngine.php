@@ -7,7 +7,11 @@ final class PhabricatorProjectProfileMenuEngine
     return true;
   }
 
-  protected function getItemURI($path) {
+  protected function isMenuEnginePersonalizable() {
+    return false;
+  }
+
+  public function getItemURI($path) {
     $project = $this->getProfileObject();
     $id = $project->getID();
     return "/project/{$id}/item/{$path}";

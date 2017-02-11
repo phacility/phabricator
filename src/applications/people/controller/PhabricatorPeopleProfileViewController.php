@@ -23,30 +23,7 @@ final class PhabricatorPeopleProfileViewController
     }
 
     $this->setUser($user);
-
-    $profile = $user->loadUserProfile();
-    $picture = $user->getProfileImageURI();
-
-    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
-    $profile_icon = id(new PHUIIconView())
-      ->setIcon($profile_icon);
-    $profile_title = $profile->getDisplayTitle();
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($user->getFullName())
-      ->setSubheader(array($profile_icon, $profile_title))
-      ->setImage($picture)
-      ->setProfileHeader(true);
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $user,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    if ($can_edit) {
-      $id = $user->getID();
-      $header->setImageEditURL($this->getApplicationURI("picture/{$id}/"));
-    }
+    $header = $this->buildProfileHeader();
 
     $properties = $this->buildPropertyView($user);
     $name = $user->getUsername();
@@ -65,6 +42,7 @@ final class PhabricatorPeopleProfileViewController
     $home = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setMainColumn(
         array(
           $properties,
@@ -110,8 +88,13 @@ final class PhabricatorPeopleProfileViewController
       return null;
     }
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('User Details'));
+
     $view = id(new PHUIObjectBoxView())
       ->appendChild($view)
+      ->setHeader($header)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->addClass('project-view-properties');
 
     return $view;
@@ -158,18 +141,15 @@ final class PhabricatorPeopleProfileViewController
       }
 
     } else {
-      $error = id(new PHUIBoxView())
-        ->addClass('mlb')
-        ->appendChild(pht('User does not belong to any projects.'));
       $list = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
-        ->appendChild($error);
+        ->appendChild(pht('User does not belong to any projects.'));
     }
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($list)
-      ->setBackground(PHUIObjectBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $box;
   }
@@ -243,7 +223,7 @@ final class PhabricatorPeopleProfileViewController
       ->setHeader($header)
       ->appendChild($day_view)
       ->addClass('calendar-profile-box')
-      ->setBackground(PHUIObjectBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $box;
   }
@@ -302,12 +282,9 @@ final class PhabricatorPeopleProfileViewController
         }
       }
     } else {
-      $error = id(new PHUIBoxView())
-        ->addClass('mlb')
-        ->appendChild(pht('User does not have any badges.'));
       $flex = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
-        ->appendChild($error);
+        ->appendChild(pht('User does not have any badges.'));
     }
 
     // Best option?
@@ -346,7 +323,7 @@ final class PhabricatorPeopleProfileViewController
       ->setHeader($header)
       ->addClass('project-view-badges')
       ->appendChild($flex)
-      ->setBackground(PHUIObjectBoxView::GREY);
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
 
     return $box;
   }

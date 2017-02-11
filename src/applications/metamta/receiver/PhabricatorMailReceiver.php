@@ -153,6 +153,10 @@ abstract class PhabricatorMailReceiver extends Phobject {
         ->loadOneOrCreate();
       return $xuser->getPhabricatorUser();
     } else {
+      // NOTE: Currently, we'll always drop this mail (since it's headed to
+      // an unverified recipient). See T12237. These details are still useful
+      // because they'll appear in the mail logs and Mail web UI.
+
       $reasons[] = pht(
         'Phabricator is also not configured to allow unknown external users '.
         'to send mail to the system using just an email address.');
@@ -174,13 +178,13 @@ abstract class PhabricatorMailReceiver extends Phobject {
         if ($user) {
           return $user;
         }
-      }
 
-      $reasons[] = pht(
-        "Phabricator is misconfigured, the application email ".
-        "'%s' is set to user '%s' but that user does not exist.",
-        $application_email->getAddress(),
-        $default_user_phid);
+        $reasons[] = pht(
+          'Phabricator is misconfigured: the application email '.
+          '"%s" is set to user "%s", but that user does not exist.',
+          $application_email->getAddress(),
+          $default_user_phid);
+      }
     }
 
     $reasons = implode("\n\n", $reasons);

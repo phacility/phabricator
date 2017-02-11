@@ -15,14 +15,13 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
   }
 
   public function getIcon() {
-    return 'fa-star-o';
+    return 'fa-star';
   }
 
   public function getRoutes() {
     return array(
       '/favorites/' => array(
-        '' => 'PhabricatorFavoritesMainController',
-        '(?P<type>global|personal)/item/' => $this->getProfileMenuRouting(
+        'menu/' => $this->getProfileMenuRouting(
           'PhabricatorFavoritesMenuItemController'),
       ),
     );
@@ -30,10 +29,6 @@ final class PhabricatorFavoritesApplication extends PhabricatorApplication {
 
   public function isLaunchable() {
     return false;
-  }
-
-  public function getApplicationOrder() {
-    return 9;
   }
 
 }

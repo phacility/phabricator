@@ -105,6 +105,7 @@ class PhabricatorApplicationTransactionFeedStory
 
     if ($author_image) {
       $view->setImage($author_image);
+      $view->setImageHref($author_handle->getURI());
     } else {
       $view->setAuthorIcon($author_handle->getIcon());
     }

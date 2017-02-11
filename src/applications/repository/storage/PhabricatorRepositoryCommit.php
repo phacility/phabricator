@@ -11,10 +11,12 @@ final class PhabricatorRepositoryCommit
     PhabricatorMentionableInterface,
     HarbormasterBuildableInterface,
     HarbormasterCircleCIBuildableInterface,
+    HarbormasterBuildkiteBuildableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorFulltextInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorDraftInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -39,6 +41,8 @@ final class PhabricatorRepositoryCommit
   private $audits = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $drafts = array();
+  private $auditAuthorityPHIDs = array();
 
   public function attachRepository(PhabricatorRepository $repository) {
     $this->repository = $repository;
@@ -178,30 +182,108 @@ final class PhabricatorRepositoryCommit
     return $this->assertAttached($this->audits);
   }
 
-  public function getAuthorityAudits(
-    PhabricatorUser $user,
-    array $authority_phids) {
+  public function loadAndAttachAuditAuthority(
+    PhabricatorUser $viewer,
+    $actor_phid = null) {
 
-    $authority = array_fill_keys($authority_phids, true);
-    $audits = $this->getAudits();
-    $authority_audits = array();
-    foreach ($audits as $audit) {
-      $has_authority = !empty($authority[$audit->getAuditorPHID()]);
-      if ($has_authority) {
-        $commit_author = $this->getAuthorPHID();
+    if ($actor_phid === null) {
+      $actor_phid = $viewer->getPHID();
+    }
 
-        // You don't have authority over package and project audits on your
-        // own commits.
+    // TODO: This method is a little weird and sketchy, but worlds better than
+    // what came before it. Eventually, this should probably live in a Query
+    // class.
 
-        $auditor_is_user = ($audit->getAuditorPHID() == $user->getPHID());
-        $user_is_author = ($commit_author == $user->getPHID());
+    // Figure out which requests the actor has authority over: these are user
+    // requests where they are the auditor, and packages and projects they are
+    // a member of.
 
-        if ($auditor_is_user || !$user_is_author) {
-          $authority_audits[$audit->getID()] = $audit;
+    if (!$actor_phid) {
+      $attach_key = $viewer->getCacheFragment();
+      $phids = array();
+    } else {
+      $attach_key = $actor_phid;
+      // At least currently, when modifying your own commits, you act only on
+      // behalf of yourself, not your packages/projects -- the idea being that
+      // you can't accept your own commits. This may change or depend on
+      // config.
+      $actor_is_author = ($actor_phid == $this->getAuthorPHID());
+      if ($actor_is_author) {
+        $phids = array($actor_phid);
+      } else {
+        $phids = array();
+        $phids[$actor_phid] = true;
+
+        $owned_packages = id(new PhabricatorOwnersPackageQuery())
+          ->setViewer($viewer)
+          ->withAuthorityPHIDs(array($actor_phid))
+          ->execute();
+        foreach ($owned_packages as $package) {
+          $phids[$package->getPHID()] = true;
         }
+
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer($viewer)
+          ->withMemberPHIDs(array($actor_phid))
+          ->execute();
+        foreach ($projects as $project) {
+          $phids[$project->getPHID()] = true;
+        }
+
+        $phids = array_keys($phids);
       }
     }
-    return $authority_audits;
+
+    $this->auditAuthorityPHIDs[$attach_key] = array_fuse($phids);
+
+    return $this;
+  }
+
+  public function hasAuditAuthority(
+    PhabricatorUser $viewer,
+    PhabricatorRepositoryAuditRequest $audit,
+    $actor_phid = null) {
+
+    if ($actor_phid === null) {
+      $actor_phid = $viewer->getPHID();
+    }
+
+    if (!$actor_phid) {
+      $attach_key = $viewer->getCacheFragment();
+    } else {
+      $attach_key = $actor_phid;
+    }
+
+    $map = $this->assertAttachedKey($this->auditAuthorityPHIDs, $attach_key);
+
+    if (!$actor_phid) {
+      return false;
+    }
+
+    return isset($map[$audit->getAuditorPHID()]);
+  }
+
+  public function writeOwnersEdges(array $package_phids) {
+    $src_phid = $this->getPHID();
+    $edge_type = DiffusionCommitHasPackageEdgeType::EDGECONST;
+
+    $editor = new PhabricatorEdgeEditor();
+
+    $dst_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $src_phid,
+      $edge_type);
+
+    foreach ($dst_phids as $dst_phid) {
+      $editor->removeEdge($src_phid, $edge_type, $dst_phid);
+    }
+
+    foreach ($package_phids as $package_phid) {
+      $editor->addEdge($src_phid, $edge_type, $package_phid);
+    }
+
+    $editor->save();
+
+    return $this;
   }
 
   public function getAuditorPHIDsForEdit() {
@@ -269,8 +351,17 @@ final class PhabricatorRepositoryCommit
       }
     }
 
+    $current_status = $this->getAuditStatus();
+    $status_verify = PhabricatorAuditCommitStatusConstants::NEEDS_VERIFICATION;
+
     if ($any_concern) {
-      $status = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+      if ($current_status == $status_verify) {
+        // If the change is in "Needs Verification", we keep it there as
+        // long as any auditors still have concerns.
+        $status = $status_verify;
+      } else {
+        $status = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+      }
     } else if ($any_accept) {
       if ($any_need) {
         $status = PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED;
@@ -341,6 +432,7 @@ final class PhabricatorRepositoryCommit
     $parsed = new PhutilEmailAddress($name);
     return nonempty($parsed->getDisplayName(), $parsed->getAddress());
   }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -499,6 +591,44 @@ final class PhabricatorRepositoryCommit
   }
 
 
+/* -(  HarbormasterBuildkiteBuildableInterface  )---------------------------- */
+
+
+  public function getBuildkiteBranch() {
+    $viewer = PhabricatorUser::getOmnipotentUser();
+    $repository = $this->getRepository();
+
+    $branches = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      DiffusionRequest::newFromDictionary(
+        array(
+          'repository' => $repository,
+          'user' => $viewer,
+        )),
+      'diffusion.branchquery',
+      array(
+        'contains' => $this->getCommitIdentifier(),
+        'repository' => $repository->getPHID(),
+      ));
+
+    if (!$branches) {
+      throw new Exception(
+        pht(
+          'Commit "%s" is not an ancestor of any branch head, so it can not '.
+          'be built with Buildkite.',
+          $this->getCommitIdentifier()));
+    }
+
+    $branch = head($branches);
+
+    return 'refs/heads/'.$branch['shortName'];
+  }
+
+  public function getBuildkiteCommit() {
+    return $this->getCommitIdentifier();
+  }
+
+
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 
 
@@ -601,6 +731,22 @@ final class PhabricatorRepositoryCommit
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorDraftInterface  )------------------------------------------ */
+
+  public function newDraftEngine() {
+    return new DiffusionCommitDraftEngine();
+  }
+
+  public function getHasDraft(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->drafts, $viewer->getCacheFragment());
+  }
+
+  public function attachHasDraft(PhabricatorUser $viewer, $has_draft) {
+    $this->drafts[$viewer->getCacheFragment()] = $has_draft;
+    return $this;
   }
 
 }

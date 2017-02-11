@@ -47,6 +47,18 @@ input[type="submit"] {
   border-radius: 3px;
 }
 
+button .phui-icon-view,
+a.button .phui-icon-view,
+button.green .phui-icon-view,
+a.button.green .phui-icon-view {
+  color: white;
+}
+
+button.grey .phui-icon-view,
+a.button.grey .phui-icon-view {
+  color: {$darkbluetext};
+}
+
 /* Buttons with images (full size only) */
 button.icon,
 a.icon,
@@ -198,12 +210,12 @@ button.link:hover {
 
 .phuix-dropdown-menu {
   position: absolute;
-  width: 240px;
+  width: 200px;
   background: #fff;
   margin-top: -1px;
-  padding: 5px 0;
+  padding: 12px;
   box-shadow: {$dropshadow};
-  border: 1px solid {$blueborder};
+  border: 1px solid {$lightgreyborder};
   border-radius: 3px;
   margin-bottom: 16px;
 }

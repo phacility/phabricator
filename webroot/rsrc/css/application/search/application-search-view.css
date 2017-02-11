@@ -6,6 +6,10 @@
   background-color: #fff;
 }
 
+.application-search-view .phui-crumbs-view {
+  background-color: #fff;
+}
+
 .application-search-view .application-search-results.phui-object-box {
   margin: 0;
   padding: 0 16px 24px;
@@ -17,7 +21,7 @@
 }
 
 .application-search-view .application-search-results .phui-profile-header {
-  padding: 16px 8px;
+  padding: 22px 8px;
   border-bottom: 1px solid {$thinblueborder};
 }
 
@@ -62,4 +66,8 @@
 
 .device-phone .application-search-pager {
   margin: 12px;
+}
+
+.application-search-view .phui-oi-list-view.phui-oi-list-big {
+  margin-top: 12px;
 }

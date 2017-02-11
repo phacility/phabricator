@@ -121,7 +121,7 @@
 
 .device-desktop .phui-main-column .phui-property-list-key {
   margin-left: 0;
-  width: 160px;
+  width: 180px;
 }
 
 .device-desktop .phui-main-column .phui-property-list-value {
@@ -159,24 +159,6 @@
   padding: 0 12px;
 }
 
-.phabricator-action-view button.phabricator-action-view-item,
-.phabricator-action-view-item {
-  padding: 5px 4px 5px 28px;
-}
-
-.device-desktop .phui-two-column-properties .phabricator-action-view-href:hover
-  .phabricator-action-view-item {
-    text-decoration: none;
-    background-color: rgba({$alphablue}, .08);
-    color: {$sky};
-    border-radius: 3px;
-}
-
-.device-desktop .phui-two-column-properties .phabricator-action-view-href:hover
-  .phabricator-action-view-icon {
-    color: {$sky};
-}
-
 .phui-two-column-view .phui-property-list-section-header,
 .phui-two-column-view .phui-property-list-text-content {
   margin: 0 16px;
@@ -197,6 +179,10 @@
 .device .phui-two-column-view .phui-info-view {
   margin: 0 0 20px 0;
   padding: 12px;
+}
+
+.phui-two-column-view .phui-oi-empty .phui-info-view {
+  margin: 0;
 }
 
 .phui-two-column-view .phui-side-column .phui-oi-empty

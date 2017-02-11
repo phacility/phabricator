@@ -26,6 +26,10 @@ final class PhabricatorProjectEditEngine
     return $this->milestoneProject;
   }
 
+  public function isDefaultQuickCreateEngine() {
+    return true;
+  }
+
   public function getEngineName() {
     return pht('Projects');
   }

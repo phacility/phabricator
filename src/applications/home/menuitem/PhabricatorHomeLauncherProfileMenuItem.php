@@ -1,16 +1,16 @@
 <?php
 
-final class PhabricatorHomeManageProfileMenuItem
+final class PhabricatorHomeLauncherProfileMenuItem
   extends PhabricatorProfileMenuItem {
 
-  const MENUITEMKEY = 'home.manage.menu';
+  const MENUITEMKEY = 'home.launcher.menu';
 
   public function getMenuItemTypeName() {
-    return pht('Manage Home Menu');
+    return pht('More Applications');
   }
 
   private function getDefaultName() {
-    return pht('Manage');
+    return pht('More Applications');
   }
 
   public function canHideMenuItem(
@@ -49,20 +49,14 @@ final class PhabricatorHomeManageProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
     $viewer = $this->getViewer();
 
-    if ($viewer->isLoggedIn()) {
-      $admin = $viewer->getIsAdmin();
-      $name = $this->getDisplayName($config);
-      $icon = 'fa-pencil';
-      $href = '/home/menu/personal/item/configure/';
-      if ($admin) {
-        $href = '/home/menu/';
-      }
+    $name = $this->getDisplayName($config);
+    $icon = 'fa-globe';
+    $href = '/applications/';
 
-      $item = $this->newItem()
-        ->setHref($href)
-        ->setName($name)
-        ->setIcon($icon);
-    }
+    $item = $this->newItem()
+      ->setHref($href)
+      ->setName($name)
+      ->setIcon($icon);
 
     return array(
       $item,

@@ -95,4 +95,41 @@ abstract class PhabricatorDraftEngine
     $editor->save();
   }
 
+  final public static function attachDrafts(
+    PhabricatorUser $viewer,
+    array $objects) {
+    assert_instances_of($objects, 'PhabricatorDraftInterface');
+
+    $viewer_phid = $viewer->getPHID();
+
+    if (!$viewer_phid) {
+      // Viewers without a valid PHID can never have drafts.
+      foreach ($objects as $object) {
+        $object->attachHasDraft($viewer, false);
+      }
+      return;
+    } else {
+      $draft_type = PhabricatorObjectHasDraftEdgeType::EDGECONST;
+
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($objects, 'getPHID'))
+        ->withEdgeTypes(
+          array(
+            $draft_type,
+          ))
+        ->withDestinationPHIDs(array($viewer_phid));
+
+      $edge_query->execute();
+
+      foreach ($objects as $object) {
+        $has_draft = (bool)$edge_query->getDestinationPHIDs(
+          array(
+            $object->getPHID(),
+          ));
+
+        $object->attachHasDraft($viewer, $has_draft);
+      }
+    }
+  }
+
 }
