@@ -13,7 +13,7 @@ final class PhabricatorDashboardSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorDashboardQuery())
-      ->needProjects(true);
+      ->needPanels(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -98,25 +98,22 @@ final class PhabricatorDashboardSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
 
-    $dashboards = mpull($dashboards, null, 'getPHID');
     $viewer = $this->requireViewer();
 
-    $proj_phids = array();
+    $phids = array();
     foreach ($dashboards as $dashboard) {
-      foreach ($dashboard->getProjectPHIDs() as $project_phid) {
-        $proj_phids[] = $project_phid;
+      $author_phid = $dashboard->getAuthorPHID();
+      if ($author_phid) {
+        $phids[] = $author_phid;
       }
     }
 
-    $proj_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($proj_phids)
-      ->execute();
+    $handles = $viewer->loadHandles($phids);
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
-    foreach ($dashboards as $dashboard_phid => $dashboard) {
+    foreach ($dashboards as $dashboard) {
       $id = $dashboard->getID();
 
       $item = id(new PHUIObjectItemView())
@@ -125,19 +122,18 @@ final class PhabricatorDashboardSearchEngine
         ->setHref($this->getApplicationURI("view/{$id}/"))
         ->setObject($dashboard);
 
-      $project_handles = array_select_keys(
-        $proj_handles,
-        $dashboard->getProjectPHIDs());
-
-      $item->addAttribute(
-        id(new PHUIHandleTagListView())
-          ->setLimit(4)
-          ->setNoDataString(pht('No Projects'))
-          ->setSlim(true)
-          ->setHandles($project_handles));
-
       if ($dashboard->isArchived()) {
         $item->setDisabled(true);
+      }
+
+      $panels = $dashboard->getPanels();
+      foreach ($panels as $panel) {
+        $item->addAttribute($panel->getName());
+      }
+
+      if (empty($panels)) {
+        $empty = phutil_tag('em', array(), pht('No panels.'));
+        $item->addAttribute($empty);
       }
 
       $icon = id(new PHUIIconView())
@@ -145,6 +141,10 @@ final class PhabricatorDashboardSearchEngine
         ->setBackground('bg-dark');
       $item->setImageIcon($icon);
       $item->setEpoch($dashboard->getDateModified());
+
+      $author_phid = $dashboard->getAuthorPHID();
+      $author_name = $handles[$author_phid]->renderLink();
+      $item->addByline(pht('Author: %s', $author_name));
 
       $list->addItem($item);
     }
