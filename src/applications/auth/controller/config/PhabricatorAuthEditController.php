@@ -191,16 +191,18 @@ final class PhabricatorAuthEditController
       ->setHeader(pht('%s: %s', $title, $provider->getProviderName()))
       ->setHeaderIcon($header_icon);
 
-    if ($config->getIsEnabled()) {
-      $status_name = pht('Enabled');
-      $status_color = 'green';
-      $status_icon = 'fa-check';
-      $header->setStatus($status_icon, $status_color, $status_name);
-    } else if (!$is_new) {
-      $status_name = pht('Disabled');
-      $status_color = 'indigo';
-      $status_icon = 'fa-ban';
-      $header->setStatus($status_icon, $status_color, $status_name);
+    if (!$is_new) {
+      if ($config->getIsEnabled()) {
+        $status_name = pht('Enabled');
+        $status_color = 'green';
+        $status_icon = 'fa-check';
+        $header->setStatus($status_icon, $status_color, $status_name);
+      } else {
+        $status_name = pht('Disabled');
+        $status_color = 'indigo';
+        $status_icon = 'fa-ban';
+        $header->setStatus($status_icon, $status_color, $status_name);
+      }
     }
 
     $config_name = 'auth.email-domains';
