@@ -595,10 +595,74 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
     }
 
+    $user_dropdown = null;
+    $user_tag = null;
+    if ($viewer->isLoggedIn()) {
+      if (!$viewer->getIsEmailVerified()) {
+        $bubble_id = celerity_generate_unique_node_id();
+        $count_id = celerity_generate_unique_node_id();
+        $dropdown_id = celerity_generate_unique_node_id();
+
+        $settings_uri = id(new PhabricatorEmailAddressesSettingsPanel())
+          ->setViewer($viewer)
+          ->setUser($viewer)
+          ->getPanelURI();
+
+        $user_icon = javelin_tag(
+          'span',
+          array(
+            'class' => 'phabricator-main-menu-setup-icon phui-icon-view '.
+                       'phui-font-fa fa-user',
+            'sigil' => 'menu-icon',
+          ));
+
+        $user_count = javelin_tag(
+          'span',
+          array(
+            'class' => 'phabricator-main-menu-setup-count',
+            'id' => $count_id,
+          ),
+          1);
+
+        $user_tag = phutil_tag(
+          'a',
+          array(
+            'href' => $settings_uri,
+            'class' => 'setup-unread',
+            'id' => $bubble_id,
+          ),
+          array(
+            $user_icon,
+            $user_count,
+          ));
+
+        Javelin::initBehavior(
+          'aphlict-dropdown',
+          array(
+            'bubbleID' => $bubble_id,
+            'countID' => $count_id,
+            'dropdownID' => $dropdown_id,
+            'loadingText' => pht('Loading...'),
+            'uri' => '/settings/issue/',
+            'unreadClass' => 'setup-unread',
+          ));
+
+        $user_dropdown = javelin_tag(
+          'div',
+          array(
+            'id'    => $dropdown_id,
+            'class' => 'phabricator-notification-menu',
+            'sigil' => 'phabricator-notification-menu',
+            'style' => 'display: none;',
+          ));
+      }
+    }
+
     $dropdowns = array(
       $notification_dropdown,
       $message_notification_dropdown,
       $setup_notification_dropdown,
+      $user_dropdown,
     );
 
     return array(
@@ -606,6 +670,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         $bubble_tag,
         $message_tag,
         $setup_tag,
+        $user_tag,
       ),
       $dropdowns,
       $aural,
