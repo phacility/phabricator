@@ -143,7 +143,7 @@ final class PhabricatorDashboardPanelEditController
           ->applyTransactions($panel, $xactions);
 
         // If we're creating a panel directly on a dashboard, add it now.
-        if ($dashboard) {
+        if ($dashboard && $is_create) {
           PhabricatorDashboardTransactionEditor::addPanelToDashboard(
             $viewer,
             PhabricatorContentSource::newFromRequest($request),
