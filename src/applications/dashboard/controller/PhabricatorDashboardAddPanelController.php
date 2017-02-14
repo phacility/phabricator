@@ -10,6 +10,7 @@ final class PhabricatorDashboardAddPanelController
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needPanels(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -33,9 +34,18 @@ final class PhabricatorDashboardAddPanelController
           ->withIDs(array($v_panel))
           ->executeOne();
         if (!$panel) {
-          $errors[] = pht('No such panel!');
+          $errors[] = pht('Not a valid panel.');
           $e_panel = pht('Invalid');
         }
+
+        $on_dashboard = $dashboard->getPanels();
+        $on_ids = mpull($on_dashboard, null, 'getID');
+        if (array_key_exists($v_panel, $on_ids)) {
+          $p_name = $panel->getName();
+          $errors[] = pht('Panel "%s" already exists on dashboard.', $p_name);
+          $e_panel = pht('Invalid');
+        }
+
       } else {
         $errors[] = pht('Select a panel to add.');
         $e_panel = pht('Required');
@@ -81,8 +91,7 @@ final class PhabricatorDashboardAddPanelController
           ->setDatasource(new PhabricatorDashboardPanelDatasource())
           ->setLimit(1)
           ->setName('panel')
-          ->setLabel(pht('Panel'))
-          ->setValue($v_panel));
+          ->setLabel(pht('Panel')));
 
     return $this->newDialog()
       ->setTitle(pht('Add Panel'))
