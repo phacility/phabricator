@@ -14,12 +14,12 @@
   margin: 0 0 16px 0;
 }
 
-.dashboard-view .phui-header-shell {
+.dashboard-box .phui-header-shell {
   padding-top: 4px;
   padding-bottom: 16px;
 }
 
-.dashboard-view .phui-header-header {
+.dashboard-box .phui-header-header {
   color: #000;
 }
 
@@ -49,16 +49,16 @@
     width: 66.66%;
 }
 
-.grippable .aphront-multi-column-column .dashboard-pane .phui-object-box {
+.grippable .aphront-multi-column-column .dashboard-box.phui-object-box {
   cursor: move;
 }
 
-.grippable .aphront-multi-column-column .dashboard-pane .phui-object-box:hover {
+.grippable .aphront-multi-column-column .dashboard-box.phui-object-box:hover {
   box-shadow: {$dropshadow};
 }
 
-.grippable .aphront-multi-column-column .dashboard-pane .phui-object-box:hover
-  .phui-object-box {
+.grippable .aphront-multi-column-column .dashboard-box.phui-object-box:hover
+  .dashboard-box {
     box-shadow: none;
 }
 

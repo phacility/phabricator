@@ -10,7 +10,7 @@
 
 JX.behavior('dashboard-move-panels', function(config) {
 
-  var itemSigil = 'dashboard-panel';
+  var itemSigil = 'panel-movable';
 
   function finditems(col) {
     return JX.DOM.scry(col, 'div', itemSigil);

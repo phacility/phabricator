@@ -97,6 +97,7 @@ final class PhabricatorDashboardTabsPanelType
           ->setPanel($panel)
           ->setPanelPHID($panel->getPHID())
           ->setHeaderMode($no_headers)
+          ->setMovable(false)
           ->renderPanel();
       } else {
         $panel_content = pht('(Invalid Panel)');

@@ -13,6 +13,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   private $parentPanelPHIDs;
   private $headerMode = self::HEADER_MODE_NORMAL;
   private $dashboardID;
+  private $movable = true;
 
   public function setDashboardID($id) {
     $this->dashboardID = $id;
@@ -61,6 +62,15 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   public function setPanel(PhabricatorDashboardPanel $panel) {
     $this->panel = $panel;
     return $this;
+  }
+
+  public function setMovable($movable) {
+    $this->movable = $movable;
+    return $this;
+  }
+
+  public function getMovable() {
+    return $this->movable;
   }
 
   public function getPanel() {
@@ -221,7 +231,12 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     $box
       ->setHeader($header)
       ->setID($id)
+      ->addClass('dashboard-box')
       ->addSigil('dashboard-panel');
+
+    if ($this->getMovable()) {
+      $box->addSigil('panel-movable');
+    }
 
     if ($panel) {
       $box->setMetadata(
