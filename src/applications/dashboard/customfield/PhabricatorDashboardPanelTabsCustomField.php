@@ -33,6 +33,49 @@ final class PhabricatorDashboardPanelTabsCustomField
     $this->setFieldValue($value);
   }
 
+  public function getApplicationTransactionTitle(
+    PhabricatorApplicationTransaction $xaction) {
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    $new_tabs = array();
+    if ($new) {
+      foreach ($new as $new_tab) {
+        $new_tabs[] = $new_tab['name'];
+      }
+      $new_tabs = implode(' | ', $new_tabs);
+    }
+
+    $old_tabs = array();
+    if ($old) {
+      foreach ($old as $old_tab) {
+        $old_tabs[] = $old_tab['name'];
+      }
+      $old_tabs = implode(' | ', $old_tabs);
+    }
+
+    if (!$old) {
+      // In case someone makes a tab panel with no tabs.
+      if ($new) {
+        return pht(
+          '%s set the tabs to "%s".',
+          $xaction->renderHandleLink($author_phid),
+          $new_tabs);
+      }
+    } else if (!$new) {
+      return pht(
+        '%s removed tabs.',
+        $xaction->renderHandleLink($author_phid));
+    } else {
+      return pht(
+        '%s changed the tabs from "%s" to "%s".',
+        $xaction->renderHandleLink($author_phid),
+        $old_tabs,
+        $new_tabs);
+    }
+  }
+
   public function renderEditControl(array $handles) {
     // NOTE: This includes archived panels so we don't mutate the tabs
     // when saving a tab panel that includes archied panels. This whole UI is
