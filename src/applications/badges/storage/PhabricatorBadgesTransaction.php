@@ -38,6 +38,10 @@ final class PhabricatorBadgesTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case PhabricatorTransactions::TYPE_CREATE:
+          return pht(
+            '%s created this badge.',
+            $this->renderHandleLink($author_phid));
       case self::TYPE_NAME:
         if ($old === null) {
           return pht(
