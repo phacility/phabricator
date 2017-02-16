@@ -1095,7 +1095,7 @@ abstract class PhabricatorCustomField extends Phobject {
 
 
   public function getEditEngineFields(PhabricatorEditEngine $engine) {
-    $field = $this->newStandardEditField($engine);
+    $field = $this->newStandardEditField();
 
     return array(
       $field,
