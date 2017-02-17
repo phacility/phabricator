@@ -52,17 +52,44 @@ final class PhabricatorUserCardView extends AphrontTagView {
 
     require_celerity_resource('project-card-view-css');
 
-    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
-    $profile_title = $profile->getDisplayTitle();
+    // We don't have a ton of room on the hovercard, so we're trying to show
+    // the most important tag. Users can click through to the profile to get
+    // more details.
+
+    if ($user->getIsDisabled()) {
+      $tag_icon = 'fa-ban';
+      $tag_title = pht('Disabled');
+      $tag_shade = PHUITagView::COLOR_RED;
+    } else if (!$user->getIsApproved()) {
+      $tag_icon = 'fa-ban';
+      $tag_title = pht('Unapproved Account');
+      $tag_shade = PHUITagView::COLOR_RED;
+    } else if (!$user->getIsEmailVerified()) {
+      $tag_icon = 'fa-envelope';
+      $tag_title = pht('Email Not Verified');
+      $tag_shade = PHUITagView::COLOR_RED;
+    } else if ($user->getIsAdmin()) {
+      $tag_icon = 'fa-star';
+      $tag_title = pht('Administrator');
+      $tag_shade = PHUITagView::COLOR_INDIGO;
+    } else {
+      $tag_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
+      $tag_title = $profile->getDisplayTitle();
+      $tag_shade = null;
+    }
 
     $tag = id(new PHUITagView())
-      ->setIcon($profile_icon)
-      ->setName($profile_title)
-      ->addClass('project-view-header-tag')
+      ->setIcon($tag_icon)
+      ->setName($tag_title)
       ->setType(PHUITagView::TYPE_SHADE);
 
+    if ($tag_shade !== null) {
+      $tag->setShade($tag_shade);
+    }
+
     $header = id(new PHUIHeaderView())
-      ->setHeader(array($user->getFullName(), $tag))
+      ->setHeader($user->getFullName())
+      ->addTag($tag)
       ->setUser($viewer)
       ->setImage($picture);
 
@@ -70,7 +97,7 @@ final class PhabricatorUserCardView extends AphrontTagView {
 
     $body[] = $this->addItem(
       pht('User Since'),
-      phabricator_date($profile->getDateCreated(), $viewer));
+      phabricator_date($user->getDateCreated(), $viewer));
 
     if (PhabricatorApplication::isClassInstalledForViewer(
         'PhabricatorCalendarApplication',

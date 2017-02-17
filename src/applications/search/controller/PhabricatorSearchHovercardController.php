@@ -9,7 +9,23 @@ final class PhabricatorSearchHovercardController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $phids = $request->getArr('phids');
+    $phids = $request->getStrList('phids');
+
+    // If object names are provided, look them up and pretend they were
+    // passed as additional PHIDs. This is primarily useful for debugging,
+    // since you don't have to go look up user PHIDs to preview their
+    // hovercards.
+    $names = $request->getStrList('names');
+    if ($names) {
+      $named_objects = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withNames($names)
+        ->execute();
+
+      foreach ($named_objects as $object) {
+        $phids[] = $object->getPHID();
+      }
+    }
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
