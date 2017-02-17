@@ -36,7 +36,7 @@ final class PhabricatorDashboardManageController
     $crumbs->addTextCrumb(pht('Manage'));
 
     $header = $this->buildHeaderView();
-    $curtain = $this->buildCurtainview($dashboard);
+    $curtain = $this->buildCurtainView($dashboard);
     $properties = $this->buildPropertyView($dashboard);
 
     $timeline = $this->buildTransactionTimeline(

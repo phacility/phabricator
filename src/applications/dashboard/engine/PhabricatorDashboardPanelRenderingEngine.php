@@ -88,7 +88,6 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
 
   public function renderPanel() {
     $panel = $this->getPanel();
-    $viewer = $this->getViewer();
 
     if (!$panel) {
       return $this->renderErrorPanel(
@@ -117,7 +116,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         }
       }
 
-      return $this->renderNormalPanel($viewer, $panel, $this);
+      return $this->renderNormalPanel();
     } catch (Exception $ex) {
       return $this->renderErrorPanel(
         $panel->getName(),

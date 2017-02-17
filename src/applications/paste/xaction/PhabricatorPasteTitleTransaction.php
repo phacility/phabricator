@@ -15,7 +15,7 @@ final class PhabricatorPasteTitleTransaction
 
   public function getTitle() {
     $old = $this->getOldValue();
-    $new = $this->getNeWValue();
+    $new = $this->getNewValue();
 
     if (strlen($old) && strlen($new)) {
       return pht(
@@ -38,7 +38,7 @@ final class PhabricatorPasteTitleTransaction
 
   public function getTitleForFeed() {
     $old = $this->getOldValue();
-    $new = $this->getNeWValue();
+    $new = $this->getNewValue();
 
     if (strlen($old) && strlen($new)) {
       return pht(

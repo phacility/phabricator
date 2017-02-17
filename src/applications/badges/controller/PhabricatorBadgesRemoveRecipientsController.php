@@ -37,7 +37,7 @@ final class PhabricatorBadgesRemoveRecipientsController
         ->setTransactionType(PhabricatorBadgesTransaction::TYPE_REVOKE)
         ->setNewValue(array($remove_phid));
 
-      $editor = id(new PhabricatorBadgesEditor($badge))
+      $editor = id(new PhabricatorBadgesEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)

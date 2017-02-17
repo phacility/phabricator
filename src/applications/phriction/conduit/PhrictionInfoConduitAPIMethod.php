@@ -38,9 +38,7 @@ final class PhrictionInfoConduitAPIMethod extends PhrictionConduitAPIMethod {
       throw new ConduitException('ERR-BAD-DOCUMENT');
     }
 
-    return $this->buildDocumentInfoDictionary(
-      $document,
-      $document->getContent());
+    return $this->buildDocumentInfoDictionary($document);
   }
 
 }

@@ -12,6 +12,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $previewTimelineID;
   private $previewToggleID;
   private $formID;
+  private $statusID;
   private $commentID;
   private $draft;
   private $requestURI;

@@ -260,7 +260,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
   /**
    * Get the best (strongest) available hasher.
    *
-   * @return PhabicatorPasswordHasher Best hasher.
+   * @return PhabricatorPasswordHasher Best hasher.
    * @task hashing
    */
   public static function getBestHasher() {
@@ -282,7 +282,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
   /**
    * Get the hashser for a given stored hash.
    *
-   * @return PhabicatorPasswordHasher Corresponding hasher.
+   * @return PhabricatorPasswordHasher Corresponding hasher.
    * @task hashing
    */
   public static function getHasherForHash(PhutilOpaqueEnvelope $hash) {

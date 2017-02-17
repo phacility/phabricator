@@ -59,7 +59,7 @@ final class DiffusionHistoryController extends DiffusionController {
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setTable($history_table);
 
-    $header = $this->buildHeader($drequest, $repository);
+    $header = $this->buildHeader($drequest);
 
     $crumbs = $this->buildCrumbs(
       array(

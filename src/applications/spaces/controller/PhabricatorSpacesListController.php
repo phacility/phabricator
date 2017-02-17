@@ -9,7 +9,7 @@ final class PhabricatorSpacesListController
 
   public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine(new PhabricatorSpacesNamespaceSearchEngine())
       ->setNavigation($this->buildSideNavView());

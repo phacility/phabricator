@@ -49,7 +49,7 @@ final class PhabricatorProjectMembersRemoveController
             '-' => array($remove_phid => $remove_phid),
           ));
 
-      $editor = id(new PhabricatorProjectTransactionEditor($project))
+      $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)

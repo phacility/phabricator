@@ -40,7 +40,7 @@ final class PhabricatorBadgesAwardController
           ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
           ->setNewValue($award_phids);
 
-        $editor = id(new PhabricatorBadgesEditor($badge))
+        $editor = id(new PhabricatorBadgesEditor())
           ->setActor($viewer)
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)

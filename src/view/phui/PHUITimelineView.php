@@ -182,7 +182,7 @@ final class PHUITimelineView extends AphrontView {
     }
 
     if ($this->shouldTerminate) {
-      $events[] = self::renderEnder(true);
+      $events[] = self::renderEnder();
     }
 
     return $events;

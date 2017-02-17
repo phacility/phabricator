@@ -10,6 +10,7 @@ final class PhragmentFragment extends PhragmentDAO
   protected $editPolicy;
 
   private $latestVersion = self::ATTACHABLE;
+  private $file = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(

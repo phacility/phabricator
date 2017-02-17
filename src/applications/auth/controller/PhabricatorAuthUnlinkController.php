@@ -61,7 +61,7 @@ final class PhabricatorAuthUnlinkController
       return id(new AphrontRedirectResponse())->setURI($this->getDoneURI());
     }
 
-    return $this->renderConfirmDialog($account);
+    return $this->renderConfirmDialog();
   }
 
   private function getDoneURI() {

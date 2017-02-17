@@ -9,9 +9,7 @@ final class PhabricatorOwnersConfiguredCustomField
   }
 
   public function createFields($object) {
-    $config = PhabricatorEnv::getEnvConfig(
-      'owners.custom-field-definitions',
-      array());
+    $config = PhabricatorEnv::getEnvConfig('owners.custom-field-definitions');
 
     $fields = PhabricatorStandardCustomField::buildStandardFields(
       $this,

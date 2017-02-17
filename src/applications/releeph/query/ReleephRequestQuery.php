@@ -229,11 +229,11 @@ final class ReleephRequestQuery
         );
       case self::STATUS_NEEDS_REVERT:
         return array(
-          ReleephRequestStatus::NEEDS_REVERT,
+          ReleephRequestStatus::STATUS_NEEDS_REVERT,
         );
       case self::STATUS_REVERTED:
         return array(
-          ReleephRequestStatus::REVERTED,
+          ReleephRequestStatus::STATUS_REVERTED,
         );
       default:
         throw new Exception(pht("Unknown status '%s'!", $this->status));

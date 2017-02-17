@@ -251,7 +251,7 @@ abstract class PhabricatorApplication
   }
 
   final protected function getInboundEmailSupportLink() {
-    return PhabricatorEnv::getDocLink('Configuring Inbound Email');
+    return PhabricatorEnv::getDoclink('Configuring Inbound Email');
   }
 
   public function getAppEmailBlurb() {
