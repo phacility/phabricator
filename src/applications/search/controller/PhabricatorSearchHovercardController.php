@@ -9,7 +9,7 @@ final class PhabricatorSearchHovercardController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-    $phids = $request->getStrList('phids');
+    $phids = $request->getArr('phids');
 
     // If object names are provided, look them up and pretend they were
     // passed as additional PHIDs. This is primarily useful for debugging,
