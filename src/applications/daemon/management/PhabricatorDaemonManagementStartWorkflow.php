@@ -34,7 +34,7 @@ final class PhabricatorDaemonManagementStartWorkflow
       array(
         'keep-leases' => $args->getArg('keep-leases'),
         'force' => $args->getArg('force'),
-        'reserve' => (float)$args->getArg('autoscale-reserve', 0.0),
+        'reserve' => (float)$args->getArg('autoscale-reserve'),
       ));
   }
 

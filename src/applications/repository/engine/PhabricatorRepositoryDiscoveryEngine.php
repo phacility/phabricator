@@ -233,7 +233,7 @@ final class PhabricatorRepositoryDiscoveryEngine
           $limit,
           $repository->getSubversionBaseURI($at_rev));
       } catch (CommandException $ex) {
-        $stderr = $ex->getStdErr();
+        $stderr = $ex->getStderr();
         if (preg_match('/(path|File) not found/', $stderr)) {
           // We've gone all the way back through history and this path was not
           // affected by earlier commits.
