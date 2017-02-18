@@ -47,16 +47,6 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     );
   }
 
-  public static function copyDashboard(
-    PhabricatorDashboard $dst,
-    PhabricatorDashboard $src) {
-
-    $dst->name = $src->name;
-    $dst->layoutConfig = $src->layoutConfig;
-
-    return $dst;
-  }
-
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

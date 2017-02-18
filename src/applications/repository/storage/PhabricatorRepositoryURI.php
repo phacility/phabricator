@@ -577,7 +577,7 @@ final class PhabricatorRepositoryURI
       self::IO_READWRITE => 200,
       self::IO_READ => 100,
     );
-    $score += idx($io_points, $this->getEffectiveIoType(), 0);
+    $score += idx($io_points, $this->getEffectiveIOType(), 0);
 
     $protocol_points = array(
       self::BUILTIN_PROTOCOL_SSH => 30,

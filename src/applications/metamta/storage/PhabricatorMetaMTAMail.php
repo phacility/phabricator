@@ -951,6 +951,16 @@ final class PhabricatorMetaMTAMail
       }
     }
 
+    // Unless delivery was forced earlier (password resets, confirmation mail),
+    // never send mail to unverified addresses.
+    foreach ($actors as $phid => $actor) {
+      if ($actor->getIsVerified()) {
+        continue;
+      }
+
+      $actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_UNVERIFIED);
+    }
+
     return $actors;
   }
 

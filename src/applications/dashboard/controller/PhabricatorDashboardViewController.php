@@ -1,9 +1,7 @@
 <?php
 
 final class PhabricatorDashboardViewController
-  extends PhabricatorDashboardController {
-
-  private $id;
+  extends PhabricatorDashboardProfileController {
 
   public function shouldAllowPublic() {
     return true;
@@ -11,63 +9,51 @@ final class PhabricatorDashboardViewController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $this->id = $request->getURIData('id');
+    $id = $request->getURIData('id');
 
     $dashboard = id(new PhabricatorDashboardQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($id))
       ->needPanels(true)
       ->executeOne();
     if (!$dashboard) {
       return new Aphront404Response();
     }
+    $this->setDashboard($dashboard);
 
+    $dashboard_uri = $this->getApplicationURI("view/{$id}/");
     $title = $dashboard->getName();
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setBorder(true);
-    $crumbs->addTextCrumb(pht('Dashboard %d', $dashboard->getID()));
+    $crumbs->addTextCrumb(pht('View'));
 
     if ($dashboard->getPanelPHIDs()) {
       $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
         ->setViewer($viewer)
         ->setDashboard($dashboard)
         ->renderDashboard();
+      $content = id(new PHUIBoxView())
+        ->addClass('dashboard-preview-box')
+        ->appendChild($rendered_dashboard);
     } else {
-      $rendered_dashboard = $this->buildEmptyView();
+      $content = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(pht('This dashboard has no panels yet.'));
     }
+
+    $navigation = $this->buildSideNavView('view');
+    $header = $this->buildHeaderView();
+
+    $view = id(new PHUITwoColumnView())
+      ->setHeader($header)
+      ->setFooter(array(
+        $content,
+      ));
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($rendered_dashboard);
-  }
-
-  protected function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-    $id = $this->id;
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setIcon('fa-th')
-        ->setName(pht('Manage Dashboard'))
-        ->setHref($this->getApplicationURI("manage/{$id}/")));
-
-    return $crumbs;
-  }
-
-  public function buildEmptyView() {
-    $id = $this->id;
-    $manage_uri = $this->getApplicationURI("manage/{$id}/");
-
-    return id(new PHUIInfoView())
-      ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
-      ->appendChild(
-        pht('This dashboard has no panels '.
-          'yet. Use %s to add panels.',
-          phutil_tag(
-            'a',
-            array('href' => $manage_uri),
-            pht('Manage Dashboard'))));
+      ->setNavigation($navigation)
+      ->appendChild($view);
   }
 
 }

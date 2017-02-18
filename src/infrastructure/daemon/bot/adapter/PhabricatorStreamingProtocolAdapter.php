@@ -6,11 +6,11 @@ abstract class PhabricatorStreamingProtocolAdapter
   protected $readHandles;
   protected $multiHandle;
   protected $authtoken;
+  protected $inRooms = array();
 
   private $readBuffers;
   private $server;
   private $active;
-  private $inRooms = array();
 
   public function getServiceName() {
     $uri = new PhutilURI($this->server);

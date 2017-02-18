@@ -201,8 +201,8 @@ final class CelerityDefaultPostprocessor
       'copy-background' => '#f1c40f',
 
       // Background color for "most" themes.
-      'page.background' => '#f8f8fb',
-      'page.sidenav' => '#f0f0f2',
+      'page.background' => '#f3f5f7',
+      'page.sidenav' => '#eaedf1',
 
       'menu.profile.text' => 'rgba(255,255,255,.8)',
       'menu.profile.text.selected' => 'rgba(255,255,255,1)',

@@ -16,7 +16,7 @@ final class PhabricatorStorageSetupCheck extends PhabricatorSetupCheck {
     $this->checkS3();
 
     if (!$chunk_engine_active) {
-      $doc_href = PhabricatorEnv::getDocLink('Configuring File Storage');
+      $doc_href = PhabricatorEnv::getDoclink('Configuring File Storage');
 
       $message = pht(
         'Large file storage has not been configured, which will limit '.

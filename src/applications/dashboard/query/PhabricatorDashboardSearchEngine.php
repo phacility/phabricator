@@ -13,7 +13,7 @@ final class PhabricatorDashboardSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorDashboardQuery())
-      ->needProjects(true);
+      ->needPanels(true);
   }
 
   protected function buildCustomSearchFields() {
@@ -98,100 +98,53 @@ final class PhabricatorDashboardSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
 
-    $dashboards = mpull($dashboards, null, 'getPHID');
     $viewer = $this->requireViewer();
 
-    if ($dashboards) {
-      $installs = id(new PhabricatorDashboardInstall())
-        ->loadAllWhere(
-          'objectPHID IN (%Ls) AND dashboardPHID IN (%Ls)',
-          array(
-            PhabricatorHomeApplication::DASHBOARD_DEFAULT,
-            $viewer->getPHID(),
-          ),
-          array_keys($dashboards));
-      $installs = mpull($installs, null, 'getDashboardPHID');
-    } else {
-      $installs = array();
-    }
-
-    $proj_phids = array();
+    $phids = array();
     foreach ($dashboards as $dashboard) {
-      foreach ($dashboard->getProjectPHIDs() as $project_phid) {
-        $proj_phids[] = $project_phid;
+      $author_phid = $dashboard->getAuthorPHID();
+      if ($author_phid) {
+        $phids[] = $author_phid;
       }
     }
 
-    $proj_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($proj_phids)
-      ->execute();
+    $handles = $viewer->loadHandles($phids);
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
-    $list->initBehavior('phabricator-tooltips', array());
-    $list->requireResource('aphront-tooltip-css');
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
 
-    foreach ($dashboards as $dashboard_phid => $dashboard) {
+    foreach ($dashboards as $dashboard) {
       $id = $dashboard->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Dashboard %d', $id))
+        ->setUser($viewer)
         ->setHeader($dashboard->getName())
         ->setHref($this->getApplicationURI("view/{$id}/"))
         ->setObject($dashboard);
-
-      if (isset($installs[$dashboard_phid])) {
-        $install = $installs[$dashboard_phid];
-        if ($install->getObjectPHID() == $viewer->getPHID()) {
-          $attrs = array(
-            'tip' => pht(
-              'This dashboard is installed to your personal homepage.'),
-          );
-          $item->addIcon('fa-user', pht('Installed'), $attrs);
-        } else {
-          $attrs = array(
-            'tip' => pht(
-              'This dashboard is the default homepage for all users.'),
-          );
-          $item->addIcon('fa-globe', pht('Installed'), $attrs);
-        }
-      }
-
-      $project_handles = array_select_keys(
-        $proj_handles,
-        $dashboard->getProjectPHIDs());
-
-      $item->addAttribute(
-        id(new PHUIHandleTagListView())
-          ->setLimit(4)
-          ->setNoDataString(pht('No Projects'))
-          ->setSlim(true)
-          ->setHandles($project_handles));
 
       if ($dashboard->isArchived()) {
         $item->setDisabled(true);
       }
 
-      $can_edit = PhabricatorPolicyFilter::hasCapability(
-        $viewer,
-        $dashboard,
-        PhabricatorPolicyCapability::CAN_EDIT);
+      $panels = $dashboard->getPanels();
+      foreach ($panels as $panel) {
+        $item->addAttribute($panel->getName());
+      }
 
-      $href_view = $this->getApplicationURI("manage/{$id}/");
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setName(pht('Manage'))
-          ->setIcon('fa-th')
-          ->setHref($href_view));
+      if (empty($panels)) {
+        $empty = phutil_tag('em', array(), pht('No panels.'));
+        $item->addAttribute($empty);
+      }
 
-      $href_edit = $this->getApplicationURI("edit/{$id}/");
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setName(pht('Edit'))
-          ->setIcon('fa-pencil')
-          ->setHref($href_edit)
-          ->setDisabled(!$can_edit));
+      $icon = id(new PHUIIconView())
+        ->setIcon($dashboard->getIcon())
+        ->setBackground('bg-dark');
+      $item->setImageIcon($icon);
+      $item->setEpoch($dashboard->getDateModified());
+
+      $author_phid = $dashboard->getAuthorPHID();
+      $author_name = $handles[$author_phid]->renderLink();
+      $item->addByline(pht('Author: %s', $author_name));
 
       $list->addItem($item);
     }

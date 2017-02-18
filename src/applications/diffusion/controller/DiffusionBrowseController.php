@@ -44,7 +44,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $is_file = ($reason == DiffusionBrowseResultSet::REASON_IS_FILE);
 
     if ($is_file) {
-      return $this->browseFile($results);
+      return $this->browseFile();
     } else {
       $paths = $results->getPaths();
       $paths = $pager->sliceResults($paths);

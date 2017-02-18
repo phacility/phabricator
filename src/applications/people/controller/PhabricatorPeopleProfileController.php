@@ -103,6 +103,8 @@ abstract class PhabricatorPeopleProfileController
 
     if ($user->getIsDisabled()) {
       $header->setStatus('fa-ban', 'red', pht('Disabled'));
+    } else if (!$user->getIsEmailVerified()) {
+      $header->setStatus('fa-envelope', 'red', pht('Email Not Verified'));
     } else {
       $header->setStatus($profile_icon, 'bluegrey', $profile_title);
     }

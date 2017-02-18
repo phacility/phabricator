@@ -61,7 +61,7 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
       }
 
       $availability = null;
-      if (!$user->isUserActivated()) {
+      if (!$user->isResponsive()) {
         $availability = PhabricatorObjectHandle::AVAILABILITY_DISABLED;
       } else {
         $until = $user->getAwayUntil();

@@ -70,7 +70,7 @@ final class PhabricatorCalendarExportEditEngine
 
     $current_mode = $object->getPolicyMode();
     if (empty($export_modes[$current_mode])) {
-      array_shift($export_modes, $current_mode);
+      array_unshift($export_modes, $current_mode);
     }
 
     $mode_options = array();

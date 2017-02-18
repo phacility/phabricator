@@ -1489,8 +1489,7 @@ abstract class PhabricatorEditEngine
       );
     } else {
       foreach ($configs as $config) {
-        $form_key = $config->getIdentifier();
-        $config_uri = $this->getEditURI(null, "form/{$form_key}/");
+        $config_uri = $config->getCreateURI();
 
         if ($parameters) {
           $config_uri = (string)id(new PhutilURI($config_uri))

@@ -17,7 +17,7 @@ final class DiffusionCommitRequiredActionResultBucket
 
     $this->objects = $objects;
 
-    $phids = $query->getEvaluatedParameter('responsiblePHIDs', array());
+    $phids = $query->getEvaluatedParameter('responsiblePHIDs');
     if (!$phids) {
       throw new Exception(
         pht(

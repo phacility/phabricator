@@ -29,6 +29,7 @@
     padding-right: 0;
     background-color: transparent;
     width: 205px;
+    max-width: 205px;
 }
 
 .device-phone .phui-basic-nav.phui-navigation-shell

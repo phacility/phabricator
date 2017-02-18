@@ -162,7 +162,7 @@ final class PhabricatorConduitLogSearchEngine
             ->addSigil('has-tooltip')
             ->setMetadata(
               array(
-                'tip' => pht('Unknown ("%s")', $status),
+                'tip' => pht('Unknown ("%s")', $method_status),
               ));
           break;
       }

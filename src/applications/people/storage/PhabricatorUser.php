@@ -120,6 +120,32 @@ final class PhabricatorUser
     return true;
   }
 
+
+  /**
+   * Is this a user who we can reasonably expect to respond to requests?
+   *
+   * This is used to provide a grey "disabled/unresponsive" dot cue when
+   * rendering handles and tags, so it isn't a surprise if you get ignored
+   * when you ask things of users who will not receive notifications or could
+   * not respond to them (because they are disabled, unapproved, do not have
+   * verified email addresses, etc).
+   *
+   * @return bool True if this user can receive and respond to requests from
+   *   other humans.
+   */
+  public function isResponsive() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if (!$this->getIsEmailVerified()) {
+      return false;
+    }
+
+    return true;
+  }
+
+
   public function canEstablishWebSessions() {
     if ($this->getIsMailingList()) {
       return false;

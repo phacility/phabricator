@@ -67,3 +67,7 @@
 .device-phone .application-search-pager {
   margin: 12px;
 }
+
+.application-search-view .phui-oi-list-view.phui-oi-list-big {
+  margin-top: 12px;
+}

@@ -68,8 +68,23 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
 
     $default_method = $subscription->getDefaultPaymentMethodPHID();
     if ($default_method) {
-      $handles = $this->loadViewerHandles(array($default_method));
-      $autopay_method = $handles[$default_method]->renderLink();
+      $method = id(new PhortunePaymentMethodQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($default_method))
+        ->withStatuses(
+          array(
+            PhortunePaymentMethod::STATUS_ACTIVE,
+          ))
+        ->executeOne();
+      if ($method) {
+        $handles = $this->loadViewerHandles(array($default_method));
+        $autopay_method = $handles[$default_method]->renderLink();
+      } else {
+        $autopay_method = phutil_tag(
+          'em',
+          array(),
+          pht('<Deleted Payment Method>'));
+      }
     } else {
       $autopay_method = phutil_tag(
         'em',
