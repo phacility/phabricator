@@ -21,6 +21,10 @@ final class PhabricatorBadgesEditEngine
     return pht('Configure creation and editing forms in Badges.');
   }
 
+  public function isEngineConfigurable() {
+    return false;
+  }
+
   protected function newEditableObject() {
     return PhabricatorBadgesBadge::initializeNewBadge($this->getViewer());
   }
