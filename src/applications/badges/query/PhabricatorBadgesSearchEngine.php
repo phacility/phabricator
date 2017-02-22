@@ -4,7 +4,7 @@ final class PhabricatorBadgesSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Badge');
+    return pht('Badges');
   }
 
   public function getApplicationClassName() {

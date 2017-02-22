@@ -31,7 +31,7 @@ final class ManiphestTaskSearchEngine
   }
 
   public function getResultTypeDescription() {
-    return pht('Tasks');
+    return pht('Maniphest Tasks');
   }
 
   public function getApplicationClassName() {
