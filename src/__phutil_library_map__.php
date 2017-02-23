@@ -4132,6 +4132,8 @@ phutil_register_library_map(array(
     'PhabricatorXHProfProfileView' => 'applications/xhprof/view/PhabricatorXHProfProfileView.php',
     'PhabricatorXHProfSample' => 'applications/xhprof/storage/PhabricatorXHProfSample.php',
     'PhabricatorXHProfSampleListController' => 'applications/xhprof/controller/PhabricatorXHProfSampleListController.php',
+    'PhabricatorXHProfSampleQuery' => 'applications/xhprof/query/PhabricatorXHProfSampleQuery.php',
+    'PhabricatorXHProfSampleSearchEngine' => 'applications/xhprof/query/PhabricatorXHProfSampleSearchEngine.php',
     'PhabricatorYoutubeRemarkupRule' => 'infrastructure/markup/rule/PhabricatorYoutubeRemarkupRule.php',
     'Phame404Response' => 'applications/phame/site/Phame404Response.php',
     'PhameBlog' => 'applications/phame/storage/PhameBlog.php',
@@ -9442,8 +9444,13 @@ phutil_register_library_map(array(
     'PhabricatorXHProfProfileSymbolView' => 'PhabricatorXHProfProfileView',
     'PhabricatorXHProfProfileTopLevelView' => 'PhabricatorXHProfProfileView',
     'PhabricatorXHProfProfileView' => 'AphrontView',
-    'PhabricatorXHProfSample' => 'PhabricatorXHProfDAO',
+    'PhabricatorXHProfSample' => array(
+      'PhabricatorXHProfDAO',
+      'PhabricatorPolicyInterface',
+    ),
     'PhabricatorXHProfSampleListController' => 'PhabricatorXHProfController',
+    'PhabricatorXHProfSampleQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorXHProfSampleSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorYoutubeRemarkupRule' => 'PhutilRemarkupRule',
     'Phame404Response' => 'AphrontHTMLResponse',
     'PhameBlog' => array(

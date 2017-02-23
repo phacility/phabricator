@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorXHProfSample extends PhabricatorXHProfDAO {
+final class PhabricatorXHProfSample
+  extends PhabricatorXHProfDAO
+  implements PhabricatorPolicyInterface {
 
   protected $filePHID;
   protected $usTotal;
@@ -27,6 +29,27 @@ final class PhabricatorXHProfSample extends PhabricatorXHProfDAO {
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::getMostOpenPolicy();
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }
