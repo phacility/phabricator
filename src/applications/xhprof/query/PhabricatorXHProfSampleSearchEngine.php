@@ -63,10 +63,13 @@ final class PhabricatorXHProfSampleSearchEngine
 
       $item = id(new PHUIObjectItemView())
         ->setObjectName($sample->getID())
-        ->setHeader($sample->getRequestPath())
-        ->setHref($this->getApplicationURI('profile/'.$file_phid.'/'))
-        ->addAttribute(
-          number_format($sample->getUsTotal())." \xCE\xBCs");
+        ->setHeader($sample->getDisplayName())
+        ->setHref($sample->getURI());
+
+      $us_total = $sample->getUsTotal();
+      if ($us_total) {
+        $item->addAttribute(pht("%s \xCE\xBCs", new PhutilNumber($us_total)));
+      }
 
       if ($sample->getController()) {
         $item->addAttribute($sample->getController());
@@ -88,10 +91,30 @@ final class PhabricatorXHProfSampleSearchEngine
       $list->addItem($item);
     }
 
-    $result = new PhabricatorApplicationSearchResultView();
-    $result->setObjectList($list);
+    return $this->newResultView()
+      ->setObjectList($list);
+  }
 
-    return $result;
+
+  private function newResultView($content = null) {
+    // If we aren't rendering a dashboard panel, activate global drag-and-drop
+    // so you can import profiles by dropping them into the list.
+
+    if (!$this->isPanelContext()) {
+      $drop_upload = id(new PhabricatorGlobalUploadTargetView())
+        ->setViewer($this->requireViewer())
+        ->setHintText("\xE2\x87\xAA ".pht('Drop .xhprof Files to Import'))
+        ->setSubmitURI('/xhprof/import/drop/')
+        ->setViewPolicy(PhabricatorPolicies::POLICY_NOONE);
+
+      $content = array(
+        $drop_upload,
+        $content,
+      );
+    }
+
+    return id(new PhabricatorApplicationSearchResultView())
+      ->setContent($content);
   }
 
 }

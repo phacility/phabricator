@@ -12,6 +12,12 @@ final class PhabricatorXHProfSample
   protected $controller;
   protected $userPHID;
 
+  public static function initializeNewSample() {
+    return id(new self())
+      ->setUsTotal(0)
+      ->setSampleRate(0);
+  }
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -29,6 +35,19 @@ final class PhabricatorXHProfSample
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getURI() {
+    return '/xhprof/profile/'.$this->getFilePHID().'/';
+  }
+
+  public function getDisplayName() {
+    $request_path = $this->getRequestPath();
+    if (strlen($request_path)) {
+      return $request_path;
+    }
+
+    return pht('Unnamed Sample');
   }
 
 
