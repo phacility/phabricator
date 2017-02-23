@@ -86,20 +86,24 @@ final class PhabricatorBadgesEditEngine
         ->setLabel(pht('Name'))
         ->setDescription(pht('Badge name.'))
         ->setConduitTypeDescription(pht('New badge name.'))
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_NAME)
-        ->setValue($object->getName()),
+        ->setTransactionType(
+          PhabricatorBadgesBadgeNameTransaction::TRANSACTIONTYPE)
+        ->setValue($object->getName())
+        ->setIsRequired(true),
       id(new PhabricatorTextEditField())
         ->setKey('flavor')
         ->setLabel(pht('Flavor text'))
         ->setDescription(pht('Short description of the badge.'))
         ->setConduitTypeDescription(pht('New badge flavor.'))
         ->setValue($object->getFlavor())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_FLAVOR),
+        ->setTransactionType(
+          PhabricatorBadgesBadgeFlavorTransaction::TRANSACTIONTYPE),
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
         ->setIconSet(new PhabricatorBadgesIconSet())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_ICON)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeIconTransaction::TRANSACTIONTYPE)
         ->setConduitDescription(pht('Change the badge icon.'))
         ->setConduitTypeDescription(pht('New badge icon.'))
         ->setValue($object->getIcon()),
@@ -109,14 +113,16 @@ final class PhabricatorBadgesEditEngine
         ->setDescription(pht('Color and rarity of the badge.'))
         ->setConduitTypeDescription(pht('New badge quality.'))
         ->setValue($object->getQuality())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_QUALITY)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeQualityTransaction::TRANSACTIONTYPE)
         ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
       id(new PhabricatorRemarkupEditField())
         ->setKey('description')
         ->setLabel(pht('Description'))
         ->setDescription(pht('Badge long description.'))
         ->setConduitTypeDescription(pht('New badge description.'))
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeDescriptionTransaction::TRANSACTIONTYPE)
         ->setValue($object->getDescription()),
     );
   }

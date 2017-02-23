@@ -34,7 +34,8 @@ final class PhabricatorBadgesRemoveRecipientsController
     if ($request->isFormPost()) {
       $xactions = array();
       $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_REVOKE)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeRevokeTransaction::TRANSACTIONTYPE)
         ->setNewValue(array($remove_phid));
 
       $editor = id(new PhabricatorBadgesEditor())

@@ -37,7 +37,8 @@ final class PhabricatorBadgesEditRecipientsController
       }
 
       $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeAwardTransaction::TRANSACTIONTYPE)
         ->setNewValue($award_phids);
 
       $editor = id(new PhabricatorBadgesEditor())
