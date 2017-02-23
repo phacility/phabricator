@@ -1462,6 +1462,12 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $type = $u->getTransactionType();
 
+    $xtype = $this->getModularTransactionType($type);
+    if ($xtype) {
+      $object = $this->object;
+      return $xtype->mergeTransactions($object, $u, $v);
+    }
+
     switch ($type) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return $this->mergePHIDOrEdgeTransactions($u, $v);
