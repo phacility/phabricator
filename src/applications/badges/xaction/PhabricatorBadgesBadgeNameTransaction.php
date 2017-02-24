@@ -38,6 +38,17 @@ final class PhabricatorBadgesBadgeNameTransaction
         pht('Badges must have a name.'));
     }
 
+    $max_length = $object->getColumnMaximumByteLength('name');
+    foreach ($xactions as $xaction) {
+      $new_value = $xaction->getNewValue();
+      $new_length = strlen($new_value);
+      if ($new_length > $max_length) {
+        $errors[] = $this->newRequiredError(
+          pht('The name can be no longer than %s characters.',
+          new PhutilNumber($max_length)));
+      }
+    }
+
     return $errors;
   }
 

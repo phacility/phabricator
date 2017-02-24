@@ -59,4 +59,32 @@ final class PhabricatorBadgesBadgeAwardTransaction
     return 'fa-user-plus';
   }
 
+  public function validateTransactions($object, array $xactions) {
+    $errors = array();
+
+    foreach ($xactions as $xaction) {
+      $user_phids = $xaction->getNewValue();
+      if (!$user_phids) {
+        $errors[] = $this->newRequiredError(
+          pht('Recipient is required.'));
+        continue;
+      }
+
+      foreach ($user_phids as $user_phid) {
+        $user = id(new PhabricatorPeopleQuery())
+          ->setViewer($this->getActor())
+          ->withPHIDs(array($user_phid))
+          ->executeOne();
+        if (!$user) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'Recipient PHID "%s" is not a valid user PHID.',
+              $user_phid));
+        }
+      }
+    }
+
+    return $errors;
+  }
+
 }

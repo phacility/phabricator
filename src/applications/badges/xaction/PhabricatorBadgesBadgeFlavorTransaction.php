@@ -30,4 +30,21 @@ final class PhabricatorBadgesBadgeFlavorTransaction
       $this->renderNewValue());
   }
 
+  public function validateTransactions($object, array $xactions) {
+    $errors = array();
+
+    $max_length = $object->getColumnMaximumByteLength('flavor');
+    foreach ($xactions as $xaction) {
+      $new_value = $xaction->getNewValue();
+      $new_length = strlen($new_value);
+      if ($new_length > $max_length) {
+        $errors[] = $this->newRequiredError(
+          pht('The flavor text can be no longer than %s characters.',
+          new PhutilNumber($max_length)));
+      }
+    }
+
+    return $errors;
+  }
+
 }

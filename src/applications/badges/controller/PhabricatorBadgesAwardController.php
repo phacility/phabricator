@@ -67,7 +67,7 @@ final class PhabricatorBadgesAwardController
                   ))));
 
     $dialog = $this->newDialog()
-      ->setTitle(pht('Grant Badge'))
+      ->setTitle(pht('Award Badge'))
       ->appendForm($form)
       ->addCancelButton($view_uri)
       ->addSubmitButton(pht('Award'));

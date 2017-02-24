@@ -92,7 +92,7 @@ final class PhabricatorBadgesEditEngine
         ->setIsRequired(true),
       id(new PhabricatorTextEditField())
         ->setKey('flavor')
-        ->setLabel(pht('Flavor text'))
+        ->setLabel(pht('Flavor Text'))
         ->setDescription(pht('Short description of the badge.'))
         ->setConduitTypeDescription(pht('New badge flavor.'))
         ->setValue($object->getFlavor())

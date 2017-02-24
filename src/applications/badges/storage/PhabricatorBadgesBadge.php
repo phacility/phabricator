@@ -156,7 +156,7 @@ final class PhabricatorBadgesBadge extends PhabricatorBadgesDAO
 
 
   public function isAutomaticallySubscribed($phid) {
-    return ($this->creatorPHID == $phid);
+    return false;
   }
 
 

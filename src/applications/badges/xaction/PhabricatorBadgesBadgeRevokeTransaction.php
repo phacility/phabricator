@@ -51,4 +51,33 @@ final class PhabricatorBadgesBadgeRevokeTransaction
     return 'fa-user-times';
   }
 
+  public function validateTransactions($object, array $xactions) {
+    $errors = array();
+
+    foreach ($xactions as $xaction) {
+      $award_phids = $xaction->getNewValue();
+      if (!$award_phids) {
+        $errors[] = $this->newRequiredError(
+          pht('Recipient is required.'));
+        continue;
+      }
+
+      foreach ($award_phids as $award_phid) {
+        $award = id(new PhabricatorBadgesAwardQuery())
+          ->setViewer($this->getActor())
+          ->withRecipientPHIDs(array($award_phid))
+          ->withBadgePHIDs(array($object->getPHID()))
+          ->executeOne();
+        if (!$award) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              'Recipient PHID "%s" has not been awarded.',
+              $award_phid));
+        }
+      }
+    }
+
+    return $errors;
+  }
+
 }

@@ -55,6 +55,30 @@ final class PhabricatorBadgesEditor
     return true;
   }
 
+  protected function expandTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $actor = $this->getActor();
+    $actor_phid = $actor->getPHID();
+
+    $results = parent::expandTransactions($object, $xactions);
+
+    // Automatically subscribe the author when they create a badge.
+    if ($this->getIsNewObject()) {
+      if ($actor_phid) {
+        $results[] = id(new PhabricatorBadgesTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(
+            array(
+              '+' => array($actor_phid => $actor_phid),
+            ));
+      }
+    }
+
+    return $results;
+  }
+
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new PhabricatorBadgesReplyHandler())
       ->setMailReceiver($object);
