@@ -64,6 +64,8 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         'ldap/' => 'PhabricatorPeopleLdapController',
         'editprofile/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileEditController',
+        'badges/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfileBadgesController',
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfilePictureController',
         'manage/(?P<id>[1-9]\d*)/' =>

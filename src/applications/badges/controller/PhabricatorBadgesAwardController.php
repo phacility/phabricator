@@ -15,7 +15,7 @@ final class PhabricatorBadgesAwardController
       return new Aphront404Response();
     }
 
-    $view_uri = '/p/'.$user->getUsername();
+    $view_uri = '/people/badges/'.$user->getID().'/';
 
     if ($request->isFormPost()) {
       $badge_phids = $request->getArr('badgePHIDs');
