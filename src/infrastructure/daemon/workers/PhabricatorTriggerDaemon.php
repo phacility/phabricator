@@ -108,6 +108,11 @@ final class PhabricatorTriggerDaemon
       $sleep_duration = $this->runNuanceImportCursors($sleep_duration);
       $sleep_duration = $this->runGarbageCollection($sleep_duration);
       $sleep_duration = $this->runCalendarNotifier($sleep_duration);
+
+      if ($this->shouldHibernate($sleep_duration)) {
+        break;
+      }
+
       $this->sleep($sleep_duration);
     } while (!$this->shouldExit());
   }
