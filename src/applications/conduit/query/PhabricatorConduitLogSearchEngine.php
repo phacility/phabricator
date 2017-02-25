@@ -11,6 +11,10 @@ final class PhabricatorConduitLogSearchEngine
     return 'PhabricatorConduitApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     return new PhabricatorConduitLogQuery();
   }

@@ -15,7 +15,7 @@ final class PhabricatorBadgesAwardController
       return new Aphront404Response();
     }
 
-    $view_uri = '/p/'.$user->getUsername();
+    $view_uri = '/people/badges/'.$user->getID().'/';
 
     if ($request->isFormPost()) {
       $badge_phids = $request->getArr('badgePHIDs');
@@ -37,7 +37,8 @@ final class PhabricatorBadgesAwardController
       foreach ($badges as $badge) {
         $xactions = array();
         $xactions[] = id(new PhabricatorBadgesTransaction())
-          ->setTransactionType(PhabricatorBadgesTransaction::TYPE_AWARD)
+          ->setTransactionType(
+            PhabricatorBadgesBadgeAwardTransaction::TRANSACTIONTYPE)
           ->setNewValue($award_phids);
 
         $editor = id(new PhabricatorBadgesEditor())
@@ -66,7 +67,7 @@ final class PhabricatorBadgesAwardController
                   ))));
 
     $dialog = $this->newDialog()
-      ->setTitle(pht('Grant Badge'))
+      ->setTitle(pht('Award Badge'))
       ->appendForm($form)
       ->addCancelButton($view_uri)
       ->addSubmitButton(pht('Award'));

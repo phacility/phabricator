@@ -86,7 +86,7 @@ final class PhabricatorPhortuneManagementInvoiceWorkflow
 
     $auto_range = $args->getArg('auto-range');
     $last_arg = $args->getArg('last');
-    $next_arg = $args->getARg('next');
+    $next_arg = $args->getArg('next');
 
     if (!$auto_range && !$last_arg && !$next_arg) {
       throw new PhutilArgumentUsageException(

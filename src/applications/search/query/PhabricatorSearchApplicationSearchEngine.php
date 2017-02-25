@@ -11,6 +11,10 @@ final class PhabricatorSearchApplicationSearchEngine
     return 'PhabricatorSearchApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

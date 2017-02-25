@@ -1094,12 +1094,12 @@ abstract class LiskDAO extends Phobject {
 
 
   /**
-   *  Save this object, forcing the query to use INSERT regardless of object
-   *  state.
+   * Save this object, forcing the query to use INSERT regardless of object
+   * state.
    *
-   *  @return this
+   * @return this
    *
-   *  @task   save
+   * @task   save
    */
   public function insert() {
     $this->isEphemeralCheck();
@@ -1108,12 +1108,12 @@ abstract class LiskDAO extends Phobject {
 
 
   /**
-   *  Save this object, forcing the query to use UPDATE regardless of object
-   *  state.
+   * Save this object, forcing the query to use UPDATE regardless of object
+   * state.
    *
-   *  @return this
+   * @return this
    *
-   *  @task   save
+   * @task   save
    */
   public function update() {
     $this->isEphemeralCheck();
@@ -1192,6 +1192,7 @@ abstract class LiskDAO extends Phobject {
    * Internal implementation of INSERT and REPLACE.
    *
    * @param  const   Either "INSERT" or "REPLACE", to force the desired mode.
+   * @return this
    *
    * @task   save
    */

@@ -39,9 +39,9 @@ final class PhabricatorPeopleProfileManageController
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setCurtain($curtain)
       ->addPropertySection(pht('Details'), $properties);
-    require_celerity_resource('project-view-css');
 
     return $this->newPage()
       ->setTitle(

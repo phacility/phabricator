@@ -32,7 +32,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return id(new PhabricatorDashboard())
       ->setName('')
       ->setIcon('fa-dashboard')
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->setEditPolicy($actor->getPHID())
       ->setStatus(self::STATUS_ACTIVE)
       ->setAuthorPHID($actor->getPHID())

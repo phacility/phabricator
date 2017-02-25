@@ -86,6 +86,9 @@ abstract class PhabricatorPeopleProfileController
     if ($user->getIsMailingList()) {
       $roles[] = pht('Mailing List');
     }
+    if (!$user->getIsEmailVerified()) {
+      $roles[] = pht('Email Not Verified');
+    }
 
     $tag = null;
     if ($roles) {
@@ -101,10 +104,10 @@ abstract class PhabricatorPeopleProfileController
       ->setProfileHeader(true)
       ->addClass('people-profile-header');
 
+    require_celerity_resource('project-view-css');
+
     if ($user->getIsDisabled()) {
       $header->setStatus('fa-ban', 'red', pht('Disabled'));
-    } else if (!$user->getIsEmailVerified()) {
-      $header->setStatus('fa-envelope', 'red', pht('Email Not Verified'));
     } else {
       $header->setStatus($profile_icon, 'bluegrey', $profile_title);
     }

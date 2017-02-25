@@ -27,7 +27,6 @@ final class PeopleHovercardEngineExtension
       ->needAvailability(true)
       ->needProfileImage(true)
       ->needProfile(true)
-      ->needBadges(true)
       ->execute();
     $users = mpull($users, null, 'getPHID');
 

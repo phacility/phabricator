@@ -11,14 +11,20 @@ final class PhabricatorPhurlURLEditor
     return pht('Phurl');
   }
 
+  public function getCreateObjectTitle($author, $object) {
+    return pht('%s created this URL.', $author);
+  }
+
+  public function getCreateObjectTitleForFeed($author, $object) {
+    return pht('%s created %s.', $author, $object);
+  }
+
+  protected function supportsSearch() {
+    return true;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
-
-    $types[] = PhabricatorPhurlURLTransaction::TYPE_NAME;
-    $types[] = PhabricatorPhurlURLTransaction::TYPE_URL;
-    $types[] = PhabricatorPhurlURLTransaction::TYPE_ALIAS;
-    $types[] = PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION;
-
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -26,173 +32,21 @@ final class PhabricatorPhurlURLEditor
     return $types;
   }
 
-  protected function getCustomTransactionOldValue(
+  protected function shouldSendMail(
     PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorPhurlURLTransaction::TYPE_NAME:
-        return $object->getName();
-      case PhabricatorPhurlURLTransaction::TYPE_URL:
-        return $object->getLongURL();
-      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
-        return $object->getAlias();
-      case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
-        return $object->getDescription();
-    }
-
-    return parent::getCustomTransactionOldValue($object, $xaction);
-  }
-
-  protected function getCustomTransactionNewValue(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorPhurlURLTransaction::TYPE_NAME:
-      case PhabricatorPhurlURLTransaction::TYPE_URL:
-      case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
-        return $xaction->getNewValue();
-      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
-        if (!strlen($xaction->getNewValue())) {
-          return null;
-        }
-        return $xaction->getNewValue();
-    }
-
-    return parent::getCustomTransactionNewValue($object, $xaction);
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorPhurlURLTransaction::TYPE_NAME:
-        $object->setName($xaction->getNewValue());
-        return;
-      case PhabricatorPhurlURLTransaction::TYPE_URL:
-        $object->setLongURL($xaction->getNewValue());
-        return;
-      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
-        $object->setAlias($xaction->getNewValue());
-        return;
-      case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
-        $object->setDescription($xaction->getNewValue());
-        return;
-    }
-
-    return parent::applyCustomInternalTransaction($object, $xaction);
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-    switch ($xaction->getTransactionType()) {
-      case PhabricatorPhurlURLTransaction::TYPE_NAME:
-      case PhabricatorPhurlURLTransaction::TYPE_URL:
-      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
-      case PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION:
-        return;
-    }
-
-    return parent::applyCustomExternalTransaction($object, $xaction);
-  }
-
-  protected function validateTransaction(
-    PhabricatorLiskDAO $object,
-    $type,
     array $xactions) {
+    return true;
+  }
 
-    $errors = parent::validateTransaction($object, $type, $xactions);
-
-    switch ($type) {
-      case PhabricatorPhurlURLTransaction::TYPE_ALIAS:
-        $overdrawn = $this->validateIsTextFieldTooLong(
-          $object->getName(),
-          $xactions,
-          64);
-
-        if ($overdrawn) {
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Alias Too Long'),
-            pht('The alias can be no longer than 64 characters.'),
-            nonempty(last($xactions), null));
-        }
-
-        foreach ($xactions as $xaction) {
-          if ($xaction->getOldValue() != $xaction->getNewValue()) {
-            $new_alias = $xaction->getNewValue();
-            $debug_alias = new PHUIInvisibleCharacterView($new_alias);
-            if (!preg_match('/[a-zA-Z]/', $new_alias)) {
-              $errors[] = new PhabricatorApplicationTransactionValidationError(
-                $type,
-                pht('Invalid Alias'),
-                pht('The alias you provided (%s) must contain at least one '.
-                  'letter.',
-                  $debug_alias),
-                $xaction);
-            }
-            if (preg_match('/[^a-z0-9]/i', $new_alias)) {
-              $errors[] = new PhabricatorApplicationTransactionValidationError(
-                $type,
-                pht('Invalid Alias'),
-                pht('The alias you provided (%s) may only contain letters and '.
-                  'numbers.',
-                  $debug_alias),
-                $xaction);
-            }
-          }
-        }
-
-        break;
-      case PhabricatorPhurlURLTransaction::TYPE_URL:
-        $missing = $this->validateIsEmptyTextField(
-          $object->getLongURL(),
-          $xactions);
-
-        if ($missing) {
-          $error = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Required'),
-            pht('URL path is required.'),
-            nonempty(last($xactions), null));
-
-          $error->setIsMissingFieldError(true);
-          $errors[] = $error;
-        }
-
-        foreach ($xactions as $xaction) {
-          if ($xaction->getOldValue() != $xaction->getNewValue()) {
-            $protocols = PhabricatorEnv::getEnvConfig('uri.allowed-protocols');
-            $uri = new PhutilURI($xaction->getNewValue());
-            if (!isset($protocols[$uri->getProtocol()])) {
-              $errors[] = new PhabricatorApplicationTransactionValidationError(
-                $type,
-                pht('Invalid URL'),
-                pht('The protocol of the URL is invalid.'),
-                null);
-            }
-          }
-        }
-
-        break;
-    }
-
-    return $errors;
+  public function getMailTagsMap() {
+    return array(
+      PhabricatorPhurlURLTransaction::MAILTAG_DETAILS =>
+        pht(
+          "A URL's details change."),
+    );
   }
 
   protected function shouldPublishFeedStory(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return true;
-  }
-
-  protected function supportsSearch() {
-    return true;
-  }
-
-  protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
     return true;
@@ -204,18 +58,9 @@ final class PhabricatorPhurlURLEditor
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
-
     $phids[] = $this->getActingAsPHID();
 
     return $phids;
-  }
-
-  public function getMailTagsMap() {
-    return array(
-      PhabricatorPhurlURLTransaction::MAILTAG_DETAILS =>
-        pht(
-          "A URL's details change."),
-    );
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
@@ -255,7 +100,7 @@ final class PhabricatorPhurlURLEditor
 
     $errors = array();
     $errors[] = new PhabricatorApplicationTransactionValidationError(
-      PhabricatorPhurlURLTransaction::TYPE_ALIAS,
+      PhabricatorPhurlURLAliasTransaction::TRANSACTIONTYPE,
       pht('Duplicate'),
       pht('This alias is already in use.'),
       null);

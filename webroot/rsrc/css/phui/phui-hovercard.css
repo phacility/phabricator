@@ -81,7 +81,11 @@
 }
 
 .hovercard-badges {
-  margin: 8px 0 0 0;
+  margin: 6px 0 0 0;
+  padding: 4px;
+  background: {$page.background};
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .hovercard-badges .phui-badge-flex-item {

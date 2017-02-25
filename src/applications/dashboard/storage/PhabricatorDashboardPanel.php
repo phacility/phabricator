@@ -27,7 +27,7 @@ final class PhabricatorDashboardPanel
     return id(new PhabricatorDashboardPanel())
       ->setName('')
       ->setAuthorPHID($actor->getPHID())
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->setEditPolicy($actor->getPHID());
   }
 

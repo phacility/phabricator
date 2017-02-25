@@ -111,7 +111,7 @@ final class PhabricatorMarkupEngine extends Phobject {
     }
 
     if (!$keys) {
-      return;
+      return $this;
     }
 
     $objects = array_select_keys($this->objects, $keys);

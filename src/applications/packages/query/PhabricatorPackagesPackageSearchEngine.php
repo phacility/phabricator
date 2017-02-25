@@ -15,6 +15,10 @@ final class PhabricatorPackagesPackageSearchEngine
     return id(new PhabricatorPackagesPackageQuery());
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 

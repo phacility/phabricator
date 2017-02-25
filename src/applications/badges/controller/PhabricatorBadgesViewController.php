@@ -90,7 +90,6 @@ final class PhabricatorBadgesViewController
     $id = $badge->getID();
     $edit_uri = $this->getApplicationURI("/edit/{$id}/");
     $archive_uri = $this->getApplicationURI("/archive/{$id}/");
-    $award_uri = $this->getApplicationURI("/recipients/{$id}/add/");
 
     $curtain = $this->newCurtainView($badge);
 
@@ -118,14 +117,6 @@ final class PhabricatorBadgesViewController
           ->setWorkflow($can_edit)
           ->setHref($archive_uri));
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName('Add Recipients')
-        ->setIcon('fa-users')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true)
-        ->setHref($award_uri));
 
     return $curtain;
   }

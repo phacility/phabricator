@@ -258,12 +258,12 @@ final class PhabricatorPeopleProfilePictureController
     $nav = $this->getProfileMenu();
     $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Edit Profile Picture'))
-      ->setHeaderIcon('fa-camera');
+    $header = $this->buildProfileHeader();
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setFooter(array(
         $form_box,
         $upload_box,

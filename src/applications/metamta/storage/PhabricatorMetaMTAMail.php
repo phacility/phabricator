@@ -340,6 +340,9 @@ final class PhabricatorMetaMTAMail
     return $this->save();
   }
 
+  /**
+   * @return this
+   */
   public function save() {
     if ($this->getID()) {
       return parent::save();

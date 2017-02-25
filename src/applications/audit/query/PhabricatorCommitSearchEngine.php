@@ -4,7 +4,7 @@ final class PhabricatorCommitSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Commits');
+    return pht('Diffusion Commits');
   }
 
   public function getApplicationClassName() {

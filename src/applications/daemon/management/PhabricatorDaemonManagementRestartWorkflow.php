@@ -47,7 +47,7 @@ final class PhabricatorDaemonManagementRestartWorkflow
 
     return $this->executeStartCommand(
       array(
-        'reserve' => (float)$args->getArg('autoscale-reserve', 0.0),
+        'reserve' => (float)$args->getArg('autoscale-reserve'),
       ));
   }
 

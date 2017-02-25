@@ -87,6 +87,13 @@ abstract class PhabricatorModularTransactionType
     return array();
   }
 
+  public function mergeTransactions(
+    $object,
+    PhabricatorApplicationTransaction $u,
+    PhabricatorApplicationTransaction $v) {
+    return null;
+  }
+
   final public function setStorage(
     PhabricatorApplicationTransaction $xaction) {
     $this->storage = $xaction;

@@ -2126,6 +2126,13 @@ abstract class PhabricatorEditEngine
 
     $configs = msort($configs, 'getCreateSortKey');
 
+    // Attach this specific engine to configurations we load so they can access
+    // any runtime configuration. For example, this allows us to generate the
+    // correct "Create Form" buttons when editing forms, see T12301.
+    foreach ($configs as $config) {
+      $config->attachEngine($this);
+    }
+
     return $configs;
   }
 

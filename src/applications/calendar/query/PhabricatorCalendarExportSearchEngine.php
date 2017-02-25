@@ -11,6 +11,10 @@ final class PhabricatorCalendarExportSearchEngine
     return 'PhabricatorCalendarApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     $viewer = $this->requireViewer();
 

@@ -193,19 +193,23 @@ final class PhabricatorDashboardPanelEditController
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($v_name)
-          ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setName('viewPolicy')
-          ->setPolicyObject($panel)
-          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-          ->setPolicies($policies))
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setName('editPolicy')
-          ->setPolicyObject($panel)
-          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-          ->setPolicies($policies));
+          ->setError($e_name));
+
+      if (!$request->isAjax() || !$is_create) {
+        $form
+          ->appendChild(
+            id(new AphrontFormPolicyControl())
+              ->setName('viewPolicy')
+              ->setPolicyObject($panel)
+              ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+              ->setPolicies($policies))
+          ->appendChild(
+            id(new AphrontFormPolicyControl())
+              ->setName('editPolicy')
+              ->setPolicyObject($panel)
+              ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+              ->setPolicies($policies));
+    }
 
     $field_list->appendFieldsToForm($form);
 

@@ -16,6 +16,10 @@ final class PhabricatorDashboardSearchEngine
       ->needPanels(true);
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchTextField())

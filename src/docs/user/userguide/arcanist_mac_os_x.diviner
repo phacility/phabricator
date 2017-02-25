@@ -9,6 +9,7 @@ You need to install:
 
   - PHP, which should be installed by default.
   - Arcanist itself, see @{article:Arcanist User Guide}.
+  or @{article:Arcanist Quick Start}
   - SVN, Git, or Mercurial.
 
 Then, configure:

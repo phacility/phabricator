@@ -21,6 +21,10 @@ final class PhabricatorPhurlURLEditEngine
     return pht('Configure creation and editing forms in Phurl.');
   }
 
+  public function isEngineConfigurable() {
+    return false;
+  }
+
   protected function newEditableObject() {
     return PhabricatorPhurlURL::initializeNewPhurlURL($this->getViewer());
   }
@@ -73,8 +77,10 @@ final class PhabricatorPhurlURLEditEngine
         ->setKey('name')
         ->setLabel(pht('Name'))
         ->setDescription(pht('URL name.'))
+        ->setIsRequired(true)
         ->setConduitTypeDescription(pht('New URL name.'))
-        ->setTransactionType(PhabricatorPhurlURLTransaction::TYPE_NAME)
+        ->setTransactionType(
+          PhabricatorPhurlURLNameTransaction::TRANSACTIONTYPE)
         ->setValue($object->getName()),
       id(new PhabricatorTextEditField())
         ->setKey('url')
@@ -83,11 +89,14 @@ final class PhabricatorPhurlURLEditEngine
         ->setConduitTypeDescription(pht('New URL.'))
         ->setValue($object->getLongURL())
         ->setIsRequired(true)
-        ->setTransactionType(PhabricatorPhurlURLTransaction::TYPE_URL),
+        ->setTransactionType(
+          PhabricatorPhurlURLLongURLTransaction::TRANSACTIONTYPE),
       id(new PhabricatorTextEditField())
         ->setKey('alias')
         ->setLabel(pht('Alias'))
-        ->setTransactionType(PhabricatorPhurlURLTransaction::TYPE_ALIAS)
+        ->setIsRequired(true)
+        ->setTransactionType(
+          PhabricatorPhurlURLAliasTransaction::TRANSACTIONTYPE)
         ->setDescription(pht('The alias to give the URL.'))
         ->setConduitTypeDescription(pht('New alias.'))
         ->setValue($object->getAlias()),
@@ -96,7 +105,8 @@ final class PhabricatorPhurlURLEditEngine
         ->setLabel(pht('Description'))
         ->setDescription(pht('URL long description.'))
         ->setConduitTypeDescription(pht('New URL description.'))
-        ->setTransactionType(PhabricatorPhurlURLTransaction::TYPE_DESCRIPTION)
+        ->setTransactionType(
+          PhabricatorPhurlURLDescriptionTransaction::TRANSACTIONTYPE)
         ->setValue($object->getDescription()),
     );
   }
