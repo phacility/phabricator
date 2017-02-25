@@ -4,15 +4,14 @@
 Quick guide to getting Arcanist working for a new project.
 
 This is a summary of steps to install Arcanist, configure a project for use with
-it, and run `arc` to send changes for review.
-
-= Install Arcanist =
-
-For detailed instructions on installing Arcanist, see
-@{article:Arcanist User Guide}.
+it, and run `arc` to send changes for review. For detailed instructions on
+installing Arcanist, see @{article:Arcanist User Guide}. OS specific guides
+are also available.
 
   - For Mac OS X, see @{article:Arcanist User Guide: Mac OS X}.
   - For Windows, see @{article:Arcanist User Guide: Windows}.
+
+= Installing Arcanist =
 
 First, install dependencies:
 
