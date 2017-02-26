@@ -119,7 +119,7 @@ final class PhabricatorPeopleProfilePictureController
       'user7.png',
       'user8.png',
       'user9.png',
-      );
+    );
     foreach ($builtins as $builtin) {
       $file = PhabricatorFile::loadBuiltin($viewer, $builtin);
       $images[$file->getPHID()] = array(

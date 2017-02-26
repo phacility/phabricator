@@ -296,7 +296,7 @@ return array(
     'rsrc/favicons/mstile-70x70.png' => '5edce7b8',
     'rsrc/image/BFCFDA.png' => 'd5ec91f4',
     'rsrc/image/actions/edit.png' => '2fc41442',
-    'rsrc/image/avatar.png' => 'e132bb6a',
+    'rsrc/image/avatar.png' => '17d346a4',
     'rsrc/image/checker_dark.png' => 'd8e65881',
     'rsrc/image/checker_light.png' => 'a0155918',
     'rsrc/image/checker_lighter.png' => 'd5da91b6',
