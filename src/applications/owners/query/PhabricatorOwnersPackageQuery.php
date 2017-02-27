@@ -129,7 +129,16 @@ final class PhabricatorOwnersPackageQuery
     }
 
     if ($this->controlMap) {
-      $this->controlResults += mpull($packages, null, 'getID');
+      foreach ($packages as $package) {
+        // If this package is archived, it's no longer a controlling package
+        // for any path. In particular, it can not force active packages with
+        // weak dominion to give up control.
+        if ($package->isArchived()) {
+          continue;
+        }
+
+        $this->controlResults[$package->getID()] = $package;
+      }
     }
 
     return $packages;
@@ -360,13 +369,6 @@ final class PhabricatorOwnersPackageQuery
     foreach ($packages as $package_id => $package) {
       $best_match = null;
       $include = false;
-
-      // If this package is archived, it's no longer a controlling package
-      // for the given path. In particular, it can not force active packages
-      // with weak dominion to give up control.
-      if ($package->isArchived()) {
-        continue;
-      }
 
       $repository_paths = $package->getPathsForRepository($repository_phid);
       foreach ($repository_paths as $package_path) {
