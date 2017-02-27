@@ -85,7 +85,7 @@ final class PhabricatorCommitSearchEngine
         ->setKey('repositoryPHIDs')
         ->setConduitKey('repositories')
         ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
-        ->setDatasource(new DiffusionRepositoryDatasource()),
+        ->setDatasource(new DiffusionRepositoryFunctionDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Packages'))
         ->setKey('packagePHIDs')
