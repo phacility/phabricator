@@ -4,15 +4,11 @@ final class PhabricatorSearchApplicationSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Fulltext Results');
+    return pht('Fulltext Search Results');
   }
 
   public function getApplicationClassName() {
     return 'PhabricatorSearchApplication';
-  }
-
-  public function canUseInPanelContext() {
-    return false;
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
