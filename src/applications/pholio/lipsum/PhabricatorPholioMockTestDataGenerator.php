@@ -8,7 +8,7 @@ final class PhabricatorPholioMockTestDataGenerator
   }
 
   public function generateObject() {
-    $author_phid = $this->loadPhabrictorUserPHID();
+    $author_phid = $this->loadPhabricatorUserPHID();
     $author = id(new PhabricatorUser())
           ->loadOneWhere('phid = %s', $author_phid);
     $mock = PholioMock::initializeNewMock($author);
@@ -82,7 +82,7 @@ final class PhabricatorPholioMockTestDataGenerator
   public function getCCPHIDs() {
     $ccs = array();
     for ($i = 0; $i < rand(1, 4);$i++) {
-      $ccs[] = $this->loadPhabrictorUserPHID();
+      $ccs[] = $this->loadPhabricatorUserPHID();
     }
     return $ccs;
   }

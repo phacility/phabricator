@@ -8,7 +8,7 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
   }
 
   public function generateObject() {
-    $author = $this->loadPhabrictorUser();
+    $author = $this->loadPhabricatorUser();
 
     $revision = DifferentialRevision::initializeNewRevision($author);
     $revision->attachReviewerStatus(array());
@@ -39,7 +39,7 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
   public function getCCPHIDs() {
     $ccs = array();
     for ($i = 0; $i < rand(1, 4);$i++) {
-      $ccs[] = $this->loadPhabrictorUserPHID();
+      $ccs[] = $this->loadPhabricatorUserPHID();
     }
     return $ccs;
   }

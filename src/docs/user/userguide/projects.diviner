@@ -37,7 +37,7 @@ only members of the "Backend" project, nor does it allow them to see it if they
 otherwise could not. Likewise, removing projects does not affect visibility.
 
 If you're familiar with other software that works differently, this may be
-unexpected, but the rule in Phabrictor is simple: **adding and removing
+unexpected, but the rule in Phabricator is simple: **adding and removing
 projects never affects policies.**
 
 Note that you //can// write policy rules which restrict capabilities to members

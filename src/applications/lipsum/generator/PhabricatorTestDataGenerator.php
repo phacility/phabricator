@@ -89,9 +89,6 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     return $xaction;
   }
 
-
-
-
   public function loadOneRandom($classname) {
     try {
       return newv($classname, array())
@@ -106,11 +103,11 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     }
   }
 
-  public function loadPhabrictorUserPHID() {
+  public function loadPhabricatorUserPHID() {
     return $this->loadOneRandom('PhabricatorUser')->getPHID();
   }
 
-  public function loadPhabrictorUser() {
+  public function loadPhabricatorUser() {
     return $this->loadOneRandom('PhabricatorUser');
   }
 
