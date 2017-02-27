@@ -3,6 +3,8 @@
 final class PhabricatorPholioMockTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'mocks';
+
   public function getGeneratorName() {
     return pht('Pholio Mocks');
   }

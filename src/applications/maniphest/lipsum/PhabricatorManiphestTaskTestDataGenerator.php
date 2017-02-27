@@ -3,6 +3,8 @@
 final class PhabricatorManiphestTaskTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'tasks';
+
   public function getGeneratorName() {
     return pht('Maniphest Tasks');
   }

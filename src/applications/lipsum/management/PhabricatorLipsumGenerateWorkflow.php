@@ -30,14 +30,30 @@ final class PhabricatorLipsumGenerateWorkflow
 
     $all_generators = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorTestDataGenerator')
+      ->setUniqueMethod('getGeneratorKey')
       ->execute();
 
     $argv = $args->getArg('args');
     $all = 'all';
 
+    if (isset($all_generators[$all])) {
+      throw new Exception(
+        pht(
+          'A lipsum generator is registered with key "%s". This key is '.
+          'reserved.',
+          $all));
+    }
+
     if (!$argv) {
-      $names = mpull($all_generators, 'getGeneratorName');
-      sort($names);
+      ksort($all_generators);
+
+      $names = array();
+      foreach ($all_generators as $generator) {
+        $names[] = tsprintf(
+          '%s (%s)',
+          $generator->getGeneratorKey(),
+          $generator->getGeneratorName());
+      }
 
       $list = id(new PhutilConsoleList())
         ->setWrap(false)
@@ -59,30 +75,48 @@ final class PhabricatorLipsumGenerateWorkflow
     foreach ($argv as $arg_original) {
       $arg = phutil_utf8_strtolower($arg_original);
 
-      $match = false;
-      foreach ($all_generators as $generator) {
-        $name = phutil_utf8_strtolower($generator->getGeneratorName());
+      if ($arg == 'all') {
+        $matches = $all_generators;
+      } else {
+        $matches = array();
+        foreach ($all_generators as $generator) {
+          $name = phutil_utf8_strtolower($generator->getGeneratorKey());
 
-        if ($arg == $all) {
-          $generators[] = $generator;
-          $match = true;
-          break;
+          // If there's an exact match, select just that generator.
+          if ($arg == $name) {
+            $matches = array($generator);
+            break;
+          }
+
+          // If there's a partial match, match that generator but continue.
+          if (strpos($name, $arg) !== false) {
+            $matches[] = $generator;
+          }
         }
 
-        if (strpos($name, $arg) !== false) {
-          $generators[] = $generator;
-          $match = true;
-          break;
+        if (!$matches) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Argument "%s" does not match the name of any generators.',
+              $arg_original));
+        }
+
+        if (count($matches) > 1) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Argument "%s" is ambiguous, and matches multiple '.
+              'generators: %s.',
+              $arg_original,
+              implode(', ', mpull($matches, 'getGeneratorName'))));
         }
       }
 
-      if (!$match) {
-        throw new PhutilArgumentUsageException(
-          pht(
-            'Argument "%s" does not match the name of any generators.',
-            $arg_original));
+      foreach ($matches as $match) {
+        $generators[] = $match;
       }
     }
+
+    $generators = mpull($generators, null, 'getGeneratorKey');
 
     echo tsprintf(
       "**<bg:blue> %s </bg>** %s\n",

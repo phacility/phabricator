@@ -3,6 +3,8 @@
 final class PhabricatorDifferentialRevisionTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'revisions';
+
   public function getGeneratorName() {
     return pht('Differential Revisions');
   }

@@ -3,6 +3,8 @@
 final class PhabricatorFileTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
+  const GENERATORKEY = 'files';
+
   public function getGeneratorName() {
     return pht('Files');
   }

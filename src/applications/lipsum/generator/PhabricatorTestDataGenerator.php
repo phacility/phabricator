@@ -16,6 +16,10 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     return $this->viewer;
   }
 
+  final public function getGeneratorKey() {
+    return $this->getPhobjectClassConstant('GENERATORKEY', 64);
+  }
+
   protected function loadRandomPHID($table) {
     $conn_r = $table->establishConnection('r');
 
