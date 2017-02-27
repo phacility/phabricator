@@ -11,6 +11,17 @@ final class PhabricatorLipsumGenerateWorkflow
       ->setArguments(
         array(
           array(
+            'name' => 'force',
+            'short' => 'f',
+            'help' => pht(
+              'Generate objects without prompting for confirmation.'),
+          ),
+          array(
+            'name' => 'quickly',
+            'help' => pht(
+              'Generate objects as quickly as possible.'),
+          ),
+          array(
             'name'      => 'args',
             'wildcard'  => true,
           ),
@@ -34,6 +45,9 @@ final class PhabricatorLipsumGenerateWorkflow
       ->execute();
 
     $argv = $args->getArg('args');
+    $is_force = $args->getArg('force');
+    $is_quickly = $args->getArg('quickly');
+
     $all = 'all';
 
     if (isset($all_generators[$all])) {
@@ -125,20 +139,22 @@ final class PhabricatorLipsumGenerateWorkflow
         'Selected generators: %s.',
         implode(', ', mpull($generators, 'getGeneratorName'))));
 
-    echo tsprintf(
-      "**<bg:yellow> %s </bg>** %s\n",
-      pht('WARNING'),
-      pht(
-        'This command generates synthetic test data, including user '.
-        'accounts. It is intended for use in development environments '.
-        'so you can test features more easily. There is no easy way to '.
-        'delete this data or undo the effects of this command. If you run '.
-        'it in a production environment, it will pollute your data with '.
-        'large amounts of meaningless garbage that you can not get rid of.'));
+    if (!$is_force) {
+      echo tsprintf(
+        "**<bg:yellow> %s </bg>** %s\n",
+        pht('WARNING'),
+        pht(
+          'This command generates synthetic test data, including user '.
+          'accounts. It is intended for use in development environments so '.
+          'you can test features more easily. There is no easy way to delete '.
+          'this data or undo the effects of this command. If you run it in a '.
+          'production environment, it will pollute your data with large '.
+          'amounts of meaningless garbage that you can not get rid of.'));
 
-    $prompt = pht('Are you sure you want to generate piles of garbage?');
-    if (!phutil_console_confirm($prompt, true)) {
-      return;
+      $prompt = pht('Are you sure you want to generate piles of garbage?');
+      if (!phutil_console_confirm($prompt, true)) {
+        return;
+      }
     }
 
     echo tsprintf(
@@ -148,10 +164,10 @@ final class PhabricatorLipsumGenerateWorkflow
         'Generating synthetic test objects forever. '.
         'Use ^C to stop when satisfied.'));
 
-    $this->generate($generators);
+    $this->generate($generators, $is_quickly);
   }
 
-  protected function generate(array $generators) {
+  protected function generate(array $generators, $is_quickly) {
     $viewer = $this->getViewer();
 
     foreach ($generators as $generator) {
@@ -178,7 +194,11 @@ final class PhabricatorLipsumGenerateWorkflow
         continue;
       }
 
-      $object_phid = $object->getPHID();
+      if (is_string($object)) {
+        $object_phid = $object;
+      } else {
+        $object_phid = $object->getPHID();
+      }
 
       $handles = $viewer->loadHandles(array($object_phid));
 
@@ -189,7 +209,9 @@ final class PhabricatorLipsumGenerateWorkflow
           $handles[$object_phid]->getTypeName(),
           $handles[$object_phid]->getFullName()));
 
-      sleep(1);
+      if (!$is_quickly) {
+        sleep(1);
+      }
     }
   }
 

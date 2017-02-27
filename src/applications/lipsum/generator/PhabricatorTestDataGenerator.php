@@ -45,6 +45,7 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($user_phid))
+        ->needUserSettings(true)
         ->executeOne();
     }
 
@@ -114,6 +115,5 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
   public function loadPhabricatorUser() {
     return $this->loadOneRandom('PhabricatorUser');
   }
-
 
 }
