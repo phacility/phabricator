@@ -63,6 +63,11 @@ final class DifferentialRevisionRequiredActionResultBucket
       ->setNoDataString(pht('No revisions are waiting on author action.'))
       ->setObjects($this->filterWaitingOnAuthors($phids));
 
+    $groups[] = $this->newGroup()
+      ->setName(pht('Waiting on Other Reviewers'))
+      ->setNoDataString(pht('No revisions are waiting for other reviewers.'))
+      ->setObjects($this->filterWaitingOnOtherReviewers($phids));
+
     // Because you can apply these buckets to queries which include revisions
     // that have been closed, add an "Other" bucket if we still have stuff
     // that didn't get filtered into any of the previous buckets.
@@ -193,6 +198,27 @@ final class DifferentialRevisionRequiredActionResultBucket
     $results = array();
     foreach ($objects as $key => $object) {
       if (empty($statuses[$object->getStatus()])) {
+        continue;
+      }
+
+      $results[$key] = $object;
+      unset($this->objects[$key]);
+    }
+
+    return $results;
+  }
+
+  private function filterWaitingOnOtherReviewers(array $phids) {
+    $statuses = array(
+      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
+    );
+    $statuses = array_fuse($statuses);
+
+    $objects = $this->getRevisionsNotAuthored($this->objects, $phids);
+
+    $results = array();
+    foreach ($objects as $key => $object) {
+      if (!isset($statuses[$object->getStatus()])) {
         continue;
       }
 
