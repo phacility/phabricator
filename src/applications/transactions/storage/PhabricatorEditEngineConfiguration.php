@@ -216,6 +216,19 @@ final class PhabricatorEditEngineConfiguration
     return "/transactions/editengine/{$engine_key}/view/{$key}/";
   }
 
+  public function getCreateURI() {
+    $form_key = $this->getIdentifier();
+    $engine = $this->getEngine();
+
+    try {
+      $create_uri = $engine->getEditURI(null, "form/{$form_key}/");
+    } catch (Exception $ex) {
+      $create_uri = null;
+    }
+
+    return $create_uri;
+  }
+
   public function getIdentifier() {
     $key = $this->getID();
     if (!$key) {

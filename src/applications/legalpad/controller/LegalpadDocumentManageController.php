@@ -54,7 +54,7 @@ final class LegalpadDocumentManageController extends LegalpadController {
 
     $add_comment = $this->buildAddCommentView($document, $comment_form_id);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       $document->getMonogram(),
       '/'.$document->getMonogram());

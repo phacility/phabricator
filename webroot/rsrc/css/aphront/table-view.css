@@ -232,6 +232,10 @@ span.single-display-line-content {
 
 .aphront-table-view td.object-link {
   white-space: nowrap;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
 }
 
 .aphront-table-view tr.closed td.object-link .object-name,

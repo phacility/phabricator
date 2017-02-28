@@ -705,7 +705,11 @@ final class DiffusionCommitController extends DiffusionController {
     $timeline = $this->buildTransactionTimeline(
       $commit,
       new PhabricatorAuditTransactionQuery());
+
     $commit->willRenderTimeline($timeline, $this->getRequest());
+
+    $timeline->setQuoteRef($commit->getMonogram());
+
     return $timeline;
   }
 

@@ -172,7 +172,7 @@ body .diviner-view .diviner-section-content .phui-header-shell {
   margin: 4px -16px;
 }
 
-.diviner-book-item:hover {
+a.diviner-book-item:hover {
   text-decoration: none;
 }
 

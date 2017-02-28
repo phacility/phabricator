@@ -4,7 +4,7 @@ final class PhabricatorWorkerBulkJobSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Bulk Jobs');
+    return pht('Daemon Bulk Jobs');
   }
 
   public function getApplicationClassName() {
@@ -13,6 +13,10 @@ final class PhabricatorWorkerBulkJobSearchEngine
 
   public function newQuery() {
     return id(new PhabricatorWorkerBulkJobQuery());
+  }
+
+  public function canUseInPanelContext() {
+    return false;
   }
 
   protected function buildQueryFromParameters(array $map) {

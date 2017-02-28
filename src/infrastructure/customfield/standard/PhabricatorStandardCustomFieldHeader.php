@@ -34,4 +34,8 @@ final class PhabricatorStandardCustomFieldHeader
     return false;
   }
 
+  public function shouldAppearInConduitTransactions() {
+    return false;
+  }
+
 }

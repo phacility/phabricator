@@ -9,6 +9,12 @@ final class DifferentialAuditorsCommitMessageField
     return pht('Auditors');
   }
 
+  public function getFieldAliases() {
+    return array(
+      'Auditor',
+    );
+  }
+
   public function parseFieldValue($value) {
     return $this->parseObjectList(
       $value,

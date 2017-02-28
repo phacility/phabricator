@@ -446,7 +446,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $header->setHeader(pht('Branches'));
 
     if ($more_branches) {
-      $header->setSubHeader(pht('Showing %d branches.', $limit));
+      $header->setSubheader(pht('Showing %d branches.', $limit));
     }
 
     $button = new PHUIButtonView();
@@ -505,7 +505,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $header->setHeader(pht('Tags'));
 
     if ($more_tags) {
-      $header->setSubHeader(
+      $header->setSubheader(
         pht('Showing the %d most recent tags.', $tag_limit));
     }
 

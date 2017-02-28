@@ -219,7 +219,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $status = $task->getStatus();
     $status_name = ManiphestTaskStatus::renderFullDescription(
-      $status, $priority_name, $priority_color);
+      $status, $priority_name);
     $view->addProperty(PHUIHeaderView::PROPERTY_STATUS, $status_name);
 
     $view->setHeaderIcon(ManiphestTaskStatus::getStatusIcon(

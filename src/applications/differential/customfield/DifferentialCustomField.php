@@ -111,8 +111,8 @@ abstract class DifferentialCustomField
    * @task diff
    */
   public function renderDiffPropertyViewLabel(DifferentialDiff $diff) {
-    if ($this->proxy) {
-      return $this->proxy->renderDiffPropertyViewLabel($diff);
+    if ($this->getProxy()) {
+      return $this->getProxy()->renderDiffPropertyViewLabel($diff);
     }
     return $this->getFieldName();
   }
@@ -122,8 +122,8 @@ abstract class DifferentialCustomField
    * @task diff
    */
   public function renderDiffPropertyViewValue(DifferentialDiff $diff) {
-    if ($this->proxy) {
-      return $this->proxy->renderDiffPropertyViewValue($diff);
+    if ($this->getProxy()) {
+      return $this->getProxy()->renderDiffPropertyViewValue($diff);
     }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }

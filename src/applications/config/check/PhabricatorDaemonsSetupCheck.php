@@ -10,13 +10,13 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
     $task_daemon = id(new PhabricatorDaemonLogQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_RUNNING)
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
       ->withDaemonClasses(array('PhabricatorTaskmasterDaemon'))
       ->setLimit(1)
       ->execute();
 
     if (!$task_daemon) {
-      $doc_href = PhabricatorEnv::getDocLink('Managing Daemons with phd');
+      $doc_href = PhabricatorEnv::getDoclink('Managing Daemons with phd');
 
       $summary = pht(
         'You must start the Phabricator daemons to send email, rebuild '.

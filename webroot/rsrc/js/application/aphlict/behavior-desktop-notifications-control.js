@@ -19,22 +19,26 @@ JX.behavior('desktop-notifications-control', function(config, statics) {
     return el;
   }
   function updateFormStatus(permission) {
-    var statusEl = findEl(config.statusID);
-    if (!statusEl) {
+    var status_node = findEl(config.statusID);
+    if (!status_node) {
       return;
     }
+
+    var message_node = JX.$(config.messageID);
+
     switch (permission) {
       case 'default':
-        JX.DOM.setContent(statusEl.firstChild, config.cancelAsk);
+        JX.DOM.setContent(message_node, config.cancelAsk);
         break;
       case 'granted':
-        JX.DOM.setContent(statusEl.firstChild, config.grantedAsk);
+        JX.DOM.setContent(message_node, config.grantedAsk);
         break;
       case 'denied':
-        JX.DOM.setContent(statusEl.firstChild, config.deniedAsk);
+        JX.DOM.setContent(message_node, config.deniedAsk);
         break;
     }
-    JX.DOM.show(statusEl);
+
+    JX.DOM.show(status_node);
   }
 
   function updateBrowserStatus(permission) {

@@ -292,7 +292,7 @@ final class PhabricatorPasteQuery
     foreach ($pastes as $paste) {
       $key = $this->getSnippetCacheKey($paste);
       if (isset($caches[$key])) {
-        $snippet_data = phutil_json_decode($caches[$key], true);
+        $snippet_data = phutil_json_decode($caches[$key]);
         $snippet = new PhabricatorPasteSnippet(
           phutil_safe_html($snippet_data['content']),
           $snippet_data['type'],

@@ -1521,6 +1521,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
+   * @return this
    * @task edgelogic
    */
   public function withEdgeLogicConstraints($edge_type, array $constraints) {

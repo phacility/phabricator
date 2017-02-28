@@ -84,11 +84,13 @@ final class PhabricatorAuthenticationConfigOptions
             'Determines whether or not basic account information is editable.'))
         ->setDescription(
           pht(
-            'Is basic account information (email, real name, profile '.
-            'picture) editable? If you set up Phabricator to automatically '.
-            'synchronize account information from some other authoritative '.
-            'system, you can disable this to ensure information remains '.
-            'consistent across both systems.')),
+            'This option controls whether users can edit account email '.
+            'addresses and profile real names.'.
+            "\n\n".
+            'If you set up Phabricator to automatically synchronize account '.
+            'information from some other authoritative system, you can '.
+            'prevent users from making these edits to ensure information '.
+            'remains consistent across both systems.')),
       $this->newOption('account.minimum-password-length', 'int', 8)
         ->setSummary(pht('Minimum password length.'))
         ->setDescription(

@@ -10,6 +10,11 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     return 'PhabricatorPhrequentApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
+
   public function getPageSize(PhabricatorSavedQuery $saved) {
     return $saved->getParameter('limit', 1000);
   }

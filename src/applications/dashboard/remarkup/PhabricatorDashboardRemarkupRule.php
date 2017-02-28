@@ -32,6 +32,7 @@ final class PhabricatorDashboardRemarkupRule
     return id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
       ->setPanel($object)
+      ->setPanelPHID($object->getPHID())
       ->setParentPanelPHIDs($parent_phids)
       ->renderPanel();
 

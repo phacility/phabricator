@@ -45,11 +45,14 @@ final class PhabricatorFilesOnDiskBuiltinFile
     $root = $root.'/resources/builtin/';
 
     $map = array();
-    $list = Filesystem::listDirectory($root, $include_hidden = false);
+    $list = id(new FileFinder($root))
+      ->withType('f')
+      ->withFollowSymlinks(true)
+      ->find();
+
     foreach ($list as $file) {
       $map[$file] = $root.$file;
     }
-
     return $map;
   }
 

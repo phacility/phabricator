@@ -361,9 +361,10 @@ commits and Maniphest tasks, by mentioning the name of an object:
                 # You must specify at least 7 characters of the hash.
   T123          # Link to Maniphest task T123
 
-You can also link directly to a comment in Maniphest and Differential:
+You can also link directly to a comment in Maniphest and Differential (these
+can be found on the date stamp of any transaction/comment):
 
-  T123#4        # Link to comment #4 of T123
+  T123#412       # Link to comment id #412 of task T123
 
 See the Phabricator configuraton setting `remarkup.ignored-object-names` to
 modify this behavior.

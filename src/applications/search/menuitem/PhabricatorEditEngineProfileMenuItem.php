@@ -106,12 +106,14 @@ final class PhabricatorEditEngineProfileMenuItem
     if (!$form) {
       return array();
     }
-    $engine = $form->getEngine();
-    $form_key = $form->getIdentifier();
 
     $icon = $form->getIcon();
     $name = $this->getDisplayName($config);
-    $href = $engine->getEditURI(null, "form/{$form_key}/");
+
+    $href = $form->getCreateURI();
+    if ($href === null) {
+      return array();
+    }
 
     $item = $this->newItem()
       ->setHref($href)

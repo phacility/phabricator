@@ -11,9 +11,7 @@ final class PhabricatorProjectConfiguredCustomField
   public function createFields($object) {
     return PhabricatorStandardCustomField::buildStandardFields(
       $this,
-      PhabricatorEnv::getEnvConfig(
-        'projects.custom-field-definitions',
-        array()));
+      PhabricatorEnv::getEnvConfig('projects.custom-field-definitions'));
   }
 
 }

@@ -21,7 +21,7 @@ final class PhabricatorConfigClusterNotificationsController
           ->setText(pht('Documentation')));
 
     $crumbs = $this
-      ->buildApplicationCrumbs($nav)
+      ->buildApplicationCrumbs()
       ->addTextCrumb($title)
       ->setBorder(true);
 

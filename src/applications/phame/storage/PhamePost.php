@@ -172,7 +172,7 @@ final class PhamePost extends PhameDAO
   }
 
   public function getSlug() {
-    return PhabricatorSlug::normalizeProjectSlug($this->getTitle(), true);
+    return PhabricatorSlug::normalizeProjectSlug($this->getTitle());
   }
 
   public function getHeaderImageURI() {

@@ -50,9 +50,6 @@ final class ConpherenceCreateThreadConduitAPIMethod
     if ($errors) {
       foreach ($errors as $error_code) {
         switch ($error_code) {
-          case ConpherenceEditor::ERROR_EMPTY_TITLE:
-            throw new ConduitException('ERR_EMPTY_TITLE');
-            break;
           case ConpherenceEditor::ERROR_EMPTY_PARTICIPANTS:
             throw new ConduitException('ERR_EMPTY_PARTICIPANT_PHIDS');
             break;

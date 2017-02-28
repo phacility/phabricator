@@ -153,6 +153,22 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     $this->assertTrue(
       in_array($phid, $mail->buildRecipientList()),
       'Recipients restored after tag preference removed.');
+
+    $email = id(new PhabricatorUserEmail())->loadOneWhere(
+      'userPHID = %s AND isPrimary = 1',
+      $phid);
+
+    $email->setIsVerified(0)->save();
+
+    $this->assertFalse(
+      in_array($phid, $mail->buildRecipientList()),
+      pht('Mail not sent to unverified address.'));
+
+    $email->setIsVerified(1)->save();
+
+    $this->assertTrue(
+      in_array($phid, $mail->buildRecipientList()),
+      pht('Mail sent to verified address.'));
   }
 
   public function testThreadIDHeaders() {

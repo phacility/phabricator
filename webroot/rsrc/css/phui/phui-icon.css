@@ -31,12 +31,18 @@
 }
 
 .phui-icon-has-text:before {
-  margin-right: 4px;
+  margin-right: 6px;
 }
 
 a.phui-icon-view:hover {
   text-decoration: none;
   color: {$sky};
+}
+
+img.phui-image-disabled {
+  opacity: .8;
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
 }
 
 /* - Icon in a Circle ------------------------------------------------------- */

@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialRepositoryDatasource
+final class DiffusionRepositoryFunctionDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
   public function getBrowseTitle() {

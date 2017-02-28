@@ -120,6 +120,32 @@ final class PhabricatorUser
     return true;
   }
 
+
+  /**
+   * Is this a user who we can reasonably expect to respond to requests?
+   *
+   * This is used to provide a grey "disabled/unresponsive" dot cue when
+   * rendering handles and tags, so it isn't a surprise if you get ignored
+   * when you ask things of users who will not receive notifications or could
+   * not respond to them (because they are disabled, unapproved, do not have
+   * verified email addresses, etc).
+   *
+   * @return bool True if this user can receive and respond to requests from
+   *   other humans.
+   */
+  public function isResponsive() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if (!$this->getIsEmailVerified()) {
+      return false;
+    }
+
+    return true;
+  }
+
+
   public function canEstablishWebSessions() {
     if ($this->getIsMailingList()) {
       return false;
@@ -1552,6 +1578,24 @@ final class PhabricatorUser
     unset($this->rawCacheData[$key]);
     unset($this->usableCacheData[$key]);
     return $this;
+  }
+
+
+  public function getCSSValue($variable_key) {
+    $preference = PhabricatorAccessibilitySetting::SETTINGKEY;
+    $key = $this->getUserSetting($preference);
+
+    $postprocessor = CelerityPostprocessor::getPostprocessor($key);
+    $variables = $postprocessor->getVariables();
+
+    if (!isset($variables[$variable_key])) {
+      throw new Exception(
+        pht(
+          'Unknown CSS variable "%s"!',
+          $variable_key));
+    }
+
+    return $variables[$variable_key];
   }
 
 }

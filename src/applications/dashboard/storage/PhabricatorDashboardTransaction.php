@@ -56,11 +56,11 @@ final class PhabricatorDashboardTransaction
       case self::TYPE_STATUS:
         if ($new == PhabricatorDashboard::STATUS_ACTIVE) {
           return pht(
-            '%s activated this dashboard',
+            '%s activated this dashboard.',
             $author_link);
         } else {
           return pht(
-            '%s archived this dashboard',
+            '%s archived this dashboard.',
             $author_link);
         }
         break;

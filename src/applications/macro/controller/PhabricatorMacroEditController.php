@@ -185,6 +185,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
     if (!$macro->getID()) {
       if ($current_file) {
         $current_file_view = id(new PhabricatorFileLinkView())
+          ->setViewer($viewer)
           ->setFilePHID($current_file->getPHID())
           ->setFileName($current_file->getName())
           ->setFileViewable(true)

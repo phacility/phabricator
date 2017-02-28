@@ -57,12 +57,18 @@
   min-width: 0;
 }
 
+.phabricator-action-view button.phabricator-action-view-item .phui-icon-view {
+  color: {$darkbluetext};
+}
+
 .phabricator-action-view button.phabricator-action-view-item,
 .phabricator-action-view-item {
   padding: 4px 8px 6px 8px;
   display: block;
   text-decoration: none;
   color: {$darkbluetext};
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .action-has-icon button.phabricator-action-view-item,

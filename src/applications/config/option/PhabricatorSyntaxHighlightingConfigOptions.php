@@ -20,7 +20,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
   }
 
   public function getOptions() {
-    $caches_href = PhabricatorEnv::getDocLink('Managing Caches');
+    $caches_href = PhabricatorEnv::getDoclink('Managing Caches');
 
     return array(
       $this->newOption(

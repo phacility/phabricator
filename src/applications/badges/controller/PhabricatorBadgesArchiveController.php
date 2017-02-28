@@ -32,7 +32,8 @@ final class PhabricatorBadgesArchiveController
       $xactions = array();
 
       $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_STATUS)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeStatusTransaction::TRANSACTIONTYPE)
         ->setNewValue($new_status);
 
       id(new PhabricatorBadgesEditor())

@@ -11,6 +11,24 @@ final class PhabricatorHomeProfileMenuEngine
     return "/home/menu/{$path}";
   }
 
+  protected function buildItemViewContent(
+    PhabricatorProfileMenuItemConfiguration $item) {
+    $viewer = $this->getViewer();
+
+    // Add content to the document so that you can drag-and-drop files onto
+    // the home page or any home dashboard to upload them.
+
+    $upload = id(new PhabricatorGlobalUploadTargetView())
+      ->setUser($viewer);
+
+    $content = parent::buildItemViewContent($item);
+
+    return array(
+      $content,
+      $upload,
+    );
+  }
+
   protected function getBuiltinProfileItems($object) {
     $viewer = $this->getViewer();
     $items = array();

@@ -11,6 +11,10 @@ final class PhabricatorConduitLogSearchEngine
     return 'PhabricatorConduitApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     return new PhabricatorConduitLogQuery();
   }
@@ -162,7 +166,7 @@ final class PhabricatorConduitLogSearchEngine
             ->addSigil('has-tooltip')
             ->setMetadata(
               array(
-                'tip' => pht('Unknown ("%s")', $status),
+                'tip' => pht('Unknown ("%s")', $method_status),
               ));
           break;
       }

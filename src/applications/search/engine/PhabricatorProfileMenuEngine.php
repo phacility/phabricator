@@ -218,7 +218,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
         $edit_mode = $request->getURIData('itemEditMode');
       }
 
-      $available_modes = $this->getViewerEditModes($viewer);
+      $available_modes = $this->getViewerEditModes();
       if ($available_modes) {
         $available_modes = array_fuse($available_modes);
         if (isset($available_modes[$edit_mode])) {
@@ -685,7 +685,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
       ->setURI($this->getConfigureURI());
   }
 
-  private function buildItemViewContent(
+  protected function buildItemViewContent(
     PhabricatorProfileMenuItemConfiguration $item) {
     return $item->newPageContent();
   }
@@ -731,7 +731,7 @@ abstract class PhabricatorProfileMenuEngine extends Phobject {
   private function buildMenuEditModeContent() {
     $viewer = $this->getViewer();
 
-    $modes = $this->getViewerEditModes($viewer);
+    $modes = $this->getViewerEditModes();
     if (!$modes) {
       return new Aphront404Response();
     }

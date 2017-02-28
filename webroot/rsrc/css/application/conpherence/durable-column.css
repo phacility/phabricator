@@ -18,7 +18,9 @@
   box-shadow: 0px 1px 8px rgba(55,55,55, .3);
 }
 
-.device .conpherence-durable-column {
+.device .conpherence-durable-column,
+.printable .conpherence-durable-column,
+!print .conpherence-durable-column {
   display: none;
 }
 

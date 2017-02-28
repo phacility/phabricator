@@ -53,17 +53,13 @@ final class ManiphestTaskGraph
 
       $full_title = $object->getTitle();
 
-      $title = id(new PhutilUTF8StringTruncator())
-        ->setMaximumGlyphs(80)
-        ->truncateString($full_title);
-
       $link = phutil_tag(
         'a',
         array(
           'href' => $object->getURI(),
           'title' => $full_title,
         ),
-        $title);
+        $full_title);
 
       $link = array(
         phutil_tag(

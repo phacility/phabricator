@@ -89,6 +89,7 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
         $actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_NO_ADDRESS);
       } else {
         $actor->setEmailAddress($email->getAddress());
+        $actor->setIsVerified($email->getIsVerified());
       }
     }
   }
@@ -119,6 +120,13 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
       }
 
       $actor->setEmailAddress($xuser->getAccountID());
+
+      // NOTE: This effectively drops all outbound mail to unrecognized
+      // addresses unless "phabricator.allow-email-users" is set. See T12237
+      // for context.
+      $allow_key = 'phabricator.allow-email-users';
+      $allow_value = PhabricatorEnv::getEnvConfig($allow_key);
+      $actor->setIsVerified((bool)$allow_value);
     }
   }
 

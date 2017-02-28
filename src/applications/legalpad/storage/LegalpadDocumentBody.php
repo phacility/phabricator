@@ -52,9 +52,6 @@ final class LegalpadDocumentBody extends LegalpadDAO
       case self::MARKUP_FIELD_TEXT:
         $text = $this->getText();
         break;
-      case self::MARKUP_FIELD_TITLE:
-        $text = $this->getTitle();
-        break;
       default:
         throw new Exception(pht('Unknown field: %s', $field));
         break;

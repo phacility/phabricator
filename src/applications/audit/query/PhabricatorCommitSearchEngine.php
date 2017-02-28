@@ -4,7 +4,7 @@ final class PhabricatorCommitSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Commits');
+    return pht('Diffusion Commits');
   }
 
   public function getApplicationClassName() {
@@ -85,7 +85,7 @@ final class PhabricatorCommitSearchEngine
         ->setKey('repositoryPHIDs')
         ->setConduitKey('repositories')
         ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
-        ->setDatasource(new DiffusionRepositoryDatasource()),
+        ->setDatasource(new DiffusionRepositoryFunctionDatasource()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Packages'))
         ->setKey('packagePHIDs')

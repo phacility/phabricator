@@ -3,7 +3,7 @@
 abstract class ManiphestController extends PhabricatorController {
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(true)->getMenu();
+    return $this->buildSideNavView()->getMenu();
   }
 
   public function buildSideNavView() {

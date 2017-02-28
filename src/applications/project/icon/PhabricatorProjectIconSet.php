@@ -269,7 +269,7 @@ final class PhabricatorProjectIconSet
                 'The project icon ("%s") with special attribute "%s" must '.
                 'not be disabled',
                 $key,
-                self::SPECIAL_MIILESTONE));
+                self::SPECIAL_MILESTONE));
           }
           $milestone = $value;
         } else {

@@ -27,21 +27,8 @@ final class PhabricatorDashboardPanel
     return id(new PhabricatorDashboardPanel())
       ->setName('')
       ->setAuthorPHID($actor->getPHID())
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->setEditPolicy($actor->getPHID());
-  }
-
-  public static function copyPanel(
-    PhabricatorDashboardPanel $dst,
-    PhabricatorDashboardPanel $src,
-    PhabricatorUser $user) {
-
-    $dst->name = $src->name;
-    $dst->panelType = $src->panelType;
-    $dst->properties = $src->properties;
-    $dst->authorPHID = $user->getPHID();
-
-    return $dst;
   }
 
   protected function getConfiguration() {

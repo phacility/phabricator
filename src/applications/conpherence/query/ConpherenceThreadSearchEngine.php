@@ -4,7 +4,7 @@ final class ConpherenceThreadSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Rooms');
+    return pht('Conpherence Rooms');
   }
 
   public function getApplicationClassName() {

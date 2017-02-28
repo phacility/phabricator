@@ -1489,8 +1489,7 @@ abstract class PhabricatorEditEngine
       );
     } else {
       foreach ($configs as $config) {
-        $form_key = $config->getIdentifier();
-        $config_uri = $this->getEditURI(null, "form/{$form_key}/");
+        $config_uri = $config->getCreateURI();
 
         if ($parameters) {
           $config_uri = (string)id(new PhutilURI($config_uri))
@@ -2126,6 +2125,13 @@ abstract class PhabricatorEditEngine
       ->execute();
 
     $configs = msort($configs, 'getCreateSortKey');
+
+    // Attach this specific engine to configurations we load so they can access
+    // any runtime configuration. For example, this allows us to generate the
+    // correct "Create Form" buttons when editing forms, see T12301.
+    foreach ($configs as $config) {
+      $config->attachEngine($this);
+    }
 
     return $configs;
   }
