@@ -22,6 +22,12 @@ final class PhabricatorDaemonManagementDebugWorkflow
             'wildcard' => true,
           ),
           array(
+            'name' => 'pool',
+            'param' => 'count',
+            'help' => pht('Maximum pool size.'),
+            'default' => 1,
+          ),
+          array(
             'name' => 'as-current-user',
             'help' => pht(
               'Run the daemon as the current user '.
@@ -43,6 +49,7 @@ final class PhabricatorDaemonManagementDebugWorkflow
     $config = array(
       'class' => array_shift($argv),
       'label' => 'debug',
+      'pool' => (int)$args->getArg('pool'),
       'argv' => $argv,
     );
 
