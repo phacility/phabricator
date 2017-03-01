@@ -297,6 +297,50 @@ See the example below for a starting point.
 EOTEXT
 ));
 
+    $subtype_type = 'custom:ManiphestSubtypesConfigOptionsType';
+    $subtype_default_key = PhabricatorEditEngineSubtype::SUBTYPE_DEFAULT;
+    $subtype_example = array(
+      array(
+        'key' => $subtype_default_key,
+        'name' => pht('Task'),
+      ),
+      array(
+        'key' => 'bug',
+        'name' => pht('Bug'),
+      ),
+      array(
+        'key' => 'feature',
+        'name' => pht('Feature Request'),
+      ),
+    );
+    $subtype_example = id(new PhutilJSON())->encodeAsList($subtype_example);
+
+    $subtype_default = array(
+      array(
+        'key' => $subtype_default_key,
+        'name' => pht('Task'),
+      ),
+    );
+
+    $subtype_description = $this->deformat(pht(<<<EOTEXT
+Allows you to define task subtypes. Subtypes let you hide fields you don't
+need to simplify the workflows for editing tasks.
+
+To define subtypes, provide a list of subtypes. Each subtype should be a
+dictionary with these keys:
+
+  - `key` //Required string.// Internal identifier for the subtype, like
+    "task", "feature", or "bug".
+  - `name` //Required string.// Human-readable name for this subtype, like
+    "Task", "Feature Request" or "Bug Report".
+
+Each subtype must have a unique key, and you must define a subtype with
+the key "%s", which is used as a default subtype.
+EOTEXT
+      ,
+      $subtype_default_key));
+
+
     return array(
       $this->newOption('maniphest.custom-field-definitions', 'wild', array())
         ->setSummary(pht('Custom Maniphest fields.'))
@@ -361,6 +405,10 @@ EOTEXT
         ->setDescription($points_description)
         ->addExample($points_json_1, pht('Points Config'))
         ->addExample($points_json_2, pht('Hours Config')),
+      $this->newOption('maniphest.subtypes', $subtype_type, $subtype_default)
+        ->setSummary(pht('Define task subtypes.'))
+        ->setDescription($subtype_description)
+        ->addExample($subtype_example, pht('Simple Subtypes')),
     );
   }
 

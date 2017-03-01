@@ -1471,6 +1471,7 @@ phutil_register_library_map(array(
     'ManiphestStatusConfigOptionType' => 'applications/maniphest/config/ManiphestStatusConfigOptionType.php',
     'ManiphestStatusEmailCommand' => 'applications/maniphest/command/ManiphestStatusEmailCommand.php',
     'ManiphestSubpriorityController' => 'applications/maniphest/controller/ManiphestSubpriorityController.php',
+    'ManiphestSubtypesConfigOptionsType' => 'applications/maniphest/config/ManiphestSubtypesConfigOptionsType.php',
     'ManiphestTask' => 'applications/maniphest/storage/ManiphestTask.php',
     'ManiphestTaskAssignHeraldAction' => 'applications/maniphest/herald/ManiphestTaskAssignHeraldAction.php',
     'ManiphestTaskAssignOtherHeraldAction' => 'applications/maniphest/herald/ManiphestTaskAssignOtherHeraldAction.php',
@@ -6348,6 +6349,7 @@ phutil_register_library_map(array(
     'ManiphestStatusConfigOptionType' => 'PhabricatorConfigJSONOptionType',
     'ManiphestStatusEmailCommand' => 'ManiphestEmailCommand',
     'ManiphestSubpriorityController' => 'ManiphestController',
+    'ManiphestSubtypesConfigOptionsType' => 'PhabricatorConfigJSONOptionType',
     'ManiphestTask' => array(
       'ManiphestDAO',
       'PhabricatorSubscribableInterface',
