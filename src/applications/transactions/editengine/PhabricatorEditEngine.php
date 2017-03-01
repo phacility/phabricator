@@ -18,6 +18,8 @@ abstract class PhabricatorEditEngine
 
   const EDITENGINECONFIG_DEFAULT = 'default';
 
+  const SUBTYPE_DEFAULT = 'default';
+
   private $viewer;
   private $controller;
   private $isCreate;
