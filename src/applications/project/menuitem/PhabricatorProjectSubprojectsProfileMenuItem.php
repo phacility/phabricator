@@ -47,10 +47,6 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
 
     $project = $config->getProfileObject();
-
-    $has_children = ($project->getHasSubprojects()) ||
-                    ($project->getHasMilestones());
-
     $id = $project->getID();
 
     $name = $this->getDisplayName($config);
@@ -60,7 +56,6 @@ final class PhabricatorProjectSubprojectsProfileMenuItem
     $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setDisabled(!$has_children)
       ->setIcon($icon);
 
     return array(
