@@ -11,6 +11,14 @@ final class HarbormasterQueryBuildsConduitAPIMethod
     return pht('Query Harbormaster builds.');
   }
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht('Use %s instead.', 'harbormaster.build.search');
+  }
+
   protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<id>',
@@ -27,64 +35,42 @@ final class HarbormasterQueryBuildsConduitAPIMethod
 
   protected function execute(ConduitAPIRequest $request) {
     $viewer = $request->getUser();
+    $call = new ConduitCall(
+      'harbormaster.build.search',
+      array_filter(array(
+        'constraints' => array_filter(array(
+          'ids' => $request->getValue('ids'),
+          'phids' => $request->getValue('phids'),
+          'statuses' => $request->getValue('buildStatuses'),
+          'buildables' => $request->getValue('buildablePHIDs'),
+          'plans' => $request->getValue('buildPlanPHIDs'),
+        )),
+        'attachments' => array(
+          'querybuilds' => true,
+        ),
+        'limit' => $request->getValue('limit'),
+        'before' => $request->getValue('before'),
+        'after' => $request->getValue('after'),
+      )));
 
-    $query = id(new HarbormasterBuildQuery())
-      ->setViewer($viewer);
-
-    $ids = $request->getValue('ids');
-    if ($ids !== null) {
-      $query->withIDs($ids);
-    }
-
-    $phids = $request->getValue('phids');
-    if ($phids !== null) {
-      $query->withPHIDs($phids);
-    }
-
-    $statuses = $request->getValue('buildStatuses');
-    if ($statuses !== null) {
-      $query->withBuildStatuses($statuses);
-    }
-
-    $buildable_phids = $request->getValue('buildablePHIDs');
-    if ($buildable_phids !== null) {
-      $query->withBuildablePHIDs($buildable_phids);
-    }
-
-    $build_plan_phids = $request->getValue('buildPlanPHIDs');
-    if ($build_plan_phids !== null) {
-      $query->withBuildPlanPHIDs($build_plan_phids);
-    }
-
-    $pager = $this->newPager($request);
-
-    $builds = $query->executeWithCursorPager($pager);
+    $subsumption = $call->setUser($viewer)
+      ->execute();
 
     $data = array();
-    foreach ($builds as $build) {
-
-      $id = $build->getID();
-      $uri = '/harbormaster/build/'.$id.'/';
-      $status = $build->getBuildStatus();
-
-      $data[] = array(
-        'id' => $id,
-        'phid' => $build->getPHID(),
-        'uri' => PhabricatorEnv::getProductionURI($uri),
-        'name' => $build->getBuildPlan()->getName(),
-        'buildablePHID' => $build->getBuildablePHID(),
-        'buildPlanPHID' => $build->getBuildPlanPHID(),
-        'buildStatus' => $status,
-        'buildStatusName' => HarbormasterBuild::getBuildStatusName($status),
-      );
+    foreach ($subsumption['data'] as $build_data) {
+      $querybuilds = idxv(
+        $build_data,
+        array('attachments', 'querybuilds'),
+        array());
+      $fields = idx($build_data, 'fields', array());
+      unset($build_data['fields']);
+      unset($build_data['attachments']);
+      $data[] = array_mergev(array($build_data, $querybuilds, $fields));
     }
 
-    $results = array(
-      'data' => $data,
-    );
+    $subsumption['data'] = $data;
 
-    $results = $this->addPagerResults($results, $pager);
-    return $results;
+    return $subsumption;
   }
 
 }

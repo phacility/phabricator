@@ -96,7 +96,9 @@ function rename_project($project, $projects) {
       if ($other->getID() == $project->getID()) {
         continue;
       }
-      if ($other->getPhrictionSlug() == $new_slug) {
+
+      $other_slug = PhabricatorSlug::normalizeProjectSlug($other->getName());
+      if ($other_slug == $new_slug) {
         $okay = false;
         break;
       }

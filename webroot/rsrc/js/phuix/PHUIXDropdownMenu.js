@@ -40,6 +40,12 @@ JX.install('PHUIXDropdownMenu', {
     JX.Stratcom.listen('phuix.dropdown.open', null, JX.bind(this, this.close));
 
     JX.Stratcom.listen('keydown', null, JX.bind(this, this._onkey));
+
+    JX.DOM.listen(
+      this._getMenuNode(),
+      'click',
+      'tag:a',
+      JX.bind(this, this._onlink));
   },
 
   events: ['open', 'close'],
@@ -110,6 +116,28 @@ JX.install('PHUIXDropdownMenu', {
         this.open();
       }
       e.prevent();
+    },
+
+    _onlink: function(e) {
+      if (!e.isNormalClick()) {
+        return;
+      }
+
+      // If this action was built dynamically with PHUIXActionView, don't
+      // do anything by default. The caller is repsonsible for installing a
+      // handler if they want to react to clicks.
+      if (e.getNode('phuix-action-view')) {
+        return;
+      }
+
+      // If this item opens a submenu, we don't want to close the current
+      // menu. One submenu is "Edit Related Objects..." on mobile.
+      var link = e.getNode('tag:a');
+      if (JX.Stratcom.hasSigil(link, 'keep-open')) {
+        return;
+      }
+
+      this.close();
     },
 
     _onanyclick : function(e) {

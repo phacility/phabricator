@@ -46,7 +46,7 @@ final class DifferentialInlineCommentEditController
       throw new Exception(
         pht(
           'Changeset ID "%s" is part of diff ID "%s", but that diff '.
-          'is attached to reivsion "%s", not revision "%s".',
+          'is attached to revision "%s", not revision "%s".',
           $changeset_id,
           $diff->getID(),
           $diff->getRevisionID(),
@@ -152,36 +152,23 @@ final class DifferentialInlineCommentEditController
 
   protected function deleteComment(PhabricatorInlineCommentInterface $inline) {
     $inline->openTransaction();
-
       $inline->setIsDeleted(1)->save();
-      DifferentialDraft::deleteHasDraft(
-        $inline->getAuthorPHID(),
-        $inline->getRevisionPHID(),
-        $inline->getPHID());
-
+      $this->syncDraft();
     $inline->saveTransaction();
   }
 
   protected function undeleteComment(
     PhabricatorInlineCommentInterface $inline) {
     $inline->openTransaction();
-
       $inline->setIsDeleted(0)->save();
-      DifferentialDraft::markHasDraft(
-        $inline->getAuthorPHID(),
-        $inline->getRevisionPHID(),
-        $inline->getPHID());
-
+      $this->syncDraft();
     $inline->saveTransaction();
   }
 
   protected function saveComment(PhabricatorInlineCommentInterface $inline) {
     $inline->openTransaction();
       $inline->save();
-      DifferentialDraft::markHasDraft(
-        $inline->getAuthorPHID(),
-        $inline->getRevisionPHID(),
-        $inline->getPHID());
+      $this->syncDraft();
     $inline->saveTransaction();
   }
 
@@ -222,6 +209,16 @@ final class DifferentialInlineCommentEditController
       $table->getTableName(),
       $viewer->getPHID(),
       $ids);
+  }
+
+  private function syncDraft() {
+    $viewer = $this->getViewer();
+    $revision = $this->loadRevision();
+
+    $revision->newDraftEngine()
+      ->setObject($revision)
+      ->setViewer($viewer)
+      ->synchronize();
   }
 
 }

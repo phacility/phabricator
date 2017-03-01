@@ -3,6 +3,7 @@
 abstract class DiffusionAuditorsHeraldAction
   extends HeraldAction {
 
+  const DO_AUTHORS = 'do.authors';
   const DO_ADD_AUDITORS = 'do.add-auditors';
 
   public function getActionGroupKey() {
@@ -18,6 +19,22 @@ abstract class DiffusionAuditorsHeraldAction
     $object = $adapter->getObject();
 
     $auditors = $object->getAudits();
+
+    // Don't try to add commit authors as auditors.
+    $authors = array();
+    foreach ($phids as $key => $phid) {
+      if ($phid == $object->getAuthorPHID()) {
+        $authors[] = $phid;
+        unset($phids[$key]);
+      }
+    }
+
+    if ($authors) {
+      $this->logEffect(self::DO_AUTHORS, $authors);
+      if (!$phids) {
+        return;
+      }
+    }
 
     $current = array();
     foreach ($auditors as $auditor) {
@@ -39,19 +56,12 @@ abstract class DiffusionAuditorsHeraldAction
 
     $phids = array_fuse(array_keys($targets));
 
-    // TODO: Convert this to be translatable, structured data eventually.
-    $reason_map = array();
-    foreach ($phids as $phid) {
-      $reason_map[$phid][] = pht('%s Triggered Audit', $rule->getMonogram());
-    }
-
     $xaction = $adapter->newTransaction()
-      ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
-      ->setNewValue($phids)
-      ->setMetadataValue(
-        'auditStatus',
-        PhabricatorAuditStatusConstants::AUDIT_REQUIRED)
-      ->setMetadataValue('auditReasonMap', $reason_map);
+      ->setTransactionType(DiffusionCommitAuditorsTransaction::TRANSACTIONTYPE)
+      ->setNewValue(
+        array(
+          '+' => $phids,
+        ));
 
     $adapter->queueTransaction($xaction);
 
@@ -60,6 +70,11 @@ abstract class DiffusionAuditorsHeraldAction
 
   protected function getActionEffectMap() {
     return array(
+      self::DO_AUTHORS => array(
+        'icon' => 'fa-user',
+        'color' => 'grey',
+        'name' => pht('Commit Author'),
+      ),
       self::DO_ADD_AUDITORS => array(
         'icon' => 'fa-user',
         'color' => 'green',
@@ -70,6 +85,10 @@ abstract class DiffusionAuditorsHeraldAction
 
   protected function renderActionEffectDescription($type, $data) {
     switch ($type) {
+      case self::DO_AUTHORS:
+        return pht(
+          'Declined to add commit author as auditor: %s.',
+          $this->renderHandleList($data));
       case self::DO_ADD_AUDITORS:
         return pht(
           'Added %s auditor(s): %s.',

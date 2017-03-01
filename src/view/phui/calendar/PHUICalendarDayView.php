@@ -61,7 +61,7 @@ final class PHUICalendarDayView extends AphrontView {
     foreach ($hours as $hour) {
       $js_hours[] = array(
         'hour' => $hour->format('G'),
-        'hour_meridian' => $hour->format('g A'),
+        'displayTime' => phabricator_time($hour->format('U'), $viewer),
       );
     }
 
@@ -85,6 +85,8 @@ final class PHUICalendarDayView extends AphrontView {
           'id' => $all_day_event->getEventID(),
           'viewerIsInvited' => $all_day_event->getViewerIsInvited(),
           'uri' => $all_day_event->getURI(),
+          'displayIcon' => $all_day_event->getIcon(),
+          'displayIconColor' => $all_day_event->getIconColor(),
         );
       }
     }
@@ -140,6 +142,8 @@ final class PHUICalendarDayView extends AphrontView {
           'top' => $top.'px',
           'height' => $height.'px',
           'canEdit' => $event->getCanEdit(),
+          'displayIcon' => $event->getIcon(),
+          'displayIconColor' => $event->getIconColor(),
         );
       }
     }
@@ -183,17 +187,15 @@ final class PHUICalendarDayView extends AphrontView {
       ->setFlush(true);
 
     $layout = id(new AphrontMultiColumnView())
-      ->addColumn($sidebar, 'third')
+      ->addColumn($sidebar, 'third phui-day-view-upcoming')
       ->addColumn($table_box, 'thirds phui-day-view-column')
-      ->setFluidLayout(true)
-      ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
+      ->setFluidLayout(true);
 
-    return phutil_tag(
-      'div',
-        array(
-          'class' => 'ml',
-        ),
-        $layout);
+    $layout = id(new PHUIBoxView())
+      ->appendChild($layout)
+      ->addClass('phui-calendar-box');
+
+    return $layout;
   }
 
   private function getAllDayEvents() {
@@ -366,39 +368,5 @@ final class PHUICalendarDayView extends AphrontView {
     $date = new DateTime("{$year}-{$month}-{$day} ", $timezone);
 
     return $date;
-  }
-
-  private function findTodayClusters() {
-    $events = msort($this->todayEvents, 'getEpochStart');
-    $clusters = array();
-
-    foreach ($events as $event) {
-      $destination_cluster_key = null;
-      $event_start = $event->getEpochStart() - (30 * 60);
-      $event_end = $event->getEpochEnd() + (30 * 60);
-
-      foreach ($clusters as $key => $cluster) {
-        foreach ($cluster as $clustered_event) {
-          $compare_event_start = $clustered_event->getEpochStart();
-          $compare_event_end = $clustered_event->getEpochEnd();
-
-          if ($event_start < $compare_event_end
-            && $event_end > $compare_event_start) {
-            $destination_cluster_key = $key;
-            break;
-          }
-        }
-      }
-
-      if ($destination_cluster_key !== null) {
-        $clusters[$destination_cluster_key][] = $event;
-      } else {
-        $next_cluster = array();
-        $next_cluster[] = $event;
-        $clusters[] = $next_cluster;
-      }
-    }
-
-    return $clusters;
   }
 }

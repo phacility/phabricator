@@ -191,6 +191,20 @@ final class PhabricatorAuthSSHKeyEditor
     return 'ssh-key-'.$object->getPHID();
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // After making any change to an SSH key, drop the authfile cache so it
+    // is regenerated the next time anyone authenticates.
+    $cache = PhabricatorCaches::getMutableCache();
+    $authfile_key = PhabricatorAuthSSHKeyQuery::AUTHFILE_CACHEKEY;
+    $cache->deleteKey($authfile_key);
+
+    return $xactions;
+  }
+
+
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return $object->getObject()->getSSHKeyNotifyPHIDs();
   }

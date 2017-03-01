@@ -2,12 +2,6 @@
 
 final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
 
-  /**
-   * NOTE: We denormalize this into the commit table; make sure the sizes
-   * match up.
-   */
-  const SUMMARY_MAX_LENGTH = 80;
-
   protected $commitID;
   protected $authorName    = '';
   protected $commitMessage = '';
@@ -38,10 +32,14 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   }
 
   public static function summarizeCommitMessage($message) {
+    $max_bytes = id(new PhabricatorRepositoryCommit())
+      ->getColumnMaximumByteLength('summary');
+
     $summary = phutil_split_lines($message, $retain_endings = false);
     $summary = head($summary);
     $summary = id(new PhutilUTF8StringTruncator())
-      ->setMaximumBytes(self::SUMMARY_MAX_LENGTH)
+      ->setMaximumBytes($max_bytes)
+      ->setMaximumGlyphs(80)
       ->truncateString($summary);
 
     return $summary;

@@ -7,10 +7,15 @@ final class PhabricatorConfigIssueViewController
     $viewer = $request->getViewer();
     $issue_key = $request->getURIData('key');
 
-    $issues = PhabricatorSetupCheck::runAllChecks();
-    PhabricatorSetupCheck::setOpenSetupIssueKeys(
-      PhabricatorSetupCheck::getUnignoredIssueKeys($issues),
-      $update_database = true);
+    $engine = new PhabricatorSetupEngine();
+    $response = $engine->execute();
+    if ($response) {
+      return $response;
+    }
+    $issues = $engine->getIssues();
+
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('issue/');
 
     if (empty($issues[$issue_key])) {
       $content = id(new PHUIInfoView())
@@ -35,12 +40,15 @@ final class PhabricatorConfigIssueViewController
       ->buildApplicationCrumbs()
       ->setBorder(true)
       ->addTextCrumb(pht('Setup Issues'), $this->getApplicationURI('issue/'))
-      ->addTextCrumb($title, $request->getRequestURI());
+      ->addTextCrumb($title, $request->getRequestURI())
+      ->setBorder(true);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($content);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function renderIssue(PhabricatorSetupIssue $issue) {

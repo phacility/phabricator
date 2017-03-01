@@ -2,7 +2,7 @@
 
 final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
 
-  protected function getFileContentFuture() {
+  protected function newQueryFuture() {
     $drequest = $this->getRequest();
 
     $repository = $drequest->getRepository();
@@ -12,11 +12,6 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
     return $repository->getRemoteCommandFuture(
       'cat %s',
       $repository->getSubversionPathURI($path, $commit));
-  }
-
-  protected function resolveFileContentFuture(Future $future) {
-    list($corpus) = $future->resolvex();
-    return $corpus;
   }
 
 }

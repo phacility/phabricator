@@ -18,6 +18,7 @@ final class PhabricatorTypeaheadResult extends Phobject {
   private $unique;
   private $autocomplete;
   private $attributes = array();
+  private $phase;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -154,6 +155,7 @@ final class PhabricatorTypeaheadResult extends Phobject {
       $this->tokenType,
       $this->unique ? 1 : null,
       $this->autocomplete,
+      $this->phase,
     );
     while (end($data) === null) {
       array_pop($data);
@@ -209,6 +211,15 @@ final class PhabricatorTypeaheadResult extends Phobject {
   public function addAttribute($attribute) {
     $this->attributes[] = $attribute;
     return $this;
+  }
+
+  public function setPhase($phase) {
+    $this->phase = $phase;
+    return $this;
+  }
+
+  public function getPhase() {
+    return $this->phase;
   }
 
 }

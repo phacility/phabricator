@@ -3,7 +3,8 @@
 abstract class AuditConduitAPIMethod extends ConduitAPIMethod {
 
   final public function getApplication() {
-    return PhabricatorApplication::getByClass('PhabricatorAuditApplication');
+    return PhabricatorApplication::getByClass(
+      'PhabricatorDiffusionApplication');
   }
 
 }

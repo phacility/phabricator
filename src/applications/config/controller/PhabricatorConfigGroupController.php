@@ -13,30 +13,37 @@ final class PhabricatorConfigGroupController
       return new Aphront404Response();
     }
 
+    $group_uri = PhabricatorConfigGroupConstants::getGroupURI(
+      $options->getGroup());
+    $group_name = PhabricatorConfigGroupConstants::getGroupShortName(
+      $options->getGroup());
+
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter($group_uri);
+
     $title = pht('%s Configuration', $options->getName());
     $list = $this->buildOptionList($options->getOptions());
 
-    $box = id(new PHUIObjectBoxView())
-      ->setObjectList($list);
-
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->addTextCrumb(pht('Config'), $this->getApplicationURI())
-      ->addTextCrumb($options->getName(), $this->getApplicationURI())
+      ->addTextCrumb($group_name, $this->getApplicationURI($group_uri))
+      ->addTextCrumb($options->getName())
       ->setBorder(true);
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->setHeaderIcon('fa-sliders');
+      ->setProfileHeader(true);
 
-    $view = id(new PHUITwoColumnView())
+    $content = id(new PhabricatorConfigPageView())
       ->setHeader($header)
-      ->setFooter($box);
+      ->setContent($list);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildOptionList(array $options) {
@@ -61,6 +68,7 @@ final class PhabricatorConfigGroupController
     $engine->process();
 
     $list = new PHUIObjectItemListView();
+    $list->setBig(true);
     foreach ($options as $option) {
       $summary = $engine->getOutput($option, 'summary');
 
@@ -68,6 +76,24 @@ final class PhabricatorConfigGroupController
         ->setHeader($option->getKey())
         ->setHref('/config/edit/'.$option->getKey().'/')
         ->addAttribute($summary);
+
+      $label = pht('Current Value:');
+      $color = null;
+      $db_value = idx($db_values, $option->getKey());
+      if ($db_value && !$db_value->getIsDeleted()) {
+        $item->setEffect('visited');
+        $color = 'violet';
+        $label = pht('Customized Value:');
+      }
+
+      if ($option->getHidden()) {
+        $item->setStatusIcon('fa-eye-slash grey', pht('Hidden'));
+        $item->setDisabled(true);
+      } else if ($option->getLocked()) {
+        $item->setStatusIcon('fa-lock '.$color, pht('Locked'));
+      } else {
+        $item->setStatusIcon('fa-pencil-square-o '.$color, pht('Editable'));
+      }
 
       if (!$option->getHidden()) {
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
@@ -79,22 +105,11 @@ final class PhabricatorConfigGroupController
             'class' => 'config-options-current-value',
           ),
           array(
-            phutil_tag('span', array(), pht('Current Value:')),
+            phutil_tag('span', array(), $label),
             ' '.$current_value,
           ));
 
         $item->appendChild($current_value);
-      }
-
-      $db_value = idx($db_values, $option->getKey());
-      if ($db_value && !$db_value->getIsDeleted()) {
-        $item->addIcon('edit', pht('Customized'));
-      }
-
-      if ($option->getHidden()) {
-        $item->addIcon('unpublish', pht('Hidden'));
-      } else if ($option->getLocked()) {
-        $item->addIcon('lock', pht('Locked'));
       }
 
       $list->addItem($item);

@@ -11,17 +11,6 @@ abstract class PhabricatorEditEngineAPIMethod
     return PhabricatorApplication::getByClass($class);
   }
 
-  public function getMethodStatus() {
-    return self::METHOD_STATUS_UNSTABLE;
-  }
-
-  public function getMethodStatusDescription() {
-    return pht(
-      'ApplicationEditor methods are fairly stable, but were introduced '.
-      'relatively recently and may continue to evolve as more applications '.
-      'adopt them.');
-  }
-
   final protected function defineParamTypes() {
     return array(
       'transactions' => 'list<map<string, wild>>',

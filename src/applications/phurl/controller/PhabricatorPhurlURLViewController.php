@@ -86,7 +86,7 @@ final class PhabricatorPhurlURLViewController
       ->setTag('a')
       ->setText(pht('Visit URL'))
       ->setIcon('fa-external-link')
-      ->setHref("u/{$id}")
+      ->setHref($url->getRedirectURI())
       ->setDisabled(!$url->isValid());
 
     $header = id(new PHUIHeaderView())
@@ -128,6 +128,10 @@ final class PhabricatorPhurlURLViewController
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer);
+
+    $properties->addProperty(
+      pht('Short URL'),
+      $url->getRedirectURI());
 
     $properties->addProperty(
       pht('Original URL'),

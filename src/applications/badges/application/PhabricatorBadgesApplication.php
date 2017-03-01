@@ -26,10 +26,6 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function canUninstall() {
-    return true;
-  }
-
   public function isPrototype() {
     return true;
   }
@@ -51,11 +47,14 @@ final class PhabricatorBadgesApplication extends PhabricatorApplication {
           => 'PhabricatorBadgesArchiveController',
         'view/(?:(?P<id>\d+)/)?'
           => 'PhabricatorBadgesViewController',
-        'recipients/(?P<id>[1-9]\d*)/'
-          => 'PhabricatorBadgesEditRecipientsController',
-        'recipients/(?P<id>[1-9]\d*)/remove/'
-          => 'PhabricatorBadgesRemoveRecipientsController',
-
+        'recipients/' => array(
+          '(?P<id>[1-9]\d*)/'
+            => 'PhabricatorBadgesRecipientsController',
+          '(?P<id>[1-9]\d*)/add/'
+            => 'PhabricatorBadgesEditRecipientsController',
+          '(?P<id>[1-9]\d*)/remove/'
+            => 'PhabricatorBadgesRemoveRecipientsController',
+        ),
       ),
     );
   }

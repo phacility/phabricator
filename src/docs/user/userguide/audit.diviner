@@ -1,71 +1,125 @@
 @title Audit User Guide
 @group userguide
 
-Guide to the Audit (post-push code review) tool and workflow.
+Guide to using Phabricator to audit published commits.
 
-= Overview =
 
-Phabricator supports two code review workflows, "review" (pre-push) and
-"audit" (post-push). To understand the differences between the two, see
+Overview
+========
+
+Phabricator supports two code review workflows, "review" (pre-publish) and
+"audit" (post-publish). To understand the differences between the two, see
 @{article:User Guide: Review vs Audit}.
 
-This document summarizes the post-push "audit" workflow implemented by the
-creatively-named //Audit// tool.
 
-= How Audit Works =
+How Audit Works
+===============
 
-Using auditing allows you to push and deploy code without waiting for code
-review, while still doing code review eventually. The Audit tool primarily keeps
-track of two things:
+The audit workflow occurs after changes have been published. It provides ways
+to track, discuss, and resolve issues with commits that are discovered after
+they go through whatever review process you have in place (if you have one).
+
+Two examples of how you might use audit are:
+
+**Fix Issues**: If a problem is discovered after a change has already been
+published, users can find the commit which introduced the problem and raise a
+concern on it. This notifies the author of the commit and prompts them to
+remedy the issue.
+
+**Watch Changes**: In some cases, you may want to passively look over changes
+that satisfy some criteria as they are published. For example, you may want to
+review all Javascript changes at the end of the week to keep an eye on things,
+or make sure that code which impacts a subsystem is looked at by someone on
+that team, eventually.
+
+Developers may also want other developers to take a second look at things if
+they realize they aren't sure about something after a change has been published,
+or just want to provide a heads-up.
+
+You can configure Herald rules and Owners packages to automatically trigger
+audits of commits that satisfy particular criteria.
+
+
+Audit States and Actions
+========================
+
+The audit workflow primarily keeps track of two things:
 
   - **Commits** and their audit state (like "Not Audited", "Approved", or
     "Concern Raised").
-  - **Audit Requests** which ask a user (or some other entity) to audit a
-    commit. These can be triggered in a number of ways (see below).
+  - **Audit Requests** which ask a user (or some other entity, like a project
+    or package) to audit a commit. These can be triggered in a number of ways
+    (see below).
 
-In the Audit tool's home screen (at `/audit/`) and on the homepage you can see
-commits and requests that require your action:
+Users interact with commits by leaving comments and applying actions, like
+accepting the changes or raising a concern. These actions change the state of
+their own audit and the overall audit state of the commit. Here's an example of
+a typical audit workflow:
 
-  - **Required Audits** are open audit requests that require you, a project
-    you are a member of, or a package you own to audit a commit. An audit
-    request is closed when you approve the associated commit.
-  - **Problem Commits** are commits you authored which someone has raised a
-    concern about in audit. Problem commits go away when you satisfy all the
-    auditors and get them to "Approve" the commit.
+  - Alice publishes a commit containing some Javascript.
+  - This triggers an audit request to Bailey, the Javascript technical
+    lead on the project (see below for a description of trigger mechanisms).
+  - Later, Bailey logs into Phabricator and sees the audit request. She ignores
+    it for the moment, since it isn't blocking anything. At the end of the
+    week she looks through her open requests to see what the team has been
+    up to.
+  - Bailey notices a few minor problems with Alice's commit. She leaves
+    comments describing improvements and uses "Raise Concern" to send the
+    commit back into Alice's queue.
+  - Later, Alice logs into Phabricator and sees that Bailey has raised a
+    concern (usually, Alice will also get an email). She resolves the issue
+    somehow, maybe by making a followup commit with fixes.
+  - After the issues have been dealt with, she uses "Request Verification" to
+    return the change to Bailey so Bailey can verify that the concerns have
+    been addressed.
+  - Bailey uses "Accept Commit" to close the audit.
 
-For example:
+In {nav Diffusion > Browse Commits}, you can review commits and query for
+commits with certain audit states. The default "Active Audits" view shows
+all of the commits which are relevant to you given their audit state, divided
+into buckets:
 
-  - Evan creates commit `abcdef1234` and pushes it to the remote.
-  - This triggers an audit request to Bob through some mechanism (see below for
-    a description of trigger mechanisms).
-  - Later, Bob logs into Phabricator and sees the audit request on his homepage.
-  - Bob clicks through and examines the commit. He notices a problem, so he
-    selects "Raise Concern" and describes the issue in a comment.
-  - Evan receives an email that Bob has raised a concern about his commit. He
-    opts not to deal with it immediately.
-  - Later, Evan logs into Phabricator and sees the commit on his homepage
-    under "Problem Commits".
-  - Evan resolves the issue somehow (e.g., by discussing it with Bob, or fixing
-    it in another commit).
-  - Now satisfied, Bob "Accepts" the original commit.
-  - This causes the request to disappear from Bob's queue, and the commit to
-    disappear from Evan's queue.
+  - **Needs Attention**: These are commits which you authored that another
+    user has raised a concern about: for example, maybe they believe they have
+    found a bug or some other problem. You should address the concerns.
+  - **Needs Verification**: These are commits which someone else authored
+    that you previously raised a concern about. The author has indicated that
+    they believe the concern has been addressed. You should verify that the
+    remedy is satisfactory and accept the change, or raise a further concern.
+  - **Ready to Audit**: These are commits which someone else authored that you
+    have been asked to audit, either by a user or by a system rule. You should
+    look over the changes and either accept them or raise concerns.
+  - **Waiting on Authors**: These are commits which someone else authored that
+    you previously raised a concern about. The author has not responded to the
+    concern yet. You may want to follow up.
+  - **Waiting on Auditors**: These are commits which you authored that someone
+    else needs to audit.
 
-= Audit Triggers =
+You can use the query constraints to filter this list or find commits that
+match certain criteria.
+
+
+Audit Triggers
+==============
 
 Audit requests can be triggered in a number of ways:
 
+  - You can add auditors explicitly from the web UI, using either "Edit Commit"
+    or the "Change Auditors" action. You might do this if you realize you are
+    not sure about something that you recently published and want a second
+    opinion.
   - If you put `Auditors: username1, username2` in your commit message, it will
     trigger an audit request to those users when you push it to a tracked
     branch.
   - You can create rules in Herald that trigger audits based on properties
     of the commit -- like the files it touches, the text of the change, the
     author, etc.
-  - You can create an audit request for yourself by commenting on any commit.
-  - You can create an Owners package and select "Enable Auditing" (this is an
-    advanced feature which is only likely to be useful for very large teams).
+  - You can create an Owners package and enable automatic auditing for the
+    package.
 
-= Audits in Small Teams =
+
+Audits in Small Teams
+=====================
 
 If you have a small team and don't need complicated trigger rules, you can set
 up a simple audit workflow like this:
@@ -84,7 +138,9 @@ commit should have //someone// look at it".
 Once your team gets bigger, you can refine this ruleset so that developers see
 only changes that are relevant to them.
 
-= Audit Tips =
+
+Audit Tips
+==========
 
   - When viewing a commit, audit requests you are responsible for are
     highlighted. You are responsible for a request if it's a user request
@@ -99,6 +155,48 @@ only changes that are relevant to them.
     you submit a comment at the bottom of the page.
   - Press "?" to view keyboard shortcuts.
 
-= Next Steps =
+
+Audit Maintenance
+=================
+
+The `bin/audit` command allows you to perform several maintenance operations.
+Get more information about a command by running:
+
+```
+phabricator/ $ ./bin/audit help <command>
+```
+
+Supported operations are:
+
+**Delete Audits**: Delete audits that match certain parameters with
+`bin/audit delete`.
+
+You can use this command to forcibly delete requests which may have triggered
+incorrectly (for example, because a package or Herald rule was configured in an
+overbroad way).
+
+After deleting audits, you may want to run `bin/audit synchronize` to
+synchronize audit state.
+
+**Synchronize Audit State**: Synchronize the audit state of commits to the
+current open audit requests with `bin/audit synchronize`.
+
+Normally, overall audit state is automatically kept up to date as changes are
+made to an audit. However, if you delete audits or manually update the database
+to make changes to audit request state, the state of corresponding commits may
+no longer be correct.
+
+This command will update commits so their overall audit state reflects the
+cumulative state of their actual audit requests.
+
+**Update Owners Package Membership**: Update which Owners packages commits
+belong to with `bin/audit update-owners`.
+
+Normally, commits are automatically associated with packages when they are
+imported. You can use this command to manually rebuild this association if
+you run into problems with it.
+
+Next Steps
+==========
 
   - Learn more about Herald at @{article:Herald User Guide}.

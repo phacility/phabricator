@@ -20,6 +20,20 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     return new PholioMock();
   }
 
+  public function isTestAdapterForObject($object) {
+    return ($object instanceof PholioMock);
+  }
+
+  public function getAdapterTestDescription() {
+    return pht(
+      'Test rules which run when a mock is created or updated.');
+  }
+
+  public function setObject($object) {
+    $this->mock = $object;
+    return $this;
+  }
+
   public function getObject() {
     return $this->mock;
   }
@@ -28,6 +42,7 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     $this->mock = $mock;
     return $this;
   }
+
   public function getMock() {
     return $this->mock;
   }

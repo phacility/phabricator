@@ -204,7 +204,14 @@ JX.install('WorkboardBoard', {
 
       if (!this._templates[phid]) {
         for (var add_phid in response.columnMaps) {
-          this.getColumn(add_phid).newCard(phid);
+          var target_column = this.getColumn(add_phid);
+
+          if (!target_column) {
+            // If the column isn't visible, don't try to add a card to it.
+            continue;
+          }
+
+          target_column.newCard(phid);
         }
       }
 
@@ -216,8 +223,18 @@ JX.install('WorkboardBoard', {
       }
 
       var column_maps = response.columnMaps;
+      var natural_column;
       for (var natural_phid in column_maps) {
-        this.getColumn(natural_phid).setNaturalOrder(column_maps[natural_phid]);
+        natural_column = this.getColumn(natural_phid);
+        if (!natural_column) {
+          // Our view of the board may be out of date, so we might get back
+          // information about columns that aren't visible. Just ignore the
+          // position information for any columns we aren't displaying on the
+          // client.
+          continue;
+        }
+
+        natural_column.setNaturalOrder(column_maps[natural_phid]);
       }
 
       var property_maps = response.propertyMaps;

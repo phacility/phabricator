@@ -4,7 +4,7 @@
 
 div.jx-typeahead-hardpoint {
   position: relative;
-  _zoom: 1; /* Some kind of IE6 fix? */ /* yes */ /* why? */
+  _zoom: 1; /* Some kind of IE6 fix? */ /* yes */ /* why? */ /* still need? */
 }
 
 div.jx-typeahead-results {
@@ -28,6 +28,9 @@ div.jx-typeahead-results a.jx-result {
   color: {$darkgreytext};
   display: block;
   font-size: {$normalfontsize};
+}
+
+div.jx-typeahead-results a.jx-result + a.jx-result {
   border-top: 1px solid {$hoverborder};
 }
 

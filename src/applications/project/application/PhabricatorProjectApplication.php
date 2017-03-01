@@ -7,7 +7,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return pht('Get Organized');
+    return pht('Projects, Tags, and Teams');
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
@@ -61,8 +61,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectEditPictureController',
         $this->getEditRoutePattern('edit/')
           => 'PhabricatorProjectEditController',
-        '(?P<projectID>[1-9]\d*)/panel/'
-          => $this->getPanelRouting('PhabricatorProjectPanelController'),
+        '(?P<projectID>[1-9]\d*)/item/' => $this->getProfileMenuRouting(
+          'PhabricatorProjectMenuItemController'),
         'subprojects/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectSubprojectsController',
         'board/(?P<id>[1-9]\d*)/'.

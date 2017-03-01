@@ -51,7 +51,7 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Constant'),
@@ -70,10 +70,6 @@ final class PhabricatorConfigPHIDModule extends PhabricatorConfigModule {
           'icon',
           'wide',
         ));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('PHID Types'))
-      ->setTable($table);
   }
 
 }

@@ -6,13 +6,13 @@
   width: auto;
 }
 
-.phui-calendar-list-container.calendar-day-view-sidebar .phui-object-box {
+.calendar-profile-box .calendar-day-view-sidebar .phui-object-box {
   border-bottom: none;
   margin: 0;
   padding: 0 12px 12px;
 }
 
-.project-view-home .phui-box-grey .phui-calendar-list-container
+.project-view-home .phui-object-box .phui-calendar-list-container
   .phui-header-shell {
   padding: 8px 0;
   background: #fff;
@@ -66,4 +66,22 @@
 
 .phui-calendar-list-item-empty {
   color: {$lightgreytext};
+  padding: 0;
+  font-style: italic;
+}
+
+.phui-calendar-list-item.all-day {
+  background: {$bluebackground};
+}
+
+.calendar-day-view-sidebar .phui-calendar-list {
+  padding: 12px 0;
+}
+
+.calendar-day-view-sidebar .phui-calendar-list-item  {
+  padding: 0 12px;
+}
+
+.calendar-day-view-sidebar .phui-calendar-list-item a {
+  position: relative;
 }

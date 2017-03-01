@@ -454,11 +454,6 @@ abstract class PhabricatorFeedStory
   }
 
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
-
 /* -(  PhabricatorMarkupInterface Implementation )--------------------------- */
 
 
@@ -467,7 +462,7 @@ abstract class PhabricatorFeedStory
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::getEngine();
+    return PhabricatorMarkupEngine::getEngine('feed');
   }
 
   public function getMarkupText($field) {

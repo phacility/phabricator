@@ -25,6 +25,13 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return true;
   }
 
+  protected function getObjectNameText(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $id) {
+    return $this->getObjectNamePrefix().$id;
+  }
+
   protected function loadHandles(array $objects) {
     $phids = mpull($objects, 'getPHID');
 
@@ -60,7 +67,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     $id) {
 
     $href = $this->getObjectHref($object, $handle, $id);
-    $text = $this->getObjectNamePrefix().$id;
+    $text = $this->getObjectNameText($object, $handle, $id);
 
     if ($anchor) {
       $href = $href.'#'.$anchor;
@@ -85,7 +92,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     $id) {
 
     $href = $this->getObjectHref($object, $handle, $id);
-    $text = $this->getObjectNamePrefix().$id;
+    $text = $this->getObjectNameText($object, $handle, $id);
     $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
 
     if ($anchor) {

@@ -100,7 +100,7 @@ is found. Valid rules are listed below. In this list, "*" means "any string".
      copy parent. (hg-only)
   - `arc:exec(*)` Execute the specified command. The command should determine
     the base revision to use and print it to stdout, then exit with return code
-    0. If the command exits with another return code, the rule will fail. The
+    `0`. If the command exits with another return code, the rule will fail. The
     command will be executed with the root directory of the working copy as the
     current working directory.
   - `arc:bookmark` Use the most recent non-outgoing ancestor of the working

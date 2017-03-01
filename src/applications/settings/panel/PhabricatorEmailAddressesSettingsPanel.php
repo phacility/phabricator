@@ -165,6 +165,11 @@ final class PhabricatorEmailAddressesSettingsPanel
     $user = $this->getUser();
     $viewer = $this->getViewer();
 
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      $this->getPanelURI());
+
     $e_email = true;
     $email   = null;
     $errors  = array();
@@ -275,6 +280,11 @@ final class PhabricatorEmailAddressesSettingsPanel
     $email_id) {
     $user = $this->getUser();
     $viewer = $this->getViewer();
+
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      $this->getPanelURI());
 
     // NOTE: You can only delete your own email addresses, and you can not
     // delete your primary address.

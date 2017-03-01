@@ -16,7 +16,7 @@ on shared hosts which require a lot of work to create or authorize access to
 each database. However, Phabricator does a lot of advanced or complex things
 which are difficult to configure or manage on shared hosts, and we don't
 recommend installing it on a shared host. The install documentation explicitly
-discouarges installing on shared hosts.
+discourages installing on shared hosts.
 
 Broadly, in cases where we must choose between operating well at scale for
 growing organizations and installing easily on shared hosts, we prioritize

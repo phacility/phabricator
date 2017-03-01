@@ -31,7 +31,6 @@ JX.install('ConpherenceThreadManager', {
     _transactionCache: null,
     _canEditLoadedThread: null,
     _updating:  null,
-    _minimalDisplay: false,
     _messagesRootCallback: JX.bag,
     _willLoadThreadCallback: JX.bag,
     _didLoadThreadCallback: JX.bag,
@@ -150,11 +149,6 @@ JX.install('ConpherenceThreadManager', {
       return this._canEditLoadedThread;
     },
 
-    setMinimalDisplay: function(bool) {
-      this._minimalDisplay = bool;
-      return this;
-    },
-
     setMessagesRootCallback: function(callback) {
       this._messagesRootCallback = callback;
       return this;
@@ -196,9 +190,6 @@ JX.install('ConpherenceThreadManager', {
     },
 
     _getParams: function(base_params) {
-      if (this._minimalDisplay) {
-        base_params.minimal_display = true;
-      }
       if (this._latestTransactionID) {
         base_params.latest_transaction_id = this._latestTransactionID;
       }
@@ -477,6 +468,7 @@ JX.install('ConpherenceThreadManager', {
           }
         }));
       this.syncWorkflow(workflow, 'finally');
+      textarea.value = '';
 
       this._willSendMessageCallback();
     },

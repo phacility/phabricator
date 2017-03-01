@@ -4,14 +4,17 @@ final class DifferentialDiff
   extends DifferentialDAO
   implements
     PhabricatorPolicyInterface,
+    PhabricatorExtendedPolicyInterface,
     HarbormasterBuildableInterface,
     HarbormasterCircleCIBuildableInterface,
+    HarbormasterBuildkiteBuildableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorDestructibleInterface {
 
   protected $revisionID;
   protected $authorPHID;
   protected $repositoryPHID;
+  protected $commitPHID;
 
   protected $sourceMachine;
   protected $sourcePath;
@@ -61,6 +64,7 @@ final class DifferentialDiff
         'branch' => 'text255?',
         'bookmark' => 'text255?',
         'repositoryUUID' => 'text64?',
+        'commitPHID' => 'phid?',
 
         // T6203/NULLABILITY
         // These should be non-null; all diffs should have a creation method
@@ -71,6 +75,9 @@ final class DifferentialDiff
       self::CONFIG_KEY_SCHEMA => array(
         'revisionID' => array(
           'columns' => array('revisionID'),
+        ),
+        'key_commit' => array(
+          'columns' => array('commitPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -429,7 +436,7 @@ final class DifferentialDiff
 
   public function getPolicy($capability) {
     if ($this->hasRevision()) {
-      return $this->getRevision()->getPolicy($capability);
+      return PhabricatorPolicies::getMostOpenPolicy();
     }
 
     return $this->viewPolicy;
@@ -440,7 +447,7 @@ final class DifferentialDiff
       return $this->getRevision()->hasAutomaticCapability($capability, $viewer);
     }
 
-    return ($this->getAuthorPHID() == $viewer->getPhid());
+    return ($this->getAuthorPHID() == $viewer->getPHID());
   }
 
   public function describeAutomaticCapability($capability) {
@@ -448,9 +455,30 @@ final class DifferentialDiff
       return pht(
         'This diff is attached to a revision, and inherits its policies.');
     }
+
     return pht('The author of a diff can see it.');
   }
 
+
+/* -(  PhabricatorExtendedPolicyInterface  )--------------------------------- */
+
+
+  public function getExtendedPolicy($capability, PhabricatorUser $viewer) {
+    $extended = array();
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        if ($this->hasRevision()) {
+          $extended[] = array(
+            $this->getRevision(),
+            PhabricatorPolicyCapability::CAN_VIEW,
+          );
+        }
+        break;
+    }
+
+    return $extended;
+  }
 
 
 /* -(  HarbormasterBuildableInterface  )------------------------------------- */
@@ -478,6 +506,10 @@ final class DifferentialDiff
     }
 
     return null;
+  }
+
+  public function getHarbormasterPublishablePHID() {
+    return $this->getHarbormasterContainerPHID();
   }
 
   public function getBuildVariables() {
@@ -589,6 +621,27 @@ final class DifferentialDiff
     $ref = preg_replace('(^refs/tags/)', '', $ref);
     return $ref;
   }
+
+
+/* -(  HarbormasterBuildkiteBuildableInterface  )---------------------------- */
+
+  public function getBuildkiteBranch() {
+    $ref = $this->getStagingRef();
+
+    // NOTE: Circa late January 2017, Buildkite fails with the error message
+    // "Tags have been disabled for this project" if we pass the "refs/tags/"
+    // prefix via the API and the project doesn't have GitHub tag builds
+    // enabled, even if GitHub builds are disabled. The tag builds fine
+    // without this prefix.
+    $ref = preg_replace('(^refs/tags/)', '', $ref);
+
+    return $ref;
+  }
+
+  public function getBuildkiteCommit() {
+    return 'HEAD';
+  }
+
 
   public function getStagingRef() {
     // TODO: We're just hoping to get lucky. Instead, `arc` should store

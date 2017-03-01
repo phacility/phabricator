@@ -156,7 +156,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
         if ($this->getFailureCount() > $maximum_failures) {
           throw new PhabricatorWorkerPermanentFailureException(
             pht(
-              'Task % has exceeded the maximum number of failures (%d).',
+              'Task %d has exceeded the maximum number of failures (%d).',
               $this->getID(),
               $maximum_failures));
         }

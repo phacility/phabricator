@@ -26,6 +26,10 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
     return true;
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRemarkupRules() {
     return array(
       new PhabricatorPhurlRemarkupRule(),
@@ -42,9 +46,7 @@ final class PhabricatorPhurlApplication extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorPhurlURLListController',
         'url/' => array(
-          'create/'
-            => 'PhabricatorPhurlURLEditController',
-          'edit/(?P<id>[1-9]\d*)/'
+          $this->getEditRoutePattern('edit/')
             => 'PhabricatorPhurlURLEditController',
           'comment/(?P<id>[1-9]\d*)/'
             => 'PhabricatorPhurlURLCommentController',

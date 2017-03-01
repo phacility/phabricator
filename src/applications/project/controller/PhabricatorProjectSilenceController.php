@@ -53,7 +53,7 @@ final class PhabricatorProjectSilenceController
             $edge_action => array($viewer_phid => $viewer_phid),
           ));
 
-      $editor = id(new PhabricatorProjectTransactionEditor($project))
+      $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)

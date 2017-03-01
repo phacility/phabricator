@@ -22,7 +22,7 @@ final class PhabricatorPronounSetting
   }
 
   public function getSettingDefaultValue() {
-    return PhutilPerson::SEX_UNKNOWN;
+    return PhutilPerson::GENDER_UNKNOWN;
   }
 
   protected function getSelectOptions() {
@@ -37,9 +37,9 @@ final class PhabricatorPronounSetting
     $label_his = pht('%s updated his profile', $username);
 
     return array(
-      PhutilPerson::SEX_UNKNOWN => $label_unknown,
-      PhutilPerson::SEX_MALE => $label_his,
-      PhutilPerson::SEX_FEMALE => $label_her,
+      PhutilPerson::GENDER_UNKNOWN => $label_unknown,
+      PhutilPerson::GENDER_MASCULINE => $label_his,
+      PhutilPerson::GENDER_FEMININE => $label_her,
     );
   }
 

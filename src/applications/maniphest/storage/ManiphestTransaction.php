@@ -767,7 +767,7 @@ final class ManiphestTransaction
             $new_name);
         } else {
           return pht(
-            '%s changed the status of %s, a subtasktask of %s, '.
+            '%s changed the status of %s, a subtask of %s, '.
             'from "%s" to "%s".',
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($blocker_phid),

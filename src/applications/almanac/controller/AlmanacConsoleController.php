@@ -16,7 +16,7 @@ final class AlmanacConsoleController extends AlmanacController {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Devices'))
         ->setHref($this->getApplicationURI('device/'))
-        ->setIcon('fa-server')
+        ->setImageIcon('fa-server')
         ->addAttribute(
           pht(
             'Create an inventory of physical and virtual hosts and '.
@@ -26,7 +26,7 @@ final class AlmanacConsoleController extends AlmanacController {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Services'))
         ->setHref($this->getApplicationURI('service/'))
-        ->setIcon('fa-plug')
+        ->setImageIcon('fa-plug')
         ->addAttribute(
           pht(
             'Create and update services, and map them to interfaces on '.
@@ -36,7 +36,7 @@ final class AlmanacConsoleController extends AlmanacController {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Networks'))
         ->setHref($this->getApplicationURI('network/'))
-        ->setIcon('fa-globe')
+        ->setImageIcon('fa-globe')
         ->addAttribute(
           pht(
             'Manage public and private networks.')));
@@ -45,7 +45,7 @@ final class AlmanacConsoleController extends AlmanacController {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Namespaces'))
         ->setHref($this->getApplicationURI('namespace/'))
-        ->setIcon('fa-asterisk')
+        ->setImageIcon('fa-asterisk')
         ->addAttribute(
           pht('Control who can create new named services and devices.')));
 
@@ -56,7 +56,7 @@ final class AlmanacConsoleController extends AlmanacController {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Documentation'))
         ->setHref($docs_uri)
-        ->setIcon('fa-book')
+        ->setImageIcon('fa-book')
         ->addAttribute(pht('Browse documentation for Almanac.')));
 
     $crumbs = $this->buildApplicationCrumbs();

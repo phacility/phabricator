@@ -1,8 +1,7 @@
 /**
  * @provides javelin-behavior-day-view
+ * @requires phuix-icon-view
  */
-
-
 JX.behavior('day-view', function(config) {
 
   function findTodayClusters() {
@@ -92,13 +91,20 @@ JX.behavior('day-view', function(config) {
       link_class = link_class + ' viewer-invited-day-event';
     }
 
+    var icon = new JX.PHUIXIconView()
+      .setIcon(e.displayIcon)
+      .setColor(e.displayIconColor)
+      .getNode();
+
+    var content = [icon, ' ', name];
+
     var name_link = JX.$N(
       'a',
       {
         className : link_class,
         href: uri
       },
-      name);
+      content);
 
     var class_name = 'phui-calendar-day-event';
     if (e.canEdit) {
@@ -123,22 +129,22 @@ JX.behavior('day-view', function(config) {
     return div;
   }
 
-  function drawAllDayEvent(
-    viewerIsInvited,
-    uri,
-    name) {
+  function drawAllDayEvent(e) {
     var class_name = 'day-view-all-day';
-    if (viewerIsInvited) {
-      class_name = class_name + ' viewer-invited-day-event';
-    }
 
-    name = JX.$N(
+    var icon = new JX.PHUIXIconView()
+      .setIcon(e.displayIcon)
+      .setColor(e.displayIconColor)
+      .getNode();
+    var content = [icon, ' ', e.name];
+
+    var name = JX.$N(
       'a',
       {
         className: class_name,
-        href: uri
+        href: e.uri
       },
-      name);
+      content);
 
     var all_day_label = JX.$N(
       'span',
@@ -169,13 +175,13 @@ JX.behavior('day-view', function(config) {
       var cell_time = JX.$N(
         'td',
         {className: 'phui-calendar-day-hour'},
-        hours[i]['hour_meridian']);
+        hours[i].displayTime);
 
       var cell_event = JX.$N(
         'td',
         {
           meta: {
-            time: hours[i]['hour_meridian']
+            time: hours[i].displayTime
           },
           className: 'phui-calendar-day-events',
           sigil: 'phui-calendar-day-event-cell'
@@ -220,10 +226,7 @@ JX.behavior('day-view', function(config) {
   var all_day_events = [];
   for(i=0; i < today_all_day_events.length; i++) {
     var all_day_event = today_all_day_events[i];
-    all_day_events.push(drawAllDayEvent(
-      all_day_event['viewerIsInvited'],
-      all_day_event['uri'],
-      all_day_event['name']));
+    all_day_events.push(drawAllDayEvent(all_day_event));
   }
 
   var table = JX.$N(
@@ -329,15 +332,14 @@ JX.behavior('day-view', function(config) {
     }
     var data = e.getNodeData('phui-calendar-day-event-cell');
     var time = data.time;
+
     new JX.Workflow(
-      '/calendar/event/create/',
+      '/calendar/event/edit/',
       {
-        year: year,
-        month: month,
-        day: day,
-        time: time,
-        next: 'day',
-        query: query
+        start_d: year + '-' + month + '-' + day,
+        start_t: time,
+        end_d: year + '-' + month + '-' + day,
+        end_t: time + ' +1 hour'
       })
       .start();
   });

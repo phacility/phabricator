@@ -88,7 +88,7 @@ function phabricator_format_local_time($epoch, $user, $format) {
       "raised an exception.", $epoch));
   }
 
-  $date->setTimeZone($zone);
+  $date->setTimezone($zone);
 
   return PhutilTranslator::getInstance()->translateDate($format, $date);
 }

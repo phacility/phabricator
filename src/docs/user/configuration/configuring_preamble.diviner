@@ -4,7 +4,8 @@
 Adjust environmental settings (SSL, remote IP, rate limiting) using a preamble
 script.
 
-= Overview =
+Overview
+========
 
 If Phabricator is deployed in an environment where HTTP headers behave oddly
 (usually, because it is behind a load balancer), it may not be able to detect
@@ -37,27 +38,52 @@ If present, this script will be executed at the very beginning of each web
 request, allowing you to adjust the environment. For common adjustments and
 examples, see the next sections.
 
-= Adjusting Client IPs =
+Adjusting Client IPs
+====================
 
 If your install is behind a load balancer, Phabricator may incorrectly detect
-all requests as originating from the load balancer, rather than from the correct
-client IPs. If this is the case and some other header (like `X-Forwarded-For`)
-is known to be trustworthy, you can overwrite the `REMOTE_ADDR` setting so
-Phabricator can figure out the client IP correctly:
+all requests as originating from the load balancer, rather than from the
+correct client IPs.
+
+If this is the case and some other header (like `X-Forwarded-For`) is known to
+be trustworthy, you can read the header and overwrite the `REMOTE_ADDR` value
+so Phabricator can figure out the client IP correctly.
+
+You should do this //only// if the `X-Forwarded-For` header is known to be
+trustworthy. In particular, if users can make requests to the web server
+directly, they can provide an arbitrary `X-Forwarded-For` header, and thereby
+spoof an arbitrary client IP.
+
+The `X-Forwarded-For` header may also contain a list of addresses if a request
+has been forwarded through multiple loadbalancers. Using a snippet like this
+will usually handle most situations correctly:
 
 ```
 name=Overwrite REMOTE_ADDR with X-Forwarded-For
 <?php
 
-$_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+// Overwrite REMOTE_ADDR with the value in the "X-Forwarded-For" HTTP header.
+
+// Only do this if you're certain the request is coming from a loadbalancer!
+// If the request came directly from a client, doing this will allow them to
+// them spoof any remote address.
+
+// The header may contain a list of IPs, like "1.2.3.4, 4.5.6.7", if the
+// request the load balancer received also had this header.
+
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+  $forwarded_for = $_SERVER['HTTP_X_FORWARDED_FOR'];
+  if ($forwarded_for) {
+    $forwarded_for = explode(',', $forwarded_for);
+    $forwarded_for = end($forwarded_for);
+    $forwarded_for = trim($forwarded_for);
+    $_SERVER['REMOTE_ADDR'] = $forwarded_for;
+  }
+}
 ```
 
-You should do this //only// if the `X-Forwarded-For` header is always
-trustworthy. In particular, if users can make requests to the web server
-directly, they can provide an arbitrary `X-Forwarded-For` header, and thereby
-spoof an arbitrary client IP.
-
-= Adjusting SSL =
+Adjusting SSL
+=============
 
 If your install is behind an SSL terminating load balancer, Phabricator may
 detect requests as HTTP when the client sees them as HTTPS. This can cause
@@ -76,38 +102,9 @@ $_SERVER['HTTPS'] = true;
 You can also set this value to `false` to explicitly tell Phabricator that a
 request is not an SSL request.
 
-= Adjusting Rate Limiting =
 
-Phabricator performs coarse, IP-based rate limiting by default. In most
-situations the default settings should be reasonable: they are set fairly high,
-and intended to prevent only significantly abusive behavior.
-
-However, if legitimate traffic is being rate limited (or you want to make the
-limits more strict) you can adjust the limits in the preamble script.
-
-```
-name=Adjust Rate Limiting Behavior
-<?php
-
-// The default is 1000, so a value of 2000 increases the limit by a factor
-// of 2: users will be able to make twice as many requests before being
-// rate limited.
-
-// You can set the limit to 0 to disable rate limiting.
-
-PhabricatorStartup::setMaximumRate(2000);
-```
-
-By examining `$_SERVER['REMOTE_ADDR']` or similar parameters, you could also
-adjust the rate limit dynamically: for example, remove it for requests from an
-internal network, but impose a strict limit for external requests.
-
-Rate limiting needs to be configured in this way in order to make it as cheap as
-possible to activate after a client is rate limited. The limiting checks execute
-before any libraries or configuration are loaded, and can emit a response within
-a few milliseconds.
-
-= Next Steps =
+Next Steps
+==========
 
 Continue by:
 

@@ -55,11 +55,27 @@ final class PhabricatorVersionedDraft extends PhabricatorDraftDAO {
       return $draft;
     }
 
-    return id(new PhabricatorVersionedDraft())
-      ->setObjectPHID($object_phid)
-      ->setAuthorPHID($viewer_phid)
-      ->setVersion((int)$version)
-      ->save();
+    try {
+      return id(new self())
+        ->setObjectPHID($object_phid)
+        ->setAuthorPHID($viewer_phid)
+        ->setVersion((int)$version)
+        ->save();
+    } catch (AphrontDuplicateKeyQueryException $ex) {
+      $duplicate_exception = $ex;
+    }
+
+    // In rare cases we can race ourselves, and at one point there was a bug
+    // which caused the browser to submit two preview requests at exactly
+    // the same time. If the insert failed with a duplicate key exception,
+    // try to load the colliding row to recover from it.
+
+    $draft = self::loadDraft($object_phid, $viewer_phid);
+    if ($draft) {
+      return $draft;
+    }
+
+    throw $duplicate_exception;
   }
 
   public static function purgeDrafts(

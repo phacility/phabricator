@@ -37,8 +37,7 @@ final class ConpherenceQueryThreadConduitAPIMethod
 
     $query = id(new ConpherenceThreadQuery())
       ->setViewer($user)
-      ->needParticipantCache(true)
-      ->needFilePHIDs(true);
+      ->needParticipantCache(true);
 
     if ($ids) {
       $conpherences = $query
@@ -73,7 +72,6 @@ final class ConpherenceQueryThreadConduitAPIMethod
         'conpherenceTitle' => $conpherence->getTitle(),
         'messageCount' => $conpherence->getMessageCount(),
         'recentParticipantPHIDs' => $conpherence->getRecentParticipantPHIDs(),
-        'filePHIDs' => $conpherence->getFilePHIDs(),
         'conpherenceURI' => $this->getConpherenceURI($conpherence),
       );
     }

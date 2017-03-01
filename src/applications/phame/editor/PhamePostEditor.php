@@ -16,8 +16,10 @@ final class PhamePostEditor
 
     $types[] = PhamePostTransaction::TYPE_BLOG;
     $types[] = PhamePostTransaction::TYPE_TITLE;
+    $types[] = PhamePostTransaction::TYPE_SUBTITLE;
     $types[] = PhamePostTransaction::TYPE_BODY;
     $types[] = PhamePostTransaction::TYPE_VISIBILITY;
+    $types[] = PhamePostTransaction::TYPE_HEADERIMAGE;
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     return $types;
@@ -32,10 +34,14 @@ final class PhamePostEditor
         return $object->getBlogPHID();
       case PhamePostTransaction::TYPE_TITLE:
         return $object->getTitle();
+      case PhamePostTransaction::TYPE_SUBTITLE:
+        return $object->getSubtitle();
       case PhamePostTransaction::TYPE_BODY:
         return $object->getBody();
       case PhamePostTransaction::TYPE_VISIBILITY:
         return $object->getVisibility();
+      case PhamePostTransaction::TYPE_HEADERIMAGE:
+        return $object->getHeaderImagePHID();
     }
   }
 
@@ -45,8 +51,10 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
+      case PhamePostTransaction::TYPE_SUBTITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
+      case PhamePostTransaction::TYPE_HEADERIMAGE:
       case PhamePostTransaction::TYPE_BLOG:
         return $xaction->getNewValue();
     }
@@ -59,10 +67,14 @@ final class PhamePostEditor
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
         return $object->setTitle($xaction->getNewValue());
+      case PhamePostTransaction::TYPE_SUBTITLE:
+        return $object->setSubtitle($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BODY:
         return $object->setBody($xaction->getNewValue());
       case PhamePostTransaction::TYPE_BLOG:
         return $object->setBlogPHID($xaction->getNewValue());
+      case PhamePostTransaction::TYPE_HEADERIMAGE:
+        return $object->setHeaderImagePHID($xaction->getNewValue());
       case PhamePostTransaction::TYPE_VISIBILITY:
         if ($xaction->getNewValue() == PhameConstants::VISIBILITY_DRAFT) {
           $object->setDatePublished(0);
@@ -84,8 +96,10 @@ final class PhamePostEditor
 
     switch ($xaction->getTransactionType()) {
       case PhamePostTransaction::TYPE_TITLE:
+      case PhamePostTransaction::TYPE_SUBTITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_VISIBILITY:
+      case PhamePostTransaction::TYPE_HEADERIMAGE:
       case PhamePostTransaction::TYPE_BLOG:
         return;
     }

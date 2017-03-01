@@ -111,11 +111,13 @@ class PhabricatorBarePageView extends AphrontPageView {
           '/rsrc/favicons/apple-touch-icon-152x152.png'),
       ));
 
-    $apple_tag = phutil_tag(
-      'meta',
+    $favicon_tag = phutil_tag(
+      'link',
       array(
-        'name' => 'apple-mobile-web-app-status-bar-style',
-        'content' => 'black-translucent',
+        'id' => 'favicon',
+        'rel' => 'shortcut icon',
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/favicon.ico'),
       ));
 
     $referrer_tag = phutil_tag(
@@ -146,7 +148,7 @@ class PhabricatorBarePageView extends AphrontPageView {
       $icon_tag_76,
       $icon_tag_120,
       $icon_tag_152,
-      $apple_tag,
+      $favicon_tag,
       $referrer_tag,
       CelerityStaticResourceResponse::renderInlineScript(
         $framebust.jsprintf('window.__DEV__=%d;', ($developer ? 1 : 0))),

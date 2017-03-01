@@ -10,6 +10,7 @@ abstract class DifferentialCoreCustomField
 
   private $value;
   private $fieldError;
+  private $fieldParser;
 
   abstract protected function readValueFromRevision(
     DifferentialRevision $revision);
@@ -60,6 +61,7 @@ abstract class DifferentialCoreCustomField
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
           $this->setFieldError(pht('Required'));
+          continue;
         }
       }
     }
@@ -72,10 +74,6 @@ abstract class DifferentialCoreCustomField
   }
 
   public function shouldAppearInApplicationTransactions() {
-    return true;
-  }
-
-  public function shouldAppearInEditView() {
     return true;
   }
 
@@ -115,15 +113,6 @@ abstract class DifferentialCoreCustomField
 
   public function getValue() {
     return $this->value;
-  }
-
-  public function readValueFromCommitMessage($value) {
-    $this->setValue($value);
-    return $this;
-  }
-
-  public function renderCommitMessageValue(array $handles) {
-    return $this->getValue();
   }
 
   public function getConduitDictionaryValue() {

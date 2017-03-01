@@ -347,6 +347,17 @@ final class PHUITimelineEventView extends AphrontView {
     $group_children = array();
     foreach ($events as $event) {
       if ($event->shouldRenderEventTitle()) {
+
+        // Render the group anchor here, outside the title box. If we render
+        // it inside the title box it ends up completely hidden and Chrome 55
+        // refuses to jump to it. See T11997 for discussion.
+
+        if ($extra && $this->anchor) {
+          $group_titles[] = id(new PhabricatorAnchorView())
+            ->setAnchorName($this->anchor)
+            ->render();
+        }
+
         $group_titles[] = $event->renderEventTitle(
           $force_icon,
           $has_menu,
@@ -533,12 +544,7 @@ final class PHUITimelineEventView extends AphrontView {
           Javelin::initBehavior('phabricator-watch-anchor');
           Javelin::initBehavior('phabricator-tooltips');
 
-          $anchor = id(new PhabricatorAnchorView())
-            ->setAnchorName($this->anchor)
-            ->render();
-
           $date = array(
-            $anchor,
             javelin_tag(
               'a',
               array(
@@ -546,7 +552,7 @@ final class PHUITimelineEventView extends AphrontView {
                 'sigil' => 'has-tooltip',
                 'meta' => array(
                   'tip' => $content_source,
-          ),
+                ),
               ),
               $date),
           );
@@ -600,8 +606,8 @@ final class PHUITimelineEventView extends AphrontView {
 
       $items[] = id(new PhabricatorActionView())
         ->setIcon('fa-quote-left')
+        ->setName(pht('Quote Comment'))
         ->setHref('#')
-        ->setName(pht('Quote'))
         ->addSigil('transaction-quote')
         ->setMetadata(
           array(
@@ -613,9 +619,9 @@ final class PHUITimelineEventView extends AphrontView {
 
     if ($this->getIsNormalComment()) {
       $items[] = id(new PhabricatorActionView())
-        ->setIcon('fa-cutlery')
+        ->setIcon('fa-code')
         ->setHref('/transactions/raw/'.$xaction_phid.'/')
-        ->setName(pht('View Raw'))
+        ->setName(pht('View Remarkup'))
         ->addSigil('transaction-raw')
         ->setMetadata(
           array(
@@ -640,25 +646,29 @@ final class PHUITimelineEventView extends AphrontView {
       }
     }
 
-    if ($this->getIsRemovable()) {
-      $items[] = id(new PhabricatorActionView())
-        ->setIcon('fa-times')
-        ->setHref('/transactions/remove/'.$xaction_phid.'/')
-        ->setName(pht('Remove Comment'))
-        ->addSigil('transaction-remove')
-        ->setMetadata(
-          array(
-            'anchor' => $anchor,
-          ));
-
-    }
-
     if ($this->getIsEdited()) {
       $items[] = id(new PhabricatorActionView())
         ->setIcon('fa-list')
         ->setHref('/transactions/history/'.$xaction_phid.'/')
         ->setName(pht('View Edit History'))
         ->setWorkflow(true);
+    }
+
+    if ($this->getIsRemovable()) {
+      $items[] = id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER);
+
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-trash-o')
+        ->setHref('/transactions/remove/'.$xaction_phid.'/')
+        ->setName(pht('Remove Comment'))
+        ->setColor(PhabricatorActionView::RED)
+        ->addSigil('transaction-remove')
+        ->setMetadata(
+          array(
+            'anchor' => $anchor,
+          ));
+
     }
 
     return $items;

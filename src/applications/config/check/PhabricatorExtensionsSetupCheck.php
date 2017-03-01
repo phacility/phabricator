@@ -6,13 +6,12 @@ final class PhabricatorExtensionsSetupCheck extends PhabricatorSetupCheck {
     return self::GROUP_PHP;
   }
 
-  public function getExecutionOrder() {
-    return 0;
+  public function isPreflightCheck() {
+    return true;
   }
 
   protected function executeChecks() {
     // TODO: Make 'mbstring' and 'iconv' soft requirements.
-    // TODO: Make 'curl' a soft requirement.
 
     $required = array(
       'hash',
@@ -22,9 +21,8 @@ final class PhabricatorExtensionsSetupCheck extends PhabricatorSetupCheck {
       'iconv',
       'ctype',
 
-      // There is a chance we might not need this, but some configurations (like
-      // OAuth or Amazon SES) will require it. Just mark it 'required' since
-      // it's widely available and relatively core.
+      // There is a tiny chance we might not need this, but a significant
+      // number of applications require it and it's widely available.
       'curl',
     );
 

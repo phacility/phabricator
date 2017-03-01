@@ -23,32 +23,14 @@ final class PhabricatorPeopleProfileManageController
     }
 
     $this->setUser($user);
-
-    $profile = $user->loadUserProfile();
-    $picture = $user->getProfileImageURI();
-
-    $profile_icon = PhabricatorPeopleIconSet::getIconIcon($profile->getIcon());
-    $profile_icon = id(new PHUIIconView())
-      ->setIcon($profile_icon);
-    $profile_title = $profile->getDisplayTitle();
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($user->getFullName())
-      ->setSubheader(array($profile_icon, $profile_title))
-      ->setImage($picture)
-      ->setProfileHeader(true);
+    $header = $this->buildProfileHeader();
 
     $curtain = $this->buildCurtain($user);
     $properties = $this->buildPropertyView($user);
     $name = $user->getUsername();
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorPeopleProfilePanelEngine::PANEL_MANAGE);
-
-    $timeline = $this->buildTransactionTimeline(
-      $user,
-      new PhabricatorPeopleTransactionQuery());
-    $timeline->setShouldTerminate(true);
+    $nav->selectFilter(PhabricatorPeopleProfileMenuEngine::ITEM_MANAGE);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Manage'));
@@ -56,12 +38,10 @@ final class PhabricatorPeopleProfileManageController
 
     $manage = id(new PHUITwoColumnView())
       ->setHeader($header)
+      ->addClass('project-view-home')
+      ->addClass('project-view-people-home')
       ->setCurtain($curtain)
-      ->addPropertySection(pht('Details'), $properties)
-      ->setMainColumn(
-        array(
-          $timeline,
-        ));
+      ->addPropertySection(pht('Details'), $properties);
 
     return $this->newPage()
       ->setTitle(

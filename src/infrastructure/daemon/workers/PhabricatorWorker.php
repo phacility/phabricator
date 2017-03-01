@@ -16,6 +16,7 @@ abstract class PhabricatorWorker extends Phobject {
 
   const PRIORITY_ALERTS  = 1000;
   const PRIORITY_DEFAULT = 2000;
+  const PRIORITY_COMMIT  = 2500;
   const PRIORITY_BULK    = 3000;
   const PRIORITY_IMPORT  = 4000;
 

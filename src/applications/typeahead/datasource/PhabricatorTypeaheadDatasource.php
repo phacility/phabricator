@@ -13,6 +13,10 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   private $parameters = array();
   private $functionStack = array();
   private $isBrowse;
+  private $phase = self::PHASE_CONTENT;
+
+  const PHASE_PREFIX = 'prefix';
+  const PHASE_CONTENT = 'content';
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -44,6 +48,10 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   public function setRawQuery($raw_query) {
     $this->rawQuery = $raw_query;
     return $this;
+  }
+
+  public function getPrefixQuery() {
+    return phutil_utf8_strtolower($this->getRawQuery());
   }
 
   public function getRawQuery() {
@@ -81,6 +89,15 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     return $this->isBrowse;
   }
 
+  public function setPhase($phase) {
+    $this->phase = $phase;
+    return $this;
+  }
+
+  public function getPhase() {
+    return $this->phase;
+  }
+
   public function getDatasourceURI() {
     $uri = new PhutilURI('/typeahead/class/'.get_class($this).'/');
     $uri->setQueryParams($this->parameters);
@@ -106,6 +123,13 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   abstract public function getDatasourceApplicationClass();
   abstract public function loadResults();
 
+  protected function loadResultsForPhase($phase, $limit) {
+    // By default, sources just load all of their results in every phase and
+    // rely on filtering at a higher level to sequence phases correctly.
+    $this->setLimit($limit);
+    return $this->loadResults();
+  }
+
   protected function didLoadResults(array $results) {
     return $results;
   }
@@ -117,8 +141,20 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       return array();
     }
 
-    $tokens = preg_split('/\s+|[-\[\]]/u', $string);
-    return array_unique($tokens);
+    // NOTE: Splitting on "(" and ")" is important for milestones.
+
+    $tokens = preg_split('/[\s\[\]\(\)-]+/u', $string);
+    $tokens = array_unique($tokens);
+
+    // Make sure we don't return the empty token, as this will boil down to a
+    // JOIN against every token.
+    foreach ($tokens as $key => $value) {
+      if (!strlen($value)) {
+        unset($tokens[$key]);
+      }
+    }
+
+    return array_values($tokens);
   }
 
   public function getTokens() {
@@ -360,13 +396,16 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       if (!self::isFunctionToken($token)) {
         $results[] = $token;
       } else {
-        $evaluate[] = $token;
+        // Put a placeholder in the result list so that we retain token order
+        // when possible. We'll overwrite this below.
+        $results[] = null;
+        $evaluate[last_key($results)] = $token;
       }
     }
 
     $results = $this->evaluateValues($results);
 
-    foreach ($evaluate as $function) {
+    foreach ($evaluate as $result_key => $function) {
       $function = self::parseFunction($function);
       if (!$function) {
         throw new PhabricatorTypeaheadInvalidTokenException();
@@ -375,11 +414,23 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       $name = $function['name'];
       $argv = $function['argv'];
 
-      foreach ($this->evaluateFunction($name, array($argv)) as $phid) {
-        $results[] = $phid;
+      $evaluated_tokens = $this->evaluateFunction($name, array($argv));
+      if (!$evaluated_tokens) {
+        unset($results[$result_key]);
+      } else {
+        $is_first = true;
+        foreach ($evaluated_tokens as $phid) {
+          if ($is_first) {
+            $results[$result_key] = $phid;
+            $is_first = false;
+          } else {
+            $results[] = $phid;
+          }
+        }
       }
     }
 
+    $results = array_values($results);
     $results = $this->didEvaluateTokens($results);
 
     return $results;

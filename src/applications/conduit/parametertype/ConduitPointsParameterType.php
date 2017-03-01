@@ -3,8 +3,8 @@
 final class ConduitPointsParameterType
   extends ConduitParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $value = parent::getParameterValue($request, $key);
+  protected function getParameterValue(array $request, $key, $strict) {
+    $value = parent::getParameterValue($request, $key, $strict);
 
     if (($value !== null) && !is_numeric($value)) {
       $this->raiseValidationException(

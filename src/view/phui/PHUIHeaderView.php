@@ -506,8 +506,40 @@ final class PHUIHeaderView extends AphrontTagView {
       }
     }
 
+    $policy_name = array($policy->getShortName());
+    $policy_icon = $policy->getIcon().' bluegrey';
+
+    if ($object instanceof PhabricatorPolicyCodexInterface) {
+      $codex = PhabricatorPolicyCodex::newFromObject($object, $viewer);
+
+      $codex_name = $codex->getPolicyShortName($policy, $view_capability);
+      if ($codex_name !== null) {
+        $policy_name = $codex_name;
+      }
+
+      $codex_icon = $codex->getPolicyIcon($policy, $view_capability);
+      if ($codex_icon !== null) {
+        $policy_icon = $codex_icon;
+      }
+
+      $codex_classes = $codex->getPolicyTagClasses($policy, $view_capability);
+      foreach ($codex_classes as $codex_class) {
+        $container_classes[] = $codex_class;
+      }
+    }
+
+    if (!is_array($policy_name)) {
+      $policy_name = (array)$policy_name;
+    }
+
+    $arrow = id(new PHUIIconView())
+      ->setIcon('fa-angle-right')
+      ->addClass('policy-tier-separator');
+
+    $policy_name = phutil_implode_html($arrow, $policy_name);
+
     $icon = id(new PHUIIconView())
-      ->setIcon($policy->getIcon().' bluegrey');
+      ->setIcon($policy_icon);
 
     $link = javelin_tag(
       'a',
@@ -516,7 +548,7 @@ final class PHUIHeaderView extends AphrontTagView {
         'href' => '/policy/explain/'.$phid.'/'.$view_capability.'/',
         'sigil' => 'workflow',
       ),
-      $policy->getShortName());
+      $policy_name);
 
     return phutil_tag(
       'span',

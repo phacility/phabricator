@@ -24,7 +24,7 @@ final class PhabricatorDestructionEngineExtensionModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Class'),
@@ -36,9 +36,6 @@ final class PhabricatorDestructionEngineExtensionModule
           'wide pri',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('DestructionEngine Extensions'))
-      ->setTable($table);
   }
 
 }

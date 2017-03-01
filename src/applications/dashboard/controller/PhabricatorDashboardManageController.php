@@ -1,13 +1,15 @@
 <?php
 
 final class PhabricatorDashboardManageController
-  extends PhabricatorDashboardController {
+  extends PhabricatorDashboardProfileController {
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
     $id = $request->getURIData('id');
-
-    $dashboard_uri = $this->getApplicationURI('view/'.$id.'/');
 
     // TODO: This UI should drop a lot of capabilities if the user can't
     // edit the dashboard, but we should still let them in for "Install" and
@@ -21,6 +23,7 @@ final class PhabricatorDashboardManageController
     if (!$dashboard) {
       return new Aphront404Response();
     }
+    $this->setDashboard($dashboard);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -30,40 +33,26 @@ final class PhabricatorDashboardManageController
     $title = $dashboard->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      pht('Dashboard %d', $dashboard->getID()),
-      $dashboard_uri);
     $crumbs->addTextCrumb(pht('Manage'));
-    $crumbs->setBorder(true);
 
-    $header = $this->buildHeaderView($dashboard);
-    $curtain = $this->buildCurtainview($dashboard);
+    $header = $this->buildHeaderView();
+    $curtain = $this->buildCurtainView($dashboard);
     $properties = $this->buildPropertyView($dashboard);
 
     $timeline = $this->buildTransactionTimeline(
       $dashboard,
       new PhabricatorDashboardTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $info_view = null;
     if (!$can_edit) {
       $no_edit = pht(
-        'You do not have permission to edit this dashboard. If you want to '.
-        'make changes, make a copy first.');
+        'You do not have permission to edit this dashboard.');
 
       $info_view = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors(array($no_edit));
     }
-
-    $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
-      ->setViewer($viewer)
-      ->setDashboard($dashboard)
-      ->setArrangeMode($can_edit)
-      ->renderDashboard();
-
-    $dashboard_box = id(new PHUIBoxView())
-      ->addClass('dashboard-preview-box')
-      ->appendChild($rendered_dashboard);
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
@@ -72,45 +61,16 @@ final class PhabricatorDashboardManageController
         $info_view,
         $properties,
         $timeline,
-      ))
-      ->setFooter($dashboard_box);
+      ));
+
+    $navigation = $this->buildSideNavView('manage');
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
+      ->setNavigation($navigation)
       ->appendChild($view);
 
-  }
-
-  private function buildHeaderView(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getViewer();
-    $id = $dashboard->getID();
-
-    if ($dashboard->isArchived()) {
-      $status_icon = 'fa-ban';
-      $status_color = 'dark';
-    } else {
-      $status_icon = 'fa-check';
-      $status_color = 'bluegrey';
-    }
-
-    $status_name = idx(
-      PhabricatorDashboard::getStatusNameMap(),
-      $dashboard->getStatus());
-
-    $button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('View Dashboard'))
-      ->setIcon('fa-columns')
-      ->setHref($this->getApplicationURI("view/{$id}/"));
-
-    return id(new PHUIHeaderView())
-      ->setUser($viewer)
-      ->setHeader($dashboard->getName())
-      ->setPolicyObject($dashboard)
-      ->setStatus($status_icon, $status_color, $status_name)
-      ->setHeaderIcon('fa-dashboard')
-      ->addActionLink($button);
   }
 
   private function buildCurtainView(PhabricatorDashboard $dashboard) {
@@ -148,33 +108,6 @@ final class PhabricatorDashboardManageController
           ->setDisabled(!$can_edit)
           ->setWorkflow($can_edit));
     }
-
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Copy Dashboard'))
-        ->setIcon('fa-files-o')
-        ->setHref($this->getApplicationURI("copy/{$id}/"))
-        ->setWorkflow(true));
-
-    $installed_dashboard = id(new PhabricatorDashboardInstall())
-      ->loadOneWhere(
-        'objectPHID = %s AND applicationClass = %s',
-        $viewer->getPHID(),
-        'PhabricatorHomeApplication');
-    if ($installed_dashboard &&
-        $installed_dashboard->getDashboardPHID() == $dashboard->getPHID()) {
-      $title_install = pht('Uninstall Dashboard');
-      $href_install = "uninstall/{$id}/";
-    } else {
-      $title_install = pht('Install Dashboard');
-      $href_install = "install/{$id}/";
-    }
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-      ->setName($title_install)
-      ->setIcon('fa-wrench')
-      ->setHref($this->getApplicationURI($href_install))
-      ->setWorkflow(true));
 
     return $curtain;
   }

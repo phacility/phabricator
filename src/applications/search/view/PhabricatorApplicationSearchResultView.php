@@ -1,21 +1,20 @@
 <?php
 
-final class PhabricatorApplicationSearchResultView extends Phobject {
-
 /**
  * Holds bits and pieces of UI information for Search Engine
  * and Dashboard Panel rendering, describing the results and
  * controls for presentation.
- *
  */
+final class PhabricatorApplicationSearchResultView extends Phobject {
 
   private $objectList = null;
   private $table = null;
   private $content = null;
   private $infoView = null;
   private $actions = array();
-  private $collapsed = null;
   private $noDataString;
+  private $crumbs = array();
+  private $header;
 
   public function setObjectList(PHUIObjectItemListView $list) {
     $this->objectList = $list;
@@ -70,18 +69,29 @@ final class PhabricatorApplicationSearchResultView extends Phobject {
     return $this->actions;
   }
 
-  public function setCollapsed($collapsed) {
-    $this->collapsed = $collapsed;
-    return $this;
-  }
-
-  public function getCollapsed() {
-    return $this->collapsed;
-  }
-
   public function setNoDataString($nodata) {
     $this->noDataString = $nodata;
     return $this;
+  }
+
+  public function setCrumbs(array $crumbs) {
+    assert_instances_of($crumbs, 'PHUICrumbView');
+
+    $this->crumbs = $crumbs;
+    return $this;
+  }
+
+  public function getCrumbs() {
+    return $this->crumbs;
+  }
+
+  public function setHeader(PHUIHeaderView $header) {
+    $this->header = $header;
+    return $this;
+  }
+
+  public function getHeader() {
+    return $this->header;
   }
 
 }

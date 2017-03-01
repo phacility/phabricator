@@ -42,7 +42,7 @@ final class PhabricatorProjectMembersViewController
       ->setUserPHIDs($project->getWatcherPHIDs());
 
     $nav = $this->getProfileMenu();
-    $nav->selectFilter(PhabricatorProject::PANEL_MEMBERS);
+    $nav->selectFilter(PhabricatorProject::ITEM_MEMBERS);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Members'));

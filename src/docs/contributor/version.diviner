@@ -49,6 +49,29 @@ hash from the output. This may be useful if you're encountering an issue which
 prevents you from reaching the version reporting screen.
 
 
+Running a Fork?
+===============
+
+If you've forked Phabricator and have local commits, please make sure you are
+reporting upstream commit hashes, not local commit hashes. The UI will attempt
+to figure out where you branched from, but it may not be able to in all cases.
+
+If you report local commit hashes instead of upstream commit hashes we can not
+go look up the commit hashes to figure out which changes they correspond to, so
+we can not use that information to determine out how old your install is or
+which patches you are missing.
+
+In most cases, you can find the upstream commit you've branched from like this:
+
+```
+$ git merge-base HEAD origin/master
+```
+
+Note that if you report a bug and have local commits, we will almost always ask
+you to reproduce the issue against a clean copy of Phabricator before we
+continue. You can get help faster by doing this //before// reporting an issue.
+
+
 Next Steps
 ==========
 

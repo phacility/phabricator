@@ -9,102 +9,91 @@ final class PhabricatorCalendarEventViewController
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $id = $request->getURIData('id');
-    $sequence = $request->getURIData('sequence');
 
-    $timeline = null;
-
-    $event = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->executeOne();
+    $event = $this->loadEvent();
     if (!$event) {
       return new Aphront404Response();
     }
 
-    if ($sequence) {
-      $result = $this->getEventAtIndexForGhostPHID(
-        $viewer,
-        $event->getPHID(),
-        $sequence);
-
-      if ($result) {
-        $parent_event = $event;
-        $event = $result;
-        $event->attachParentEvent($parent_event);
-        return id(new AphrontRedirectResponse())
-          ->setURI('/E'.$result->getID());
-      } else if ($sequence && $event->getIsRecurring()) {
-        $parent_event = $event;
-        $event = $event->generateNthGhost($sequence, $viewer);
-        $event->attachParentEvent($parent_event);
-      } else if ($sequence) {
-        return new Aphront404Response();
-      }
-
-      $title = $event->getMonogram().' ('.$sequence.')';
-      $page_title = $title.' '.$event->getName();
-      $crumbs = $this->buildApplicationCrumbs();
-      $crumbs->addTextCrumb($title, '/'.$event->getMonogram().'/'.$sequence);
-
-
-    } else {
-      $title = 'E'.$event->getID();
-      $page_title = $title.' '.$event->getName();
-      $crumbs = $this->buildApplicationCrumbs();
-      $crumbs->addTextCrumb($title);
-      $crumbs->setBorder(true);
+    // If we looked up or generated a stub event, redirect to that event's
+    // canonical URI.
+    $id = $request->getURIData('id');
+    if ($event->getID() != $id) {
+      $uri = $event->getURI();
+      return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    if (!$event->getIsGhostEvent()) {
-      $timeline = $this->buildTransactionTimeline(
-        $event,
-        new PhabricatorCalendarEventTransactionQuery());
-    }
+    $monogram = $event->getMonogram();
+    $page_title = $monogram.' '.$event->getName();
+    $crumbs = $this->buildApplicationCrumbs();
+
+    $start = $event->newStartDateTime()
+      ->newPHPDateTime();
+
+    $crumbs->addTextCrumb(
+      $start->format('F Y'),
+      '/calendar/query/month/'.$start->format('Y/m/'));
+
+    $crumbs->addTextCrumb(
+      $start->format('D jS'),
+      '/calendar/query/month/'.$start->format('Y/m/d/'));
+
+    $crumbs->addTextCrumb($monogram);
+    $crumbs->setBorder(true);
+
+    $timeline = $this->buildTransactionTimeline(
+      $event,
+      new PhabricatorCalendarEventTransactionQuery());
 
     $header = $this->buildHeaderView($event);
+    $subheader = $this->buildSubheaderView($event);
     $curtain = $this->buildCurtain($event);
     $details = $this->buildPropertySection($event);
+    $recurring = $this->buildRecurringSection($event);
     $description = $this->buildDescriptionView($event);
 
-    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-    $add_comment_header = $is_serious
-      ? pht('Add Comment')
-      : pht('Add To Plate');
-    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $event->getPHID());
-    if ($sequence) {
-      $comment_uri = $this->getApplicationURI(
-        '/event/comment/'.$event->getID().'/'.$sequence.'/');
-    } else {
-      $comment_uri = $this->getApplicationURI(
-        '/event/comment/'.$event->getID().'/');
+    $comment_view = id(new PhabricatorCalendarEventEditEngine())
+      ->setViewer($viewer)
+      ->buildEditEngineCommentView($event);
+
+    $timeline->setQuoteRef($monogram);
+    $comment_view->setTransactionTimeline($timeline);
+
+    $details_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Details'));
+    $recurring_header = $this->buildRecurringHeader($event);
+
+    // NOTE: This is a bit hacky: for imported events, we're just hiding the
+    // comment form without actually preventing comments. Users could still
+    // submit a request to add comments to these events. This isn't really a
+    // major problem since they can't do anything truly bad and there isn't an
+    // easy way to selectively disable this or some other similar behaviors
+    // today, but it would probably be nice to fully disable these
+    // "pseudo-edits" (like commenting and probably subscribing and awarding
+    // tokens) at some point.
+    if ($event->isImportedEvent()) {
+      $comment_view = null;
+      $timeline->setShouldTerminate(true);
     }
-    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
-      ->setUser($viewer)
-      ->setObjectPHID($event->getPHID())
-      ->setDraft($draft)
-      ->setHeaderText($add_comment_header)
-      ->setAction($comment_uri)
-      ->setSubmitButtonName(pht('Add Comment'));
 
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setMainColumn(array(
+      ->setSubheader($subheader)
+      ->setMainColumn(
+        array(
           $timeline,
-          $add_comment_form,
+          $comment_view,
         ))
       ->setCurtain($curtain)
-      ->addPropertySection(pht('Details'), $details)
-      ->addPropertySection(pht('Description'), $description);
+      ->addPropertySection(pht('Description'), $description)
+      ->addPropertySection($recurring_header, $recurring)
+      ->addPropertySection($details_header, $details);
 
     return $this->newPage()
       ->setTitle($page_title)
       ->setCrumbs($crumbs)
       ->setPageObjectPHIDs(array($event->getPHID()))
-      ->appendChild(
-        array(
-          $view,
-      ));
+      ->appendChild($view);
   }
 
   private function buildHeaderView(
@@ -112,47 +101,80 @@ final class PhabricatorCalendarEventViewController
     $viewer = $this->getViewer();
     $id = $event->getID();
 
-    $is_cancelled = $event->getIsCancelled();
-    $icon = $is_cancelled ? ('fa-ban') : ('fa-check');
-    $color = $is_cancelled ? ('red') : ('bluegrey');
-    $status = $is_cancelled ? pht('Cancelled') : pht('Active');
-
-    $invite_status = $event->getUserInviteStatus($viewer->getPHID());
-    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
-    $is_invite_pending = ($invite_status == $status_invited);
+    if ($event->getIsCancelled()) {
+      $icon = 'fa-ban';
+      $color = 'red';
+      $status = pht('Cancelled');
+    } else {
+      $icon = 'fa-check';
+      $color = 'bluegrey';
+      $status = pht('Active');
+    }
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($event->getName())
       ->setStatus($icon, $color, $status)
       ->setPolicyObject($event)
-      ->setHeaderIcon('fa-calendar');
+      ->setHeaderIcon($event->getIcon());
 
-    if ($is_invite_pending) {
-      $decline_button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-times grey')
-        ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
-        ->setWorkflow(true)
-        ->setText(pht('Decline'));
-
-      $accept_button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setIcon('fa-check green')
-        ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
-        ->setWorkflow(true)
-        ->setText(pht('Accept'));
-
-      $header->addActionLink($decline_button)
-        ->addActionLink($accept_button);
+    if ($event->isImportedEvent()) {
+      $header->addTag(
+        id(new PHUITagView())
+          ->setType(PHUITagView::TYPE_SHADE)
+          ->setName(pht('Imported'))
+          ->setIcon('fa-download')
+          ->setHref($event->getImportSource()->getURI())
+          ->setShade('orange'));
     }
+
+    foreach ($this->buildRSVPActions($event) as $action) {
+      $header->addActionLink($action);
+    }
+
+    $options = PhabricatorCalendarEventInvitee::getAvailabilityMap();
+
+    $is_attending = $event->getIsUserAttending($viewer->getPHID());
+    if ($is_attending) {
+      $invitee = $event->getInviteeForPHID($viewer->getPHID());
+
+      $selected = $invitee->getDisplayAvailability($event);
+      if (!$selected) {
+        $selected = PhabricatorCalendarEventInvitee::AVAILABILITY_AVAILABLE;
+      }
+
+      $selected_option = idx($options, $selected);
+
+      $availability_select = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon('fa-circle '.$selected_option['color'])
+        ->setText(pht('Availability: %s', $selected_option['name']));
+
+      $dropdown = id(new PhabricatorActionListView())
+        ->setUser($viewer);
+
+      foreach ($options as $key => $option) {
+        $uri = "event/availability/{$id}/{$key}/";
+        $uri = $this->getApplicationURI($uri);
+
+        $dropdown->addAction(
+          id(new PhabricatorActionView())
+            ->setName($option['name'])
+            ->setIcon('fa-circle '.$option['color'])
+            ->setHref($uri)
+            ->setWorkflow(true));
+      }
+
+      $availability_select->setDropdownMenu($dropdown);
+      $header->addActionLink($availability_select);
+    }
+
     return $header;
   }
 
   private function buildCurtain(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
     $id = $event->getID();
-    $is_cancelled = $event->getIsCancelled();
     $is_attending = $event->getIsUserAttending($viewer->getPHID());
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -160,20 +182,10 @@ final class PhabricatorCalendarEventViewController
       $event,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $edit_label = false;
-    $edit_uri = false;
-
-    if ($event->getIsGhostEvent()) {
-      $index = $event->getSequenceIndex();
-      $edit_label = pht('Edit This Instance');
-      $edit_uri = "event/edit/{$id}/{$index}/";
-    } else if ($event->getIsRecurrenceException()) {
-      $edit_label = pht('Edit This Instance');
-      $edit_uri = "event/edit/{$id}/";
-    } else {
-      $edit_label = pht('Edit');
-      $edit_uri = "event/edit/{$id}/";
-    }
+    $edit_uri = "event/edit/{$id}/";
+    $edit_uri = $this->getApplicationURI($edit_uri);
+    $is_recurring = $event->getIsRecurring();
+    $edit_label = pht('Edit Event');
 
     $curtain = $this->newCurtainView($event);
 
@@ -182,10 +194,29 @@ final class PhabricatorCalendarEventViewController
         id(new PhabricatorActionView())
           ->setName($edit_label)
           ->setIcon('fa-pencil')
-          ->setHref($this->getApplicationURI($edit_uri))
+          ->setHref($edit_uri)
           ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit));
+          ->setWorkflow(!$can_edit || $is_recurring));
     }
+
+    $recurring_uri = "{$edit_uri}page/recurring/";
+    $can_recurring = $can_edit && !$event->isChildEvent();
+
+    if ($event->getIsRecurring()) {
+      $recurring_label = pht('Edit Recurrence');
+    } else {
+      $recurring_label = pht('Make Recurring');
+    }
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName($recurring_label)
+        ->setIcon('fa-repeat')
+        ->setHref($recurring_uri)
+        ->setDisabled(!$can_recurring)
+        ->setWorkflow(true));
+
+    $can_attend = !$event->isImportedEvent();
 
     if ($is_attending) {
       $curtain->addAction(
@@ -193,6 +224,7 @@ final class PhabricatorCalendarEventViewController
           ->setName(pht('Decline Event'))
           ->setIcon('fa-user-times')
           ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setDisabled(!$can_attend)
           ->setWorkflow(true));
     } else {
       $curtain->addAction(
@@ -200,35 +232,17 @@ final class PhabricatorCalendarEventViewController
           ->setName(pht('Join Event'))
           ->setIcon('fa-user-plus')
           ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setDisabled(!$can_attend)
           ->setWorkflow(true));
     }
 
     $cancel_uri = $this->getApplicationURI("event/cancel/{$id}/");
+    $cancel_disabled = !$can_edit;
 
-    if ($event->getIsGhostEvent()) {
-      $index = $event->getSequenceIndex();
-      $can_reinstate = $event->getIsParentCancelled();
+    $cancel_label = pht('Cancel Event');
+    $reinstate_label = pht('Reinstate Event');
 
-      $cancel_label = pht('Cancel This Instance');
-      $reinstate_label = pht('Reinstate This Instance');
-      $cancel_disabled = (!$can_edit || $can_reinstate);
-      $cancel_uri = $this->getApplicationURI("event/cancel/{$id}/{$index}/");
-    } else if ($event->getIsRecurrenceException()) {
-      $can_reinstate = $event->getIsParentCancelled();
-      $cancel_label = pht('Cancel This Instance');
-      $reinstate_label = pht('Reinstate This Instance');
-      $cancel_disabled = (!$can_edit || $can_reinstate);
-    } else if ($event->getIsRecurrenceParent()) {
-      $cancel_label = pht('Cancel All');
-      $reinstate_label = pht('Reinstate All');
-      $cancel_disabled = !$can_edit;
-    } else {
-      $cancel_label = pht('Cancel Event');
-      $reinstate_label = pht('Reinstate Event');
-      $cancel_disabled = !$can_edit;
-    }
-
-    if ($is_cancelled) {
+    if ($event->getIsCancelled()) {
       $curtain->addAction(
         id(new PhabricatorActionView())
           ->setName($reinstate_label)
@@ -246,6 +260,15 @@ final class PhabricatorCalendarEventViewController
           ->setWorkflow(true));
     }
 
+    $ics_name = $event->getICSFilename();
+    $export_uri = $this->getApplicationURI("event/export/{$id}/{$ics_name}");
+
+    $curtain->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Export as .ics'))
+        ->setIcon('fa-download')
+        ->setHref($export_uri));
+
     return $curtain;
   }
 
@@ -255,56 +278,6 @@ final class PhabricatorCalendarEventViewController
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer);
-
-    if ($event->getIsAllDay()) {
-      $date_start = phabricator_date($event->getDateFrom(), $viewer);
-      $date_end = phabricator_date($event->getDateTo(), $viewer);
-
-      if ($date_start == $date_end) {
-        $properties->addProperty(
-          pht('Time'),
-          phabricator_date($event->getDateFrom(), $viewer));
-      } else {
-        $properties->addProperty(
-          pht('Starts'),
-          phabricator_date($event->getDateFrom(), $viewer));
-        $properties->addProperty(
-          pht('Ends'),
-          phabricator_date($event->getDateTo(), $viewer));
-      }
-    } else {
-      $properties->addProperty(
-        pht('Starts'),
-        phabricator_datetime($event->getDateFrom(), $viewer));
-
-      $properties->addProperty(
-        pht('Ends'),
-        phabricator_datetime($event->getDateTo(), $viewer));
-    }
-
-    if ($event->getIsRecurring()) {
-      $properties->addProperty(
-        pht('Recurs'),
-        ucwords(idx($event->getRecurrenceFrequency(), 'rule')));
-
-      if ($event->getRecurrenceEndDate()) {
-        $properties->addProperty(
-          pht('Recurrence Ends'),
-          phabricator_datetime($event->getRecurrenceEndDate(), $viewer));
-      }
-
-      if ($event->getInstanceOfEventPHID()) {
-        $properties->addProperty(
-          pht('Recurrence of Event'),
-          pht('%s of %s',
-            $event->getSequenceIndex(),
-            $viewer->renderHandle($event->getInstanceOfEventPHID())->render()));
-      }
-    }
-
-    $properties->addProperty(
-      pht('Host'),
-      $viewer->renderHandle($event->getUserPHID()));
 
     $invitees = $event->getInvitees();
     foreach ($invitees as $key => $invitee) {
@@ -336,16 +309,48 @@ final class PhabricatorCalendarEventViewController
         $status_declined => 'red',
       );
 
+      $viewer_phid = $viewer->getPHID();
+      $is_rsvp_invited = $event->isRSVPInvited($viewer_phid);
+      $type_user = PhabricatorPeopleUserPHIDType::TYPECONST;
+
+      $head = array();
+      $tail = array();
       foreach ($invitees as $invitee) {
         $item = new PHUIStatusItemView();
         $invitee_phid = $invitee->getInviteePHID();
         $status = $invitee->getStatus();
         $target = $viewer->renderHandle($invitee_phid);
-        $icon = $icon_map[$status];
-        $icon_color = $icon_color_map[$status];
+        $is_user = (phid_get_type($invitee_phid) == $type_user);
+
+        if (!$is_user) {
+          $icon = 'fa-users';
+          $icon_color = 'blue';
+        } else {
+          $icon = $icon_map[$status];
+          $icon_color = $icon_color_map[$status];
+        }
+
+        // Highlight invited groups which you're a member of if you have
+        // not RSVP'd to an event yet.
+        if ($is_rsvp_invited) {
+          if ($invitee_phid != $viewer_phid) {
+            if ($event->hasRSVPAuthority($viewer_phid, $invitee_phid)) {
+              $item->setHighlighted(true);
+            }
+          }
+        }
 
         $item->setIcon($icon, $icon_color)
           ->setTarget($target);
+
+        if ($is_user) {
+          $tail[] = $item;
+        } else {
+          $head[] = $item;
+        }
+      }
+
+      foreach (array_merge($head, $tail) as $item) {
         $invitee_list->addItem($item);
       }
     } else {
@@ -355,16 +360,150 @@ final class PhabricatorCalendarEventViewController
         pht('None'));
     }
 
+    if ($event->isImportedEvent()) {
+      $properties->addProperty(
+        pht('Imported By'),
+        pht(
+          '%s from %s',
+          $viewer->renderHandle($event->getImportAuthorPHID()),
+          $viewer->renderHandle($event->getImportSourcePHID())));
+    }
+
     $properties->addProperty(
       pht('Invitees'),
       $invitee_list);
 
     $properties->invokeWillRenderEvent();
 
-    $properties->addProperty(
-      pht('Icon'),
-      id(new PhabricatorCalendarIconSet())
-        ->getIconLabel($event->getIcon()));
+    return $properties;
+  }
+
+  private function buildRecurringHeader(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    if (!$event->getIsRecurring()) {
+      return null;
+    }
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recurring Event'));
+
+    $sequence = $event->getSequenceIndex();
+    if ($event->isParentEvent()) {
+      $parent = $event;
+    } else {
+      $parent = $event->getParentEvent();
+    }
+
+    if ($parent->isValidSequenceIndex($viewer, $sequence + 1)) {
+      $next_uri = $parent->getURI().'/'.($sequence + 1);
+      $has_next = true;
+    } else {
+      $next_uri = null;
+      $has_next = false;
+    }
+
+    if ($sequence) {
+      if ($sequence > 1) {
+        $previous_uri = $parent->getURI().'/'.($sequence - 1);
+      } else {
+        $previous_uri = $parent->getURI();
+      }
+      $has_previous = true;
+    } else {
+      $has_previous = false;
+      $previous_uri = null;
+    }
+
+    $prev_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-chevron-left')
+      ->setHref($previous_uri)
+      ->setDisabled(!$has_previous)
+      ->setText(pht('Previous'));
+
+    $next_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-chevron-right')
+      ->setHref($next_uri)
+      ->setDisabled(!$has_next)
+      ->setText(pht('Next'));
+
+    $header
+      ->addActionLink($next_button)
+      ->addActionLink($prev_button);
+
+    return $header;
+  }
+
+  private function buildRecurringSection(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    if (!$event->getIsRecurring()) {
+      return null;
+    }
+
+    $properties = id(new PHUIPropertyListView())
+      ->setUser($viewer);
+
+    $is_parent = $event->isParentEvent();
+    if ($is_parent) {
+      $parent_link = null;
+    } else {
+      $parent = $event->getParentEvent();
+      $parent_link = $viewer
+        ->renderHandle($parent->getPHID())
+        ->render();
+    }
+
+    $rrule = $event->newRecurrenceRule();
+
+    if ($rrule) {
+      $frequency = $rrule->getFrequency();
+    } else {
+      $frequency = null;
+    }
+
+    switch ($frequency) {
+      case PhutilCalendarRecurrenceRule::FREQUENCY_DAILY:
+        if ($is_parent) {
+          $message = pht('This event repeats every day.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every day.',
+            $parent_link);
+        }
+        break;
+      case PhutilCalendarRecurrenceRule::FREQUENCY_WEEKLY:
+        if ($is_parent) {
+          $message = pht('This event repeats every week.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every week.',
+            $parent_link);
+        }
+        break;
+      case PhutilCalendarRecurrenceRule::FREQUENCY_MONTHLY:
+        if ($is_parent) {
+          $message = pht('This event repeats every month.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every month.',
+            $parent_link);
+        }
+        break;
+      case PhutilCalendarRecurrenceRule::FREQUENCY_YEARLY:
+        if ($is_parent) {
+          $message = pht('This event repeats every year.');
+        } else {
+          $message = pht(
+            'This event is an instance of %s, and repeats every year.',
+            $parent_link);
+        }
+        break;
+    }
+
+    $properties->addProperty(pht('Event Series'), $message);
 
     return $properties;
   }
@@ -383,6 +522,123 @@ final class PhabricatorCalendarEventViewController
     }
 
     return null;
+  }
+
+  private function loadEvent() {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $id = $request->getURIData('id');
+    $sequence = $request->getURIData('sequence');
+
+    // We're going to figure out which event you're trying to look at. Most of
+    // the time this is simple, but you may be looking at an instance of a
+    // recurring event which we haven't generated an object for.
+
+    // If you are, we're going to generate a "stub" event so we have a real
+    // ID and PHID to work with, since the rest of the infrastructure relies
+    // on these identifiers existing.
+
+    // Load the event identified by ID first.
+    $event = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->needRSVPs(array($viewer->getPHID()))
+      ->executeOne();
+    if (!$event) {
+      return null;
+    }
+
+    // If we aren't looking at an instance of this event, this is a completely
+    // normal request and we can just return this event.
+    if (!$sequence) {
+      return $event;
+    }
+
+    // When you view "E123/999", E123 is normally the parent event. However,
+    // you might visit a different instance first instead and then fiddle
+    // with the URI. If the event we're looking at is a child, we are going
+    // to act on the parent instead.
+    if ($event->isChildEvent()) {
+      $event = $event->getParentEvent();
+    }
+
+    // Try to load the instance. If it already exists, we're all done and
+    // can just return it.
+    $instance = id(new PhabricatorCalendarEventQuery())
+      ->setViewer($viewer)
+      ->withInstanceSequencePairs(
+        array(
+          array($event->getPHID(), $sequence),
+        ))
+      ->executeOne();
+    if ($instance) {
+      return $instance;
+    }
+
+    if (!$viewer->isLoggedIn()) {
+      throw new Exception(
+        pht(
+          'This event instance has not been created yet. Log in to create '.
+          'it.'));
+    }
+
+    if (!$event->isValidSequenceIndex($viewer, $sequence)) {
+      return null;
+    }
+
+    return $event->newStub($viewer, $sequence);
+  }
+
+  private function buildSubheaderView(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+
+    $host_phid = $event->getHostPHID();
+
+    $handles = $viewer->loadHandles(array($host_phid));
+    $handle = $handles[$host_phid];
+
+    $host = $viewer->renderHandle($host_phid);
+    $host = phutil_tag('strong', array(), $host);
+
+    $image_uri = $handles[$host_phid]->getImageURI();
+    $image_href = $handles[$host_phid]->getURI();
+
+    $date = $event->renderEventDate($viewer, true);
+
+    $content = pht('Hosted by %s on %s.', $host, $date);
+
+    return id(new PHUIHeadThingView())
+      ->setImage($image_uri)
+      ->setImageHref($image_href)
+      ->setContent($content);
+  }
+
+
+  private function buildRSVPActions(PhabricatorCalendarEvent $event) {
+    $viewer = $this->getViewer();
+    $id = $event->getID();
+
+    $is_pending = $event->isRSVPInvited($viewer->getPHID());
+    if (!$is_pending) {
+      return array();
+    }
+
+    $decline_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-times grey')
+      ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
+      ->setWorkflow(true)
+      ->setText(pht('Decline'));
+
+    $accept_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-check green')
+      ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
+      ->setWorkflow(true)
+      ->setText(pht('Accept'));
+
+    return array($decline_button, $accept_button);
   }
 
 }

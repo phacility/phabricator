@@ -201,7 +201,7 @@ final class PhabricatorAppSearchEngine
         $results[] = phutil_tag(
           'h1',
           array(
-            'class' => 'phui-object-item-list-header',
+            'class' => 'phui-oi-list-header',
           ),
           idx($group_names, $group, $group));
       }
@@ -213,18 +213,6 @@ final class PhabricatorAppSearchEngine
         if (!$icon) {
           $icon = 'application';
         }
-
-        // TODO: This sheet doesn't work the same way other sheets do so it
-        // ends up with the wrong classes if we try to use PHUIIconView. This
-        // is probably all changing in the redesign anyway.
-
-        $icon_view = javelin_tag(
-          'span',
-          array(
-            'class' => 'phui-icon-view phui-font-fa '.$icon,
-            'aural' => false,
-          ),
-          '');
 
         $description = $application->getShortDescription();
 
@@ -241,7 +229,7 @@ final class PhabricatorAppSearchEngine
 
         $item = id(new PHUIObjectItemView())
           ->setHeader($name)
-          ->setImageIcon($icon_view)
+          ->setImageIcon($icon)
           ->setSubhead($description)
           ->setLaunchButton($configure);
 

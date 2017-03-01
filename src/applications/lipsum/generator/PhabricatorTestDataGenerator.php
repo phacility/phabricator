@@ -16,6 +16,10 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     return $this->viewer;
   }
 
+  final public function getGeneratorKey() {
+    return $this->getPhobjectClassConstant('GENERATORKEY', 64);
+  }
+
   protected function loadRandomPHID($table) {
     $conn_r = $table->establishConnection('r');
 
@@ -41,6 +45,7 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($user_phid))
+        ->needUserSettings(true)
         ->executeOne();
     }
 
@@ -89,28 +94,26 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     return $xaction;
   }
 
-
-
-
   public function loadOneRandom($classname) {
     try {
       return newv($classname, array())
         ->loadOneWhere('1 = 1 ORDER BY RAND() LIMIT 1');
     } catch (PhutilMissingSymbolException $ex) {
       throw new PhutilMissingSymbolException(
+        $classname,
+        pht('class'),
         pht(
-          'Unable to load symbol %s: this class does not exit.',
+          'Unable to load symbol %s: this class does not exist.',
           $classname));
     }
   }
 
-  public function loadPhabrictorUserPHID() {
+  public function loadPhabricatorUserPHID() {
     return $this->loadOneRandom('PhabricatorUser')->getPHID();
   }
 
-  public function loadPhabrictorUser() {
+  public function loadPhabricatorUser() {
     return $this->loadOneRandom('PhabricatorUser');
   }
-
 
 }

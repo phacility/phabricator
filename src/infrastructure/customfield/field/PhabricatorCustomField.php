@@ -33,6 +33,7 @@ abstract class PhabricatorCustomField extends Phobject {
   const ROLE_GLOBALSEARCH             = 'GlobalSearch';
   const ROLE_CONDUIT                  = 'conduit';
   const ROLE_HERALD                   = 'herald';
+  const ROLE_EDITENGINE = 'EditEngine';
 
 
 /* -(  Building Applications with Custom Fields  )--------------------------- */
@@ -112,20 +113,13 @@ abstract class PhabricatorCustomField extends Phobject {
     $object,
     array $options = array()) {
 
-    PhutilTypeSpec::checkMap(
-      $options,
-      array(
-        'withDisabled' => 'optional bool',
-      ));
-
-    $field_objects = id(new PhutilSymbolLoader())
+    $field_objects = id(new PhutilClassMapQuery())
       ->setAncestorClass($base_class)
-      ->loadObjects();
+      ->execute();
 
     $fields = array();
-    $from_map = array();
     foreach ($field_objects as $field_object) {
-      $current_class = get_class($field_object);
+      $field_object = clone $field_object;
       foreach ($field_object->createFields($object) as $field) {
         $key = $field->getFieldKey();
         if (isset($fields[$key])) {
@@ -133,11 +127,10 @@ abstract class PhabricatorCustomField extends Phobject {
             pht(
               "Both '%s' and '%s' define a custom field with ".
               "field key '%s'. Field keys must be unique.",
-              $from_map[$key],
-              $current_class,
+              get_class($fields[$key]),
+              get_class($field),
               $key));
         }
-        $from_map[$key] = $current_class;
         $fields[$key] = $field;
       }
     }
@@ -152,11 +145,13 @@ abstract class PhabricatorCustomField extends Phobject {
 
     if (empty($options['withDisabled'])) {
       foreach ($fields as $key => $field) {
-        $config = idx($spec, $key, array()) + array(
-          'disabled' => $field->shouldDisableByDefault(),
-        );
+        if (isset($spec[$key]['disabled'])) {
+          $is_disabled = $spec[$key]['disabled'];
+        } else {
+          $is_disabled = $field->shouldDisableByDefault();
+        }
 
-        if (!empty($config['disabled'])) {
+        if ($is_disabled) {
           if ($field->canDisableField()) {
             unset($fields[$key]);
           }
@@ -298,6 +293,9 @@ abstract class PhabricatorCustomField extends Phobject {
         return $this->shouldAppearInTransactionMail();
       case self::ROLE_HERALD:
         return $this->shouldAppearInHerald();
+      case self::ROLE_EDITENGINE:
+        return $this->shouldAppearInEditView() ||
+               $this->shouldAppearInEditEngine();
       case self::ROLE_DEFAULT:
         return true;
       default:
@@ -1097,7 +1095,7 @@ abstract class PhabricatorCustomField extends Phobject {
 
 
   public function getEditEngineFields(PhabricatorEditEngine $engine) {
-    $field = $this->newStandardEditField($engine);
+    $field = $this->newStandardEditField();
 
     return array(
       $field,
@@ -1126,12 +1124,19 @@ abstract class PhabricatorCustomField extends Phobject {
       return $this->proxy->newStandardEditField();
     }
 
+    if (!$this->shouldAppearInEditView()) {
+      $conduit_only = true;
+    } else {
+      $conduit_only = false;
+    }
+
     return $this->newEditField()
       ->setKey($this->getFieldKey())
       ->setEditTypeKey($this->getModernFieldKey())
       ->setLabel($this->getFieldName())
       ->setDescription($this->getFieldDescription())
       ->setTransactionType($this->getApplicationTransactionType())
+      ->setIsConduitOnly($conduit_only)
       ->setValue($this->getNewValueForApplicationTransactions());
   }
 
@@ -1148,6 +1153,16 @@ abstract class PhabricatorCustomField extends Phobject {
   public function shouldAppearInEditView() {
     if ($this->proxy) {
       return $this->proxy->shouldAppearInEditView();
+    }
+    return false;
+  }
+
+  /**
+   * @task edit
+   */
+  public function shouldAppearInEditEngine() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInEditEngine();
     }
     return false;
   }

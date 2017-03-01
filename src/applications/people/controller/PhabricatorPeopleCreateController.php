@@ -101,9 +101,20 @@ final class PhabricatorPeopleCreateController
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setForm($form);
 
+    $guidance_context = new PhabricatorPeopleCreateGuidanceContext();
+
+    $guidance = id(new PhabricatorGuidanceEngine())
+      ->setViewer($admin)
+      ->setGuidanceContext($guidance_context)
+      ->newInfoView();
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
-      ->setFooter($box);
+      ->setFooter(
+        array(
+          $guidance,
+          $box,
+        ));
 
     return $this->newPage()
       ->setTitle($title)

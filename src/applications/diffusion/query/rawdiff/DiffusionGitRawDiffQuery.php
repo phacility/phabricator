@@ -2,7 +2,7 @@
 
 final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
 
-  protected function executeQuery() {
+  protected function newQueryFuture() {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
@@ -17,54 +17,34 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
       '--dst-prefix=b/',
       '-U'.(int)$this->getLinesOfContext(),
     );
-    $options = implode(' ', $options);
 
     $against = $this->getAgainstCommit();
     if ($against === null) {
-      $against = $commit.'^';
+      // Check if this is the root commit by seeing if it has parents, since
+      // `git diff X^ X` does not work if "X" is the initial commit.
+      list($parents) = $repository->execxLocalCommand(
+        'log -n 1 --format=%s %s --',
+        '%P',
+        $commit);
+
+      if (strlen(trim($parents))) {
+        $against = $commit.'^';
+      } else {
+        $against = ArcanistGitAPI::GIT_MAGIC_ROOT_COMMIT;
+      }
     }
 
-    // If there's no path, get the entire raw diff.
-    $path = nonempty($drequest->getPath(), '.');
+    $path = $drequest->getPath();
+    if (!strlen($path)) {
+      $path = '.';
+    }
 
-    $future = $repository->getLocalCommandFuture(
-      'diff %C %s %s -- %s',
+    return $repository->getLocalCommandFuture(
+      'diff %Ls %s %s -- %s',
       $options,
       $against,
       $commit,
       $path);
-
-    $this->configureFuture($future);
-
-    try {
-      list($raw_diff) = $future->resolvex();
-    } catch (CommandException $ex) {
-      // Check if this is the root commit by seeing if it has parents.
-      list($parents) = $repository->execxLocalCommand(
-        'log --format=%s %s --',
-        '%P', // "parents"
-        $commit);
-
-      if (strlen(trim($parents))) {
-        throw $ex;
-      }
-
-      // No parents means we're looking at the root revision. Diff against
-      // the empty tree hash instead, since there is no parent so "^" does
-      // not work. See ArcanistGitAPI for more discussion.
-      $future = $repository->getLocalCommandFuture(
-        'diff %C %s %s -- %s',
-        $options,
-        ArcanistGitAPI::GIT_MAGIC_ROOT_COMMIT,
-        $commit,
-        $drequest->getPath());
-
-      $this->configureFuture($future);
-
-      list($raw_diff) = $future->resolvex();
-    }
-
-    return $raw_diff;
   }
 
 }

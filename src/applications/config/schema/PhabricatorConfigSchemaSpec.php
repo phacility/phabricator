@@ -64,13 +64,24 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
     $table = $this->newTable($table_name);
 
+    if (PhabricatorSearchDocument::isInnoDBFulltextEngineAvailable()) {
+      $fulltext_engine = 'InnoDB';
+    } else {
+      $fulltext_engine = 'MyISAM';
+    }
+
     foreach ($columns as $name => $type) {
       if ($type === null) {
         continue;
       }
 
       $details = $this->getDetailsForDataType($type);
-      list($column_type, $charset, $collation, $nullable, $auto) = $details;
+
+      $column_type = $details['type'];
+      $charset = $details['charset'];
+      $collation = $details['collation'];
+      $nullable = $details['nullable'];
+      $auto = $details['auto'];
 
       $column = $this->newColumn($name)
         ->setDataType($type)
@@ -79,6 +90,15 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         ->setCollation($collation)
         ->setNullable($nullable)
         ->setAutoIncrement($auto);
+
+      // If this table has any FULLTEXT fields, we expect it to use the best
+      // available FULLTEXT engine, which may not be InnoDB.
+      switch ($type) {
+        case 'fulltext':
+        case 'fulltext?':
+          $table->setEngine($fulltext_engine);
+          break;
+      }
 
       $table->addColumn($column);
     }
@@ -169,7 +189,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   protected function newTable($name) {
     return id(new PhabricatorConfigTableSchema())
       ->setName($name)
-      ->setCollation($this->getUTF8BinaryCollation());
+      ->setCollation($this->getUTF8BinaryCollation())
+      ->setEngine('InnoDB');
   }
 
   protected function newColumn($name) {
@@ -182,11 +203,17 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       ->setName($name);
   }
 
+  public function getMaximumByteLengthForDataType($data_type) {
+    $info = $this->getDetailsForDataType($data_type);
+    return idx($info, 'bytes');
+  }
+
   private function getDetailsForDataType($data_type) {
     $column_type = null;
     $charset = null;
     $collation = null;
     $auto = false;
+    $bytes = null;
 
     // If the type ends with "?", make the column nullable.
     $nullable = false;
@@ -211,7 +238,6 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         'text255' => true,
         'text160' => true,
         'text128' => true,
-        'text80' => true,
         'text64' => true,
         'text40' => true,
         'text32' => true,
@@ -236,6 +262,10 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
       $type = $matches[1];
       $size = idx($matches, 2);
+
+      if ($size) {
+        $bytes = $size;
+      }
 
       switch ($type) {
         case 'text':
@@ -363,7 +393,14 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       }
     }
 
-    return array($column_type, $charset, $collation, $nullable, $auto);
+    return array(
+      'type' => $column_type,
+      'charset' => $charset,
+      'collation' => $collation,
+      'nullable' => $nullable,
+      'auto' => $auto,
+      'bytes' => $bytes,
+    );
   }
 
 }

@@ -14,6 +14,10 @@ final class ReleephRequestSearchEngine
     return 'PhabricatorReleephApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function setBranch(ReleephBranch $branch) {
     $this->branch = $branch;
     return $this;

@@ -25,9 +25,11 @@ final class PhabricatorConduitAPIController
 
     try {
 
-      list($metadata, $params) = $this->decodeConduitParams($request, $method);
+      list($metadata, $params, $strictly_typed) = $this->decodeConduitParams(
+        $request,
+        $method);
 
-      $call = new ConduitCall($method, $params);
+      $call = new ConduitCall($method, $params, $strictly_typed);
       $method_implementation = $call->getMethodImplementation();
 
       $result = null;
@@ -638,7 +640,7 @@ final class PhabricatorConduitAPIController
       $metadata = idx($params, '__conduit__', array());
       unset($params['__conduit__']);
 
-      return array($metadata, $params);
+      return array($metadata, $params, true);
     }
 
     // Otherwise, look for a single parameter called 'params' which has the
@@ -659,7 +661,7 @@ final class PhabricatorConduitAPIController
       $metadata = idx($params, '__conduit__', array());
       unset($params['__conduit__']);
 
-      return array($metadata, $params);
+      return array($metadata, $params, true);
     }
 
     // If we do not have `params`, assume this is a simple HTTP request with
@@ -675,7 +677,7 @@ final class PhabricatorConduitAPIController
       }
     }
 
-    return array($metadata, $params);
+    return array($metadata, $params, false);
   }
 
   private function authorizeOAuthMethodAccess(

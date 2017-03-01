@@ -150,11 +150,16 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
             $tag->addClass('phabricator-remarkup-mention-nopermission');
           }
 
-          if (!$user->isUserActivated()) {
+          if (!$user->isResponsive()) {
             $tag->setDotColor(PHUITagView::COLOR_GREY);
           } else {
             if ($user->getAwayUntil()) {
-              $tag->setDotColor(PHUITagView::COLOR_RED);
+              $away = PhabricatorCalendarEventInvitee::AVAILABILITY_AWAY;
+              if ($user->getDisplayAvailability() == $away) {
+                $tag->setDotColor(PHUITagView::COLOR_RED);
+              } else {
+                $tag->setDotColor(PHUITagView::COLOR_ORANGE);
+              }
             }
           }
         }

@@ -170,7 +170,7 @@ final class PhabricatorProjectBoardViewController
       }
 
       $nav = $this->getProfileMenu();
-      $nav->selectFilter(PhabricatorProject::PANEL_WORKBOARD);
+      $nav->selectFilter(PhabricatorProject::ITEM_WORKBOARD);
 
       $crumbs = $this->buildApplicationCrumbs();
       $crumbs->addTextCrumb(pht('Workboard'));
@@ -417,6 +417,7 @@ final class PhabricatorProjectBoardViewController
       ->addClass('project-board-wrapper');
 
     $nav = $this->getProfileMenu();
+
     $divider = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_DIVIDER);
     $fullscreen = $this->buildFullscreenMenu();
@@ -451,12 +452,14 @@ final class PhabricatorProjectBoardViewController
         ));
 
     $background = $project->getDisplayWorkboardBackgroundColor();
+    require_celerity_resource('phui-workboard-color-css');
     if ($background !== null) {
-      require_celerity_resource('phui-workboard-color-css');
       $background_color_class = "phui-workboard-{$background}";
 
       $page->addClass('phui-workboard-color');
       $page->addClass($background_color_class);
+    } else {
+      $page->addClass('phui-workboard-no-color');
     }
 
     return $page;
@@ -934,8 +937,8 @@ final class PhabricatorProjectBoardViewController
     $set_default = $request->getBool('default');
     if ($set_default) {
       $this
-        ->getProfilePanelEngine()
-        ->adjustDefault(PhabricatorProject::PANEL_WORKBOARD);
+        ->getProfileMenuEngine()
+        ->adjustDefault(PhabricatorProject::ITEM_WORKBOARD);
     }
 
     if ($request->isFormPost()) {

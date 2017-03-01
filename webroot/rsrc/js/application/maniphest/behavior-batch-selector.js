@@ -35,7 +35,7 @@ JX.behavior('maniphest-batch-selector', function(config) {
 
     JX.DOM.alterClass(
       task,
-      'phui-object-item-selected',
+      'phui-oi-selected',
       is_selected(task));
 
     update();

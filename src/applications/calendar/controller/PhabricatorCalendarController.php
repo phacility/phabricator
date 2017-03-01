@@ -2,77 +2,39 @@
 
 abstract class PhabricatorCalendarController extends PhabricatorController {
 
-  protected function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
+  protected function newICSResponse(
+    PhabricatorUser $viewer,
+    $file_name,
+    array $events) {
 
-    $actions = id(new PhabricatorActionListView())
-      ->setUser($this->getViewer())
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Create Event'))
-          ->setHref('/calendar/event/create/'))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Create Public Event'))
-          ->setHref('/calendar/event/create/?mode=public'))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Create Recurring Event'))
-          ->setHref('/calendar/event/create/?mode=recurring'));
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setName(pht('Create Event'))
-        ->setHref($this->getApplicationURI().'event/create/')
-        ->setIcon('fa-plus-square')
-        ->setDropdownMenu($actions));
-
-    return $crumbs;
-  }
-
-  protected function getEventAtIndexForGhostPHID($viewer, $phid, $index) {
-    $result = id(new PhabricatorCalendarEventQuery())
+    $ics_data = id(new PhabricatorCalendarICSWriter())
       ->setViewer($viewer)
-      ->withInstanceSequencePairs(
-        array(
-          array(
-            $phid,
-            $index,
-          ),
-        ))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
+      ->setEvents($events)
+      ->writeICSDocument();
 
-    return $result;
+    return id(new AphrontFileResponse())
+      ->setDownload($file_name)
+      ->setMimeType('text/calendar')
+      ->setContent($ics_data);
   }
 
-  protected function createEventFromGhost($viewer, $event, $index) {
-    $invitees = $event->getInvitees();
-
-    $new_ghost = $event->generateNthGhost($index, $viewer);
-    $new_ghost->attachParentEvent($event);
-
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $new_ghost
-      ->setID(null)
-      ->setPHID(null)
-      ->removeViewerTimezone($viewer)
-      ->setViewPolicy($event->getViewPolicy())
-      ->setEditPolicy($event->getEditPolicy())
-      ->save();
-    $ghost_invitees = array();
-    foreach ($invitees as $invitee) {
-      $ghost_invitee = clone $invitee;
-      $ghost_invitee
-        ->setID(null)
-        ->setEventPHID($new_ghost->getPHID())
-        ->save();
+  protected function newImportedEventResponse(PhabricatorCalendarEvent $event) {
+    if (!$event->isImportedEvent()) {
+      return null;
     }
-    unset($unguarded);
-    return $new_ghost;
+
+    // Give the user a specific, detailed message if they try to edit an
+    // imported event via common web paths. Other edits (including those via
+    // the API) are blocked by the normal policy system, but this makes it more
+    // clear exactly why the event can't be edited.
+
+    return $this->newDialog()
+      ->setTitle(pht('Can Not Edit Imported Event'))
+      ->appendParagraph(
+        pht(
+          'This event has been imported from an external source and '.
+          'can not be edited.'))
+      ->addCancelButton($event->getURI(), pht('Done'));
   }
+
 }

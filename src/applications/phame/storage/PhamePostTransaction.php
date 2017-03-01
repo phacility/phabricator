@@ -4,8 +4,10 @@ final class PhamePostTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_TITLE            = 'phame.post.title';
+  const TYPE_SUBTITLE         = 'phame.post.subtitle';
   const TYPE_BODY             = 'phame.post.body';
   const TYPE_VISIBILITY       = 'phame.post.visibility';
+  const TYPE_HEADERIMAGE      = 'phame.post.headerimage';
   const TYPE_BLOG             = 'phame.post.blog';
 
   const MAILTAG_CONTENT       = 'phame-post-content';
@@ -70,6 +72,9 @@ final class PhamePostTransaction
       case PhabricatorTransactions::TYPE_CREATE:
         return 'fa-plus';
       break;
+      case self::TYPE_HEADERIMAGE:
+        return 'fa-camera-retro';
+      break;
       case self::TYPE_VISIBILITY:
         if ($new == PhameConstants::VISIBILITY_PUBLISHED) {
           return 'fa-globe';
@@ -94,6 +99,7 @@ final class PhamePostTransaction
         $tags[] = self::MAILTAG_SUBSCRIBERS;
         break;
       case self::TYPE_TITLE:
+      case self::TYPE_SUBTITLE:
       case self::TYPE_BODY:
         $tags[] = self::MAILTAG_CONTENT;
         break;
@@ -136,9 +142,27 @@ final class PhamePostTransaction
             $new);
         }
         break;
+      case self::TYPE_SUBTITLE:
+        if ($old === null) {
+          return pht(
+            '%s set the post\'s subtitle to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else {
+          return pht(
+            '%s updated the post\'s subtitle to "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        }
+        break;
       case self::TYPE_BODY:
         return pht(
           '%s updated the blog post.',
+          $this->renderHandleLink($author_phid));
+        break;
+      case self::TYPE_HEADERIMAGE:
+        return pht(
+          '%s updated the header image.',
           $this->renderHandleLink($author_phid));
         break;
       case self::TYPE_VISIBILITY:
@@ -195,9 +219,21 @@ final class PhamePostTransaction
             $this->renderHandleLink($object_phid));
         }
         break;
+      case self::TYPE_SUBTITLE:
+        return pht(
+            '%s updated the subtitle for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
       case self::TYPE_BODY:
         return pht(
           '%s updated the blog post %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
+      case self::TYPE_HEADERIMAGE:
+        return pht(
+          '%s updated the header image for post %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;

@@ -607,7 +607,9 @@ final class DiffusionServeController extends DiffusionController {
     $request = $this->getRequest();
     $request_path = $request->getRequestURI()->getPath();
 
-    $info = PhabricatorRepository::parseRepositoryServicePath($request_path);
+    $info = PhabricatorRepository::parseRepositoryServicePath(
+      $request_path,
+      $repository->getVersionControlSystem());
     $base_path = $info['path'];
 
     // For Git repositories, strip an optional directory component if it

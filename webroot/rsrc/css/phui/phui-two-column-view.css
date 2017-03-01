@@ -23,7 +23,7 @@
 }
 
 .device-phone .phui-two-column-header .phui-header-header {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .phui-two-column-view .phui-two-column-header .phui-header-shell {
@@ -121,7 +121,7 @@
 
 .device-desktop .phui-main-column .phui-property-list-key {
   margin-left: 0;
-  width: 160px;
+  width: 180px;
 }
 
 .device-desktop .phui-main-column .phui-property-list-value {
@@ -155,35 +155,8 @@
     display: none;
 }
 
-.phui-two-column-properties.phui-object-box {
-  border: 1px solid rgba({$alphablue}, .2);
-}
-
 .device .phui-two-column-content .phui-two-column-properties.phui-object-box {
   padding: 0 12px;
-}
-
-.phui-two-column-properties .phabricator-action-view-icon {
-  top: 8px;
-  left: 8px;
-}
-
-.phabricator-action-view button.phabricator-action-view-item,
-.phabricator-action-view-item {
-  padding: 5px 4px 5px 28px;
-}
-
-.device-desktop .phui-two-column-properties .phabricator-action-view:hover
-  .phabricator-action-view-item {
-    text-decoration: none;
-    background-color: rgba({$alphablue}, .08);
-    color: {$sky};
-    border-radius: 3px;
-}
-
-.device-desktop .phui-two-column-properties .phabricator-action-view:hover
-  .phabricator-action-view-icon {
-    color: {$sky};
 }
 
 .phui-two-column-view .phui-property-list-section-header,
@@ -203,7 +176,16 @@
   padding: 16px;
 }
 
-.phui-two-column-view .phui-side-column .phui-object-item-empty
+.device .phui-two-column-view .phui-info-view {
+  margin: 0 0 20px 0;
+  padding: 12px;
+}
+
+.phui-two-column-view .phui-oi-empty .phui-info-view {
+  margin: 0;
+}
+
+.phui-two-column-view .phui-side-column .phui-oi-empty
   .phui-info-view {
    margin-bottom: 0;
 }
@@ -212,6 +194,11 @@
 .phui-two-column-view .phui-box-blue-property
   .phui-header-shell + .phui-info-view {
     margin: 16px;
+}
+
+.device .phui-two-column-view .phui-box-blue-property
+  .phui-header-shell + .phui-info-view {
+    margin: 8px;
 }
 
 /* Navigation */

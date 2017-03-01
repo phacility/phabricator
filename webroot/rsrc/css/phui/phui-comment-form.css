@@ -1,0 +1,173 @@
+/**
+ * @provides phui-comment-form-css
+ */
+
+body .phui-box.phui-object-box.phui-comment-form-view {
+  background-color: #fff;
+  margin-left: 62px;
+  position: relative;
+}
+
+body.device .phui-box.phui-object-box.phui-comment-form-view {
+  margin-left: 0;
+}
+
+.phui-comment-form-view.phui-object-box {
+  padding: 0;
+}
+
+.phui-comment-form-view .phui-form-view {
+  padding: 0;
+}
+
+.phui-comment-form-view .phui-comment-image {
+  background-repeat: no-repeat;
+  position: absolute;
+  border-radius: 3px;
+  background-size: 100%;
+  display: block;
+}
+
+.device-desktop .phui-comment-form-view .phui-comment-image {
+  width: 50px;
+  height: 50px;
+  top: 0px;
+  left: -62px;
+}
+
+.phui-comment-form-view .phui-timeline-wedge {
+  top: 26px;
+}
+
+.phui-comment-fullwidth-control .aphront-form-input {
+  margin: 0;
+  width: auto;
+}
+
+.phui-comment-form-view .remarkup-assist-bar {
+  height: 32px;
+  border-color: {$lightblueborder};
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  padding: 0 4px;
+}
+
+.device-phone .phui-comment-form-view .remarkup-assist-bar,
+.device-phone .phui-comment-form-view .aphront-form-input
+  .remarkup-assist-textarea {
+    border-radius: 0;
+}
+
+.phui-comment-form-view .aphront-form-input .remarkup-assist-textarea {
+  border-color: {$lightblueborder};
+  border-top: 1px solid {$thinblueborder};
+  padding: 8px;
+  height: 10em;
+  background-color: rgba({$alphablue},.02);
+}
+
+.phui-comment-form-view .aphront-form-input .remarkup-assist-textarea:focus {
+  background-color: #fff;
+}
+
+.device-phone .phui-comment-form-view .aphront-form-input
+  .remarkup-assist-textarea {
+    height: 8em;
+}
+
+.phui-comment-form-view .phui-comment-textarea-control {
+  padding: 16px 16px 8px 16px;
+}
+
+.phui-comment-form-view .phui-comment-has-actions
+  .phui-comment-textarea-control {
+    padding-top: 0;
+}
+
+.device-phone .phui-comment-form-view .phui-comment-textarea-control {
+  padding: 0;
+  margin: -1px;
+}
+
+.phui-comment-action {
+  background-color: rgba(239, 243, 252, .75);
+  border-radius: 3px;
+  margin: 0px 16px 8px;
+  padding: 6px;
+}
+
+.phui-comment-action + .phui-comment-action {
+  margin-top: -4px;
+}
+
+.device-phone .phui-comment-action {
+  margin: 8px;
+}
+
+.phui-comment-form-view .phui-comment-action-bar {
+  border-bottom: 1px solid {$thinblueborder};
+  background-color: rgba(239, 243, 252, .75);
+  padding: 4px 12px 4px 12px;
+  margin-bottom: 16px;
+}
+
+.device-phone .phui-comment-form-view .phui-comment-action-bar {
+  margin: 0;
+  padding: 8px;
+}
+
+.phui-comment-form-view .phui-comment-submit-control {
+  padding: 0 16px 12px;
+}
+
+.device-phone .phui-comment-form-view .phui-comment-submit-control {
+  margin: 0px;
+  padding: 6px 8px 8px;
+}
+
+.phui-comment-form-view .phui-comment-action-control {
+  float: left;
+}
+
+.device-phone .phui-comment-form-view .phui-comment-action-control {
+  float: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.phui-comment-form-view .phui-comment-action-icon {
+  float: left;
+  font-size: 20px;
+  color: {$lightbluetext};
+  height: 40px;
+  line-height: 40px;
+  margin: 0 4px;
+}
+
+.device-phone .phui-comment-form-view .phui-comment-action-icon {
+  display: none;
+}
+
+.device-phone .aphront-form-control-submit button {
+  width: 100%;
+}
+
+.phui-comment-form-view .phui-form-view label.aphront-form-label,
+.phui-comment-form-view .phui-form-view .aphront-form-error {
+  height: 26px;
+  line-height: 26px;
+  padding: 0;
+}
+
+.phui-comment-form-view .aphront-form-error .phui-icon-view {
+  padding: 4px;
+}
+
+.phui-comment-form-view .phui-form-view .phui-info-view {
+  margin: 16px;
+}
+
+.device-phone .phui-comment-form-view .phui-form-view .phui-info-view {
+  margin: 8px;
+}

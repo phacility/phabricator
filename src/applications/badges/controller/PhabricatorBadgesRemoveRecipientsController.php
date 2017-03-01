@@ -29,15 +29,16 @@ final class PhabricatorBadgesRemoveRecipientsController
       return new Aphront404Response();
     }
 
-    $view_uri = $this->getApplicationURI('view/'.$badge->getID().'/');
+    $view_uri = $this->getApplicationURI('recipients/'.$badge->getID().'/');
 
     if ($request->isFormPost()) {
       $xactions = array();
       $xactions[] = id(new PhabricatorBadgesTransaction())
-        ->setTransactionType(PhabricatorBadgesTransaction::TYPE_REVOKE)
+        ->setTransactionType(
+          PhabricatorBadgesBadgeRevokeTransaction::TRANSACTIONTYPE)
         ->setNewValue(array($remove_phid));
 
-      $editor = id(new PhabricatorBadgesEditor($badge))
+      $editor = id(new PhabricatorBadgesEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true)

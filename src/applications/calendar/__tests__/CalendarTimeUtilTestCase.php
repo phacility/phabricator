@@ -7,9 +7,7 @@ final class CalendarTimeUtilTestCase extends PhabricatorTestCase {
     $u->overrideTimezoneIdentifier('America/Los_Angeles');
     $days = $this->getAllDays();
     foreach ($days as $day) {
-      $data = CalendarTimeUtil::getCalendarWidgetTimestamps(
-        $u,
-        $day);
+      $data = CalendarTimeUtil::getTimestamps($u, $day, 1);
 
       $this->assertEqual(
         '000000',

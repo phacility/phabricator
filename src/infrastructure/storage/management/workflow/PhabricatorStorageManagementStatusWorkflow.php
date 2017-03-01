@@ -15,50 +15,54 @@ final class PhabricatorStorageManagementStatusWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
-    $api     = $this->getAPI();
-    $patches = $this->getPatches();
+    foreach ($this->getAPIs() as $api) {
+      $patches = $this->getPatches();
+      $applied = $api->getAppliedPatches();
 
-    $applied = $api->getAppliedPatches();
+      if ($applied === null) {
+        echo phutil_console_format(
+          "**%s**: %s\n",
+          pht('Database Not Initialized'),
+          pht('Run **%s** to initialize.', './bin/storage upgrade'));
 
-    if ($applied === null) {
-      echo phutil_console_format(
-        "**%s**: %s\n",
-        pht('Database Not Initialized'),
-        pht('Run **%s** to initialize.', './bin/storage upgrade'));
-
-      return 1;
-    }
-
-    $table = id(new PhutilConsoleTable())
-      ->setShowHeader(false)
-      ->addColumn('id',       array('title' => pht('ID')))
-      ->addColumn('status',   array('title' => pht('Status')))
-      ->addColumn('duration', array('title' => pht('Duration')))
-      ->addColumn('type',     array('title' => pht('Type')))
-      ->addColumn('name',     array('title' => pht('Name')));
-
-    $durations = $api->getPatchDurations();
-
-    foreach ($patches as $patch) {
-      $duration = idx($durations, $patch->getFullKey());
-      if ($duration === null) {
-        $duration = '-';
-      } else {
-        $duration = pht('%s us', new PhutilNumber($duration));
+        return 1;
       }
 
-      $table->addRow(array(
-        'id' => $patch->getFullKey(),
-        'status' => in_array($patch->getFullKey(), $applied)
-          ? pht('Applied')
-          : pht('Not Applied'),
-        'duration' => $duration,
-        'type' => $patch->getType(),
-        'name' => $patch->getName(),
-      ));
-    }
+      $ref = $api->getRef();
 
-    $table->draw();
+      $table = id(new PhutilConsoleTable())
+        ->setShowHeader(false)
+        ->addColumn('id', array('title' => pht('ID')))
+        ->addColumn('host', array('title' => pht('Host')))
+        ->addColumn('status', array('title' => pht('Status')))
+        ->addColumn('duration', array('title' => pht('Duration')))
+        ->addColumn('type', array('title' => pht('Type')))
+        ->addColumn('name', array('title' => pht('Name')));
+
+      $durations = $api->getPatchDurations();
+
+      foreach ($patches as $patch) {
+        $duration = idx($durations, $patch->getFullKey());
+        if ($duration === null) {
+          $duration = '-';
+        } else {
+          $duration = pht('%s us', new PhutilNumber($duration));
+        }
+
+        $table->addRow(array(
+          'id' => $patch->getFullKey(),
+          'host' => $ref->getRefKey(),
+          'status' => in_array($patch->getFullKey(), $applied)
+            ? pht('Applied')
+            : pht('Not Applied'),
+          'duration' => $duration,
+          'type' => $patch->getType(),
+          'name' => $patch->getName(),
+        ));
+      }
+
+      $table->draw();
+    }
     return 0;
   }
 

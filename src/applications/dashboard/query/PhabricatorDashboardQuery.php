@@ -6,6 +6,7 @@ final class PhabricatorDashboardQuery
   private $ids;
   private $phids;
   private $statuses;
+  private $authorPHIDs;
 
   private $needPanels;
   private $needProjects;
@@ -25,6 +26,11 @@ final class PhabricatorDashboardQuery
     return $this;
   }
 
+  public function withAuthorPHIDs(array $authors) {
+    $this->authorPHIDs = $authors;
+    return $this;
+  }
+
   public function needPanels($need_panels) {
     $this->needPanels = $need_panels;
     return $this;
@@ -33,6 +39,12 @@ final class PhabricatorDashboardQuery
   public function needProjects($need_projects) {
     $this->needProjects = $need_projects;
     return $this;
+  }
+
+  public function withNameNgrams($ngrams) {
+    return $this->withNgramsConstraint(
+      id(new PhabricatorDashboardNgrams()),
+      $ngrams);
   }
 
   protected function loadPage() {
@@ -58,8 +70,13 @@ final class PhabricatorDashboardQuery
 
       $panel_phids = $edge_query->getDestinationPHIDs();
       if ($panel_phids) {
+        // NOTE: We explicitly disable policy exceptions when loading panels.
+        // If a particular panel is invalid or not visible to the viewer,
+        // we'll still render the dashboard, just not that panel.
+
         $panels = id(new PhabricatorDashboardPanelQuery())
           ->setParentQuery($this)
+          ->setRaisePolicyExceptions(false)
           ->setViewer($this->getViewer())
           ->withPHIDs($panel_phids)
           ->execute();
@@ -121,11 +138,22 @@ final class PhabricatorDashboardQuery
         $this->statuses);
     }
 
+    if ($this->authorPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'authorPHID IN (%Ls)',
+        $this->authorPHIDs);
+    }
+
     return $where;
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDashboardApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'dashboard';
   }
 
 }

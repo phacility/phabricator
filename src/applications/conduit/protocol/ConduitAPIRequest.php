@@ -6,9 +6,11 @@ final class ConduitAPIRequest extends Phobject {
   private $user;
   private $isClusterRequest = false;
   private $oauthToken;
+  private $isStrictlyTyped = true;
 
-  public function __construct(array $params) {
+  public function __construct(array $params, $strictly_typed) {
     $this->params = $params;
+    $this->isStrictlyTyped = $strictly_typed;
   }
 
   public function getValue($key, $default = null) {
@@ -66,6 +68,10 @@ final class ConduitAPIRequest extends Phobject {
 
   public function getIsClusterRequest() {
     return $this->isClusterRequest;
+  }
+
+  public function getIsStrictlyTyped() {
+    return $this->isStrictlyTyped;
   }
 
   public function newContentSource() {

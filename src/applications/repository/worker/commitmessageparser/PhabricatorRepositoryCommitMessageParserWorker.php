@@ -47,6 +47,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $this->getFollowupTaskClass(),
         array(
           'commitID' => $commit->getID(),
+        ),
+        array(
+          // We queue followup tasks at default priority so that the queue
+          // finishes work it has started before starting more work. If
+          // followups are queued at the same priority level, we do all
+          // message parses first, then all change parses, etc. This makes
+          // progress uneven. See T11677 for discussion.
+          'priority' => PhabricatorWorker::PRIORITY_DEFAULT,
         ));
     }
   }

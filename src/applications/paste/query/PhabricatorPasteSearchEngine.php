@@ -166,7 +166,7 @@ final class PhabricatorPasteSearchEngine
         $preview);
 
       $created = phabricator_datetime($paste->getDateCreated(), $viewer);
-      $line_count = count($lines);
+      $line_count = $paste->getSnippet()->getContentLineCount();
       $line_count = pht(
         '%s Line(s)',
         new PhutilNumber($line_count));
@@ -204,11 +204,11 @@ final class PhabricatorPasteSearchEngine
   }
 
   protected function getNewUserBody() {
-    $create_button = id(new PHUIButtonView())
-      ->setTag('a')
-      ->setText(pht('Create a Paste'))
-      ->setHref('/paste/create/')
-      ->setColor(PHUIButtonView::GREEN);
+    $viewer = $this->requireViewer();
+
+    $create_button = id(new PhabricatorPasteEditEngine())
+      ->setViewer($viewer)
+      ->newNUXButton(pht('Create a Paste'));
 
     $icon = $this->getApplication()->getIcon();
     $app_name =  $this->getApplication()->getName();

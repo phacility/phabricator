@@ -11,7 +11,7 @@ final class PhabricatorUserConfiguredCustomField
   public function createFields($object) {
     return PhabricatorStandardCustomField::buildStandardFields(
       $this,
-      PhabricatorEnv::getEnvConfig('user.custom-field-definitions', array()));
+      PhabricatorEnv::getEnvConfig('user.custom-field-definitions'));
   }
 
   public function newStorageObject() {

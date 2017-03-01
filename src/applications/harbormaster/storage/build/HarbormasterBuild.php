@@ -3,7 +3,8 @@
 final class HarbormasterBuild extends HarbormasterDAO
   implements
     PhabricatorApplicationTransactionInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorConduitResultInterface {
 
   protected $buildablePHID;
   protected $buildPlanPHID;
@@ -18,131 +19,9 @@ final class HarbormasterBuild extends HarbormasterDAO
   private $buildTargets = self::ATTACHABLE;
   private $unprocessedCommands = self::ATTACHABLE;
 
-  /**
-   * Not currently being built.
-   */
-  const STATUS_INACTIVE = 'inactive';
-
-  /**
-   * Pending pick up by the Harbormaster daemon.
-   */
-  const STATUS_PENDING = 'pending';
-
-  /**
-   * Current building the buildable.
-   */
-  const STATUS_BUILDING = 'building';
-
-  /**
-   * The build has passed.
-   */
-  const STATUS_PASSED = 'passed';
-
-  /**
-   * The build has failed.
-   */
-  const STATUS_FAILED = 'failed';
-
-  /**
-   * The build has aborted.
-   */
-  const STATUS_ABORTED = 'aborted';
-
-  /**
-   * The build encountered an unexpected error.
-   */
-  const STATUS_ERROR = 'error';
-
-  /**
-   * The build has been paused.
-   */
-  const STATUS_PAUSED = 'paused';
-
-  /**
-   * The build has been deadlocked.
-   */
-  const STATUS_DEADLOCKED = 'deadlocked';
-
-
-  /**
-   * Get a human readable name for a build status constant.
-   *
-   * @param  const  Build status constant.
-   * @return string Human-readable name.
-   */
-  public static function getBuildStatusName($status) {
-    switch ($status) {
-      case self::STATUS_INACTIVE:
-        return pht('Inactive');
-      case self::STATUS_PENDING:
-        return pht('Pending');
-      case self::STATUS_BUILDING:
-        return pht('Building');
-      case self::STATUS_PASSED:
-        return pht('Passed');
-      case self::STATUS_FAILED:
-        return pht('Failed');
-      case self::STATUS_ABORTED:
-        return pht('Aborted');
-      case self::STATUS_ERROR:
-        return pht('Unexpected Error');
-      case self::STATUS_PAUSED:
-        return pht('Paused');
-      case self::STATUS_DEADLOCKED:
-        return pht('Deadlocked');
-      default:
-        return pht('Unknown');
-    }
-  }
-
-  public static function getBuildStatusIcon($status) {
-    switch ($status) {
-      case self::STATUS_INACTIVE:
-      case self::STATUS_PENDING:
-        return PHUIStatusItemView::ICON_OPEN;
-      case self::STATUS_BUILDING:
-        return PHUIStatusItemView::ICON_RIGHT;
-      case self::STATUS_PASSED:
-        return PHUIStatusItemView::ICON_ACCEPT;
-      case self::STATUS_FAILED:
-        return PHUIStatusItemView::ICON_REJECT;
-      case self::STATUS_ABORTED:
-        return PHUIStatusItemView::ICON_MINUS;
-      case self::STATUS_ERROR:
-        return PHUIStatusItemView::ICON_MINUS;
-      case self::STATUS_PAUSED:
-        return PHUIStatusItemView::ICON_MINUS;
-      case self::STATUS_DEADLOCKED:
-        return PHUIStatusItemView::ICON_WARNING;
-      default:
-        return PHUIStatusItemView::ICON_QUESTION;
-    }
-  }
-
-  public static function getBuildStatusColor($status) {
-    switch ($status) {
-      case self::STATUS_INACTIVE:
-        return 'dark';
-      case self::STATUS_PENDING:
-      case self::STATUS_BUILDING:
-        return 'blue';
-      case self::STATUS_PASSED:
-        return 'green';
-      case self::STATUS_FAILED:
-      case self::STATUS_ABORTED:
-      case self::STATUS_ERROR:
-      case self::STATUS_DEADLOCKED:
-        return 'red';
-      case self::STATUS_PAUSED:
-        return 'dark';
-      default:
-        return 'bluegrey';
-    }
-  }
-
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
-      ->setBuildStatus(self::STATUS_INACTIVE)
+      ->setBuildStatus(HarbormasterBuildStatus::STATUS_INACTIVE)
       ->setBuildGeneration(0);
   }
 
@@ -180,6 +59,9 @@ final class HarbormasterBuild extends HarbormasterDAO
         'key_planautokey' => array(
           'columns' => array('buildablePHID', 'planAutoKey'),
           'unique' => true,
+        ),
+        'key_initiator' => array(
+          'columns' => array('initiatorPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -226,8 +108,9 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function isBuilding() {
-    return $this->getBuildStatus() === self::STATUS_PENDING ||
-      $this->getBuildStatus() === self::STATUS_BUILDING;
+    return
+      $this->getBuildStatus() === HarbormasterBuildStatus::STATUS_PENDING ||
+      $this->getBuildStatus() === HarbormasterBuildStatus::STATUS_BUILDING;
   }
 
   public function isAutobuild() {
@@ -290,20 +173,13 @@ final class HarbormasterBuild extends HarbormasterDAO
   }
 
   public function isComplete() {
-    switch ($this->getBuildStatus()) {
-      case self::STATUS_PASSED:
-      case self::STATUS_FAILED:
-      case self::STATUS_ABORTED:
-      case self::STATUS_ERROR:
-      case self::STATUS_PAUSED:
-        return true;
-    }
-
-    return false;
+    return in_array(
+      $this->getBuildStatus(),
+      HarbormasterBuildStatus::getCompletedStatusConstants());
   }
 
   public function isPaused() {
-    return ($this->getBuildStatus() == self::STATUS_PAUSED);
+    return ($this->getBuildStatus() == HarbormasterBuildStatus::STATUS_PAUSED);
   }
 
   public function getURI() {
@@ -520,6 +396,56 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('A build inherits policies from its buildable.');
+  }
+
+
+/* -(  PhabricatorConduitResultInterface  )---------------------------------- */
+
+
+  public function getFieldSpecificationsForConduit() {
+    return array(
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildablePHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the object this build is building.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildPlanPHID')
+        ->setType('phid')
+        ->setDescription(pht('PHID of the build plan being run.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('buildStatus')
+        ->setType('map<string, wild>')
+        ->setDescription(pht('The current status of this build.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('initiatorPHID')
+        ->setType('phid')
+        ->setDescription(pht('The person (or thing) that started this build.')),
+      id(new PhabricatorConduitSearchFieldSpecification())
+        ->setKey('name')
+        ->setType('string')
+        ->setDescription(pht('The name of this build.')),
+    );
+  }
+
+  public function getFieldValuesForConduit() {
+    $status = $this->getBuildStatus();
+    return array(
+      'buildablePHID' => $this->getBuildablePHID(),
+      'buildPlanPHID' => $this->getBuildPlanPHID(),
+      'buildStatus' => array(
+        'value' => $status,
+        'name' => HarbormasterBuildStatus::getBuildStatusName($status),
+      ),
+      'initiatorPHID' => nonempty($this->getInitiatorPHID(), null),
+      'name' => $this->getName(),
+    );
+  }
+
+  public function getConduitSearchAttachments() {
+    return array(
+      id(new HarbormasterQueryBuildsSearchEngineAttachment())
+        ->setAttachmentKey('querybuilds'),
+    );
   }
 
 }

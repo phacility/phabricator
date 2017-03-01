@@ -81,15 +81,15 @@
       "rule": ".login-PayPal",
       "hash": "dfa09f45369c93bb0fd82a333b0fe927"
     },
-    "login-Persona": {
-      "name": "login-Persona",
-      "rule": ".login-Persona",
-      "hash": "14cc5b479b14abe16261c01fc432ffd1"
-    },
     "login-Phabricator": {
       "name": "login-Phabricator",
       "rule": ".login-Phabricator",
       "hash": "d0f830803593bbcc025d7d5a29ee3ecd"
+    },
+    "login-Slack": {
+      "name": "login-Slack",
+      "rule": ".login-Slack",
+      "hash": "fe0df2df040032b949aa05948b6bd986"
     },
     "login-Stripe": {
       "name": "login-Stripe",

@@ -136,6 +136,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     return (bool)$this->getUserPreference($column_key, false);
   }
 
+  public function getDurableColumnMinimize() {
+    $column_key = PhabricatorConpherenceColumnMinimizeSetting::SETTINGKEY;
+    return (bool)$this->getUserPreference($column_key, false);
+  }
+
   public function addQuicksandConfig(array $config) {
     $this->quicksandConfig = $config + $this->quicksandConfig;
     return $this;
@@ -263,26 +268,32 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         }
       }
 
-      $default_img_uri =
-        celerity_get_resource_uri(
-          'rsrc/image/icon/fatcow/document_black.png');
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-download');
+      $lightbox_id = celerity_generate_unique_node_id();
       $download_form = phabricator_form(
         $user,
         array(
           'action' => '#',
           'method' => 'POST',
           'class'  => 'lightbox-download-form',
-          'sigil'  => 'download',
+          'sigil'  => 'download lightbox-download-submit',
+          'id'     => 'lightbox-download-form',
         ),
         phutil_tag(
-          'button',
-          array(),
-          pht('Download')));
+          'a',
+          array(
+            'class' => 'lightbox-download phui-icon-circle hover-green',
+            'href' => '#',
+          ),
+          array(
+            $icon,
+          )));
 
       Javelin::initBehavior(
         'lightbox-attachments',
         array(
-          'defaultImageUri' => $default_img_uri,
+          'lightbox_id'     => $lightbox_id,
           'downloadForm'    => $download_form,
         ));
     }
@@ -459,24 +470,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
           'or the error log.'));
     }
 
-    // Render the "you have unresolved setup issues..." warning.
-    $setup_warning = null;
-    if ($user && $user->getIsAdmin()) {
-      $open = PhabricatorSetupCheck::getOpenSetupIssueKeys();
-      if ($open) {
-        $classes[] = 'page-has-warning';
-        $setup_warning = phutil_tag_div(
-          'setup-warning-callout',
-          phutil_tag(
-            'a',
-            array(
-              'href' => '/config/issue/',
-              'title' => implode(', ', $open),
-            ),
-            pht('You have %d unresolved setup issue(s)...', count($open))));
-      }
-    }
-
     $main_page = phutil_tag(
       'div',
       array(
@@ -486,7 +479,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       array(
         $developer_warning,
         $header_chrome,
-        $setup_warning,
         phutil_tag(
           'div',
           array(
@@ -499,12 +491,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     $durable_column = null;
     if ($this->getShowDurableColumn()) {
       $is_visible = $this->getDurableColumnVisible();
+      $is_minimize = $this->getDurableColumnMinimize();
       $durable_column = id(new ConpherenceDurableColumnView())
         ->setSelectedConpherence(null)
         ->setUser($user)
         ->setQuicksandConfig($this->buildQuicksandConfig())
         ->setVisible($is_visible)
+        ->setMinimize($is_minimize)
         ->setInitialLoad(true);
+      if ($is_minimize) {
+        $this->classes[] = 'minimize-column';
+      }
     }
 
     Javelin::initBehavior('quicksand-blacklist', array(
@@ -515,6 +512,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       'div',
       array(
         'class' => implode(' ', $classes),
+        'id' => 'main-page-frame',
       ),
       array(
         $main_page,
@@ -769,23 +767,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
       ->setViewer($viewer);
     $dropdown_query->execute();
 
-    $rendered_dropdowns = array();
-    $applications = array(
-      'PhabricatorHelpApplication',
-    );
-    foreach ($applications as $application_class) {
-      if (!PhabricatorApplication::isClassInstalledForViewer(
-        $application_class,
-        $viewer)) {
-        continue;
-      }
-      $application = PhabricatorApplication::getByClass($application_class);
-      $rendered_dropdowns[$application_class] =
-        $application->buildMainMenuExtraNodes(
-          $viewer,
-          $controller);
-    }
-
     $hisec_warning_config = $this->getHighSecurityWarningConfig();
 
     $console_config = null;
@@ -801,6 +782,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
 
     $application_class = null;
     $application_search_icon = null;
+    $application_help = null;
     $controller = $this->getController();
     if ($controller) {
       $application = $controller->getCurrentApplication();
@@ -809,21 +791,32 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
         if ($application->getApplicationSearchDocumentTypes()) {
           $application_search_icon = $application->getIcon();
         }
+
+        $help_items = $application->getHelpMenuItems($viewer);
+        if ($help_items) {
+          $help_list = id(new PhabricatorActionListView())
+            ->setViewer($viewer);
+          foreach ($help_items as $help_item) {
+            $help_list->addAction($help_item);
+          }
+          $application_help = $help_list->getDropdownMenuMetadata();
+        }
       }
     }
 
     return array(
       'title' => $this->getTitle(),
+      'bodyClasses' => $this->getBodyClasses(),
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),
       ),
       'globalDragAndDrop' => $upload_enabled,
-      'aphlictDropdowns' => $rendered_dropdowns,
       'hisecWarningConfig' => $hisec_warning_config,
       'consoleConfig' => $console_config,
       'applicationClass' => $application_class,
       'applicationSearchIcon' => $application_search_icon,
+      'helpItems' => $application_help,
     ) + $this->buildAphlictListenConfigData();
   }
 
@@ -890,7 +883,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView
     } else {
       $content = $this->render();
       $response = id(new AphrontWebpageResponse())
-        ->setContent($content);
+        ->setContent($content)
+        ->setFrameable($this->getFrameable());
     }
 
     return $response;

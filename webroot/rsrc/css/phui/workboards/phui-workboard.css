@@ -19,19 +19,6 @@
   left: 0;
   right: 0;
   padding: 16px;
-  background-color: #fff;
-}
-
-.device-desktop .page-has-warning .phui-workboard-view-shadow {
-  top: 113px;
-}
-
-.device-desktop.with-durable-column .phui-workboard-view-shadow {
-  right: 300px;
-}
-
-.device-desktop.with-durable-margin .phui-workboard-view-shadow {
-  right: 312px;
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
@@ -45,12 +32,7 @@
 }
 
 .device-desktop .project-board-wrapper .phui-workboard-view-shadow {
-  left: {$menu.profile.width};
-}
-
-.device-desktop .phui-profile-menu-collapsed .project-board-wrapper
-  .phui-workboard-view-shadow {
-  left: {$menu.profile.width.collapsed};
+  left: 212px;
 }
 
 !print .project-board-wrapper .phui-workboard-view-shadow {

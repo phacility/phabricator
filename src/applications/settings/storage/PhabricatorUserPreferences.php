@@ -219,13 +219,15 @@ final class PhabricatorUserPreferences
       }
     }
 
+    switch ($this->getBuiltinKey()) {
+      case self::BUILTIN_GLOBAL_DEFAULT:
+        // NOTE: Without this policy exception, the logged-out viewer can not
+        // see global preferences.
+        return true;
+    }
+
     return false;
   }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

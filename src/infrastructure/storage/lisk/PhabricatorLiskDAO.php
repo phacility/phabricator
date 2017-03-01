@@ -60,14 +60,12 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $this->raiseImproperWrite($database);
     }
 
-    $is_cluster = (bool)PhabricatorEnv::getEnvConfig('cluster.databases');
-    if ($is_cluster) {
-      $connection = $this->newClusterConnection($database, $mode);
-    } else {
-      $connection = $this->newBasicConnection($database, $mode, $namespace);
-    }
+    $connection = $this->newClusterConnection(
+      $this->getApplicationName(),
+      $database,
+      $mode);
 
-    // TODO: This should be testing if the mode is "r", but that would proably
+    // TODO: This should be testing if the mode is "r", but that would probably
     // break a lot of things. Perform a more narrow test for readonly mode
     // until we have greater certainty that this works correctly most of the
     // time.
@@ -75,37 +73,12 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $connection->setReadOnly(true);
     }
 
-    // Unless this is a script running from the CLI, prevent any query from
-    // running for more than 30 seconds. See T10849 for discussion.
-    if (php_sapi_name() != 'cli') {
-      $connection->setQueryTimeout(30);
-    }
-
     return $connection;
   }
 
-  private function newBasicConnection($database, $mode, $namespace) {
-    $conf = PhabricatorEnv::newObjectFromConfig(
-      'mysql.configuration-provider',
-      array($this, $mode, $namespace));
-
-    return PhabricatorEnv::newObjectFromConfig(
-      'mysql.implementation',
-      array(
-        array(
-          'user'      => $conf->getUser(),
-          'pass'      => $conf->getPassword(),
-          'host'      => $conf->getHost(),
-          'port'      => $conf->getPort(),
-          'database'  => $database,
-          'retries'   => 3,
-          'timeout' => 10,
-        ),
-      ));
-  }
-
-  private function newClusterConnection($database, $mode) {
-    $master = PhabricatorDatabaseRef::getMasterDatabaseRef();
+  private function newClusterConnection($application, $database, $mode) {
+    $master = PhabricatorDatabaseRef::getMasterDatabaseRefForApplication(
+      $application);
 
     if ($master && !$master->isSevered()) {
       $connection = $master->newApplicationConnection($database);
@@ -121,16 +94,18 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       }
     }
 
-    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRef();
-    if (!$replica) {
-      throw new Exception(
-        pht('No valid databases are configured!'));
+    $replica = PhabricatorDatabaseRef::getReplicaDatabaseRefForApplication(
+      $application);
+    if ($replica) {
+      $connection = $replica->newApplicationConnection($database);
+      $connection->setReadOnly(true);
+      if ($replica->isReachable($connection)) {
+        return $connection;
+      }
     }
 
-    $connection = $replica->newApplicationConnection($database);
-    $connection->setReadOnly(true);
-    if ($replica->isReachable($connection)) {
-      return $connection;
+    if (!$master && !$replica) {
+      $this->raiseUnconfigured($database);
     }
 
     $this->raiseUnreachable($database);
@@ -153,10 +128,18 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
         $database));
   }
 
+  private function raiseUnconfigured($database) {
+    throw new Exception(
+      pht(
+        'Unable to establish a connection to any database host '.
+        '(while trying "%s"). No masters or replicas are configured.',
+        $database));
+  }
+
   private function raiseUnreachable($database) {
     throw new PhabricatorClusterStrandedException(
       pht(
-        'Unable to establish a connection to ANY database host '.
+        'Unable to establish a connection to any database host '.
         '(while trying "%s"). All masters and replicas are completely '.
         'unreachable.',
         $database));

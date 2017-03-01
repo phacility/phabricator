@@ -186,7 +186,7 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
         $form->appendRemarkupInstructions(
           pht(
             'Having trouble coming up with a good password? Try this '.
-            'artisinal password, hand made in small batches by our expert '.
+            'artisanal password, hand made in small batches by our expert '.
             'craftspeople: '.
             "\n\n".
             "`%s`",

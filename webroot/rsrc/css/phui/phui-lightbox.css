@@ -1,0 +1,191 @@
+/**
+ * @provides phui-lightbox-css
+ */
+
+
+.lightbox-attached {
+  overflow: hidden;
+}
+
+.lightbox-attachment {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow-y: auto;
+}
+
+.lightbox-attachment .lightbox-image-frame {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+}
+
+.lightbox-attachment.comment-panel-open .lightbox-image-frame {
+  right: 360px;
+}
+
+.lightbox-attachment .lightbox-image-frame img {
+  max-width: calc(100% - 40px);
+  max-height: calc(100% - 24px);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.lightbox-comment-frame {
+  position: absolute;
+  top: -19999px;
+  right: 0;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.lightbox-attachment .lightbox-icon-frame {
+  top: 44%;
+  left: calc(50% - 160px);
+  position: fixed;
+  display: block;
+  height: 120px;
+  width: 320px;
+  color: {$darkbluetext};
+}
+
+.lightbox-attachment .lightbox-icon-frame:hover,
+.lightbox-attachment .lightbox-icon-frame:hover .phui-icon-view {
+  color: {$anchor};
+  text-decoration: none;
+}
+
+.lightbox-attachment.comment-panel-open .lightbox-icon-frame {
+  left: calc(50% - 340px);
+}
+
+.lightbox-attachment .phui-lightbox-file-icon {
+  font-size: 64px;
+  color: {$darkbluetext};
+}
+
+.comment-panel-open .lightbox-comment-frame {
+  position: fixed;
+  top: 44px;
+  bottom: 0;
+  right: 0;
+  width: 360px;
+  overflow-y: auto;
+  background: #fff;
+  opacity: 1;
+}
+
+.device-phone .comment-panel-open .lightbox-comment-frame {
+  width: auto;
+  left: 0;
+}
+
+.jx-mask + .lightbox-attachment {
+  background: {$lightgreybackground};
+}
+
+.lightbox-attachment .attachment-name {
+  line-height: 32px;
+  font-size: {$biggerfontsize};
+  text-align: center;
+}
+
+.lightbox-attachment .lightbox-status {
+  background: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  padding: 0 20px;
+  line-height: 44px;
+  border-bottom: 1px solid {$thinblueborder};
+  color: {$greytext};
+}
+
+.device-phone .lightbox-attachment .lightbox-status {
+  padding: 0 12px;
+}
+
+.lightbox-attachment .lightbox-status .lightbox-download {
+  float: right;
+}
+
+.lightbox-attachment .lightbox-status-txt a {
+  color: #000;
+  margin-right: 12px;
+  font-size: {$biggerfontsize};
+}
+
+.lightbox-attachment .lightbox-status .phui-icon-view {
+  height: 18px;
+  width: 24px;
+  font-size: 14px;
+  line-height: 23px;
+  display: block;
+}
+
+.lightbox-attachment .lightbox-status .lightbox-download
+  .lightbox-download-form {
+    display: inline;
+}
+
+.lightbox-attachment a.lightbox-download,
+.lightbox-attachment a.lightbox-comment,
+.lightbox-attachment a.lightbox-close {
+  float: right;
+  margin: 9px 0 0 8px;
+}
+
+.lightbox-attachment.comment-panel-open .lightbox-comment.phui-icon-circle,
+.lightbox-attachment.comment-panel-open .lightbox-comment .phui-icon-view {
+  color: {$sky};
+  border-color: {$sky};
+}
+
+.lightbox-attachment .lightbox-left {
+  top: 46%;
+  left: 12px;
+  position: fixed;
+  display: block;
+  height: 40px;
+  width: 40px;
+}
+
+.lightbox-attachment .lightbox-left .phui-icon-view {
+  font-size: 40px;
+}
+
+.lightbox-attachment .lightbox-left:hover .phui-icon-view {
+  color: {$sky};
+}
+
+.lightbox-attachment .lightbox-right .phui-icon-view {
+  top: 46%;
+  right: 12px;
+  position: fixed;
+  display: block;
+  height: 38px;
+  width: 21px;
+}
+
+.lightbox-attachment.comment-panel-open .lightbox-right .phui-icon-view {
+  right: 362px;
+}
+
+.lightbox-attachment .lightbox-right .phui-icon-view {
+  font-size: 40px;
+}
+
+.lightbox-attachment .lightbox-right:hover .phui-icon-view {
+  color: {$sky};
+}

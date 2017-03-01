@@ -11,11 +11,23 @@ final class PhabricatorWorkerManagementFloodWorkflow
         pht(
           'Flood the queue with test tasks. This command is intended for '.
           'use when developing and debugging Phabricator.'))
-      ->setArguments(array());
+      ->setArguments(
+        array(
+          array(
+            'name' => 'duration',
+            'param' => 'seconds',
+            'help' => pht(
+              'Queue tasks which require a specific amount of wall time to '.
+              'complete. By default, tasks complete as quickly as possible.'),
+            'default' => 0,
+          ),
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
+
+    $duration = (float)$args->getArg('duration');
 
     $console->writeOut(
       "%s\n",
@@ -25,7 +37,9 @@ final class PhabricatorWorkerManagementFloodWorkflow
     while (true) {
       PhabricatorWorker::scheduleTask(
         'PhabricatorTestWorker',
-        array());
+        array(
+          'duration' => $duration,
+        ));
 
       if (($n++ % 100) === 0) {
         $console->writeOut('.');

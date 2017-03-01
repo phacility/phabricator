@@ -15,7 +15,8 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorDestructibleInterface,
     PhabricatorProjectInterface,
     PhabricatorFulltextInterface,
-    PhabricatorConduitResultInterface {
+    PhabricatorConduitResultInterface,
+    PhabricatorDraftInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -70,6 +71,8 @@ final class DifferentialRevision extends DifferentialDAO
       ->setAuthorPHID($actor->getPHID())
       ->attachRelationships(array())
       ->attachRepository(null)
+      ->attachActiveDiff(null)
+      ->attachReviewerStatus(array())
       ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
   }
 
@@ -370,14 +373,6 @@ final class DifferentialRevision extends DifferentialDAO
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        // NOTE: In Differential, an automatic capability on a revision (being
-        // an author) is sufficient to view it, even if you can not see the
-        // repository the revision belongs to. We can bail out early in this
-        // case.
-        if ($this->hasAutomaticCapability($capability, $viewer)) {
-          break;
-        }
-
         $repository_phid = $this->getRepositoryPHID();
         $repository = $this->getRepository();
 
@@ -411,10 +406,28 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function attachReviewerStatus(array $reviewers) {
-    assert_instances_of($reviewers, 'DifferentialReviewer');
+    assert_instances_of($reviewers, 'DifferentialReviewerProxy');
 
     $this->reviewerStatus = $reviewers;
     return $this;
+  }
+
+  public function getReviewerPHIDsForEdit() {
+    $reviewers = $this->getReviewerStatus();
+
+    $status_blocking = DifferentialReviewerStatus::STATUS_BLOCKING;
+
+    $value = array();
+    foreach ($reviewers as $reviewer) {
+      $phid = $reviewer->getReviewerPHID();
+      if ($reviewer->getStatus() == $status_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
+    }
+
+    return $value;
   }
 
   public function getRepository() {
@@ -428,6 +441,16 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function isClosed() {
     return DifferentialRevisionStatus::isClosedStatus($this->getStatus());
+  }
+
+  public function isAbandoned() {
+    $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
+    return ($this->getStatus() == $status_abandoned);
+  }
+
+  public function isAccepted() {
+    $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+    return ($this->getStatus() == $status_accepted);
   }
 
   public function getStatusIcon() {
@@ -466,12 +489,12 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
-  public function getDrafts(PhabricatorUser $viewer) {
-    return $this->assertAttachedKey($this->drafts, $viewer->getPHID());
+  public function getHasDraft(PhabricatorUser $viewer) {
+    return $this->assertAttachedKey($this->drafts, $viewer->getCacheFragment());
   }
 
-  public function attachDrafts(PhabricatorUser $viewer, array $drafts) {
-    $this->drafts[$viewer->getPHID()] = $drafts;
+  public function attachHasDraft(PhabricatorUser $viewer, $has_draft) {
+    $this->drafts[$viewer->getCacheFragment()] = $has_draft;
     return $this;
   }
 
@@ -488,6 +511,10 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function getHarbormasterContainerPHID() {
+    return $this->getPHID();
+  }
+
+  public function getHarbormasterPublishablePHID() {
     return $this->getPHID();
   }
 
@@ -707,6 +734,14 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getConduitSearchAttachments() {
     return array();
+  }
+
+
+/* -(  PhabricatorDraftInterface  )------------------------------------------ */
+
+
+  public function newDraftEngine() {
+    return new DifferentialRevisionDraftEngine();
   }
 
 }

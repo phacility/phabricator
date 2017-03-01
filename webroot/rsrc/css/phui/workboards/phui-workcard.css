@@ -2,7 +2,7 @@
  * @provides phui-workcard-view-css
  */
 
-.phui-workcard.phui-object-item {
+.phui-workcard.phui-oi {
   background-color: #fff;
   border-radius: 3px;
   margin-bottom: 8px;
@@ -10,22 +10,22 @@
   box-sizing: border-box;
 }
 
-.phui-workcard .phui-object-item-name {
+.phui-workcard .phui-oi-name {
   padding-bottom: 4px;
 }
 
-.phui-workcard .phui-object-item-content {
+.phui-workcard .phui-oi-content {
   margin-top: 0;
 }
 
-.phui-workcard .phui-object-item-frame {
+.phui-workcard .phui-oi-frame {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
   border-color: {$thinblueborder};
   border-bottom-color: {$lightblueborder};
 }
 
-.phui-workcard.phui-object-item .phui-object-item-objname {
+.phui-workcard.phui-oi .phui-oi-objname {
   -webkit-touch-callout: text;
   -webkit-user-select: text;
   -khtml-user-select: text;
@@ -34,36 +34,36 @@
   user-select: text;
 }
 
-.phui-workcard .phui-object-item-link {
+.phui-workcard .phui-oi-link {
   white-space: normal;
   font-weight: normal;
   color: #000;
   margin-left: 2px;
 }
 
-.phui-object-item-disabled.phui-workcard {
+.phui-oi-disabled.phui-workcard {
   background-color: rgba({$alphawhite},.67);
 }
 
-.phui-object-item-disabled.phui-workcard .phui-object-item-link {
+.phui-oi-disabled.phui-workcard .phui-oi-link {
   color: {$greytext};
 }
 
-.device-desktop .phui-workcard .phui-object-item-with-1-actions
-  .phui-object-item-content-box {
+.device-desktop .phui-workcard .phui-oi-with-1-actions
+  .phui-oi-content-box {
   margin-right: 0;
   overflow: hidden;
 }
 
-.phui-workcard .phui-object-item-objname {
+.phui-workcard .phui-oi-objname {
   vertical-align: top;
 }
 
-.phui-workcard.phui-object-item-grippable .phui-object-item-frame {
+.phui-workcard.phui-oi-grippable .phui-oi-frame {
   padding-left: 0;
 }
 
-.phui-workcard .phui-object-item-grip {
+.phui-workcard .phui-oi-grip {
   display: none;
 }
 
@@ -71,28 +71,28 @@
   display: none;
 }
 
-.phui-workcard.phui-object-item .phui-list-item-href {
+.phui-workcard.phui-oi .phui-list-item-href {
   height: 24px;
   width: 24px;
 }
 
-.device-desktop .phui-workcard.phui-object-item:hover
+.device-desktop .phui-workcard.phui-oi:hover
   .phui-list-item-href {
     background: #fff;
     opacity: .7;
 }
 
-.device-desktop .phui-workcard.phui-object-item
+.device-desktop .phui-workcard.phui-oi
   .phui-list-item-href:hover {
     background: {$sh-bluebackground};
     opacity: 1;
 }
 
-.phui-workcard.phui-object-item:hover .phui-list-item-icon {
+.phui-workcard.phui-oi:hover .phui-list-item-icon {
   display: block;
 }
 
-.phui-workcard .phui-object-item-attributes {
+.phui-workcard .phui-oi-attributes {
   margin-right: 12px;
 }
 
@@ -100,21 +100,21 @@
   margin-bottom: 8px;
 }
 
-.phui-workcard .phui-object-item-cover-image {
+.phui-workcard .phui-oi-cover-image {
   display: block;
   padding: 8px 8px 0 8px;
   width: 263px;
 }
 
-.phui-workcard.phui-object-item.phui-workcard-upload-target {
+.phui-workcard.phui-oi.phui-workcard-upload-target {
   background-color: {$sh-greenbackground};
 }
 
-.phui-object-item-list-view .phui-workcard:last-child {
+.phui-oi-list-view .phui-workcard:last-child {
   margin-bottom: 0;
 }
 
-.phui-workcard .phui-object-item-attribute-spacer {
+.phui-workcard .phui-oi-attribute-spacer {
   display: none;
 }
 
@@ -123,54 +123,54 @@
   display: inline-block;
 }
 
-.phui-workcard .phui-object-item-attribute {
+.phui-workcard .phui-oi-attribute {
   display: inline;
 }
 
 
 /* - Draggable Colors --------------------------------------------------------*/
 
-.phui-workcard.phui-object-item.drag-clone {
+.phui-workcard.phui-oi.drag-clone {
   box-shadow: {$dropshadow};
   background-color: {$sh-greybackground};
 }
 
-.phui-workcard.phui-object-item.drag-clone .phui-list-item-href {
+.phui-workcard.phui-oi.drag-clone .phui-list-item-href {
   display: none;
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-red {
+.phui-workcard.drag-clone.phui-oi-bar-color-red {
   background-color: {$sh-redbackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-orange {
+.phui-workcard.drag-clone.phui-oi-bar-color-orange {
   background-color: {$sh-orangebackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-yellow {
+.phui-workcard.drag-clone.phui-oi-bar-color-yellow {
   background-color: {$sh-yellowbackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-green {
+.phui-workcard.drag-clone.phui-oi-bar-color-green {
   background-color: {$sh-greenbackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-blue {
+.phui-workcard.drag-clone.phui-oi-bar-color-blue {
   background-color: {$sh-bluebackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-indigo {
+.phui-workcard.drag-clone.phui-oi-bar-color-indigo {
   background-color: {$sh-indigobackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-violet {
+.phui-workcard.drag-clone.phui-oi-bar-color-violet {
   background-color: {$sh-violetbackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-pink {
+.phui-workcard.drag-clone.phui-oi-bar-color-pink {
   background-color: {$sh-pinkbackground};
 }
 
-.phui-workcard.drag-clone.phui-object-item-bar-color-sky {
+.phui-workcard.drag-clone.phui-oi-bar-color-sky {
   background-color: {$sh-bluebackground};
 }

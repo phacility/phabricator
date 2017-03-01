@@ -31,6 +31,10 @@ final class PhabricatorObjectHandle
   private $tokenIcon;
   private $commandLineObjectName;
 
+  private $stateIcon;
+  private $stateColor;
+  private $stateName;
+
   public function setIcon($icon) {
     $this->icon = $icon;
     return $this;
@@ -284,6 +288,54 @@ final class PhabricatorObjectHandle
     return $this->complete;
   }
 
+  public function setStateIcon($state_icon) {
+    $this->stateIcon = $state_icon;
+    return $this;
+  }
+
+  public function getStateIcon() {
+    return $this->stateIcon;
+  }
+
+  public function setStateColor($state_color) {
+    $this->stateColor = $state_color;
+    return $this;
+  }
+
+  public function getStateColor() {
+    return $this->stateColor;
+  }
+
+  public function setStateName($state_name) {
+    $this->stateName = $state_name;
+    return $this;
+  }
+
+  public function getStateName() {
+    return $this->stateName;
+  }
+
+  public function renderStateIcon() {
+    $icon = $this->getStateIcon();
+    if ($icon === null) {
+      $icon = 'fa-question-circle-o';
+    }
+
+    $color = $this->getStateColor();
+
+    $name = $this->getStateName();
+    if ($name === null) {
+      $name = pht('Unknown');
+    }
+
+    return id(new PHUIIconView())
+      ->setIcon($icon, $color)
+      ->addSigil('has-tooltip')
+      ->setMetadata(
+        array(
+          'tip' => $name,
+        ));
+  }
 
   public function renderLink($name = null) {
     return $this->renderLinkWithAttributes($name, array());
@@ -314,8 +366,18 @@ final class PhabricatorObjectHandle
       $classes[] = 'handle-status-'.$this->status;
     }
 
+    $circle = null;
     if ($this->availability != self::AVAILABILITY_FULL) {
       $classes[] = 'handle-availability-'.$this->availability;
+      $circle = array(
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'perfect-circle',
+          ),
+          "\xE2\x80\xA2"),
+        ' ',
+      );
     }
 
     if ($this->getType() == PhabricatorPeopleUserPHIDType::TYPECONST) {
@@ -339,7 +401,7 @@ final class PhabricatorObjectHandle
     return javelin_tag(
       $uri ? 'a' : 'span',
       $attributes,
-      array($icon, $name));
+      array($circle, $icon, $name));
   }
 
   public function renderTag() {

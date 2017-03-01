@@ -1,30 +1,45 @@
 @title User Guide: Review vs Audit
 @group userguide
 
-Discusses the differences between Review and Audit workflows.
+Discusses the differences between "review" and "audit" workflows.
 
-= Overview =
+Overview
+========
 
-Phabricator supports two similar but separate code review workflows:
+Phabricator supports two similar but separate code review workflows: "review"
+and "audit".
 
-  - **Differential** is used for pre-push code review, called "reviews"
-    elsewhere in the documentation. You can learn more in
-    @{article:Differential User Guide}.
-  - **Audit** is used for post-push code reviews, called "audits" elsewhere in
-    the documentation. You can learn more in @{article:Audit User Guide}.
+Review occurs in **Differential**, before changes are published. You can learn
+more in @{article:Differential User Guide}.
 
-(By "pre-push", this document means review which blocks deployment of changes,
-while "post-push" means review which happens after changes are deployed or
-en route to deployment.)
+Audit occurs in **Diffusion**, after changes are published. You can learn more
+in @{article:Audit User Guide}.
 
-Both are lightweight, asynchronous web-based workflows where reviewers/auditors
-inspect code independently, from their own machines -- not synchronous review
-sessions where authors and reviewers meet in person to discuss changes.
+When this documentation discusses "unpublished changes", it refers to changes
+which are still subject to being reworked in response to feedback. In many
+workflows, these changes will only exist locally on the developer's machine,
+but some workflows push tentative or temporary changes into remotes. The step
+that "publishes" changes might be either pushing or merging them, depending on
+your workflow.
 
-= Advantages of Review =
+Both the audit and review workflows are lightweight, asynchronous web-based
+workflows where reviewers or auditors inspect code independently, from their
+own machines -- not synchronous review sessions where authors and reviewers
+meet in person to discuss changes.
 
-Pre-push review is significantly more powerful than post-push auditing. You
-gain these advantages by requiring review //before// changes may be pushed:
+Broadly, review is normally a //blocking// workflow: in review workflows,
+authors usually can not publish changes until review completes and reviewers
+are satisfied.
+
+In contrast, audit is normally a //nonblocking// workflow: in audit workflows,
+changes usually move forward by default.
+
+Advantages of Review
+====================
+
+Pre-publish review is significantly more powerful than post-publish auditing.
+You gain these advantages by requiring review //before// changes may be
+published:
 
   - Authors have a strong incentive to craft small, well-formed changes that
     will be readily understood, to explain them adequately, and to provide
@@ -32,11 +47,12 @@ gain these advantages by requiring review //before// changes may be pushed:
   - Reviewers have a real opportunity to make significant suggestions about
     architecture or approach in review. These suggestions are less attractive
     to adopt from audit, and may be much more difficult to adopt if significant
-    time has passed between push and audit.
+    time has passed between publish and audit.
   - Authors have a strong incentive to fix problems and respond to feedback
-    received during review, because it blocks them. Authors have a much weaker
-    incentive to address problems raised during audit.
-  - Authors can ask reviewers to apply and verify fixes before they are pushed.
+    received during review because it blocks them. Authors have a much weaker
+    incentive to promptly address problems raised during audit.
+  - Authors can ask reviewers to apply and verify fixes before they are
+    published.
   - Authors can easily pursue feedback early, and get course corrections on
     approach or direction.
   - Reviewers are better prepared to support a given change once it is in
@@ -54,7 +70,7 @@ a blocking step into the process and generally wastes developer time that could
 be better spent developing. This is less true than it appears, because the costs
 are low and pay for themselves in other ways:
 
-  - Differential is fast and provides a very lightweight process for submitting
+  - Differential is fast and provides a lightweight process for submitting
     code for review and for performing review.
   - Authors are free to pursue other changes while code is being reviewed. With
     appropriate change management (like local branching in Git) they can even
@@ -87,13 +103,15 @@ are low and pay for themselves in other ways:
   - With `arc patch`, it is roughly as easy to pull a change out of Differential
     as it is to pull it out of the remote.
 
-= Advantages of Audit =
+Advantages of Audit
+===================
 
-Post-push review is significantly better than nothing. If you are unpersuaded
+Post-publish audit is a less powerful workflow than pre-publish review, but can
+supplement review and is better than nothing on its own. If you are unpersuaded
 by the arguments above (or work on a team that is unswayed), audits provide
 some of the benefits of review with less friction:
 
-  - Audits are driven entirely by Phabricator, users do not need to install
+  - Audits are driven entirely by Phabricator: users do not need to install
     `arc`.
   - Audits require little adjustment to existing workflows and little training.
   - Audits are completely nonblocking, and send fewer notifications than review.
@@ -101,7 +119,8 @@ some of the benefits of review with less friction:
     on lower-importance changes or raise issues that are discovered after
     review.
 
-= Recommendations =
+Recommendations
+===============
 
 Here are super biased recommendations from developers of code review software:
 
@@ -117,7 +136,8 @@ Here are super biased recommendations from developers of code review software:
   - If you aren't interested in review, just do audits. You can always
     change your mind later. But consider review! It's really good, we promise!
 
-= Next Steps =
+Next Steps
+==========
 
   - Learn more about reviews in @{article:Differential User Guide}; or
   - learn more about audits in @{article:Audit User Guide}.

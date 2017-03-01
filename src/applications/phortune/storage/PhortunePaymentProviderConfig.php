@@ -1,7 +1,9 @@
 <?php
 
 final class PhortunePaymentProviderConfig extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $merchantPHID;
   protected $providerClassKey;
@@ -94,6 +96,29 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('Providers have the policies of their merchant.');
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhortunePaymentProviderConfigEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhortunePaymentProviderConfigTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 }

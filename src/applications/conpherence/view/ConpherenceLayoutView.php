@@ -1,12 +1,13 @@
 <?php
 
-final class ConpherenceLayoutView extends AphrontView {
+final class ConpherenceLayoutView extends AphrontTagView {
 
   private $thread;
   private $baseURI;
   private $threadView;
   private $role;
   private $header;
+  private $search;
   private $messages;
   private $replyForm;
   private $latestTransactionID;
@@ -23,6 +24,11 @@ final class ConpherenceLayoutView extends AphrontView {
 
   public function setHeader($header) {
     $this->header = $header;
+    return $this;
+  }
+
+  public function setSearch($search) {
+    $this->search = $search;
     return $this;
   }
 
@@ -55,17 +61,29 @@ final class ConpherenceLayoutView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'conpherence-layout';
+    $classes[] = 'hide-widgets';
+    $classes[] = 'conpherence-role-'.$this->role;
+
+    return array(
+      'id'    => 'conpherence-main-layout',
+      'sigil' => 'conpherence-layout',
+      'class' => implode(' ', $classes),
+    );
+  }
+
+  protected function getTagContent() {
     require_celerity_resource('conpherence-menu-css');
     require_celerity_resource('conpherence-message-pane-css');
-    require_celerity_resource('conpherence-widget-pane-css');
-
-    $layout_id = celerity_generate_unique_node_id();
+    require_celerity_resource('conpherence-participant-pane-css');
 
     $selected_id = null;
     $selected_thread_id = null;
     $selected_thread_phid = null;
     $can_edit_selected = null;
+    $nux = null;
     if ($this->thread) {
       $selected_id = $this->thread->getPHID().'-nav-item';
       $selected_thread_id = $this->thread->getID();
@@ -74,11 +92,13 @@ final class ConpherenceLayoutView extends AphrontView {
         $this->getUser(),
         $this->thread,
         PhabricatorPolicyCapability::CAN_EDIT);
+    } else {
+      $nux = $this->buildNUXView();
     }
     $this->initBehavior('conpherence-menu',
       array(
         'baseURI' => $this->baseURI,
-        'layoutID' => $layout_id,
+        'layoutID' => 'conpherence-main-layout',
         'selectedID' => $selected_id,
         'selectedThreadID' => $selected_thread_id,
         'selectedThreadPHID' => $selected_thread_phid,
@@ -90,24 +110,9 @@ final class ConpherenceLayoutView extends AphrontView {
         'hasWidgets' => false,
       ));
 
-    $class = null;
-    if (!$this->getUser()->isLoggedIn()) {
-      $class = 'conpherence-logged-out';
-    }
+    $this->initBehavior('conpherence-participant-pane');
 
-    $this->initBehavior(
-      'conpherence-widget-pane',
-      ConpherenceWidgetConfigConstants::getWidgetPaneBehaviorConfig());
-
-    return javelin_tag(
-      'div',
-      array(
-        'id'    => $layout_id,
-        'sigil' => 'conpherence-layout',
-        'class' => 'conpherence-layout '.
-                    $class.
-                    ' conpherence-role-'.$this->role,
-      ),
+    return
       array(
         javelin_tag(
           'div',
@@ -123,6 +128,12 @@ final class ConpherenceLayoutView extends AphrontView {
             'class' => 'conpherence-content-pane',
           ),
           array(
+            phutil_tag(
+              'div',
+              array(
+                'class' => 'conpherence-loading-mask',
+              ),
+              ''),
             javelin_tag(
               'div',
               array(
@@ -138,28 +149,13 @@ final class ConpherenceLayoutView extends AphrontView {
                 'sigil' => 'conpherence-no-threads',
                 'style' => 'display: none;',
               ),
-              array(
-                phutil_tag(
-                  'div',
-                  array(
-                    'class' => 'text',
-                  ),
-                  pht('You are not in any rooms yet.')),
-                javelin_tag(
-                  'a',
-                  array(
-                    'href' => '/conpherence/new/',
-                    'class' => 'button grey',
-                    'sigil' => 'workflow',
-                  ),
-                  pht('Create a Room')),
-            )),
+              $nux),
             javelin_tag(
               'div',
               array(
-                'class' => 'conpherence-widget-pane',
-                'id' => 'conpherence-widget-pane',
-                'sigil' => 'conpherence-widget-pane',
+                'class' => 'conpherence-participant-pane',
+                'id' => 'conpherence-participant-pane',
+                'sigil' => 'conpherence-participant-pane',
               ),
               array(
                 phutil_tag(
@@ -191,6 +187,14 @@ final class ConpherenceLayoutView extends AphrontView {
                     'sigil' => 'conpherence-messages',
                   ),
                   nonempty($this->messages, '')),
+                javelin_tag(
+                  'div',
+                  array(
+                    'class' => 'conpherence-search-main',
+                    'id' => 'conpherence-search-main',
+                    'sigil' => 'conpherence-search-main',
+                  ),
+                  nonempty($this->search, '')),
                 phutil_tag(
                   'div',
                   array(
@@ -206,7 +210,52 @@ final class ConpherenceLayoutView extends AphrontView {
                   nonempty($this->replyForm, '')),
               )),
           )),
-      ));
+      );
+  }
+
+  private function buildNUXView() {
+    $viewer = $this->getViewer();
+
+    $engine = new ConpherenceThreadSearchEngine();
+    $engine->setViewer($viewer);
+    $saved = $engine->buildSavedQueryFromBuiltin('all');
+    $query = $engine->buildQueryFromSavedQuery($saved);
+    $pager = $engine->newPagerForSavedQuery($saved);
+    $pager->setPageSize(10);
+    $results = $engine->executeQuery($query, $pager);
+    $view = $engine->renderResults($results, $saved);
+
+    $create_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText(pht('New Room'))
+      ->setHref('/conpherence/new/')
+      ->setWorkflow(true)
+      ->setColor(PHUIButtonView::GREEN);
+
+    if ($results) {
+      $create_button->setIcon('fa-comments');
+
+      $header = id(new PHUIHeaderView())
+        ->setHeader(pht('Joinable Rooms'))
+        ->addActionLink($create_button);
+
+      $box = id(new PHUIObjectBoxView())
+        ->setHeader($header)
+        ->setObjectList($view->getContent());
+
+      return $box;
+    } else {
+
+      $view = id(new PHUIBigInfoView())
+        ->setIcon('fa-comments')
+        ->setTitle(pht('Welcome to Conpherence'))
+        ->setDescription(
+          pht('Conpherence lets you create public or private rooms to '.
+            'communicate with others.'))
+        ->addAction($create_button);
+
+        return $view;
+    }
   }
 
 }

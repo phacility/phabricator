@@ -125,8 +125,8 @@ final class PhabricatorRepositoryURI
         $other_uris = $repository->getURIs();
 
         $identifier_value = array(
-          self::BUILTIN_IDENTIFIER_CALLSIGN => 3,
-          self::BUILTIN_IDENTIFIER_SHORTNAME => 2,
+          self::BUILTIN_IDENTIFIER_SHORTNAME => 3,
+          self::BUILTIN_IDENTIFIER_CALLSIGN => 2,
           self::BUILTIN_IDENTIFIER_ID => 1,
         );
 
@@ -577,7 +577,7 @@ final class PhabricatorRepositoryURI
       self::IO_READWRITE => 200,
       self::IO_READ => 100,
     );
-    $score += idx($io_points, $this->getEffectiveIoType(), 0);
+    $score += idx($io_points, $this->getEffectiveIOType(), 0);
 
     $protocol_points = array(
       self::BUILTIN_PROTOCOL_SSH => 30,
@@ -640,10 +640,6 @@ final class PhabricatorRepositoryURI
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
-  }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
   }
 
 

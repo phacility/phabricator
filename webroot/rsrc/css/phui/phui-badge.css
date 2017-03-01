@@ -3,14 +3,13 @@
  */
 
 .phui-badge-flex-view {
-  padding: 12px 4px 8px;
+  padding: 0;
   overflow: hidden;
-  text-align: center;
 }
 
 .phui-badge-flex-item {
   display: inline-block;
-  padding: 4px 8px;
+  padding: 4px 12px 4px 0;
 }
 
 .phui-badge-flex-view.flex-view-collapsed {
@@ -183,11 +182,6 @@
   line-height: 24px;
   text-align: center;
   display: inline-block;
-  opacity: 0.7;
-}
-
-.phui-badge-mini:hover {
-  opacity: 1;
 }
 
 .phui-badge-mini .phui-icon-view {

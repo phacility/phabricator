@@ -68,7 +68,8 @@ final class PhabricatorAuditInlineComment
 
   public static function loadDraftComments(
     PhabricatorUser $viewer,
-    $commit_phid) {
+    $commit_phid,
+    $raw = false) {
 
     $inlines = id(new DiffusionDiffInlineCommentQuery())
       ->setViewer($viewer)
@@ -79,6 +80,10 @@ final class PhabricatorAuditInlineComment
       ->withIsDeleted(false)
       ->needReplyToComments(true)
       ->execute();
+
+    if ($raw) {
+      return $inlines;
+    }
 
     return self::buildProxies($inlines);
   }

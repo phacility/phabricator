@@ -8,15 +8,6 @@
   position: relative;
 }
 
-.phui-document-view .phui-header-shell {
-  padding: 16px;
-  background-color: {$bluebackground};
-}
-
-.phui-document-content {
-  border-radius: 3px;
-}
-
 .device-desktop .phui-document-view {
   border: 1px solid {$lightblueborder};
   max-width: 960px;
@@ -33,42 +24,9 @@
   margin: 16px;
 }
 
-.phui-crumbs-view + .phui-document-fluid .phui-document-view {
-  margin-top: 0;
-}
-
-.device-desktop .phui-document-view.phui-offset-view {
-  max-width: 800px;
-}
-
 /* Fix so that Phriction Document preview is the same width as the document */
 .device-desktop .phui-remarkup-preview .phui-document-view {
   width: 800px;
-}
-
-.phui-document-sidenav {
-  position:absolute;
-  width: 200px;
-  text-overflow: ellipsis;
-  top: 0;
-  right: 0;
-}
-
-.device-phone .phui-document-sidenav {
-  position: static;
-  width: auto;
-  border-top: 1px solid {$thinblueborder};
-  border-bottom: 1px solid {$thinblueborder};
-}
-
-.device-phone .phui-sidenav-view .phui-document-inner {
-  margin: 0;
-}
-
-.phui-sidenav-view .phui-document-inner {
-  margin-right: 200px;
-  border-right: 1px solid {$thinblueborder};
-  background: #fff;
 }
 
 .phui-document-content .phui-header-shell {
@@ -86,11 +44,6 @@
   .phui-header-shell.phui-header-no-backgound
   .phui-header-view {
   padding: 8px 0 4px;
-}
-
-.phui-document-content .phui-property-list-container {
-  border-bottom: 1px solid {$thinblueborder};
-  background-color: {$lightgreybackground};
 }
 
 .legalpad .phui-document-content .phui-property-list-view {
@@ -127,16 +80,8 @@
   margin: 16px 0;
 }
 
-.device-desktop .phui-document-offset {
-  padding-right: 120px;
-}
-
 .phui-document-view .phui-info-severity-nodata {
   background-color: {$lightgreybackground};
-}
-
-body .phui-document-view .phui-header-shell.phui-bleed-header {
-  padding: 0;
 }
 
 .phui-document-view .phui-property-list-section-header {

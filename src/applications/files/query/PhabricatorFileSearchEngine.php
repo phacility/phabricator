@@ -11,6 +11,10 @@ final class PhabricatorFileSearchEngine
     return 'PhabricatorFilesApplication';
   }
 
+  public function canUseInPanelContext() {
+    return false;
+  }
+
   public function newQuery() {
     return new PhabricatorFileQuery();
   }

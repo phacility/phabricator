@@ -101,10 +101,7 @@ final class DoorkeeperBridgeGitHubUser
 
       $obj = $ref->getExternalObject();
       $this->fillObjectFromData($obj, $spec);
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $obj->save();
-      unset($unguarded);
+      $this->saveExternalObject($ref, $obj);
     }
   }
 

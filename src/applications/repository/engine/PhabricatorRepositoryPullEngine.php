@@ -172,8 +172,6 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function logPull($message) {
-    $code_working = PhabricatorRepositoryStatusMessage::CODE_WORKING;
-    $this->updateRepositoryInitStatus($code_working, $message);
     $this->log('%s', $message);
   }
 
@@ -473,7 +471,7 @@ final class PhabricatorRepositoryPullEngine
       $future->resolvex();
     } catch (CommandException $ex) {
       $err = $ex->getError();
-      $stdout = $ex->getStdOut();
+      $stdout = $ex->getStdout();
 
       // NOTE: Between versions 2.1 and 2.1.1, Mercurial changed the behavior
       // of "hg pull" to return 1 in case of a successful pull with no changes.

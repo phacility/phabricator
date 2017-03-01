@@ -16,6 +16,26 @@ final class PhabricatorStorageManagementDumpWorkflow
               'Add __--master-data__ to the __mysqldump__ command, '.
               'generating a CHANGE MASTER statement in the output.'),
           ),
+          array(
+            'name' => 'output',
+            'param' => 'file',
+            'help' => pht(
+              'Write output directly to disk. This handles errors better '.
+              'than using pipes. Use with __--compress__ to gzip the '.
+              'output.'),
+          ),
+          array(
+            'name' => 'compress',
+            'help' => pht(
+              'With __--output__, write a compressed file to disk instead '.
+              'of a plaintext file.'),
+          ),
+          array(
+            'name' => 'overwrite',
+            'help' => pht(
+              'With __--output__, overwrite the output file if it already '.
+              'exists.'),
+          ),
         ));
   }
 
@@ -24,7 +44,7 @@ final class PhabricatorStorageManagementDumpWorkflow
   }
 
   public function didExecute(PhutilArgumentParser $args) {
-    $api = $this->getAPI();
+    $api = $this->getSingleAPI();
     $patches = $this->getPatches();
 
     $console = PhutilConsole::getConsole();
@@ -55,6 +75,38 @@ final class PhabricatorStorageManagementDumpWorkflow
       }
     }
 
+    $output_file = $args->getArg('output');
+    $is_compress = $args->getArg('compress');
+    $is_overwrite = $args->getArg('overwrite');
+
+    if ($is_compress) {
+      if ($output_file === null) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'The "--compress" flag can only be used alongside "--output".'));
+      }
+    }
+
+    if ($is_overwrite) {
+      if ($output_file === null) {
+        throw new PhutilArgumentUsageException(
+          pht(
+            'The "--overwrite" flag can only be used alongside "--output".'));
+      }
+    }
+
+    if ($output_file !== null) {
+      if (Filesystem::pathExists($output_file)) {
+        if (!$is_overwrite) {
+          throw new PhutilArgumentUsageException(
+            pht(
+              'Output file "%s" already exists. Use "--overwrite" '.
+              'to overwrite.',
+              $output_file));
+        }
+      }
+    }
+
     $argv = array();
     $argv[] = '--hex-blob';
     $argv[] = '--single-transaction';
@@ -79,13 +131,83 @@ final class PhabricatorStorageManagementDumpWorkflow
       $argv[] = $database;
     }
 
+
     if ($has_password) {
-      $err = phutil_passthru('mysqldump -p%P %Ls', $password, $argv);
+      $command = csprintf('mysqldump -p%P %Ls', $password, $argv);
     } else {
-      $err = phutil_passthru('mysqldump %Ls', $argv);
+      $command = csprintf('mysqldump %Ls', $argv);
     }
 
-    return $err;
+    // If we aren't writing to a file, just passthru the command.
+    if ($output_file === null) {
+      return phutil_passthru('%C', $command);
+    }
+
+    // If we are writing to a file, stream the command output to disk. This
+    // mode makes sure the whole command fails if there's an error (commonly,
+    // a full disk). See T6996 for discussion.
+
+    if ($is_compress) {
+      $file = gzopen($output_file, 'wb');
+    } else {
+      $file = fopen($output_file, 'wb');
+    }
+
+    if (!$file) {
+      throw new Exception(
+        pht(
+          'Failed to open file "%s" for writing.',
+          $file));
+    }
+
+    $future = new ExecFuture('%C', $command);
+
+    $lines = new LinesOfALargeExecFuture($future);
+
+    try {
+      foreach ($lines as $line) {
+        $line = $line."\n";
+        if ($is_compress) {
+          $ok = gzwrite($file, $line);
+        } else {
+          $ok = fwrite($file, $line);
+        }
+
+        if ($ok !== strlen($line)) {
+          throw new Exception(
+            pht(
+              'Failed to write %d byte(s) to file "%s".',
+              new PhutilNumber(strlen($line)),
+              $output_file));
+        }
+      }
+
+      if ($is_compress) {
+        $ok = gzclose($file);
+      } else {
+        $ok = fclose($file);
+      }
+
+      if ($ok !== true) {
+        throw new Exception(
+          pht(
+            'Failed to close file "%s".',
+            $output_file));
+      }
+    } catch (Exception $ex) {
+      // If we might have written a partial file to disk, try to remove it so
+      // we don't leave any confusing artifacts laying around.
+
+      try {
+        Filesystem::remove($output_file);
+      } catch (Exception $ex) {
+        // Ignore any errors we hit.
+      }
+
+      throw $ex;
+    }
+
+    return 0;
   }
 
 }

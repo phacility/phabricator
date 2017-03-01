@@ -38,21 +38,24 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
     return array(
       '/config/' => array(
         '' => 'PhabricatorConfigListController',
+        'application/' => 'PhabricatorConfigApplicationController',
         'all/' => 'PhabricatorConfigAllController',
         'history/' => 'PhabricatorConfigHistoryController',
         'edit/(?P<key>[\w\.\-]+)/' => 'PhabricatorConfigEditController',
         'group/(?P<key>[^/]+)/' => 'PhabricatorConfigGroupController',
-        'welcome/' => 'PhabricatorConfigWelcomeController',
+        'version/' => 'PhabricatorConfigVersionController',
         'database/'.
+          '(?:(?P<ref>[^/]+)/'.
           '(?:(?P<database>[^/]+)/'.
           '(?:(?P<table>[^/]+)/'.
-          '(?:(?:col/(?P<column>[^/]+)|key/(?P<key>[^/]+))/)?)?)?'
+          '(?:(?:col/(?P<column>[^/]+)|key/(?P<key>[^/]+))/)?)?)?)?'
           => 'PhabricatorConfigDatabaseStatusController',
         'dbissue/' => 'PhabricatorConfigDatabaseIssueController',
         '(?P<verb>ignore|unignore)/(?P<key>[^/]+)/'
           => 'PhabricatorConfigIgnoreController',
         'issue/' => array(
           '' => 'PhabricatorConfigIssueListController',
+          'panel/' => 'PhabricatorConfigIssuePanelController',
           '(?P<key>[^/]+)/' => 'PhabricatorConfigIssueViewController',
         ),
         'cache/' => array(

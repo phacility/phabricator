@@ -32,7 +32,7 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     $dashboard_id = celerity_generate_unique_node_id();
     $result = id(new AphrontMultiColumnView())
       ->setID($dashboard_id)
-      ->setFluidlayout(true)
+      ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_LARGE);
 
     if ($this->arrangeMode) {
@@ -43,17 +43,28 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
 
     foreach ($panel_grid_locations as $column => $panel_column_locations) {
       $panel_phids = $panel_column_locations;
-      $column_panels = array_select_keys($panels, $panel_phids);
+
+      // TODO: This list may contain duplicates when the dashboard itself
+      // does not? Perhaps this is related to T10612. For now, just unique
+      // the list before moving on.
+      $panel_phids = array_unique($panel_phids);
+
       $column_result = array();
-      foreach ($column_panels as $panel) {
-        $column_result[] = id(new PhabricatorDashboardPanelRenderingEngine())
+      foreach ($panel_phids as $panel_phid) {
+        $panel_engine = id(new PhabricatorDashboardPanelRenderingEngine())
           ->setViewer($viewer)
-          ->setPanel($panel)
           ->setDashboardID($dashboard->getID())
           ->setEnableAsyncRendering(true)
+          ->setPanelPHID($panel_phid)
           ->setParentPanelPHIDs(array())
-          ->setHeaderMode($h_mode)
-          ->renderPanel();
+          ->setHeaderMode($h_mode);
+
+        $panel = idx($panels, $panel_phid);
+        if ($panel) {
+          $panel_engine->setPanel($panel);
+        }
+
+        $column_result[] = $panel_engine->renderPanel();
       }
       $column_class = $layout_config->getColumnClass(
         $column,
@@ -70,17 +81,43 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     }
 
     if ($this->arrangeMode) {
+      $footer = null;
       Javelin::initBehavior(
         'dashboard-move-panels',
         array(
           'dashboardID' => $dashboard_id,
           'moveURI' => '/dashboard/movepanel/'.$dashboard->getID().'/',
         ));
+    } else {
+      $name = $dashboard->getName();
+      $icon = id(new PHUIIconView())
+        ->setIcon($dashboard->getIcon())
+        ->addClass('msr');
+      $footer_left = phutil_tag(
+        'a',
+        array(
+          'class' => 'dashboard-footer-name',
+          'href' => '/dashboard/view/'.$dashboard->getID().'/',
+        ),
+        array(
+          $icon,
+          $name,
+        ));
+
+      $footer = phutil_tag(
+        'div',
+        array(
+          'class' => 'dashboard-footer-view',
+        ),
+        array(
+          $footer_left,
+        ));
     }
 
     $view = id(new PHUIBoxView())
       ->addClass('dashboard-view')
-      ->appendChild($result);
+      ->appendChild($result)
+      ->appendChild($footer);
 
     return $view;
   }
@@ -112,7 +149,6 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       ->setTag('a')
       ->setHref($create_uri)
       ->setWorkflow(true)
-      ->setColor(PHUIButtonView::GREY)
       ->setText(pht('Create Panel'))
       ->addClass(PHUI::MARGIN_MEDIUM);
 
@@ -120,7 +156,6 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
       ->setTag('a')
       ->setHref($add_uri)
       ->setWorkflow(true)
-      ->setColor(PHUIButtonView::GREY)
       ->setText(pht('Add Existing Panel'))
       ->addClass(PHUI::MARGIN_MEDIUM);
 

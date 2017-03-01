@@ -59,27 +59,6 @@ final class AphrontFormDateControlValue extends Phobject {
     return $this->viewer;
   }
 
-  public static function newFromParts(
-    PhabricatorUser $viewer,
-    $year,
-    $month,
-    $day,
-    $time = null,
-    $enabled = true) {
-
-    $value = new AphrontFormDateControlValue();
-    $value->viewer = $viewer;
-    list($value->valueDate, $value->valueTime) =
-      $value->getFormattedDateFromParts(
-        $year,
-        $month,
-        $day,
-        coalesce($time, '12:00 AM'));
-    $value->valueEnabled = $enabled;
-
-    return $value;
-  }
-
   public static function newFromRequest(AphrontRequest $request, $key) {
     $value = new AphrontFormDateControlValue();
     $value->viewer = $request->getViewer();
@@ -203,7 +182,7 @@ final class AphrontFormDateControlValue extends Phobject {
       return null;
     }
 
-    return $datetime->format('U');
+    return (int)$datetime->format('U');
   }
 
   private function getTimeFormat() {
@@ -251,6 +230,32 @@ final class AphrontFormDateControlValue extends Phobject {
 
     return $datetime;
   }
+
+  public function newPhutilDateTime() {
+    $datetime = $this->getDateTime();
+    if (!$datetime) {
+      return null;
+    }
+
+    $all_day = !strlen($this->valueTime);
+    $zone_identifier = $this->viewer->getTimezoneIdentifier();
+
+    $result = id(new PhutilCalendarAbsoluteDateTime())
+      ->setYear((int)$datetime->format('Y'))
+      ->setMonth((int)$datetime->format('m'))
+      ->setDay((int)$datetime->format('d'))
+      ->setHour((int)$datetime->format('G'))
+      ->setMinute((int)$datetime->format('i'))
+      ->setSecond((int)$datetime->format('s'))
+      ->setTimezone($zone_identifier);
+
+    if ($all_day) {
+      $result->setIsAllDay(true);
+    }
+
+    return $result;
+  }
+
 
   private function getFormattedDateFromParts(
     $year,

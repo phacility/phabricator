@@ -17,12 +17,20 @@
   clear: both;
 }
 
+body.white-background {
+  background: #fff;
+}
+
 .phabricator-standard-page-footer {
   text-align: right;
   margin: 44px 16px 16px;
   padding: 12px 0;
   border-top: 1px solid rgba({$alphagrey},.1);
   color: {$greytext};
+}
+
+.with-durable-column .phabricator-standard-page-footer {
+  margin: 36px 16px 28px;
 }
 
 .device .phabricator-standard-page-footer {
@@ -52,14 +60,6 @@
   color: {$greytext};
 }
 
-.keyboard-shortcut-help kbd {
-  background: #222222;
-  padding: 6px;
-  color: #ffffff;
-  font-weight: bold;
-  border: 1px solid #555555;
-}
-
 .keyboard-focus-focus-reticle {
   background: #ffffd3;
   position: absolute;
@@ -76,24 +76,16 @@ a.handle-status-closed:hover {
   color: #19558D;
 }
 
-a.handle-availability-disabled,
-a.handle-availability-none,
-a.handle-availability-partial {
-  padding-left: 11px;
-  background-repeat: no-repeat;
-  background-position: -4px center;
+.handle-availability-none .perfect-circle {
+  color: {$red};
 }
 
-a.handle-availability-none {
-  background-image: url(/rsrc/image/icon/fatcow/bullet_red.png);
+.handle-availability-partial .perfect-circle {
+  color: {$orange};
 }
 
-a.handle-availability-partial {
-  background-image: url(/rsrc/image/icon/fatcow/bullet_orange.png);
-}
-
-a.handle-availability-disabled {
-  background-image: url(/rsrc/image/icon/fatcow/bullet_black.png);
+.handle-availability-disabled .perfect-circle {
+  color: {$greytext};
 }
 
 .aphront-developer-error-callout {
@@ -103,17 +95,6 @@ a.handle-availability-disabled {
   color: white;
   text-align: center;
   font-size: {$smallerfontsize};
-}
-
-.setup-warning-callout {
-  padding: 8px 16px;
-  background: {$lightred};
-  border-bottom: 1px solid {$sh-redborder};
-  position: relative;
-}
-
-.setup-warning-callout a {
-  color: {$red};
 }
 
 .phui-handle .phui-icon-view {

@@ -117,7 +117,9 @@ final class DiffusionSubversionServeSSHWorkflow
           $uri = $struct[2]['value'];
           $path = $this->getPathFromSubversionURI($uri);
 
-          return $this->loadRepositoryWithPath($path);
+          return $this->loadRepositoryWithPath(
+            $path,
+            PhabricatorRepositoryType::REPOSITORY_TYPE_SVN);
         }
       }
 
@@ -445,6 +447,16 @@ final class DiffusionSubversionServeSSHWorkflow
     $path = preg_replace('(/+)', '/', $path);
 
     return $path;
+  }
+
+  protected function raiseWrongVCSException(
+    PhabricatorRepository $repository) {
+    throw new Exception(
+      pht(
+        'This repository ("%s") is not a Subversion repository. Use "%s" to '.
+        'interact with this repository.',
+        $repository->getDisplayName(),
+        $repository->getVersionControlSystem()));
   }
 
 }

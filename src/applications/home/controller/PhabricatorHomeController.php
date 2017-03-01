@@ -2,71 +2,42 @@
 
 abstract class PhabricatorHomeController extends PhabricatorController {
 
-  public function buildNav() {
-    $user = $this->getRequest()->getUser();
+  private $home;
+  private $profileMenu;
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/'));
+  public function buildApplicationMenu() {
+    $menu = $this->newApplicationMenu();
 
-    $applications = id(new PhabricatorApplicationQuery())
-      ->setViewer($user)
-      ->withInstalled(true)
-      ->withUnlisted(false)
-      ->withLaunchable(true)
-      ->execute();
-
-    $pinned = $user->getUserSetting(
-      PhabricatorPinnedApplicationsSetting::SETTINGKEY);
-
-    // Force "Applications" to appear at the bottom.
-    $meta_app = 'PhabricatorApplicationsApplication';
-    $pinned = array_fuse($pinned);
-    unset($pinned[$meta_app]);
-    $pinned[$meta_app] = $meta_app;
-    $applications[$meta_app] = PhabricatorApplication::getByClass($meta_app);
-
-    $tiles = array();
-
-    $home_app = new PhabricatorHomeApplication();
-
-    $tiles[] = id(new PhabricatorApplicationLaunchView())
-      ->setApplication($home_app)
-      ->setApplicationStatus($home_app->loadStatus($user))
-      ->addClass('phabricator-application-launch-phone-only')
-      ->setUser($user);
-
-    foreach ($pinned as $pinned_application) {
-      if (empty($applications[$pinned_application])) {
-        continue;
-      }
-
-      $application = $applications[$pinned_application];
-
-      $tile = id(new PhabricatorApplicationLaunchView())
-        ->setApplication($application)
-        ->setApplicationStatus($application->loadStatus($user))
-        ->setUser($user);
-
-      $tiles[] = $tile;
+    $profile_menu = $this->getProfileMenu();
+    if ($profile_menu) {
+      $menu->setProfileMenu($profile_menu);
     }
 
-    $nav->addCustomBlock(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'application-tile-group',
-        ),
-        $tiles));
+    return $menu;
+  }
 
-    $nav->addFilter(
-      '',
-      pht('Customize Menu...'),
-      '/settings/panel/home/');
+  protected function getProfileMenu() {
+    if (!$this->profileMenu) {
+      $viewer = $this->getViewer();
+      $applications = id(new PhabricatorApplicationQuery())
+        ->setViewer($viewer)
+        ->withClasses(array('PhabricatorHomeApplication'))
+        ->withInstalled(true)
+        ->execute();
+      $home = head($applications);
+      if (!$home) {
+        return null;
+      }
 
-    $nav->addClass('phabricator-side-menu-home');
-    $nav->selectFilter(null);
+      $engine = id(new PhabricatorHomeProfileMenuEngine())
+        ->setViewer($viewer)
+        ->setProfileObject($home)
+        ->setCustomPHID($viewer->getPHID());
 
-    return $nav;
+      $this->profileMenu = $engine->buildNavigation();
+    }
+
+    return $this->profileMenu;
   }
 
 }

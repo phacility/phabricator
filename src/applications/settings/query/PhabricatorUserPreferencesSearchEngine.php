@@ -62,11 +62,14 @@ final class PhabricatorUserPreferencesSearchEngine
       ->setViewer($viewer);
     foreach ($settings as $setting) {
 
+      $icon = id(new PHUIIconView())
+        ->setIcon('fa-globe')
+        ->setBackground('bg-sky');
+
       $item = id(new PHUIObjectItemView())
         ->setHeader($setting->getDisplayName())
         ->setHref($setting->getEditURI())
-        ->setImageURI(PhabricatorUser::getDefaultProfileImageURI())
-        ->setIcon('fa-globe')
+        ->setImageIcon($icon)
         ->addAttribute(pht('Edit global default settings for all users.'));
 
       $list->addItem($item);

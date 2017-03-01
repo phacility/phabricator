@@ -9,75 +9,102 @@ Overview
 IMPORTANT: Calendar is a prototype application. See
 @{article:User Guide: Prototype Applications}.
 
-The Calendar application is a tool that allows users to schedule group events
-and share personal plans.
-
-There are several kinds of events you can create:
-
-- Regular events such as a one-time meeting or a personal appointment.
-- All day events such as a company-wide holiday or a vacation.
-- Recurring events, which can be regular or all day, such as a weekly 1-1 or
-  a birthday.
+Calendar allows you to schedule parties and invite other users to party with
+you. Everyone loves to party. Use Calendar primarily for partying.
 
 
-Editing Events
-==============
+Reminders
+=========
 
-All fields of basic and all day events can be edited after the event has been
-created.
+Calendar sends reminder email before events occur. You will receive a reminder
+if:
 
-Every instance of a recurring event has an index that maintains its place in
-the sequence order. Before an instance of a recurring event is edited, it is
-considered a ghost event, or a placeholder. This means that there is no
-database entry for that instance. Rather, when querying for events, if a
-recurring series of events overlaps with the query range, instance
-placeholders of that recurring event are generated and are displayed for
-that range. If a placeholder instance of a recurring event is edited, a real
-entry in the database is created and all changes are saved. When that
-instance falls within a query range, the real instance event replaces the
-old placeholder instance.
+  - you have marked yourself as **attending** the event;
+  - the event has not been cancelled; and
+  - the event was not imported from an external source.
 
-To prevent disordering of the recurring sequence of events, parent recurring
-events do not allow editing of date-related fields like recurrence frequency
-and recurrence start and end dates. If all instances of the recurring event
-need to be rescheduled, users are encouraged to cancel a recurring event and
-create a new recurring event with the revised date and time.
+Reminders are sent 15 minutes before events begin.
 
 
-Cancelling Events
-=================
+Availability
+============
 
-Cancelling basic events will hide that event from most of the builtin Calendar
-queries, unless the query specifies to display cancelled events.
+Across all applications, Phabricator shows a red dot next to usernames if the
+user is currently attending an event. This provides a hint that they may be in
+a meeting (or on vacation) and could take a while to get back to you about a
+revision or task.
 
-There are two ways to cancel an instance of a recurring event.
+You can click through to a user's profile to see more details about their
+availability.
 
-- Cancel an instance of a recurring event.
-- Cancel the entire series of a recurring event.
+Status Icons
+============
 
-Cancelling a placeholder instance of a recurring event will create a real
-cancelled event that will replace the placeholder instance. Consequently,
-the cancellation status of that instance of the recurring event will
-persist if the parent event is cancelled and subsequently reinstated.
+On the month and day views, Calendar shows an icon next to each event to
+indicate status. The icons are:
 
-When an entire series of a recurring event is cancelled, all the placeholder
-and real instances are also cancelled. An entire series can similarly be
-reinstated, but it is currently not possible to reinstate an instance of a
-cancelled recurring event series. To reinstate that instance, the entire
-series must be reinstated. If an instance of a recurring event has been
-cancelled, then the entire recurring event series is also cancelled,
-reinstating the series will not reinstate the previously cancelled instances
-of that event.
+  - {icon user-plus, color=green} **Invited, Individual**: You're personally
+    invited to the event.
+  - {icon users, color=green} **Invited, Group**: A project you are a member
+    of is invited to the event.
+  - {icon check-circle, color=green} **Attending**: You're attending the event.
+  - {icon times-circle, color=grey} **Declined**: You've declined the event.
+  - {icon times, color=red} **Cancelled**: The event has been cancelled.
+
+If you don't have any special relationship to the event and the event does not
+have any special status, an event-specific icon is shown instead.
+
+Importing Events
+================
+
+You can import events from email and from other calendar applications
+(like Google Calendar and Calendar.app) into Calendar. For a detailed
+guide, see @{article:Calendar User Guide: Importing Events}.
 
 
-Commenting On Recurring Events
-==============================
+Exporting Events
+================
 
-If a placeholder instance of a recurring event has not been converted to a
-real instance of the series as a result of editing or cancelling, commenting on
-that placeholder instance does not currently save a draft for that instance
-only. The draft is saved for the recurring event parent, so the parent
-recurring event and all placeholder instances will show that draft. When a
-comment is actually added to a placeholder instance, the instance is converted
-to a recurrence exception, and the comment will only appear on that instance
-of the recurring event.
+You can export events from Calendar to other applications by downloading
+events as `.ics` files or configuring a calendar subscription.
+
+Calendar also attaches `.ics` files containing event information when it sends
+email. Most calendar applications can import these files.
+
+For a detailed guide to exporting events, see
+@{article:Calendar User Guide: Exporting Events}.
+
+
+Recurring Events
+================
+
+To create a recurring event (like a weekly meeting), first create an event
+normally, then select {nav Make Recurring} from the action menu and configure
+how often the event should repeat.
+
+**Monthly Events on the 29th, 30th or 31st**: If you configure an event to
+repeat monthly and schedule the first instance on the 29th, 30th, or 31st of
+the month, it can not occur on the same day every month because some months
+do not have enough days.
+
+Instead, these events are internally scheduled to occur relative to the end
+of the month. For example, if you schedule a monthly event on the 30th of a
+31 day month, it will occur on the second-to-last day of each following month.
+
+**Complex RRULEs**: Calendar supports complex RRULEs internally (like events
+that occur every-other Thursday in prime-numbered months) but does not
+currently have a UI for scheduling events with complex rules.
+
+Future versions of Calendar may improve support for complex scheduling by using
+the UI. In some cases, a partial workaround is to schedule the event in another
+application (which has more complex scheduling controls available) and then
+import it into Calendar.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - importing events with @{article:Calendar User Guide: Importing Events}; or
+  - exporting events with @{article:Calendar User Guide: Exporting Events}.

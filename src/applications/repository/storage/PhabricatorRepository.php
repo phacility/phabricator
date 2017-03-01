@@ -35,7 +35,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_PATHCHANGE = 'repository_pathchange';
   const TABLE_FILESYSTEM = 'repository_filesystem';
   const TABLE_SUMMARY = 'repository_summary';
-  const TABLE_BADCOMMIT = 'repository_badcommit';
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
   const TABLE_PARENTS = 'repository_parents';
   const TABLE_COVERAGE = 'repository_coverage';
@@ -443,6 +442,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'short names may not contain only numbers.',
           $slug));
     }
+
+    if (preg_match('/\\.git/', $slug)) {
+      throw new Exception(
+        pht(
+          'The name "%s" is not a valid repository short name. Repository '.
+          'short names must not end in ".git". This suffix will be added '.
+          'automatically in appropriate contexts.',
+          $slug));
+    }
   }
 
   public static function assertValidCallsign($callsign) {
@@ -564,6 +572,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getURI() {
+    $short_name = $this->getRepositorySlug();
+    if (strlen($short_name)) {
+      return "/source/{$short_name}/";
+    }
+
     $callsign = $this->getCallsign();
     if (strlen($callsign)) {
       return "/diffusion/{$callsign}/";
@@ -574,7 +587,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
   public function getPathURI($path) {
-    return $this->getURI().$path;
+    return $this->getURI().ltrim($path, '/');
   }
 
   public function getCommitURI($identifier) {
@@ -587,14 +600,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return "/R{$id}:{$identifier}";
   }
 
-  public static function parseRepositoryServicePath($request_path) {
-    // NOTE: In Mercurial over SSH, the path will begin without a leading "/",
-    // so we're matching it optionally.
+  public static function parseRepositoryServicePath($request_path, $vcs) {
+    $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
 
     $patterns = array(
       '(^'.
-        '(?P<base>/?diffusion/(?P<identifier>[A-Z]+|[0-9]\d*))'.
-        '(?P<path>(?:/.*)?)'.
+        '(?P<base>/?(?:diffusion|source)/(?P<identifier>[^/]+))'.
+        '(?P<path>.*)'.
       '\z)',
     );
 
@@ -606,6 +618,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
 
       $identifier = $matches['identifier'];
+      if ($is_git) {
+        $identifier = preg_replace('/\\.git\z/', '', $identifier);
+      }
+
       $base = $matches['base'];
       $path = $matches['path'];
       break;
@@ -625,28 +641,15 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function getCanonicalPath($request_path) {
     $standard_pattern =
       '(^'.
-        '(?P<prefix>/diffusion/)'.
+        '(?P<prefix>/(?:diffusion|source)/)'.
         '(?P<identifier>[^/]+)'.
         '(?P<suffix>(?:/.*)?)'.
       '\z)';
 
     $matches = null;
     if (preg_match($standard_pattern, $request_path, $matches)) {
-      $prefix = $matches['prefix'];
-
-      $callsign = $this->getCallsign();
-      if ($callsign) {
-        $identifier = $callsign;
-      } else {
-        $identifier = $this->getID();
-      }
-
       $suffix = $matches['suffix'];
-      if (!strlen($suffix)) {
-        $suffix = '/';
-      }
-
-      return $prefix.$identifier.$suffix;
+      return $this->getPathURI($suffix);
     }
 
     $commit_pattern =
@@ -686,6 +689,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'lint':
       case 'pathtree':
       case 'refs':
+      case 'compare':
         break;
       case 'branch':
         // NOTE: This does not actually require a branch, and won't have one
@@ -707,6 +711,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $commit   = idx($params, 'commit');
     $line     = idx($params, 'line');
 
+    $head = idx($params, 'head');
+    $against = idx($params, 'against');
+
     if ($req_commit && !strlen($commit)) {
       throw new Exception(
         pht(
@@ -725,29 +732,19 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       return $this->getCommitURI($commit);
     }
 
-
-    $identifier = $this->getID();
-
-    $callsign = $this->getCallsign();
-    if ($callsign !== null) {
-      $identifier = $callsign;
-    }
-
-    if (strlen($identifier)) {
-      $identifier = phutil_escape_uri_path_component($identifier);
-    }
-
     if (strlen($path)) {
       $path = ltrim($path, '/');
       $path = str_replace(array(';', '$'), array(';;', '$$'), $path);
       $path = phutil_escape_uri($path);
     }
 
+    $raw_branch = $branch;
     if (strlen($branch)) {
       $branch = phutil_escape_uri_path_component($branch);
       $path = "{$branch}/{$path}";
     }
 
+    $raw_commit = $commit;
     if (strlen($commit)) {
       $commit = str_replace('$', '$$', $commit);
       $commit = ';'.phutil_escape_uri($commit);
@@ -757,6 +754,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $line = '$'.phutil_escape_uri($line);
     }
 
+    $query = array();
     switch ($action) {
       case 'change':
       case 'history':
@@ -767,13 +765,27 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       case 'lint':
       case 'pathtree':
       case 'refs':
-        $uri = "/diffusion/{$identifier}/{$action}/{$path}{$commit}{$line}";
+        $uri = $this->getPathURI("/{$action}/{$path}{$commit}{$line}");
+        break;
+      case 'compare':
+        $uri = $this->getPathURI("/{$action}/");
+        if (strlen($head)) {
+          $query['head'] = $head;
+        } else if (strlen($raw_commit)) {
+          $query['commit'] = $raw_commit;
+        } else if (strlen($raw_branch)) {
+          $query['head'] = $raw_branch;
+        }
+
+        if (strlen($against)) {
+          $query['against'] = $against;
+        }
         break;
       case 'branch':
         if (strlen($path)) {
-          $uri = "/diffusion/{$identifier}/repository/{$path}";
+          $uri = $this->getPathURI("/repository/{$path}");
         } else {
-          $uri = "/diffusion/{$identifier}/";
+          $uri = $this->getPathURI('/');
         }
         break;
       case 'external':
@@ -800,8 +812,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       );
     }
 
-    if (idx($params, 'params')) {
-      $uri->setQueryParams($params['params']);
+    $query = idx($params, 'params', array()) + $query;
+
+    if ($query) {
+      $uri->setQueryParams($query);
     }
 
     return $uri;
@@ -1650,12 +1664,27 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $this->getID(),
         $status_type);
     } else {
+      // If the existing message has the same code (e.g., we just hit an
+      // error and also previously hit an error) we increment the message
+      // count. This allows us to determine how many times in a row we've
+      // run into an error.
+
+      // NOTE: The assignments in "ON DUPLICATE KEY UPDATE" are evaluated
+      // in order, so the "messageCount" assignment must occur before the
+      // "statusCode" assignment. See T11705.
+
       queryfx(
         $conn_w,
         'INSERT INTO %T
-          (repositoryID, statusType, statusCode, parameters, epoch)
-          VALUES (%d, %s, %s, %s, %d)
+          (repositoryID, statusType, statusCode, parameters, epoch,
+            messageCount)
+          VALUES (%d, %s, %s, %s, %d, %d)
           ON DUPLICATE KEY UPDATE
+            messageCount =
+              IF(
+                statusCode = VALUES(statusCode),
+                messageCount + VALUES(messageCount),
+                VALUES(messageCount)),
             statusCode = VALUES(statusCode),
             parameters = VALUES(parameters),
             epoch = VALUES(epoch)',
@@ -1664,7 +1693,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $status_type,
         $status_code,
         json_encode($parameters),
-        time());
+        time(),
+        1);
     }
 
     return $this;
@@ -1739,6 +1769,33 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * @return  int   Repository update interval, in seconds.
    */
   public function loadUpdateInterval($minimum = 15) {
+    // First, check if we've hit errors recently. If we have, wait one period
+    // for each consecutive error. Normally, this corresponds to a backoff of
+    // 15s, 30s, 45s, etc.
+
+    $message_table = new PhabricatorRepositoryStatusMessage();
+    $conn = $message_table->establishConnection('r');
+    $error_count = queryfx_one(
+      $conn,
+      'SELECT MAX(messageCount) error_count FROM %T
+        WHERE repositoryID = %d
+        AND statusType IN (%Ls)
+        AND statusCode IN (%Ls)',
+      $message_table->getTableName(),
+      $this->getID(),
+      array(
+        PhabricatorRepositoryStatusMessage::TYPE_INIT,
+        PhabricatorRepositoryStatusMessage::TYPE_FETCH,
+      ),
+      array(
+        PhabricatorRepositoryStatusMessage::CODE_ERROR,
+      ));
+
+    $error_count = (int)$error_count['error_count'];
+    if ($error_count > 0) {
+      return (int)($minimum * $error_count);
+    }
+
     // If a repository is still importing, always pull it as frequently as
     // possible. This prevents us from hanging for a long time at 99.9% when
     // importing an inactive repository.
@@ -1759,32 +1816,35 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $window_start);
     if ($last_commit) {
       $time_since_commit = ($window_start - $last_commit['epoch']);
-
-      $last_few_days = phutil_units('3 days in seconds');
-
-      if ($time_since_commit <= $last_few_days) {
-        // For repositories with activity in the recent past, we wait one
-        // extra second for every 10 minutes since the last commit. This
-        // shorter backoff is intended to handle weekends and other short
-        // breaks from development.
-        $smart_wait = ($time_since_commit / 600);
-      } else {
-        // For repositories without recent activity, we wait one extra second
-        // for every 4 minutes since the last commit. This longer backoff
-        // handles rarely used repositories, up to the maximum.
-        $smart_wait = ($time_since_commit / 240);
-      }
-
-      // We'll never wait more than 6 hours to pull a repository.
-      $longest_wait = phutil_units('6 hours in seconds');
-      $smart_wait = min($smart_wait, $longest_wait);
-
-      $smart_wait = max($minimum, $smart_wait);
     } else {
-      $smart_wait = $minimum;
+      // If the repository has no commits, treat the creation date as
+      // though it were the date of the last commit. This makes empty
+      // repositories update quickly at first but slow down over time
+      // if they don't see any activity.
+      $time_since_commit = ($window_start - $this->getDateCreated());
     }
 
-    return $smart_wait;
+    $last_few_days = phutil_units('3 days in seconds');
+
+    if ($time_since_commit <= $last_few_days) {
+      // For repositories with activity in the recent past, we wait one
+      // extra second for every 10 minutes since the last commit. This
+      // shorter backoff is intended to handle weekends and other short
+      // breaks from development.
+      $smart_wait = ($time_since_commit / 600);
+    } else {
+      // For repositories without recent activity, we wait one extra second
+      // for every 4 minutes since the last commit. This longer backoff
+      // handles rarely used repositories, up to the maximum.
+      $smart_wait = ($time_since_commit / 240);
+    }
+
+    // We'll never wait more than 6 hours to pull a repository.
+    $longest_wait = phutil_units('6 hours in seconds');
+    $smart_wait = min($smart_wait, $longest_wait);
+    $smart_wait = max($minimum, $smart_wait);
+
+    return (int)$smart_wait;
   }
 
 
@@ -1805,21 +1865,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $never_proxy,
     array $protocols) {
 
-    $service = $this->loadAlmanacService();
-    if (!$service) {
+    $cache_key = $this->getAlmanacServiceCacheKey();
+    if (!$cache_key) {
       return null;
     }
 
-    $bindings = $service->getActiveBindings();
-    if (!$bindings) {
-      throw new Exception(
-        pht(
-          'The Almanac service for this repository is not bound to any '.
-          'interfaces.'));
+    $cache = PhabricatorCaches::getMutableStructureCache();
+    $uris = $cache->getKey($cache_key, false);
+
+    // If we haven't built the cache yet, build it now.
+    if ($uris === false) {
+      $uris = $this->buildAlmanacServiceURIs();
+      $cache->setKey($cache_key, $uris);
+    }
+
+    if ($uris === null) {
+      return null;
     }
 
     $local_device = AlmanacKeys::getDeviceID();
-
     if ($never_proxy && !$local_device) {
       throw new Exception(
         pht(
@@ -1830,10 +1894,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $protocol_map = array_fuse($protocols);
 
-    $uris = array();
-    foreach ($bindings as $binding) {
-      $iface = $binding->getInterface();
-
+    $results = array();
+    foreach ($uris as $uri) {
       // If we're never proxying this and it's locally satisfiable, return
       // `null` to tell the caller to handle it locally. If we're allowed to
       // proxy, we skip this check and may proxy the request to ourselves.
@@ -1841,22 +1903,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       // return `null`, and then the request will actually run.)
 
       if ($local_device && $never_proxy) {
-        if ($iface->getDevice()->getName() == $local_device) {
+        if ($uri['device'] == $local_device) {
           return null;
         }
       }
 
-      $uri = $this->getClusterRepositoryURIFromBinding($binding);
-
-      $protocol = $uri->getProtocol();
-      if (empty($protocol_map[$protocol])) {
-        continue;
+      if (isset($protocol_map[$uri['protocol']])) {
+        $results[] = new PhutilURI($uri['uri']);
       }
-
-      $uris[] = $uri;
     }
 
-    if (!$uris) {
+    if (!$results) {
       throw new Exception(
         pht(
           'The Almanac service for this repository is not bound to any '.
@@ -1871,10 +1928,51 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'Cluster hosts must correctly route their intracluster requests.'));
     }
 
-    shuffle($uris);
-    return head($uris);
+    shuffle($results);
+    return head($results);
   }
 
+  public function getAlmanacServiceCacheKey() {
+    $service_phid = $this->getAlmanacServicePHID();
+    if (!$service_phid) {
+      return null;
+    }
+
+    $repository_phid = $this->getPHID();
+    return "diffusion.repository({$repository_phid}).service({$service_phid})";
+  }
+
+  private function buildAlmanacServiceURIs() {
+    $service = $this->loadAlmanacService();
+    if (!$service) {
+      return null;
+    }
+
+    $bindings = $service->getActiveBindings();
+    if (!$bindings) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is not bound to any '.
+          'interfaces.'));
+    }
+
+    $uris = array();
+    foreach ($bindings as $binding) {
+      $iface = $binding->getInterface();
+
+      $uri = $this->getClusterRepositoryURIFromBinding($binding);
+      $protocol = $uri->getProtocol();
+      $device_name = $iface->getDevice()->getName();
+
+      $uris[] = array(
+        'protocol' => $protocol,
+        'uri' => (string)$uri,
+        'device' => $device_name,
+      );
+    }
+
+    return $uris;
+  }
 
   /**
    * Build a new Conduit client in order to make a service call to this
@@ -1978,6 +2076,61 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $client;
   }
 
+  public function getPassthroughEnvironmentalVariables() {
+    $env = $_ENV;
+
+    if ($this->isGit()) {
+      // $_ENV does not populate in CLI contexts if "E" is missing from
+      // "variables_order" in PHP config. Currently, we do not require this
+      // to be configured. Since it may not be, explictitly bring expected Git
+      // environmental variables into scope. This list is not exhaustive, but
+      // only lists variables with a known impact on commit hook behavior.
+
+      // This can be removed if we later require "E" in "variables_order".
+
+      $git_env = array(
+        'GIT_OBJECT_DIRECTORY',
+        'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+        'GIT_QUARANTINE_PATH',
+      );
+      foreach ($git_env as $key) {
+        $value = getenv($key);
+        if (strlen($value)) {
+          $env[$key] = $value;
+        }
+      }
+
+      $key = 'GIT_PUSH_OPTION_COUNT';
+      $git_count = getenv($key);
+      if (strlen($git_count)) {
+        $git_count = (int)$git_count;
+        $env[$key] = $git_count;
+        for ($ii = 0; $ii < $git_count; $ii++) {
+          $key = 'GIT_PUSH_OPTION_'.$ii;
+          $env[$key] = getenv($key);
+        }
+      }
+    }
+
+    $result = array();
+    foreach ($env as $key => $value) {
+      // In Git, pass anything matching "GIT_*" though. Some of these variables
+      // need to be preserved to allow `git` operations to work properly when
+      // running from commit hooks.
+      if ($this->isGit()) {
+        if (preg_match('/^GIT_/', $key)) {
+          $result[$key] = $value;
+        }
+      }
+    }
+
+    return $result;
+  }
+
+  public function supportsBranchComparison() {
+    return $this->isGit();
+  }
+
 /* -(  Repository URIs  )---------------------------------------------------- */
 
 
@@ -2062,9 +2215,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function newBuiltinURIs() {
     $has_callsign = ($this->getCallsign() !== null);
     $has_shortname = ($this->getRepositorySlug() !== null);
-
-    // TODO: For now, never enable these because they don't work yet.
-    $has_shortname = false;
 
     $identifier_map = array(
       PhabricatorRepositoryURI::BUILTIN_IDENTIFIER_CALLSIGN => $has_callsign,
@@ -2284,11 +2434,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
     return false;
   }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */

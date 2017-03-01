@@ -5,6 +5,7 @@
 .phui-info-view {
   border-style: solid;
   border-width: 1px;
+  background: #fff;
   margin: 16px;
   padding: 12px;
   border-radius: 3px;
@@ -22,8 +23,17 @@
   padding: 0;
 }
 
+.phui-info-view-icon {
+  width: 24px;
+  float: left;
+}
+
 .phui-info-view-body {
   line-height: 1.6em;
+}
+
+.phui-info-view.phui-info-has-icon .phui-info-view-body {
+  margin-left: 24px;
 }
 
 .phui-info-view-body tt {
@@ -48,68 +58,58 @@
 h1.phui-info-view-head {
   font-weight: bold;
   font-size: {$biggerfontsize};
-  line-height: 1.2em;
+  line-height: 1.3em;
 }
 
 .phui-info-view-list {
-  margin: 0 0 0 16px;
-  list-style: disc;
-  line-height: 1.5em;
+  margin: 0;
+  list-style: none;
+  line-height: 1.6em;
 }
 
-.phui-info-view .phui-info-view-actions .button:hover {
-  background: #fff;
-  box-shadow: none;
+.phui-info-view .phui-info-icon {
+  padding-top: 1px;
+  font-size: 16px;
 }
 
-.phui-info-severity-error,
-.phui-info-severity-error a.button {
-  border-color: {$sh-redborder};
-  background: {$sh-redbackground};
+.phui-info-severity-error {
+  border-color: {$red};
+  border-left-width: 6px;
 }
 
-.phui-info-severity-error a.button {
-  color: {$sh-redtext};
+.phui-info-severity-error .phui-info-icon {
+  color: {$red};
 }
 
-.phui-info-severity-warning,
-.phui-info-severity-warning a.button {
-  border-color: {$sh-yellowborder};
-  background: {$sh-yellowbackground};
+.phui-info-severity-warning {
+  border-color: {$yellow};
+  border-left-width: 6px;
 }
 
-.phui-info-severity-warning a.button {
-  color: {$sh-yellowtext};
+.phui-info-severity-warning .phui-info-icon {
+  color: {$yellow};
 }
 
-.phui-info-severity-notice,
-.phui-info-severity-notice a.button {
-  border-color: {$sh-blueborder};
-  background: {$sh-bluebackground};
+.phui-info-severity-notice {
+  border-color: {$blue};
+  border-left-width: 6px;
 }
 
-.phui-info-severity-notice a.button {
-  color: {$sh-bluetext};
+.phui-info-severity-notice .phui-info-icon {
+  color: {$blue};
 }
 
-.phui-info-severity-nodata,
-.phui-info-severity-nodata a.button {
+.phui-info-severity-nodata {
   border-color: {$lightgreyborder};
-  background: #fff;
 }
 
-.phui-info-severity-nodata a.button {
-  color: {$greytext};
+.phui-info-severity-success {
+  border-color: {$green};
+  border-left-width: 6px;
 }
 
-.phui-info-severity-success,
-.phui-info-severity-success a.button {
-  border-color: {$sh-greenborder};
-  background: {$sh-greenbackground};
-}
-
-.phui-info-severity-success a.button {
-  color: {$sh-greentext};
+.phui-info-severity-success .phui-info-icon {
+  color: {$green};
 }
 
 .aphront-dialog-body .phui-info-view {
@@ -122,4 +122,8 @@ h1.phui-info-view-head {
 
 .phui-crumbs-view.phui-crumbs-border + .phui-info-view {
   margin-top: 16px;
+}
+
+div.phui-object-box .phui-header-shell + .phui-info-view {
+  margin: 16px 0 8px;
 }

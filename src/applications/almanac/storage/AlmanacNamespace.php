@@ -174,10 +174,6 @@ final class AlmanacNamespace
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

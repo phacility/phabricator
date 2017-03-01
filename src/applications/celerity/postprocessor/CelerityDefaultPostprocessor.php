@@ -20,16 +20,16 @@ final class CelerityDefaultPostprocessor
   public function buildVariables() {
     return array(
       // Fonts
-      'basefont' => "13px 'Segoe UI', 'Segoe UI Web Regular', ".
-        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', Helvetica, ".
-        "Arial, sans-serif",
+      'basefont' => "13px 'Segoe UI', 'Segoe UI Emoji', ".
+        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', ".
+        "Helvetica, Arial, sans-serif",
 
-      'fontfamily' => "'Segoe UI', 'Segoe UI Web Regular', ".
-        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', Helvetica, ".
-        "Arial, sans-serif",
+      'fontfamily' => "'Segoe UI', 'Segoe UI Emoji', ".
+        "'Segoe UI Symbol', 'Lato', 'Helvetica Neue', ".
+        "Helvetica, Arial, sans-serif",
 
       // Drop Shadow
-      'dropshadow' => '0 1px 6px rgba(0, 0, 0, .25)',
+      'dropshadow' => '0 2px 12px rgba(0, 0, 0, .20)',
       'whitetextshadow' => '0 1px 0 rgba(255, 255, 255, 1)',
 
       // Anchors
@@ -192,18 +192,24 @@ final class CelerityDefaultPostprocessor
       'sh-disabledtext'         => '#a6a6a6',
       'sh-disabledbackground'   => '#f3f3f3',
 
+      // Diffs
+      'new-background' => 'rgba(151, 234, 151, .3)',
+      'new-bright' => 'rgba(151, 234, 151, .6)',
+      'old-background' => 'rgba(251, 175, 175, .3)',
+      'old-bright' => 'rgba(251, 175, 175, .7)',
+      'move-background' => '#fdf5d4',
+      'copy-background' => '#f1c40f',
+
       // Background color for "most" themes.
-      'page.background' => '#f8f8fb',
+      'page.background' => '#f3f5f7',
+      'page.sidenav' => '#eaedf1',
 
       'menu.profile.text' => 'rgba(255,255,255,.8)',
       'menu.profile.text.selected' => 'rgba(255,255,255,1)',
       'menu.profile.icon.disabled' => 'rgba(255,255,255,.4)',
 
       'menu.main.height' => '44px',
-
       'menu.profile.width' => '240px',
-      'menu.profile.width.collapsed' => '88px',
-      'menu.profile.item.height' => '46px',
 
     );
   }

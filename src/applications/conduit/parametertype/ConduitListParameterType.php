@@ -3,8 +3,19 @@
 abstract class ConduitListParameterType
   extends ConduitParameterType {
 
-  protected function getParameterValue(array $request, $key) {
-    $value = parent::getParameterValue($request, $key);
+  private $allowEmptyList = true;
+
+  public function setAllowEmptyList($allow_empty_list) {
+    $this->allowEmptyList = $allow_empty_list;
+    return $this;
+  }
+
+  public function getAllowEmptyList() {
+    return $this->allowEmptyList;
+  }
+
+  protected function getParameterValue(array $request, $key, $strict) {
+    $value = parent::getParameterValue($request, $key, $strict);
 
     if (!is_array($value)) {
       $this->raiseValidationException(
@@ -27,20 +38,28 @@ abstract class ConduitListParameterType
         pht('Expected a list, but value is an object.'));
     }
 
+    if (!$value && !$this->getAllowEmptyList()) {
+      $this->raiseValidationException(
+        $request,
+        $key,
+        pht('Expected a nonempty list, but value is an empty list.'));
+    }
+
     return $value;
   }
 
-  protected function validateStringList(array $request, $key, array $list) {
+  protected function parseStringList(
+    array $request,
+    $key,
+    array $list,
+    $strict) {
+
     foreach ($list as $idx => $item) {
-      if (!is_string($item)) {
-        $this->raiseValidationException(
-          $request,
-          $key,
-          pht(
-            'Expected a list of strings, but item with index "%s" is '.
-            'not a string.',
-            $idx));
-      }
+      $list[$idx] = $this->parseStringValue(
+        $request,
+        $key.'['.$idx.']',
+        $item,
+        $strict);
     }
 
     return $list;

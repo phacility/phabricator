@@ -99,6 +99,77 @@ final class PhabricatorCaches extends Phobject {
     return $caches;
   }
 
+  public static function getMutableCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildMutableCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildMutableCaches() {
+    $caches = array();
+
+    $caches[] = new PhabricatorKeyValueDatabaseCache();
+
+    return $caches;
+  }
+
+  public static function getMutableStructureCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildMutableStructureCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildMutableStructureCaches() {
+    $caches = array();
+
+    $cache = new PhabricatorKeyValueDatabaseCache();
+    $cache = new PhabricatorKeyValueSerializingCacheProxy($cache);
+    $caches[] = $cache;
+
+    return $caches;
+  }
+
+/* -(  Runtime Cache  )------------------------------------------------------ */
+
+
+  /**
+   * Get a runtime cache stack.
+   *
+   * This stack is just APC. It's fast, it's effectively immutable, and it
+   * gets thrown away when the webserver restarts.
+   *
+   * This cache is suitable for deriving runtime caches, like a map of Conduit
+   * method names to provider classes.
+   *
+   * @return PhutilKeyValueCacheStack Best runtime stack available.
+   */
+  public static function getRuntimeCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildRuntimeCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+
+  private static function buildRuntimeCaches() {
+    $caches = array();
+
+    $apc = new PhutilAPCKeyValueCache();
+    if ($apc->isAvailable()) {
+      $caches[] = $apc;
+    }
+
+    return $caches;
+  }
+
 
 /* -(  Repository Graph Cache  )--------------------------------------------- */
 
@@ -143,6 +214,39 @@ final class PhabricatorCaches extends Phobject {
   }
 
 
+/* -(  Server State Cache  )------------------------------------------------- */
+
+
+  /**
+   * Highly specialized cache for storing server process state.
+   *
+   * We use this cache to track initial steps in the setup phase, before
+   * configuration is loaded.
+   *
+   * This cache does NOT use the cache namespace (it must be accessed before
+   * we build configuration), and is global across all instances on the host.
+   *
+   * @return PhutilKeyValueCacheStack Best available server state cache stack.
+   * @task setup
+   */
+  public static function getServerStateCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildSetupCaches('phabricator-server');
+
+      // NOTE: We are NOT adding a cache namespace here! This cache is shared
+      // across all instances on the host.
+
+      $caches = self::addProfilerToCaches($caches);
+      $cache = id(new PhutilKeyValueCacheStack())
+        ->setCaches($caches);
+
+    }
+    return $cache;
+  }
+
+
+
 /* -(  Setup Cache  )-------------------------------------------------------- */
 
 
@@ -163,7 +267,7 @@ final class PhabricatorCaches extends Phobject {
   public static function getSetupCache() {
     static $cache;
     if (!$cache) {
-      $caches = self::buildSetupCaches();
+      $caches = self::buildSetupCaches('phabricator-setup');
       $cache = self::newStackFromCaches($caches);
     }
     return $cache;
@@ -173,7 +277,7 @@ final class PhabricatorCaches extends Phobject {
   /**
    * @task setup
    */
-  private static function buildSetupCaches() {
+  private static function buildSetupCaches($cache_name) {
     // If this is the CLI, just build a setup cache.
     if (php_sapi_name() == 'cli') {
       return array();
@@ -188,7 +292,7 @@ final class PhabricatorCaches extends Phobject {
 
     // If we don't have APC, build a poor approximation on disk. This is still
     // much better than nothing; some setup steps are quite slow.
-    $disk_path = self::getSetupCacheDiskCachePath();
+    $disk_path = self::getSetupCacheDiskCachePath($cache_name);
     if ($disk_path) {
       $disk = new PhutilOnDiskKeyValueCache();
       $disk->setCacheFile($disk_path);
@@ -205,7 +309,7 @@ final class PhabricatorCaches extends Phobject {
   /**
    * @task setup
    */
-  private static function getSetupCacheDiskCachePath() {
+  private static function getSetupCacheDiskCachePath($name) {
     // The difficulty here is in choosing a path which will change on server
     // restart (we MUST have this property), but as rarely as possible
     // otherwise (we desire this property to give the cache the best hit rate
@@ -230,7 +334,7 @@ final class PhabricatorCaches extends Phobject {
 
     $tmp_dir = sys_get_temp_dir();
 
-    $tmp_path = $tmp_dir.DIRECTORY_SEPARATOR.'phabricator-setup';
+    $tmp_path = $tmp_dir.DIRECTORY_SEPARATOR.$name;
     if (!file_exists($tmp_path)) {
       @mkdir($tmp_path);
     }

@@ -53,7 +53,6 @@ final class PhabricatorApplicationDetailViewController
       $panel = $config->buildConfigurationPagePanel();
       $panel->setBackground(PHUIObjectBoxView::BLUE_PROPERTY);
       $panels[] = $panel;
-
     }
 
     $view = id(new PHUITwoColumnView())
@@ -126,8 +125,7 @@ final class PhabricatorApplicationDetailViewController
     $properties = id(new PHUIPropertyListView());
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('POLICIES'))
-      ->setHeaderIcon('fa-lock');
+      ->setHeader(pht('Policies'));
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $viewer,

@@ -30,20 +30,33 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/Z(?P<id>[1-9]\d*)'         => 'ConpherenceViewController',
+      '/Z(?P<id>[1-9]\d*)'
+        => 'ConpherenceViewController',
       '/conpherence/' => array(
-        ''                         => 'ConpherenceListController',
-        'thread/(?P<id>[1-9]\d*)/' => 'ConpherenceListController',
-        '(?P<id>[1-9]\d*)/'        => 'ConpherenceViewController',
+        ''
+          => 'ConpherenceListController',
+        'thread/(?P<id>[1-9]\d*)/'
+          => 'ConpherenceListController',
+        'threadsearch/(?P<id>[1-9]\d*)/'
+          => 'ConpherenceThreadSearchController',
+        '(?P<id>[1-9]\d*)/'
+          => 'ConpherenceViewController',
         '(?P<id>[1-9]\d*)/(?P<messageID>[1-9]\d*)/'
-                                   => 'ConpherenceViewController',
-        'columnview/'              => 'ConpherenceColumnViewController',
-        'new/'                     => 'ConpherenceNewRoomController',
+          => 'ConpherenceViewController',
+        'columnview/'
+          => 'ConpherenceColumnViewController',
+        'new/'
+          => 'ConpherenceNewRoomController',
+        'picture/(?P<id>[1-9]\d*)/'
+          => 'ConpherenceRoomPictureController',
         'search/(?:query/(?P<queryKey>[^/]+)/)?'
-           => 'ConpherenceRoomListController',
-        'panel/'                   => 'ConpherenceNotificationPanelController',
-        'widget/(?P<id>[1-9]\d*)/' => 'ConpherenceWidgetController',
-        'update/(?P<id>[1-9]\d*)/' => 'ConpherenceUpdateController',
+          => 'ConpherenceRoomListController',
+        'panel/'
+          => 'ConpherenceNotificationPanelController',
+        'participant/(?P<id>[1-9]\d*)/'
+          => 'ConpherenceParticipantController',
+        'update/(?P<id>[1-9]\d*)/'
+          => 'ConpherenceUpdateController',
       ),
     );
   }

@@ -31,6 +31,16 @@ abstract class PhabricatorConfigOptionType extends Phobject {
 
   }
 
+  public function renderControls(
+    PhabricatorConfigOption $option,
+    $display_value,
+    $e_value) {
+
+    $control = $this->renderControl($option, $display_value, $e_value);
+
+    return array($control);
+  }
+
   public function renderControl(
     PhabricatorConfigOption $option,
     $display_value,

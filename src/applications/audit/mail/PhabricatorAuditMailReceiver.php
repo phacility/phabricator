@@ -4,7 +4,7 @@ final class PhabricatorAuditMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
     return PhabricatorApplication::isClassInstalled(
-      'PhabricatorAuditApplication');
+      'PhabricatorDiffusionApplication');
   }
 
   protected function getObjectPattern() {

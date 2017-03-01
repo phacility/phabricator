@@ -3,6 +3,8 @@
 final class PhabricatorAuthSSHKeyQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  const AUTHFILE_CACHEKEY = 'ssh.authfile';
+
   private $ids;
   private $phids;
   private $objectPHIDs;

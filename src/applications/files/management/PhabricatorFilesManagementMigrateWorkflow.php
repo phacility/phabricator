@@ -37,6 +37,12 @@ final class PhabricatorFilesManagementMigrateWorkflow
             'help'      => pht('Migrate all files.'),
           ),
           array(
+            'name' => 'copy',
+            'help' => pht(
+              'Copy file data instead of moving it: after migrating, do not '.
+              'remove the old data even if it is no longer referenced.'),
+          ),
+          array(
             'name'      => 'names',
             'wildcard'  => true,
           ),
@@ -69,6 +75,8 @@ final class PhabricatorFilesManagementMigrateWorkflow
 
     $min_size = (int)$args->getArg('min-size');
     $max_size = (int)$args->getArg('max-size');
+
+    $is_copy = $args->getArg('copy');
 
     $failed = array();
     $engines = PhabricatorFileStorageEngine::loadAllEngines();
@@ -158,7 +166,7 @@ final class PhabricatorFilesManagementMigrateWorkflow
         if ($is_dry_run) {
           // Do nothing, this is a dry run.
         } else {
-          $file->migrateToEngine($target_engine);
+          $file->migrateToEngine($target_engine, $is_copy);
         }
 
         $total_files += 1;

@@ -48,7 +48,15 @@ final class PhabricatorConfigCollectorsModule extends PhabricatorConfigModule {
       );
     }
 
+    $info = id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->appendChild(pht(
+          'Collectors with custom policies are highlighted. Use '.
+          '%s to change retention policies.',
+          phutil_tag('tt', array(), 'bin/garbage set-policy')));
+
     $table = id(new AphrontTableView($rows))
+      ->setNotice($info)
       ->setRowClasses($rowc)
       ->setHeaders(
         array(
@@ -63,17 +71,7 @@ final class PhabricatorConfigCollectorsModule extends PhabricatorConfigModule {
           null,
         ));
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Garbage Collectors'))
-      ->setSubheader(
-        pht(
-          'Collectors with custom policies are highlighted. Use '.
-          '%s to change retention policies.',
-          phutil_tag('tt', array(), 'bin/garbage set-policy')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setTable($table);
+    return $table;
   }
 
 }

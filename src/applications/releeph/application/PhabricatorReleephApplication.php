@@ -18,6 +18,10 @@ final class PhabricatorReleephApplication extends PhabricatorApplication {
     return 'fa-flag-checkered';
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function isPrototype() {
     return true;
   }

@@ -41,7 +41,7 @@ final class PhortuneProductListController extends PhabricatorController {
         ->setHeader($product->getProductName())
         ->setHref($view_uri)
         ->addAttribute($price->formatForDisplay())
-        ->setIcon('fa-gift');
+        ->setImageIcon('fa-gift');
 
       $product_list->addItem($item);
     }

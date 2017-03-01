@@ -162,7 +162,7 @@ abstract class AphrontResponse extends Phobject {
       $object,
       array(__CLASS__, 'processValueForJSONEncoding'));
 
-    $response = json_encode($object);
+    $response = phutil_json_encode($object);
 
     // Prevent content sniffing attacks by encoding "<" and ">", so browsers
     // won't try to execute the document as HTML even if they ignore
@@ -240,6 +240,21 @@ abstract class AphrontResponse extends Phobject {
 
   private function formatEpochTimestampForHTTPHeader($epoch_timestamp) {
     return gmdate('D, d M Y H:i:s', $epoch_timestamp).' GMT';
+  }
+
+  protected function shouldCompressResponse() {
+    return true;
+  }
+
+  public function willBeginWrite() {
+    if ($this->shouldCompressResponse()) {
+      // Enable automatic compression here. Webservers sometimes do this for
+      // us, but we now detect the absence of compression and warn users about
+      // it so try to cover our bases more thoroughly.
+      ini_set('zlib.output_compression', 1);
+    } else {
+      ini_set('zlib.output_compression', 0);
+    }
   }
 
   public function didCompleteWrite($aborted) {

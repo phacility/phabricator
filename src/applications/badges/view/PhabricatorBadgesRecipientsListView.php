@@ -27,6 +27,18 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
       $badge,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $award_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setIcon('fa-plus')
+      ->setText(pht('Add Recipents'))
+      ->setWorkflow(true)
+      ->setDisabled(!$can_edit)
+      ->setHref('/badges/recipients/'.$badge->getID().'/add/');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recipients'))
+      ->addActionLink($award_button);
+
     $list = id(new PHUIObjectItemListView())
       ->setNoDataString(pht('This badge does not have any recipients.'))
       ->setFlush(true);
@@ -62,7 +74,7 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
     }
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Recipients'))
+      ->setHeader($header)
       ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($list);
 

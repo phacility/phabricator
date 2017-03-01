@@ -26,6 +26,7 @@ final class PhabricatorOwnersPackage
   private $paths = self::ATTACHABLE;
   private $owners = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $pathRepositoryMap = array();
 
   const STATUS_ACTIVE = 'active';
   const STATUS_ARCHIVED = 'archived';
@@ -211,10 +212,13 @@ final class PhabricatorOwnersPackage
         $conn,
         'SELECT pkg.id, pkg.dominion, p.excluded, p.path
           FROM %T pkg JOIN %T p ON p.packageID = pkg.id
-          WHERE p.path IN (%Ls) %Q',
+          WHERE p.path IN (%Ls) AND pkg.status IN (%Ls) %Q',
         $package->getTableName(),
         $path->getTableName(),
         $chunk,
+        array(
+          self::STATUS_ACTIVE,
+        ),
         $repository_clause);
     }
     $rows = array_mergev($rows);
@@ -366,11 +370,32 @@ final class PhabricatorOwnersPackage
   public function attachPaths(array $paths) {
     assert_instances_of($paths, 'PhabricatorOwnersPath');
     $this->paths = $paths;
+
+    // Drop this cache if we're attaching new paths.
+    $this->pathRepositoryMap = array();
+
     return $this;
   }
 
   public function getPaths() {
     return $this->assertAttached($this->paths);
+  }
+
+  public function getPathsForRepository($repository_phid) {
+    if (isset($this->pathRepositoryMap[$repository_phid])) {
+      return $this->pathRepositoryMap[$repository_phid];
+    }
+
+    $map = array();
+    foreach ($this->getPaths() as $path) {
+      if ($path->getRepositoryPHID() == $repository_phid) {
+        $map[] = $path;
+      }
+    }
+
+    $this->pathRepositoryMap[$repository_phid] = $map;
+
+    return $this->pathRepositoryMap[$repository_phid];
   }
 
   public function attachOwners(array $owners) {

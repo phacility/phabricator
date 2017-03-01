@@ -222,23 +222,92 @@ other Phabricator SSH services.
 NOTE: The Phabricator `sshd` service **MUST** be 6.2 or newer, because
 Phabricator relies on the `AuthorizedKeysCommand` option.
 
-**Choose a Port**: These instructions will configure the alternate `sshd` on
+Before continuing, you must choose a strategy for which port each copy of
+`sshd` will run on. The next section lays out various approaches.
+
+
+SSHD Port Assignment
+====================
+
+The normal `sshd` that lets you administrate the host and the special `sshd`
+which serves repositories can't run on the same port. In particular, only one
+of them can run on port `22`, which will make it a bit inconvenient to access
+the other one.
+
+These instructions will walk you through configuring the alternate `sshd` on
 port `2222`. This is easy to configure, but if you run the service on this port
-users will clone and push to URIs like `ssh://git@host.com:2222/`, which is
-a little ugly.
+users will clone and push to URIs like `ssh://git@host.com:2222/`, which is a
+little ugly.
 
-The easiest way to fix this is to put a load balancer in front of the host and
-have it forward TCP traffic on port `22` to port `2222`. Then users can clone
-from `ssh://git@host.com/` without an explicit port number and you don't need
-to do anything else.
+There are several different approaches you can use to mitigate or eliminate
+this problem.
 
-Alternatively, you can move the administrative `sshd` to a new port, then run
-Phabricator `sshd` on port 22. This is complicated and risky. See "Moving the
-sshd Port" below for help.
+**Run on Port 2222**: You can do nothing, and just run the repository `sshd` on
+port `2222` and accept the explicit port in the URIs. This is the simplest
+approach, and you can always start here and clean things up later if you grow
+tired of dealing with the port number.
 
-Finally, you can just run on port `2222` and accept the explicit port in the
-URIs. This is the simplest approach, and you can start here and clean things
-up later.
+**Use a Load Balancer**: You can configure a load balancer in front of the host
+and have it forward TCP traffic on port `22` to port `2222`. Then users can
+clone from `ssh://git@host.com/` without an explicit port number and you don't
+need to do anything else.
+
+This may be very easy to set up, particularly if you are hosted in AWS, and
+is often the simplest and cleanest approach.
+
+**Swap Ports**: You can move the administrative `sshd` to a new port, then run
+Phabricator `sshd` on port 22. This is somewhat complicated and can be a bit
+risky if you make a mistake. See "Moving the sshd Port" below for help.
+
+**Change Client Config**: You can run on a nonstandard port, but configure SSH
+on the client side so that `ssh` automatically defaults to the correct port
+when connecting to the host. To do this, add a section like this to your
+`~/.ssh/config`:
+
+```
+Host phabricator.corporation.com
+  Port 2222
+```
+
+(If you want, you can also add a default `User`.)
+
+Command line tools like `ssh`, `git` and `hg` will now default to port
+`2222` when connecting to this host.
+
+A downside to this approach is that your users will each need to set up their
+`~/.ssh/config` files individually.
+
+This file also allows you to define short names for hosts using the `Host` and
+`HostName` options. If you choose to do this, be aware that Phabricator uses
+remote/clone URIs to figure out which repository it is operating in, but can
+not resolve host aliases defined in your `ssh` config. If you create host
+aliases they may break some features related to repository identification.
+
+If you use this approach, you will also need to specify a port explicitly when
+connecting to administrate the host. Any unit tests or other build automation
+will also need to be configured or use explicit port numbers.
+
+**Port Multiplexing**: If you have hardware access, you can power down the host
+and find the network I/O pins on the motherboard (for onboard networking) or
+network card.
+
+Carefully strip and solder a short piece of copper wire between the pins for
+the external interface `22` and internal `2222`, so the external interface can
+receive traffic for both services.
+
+(Make sure not to desolder the existing connection between external `22` and
+internal `22` or you won't be able to connect normally to administrate the
+host.)
+
+The obvious downside to this approach is that it requires physical access to
+the machine, so it won't work if you're hosted on a cloud provider.
+
+
+SSHD Setup
+==========
+
+Now that you've decided how you'll handle port assignment, you're ready to
+continue `sshd` setup.
 
 If you plan to connect to a port other than `22`, you should set this port
 as `diffusion.ssh-port` in your Phabricator config:

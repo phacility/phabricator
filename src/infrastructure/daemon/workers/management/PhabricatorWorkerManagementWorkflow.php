@@ -11,31 +11,80 @@ abstract class PhabricatorWorkerManagementWorkflow
         'repeat' => true,
         'help' => pht('Select one or more tasks by ID.'),
       ),
+      array(
+        'name' => 'class',
+        'param' => 'name',
+        'help' => pht('Select all tasks of a given class.'),
+      ),
+      array(
+        'name' => 'min-failure-count',
+        'param' => 'int',
+        'help' => pht('Limit to tasks with at least this many failures.'),
+      ),
     );
   }
 
   protected function loadTasks(PhutilArgumentParser $args) {
     $ids = $args->getArg('id');
-    if (!$ids) {
+    $class = $args->getArg('class');
+    $min_failures = $args->getArg('min-failure-count');
+
+    if (!$ids && !$class && !$min_failures) {
       throw new PhutilArgumentUsageException(
-        pht('Use --id to select tasks by ID.'));
+        pht('Use --id, --class, or --min-failure-count to select tasks.'));
     }
 
-    $active_tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
-      'id IN (%Ls)',
-      $ids);
-    $archive_tasks = id(new PhabricatorWorkerArchiveTaskQuery())
-      ->withIDs($ids)
-      ->execute();
+    $active_query = new PhabricatorWorkerActiveTaskQuery();
+    $archive_query = new PhabricatorWorkerArchiveTaskQuery();
 
+    if ($ids) {
+      $active_query = $active_query->withIDs($ids);
+      $archive_query = $archive_query->withIDs($ids);
+    }
+
+    if ($class) {
+      $class_array = array($class);
+      $active_query = $active_query->withClassNames($class_array);
+      $archive_query = $archive_query->withClassNames($class_array);
+    }
+
+    if ($min_failures) {
+      $active_query = $active_query->withFailureCountBetween(
+        $min_failures, null);
+      $archive_query = $archive_query->withFailureCountBetween(
+        $min_failures, null);
+    }
+
+    $active_tasks = $active_query->execute();
+    $archive_tasks = $archive_query->execute();
     $tasks =
       mpull($active_tasks, null, 'getID') +
       mpull($archive_tasks, null, 'getID');
 
-    foreach ($ids as $id) {
-      if (empty($tasks[$id])) {
+    if ($ids) {
+      foreach ($ids as $id) {
+        if (empty($tasks[$id])) {
+          throw new PhutilArgumentUsageException(
+            pht('No task exists with id "%s"!', $id));
+        }
+      }
+    }
+    if ($class && $min_failures) {
+      if (!$tasks) {
         throw new PhutilArgumentUsageException(
-          pht('No task exists with id "%s"!', $id));
+          pht('No task exists with class "%s" and at least %d failures!',
+            $class,
+            $min_failures));
+      }
+    } else if ($class) {
+      if (!$tasks) {
+        throw new PhutilArgumentUsageException(
+          pht('No task exists with class "%s"!', $class));
+      }
+    } else if ($min_failures) {
+      if (!$tasks) {
+        throw new PhutilArgumentUsageException(
+          pht('No tasks exist with at least %d failures!', $min_failures));
       }
     }
 

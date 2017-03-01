@@ -3,6 +3,8 @@
 final class PhabricatorEmbedFileRemarkupRule
   extends PhabricatorObjectRemarkupRule {
 
+  private $viewer;
+
   const KEY_EMBED_FILE_PHIDS = 'phabricator.embedded-file-phids';
 
   protected function getObjectNamePrefix() {
@@ -12,9 +14,9 @@ final class PhabricatorEmbedFileRemarkupRule
   protected function loadObjects(array $ids) {
     $engine = $this->getEngine();
 
-    $viewer = $engine->getConfig('viewer');
+    $this->viewer = $engine->getConfig('viewer');
     $objects = id(new PhabricatorFileQuery())
-      ->setViewer($viewer)
+      ->setViewer($this->viewer)
       ->withIDs($ids)
       ->needTransforms(
         array(
@@ -98,7 +100,7 @@ final class PhabricatorEmbedFileRemarkupRule
     PhabricatorObjectHandle $handle,
     array $options) {
 
-    require_celerity_resource('lightbox-attachment-css');
+    require_celerity_resource('phui-lightbox-css');
 
     $attrs = array();
     $image_class = 'phabricator-remarkup-embed-image';
@@ -176,6 +178,7 @@ final class PhabricatorEmbedFileRemarkupRule
           'uri'      => $file->getBestURI(),
           'dUri'     => $file->getDownloadURI(),
           'viewable' => true,
+          'monogram' => $file->getMonogram(),
         ),
       ),
       $img);
@@ -251,6 +254,12 @@ final class PhabricatorEmbedFileRemarkupRule
       $autoplay = null;
     }
 
+    // Rendering contexts like feed can disable autoplay.
+    $engine = $this->getEngine();
+    if ($engine->getConfig('autoplay.disable')) {
+      $autoplay = null;
+    }
+
     return $this->newTag(
       $tag,
       array(
@@ -275,11 +284,14 @@ final class PhabricatorEmbedFileRemarkupRule
     array $options) {
 
     return id(new PhabricatorFileLinkView())
+      ->setViewer($this->viewer)
       ->setFilePHID($file->getPHID())
       ->setFileName($this->assertFlatText($options['name']))
       ->setFileDownloadURI($file->getDownloadURI())
       ->setFileViewURI($file->getBestURI())
-      ->setFileViewable((bool)$options['viewable']);
+      ->setFileViewable((bool)$options['viewable'])
+      ->setFileSize(phutil_format_bytes($file->getByteSize()))
+      ->setFileMonogram($file->getMonogram());
   }
 
   private function parseDimension($string) {

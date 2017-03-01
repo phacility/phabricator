@@ -63,8 +63,4 @@ final class NuanceImportCursorData
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 }

@@ -34,48 +34,41 @@ final class PhabricatorConduitTokenQuery
     return $this;
   }
 
-  protected function loadPage() {
-    $table = new PhabricatorConduitToken();
-    $conn_r = $table->establishConnection('r');
-
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
-      $table->getTableName(),
-      $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
-      $this->buildLimitClause($conn_r));
-
-    return $table->loadAllFromArray($data);
+  public function newResultObject() {
+    return new PhabricatorConduitToken();
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function loadPage() {
+    return $this->loadStandardPage($this->newResultObject());
+  }
+
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = parent::buildWhereClauseParts($conn);
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->objectPHIDs !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'objectPHID IN (%Ls)',
         $this->objectPHIDs);
     }
 
     if ($this->tokens !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'token IN (%Ls)',
         $this->tokens);
     }
 
     if ($this->tokenTypes !== null) {
       $where[] = qsprintf(
-        $conn_r,
+        $conn,
         'tokenType IN (%Ls)',
         $this->tokenTypes);
     }
@@ -83,20 +76,18 @@ final class PhabricatorConduitTokenQuery
     if ($this->expired !== null) {
       if ($this->expired) {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'expires <= %d',
           PhabricatorTime::getNow());
       } else {
         $where[] = qsprintf(
-          $conn_r,
+          $conn,
           'expires IS NULL OR expires > %d',
           PhabricatorTime::getNow());
       }
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
 
   protected function willFilterPage(array $tokens) {

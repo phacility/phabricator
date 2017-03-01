@@ -581,9 +581,9 @@ final class HarbormasterBuildViewController
     } else {
       $status = $build->getBuildStatus();
       $status_name =
-        HarbormasterBuild::getBuildStatusName($status);
-      $icon = HarbormasterBuild::getBuildStatusIcon($status);
-      $color = HarbormasterBuild::getBuildStatusColor($status);
+        HarbormasterBuildStatus::getBuildStatusName($status);
+      $icon = HarbormasterBuildStatus::getBuildStatusIcon($status);
+      $color = HarbormasterBuildStatus::getBuildStatusColor($status);
     }
 
     $item->setTarget($status_name);

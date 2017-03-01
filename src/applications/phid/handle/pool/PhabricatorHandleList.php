@@ -74,6 +74,24 @@ final class PhabricatorHandleList
   }
 
 
+  /**
+   * Create a new list with a subset of the PHIDs in this list.
+   */
+  public function newSublist(array $phids) {
+    foreach ($phids as $phid) {
+      if (!isset($this[$phid])) {
+        throw new Exception(
+          pht(
+            'Trying to create a new sublist of an existsing handle list, '.
+            'but PHID "%s" does not appear in the parent list.',
+            $phid));
+      }
+    }
+
+    return $this->handlePool->newHandleList($phids);
+  }
+
+
 /* -(  Rendering  )---------------------------------------------------------- */
 
 

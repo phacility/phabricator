@@ -84,7 +84,7 @@ a {
   cursor: pointer;
 }
 
-a:hover {
+.device-desktop a:hover {
   text-decoration: underline;
 }
 

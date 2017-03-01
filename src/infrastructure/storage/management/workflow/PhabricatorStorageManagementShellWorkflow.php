@@ -15,7 +15,7 @@ final class PhabricatorStorageManagementShellWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $api = $this->getAPI();
+    $api = $this->getSingleAPI();
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
     $flag_port = $port
@@ -31,7 +31,7 @@ final class PhabricatorStorageManagementShellWorkflow
     }
 
     return phutil_passthru(
-      'mysql --default-character-set=utf8 '.
+      'mysql --protocol=TCP --default-character-set=utf8mb4 '.
       '-u %s %C -h %s %C',
       $api->getUser(),
       $flag_password,

@@ -126,7 +126,7 @@ final class PhabricatorProjectTransaction
           return 'fa-unlock';
         }
       case self::TYPE_ICON:
-        return $new;
+        return PhabricatorProjectIconSet::getIconIcon($new);
       case self::TYPE_IMAGE:
         return 'fa-photo';
       case self::TYPE_MEMBERS:

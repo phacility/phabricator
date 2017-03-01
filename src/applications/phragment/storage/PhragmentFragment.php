@@ -10,6 +10,7 @@ final class PhragmentFragment extends PhragmentDAO
   protected $editPolicy;
 
   private $latestVersion = self::ATTACHABLE;
+  private $file = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
@@ -343,10 +344,6 @@ final class PhragmentFragment extends PhragmentDAO
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
-  }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
   }
 
 }

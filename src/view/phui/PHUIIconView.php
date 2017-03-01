@@ -17,6 +17,7 @@ final class PHUIIconView extends AphrontTagView {
   private $spriteSheet;
   private $iconFont;
   private $iconColor;
+  private $iconBackground;
 
   public function setHref($href) {
     $this->href = $href;
@@ -54,6 +55,11 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
+  public function setBackground($color) {
+    $this->iconBackground = $color;
+    return $this;
+  }
+
   protected function getTagName() {
     $tag = 'span';
     if ($this->href) {
@@ -78,6 +84,10 @@ final class PHUIIconView extends AphrontTagView {
       $classes[] = $this->iconFont;
       if ($this->iconColor) {
         $classes[] = $this->iconColor;
+      }
+      if ($this->iconBackground) {
+        $classes[] = 'phui-icon-square';
+        $classes[] = $this->iconBackground;
       }
     } else {
       if ($this->headSize) {
@@ -497,6 +507,7 @@ final class PHUIIconView extends AphrontTagView {
       'fa-pied-piper-square',
       'fa-pied-piper',
       'fa-pied-piper-alt',
+      'fa-pied-piper-pp',
       'fa-drupal',
       'fa-joomla',
       'fa-language',
@@ -771,6 +782,69 @@ final class PHUIIconView extends AphrontTagView {
       'fa-snapchat',
       'fa-snapchat-ghost',
       'fa-snapchat-square',
+      'fa-first-order',
+      'fa-yoast',
+      'fa-themeisle',
+      'fa-google-plus-circle',
+      'fa-google-plus-official',
+      'fa-fa',
+      'fa-font-awesome',
+      'fa-handshake-o',
+      'fa-envelope-open',
+      'fa-envelope-open-o',
+      'fa-linode',
+      'fa-address-book',
+      'fa-address-book-o',
+      'fa-vcard',
+      'fa-address-card',
+      'fa-vcard-o',
+      'fa-address-card-o',
+      'fa-user-circle',
+      'fa-user-circle-o',
+      'fa-user-o:before',
+      'fa-id-badge',
+      'fa-drivers-license',
+      'fa-id-card',
+      'fa-drivers-license-o',
+      'fa-id-card-o',
+      'fa-quora',
+      'fa-free-code-camp',
+      'fa-telegram',
+      'fa-thermometer-4',
+      'fa-thermometer',
+      'fa-thermometer-full',
+      'fa-thermometer-3',
+      'fa-thermometer-three-quarters',
+      'fa-thermometer-2',
+      'fa-thermometer-half',
+      'fa-thermometer-1',
+      'fa-thermometer-quarter',
+      'fa-thermometer-0:',
+      'fa-thermometer-empty',
+      'fa-shower',
+      'fa-bathtub',
+      'fa-s15',
+      'fa-bath',
+      'fa-podcast',
+      'fa-window-maximize',
+      'fa-window-minimize',
+      'fa-window-restore',
+      'fa-times-rectangle',
+      'fa-window-close',
+      'fa-times-rectangle-o',
+      'fa-window-close-o',
+      'fa-bandcamp',
+      'fa-grav',
+      'fa-etsy',
+      'fa-imdb',
+      'fa-ravelry',
+      'fa-eercast',
+      'fa-microchip',
+      'fa-snowflake-o',
+      'fa-superpowers',
+      'fa-wpexplorer',
+      'fa-meetup',
+
     );
   }
 

@@ -297,8 +297,13 @@ JX.install('DraggableList', {
 
           if (group[ii].getHasInfiniteHeight()) {
             // The math doesn't work out quite right if we actually use
-            // Math.Infinity, so approximate infinity as the document height.
-            infinity = infinity || JX.Vector.getDocument().y;
+            // Math.Infinity, so approximate infinity as the larger of the
+            // document height or viewport height.
+            if (!infinity) {
+              infinity = Math.max(
+                JX.Vector.getViewport().y,
+                JX.Vector.getDocument().y);
+            }
 
             rp.y = 0;
             rd.y = infinity;

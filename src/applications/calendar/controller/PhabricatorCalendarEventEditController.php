@@ -3,633 +3,94 @@
 final class PhabricatorCalendarEventEditController
   extends PhabricatorCalendarController {
 
-  private $id;
-
-  public function isCreate() {
-    return !$this->id;
-  }
-
   public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getViewer();
-    $user_phid = $viewer->getPHID();
-    $this->id = $request->getURIData('id');
+    $viewer = $this->getViewer();
 
-    $error_name = true;
-    $error_recurrence_end_date = null;
-    $error_start_date = true;
-    $error_end_date = true;
-    $validation_exception = null;
+    $engine = id(new PhabricatorCalendarEventEditEngine())
+      ->setController($this);
 
-    $is_recurring_id = celerity_generate_unique_node_id();
-    $recurrence_end_date_id = celerity_generate_unique_node_id();
-    $frequency_id = celerity_generate_unique_node_id();
-    $all_day_id = celerity_generate_unique_node_id();
-    $start_date_id = celerity_generate_unique_node_id();
-    $end_date_id = celerity_generate_unique_node_id();
-
-    $next_workflow = $request->getStr('next');
-    $uri_query = $request->getStr('query');
-
-    if ($this->isCreate()) {
-      $mode = $request->getStr('mode');
-      $event = PhabricatorCalendarEvent::initializeNewCalendarEvent(
-        $viewer,
-        $mode);
-
-      $create_start_year = $request->getInt('year');
-      $create_start_month = $request->getInt('month');
-      $create_start_day = $request->getInt('day');
-      $create_start_time = $request->getStr('time');
-
-      if ($create_start_year) {
-        $start = AphrontFormDateControlValue::newFromParts(
-          $viewer,
-          $create_start_year,
-          $create_start_month,
-          $create_start_day,
-          $create_start_time);
-        if (!$start->isValid()) {
-          return new Aphront400Response();
-        }
-        $start_value = AphrontFormDateControlValue::newFromEpoch(
-          $viewer,
-          $start->getEpoch());
-
-        $end = clone $start_value->getDateTime();
-        $end->modify('+1 hour');
-        $end_value = AphrontFormDateControlValue::newFromEpoch(
-          $viewer,
-          $end->format('U'));
-
-      } else {
-        list($start_value, $end_value) = $this->getDefaultTimeValues($viewer);
-      }
-
-      $recurrence_end_date_value = clone $end_value;
-      $recurrence_end_date_value->setOptional(true);
-
-      $submit_label = pht('Create');
-      $title = pht('Create Event');
-      $header_icon = 'fa-plus-square';
-      $redirect = 'created';
-      $subscribers = array();
-      $invitees = array($user_phid);
-      $cancel_uri = $this->getApplicationURI();
-    } else {
+    $id = $request->getURIData('id');
+    if ($id) {
       $event = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($this->id))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-
-      if (!$event) {
-        return new Aphront404Response();
-      }
-
-      if ($request->getURIData('sequence')) {
-        $index = $request->getURIData('sequence');
-
-        $result = $this->getEventAtIndexForGhostPHID(
-          $viewer,
-          $event->getPHID(),
-          $index);
-
-        if ($result) {
-          return id(new AphrontRedirectResponse())
-            ->setURI('/calendar/event/edit/'.$result->getID().'/');
-        }
-
-        $event = $this->createEventFromGhost(
-          $viewer,
-          $event,
-          $index);
-
-        return id(new AphrontRedirectResponse())
-          ->setURI('/calendar/event/edit/'.$event->getID().'/');
-      }
-
-      $end_value = AphrontFormDateControlValue::newFromEpoch(
-        $viewer,
-        $event->getDateTo());
-      $start_value = AphrontFormDateControlValue::newFromEpoch(
-        $viewer,
-        $event->getDateFrom());
-      $recurrence_end_date_value = id(clone $end_value)
-        ->setOptional(true);
-
-      $submit_label = pht('Update');
-      $title = pht('Edit Event: %s', $event->getName());
-      $header_icon = 'fa-pencil';
-
-      $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-        $event->getPHID());
-
-      $invitees = array();
-      foreach ($event->getInvitees() as $invitee) {
-        if ($invitee->isUninvited()) {
-          continue;
-        } else {
-          $invitees[] = $invitee->getInviteePHID();
-        }
-      }
-
-      $cancel_uri = '/'.$event->getMonogram();
-    }
-
-    if ($this->isCreate()) {
-      $projects = array();
-    } else {
-      $projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
-        $event->getPHID(),
-        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-      $projects = array_reverse($projects);
-    }
-
-    $name = $event->getName();
-    $description = $event->getDescription();
-    $is_all_day = $event->getIsAllDay();
-    $is_recurring = $event->getIsRecurring();
-    $is_parent = $event->getIsRecurrenceParent();
-    $frequency = idx($event->getRecurrenceFrequency(), 'rule');
-    $icon = $event->getIcon();
-    $edit_policy = $event->getEditPolicy();
-    $view_policy = $event->getViewPolicy();
-    $space = $event->getSpacePHID();
-
-    if ($request->isFormPost()) {
-      $xactions = array();
-      $name = $request->getStr('name');
-
-      $start_value = AphrontFormDateControlValue::newFromRequest(
-        $request,
-        'start');
-      $end_value = AphrontFormDateControlValue::newFromRequest(
-        $request,
-        'end');
-      $recurrence_end_date_value = AphrontFormDateControlValue::newFromRequest(
-        $request,
-        'recurrenceEndDate');
-      $recurrence_end_date_value->setOptional(true);
-      $projects = $request->getArr('projects');
-      $description = $request->getStr('description');
-      $subscribers = $request->getArr('subscribers');
-      $edit_policy = $request->getStr('editPolicy');
-      $view_policy = $request->getStr('viewPolicy');
-      $space = $request->getStr('spacePHID');
-      $is_recurring = $request->getStr('isRecurring') ? 1 : 0;
-      $frequency = $request->getStr('frequency');
-      $is_all_day = $request->getStr('isAllDay');
-      $icon = $request->getStr('icon');
-
-      $invitees = $request->getArr('invitees');
-      $new_invitees = $this->getNewInviteeList($invitees, $event);
-      $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
-      if ($this->isCreate()) {
-        $status = idx($new_invitees, $viewer->getPHID());
-        if ($status) {
-          $new_invitees[$viewer->getPHID()] = $status_attending;
-        }
-      }
-
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_NAME)
-        ->setNewValue($name);
-
-      if ($is_recurring && $this->isCreate()) {
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_RECURRING)
-          ->setNewValue($is_recurring);
-
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_FREQUENCY)
-          ->setNewValue(array('rule' => $frequency));
-
-        if (!$recurrence_end_date_value->isDisabled()) {
-          $xactions[] = id(new PhabricatorCalendarEventTransaction())
-            ->setTransactionType(
-              PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE)
-            ->setNewValue($recurrence_end_date_value);
-        }
-      }
-
-      if (($is_recurring && $this->isCreate()) || !$is_parent) {
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)
-          ->setNewValue($is_all_day);
-
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_ICON)
-          ->setNewValue($icon);
-
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_START_DATE)
-          ->setNewValue($start_value);
-
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_END_DATE)
-          ->setNewValue($end_value);
-      }
-
-
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorTransactions::TYPE_SUBSCRIBERS)
-        ->setNewValue(array('=' => array_fuse($subscribers)));
-
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_INVITE)
-        ->setNewValue($new_invitees);
-
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(
-          PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
-        ->setNewValue($description);
-
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-        ->setNewValue($request->getStr('viewPolicy'));
-
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-        ->setNewValue($request->getStr('editPolicy'));
-
-      $xactions[] = id(new PhabricatorCalendarEventTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_SPACE)
-        ->setNewValue($space);
-
-      $editor = id(new PhabricatorCalendarEventEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true);
-
-      try {
-        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $proj_edge_type)
-          ->setNewValue(array('=' => array_fuse($projects)));
-
-        $xactions = $editor->applyTransactions($event, $xactions);
-        $response = id(new AphrontRedirectResponse());
-        switch ($next_workflow) {
-          case 'day':
-            if (!$uri_query) {
-              $uri_query = 'month';
-            }
-            $year = $start_value->getDateTime()->format('Y');
-            $month = $start_value->getDateTime()->format('m');
-            $day = $start_value->getDateTime()->format('d');
-            $response->setURI(
-              '/calendar/query/'.$uri_query.'/'.$year.'/'.$month.'/'.$day.'/');
-            break;
-          default:
-            $response->setURI('/E'.$event->getID());
-            break;
-        }
+        ->setViewer($viewer)
+        ->withIDs(array($id))
+        ->executeOne();
+      $response = $this->newImportedEventResponse($event);
+      if ($response) {
         return $response;
-      } catch (PhabricatorApplicationTransactionValidationException $ex) {
-        $validation_exception = $ex;
-        $error_name = $ex->getShortMessage(
-          PhabricatorCalendarEventTransaction::TYPE_NAME);
-        $error_start_date = $ex->getShortMessage(
-          PhabricatorCalendarEventTransaction::TYPE_START_DATE);
-        $error_end_date = $ex->getShortMessage(
-          PhabricatorCalendarEventTransaction::TYPE_END_DATE);
-        $error_recurrence_end_date = $ex->getShortMessage(
-          PhabricatorCalendarEventTransaction::TYPE_RECURRENCE_END_DATE);
+      }
+
+      $cancel_uri = $event->getURI();
+
+      $page = $request->getURIData('pageKey');
+      if ($page == 'recurring') {
+        if ($event->isChildEvent()) {
+          return $this->newDialog()
+            ->setTitle(pht('Series Event'))
+            ->appendParagraph(
+              pht(
+                'This event is an instance in an event series. To change '.
+                'the behavior for the series, edit the parent event.'))
+            ->addCancelButton($cancel_uri);
+        }
+      } else if ($event->getIsRecurring()) {
+
+        // If the user submits a comment or makes an edit via comment actions,
+        // always target only the current event. It doesn't make sense to add
+        // comments to every instance of an event, and the other actions don't
+        // make much sense to apply to all instances either.
+        if ($engine->isCommentAction()) {
+          $mode = PhabricatorCalendarEventEditEngine::MODE_THIS;
+        } else {
+          $mode = $request->getStr('mode');
+        }
+
+        if (!$mode) {
+          $start_time = phutil_tag(
+            'strong',
+            array(),
+            phabricator_datetime($event->getStartDateTimeEpoch(), $viewer));
+
+          $form = id(new AphrontFormView())
+            ->setViewer($viewer)
+            ->appendControl(
+              id(new AphrontFormRadioButtonControl())
+                ->setName('mode')
+                ->setValue(PhabricatorCalendarEventEditEngine::MODE_THIS)
+                ->addButton(
+                  PhabricatorCalendarEventEditEngine::MODE_THIS,
+                  pht('Edit Only This Event'),
+                  pht(
+                    'Edit only the event which occurs at %s.',
+                    $start_time))
+                ->addButton(
+                  PhabricatorCalendarEventEditEngine::MODE_FUTURE,
+                  pht('Edit This And All Later Events'),
+                  pht(
+                    'Edit this event and all events in the series which '.
+                    'occur on or after %s. This will overwrite previous '.
+                    'edits!',
+                    $start_time)));
+          return $this->newDialog()
+            ->setTitle(pht('Edit Event'))
+            ->setWidth(AphrontDialogView::WIDTH_FORM)
+            ->appendParagraph(
+              pht(
+                'This event is part of a series. Which events do you '.
+                'want to edit?'))
+            ->appendForm($form)
+            ->addSubmitButton(pht('Continue'))
+            ->addCancelButton($cancel_uri)
+            ->setDisableWorkflowOnSubmit(true);
+        }
+
+        $engine
+          ->addContextParameter('mode', $mode)
+          ->setSeriesEditMode($mode);
       }
     }
 
-    $is_recurring_checkbox = null;
-    $recurrence_end_date_control = null;
-    $recurrence_frequency_select = null;
-
-    $all_day_checkbox = null;
-    $start_control = null;
-    $end_control = null;
-
-    $recurring_date_edit_label = null;
-
-    $current_policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($viewer)
-      ->setObject($event)
-      ->execute();
-
-    $name = id(new AphrontFormTextControl())
-      ->setLabel(pht('Name'))
-      ->setName('name')
-      ->setValue($name)
-      ->setError($error_name);
-
-    if ($this->isCreate()) {
-      Javelin::initBehavior('recurring-edit', array(
-        'isRecurring' => $is_recurring_id,
-        'frequency' => $frequency_id,
-        'recurrenceEndDate' => $recurrence_end_date_id,
-      ));
-
-      $is_recurring_checkbox = id(new AphrontFormCheckboxControl())
-        ->addCheckbox(
-          'isRecurring',
-          1,
-          pht('Recurring Event'),
-          $is_recurring,
-          $is_recurring_id);
-
-      $recurrence_end_date_control = id(new AphrontFormDateControl())
-        ->setUser($viewer)
-        ->setName('recurrenceEndDate')
-        ->setLabel(pht('Recurrence End Date'))
-        ->setError($error_recurrence_end_date)
-        ->setValue($recurrence_end_date_value)
-        ->setID($recurrence_end_date_id)
-        ->setIsTimeDisabled(true)
-        ->setIsDisabled($recurrence_end_date_value->isDisabled())
-        ->setAllowNull(true);
-
-      $recurrence_frequency_select = id(new AphrontFormSelectControl())
-        ->setName('frequency')
-        ->setOptions(array(
-            PhabricatorCalendarEvent::FREQUENCY_DAILY => pht('Daily'),
-            PhabricatorCalendarEvent::FREQUENCY_WEEKLY => pht('Weekly'),
-            PhabricatorCalendarEvent::FREQUENCY_MONTHLY => pht('Monthly'),
-            PhabricatorCalendarEvent::FREQUENCY_YEARLY => pht('Yearly'),
-          ))
-        ->setValue($frequency)
-        ->setLabel(pht('Recurring Event Frequency'))
-        ->setID($frequency_id)
-        ->setDisabled(!$is_recurring);
-    }
-
-    if ($this->isCreate() || (!$is_parent && !$this->isCreate())) {
-      Javelin::initBehavior('event-all-day', array(
-        'allDayID' => $all_day_id,
-        'startDateID' => $start_date_id,
-        'endDateID' => $end_date_id,
-      ));
-
-      $all_day_checkbox = id(new AphrontFormCheckboxControl())
-        ->addCheckbox(
-          'isAllDay',
-          1,
-          pht('All Day Event'),
-          $is_all_day,
-          $all_day_id);
-
-      $start_control = id(new AphrontFormDateControl())
-        ->setUser($viewer)
-        ->setName('start')
-        ->setLabel(pht('Start'))
-        ->setError($error_start_date)
-        ->setValue($start_value)
-        ->setID($start_date_id)
-        ->setIsTimeDisabled($is_all_day)
-        ->setEndDateID($end_date_id);
-
-      $end_control = id(new AphrontFormDateControl())
-        ->setUser($viewer)
-        ->setName('end')
-        ->setLabel(pht('End'))
-        ->setError($error_end_date)
-        ->setValue($end_value)
-        ->setID($end_date_id)
-        ->setIsTimeDisabled($is_all_day);
-    } else if ($is_parent) {
-      $recurring_date_edit_label = id(new AphrontFormStaticControl())
-        ->setUser($viewer)
-        ->setValue(pht('Date and time of recurring event cannot be edited.'));
-
-      if (!$recurrence_end_date_value->isDisabled()) {
-        $disabled_recurrence_end_date_value =
-          $recurrence_end_date_value->getValueAsFormat('M d, Y');
-        $recurrence_end_date_control = id(new AphrontFormStaticControl())
-          ->setUser($viewer)
-          ->setLabel(pht('Recurrence End Date'))
-          ->setValue($disabled_recurrence_end_date_value)
-          ->setDisabled(true);
-      }
-
-      $recurrence_frequency_select = id(new AphrontFormSelectControl())
-        ->setName('frequency')
-        ->setOptions(array(
-          'daily' => pht('Daily'),
-          'weekly' => pht('Weekly'),
-          'monthly' => pht('Monthly'),
-          'yearly' => pht('Yearly'),
-        ))
-        ->setValue($frequency)
-        ->setLabel(pht('Recurring Event Frequency'))
-        ->setID($frequency_id)
-        ->setDisabled(true);
-
-      $all_day_checkbox = id(new AphrontFormCheckboxControl())
-        ->addCheckbox(
-          'isAllDay',
-          1,
-          pht('All Day Event'),
-          $is_all_day,
-          $all_day_id)
-        ->setDisabled(true);
-
-      $start_disabled = $start_value->getValueAsFormat('M d, Y, g:i A');
-      $end_disabled = $end_value->getValueAsFormat('M d, Y, g:i A');
-
-      $start_control = id(new AphrontFormStaticControl())
-        ->setUser($viewer)
-        ->setLabel(pht('Start'))
-        ->setValue($start_disabled)
-        ->setDisabled(true);
-
-      $end_control = id(new AphrontFormStaticControl())
-        ->setUser($viewer)
-        ->setLabel(pht('End'))
-        ->setValue($end_disabled);
-    }
-
-    $projects = id(new AphrontFormTokenizerControl())
-      ->setLabel(pht('Tags'))
-      ->setName('projects')
-      ->setValue($projects)
-      ->setUser($viewer)
-      ->setDatasource(new PhabricatorProjectDatasource());
-
-    $description = id(new PhabricatorRemarkupControl())
-      ->setLabel(pht('Description'))
-      ->setName('description')
-      ->setValue($description)
-      ->setUser($viewer);
-
-    $view_policies = id(new AphrontFormPolicyControl())
-      ->setUser($viewer)
-      ->setValue($view_policy)
-      ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-      ->setPolicyObject($event)
-      ->setPolicies($current_policies)
-      ->setSpacePHID($space)
-      ->setName('viewPolicy');
-    $edit_policies = id(new AphrontFormPolicyControl())
-      ->setUser($viewer)
-      ->setValue($edit_policy)
-      ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
-      ->setPolicyObject($event)
-      ->setPolicies($current_policies)
-      ->setName('editPolicy');
-
-    $subscribers = id(new AphrontFormTokenizerControl())
-      ->setLabel(pht('Subscribers'))
-      ->setName('subscribers')
-      ->setValue($subscribers)
-      ->setUser($viewer)
-      ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
-
-    $invitees = id(new AphrontFormTokenizerControl())
-      ->setLabel(pht('Invitees'))
-      ->setName('invitees')
-      ->setValue($invitees)
-      ->setUser($viewer)
-      ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
-
-
-    $icon = id(new PHUIFormIconSetControl())
-      ->setLabel(pht('Icon'))
-      ->setName('icon')
-      ->setIconSet(new PhabricatorCalendarIconSet())
-      ->setValue($icon);
-
-    $form = id(new AphrontFormView())
-      ->addHiddenInput('next', $next_workflow)
-      ->addHiddenInput('query', $uri_query)
-      ->setUser($viewer)
-      ->appendChild($name);
-
-    if ($recurring_date_edit_label) {
-      $form->appendControl($recurring_date_edit_label);
-    }
-    if ($is_recurring_checkbox) {
-      $form->appendChild($is_recurring_checkbox);
-    }
-    if ($recurrence_end_date_control) {
-      $form->appendChild($recurrence_end_date_control);
-    }
-    if ($recurrence_frequency_select) {
-      $form->appendControl($recurrence_frequency_select);
-    }
-
-    $form
-      ->appendChild($all_day_checkbox)
-      ->appendChild($start_control)
-      ->appendChild($end_control)
-      ->appendControl($view_policies)
-      ->appendControl($edit_policies)
-      ->appendControl($subscribers)
-      ->appendControl($invitees)
-      ->appendChild($projects)
-      ->appendChild($description)
-      ->appendChild($icon);
-
-
-    if ($request->isAjax()) {
-      return $this->newDialog()
-        ->setTitle($title)
-        ->setWidth(AphrontDialogView::WIDTH_FULL)
-        ->appendForm($form)
-        ->addCancelButton($cancel_uri)
-        ->addSubmitButton($submit_label);
-    }
-
-    $submit = id(new AphrontFormSubmitControl())
-      ->addCancelButton($cancel_uri)
-      ->setValue($submit_label);
-
-    $form->appendChild($submit);
-
-    $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Event'))
-      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
-      ->setValidationException($validation_exception)
-      ->setForm($form);
-
-    $crumbs = $this->buildApplicationCrumbs();
-
-    if (!$this->isCreate()) {
-      $crumbs->addTextCrumb('E'.$event->getId(), '/E'.$event->getId());
-      $crumb_title = pht('Edit Event');
-    } else {
-      $crumb_title = pht('Create Event');
-    }
-
-    $crumbs->addTextCrumb($crumb_title);
-    $crumbs->setBorder(true);
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader($title)
-      ->setHeaderIcon($header_icon);
-
-    $view = id(new PHUITwoColumnView())
-      ->setHeader($header)
-      ->setFooter($form_box);
-
-    return $this->newPage()
-      ->setTitle($title)
-      ->setCrumbs($crumbs)
-      ->appendChild($view);
-  }
-
-
-  public function getNewInviteeList(array $phids, $event) {
-    $invitees = $event->getInvitees();
-    $invitees = mpull($invitees, null, 'getInviteePHID');
-    $invited_status = PhabricatorCalendarEventInvitee::STATUS_INVITED;
-    $uninvited_status = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
-    $phids = array_fuse($phids);
-
-    $new = array();
-    foreach ($phids as $phid) {
-      $old_status = $event->getUserInviteStatus($phid);
-      if ($old_status != $uninvited_status) {
-        continue;
-      }
-      $new[$phid] = $invited_status;
-    }
-
-    foreach ($invitees as $invitee) {
-      $deleted_invitee = !idx($phids, $invitee->getInviteePHID());
-      if ($deleted_invitee) {
-        $new[$invitee->getInviteePHID()] = $uninvited_status;
-      }
-    }
-
-    return $new;
-  }
-
-  private function getDefaultTimeValues($viewer) {
-    $start = new DateTime('@'.time());
-    $start->setTimeZone($viewer->getTimeZone());
-
-    $start->setTime($start->format('H'), 0, 0);
-    $start->modify('+1 hour');
-    $end = id(clone $start)->modify('+1 hour');
-
-    $start_value = AphrontFormDateControlValue::newFromEpoch(
-      $viewer,
-      $start->format('U'));
-    $end_value = AphrontFormDateControlValue::newFromEpoch(
-      $viewer,
-      $end->format('U'));
-
-    return array($start_value, $end_value);
+    return $engine->buildResponse();
   }
 
 }

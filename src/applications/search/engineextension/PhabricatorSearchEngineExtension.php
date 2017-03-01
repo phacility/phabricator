@@ -56,7 +56,11 @@ abstract class PhabricatorSearchEngineExtension extends Phobject {
     return array();
   }
 
-  public function getFieldValuesForConduit($object) {
+  public function loadExtensionConduitData(array $objects) {
+    return null;
+  }
+
+  public function getFieldValuesForConduit($object, $data) {
     return array();
   }
 

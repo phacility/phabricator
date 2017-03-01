@@ -225,7 +225,9 @@ final class PhabricatorPolicy
 
     switch ($policy) {
       case PhabricatorPolicies::POLICY_PUBLIC:
-        return pht('This object is public.');
+        return pht(
+          'This object is public and can be viewed by anyone, even if they '.
+          'do not have a Phabricator account.');
       case PhabricatorPolicies::POLICY_USER:
         return pht('Logged in users can take this action.');
       case PhabricatorPolicies::POLICY_ADMIN:
@@ -420,6 +422,54 @@ final class PhabricatorPolicy
     return ($this_strength > $other_strength);
   }
 
+  public static function getSpecialRules(
+    PhabricatorPolicyInterface $object,
+    PhabricatorUser $viewer,
+    $capability,
+    $active_only) {
+
+    if ($object instanceof PhabricatorPolicyCodexInterface) {
+      $codex = PhabricatorPolicyCodex::newFromObject($object, $viewer);
+      $rules = $codex->getPolicySpecialRuleDescriptions();
+
+      $exceptions = array();
+      foreach ($rules as $rule) {
+        $is_active = $rule->getIsActive();
+        if ($is_active) {
+          $rule_capabilities = $rule->getCapabilities();
+          if ($rule_capabilities) {
+            if (!in_array($capability, $rule_capabilities)) {
+              $is_active = false;
+            }
+          }
+        }
+
+        if (!$is_active && $active_only) {
+          continue;
+        }
+
+        $description = $rule->getDescription();
+
+        if (!$is_active) {
+          $description = phutil_tag(
+            'span',
+            array(
+              'class' => 'phui-policy-section-view-inactive-rule',
+            ),
+            $description);
+        }
+
+        $exceptions[] = $description;
+      }
+    } else if (method_exists($object, 'describeAutomaticCapability')) {
+      $exceptions = (array)$object->describeAutomaticCapability($capability);
+      $exceptions = array_filter($exceptions);
+    } else {
+      $exceptions = array();
+    }
+
+    return $exceptions;
+  }
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
@@ -440,10 +490,6 @@ final class PhabricatorPolicy
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
-  }
-
-  public function describeAutomaticCapability($capability) {
-    return null;
   }
 
 

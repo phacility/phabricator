@@ -23,10 +23,6 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
     return false;
   }
 
-  public function canUninstall() {
-    return true;
-  }
-
   public function getBaseURI() {
     return '/nuance/';
   }

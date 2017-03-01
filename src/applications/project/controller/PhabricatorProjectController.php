@@ -4,7 +4,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
 
   private $project;
   private $profileMenu;
-  private $profilePanelEngine;
+  private $profileMenuEngine;
 
   protected function setProject(PhabricatorProject $project) {
     $this->project = $project;
@@ -99,7 +99,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
 
   protected function getProfileMenu() {
     if (!$this->profileMenu) {
-      $engine = $this->getProfilePanelEngine();
+      $engine = $this->getProfileMenuEngine();
       if ($engine) {
         $this->profileMenu = $engine->buildNavigation();
       }
@@ -119,31 +119,33 @@ abstract class PhabricatorProjectController extends PhabricatorController {
       foreach ($ancestors as $ancestor) {
         $crumbs->addTextCrumb(
           $ancestor->getName(),
-          $ancestor->getURI());
+          $ancestor->getProfileURI()
+        );
       }
     }
 
     return $crumbs;
   }
 
-  protected function getProfilePanelEngine() {
-    if (!$this->profilePanelEngine) {
+  protected function getProfileMenuEngine() {
+    if (!$this->profileMenuEngine) {
       $viewer = $this->getViewer();
       $project = $this->getProject();
       if ($project) {
-        $engine = id(new PhabricatorProjectProfilePanelEngine())
+        $engine = id(new PhabricatorProjectProfileMenuEngine())
           ->setViewer($viewer)
           ->setController($this)
           ->setProfileObject($project);
-        $this->profilePanelEngine = $engine;
+        $this->profileMenuEngine = $engine;
       }
     }
-    return $this->profilePanelEngine;
+
+    return $this->profileMenuEngine;
   }
 
-  protected function setProfilePanelEngine(
-    PhabricatorProjectProfilePanelEngine $engine) {
-    $this->profilePanelEngine = $engine;
+  protected function setProfileMenuEngine(
+    PhabricatorProjectProfileMenuEngine $engine) {
+    $this->profileMenuEngine = $engine;
     return $this;
   }
 

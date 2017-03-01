@@ -3,7 +3,15 @@
 final class PhabricatorCalendarEventListController
   extends PhabricatorCalendarController {
 
+  private $viewYear;
+  private $viewMonth;
+  private $viewDay;
+
   public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function isGlobalDragAndDropUploadEnabled() {
     return true;
   }
 
@@ -11,32 +19,78 @@ final class PhabricatorCalendarEventListController
     $year = $request->getURIData('year');
     $month = $request->getURIData('month');
     $day = $request->getURIData('day');
+
+    $this->viewYear = $year;
+    $this->viewMonth = $month;
+    $this->viewDay = $day;
+
     $engine = new PhabricatorCalendarEventSearchEngine();
 
     if ($month && $year) {
       $engine->setCalendarYearAndMonthAndDay($year, $month, $day);
     }
 
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($request->getURIData('queryKey'))
-      ->setSearchEngine($engine)
-      ->setNavigation($this->buildSideNav());
-    return $this->delegateToController($controller);
+    $nav_items = $this->buildNavigationItems();
+
+    return $engine
+      ->setNavigationItems($nav_items)
+      ->setController($this)
+      ->buildResponse();
   }
 
-  public function buildSideNav() {
-    $user = $this->getRequest()->getUser();
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+    $viewer = $this->getViewer();
 
-    id(new PhabricatorCalendarEventSearchEngine())
-      ->setViewer($user)
-      ->addNavigationItems($nav->getMenu());
+    $year = $this->viewYear;
+    $month = $this->viewMonth;
+    $day = $this->viewDay;
 
-    $nav->selectFilter(null);
+    $parameters = array();
 
-    return $nav;
+    // If the viewer clicks "Create Event" while on a particular day view,
+    // default the times to that day.
+    if ($year && $month && $day) {
+      $datetimes = PhabricatorCalendarEvent::newDefaultEventDateTimes(
+        $viewer,
+        PhabricatorTime::getNow());
+
+      foreach ($datetimes as $datetime) {
+        $datetime
+          ->setYear($year)
+          ->setMonth($month)
+          ->setDay($day);
+      }
+
+      list($start, $end) = $datetimes;
+      $parameters['start'] = $start->getEpoch();
+      $parameters['end'] = $end->getEpoch();
+    }
+
+    id(new PhabricatorCalendarEventEditEngine())
+      ->setViewer($this->getViewer())
+      ->addActionToCrumbs($crumbs, $parameters);
+
+    return $crumbs;
+  }
+
+  protected function buildNavigationItems() {
+    $items = array();
+
+    $items[] = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LABEL)
+      ->setName(pht('Import/Export'));
+
+    $items[] = id(new PHUIListItemView())
+      ->setName('Imports')
+      ->setHref('/calendar/import/');
+
+    $items[] = id(new PHUIListItemView())
+      ->setName('Exports')
+      ->setHref('/calendar/export/');
+
+    return $items;
   }
 
 }

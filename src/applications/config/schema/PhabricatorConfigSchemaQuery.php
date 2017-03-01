@@ -2,39 +2,73 @@
 
 final class PhabricatorConfigSchemaQuery extends Phobject {
 
-  private $api;
+  private $refs;
+  private $apis;
 
-  public function setAPI(PhabricatorStorageManagementAPI $api) {
-    $this->api = $api;
+  public function setRefs(array $refs) {
+    $this->refs = $refs;
     return $this;
   }
 
-  protected function getAPI() {
-    if (!$this->api) {
-      throw new PhutilInvalidStateException('setAPI');
+  public function getRefs() {
+    if (!$this->refs) {
+      return PhabricatorDatabaseRef::getMasterDatabaseRefs();
     }
-    return $this->api;
+    return $this->refs;
   }
 
-  protected function getConn() {
-    return $this->getAPI()->getConn(null);
+  public function setAPIs(array $apis) {
+    $map = array();
+    foreach ($apis as $api) {
+      $map[$api->getRef()->getRefKey()] = $api;
+    }
+    $this->apis = $map;
+    return $this;
   }
 
-  private function getDatabaseNames() {
-    $api = $this->getAPI();
+  private function getDatabaseNames(PhabricatorDatabaseRef $ref) {
+    $api = $this->getAPI($ref);
     $patches = PhabricatorSQLPatchList::buildAllPatches();
     return $api->getDatabaseList(
       $patches,
       $only_living = true);
   }
 
-  public function loadActualSchema() {
-    $databases = $this->getDatabaseNames();
+  private function getAPI(PhabricatorDatabaseRef $ref) {
+    $key = $ref->getRefKey();
 
-    $conn = $this->getConn();
+    if (isset($this->apis[$key])) {
+      return $this->apis[$key];
+    }
+
+    return id(new PhabricatorStorageManagementAPI())
+      ->setUser($ref->getUser())
+      ->setHost($ref->getHost())
+      ->setPort($ref->getPort())
+      ->setNamespace(PhabricatorLiskDAO::getDefaultStorageNamespace())
+      ->setPassword($ref->getPass());
+  }
+
+  public function loadActualSchemata() {
+    $refs = $this->getRefs();
+
+    $schemata = array();
+    foreach ($refs as $ref) {
+      $schema = $this->loadActualSchemaForServer($ref);
+      $schemata[$schema->getRef()->getRefKey()] = $schema;
+    }
+
+    return $schemata;
+  }
+
+  private function loadActualSchemaForServer(PhabricatorDatabaseRef $ref) {
+    $databases = $this->getDatabaseNames($ref);
+
+    $conn = $ref->newManagementConnection();
+
     $tables = queryfx_all(
       $conn,
-      'SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_COLLATION
+      'SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_COLLATION, ENGINE
         FROM INFORMATION_SCHEMA.TABLES
         WHERE TABLE_SCHEMA IN (%Ls)',
       $databases);
@@ -92,7 +126,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     // primary, unique, and foreign keys, so we can't use them here. We pull
     // indexes later on using SHOW INDEXES.
 
-    $server_schema = new PhabricatorConfigServerSchema();
+    $server_schema = id(new PhabricatorConfigServerSchema())
+      ->setRef($ref);
 
     $tables = igroup($tables, 'TABLE_SCHEMA');
     foreach ($tables as $database_name => $database_tables) {
@@ -111,7 +146,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
         $table_schema = id(new PhabricatorConfigTableSchema())
           ->setName($table_name)
-          ->setCollation($table['TABLE_COLLATION']);
+          ->setCollation($table['TABLE_COLLATION'])
+          ->setEngine($table['ENGINE']);
 
         $columns = idx($database_column_info, $table_name, array());
         foreach ($columns as $column) {
@@ -177,15 +213,29 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     return $server_schema;
   }
 
-  public function loadExpectedSchema() {
-    $databases = $this->getDatabaseNames();
-    $info = $this->getAPI()->getCharsetInfo();
+  public function loadExpectedSchemata() {
+    $refs = $this->getRefs();
+
+    $schemata = array();
+    foreach ($refs as $ref) {
+      $schema = $this->loadExpectedSchemaForServer($ref);
+      $schemata[$schema->getRef()->getRefKey()] = $schema;
+    }
+
+    return $schemata;
+  }
+
+  public function loadExpectedSchemaForServer(PhabricatorDatabaseRef $ref) {
+    $databases = $this->getDatabaseNames($ref);
+    $info = $this->getAPI($ref)->getCharsetInfo();
 
     $specs = id(new PhutilClassMapQuery())
       ->setAncestorClass('PhabricatorConfigSchemaSpec')
       ->execute();
 
-    $server_schema = new PhabricatorConfigServerSchema();
+    $server_schema = id(new PhabricatorConfigServerSchema())
+      ->setRef($ref);
+
     foreach ($specs as $spec) {
       $spec
         ->setUTF8Charset(
@@ -201,7 +251,21 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     return $server_schema;
   }
 
-  public function buildComparisonSchema(
+  public function buildComparisonSchemata(
+    array $expect_servers,
+    array $actual_servers) {
+
+    $schemata = array();
+    foreach ($actual_servers as $key => $actual_server) {
+      $schemata[$key] = $this->buildComparisonSchemaForServer(
+        $expect_servers[$key],
+        $actual_server);
+    }
+
+    return $schemata;
+  }
+
+  private function buildComparisonSchemaForServer(
     PhabricatorConfigServerSchema $expect,
     PhabricatorConfigServerSchema $actual) {
 

@@ -33,16 +33,30 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
       $revision = $objects[$phid];
 
       $title = $revision->getTitle();
-      $id = $revision->getID();
       $status = $revision->getStatus();
+      $monogram = $revision->getMonogram();
+      $uri = $revision->getURI();
 
-      $handle->setName("D{$id}");
-      $handle->setURI("/D{$id}");
-      $handle->setFullName("D{$id}: {$title}");
+      $handle
+        ->setName($monogram)
+        ->setURI($uri)
+        ->setFullName("{$monogram}: {$title}");
 
       if ($revision->isClosed()) {
         $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
+
+      $status = $revision->getStatus();
+
+      $icon = DifferentialRevisionStatus::getRevisionStatusIcon($status);
+      $color = DifferentialRevisionStatus::getRevisionStatusColor($status);
+      $name = ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
+        $status);
+
+      $handle
+        ->setStateIcon($icon)
+        ->setStateColor($color)
+        ->setStateName($name);
     }
   }
 

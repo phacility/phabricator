@@ -4,7 +4,7 @@ final class PhabricatorCommitSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Commits');
+    return pht('Diffusion Commits');
   }
 
   public function getApplicationClassName() {
@@ -14,30 +14,43 @@ final class PhabricatorCommitSearchEngine
   public function newQuery() {
     return id(new DiffusionCommitQuery())
       ->needAuditRequests(true)
-      ->needCommitData(true);
+      ->needCommitData(true)
+      ->needDrafts(true);
+  }
+
+  protected function newResultBuckets() {
+    return DiffusionCommitResultBucket::getAllResultBuckets();
   }
 
   protected function buildQueryFromParameters(array $map) {
     $query = $this->newQuery();
 
-    if ($map['needsAuditByPHIDs']) {
-      $query->withNeedsAuditByPHIDs($map['needsAuditByPHIDs']);
+    if ($map['responsiblePHIDs']) {
+      $query->withResponsiblePHIDs($map['responsiblePHIDs']);
     }
 
     if ($map['auditorPHIDs']) {
       $query->withAuditorPHIDs($map['auditorPHIDs']);
     }
 
-    if ($map['commitAuthorPHIDs']) {
-      $query->withAuthorPHIDs($map['commitAuthorPHIDs']);
+    if ($map['authorPHIDs']) {
+      $query->withAuthorPHIDs($map['authorPHIDs']);
     }
 
-    if ($map['auditStatus']) {
-      $query->withAuditStatus($map['auditStatus']);
+    if ($map['statuses']) {
+      $query->withStatuses($map['statuses']);
     }
 
     if ($map['repositoryPHIDs']) {
       $query->withRepositoryPHIDs($map['repositoryPHIDs']);
+    }
+
+    if ($map['packagePHIDs']) {
+      $query->withPackagePHIDs($map['packagePHIDs']);
+    }
+
+    if ($map['unreachable'] !== null) {
+      $query->withUnreachable($map['unreachable']);
     }
 
     return $query;
@@ -46,48 +59,64 @@ final class PhabricatorCommitSearchEngine
   protected function buildCustomSearchFields() {
     return array(
       id(new PhabricatorSearchDatasourceField())
-        ->setLabel(pht('Needs Audit By'))
-        ->setKey('needsAuditByPHIDs')
-        ->setAliases(array('needs', 'need'))
-        ->setDatasource(new DiffusionAuditorFunctionDatasource()),
+        ->setLabel(pht('Responsible Users'))
+        ->setKey('responsiblePHIDs')
+        ->setConduitKey('responsible')
+        ->setAliases(array('responsible', 'responsibles', 'responsiblePHID'))
+        ->setDatasource(new DifferentialResponsibleDatasource()),
+      id(new PhabricatorUsersSearchField())
+        ->setLabel(pht('Authors'))
+        ->setKey('authorPHIDs')
+        ->setConduitKey('authors')
+        ->setAliases(array('author', 'authors', 'authorPHID')),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Auditors'))
         ->setKey('auditorPHIDs')
-        ->setAliases(array('auditor', 'auditors'))
+        ->setConduitKey('auditors')
+        ->setAliases(array('auditor', 'auditors', 'auditorPHID'))
         ->setDatasource(new DiffusionAuditorFunctionDatasource()),
-      id(new PhabricatorUsersSearchField())
-        ->setLabel(pht('Authors'))
-        ->setKey('commitAuthorPHIDs')
-        ->setAliases(array('author', 'authors')),
-      id(new PhabricatorSearchSelectField())
+      id(new PhabricatorSearchCheckboxesField())
         ->setLabel(pht('Audit Status'))
-        ->setKey('auditStatus')
+        ->setKey('statuses')
         ->setAliases(array('status'))
-        ->setOptions($this->getAuditStatusOptions()),
+        ->setOptions(PhabricatorAuditCommitStatusConstants::getStatusNameMap()),
       id(new PhabricatorSearchDatasourceField())
         ->setLabel(pht('Repositories'))
         ->setKey('repositoryPHIDs')
-        ->setAliases(array('repository', 'repositories'))
-        ->setDatasource(new DiffusionRepositoryDatasource()),
+        ->setConduitKey('repositories')
+        ->setAliases(array('repository', 'repositories', 'repositoryPHID'))
+        ->setDatasource(new DiffusionRepositoryFunctionDatasource()),
+      id(new PhabricatorSearchDatasourceField())
+        ->setLabel(pht('Packages'))
+        ->setKey('packagePHIDs')
+        ->setConduitKey('packages')
+        ->setAliases(array('package', 'packages', 'packagePHID'))
+        ->setDatasource(new PhabricatorOwnersPackageDatasource()),
+      id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Unreachable'))
+        ->setKey('unreachable')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Unreachable Commits'),
+          pht('Hide Unreachable Commits'))
+        ->setDescription(
+          pht(
+            'Find or exclude unreachable commits which are not ancestors of '.
+            'any branch, tag, or ref.')),
     );
   }
 
   protected function getURI($path) {
-    return '/audit/'.$path;
+    return '/diffusion/commit/'.$path;
   }
 
   protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {
-      $names['need'] = pht('Needs Audit');
-      $names['problem'] = pht('Problem Commits');
-    }
-
-    $names['open'] = pht('Open Audits');
-
-    if ($this->requireViewer()->isLoggedIn()) {
-      $names['authored'] = pht('Authored Commits');
+      $names['active'] = pht('Active Audits');
+      $names['authored'] = pht('Authored');
+      $names['audited'] = pht('Audited');
     }
 
     $names['all'] = pht('All Commits');
@@ -101,76 +130,73 @@ final class PhabricatorCommitSearchEngine
     $viewer = $this->requireViewer();
 
     $viewer_phid = $viewer->getPHID();
-    $status_open = DiffusionCommitQuery::AUDIT_STATUS_OPEN;
-
     switch ($query_key) {
       case 'all':
         return $query;
-      case 'open':
-        $query->setParameter('auditStatus', $status_open);
-        return $query;
-      case 'need':
-        $needs_tokens = array(
-          $viewer_phid,
-          'projects('.$viewer_phid.')',
-          'packages('.$viewer_phid.')',
-        );
+      case 'active':
+        $bucket_key = DiffusionCommitRequiredActionResultBucket::BUCKETKEY;
 
-        $query->setParameter('needsAuditByPHIDs', $needs_tokens);
-        $query->setParameter('auditStatus', $status_open);
+        $open = PhabricatorAuditCommitStatusConstants::getOpenStatusConstants();
+
+        $query
+          ->setParameter('responsiblePHIDs', array($viewer_phid))
+          ->setParameter('statuses', $open)
+          ->setParameter('bucket', $bucket_key)
+          ->setParameter('unreachable', false);
         return $query;
       case 'authored':
-        $query->setParameter('commitAuthorPHIDs', array($viewer->getPHID()));
+        $query
+          ->setParameter('authorPHIDs', array($viewer_phid));
         return $query;
-      case 'problem':
-        $query->setParameter('commitAuthorPHIDs', array($viewer->getPHID()));
-        $query->setParameter(
-          'auditStatus',
-          DiffusionCommitQuery::AUDIT_STATUS_CONCERN);
+      case 'audited':
+        $query
+          ->setParameter('auditorPHIDs', array($viewer_phid));
         return $query;
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  private function getAuditStatusOptions() {
-    return array(
-      DiffusionCommitQuery::AUDIT_STATUS_ANY => pht('Any'),
-      DiffusionCommitQuery::AUDIT_STATUS_OPEN => pht('Open'),
-      DiffusionCommitQuery::AUDIT_STATUS_CONCERN => pht('Concern Raised'),
-      DiffusionCommitQuery::AUDIT_STATUS_ACCEPTED => pht('Accepted'),
-      DiffusionCommitQuery::AUDIT_STATUS_PARTIAL => pht('Partially Audited'),
-    );
-  }
-
   protected function renderResultList(
     array $commits,
     PhabricatorSavedQuery $query,
     array $handles) {
-
     assert_instances_of($commits, 'PhabricatorRepositoryCommit');
-
     $viewer = $this->requireViewer();
-    $nodata = pht('No matching audits.');
-    $view = id(new PhabricatorAuditListView())
-      ->setUser($viewer)
-      ->setCommits($commits)
-      ->setAuthorityPHIDs(
-        PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($viewer))
-      ->setNoDataString($nodata);
 
-    $phids = $view->getRequiredHandlePHIDs();
-    if ($phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs($phids)
-        ->execute();
+    $bucket = $this->getResultBucket($query);
+
+    $template = id(new PhabricatorAuditListView())
+      ->setViewer($viewer)
+      ->setShowDrafts(true);
+
+    $views = array();
+    if ($bucket) {
+      $bucket->setViewer($viewer);
+
+      try {
+        $groups = $bucket->newResultGroups($query, $commits);
+
+        foreach ($groups as $group) {
+          $views[] = id(clone $template)
+            ->setHeader($group->getName())
+            ->setNoDataString($group->getNoDataString())
+            ->setCommits($group->getObjects());
+        }
+      } catch (Exception $ex) {
+        $this->addError($ex->getMessage());
+      }
     } else {
-      $handles = array();
+      $views[] = id(clone $template)
+        ->setCommits($commits)
+        ->setNoDataString(pht('No matching commits.'));
     }
 
-    $view->setHandles($handles);
-    $list = $view->buildList();
+    if (count($views) == 1) {
+      $list = head($views)->buildList();
+    } else {
+      $list = $views;
+    }
 
     $result = new PhabricatorApplicationSearchResultView();
     $result->setContent($list);

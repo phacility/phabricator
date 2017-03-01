@@ -17,17 +17,18 @@ final class PhabricatorProjectViewController
     }
     $project = $this->getProject();
 
-    $engine = $this->getProfilePanelEngine();
-    $default = $engine->getDefaultPanel();
+    $engine = $this->getProfileMenuEngine();
+    $default = $engine->getDefaultItem();
 
     switch ($default->getBuiltinKey()) {
-      case PhabricatorProject::PANEL_WORKBOARD:
+      case PhabricatorProject::ITEM_WORKBOARD:
         $controller_object = new PhabricatorProjectBoardViewController();
         break;
-      case PhabricatorProject::PANEL_PROFILE:
-      default:
+      case PhabricatorProject::ITEM_PROFILE:
         $controller_object = new PhabricatorProjectProfileController();
         break;
+      default:
+        return $engine->buildResponse();
     }
 
     return $this->delegateToController($controller_object);

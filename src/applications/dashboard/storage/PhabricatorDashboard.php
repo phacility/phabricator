@@ -9,12 +9,15 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorDestructibleInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorNgramsInterface {
 
   protected $name;
+  protected $authorPHID;
   protected $viewPolicy;
   protected $editPolicy;
   protected $status;
+  protected $icon;
   protected $layoutConfig = array();
 
   const STATUS_ACTIVE = 'active';
@@ -28,9 +31,11 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   public static function initializeNewDashboard(PhabricatorUser $actor) {
     return id(new PhabricatorDashboard())
       ->setName('')
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setIcon('fa-dashboard')
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
       ->setEditPolicy($actor->getPHID())
       ->setStatus(self::STATUS_ACTIVE)
+      ->setAuthorPHID($actor->getPHID())
       ->attachPanels(array())
       ->attachPanelPHIDs(array());
   }
@@ -42,16 +47,6 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     );
   }
 
-  public static function copyDashboard(
-    PhabricatorDashboard $dst,
-    PhabricatorDashboard $src) {
-
-    $dst->name = $src->name;
-    $dst->layoutConfig = $src->layoutConfig;
-
-    return $dst;
-  }
-
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -59,8 +54,10 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
         'layoutConfig' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'sort255',
         'status' => 'text32',
+        'icon' => 'text32',
+        'authorPHID' => 'phid',
       ),
     ) + parent::getConfiguration();
   }
@@ -113,6 +110,10 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return ($this->getStatus() == self::STATUS_ARCHIVED);
   }
 
+  public function getViewURI() {
+    return '/dashboard/view/'.$this->getID().'/';
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -160,10 +161,6 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return false;
   }
 
-  public function describeAutomaticCapability($capability) {
-    return null;
-  }
-
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
@@ -183,5 +180,15 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     $this->saveTransaction();
   }
 
+
+/* -(  PhabricatorNgramInterface  )------------------------------------------ */
+
+
+  public function newNgrams() {
+    return array(
+      id(new PhabricatorDashboardNgrams())
+        ->setValue($this->getName()),
+    );
+  }
 
 }

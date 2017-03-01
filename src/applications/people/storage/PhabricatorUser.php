@@ -64,6 +64,7 @@ final class PhabricatorUser
   private $settingCacheKeys = array();
   private $settingCache = array();
   private $allowInlineCacheGeneration;
+  private $conduitClusterToken = self::ATTACHABLE;
 
   protected function readField($field) {
     switch ($field) {
@@ -118,6 +119,32 @@ final class PhabricatorUser
 
     return true;
   }
+
+
+  /**
+   * Is this a user who we can reasonably expect to respond to requests?
+   *
+   * This is used to provide a grey "disabled/unresponsive" dot cue when
+   * rendering handles and tags, so it isn't a surprise if you get ignored
+   * when you ask things of users who will not receive notifications or could
+   * not respond to them (because they are disabled, unapproved, do not have
+   * verified email addresses, etc).
+   *
+   * @return bool True if this user can receive and respond to requests from
+   *   other humans.
+   */
+  public function isResponsive() {
+    if (!$this->isUserActivated()) {
+      return false;
+    }
+
+    if (!$this->getIsEmailVerified()) {
+      return false;
+    }
+
+    return true;
+  }
+
 
   public function canEstablishWebSessions() {
     if ($this->getIsMailingList()) {
@@ -487,41 +514,31 @@ final class PhabricatorUser
     if ($this->getPHID()) {
       $settings = $this->requireCacheData($settings_key);
     } else {
-      $settings = array();
+      $settings = $this->loadGlobalSettings();
     }
-
-    // NOTE: To slightly improve performance, we're using all settings here,
-    // not just settings that are enabled for the current viewer. It's fine to
-    // get the value of a setting that we wouldn't let the user edit in the UI.
-    $defaults = PhabricatorSetting::getAllSettings();
 
     if (array_key_exists($key, $settings)) {
       $value = $settings[$key];
-
-      // Make sure the value is valid before we return it. This makes things
-      // more robust when options are changed or removed.
-      if (isset($defaults[$key])) {
-        try {
-          id(clone $defaults[$key])
-            ->setViewer($this)
-            ->assertValidValue($value);
-
-          return $this->writeUserSettingCache($key, $value);
-        } catch (Exception $ex) {
-          // Fall through below and return the default value.
-        }
-      } else {
-        // This is an ad-hoc setting with no controlling object.
-        return $this->writeUserSettingCache($key, $value);
-      }
+      return $this->writeUserSettingCache($key, $value);
     }
 
-    if (isset($defaults[$key])) {
-      $value = id(clone $defaults[$key])
-        ->setViewer($this)
-        ->getSettingDefaultValue();
+    $cache = PhabricatorCaches::getRuntimeCache();
+    $cache_key = "settings.defaults({$key})";
+    $cache_map = $cache->getKeys(array($cache_key));
+
+    if ($cache_map) {
+      $value = $cache_map[$cache_key];
     } else {
-      $value = null;
+      $defaults = PhabricatorSetting::getAllSettings();
+      if (isset($defaults[$key])) {
+        $value = id(clone $defaults[$key])
+          ->setViewer($this)
+          ->getSettingDefaultValue();
+      } else {
+        $value = null;
+      }
+
+      $cache->setKey($cache_key, $value);
     }
 
     return $this->writeUserSettingCache($key, $value);
@@ -555,6 +572,24 @@ final class PhabricatorUser
     return $this->getUserSetting(PhabricatorTimezoneSetting::SETTINGKEY);
   }
 
+  public static function getGlobalSettingsCacheKey() {
+    return 'user.settings.globals.v1';
+  }
+
+  private function loadGlobalSettings() {
+    $cache_key = self::getGlobalSettingsCacheKey();
+    $cache = PhabricatorCaches::getMutableStructureCache();
+
+    $settings = $cache->getKey($cache_key);
+    if (!$settings) {
+      $preferences = PhabricatorUserPreferences::loadGlobalPreferences($this);
+      $settings = $preferences->getPreferences();
+      $cache->setKey($cache_key, $settings);
+    }
+
+    return $settings;
+  }
+
 
   /**
    * Override the user's timezone identifier.
@@ -572,7 +607,7 @@ final class PhabricatorUser
     return $this;
   }
 
-  public function getSex() {
+  public function getGender() {
     return $this->getUserSetting(PhabricatorPronounSetting::SETTINGKEY);
   }
 
@@ -832,6 +867,14 @@ final class PhabricatorUser
     return $offset;
   }
 
+  public function getTimeZoneOffsetInHours() {
+    $offset = $this->getTimeZoneOffset();
+    $offset = (int)round($offset / 60);
+    $offset = -$offset;
+
+    return $offset;
+  }
+
   public function formatShortDateTime($when, $now = null) {
     if ($now === null) {
       $now = PhabricatorTime::getNow();
@@ -921,6 +964,19 @@ final class PhabricatorUser
     return $this->authorities;
   }
 
+  public function hasConduitClusterToken() {
+    return ($this->conduitClusterToken !== self::ATTACHABLE);
+  }
+
+  public function attachConduitClusterToken(PhabricatorConduitToken $token) {
+    $this->conduitClusterToken = $token;
+    return $this;
+  }
+
+  public function getConduitClusterToken() {
+    return $this->assertAttached($this->conduitClusterToken);
+  }
+
 
 /* -(  Availability  )------------------------------------------------------- */
 
@@ -952,20 +1008,29 @@ final class PhabricatorUser
   }
 
 
-  /**
-   * Describe the user's availability.
-   *
-   * @param PhabricatorUser Viewing user.
-   * @return string Human-readable description of away status.
-   * @task availability
-   */
-  public function getAvailabilityDescription(PhabricatorUser $viewer) {
-    $until = $this->getAwayUntil();
-    if ($until) {
-      return pht('Away until %s', phabricator_datetime($until, $viewer));
-    } else {
-      return pht('Available');
+  public function getDisplayAvailability() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
     }
+
+    $busy = PhabricatorCalendarEventInvitee::AVAILABILITY_BUSY;
+
+    return idx($availability, 'availability', $busy);
+  }
+
+
+  public function getAvailabilityEventPHID() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    return idx($availability, 'eventPHID');
   }
 
 
@@ -1464,9 +1529,27 @@ final class PhabricatorUser
       throw new PhabricatorDataNotAttachedException($this);
     }
 
+    $user_phid = $this->getPHID();
+
+    // Try to read the actual cache before we generate a new value. We can
+    // end up here via Conduit, which does not use normal sessions and can
+    // not pick up a free cache load during session identification.
+    if ($user_phid) {
+      $raw_data = PhabricatorUserCache::readCaches(
+        $type,
+        $key,
+        array($user_phid));
+      if (array_key_exists($user_phid, $raw_data)) {
+        $raw_value = $raw_data[$user_phid];
+        $usable_value = $type->getValueFromStorage($raw_value);
+        $this->rawCacheData[$key] = $raw_value;
+        $this->usableCacheData[$key] = $usable_value;
+        return $usable_value;
+      }
+    }
+
     $usable_value = $type->getDefaultValue();
 
-    $user_phid = $this->getPHID();
     if ($user_phid) {
       $map = $type->newValueForUsers($key, array($this));
       if (array_key_exists($user_phid, $map)) {
@@ -1495,6 +1578,24 @@ final class PhabricatorUser
     unset($this->rawCacheData[$key]);
     unset($this->usableCacheData[$key]);
     return $this;
+  }
+
+
+  public function getCSSValue($variable_key) {
+    $preference = PhabricatorAccessibilitySetting::SETTINGKEY;
+    $key = $this->getUserSetting($preference);
+
+    $postprocessor = CelerityPostprocessor::getPostprocessor($key);
+    $variables = $postprocessor->getVariables();
+
+    if (!isset($variables[$variable_key])) {
+      throw new Exception(
+        pht(
+          'Unknown CSS variable "%s"!',
+          $variable_key));
+    }
+
+    return $variables[$variable_key];
   }
 
 }

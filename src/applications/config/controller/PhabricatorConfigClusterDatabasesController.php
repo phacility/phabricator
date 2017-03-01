@@ -7,22 +7,36 @@ final class PhabricatorConfigClusterDatabasesController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('cluster/databases/');
 
-    $title = pht('Database Servers');
+    $title = pht('Cluster Database Status');
+    $doc_href = PhabricatorEnv::getDoclink('Cluster: Databases');
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->setProfileHeader(true)
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setIcon('fa-book')
+          ->setHref($doc_href)
+          ->setTag('a')
+          ->setText(pht('Documentation')));
 
     $crumbs = $this
-      ->buildApplicationCrumbs($nav)
-      ->addTextCrumb(pht('Database Servers'));
+      ->buildApplicationCrumbs()
+      ->addTextCrumb($title)
+      ->setBorder(true);
 
     $database_status = $this->buildClusterDatabaseStatus();
 
-    $view = id(new PHUITwoColumnView())
-      ->setNavigation($nav)
-      ->setMainColumn($database_status);
+    $content = id(new PhabricatorConfigPageView())
+      ->setHeader($header)
+      ->setContent($database_status);
 
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild($view);
+      ->setNavigation($nav)
+      ->appendChild($content)
+      ->addClass('white-background');
   }
 
   private function buildClusterDatabaseStatus() {
@@ -155,8 +169,37 @@ final class PhabricatorConfigClusterDatabasesController
 
       $messages = phutil_implode_html(phutil_tag('br'), $messages);
 
+      $partition = null;
+      if ($database->getIsMaster()) {
+        if ($database->getIsDefaultPartition()) {
+          $partition = id(new PHUIIconView())
+            ->setIcon('fa-circle sky')
+            ->addSigil('has-tooltip')
+            ->setMetadata(
+              array(
+                'tip' => pht('Default Partition'),
+              ));
+        } else {
+          $map = $database->getApplicationMap();
+          if ($map) {
+            $list = implode(', ', $map);
+          } else {
+            $list = pht('Empty');
+          }
+
+          $partition = id(new PHUIIconView())
+            ->setIcon('fa-adjust sky')
+            ->addSigil('has-tooltip')
+            ->setMetadata(
+              array(
+                'tip' => pht('Partition: %s', $list),
+              ));
+        }
+      }
+
       $rows[] = array(
         $role_icon,
+        $partition,
         $database->getHost(),
         $database->getPort(),
         $database->getUser(),
@@ -173,6 +216,7 @@ final class PhabricatorConfigClusterDatabasesController
         pht('Phabricator is not configured in cluster mode.'))
       ->setHeaders(
         array(
+          null,
           null,
           pht('Host'),
           pht('Port'),
@@ -191,23 +235,11 @@ final class PhabricatorConfigClusterDatabasesController
           null,
           null,
           null,
+          null,
           'wide',
         ));
 
-    $doc_href = PhabricatorEnv::getDoclink('Cluster: Databases');
-
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Cluster Database Status'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setIcon('fa-book')
-          ->setHref($doc_href)
-          ->setTag('a')
-          ->setText(pht('Documentation')));
-
-    return id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->setTable($table);
+    return $table;
   }
 
 }

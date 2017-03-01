@@ -15,8 +15,7 @@
   ],
 
   "conduit.uri" : null,
-  "conduit.user" : null,
-  "conduit.cert" : null,
+  "conduit.token" : null,
 
   "macro.size" : 48,
   "macro.aspect" : 0.66,

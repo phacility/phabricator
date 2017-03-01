@@ -213,10 +213,6 @@ final class PhabricatorCoreConfigOptions
         ->setLocked(true)
         ->setDescription(
           pht('Customized settings for Phabricator applications.')),
-      $this->newOption('welcome.html', 'string', null)
-        ->setLocked(true)
-        ->setDescription(
-          pht('Custom HTML to show on the main Phabricator dashboard.')),
       $this->newOption('phabricator.cache-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setDescription(pht('Cache namespace.')),

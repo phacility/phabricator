@@ -14,7 +14,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5),
 only screen and (min-resolution: 1.5dppx) {
   .sprite-login {
     background-image: url(/rsrc/image/sprite-login-X2.png);
-    background-size: 145px 145px;
+    background-size: 145px 174px;
   }
 }
 
@@ -83,38 +83,38 @@ only screen and (min-resolution: 1.5dppx) {
   background-position: 0px -87px;
 }
 
-.login-Persona {
-  background-position: -29px -87px;
-}
-
 .login-Phabricator {
   background-position: -58px -87px;
 }
 
-.login-Stripe {
+.login-Slack {
   background-position: -87px -87px;
 }
 
-.login-TestPayment {
+.login-Stripe {
   background-position: -116px -87px;
 }
 
-.login-TwitchTV {
+.login-TestPayment {
   background-position: 0px -116px;
 }
 
-.login-Twitter {
+.login-TwitchTV {
   background-position: -29px -116px;
 }
 
-.login-WePay {
+.login-Twitter {
   background-position: -58px -116px;
 }
 
-.login-WordPressCOM {
+.login-WePay {
   background-position: -87px -116px;
 }
 
-.login-Yahoo {
+.login-WordPressCOM {
   background-position: -116px -116px;
+}
+
+.login-Yahoo {
+  background-position: 0px -145px;
 }

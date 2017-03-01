@@ -2,7 +2,7 @@
 
 final class AphrontCalendarEventView extends AphrontView {
 
-  private $userPHID;
+  private $hostPHID;
   private $name;
   private $epochStart;
   private $epochEnd;
@@ -12,7 +12,28 @@ final class AphrontCalendarEventView extends AphrontView {
   private $uri;
   private $isAllDay;
   private $icon;
+  private $iconColor;
   private $canEdit;
+  private $isCancelled;
+  private $datetimeSummary;
+
+  public function setIconColor($icon_color) {
+    $this->iconColor = $icon_color;
+    return $this;
+  }
+
+  public function getIconColor() {
+    return $this->iconColor;
+  }
+
+  public function setIsCancelled($is_cancelled) {
+    $this->isCancelled = $is_cancelled;
+    return $this;
+  }
+
+  public function getIsCancelled() {
+    return $this->isCancelled;
+  }
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -39,13 +60,13 @@ final class AphrontCalendarEventView extends AphrontView {
     return $this->viewerIsInvited;
   }
 
-  public function setUserPHID($user_phid) {
-    $this->userPHID = $user_phid;
+  public function setHostPHID($host_phid) {
+    $this->hostPHID = $host_phid;
     return $this;
   }
 
-  public function getUserPHID() {
-    return $this->userPHID;
+  public function getHostPHID() {
+    return $this->hostPHID;
   }
 
   public function setName($name) {
@@ -113,6 +134,15 @@ final class AphrontCalendarEventView extends AphrontView {
       return true;
     }
     return false;
+  }
+
+  public function setDatetimeSummary($datetime_summary) {
+    $this->datetimeSummary = $datetime_summary;
+    return $this;
+  }
+
+  public function getDatetimeSummary() {
+    return $this->datetimeSummary;
   }
 
   public function render() {

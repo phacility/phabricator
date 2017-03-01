@@ -24,7 +24,8 @@ final class PhabricatorPHIDsSearchField
   }
 
   protected function newConduitParameterType() {
-    return new ConduitPHIDListParameterType();
+    return id(new ConduitPHIDListParameterType())
+      ->setAllowEmptyList(false);
   }
 
 }

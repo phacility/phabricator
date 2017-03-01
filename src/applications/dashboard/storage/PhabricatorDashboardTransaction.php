@@ -4,6 +4,7 @@ final class PhabricatorDashboardTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME = 'dashboard:name';
+  const TYPE_ICON = 'dashboard:icon';
   const TYPE_STATUS = 'dashboard:status';
   const TYPE_LAYOUT_MODE = 'dashboard:layoutmode';
 
@@ -39,14 +40,27 @@ final class PhabricatorDashboardTransaction
             $new);
         }
         break;
-      case self::TYPE_STATUS:
-        if ($new == PhabricatorDashboard::STATUS_ACTIVE) {
+      case self::TYPE_ICON:
+        if (!strlen($old)) {
           return pht(
-            '%s activated this dashboard',
+            '%s set the dashboard icon.',
             $author_link);
         } else {
           return pht(
-            '%s archived this dashboard',
+            '%s changed this dashboard icon from "%s" to "%s".',
+            $author_link,
+            $old,
+            $new);
+        }
+        break;
+      case self::TYPE_STATUS:
+        if ($new == PhabricatorDashboard::STATUS_ACTIVE) {
+          return pht(
+            '%s activated this dashboard.',
+            $author_link);
+        } else {
+          return pht(
+            '%s archived this dashboard.',
             $author_link);
         }
         break;
@@ -76,6 +90,21 @@ final class PhabricatorDashboardTransaction
         } else {
           return pht(
             '%s renamed dashboard %s from "%s" to "%s".',
+            $author_link,
+            $object_link,
+            $old,
+            $new);
+        }
+        break;
+      case self::TYPE_ICON:
+        if (!strlen($old)) {
+          return pht(
+            '%s set dashboard icon for %s.',
+            $author_link,
+            $object_link);
+        } else {
+          return pht(
+            '%s set the dashboard icon on %s from "%s" to "%s".',
             $author_link,
             $object_link,
             $old,

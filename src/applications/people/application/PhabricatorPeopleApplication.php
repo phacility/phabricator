@@ -30,6 +30,10 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     return pht('Sort of a social utility.');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function canUninstall() {
     return false;
   }
@@ -60,6 +64,8 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         'ldap/' => 'PhabricatorPeopleLdapController',
         'editprofile/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileEditController',
+        'badges/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfileBadgesController',
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfilePictureController',
         'manage/(?P<id>[1-9]\d*)/' =>
@@ -67,9 +73,8 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         ),
       '/p/(?P<username>[\w._-]+)/' => array(
         '' => 'PhabricatorPeopleProfileViewController',
-        'panel/'
-          => $this->getPanelRouting('PhabricatorPeopleProfilePanelController'),
-        'calendar/' => 'PhabricatorPeopleCalendarController',
+        'item/' => $this->getProfileMenuRouting(
+          'PhabricatorPeopleProfileMenuController'),
       ),
     );
   }
@@ -87,44 +92,6 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
       ),
       PeopleBrowseUserDirectoryCapability::CAPABILITY => array(),
     );
-  }
-
-  public function loadStatus(PhabricatorUser $user) {
-    if (!$user->getIsAdmin()) {
-      return array();
-    }
-    $limit = self::MAX_STATUS_ITEMS;
-
-    $need_approval = id(new PhabricatorPeopleQuery())
-      ->setViewer($user)
-      ->withIsApproved(false)
-      ->withIsDisabled(false)
-      ->setLimit($limit)
-      ->execute();
-    if (!$need_approval) {
-      return array();
-    }
-
-    $status = array();
-
-    $count = count($need_approval);
-    if ($count >= $limit) {
-      $count_str = pht(
-        '%s+ User(s) Need Approval',
-        new PhutilNumber($limit - 1));
-    } else {
-      $count_str = pht(
-        '%s User(s) Need Approval',
-        new PhutilNumber($count));
-    }
-
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText($count_str)
-      ->setCount($count);
-
-    return $status;
   }
 
   public function getApplicationSearchDocumentTypes() {

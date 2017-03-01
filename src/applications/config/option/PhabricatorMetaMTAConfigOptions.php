@@ -61,9 +61,10 @@ of each approach are:
       a normal recipient and also Cc'd on a mailing list.
     - Getting threading to work properly is harder, and probably requires
       making mail less useful by turning off options.
-    - Sometimes people will "Reply All" and everyone will get two mails,
-      one from the user and one from Phabricator turning their mail into
-      a comment.
+    - Sometimes people will "Reply All", which can send mail to too many
+      recipients. Phabricator will try not to send mail to users who already
+      received a similar message, but can not prevent all stray email arising
+      from "Reply All".
     - Not supported with a private reply-to address.
     - Mails are sent in the server default translation.
   - One mail to each user:
@@ -73,7 +74,8 @@ of each approach are:
       mail.
     - Getting threading to work properly is easier, and threading settings
       can be customzied by each user.
-    - "Reply All" no longer spams all other users.
+    - "Reply All" will never send extra mail to other users involved in the
+      thread.
     - Required if private reply-to addresses are configured.
     - Mails are sent in the language of user preference.
 
@@ -97,16 +99,6 @@ EODOC
     $recipient_hints_description = $this->deformat(pht(<<<EODOC
 You can disable the "To:" and "Cc:" footers in mail if users prefer smaller
 messages.
-EODOC
-));
-
-    $bulk_description = $this->deformat(pht(<<<EODOC
-If this option is enabled, Phabricator will add a "Precedence: bulk" header to
-transactional mail (e.g., Differential, Maniphest and Herald notifications).
-This may improve the behavior of some auto-responder software and prevent it
-from replying. However, it may also cause deliverability issues -- notably, you
-currently can not send this header via Amazon SES, and enabling this option with
-SES will prevent delivery of any affected mail.
 EODOC
 ));
 

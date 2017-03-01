@@ -2,14 +2,76 @@
 
 final class HeraldTestConsoleController extends HeraldController {
 
+  private $testObject;
+  private $testAdapter;
+
+  public function setTestObject($test_object) {
+    $this->testObject = $test_object;
+    return $this;
+  }
+
+  public function getTestObject() {
+    return $this->testObject;
+  }
+
+  public function setTestAdapter(HeraldAdapter $test_adapter) {
+    $this->testAdapter = $test_adapter;
+    return $this;
+  }
+
+  public function getTestAdapter() {
+    return $this->testAdapter;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
-    $object_name = trim($request->getStr('object_name'));
+
+    $response = $this->loadTestObject($request);
+    if ($response) {
+      return $response;
+    }
+
+    $response = $this->loadAdapter($request);
+    if ($response) {
+      return $response;
+    }
+
+    $object = $this->getTestObject();
+    $adapter = $this->getTestAdapter();
+
+    $adapter->setIsNewObject(false);
+
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer($viewer)
+      ->withContentTypes(array($adapter->getAdapterContentType()))
+      ->withDisabled(false)
+      ->needConditionsAndActions(true)
+      ->needAppliedToPHIDs(array($object->getPHID()))
+      ->needValidateAuthors(true)
+      ->execute();
+
+    $engine = id(new HeraldEngine())
+      ->setDryRun(true);
+
+    $effects = $engine->applyRules($rules, $adapter);
+    $engine->applyEffects($effects, $adapter, $rules);
+
+    $xscript = $engine->getTranscript();
+
+    return id(new AphrontRedirectResponse())
+      ->setURI('/herald/transcript/'.$xscript->getID().'/');
+  }
+
+  private function loadTestObject(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $e_name = true;
+    $v_name = null;
     $errors = array();
+
     if ($request->isFormPost()) {
-      if (!$object_name) {
+      $v_name = trim($request->getStr('object_name'));
+      if (!$v_name) {
         $e_name = pht('Required');
         $errors[] = pht('An object name is required.');
       }
@@ -17,66 +79,18 @@ final class HeraldTestConsoleController extends HeraldController {
       if (!$errors) {
         $object = id(new PhabricatorObjectQuery())
           ->setViewer($viewer)
-          ->withNames(array($object_name))
+          ->withNames(array($v_name))
           ->executeOne();
 
         if (!$object) {
           $e_name = pht('Invalid');
           $errors[] = pht('No object exists with that name.');
         }
+      }
 
-        if (!$errors) {
-
-          // TODO: Let the adapters claim objects instead.
-
-          if ($object instanceof DifferentialRevision) {
-            $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
-              $object,
-              $object->loadActiveDiff());
-          } else if ($object instanceof PhabricatorRepositoryCommit) {
-            $adapter = id(new HeraldCommitAdapter())
-              ->setCommit($object);
-          } else if ($object instanceof ManiphestTask) {
-            $adapter = id(new HeraldManiphestTaskAdapter())
-              ->setTask($object);
-          } else if ($object instanceof PholioMock) {
-            $adapter = id(new HeraldPholioMockAdapter())
-              ->setMock($object);
-          } else if ($object instanceof PhrictionDocument) {
-            $adapter = id(new PhrictionDocumentHeraldAdapter())
-              ->setDocument($object);
-          } else if ($object instanceof PonderQuestion) {
-            $adapter = id(new HeraldPonderQuestionAdapter())
-              ->setQuestion($object);
-          } else if ($object instanceof PhabricatorMetaMTAMail) {
-            $adapter = id(new PhabricatorMailOutboundMailHeraldAdapter())
-              ->setObject($object);
-          } else {
-            throw new Exception(pht('Can not build adapter for object!'));
-          }
-
-          $adapter->setIsNewObject(false);
-
-          $rules = id(new HeraldRuleQuery())
-            ->setViewer($viewer)
-            ->withContentTypes(array($adapter->getAdapterContentType()))
-            ->withDisabled(false)
-            ->needConditionsAndActions(true)
-            ->needAppliedToPHIDs(array($object->getPHID()))
-            ->needValidateAuthors(true)
-            ->execute();
-
-          $engine = id(new HeraldEngine())
-            ->setDryRun(true);
-
-          $effects = $engine->applyRules($rules, $adapter);
-          $engine->applyEffects($effects, $adapter, $rules);
-
-          $xscript = $engine->getTranscript();
-
-          return id(new AphrontRedirectResponse())
-            ->setURI('/herald/transcript/'.$xscript->getID().'/');
-        }
+      if (!$errors) {
+        $this->setTestObject($object);
+        return null;
       }
     }
 
@@ -92,11 +106,91 @@ final class HeraldTestConsoleController extends HeraldController {
           ->setLabel(pht('Object Name'))
           ->setName('object_name')
           ->setError($e_name)
-          ->setValue($object_name))
+          ->setValue($v_name))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Test Rules')));
+          ->setValue(pht('Continue')));
 
+    return $this->buildTestConsoleResponse($form, $errors);
+  }
+
+  private function loadAdapter(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+    $object = $this->getTestObject();
+
+    $adapter_key = $request->getStr('adapter');
+
+    $adapters = HeraldAdapter::getAllAdapters();
+
+    $can_select = array();
+    $display_adapters = array();
+    foreach ($adapters as $key => $adapter) {
+      if (!$adapter->isTestAdapterForObject($object)) {
+        continue;
+      }
+
+      if (!$adapter->isAvailableToUser($viewer)) {
+        continue;
+      }
+
+      $display_adapters[$key] = $adapter;
+
+      if ($adapter->canCreateTestAdapterForObject($object)) {
+        $can_select[$key] = $adapter;
+      }
+    }
+
+    if ($request->isFormPost() && $adapter_key) {
+      if (isset($can_select[$adapter_key])) {
+        $adapter = $can_select[$adapter_key]->newTestAdapter(
+          $viewer,
+          $object);
+        $this->setTestAdapter($adapter);
+        return null;
+      }
+    }
+
+    $form = id(new AphrontFormView())
+      ->addHiddenInput('object_name', $request->getStr('object_name'))
+      ->setViewer($viewer);
+
+    $cancel_uri = $this->getApplicationURI();
+
+    if (!$display_adapters) {
+      $form
+        ->appendRemarkupInstructions(
+          pht('//There are no available Herald events for this object.//'))
+        ->appendControl(
+          id(new AphrontFormSubmitControl())
+            ->addCancelButton($cancel_uri));
+    } else {
+      $adapter_control = id(new AphrontFormRadioButtonControl())
+        ->setLabel(pht('Event'))
+        ->setName('adapter')
+        ->setValue(head_key($can_select));
+
+      foreach ($display_adapters as $adapter_key => $adapter) {
+        $is_disabled = empty($can_select[$adapter_key]);
+
+        $adapter_control->addButton(
+          $adapter_key,
+          $adapter->getAdapterContentName(),
+          $adapter->getAdapterTestDescription(),
+          null,
+          $is_disabled);
+      }
+
+      $form
+        ->appendControl($adapter_control)
+        ->appendControl(
+          id(new AphrontFormSubmitControl())
+            ->setValue(pht('Run Test')));
+    }
+
+    return $this->buildTestConsoleResponse($form, array());
+  }
+
+  private function buildTestConsoleResponse($form, array $errors) {
     $box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
       ->setForm($form);
@@ -118,11 +212,7 @@ final class HeraldTestConsoleController extends HeraldController {
     return $this->newPage()
       ->setTitle($title)
       ->setCrumbs($crumbs)
-      ->appendChild(
-        array(
-          $view,
-      ));
-
+      ->appendChild($view);
   }
 
 }

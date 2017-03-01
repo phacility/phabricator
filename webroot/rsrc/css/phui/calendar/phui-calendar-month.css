@@ -34,8 +34,16 @@ tr.phui-calendar-day-of-week-header th .short-weekday-name {
 
 table.phui-calendar-view td {
   border: solid #dfdfdf;
-  border-width: 1px 1px 0 1px;
+  border-width: 1px 0 0;
   width: 14.2857%; /* This is one seventh, approximately. */
+}
+
+table.phui-calendar-view td + td {
+  border-left-width: 1px;
+}
+
+table.phui-calendar-view td.phui-calendar-month-number {
+  border-top-width: 0;
 }
 
 .phui-calendar-month-cell-div {
@@ -48,16 +56,6 @@ table.phui-calendar-view td {
 
 .device .phui-calendar-month-event-list .phui-calendar-month-cell-div {
   min-height: 32px;
-}
-
-a.phui-calendar-month-secret-link {
-  position: absolute;
-  left: 0;
-  right: 0;
-}
-
-table.phui-calendar-view tr td:first-child {
-  border-left-width: 0px;
 }
 
 .device table.phui-calendar-view .phui-calendar-event-list {
@@ -113,10 +111,9 @@ table.phui-calendar-view a.phui-calendar-date-number {
   width: 12px;
 }
 
-table.phui-calendar-view td.phui-calendar-date-number-container {
+table.phui-calendar-view td.phui-calendar-month-number {
   font-weight: normal;
   color: {$lightgreytext};
-  border-width: 0 1px 0 1px;
   text-align: right;
 }
 
@@ -133,12 +130,17 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
   right: 0px;
 }
 
-.phui-calendar-today-slot.phui-calendar-this-week {
-  background-color: {$blueborder};
+.phui-calendar-this-week .phui-calendar-today-slot {
+  background-color: {$blue};
 }
 
-.phui-calendar-today-slot.phui-calendar-today {
-  background-color: {$lightblueborder};
+.phui-calendar-today .phui-calendar-today-slot,
+.phui-calendar-today .phui-calendar-date-number {
+  background-color: {$sky};
+}
+
+table.phui-calendar-view .phui-calendar-today a.phui-calendar-date-number {
+  color: #ffffff;
 }
 
 .phui-calendar-event-empty {
@@ -159,7 +161,7 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 
 .phui-calendar-view .phui-calendar-list li.phui-calendar-list-item.all-day {
   height: 20px;
-  background-color: {$darkgreybackground};
+  background-color: {$bluebackground};
   display: block;
   float: none;
 }
@@ -194,7 +196,7 @@ li.phui-calendar-viewer-invited.all-day {
 .phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-title {
   width: auto;
   position: absolute;
-  left: 20px;
+  left: 16px;
   right: 60px;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -209,4 +211,18 @@ li.phui-calendar-viewer-invited.all-day {
   width: 60px;
   color: {$lightgreytext};
   text-align: right;
+}
+
+td.phui-calendar-month-day,
+td.phui-calendar-month-number {
+  cursor: pointer;
+}
+
+.device-desktop td.phui-calendar-month-day.calendar-hover,
+.device-desktop td.phui-calendar-month-number.calendar-hover {
+  background: {$lightblue};
+}
+
+.phui-calendar-month-adjacent {
+  background: {$greybackground};
 }

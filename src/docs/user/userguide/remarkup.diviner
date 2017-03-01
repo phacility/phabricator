@@ -361,9 +361,10 @@ commits and Maniphest tasks, by mentioning the name of an object:
                 # You must specify at least 7 characters of the hash.
   T123          # Link to Maniphest task T123
 
-You can also link directly to a comment in Maniphest and Differential:
+You can also link directly to a comment in Maniphest and Differential (these
+can be found on the date stamp of any transaction/comment):
 
-  T123#4        # Link to comment #4 of T123
+  T123#412       # Link to comment id #412 of task T123
 
 See the Phabricator configuraton setting `remarkup.ignored-object-names` to
 modify this behavior.
@@ -687,6 +688,32 @@ In general:
   - Supported keys are `icon`, `name`, `type` and `href`.
   - The `type` option can be set to `instructions` to indicate that an element
     is asking the user to make a choice or follow specific instructions.
+
+Keystrokes
+==========
+
+You can use `{key ...}` to render a stylized keystroke. For example, this:
+
+```
+Press {key M} to view the starmap.
+```
+
+...renders this:
+
+> Press {key M} to view the starmap.
+
+You can also render sequences with modifier keys. This:
+
+```
+Use {key command option shift 3} to take a screenshot.
+Press {key down down-right right LP} to activate the hadoken technique.
+```
+
+...renders this:
+
+> Use {key command option shift 3} to take a screenshot.
+> Press {key down down-right right LP} to activate the hadoken technique.
+
 
 = Fullscreen Mode =
 

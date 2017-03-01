@@ -13,6 +13,14 @@ final class PhabricatorSetupIssueView extends AphrontView {
     return $this->issue;
   }
 
+  public function renderInFlight() {
+    $issue = $this->getIssue();
+
+    return id(new PhabricatorInFlightErrorView())
+      ->setMessage($issue->getName())
+      ->render();
+  }
+
   public function render() {
     $issue = $this->getIssue();
 
@@ -396,19 +404,48 @@ final class PhabricatorSetupIssueView extends AphrontView {
         implode("\n", $more_loc));
     }
 
-    $info[] = phutil_tag(
-      'p',
-      array(),
-      pht(
-        'You can find more information about PHP configuration values in the '.
-        '%s.',
-        phutil_tag(
-          'a',
-          array(
-            'href' => 'http://php.net/manual/ini.list.php',
-            'target' => '_blank',
-          ),
-          pht('PHP Documentation'))));
+    $show_standard = false;
+    $show_opcache = false;
+
+    foreach ($configs as $key) {
+      if (preg_match('/^opcache\./', $key)) {
+        $show_opcache = true;
+      } else {
+        $show_standard = true;
+      }
+    }
+
+    if ($show_standard) {
+      $info[] = phutil_tag(
+        'p',
+        array(),
+        pht(
+          'You can find more information about PHP configuration values '.
+          'in the %s.',
+          phutil_tag(
+            'a',
+            array(
+              'href' => 'http://php.net/manual/ini.list.php',
+              'target' => '_blank',
+            ),
+            pht('PHP Documentation'))));
+    }
+
+    if ($show_opcache) {
+      $info[] = phutil_tag(
+        'p',
+        array(),
+        pht(
+          'You can find more information about configuring OPCache in '.
+          'the %s.',
+          phutil_tag(
+            'a',
+            array(
+              'href' => 'http://php.net/manual/opcache.configuration.php',
+              'target' => '_blank',
+            ),
+            pht('PHP OPCache Documentation'))));
+    }
 
     $info[] = phutil_tag(
       'p',
@@ -433,15 +470,19 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
   private function renderMySQLConfig(array $config) {
     $values = array();
-    foreach ($config as $key) {
-      $value = PhabricatorMySQLSetupCheck::loadRawConfigValue($key);
-      if ($value === null) {
-        $value = phutil_tag(
-          'em',
-          array(),
-          pht('(Not Supported)'));
+    $issue = $this->getIssue();
+    $ref = $issue->getDatabaseRef();
+    if ($ref) {
+      foreach ($config as $key) {
+        $value = $ref->loadRawMySQLConfigValue($key);
+        if ($value === null) {
+          $value = phutil_tag(
+            'em',
+            array(),
+            pht('(Not Supported)'));
+        }
+        $values[$key] = $value;
       }
-      $values[$key] = $value;
     }
 
     $table = $this->renderValueTable($values);

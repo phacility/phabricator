@@ -553,8 +553,16 @@ abstract class PhabricatorApplicationTransaction
             return true;
           }
 
-          if (!is_array($old) && !strlen($old)) {
-            return true;
+          if (!is_array($old)) {
+            if (!strlen($old)) {
+              return true;
+            }
+
+            // The integer 0 is also uninteresting by default; this is often
+            // an "off" flag for something like "All Day Event".
+            if ($old === 0) {
+              return true;
+            }
           }
 
           break;
@@ -952,9 +960,18 @@ abstract class PhabricatorApplicationTransaction
         if ($field) {
           return $field->getApplicationTransactionTitle($this);
         } else {
-          return pht(
-            '%s edited a custom field.',
-            $this->renderHandleLink($author_phid));
+          $developer_mode = 'phabricator.developer-mode';
+          $is_developer = PhabricatorEnv::getEnvConfig($developer_mode);
+          if ($is_developer) {
+            return pht(
+              '%s edited a custom field (with key "%s").',
+              $this->renderHandleLink($author_phid),
+              $this->getMetadata('customfield:key'));
+          } else {
+            return pht(
+              '%s edited a custom field.',
+              $this->renderHandleLink($author_phid));
+          }
         }
 
       case PhabricatorTransactions::TYPE_TOKEN:
@@ -1065,10 +1082,21 @@ abstract class PhabricatorApplicationTransaction
         break;
 
       default:
-        return pht(
-          '%s edited this %s.',
-          $this->renderHandleLink($author_phid),
-          $this->getApplicationObjectTypeName());
+        // In developer mode, provide a better hint here about which string
+        // we're missing.
+        $developer_mode = 'phabricator.developer-mode';
+        $is_developer = PhabricatorEnv::getEnvConfig($developer_mode);
+        if ($is_developer) {
+          return pht(
+            '%s edited this object (transaction type "%s").',
+            $this->renderHandleLink($author_phid),
+            $this->getTransactionType());
+        } else {
+          return pht(
+            '%s edited this %s.',
+            $this->renderHandleLink($author_phid),
+            $this->getApplicationObjectTypeName());
+        }
     }
   }
 
@@ -1605,6 +1633,10 @@ abstract class PhabricatorApplicationTransaction
       'Transactions are visible to users that can see the object which was '.
       'acted upon. Some transactions - in particular, comments - are '.
       'editable by the transaction author.');
+  }
+
+  public function getModularType() {
+    return null;
   }
 
 

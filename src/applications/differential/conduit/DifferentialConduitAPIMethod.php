@@ -53,21 +53,16 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
 
     $viewer = $request->getUser();
 
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $revision,
-      DifferentialCustomField::ROLE_COMMITMESSAGEEDIT);
-
-    $field_list
-      ->setViewer($viewer)
-      ->readFieldsFromStorage($revision);
-    $field_map = mpull($field_list->getFields(), null, 'getFieldKeyForConduit');
+    // We're going to build the body of a "differential.revision.edit" API
+    // request, then just call that code directly.
 
     $xactions = array();
+    $xactions[] = array(
+      'type' => DifferentialRevisionEditEngine::KEY_UPDATE,
+      'value' => $diff->getPHID(),
+    );
 
-    $xactions[] = id(new DifferentialTransaction())
-      ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
-      ->setNewValue($diff->getPHID());
-
+    $field_map = DifferentialCommitMessageField::newEnabledFields($viewer);
     $values = $request->getValue('fields', array());
     foreach ($values as $key => $value) {
       $field = idx($field_map, $key);
@@ -79,70 +74,48 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
         continue;
       }
 
-      $role = PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS;
-      if (!$field->shouldEnableForRole($role)) {
-        continue;
-      }
-
-      // TODO: This is fairly similar to PhabricatorCustomField's
-      // buildFieldTransactionsFromRequest() method, but that's currently not
-      // easy to reuse.
-
-      $transaction_type = $field->getApplicationTransactionType();
-      $xaction = id(new DifferentialTransaction())
-        ->setTransactionType($transaction_type);
-
-      if ($transaction_type == PhabricatorTransactions::TYPE_CUSTOMFIELD) {
-        // For TYPE_CUSTOMFIELD transactions only, we provide the old value
-        // as an input.
-        $old_value = $field->getOldValueForApplicationTransactions();
-        $xaction->setOldValue($old_value);
-      }
-
       // The transaction itself will be validated so this is somewhat
       // redundant, but this validator will sometimes give us a better error
       // message or a better reaction to a bad value type.
-      $field->validateCommitMessageValue($value);
-      $field->readValueFromCommitMessage($value);
+      $value = $field->readFieldValueFromConduit($value);
 
-      $xaction
-        ->setNewValue($field->getNewValueForApplicationTransactions());
-
-      if ($transaction_type == PhabricatorTransactions::TYPE_CUSTOMFIELD) {
-        // For TYPE_CUSTOMFIELD transactions, add the field key in metadata.
-        $xaction->setMetadataValue('customfield:key', $field->getFieldKey());
+      foreach ($field->getFieldTransactions($value) as $xaction) {
+        $xactions[] = $xaction;
       }
-
-      $metadata = $field->getApplicationTransactionMetadata();
-      foreach ($metadata as $meta_key => $meta_value) {
-        $xaction->setMetadataValue($meta_key, $meta_value);
-      }
-
-      $xactions[] = $xaction;
     }
 
     $message = $request->getValue('message');
     if (strlen($message)) {
-      // This is a little awkward, and should maybe move inside the transaction
-      // editor. It largely exists for legacy reasons.
+      // This is a little awkward, and should move elsewhere or be removed. It
+      // largely exists for legacy reasons. See some discussion in T7899.
       $first_line = head(phutil_split_lines($message, false));
+
+      $first_line = id(new PhutilUTF8StringTruncator())
+        ->setMaximumBytes(250)
+        ->setMaximumGlyphs(80)
+        ->truncateString($first_line);
+
       $diff->setDescription($first_line);
       $diff->save();
 
-      $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-        ->attachComment(
-          id(new DifferentialTransactionComment())
-            ->setContent($message));
+      $xactions[] = array(
+        'type' => PhabricatorCommentEditEngineExtension::EDITKEY,
+        'value' => $message,
+      );
     }
 
-    $editor = id(new DifferentialTransactionEditor())
-      ->setActor($viewer)
-      ->setContentSource($request->newContentSource())
-      ->setContinueOnNoEffect(true)
-      ->setContinueOnMissingFields(true);
+    $method = 'differential.revision.edit';
+    $params = array(
+      'transactions' => $xactions,
+    );
 
-    $editor->applyTransactions($revision, $xactions);
+    if ($revision->getID()) {
+      $params['objectIdentifier'] = $revision->getID();
+    }
+
+    return id(new ConduitCall($method, $params, $strict = true))
+      ->setUser($viewer)
+      ->execute();
   }
 
   protected function loadCustomFieldsForRevisions(
@@ -150,21 +123,69 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
     array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
 
-    $results = array();
+    if (!$revisions) {
+      return array();
+    }
+
+    $field_lists = array();
     foreach ($revisions as $revision) {
-      // TODO: This is inefficient and issues a query for each object.
+      $revision_phid = $revision->getPHID();
+
       $field_list = PhabricatorCustomField::getObjectFields(
         $revision,
         PhabricatorCustomField::ROLE_CONDUIT);
 
       $field_list
         ->setViewer($viewer)
-        ->readFieldsFromStorage($revision);
+        ->readFieldsFromObject($revision);
 
+      $field_lists[$revision_phid] = $field_list;
+    }
+
+    $all_fields = array();
+    foreach ($field_lists as $field_list) {
+      foreach ($field_list->getFields() as $field) {
+        $all_fields[] = $field;
+      }
+    }
+
+    id(new PhabricatorCustomFieldStorageQuery())
+      ->addFields($all_fields)
+      ->execute();
+
+    $results = array();
+    foreach ($field_lists as $revision_phid => $field_list) {
+      $results[$revision_phid] = array();
       foreach ($field_list->getFields() as $field) {
         $field_key = $field->getFieldKeyForConduit();
         $value = $field->getConduitDictionaryValue();
-        $results[$revision->getPHID()][$field_key] = $value;
+        $results[$revision_phid][$field_key] = $value;
+      }
+    }
+
+    // For compatibility, fill in these "custom fields" by querying for them
+    // efficiently. See T11404 for discussion.
+
+    $legacy_edge_map = array(
+      'phabricator:projects' =>
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+      'phabricator:depends-on' =>
+        DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST,
+    );
+
+    $query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array_keys($results))
+      ->withEdgeTypes($legacy_edge_map);
+
+    $query->execute();
+
+    foreach ($results as $revision_phid => $dict) {
+      foreach ($legacy_edge_map as $edge_key => $edge_type) {
+        $phid_list = $query->getDestinationPHIDs(
+          array($revision_phid),
+          array($edge_type));
+
+        $results[$revision_phid][$edge_key] = $phid_list;
       }
     }
 

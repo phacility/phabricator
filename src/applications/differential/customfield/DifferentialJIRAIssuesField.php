@@ -270,44 +270,16 @@ final class DifferentialJIRAIssuesField
     $editor->save();
   }
 
-  public function shouldAppearInCommitMessage() {
-    return true;
-  }
-
-  public function shouldAppearInCommitMessageTemplate() {
-    return true;
-  }
-
-  public function getCommitMessageLabels() {
-    return array(
-      'JIRA',
-      'JIRA Issues',
-      'JIRA Issue',
-    );
-  }
-
-  public function parseValueFromCommitMessage($value) {
-    return preg_split('/[\s,]+/', $value, $limit = -1, PREG_SPLIT_NO_EMPTY);
-  }
-
-  public function readValueFromCommitMessage($value) {
-    $this->setValue($value);
-    return $this;
-  }
-
-
-
-  public function renderCommitMessageValue(array $handles) {
-    $value = $this->getValue();
-    if (!$value) {
-      return null;
-    }
-    return implode(', ', $value);
-  }
-
   public function shouldAppearInConduitDictionary() {
     return true;
   }
 
+  public function shouldAppearInConduitTransactions() {
+    return true;
+  }
+
+  protected function newConduitEditParameterType() {
+    return new ConduitStringListParameterType();
+  }
 
 }

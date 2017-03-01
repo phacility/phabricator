@@ -3,15 +3,9 @@
 final class PhabricatorPeopleLogsController
   extends PhabricatorPeopleController {
 
-  private $queryKey;
-
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
-    $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+  public function handleRequest(AphrontRequest $request) {
+   $controller = id(new PhabricatorApplicationSearchController())
+      ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine(new PhabricatorPeopleLogSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

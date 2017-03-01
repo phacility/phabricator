@@ -213,7 +213,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setPolicies($policies)
         ->setName('can_edit'));
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs = $this->buildApplicationCrumbs();
     $submit = new AphrontFormSubmitControl();
     if ($is_create) {
       $submit->setValue(pht('Create Document'));

@@ -194,6 +194,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'The "Re: Prefix" and "Vary Subjects" settings are now configured '.
       'in global settings.');
 
+    $dashboard_reason = pht(
+        'This option has been removed, you can use Dashboards to provide '.
+        'homepage customization. See T11533 for more details.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -328,6 +332,22 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'metamta.re-prefix' => $global_settings_reason,
       'metamta.vary-subjects' => $global_settings_reason,
+
+      'ui.custom-header' => pht(
+        'This option has been replaced with `ui.logo`, which provides more '.
+        'flexible configuration options.'),
+
+      'welcome.html' => $dashboard_reason,
+      'maniphest.priorities.unbreak-now' => $dashboard_reason,
+      'maniphest.priorities.needs-triage' => $dashboard_reason,
+
+      'mysql.implementation' => pht(
+        'Phabricator now automatically selects the best available '.
+        'MySQL implementation.'),
+
+      'mysql.configuration-provider' => pht(
+        'Phabricator now has application-level management of partitioning '.
+        'and replicas.'),
     );
 
     return $ancient_config;

@@ -24,7 +24,7 @@ final class PhabricatorFulltextEngineExtensionModule
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    return id(new AphrontTableView($rows))
       ->setHeaders(
         array(
           pht('Class'),
@@ -36,9 +36,6 @@ final class PhabricatorFulltextEngineExtensionModule
           'wide pri',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('FulltextEngine Extensions'))
-      ->setTable($table);
   }
 
 }

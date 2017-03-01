@@ -67,12 +67,14 @@ final class PhabricatorDashboardEditController
     }
 
     $v_name = $dashboard->getName();
+    $v_icon = $dashboard->getIcon();
     $v_layout_mode = $dashboard->getLayoutConfigObject()->getLayoutMode();
     $e_name = true;
 
     $validation_exception = null;
     if ($request->isFormPost() && $request->getStr('edit')) {
       $v_name = $request->getStr('name');
+      $v_icon = $request->getStr('icon');
       $v_layout_mode = $request->getStr('layout_mode');
       $v_view_policy = $request->getStr('viewPolicy');
       $v_edit_policy = $request->getStr('editPolicy');
@@ -81,6 +83,7 @@ final class PhabricatorDashboardEditController
       $xactions = array();
 
       $type_name = PhabricatorDashboardTransaction::TYPE_NAME;
+      $type_icon = PhabricatorDashboardTransaction::TYPE_ICON;
       $type_layout_mode = PhabricatorDashboardTransaction::TYPE_LAYOUT_MODE;
       $type_view_policy = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit_policy = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -91,6 +94,9 @@ final class PhabricatorDashboardEditController
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_layout_mode)
         ->setNewValue($v_layout_mode);
+      $xactions[] = id(new PhabricatorDashboardTransaction())
+        ->setTransactionType($type_icon)
+        ->setNewValue($v_icon);
       $xactions[] = id(new PhabricatorDashboardTransaction())
         ->setTransactionType($type_view_policy)
         ->setNewValue($v_view_policy);
@@ -111,7 +117,7 @@ final class PhabricatorDashboardEditController
           ->setContentSourceFromRequest($request)
           ->applyTransactions($dashboard, $xactions);
 
-        $uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+        $uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
 
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
@@ -146,6 +152,12 @@ final class PhabricatorDashboardEditController
           ->setName('layout_mode')
           ->setValue($v_layout_mode)
           ->setOptions($layout_mode_options))
+      ->appendChild(
+        id(new PHUIFormIconSetControl())
+          ->setLabel(pht('Icon'))
+          ->setName('icon')
+          ->setIconSet(new PhabricatorDashboardIconSet())
+          ->setValue($v_icon))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')
@@ -233,7 +245,7 @@ final class PhabricatorDashboardEditController
 
     switch ($template) {
       case 'simple':
-        $v_name = pht('New Simple Dashboard');
+        $v_name = pht("%s's Dashboard", $viewer->getUsername());
 
         $welcome_panel = $this->newPanel(
           $request,
@@ -248,8 +260,9 @@ final class PhabricatorDashboardEditController
               "rustic, authentic feel.\n\n".
               "You can drag, remove, add, and edit panels to customize the ".
               "rest of this dashboard to show the information you want.\n\n".
-              "To install this dashboard on the home page, use the ".
-              "**Install Dashboard** action link above."),
+              "To install this dashboard on the home page, edit your personal ".
+              "or global menu on the homepage and click Dashboard under ".
+              "New Menu Item on the right."),
           ));
         $panel_phids[] = $welcome_panel->getPHID();
 
@@ -264,14 +277,25 @@ final class PhabricatorDashboardEditController
           ));
         $panel_phids[] = $feed_panel->getPHID();
 
+        $revision_panel = $this->newPanel(
+          $request,
+          $viewer,
+          'query',
+          pht('Active Revisions'),
+          array(
+            'class' => 'DifferentialRevisionSearchEngine',
+            'key' => 'active',
+          ));
+        $panel_phids[] = $revision_panel->getPHID();
+
         $task_panel = $this->newPanel(
           $request,
           $viewer,
           'query',
-          pht('Open Tasks'),
+          pht('Assigned Tasks'),
           array(
             'class' => 'ManiphestTaskSearchEngine',
-            'key' => 'open',
+            'key' => 'assigned',
           ));
         $panel_phids[] = $task_panel->getPHID();
 
@@ -290,6 +314,7 @@ final class PhabricatorDashboardEditController
         $layout = id(new PhabricatorDashboardLayoutConfig())
           ->setLayoutMode($mode_2_and_1)
           ->setPanelLocation(0, $welcome_panel->getPHID())
+          ->setPanelLocation(0, $revision_panel->getPHID())
           ->setPanelLocation(0, $task_panel->getPHID())
           ->setPanelLocation(0, $commit_panel->getPHID())
           ->setPanelLocation(1, $feed_panel->getPHID());
@@ -326,7 +351,7 @@ final class PhabricatorDashboardEditController
       ->setContentSourceFromRequest($request)
       ->applyTransactions($dashboard, $xactions);
 
-    $manage_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
+    $manage_uri = $this->getApplicationURI('arrange/'.$dashboard->getID().'/');
 
     return id(new AphrontRedirectResponse())
       ->setURI($manage_uri);

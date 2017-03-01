@@ -107,6 +107,13 @@ abstract class PhabricatorEditType extends Phobject {
 
   public function getConduitType() {
     $parameter_type = $this->getConduitParameterType();
+    if (!$parameter_type) {
+      throw new Exception(
+        pht(
+          'Edit type (with key "%s") is missing a Conduit parameter type.',
+          $this->getEditType()));
+    }
+
     return $parameter_type->getTypeName();
   }
 

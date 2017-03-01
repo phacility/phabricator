@@ -48,8 +48,6 @@ this:
     DocumentRoot /path/to/phabricator/webroot
 
     RewriteEngine on
-    RewriteRule ^/rsrc/(.*)     -                       [L,QSA]
-    RewriteRule ^/favicon.ico   -                       [L,QSA]
     RewriteRule ^(.*)$          /index.php?__path__=$1  [B,L,QSA]
   </VirtualHost>
 
@@ -91,10 +89,6 @@ For nginx, use a configuration like this:
       rewrite ^/(.*)$ /index.php?__path__=/$1 last;
     }
 
-    location = /favicon.ico {
-      try_files $uri =204;
-    }
-
     location /index.php {
       fastcgi_pass   localhost:9000;
       fastcgi_index   index.php;
@@ -130,8 +124,6 @@ For lighttpd, add a section like this to your lighttpd.conf:
   $HTTP["host"] =~ "phabricator(\.example\.com)?" {
       server.document-root = "/path/to/phabricator/webroot"
       url.rewrite-once = (
-          "^(/rsrc/.*)$" => "$1",
-          "^(/favicon.ico)$" => "$1",
           # This simulates QSA ("query string append") mode in apache
           "^(/[^?]*)\?(.*)" => "/index.php?__path__=$1&$2",
           "^(/.*)$" => "/index.php?__path__=$1",

@@ -48,7 +48,8 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     PhabricatorUser $user,
     DiffusionRequest $drequest,
     $method,
-    array $params = array()) {
+    array $params = array(),
+    $return_future = false) {
 
     $repository = $drequest->getRepository();
 
@@ -76,12 +77,19 @@ abstract class DiffusionQuery extends PhabricatorQuery {
       $user,
       $drequest->getIsClusterRequest());
     if (!$client) {
-      return id(new ConduitCall($method, $params))
+      $result = id(new ConduitCall($method, $params))
         ->setUser($user)
         ->execute();
+      $future = new ImmediateFuture($result);
     } else {
-      return $client->callMethodSynchronous($method, $params);
+      $future = $client->callMethod($method, $params);
     }
+
+    if (!$return_future) {
+      return $future->resolve();
+    }
+
+    return $future;
   }
 
   public function execute() {

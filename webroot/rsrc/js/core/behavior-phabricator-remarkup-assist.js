@@ -18,6 +18,16 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
   var edit_mode = 'normal';
   var edit_root = null;
   var preview = null;
+  var pinned = false;
+
+  // When we pin the comment area to the bottom of the window, we need to put
+  // an extra spacer element at the bottom of the document so that it is
+  // possible to scroll down far enough to see content at the end. Otherwise,
+  // the last part of the document will be hidden behind the comment area when
+  // the document is fully scrolled.
+  var pinned_spacer = JX.$N(
+    'div',
+    {className: 'remarkup-assist-pinned-spacer'});
 
   function set_edit_mode(root, mode) {
     if (mode == edit_mode) {
@@ -66,7 +76,42 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     JX.DOM.focus(area);
   }
 
+  function set_pinned_mode(root, mode) {
+    if (mode === pinned) {
+      return;
+    }
+
+    pinned = mode;
+
+    var container = get_pinned_container(root);
+    JX.DOM.alterClass(container, 'remarkup-assist-pinned', pinned);
+
+    if (pinned) {
+      JX.DOM.appendContent(document.body, pinned_spacer);
+    } else {
+      JX.DOM.remove(pinned_spacer);
+    }
+
+    resizearea();
+
+    JX.DOM.focus(area);
+  }
+
+  function get_pinned_container(root) {
+    return JX.DOM.findAbove(root, 'div', 'phui-comment-form');
+  }
+
   function resizearea() {
+    // If we're in the pinned comment mode, resize the pinned spacer to be the
+    // same size as the pinned form. This allows users to scroll to the bottom
+    // of the document by creating extra footer space to scroll through.
+    if (pinned) {
+      var container = get_pinned_container(root);
+      var d = JX.Vector.getDim(container);
+      d.x = null;
+      d.setDim(pinned_spacer);
+    }
+
     if (!edit_root) {
       return;
     }
@@ -98,6 +143,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
     e.kill();
     set_edit_mode(edit_root, 'normal');
+    set_pinned_mode(root, false);
   });
 
   function update(area, l, m, r) {
@@ -211,6 +257,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           .start();
         break;
       case 'fa-arrows-alt':
+        set_pinned_mode(root, false);
         if (edit_mode == 'fa-arrows-alt') {
           set_edit_mode(root, 'normal');
         } else {
@@ -241,6 +288,14 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           JX.DOM.alterClass(button, 'preview-active', false);
         }
         break;
+      case 'fa-thumb-tack':
+        // If we're pinning, kick us out of fullscreen mode first.
+        set_edit_mode(edit_root, 'normal');
+
+        // Now pin or unpin the area.
+        set_pinned_mode(root, !pinned);
+        break;
+
     }
   }
 
@@ -316,5 +371,13 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
   }
 
   autocomplete.start();
+
+  if (config.canPin) {
+    new JX.KeyboardShortcut('z', pht('key-help'))
+      .setHandler(function() {
+        set_pinned_mode(root, !pinned);
+      })
+      .register();
+  }
 
 });

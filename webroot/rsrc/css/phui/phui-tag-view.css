@@ -145,11 +145,11 @@ a.phui-tag-view:hover
   margin-top: 4px;
 }
 
-.phui-object-item .phabricator-handle-tag-list {
+.phui-oi .phabricator-handle-tag-list {
   display: inline;
 }
 
-.phui-object-item .phabricator-handle-tag-list-item {
+.phui-oi .phabricator-handle-tag-list-item {
   display: inline-block;
   margin: 0 4px 2px 0;
 }
