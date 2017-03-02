@@ -1586,10 +1586,21 @@ abstract class PhabricatorEditEngine
 
     $fields = $this->buildEditFields($object);
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $comment_actions = array();
     foreach ($fields as $field) {
       if (!$field->shouldGenerateTransactionsFromComment()) {
         continue;
+      }
+
+      if (!$can_edit) {
+        if (!$field->getCanApplyWithoutEditCapability()) {
+          continue;
+        }
       }
 
       $comment_action = $field->getCommentAction();
@@ -1812,6 +1823,11 @@ abstract class PhabricatorEditEngine
 
     $xactions = array();
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $object,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     if ($actions) {
       $action_map = array();
       foreach ($actions as $action) {
@@ -1832,6 +1848,21 @@ abstract class PhabricatorEditEngine
 
         if (!$field->shouldGenerateTransactionsFromComment()) {
           continue;
+        }
+
+        // If you don't have edit permission on the object, you're limited in
+        // which actions you can take via the comment form. Most actions
+        // need edit permission, but some actions (like "Accept Revision")
+        // can be applied by anyone with view permission.
+        if (!$can_edit) {
+          if (!$field->getCanApplyWithoutEditCapability()) {
+            // We know the user doesn't have the capability, so this will
+            // raise a policy exception.
+            PhabricatorPolicyFilter::requireCapability(
+              $viewer,
+              $object,
+              PhabricatorPolicyCapability::CAN_EDIT);
+          }
         }
 
         if (array_key_exists('initialValue', $action)) {

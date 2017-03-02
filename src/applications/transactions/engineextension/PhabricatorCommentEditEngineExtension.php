@@ -39,6 +39,10 @@ final class PhabricatorCommentEditEngineExtension
 
     $comment_type = PhabricatorTransactions::TYPE_COMMENT;
 
+    // Comments have a lot of special behavior which doesn't always check
+    // this flag, but we set it for consistency.
+    $is_interact = true;
+
     $comment_field = id(new PhabricatorCommentEditField())
       ->setKey(self::EDITKEY)
       ->setLabel(pht('Comments'))
@@ -47,6 +51,7 @@ final class PhabricatorCommentEditEngineExtension
       ->setIsReorderable(false)
       ->setIsDefaultable(false)
       ->setIsLockable(false)
+      ->setCanApplyWithoutEditCapability($is_interact)
       ->setTransactionType($comment_type)
       ->setConduitDescription(pht('Make comments.'))
       ->setConduitTypeDescription(
