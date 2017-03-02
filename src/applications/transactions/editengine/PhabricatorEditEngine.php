@@ -1483,7 +1483,7 @@ abstract class PhabricatorEditEngine
    * Build a raw description of available "Create New Object" UI options so
    * other methods can build menus or buttons.
    */
-  private function newCreateActionSpecifications(array $parameters) {
+  public function newCreateActionSpecifications(array $parameters) {
     $viewer = $this->getViewer();
 
     $can_create = $this->hasCreateCapability();
