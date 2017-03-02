@@ -27,6 +27,10 @@ final class PhabricatorEditEngineSubtype
     return $this->name;
   }
 
+  public function getIcon() {
+    return 'fa-drivers-license-o';
+  }
+
   public static function validateSubtypeKey($subtype) {
     if (strlen($subtype) > 64) {
       throw new Exception(
