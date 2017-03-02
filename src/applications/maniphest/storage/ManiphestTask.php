@@ -557,4 +557,9 @@ final class ManiphestTask extends ManiphestDAO
     return $this->setSubtype($value);
   }
 
+  public function newEditEngineSubtypeMap() {
+    $config = PhabricatorEnv::getEnvConfig('maniphest.subtypes');
+    return PhabricatorEditEngineSubtype::newSubtypeMap($config);
+  }
+
 }

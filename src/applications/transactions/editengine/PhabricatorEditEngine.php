@@ -213,6 +213,20 @@ abstract class PhabricatorEditEngine
     return $fields;
   }
 
+  final public function supportsSubtypes() {
+    try {
+      $object = $this->newEditableObject();
+    } catch (Exception $ex) {
+      return false;
+    }
+
+    return ($object instanceof PhabricatorEditEngineSubtypeInterface);
+  }
+
+  final public function newSubtypeMap() {
+    return $this->newEditableObject()->newEditEngineSubtypeMap();
+  }
+
 
 /* -(  Display Text  )------------------------------------------------------- */
 

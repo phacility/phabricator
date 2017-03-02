@@ -6,6 +6,27 @@ final class PhabricatorEditEngineSubtype
 
   const SUBTYPE_DEFAULT = 'default';
 
+  private $key;
+  private $name;
+
+  public function setKey($key) {
+    $this->key = $key;
+    return $this;
+  }
+
+  public function getKey() {
+    return $this->key;
+  }
+
+  public function setName($name) {
+    $this->name = $name;
+    return $this;
+  }
+
+  public function getName() {
+    return $this->name;
+  }
+
   public static function validateSubtypeKey($subtype) {
     if (strlen($subtype) > 64) {
       throw new Exception(
@@ -79,6 +100,21 @@ final class PhabricatorEditEngineSubtype
           'with key "%s". This subtype is required and must be defined.',
           self::SUBTYPE_DEFAULT));
     }
+  }
+
+  public static function newSubtypeMap(array $config) {
+    $map = array();
+
+    foreach ($config as $entry) {
+      $key = $entry['key'];
+      $name = $entry['name'];
+
+      $map[$key] = id(new self())
+        ->setKey($key)
+        ->setName($name);
+    }
+
+    return $map;
   }
 
 }
