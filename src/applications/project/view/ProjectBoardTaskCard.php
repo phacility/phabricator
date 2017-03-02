@@ -108,6 +108,13 @@ final class ProjectBoardTaskCard extends Phobject {
       }
     }
 
+    $subtype = $task->newSubtypeObject();
+    if ($subtype && $subtype->hasTagView()) {
+      $subtype_tag = $subtype->newTagView()
+        ->setSlimShady(true);
+      $card->addAttribute($subtype_tag);
+    }
+
     if ($task->isClosed()) {
       $icon = ManiphestTaskStatus::getStatusIcon($task->getStatus());
       $icon = id(new PHUIIconView())

@@ -56,6 +56,9 @@ final class ManiphestTaskListView extends ManiphestView {
       Javelin::initBehavior('maniphest-list-editor');
     }
 
+    $subtype_map = id(new ManiphestTask())
+      ->newEditEngineSubtypeMap();
+
     foreach ($this->tasks as $task) {
       $item = id(new PHUIObjectItemView())
         ->setUser($this->getUser())
@@ -92,6 +95,13 @@ final class ManiphestTaskListView extends ManiphestView {
       }
       if ($this->showSubpriorityControls || $this->showBatchControls) {
         $item->addSigil('maniphest-task');
+      }
+
+      $subtype = $task->newSubtypeObject();
+      if ($subtype && $subtype->hasTagView()) {
+        $subtype_tag = $subtype->newTagView()
+          ->setSlimShady(true);
+        $item->addAttribute($subtype_tag);
       }
 
       $project_handles = array_select_keys(

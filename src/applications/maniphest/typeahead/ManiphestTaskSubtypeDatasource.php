@@ -32,6 +32,7 @@ final class ManiphestTaskSubtypeDatasource
 
       $result = id(new PhabricatorTypeaheadResult())
         ->setIcon($subtype->getIcon())
+        ->setColor($subtype->getColor())
         ->setPHID($key)
         ->setName($subtype->getName());
 
