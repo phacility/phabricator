@@ -13,7 +13,6 @@ final class PhabricatorPeopleProfileBadgesController
       ->needProfile(true)
       ->needProfileImage(true)
       ->needAvailability(true)
-      ->needBadges(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -82,21 +81,17 @@ final class PhabricatorPeopleProfileBadgesController
   private function buildBadgesView(PhabricatorUser $user) {
     $viewer = $this->getViewer();
 
-    $awards = array();
-    $badges = array();
-    if ($user->getBadgePHIDs()) {
-      $awards = id(new PhabricatorBadgesAwardQuery())
-        ->setViewer($viewer)
-        ->withRecipientPHIDs(array($user->getPHID()))
-        ->execute();
-      $awards = mpull($awards, null, 'getBadgePHID');
+    $awards = id(new PhabricatorBadgesAwardQuery())
+      ->setViewer($viewer)
+      ->withRecipientPHIDs(array($user->getPHID()))
+      ->execute();
+    $awards = mpull($awards, null, 'getBadgePHID');
 
-      $badges = array();
-      foreach ($awards as $award) {
-        $badge = $award->getBadge();
-        if ($badge->getStatus() == PhabricatorBadgesBadge::STATUS_ACTIVE) {
-          $badges[$award->getBadgePHID()] = $badge;
-        }
+    $badges = array();
+    foreach ($awards as $award) {
+      $badge = $award->getBadge();
+      if ($badge->getStatus() == PhabricatorBadgesBadge::STATUS_ACTIVE) {
+        $badges[$award->getBadgePHID()] = $badge;
       }
     }
 
