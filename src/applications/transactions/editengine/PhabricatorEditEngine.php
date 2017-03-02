@@ -976,6 +976,9 @@ abstract class PhabricatorEditEngine
     $fields = $this->buildEditFields($object);
     $template = $object->getApplicationTransactionTemplate();
 
+    $config = $this->getEditEngineConfiguration()
+      ->attachEngine($this);
+
     $validation_exception = null;
     if ($request->isFormPost() && $request->getBool('editEngine')) {
       $submit_fields = $fields;
@@ -1010,6 +1013,12 @@ abstract class PhabricatorEditEngine
       if ($this->getIsCreate()) {
         $xactions[] = id(clone $template)
           ->setTransactionType(PhabricatorTransactions::TYPE_CREATE);
+
+        if ($this->supportsSubtypes()) {
+          $xactions[] = id(clone $template)
+            ->setTransactionType(PhabricatorTransactions::TYPE_SUBTYPE)
+            ->setNewValue($config->getSubtype());
+        }
       }
 
       foreach ($submit_fields as $key => $field) {

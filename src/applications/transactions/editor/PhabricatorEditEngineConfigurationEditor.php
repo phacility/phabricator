@@ -57,7 +57,9 @@ final class PhabricatorEditEngineConfigurationEditor
         }
         break;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE:
-        $map = $object->getEngine()->newSubtypeMap();
+        $map = $object->getEngine()
+          ->setViewer($this->getActor())
+          ->newSubtypeMap();
         foreach ($xactions as $xaction) {
           $new = $xaction->getNewValue();
 
