@@ -17,7 +17,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorConduitResultInterface,
     PhabricatorFulltextInterface,
     DoorkeeperBridgedObjectInterface,
-    PhabricatorEditEngineSubtypeInterface {
+    PhabricatorEditEngineSubtypeInterface,
+    PhabricatorEditEngineLockableInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -213,6 +214,10 @@ final class ManiphestTask extends ManiphestDAO
     return ManiphestTaskStatus::isClosedStatus($this->getStatus());
   }
 
+  public function isLocked() {
+    return ManiphestTaskStatus::isLockedStatus($this->getStatus());
+  }
+
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
@@ -343,6 +348,7 @@ final class ManiphestTask extends ManiphestDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_INTERACT,
       PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
@@ -351,6 +357,12 @@ final class ManiphestTask extends ManiphestDAO
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_INTERACT:
+        if ($this->isLocked()) {
+          return PhabricatorPolicies::POLICY_NOONE;
+        } else {
+          return PhabricatorPolicies::POLICY_USER;
+        }
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
     }
@@ -560,6 +572,14 @@ final class ManiphestTask extends ManiphestDAO
   public function newEditEngineSubtypeMap() {
     $config = PhabricatorEnv::getEnvConfig('maniphest.subtypes');
     return PhabricatorEditEngineSubtype::newSubtypeMap($config);
+  }
+
+
+/* -(  PhabricatorEditEngineLockableInterface  )----------------------------- */
+
+
+  public function newEditEngineLock() {
+    return new ManiphestTaskEditEngineLock();
   }
 
 }

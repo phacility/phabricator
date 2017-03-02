@@ -22,6 +22,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $noPermission;
   private $fullWidth;
   private $infoView;
+  private $editEngineLock;
 
   private $currentVersion;
   private $versionedDraft;
@@ -149,11 +150,20 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this->noPermission;
   }
 
+  public function setEditEngineLock(PhabricatorEditEngineLock $lock) {
+    $this->editEngineLock = $lock;
+    return $this;
+  }
+
+  public function getEditEngineLock() {
+    return $this->editEngineLock;
+  }
+
   public function setTransactionTimeline(
     PhabricatorApplicationTransactionView $timeline) {
 
     $timeline->setQuoteTargetID($this->getCommentID());
-    if ($this->getNoPermission()) {
+    if ($this->getNoPermission() || $this->getEditEngineLock()) {
       $timeline->setShouldTerminate(true);
     }
 
@@ -164,6 +174,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   public function render() {
     if ($this->getNoPermission()) {
       return null;
+    }
+
+    $lock = $this->getEditEngineLock();
+    if ($lock) {
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
+        ->setErrors(
+          array(
+            $lock->getLockedObjectDisplayText(),
+          ));
     }
 
     $user = $this->getUser();

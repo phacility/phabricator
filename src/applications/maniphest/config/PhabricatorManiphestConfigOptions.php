@@ -210,6 +210,8 @@ The keys you can provide in a specification are:
   - `claim` //Optional bool.// By default, closing an unassigned task claims
     it. You can set this to `false` to disable this behavior for a particular
     status.
+  - `locked` //Optional bool.// Lock tasks in this status, preventing users
+    from commenting.
 
 Statuses will appear in the UI in the order specified. Note the status marked
 `special` as `duplicate` is not settable directly and will not appear in UI

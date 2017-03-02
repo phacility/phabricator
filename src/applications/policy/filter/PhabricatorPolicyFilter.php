@@ -86,6 +86,36 @@ final class PhabricatorPolicyFilter extends Phobject {
     return (count($result) == 1);
   }
 
+  public static function canInteract(
+    PhabricatorUser $user,
+    PhabricatorPolicyInterface $object) {
+
+    $capabilities = $object->getCapabilities();
+    $capabilities = array_fuse($capabilities);
+
+    $can_interact = PhabricatorPolicyCapability::CAN_INTERACT;
+    $can_view = PhabricatorPolicyCapability::CAN_VIEW;
+
+    $require = array();
+
+    // If the object doesn't support a separate "Interact" capability, we
+    // only use the "View" capability: for most objects, you can interact
+    // with them if you can see them.
+    $require[] = $can_view;
+
+    if (isset($capabilities[$can_interact])) {
+      $require[] = $can_interact;
+    }
+
+    foreach ($require as $capability) {
+      if (!self::hasCapability($user, $object, $capability)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   public function setViewer(PhabricatorUser $user) {
     $this->viewer = $user;
     return $this;

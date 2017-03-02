@@ -985,8 +985,32 @@ abstract class PhabricatorEditEngine
     $fields = $this->buildEditFields($object);
     $template = $object->getApplicationTransactionTemplate();
 
+    if ($this->getIsCreate()) {
+      $cancel_uri = $this->getObjectCreateCancelURI($object);
+      $submit_button = $this->getObjectCreateButtonText($object);
+    } else {
+      $cancel_uri = $this->getEffectiveObjectEditCancelURI($object);
+      $submit_button = $this->getObjectEditButtonText($object);
+    }
+
     $config = $this->getEditEngineConfiguration()
       ->attachEngine($this);
+
+    $can_interact = PhabricatorPolicyFilter::canInteract($viewer, $object);
+    if (!$can_interact &&
+        !$request->getBool('editEngine') &&
+        !$request->getBool('overrideLock')) {
+
+      $lock = PhabricatorEditEngineLock::newForObject($viewer, $object);
+
+      $dialog = $this->getController()
+        ->newDialog()
+        ->addHiddenInput('overrideLock', true)
+        ->setDisableWorkflowOnSubmit(true)
+        ->addCancelButton($cancel_uri);
+
+      return $lock->willPromptUserForLockOverrideWithDialog($dialog);
+    }
 
     $validation_exception = null;
     if ($request->isFormPost() && $request->getBool('editEngine')) {
@@ -1154,14 +1178,6 @@ abstract class PhabricatorEditEngine
     $form = $this->buildEditForm($object, $fields);
 
     if ($request->isAjax()) {
-      if ($this->getIsCreate()) {
-        $cancel_uri = $this->getObjectCreateCancelURI($object);
-        $submit_button = $this->getObjectCreateButtonText($object);
-      } else {
-        $cancel_uri = $this->getEffectiveObjectEditCancelURI($object);
-        $submit_button = $this->getObjectEditButtonText($object);
-      }
-
       return $this->getController()
         ->newDialog()
         ->setWidth(AphrontDialogView::WIDTH_FULL)
@@ -1554,8 +1570,16 @@ abstract class PhabricatorEditEngine
     }
 
     $viewer = $this->getViewer();
-    $object_phid = $object->getPHID();
 
+    $can_interact = PhabricatorPolicyFilter::canInteract($viewer, $object);
+    if (!$can_interact) {
+      $lock = PhabricatorEditEngineLock::newForObject($viewer, $object);
+
+      return id(new PhabricatorApplicationTransactionCommentView())
+        ->setEditEngineLock($lock);
+    }
+
+    $object_phid = $object->getPHID();
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
     if ($is_serious) {
@@ -1700,11 +1724,19 @@ abstract class PhabricatorEditEngine
   private function buildError($object, $title, $body) {
     $cancel_uri = $this->getObjectCreateCancelURI($object);
 
-    return $this->getController()
+    $dialog = $this->getController()
       ->newDialog()
-      ->setTitle($title)
-      ->appendParagraph($body)
       ->addCancelButton($cancel_uri);
+
+    if ($title !== null) {
+      $dialog->setTitle($title);
+    }
+
+    if ($body !== null) {
+      $dialog->appendParagraph($body);
+    }
+
+    return $dialog;
   }
 
 
@@ -1761,6 +1793,14 @@ abstract class PhabricatorEditEngine
         $config->getName()));
   }
 
+  private function buildLockedObjectResponse($object) {
+    $dialog = $this->buildError($object, null, null);
+    $viewer = $this->getViewer();
+
+    $lock = PhabricatorEditEngineLock::newForObject($viewer, $object);
+    return $lock->willBlockUserInteractionWithDialog($dialog);
+  }
+
   private function buildCommentResponse($object) {
     $viewer = $this->getViewer();
 
@@ -1773,6 +1813,11 @@ abstract class PhabricatorEditEngine
 
     if (!$request->isFormPost()) {
       return new Aphront400Response();
+    }
+
+    $can_interact = PhabricatorPolicyFilter::canInteract($viewer, $object);
+    if (!$can_interact) {
+      return $this->buildLockedObjectResponse($object);
     }
 
     $config = $this->loadDefaultEditConfiguration($object);
