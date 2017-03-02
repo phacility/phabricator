@@ -408,10 +408,19 @@ abstract class PhabricatorEditEngine
       'getCreateSortKey');
   }
 
-  public function loadDefaultEditConfiguration() {
+  public function loadDefaultEditConfiguration($object) {
     $query = $this->newConfigurationQuery()
       ->withIsEdit(true)
       ->withIsDisabled(false);
+
+    // If this object supports subtyping, we edit it with a form of the same
+    // subtype: so "bug" tasks get edited with "bug" forms.
+    if ($object instanceof PhabricatorEditEngineSubtypeInterface) {
+      $query->withSubtypes(
+        array(
+          $object->getEditEngineSubtype(),
+        ));
+    }
 
     return $this->loadEditEngineConfigurationWithQuery(
       $query,
@@ -891,7 +900,7 @@ abstract class PhabricatorEditEngine
         }
       } else {
         if ($id) {
-          $config = $this->loadDefaultEditConfiguration();
+          $config = $this->loadDefaultEditConfiguration($object);
           if (!$config) {
             return $this->buildNoEditResponse($object);
           }
@@ -1370,14 +1379,14 @@ abstract class PhabricatorEditEngine
   final public function hasEditAccessToTransaction($xaction_type) {
     $viewer = $this->getViewer();
 
-    $config = $this->loadDefaultEditConfiguration();
-    if (!$config) {
-      return false;
-    }
-
     $object = $this->getTargetObject();
     if (!$object) {
       $object = $this->newEditableObject();
+    }
+
+    $config = $this->loadDefaultEditConfiguration($object);
+    if (!$config) {
+      return false;
     }
 
     $fields = $this->buildEditFields($object);
@@ -1535,7 +1544,7 @@ abstract class PhabricatorEditEngine
   }
 
   final public function buildEditEngineCommentView($object) {
-    $config = $this->loadDefaultEditConfiguration();
+    $config = $this->loadDefaultEditConfiguration($object);
 
     if (!$config) {
       // TODO: This just nukes the entire comment form if you don't have access
@@ -1755,7 +1764,7 @@ abstract class PhabricatorEditEngine
       return new Aphront400Response();
     }
 
-    $config = $this->loadDefaultEditConfiguration();
+    $config = $this->loadDefaultEditConfiguration($object);
     if (!$config) {
       return new Aphront404Response();
     }

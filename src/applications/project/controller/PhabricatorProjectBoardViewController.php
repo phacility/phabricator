@@ -910,7 +910,7 @@ final class PhabricatorProjectBoardViewController
     // for each column or board?
     $edit_config = id(new ManiphestEditEngine())
       ->setViewer($viewer)
-      ->loadDefaultEditConfiguration();
+      ->loadDefaultEditConfiguration(new ManiphestTask());
     if ($edit_config) {
       $form_key = $edit_config->getIdentifier();
       $create_uri = "/maniphest/task/edit/form/{$form_key}/";

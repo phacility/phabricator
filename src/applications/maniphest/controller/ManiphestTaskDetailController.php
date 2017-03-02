@@ -267,7 +267,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $edit_config = $edit_engine->loadDefaultEditConfiguration();
+    $edit_config = $edit_engine->loadDefaultEditConfiguration($task);
     $can_create = (bool)$edit_config;
 
     $can_reassign = $edit_engine->hasEditAccessToTransaction(
