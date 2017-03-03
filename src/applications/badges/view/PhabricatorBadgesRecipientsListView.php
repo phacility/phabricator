@@ -3,10 +3,16 @@
 final class PhabricatorBadgesRecipientsListView extends AphrontView {
 
   private $badge;
+  private $awards;
   private $handles;
 
   public function setBadge(PhabricatorBadgesBadge $badge) {
     $this->badge = $badge;
+    return $this;
+  }
+
+  public function setAwards(array $awards) {
+    $this->awards = $awards;
     return $this;
   }
 
@@ -20,7 +26,7 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
 
     $badge = $this->badge;
     $handles = $this->handles;
-    $awards = mpull($badge->getAwards(), null, 'getRecipientPHID');
+    $awards = mpull($this->awards, null, 'getRecipientPHID');
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,

@@ -6,25 +6,17 @@ final class PhabricatorBadgesBadgeAwardTransaction
   const TRANSACTIONTYPE = 'badge.award';
 
   public function generateOldValue($object) {
-    return mpull($object->getAwards(), 'getRecipientPHID');
+    return null;
   }
 
   public function applyExternalEffects($object, $value) {
-    $awards = $object->getAwards();
-    $awards = mpull($awards, null, 'getRecipientPHID');
-
     foreach ($value as $phid) {
-      $award = idx($awards, $phid);
-      if (!$award) {
-        $award = PhabricatorBadgesAward::initializeNewBadgesAward(
-          $this->getActor(),
-          $object,
-          $phid);
-        $award->save();
-        $awards[] = $award;
-      }
+      $award = PhabricatorBadgesAward::initializeNewBadgesAward(
+        $this->getActor(),
+        $object,
+        $phid);
+      $award->save();
     }
-    $object->attachAwards($awards);
     return;
   }
 
@@ -71,6 +63,7 @@ final class PhabricatorBadgesBadgeAwardTransaction
       }
 
       foreach ($user_phids as $user_phid) {
+        // Check if a valid user
         $user = id(new PhabricatorPeopleQuery())
           ->setViewer($this->getActor())
           ->withPHIDs(array($user_phid))
@@ -80,6 +73,20 @@ final class PhabricatorBadgesBadgeAwardTransaction
             pht(
               'Recipient PHID "%s" is not a valid user PHID.',
               $user_phid));
+          continue;
+        }
+
+        // Check if already awarded
+        $award = id(new PhabricatorBadgesAwardQuery())
+          ->setViewer($this->getActor())
+          ->withRecipientPHIDs(array($user_phid))
+          ->withBadgePHIDs(array($object->getPHID()))
+          ->executeOne();
+        if ($award) {
+          $errors[] = $this->newInvalidError(
+            pht(
+              '%s has already been awarded this badge.',
+              $user->getUsername()));
         }
       }
     }
