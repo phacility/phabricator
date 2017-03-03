@@ -37,7 +37,7 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
   public function getBuiltinFileKey() {
     $icon = $this->getIcon();
     $color = $this->getColor();
-    $border = $this->getBorder();
+    $border = implode(',', $this->getBorder());
     $desc = "compose(icon={$icon}, color={$color}, border={$border}";
     $hash = PhabricatorHash::digestToLength($desc, 40);
     return "builtin:{$hash}";
@@ -46,7 +46,7 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
   public function getBuiltinDisplayName() {
     $icon = $this->getIcon();
     $color = $this->getColor();
-    $border = $this->getBorder();
+    $border = implode(',', $this->getBorder());
     return "{$icon}-{$color}-{$border}.png";
   }
 
@@ -55,8 +55,53 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       $this->getColor(), $this->getIcon(), $this->getBorder());
   }
 
-  private function composeImage($color, $icon, $border) {
-    // TODO
+  private function composeImage($color, $image, $border) {
+    $color_const = hexdec(trim($color, '#'));
+    $true_border = self::rgba2gd($border);
+    $image_map = self::getImageMap();
+    $data = Filesystem::readFile($image_map[$image]);
+
+    $img = imagecreatefromstring($data);
+
+    // 4 pixel border at 50x50, 32 pixel border at 400x400
+    $canvas = imagecreatetruecolor(400, 400);
+
+    $image_fill = imagefill($canvas, 0, 0, $color_const);
+    if (!$image_fill) {
+      throw new Exception(
+        pht('Failed to save builtin avatar image data (imagefill).'));
+    }
+
+    $border_thickness = imagesetthickness($canvas, 64);
+    if (!$border_thickness) {
+      throw new Exception(
+        pht('Failed to save builtin avatar image data (imagesetthickness).'));
+    }
+
+    $image_rectangle = imagerectangle($canvas, 0, 0, 400, 400, $true_border);
+    if (!$image_rectangle) {
+      throw new Exception(
+        pht('Failed to save builtin avatar image data (imagerectangle).'));
+    }
+
+    $image_copy = imagecopy($canvas, $img, 0, 0, 0, 0, 400, 400);
+    if (!$image_copy) {
+      throw new Exception(
+        pht('Failed to save builtin avatar image data (imagecopy).'));
+    }
+
+    return PhabricatorImageTransformer::saveImageDataInAnyFormat(
+      $canvas,
+      'image/png');
+  }
+
+  private static function rgba2gd($rgba) {
+    $r = $rgba[0];
+    $g = $rgba[1];
+    $b = $rgba[2];
+    $a = $rgba[3];
+    $a = (1 - $a) * 255;
+      return ($a << 24) | ($r << 16) | ($g << 8) | $b;
   }
 
   public static function getImageMap() {
@@ -64,21 +109,106 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
     $root = $root.'/resources/builtin/alphanumeric/';
 
     $map = array();
-    $list = Filesystem::listDirectory($root, $include_hidden = false);
+    $list = id(new FileFinder($root))
+      ->withType('f')
+      ->withFollowSymlinks(true)
+      ->find();
+
     foreach ($list as $file) {
-      $key = 'alphanumeric/'.$file;
-      $map[$key] = $root.$file;
+      $map['alphanumeric/'.$file] = $root.$file;
     }
+    return $map;
+  }
+
+  public function getUniqueProfileImage($username) {
+    $pack_map = $this->getImagePackMap();
+    $image_map = $this->getImageMap();
+    $color_map = $this->getColorMap();
+    $border_map = $this->getBorderMap();
+    $file = phutil_utf8_strtoupper(substr($username, 0, 1));
+
+    $pack_count = count($pack_map);
+    $color_count = count($color_map);
+    $border_count = count($border_map);
+
+    $pack_seed = $username.'_pack';
+    $color_seed = $username.'_color';
+    $border_seed = $username.'_border';
+
+    $pack_key =
+      PhabricatorHash::digestToRange($pack_seed, 1, $pack_count);
+    $color_key =
+      PhabricatorHash::digestToRange($color_seed, 1, $color_count);
+    $border_key =
+      PhabricatorHash::digestToRange($border_seed, 1, $border_count);
+
+    $pack = $pack_map[$pack_key];
+    $icon = 'alphanumeric/'.$pack.'/'.$file.'.png';
+    $color = $color_map[$color_key];
+    $border = $border_map[$border_key];
+
+    if (!isset($image_map[$icon])) {
+    $icon = 'alphanumeric/'.$pack.'/_default.png';
+    }
+
+    return array('color' => $color, 'icon' => $icon, 'border' => $border);
+  }
+
+  public function getUserProfileImageFile($username) {
+    $unique = $this->getUniqueProfileImage($username);
+
+    $composer = id(new self())
+      ->setIcon($unique['icon'])
+      ->setColor($unique['color'])
+      ->setBorder($unique['border']);
+
+    $data = $composer->loadBuiltinFileData();
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    $file = PhabricatorFile::newFromFileData(
+      $data,
+      array(
+        'name' => $composer->getBuiltinDisplayName(),
+        'profile' => true,
+        'canCDN' => true,
+      ));
+    unset($unguarded);
+
+    return $file;
+  }
+
+  public static function getImagePackMap() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $root = $root.'/resources/builtin/alphanumeric/';
+
+    $map = id(new FileFinder($root))
+      ->withType('d')
+      ->withFollowSymlinks(false)
+      ->find();
+
+    return $map;
+  }
+
+  public static function getBorderMap() {
+
+    $map = array(
+      array(0, 0, 0, 0),
+      array(0, 0, 0, 0.3),
+      array(255, 255, 255, 0.4),
+      array(255, 255, 255, 0.7),
+    );
 
     return $map;
   }
 
   public static function getColorMap() {
+    //
+    // Generated Colors
+    // http://tools.medialab.sciences-po.fr/iwanthue/
+    //
     $map = array(
       '#335862',
-      '#dfc47b',
       '#2d5192',
-      '#c0bc6e',
       '#3c5da0',
       '#99cd86',
       '#704889',
@@ -91,19 +221,14 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#4bd0e3',
       '#a25542',
       '#4eb4f3',
-      '#705412',
       '#6da8ec',
       '#545608',
       '#829ce5',
       '#68681d',
       '#607bc2',
-      '#d1b66e',
       '#4b69ad',
-      '#a4a154',
       '#236ead',
-      '#daa969',
       '#31a0de',
-      '#996f31',
       '#4f8ed0',
       '#846f2a',
       '#bdb0f0',
@@ -121,13 +246,11 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#7f4c7f',
       '#a1bb7a',
       '#65558f',
-      '#c2a962',
       '#445082',
       '#c9ca8e',
       '#265582',
       '#f4b189',
       '#265582',
-      '#bd8f50',
       '#40b8e1',
       '#814a28',
       '#80c8f6',
@@ -142,7 +265,6 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#b888c9',
       '#476025',
       '#9987c5',
-      '#828136',
       '#7867a3',
       '#769b5a',
       '#c46e9d',
@@ -161,7 +283,6 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#45a998',
       '#faa38c',
       '#265582',
-      '#ad954f',
       '#265582',
       '#e4b788',
       '#265582',
@@ -187,7 +308,6 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#ae78ad',
       '#569160',
       '#d898be',
-      '#525620',
       '#8eb4e8',
       '#5e622c',
       '#929ad3',
@@ -209,13 +329,9 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#63acda',
       '#7b5d30',
       '#66bed6',
-      '#a66c4e',
       '#3585b0',
-      '#ba865c',
       '#5880b0',
-      '#9b864d',
       '#739acc',
-      '#9d764a',
       '#48a3ba',
       '#9d565b',
       '#7fc4ca',
@@ -232,15 +348,11 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#6bafb6',
       '#8c5744',
       '#84b9d6',
-      '#725238',
       '#9db3d6',
-      '#816f3e',
       '#777cad',
-      '#a6a86e',
       '#826693',
       '#86a779',
       '#9d7fad',
-      '#8b8e55',
       '#b193c2',
       '#547348',
       '#d5adcb',
@@ -250,11 +362,9 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#b2add6',
       '#5a623d',
       '#9793bb',
-      '#bea975',
       '#3c5472',
       '#d5c5a1',
       '#5e5a7f',
-      '#b09c68',
       '#2c647e',
       '#d8b194',
       '#49607f',
@@ -269,7 +379,6 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#ad697e',
       '#799a6d',
       '#916b88',
-      '#aeb68d',
       '#69536b',
       '#b4c4ad',
       '#845865',
@@ -291,20 +400,16 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#50959b',
       '#b27d7a',
       '#335862',
-      '#b2a381',
       '#335862',
       '#bcadc4',
       '#706343',
       '#749ebc',
       '#8c6a50',
       '#92b8c4',
-      '#a07d62',
       '#758cad',
       '#868e67',
       '#335862',
-      '#b6978c',
       '#335862',
-      '#9e8f6e',
       '#335862',
       '#ac7e8b',
       '#77a185',
@@ -314,7 +419,6 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#467a70',
       '#9b7d73',
       '#335862',
-      '#8a7c5b',
       '#335862',
       '#8c9c85',
       '#335862',
@@ -331,14 +435,6 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       '#335862',
       '#335862',
       '#335862',
-    );
-    return $map;
-  }
-
-  public static function getBorderMap() {
-    $map = array(
-      'rgba(0,0,0,.3);',        // Darker
-      'rgba(255,255,255,.5);',  // Lighter
     );
     return $map;
   }
