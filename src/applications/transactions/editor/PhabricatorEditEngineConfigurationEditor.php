@@ -57,21 +57,23 @@ final class PhabricatorEditEngineConfigurationEditor
         }
         break;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE:
-        $map = $object->getEngine()
-          ->setViewer($this->getActor())
-          ->newSubtypeMap();
-        foreach ($xactions as $xaction) {
-          $new = $xaction->getNewValue();
+        if ($xactions) {
+          $map = $object->getEngine()
+            ->setViewer($this->getActor())
+            ->newSubtypeMap();
+          foreach ($xactions as $xaction) {
+            $new = $xaction->getNewValue();
 
-          if (isset($map[$new])) {
-            continue;
+            if (isset($map[$new])) {
+              continue;
+            }
+
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('Subtype "%s" is not a valid subtype.', $new),
+              $xaction);
           }
-
-          $errors[] = new PhabricatorApplicationTransactionValidationError(
-            $type,
-            pht('Invalid'),
-            pht('Subtype "%s" is not a valid subtype.', $new),
-            $xaction);
         }
         break;
     }
