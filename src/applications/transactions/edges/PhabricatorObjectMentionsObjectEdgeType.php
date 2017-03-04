@@ -13,4 +13,17 @@ final class PhabricatorObjectMentionsObjectEdgeType
     return true;
   }
 
+  public function getConduitKey() {
+    return 'mention';
+  }
+
+  public function getConduitName() {
+    return pht('Mention');
+  }
+
+  public function getConduitDescription() {
+    return pht(
+      'The source object has a comment which mentions the destination object.');
+  }
+
 }
