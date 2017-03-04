@@ -11,11 +11,6 @@ final class PhabricatorPeopleProfileImageWorkflow
       ->setArguments(
         array(
           array(
-            'name' => 'user',
-            'help' => pht(
-              'Generate a default profile image for a specific user'),
-          ),
-          array(
             'name' => 'all',
             'help' => pht(
               'Generate default profile images for all users.'),
@@ -38,7 +33,6 @@ final class PhabricatorPeopleProfileImageWorkflow
 
     $is_force = $args->getArg('force');
     $is_all = $args->getArg('all');
-    $is_user = $args->getArg('user');
 
     $gd = function_exists('imagecreatefromstring');
     if (!$gd) {
