@@ -37,6 +37,8 @@ final class PhabricatorTokenUIEventListener
       return null;
     }
 
+    $can_interact = PhabricatorPolicyFilter::canInteract($user, $object);
+
     $current = id(new PhabricatorTokenGivenQuery())
       ->setViewer($user)
       ->withAuthorPHIDs(array($user->getPHID()))
@@ -48,14 +50,17 @@ final class PhabricatorTokenUIEventListener
         ->setWorkflow(true)
         ->setHref('/token/give/'.$object->getPHID().'/')
         ->setName(pht('Award Token'))
-        ->setIcon('fa-trophy');
+        ->setIcon('fa-trophy')
+        ->setDisabled(!$can_interact);
     } else {
       $token_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setHref('/token/give/'.$object->getPHID().'/')
         ->setName(pht('Rescind Token'))
-        ->setIcon('fa-trophy');
+        ->setIcon('fa-trophy')
+        ->setDisabled(!$can_interact);
     }
+
     if (!$user->isLoggedIn()) {
       $token_action->setDisabled(true);
     }
