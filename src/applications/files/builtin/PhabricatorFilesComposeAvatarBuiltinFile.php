@@ -7,6 +7,8 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
   private $color;
   private $border;
 
+  const VERSION = 'v1';
+
   public function setIcon($icon) {
     $this->icon = $icon;
     return $this;
