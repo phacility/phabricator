@@ -11,6 +11,18 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     return true;
   }
 
+  public function getConduitKey() {
+    return 'task.parent';
+  }
+
+  public function getConduitName() {
+    return pht('Parent Task');
+  }
+
+  public function getConduitDescription() {
+    return pht('The source object has the destination object as a parent.');
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,
