@@ -87,10 +87,12 @@ final class PhabricatorBadgesEditor
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $name = $object->getName();
     $id = $object->getID();
-    $name = pht('Badge %d', $id);
+    $topic = pht('Badge %d', $id);
+    $subject = pht('Badge %d: %s', $id, $name);
+
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject($name)
-      ->addHeader('Thread-Topic', $name);
+      ->setSubject($subject)
+      ->addHeader('Thread-Topic', $topic);
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
@@ -104,14 +106,7 @@ final class PhabricatorBadgesEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $description = $object->getDescription();
     $body = parent::buildMailBody($object, $xactions);
-
-    if (strlen($description)) {
-      $body->addRemarkupSection(
-        pht('BADGE DESCRIPTION'),
-        $object->getDescription());
-    }
 
     $body->addLinkSection(
       pht('BADGE DETAIL'),

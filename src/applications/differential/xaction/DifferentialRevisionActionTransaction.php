@@ -74,9 +74,15 @@ abstract class DifferentialRevisionActionTransaction
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
 
+    // Actions in the "review" group, like "Accept Revision", do not require
+    // that the actor be able to edit the revision.
+    $group_review = DifferentialRevisionEditEngine::ACTIONGROUP_REVIEW;
+    $is_review = ($this->getRevisionActionGroupKey() == $group_review);
+
     $field = id(new PhabricatorApplyEditField())
       ->setKey($this->getRevisionActionKey())
       ->setTransactionType($this->getTransactionTypeConstant())
+      ->setCanApplyWithoutEditCapability($is_review)
       ->setValue(true);
 
     if ($this->isActionAvailable($revision, $viewer)) {

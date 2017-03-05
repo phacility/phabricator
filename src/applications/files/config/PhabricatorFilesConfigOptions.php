@@ -155,6 +155,7 @@ final class PhabricatorFilesConfigOptions
             'List of MIME types which can be rendered with an `%s` tag.',
             '<audio />')),
       $this->newOption('files.video-mime-types', 'set', $video_default)
+        ->setLocked(true)
         ->setSummary(pht('Configure which MIME types are video.'))
         ->setDescription(
           pht(

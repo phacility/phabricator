@@ -21,7 +21,6 @@ JX.install('WorkboardController', {
     uploadURI: null,
     coverURI: null,
     moveURI: null,
-    createURI: null,
     chunkThreshold: null
   },
 
@@ -170,7 +169,7 @@ JX.install('WorkboardController', {
         order: board.getOrder()
       };
 
-      new JX.Workflow(this.getCreateURI(), request_data)
+      new JX.Workflow(column_data.createURI, request_data)
         .setHandler(JX.bind(board, board.updateCard))
         .start();
     },

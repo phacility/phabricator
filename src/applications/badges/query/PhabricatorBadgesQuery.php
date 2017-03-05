@@ -7,9 +7,6 @@ final class PhabricatorBadgesQuery
   private $phids;
   private $qualities;
   private $statuses;
-  private $recipientPHIDs;
-
-  private $needRecipients;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -31,20 +28,10 @@ final class PhabricatorBadgesQuery
     return $this;
   }
 
-  public function withRecipientPHIDs(array $recipient_phids) {
-    $this->recipientPHIDs = $recipient_phids;
-    return $this;
-  }
-
   public function withNameNgrams($ngrams) {
     return $this->withNgramsConstraint(
       id(new PhabricatorBadgesBadgeNameNgrams()),
       $ngrams);
-  }
-
-  public function needRecipients($need_recipients) {
-    $this->needRecipients = $need_recipients;
-    return $this;
   }
 
   protected function loadPage() {
@@ -57,24 +44,6 @@ final class PhabricatorBadgesQuery
 
   public function newResultObject() {
     return new PhabricatorBadgesBadge();
-  }
-
-  protected function didFilterPage(array $badges) {
-    if ($this->needRecipients) {
-      $query = id(new PhabricatorBadgesAwardQuery())
-        ->setViewer($this->getViewer())
-        ->withBadgePHIDs(mpull($badges, 'getPHID'))
-        ->execute();
-
-      $awards = mgroup($query, 'getBadgePHID');
-
-      foreach ($badges as $badge) {
-        $badge_awards = idx($awards, $badge->getPHID(), array());
-        $badge->attachAwards($badge_awards);
-      }
-    }
-
-    return $badges;
   }
 
   protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {

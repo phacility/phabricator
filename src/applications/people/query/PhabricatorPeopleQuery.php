@@ -23,7 +23,6 @@ final class PhabricatorPeopleQuery
   private $needProfile;
   private $needProfileImage;
   private $needAvailability;
-  private $needBadges;
   private $cacheKeys = array();
 
   public function withIDs(array $ids) {
@@ -128,11 +127,6 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
-  public function needBadges($need) {
-    $this->needBadges = $need;
-    return $this;
-  }
-
   public function needUserSettings($need) {
     $cache_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
 
@@ -177,21 +171,6 @@ final class PhabricatorPeopleQuery
         }
 
         $user->attachUserProfile($profile);
-      }
-    }
-
-    if ($this->needBadges) {
-      $awards = id(new PhabricatorBadgesAwardQuery())
-        ->setViewer($this->getViewer())
-        ->withRecipientPHIDs(mpull($users, 'getPHID'))
-        ->execute();
-
-      $awards = mgroup($awards, 'getRecipientPHID');
-
-      foreach ($users as $user) {
-        $user_awards = idx($awards, $user->getPHID(), array());
-        $badge_phids = mpull($user_awards, 'getBadgePHID');
-        $user->attachBadgePHIDs($badge_phids);
       }
     }
 

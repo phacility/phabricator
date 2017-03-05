@@ -45,6 +45,7 @@ final class PhabricatorDaemonManagementLaunchWorkflow
 
     $daemon = array();
     $daemon['class'] = array_shift($argv);
+    $daemon['label'] = $daemon['class'];
     $daemon['argv'] = $argv;
 
     $daemons = array_fill(0, $daemon_count, $daemon);

@@ -16,6 +16,10 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     return $this->viewer;
   }
 
+  final public function getGeneratorKey() {
+    return $this->getPhobjectClassConstant('GENERATORKEY', 64);
+  }
+
   protected function loadRandomPHID($table) {
     $conn_r = $table->establishConnection('r');
 
@@ -41,6 +45,7 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($user_phid))
+        ->needUserSettings(true)
         ->executeOne();
     }
 
@@ -89,9 +94,6 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     return $xaction;
   }
 
-
-
-
   public function loadOneRandom($classname) {
     try {
       return newv($classname, array())
@@ -106,13 +108,12 @@ abstract class PhabricatorTestDataGenerator extends Phobject {
     }
   }
 
-  public function loadPhabrictorUserPHID() {
+  public function loadPhabricatorUserPHID() {
     return $this->loadOneRandom('PhabricatorUser')->getPHID();
   }
 
-  public function loadPhabrictorUser() {
+  public function loadPhabricatorUser() {
     return $this->loadOneRandom('PhabricatorUser');
   }
-
 
 }

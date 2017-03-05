@@ -78,6 +78,21 @@ final class PhabricatorHash extends Phobject {
     return $result;
   }
 
+  public static function digestToRange($string, $min, $max) {
+    if ($min > $max) {
+      throw new Exception(pht('Maximum must be larger than minimum.'));
+    }
+
+    if ($min == $max) {
+      return $min;
+    }
+
+    $hash = sha1($string, $raw_output = true);
+    $value = head(unpack('L', $hash));
+
+    return $min + ($value % ($max - $min));
+  }
+
 
   /**
    * Shorten a string to a maximum byte length in a collision-resistant way

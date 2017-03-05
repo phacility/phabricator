@@ -24,4 +24,17 @@ final class PhabricatorObjectMentionedByObjectEdgeType
       $add_edges);
   }
 
+  public function getConduitKey() {
+    return 'mentioned-in';
+  }
+
+  public function getConduitName() {
+    return pht('Mention In');
+  }
+
+  public function getConduitDescription() {
+    return pht(
+      'The source object is mentioned in a comment on the destination object.');
+  }
+
 }

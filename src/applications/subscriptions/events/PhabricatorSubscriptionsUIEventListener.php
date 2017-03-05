@@ -56,20 +56,24 @@ final class PhabricatorSubscriptionsUIEventListener
         $subscribed = isset($edges[$src_phid][$edge_type][$user_phid]);
       }
 
+      $can_interact = PhabricatorPolicyFilter::canInteract($user, $object);
+
       if ($subscribed) {
         $sub_action = id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/delete/'.$object->getPHID().'/')
           ->setName(pht('Unsubscribe'))
-          ->setIcon('fa-minus-circle');
+          ->setIcon('fa-minus-circle')
+          ->setDisabled(!$can_interact);
       } else {
         $sub_action = id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/add/'.$object->getPHID().'/')
           ->setName(pht('Subscribe'))
-          ->setIcon('fa-plus-circle');
+          ->setIcon('fa-plus-circle')
+          ->setDisabled(!$can_interact);
       }
 
       if (!$user->isLoggedIn()) {

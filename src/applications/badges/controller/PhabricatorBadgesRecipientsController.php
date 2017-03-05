@@ -14,13 +14,20 @@ final class PhabricatorBadgesRecipientsController
     $badge = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needRecipients(true)
       ->executeOne();
     if (!$badge) {
       return new Aphront404Response();
     }
-
     $this->setBadge($badge);
+
+    $awards = id(new PhabricatorBadgesAwardQuery())
+      ->setViewer($viewer)
+      ->withBadgePHIDs(array($badge->getPHID()))
+      ->execute();
+
+    $recipient_phids = mpull($awards, 'getRecipientPHID');
+    $recipient_phids = array_reverse($recipient_phids);
+    $handles = $this->loadViewerHandles($recipient_phids);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Recipients'));
@@ -29,13 +36,9 @@ final class PhabricatorBadgesRecipientsController
 
     $header = $this->buildHeaderView();
 
-    $awards = $badge->getAwards();
-    $recipient_phids = mpull($awards, 'getRecipientPHID');
-    $recipient_phids = array_reverse($recipient_phids);
-    $handles = $this->loadViewerHandles($recipient_phids);
-
     $recipient_list = id(new PhabricatorBadgesRecipientsListView())
       ->setBadge($badge)
+      ->setAwards($awards)
       ->setHandles($handles)
       ->setUser($viewer);
 

@@ -59,7 +59,7 @@ a typical audit workflow:
   - Alice publishes a commit containing some Javascript.
   - This triggers an audit request to Bailey, the Javascript technical
     lead on the project (see below for a description of trigger mechanisms).
-  - Later, Bailey logs into Phabrictor and sees the audit request. She ignores
+  - Later, Bailey logs into Phabricator and sees the audit request. She ignores
     it for the moment, since it isn't blocking anything. At the end of the
     week she looks through her open requests to see what the team has been
     up to.

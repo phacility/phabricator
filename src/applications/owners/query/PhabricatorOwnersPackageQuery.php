@@ -129,7 +129,16 @@ final class PhabricatorOwnersPackageQuery
     }
 
     if ($this->controlMap) {
-      $this->controlResults += mpull($packages, null, 'getID');
+      foreach ($packages as $package) {
+        // If this package is archived, it's no longer a controlling package
+        // for any path. In particular, it can not force active packages with
+        // weak dominion to give up control.
+        if ($package->isArchived()) {
+          continue;
+        }
+
+        $this->controlResults[$package->getID()] = $package;
+      }
     }
 
     return $packages;
@@ -353,25 +362,19 @@ final class PhabricatorOwnersPackageQuery
     $packages = $this->controlResults;
     $weak_dominion = PhabricatorOwnersPackage::DOMINION_WEAK;
 
+    $path_fragments = PhabricatorOwnersPackage::splitPath($path);
+    $fragment_count = count($path_fragments);
+
     $matches = array();
     foreach ($packages as $package_id => $package) {
       $best_match = null;
       $include = false;
 
-      // If this package is archived, it's no longer a controlling package
-      // for the given path. In particular, it can not force active packages
-      // with weak dominion to give up control.
-      if ($package->isArchived()) {
-        continue;
-      }
-
-      foreach ($package->getPaths() as $package_path) {
-        if ($package_path->getRepositoryPHID() != $repository_phid) {
-          // If this path is for some other repository, skip it.
-          continue;
-        }
-
-        $strength = $package_path->getPathMatchStrength($path);
+      $repository_paths = $package->getPathsForRepository($repository_phid);
+      foreach ($repository_paths as $package_path) {
+        $strength = $package_path->getPathMatchStrength(
+          $path_fragments,
+          $fragment_count);
         if ($strength > $best_match) {
           $best_match = $strength;
           $include = !$package_path->getExcluded();

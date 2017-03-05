@@ -47,6 +47,15 @@ final class PhabricatorSubscriptionsEditController
         $handle->getURI());
     }
 
+    if (!PhabricatorPolicyFilter::canInteract($viewer, $object)) {
+      $lock = PhabricatorEditEngineLock::newForObject($viewer, $object);
+
+      $dialog = $this->newDialog()
+        ->addCancelButton($handle->getURI());
+
+      return $lock->willBlockUserInteractionWithDialog($dialog);
+    }
+
     if ($object instanceof PhabricatorApplicationTransactionInterface) {
       if ($is_add) {
         $xaction_value = array(

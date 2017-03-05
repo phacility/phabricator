@@ -81,43 +81,17 @@ final class PhabricatorDashboardRenderingEngine extends Phobject {
     }
 
     if ($this->arrangeMode) {
-      $footer = null;
       Javelin::initBehavior(
         'dashboard-move-panels',
         array(
           'dashboardID' => $dashboard_id,
           'moveURI' => '/dashboard/movepanel/'.$dashboard->getID().'/',
         ));
-    } else {
-      $name = $dashboard->getName();
-      $icon = id(new PHUIIconView())
-        ->setIcon($dashboard->getIcon())
-        ->addClass('msr');
-      $footer_left = phutil_tag(
-        'a',
-        array(
-          'class' => 'dashboard-footer-name',
-          'href' => '/dashboard/view/'.$dashboard->getID().'/',
-        ),
-        array(
-          $icon,
-          $name,
-        ));
-
-      $footer = phutil_tag(
-        'div',
-        array(
-          'class' => 'dashboard-footer-view',
-        ),
-        array(
-          $footer_left,
-        ));
     }
 
     $view = id(new PHUIBoxView())
       ->addClass('dashboard-view')
-      ->appendChild($result)
-      ->appendChild($footer);
+      ->appendChild($result);
 
     return $view;
   }

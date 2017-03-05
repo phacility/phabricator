@@ -404,7 +404,12 @@ final class ManiphestTransaction
         return pht(
           '%s created this task.',
           $this->renderHandleLink($author_phid));
-
+      case PhabricatorTransactions::TYPE_SUBTYPE:
+        return pht(
+          '%s changed the subtype of this task from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderSubtypeName($old),
+          $this->renderSubtypeName($new));
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
@@ -876,9 +881,26 @@ final class ManiphestTransaction
           $this->renderHandleList($new),
           $this->renderHandleLink($object_phid));
 
+      case PhabricatorTransactions::TYPE_SUBTYPE:
+        return pht(
+          '%s changed the subtype of %s from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $this->renderSubtypeName($old),
+          $this->renderSubtypeName($new));
     }
 
     return parent::getTitleForFeed();
+  }
+
+  private function renderSubtypeName($value) {
+    $object = $this->getObject();
+    $map = $object->newEditEngineSubtypeMap();
+    if (!isset($map[$value])) {
+      return $value;
+    }
+
+    return $map[$value]->getName();
   }
 
   public function hasChangeDetails() {

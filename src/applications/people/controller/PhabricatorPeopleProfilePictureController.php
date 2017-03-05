@@ -30,12 +30,22 @@ final class PhabricatorPeopleProfilePictureController
     $e_file = true;
     $errors = array();
 
+    // Verify install has GD extension, otherwise default to avatar.png
+    $gd = function_exists('imagecreatefromstring');
+
     if ($request->isFormPost()) {
       $phid = $request->getStr('phid');
       $is_default = false;
       if ($phid == PhabricatorPHIDConstants::PHID_VOID) {
-        $phid = null;
-        $is_default = true;
+        // Compose the builtin unique image
+        if ($gd) {
+          $file = id(new PhabricatorFilesComposeAvatarBuiltinFile())
+            ->getUserProfileImageFile($name);
+        } else {
+          $phid = null;
+          $is_default = true;
+        }
+
       } else if ($phid) {
         $file = id(new PhabricatorFileQuery())
           ->setViewer($viewer)
@@ -86,7 +96,15 @@ final class PhabricatorPeopleProfilePictureController
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
 
-    $default_image = PhabricatorFile::loadBuiltin($viewer, 'profile.png');
+    if ($gd) {
+      $unique_default = id(new PhabricatorFilesComposeAvatarBuiltinFile())
+        ->getUniqueProfileImage($name);
+      $default_image = PhabricatorFile::loadBuiltin(
+        $viewer, $unique_default['icon']);
+    } else {
+      $unique_default = null;
+      $default_image = PhabricatorFile::loadBuiltin($viewer, 'profile.png');
+    }
 
     $images = array();
 
@@ -119,7 +137,7 @@ final class PhabricatorPeopleProfilePictureController
       'user7.png',
       'user8.png',
       'user9.png',
-      );
+    );
     foreach ($builtins as $builtin) {
       $file = PhabricatorFile::loadBuiltin($viewer, $builtin);
       $images[$file->getPHID()] = array(
@@ -163,9 +181,21 @@ final class PhabricatorPeopleProfilePictureController
       }
     }
 
+    $default_style = array();
+    if ($unique_default) {
+      $border_color = implode(', ', $unique_default['border']);
+      $default_style = array(
+        'background-color: '.$unique_default['color'].';',
+        'border: 4px solid rgba('.$border_color.');',
+        'height: 42px;',
+        'width: 42px',
+      );
+    }
+
     $images[PhabricatorPHIDConstants::PHID_VOID] = array(
       'uri' => $default_image->getBestURI(),
       'tip' => pht('Default Picture'),
+      'style' => implode(' ', $default_style),
     );
 
     require_celerity_resource('people-profile-css');
@@ -173,6 +203,10 @@ final class PhabricatorPeopleProfilePictureController
 
     $buttons = array();
     foreach ($images as $phid => $spec) {
+      $style = null;
+      if (isset($spec['style'])) {
+        $style = $spec['style'];
+      }
       $button = javelin_tag(
         'button',
         array(
@@ -189,6 +223,7 @@ final class PhabricatorPeopleProfilePictureController
             'height' => 50,
             'width' => 50,
             'src' => $spec['uri'],
+            'style' => $style,
           )));
 
       $button = array(

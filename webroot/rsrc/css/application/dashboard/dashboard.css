@@ -106,17 +106,3 @@
 .drag-frame .phui-object-box .phui-object-box {
   box-shadow: none;
 }
-
-/*** Footer *******************************************************************/
-
-.dashboard-footer-view {
-  background-color: {$page.sidenav};
-  padding: 8px 16px;
-  border-radius: 3px;
-}
-
-.dashboard-footer-name {
-  color: {$darkbluetext};
-  font-weight: bold;
-  -webkit-font-smoothing: antialiased;
-}
