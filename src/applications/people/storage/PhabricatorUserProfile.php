@@ -13,7 +13,9 @@ final class PhabricatorUserProfile extends PhabricatorUserDAO {
 
     return id(new self())
       ->setUserPHID($user->getPHID())
-      ->setIcon($default_icon);
+      ->setIcon($default_icon)
+      ->setTitle('')
+      ->setBlurb('');
   }
 
   protected function getConfiguration() {

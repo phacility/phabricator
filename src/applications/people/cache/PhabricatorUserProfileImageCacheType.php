@@ -24,8 +24,43 @@ final class PhabricatorUserProfileImageCacheType
   public function newValueForUsers($key, array $users) {
     $viewer = $this->getViewer();
 
-    $file_phids = mpull($users, 'getProfileImagePHID');
-    $file_phids = array_filter($file_phids);
+    $file_phids = array();
+    $generate_users = array();
+    foreach ($users as $user) {
+      $user_phid = $user->getPHID();
+      $custom_phid = $user->getProfileImagePHID();
+      $default_phid = $user->getDefaultProfileImagePHID();
+      $version = $user->getDefaultProfileImageVersion();
+
+      if ($custom_phid) {
+        $file_phids[$user_phid] = $custom_phid;
+        continue;
+      }
+      if ($default_phid) {
+        if ($version == PhabricatorFilesComposeAvatarBuiltinFile::VERSION) {
+          $file_phids[$user_phid] = $default_phid;
+          continue;
+        }
+      }
+      $generate_users[] = $user;
+    }
+
+    // Generate Files for anyone without a default
+    foreach ($generate_users as $generate_user) {
+      $generate_user_phid = $generate_user->getPHID();
+      $generate_username = $generate_user->getUsername();
+      $generate_version = PhabricatorFilesComposeAvatarBuiltinFile::VERSION;
+      $generate_file = id(new PhabricatorFilesComposeAvatarBuiltinFile())
+        ->getUserProfileImageFile($generate_username);
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $generate_user->setDefaultProfileImagePHID($generate_file->getPHID());
+      $generate_user->setDefaultProfileImageVersion($generate_version);
+      $generate_user->save();
+      unset($unguarded);
+
+      $file_phids[$generate_user_phid] = $generate_file->getPHID();
+    }
 
     if ($file_phids) {
       $files = id(new PhabricatorFileQuery())
@@ -40,8 +75,11 @@ final class PhabricatorUserProfileImageCacheType
     $results = array();
     foreach ($users as $user) {
       $image_phid = $user->getProfileImagePHID();
+      $default_phid = $user->getDefaultProfileImagePHID();
       if (isset($files[$image_phid])) {
         $image_uri = $files[$image_phid]->getBestURI();
+      } else if (isset($files[$default_phid])) {
+        $image_uri = $files[$default_phid]->getBestURI();
       } else {
         $image_uri = PhabricatorUser::getDefaultProfileImageURI();
       }
