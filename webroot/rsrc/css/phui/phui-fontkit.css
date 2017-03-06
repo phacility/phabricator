@@ -34,3 +34,7 @@
   padding: 0 24px 8px 0;
   margin: 32px 0 4px;
 }
+
+.phui-document-view .phabricator-remarkup .remarkup-header strong {
+  color: #586BE9;
+}
