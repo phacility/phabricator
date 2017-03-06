@@ -105,6 +105,7 @@ final class PhabricatorPeopleProfileBadgesController
           $award = idx($awards, $badge->getPHID(), null);
           $awarder_phid = $award->getAwarderPHID();
           $awarder_handle = $viewer->renderHandle($awarder_phid);
+          $awarded_date = phabricator_date($award->getDateCreated(), $viewer);
 
           $awarder_info = pht(
             'Awarded by %s',
@@ -116,7 +117,8 @@ final class PhabricatorPeopleProfileBadgesController
             ->setSubhead($badge->getFlavor())
             ->setQuality($badge->getQuality())
             ->setHref($badge->getViewURI())
-            ->addByLine($awarder_info);
+            ->addByLine($awarder_info)
+            ->addByLine($awarded_date);
 
           $flex->addItem($item);
         }
