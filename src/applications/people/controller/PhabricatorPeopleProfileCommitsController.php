@@ -59,6 +59,9 @@ final class PhabricatorPeopleProfileCommitsController
 
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
+      ->needAuditRequests(true)
+      ->needCommitData(true)
+      ->needDrafts(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
