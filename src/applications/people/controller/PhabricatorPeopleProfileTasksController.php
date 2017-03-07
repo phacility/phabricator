@@ -57,14 +57,13 @@ final class PhabricatorPeopleProfileTasksController
   private function buildTasksView(PhabricatorUser $user) {
     $viewer = $this->getViewer();
 
+    $open = ManiphestTaskStatus::getOpenStatusConstants();
+
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withOwners(array($user->getPHID()))
+      ->withStatuses($open)
       ->needProjectPHIDs(true)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-        ))
       ->setLimit(100)
       ->execute();
 
@@ -74,7 +73,7 @@ final class PhabricatorPeopleProfileTasksController
       ->setUser($viewer)
       ->setHandles($handles)
       ->setTasks($tasks)
-      ->setNoDataString(pht('No assigned tasks.'));
+      ->setNoDataString(pht('No open, assigned tasks.'));
 
     $view = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Assigned Tasks'))
