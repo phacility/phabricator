@@ -244,7 +244,7 @@ final class PhabricatorProjectProfileController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setBackground(PHUIObjectBoxView::GREY)
+      ->setBackground(PHUIObjectBoxView::BLUE_PROPERTY)
       ->setObjectList($milestone_list);
   }
 
