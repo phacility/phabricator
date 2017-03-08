@@ -15,10 +15,10 @@ final class PhabricatorFilesComposeAvatarExample extends PhabricatorUIExample {
     $viewer = $request->getUser();
 
     $colors = PhabricatorFilesComposeAvatarBuiltinFile::getColorMap();
+    $packs = PhabricatorFilesComposeAvatarBuiltinFile::getImagePackMap();
     $builtins = PhabricatorFilesComposeAvatarBuiltinFile::getImageMap();
     $borders = PhabricatorFilesComposeAvatarBuiltinFile::getBorderMap();
 
-    shuffle($colors);
     $images = array();
     foreach ($builtins as $builtin => $raw_file) {
       $file = PhabricatorFile::loadBuiltin($viewer, $builtin);
@@ -26,17 +26,20 @@ final class PhabricatorFilesComposeAvatarExample extends PhabricatorUIExample {
     }
 
     $content = array();
+    shuffle($colors);
     foreach ($colors as $color) {
       shuffle($borders);
+      $color_const = hexdec(trim($color, '#'));
       $border = head($borders);
+      $border_color = implode(', ', $border);
 
       $styles = array();
       $styles[] = 'background-color: '.$color.';';
       $styles[] = 'display: inline-block;';
-      $styles[] = 'height: 46px;';
-      $styles[] = 'width: 46px;';
+      $styles[] = 'height: 42px;';
+      $styles[] = 'width: 42px;';
       $styles[] = 'border-radius: 3px;';
-      $styles[] = 'border: 4px solid '.$border.';';
+      $styles[] = 'border: 4px solid rgba('.$border_color.');';
 
       shuffle($images);
       $png = head($images);
@@ -45,8 +48,8 @@ final class PhabricatorFilesComposeAvatarExample extends PhabricatorUIExample {
         'img',
         array(
           'src' => $png,
-          'height' => 46,
-          'width' => 46,
+          'height' => 42,
+          'width' => 42,
         ));
 
       $tag = phutil_tag(
@@ -65,12 +68,23 @@ final class PhabricatorFilesComposeAvatarExample extends PhabricatorUIExample {
         $tag);
     }
 
+    $count = new PhutilNumber(
+      count($colors) * count($builtins) * count($borders));
+
+    $infoview = id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+      ->appendChild(pht('This installation can generate %s unique '.
+      'avatars. You can add additional image packs in '.
+      'resources/builtins/alphanumeric/.', $count));
+
+    $info = phutil_tag_div('pmb', $infoview);
     $view = phutil_tag_div('ml', $content);
 
     return phutil_tag(
       'div',
         array(),
         array(
+          $info,
           $view,
         ));
       }

@@ -24,6 +24,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $hasOpenSubtasks;
   private $parentTaskIDs;
   private $subtaskIDs;
+  private $subtypes;
 
   private $fullTextSearch   = '';
 
@@ -205,6 +206,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withBridgedObjectPHIDs(array $phids) {
     $this->bridgedObjectPHIDs = $phids;
+    return $this;
+  }
+
+  public function withSubtypes(array $subtypes) {
+    $this->subtypes = $subtypes;
     return $this;
   }
 
@@ -421,6 +427,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn,
         'task.bridgedObjectPHID IN (%Ls)',
         $this->bridgedObjectPHIDs);
+    }
+
+    if ($this->subtypes !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subtype IN (%Ls)',
+        $this->subtypes);
     }
 
     return $where;

@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_maniphest.maniphest_task
+  ADD subtype VARCHAR(64) COLLATE {$COLLATE_TEXT} NOT NULL;

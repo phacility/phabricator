@@ -70,9 +70,15 @@ abstract class DiffusionCommitActionTransaction
     PhabricatorRepositoryCommit $commit,
     PhabricatorUser $viewer) {
 
+    // Actions in the "audit" group, like "Accept Commit", do not require
+    // that the actor be able to edit the commit.
+    $group_audit = DiffusionCommitEditEngine::ACTIONGROUP_AUDIT;
+    $is_audit = ($this->getCommitActionGroupKey() == $group_audit);
+
     $field = id(new PhabricatorApplyEditField())
       ->setKey($this->getCommitActionKey())
       ->setTransactionType($this->getTransactionTypeConstant())
+      ->setCanApplyWithoutEditCapability($is_audit)
       ->setValue(true);
 
     if ($this->isActionAvailable($commit, $viewer)) {

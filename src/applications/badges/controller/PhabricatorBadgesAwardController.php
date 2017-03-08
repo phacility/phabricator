@@ -22,7 +22,6 @@ final class PhabricatorBadgesAwardController
       $badges = id(new PhabricatorBadgesQuery())
         ->setViewer($viewer)
         ->withPHIDs($badge_phids)
-        ->needRecipients(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_EDIT,

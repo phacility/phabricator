@@ -235,6 +235,13 @@ a.policy-control .caret {
   float: right;
 }
 
+a.policy-control .phui-button-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
 .caret {
   display: inline-block;
   width: 0;

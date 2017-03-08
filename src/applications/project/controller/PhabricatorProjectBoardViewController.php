@@ -372,7 +372,6 @@ final class PhabricatorProjectBoardViewController
 
     $behavior_config = array(
       'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
-      'createURI' => $this->getCreateURI(),
       'uploadURI' => '/file/dropupload/',
       'coverURI' => $this->getApplicationURI('cover/'),
       'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
@@ -800,17 +799,30 @@ final class PhabricatorProjectBoardViewController
       $default_phid = $column->getProjectPHID();
     }
 
-    $column_items[] = id(new PhabricatorActionView())
-      ->setIcon('fa-plus')
-      ->setName(pht('Create Task...'))
-      ->setHref($this->getCreateURI())
-      ->addSigil('column-add-task')
-      ->setMetadata(
-        array(
-          'columnPHID' => $column->getPHID(),
-          'boardPHID' => $project->getPHID(),
-          'projectPHID' => $default_phid,
-        ));
+    $specs = id(new ManiphestEditEngine())
+      ->setViewer($viewer)
+      ->newCreateActionSpecifications(array());
+
+    foreach ($specs as $spec) {
+      $column_items[] = id(new PhabricatorActionView())
+        ->setIcon($spec['icon'])
+        ->setName($spec['name'])
+        ->setHref($spec['uri'])
+        ->setDisabled($spec['disabled'])
+        ->addSigil('column-add-task')
+        ->setMetadata(
+          array(
+            'createURI' => $spec['uri'],
+            'columnPHID' => $column->getPHID(),
+            'boardPHID' => $project->getPHID(),
+            'projectPHID' => $default_phid,
+          ));
+    }
+
+    if (count($specs) > 1) {
+      $column_items[] = id(new PhabricatorActionView())
+        ->setType(PhabricatorActionView::TYPE_DIVIDER);
+    }
 
     $batch_edit_uri = $request->getRequestURI();
     $batch_edit_uri->setQueryParam('batch', $column->getID());
@@ -902,25 +914,6 @@ final class PhabricatorProjectBoardViewController
 
     return $base;
   }
-
-  private function getCreateURI() {
-    $viewer = $this->getViewer();
-
-    // TODO: This should be cleaned up, but maybe we're going to make options
-    // for each column or board?
-    $edit_config = id(new ManiphestEditEngine())
-      ->setViewer($viewer)
-      ->loadDefaultEditConfiguration();
-    if ($edit_config) {
-      $form_key = $edit_config->getIdentifier();
-      $create_uri = "/maniphest/task/edit/form/{$form_key}/";
-    } else {
-      $create_uri = '/maniphest/task/edit/';
-    }
-
-    return $create_uri;
-  }
-
 
   private function buildInitializeContent(PhabricatorProject $project) {
     $request = $this->getRequest();

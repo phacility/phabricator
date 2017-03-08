@@ -21,6 +21,7 @@ final class PhabricatorEditEngineConfigurationEditor
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS;
+    $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE;
     $types[] =
       PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE;
     $types[] = PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT;
@@ -55,6 +56,26 @@ final class PhabricatorEditEngineConfigurationEditor
           $errors[] = $error;
         }
         break;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE:
+        if ($xactions) {
+          $map = $object->getEngine()
+            ->setViewer($this->getActor())
+            ->newSubtypeMap();
+          foreach ($xactions as $xaction) {
+            $new = $xaction->getNewValue();
+
+            if (isset($map[$new])) {
+              continue;
+            }
+
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('Subtype "%s" is not a valid subtype.', $new),
+              $xaction);
+          }
+        }
+        break;
     }
 
     return $errors;
@@ -76,6 +97,8 @@ final class PhabricatorEditEngineConfigurationEditor
         return $object->getFieldDefault($field_key);
       case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
         return $object->getFieldLocks();
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE:
+        return $object->getSubtype();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
         return (int)$object->getIsDefault();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT:
@@ -86,6 +109,7 @@ final class PhabricatorEditEngineConfigurationEditor
         return (int)$object->getCreateOrder();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_EDITORDER:
         return (int)$object->getEditOrder();
+
     }
   }
 
@@ -99,6 +123,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ORDER:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE:
         return $xaction->getNewValue();
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT:
@@ -129,6 +154,9 @@ final class PhabricatorEditEngineConfigurationEditor
         return;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
         $object->setFieldLocks($xaction->getNewValue());
+        return;
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE:
+        $object->setSubtype($xaction->getNewValue());
         return;
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
         $object->setIsDefault($xaction->getNewValue());
@@ -161,6 +189,7 @@ final class PhabricatorEditEngineConfigurationEditor
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULT:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_ISEDIT:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_LOCKS:
+      case PhabricatorEditEngineConfigurationTransaction::TYPE_SUBTYPE:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DEFAULTCREATE:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_DISABLE:
       case PhabricatorEditEngineConfigurationTransaction::TYPE_CREATEORDER:

@@ -9,21 +9,19 @@ final class PhabricatorBadgesAwardQuery
 
 
   protected function willFilterPage(array $awards) {
+    $badge_phids = array();
+    foreach ($awards as $key => $award) {
+      $badge_phids[] = $award->getBadgePHID();
+    }
+
     $badges = id(new PhabricatorBadgesQuery())
       ->setViewer($this->getViewer())
-      ->withRecipientPHIDs(mpull($awards, null, 'getRecipientPHID'))
+      ->withPHIDs($badge_phids)
       ->execute();
 
     $badges = mpull($badges, null, 'getPHID');
-
     foreach ($awards as $key => $award) {
       $award_badge = idx($badges, $award->getBadgePHID());
-      if ($award_badge === null) {
-        $this->didRejectResult($award);
-        unset($awards[$key]);
-        continue;
-      }
-
       $award->attachBadge($award_badge);
     }
 

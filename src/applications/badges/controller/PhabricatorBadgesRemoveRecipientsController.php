@@ -10,7 +10,6 @@ final class PhabricatorBadgesRemoveRecipientsController
     $badge = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needRecipients(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -21,14 +20,7 @@ final class PhabricatorBadgesRemoveRecipientsController
       return new Aphront404Response();
     }
 
-    $awards = $badge->getAwards();
-    $recipient_phids = mpull($awards, 'getRecipientPHID');
     $remove_phid = $request->getStr('phid');
-
-    if (!in_array($remove_phid, $recipient_phids)) {
-      return new Aphront404Response();
-    }
-
     $view_uri = $this->getApplicationURI('recipients/'.$badge->getID().'/');
 
     if ($request->isFormPost()) {

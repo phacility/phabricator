@@ -69,6 +69,7 @@
   color: {$darkbluetext};
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .action-has-icon button.phabricator-action-view-item,

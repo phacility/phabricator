@@ -11,7 +11,6 @@ final class PhabricatorBadgesEditRecipientsController
     $badge = id(new PhabricatorBadgesQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
-      ->needRecipients(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_EDIT,
@@ -23,8 +22,6 @@ final class PhabricatorBadgesEditRecipientsController
     }
 
     $view_uri = $this->getApplicationURI('recipients/'.$badge->getID().'/');
-    $awards = $badge->getAwards();
-    $recipient_phids = mpull($awards, 'getRecipientPHID');
 
     if ($request->isFormPost()) {
       $award_phids = array();
@@ -50,17 +47,6 @@ final class PhabricatorBadgesEditRecipientsController
 
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);
-    }
-
-    $recipient_phids = array_reverse($recipient_phids);
-    $handles = $this->loadViewerHandles($recipient_phids);
-
-    $state = array();
-    foreach ($handles as $handle) {
-      $state[] = array(
-        'phid' => $handle->getPHID(),
-        'name' => $handle->getFullName(),
-      );
     }
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

@@ -36,6 +36,7 @@ abstract class PhabricatorEditField extends Phobject {
   private $isEditDefaults;
   private $isSubmittedForm;
   private $controlError;
+  private $canApplyWithoutEditCapability = false;
 
   private $isReorderable = true;
   private $isDefaultable = true;
@@ -290,6 +291,15 @@ abstract class PhabricatorEditField extends Phobject {
 
   public function getControlInstructions() {
     return $this->controlInstructions;
+  }
+
+  public function setCanApplyWithoutEditCapability($can_apply) {
+    $this->canApplyWithoutEditCapability = $can_apply;
+    return $this;
+  }
+
+  public function getCanApplyWithoutEditCapability() {
+    return $this->canApplyWithoutEditCapability;
   }
 
   protected function newControl() {

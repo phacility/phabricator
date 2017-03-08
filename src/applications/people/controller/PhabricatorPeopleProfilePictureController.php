@@ -86,7 +86,17 @@ final class PhabricatorPeopleProfilePictureController
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
 
-    $default_image = PhabricatorFile::loadBuiltin($viewer, 'profile.png');
+    $default_image = $user->getDefaultProfileImagePHID();
+    if ($default_image) {
+      $default_image = id(new PhabricatorFileQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($default_image))
+        ->executeOne();
+    }
+
+    if (!$default_image) {
+      $default_image = PhabricatorFile::loadBuiltin($viewer, 'profile.png');
+    }
 
     $images = array();
 
@@ -173,6 +183,10 @@ final class PhabricatorPeopleProfilePictureController
 
     $buttons = array();
     foreach ($images as $phid => $spec) {
+      $style = null;
+      if (isset($spec['style'])) {
+        $style = $spec['style'];
+      }
       $button = javelin_tag(
         'button',
         array(

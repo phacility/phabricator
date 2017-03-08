@@ -48,6 +48,17 @@
 .phui-crumb-view {
   float: left;
   padding: 8px 0;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Safari Hack, See D17361 */
+.phui-crumb-view:after {
+  content: "\0000a0";
+  display: inline-block;
+  width: 0;
 }
 
 .device-phone .phui-crumb-view.phabricator-last-crumb .phui-crumb-name,

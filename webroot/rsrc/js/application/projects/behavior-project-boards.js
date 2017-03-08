@@ -16,7 +16,6 @@ JX.behavior('project-boards', function(config, statics) {
     statics.projectPHID = update_config.projectPHID;
     statics.order = update_config.order;
     statics.moveURI = update_config.moveURI;
-    statics.createURI = update_config.createURI;
   }
 
   function setup() {
@@ -71,7 +70,6 @@ JX.behavior('project-boards', function(config, statics) {
       .setUploadURI(config.uploadURI)
       .setCoverURI(config.coverURI)
       .setMoveURI(config.moveURI)
-      .setCreateURI(config.createURI)
       .setChunkThreshold(config.chunkThreshold)
       .start();
   }

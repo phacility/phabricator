@@ -7,6 +7,7 @@ final class PhabricatorLinkProfileMenuItem
 
   const FIELD_URI = 'uri';
   const FIELD_NAME = 'name';
+  const FIELD_TOOLTIP = 'tooltip';
 
   public function getMenuItemTypeIcon() {
     return 'fa-link';
@@ -38,6 +39,10 @@ final class PhabricatorLinkProfileMenuItem
         ->setLabel(pht('URI'))
         ->setIsRequired(true)
         ->setValue($this->getLinkURI($config)),
+      id(new PhabricatorTextEditField())
+        ->setKey(self::FIELD_TOOLTIP)
+        ->setLabel(pht('Tooltip'))
+        ->setValue($this->getLinkTooltip($config)),
       id(new PhabricatorIconSetEditField())
         ->setKey('icon')
         ->setLabel(pht('Icon'))
@@ -61,6 +66,11 @@ final class PhabricatorLinkProfileMenuItem
     return $config->getMenuItemProperty('uri');
   }
 
+  private function getLinkTooltip(
+    PhabricatorProfileMenuItemConfiguration $config) {
+    return $config->getMenuItemProperty('tooltip');
+  }
+
   private function isValidLinkURI($uri) {
     return PhabricatorEnv::isValidURIForLink($uri);
   }
@@ -71,6 +81,7 @@ final class PhabricatorLinkProfileMenuItem
     $icon = $this->getLinkIcon($config);
     $name = $this->getLinkName($config);
     $href = $this->getLinkURI($config);
+    $tooltip = $this->getLinkTooltip($config);
 
     if (!$this->isValidLinkURI($href)) {
       $href = '#';
@@ -87,7 +98,8 @@ final class PhabricatorLinkProfileMenuItem
     $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setIcon($icon_class);
+      ->setIcon($icon_class)
+      ->setTooltip($tooltip);
 
     return array(
       $item,

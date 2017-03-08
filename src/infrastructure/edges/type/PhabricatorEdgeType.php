@@ -27,6 +27,18 @@ abstract class PhabricatorEdgeType extends Phobject {
     return $const;
   }
 
+  public function getConduitKey() {
+    return null;
+  }
+
+  public function getConduitName() {
+    return null;
+  }
+
+  public function getConduitDescription() {
+    return null;
+  }
+
   public function getInverseEdgeConstant() {
     return null;
   }

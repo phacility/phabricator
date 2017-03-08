@@ -10,13 +10,16 @@ final class PhabricatorBadgesBadgeRevokeTransaction
   }
 
   public function applyExternalEffects($object, $value) {
-    $awards = $object->getAwards();
+    $awards = id(new PhabricatorBadgesAwardQuery())
+      ->setViewer($this->getActor())
+      ->withRecipientPHIDs($value)
+      ->withBadgePHIDs(array($object->getPHID()))
+      ->execute();
     $awards = mpull($awards, null, 'getRecipientPHID');
 
     foreach ($value as $phid) {
       $awards[$phid]->delete();
     }
-    $object->attachAwards($awards);
     return;
   }
 

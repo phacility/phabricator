@@ -56,8 +56,6 @@ final class PhabricatorProjectWorkboardProfileMenuItem
     PhabricatorProfileMenuItemConfiguration $config) {
     $project = $config->getProfileObject();
 
-    $has_workboard = $project->getHasWorkboard();
-
     $id = $project->getID();
     $href = "/project/board/{$id}/";
     $name = $this->getDisplayName($config);
@@ -65,7 +63,6 @@ final class PhabricatorProjectWorkboardProfileMenuItem
     $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setDisabled(!$has_workboard)
       ->setIcon('fa-columns');
 
     return array(

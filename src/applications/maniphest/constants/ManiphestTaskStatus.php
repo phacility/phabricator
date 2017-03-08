@@ -156,6 +156,10 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return !self::isOpenStatus($status);
   }
 
+  public static function isLockedStatus($status) {
+    return self::getStatusAttribute($status, 'locked', false);
+  }
+
   public static function getStatusActionName($status) {
     return self::getStatusAttribute($status, 'name.action');
   }
@@ -277,6 +281,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'keywords' => 'optional list<string>',
           'disabled' => 'optional bool',
           'claim' => 'optional bool',
+          'locked' => 'optional bool',
         ));
     }
 
