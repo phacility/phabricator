@@ -59,6 +59,7 @@ final class PhabricatorPeopleProfileCommitsController
 
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
+      ->withAuthorPHIDs(array($user->getPHID()))
       ->needAuditRequests(true)
       ->needCommitData(true)
       ->needDrafts(true)
