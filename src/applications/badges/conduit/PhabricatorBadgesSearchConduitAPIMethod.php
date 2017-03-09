@@ -4,7 +4,7 @@ final class PhabricatorBadgesSearchConduitAPIMethod
   extends PhabricatorSearchEngineAPIMethod {
 
   public function getAPIMethodName() {
-    return 'badges.search';
+    return 'badge.search';
   }
 
   public function newSearchEngine() {

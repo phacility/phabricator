@@ -24,6 +24,7 @@ final class PhabricatorBadgesSearchEngine
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('qualities')
         ->setLabel(pht('Quality'))
+        ->setEnableForConduit(false)
         ->setOptions(PhabricatorBadgesQuality::getDropdownQualityMap()),
       id(new PhabricatorSearchCheckboxesField())
         ->setKey('statuses')

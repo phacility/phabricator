@@ -19,6 +19,8 @@ abstract class PhabricatorSearchField extends Phobject {
   private $description;
   private $isHidden;
 
+  private $enableForConduit = true;
+
 
 /* -(  Configuring Fields  )------------------------------------------------- */
 
@@ -333,6 +335,10 @@ abstract class PhabricatorSearchField extends Phobject {
    * @task conduit
    */
   final public function getConduitParameterType() {
+    if (!$this->getEnableForConduit()) {
+      return false;
+    }
+
     $type = $this->newConduitParameterType();
 
     if ($type) {
@@ -365,6 +371,15 @@ abstract class PhabricatorSearchField extends Phobject {
   public function getValidConstraintKeys() {
     return $this->getConduitParameterType()->getKeys(
       $this->getConduitKey());
+  }
+
+  final public function setEnableForConduit($enable) {
+    $this->enableForConduit = $enable;
+    return $this;
+  }
+
+  final public function getEnableForConduit() {
+    return $this->enableForConduit;
   }
 
 

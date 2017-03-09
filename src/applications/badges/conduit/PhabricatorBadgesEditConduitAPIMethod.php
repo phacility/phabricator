@@ -4,7 +4,7 @@ final class PhabricatorBadgesEditConduitAPIMethod
   extends PhabricatorEditEngineAPIMethod {
 
   public function getAPIMethodName() {
-    return 'badges.edit';
+    return 'badge.edit';
   }
 
   public function newEditEngine() {

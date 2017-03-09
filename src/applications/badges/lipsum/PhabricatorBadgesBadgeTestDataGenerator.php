@@ -40,7 +40,7 @@ final class PhabricatorBadgesBadgeTestDataGenerator
       'transactions' => $xactions,
     );
 
-    $result = id(new ConduitCall('badges.edit', $params))
+    $result = id(new ConduitCall('badge.edit', $params))
       ->setUser($author)
       ->execute();
 
