@@ -103,6 +103,14 @@
   margin-top: 8px;
 }
 
+.project-card-view .phui-header-subheader .phui-tag-core {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 232px;
+  overflow: hidden;
+  display: inline-block;
+}
+
 .project-card-view .phui-header-header .phui-tag-view .phui-tag-core {
   padding: 0;
 }
