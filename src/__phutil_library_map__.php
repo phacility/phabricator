@@ -2018,6 +2018,7 @@ phutil_register_library_map(array(
     'PhabricatorBadgesAward' => 'applications/badges/storage/PhabricatorBadgesAward.php',
     'PhabricatorBadgesAwardController' => 'applications/badges/controller/PhabricatorBadgesAwardController.php',
     'PhabricatorBadgesAwardQuery' => 'applications/badges/query/PhabricatorBadgesAwardQuery.php',
+    'PhabricatorBadgesAwardTestDataGenerator' => 'applications/badges/lipsum/PhabricatorBadgesAwardTestDataGenerator.php',
     'PhabricatorBadgesBadge' => 'applications/badges/storage/PhabricatorBadgesBadge.php',
     'PhabricatorBadgesBadgeAwardTransaction' => 'applications/badges/xaction/PhabricatorBadgesBadgeAwardTransaction.php',
     'PhabricatorBadgesBadgeDescriptionTransaction' => 'applications/badges/xaction/PhabricatorBadgesBadgeDescriptionTransaction.php',
@@ -7000,6 +7001,7 @@ phutil_register_library_map(array(
     ),
     'PhabricatorBadgesAwardController' => 'PhabricatorBadgesController',
     'PhabricatorBadgesAwardQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorBadgesAwardTestDataGenerator' => 'PhabricatorTestDataGenerator',
     'PhabricatorBadgesBadge' => array(
       'PhabricatorBadgesDAO',
       'PhabricatorPolicyInterface',
