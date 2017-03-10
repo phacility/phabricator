@@ -43,6 +43,10 @@
   border-radius: 3px;
 }
 
+.project-card-view .project-card-image-href {
+  display: inline-block;
+}
+
 .project-card-view .project-card-item div {
   display: inline;
 }
@@ -103,7 +107,7 @@
   margin-top: 8px;
 }
 
-.project-card-view .phui-header-subheader .phui-tag-core {
+.people-card-view .phui-header-subheader .phui-tag-core {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 232px;
