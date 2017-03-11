@@ -242,6 +242,12 @@ a.policy-control .phui-button-text {
   display: block;
 }
 
+.device-phone a.button.policy-control {
+  display: block;
+  float: none;
+  width: auto;
+}
+
 .caret {
   display: inline-block;
   width: 0;
