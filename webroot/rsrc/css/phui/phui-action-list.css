@@ -69,6 +69,7 @@
   color: {$darkbluetext};
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .action-has-icon button.phabricator-action-view-item,
@@ -163,4 +164,32 @@
 .phabricator-action-view-type-divider {
   margin-top: 8px;
   border-top: 1px solid {$thinblueborder};
+}
+
+/******* Sub Menu *************************************************************/
+
+.phabricator-action-view-submenu .caret-right {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border-left-color: {$alphablue};
+}
+
+.phabricator-action-view-submenu .caret {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  border-top: 7px solid {$lightgreytext};
+}
+
+.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
+  .phabricator-action-view-item {
+  background-color: rgba({$alphablue}, 0.07);
+  color: {$sky};
+  border-radius: 3px;
+}
+
+.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
+  .phabricator-action-view-item .phui-icon-view {
+    color: {$sky};
 }

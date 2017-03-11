@@ -55,8 +55,14 @@ final class PhabricatorPeopleProfileImageWorkflow
     foreach ($iterator as $user) {
       $username = $user->getUsername();
       $default_phid = $user->getDefaultProfileImagePHID();
+      $gen_version = $user->getDefaultProfileImageVersion();
 
-      if ($default_phid == null || $is_force) {
+      $generate = false;
+      if ($gen_version != $version) {
+        $generate = true;
+      }
+
+      if ($default_phid == null || $is_force || $generate) {
         $file = id(new PhabricatorFilesComposeAvatarBuiltinFile())
           ->getUserProfileImageFile($username);
         $user->setDefaultProfileImagePHID($file->getPHID());

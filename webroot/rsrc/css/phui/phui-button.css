@@ -235,6 +235,19 @@ a.policy-control .caret {
   float: right;
 }
 
+a.policy-control .phui-button-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.device-phone a.button.policy-control {
+  display: block;
+  float: none;
+  width: auto;
+}
+
 .caret {
   display: inline-block;
   width: 0;
@@ -281,32 +294,6 @@ a.policy-control .caret {
 
 .grey.dropdown .caret {
   border-top-color: #000;
-}
-
-.phabricator-action-view-submenu .caret-right {
-  float: right;
-  margin-top: 4px;
-  margin-right: 6px;
-  border-left-color: {$alphablue};
-}
-
-.phabricator-action-view-submenu .caret {
-  float: right;
-  margin-top: 5px;
-  margin-right: 4px;
-  border-top: 7px solid {$lightgreytext};
-}
-
-.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
-  .phabricator-action-view-item {
-  background-color: rgba({$alphablue}, 0.07);
-  color: {$sky};
-  border-radius: 3px;
-}
-
-.phabricator-action-list-view .phabricator-action-view-submenu.phui-submenu-open
-  .phabricator-action-view-item .phui-icon-view {
-    color: {$sky};
 }
 
 /* Icons */

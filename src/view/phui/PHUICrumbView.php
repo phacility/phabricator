@@ -75,7 +75,7 @@ final class PHUICrumbView extends AphrontView {
 
     // Surround the crumb name with spaces so that double clicking it only
     // selects the crumb itself.
-    $name = array(' ', $this->name, ' ');
+    $name = array(' ', $this->name);
 
     $name = phutil_tag(
       'span',
@@ -83,6 +83,10 @@ final class PHUICrumbView extends AphrontView {
         'class' => 'phui-crumb-name',
       ),
       $name);
+
+    // Because of text-overflow and safari, put the second space on the
+    // outside of the element.
+    $name = array($name, ' ');
 
     $divider = null;
     if (!$this->isLastCrumb) {

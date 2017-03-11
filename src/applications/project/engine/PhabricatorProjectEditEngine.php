@@ -30,6 +30,10 @@ final class PhabricatorProjectEditEngine
     return true;
   }
 
+  public function getQuickCreateOrderVector() {
+    return id(new PhutilSortVector())->addInt(200);
+  }
+
   public function getEngineName() {
     return pht('Projects');
   }

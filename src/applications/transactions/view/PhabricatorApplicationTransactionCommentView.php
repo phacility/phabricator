@@ -238,11 +238,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'class' => 'phui-timeline-wedge',
       ),
       '');
+
+    $badge_view = $this->renderBadgeView();
+
     $comment_box = id(new PHUIObjectBoxView())
       ->setFlush(true)
       ->addClass('phui-comment-form-view')
       ->addSigil('phui-comment-form')
       ->appendChild($image)
+      ->appendChild($badge_view)
       ->appendChild($wedge)
       ->appendChild($comment);
 
@@ -510,6 +514,49 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     }
 
     return $options;
+  }
+
+  private function renderBadgeView() {
+    $user = $this->getUser();
+    $can_use_badges = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorBadgesApplication',
+      $user);
+    if (!$can_use_badges) {
+      return null;
+    }
+
+    $awards = id(new PhabricatorBadgesAwardQuery())
+      ->setViewer($this->getUser())
+      ->withRecipientPHIDs(array($user->getPHID()))
+      ->setLimit(2)
+      ->execute();
+
+    $badge_view = null;
+    if ($awards) {
+      $badges = mpull($awards, 'getBadge');
+      $badge_list = array();
+      foreach ($badges as $badge) {
+        $badge_view = id(new PHUIBadgeMiniView())
+          ->setIcon($badge->getIcon())
+          ->setQuality($badge->getQuality())
+          ->setHeader($badge->getName())
+          ->setTipDirection('E')
+          ->setHref('/badges/view/'.$badge->getID());
+
+        $badge_list[] = $badge_view;
+      }
+      $flex = new PHUIBadgeBoxView();
+      $flex->addItems($badge_list);
+      $flex->setCollapsed(true);
+      $badge_view = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-timeline-badges',
+        ),
+        $flex);
+    }
+
+    return $badge_view;
   }
 
 }

@@ -157,9 +157,20 @@ textarea[disabled],
 }
 
 .aphront-space-select-control-knob {
-  margin: 2px 8px 2px 0;
+  margin: 0 8px 0 0;
+  float: left;
+}
+
+.aphront-form-control-policy .policy-control {
+  float: left;
+  margin-right: 8px;
 }
 
 .device .aphront-space-select-control-knob {
   margin-bottom: 8px;
+  float: none;
+}
+
+.device .aphront-form-control-policy .policy-control {
+  margin: 0;
 }

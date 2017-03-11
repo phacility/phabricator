@@ -12,7 +12,7 @@ final class PhabricatorBadgesBadgeTestDataGenerator
   public function generateObject() {
     $author = $this->loadRandomUser();
 
-    list($name, $description) = $this->newLoot();
+    list($name, $description, $quality, $icon) = $this->newLoot();
 
     $xactions = array();
 
@@ -26,11 +26,21 @@ final class PhabricatorBadgesBadgeTestDataGenerator
       'value' => $description,
     );
 
+    $xactions[] = array(
+      'type' => 'quality',
+      'value' => (string)$quality,
+    );
+
+    $xactions[] = array(
+      'type' => 'icon',
+      'value' => $icon,
+    );
+
     $params = array(
       'transactions' => $xactions,
     );
 
-    $result = id(new ConduitCall('badges.edit', $params))
+    $result = id(new ConduitCall('badge.edit', $params))
       ->setUser($author)
       ->execute();
 
@@ -58,7 +68,17 @@ final class PhabricatorBadgesBadgeTestDataGenerator
 
     $drop = preg_replace($effect_pattern, '', $drop);
 
-    return array($drop, $description);
+    $quality_map = PhabricatorBadgesQuality::getQualityMap();
+    shuffle($quality_map);
+    $quality = head($quality_map);
+    $rarity = $quality['rarity'];
+
+    $icon_map = id(new PhabricatorBadgesIconSet())->getIcons();
+    shuffle($icon_map);
+    $icon_map = head($icon_map);
+    $icon = $icon_map->getKey();
+
+    return array($drop, $description, $rarity, $icon);
   }
 
   public function rollDropValue($matches) {
