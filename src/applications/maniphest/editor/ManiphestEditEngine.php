@@ -25,6 +25,10 @@ final class ManiphestEditEngine
     return true;
   }
 
+  public function getQuickCreateOrderVector() {
+    return id(new PhutilSortVector())->addInt(100);
+  }
+
   protected function newEditableObject() {
     return ManiphestTask::initializeNewTask($this->getViewer());
   }
