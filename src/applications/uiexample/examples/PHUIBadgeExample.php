@@ -97,7 +97,7 @@ final class PHUIBadgeExample extends PhabricatorUIExample {
 
     $badges2[] = id(new PHUIBadgeView())
       ->setIcon('fa-user')
-      ->setHeader(pht('Adminstrator'))
+      ->setHeader(pht('Administrator'))
       ->setSubhead(pht('Drew the short stick'))
       ->setQuality(PhabricatorBadgesQuality::LEGENDARY)
       ->setSource(pht('People (automatic)'))
