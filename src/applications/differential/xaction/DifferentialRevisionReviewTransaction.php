@@ -116,6 +116,9 @@ abstract class DifferentialRevisionReviewTransaction
       );
     }
 
+    // This is currently double-writing: to the old (edge) store and the new
+    // (reviewer) store. Do the old edge write first.
+
     $src_phid = $revision->getPHID();
     $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
@@ -131,6 +134,42 @@ abstract class DifferentialRevisionReviewTransaction
     }
 
     $editor->save();
+
+    // Now, do the new write.
+
+    if ($map) {
+      $table = new DifferentialReviewer();
+
+      $reviewers = $table->loadAllWhere(
+        'revisionPHID = %s AND reviewerPHID IN (%Ls)',
+        $src_phid,
+        array_keys($map));
+      $reviewers = mpull($reviewers, null, 'getReviewerPHID');
+
+      foreach ($map as $dst_phid => $edge_data) {
+        $reviewer = idx($reviewers, $dst_phid);
+        if (!$reviewer) {
+          $reviewer = id(new DifferentialReviewer())
+            ->setRevisionPHID($src_phid)
+            ->setReviewerPHID($dst_phid);
+        }
+
+        $reviewer->setReviewerStatus($status);
+
+        if ($status == DifferentialReviewerStatus::STATUS_RESIGNED) {
+          if ($reviewer->getID()) {
+            $reviewer->delete();
+          }
+        } else {
+          try {
+            $reviewer->save();
+          } catch (AphrontDuplicateKeyQueryException $ex) {
+            // At least for now, just ignore it if we lost a race.
+          }
+        }
+      }
+    }
+
   }
 
 }
