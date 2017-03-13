@@ -181,13 +181,14 @@
   border: none;
 }
 
-.device .remarkup-assist-button,
-.device .remarkup-assist-separator {
+.device .conpherence-message-pane .remarkup-assist-button,
+.device .conpherence-message-pane .remarkup-assist-separator {
   display: none;
 }
 
-.device .remarkup-assist-button.remarkup-assist-upload {
-  display: block;
+.device .conpherence-message-pane
+  .remarkup-assist-button.remarkup-assist-upload {
+    display: block;
 }
 
 .device .conpherence-message-pane .phui-form-view {
@@ -343,7 +344,7 @@
   padding: 2px 0 8px 0;
 }
 
-.conpherence-message-pane .aphront-form-control {
+body .conpherence-message-pane .aphront-form-control {
   padding: 0;
 }
 

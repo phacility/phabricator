@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'conpherence.pkg.css' => '6875302f',
+    'conpherence.pkg.css' => '32f2c040',
     'conpherence.pkg.js' => '6249a1cf',
     'core.pkg.css' => '35645dec',
     'core.pkg.js' => '1fa7c0c5',
@@ -48,7 +48,7 @@ return array(
     'rsrc/css/application/conpherence/durable-column.css' => '292c71f0',
     'rsrc/css/application/conpherence/header-pane.css' => 'db93ebc6',
     'rsrc/css/application/conpherence/menu.css' => '3d8e5c9c',
-    'rsrc/css/application/conpherence/message-pane.css' => 'b085d40d',
+    'rsrc/css/application/conpherence/message-pane.css' => 'd1fc13e1',
     'rsrc/css/application/conpherence/notification.css' => '965db05b',
     'rsrc/css/application/conpherence/participant-pane.css' => '604a8b02',
     'rsrc/css/application/conpherence/transaction.css' => '85129c68',
@@ -566,7 +566,7 @@ return array(
     'conpherence-durable-column-view' => '292c71f0',
     'conpherence-header-pane-css' => 'db93ebc6',
     'conpherence-menu-css' => '3d8e5c9c',
-    'conpherence-message-pane-css' => 'b085d40d',
+    'conpherence-message-pane-css' => 'd1fc13e1',
     'conpherence-notification-css' => '965db05b',
     'conpherence-participant-pane-css' => '604a8b02',
     'conpherence-thread-manager' => 'c8b5ee6f',
