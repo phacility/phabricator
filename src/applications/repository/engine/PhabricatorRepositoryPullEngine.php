@@ -352,44 +352,24 @@ final class PhabricatorRepositoryPullEngine
 
     $this->logRefDifferences($remote_refs, $local_refs);
 
-    $retry = false;
-    do {
-      // This is a local command, but needs credentials.
-      if ($repository->isWorkingCopyBare()) {
-        // For bare working copies, we need this magic incantation.
-        $future = $repository->getRemoteCommandFuture(
-          'fetch origin %s --prune',
-          '+refs/*:refs/*');
-      } else {
-        $future = $repository->getRemoteCommandFuture(
-          'fetch --all --prune');
-      }
+    // Force the "origin" URI to the configured value.
+    $repository->execxLocalCommand(
+      'remote set-url origin -- %P',
+      $repository->getRemoteURIEnvelope());
 
-      $future->setCWD($path);
-      list($err, $stdout, $stderr) = $future->resolve();
+    if ($repository->isWorkingCopyBare()) {
+      // For bare working copies, we need this magic incantation.
+      $future = $repository->getRemoteCommandFuture(
+        'fetch origin %s --prune',
+        '+refs/*:refs/*');
+    } else {
+      $future = $repository->getRemoteCommandFuture(
+        'fetch --all --prune');
+    }
 
-      if ($err && !$retry && $repository->canDestroyWorkingCopy()) {
-        $retry = true;
-        // Fix remote origin url if it doesn't match our configuration
-        $origin_url = $repository->execLocalCommand(
-          'config --get remote.origin.url');
-        $remote_uri = $repository->getRemoteURIEnvelope();
-        if ($origin_url != $remote_uri->openEnvelope()) {
-          $repository->execLocalCommand(
-            'remote set-url origin %P',
-            $remote_uri);
-        }
-      } else if ($err) {
-        throw new CommandException(
-          pht('Failed to fetch changes!'),
-          $future->getCommand(),
-          $err,
-          $stdout,
-          $stderr);
-      } else {
-        $retry = false;
-      }
-    } while ($retry);
+    $future
+      ->setCWD($path)
+      ->resolvex();
   }
 
 
