@@ -120,6 +120,7 @@ final class PhabricatorRepositoryPullEngine
           pht(
             'Updating the working copy for repository "%s".',
             $repository->getDisplayName()));
+
         if ($is_git) {
           $this->verifyGitOrigin($repository);
           $this->executeGitUpdate();
@@ -157,7 +158,7 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function skipPull($message) {
-    $this->log('%s', $message);
+    $this->log($message);
     $this->donePull();
   }
 
@@ -172,7 +173,7 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function logPull($message) {
-    $this->log('%s', $message);
+    $this->log($message);
   }
 
   private function donePull() {
@@ -190,7 +191,7 @@ final class PhabricatorRepositoryPullEngine
   }
 
   private function installHook($path, array $hook_argv = array()) {
-    $this->log('%s', pht('Installing commit hook to "%s"...', $path));
+    $this->log(pht('Installing commit hook to "%s"...', $path));
 
     $repository = $this->getRepository();
     $identifier = $this->getHookContextIdentifier($repository);
@@ -339,6 +340,18 @@ final class PhabricatorRepositoryPullEngine
       throw new Exception($message);
     }
 
+    $remote_refs = $this->loadGitRemoteRefs($repository);
+    $local_refs = $this->loadGitLocalRefs($repository);
+    if ($remote_refs === $local_refs) {
+      $this->log(
+        pht(
+          'Skipping fetch because local and remote refs are already '.
+          'identical.'));
+      return false;
+    }
+
+    $this->logRefDifferences($remote_refs, $local_refs);
+
     $retry = false;
     do {
       // This is a local command, but needs credentials.
@@ -395,6 +408,75 @@ final class PhabricatorRepositoryPullEngine
 
     $this->installHook($root.$path);
   }
+
+  private function loadGitRemoteRefs(PhabricatorRepository $repository) {
+    $remote_envelope = $repository->getRemoteURIEnvelope();
+
+    list($stdout) = $repository->execxRemoteCommand(
+      'ls-remote -- %P',
+      $remote_envelope);
+
+    $map = array();
+    $lines = phutil_split_lines($stdout, false);
+    foreach ($lines as $line) {
+      list($hash, $name) = preg_split('/\s+/', $line, 2);
+
+      // If the remote has a HEAD, just ignore it.
+      if ($name == 'HEAD') {
+        continue;
+      }
+
+      // If the remote ref is itself a remote ref, ignore it.
+      if (preg_match('(^refs/remotes/)', $name)) {
+        continue;
+      }
+
+      $map[$name] = $hash;
+    }
+
+    ksort($map);
+
+    return $map;
+  }
+
+  private function loadGitLocalRefs(PhabricatorRepository $repository) {
+    $refs = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->execute();
+
+    $map = array();
+    foreach ($refs as $ref) {
+      $fields = $ref->getRawFields();
+      $map[idx($fields, 'refname')] = $ref->getCommitIdentifier();
+    }
+
+    ksort($map);
+
+    return $map;
+  }
+
+  private function logRefDifferences(array $remote, array $local) {
+    $all = $local + $remote;
+
+    $differences = array();
+    foreach ($all as $key => $ignored) {
+      $remote_ref = idx($remote, $key, pht('<null>'));
+      $local_ref = idx($local, $key, pht('<null>'));
+      if ($remote_ref !== $local_ref) {
+        $differences[] = pht(
+          '%s (remote: "%s", local: "%s")',
+          $key,
+          $remote_ref,
+          $local_ref);
+      }
+    }
+
+    $this->log(
+      pht(
+        "Updating repository after detecting ref differences:\n%s",
+        implode("\n", $differences)));
+  }
+
 
 
 /* -(  Pulling Mercurial Working Copies  )----------------------------------- */
