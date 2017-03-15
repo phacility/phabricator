@@ -220,7 +220,6 @@ final class PHUITimelineView extends AphrontView {
     }
 
     $user_phid_type = PhabricatorPeopleUserPHIDType::TYPECONST;
-    $badge_edge_type = PhabricatorRecipientHasBadgeEdgeType::EDGECONST;
 
     $user_phids = array();
     foreach ($events as $key => $event) {
@@ -248,6 +247,7 @@ final class PHUITimelineView extends AphrontView {
     $awards = id(new PhabricatorBadgesAwardQuery())
       ->setViewer($this->getViewer())
       ->withRecipientPHIDs($user_phids)
+      ->withBadgeStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
       ->execute();
 
     $awards = mgroup($awards, 'getRecipientPHID');
@@ -259,9 +259,7 @@ final class PHUITimelineView extends AphrontView {
       $badges = array();
       foreach ($author_awards as $award) {
         $badge = $award->getBadge();
-        if ($badge->getStatus() == PhabricatorBadgesBadge::STATUS_ACTIVE) {
-          $badges[$award->getBadgePHID()] = $badge;
-        }
+        $badges[$award->getBadgePHID()] = $badge;
       }
 
       // TODO: Pick the "best" badges in some smart way. For now, just pick

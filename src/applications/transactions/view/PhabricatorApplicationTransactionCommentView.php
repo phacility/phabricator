@@ -528,12 +528,14 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $awards = id(new PhabricatorBadgesAwardQuery())
       ->setViewer($this->getUser())
       ->withRecipientPHIDs(array($user->getPHID()))
+      ->withBadgeStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
       ->setLimit(2)
       ->execute();
 
+    $badges = mpull($awards, 'getBadge');
+
     $badge_view = null;
-    if ($awards) {
-      $badges = mpull($awards, 'getBadge');
+    if ($badges) {
       $badge_list = array();
       foreach ($badges as $badge) {
         $badge_view = id(new PHUIBadgeMiniView())
