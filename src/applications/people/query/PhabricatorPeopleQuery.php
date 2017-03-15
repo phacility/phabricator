@@ -18,6 +18,7 @@ final class PhabricatorPeopleQuery
   private $nameLike;
   private $nameTokens;
   private $namePrefixes;
+  private $isEnrolledInMultiFactor;
 
   private $needPrimaryEmail;
   private $needProfile;
@@ -97,6 +98,11 @@ final class PhabricatorPeopleQuery
 
   public function withNamePrefixes(array $prefixes) {
     $this->namePrefixes = $prefixes;
+    return $this;
+  }
+
+  public function withIsEnrolledInMultiFactor($enrolled) {
+    $this->isEnrolledInMultiFactor = $enrolled;
     return $this;
   }
 
@@ -335,6 +341,13 @@ final class PhabricatorPeopleQuery
         'user.username LIKE %~ OR user.realname LIKE %~',
         $this->nameLike,
         $this->nameLike);
+    }
+
+    if ($this->isEnrolledInMultiFactor !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'user.isEnrolledInMultiFactor = %d',
+        (int)$this->isEnrolledInMultiFactor);
     }
 
     return $where;
