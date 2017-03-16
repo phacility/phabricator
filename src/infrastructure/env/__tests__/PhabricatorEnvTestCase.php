@@ -218,4 +218,39 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
     $this->assertFalse($caught instanceof Exception);
   }
 
+  public function testSelfURI() {
+    $base_uri = 'https://allowed.example.com/';
+
+    $allowed_uris = array(
+      'https://old.example.com/',
+    );
+
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('phabricator.base-uri', $base_uri);
+    $env->overrideEnvConfig('phabricator.allowed-uris', $allowed_uris);
+
+    $map = array(
+      'https://allowed.example.com/' => true,
+      'https://allowed.example.com' => true,
+      'https://allowed.EXAMPLE.com' => true,
+      'http://allowed.example.com/' => true,
+      'https://allowed.example.com/path/to/resource.png' => true,
+
+      'https://old.example.com/' => true,
+      'https://old.example.com' => true,
+      'https://old.EXAMPLE.com' => true,
+      'http://old.example.com/' => true,
+      'https://old.example.com/path/to/resource.png' => true,
+
+      'https://other.example.com/' => false,
+    );
+
+    foreach ($map as $input => $expect) {
+      $this->assertEqual(
+        $expect,
+        PhabricatorEnv::isSelfURI($input),
+        pht('Is self URI? %s', $input));
+    }
+  }
+
 }
