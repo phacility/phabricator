@@ -350,12 +350,18 @@ final class DifferentialChangesetViewController extends DifferentialController {
         $data = $changeset->makeOldFile();
       }
 
+      $diff = $changeset->getDiff();
+
       $file = PhabricatorFile::newFromFileData(
         $data,
         array(
-          'name'      => $changeset->getFilename(),
+          'name' => $changeset->getFilename(),
           'mime-type' => 'text/plain',
+          'ttl' => phutil_units('24 hours in seconds'),
+          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
         ));
+
+      $file->attachToObject($diff->getPHID());
 
       $metadata[$key] = $file->getPHID();
       $changeset->setMetadata($metadata);
