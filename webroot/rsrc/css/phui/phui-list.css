@@ -2,6 +2,10 @@
  * @provides phui-list-view-css
  */
 
+.phui-list-item-view {
+  position: relative;
+}
+
 .phui-list-item-header,
 .phui-list-item-header a {
   color: {$bluetext};
@@ -187,4 +191,40 @@
 .phui-info-view + .phui-list-view {
   margin-top: 16px;
   border-top: 1px solid {$thinblueborder};
+}
+
+/* - Action Icon ----------------------------------------------------------- */
+
+.phui-list-item-has-action-icon .phui-list-item-action-href {
+  position: absolute;
+  width: 28px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  line-height: 28px;
+  background-color: transparent;
+  display: none;
+}
+
+.phui-list-item-has-action-icon.phui-list-item-selected .phui-list-item-href {
+  padding-right: 32px;
+}
+
+.phui-list-item-has-action-icon.phui-list-item-selected
+  .phui-list-item-action-href {
+    display: block;
+}
+
+.phui-list-item-has-action-icon .phui-list-item-action-href:hover {
+  background-color: rgba({$alphablack},.05);
+}
+
+.phui-list-item-has-action-icon .phui-list-item-action-icon {
+  opacity: 0.5;
+}
+
+.phui-list-item-has-action-icon .phui-list-item-action-href:hover
+  .phui-list-item-action-icon {
+    opacity: 1;
 }
