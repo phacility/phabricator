@@ -2103,9 +2103,10 @@ abstract class PhabricatorEditEngine
         throw new Exception(
           pht(
             'Parameter "%s" must contain a list of transaction descriptions, '.
-            'but item with key "%s" is not a dictionary.',
+            'but item with key "%s" is of type "%s".',
             $transactions_key,
-            $key));
+            $key,
+            gettype($xaction)));
       }
 
       if (!array_key_exists('type', $xaction)) {
