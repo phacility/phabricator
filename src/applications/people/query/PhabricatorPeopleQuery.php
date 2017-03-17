@@ -24,6 +24,7 @@ final class PhabricatorPeopleQuery
   private $needProfile;
   private $needProfileImage;
   private $needAvailability;
+  private $needBadgeAwards;
   private $cacheKeys = array();
 
   public function withIDs(array $ids) {
@@ -135,6 +136,18 @@ final class PhabricatorPeopleQuery
 
   public function needUserSettings($need) {
     $cache_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
+
+    if ($need) {
+      $this->cacheKeys[$cache_key] = true;
+    } else {
+      unset($this->cacheKeys[$cache_key]);
+    }
+
+    return $this;
+  }
+
+  public function needBadgeAwards($need) {
+    $cache_key = PhabricatorUserBadgesCacheType::KEY_BADGES;
 
     if ($need) {
       $this->cacheKeys[$cache_key] = true;

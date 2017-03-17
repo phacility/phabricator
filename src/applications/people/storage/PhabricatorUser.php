@@ -848,6 +848,11 @@ final class PhabricatorUser
     return $this->requireCacheData($message_key);
   }
 
+  public function getRecentBadgeAwards() {
+    $badges_key = PhabricatorUserBadgesCacheType::KEY_BADGES;
+    return $this->requireCacheData($badges_key);
+  }
+
   public function getFullName() {
     if (strlen($this->getRealName())) {
       return $this->getUsername().' ('.$this->getRealName().')';
