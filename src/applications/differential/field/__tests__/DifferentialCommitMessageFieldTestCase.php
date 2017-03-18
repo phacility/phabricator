@@ -13,6 +13,7 @@ final class DifferentialCommitMessageFieldTestCase
       "D123\nSome-Custom-Field: The End" => 123,
       "{$base_uri}D123" => 123,
       "{$base_uri}D123\nSome-Custom-Field: The End" => 123,
+      'https://www.other.com/D123' => null,
     );
 
     $env = PhabricatorEnv::beginScopedEnv();

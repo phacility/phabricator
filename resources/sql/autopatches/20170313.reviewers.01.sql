@@ -1,0 +1,9 @@
+CREATE TABLE {$NAMESPACE}_differential.differential_reviewer (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  revisionPHID VARBINARY(64) NOT NULL,
+  reviewerPHID VARBINARY(64) NOT NULL,
+  reviewerStatus VARCHAR(64) NOT NULL COLLATE {$COLLATE_TEXT},
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_revision` (revisionPHID, reviewerPHID)
+) ENGINE=InnoDB, COLLATE {$COLLATE_TEXT};

@@ -331,6 +331,8 @@ final class PhabricatorApplicationSearchController
           'query parameters and correct errors.');
       } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
         $exec_errors[] = $ex->getMessage();
+      } catch (PhabricatorSearchConstraintException $ex) {
+        $exec_errors[] = $ex->getMessage();
       }
 
       // The engine may have encountered additional errors during rendering;

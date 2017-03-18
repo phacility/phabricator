@@ -36,7 +36,7 @@ final class PhabricatorBadgesRecipientsListView extends AphrontView {
     $award_button = id(new PHUIButtonView())
       ->setTag('a')
       ->setIcon('fa-plus')
-      ->setText(pht('Add Recipents'))
+      ->setText(pht('Add Recipients'))
       ->setWorkflow(true)
       ->setDisabled(!$can_edit)
       ->setHref('/badges/recipients/'.$badge->getID().'/add/');

@@ -414,21 +414,44 @@ final class PhabricatorEnv extends Phobject {
     return rtrim($production_domain, '/').$path;
   }
 
-  public static function getAllowedURIs($path) {
-    $uri = new PhutilURI($path);
-    if ($uri->getDomain()) {
-      return $path;
+
+  public static function isSelfURI($raw_uri) {
+    $uri = new PhutilURI($raw_uri);
+
+    $host = $uri->getDomain();
+    if (!strlen($host)) {
+      return false;
     }
 
-    $allowed_uris = self::getEnvConfig('phabricator.allowed-uris');
-    $return = array();
-    foreach ($allowed_uris as $allowed_uri) {
-      $return[] = rtrim($allowed_uri, '/').$path;
-    }
+    $host = phutil_utf8_strtolower($host);
 
-    return $return;
+    $self_map = self::getSelfURIMap();
+    return isset($self_map[$host]);
   }
 
+  private static function getSelfURIMap() {
+    $self_uris = array();
+    $self_uris[] = self::getProductionURI('/');
+    $self_uris[] = self::getURI('/');
+
+    $allowed_uris = self::getEnvConfig('phabricator.allowed-uris');
+    foreach ($allowed_uris as $allowed_uri) {
+      $self_uris[] = $allowed_uri;
+    }
+
+    $self_map = array();
+    foreach ($self_uris as $self_uri) {
+      $host = id(new PhutilURI($self_uri))->getDomain();
+      if (!strlen($host)) {
+        continue;
+      }
+
+      $host = phutil_utf8_strtolower($host);
+      $self_map[$host] = $host;
+    }
+
+    return $self_map;
+  }
 
   /**
    * Get the fully-qualified production URI for a static resource path.

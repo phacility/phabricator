@@ -306,6 +306,18 @@ final class PhabricatorAuditEditor
 
     $field_key = DifferentialAuditorsCommitMessageField::FIELDKEY;
     $phids = idx($result, $field_key, null);
+
+    if (!$phids) {
+      return array();
+    }
+
+    // If a commit lists its author as an auditor, just pretend it does not.
+    foreach ($phids as $key => $phid) {
+      if ($phid == $commit->getAuthorPHID()) {
+        unset($phids[$key]);
+      }
+    }
+
     if (!$phids) {
       return array();
     }

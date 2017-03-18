@@ -66,6 +66,21 @@ EOTEXT
       ,
       PhabricatorEnv::getDoclink('Configuring Encryption')));
 
+    $require_mfa_description = $this->deformat(pht(<<<EOTEXT
+By default, Phabricator allows users to add multi-factor authentication to
+their accounts, but does not require it. By enabling this option, you can
+force all users to add at least one authentication factor before they can use
+their accounts.
+
+Administrators can query a list of users who do not have MFA configured in
+{nav People}:
+
+  - **[[ %s | %s ]]**
+EOTEXT
+      ,
+      '/people/?mfa=false',
+      pht('List of Users Without MFA')));
+
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
         ->setLocked(true)
@@ -132,13 +147,7 @@ EOTEXT
         ->setLocked(true)
         ->setSummary(
           pht('Require all users to configure multi-factor authentication.'))
-        ->setDescription(
-          pht(
-            'By default, Phabricator allows users to add multi-factor '.
-            'authentication to their accounts, but does not require it. '.
-            'By enabling this option, you can force all users to add '.
-            'at least one authentication factor before they can use their '.
-            'accounts.'))
+        ->setDescription($require_mfa_description)
         ->setBoolOptions(
           array(
             pht('Multi-Factor Required'),

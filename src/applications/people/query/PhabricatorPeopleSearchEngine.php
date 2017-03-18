@@ -18,7 +18,7 @@ final class PhabricatorPeopleSearchEngine
   }
 
   protected function buildCustomSearchFields() {
-    return array(
+    $fields = array(
       id(new PhabricatorSearchStringListField())
         ->setLabel(pht('Usernames'))
         ->setKey('usernames')
@@ -84,18 +84,36 @@ final class PhabricatorPeopleSearchEngine
           pht(
             'Pass true to find only users awaiting administrative approval, '.
             'or false to omit these users.')),
-      id(new PhabricatorSearchDateField())
-        ->setKey('createdStart')
-        ->setLabel(pht('Joined After'))
-        ->setDescription(
-          pht('Find user accounts created after a given time.')),
-      id(new PhabricatorSearchDateField())
-        ->setKey('createdEnd')
-        ->setLabel(pht('Joined Before'))
-        ->setDescription(
-          pht('Find user accounts created before a given time.')),
-
     );
+
+    $viewer = $this->requireViewer();
+    if ($viewer->getIsAdmin()) {
+      $fields[] = id(new PhabricatorSearchThreeStateField())
+        ->setLabel(pht('Has MFA'))
+        ->setKey('mfa')
+        ->setOptions(
+          pht('(Show All)'),
+          pht('Show Only Users With MFA'),
+          pht('Hide Users With MFA'))
+        ->setDescription(
+          pht(
+            'Pass true to find only users who are enrolled in MFA, or false '.
+            'to omit these users.'));
+    }
+
+    $fields[] = id(new PhabricatorSearchDateField())
+      ->setKey('createdStart')
+      ->setLabel(pht('Joined After'))
+      ->setDescription(
+        pht('Find user accounts created after a given time.'));
+
+    $fields[] = id(new PhabricatorSearchDateField())
+      ->setKey('createdEnd')
+      ->setLabel(pht('Joined Before'))
+      ->setDescription(
+        pht('Find user accounts created before a given time.'));
+
+    return $fields;
   }
 
   protected function getDefaultFieldOrder() {
@@ -149,6 +167,19 @@ final class PhabricatorPeopleSearchEngine
 
     if ($map['needsApproval'] !== null) {
       $query->withIsApproved(!$map['needsApproval']);
+    }
+
+    if (idx($map, 'mfa') !== null) {
+      $viewer = $this->requireViewer();
+      if (!$viewer->getIsAdmin()) {
+        throw new PhabricatorSearchConstraintException(
+          pht(
+            'The "Has MFA" query constraint may only be used by '.
+            'administrators, to prevent attackers from using it to target '.
+            'weak accounts.'));
+      }
+
+      $query->withIsEnrolledInMultiFactor($map['mfa']);
     }
 
     if ($map['createdStart']) {
@@ -252,6 +283,12 @@ final class PhabricatorPeopleSearchEngine
 
       if ($user->getIsMailingList()) {
         $item->addIcon('fa-envelope-o', pht('Mailing List'));
+      }
+
+      if ($viewer->getIsAdmin()) {
+        if ($user->getIsEnrolledInMultiFactor()) {
+          $item->addIcon('fa-lock', pht('Has MFA'));
+        }
       }
 
       if ($viewer->getIsAdmin()) {
