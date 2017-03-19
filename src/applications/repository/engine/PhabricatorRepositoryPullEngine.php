@@ -392,8 +392,11 @@ final class PhabricatorRepositoryPullEngine
   private function loadGitRemoteRefs(PhabricatorRepository $repository) {
     $remote_envelope = $repository->getRemoteURIEnvelope();
 
+    // NOTE: "git ls-remote" does not support "--" until circa January 2016.
+    // See T12416. None of the flags to "ls-remote" appear dangerous, and
+    // other checks make it difficult to configure a suspicious remote URI.
     list($stdout) = $repository->execxRemoteCommand(
-      'ls-remote -- %P',
+      'ls-remote %P',
       $remote_envelope);
 
     $map = array();
