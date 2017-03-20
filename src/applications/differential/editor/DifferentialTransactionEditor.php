@@ -1687,22 +1687,21 @@ final class DifferentialTransactionEditor
 
     $value = array();
     foreach ($phids as $phid) {
-      $value[$phid] = array(
-        'data' => array(
-          'status' => $new_status,
-        ),
-      );
+      if ($is_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
     }
-
-    $edgetype_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
     $owners_phid = id(new PhabricatorOwnersApplication())
       ->getPHID();
 
+    $reviewers_type = DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE;
+
     return $object->getApplicationTransactionTemplate()
       ->setAuthorPHID($owners_phid)
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', $edgetype_reviewer)
+      ->setTransactionType($reviewers_type)
       ->setNewValue(
         array(
           '+' => $value,
