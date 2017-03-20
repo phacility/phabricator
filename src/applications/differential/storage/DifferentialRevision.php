@@ -296,15 +296,6 @@ final class DifferentialRevision extends DifferentialDAO
     return idx($this->relationships, $relation, array());
   }
 
-  public function getPrimaryReviewer() {
-    $reviewers = $this->getReviewers();
-    $last = $this->lastReviewerPHID;
-    if (!$last || !in_array($last, $reviewers)) {
-      return head($this->getReviewers());
-    }
-    return $last;
-  }
-
   public function getHashes() {
     return $this->assertAttached($this->hashes);
   }
@@ -406,8 +397,7 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function attachReviewerStatus(array $reviewers) {
-    assert_instances_of($reviewers, 'DifferentialReviewerProxy');
-
+    assert_instances_of($reviewers, 'DifferentialReviewer');
     $this->reviewerStatus = $reviewers;
     return $this;
   }

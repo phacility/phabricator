@@ -42,7 +42,10 @@ final class DifferentialProjectReviewersField
       ->setReviewers($reviewers)
       ->setHandles($handles);
 
-    // TODO: Active diff stuff.
+    $diff = $this->getActiveDiff();
+    if ($diff) {
+      $view->setActiveDiff($diff);
+    }
 
     return $view;
   }

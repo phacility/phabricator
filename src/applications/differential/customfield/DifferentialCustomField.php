@@ -70,6 +70,15 @@ abstract class DifferentialCustomField
     return array();
   }
 
+  protected function getActiveDiff() {
+    $object = $this->getObject();
+    try {
+      return $object->getActiveDiff();
+    } catch (Exception $ex) {
+      return null;
+    }
+  }
+
   public function getRequiredHandlePHIDsForRevisionHeaderWarnings() {
     return array();
   }

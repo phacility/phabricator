@@ -7,7 +7,7 @@ final class DifferentialReviewersView extends AphrontView {
   private $diff;
 
   public function setReviewers(array $reviewers) {
-    assert_instances_of($reviewers, 'DifferentialReviewerProxy');
+    assert_instances_of($reviewers, 'DifferentialReviewer');
     $this->reviewers = $reviewers;
     return $this;
   }
@@ -31,47 +31,54 @@ final class DifferentialReviewersView extends AphrontView {
       $phid = $reviewer->getReviewerPHID();
       $handle = $this->handles[$phid];
 
-      // If we're missing either the diff or action information for the
-      // reviewer, render information as current.
-      $is_current = (!$this->diff) ||
-                    (!$reviewer->getDiffID()) ||
-                    ($this->diff->getID() == $reviewer->getDiffID());
+      $action_phid = $reviewer->getLastActionDiffPHID();
+      $is_current_action = $this->isCurrent($action_phid);
+
+      $comment_phid = $reviewer->getLastCommentDiffPHID();
+      $is_current_comment = $this->isCurrent($comment_phid);
 
       $item = new PHUIStatusItemView();
 
       $item->setHighlighted($reviewer->hasAuthority($viewer));
 
-      switch ($reviewer->getStatus()) {
+      switch ($reviewer->getReviewerStatus()) {
         case DifferentialReviewerStatus::STATUS_ADDED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_OPEN,
-            'bluegrey',
-            pht('Review Requested'));
+          if ($comment_phid) {
+            if ($is_current_comment) {
+              $item->setIcon(
+                'fa-comment',
+                'blue',
+                pht('Commented'));
+            } else {
+              $item->setIcon(
+                'fa-comment-o',
+                'bluegrey',
+                pht('Commented Previously'));
+            }
+          } else {
+            $item->setIcon(
+              PHUIStatusItemView::ICON_OPEN,
+              'bluegrey',
+              pht('Review Requested'));
+          }
           break;
 
         case DifferentialReviewerStatus::STATUS_ACCEPTED:
-          if ($is_current) {
+          if ($is_current_action) {
             $item->setIcon(
               PHUIStatusItemView::ICON_ACCEPT,
               'green',
               pht('Accepted'));
           } else {
             $item->setIcon(
-              PHUIStatusItemView::ICON_ACCEPT,
+              'fa-check-circle-o',
               'bluegrey',
               pht('Accepted Prior Diff'));
           }
           break;
 
-        case DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER:
-          $item->setIcon(
-            'fa-check-circle-o',
-            'bluegrey',
-            pht('Accepted Prior Diff'));
-          break;
-
         case DifferentialReviewerStatus::STATUS_REJECTED:
-          if ($is_current) {
+          if ($is_current_action) {
             $item->setIcon(
               PHUIStatusItemView::ICON_REJECT,
               'red',
@@ -81,27 +88,6 @@ final class DifferentialReviewersView extends AphrontView {
               'fa-times-circle-o',
               'bluegrey',
               pht('Requested Changes to Prior Diff'));
-          }
-          break;
-
-        case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
-          $item->setIcon(
-            'fa-times-circle-o',
-            'bluegrey',
-            pht('Rejected Prior Diff'));
-          break;
-
-        case DifferentialReviewerStatus::STATUS_COMMENTED:
-          if ($is_current) {
-            $item->setIcon(
-              'fa-question-circle',
-              'blue',
-              pht('Commented'));
-          } else {
-            $item->setIcon(
-              'fa-question-circle-o',
-              'bluegrey',
-              pht('Commented Previously'));
           }
           break;
 
@@ -116,7 +102,7 @@ final class DifferentialReviewersView extends AphrontView {
           $item->setIcon(
             PHUIStatusItemView::ICON_QUESTION,
             'bluegrey',
-            pht('%s?', $reviewer->getStatus()));
+            pht('%s?', $reviewer->getReviewerStatus()));
           break;
 
       }
@@ -126,6 +112,28 @@ final class DifferentialReviewersView extends AphrontView {
     }
 
     return $view;
+  }
+
+  private function isCurrent($action_phid) {
+    if (!$this->diff) {
+      echo "A\n";
+      return true;
+    }
+
+    if (!$action_phid) {
+      return true;
+    }
+
+    $diff_phid = $this->diff->getPHID();
+    if (!$diff_phid) {
+      return true;
+    }
+
+    if ($diff_phid == $action_phid) {
+      return true;
+    }
+
+    return false;
   }
 
 }
