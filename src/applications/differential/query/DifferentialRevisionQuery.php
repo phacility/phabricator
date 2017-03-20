@@ -47,7 +47,7 @@ final class DifferentialRevisionQuery
   private $needDiffIDs        = false;
   private $needCommitPHIDs    = false;
   private $needHashes         = false;
-  private $needReviewerStatus = false;
+  private $needReviewers = false;
   private $needReviewerAuthority;
   private $needDrafts;
   private $needFlags;
@@ -283,14 +283,14 @@ final class DifferentialRevisionQuery
 
 
   /**
-   * Set whether or not the query should load associated reviewer status.
+   * Set whether or not the query should load associated reviewers.
    *
    * @param bool True to load and attach reviewers.
    * @return this
    * @task config
    */
-  public function needReviewerStatus($need_reviewer_status) {
-    $this->needReviewerStatus = $need_reviewer_status;
+  public function needReviewers($need_reviewers) {
+    $this->needReviewers = $need_reviewers;
     return $this;
   }
 
@@ -429,7 +429,7 @@ final class DifferentialRevisionQuery
       $this->loadHashes($conn_r, $revisions);
     }
 
-    if ($this->needReviewerStatus || $this->needReviewerAuthority) {
+    if ($this->needReviewers || $this->needReviewerAuthority) {
       $this->loadReviewers($conn_r, $revisions);
     }
 

@@ -17,7 +17,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($this->revisionID))
       ->setViewer($viewer)
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needReviewerAuthority(true)
       ->executeOne();
     if (!$revision) {
@@ -784,7 +784,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setLimit(10)
       ->needFlags(true)
       ->needDrafts(true)
-      ->needReviewerStatus(true);
+      ->needReviewers(true);
 
     foreach ($path_map as $path => $path_id) {
       $query->withPath($repository->getID(), $path_id);

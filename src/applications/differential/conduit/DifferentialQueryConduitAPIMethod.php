@@ -182,7 +182,7 @@ final class DifferentialQueryConduitAPIMethod
       $query->withBranches($branches);
     }
 
-    $query->needReviewerStatus(true);
+    $query->needReviewers(true);
     $query->needCommitPHIDs(true);
     $query->needDiffIDs(true);
     $query->needActiveDiffs(true);

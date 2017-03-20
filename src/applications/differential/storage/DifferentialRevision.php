@@ -478,7 +478,7 @@ final class DifferentialRevision extends DifferentialDAO
       $reviewers = id(new DifferentialRevisionQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withPHIDs(array($this->getPHID()))
-        ->needReviewerStatus(true)
+        ->needReviewers(true)
         ->executeOne()
         ->getReviewerStatus();
     } else {

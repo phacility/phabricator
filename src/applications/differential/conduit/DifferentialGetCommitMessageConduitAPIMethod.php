@@ -39,7 +39,7 @@ final class DifferentialGetCommitMessageConduitAPIMethod
       $revision = id(new DifferentialRevisionQuery())
         ->withIDs(array($id))
         ->setViewer($viewer)
-        ->needReviewerStatus(true)
+        ->needReviewers(true)
         ->needActiveDiffs(true)
         ->executeOne();
       if (!$revision) {

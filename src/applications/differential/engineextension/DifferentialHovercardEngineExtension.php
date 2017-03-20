@@ -25,7 +25,7 @@ final class DifferentialHovercardEngineExtension
     $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withPHIDs($phids)
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->execute();
     $revisions = mpull($revisions, null, 'getPHID');
 

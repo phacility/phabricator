@@ -47,7 +47,7 @@ final class DifferentialCreateCommentConduitAPIMethod
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getValue('revision_id')))
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needReviewerAuthority(true)
       ->executeOne();
     if (!$revision) {

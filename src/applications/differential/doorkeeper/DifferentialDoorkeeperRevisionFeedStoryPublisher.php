@@ -26,7 +26,7 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
     return id(new DifferentialRevisionQuery())
       ->setViewer($this->getViewer())
       ->withIDs(array($object->getID()))
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->executeOne();
   }
 

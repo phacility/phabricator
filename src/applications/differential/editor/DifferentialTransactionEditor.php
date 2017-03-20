@@ -614,7 +614,7 @@ final class DifferentialTransactionEditor
 
     $new_revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needActiveDiffs(true)
       ->withIDs(array($object->getID()))
       ->executeOne();
@@ -1575,7 +1575,7 @@ final class DifferentialTransactionEditor
       ->setViewer($this->getActor())
       ->withPHIDs(array($object->getPHID()))
       ->needActiveDiffs(true)
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->executeOne();
     if (!$revision) {
       throw new Exception(
@@ -1791,7 +1791,7 @@ final class DifferentialTransactionEditor
     // Reload to pick up the active diff and reviewer status.
     return id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needActiveDiffs(true)
       ->withIDs(array($object->getID()))
       ->executeOne();

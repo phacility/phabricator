@@ -67,7 +67,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $revision = id(new DifferentialRevisionQuery())
         ->setViewer($viewer)
         ->withIDs(array($revision_id))
-        ->needReviewerStatus(true)
+        ->needReviewers(true)
         ->executeOne();
     } else {
       $revision = null;

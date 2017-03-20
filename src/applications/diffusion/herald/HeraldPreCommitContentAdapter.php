@@ -190,7 +190,7 @@ final class HeraldPreCommitContentAdapter extends HeraldPreCommitAdapter {
         $this->revision = id(new DifferentialRevisionQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
           ->withIDs(array($revision_id))
-          ->needReviewerStatus(true)
+          ->needReviewers(true)
           ->executeOne();
       }
     }

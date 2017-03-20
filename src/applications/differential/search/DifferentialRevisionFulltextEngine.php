@@ -10,7 +10,7 @@ final class DifferentialRevisionFulltextEngine
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs(array($object->getPHID()))
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->executeOne();
 
     // TODO: This isn't very clean, but custom fields currently rely on it.
