@@ -36,6 +36,8 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
         'removepanel/(?P<id>\d+)/'
           => 'PhabricatorDashboardRemovePanelController',
         'panel/' => array(
+          'install/(?P<engineKey>[^/]+)/(?:(?P<queryKey>[^/]+)/)?' =>
+            'PhabricatorDashboardQueryPanelInstallController',
           '(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhabricatorDashboardPanelListController',
           'create/' => 'PhabricatorDashboardPanelEditController',
