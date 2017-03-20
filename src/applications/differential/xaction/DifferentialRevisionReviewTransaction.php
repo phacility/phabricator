@@ -138,6 +138,13 @@ abstract class DifferentialRevisionReviewTransaction
     // Now, do the new write.
 
     if ($map) {
+      $diff = $this->getEditor()->getActiveDiff($revision);
+      if ($diff) {
+        $diff_phid = $diff->getPHID();
+      } else {
+        $diff_phid = null;
+      }
+
       $table = new DifferentialReviewer();
 
       $reviewers = $table->loadAllWhere(
@@ -155,6 +162,10 @@ abstract class DifferentialRevisionReviewTransaction
         }
 
         $reviewer->setReviewerStatus($status);
+
+        if ($diff_phid) {
+          $reviewer->setLastActionDiffPHID($diff_phid);
+        }
 
         if ($status == DifferentialReviewerStatus::STATUS_RESIGNED) {
           if ($reviewer->getID()) {

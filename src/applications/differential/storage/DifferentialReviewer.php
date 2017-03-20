@@ -7,10 +7,15 @@ final class DifferentialReviewer
   protected $reviewerPHID;
   protected $reviewerStatus;
 
+  protected $lastActionDiffPHID;
+  protected $lastCommentDiffPHID;
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'reviewerStatus' => 'text64',
+        'lastActionDiffPHID' => 'phid?',
+        'lastCommentDiffPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_revision' => array(

@@ -718,6 +718,9 @@ final class DifferentialTransactionEditor
         break;
     }
 
+
+    $this->markReviewerComments($object, $xactions);
+
     return $xactions;
   }
 
@@ -1835,5 +1838,60 @@ final class DifferentialTransactionEditor
       ->setIsCommandeerSideEffect(true)
       ->setNewValue($edits);
   }
+
+  public function getActiveDiff($object) {
+    if ($this->getIsNewObject()) {
+      return null;
+    } else {
+      return $object->getActiveDiff();
+    }
+  }
+
+  /**
+   * When a reviewer makes a comment, mark the last revision they commented
+   * on.
+   *
+   * This allows us to show a hint to help authors and other reviewers quickly
+   * distinguish between reviewers who have participated in the discussion and
+   * reviewers who haven't been part of it.
+   */
+  private function markReviewerComments($object, array $xactions) {
+    $acting_phid = $this->getActingAsPHID();
+    if (!$acting_phid) {
+      return;
+    }
+
+    $diff = $this->getActiveDiff($object);
+    if (!$diff) {
+      return;
+    }
+
+    $has_comment = false;
+    foreach ($xactions as $xaction) {
+      if ($xaction->hasComment()) {
+        $has_comment = true;
+        break;
+      }
+    }
+
+    if (!$has_comment) {
+      return;
+    }
+
+    $reviewer_table = new DifferentialReviewer();
+    $conn = $reviewer_table->establishConnection('w');
+
+    queryfx(
+      $conn,
+      'UPDATE %T SET lastCommentDiffPHID = %s
+        WHERE revisionPHID = %s
+        AND reviewerPHID = %s',
+      $reviewer_table->getTableName(),
+      $diff->getPHID(),
+      $object->getPHID(),
+      $acting_phid);
+  }
+
+
 
 }
