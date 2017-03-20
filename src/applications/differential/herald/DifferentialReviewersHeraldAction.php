@@ -81,18 +81,17 @@ abstract class DifferentialReviewersHeraldAction
 
     $value = array();
     foreach ($phids as $phid) {
-      $value[$phid] = array(
-        'data' => array(
-          'status' => $new_status,
-        ),
-      );
+      if ($is_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
     }
 
-    $edgetype_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
+    $reviewers_type = DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE;
 
     $xaction = $adapter->newTransaction()
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', $edgetype_reviewer)
+      ->setTransactionType($reviewers_type)
       ->setNewValue(
         array(
           '+' => $value,
