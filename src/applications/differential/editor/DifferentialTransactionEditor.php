@@ -130,33 +130,6 @@ final class DifferentialTransactionEditor
 
         $action_type = $xaction->getNewValue();
         switch ($action_type) {
-          case DifferentialAction::ACTION_ACCEPT:
-          case DifferentialAction::ACTION_REJECT:
-            if ($action_type == DifferentialAction::ACTION_ACCEPT) {
-              $new_status = DifferentialReviewerStatus::STATUS_ACCEPTED;
-            } else {
-              $new_status = DifferentialReviewerStatus::STATUS_REJECTED;
-            }
-
-            $actor = $this->getActor();
-
-            // These transactions can cause effects in two ways: by altering the
-            // status of an existing reviewer; or by adding the actor as a new
-            // reviewer.
-
-            $will_add_reviewer = true;
-            foreach ($object->getReviewerStatus() as $reviewer) {
-              if ($reviewer->hasAuthority($actor)) {
-                if ($reviewer->getStatus() != $new_status) {
-                  return true;
-                }
-              }
-              if ($reviewer->getReviewerPHID() == $actor_phid) {
-                $will_add_reviwer = false;
-              }
-            }
-
-            return $will_add_reviewer;
           case DifferentialAction::ACTION_CLOSE:
             return ($object->getStatus() != $status_closed);
           case DifferentialAction::ACTION_ABANDON:
@@ -169,13 +142,6 @@ final class DifferentialTransactionEditor
             return ($object->getStatus() != $status_plan);
           case DifferentialAction::ACTION_REQUEST:
             return ($object->getStatus() != $status_review);
-          case DifferentialAction::ACTION_RESIGN:
-            foreach ($object->getReviewerStatus() as $reviewer) {
-              if ($reviewer->getReviewerPHID() == $actor_phid) {
-                return true;
-              }
-            }
-            return false;
           case DifferentialAction::ACTION_CLAIM:
             return ($actor_phid != $object->getAuthorPHID());
         }
@@ -222,12 +188,6 @@ final class DifferentialTransactionEditor
         return;
       case DifferentialTransaction::TYPE_ACTION:
         switch ($xaction->getNewValue()) {
-          case DifferentialAction::ACTION_RESIGN:
-          case DifferentialAction::ACTION_ACCEPT:
-          case DifferentialAction::ACTION_REJECT:
-            // These have no direct effects, and affect review status only
-            // indirectly by altering reviewers with TYPE_EDGE transactions.
-            return;
           case DifferentialAction::ACTION_ABANDON:
             $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
             return;
@@ -482,58 +442,8 @@ final class DifferentialTransactionEditor
         $action_type = $xaction->getNewValue();
 
         switch ($action_type) {
-          case DifferentialAction::ACTION_ACCEPT:
-          case DifferentialAction::ACTION_REJECT:
-            if ($action_type == DifferentialAction::ACTION_ACCEPT) {
-              $data = array(
-                'status' => DifferentialReviewerStatus::STATUS_ACCEPTED,
-              );
-            } else {
-              $data = array(
-                'status' => DifferentialReviewerStatus::STATUS_REJECTED,
-              );
-            }
-
-            $edits = array();
-
-            foreach ($object->getReviewerStatus() as $reviewer) {
-              if ($reviewer->hasAuthority($actor)) {
-                $edits[$reviewer->getReviewerPHID()] = array(
-                  'data' => $data,
-                );
-              }
-            }
-
-            // Also either update or add the actor themselves as a reviewer.
-            $edits[$actor_phid] = array(
-              'data' => $data,
-            );
-
-            $results[] = id(new DifferentialTransaction())
-              ->setTransactionType($type_edge)
-              ->setMetadataValue('edge:type', $edge_reviewer)
-              ->setIgnoreOnNoEffect(true)
-              ->setNewValue(array('+' => $edits));
-            break;
-
           case DifferentialAction::ACTION_CLAIM:
             $is_commandeer = true;
-            break;
-          case DifferentialAction::ACTION_RESIGN:
-            // If the user is resigning, add a separate reviewer edit
-            // transaction which removes them as a reviewer.
-
-            $results[] = id(new DifferentialTransaction())
-              ->setTransactionType($type_edge)
-              ->setMetadataValue('edge:type', $edge_reviewer)
-              ->setIgnoreOnNoEffect(true)
-              ->setNewValue(
-                array(
-                  '-' => array(
-                    $actor_phid => $actor_phid,
-                  ),
-                ));
-
             break;
         }
       break;
@@ -925,60 +835,6 @@ final class DifferentialTransactionEditor
     $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
 
     switch ($action) {
-      case DifferentialAction::ACTION_ACCEPT:
-        if ($actor_is_author && !$allow_self_accept) {
-          return pht(
-            'You can not accept this revision because you are the owner.');
-        }
-
-        if ($revision_status == $status_abandoned) {
-          return pht(
-            'You can not accept this revision because it has been '.
-            'abandoned.');
-        }
-
-        if ($revision_status == $status_closed) {
-          return pht(
-            'You can not accept this revision because it has already been '.
-            'closed.');
-        }
-
-        // TODO: It would be nice to make this generic at some point.
-        $signatures = DifferentialRequiredSignaturesField::loadForRevision(
-          $revision);
-        foreach ($signatures as $phid => $signed) {
-          if (!$signed) {
-            return pht(
-              'You can not accept this revision because the author has '.
-              'not signed all of the required legal documents.');
-          }
-        }
-
-        break;
-
-      case DifferentialAction::ACTION_REJECT:
-        if ($actor_is_author) {
-          return pht('You can not request changes to your own revision.');
-        }
-
-        if ($revision_status == $status_abandoned) {
-          return pht(
-            'You can not request changes to this revision because it has been '.
-            'abandoned.');
-        }
-
-        if ($revision_status == $status_closed) {
-          return pht(
-            'You can not request changes to this revision because it has '.
-            'already been closed.');
-        }
-        break;
-
-      case DifferentialAction::ACTION_RESIGN:
-        // You can always resign from a revision if you're a reviewer. If you
-        // aren't, this is a no-op rather than invalid.
-        break;
-
       case DifferentialAction::ACTION_CLAIM:
         // You can claim a revision if you're not the owner. If you are, this
         // is a no-op rather than invalid.

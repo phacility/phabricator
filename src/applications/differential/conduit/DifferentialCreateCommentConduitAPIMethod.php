@@ -56,11 +56,28 @@ final class DifferentialCreateCommentConduitAPIMethod
 
     $xactions = array();
 
+    $modular_map = array(
+      'accept' => DifferentialRevisionAcceptTransaction::TRANSACTIONTYPE,
+      'reject' => DifferentialRevisionRejectTransaction::TRANSACTIONTYPE,
+      'resign' => DifferentialRevisionResignTransaction::TRANSACTIONTYPE,
+    );
+
     $action = $request->getValue('action');
-    if ($action && ($action != 'comment') && ($action != 'none')) {
+    if (isset($modular_map[$action])) {
       $xactions[] = id(new DifferentialTransaction())
-        ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
-        ->setNewValue($action);
+        ->setTransactionType($modular_map[$action])
+        ->setNewValue(true);
+    } else if ($action) {
+      switch ($action) {
+        case 'comment':
+        case 'none':
+          break;
+        default:
+          $xactions[] = id(new DifferentialTransaction())
+            ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
+            ->setNewValue($action);
+          break;
+      }
     }
 
     $content = $request->getValue('message');

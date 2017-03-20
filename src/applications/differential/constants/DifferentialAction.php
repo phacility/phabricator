@@ -119,37 +119,4 @@ final class DifferentialAction extends Phobject {
     return $title;
   }
 
-  public static function getActionVerb($action) {
-    $verbs = array(
-      self::ACTION_COMMENT        => pht('Comment'),
-      self::ACTION_ACCEPT         => pht("Accept Revision \xE2\x9C\x94"),
-      self::ACTION_REJECT         => pht("Request Changes \xE2\x9C\x98"),
-      self::ACTION_RETHINK        => pht("Plan Changes \xE2\x9C\x98"),
-      self::ACTION_ABANDON        => pht('Abandon Revision'),
-      self::ACTION_REQUEST        => pht('Request Review'),
-      self::ACTION_RECLAIM        => pht('Reclaim Revision'),
-      self::ACTION_RESIGN         => pht('Resign as Reviewer'),
-      self::ACTION_ADDREVIEWERS   => pht('Add Reviewers'),
-      self::ACTION_ADDCCS         => pht('Add Subscribers'),
-      self::ACTION_CLOSE          => pht('Close Revision'),
-      self::ACTION_CLAIM          => pht('Commandeer Revision'),
-      self::ACTION_REOPEN         => pht('Reopen'),
-    );
-
-    if (!empty($verbs[$action])) {
-      return $verbs[$action];
-    } else {
-      return pht('brazenly %s', $action);
-    }
-  }
-
-  public static function allowReviewers($action) {
-    if ($action == self::ACTION_ADDREVIEWERS ||
-        $action == self::ACTION_REQUEST ||
-        $action == self::ACTION_RESIGN) {
-      return true;
-    }
-    return false;
-  }
-
 }
