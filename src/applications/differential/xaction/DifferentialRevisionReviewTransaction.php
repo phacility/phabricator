@@ -21,7 +21,8 @@ abstract class DifferentialRevisionReviewTransaction
       $viewer,
       array(
         DifferentialReviewerStatus::STATUS_ACCEPTED,
-      ));
+      ),
+      true);
   }
 
   protected function isViewerFullyRejected(
@@ -32,7 +33,8 @@ abstract class DifferentialRevisionReviewTransaction
       $viewer,
       array(
         DifferentialReviewerStatus::STATUS_REJECTED,
-      ));
+      ),
+      true);
   }
 
   protected function getViewerReviewerStatus(
@@ -43,12 +45,12 @@ abstract class DifferentialRevisionReviewTransaction
       return null;
     }
 
-    foreach ($revision->getReviewerStatus() as $reviewer) {
+    foreach ($revision->getReviewers() as $reviewer) {
       if ($reviewer->getReviewerPHID() != $viewer->getPHID()) {
         continue;
       }
 
-      return $reviewer->getStatus();
+      return $reviewer->getReviewerStatus();
     }
 
     return null;
@@ -57,7 +59,8 @@ abstract class DifferentialRevisionReviewTransaction
   protected function isViewerReviewerStatusFullyAmong(
     DifferentialRevision $revision,
     PhabricatorUser $viewer,
-    array $status_list) {
+    array $status_list,
+    $require_current) {
 
     // If the user themselves is not a reviewer, the reviews they have
     // authority over can not all be in any set of states since their own
@@ -67,17 +70,25 @@ abstract class DifferentialRevisionReviewTransaction
       return false;
     }
 
+    $active_phid = $this->getActiveDiffPHID($revision);
+
     // Otherwise, check that all reviews they have authority over are in
     // the desired set of states.
     $status_map = array_fuse($status_list);
-    foreach ($revision->getReviewerStatus() as $reviewer) {
+    foreach ($revision->getReviewers() as $reviewer) {
       if (!$reviewer->hasAuthority($viewer)) {
         continue;
       }
 
-      $status = $reviewer->getStatus();
+      $status = $reviewer->getReviewerStatus();
       if (!isset($status_map[$status])) {
         return false;
+      }
+
+      if ($require_current) {
+        if ($reviewer->getLastActionDiffPHID() != $active_phid) {
+          return false;
+        }
       }
     }
 
@@ -97,7 +108,7 @@ abstract class DifferentialRevisionReviewTransaction
     // yourself.
     $with_authority = ($status != DifferentialReviewerStatus::STATUS_RESIGNED);
     if ($with_authority) {
-      foreach ($revision->getReviewerStatus() as $reviewer) {
+      foreach ($revision->getReviewers() as $reviewer) {
         if ($reviewer->hasAuthority($viewer)) {
           $map[$reviewer->getReviewerPHID()] = $status;
         }

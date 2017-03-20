@@ -54,8 +54,7 @@ final class DifferentialHovercardEngineExtension
       pht('Author'),
       $viewer->renderHandle($revision->getAuthorPHID()));
 
-    $reviewer_phids = $revision->getReviewerStatus();
-    $reviewer_phids = mpull($reviewer_phids, 'getReviewerPHID');
+    $reviewer_phids = $revision->getReviewerPHIDs();
 
     $hovercard->addField(
       pht('Reviewers'),

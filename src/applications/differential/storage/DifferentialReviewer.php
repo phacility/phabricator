@@ -27,12 +27,6 @@ final class DifferentialReviewer
     ) + parent::getConfiguration();
   }
 
-  public function getStatus() {
-    // TODO: This is an older method for compatibility with some callers
-    // which have not yet been cleaned up.
-    return $this->getReviewerStatus();
-  }
-
   public function isUser() {
     $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
     return (phid_get_type($this->getReviewerPHID()) == $user_type);

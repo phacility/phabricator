@@ -326,9 +326,9 @@ final class DifferentialTransactionEditor
       // actually change the diff text.
 
       $edits = array();
-      foreach ($object->getReviewerStatus() as $reviewer) {
+      foreach ($object->getReviewers() as $reviewer) {
         if ($downgrade_rejects) {
-          if ($reviewer->getStatus() == $new_reject) {
+          if ($reviewer->getReviewerStatus() == $new_reject) {
             $edits[$reviewer->getReviewerPHID()] = array(
               'data' => array(
                 'status' => $old_reject,
@@ -338,7 +338,7 @@ final class DifferentialTransactionEditor
         }
 
         if ($downgrade_accepts) {
-          if ($reviewer->getStatus() == $new_accept) {
+          if ($reviewer->getReviewerStatus() == $new_accept) {
             $edits[$reviewer->getReviewerPHID()] = array(
               'data' => array(
                 'status' => $old_accept,
@@ -415,9 +415,9 @@ final class DifferentialTransactionEditor
         );
 
         $edits = array();
-        foreach ($object->getReviewerStatus() as $reviewer) {
+        foreach ($object->getReviewers() as $reviewer) {
           if ($reviewer->getReviewerPHID() == $actor_phid) {
-            if ($reviewer->getStatus() == $status_added) {
+            if ($reviewer->getReviewerStatus() == $status_added) {
               $edits[$actor_phid] = array(
                 'data' => $data,
               );
@@ -623,7 +623,7 @@ final class DifferentialTransactionEditor
         pht('Failed to load revision from transaction finalization.'));
     }
 
-    $object->attachReviewerStatus($new_revision->getReviewerStatus());
+    $object->attachReviewers($new_revision->getReviewers());
     $object->attachActiveDiff($new_revision->getActiveDiff());
     $object->attachRepository($new_revision->getRepository());
 
@@ -645,7 +645,11 @@ final class DifferentialTransactionEditor
     $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
 
+    $is_sticky_accept = PhabricatorEnv::getEnvConfig(
+      'differential.sticky-accept');
+
     $old_status = $object->getStatus();
+    $active_diff = $object->getActiveDiff();
     switch ($old_status) {
       case $status_accepted:
       case $status_revision:
@@ -661,11 +665,17 @@ final class DifferentialTransactionEditor
         $has_rejecting_reviewer = false;
         $has_rejecting_older_reviewer = false;
         $has_blocking_reviewer = false;
-        foreach ($object->getReviewerStatus() as $reviewer) {
-          $reviewer_status = $reviewer->getStatus();
+        foreach ($object->getReviewers() as $reviewer) {
+          $reviewer_status = $reviewer->getReviewerStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:
-              $has_rejecting_reviewer = true;
+              $action_phid = $reviewer->getLastActionDiffPHID();
+              $active_phid = $active_diff->getPHID();
+              $is_current = ($action_phid == $active_phid);
+
+              if ($is_current) {
+                $has_rejecting_reviewer = true;
+              }
               break;
             case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
               $has_rejecting_older_reviewer = true;
@@ -675,7 +685,13 @@ final class DifferentialTransactionEditor
               break;
             case DifferentialReviewerStatus::STATUS_ACCEPTED:
               if ($reviewer->isUser()) {
-                $has_accepting_user = true;
+                $action_phid = $reviewer->getLastActionDiffPHID();
+                $active_phid = $active_diff->getPHID();
+                $is_current = ($action_phid == $active_phid);
+
+                if ($is_sticky_accept || $is_current) {
+                  $has_accepting_user = true;
+                }
               }
               break;
           }
@@ -1032,7 +1048,7 @@ final class DifferentialTransactionEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
     $phids[] = $object->getAuthorPHID();
-    foreach ($object->getReviewerStatus() as $reviewer) {
+    foreach ($object->getReviewers() as $reviewer) {
       $phids[] = $reviewer->getReviewerPHID();
     }
     return $phids;
@@ -1507,7 +1523,7 @@ final class DifferentialTransactionEditor
     // and both are needlessly complex. This logic should live in the normal
     // transaction application pipeline. See T10967.
 
-    $reviewers = $object->getReviewerStatus();
+    $reviewers = $object->getReviewers();
     $reviewers = mpull($reviewers, null, 'getReviewerPHID');
 
     if ($is_blocking) {
@@ -1528,7 +1544,7 @@ final class DifferentialTransactionEditor
       // If we're applying a stronger status (usually, upgrading a reviewer
       // into a blocking reviewer), skip this check so we apply the change.
       $old_strength = DifferentialReviewerStatus::getStatusStrength(
-        $reviewers[$phid]->getStatus());
+        $reviewers[$phid]->getReviewerStatus());
       if ($old_strength <= $new_strength) {
         continue;
       }

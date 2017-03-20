@@ -974,7 +974,7 @@ final class DifferentialRevisionQuery
         $reviewers[$reviewer_phid] = $reviewer;
       }
 
-      $revision->attachReviewerStatus($reviewers);
+      $revision->attachReviewers($reviewers);
     }
   }
 
@@ -993,7 +993,6 @@ final class DifferentialRevisionQuery
     $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
     $package_type = PhabricatorOwnersPackagePHIDType::TYPECONST;
 
-    $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
     foreach ($reviewers as $revision_phid => $reviewer_list) {
       if (!$allow_self) {
         if ($revision_map[$revision_phid]->getAuthorPHID() == $viewer_phid) {

@@ -137,8 +137,7 @@ final class HeraldDifferentialRevisionAdapter
   }
 
   public function loadReviewers() {
-    $reviewers = $this->getObject()->getReviewerStatus();
-    return mpull($reviewers, 'getReviewerPHID');
+    return $this->getObject()->getReviewerPHIDs();
   }
 
 

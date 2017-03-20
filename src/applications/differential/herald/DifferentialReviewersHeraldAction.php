@@ -37,8 +37,7 @@ abstract class DifferentialReviewersHeraldAction
       }
     }
 
-    $reviewers = $object->getReviewerStatus();
-    $reviewers = mpull($reviewers, null, 'getReviewerPHID');
+    $reviewers = $object->getReviewers();
 
     if ($is_blocking) {
       $new_status = DifferentialReviewerStatus::STATUS_BLOCKING;

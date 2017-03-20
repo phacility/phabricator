@@ -52,7 +52,7 @@ final class DifferentialProjectReviewersField
 
   private function getProjectReviewers() {
     $reviewers = array();
-    foreach ($this->getObject()->getReviewerStatus() as $reviewer) {
+    foreach ($this->getObject()->getReviewers() as $reviewer) {
       if (!$reviewer->isUser()) {
         $reviewers[] = $reviewer;
       }

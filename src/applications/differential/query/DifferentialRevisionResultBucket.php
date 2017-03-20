@@ -56,13 +56,13 @@ abstract class DifferentialRevisionResultBucket
     array $phids,
     array $statuses) {
 
-    foreach ($revision->getReviewerStatus() as $reviewer) {
+    foreach ($revision->getReviewers() as $reviewer) {
       $reviewer_phid = $reviewer->getReviewerPHID();
       if (empty($phids[$reviewer_phid])) {
         continue;
       }
 
-      $status = $reviewer->getStatus();
+      $status = $reviewer->getReviewerStatus();
       if (empty($statuses[$status])) {
         continue;
       }

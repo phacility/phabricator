@@ -17,7 +17,7 @@ final class DifferentialReviewersField
 
   protected function readValueFromRevision(
     DifferentialRevision $revision) {
-    return $revision->getReviewerStatus();
+    return $revision->getReviewers();
   }
 
   public function shouldAppearInPropertyView() {
@@ -53,7 +53,7 @@ final class DifferentialReviewersField
 
   private function getUserReviewers() {
     $reviewers = array();
-    foreach ($this->getObject()->getReviewerStatus() as $reviewer) {
+    foreach ($this->getObject()->getReviewers() as $reviewer) {
       if ($reviewer->isUser()) {
         $reviewers[] = $reviewer;
       }
