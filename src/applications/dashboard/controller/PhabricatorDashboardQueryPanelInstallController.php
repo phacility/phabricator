@@ -12,6 +12,8 @@ final class PhabricatorDashboardQueryPanelInstallController
     $v_engine = $request->getURIData('engineKey');
     $v_query = $request->getURIData('queryKey');
 
+    $e_name = true;
+
     // Validate Engines
     $engines = PhabricatorApplicationSearchEngine::getAllEngines();
     foreach ($engines as $name => $engine) {
@@ -26,8 +28,20 @@ final class PhabricatorDashboardQueryPanelInstallController
     // Validate Queries
     $engine = $engines[$v_engine];
     $engine->setViewer($viewer);
-    $queries = array_keys($engine->loadEnabledNamedQueries());
-    if (!in_array($v_query, $queries)) {
+    $good_query = false;
+    if ($engine->isBuiltinQuery($v_engine)) {
+      $good_query = true;
+    } else {
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($viewer)
+        ->withEngineClassNames(array($v_engine))
+        ->withQueryKeys(array($v_query))
+        ->executeOne();
+      if ($saved_query) {
+        $good_query = true;
+      }
+    }
+    if (!$good_query) {
       return new Aphront404Response();
     }
 
@@ -38,6 +52,7 @@ final class PhabricatorDashboardQueryPanelInstallController
       $v_name = $request->getStr('name');
       if (!$v_name) {
         $errors[] = pht('You must provide a name for this panel.');
+        $e_name = pht('Required');
       }
 
       $dashboard = id(new PhabricatorDashboardQuery())
@@ -127,7 +142,7 @@ final class PhabricatorDashboardQueryPanelInstallController
     $options = mpull($dashboards, 'getName', 'getID');
     asort($options);
 
-    $redirect_uri = '#'; // ??
+    $redirect_uri = $engine->getQueryResultsPageURI($v_query);
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -138,7 +153,8 @@ final class PhabricatorDashboardQueryPanelInstallController
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setValue($v_name))
+          ->setValue($v_name)
+          ->setError($e_name))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setUser($this->getViewer())
