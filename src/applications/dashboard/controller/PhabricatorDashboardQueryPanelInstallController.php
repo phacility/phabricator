@@ -29,7 +29,7 @@ final class PhabricatorDashboardQueryPanelInstallController
     $engine = $engines[$v_engine];
     $engine->setViewer($viewer);
     $good_query = false;
-    if ($engine->isBuiltinQuery($v_engine)) {
+    if ($engine->isBuiltinQuery($v_query)) {
       $good_query = true;
     } else {
       $saved_query = id(new PhabricatorSavedQueryQuery())
