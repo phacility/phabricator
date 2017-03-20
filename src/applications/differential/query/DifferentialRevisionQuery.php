@@ -43,7 +43,6 @@ final class DifferentialRevisionQuery
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
 
-  private $needRelationships  = false;
   private $needActiveDiffs    = false;
   private $needDiffIDs        = false;
   private $needCommitPHIDs    = false;
@@ -223,20 +222,6 @@ final class DifferentialRevisionQuery
   public function withUpdatedEpochBetween($min, $max) {
     $this->updatedEpochMin = $min;
     $this->updatedEpochMax = $max;
-    return $this;
-  }
-
-
-
-  /**
-   * Set whether or not the query will load and attach relationships.
-   *
-   * @param bool True to load and attach relationships.
-   * @return this
-   * @task config
-   */
-  public function needRelationships($need_relationships) {
-    $this->needRelationships = $need_relationships;
     return $this;
   }
 
@@ -424,10 +409,6 @@ final class DifferentialRevisionQuery
 
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
-
-    if ($this->needRelationships) {
-      $this->loadRelationships($conn_r, $revisions);
-    }
 
     if ($this->needCommitPHIDs) {
       $this->loadCommitPHIDs($conn_r, $revisions);
@@ -852,40 +833,6 @@ final class DifferentialRevisionQuery
       'id' => $revision->getID(),
       'updated' => $revision->getDateModified(),
     );
-  }
-
-  private function loadRelationships($conn_r, array $revisions) {
-    assert_instances_of($revisions, 'DifferentialRevision');
-
-    $type_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
-    $type_subscriber = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
-
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs(mpull($revisions, 'getPHID'))
-      ->withEdgeTypes(array($type_reviewer, $type_subscriber))
-      ->setOrder(PhabricatorEdgeQuery::ORDER_OLDEST_FIRST)
-      ->execute();
-
-    $type_map = array(
-      DifferentialRevision::RELATION_REVIEWER => $type_reviewer,
-      DifferentialRevision::RELATION_SUBSCRIBED => $type_subscriber,
-    );
-
-    foreach ($revisions as $revision) {
-      $data = array();
-      foreach ($type_map as $rel_type => $edge_type) {
-        $revision_edges = $edges[$revision->getPHID()][$edge_type];
-        foreach ($revision_edges as $dst_phid => $edge_data) {
-          $data[] = array(
-            'relation' => $rel_type,
-            'objectPHID' => $dst_phid,
-            'reasonPHID' => null,
-          );
-        }
-      }
-
-      $revision->attachRelationships($data);
-    }
   }
 
   private function loadCommitPHIDs($conn_r, array $revisions) {

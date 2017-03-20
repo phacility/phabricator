@@ -190,7 +190,6 @@ final class HeraldCommitAdapter
         $revision = id(new DifferentialRevisionQuery())
           ->withIDs(array($revision_id))
           ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->needRelationships(true)
           ->needReviewerStatus(true)
           ->executeOne();
         if ($revision) {

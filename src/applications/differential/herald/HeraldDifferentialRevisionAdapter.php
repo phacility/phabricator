@@ -85,7 +85,6 @@ final class HeraldDifferentialRevisionAdapter
     $revision = id(new DifferentialRevisionQuery())
       ->withIDs(array($revision->getID()))
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->needRelationships(true)
       ->needReviewerStatus(true)
       ->executeOne();
 

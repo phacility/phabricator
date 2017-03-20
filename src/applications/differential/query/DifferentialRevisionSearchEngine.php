@@ -19,7 +19,6 @@ final class DifferentialRevisionSearchEngine
     return id(new DifferentialRevisionQuery())
       ->needFlags(true)
       ->needDrafts(true)
-      ->needRelationships(true)
       ->needReviewerStatus(true);
   }
 
