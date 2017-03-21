@@ -18,6 +18,14 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     return 'fa-dashboard';
   }
 
+  public function isPinnedByDefault(PhabricatorUser $viewer) {
+    return true;
+  }
+
+  public function getApplicationOrder() {
+    return 0.160;
+  }
+
   public function getRoutes() {
     return array(
       '/W(?P<id>\d+)' => 'PhabricatorDashboardPanelViewController',
