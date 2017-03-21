@@ -34,6 +34,10 @@ final class PhabricatorDashboardSearchEngine
         ->setKey('statuses')
         ->setLabel(pht('Status'))
         ->setOptions(PhabricatorDashboard::getStatusNameMap()),
+      id(new PhabricatorSearchCheckboxesField())
+        ->setKey('editable')
+        ->setLabel(pht('Editable'))
+        ->setOptions(array('editable' => null)),
     );
   }
 
@@ -94,6 +98,10 @@ final class PhabricatorDashboardSearchEngine
       $query->withNameNgrams($map['name']);
     }
 
+    if ($map['editable'] !== null) {
+      $query->withCanEdit($map['editable']);
+    }
+
     return $query;
   }
 
@@ -126,8 +134,10 @@ final class PhabricatorDashboardSearchEngine
         ->setHref($this->getApplicationURI("view/{$id}/"))
         ->setObject($dashboard);
 
+      $bg_color = 'bg-dark';
       if ($dashboard->isArchived()) {
         $item->setDisabled(true);
+        $bg_color = 'bg-grey';
       }
 
       $panels = $dashboard->getPanels();
@@ -142,7 +152,7 @@ final class PhabricatorDashboardSearchEngine
 
       $icon = id(new PHUIIconView())
         ->setIcon($dashboard->getIcon())
-        ->setBackground('bg-dark');
+        ->setBackground($bg_color);
       $item->setImageIcon($icon);
       $item->setEpoch($dashboard->getDateModified());
 

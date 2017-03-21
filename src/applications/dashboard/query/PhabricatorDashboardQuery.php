@@ -7,6 +7,7 @@ final class PhabricatorDashboardQuery
   private $phids;
   private $statuses;
   private $authorPHIDs;
+  private $canEdit;
 
   private $needPanels;
   private $needProjects;
@@ -41,6 +42,11 @@ final class PhabricatorDashboardQuery
     return $this;
   }
 
+  public function withCanEdit($can_edit) {
+    $this->canEdit = $can_edit;
+    return $this;
+  }
+
   public function withNameNgrams($ngrams) {
     return $this->withNgramsConstraint(
       id(new PhabricatorDashboardNgrams()),
@@ -58,6 +64,15 @@ final class PhabricatorDashboardQuery
   protected function didFilterPage(array $dashboards) {
 
     $phids = mpull($dashboards, 'getPHID');
+
+    if ($this->canEdit) {
+      $dashboards = id(new PhabricatorPolicyFilter())
+        ->setViewer($this->getViewer())
+        ->requireCapabilities(array(
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+        ->apply($dashboards);
+    }
 
     if ($this->needPanels) {
       $edge_query = id(new PhabricatorEdgeQuery())
