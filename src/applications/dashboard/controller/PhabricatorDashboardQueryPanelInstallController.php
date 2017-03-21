@@ -149,6 +149,19 @@ final class PhabricatorDashboardQueryPanelInstallController
 
     $redirect_uri = $engine->getQueryResultsPageURI($v_query);
 
+    if (!$options) {
+      $notice = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(pht('You do not have access to any dashboards. To '.
+        'continue, please create a dashboard first.'));
+
+      return $this->newDialog()
+        ->setTitle(pht('No Dashboards'))
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->appendChild($notice)
+        ->addCancelButton($redirect_uri);
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('engine', $v_engine)
@@ -175,6 +188,7 @@ final class PhabricatorDashboardQueryPanelInstallController
       ->appendChild($form->buildLayoutView())
       ->addCancelButton($redirect_uri)
       ->addSubmitButton(pht('Add Panel'));
+
   }
 
 }
