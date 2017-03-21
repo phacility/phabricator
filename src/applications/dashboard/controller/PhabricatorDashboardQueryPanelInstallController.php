@@ -45,6 +45,11 @@ final class PhabricatorDashboardQueryPanelInstallController
       return new Aphront404Response();
     }
 
+    $named_query = idx($engine->loadEnabledNamedQueries(), $v_query);
+    if ($named_query) {
+      $v_name = $named_query->getQueryName();
+    }
+
     $errors = array();
 
     if ($request->isFormPost()) {
