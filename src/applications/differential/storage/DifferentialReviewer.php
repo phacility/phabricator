@@ -50,4 +50,35 @@ final class DifferentialReviewer
     return ($this->getReviewerStatus() == $status_resigned);
   }
 
+  public function isAccepted($diff_phid) {
+    $status_accepted = DifferentialReviewerStatus::STATUS_ACCEPTED;
+
+    if ($this->getReviewerStatus() != $status_accepted) {
+      return false;
+    }
+
+    if (!$diff_phid) {
+      return true;
+    }
+
+    $action_phid = $this->getLastActionDiffPHID();
+
+    if (!$action_phid) {
+      return true;
+    }
+
+    if ($action_phid == $diff_phid) {
+      return true;
+    }
+
+    $sticky_key = 'differential.sticky-accept';
+    $is_sticky = PhabricatorEnv::getEnvConfig($sticky_key);
+
+    if ($is_sticky) {
+      return true;
+    }
+
+    return false;
+  }
+
 }

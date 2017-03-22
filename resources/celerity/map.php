@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'conpherence.pkg.css' => '82aca405',
     'conpherence.pkg.js' => '6249a1cf',
-    'core.pkg.css' => 'c012c648',
+    'core.pkg.css' => 'dc689e29',
     'core.pkg.js' => '1fa7c0c5',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '90b30783',
@@ -145,7 +145,7 @@ return array(
     'rsrc/css/phui/phui-document.css' => 'c32e8dec',
     'rsrc/css/phui/phui-feed-story.css' => '44a9c8e9',
     'rsrc/css/phui/phui-fontkit.css' => '1320ed01',
-    'rsrc/css/phui/phui-form-view.css' => 'cf198e10',
+    'rsrc/css/phui/phui-form-view.css' => '6175808d',
     'rsrc/css/phui/phui-form.css' => 'b62c01d8',
     'rsrc/css/phui/phui-head-thing.css' => 'fd311e5f',
     'rsrc/css/phui/phui-header-view.css' => '9cf828ce',
@@ -530,7 +530,7 @@ return array(
     'rsrc/js/phuix/PHUIXActionView.js' => 'b3465b9b',
     'rsrc/js/phuix/PHUIXAutocomplete.js' => '7c492cd2',
     'rsrc/js/phuix/PHUIXDropdownMenu.js' => '8018ee50',
-    'rsrc/js/phuix/PHUIXFormControl.js' => 'bbece68d',
+    'rsrc/js/phuix/PHUIXFormControl.js' => '83e03671',
     'rsrc/js/phuix/PHUIXIconView.js' => 'bff6884b',
   ),
   'symbols' => array(
@@ -847,7 +847,7 @@ return array(
     'phui-font-icon-base-css' => '870a7360',
     'phui-fontkit-css' => '1320ed01',
     'phui-form-css' => 'b62c01d8',
-    'phui-form-view-css' => 'cf198e10',
+    'phui-form-view-css' => '6175808d',
     'phui-head-thing-view-css' => 'fd311e5f',
     'phui-header-view-css' => '9cf828ce',
     'phui-hovercard' => '1bd28176',
@@ -887,7 +887,7 @@ return array(
     'phuix-action-view' => 'b3465b9b',
     'phuix-autocomplete' => '7c492cd2',
     'phuix-dropdown-menu' => '8018ee50',
-    'phuix-form-control-view' => 'bbece68d',
+    'phuix-form-control-view' => '83e03671',
     'phuix-icon-view' => 'bff6884b',
     'policy-css' => '957ea14c',
     'policy-edit-css' => '815c66f7',
@@ -1518,6 +1518,10 @@ return array(
       'javelin-behavior',
       'javelin-scrollbar',
     ),
+    '83e03671' => array(
+      'javelin-install',
+      'javelin-dom',
+    ),
     '8499b6ab' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1901,10 +1905,6 @@ return array(
       'javelin-dom',
       'javelin-vector',
       'javelin-install',
-    ),
-    'bbece68d' => array(
-      'javelin-install',
-      'javelin-dom',
     ),
     'bcaccd64' => array(
       'javelin-behavior',

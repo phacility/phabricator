@@ -548,3 +548,16 @@ properly, and submit values. */
   padding: 4px;
   color: {$bluetext};
 }
+
+.phuix-form-checkbox-action {
+  padding: 4px;
+  color: {$bluetext};
+}
+
+.phuix-form-checkbox-action input[type=checkbox] {
+  margin: 4px 0;
+}
+
+.phuix-form-checkbox-label {
+  margin-left: 4px;
+}

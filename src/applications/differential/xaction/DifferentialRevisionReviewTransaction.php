@@ -7,6 +7,26 @@ abstract class DifferentialRevisionReviewTransaction
     return DifferentialRevisionEditEngine::ACTIONGROUP_REVIEW;
   }
 
+  public function generateNewValue($object, $value) {
+    if (!is_array($value)) {
+      return true;
+    }
+
+    // If the list of options is the same as the default list, just treat this
+    // as a "take the default action" transaction.
+    $viewer = $this->getActor();
+    list($options, $default) = $this->getActionOptions($viewer, $object);
+
+    sort($default);
+    sort($value);
+
+    if ($default === $value) {
+      return true;
+    }
+
+    return $value;
+  }
+
   protected function isViewerAnyReviewer(
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
@@ -117,6 +137,12 @@ abstract class DifferentialRevisionReviewTransaction
 
     // In all cases, you affect yourself.
     $map[$viewer->getPHID()] = $status;
+
+    // If the user has submitted a specific list of reviewers to act as (by
+    // unchecking some checkboxes under "Accept"), only affect those reviewers.
+    if (is_array($value)) {
+      $map = array_select_keys($map, $value);
+    }
 
     // Convert reviewer statuses into edge data.
     foreach ($map as $reviewer_phid => $reviewer_status) {
