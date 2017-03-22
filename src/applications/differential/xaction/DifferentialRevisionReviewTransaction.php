@@ -198,10 +198,15 @@ abstract class DifferentialRevisionReviewTransaction
             ->setReviewerPHID($dst_phid);
         }
 
+        $old_status = $reviewer->getReviewerStatus();
         $reviewer->setReviewerStatus($status);
 
         if ($diff_phid) {
           $reviewer->setLastActionDiffPHID($diff_phid);
+        }
+
+        if ($old_status !== $status) {
+          $reviewer->setLastActorPHID($this->getActingAsPHID());
         }
 
         try {

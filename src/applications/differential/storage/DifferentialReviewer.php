@@ -8,6 +8,7 @@ final class DifferentialReviewer
   protected $reviewerStatus;
   protected $lastActionDiffPHID;
   protected $lastCommentDiffPHID;
+  protected $lastActorPHID;
 
   private $authority = array();
 
@@ -17,6 +18,7 @@ final class DifferentialReviewer
         'reviewerStatus' => 'text64',
         'lastActionDiffPHID' => 'phid?',
         'lastCommentDiffPHID' => 'phid?',
+        'lastActorPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_revision' => array(
