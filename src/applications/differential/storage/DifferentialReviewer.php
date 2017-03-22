@@ -23,6 +23,9 @@ final class DifferentialReviewer
           'columns' => array('revisionPHID', 'reviewerPHID'),
           'unique' => true,
         ),
+        'key_reviewer' => array(
+          'columns' => array('reviewerPHID', 'revisionPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
