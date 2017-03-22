@@ -92,6 +92,7 @@ final class PhabricatorApplicationTransactionCommentEditor
               $editor
                 ->setContentSource($this->getContentSource())
                 ->setContinueOnNoEffect(true)
+                ->setContinueOnMissingFields(true)
                 ->applyTransactions($object, $support_xactions);
             }
           }
