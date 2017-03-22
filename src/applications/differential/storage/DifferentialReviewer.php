@@ -42,4 +42,9 @@ final class DifferentialReviewer
     return $this->assertAttachedKey($this->authority, $cache_fragment);
   }
 
+  public function isResigned() {
+    $status_resigned = DifferentialReviewerStatus::STATUS_RESIGNED;
+    return ($this->getReviewerStatus() == $status_resigned);
+  }
+
 }

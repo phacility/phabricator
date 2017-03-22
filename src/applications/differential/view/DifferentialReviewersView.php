@@ -25,9 +25,23 @@ final class DifferentialReviewersView extends AphrontView {
 
   public function render() {
     $viewer = $this->getUser();
+    $reviewers = $this->reviewers;
 
     $view = new PHUIStatusListView();
-    foreach ($this->reviewers as $reviewer) {
+
+    // Move resigned reviewers to the bottom.
+    $head = array();
+    $tail = array();
+    foreach ($reviewers as $key => $reviewer) {
+      if ($reviewer->isResigned()) {
+        $tail[$key] = $reviewer;
+      } else {
+        $head[$key] = $reviewer;
+      }
+    }
+
+    $reviewers = $head + $tail;
+    foreach ($reviewers as $reviewer) {
       $phid = $reviewer->getReviewerPHID();
       $handle = $this->handles[$phid];
 
@@ -96,6 +110,13 @@ final class DifferentialReviewersView extends AphrontView {
             PHUIStatusItemView::ICON_MINUS,
             'red',
             pht('Blocking Review'));
+          break;
+
+        case DifferentialReviewerStatus::STATUS_RESIGNED:
+          $item->setIcon(
+            'fa-times',
+            'grey',
+            pht('Resigned'));
           break;
 
         default:

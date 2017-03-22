@@ -178,16 +178,10 @@ abstract class DifferentialRevisionReviewTransaction
           $reviewer->setLastActionDiffPHID($diff_phid);
         }
 
-        if ($status == DifferentialReviewerStatus::STATUS_RESIGNED) {
-          if ($reviewer->getID()) {
-            $reviewer->delete();
-          }
-        } else {
-          try {
-            $reviewer->save();
-          } catch (AphrontDuplicateKeyQueryException $ex) {
-            // At least for now, just ignore it if we lost a race.
-          }
+        try {
+          $reviewer->save();
+        } catch (AphrontDuplicateKeyQueryException $ex) {
+          // At least for now, just ignore it if we lost a race.
         }
       }
     }
