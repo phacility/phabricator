@@ -57,7 +57,7 @@ abstract class DifferentialReviewersHeraldAction
       // If we're applying a stronger status (usually, upgrading a reviewer
       // into a blocking reviewer), skip this check so we apply the change.
       $old_strength = DifferentialReviewerStatus::getStatusStrength(
-        $reviewers[$phid]->getStatus());
+        $reviewers[$phid]->getReviewerStatus());
       if ($old_strength <= $new_strength) {
         continue;
       }
