@@ -3692,6 +3692,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPullEventPHIDType' => 'applications/repository/phid/PhabricatorRepositoryPullEventPHIDType.php',
     'PhabricatorRepositoryPullEventQuery' => 'applications/repository/query/PhabricatorRepositoryPullEventQuery.php',
     'PhabricatorRepositoryPullLocalDaemon' => 'applications/repository/daemon/PhabricatorRepositoryPullLocalDaemon.php',
+    'PhabricatorRepositoryPullLocalDaemonModule' => 'applications/repository/daemon/PhabricatorRepositoryPullLocalDaemonModule.php',
     'PhabricatorRepositoryPushEvent' => 'applications/repository/storage/PhabricatorRepositoryPushEvent.php',
     'PhabricatorRepositoryPushEventPHIDType' => 'applications/repository/phid/PhabricatorRepositoryPushEventPHIDType.php',
     'PhabricatorRepositoryPushEventQuery' => 'applications/repository/query/PhabricatorRepositoryPushEventQuery.php',
@@ -8987,6 +8988,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPullEventPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryPullEventQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositoryPullLocalDaemon' => 'PhabricatorDaemon',
+    'PhabricatorRepositoryPullLocalDaemonModule' => 'PhutilDaemonOverseerModule',
     'PhabricatorRepositoryPushEvent' => array(
       'PhabricatorRepositoryDAO',
       'PhabricatorPolicyInterface',
