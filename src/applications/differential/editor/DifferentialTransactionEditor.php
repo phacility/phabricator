@@ -130,33 +130,6 @@ final class DifferentialTransactionEditor
 
         $action_type = $xaction->getNewValue();
         switch ($action_type) {
-          case DifferentialAction::ACTION_ACCEPT:
-          case DifferentialAction::ACTION_REJECT:
-            if ($action_type == DifferentialAction::ACTION_ACCEPT) {
-              $new_status = DifferentialReviewerStatus::STATUS_ACCEPTED;
-            } else {
-              $new_status = DifferentialReviewerStatus::STATUS_REJECTED;
-            }
-
-            $actor = $this->getActor();
-
-            // These transactions can cause effects in two ways: by altering the
-            // status of an existing reviewer; or by adding the actor as a new
-            // reviewer.
-
-            $will_add_reviewer = true;
-            foreach ($object->getReviewerStatus() as $reviewer) {
-              if ($reviewer->hasAuthority($actor)) {
-                if ($reviewer->getStatus() != $new_status) {
-                  return true;
-                }
-              }
-              if ($reviewer->getReviewerPHID() == $actor_phid) {
-                $will_add_reviwer = false;
-              }
-            }
-
-            return $will_add_reviewer;
           case DifferentialAction::ACTION_CLOSE:
             return ($object->getStatus() != $status_closed);
           case DifferentialAction::ACTION_ABANDON:
@@ -169,13 +142,6 @@ final class DifferentialTransactionEditor
             return ($object->getStatus() != $status_plan);
           case DifferentialAction::ACTION_REQUEST:
             return ($object->getStatus() != $status_review);
-          case DifferentialAction::ACTION_RESIGN:
-            foreach ($object->getReviewerStatus() as $reviewer) {
-              if ($reviewer->getReviewerPHID() == $actor_phid) {
-                return true;
-              }
-            }
-            return false;
           case DifferentialAction::ACTION_CLAIM:
             return ($actor_phid != $object->getAuthorPHID());
         }
@@ -222,12 +188,6 @@ final class DifferentialTransactionEditor
         return;
       case DifferentialTransaction::TYPE_ACTION:
         switch ($xaction->getNewValue()) {
-          case DifferentialAction::ACTION_RESIGN:
-          case DifferentialAction::ACTION_ACCEPT:
-          case DifferentialAction::ACTION_REJECT:
-            // These have no direct effects, and affect review status only
-            // indirectly by altering reviewers with TYPE_EDGE transactions.
-            return;
           case DifferentialAction::ACTION_ABANDON:
             $object->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
             return;
@@ -366,9 +326,9 @@ final class DifferentialTransactionEditor
       // actually change the diff text.
 
       $edits = array();
-      foreach ($object->getReviewerStatus() as $reviewer) {
+      foreach ($object->getReviewers() as $reviewer) {
         if ($downgrade_rejects) {
-          if ($reviewer->getStatus() == $new_reject) {
+          if ($reviewer->getReviewerStatus() == $new_reject) {
             $edits[$reviewer->getReviewerPHID()] = array(
               'data' => array(
                 'status' => $old_reject,
@@ -378,7 +338,7 @@ final class DifferentialTransactionEditor
         }
 
         if ($downgrade_accepts) {
-          if ($reviewer->getStatus() == $new_accept) {
+          if ($reviewer->getReviewerStatus() == $new_accept) {
             $edits[$reviewer->getReviewerPHID()] = array(
               'data' => array(
                 'status' => $old_accept,
@@ -455,9 +415,9 @@ final class DifferentialTransactionEditor
         );
 
         $edits = array();
-        foreach ($object->getReviewerStatus() as $reviewer) {
+        foreach ($object->getReviewers() as $reviewer) {
           if ($reviewer->getReviewerPHID() == $actor_phid) {
-            if ($reviewer->getStatus() == $status_added) {
+            if ($reviewer->getReviewerStatus() == $status_added) {
               $edits[$actor_phid] = array(
                 'data' => $data,
               );
@@ -482,58 +442,8 @@ final class DifferentialTransactionEditor
         $action_type = $xaction->getNewValue();
 
         switch ($action_type) {
-          case DifferentialAction::ACTION_ACCEPT:
-          case DifferentialAction::ACTION_REJECT:
-            if ($action_type == DifferentialAction::ACTION_ACCEPT) {
-              $data = array(
-                'status' => DifferentialReviewerStatus::STATUS_ACCEPTED,
-              );
-            } else {
-              $data = array(
-                'status' => DifferentialReviewerStatus::STATUS_REJECTED,
-              );
-            }
-
-            $edits = array();
-
-            foreach ($object->getReviewerStatus() as $reviewer) {
-              if ($reviewer->hasAuthority($actor)) {
-                $edits[$reviewer->getReviewerPHID()] = array(
-                  'data' => $data,
-                );
-              }
-            }
-
-            // Also either update or add the actor themselves as a reviewer.
-            $edits[$actor_phid] = array(
-              'data' => $data,
-            );
-
-            $results[] = id(new DifferentialTransaction())
-              ->setTransactionType($type_edge)
-              ->setMetadataValue('edge:type', $edge_reviewer)
-              ->setIgnoreOnNoEffect(true)
-              ->setNewValue(array('+' => $edits));
-            break;
-
           case DifferentialAction::ACTION_CLAIM:
             $is_commandeer = true;
-            break;
-          case DifferentialAction::ACTION_RESIGN:
-            // If the user is resigning, add a separate reviewer edit
-            // transaction which removes them as a reviewer.
-
-            $results[] = id(new DifferentialTransaction())
-              ->setTransactionType($type_edge)
-              ->setMetadataValue('edge:type', $edge_reviewer)
-              ->setIgnoreOnNoEffect(true)
-              ->setNewValue(
-                array(
-                  '-' => array(
-                    $actor_phid => $actor_phid,
-                  ),
-                ));
-
             break;
         }
       break;
@@ -704,7 +614,7 @@ final class DifferentialTransactionEditor
 
     $new_revision = id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needActiveDiffs(true)
       ->withIDs(array($object->getID()))
       ->executeOne();
@@ -713,7 +623,7 @@ final class DifferentialTransactionEditor
         pht('Failed to load revision from transaction finalization.'));
     }
 
-    $object->attachReviewerStatus($new_revision->getReviewerStatus());
+    $object->attachReviewers($new_revision->getReviewers());
     $object->attachActiveDiff($new_revision->getActiveDiff());
     $object->attachRepository($new_revision->getRepository());
 
@@ -735,7 +645,11 @@ final class DifferentialTransactionEditor
     $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
 
+    $is_sticky_accept = PhabricatorEnv::getEnvConfig(
+      'differential.sticky-accept');
+
     $old_status = $object->getStatus();
+    $active_diff = $object->getActiveDiff();
     switch ($old_status) {
       case $status_accepted:
       case $status_revision:
@@ -751,11 +665,17 @@ final class DifferentialTransactionEditor
         $has_rejecting_reviewer = false;
         $has_rejecting_older_reviewer = false;
         $has_blocking_reviewer = false;
-        foreach ($object->getReviewerStatus() as $reviewer) {
-          $reviewer_status = $reviewer->getStatus();
+        foreach ($object->getReviewers() as $reviewer) {
+          $reviewer_status = $reviewer->getReviewerStatus();
           switch ($reviewer_status) {
             case DifferentialReviewerStatus::STATUS_REJECTED:
-              $has_rejecting_reviewer = true;
+              $action_phid = $reviewer->getLastActionDiffPHID();
+              $active_phid = $active_diff->getPHID();
+              $is_current = ($action_phid == $active_phid);
+
+              if ($is_current) {
+                $has_rejecting_reviewer = true;
+              }
               break;
             case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
               $has_rejecting_older_reviewer = true;
@@ -765,7 +685,13 @@ final class DifferentialTransactionEditor
               break;
             case DifferentialReviewerStatus::STATUS_ACCEPTED:
               if ($reviewer->isUser()) {
-                $has_accepting_user = true;
+                $action_phid = $reviewer->getLastActionDiffPHID();
+                $active_phid = $active_diff->getPHID();
+                $is_current = ($action_phid == $active_phid);
+
+                if ($is_sticky_accept || $is_current) {
+                  $has_accepting_user = true;
+                }
               }
               break;
           }
@@ -807,6 +733,9 @@ final class DifferentialTransactionEditor
         // abandoned) as a side effect of reviewer status changes.
         break;
     }
+
+
+    $this->markReviewerComments($object, $xactions);
 
     return $xactions;
   }
@@ -925,60 +854,6 @@ final class DifferentialTransactionEditor
     $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
 
     switch ($action) {
-      case DifferentialAction::ACTION_ACCEPT:
-        if ($actor_is_author && !$allow_self_accept) {
-          return pht(
-            'You can not accept this revision because you are the owner.');
-        }
-
-        if ($revision_status == $status_abandoned) {
-          return pht(
-            'You can not accept this revision because it has been '.
-            'abandoned.');
-        }
-
-        if ($revision_status == $status_closed) {
-          return pht(
-            'You can not accept this revision because it has already been '.
-            'closed.');
-        }
-
-        // TODO: It would be nice to make this generic at some point.
-        $signatures = DifferentialRequiredSignaturesField::loadForRevision(
-          $revision);
-        foreach ($signatures as $phid => $signed) {
-          if (!$signed) {
-            return pht(
-              'You can not accept this revision because the author has '.
-              'not signed all of the required legal documents.');
-          }
-        }
-
-        break;
-
-      case DifferentialAction::ACTION_REJECT:
-        if ($actor_is_author) {
-          return pht('You can not request changes to your own revision.');
-        }
-
-        if ($revision_status == $status_abandoned) {
-          return pht(
-            'You can not request changes to this revision because it has been '.
-            'abandoned.');
-        }
-
-        if ($revision_status == $status_closed) {
-          return pht(
-            'You can not request changes to this revision because it has '.
-            'already been closed.');
-        }
-        break;
-
-      case DifferentialAction::ACTION_RESIGN:
-        // You can always resign from a revision if you're a reviewer. If you
-        // aren't, this is a no-op rather than invalid.
-        break;
-
       case DifferentialAction::ACTION_CLAIM:
         // You can claim a revision if you're not the owner. If you are, this
         // is a no-op rather than invalid.
@@ -1173,7 +1048,7 @@ final class DifferentialTransactionEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
     $phids[] = $object->getAuthorPHID();
-    foreach ($object->getReviewerStatus() as $reviewer) {
+    foreach ($object->getReviewers() as $reviewer) {
       $phids[] = $reviewer->getReviewerPHID();
     }
     return $phids;
@@ -1648,7 +1523,7 @@ final class DifferentialTransactionEditor
     // and both are needlessly complex. This logic should live in the normal
     // transaction application pipeline. See T10967.
 
-    $reviewers = $object->getReviewerStatus();
+    $reviewers = $object->getReviewers();
     $reviewers = mpull($reviewers, null, 'getReviewerPHID');
 
     if ($is_blocking) {
@@ -1669,7 +1544,7 @@ final class DifferentialTransactionEditor
       // If we're applying a stronger status (usually, upgrading a reviewer
       // into a blocking reviewer), skip this check so we apply the change.
       $old_strength = DifferentialReviewerStatus::getStatusStrength(
-        $reviewers[$phid]->getStatus());
+        $reviewers[$phid]->getReviewerStatus());
       if ($old_strength <= $new_strength) {
         continue;
       }
@@ -1687,22 +1562,21 @@ final class DifferentialTransactionEditor
 
     $value = array();
     foreach ($phids as $phid) {
-      $value[$phid] = array(
-        'data' => array(
-          'status' => $new_status,
-        ),
-      );
+      if ($is_blocking) {
+        $value[] = 'blocking('.$phid.')';
+      } else {
+        $value[] = $phid;
+      }
     }
-
-    $edgetype_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
     $owners_phid = id(new PhabricatorOwnersApplication())
       ->getPHID();
 
+    $reviewers_type = DifferentialRevisionReviewersTransaction::TRANSACTIONTYPE;
+
     return $object->getApplicationTransactionTemplate()
       ->setAuthorPHID($owners_phid)
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', $edgetype_reviewer)
+      ->setTransactionType($reviewers_type)
       ->setNewValue(
         array(
           '+' => $value,
@@ -1717,7 +1591,7 @@ final class DifferentialTransactionEditor
       ->setViewer($this->getActor())
       ->withPHIDs(array($object->getPHID()))
       ->needActiveDiffs(true)
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->executeOne();
     if (!$revision) {
       throw new Exception(
@@ -1933,7 +1807,7 @@ final class DifferentialTransactionEditor
     // Reload to pick up the active diff and reviewer status.
     return id(new DifferentialRevisionQuery())
       ->setViewer($this->getActor())
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needActiveDiffs(true)
       ->withIDs(array($object->getID()))
       ->executeOne();
@@ -1980,5 +1854,60 @@ final class DifferentialTransactionEditor
       ->setIsCommandeerSideEffect(true)
       ->setNewValue($edits);
   }
+
+  public function getActiveDiff($object) {
+    if ($this->getIsNewObject()) {
+      return null;
+    } else {
+      return $object->getActiveDiff();
+    }
+  }
+
+  /**
+   * When a reviewer makes a comment, mark the last revision they commented
+   * on.
+   *
+   * This allows us to show a hint to help authors and other reviewers quickly
+   * distinguish between reviewers who have participated in the discussion and
+   * reviewers who haven't been part of it.
+   */
+  private function markReviewerComments($object, array $xactions) {
+    $acting_phid = $this->getActingAsPHID();
+    if (!$acting_phid) {
+      return;
+    }
+
+    $diff = $this->getActiveDiff($object);
+    if (!$diff) {
+      return;
+    }
+
+    $has_comment = false;
+    foreach ($xactions as $xaction) {
+      if ($xaction->hasComment()) {
+        $has_comment = true;
+        break;
+      }
+    }
+
+    if (!$has_comment) {
+      return;
+    }
+
+    $reviewer_table = new DifferentialReviewer();
+    $conn = $reviewer_table->establishConnection('w');
+
+    queryfx(
+      $conn,
+      'UPDATE %T SET lastCommentDiffPHID = %s
+        WHERE revisionPHID = %s
+        AND reviewerPHID = %s',
+      $reviewer_table->getTableName(),
+      $diff->getPHID(),
+      $object->getPHID(),
+      $acting_phid);
+  }
+
+
 
 }

@@ -331,6 +331,8 @@ final class PhabricatorApplicationSearchController
           'query parameters and correct errors.');
       } catch (PhutilSearchQueryCompilerSyntaxException $ex) {
         $exec_errors[] = $ex->getMessage();
+      } catch (PhabricatorSearchConstraintException $ex) {
+        $exec_errors[] = $ex->getMessage();
       }
 
       // The engine may have encountered additional errors during rendering;
@@ -553,8 +555,9 @@ final class PhabricatorApplicationSearchController
       ->setTag('a')
       ->setHref('#')
       ->setText(pht('Use Results...'))
-      ->setIcon('fa-road')
-      ->setDropdownMenu($action_list);
+      ->setIcon('fa-bars')
+      ->setDropdownMenu($action_list)
+      ->addClass('dropdown');
   }
 
   private function newOverflowingView() {
@@ -598,8 +601,31 @@ final class PhabricatorApplicationSearchController
 
   private function newBuiltinUseActions() {
     $actions = array();
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+
+    $engine = $this->getSearchEngine();
+    $engine_class = get_class($engine);
+    $query_key = $this->getQueryKey();
+    if (!$query_key) {
+      $query_key = head_key($engine->loadEnabledNamedQueries());
+    }
+
+    $can_use = $engine->canUseInPanelContext();
+    $is_installed = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorDashboardApplication',
+      $viewer);
+
+    if ($can_use && $is_installed) {
+      $dashboard_uri = '/dashboard/install/';
+      $actions[] = id(new PhabricatorActionView())
+        ->setIcon('fa-dashboard')
+        ->setName(pht('Add to Dasbhoard'))
+        ->setWorkflow(true)
+        ->setHref("/dashboard/panel/install/{$engine_class}/{$query_key}/");
+    }
 
     if ($is_dev) {
       $engine = $this->getSearchEngine();
@@ -608,8 +634,8 @@ final class PhabricatorApplicationSearchController
         ->setQueryParam('nux', true);
 
       $actions[] = id(new PhabricatorActionView())
-        ->setIcon('fa-bug')
-        ->setName(pht('Developer: Show New User State'))
+        ->setIcon('fa-user-plus')
+        ->setName(pht('DEV: New User State'))
         ->setHref($nux_uri);
     }
 
@@ -618,8 +644,8 @@ final class PhabricatorApplicationSearchController
         ->setQueryParam('overheated', true);
 
       $actions[] = id(new PhabricatorActionView())
-        ->setIcon('fa-bug')
-        ->setName(pht('Developer: Show Overheated State'))
+        ->setIcon('fa-fire')
+        ->setName(pht('DEV: Overheated State'))
         ->setHref($overheated_uri);
     }
 

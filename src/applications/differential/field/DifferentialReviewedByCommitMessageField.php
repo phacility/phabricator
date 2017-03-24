@@ -37,10 +37,9 @@ final class DifferentialReviewedByCommitMessageField
     }
 
     $phids = array();
-    foreach ($revision->getReviewerStatus() as $reviewer) {
-      switch ($reviewer->getStatus()) {
+    foreach ($revision->getReviewers() as $reviewer) {
+      switch ($reviewer->getReviewerStatus()) {
         case DifferentialReviewerStatus::STATUS_ACCEPTED:
-        case DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER:
           $phids[] = $reviewer->getReviewerPHID();
           break;
       }

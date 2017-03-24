@@ -51,6 +51,14 @@ final class PhabricatorDashboardArrangeController
       ->addClass('dashboard-preview-box')
       ->appendChild($rendered_dashboard);
 
+    $install_button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setText('Install Dashboard')
+      ->setIcon('fa-plus')
+      ->setWorkflow(true)
+      ->setHref($this->getApplicationURI("/install/{$id}/"));
+    $header->addActionLink($install_button);
+
     $view = id(new PHUITwoColumnView())
       ->setHeader($header)
       ->setFooter(array(

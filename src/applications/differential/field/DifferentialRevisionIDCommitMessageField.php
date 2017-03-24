@@ -50,24 +50,10 @@ final class DifferentialRevisionIDCommitMessageField
     $uri = new PhutilURI($uri_string);
     $path = $uri->getPath();
 
-    $matches = null;
-    if (preg_match('#^/D(\d+)$#', $path, $matches)) {
-      $id = (int)$matches[1];
-
-      $prod_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/D'.$id));
-
-      // Make sure the URI is the same as our URI. Basically, we want to ignore
-      // commits from other Phabricator installs.
-      if ($uri->getDomain() == $prod_uri->getDomain()) {
-        return $id;
-      }
-
-      $allowed_uris = PhabricatorEnv::getAllowedURIs('/D'.$id);
-
-      foreach ($allowed_uris as $allowed_uri) {
-        if ($uri_string == $allowed_uri) {
-          return $id;
-        }
+    if (PhabricatorEnv::isSelfURI($uri_string)) {
+      $matches = null;
+      if (preg_match('#^/D(\d+)$#', $path, $matches)) {
+        return (int)$matches[1];
       }
     }
 

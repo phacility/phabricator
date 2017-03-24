@@ -182,7 +182,7 @@ final class DifferentialQueryConduitAPIMethod
       $query->withBranches($branches);
     }
 
-    $query->needRelationships(true);
+    $query->needReviewers(true);
     $query->needCommitPHIDs(true);
     $query->needDiffIDs(true);
     $query->needActiveDiffs(true);
@@ -193,6 +193,14 @@ final class DifferentialQueryConduitAPIMethod
     $field_data = $this->loadCustomFieldsForRevisions(
       $request->getUser(),
       $revisions);
+
+    if ($revisions) {
+      $ccs = id(new PhabricatorSubscribersQuery())
+        ->withObjectPHIDs(mpull($revisions, 'getPHID'))
+        ->execute();
+    } else {
+      $ccs = array();
+    }
 
     $results = array();
     foreach ($revisions as $revision) {
@@ -224,8 +232,8 @@ final class DifferentialQueryConduitAPIMethod
         'activeDiffPHID'      => $diff->getPHID(),
         'diffs'               => $revision->getDiffIDs(),
         'commits'             => $revision->getCommitPHIDs(),
-        'reviewers'           => array_values($revision->getReviewers()),
-        'ccs'                 => array_values($revision->getCCPHIDs()),
+        'reviewers'           => $revision->getReviewerPHIDs(),
+        'ccs'                 => idx($ccs, $phid, array()),
         'hashes'              => $revision->getHashes(),
         'auxiliary'           => idx($field_data, $phid, array()),
         'repositoryPHID'      => $diff->getRepositoryPHID(),

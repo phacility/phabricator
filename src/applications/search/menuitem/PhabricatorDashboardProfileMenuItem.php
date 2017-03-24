@@ -133,11 +133,13 @@ final class PhabricatorDashboardProfileMenuItem
     $icon = $dashboard->getIcon();
     $name = $this->getDisplayName($config);
     $href = $this->getItemViewURI($config);
+    $action_href = '/dashboard/arrange/'.$dashboard->getID().'/';
 
     $item = $this->newItem()
       ->setHref($href)
       ->setName($name)
-      ->setIcon($icon);
+      ->setIcon($icon)
+      ->setActionIcon('fa-pencil', $action_href);
 
     return array(
       $item,

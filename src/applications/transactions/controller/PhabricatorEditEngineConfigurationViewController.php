@@ -163,15 +163,6 @@ final class PhabricatorEditEngineConfigurationViewController
           ->setDisabled(!$can_edit));
     }
 
-    $curtain->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Change Default Values'))
-        ->setIcon('fa-paint-brush')
-        ->setHref($defaults_uri)
-        ->setWorkflow(!$can_edit)
-        ->setDisabled(!$can_edit));
-
-
     $disable_uri = "{$base_uri}/disable/{$form_key}/";
 
     if ($config->getIsDisabled()) {

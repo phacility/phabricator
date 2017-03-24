@@ -42,10 +42,3 @@ Then set your "Editor Link" to:
 
   lang=uri
   txmt://open/?url=file:///Users/alincoln/editor_links/%r/%f&line=%l
-
-== Configuring: Other Editors ==
-
-General instructions for configuring some other editors and environments can be
-found here:
-
-http://wiki.nette.org/en/howto-editor-link

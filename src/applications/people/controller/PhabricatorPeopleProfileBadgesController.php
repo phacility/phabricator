@@ -84,15 +84,14 @@ final class PhabricatorPeopleProfileBadgesController
     $awards = id(new PhabricatorBadgesAwardQuery())
       ->setViewer($viewer)
       ->withRecipientPHIDs(array($user->getPHID()))
+      ->withBadgeStatuses(array(PhabricatorBadgesBadge::STATUS_ACTIVE))
       ->execute();
     $awards = mpull($awards, null, 'getBadgePHID');
 
     $badges = array();
     foreach ($awards as $award) {
       $badge = $award->getBadge();
-      if ($badge->getStatus() == PhabricatorBadgesBadge::STATUS_ACTIVE) {
-        $badges[$award->getBadgePHID()] = $badge;
-      }
+      $badges[$award->getBadgePHID()] = $badge;
     }
 
     if (count($badges)) {

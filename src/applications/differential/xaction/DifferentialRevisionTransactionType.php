@@ -57,4 +57,13 @@ abstract class DifferentialRevisionTransactionType
       $xaction);
   }
 
+  protected function getActiveDiffPHID(DifferentialRevision $revision) {
+    try {
+      $diff = $revision->getActiveDiff();
+      return $diff->getPHID();
+    } catch (Exception $ex) {
+      return null;
+    }
+  }
+
 }

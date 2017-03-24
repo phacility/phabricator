@@ -119,6 +119,7 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
     foreach ($list as $file) {
       $map['alphanumeric/'.$file] = $root.$file;
     }
+
     return $map;
   }
 
@@ -138,11 +139,11 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
     $border_seed = $username.'_border';
 
     $pack_key =
-      PhabricatorHash::digestToRange($pack_seed, 1, $pack_count);
+      PhabricatorHash::digestToRange($pack_seed, 0, $pack_count - 1);
     $color_key =
-      PhabricatorHash::digestToRange($color_seed, 1, $color_count);
+      PhabricatorHash::digestToRange($color_seed, 0, $color_count - 1);
     $border_key =
-      PhabricatorHash::digestToRange($border_seed, 1, $border_count);
+      PhabricatorHash::digestToRange($border_seed, 0, $border_count - 1);
 
     $pack = $pack_map[$pack_key];
     $icon = 'alphanumeric/'.$pack.'/'.$file.'.png';
@@ -188,7 +189,7 @@ final class PhabricatorFilesComposeAvatarBuiltinFile
       ->withFollowSymlinks(false)
       ->find();
 
-    return $map;
+    return array_values($map);
   }
 
   public static function getBorderMap() {

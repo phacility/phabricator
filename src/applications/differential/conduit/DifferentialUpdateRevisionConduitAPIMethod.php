@@ -57,7 +57,7 @@ final class DifferentialUpdateRevisionConduitAPIMethod
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($request->getUser())
       ->withIDs(array($request->getValue('id')))
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needActiveDiffs(true)
       ->requireCapabilities(
         array(

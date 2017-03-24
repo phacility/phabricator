@@ -361,7 +361,7 @@ final class ManiphestTask extends ManiphestDAO
         if ($this->isLocked()) {
           return PhabricatorPolicies::POLICY_NOONE;
         } else {
-          return PhabricatorPolicies::POLICY_USER;
+          return $this->getViewPolicy();
         }
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();

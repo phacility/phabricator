@@ -41,7 +41,7 @@ final class DifferentialRevisionEditEngine
   protected function newObjectQuery() {
     return id(new DifferentialRevisionQuery())
       ->needActiveDiffs(true)
-      ->needReviewerStatus(true)
+      ->needReviewers(true)
       ->needReviewerAuthority(true);
   }
 

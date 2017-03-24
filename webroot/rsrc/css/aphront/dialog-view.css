@@ -3,7 +3,7 @@
  */
 
 .aphront-dialog-view {
-  width: 540px;
+  width: 560px;
   margin: 32px auto 16px;
   border: 1px solid {$lightblueborder};
   border-radius: 3px;
@@ -32,7 +32,7 @@
 }
 
 .aphront-dialog-view-width-form {
-  width: 600px;
+  width: 640px;
 }
 
 .aphront-dialog-view-width-full {

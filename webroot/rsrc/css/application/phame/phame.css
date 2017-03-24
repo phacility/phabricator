@@ -139,7 +139,6 @@
 .phame-next-post-view {
   margin: 0 auto;
   padding: 12px 0;
-  font-family: 'Aleo', {$fontfamily};
 }
 
 .phame-next {
@@ -294,7 +293,6 @@
   color: #000;
   font-size: 28px;
   font-weight: bold;
-  font-family: 'Aleo', {$fontfamily};
   padding-top: 24px;
 }
 
@@ -305,7 +303,6 @@
 .phame-mega-header .phame-header-subtitle {
   color: {$greytext};
   font-size: 20px;
-  font-family: 'Aleo', {$fontfamily};
   padding-top: 8px;
 }
 

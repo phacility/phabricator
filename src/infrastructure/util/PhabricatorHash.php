@@ -88,9 +88,10 @@ final class PhabricatorHash extends Phobject {
     }
 
     $hash = sha1($string, $raw_output = true);
-    $value = head(unpack('L', $hash));
+    // Make sure this ends up positive, even on 32-bit machines.
+    $value = head(unpack('L', $hash)) & 0x7FFFFFFF;
 
-    return $min + ($value % ($max - $min));
+    return $min + ($value % (1 + $max - $min));
   }
 
 

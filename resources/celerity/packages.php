@@ -138,7 +138,6 @@ return array(
 
     'font-fontawesome',
     'font-lato',
-    'font-aleo',
     'phui-font-icon-base-css',
     'phui-fontkit-css',
     'phui-box-css',

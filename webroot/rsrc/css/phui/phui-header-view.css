@@ -345,7 +345,6 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-profile-header.phui-header-shell .phui-header-header {
-  font-family: 'Aleo', {$fontfamily};
   font-size: 24px;
   color: #000;
 }

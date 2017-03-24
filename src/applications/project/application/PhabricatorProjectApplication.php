@@ -138,6 +138,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationOrder() {
+    return 0.150;
+  }
+
   public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
     return array(
       array(

@@ -52,10 +52,7 @@ final class DifferentialRevisionListView extends AphrontView {
     $phids = array();
     foreach ($this->revisions as $revision) {
       $phids[] = array($revision->getAuthorPHID());
-
-      // TODO: Switch to getReviewerStatus(), but not all callers pass us
-      // revisions with this data loaded.
-      $phids[] = $revision->getReviewers();
+      $phids[] = $revision->getReviewerPHIDs();
     }
     return array_mergev($phids);
   }
@@ -132,8 +129,7 @@ final class DifferentialRevisionListView extends AphrontView {
       }
 
       $reviewers = array();
-      // TODO: As above, this should be based on `getReviewerStatus()`.
-      foreach ($revision->getReviewers() as $reviewer) {
+      foreach ($revision->getReviewerPHIDs() as $reviewer) {
         $reviewers[] = $this->handles[$reviewer]->renderLink();
       }
       if (!$reviewers) {

@@ -178,7 +178,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $revision_query = id(new DifferentialRevisionQuery())
         ->withIDs(array($revision_id))
         ->setViewer($actor)
-        ->needReviewerStatus(true)
+        ->needReviewers(true)
         ->needActiveDiffs(true);
 
       $revision = $revision_query->executeOne();

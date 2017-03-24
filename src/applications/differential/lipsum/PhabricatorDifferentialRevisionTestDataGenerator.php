@@ -13,7 +13,7 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
     $author = $this->loadPhabricatorUser();
 
     $revision = DifferentialRevision::initializeNewRevision($author);
-    $revision->attachReviewerStatus(array());
+    $revision->attachReviewers(array());
     $revision->attachActiveDiff(null);
 
     // This could be a bit richer and more formal than it is.

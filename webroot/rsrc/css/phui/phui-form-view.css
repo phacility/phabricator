@@ -208,14 +208,13 @@
 
 table.aphront-form-control-radio-layout,
 table.aphront-form-control-checkbox-layout {
-  margin-top: 3px;
+  margin-top: 4px !important;
   font-size: {$normalfontsize};
 }
 
 table.aphront-form-control-radio-layout th {
-  padding-top: 3px;
   padding-left: 8px;
-  padding-bottom: 4px;
+  padding-bottom: 8px;
   font-weight: bold;
   color: {$darkgreytext};
 }
@@ -548,4 +547,17 @@ properly, and submit values. */
 .phui-form-static-action {
   padding: 4px;
   color: {$bluetext};
+}
+
+.phuix-form-checkbox-action {
+  padding: 4px;
+  color: {$bluetext};
+}
+
+.phuix-form-checkbox-action input[type=checkbox] {
+  margin: 4px 0;
+}
+
+.phuix-form-checkbox-label {
+  margin-left: 4px;
 }

@@ -18,11 +18,13 @@ final class PhabricatorPeopleQuery
   private $nameLike;
   private $nameTokens;
   private $namePrefixes;
+  private $isEnrolledInMultiFactor;
 
   private $needPrimaryEmail;
   private $needProfile;
   private $needProfileImage;
   private $needAvailability;
+  private $needBadgeAwards;
   private $cacheKeys = array();
 
   public function withIDs(array $ids) {
@@ -100,6 +102,11 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
+  public function withIsEnrolledInMultiFactor($enrolled) {
+    $this->isEnrolledInMultiFactor = $enrolled;
+    return $this;
+  }
+
   public function needPrimaryEmail($need) {
     $this->needPrimaryEmail = $need;
     return $this;
@@ -129,6 +136,18 @@ final class PhabricatorPeopleQuery
 
   public function needUserSettings($need) {
     $cache_key = PhabricatorUserPreferencesCacheType::KEY_PREFERENCES;
+
+    if ($need) {
+      $this->cacheKeys[$cache_key] = true;
+    } else {
+      unset($this->cacheKeys[$cache_key]);
+    }
+
+    return $this;
+  }
+
+  public function needBadgeAwards($need) {
+    $cache_key = PhabricatorUserBadgesCacheType::KEY_BADGES;
 
     if ($need) {
       $this->cacheKeys[$cache_key] = true;
@@ -335,6 +354,13 @@ final class PhabricatorPeopleQuery
         'user.username LIKE %~ OR user.realname LIKE %~',
         $this->nameLike,
         $this->nameLike);
+    }
+
+    if ($this->isEnrolledInMultiFactor !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'user.isEnrolledInMultiFactor = %d',
+        (int)$this->isEnrolledInMultiFactor);
     }
 
     return $where;

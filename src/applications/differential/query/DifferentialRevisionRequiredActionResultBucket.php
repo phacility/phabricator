@@ -29,6 +29,14 @@ final class DifferentialRevisionRequiredActionResultBucket
     }
     $phids = array_fuse($phids);
 
+    // Before continuing, throw away any revisions which responsible users
+    // have explicitly resigned from.
+
+    // The goal is to allow users to resign from revisions they don't want to
+    // review to get these revisions off their dashboard, even if there are
+    // other project or package reviewers which they have authority over.
+    $this->filterResigned($phids);
+
     $groups = array();
 
     $groups[] = $this->newGroup()
@@ -219,6 +227,27 @@ final class DifferentialRevisionRequiredActionResultBucket
     $results = array();
     foreach ($objects as $key => $object) {
       if (!isset($statuses[$object->getStatus()])) {
+        continue;
+      }
+
+      $results[$key] = $object;
+      unset($this->objects[$key]);
+    }
+
+    return $results;
+  }
+
+  private function filterResigned(array $phids) {
+    $resigned = array(
+      DifferentialReviewerStatus::STATUS_RESIGNED,
+    );
+    $resigned = array_fuse($resigned);
+
+    $objects = $this->getRevisionsNotAuthored($this->objects, $phids);
+
+    $results = array();
+    foreach ($objects as $key => $object) {
+      if (!$this->hasReviewersWithStatus($object, $phids, $resigned)) {
         continue;
       }
 

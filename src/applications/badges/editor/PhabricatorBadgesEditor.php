@@ -118,4 +118,45 @@ final class PhabricatorBadgesEditor
     return pht('[Badge]');
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $badge_phid = $object->getPHID();
+    $user_phids = array();
+    $clear_everything = false;
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorBadgesBadgeAwardTransaction::TRANSACTIONTYPE:
+        case PhabricatorBadgesBadgeRevokeTransaction::TRANSACTIONTYPE:
+          foreach ($xaction->getNewValue() as $user_phid) {
+            $user_phids[] = $user_phid;
+          }
+          break;
+        default:
+          $clear_everything = true;
+          break;
+      }
+    }
+
+    if ($clear_everything) {
+      $awards = id(new PhabricatorBadgesAwardQuery())
+        ->setViewer($this->getActor())
+        ->withBadgePHIDs(array($badge_phid))
+        ->execute();
+      foreach ($awards as $award) {
+        $user_phids[] = $award->getRecipientPHID();
+      }
+    }
+
+    if ($user_phids) {
+      PhabricatorUserCache::clearCaches(
+        PhabricatorUserBadgesCacheType::KEY_BADGES,
+        $user_phids);
+    }
+
+    return $xactions;
+  }
+
 }

@@ -10,18 +10,9 @@ final class PhabricatorDaemonOverseerModule
   extends PhutilDaemonOverseerModule {
 
   private $configVersion;
-  private $timestamp;
-
-  public function __construct() {
-    $this->timestamp = PhabricatorTime::getNow();
-  }
 
   public function shouldReloadDaemons() {
-    $now = PhabricatorTime::getNow();
-    $ago = ($now - $this->timestamp);
-
-    // Don't check more than once every 10 seconds.
-    if ($ago < 10) {
+    if ($this->shouldThrottle('reload', 10)) {
       return false;
     }
 
@@ -47,25 +38,23 @@ final class PhabricatorDaemonOverseerModule
   }
 
   /**
-   * Update the configuration version and timestamp.
+   * Check and update the configuration version.
    *
    * @return bool  True if the daemons should restart, otherwise false.
    */
   private function updateConfigVersion() {
-    $config_version = $this->loadConfigVersion();
-    $this->timestamp = PhabricatorTime::getNow();
+    $old_version = $this->configVersion;
+    $new_version = $this->loadConfigVersion();
 
-    if (!$this->configVersion) {
-      $this->configVersion = $config_version;
+    $this->configVersion = $new_version;
+
+    // Don't trigger a reload if we're loading the config for the very
+    // first time.
+    if ($old_version === null) {
       return false;
     }
 
-    if ($this->configVersion != $config_version) {
-      $this->configVersion = $config_version;
-      return true;
-    }
-
-    return false;
+    return ($old_version != $new_version);
   }
 
 }
