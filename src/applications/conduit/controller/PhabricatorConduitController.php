@@ -56,6 +56,12 @@ abstract class PhabricatorConduitController extends PhabricatorController {
         $panel_link),
     );
 
+    if ($params === null) {
+      $messages[] = pht(
+        'If you submit parameters, these examples will update to show '.
+        'exactly how to encode the parameters you submit.');
+    }
+
     $info_view = id(new PHUIInfoView())
       ->setErrors($messages)
       ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
