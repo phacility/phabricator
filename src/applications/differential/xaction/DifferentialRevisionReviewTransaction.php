@@ -33,6 +33,20 @@ abstract class DifferentialRevisionReviewTransaction
     return ($this->getViewerReviewerStatus($revision, $viewer) !== null);
   }
 
+  protected function isViewerAnyAuthority(
+    DifferentialRevision $revision,
+    PhabricatorUser $viewer) {
+
+    $reviewers = $revision->getReviewers();
+    foreach ($revision->getReviewers() as $reviewer) {
+      if ($reviewer->hasAuthority($viewer)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   protected function isViewerFullyAccepted(
     DifferentialRevision $revision,
     PhabricatorUser $viewer) {
