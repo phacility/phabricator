@@ -125,12 +125,10 @@ final class PhabricatorDaemonLogViewController
       case PhabricatorDaemonLog::STATUS_WAIT:
         $details = pht(
           'This daemon is running normally and reported a status update '.
-          'recently (within %s). However, it encountered an error while '.
-          'doing work and is waiting a little while (%s) to resume '.
-          'processing. After encountering an error, daemons wait before '.
-          'resuming work to avoid overloading services.',
-          phutil_format_relative_time($unknown_time),
-          phutil_format_relative_time($wait_time));
+          'recently (within %s). The process is currently waiting to '.
+          'restart, either because it is hibernating or because it '.
+          'encountered an error.',
+          phutil_format_relative_time($unknown_time));
         break;
       case PhabricatorDaemonLog::STATUS_EXITING:
         $details = pht('This daemon is shutting down gracefully.');

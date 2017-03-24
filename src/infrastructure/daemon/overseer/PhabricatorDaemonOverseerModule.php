@@ -48,6 +48,12 @@ final class PhabricatorDaemonOverseerModule
 
     $this->configVersion = $new_version;
 
+    // Don't trigger a reload if we're loading the config for the very
+    // first time.
+    if ($old_version === null) {
+      return false;
+    }
+
     return ($old_version != $new_version);
   }
 
