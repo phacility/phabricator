@@ -275,7 +275,7 @@ final class PhabricatorTriggerDaemon
    * @return int Number of seconds to sleep for.
    */
   private function getSleepDuration() {
-    $sleep = 5;
+    $sleep = phutil_units('3 minutes in seconds');
 
     $next_triggers = id(new PhabricatorWorkerTriggerQuery())
       ->setViewer($this->getViewer())
