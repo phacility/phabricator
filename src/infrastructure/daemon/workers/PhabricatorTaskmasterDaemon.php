@@ -44,8 +44,11 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
         $sleep = 0;
       } else {
 
-        if ($this->shouldHibernate(60)) {
-          break;
+        if ($this->getIdleDuration() > 15) {
+          $hibernate_duration = phutil_units('3 minutes in seconds');
+          if ($this->shouldHibernate($hibernate_duration)) {
+            break;
+          }
         }
 
         // When there's no work, sleep for one second. The pool will
